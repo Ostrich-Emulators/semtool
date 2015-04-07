@@ -1,0 +1,30 @@
+<http://seman.tc/data/northwind/Concept/Apple/R309993226195c3e742d872c054840c44> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Apple> .
+<http://seman.tc/data/northwind/Concept/Apple/R309993226195c3e742d872c054840c44> <http://www.w3.org/2000/01/rdf-schema#label> "Golden Delicious" .
+<http://seman.tc/data/northwind/Concept/Orange/R309993226195c3e742d872c054840c44> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Orange> .
+<http://seman.tc/data/northwind/Concept/Orange/R309993226195c3e742d872c054840c44> <http://www.w3.org/2000/01/rdf-schema#label> "Golden Delicious" .
+<http://seman.tc/data/northwind/Concept/Person/John> <http://seman.tc/data/northwind/Relation/hates/B67583e903e11939fc8613dfebc7b0ef0> <http://seman.tc/data/northwind/Concept/Orange/R309993226195c3e742d872c054840c44> .
+<http://seman.tc/data/northwind/Concept/Person/John> <http://seman.tc/data/northwind/Relation/likes/B67583e903e11939fc8613dfebc7b0ef0> <http://seman.tc/data/northwind/Concept/Apple/R309993226195c3e742d872c054840c44> .
+<http://seman.tc/data/northwind/Concept/Person/John> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Person> .
+<http://seman.tc/data/northwind/Concept/Person/John> <http://www.w3.org/2000/01/rdf-schema#label> "John" .
+<http://seman.tc/data/northwind/Relation/hates/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#label> "John:Golden Delicious" .
+<http://seman.tc/data/northwind/Relation/hates/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/hates> .
+<http://seman.tc/data/northwind/Relation/likes/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#label> "John:Golden Delicious" .
+<http://seman.tc/data/northwind/Relation/likes/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/likes> .
+<http://seman.tc/models/northwind#Apple> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://seman.tc/models/northwind#Apple> <http://www.w3.org/2000/01/rdf-schema#label> "Apple" .
+<http://seman.tc/models/northwind#Apple> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://seman.tc/models/northwind#Concept> .
+<http://seman.tc/models/northwind#Concept> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://seman.tc/models/northwind#Orange> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://seman.tc/models/northwind#Orange> <http://www.w3.org/2000/01/rdf-schema#label> "Orange" .
+<http://seman.tc/models/northwind#Orange> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://seman.tc/models/northwind#Concept> .
+<http://seman.tc/models/northwind#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://seman.tc/models/northwind#Person> <http://www.w3.org/2000/01/rdf-schema#label> "Person" .
+<http://seman.tc/models/northwind#Person> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://seman.tc/models/northwind#Concept> .
+<http://seman.tc/models/northwind#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://seman.tc/models/northwind#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Contains> .
+<http://seman.tc/models/northwind#Relation/hates> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://seman.tc/models/northwind#Relation/hates> <http://www.w3.org/2000/01/rdf-schema#label> "hates" .
+<http://seman.tc/models/northwind#Relation/hates> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation> .
+<http://seman.tc/models/northwind#Relation/likes> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://seman.tc/models/northwind#Relation/likes> <http://www.w3.org/2000/01/rdf-schema#label> "likes" .
+<http://seman.tc/models/northwind#Relation/likes> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation> .

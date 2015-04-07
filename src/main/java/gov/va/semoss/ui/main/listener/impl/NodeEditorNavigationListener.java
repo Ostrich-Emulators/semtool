@@ -1,0 +1,175 @@
+/**
+ * *****************************************************************************
+ * Copyright 2013 SEMOSS.ORG
+ *
+ * This file is part of SEMOSS.
+ *
+ * SEMOSS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * SEMOSS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
+ *****************************************************************************
+ */
+package gov.va.semoss.ui.main.listener.impl;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+
+import org.apache.log4j.Logger;
+
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.util.Constants;
+
+import com.google.gson.Gson;
+import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.JSValue;
+import com.teamdev.jxbrowser.chromium.events.FailLoadingEvent;
+import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
+import com.teamdev.jxbrowser.chromium.events.FrameLoadEvent;
+import com.teamdev.jxbrowser.chromium.events.LoadEvent;
+import com.teamdev.jxbrowser.chromium.events.LoadListener;
+import com.teamdev.jxbrowser.chromium.events.ProvisionalLoadingEvent;
+import com.teamdev.jxbrowser.chromium.events.StartLoadingEvent;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import java.util.Map;
+
+/**
+ */
+public class NodeEditorNavigationListener implements LoadListener {
+
+	private static final Logger logger
+			= Logger.getLogger( NodeEditorNavigationListener.class );
+
+	SEMOSSVertex node = null;
+	Browser browser = null;
+	Map<String, String> filterHash;
+	IEngine engine;
+
+	/**
+	 * Method setEngine. Sets the engine that the listener will access.
+	 *
+	 * @param engine IEngine
+	 */
+	public void setEngine( IEngine engine ) {
+		this.engine = engine;
+	}
+
+	/**
+	 * Method setFilterHash. Sets the filter hash that the listener will access.
+	 *
+	 * @param filterHash Hashtable
+	 */
+	public void setFilterHash( Map<String, String> filterHash ) {
+		this.filterHash = filterHash;
+	}
+
+	/**
+	 * Method getBrowser. Gets the current browser.
+	 *
+	 * @return Browser
+	 */
+	public Browser getBrowser() {
+		return browser;
+	}
+
+	/**
+	 * Method setBrowser. Sets the browser that the listener will access.
+	 *
+	 * @param browser Browser
+	 */
+	public void setBrowser( Browser browser ) {
+		this.browser = browser;
+	}
+
+	/**
+	 * Method setNode. Sets the node that the listener will access.
+	 *
+	 * @param node DBCMVertex
+	 */
+	public void setNode( SEMOSSVertex node ) {
+		this.node = node;
+	}
+
+	/**
+	 * Method navigationStarted. Occurs when the navigation starts.
+	 *
+	 * @param event NavigationEvent
+	 */
+	/**
+	 * Method getFullNodeType. Gets the full node type.
+	 *
+	 * @param uri String
+	 * @param filterFunction SPARQLExecuteFilterBaseFunction
+	 *
+	 * @return String
+	 */
+	public String getFullNodeType( String uri, SPARQLExecuteFilterBaseFunction filterFunction ) {
+		String nodeType = "";
+
+		String query = "SELECT ?type WHERE {<" + uri + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type}";
+		String retHashJson = filterFunction.invoke( JSValue.create( query ) ).getString();
+		Gson gson = new Gson();
+		Hashtable retHash = gson.fromJson( retHashJson, Hashtable.class );
+		ArrayList<ArrayList> retArray = (ArrayList<ArrayList>) retHash.get( "results" );
+		ArrayList array = retArray.get( 0 );
+		nodeType = (String) array.get( 0 );
+
+		return nodeType;
+	}
+
+	@Override
+	public void onDocumentLoadedInFrame( FrameLoadEvent arg0 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onDocumentLoadedInMainFrame( LoadEvent arg0 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onFailLoadingFrame( FailLoadingEvent arg0 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onFinishLoadingFrame( FinishLoadingEvent arg0 ) {
+
+		//register the various functions for javascript to call
+		SPARQLExecuteFilterBaseFunction filterBaseFunction = new SPARQLExecuteFilterBaseFunction();
+		filterBaseFunction.setFilterHash( new Hashtable( filterHash ) );
+		filterBaseFunction.setEngine( engine );
+
+		//get the parameters to pass it
+		String uri = (String) node.getProperty( Constants.URI_KEY );
+		String nodeName = (String) node.getProperty( Constants.VERTEX_NAME );
+		String nodeType = getFullNodeType( uri, filterBaseFunction );
+
+		browser.executeJavaScript( "start('" + uri + "', '" + nodeName + "', '" + nodeType + "');" );
+	    //cp.callIt();
+
+	}
+
+	@Override
+	public void onProvisionalLoadingFrame( ProvisionalLoadingEvent arg0 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStartLoadingFrame( StartLoadingEvent arg0 ) {
+		// TODO Auto-generated method stub
+
+	}
+}

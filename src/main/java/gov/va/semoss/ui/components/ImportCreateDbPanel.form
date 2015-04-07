@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="questionlbl" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel3" alignment="0" pref="160" max="32767" attributes="0"/>
+                              <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
+                              <Component id="urilbl" alignment="0" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel2" alignment="0" min="-2" pref="160" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="file" max="32767" attributes="0"/>
+                          <Component id="dbname" max="32767" attributes="0"/>
+                          <Component id="dbdir" pref="429" max="32767" attributes="0"/>
+                          <Component id="baseuri" alignment="1" max="32767" attributes="0"/>
+                          <Component id="questionfile" alignment="0" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="conformer" min="-2" max="-2" attributes="0"/>
+                          <Component id="calcInfers" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="metamodel" min="-2" max="-2" attributes="0"/>
+                          <Component id="jPanel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="dbname" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="urilbl" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="baseuri" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="dbdir" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="questionlbl" min="-2" max="-2" attributes="0"/>
+                  <Component id="questionfile" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="file" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="calcInfers" min="-2" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="metamodel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="conformer" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="file"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Select File(s) to Import"/>
+      </Properties>
+    </Component>
+    <Component class="gov.va.semoss.ui.components.FileBrowsePanel" name="file">
+    </Component>
+    <Component class="javax.swing.JLabel" name="urilbl">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Designate Base URI"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="baseuri">
+      <Properties>
+        <Property name="toolTipText" type="java.lang.String" value="The URI to which the resource names being imported will be appended"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="New Database Name"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="dbname">
+      <Properties>
+        <Property name="toolTipText" type="java.lang.String" value="Database name cannot contain spaces"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="questionlbl">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Import Insights"/>
+      </Properties>
+    </Component>
+    <Component class="gov.va.semoss.ui.components.FileBrowsePanel" name="questionfile">
+      <Properties>
+        <Property name="toolTipText" type="java.lang.String" value="Enter file path and name or browse to find custom questions sheet"/>
+      </Properties>
+    </Component>
+    <Component class="gov.va.semoss.ui.components.FileBrowsePanel" name="dbdir">
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Database Location"/>
+      </Properties>
+    </Component>
+    <Container class="javax.swing.JPanel" name="jPanel1">
+      <Properties>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+            <TitledBorder title="Load Intermediate Data">
+              <Border PropertyName="innerBorder" info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
+                <LineBorder roundedCorners="true">
+                  <Color PropertyName="color" blue="80" green="80" id="gray" palette="1" red="80" type="palette"/>
+                </LineBorder>
+              </Border>
+              <Font PropertyName="font" name="SansSerif" size="12" style="0"/>
+            </TitledBorder>
+          </Border>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Where should the raw data be loaded before importing?"/>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" attributes="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="diskStaging" min="-2" max="-2" attributes="0"/>
+                      <Component id="memoryStaging" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="0" pref="83" max="32767" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <Component id="diskStaging" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="memoryStaging" min="-2" max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JRadioButton" name="diskStaging">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="On Disk"/>
+            <Property name="toolTipText" type="java.lang.String" value="Loading on disk can be slower, but uses less memory"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JRadioButton" name="memoryStaging">
+          <Properties>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="In Memory"/>
+            <Property name="toolTipText" type="java.lang.String" value="Loading in memory can be faster, but uses more memory"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.JCheckBox" name="calcInfers">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Compute Dependent Relationships"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="metamodel">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Create Metamodel"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="conformer">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Check Quality"/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>

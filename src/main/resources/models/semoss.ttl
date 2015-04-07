@@ -1,0 +1,38 @@
+# baseURI: http://semoss.org/ontologies
+# imports: http://purl.org/dc/terms/
+
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix semoss: <http://semoss.org/ontologies/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://semoss.org/ontologies>
+  rdf:type owl:Ontology ;
+  owl:imports <http://purl.org/dc/terms/> ;
+  owl:versionInfo "Created with TopBraid Composer"^^xsd:string ;
+.
+semoss:Concept
+  rdf:type owl:Class ;
+  rdfs:comment "A SEMOSS Concept is a base class for any class constructed under the semoss: namespace.  The utility of the Concept class is merely for easy identification of the auto-created class of the SEMOSS importer."^^xsd:string ;
+  rdfs:label "Concept"^^xsd:string ;
+  rdfs:subClassOf owl:Thing ;
+  owl:sameAs <http://www.w3.org/2004/02/skos/core#Concept> ;
+.
+semoss:Relation
+  rdf:type rdfs:Class ;
+  rdfs:comment "A \"Relation\" in SEMOSS parlance is a reification, or graph edge. A semoss:Relation property is unique between a source (subject) and target (object) node (instance). Every semoss:Relation is associated with exactly 1 rdf:Property identified by the required rdf:predicate property of the relation property instance. The grounding predicate must also be asserted in a statement between the same source and target nodes (a SPO assertion). A semoss:Relation is only created when attributes must be applied to the statement -thus necessitating the need for reification. Attributes and their values applied to a semoss:Relation instance will come from Columns D and later in a \"Relation Sheet\" found in a SEMOSS Loading Workbook."^^xsd:string ;
+  rdfs:label "Relation"^^xsd:string ;
+  rdfs:subClassOf rdf:Property ;
+  rdfs:subClassOf [
+      rdf:type owl:Restriction ;
+      owl:onClass rdf:Property ;
+      owl:onProperty rdf:predicate ;
+      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    ] ;
+.
+semoss:has
+  rdf:type owl:ObjectProperty ;
+  rdfs:comment "\"Has\" is an atomic property for the use case where a Node type appears in an attribute header of another Node or Relation sheet."^^xsd:string ;
+  rdfs:label "Has"^^xsd:string ;
+.

@@ -1,0 +1,54 @@
+#nav {
+  background-color: #fff;
+  height: 36px;
+  width: 100%;
+  padding: 0px 10px;
+  position: fixed;
+  z-index: 2;
+  border-bottom: 1px solid #ccc;
+  -webkit-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.065);
+  -moz-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.065);
+  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.065);
+}
+
+#nav .brand {
+  margin-left: 0px;
+  margin-right: 10px;
+  color: #555;
+  font-size: 17px;
+  font-weight: bold;
+  position: relative;
+  top:3px;
+}
+
+#refreshBtn{
+  margin-top: 3px;
+}
+
+body, html {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-size: 12px;
+}
+#grid, #pager {
+  position: fixed;
+  width: 100%;
+}
+#grid {
+  bottom: 0;
+  height: 300px;
+}
+#pager {
+  bottom: 306px;
+  height: 20px;
+}
+.slick-row:hover {
+  font-weight: bold;
+  color: #069;
+}
+
+text {
+  font: 10px sans-serif;
+}

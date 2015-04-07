@@ -1,0 +1,8 @@
+http://google.com/this is a test
+http://google.com/this is a {test}
+http://google.com/this is a \t\e\s\t
+http://google.com/this is a "test"
+http://google.com/this is a |test|
+http://google.com/this is <a> test
+http://google.com/this is (a) test
+http://google.com/this_test,_that_test
