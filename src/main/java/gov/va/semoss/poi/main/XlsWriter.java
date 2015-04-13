@@ -42,6 +42,7 @@ import gov.va.semoss.util.Utility;
 import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Set;
@@ -106,6 +107,7 @@ public class XlsWriter {
 			List<String> props = new ArrayList<>( nodes.getProperties() );
 
 			int counter = 0;
+			Iterator<LoadingNodeAndPropertyValues> napit = nodes.getData().iterator();
 			while ( counter < nodes.getData().size() ) {
 				String name = generateSheetName( nodes.getName(), sheetNamesSoFar );
 				XSSFSheet sheet = wb.createSheet( name );
@@ -113,8 +115,6 @@ public class XlsWriter {
 				makeHeaderRow( sheet, nodes, props );
 
 				int rownum = 0;
-				ListIterator<LoadingNodeAndPropertyValues> napit
-						= nodes.getData().listIterator( counter );
 				while ( napit.hasNext() && rownum < TAB_ROWLIMIT ) {
 					LoadingNodeAndPropertyValues nap = napit.next();
 
@@ -145,6 +145,7 @@ public class XlsWriter {
 		for ( LoadingSheetData rels : data.getRels() ) {
 			int counter = 0;
 			List<String> props = new ArrayList<>( rels.getProperties() );
+			Iterator<LoadingNodeAndPropertyValues> napit = rels.getData().iterator();
 
 			while ( counter < rels.getData().size() ) {
 				String name = generateSheetName( rels.getName(), sheetNamesSoFar );
@@ -164,8 +165,6 @@ public class XlsWriter {
 				Cell cell0 = relrow.createCell( 0 );
 				cell0.setCellValue( rels.getRelname() );
 
-				ListIterator<LoadingNodeAndPropertyValues> napit
-						= rels.getData().listIterator( counter );
 				while ( napit.hasNext() && rownum < TAB_ROWLIMIT ) {
 					LoadingNodeAndPropertyValues nap = napit.next();
 
