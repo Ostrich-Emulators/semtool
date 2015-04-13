@@ -18,64 +18,86 @@
  ******************************************************************************/
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
+
+import javax.swing.table.AbstractTableModel;
 
 /**
  * This class is used to keep track of specific properties for a table.
  */
 public class ControlDataTable {
-	private Object[][] rows;
+	private Object[][] rows = new Object[0][4];
 	private Hashtable<String, ArrayList<String>> selectedList = new Hashtable<String, ArrayList<String>>();
 	private Hashtable<String, String> unselectedList = new Hashtable<String, String>();
-	private Hashtable<String, String> propOn  = new Hashtable<String, String>();
+	private Hashtable<String, String> propertyOn  = new Hashtable<String, String>();
 
-	public ControlDataTable(Hashtable<String, String> _propOn) {
-		propOn = _propOn;
+	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
+	private ControlDataTableModel tableModel;
+	
+	public ControlDataTable(Hashtable<String, String> _propertyOn, String[] columnNames) {
+		propertyOn = _propertyOn;
+		tableModel = new ControlDataTableModel( columnNames );
 	}
 
-	public void generate(int rowIndex, String type, String prop, boolean firstRow) {
-		boolean foundProp = findIfPropSelected(selectedList, type, prop);
-		
+	/**
+	 * Populates the first row.
+	 * columns are: Type, Property, Boolean
+	 * 
+	 * @param rowCount: total number of rows
+	 */
+	public void populateFirstRow(int rowCount) {
+		rows = new Object[rowCount + 1][4];
+		rows[0][0] = "SELECT ALL";
+		rows[0][1] = "";
+		rows[0][2] = new Boolean(true);
+		rows[0][3] = "SELECT ALL";
+	}
+
+	/**
+	 * Populates one row.
+	 * columns are: Type, Property, Boolean
+	 * 
+	 * @param rowIndex: the row number
+	 * @param type: the type of the row
+	 * @param property: the property to be shown or hidden
+	 * @param firstRow: 
+	 */
+	public void populateRow(int rowIndex, String type, String property, boolean firstRow) {
 		rows[rowIndex][0] = "";
-		rows[rowIndex][1] = prop;
-		rows[rowIndex][2] = new Boolean(foundProp);
+		rows[rowIndex][1] = property;
+		rows[rowIndex][2] = isSelected(type, property);
 		rows[rowIndex][3] = type;
 
 		if (firstRow)
 			rows[rowIndex][0] = type;
 
-		if (propOn.containsKey(prop) && !unselectedList.containsKey(type) && !foundProp) {
-			rows[rowIndex][2] = new Boolean(true);
-			
-			ArrayList<String> typePropList = new ArrayList<String>();
-			if (selectedList.containsKey(type))
-				typePropList = selectedList.get(type);
-			
-			typePropList.add(prop);
-			selectedList.put(type, typePropList);
-		}
+		if (propertyOn.containsKey(property) && !unselectedList.containsKey(type))
+			setValue(new Boolean(true), rowIndex, 2);
 	}
 
 	/**
 	 * Checks if property for a certain type is selected.
 	 * 
-	 * @param list
+	 * @param selectedList
 	 *            List of properties.
 	 * @param type
 	 *            Property type.
-	 * @param prop
+	 * @param property
 	 *            Property.
 	 * 
 	 * @return boolean True if a property is selected.
 	 */
-	private boolean findIfPropSelected(Hashtable<String, ArrayList<String>> list,
-			String type, String prop) {
-		if (!list.containsKey(type)) 
+	private Boolean isSelected(String type, String property) {
+		if (!selectedList.containsKey(type)) 
 			return false;
 		
-		for (String thisProp:list.get(type)) {
-			if (thisProp!= null && thisProp.equalsIgnoreCase(prop))
+		for (String thisProp:selectedList.get(type)) {
+			if (thisProp != null && thisProp.equalsIgnoreCase(property))
 				return true;
 		}
 
@@ -92,11 +114,11 @@ public class ControlDataTable {
 	 * @param column
 	 *            Column number.
 	 */
-	public void setValueAt(Object val, int row, int column) {
-		// check if it is the header row--select all
+	public void setValue(Object val, int row, int column) {
 		if (row == 0) {
+			// if it is the header row--select all
 			for (int i=1; i<rows.length; i++)
-				setValueAt(val, i, 2);
+				setValue(val, i, 2);
 		}
 		
 		String type = rows[row][3] + "";
@@ -115,15 +137,6 @@ public class ControlDataTable {
 		
 		rows[row][column] = val;
 		selectedList.put(type, typePropList);
-	}
-
-	public void initRows(int rowCount) {
-		// columns are - Type - Property - Boolean
-		rows = new Object[rowCount + 1][4];
-		rows[0][0] = "SELECT ALL";
-		rows[0][1] = "";
-		rows[0][2] = new Boolean(true);
-		rows[0][3] = "SELECT ALL";
 	}
 
 	/**
@@ -150,5 +163,122 @@ public class ControlDataTable {
 	 */
 	public ArrayList<String> getSelectedProperties(String type) {
 		return selectedList.get(type);
+	}
+	
+	public ControlDataTableModel getTableModel() {
+		return tableModel;
+	}
+	
+	public void setViewer(VisualizationViewer<SEMOSSVertex, SEMOSSEdge> _viewer) {
+		viewer = _viewer;
+	}
+	
+	class ControlDataTableModel extends AbstractTableModel {
+		private static final long serialVersionUID = 502758220766389041L;
+		private String[] columnNames;
+
+		
+		public ControlDataTableModel(String[] _columnNames) {
+			columnNames = _columnNames;
+		}
+		
+		/**
+		 * Returns the column count.
+		 * 
+		 * @return int Column count.
+		 */
+		@Override
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		/**
+		 * Gets the column name at a particular index.
+		 * 
+		 * @param index
+		 *            Column index.
+		 * 
+		 * @return String Column name.
+		 */
+		@Override
+		public String getColumnName(int index) {
+			return columnNames[index];
+		}
+
+		/**
+		 * Returns the row count.
+		 * 
+		 * @return int Row count.
+		 */
+		@Override
+		public int getRowCount() {
+			return rows.length;
+		}
+
+		/**
+		 * Gets the cell value at a particular row and column index.
+		 * 
+		 * @param row
+		 *            Row index.
+		 * @param column
+		 *            Column index.
+		 * 
+		 * @return Object Cell value.
+		 */
+		@Override
+		public Object getValueAt(int row, int column) {
+			return getCell(row, column);
+		}
+
+		/**
+		 * Gets the column class at a particular index.
+		 * 
+		 * @param column
+		 *            Column index.
+		 * 
+		 * @return Class Column class.
+		 */
+		@Override
+		public Class<?> getColumnClass(int column) {
+			if (getCell(0, column)==null) {
+				return String.class;
+			}
+
+			Class<?> theClass = getCell(0, column).getClass();
+			return theClass;
+		}
+
+		/**
+		 * Checks whether the cell at a particular row and column index is editable.
+		 * 
+		 * @param row
+		 *            Row index.
+		 * @param column
+		 *            Column index.
+		 * 
+		 * @return boolean True if cell is editable.
+		 */
+		public boolean isCellEditable(int row, int column) {
+			if (column == 2)
+				return true;
+
+			return false;
+		}
+
+		/**
+		 * Sets the label value at a particular row and column index.
+		 * 
+		 * @param value
+		 *            Label value.
+		 * @param row
+		 *            Row index.
+		 * @param column
+		 *            Column index.
+		 */
+		public void setValueAt(Object value, int row, int column) {
+			setValue(value, row, column);
+			fireTableDataChanged();
+			viewer.repaint();
+		}
 	}
 }

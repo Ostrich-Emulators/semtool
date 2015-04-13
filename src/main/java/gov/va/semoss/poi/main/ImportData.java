@@ -17,8 +17,7 @@ import org.openrdf.model.Statement;
  */
 public final class ImportData {
 
-	private final List<RelationshipLoadingSheetData> rels = new ArrayList<>();
-	private final List<NodeLoadingSheetData> nodes = new ArrayList<>();
+	private final List<LoadingSheetData> sheets = new ArrayList<>();
 	private ImportMetadata metadata;
 
 	public ImportData() {
@@ -34,58 +33,19 @@ public final class ImportData {
 	}
 
 	public void clear() {
-		rels.clear();
-		nodes.clear();
+		sheets.clear();
 		metadata.clear();
 	}
 
-	/**
-	 * Gets the loading sheet data with the given name, or null. If multiple
-	 * sheets have the same name, the first one is returned
-	 *
-	 * @param name
-	 * @return
-	 */
-	public NodeLoadingSheetData getNodeSheet( String name ) {
-		for ( NodeLoadingSheetData d : getNodes() ) {
-			if ( d.getName().equals( name ) ) {
-				return d;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Gets the loading sheet data with the given name, or null. If multiple
-	 * sheets have the same name, the first one is returned
-	 *
-	 * @param name
-	 * @return
-	 */
-	public RelationshipLoadingSheetData getRelationsSheet( String name ) {
-		for ( RelationshipLoadingSheetData d : getRels() ) {
-			if ( d.getName().equals( name ) ) {
-				return d;
-			}
-		}
-		return null;
-	}
-
-	public ImportData add( RelationshipLoadingSheetData d ) {
-		rels.add( d );
+	public ImportData add( LoadingSheetData d ) {
+		sheets.add( d );
 		return this;
 	}
 
-	public ImportData add( NodeLoadingSheetData d ) {
-		nodes.add( d );
-		return this;
-	}
+	public ImportData add( Collection<LoadingSheetData> newsheets,
+			Collection<Statement> stmts ) {
 
-	public ImportData add( Collection<NodeLoadingSheetData> newnodes,
-			Collection<RelationshipLoadingSheetData> newrels, Collection<Statement> stmts ) {
-
-		nodes.addAll( newnodes );
-		rels.addAll( newrels );
+		sheets.addAll( newsheets );
 		metadata.addAll( stmts );
 
 		return this;
@@ -100,11 +60,23 @@ public final class ImportData {
 		return metadata;
 	}
 
-	public Collection<RelationshipLoadingSheetData> getRels() {
+	public Collection<LoadingSheetData> getRels() {
+		List<LoadingSheetData> rels = new ArrayList<>();
+		for ( LoadingSheetData d : sheets ) {
+			if ( d.isRel() ) {
+				rels.add( d );
+			}
+		}
 		return rels;
 	}
 
-	public Collection<NodeLoadingSheetData> getNodes() {
+	public Collection<LoadingSheetData> getNodes() {
+		List<LoadingSheetData> nodes = new ArrayList<>();
+		for ( LoadingSheetData d : sheets ) {
+			if ( !d.isRel() ) {
+				nodes.add( d );
+			}
+		}
 		return nodes;
 	}
 
@@ -113,10 +85,8 @@ public final class ImportData {
 	 *
 	 * @return
 	 */
-	public Collection<LoadingSheetData> getAllData() {
-		List<LoadingSheetData> data = new ArrayList<>( nodes );
-		data.addAll( rels );
-		return data;
+	public Collection<LoadingSheetData> getSheets() {
+		return new ArrayList<>( sheets );
 	}
 
 	public Collection<Statement> getStatements() {
@@ -126,22 +96,18 @@ public final class ImportData {
 	/**
 	 * Are there any nodes or relationships in this instance?
 	 *
-	 * @return true if getAllData returns an empty collection
+	 * @return true if getSheets returns an empty collection
 	 */
 	public boolean isEmpty() {
-		return ( nodes.isEmpty() && rels.isEmpty() );
+		return sheets.isEmpty();
 	}
 
 	public List<String> getSheetNames() {
-		List<String> sheets = new ArrayList<>();
-		for ( LoadingSheetData lsd : getNodes() ) {
-			sheets.add( lsd.getName() );
+		List<String> names = new ArrayList<>();
+		for ( LoadingSheetData lsd : sheets ) {
+			names.add( lsd.getName() );
 		}
 
-		for ( LoadingSheetData lsd : getRels() ) {
-			sheets.add( lsd.getName() );
-		}
-
-		return sheets;
+		return names;
 	}
 }

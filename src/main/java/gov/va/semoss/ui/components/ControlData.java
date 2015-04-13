@@ -41,7 +41,7 @@ public class ControlData {
 	private Hashtable<String, String> propHide = new Hashtable<String, String>();
 	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
 	private int rowCount = 0;
-
+	
 	/**
 	 * Constructor for ControlData.
 	 */
@@ -49,15 +49,15 @@ public class ControlData {
 		// put what we want to show first in all of these things
 		Hashtable<String, String> propOn  = new Hashtable<String, String>();
 		propOn.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
-		labels = new ControlDataTable(propOn);
-		
+		labels = new ControlDataTable(propOn, new String[] {"Type", "Property", "Show" });
+
 		Hashtable<String, String> propOnT = new Hashtable<String, String>();
 		propOnT.put(Constants.EDGE_NAME, Constants.EDGE_NAME);
 		propOnT.put(Constants.EDGE_TYPE, Constants.EDGE_TYPE);
 		propOnT.put(Constants.URI_KEY, Constants.URI_KEY);
 		propOnT.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
 		propOnT.put(Constants.VERTEX_TYPE, Constants.VERTEX_TYPE);
-		tooltips = new ControlDataTable(propOnT);
+		tooltips = new ControlDataTable(propOnT, new String[] {"Type", "Property", "Show" });
 		
 		propHide.put(Constants.VERTEX_COLOR, Constants.VERTEX_COLOR);
 	}
@@ -66,8 +66,8 @@ public class ControlData {
 	 * Generates all the rows in the control panel.
 	 */
 	public void generateAllRows() {
-		labels.initRows(rowCount);
-		tooltips.initRows(rowCount);
+		labels.populateFirstRow(rowCount);
+		tooltips.populateFirstRow(rowCount);
 
 		ArrayList<String> types = new ArrayList<String>(properties.keySet());
 		Collections.sort(types);
@@ -83,8 +83,8 @@ public class ControlData {
 				if (propHide.containsKey(property)) 
 					continue;
 
-				labels.generate(rowIndex, type, property, firstRow);
-				tooltips.generate(rowIndex, type, property, firstRow);
+				labels.populateRow(rowIndex, type, property, firstRow);
+				tooltips.populateRow(rowIndex, type, property, firstRow);
 				
 				logger.debug("Adding Rows -- " + rowIndex + "<>" + type + "<>" + property);
 				firstRow = false;
@@ -104,7 +104,7 @@ public class ControlData {
 	 *            Column number.
 	 */
 	public void setLabelValueAt(Object val, int row, int column) {
-		labels.setValueAt(val, row, column);
+		labels.setValue(val, row, column);
 		viewer.repaint();
 	}
 
@@ -119,7 +119,7 @@ public class ControlData {
 	 *            Column number.
 	 */
 	public void setTooltipValueAt(Object val, int row, int column) {
-		tooltips.setValueAt(val, row, column);
+		tooltips.setValue(val, row, column);
 		viewer.repaint();
 	}
 	
@@ -199,14 +199,19 @@ public class ControlData {
 	public ArrayList<String> getSelectedPropertiesTT(String type) {
 		return tooltips.getSelectedProperties(type);
 	}
-
-	/**
-	 * Sets the viewer.
-	 * 
-	 * @param viewer
-	 *            VisualizationViewer
-	 */
+	
 	public void setViewer(VisualizationViewer<SEMOSSVertex, SEMOSSEdge> _viewer) {
 		viewer = _viewer;
+		
+		labels.setViewer(viewer);
+		tooltips.setViewer(viewer);
+	}
+
+	public ControlDataTable getLabels() {
+		return labels;
+	}
+	
+	public ControlDataTable getTooltips() {
+		return tooltips;
 	}
 }

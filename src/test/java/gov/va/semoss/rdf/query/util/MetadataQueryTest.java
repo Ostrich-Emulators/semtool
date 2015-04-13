@@ -80,10 +80,10 @@ public class MetadataQueryTest {
 
   @Test
   public void testHandleTupleExists() throws Exception {
-    ValueFactory vf = engine.getRepositoryConnection().getValueFactory();
+    ValueFactory vf = engine.getRawConnection().getValueFactory();
     String raw = "The Team!";
 
-    engine.getRepositoryConnection().add( bldr.toUri(), MetadataConstants.DCT_CREATOR,
+    engine.getRawConnection().add( bldr.toUri(), MetadataConstants.DCT_CREATOR,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
     Map<URI, String> data = engine.query( mq );
@@ -93,9 +93,9 @@ public class MetadataQueryTest {
 
   @Test
   public void testHandleTupleUpgradeDcToDct() throws Exception {
-    ValueFactory vf = engine.getRepositoryConnection().getValueFactory();
+    ValueFactory vf = engine.getRawConnection().getValueFactory();
     String raw = "old publisher predicate";
-    engine.getRepositoryConnection().add( bldr.toUri(), DC.PUBLISHER,
+    engine.getRawConnection().add( bldr.toUri(), DC.PUBLISHER,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
     Map<URI, String> data = engine.query( mq );
@@ -106,9 +106,9 @@ public class MetadataQueryTest {
 
   @Test
   public void testHandleTupleNonUpgradeDcToDct() throws Exception {
-    ValueFactory vf = engine.getRepositoryConnection().getValueFactory();
+    ValueFactory vf = engine.getRawConnection().getValueFactory();
     String raw = "should be a date, but that's okay";
-    engine.getRepositoryConnection().add(bldr.toUri(), MetadataConstants.DCT_CREATED,
+    engine.getRawConnection().add(bldr.toUri(), MetadataConstants.DCT_CREATED,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
     Map<URI, String> data = engine.query( mq );
@@ -119,9 +119,9 @@ public class MetadataQueryTest {
 
   @Test
   public void testHandleTupleMissingDc() throws Exception {
-    ValueFactory vf = engine.getRepositoryConnection().getValueFactory();
+    ValueFactory vf = engine.getRawConnection().getValueFactory();
     String raw = "desc";
-    engine.getRepositoryConnection().add( bldr.toUri(), MetadataConstants.DCT_DESC,
+    engine.getRawConnection().add( bldr.toUri(), MetadataConstants.DCT_DESC,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
     Map<URI, String> data = engine.query( mq );

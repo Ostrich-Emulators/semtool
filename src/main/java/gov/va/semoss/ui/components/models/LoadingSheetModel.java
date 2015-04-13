@@ -7,12 +7,11 @@ package gov.va.semoss.ui.components.models;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.poi.main.NodeLoadingSheetData;
-import gov.va.semoss.poi.main.RelationshipLoadingSheetData;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
@@ -52,9 +51,47 @@ public class LoadingSheetModel extends ValueTableModel {
 	@Override
 	public void setHeaders( List<String> heads ) {
 		super.setHeaders( heads );
-		if( null != sheetdata ){
+		if ( null != sheetdata ) {
 			sheetdata.setHeaders( heads );
 		}
+	}
+
+	@Override
+	public void setValueAt( Object aValue, int r, int c ) {
+		boolean isinsert = isInsertRow( r );
+
+		ValueFactory vf = new ValueFactoryImpl();
+
+		if ( isinsert ) {
+			sheetdata.add( aValue.toString() );
+		}
+		else {
+			LoadingNodeAndPropertyValues nap = sheetdata.getData().get( r );
+			if ( 0 == c ) {
+				nap.setSubject( aValue.toString() );
+			}
+			else {
+				if ( sheetdata.isRel() ) {
+					if ( 1 == c ) {
+						nap.setObject( aValue.toString() );
+					}
+					else {
+						// we're setting a property
+						String prop = sheetdata.getHeaders().get( c );
+						// FIXME: handle datatypes
+						nap.put( prop, vf.createLiteral( aValue.toString() ) );
+					}
+				}
+				else {
+					// we're setting a property
+					String prop = sheetdata.getHeaders().get( c );
+					// FIXME: handle datatypes
+					nap.put( prop, vf.createLiteral( aValue.toString() ) );
+				}
+			}
+		}
+
+		super.setValueAt( aValue, r, c );
 	}
 
 	/**
@@ -110,10 +147,14 @@ public class LoadingSheetModel extends ValueTableModel {
 		if ( sheetdata.getSubjectType().equals( lsd.getSubjectType() ) ) {
 			sheetdata.setSubjectTypeIsError( lsd.hasSubjectTypeError() );
 		}
-		if ( sheetdata.getObjectType().equals( lsd.getObjectType() ) ) {
+
+		String ot = sheetdata.getObjectType();
+		if ( null != ot && ot.equals( lsd.getObjectType() ) ) {
 			sheetdata.setObjectTypeIsError( lsd.hasObjectTypeError() );
 		}
-		if ( sheetdata.getRelname().equals( lsd.getRelname() ) ) {
+
+		String rn = sheetdata.getRelname();
+		if ( null != rn && rn.equals( lsd.getRelname() ) ) {
 			sheetdata.setRelationIsError( lsd.hasRelationError() );
 		}
 
@@ -181,56 +222,38 @@ public class LoadingSheetModel extends ValueTableModel {
 		return null;
 	}
 
-	public NodeLoadingSheetData toNodeLoadingSheetData( String tabname ) {
+	public LoadingSheetData toLoadingSheet( String tabname ) {
 		List<String> heads = sheetdata.getHeaders();
 		String stype = heads.remove( 0 );
 
-		NodeLoadingSheetData lsd
-				= new NodeLoadingSheetData( tabname, stype, heads );
-		int rows = getRowCount();
-		int cols = getColumnCount();
-		boolean hasprops = ( cols > 1 );
-
-		for ( int r = 0; r < rows; r++ ) {
-			LoadingSheetData.LoadingNodeAndPropertyValues nap
-					= lsd.add( getValueAt( r, 0 ).toString() );
-			nap.setSubjectIsError( sheetdata.getData().get( r ).isSubjectError() );
-			nap.setObjectIsError( sheetdata.getData().get( r ).isObjectError() );
-
-			if ( hasprops ) {
-				for ( int p = 0; p < heads.size(); p++ ) {
-					Value v = getRdfValueAt( r, p + 1 ); // remember: we took off the first col
-					if ( null != v ) {
-						nap.put( heads.get( p ), v );
-					}
-				}
-			}
+		LoadingSheetData lsd;
+		int firstprop;
+		if ( sheetdata.isRel() ) {
+			String otype = heads.remove( 0 );
+			lsd = LoadingSheetData.relsheet( tabname, stype, otype, sheetdata.getRelname() );
+			firstprop = 2;
 		}
+		else {
+			lsd = LoadingSheetData.nodesheet( tabname, stype );
+			firstprop = 1;
+		}
+		lsd.addProperties( heads );
 
-		return lsd;
-	}
-
-	public RelationshipLoadingSheetData toRelationshipLoadingSheetData( String tabname ) {
-		List<String> heads = sheetdata.getHeaders();
-
-		String stype = heads.remove( 0 );
-		String otype = heads.remove( 0 );
-		RelationshipLoadingSheetData lsd = new RelationshipLoadingSheetData( tabname,
-				stype, otype, sheetdata.getRelname(), heads );
-		int rows = getRowCount();
+		int rows = getRealRowCount();
 		int cols = getColumnCount();
-		boolean hasprops = ( cols > 2 );
+		boolean hasprops = ( cols > firstprop );
 
 		for ( int r = 0; r < rows; r++ ) {
 			String sbj = getValueAt( r, 0 ).toString();
-			String obj = getValueAt( r, 1 ).toString();
-			LoadingSheetData.LoadingNodeAndPropertyValues nap = lsd.add( sbj, obj );
+			LoadingSheetData.LoadingNodeAndPropertyValues nap = ( sheetdata.isRel()
+					? lsd.add( sbj, getValueAt( r, 1 ).toString() ) : lsd.add( sbj ) );
+
 			nap.setSubjectIsError( sheetdata.getData().get( r ).isSubjectError() );
 			nap.setObjectIsError( sheetdata.getData().get( r ).isObjectError() );
 
 			if ( hasprops ) {
 				for ( int p = 0; p < heads.size(); p++ ) {
-					Value v = getRdfValueAt( r, p + 2 ); // remember: we took off the first two cols
+					Value v = getRdfValueAt( r, p + firstprop ); // remember: we took off some cols
 					if ( null != v ) {
 						nap.put( heads.get( p ), v );
 					}

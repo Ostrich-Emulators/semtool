@@ -8,7 +8,6 @@ package gov.va.semoss.rdf.engine.util;
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -47,7 +46,6 @@ import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
@@ -100,7 +98,7 @@ public class EngineLoaderTest {
 	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
 	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
 
-	private RepositoryConnection rc;
+	private InMemorySesameEngine engine;
 	private File destination;
 
 	private IEngine extractKb() {
@@ -178,331 +176,220 @@ public class EngineLoaderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rc = null;
-		SailRepository repo = new SailRepository( new MemoryStore() );
-		repo.initialize();
-
-		try {
-			rc = repo.getConnection();
-		}
-		catch ( Exception e ) {
-			repo.shutDown();
-			throw e;
-		}
+		engine = new InMemorySesameEngine();
 	}
 
 	@After
 	public void tearDown() {
-		if ( null != rc ) {
-			try {
-				rc.close();
-			}
-			catch ( Exception e ) {
-				// don't care
-			}
-
-			try {
-				rc.getRepository().shutDown();
-			}
-			catch ( Exception e ) {
-				// don't care
-			}
+		if ( null != engine ) {
+			engine.closeDB();
 		}
 	}
 
 	@Test
 	public void testCsvImport() throws Exception {
 		CSVReader rdr = new CSVReader( CSVLOADER );
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setBuilders( UriBuilder.getBuilder( BASEURI ),
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
-		eng.setRepositoryConnection( rc );
 
 		EngineLoader el = new EngineLoader();
 		el.setReader( "csv", rdr );
-		el.loadToEngine( Arrays.asList( CSVDATA ), eng, true, null );
+		el.loadToEngine( Arrays.asList( CSVDATA ), engine, true, null );
 		el.release();
-
-		// need a little cleanup because making the IEngine
-		//  adds some statements not in the input file
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"airplanes-mm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( CSV_EXP ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), getExpectedGraph( CSV_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testCsvImportNoMetamodel() throws Exception {
 		CSVReader rdr = new CSVReader( CSVLOADER );
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setBuilders( UriBuilder.getBuilder( BASEURI ),
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
-		eng.setRepositoryConnection( rc );
 
 		EngineLoader el = new EngineLoader();
 		el.setReader( "csv", rdr );
-		el.loadToEngine( Arrays.asList( CSVDATA ), eng, false, null );
+		el.loadToEngine( Arrays.asList( CSVDATA ), engine, false, null );
 		el.release();
-
-		// need a little cleanup because making the IEngine
-		//  adds some statements not in the input file
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"airplanes-nomm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( CSV_NOMM_EXP ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(),
+				getExpectedGraph( CSV_NOMM_EXP ), engine.getSchemaBuilder(),
+				engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testCsvImport2() throws Exception {
 		CSVReader rdr = new CSVReader( CSVLOADER2 );
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setBuilders( UriBuilder.getBuilder( BASEURI ),
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
-		eng.setRepositoryConnection( rc );
 
 		EngineLoader el = new EngineLoader();
 		el.setReader( "csv", rdr );
-		el.loadToEngine( Arrays.asList( CSVDATA2 ), eng, true, null );
+		el.loadToEngine( Arrays.asList( CSVDATA2 ), engine, true, null );
 		el.release();
-
-		// need a little cleanup because making the IEngine
-		//  adds some statements not in the input file
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-
-		// not sure where these are coming from
-		// (actually, not sure why they're missing in the "expected" file)
-		URI contains = eng.getSchemaBuilder().getContainsUri();
-		UriBuilder junker = UriBuilder.getBuilder( contains );
-		URI has = eng.getSchemaBuilder().getConceptUri( "has" );
-		URI cn = junker.copy().add( "cn_In" ).build();
-		rc.remove( has, null, null );
-		rc.remove( cn, null, null );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"systems-mm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( CSV_EXP2 ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), getExpectedGraph( CSV_EXP2 ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testImportXlsLegacy() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( BASEURI ),
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		ImportData id = new ImportData();
 		EngineLoader el = new EngineLoader();
-		el.loadToEngine( Arrays.asList( LEGACY ), eng, true, id );
+		el.loadToEngine( Arrays.asList( LEGACY ), engine, true, id );
 		el.release();
-
-		// need a little cleanup because making the in-memory
-		// engine adds some statements not in the XLSX
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"legacy-mm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( LEGACY_EXP ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), getExpectedGraph( LEGACY_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testImportXlsLegacyNoMetamodel() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( BASEURI ),
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		ImportData id = new ImportData();
 		EngineLoader el = new EngineLoader();
-		el.loadToEngine( Arrays.asList( LEGACY ), eng, false, id );
+		el.loadToEngine( Arrays.asList( LEGACY ), engine, false, id );
 		el.release();
-
-		// need a little cleanup because making the in-memory
-		// engine adds some statements not in the XLSX
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"legacy-nomm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( LEGACY_NOMM_EXP ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), getExpectedGraph( LEGACY_NOMM_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testImportXlsModern() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( DATAURI ),
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
 		ImportData errors = new ImportData();
 		Collection<Statement> owls
-				= el.loadToEngine( Arrays.asList( CUSTOM ), eng, true, errors );
+				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, true, errors );
 		el.release();
-
-		// need a little cleanup because making the in-memory
-		// engine adds some statements not in the XLSX
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"custom-mm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareOwls( owls, CUSTOM_EXP, eng.getSchemaBuilder() );
-		compareData( rc, getExpectedGraph( CUSTOM_EXP ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareOwls( owls, CUSTOM_EXP, engine.getSchemaBuilder() );
+		compareData( engine.getRawConnection(), getExpectedGraph( CUSTOM_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testImportNamespaceHeavyXlsModern() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( DATAURI ),
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
 		ImportData errors = new ImportData();
-		el.loadToEngine( Arrays.asList( CUSTOM2 ), eng, true, errors );
+		el.loadToEngine( Arrays.asList( CUSTOM2 ), engine, true, errors );
 		el.release();
-
-		// need a little cleanup because making the in-memory
-		// engine adds some statements not in the XLSX
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"custom2-mm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( CUSTOM2_EXP ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), getExpectedGraph( CUSTOM2_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testImportNamespaceHeavyXlsModernNoMetamodel() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( DATAURI ),
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
 		ImportData errors = new ImportData();
-		el.loadToEngine( Arrays.asList( CUSTOM2 ), eng, false, errors );
+		el.loadToEngine( Arrays.asList( CUSTOM2 ), engine, false, errors );
 		el.release();
-
-		// need a little cleanup because making the in-memory
-		// engine adds some statements not in the XLSX
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"custom2-nomm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( CUSTOM2_NOMM_EXP ), eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), getExpectedGraph( CUSTOM2_NOMM_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
 	@Test
 	public void testImportXlsModernNoMetamodel() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( DATAURI ),
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
 		Collection<Statement> owls
-				= el.loadToEngine( Arrays.asList( CUSTOM ), eng, false, null );
+				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, false, null );
 		el.release();
-
-		// need a little cleanup because making the in-memory
-		// engine adds some statements not in the XLSX
-		rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"custom-nomm.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
 		Model expected = getExpectedGraph( CUSTOM_NOMM_EXP );
 		assertTrue( owls.isEmpty() );
-		compareData( rc, expected, eng.getSchemaBuilder(),
-				eng.getDataBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), expected, engine.getSchemaBuilder(),
+				engine.getDataBuilder() );
 	}
 
 	@Test
@@ -521,7 +408,7 @@ public class EngineLoaderTest {
 		EngineLoader el2 = new EngineLoader();
 		el2.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
 		el2.release();
-		List<URI> newlist = eng.query( o );
+		List<URI> newlist = engine.query( o );
 		removeKb( eng );
 		assertEquals( oldlist, newlist );
 	}
@@ -542,21 +429,19 @@ public class EngineLoaderTest {
 		el2.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
 		el2.release();
 
-		List<URI> newlist = eng.query( o );
+		List<URI> newlist = engine.query( o );
 		removeKb( eng );
 		assertEquals( oldlist, newlist );
 	}
 
 	@Test
 	public void testTicket583() throws Exception {
+		RepositoryConnection rc = engine.getRawConnection();
 		rc.add( TICKETBASE, null, RDFFormat.TURTLE );
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
 
 		EngineLoader el = new EngineLoader();
-		el.loadToEngine( Arrays.asList( TICKET583 ), eng, false, null );
+		el.loadToEngine( Arrays.asList( TICKET583 ), engine, false, null );
 		el.release();
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -569,63 +454,52 @@ public class EngineLoaderTest {
 		compareData( rc, getExpectedGraph( TICKET583_EXP ),
 				UriBuilder.getBuilder( "http://example.org/ex1" ),
 				UriBuilder.getBuilder( "http://foo.bar/model#" ) );
-		eng.closeDB();
 	}
 
 	// @Test
 	public void testTicket584() throws Exception {
+		RepositoryConnection rc = engine.getRawConnection();
+
 		rc.add( TICKETBASE, null, RDFFormat.TURTLE );
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( "http://example.org/ex1" ),
+		engine.setBuilders( UriBuilder.getBuilder( "http://example.org/ex1" ),
 				UriBuilder.getBuilder( "http://foo.bar/model#" ) );
 
 		EngineLoader el = new EngineLoader();
-		el.loadToEngine( Arrays.asList( TICKET584 ), eng, false, null );
+		el.loadToEngine( Arrays.asList( TICKET584 ), engine, false, null );
 		el.release();
-
-		// need a little cleanup because making the in-memory
-		// engine adds some statements not in the XLSX
-		//rc.remove( eng.getBaseUri(), RDF.TYPE, MetadataConstants.VOID_DS );
-		//rc.remove( eng.getBaseUri(), RDF.TYPE, OWL.ONTOLOGY );
-		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"ticket584.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
 //		compareData( rc, getExpectedGraph( TICKET584_EXP ),
 //				UriBuilder.getBuilder( "http://example.org/ex1" ),
 //				UriBuilder.getBuilder( "http://foo.bar/model#" ) );
-		eng.closeDB();
 	}
 
 	@Test
 	public void testVerySimilarProperties() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
-		eng.setRepositoryConnection( rc );
-		eng.setBuilders( UriBuilder.getBuilder( DATAURI ),
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
-		el.loadToEngine( Arrays.asList( TICKET608 ), eng, true, null );
+		el.loadToEngine( Arrays.asList( TICKET608 ), engine, true, null );
 		el.release();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"ticket608.nt" ) ) ) ) {
-				rc.export( new NTriplesWriter( w ) );
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
 		}
 
-		compareData( rc, getExpectedGraph( TICKET608_EXP ),
-				eng.getDataBuilder(), eng.getSchemaBuilder() );
-		eng.closeDB();
+		compareData( engine.getRawConnection(), getExpectedGraph( TICKET608_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
 	private Model getExpectedGraph( File rdf ) {

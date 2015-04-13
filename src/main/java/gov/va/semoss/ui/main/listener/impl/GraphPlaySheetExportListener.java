@@ -92,12 +92,6 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 			Value pred = vf.createLiteral( "Type" );
 			Value obj = vf.createLiteral( "Vertex" );
 			vals.add( new Value[]{ subj, pred, obj } );
-
-//			for ( Map.Entry<String, Object> en : v.getProperty().entrySet() ) {
-//				Value pred = vf.createLiteral( en.getKey() );
-//				Value obj = vf.createLiteral( en.getValue().toString() );
-//				vals.add( new Value[]{ subj, pred, obj } );
-//			}
 		}
 
 		for ( SEMOSSEdge v : edges ) {
@@ -125,11 +119,6 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 			Value pred = vf.createLiteral( "Type" );
 			Value obj = vf.createLiteral( "Edge" );
 			vals.add( new Value[]{ subj, pred, obj } );
-//			for ( Map.Entry<String, Object> en : v.getProperties().entrySet() ) {
-//				Value pred = vf.createLiteral( en.getKey() );
-//				Value obj = vf.createLiteral( en.getValue().toString() );
-//				vals.add( new Value[]{ subj, pred, obj } );
-//			}
 		}
 
 		GridRAWPlaySheet.convertUrisToLabels( vals, gps.getEngine() );
@@ -173,8 +162,6 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 
 		//the second token coming from between the first two brackets must have all period and semicolons removed
 		String secondToken = QueryBracketTokens.nextToken();
-		//String secondTokensansSemi = "";
-		//String secondTokensansPer = "";
 		String newsecondToken = null;
 		if ( secondToken.contains( ";" ) && secondToken.contains( "." ) ) {
 			String secondTokensansSemi = secondToken.replaceAll( ";", " " );

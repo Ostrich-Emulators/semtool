@@ -34,8 +34,17 @@ public class NodeLoadingPlaySheet extends LoadingPlaySheetBase {
 	}
 	
 	public NodeLoadingPlaySheet( LoadingSheetData lsd ) {
+		this( lsd, false );
+	}
+
+	public NodeLoadingPlaySheet( LoadingSheetData lsd, boolean allowInserts ) {
 		super( new LoadingSheetModel( lsd ) );
+
+		getModel().setReadOnly( !allowInserts );
+		getModel().setAllowInsertsInPlace( allowInserts );
+		
 		setTitle( lsd.getName() );
+		setHeaders( lsd.getHeaders() );
 	}
 
 	@Override

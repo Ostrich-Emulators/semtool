@@ -14,17 +14,26 @@ public class Parameter {
     private String strValueType;
     private String strDefaultValue;
     private String strDefaultQuery;
+    private String strParameterURI;
     
     public Parameter(){
     }    
-    public Parameter(String strLabel, String strVariable, String strValueType, String strDefaultValue, String strDefaultQuery){
+    public Parameter(String strParameterURI, String strLabel, String strVariable, String strValueType, String strDefaultValue, String strDefaultQuery){
+    	this.strParameterURI = strParameterURI;
     	this.strLabel = strLabel;
     	this.strVariable = strVariable;
     	this.strValueType = strValueType;
     	this.strDefaultValue = strDefaultValue;
     	this.strDefaultQuery = strDefaultQuery;
     }
-    
+
+    //Parameter URI:
+    public String getParameterURI(){
+    	return this.strParameterURI;
+    }
+    public void setParameterURI(String strParameterURI){
+    	this.strParameterURI = strParameterURI;
+    }    
     //Parameter label:
     public String getLabel(){
     	return this.strLabel;
@@ -66,6 +75,17 @@ public class Parameter {
      * @param resultSet -- (BindingSet) A row of data corresponding to one Parameter.
      */
     public void setFromResultSet( BindingSet resultSet ) {
+    	this.strParameterURI = "";
+    	this.strLabel = "";
+    	this.strVariable = "";
+    	this.strValueType = "";
+    	this.strDefaultValue = "";
+    	this.strDefaultQuery = "";
+    	
+		Value ParameterURI_Value = resultSet.getValue("parameter");
+		if(ParameterURI_Value != null){
+			this.strParameterURI = ParameterURI_Value.stringValue();
+		}
 		Value labelValue = resultSet.getValue("label");
 		if(labelValue != null){
 			this.strLabel = labelValue.stringValue();
@@ -90,7 +110,8 @@ public class Parameter {
 
 	@Override
 	public String toString() {
-		return "Parameter [label: " + this.strLabel
+		return "Parameter [parameterURI: " + this.strParameterURI
+				+ ", label: " + this.strLabel
 				+ ", variable: " + this.strVariable
 				+ ", valueType: " + this.strValueType
 				+ ", defaultValue: " + this.strDefaultValue

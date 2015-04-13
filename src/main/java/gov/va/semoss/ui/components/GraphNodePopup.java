@@ -24,9 +24,9 @@ import gov.va.semoss.algorithm.impl.IslandIdentifierProcessor;
 import gov.va.semoss.algorithm.impl.LoopIdentifierProcessor;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.playsheets.BrowserTabSheet3;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.main.listener.impl.AdjacentPopupMenuListener;
-import gov.va.semoss.ui.main.listener.impl.ChartListener;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeRankListener;
 import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetExportListener;
 import gov.va.semoss.ui.main.listener.impl.HideVertexPopupMenuListener;
@@ -37,6 +37,8 @@ import gov.va.semoss.ui.main.listener.impl.NodeEditorListener;
 import gov.va.semoss.ui.main.listener.impl.UnHideVertexPopupMenuListener;
 import gov.va.semoss.util.DIHelper;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JMenu;
@@ -84,9 +86,17 @@ public class GraphNodePopup extends JPopupMenu {
 
 	private void addChartOptions() {
 		addSeparator();
-
-		JMenuItem item = add( new ChartListener( gps ) );
-		item.setEnabled( true );
+		
+		JMenuItem item = add( "Create Custom Chart" );
+		item.setToolTipText( "Invoke a screen to build a custom chart" );
+		item.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+				BrowserTabSheet3 tab
+						= new BrowserTabSheet3( "/html/RDFSemossCharts/app/index.html", gps );
+				gps.getPlaySheetFrame().addTab( "Custom Chart", tab );
+				tab.pullData();
+		    }
+		});
 
 		item = add( "Edit Node" );
 		item.setToolTipText( "Make modifications to the SEMOSS database" );

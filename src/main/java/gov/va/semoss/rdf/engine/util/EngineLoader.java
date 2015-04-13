@@ -38,10 +38,9 @@ import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.poi.main.NodeLoadingSheetData;
 import gov.va.semoss.poi.main.POIReader;
-import gov.va.semoss.poi.main.RelationshipLoadingSheetData;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
@@ -70,13 +69,10 @@ import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.ntriples.NTriplesWriter;
-import org.openrdf.sail.memory.MemoryStore;
 
 /**
  * A class to handle loading files to an existing engine
@@ -152,8 +148,6 @@ public class EngineLoader {
 		BigdataSailRepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
 
-		Repository frepo = new SailRepository( new MemoryStore() );
-		frepo.initialize();
 		return rc;
 	}
 
@@ -282,13 +276,13 @@ public class EngineLoader {
 						getRDFStringValue( en.getValue(), namespaces ) );
 			}
 
-			for ( NodeLoadingSheetData n : data.getNodes() ) {
+			for ( LoadingSheetData n : data.getNodes() ) {
 				addToEngine( n, engine, data.getMetadata() );
 			}
 
 			separateConformanceErrors( data, conformanceErrors, engine );
 
-			for ( RelationshipLoadingSheetData r : data.getRels() ) {
+			for ( LoadingSheetData r : data.getRels() ) {
 				addToEngine( r, engine, data.getMetadata() );
 			}
 		}
@@ -309,12 +303,12 @@ public class EngineLoader {
 	public void separateConformanceErrors( ImportData data, ImportData errors,
 			IEngine engine ) {
 		if ( null != errors ) {
-			for ( RelationshipLoadingSheetData d : data.getRels() ) {
+			for ( LoadingSheetData d : data.getRels() ) {
 				List<LoadingNodeAndPropertyValues> errs = checkConformance( d, engine, false );
 
 				if ( !errs.isEmpty() ) {
-					RelationshipLoadingSheetData errdata
-							= new RelationshipLoadingSheetData( d.getName(), d.getSubjectType(),
+					LoadingSheetData errdata
+							= LoadingSheetData.relsheet( d.getName(), d.getSubjectType(),
 									d.getObjectType(), d.getRelname() );
 					errdata.setProperties( d.getPropertiesAndDataTypes() );
 					errors.add( errdata );
@@ -553,7 +547,7 @@ public class EngineLoader {
 
 		ConceptInstanceCacheKey okey = new ConceptInstanceCacheKey( otype, orawlabel );
 		if ( !dataNodes.containsKey( okey ) ) {
-			NodeLoadingSheetData lsd = new NodeLoadingSheetData( sheet.getName(), otype );
+			LoadingSheetData lsd = LoadingSheetData.nodesheet( sheet.getName(), otype );
 			LoadingNodeAndPropertyValues filler = lsd.add( orawlabel );
 			addNode( filler, namespaces, lsd, metas );
 		}
@@ -912,8 +906,7 @@ public class EngineLoader {
 				= Iterations.asList( myrc.getStatements( null, null, null, false ) );
 
 		// we're done importing the files, so add all the statements to our engine
-		engine.execute( new ModificationExecutorAdapter() {
-
+		ModificationExecutor mea = new ModificationExecutorAdapter(){
 			@Override
 			public void exec( RepositoryConnection conn ) throws RepositoryException {
 				initNamespaces( conn );
@@ -924,8 +917,10 @@ public class EngineLoader {
 				}
 
 				// NOTE: no commit here
-			}
-		} );
+			}			
+		};
+		
+		engine.execute( mea );
 
 		if ( log.isTraceEnabled() ) {
 			File exportfile

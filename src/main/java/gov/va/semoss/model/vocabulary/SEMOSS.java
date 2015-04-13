@@ -7,7 +7,7 @@ import org.openrdf.model.impl.NamespaceImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
- * Minimal vocabulary of the SEMOSS data model.
+ * Minimal vocabulary of the VA SEMOSS Insights.
  *
  */
 public class SEMOSS {
@@ -15,18 +15,18 @@ public class SEMOSS {
 	public final static String BASE_URI = "http://semoss.org/ontologies";
 	
 	/**
-	 * SEMOSS namespace: http://semoss.org/ontologie/
+	 * V-CAMP SEMOSS Tool namespace: http://semoss.org/ontologie/
 	 */
 	public final static String NAMESPACE = BASE_URI + "/";
 
 	/**
-	 * Recommend prefix for the SEMOSS namespace: "semoss"
+	 * Recommend prefix for the V-CAMP SEMOSS Tool namespace: "semoss"
 	 */
 	public final static String PREFIX = "semoss";
 
 	/**
 	 * An immutable {@link Namespace} constant that represents the SEMOSS
-	 * namespace.
+	 * Tool namespace.
 	 */
 	public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
 	
@@ -34,12 +34,12 @@ public class SEMOSS {
 	// ----- Classes ------
 	
 	/**
-	 * http://semoss.org/ontologies/Concept
+	 * http://va.gov/ontologies/Concept
 	 */
 	public final static URI Concept;
 	
 	/**
-	 * http://semoss.org/ontologies/Relation
+	 * http://va.gov/ontologies/Relation
 	 */
 	public final static URI Relation;
 
@@ -47,7 +47,7 @@ public class SEMOSS {
 	// ----- Properties ------
 	
 	/**
-	 * http://semoss.org/ontologies/has
+	 * http://va.gov/ontologies/has
 	 */
 	public static final URI has;
 

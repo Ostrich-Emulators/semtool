@@ -19,8 +19,6 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
-import gov.va.semoss.ui.components.models.LabelTableModel;
-import gov.va.semoss.ui.components.models.TooltipTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
@@ -45,8 +43,8 @@ public class PlaySheetControlListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameActivated( InternalFrameEvent e ) {
-		Utility.addModelToJTable( new LabelTableModel(   ps.getControlData()), Constants.LABEL_TABLE);
-		Utility.addModelToJTable( new TooltipTableModel( ps.getControlData()), Constants.TOOLTIP_TABLE);
+		Utility.addModelToJTable( ps.getControlData().getLabels().getTableModel(), Constants.LABEL_TABLE);
+		Utility.addModelToJTable( ps.getControlData().getTooltips().getTableModel(), Constants.TOOLTIP_TABLE);
 	}
 
 	/**

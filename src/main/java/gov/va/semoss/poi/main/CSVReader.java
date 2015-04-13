@@ -69,7 +69,6 @@ public class CSVReader implements ImportFileReader {
 	private File propFile;
 	private final Properties rdfMap = new Properties();
 
-
 	public CSVReader() {
 	}
 
@@ -93,6 +92,11 @@ public class CSVReader implements ImportFileReader {
 		for ( String name : rdfPropMap.stringPropertyNames() ) {
 			rdfMap.put( name, rdfPropMap.getProperty( name ) );
 		}
+	}
+
+	@Override
+	public ImportMetadata getMetadata( File file ) throws IOException {
+		return new ImportMetadata(); // no metadata for CSVs
 	}
 
 	@Override
@@ -146,13 +150,15 @@ public class CSVReader implements ImportFileReader {
 	}
 
 	public void processRelationships( ImportData data ) throws IOException {
-		Map<String, RelationshipLoadingSheetData> rels = new HashMap<>();
-		Map<String, NodeLoadingSheetData> nodes = new HashMap<>();
-		for ( RelationshipLoadingSheetData r : data.getRels() ) {
-			rels.put( r.getName(), r );
-		}
-		for ( NodeLoadingSheetData r : data.getNodes() ) {
-			nodes.put( r.getName(), r );
+		Map<String, LoadingSheetData> rels = new HashMap<>();
+		Map<String, LoadingSheetData> nodes = new HashMap<>();
+		for ( LoadingSheetData r : data.getSheets() ) {
+			if ( r.isRel() ) {
+				rels.put( r.getName(), r );
+			}
+			else {
+				nodes.put( r.getName(), r );
+			}
 		}
 
 		//start count at 1 just row 1 is the header
@@ -185,7 +191,7 @@ public class CSVReader implements ImportFileReader {
 
 				String sbjinstance = createInstanceValue( nodetype, jcrMap );
 
-				NodeLoadingSheetData nlsd = nodes.get( nodetype );
+				LoadingSheetData nlsd = nodes.get( nodetype );
 
 				Map<String, Value> props = new HashMap<>();
 				for ( String propValColumn : valuesForProp ) {
@@ -206,7 +212,7 @@ public class CSVReader implements ImportFileReader {
 					break; // don't expect to ever get here
 				}
 
-				RelationshipLoadingSheetData rlsd = rels.get( relation );
+				LoadingSheetData rlsd = rels.get( relation );
 
 				// get the subject and object for triple (the two indexes)
 				String sub = m.group( 1 );
@@ -225,7 +231,7 @@ public class CSVReader implements ImportFileReader {
 	private void processConceptRelationURIs( ImportData data ) {
 		// get the list of relationships from the prop file
 
-		Map<String, RelationshipLoadingSheetData> rels = new HashMap<>();
+		Map<String, LoadingSheetData> rels = new HashMap<>();
 
 		if ( null != rdfMap.getProperty( RELATION ) ) {
 			String relationNames = rdfMap.getProperty( RELATION );
@@ -251,9 +257,8 @@ public class CSVReader implements ImportFileReader {
 				String objectLabel = processAutoConcat( obj );
 
 				// String name, String sType, String oType,String relname
-				RelationshipLoadingSheetData rlsd
-						= new RelationshipLoadingSheetData( relation, subjectLabel,
-								objectLabel, predicate );
+				LoadingSheetData rlsd = LoadingSheetData.relsheet( relation, subjectLabel,
+						objectLabel, predicate );
 				data.add( rlsd );
 				rels.put( relation, rlsd );
 			}
@@ -262,11 +267,9 @@ public class CSVReader implements ImportFileReader {
 
 	public void processNodePropURIs( ImportData data ) {
 
-		Map<String, NodeLoadingSheetData> nodes = new HashMap<>();
+		Map<String, LoadingSheetData> nodes = new HashMap<>();
 
 		if ( null != rdfMap.getProperty( NODE_PROP ) ) {
-			ValueFactory vf = new ValueFactoryImpl();
-
 			nodePropArrayList.clear();
 			String nodePropNames = rdfMap.getProperty( NODE_PROP );
 
@@ -291,13 +294,12 @@ public class CSVReader implements ImportFileReader {
 				String subjectLabel = processAutoConcat( sub );
 
 				if ( !nodes.containsKey( sub ) ) {
-					NodeLoadingSheetData nlsd
-							= new NodeLoadingSheetData( sub, subjectLabel );
+					LoadingSheetData nlsd = LoadingSheetData.nodesheet( sub, subjectLabel );
 					nodes.put( sub, nlsd );
 					data.add( nlsd );
 				}
 
-				NodeLoadingSheetData nlsd = nodes.get( sub );
+				LoadingSheetData nlsd = nodes.get( sub );
 				for ( String pname : propnames ) {
 					nlsd.addProperty( pname, datatypes.get( pname ) );
 				}
@@ -310,13 +312,12 @@ public class CSVReader implements ImportFileReader {
 			return;
 		}
 
-		logger.error( "this function doesn't do anything");
-		
+		logger.error( "this function doesn't do anything" );
+
 		String propNames = rdfMap.getProperty( RELATION_PROP );
 		StringTokenizer propTokens = new StringTokenizer( propNames, ";" );
 		relPropArrayList.clear();
 
-		ValueFactory vf = new ValueFactoryImpl();
 		while ( propTokens.hasMoreElements() ) {
 			String relation = propTokens.nextToken();
 			//just in case the end of the prop string is empty string or spaces
@@ -344,10 +345,6 @@ public class CSVReader implements ImportFileReader {
 					// if no user specified URI, use generic URI
 					property = processAutoConcat( prop );
 				}
-
-//				String propURI = getBasePropUri() + "/" + property;
-//				data.getMetadata().addExtra( vf.createURI( propURI ),
-//						RDF.TYPE, getBasePropUri() ) );
 			}
 		}
 	}

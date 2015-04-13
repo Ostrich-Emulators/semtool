@@ -229,22 +229,21 @@ public class ValueTableModel extends AbstractTableModel {
 	public void setValueAt( Object aValue, int r, int c ) {
 		Class<?> k = getColumnClass( c );
 
-		if ( isInsertRow( r ) ) {
+		boolean isinsert = isInsertRow( r );
+		
+		if ( isinsert ) {
 			Object objs[] = new Object[getColumnCount()];
 			data.add( objs );
 		}
 
 		data.get( r )[c] = k.cast( aValue );
 
-		if ( isInsertRow( r ) ) {
-			Object objs2[] = new Object[getColumnCount()];
-			objs2[0] = "*";
-			data.add( objs2 );
-
-			fireTableRowsInserted( r + 1, r + 1 );
+		if ( isinsert ) {
+			fireTableRowsInserted( r, r );
 		}
-
-		fireTableCellUpdated( r, c );
+		else{
+			fireTableCellUpdated( r, c );
+		}
 	}
 
 	@Override

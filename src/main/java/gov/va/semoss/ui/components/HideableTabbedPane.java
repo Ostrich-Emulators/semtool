@@ -22,7 +22,8 @@ import javax.swing.event.ChangeListener;
  * @author ryan
  */
 public class HideableTabbedPane extends JPanel {
-
+	private static final long serialVersionUID = 1149198288527605328L;
+	
 	private static final String NOTABS = "no-tabs-component";
 	private static final String TABS = "tabs-component";
 
@@ -84,7 +85,7 @@ public class HideableTabbedPane extends JPanel {
 	}
 
 	public void add( String title, PlaySheetCentralComponent c ) {
-		if ( tabs.getTabCount() > 0 || c.prefersTabs() ) {
+		if ( getTabCount() > 0 || c.prefersTabs() ) {
 			showTabs( true );
 			tabs.add( title, c );
 			tabs.setSelectedComponent( c );
@@ -175,8 +176,5 @@ public class HideableTabbedPane extends JPanel {
 
 	public CloseableTab getTabComponentAt( int idx ) {
 		return CloseableTab.class.cast( tabs.getTabComponentAt( idx ) );
-	}
-	
-	
-	
+	}	
 }

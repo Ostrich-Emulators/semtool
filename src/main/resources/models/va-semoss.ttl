@@ -1,6 +1,7 @@
 # baseURI: http://va.gov/ontologies/semoss
 # imports: http://purl.org/dc/terms/
 # imports: http://purl.org/ontology/olo/core#
+# imports: http://rdfs.org/ns/void
 # imports: http://spinrdf.org/spin
 # imports: http://uispin.org/ui
 # imports: http://va.gov/ontologies/core
@@ -20,6 +21,7 @@
   rdf:type owl:Ontology ;
   owl:imports <http://purl.org/dc/terms/> ;
   owl:imports olo: ;
+  owl:imports <http://rdfs.org/ns/void> ;
   owl:imports <http://spinrdf.org/spin> ;
   owl:imports <http://uispin.org/ui> ;
   owl:imports <http://va.gov/ontologies/core> ;
@@ -38,7 +40,7 @@ vas:DataView
 vas:Database
   rdf:type owl:Class ;
   rdfs:label "Database"^^xsd:string ;
-  rdfs:subClassOf owl:Thing ;
+  rdfs:subClassOf <http://rdfs.org/ns/void#Dataset> ;
 .
 vas:Functions
   rdf:type spin:Function ;
@@ -76,31 +78,31 @@ vas:W3C-Reification
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.CONUSMapPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_conus_map1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.CONUSMapPlaySheet"^^xsd:string ;
   vac:description """The Play Sheet for Continental United States (CONUS) geo-location data.  
 Visualizes Latitude/Longitude coordinates on a map of the CONUS."""^^xsd:string ;
+  vas:icon "questions_conus_map1_16.png"^^xsd:string ;
   rdfs:label "Continental US Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_bar_chart1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet"^^xsd:string ;
+  vas:icon "questions_bar_chart1_16.png"^^xsd:string ;
   rdfs:label "Column Chart"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.CountyHeatMapPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_country_heat_map1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.CountyHeatMapPlaySheet"^^xsd:string ;
   vac:description """The Play Sheet for the United States geo-location data heatmap.  
 Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+  vas:icon "questions_country_heat_map1_16.png"^^xsd:string ;
   rdfs:label "County Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_dendrogram1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet"^^xsd:string ;
   vac:description "The Play Sheet for creating a Dendrogram diagram using names and children.  "^^xsd:string ;
+  vas:icon "questions_dendrogram1_16.png"^^xsd:string ;
   rdfs:label "Dendrogram"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.DualEngineGridPlaySheet>
@@ -111,99 +113,99 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GraphPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_graph_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GraphPlaySheet"^^xsd:string ;
+  vas:icon "questions_graph_16.png"^^xsd:string ;
   rdfs:label "Graph"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_grid1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
   vac:description "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^xsd:string ;
+  vas:icon "questions_grid1_16.png"^^xsd:string ;
   rdfs:label "Grid"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_raw_grid1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
   vac:description "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
+  vas:icon "questions_raw_grid1_16.png"^^xsd:string ;
   rdfs:label "Raw Grid"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridScatterSheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_scatter_grid1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
   vac:description "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^xsd:string ;
+  vas:icon "questions_scatter_grid1_16.png"^^xsd:string ;
   rdfs:label "Grid Scatter"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet"^^xsd:string ;
   vac:description "The Play Sheet for creating a heat map diagram. "^^xsd:string ;
+  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   rdfs:label "Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.OCONUSMapPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_oconus_map1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.OCONUSMapPlaySheet"^^xsd:string ;
   vac:description """The Play Sheet for Outside the Continental United States (OCONUS) geo-location data.  
 Visualizes Latitude/Longitude coordinates on a map of OCONUS."""^^xsd:string ;
+  vas:icon "questions_oconus_map1_16.png"^^xsd:string ;
   rdfs:label "Outside Continental US Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_parcoords4_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet"^^xsd:string ;
   vac:description "The Play Sheet for creating a Parallel Coordinates diagram."^^xsd:string ;
+  vas:icon "questions_parcoords4_16.png"^^xsd:string ;
   rdfs:label "Parallel Coordinates"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.PieChartPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_pie_chart1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet"^^xsd:string ;
+  vas:icon "questions_pie_chart1_16.png"^^xsd:string ;
   rdfs:label "Pie Chart"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.SankeyPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_sankey_diagram_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
   vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships.  "^^xsd:string ;
+  vas:icon "questions_sankey_diagram_16.png"^^xsd:string ;
   rdfs:label "Sankey Diagram"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_us_heat_map1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet"^^xsd:string ;
   vac:description """The Play Sheet for the United States geo-location data heatmap.  
 Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+  vas:icon "questions_us_heat_map1_16.png"^^xsd:string ;
   rdfs:label "US Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_world_heat_map1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet"^^xsd:string ;
   vac:description """The Play Sheet for the World geo-location data heatmap.  
 Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+  vas:icon "questions_world_heat_map1_16.png"^^xsd:string ;
   rdfs:label "World Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   ui:viewClass "gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
+  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   rdfs:label "Application Duplication Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet>
   rdf:type vas:DataView ;
-  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   ui:viewClass "gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet"^^xsd:string ;
+  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   rdfs:label "Dupe Heat Map"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet>
   rdf:type vas:DataView ;
   vas:icon "questions_metamodel1_16.png"^^xsd:string ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
-  rdfs:label "Dupe Heat Map"^^xsd:string ;
+  rdfs:label "Metamodel Graph"^^xsd:string ;
 .
 vas:icon
   rdf:type owl:DatatypeProperty ;

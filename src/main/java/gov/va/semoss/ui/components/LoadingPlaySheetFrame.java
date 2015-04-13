@@ -9,8 +9,6 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.poi.main.NodeLoadingSheetData;
-import gov.va.semoss.poi.main.RelationshipLoadingSheetData;
 import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
@@ -64,9 +62,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private boolean doconformance;
 	private boolean calcinfers;
 	private boolean doreplace;
+	
 	private final List<File> toload = new ArrayList<>();
-	private final List<RelationshipLoadingPlaySheet> rels = new ArrayList<>();
-	private final List<NodeLoadingPlaySheet> nodes = new ArrayList<>();
+	private final List<LoadingPlaySheetBase> sheets = new ArrayList<>();
+	
 	private final ConformanceAction conformer = new ConformanceAction();
 	private final LoadingAction loader = new LoadingAction();
 	private final JCheckBox showerrs = new JCheckBox( "Show Only Errors" );
@@ -86,8 +85,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		doconformance = conform;
 		doreplace = replace;
 		setTitle( "Import Data Review" );
-		showerrs.setEnabled( false );
-		conformer.setEnabled( false );
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
@@ -96,41 +93,25 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		populateForFiles( toload );
 	}
 
-	private LoadingPlaySheetFrame() {
-		super( null );
-		calcinfers = false;
-		dometamodel = false;
-		doconformance = false;
-		doreplace = false;
+	public LoadingPlaySheetFrame() {
+		this( null, false, false, false, false );
 		hideProgress();
 	}
 
+	public LoadingPlaySheetFrame( ImportData data ) {
+		this( null, data );
+	}
+
 	public LoadingPlaySheetFrame( IEngine eng, ImportData data ) {
-		super( eng );
-		calcinfers = false;
-		doreplace = false;
-		dometamodel = data.getMetadata().isAutocreateMetamodel();
-		doconformance = true;
+		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
 
 		setTitle( "Import Data Review" );
-		showerrs.setEnabled( true );
-		conformer.setEnabled( true );
 
 		LoadingPlaySheetBase first = null;
-		for ( NodeLoadingSheetData n : data.getNodes() ) {
-			if ( !n.isEmpty() ) {
-				LoadingPlaySheetBase ps = add( n );
-				if ( null == first ) {
-					first = ps;
-				}
-			}
-		}
-		for ( RelationshipLoadingSheetData r : data.getRels() ) {
-			if ( !r.isEmpty() ) {
-				LoadingPlaySheetBase ps = add( r );
-				if ( null == first ) {
-					first = ps;
-				}
+		for ( LoadingSheetData n : data.getSheets() ) {
+			LoadingPlaySheetBase ps = add( n );
+			if ( null == first ) {
+				first = ps;
 			}
 		}
 
@@ -141,37 +122,32 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		hideProgress();
 	}
 
-	public final NodeLoadingPlaySheet add( NodeLoadingSheetData data ) {
-		NodeLoadingPlaySheet sheet = new NodeLoadingPlaySheet( data );
-		nodes.add( sheet );
-		addTab( sheet );
+	public final LoadingPlaySheetBase add( LoadingSheetData data ) {
+		LoadingPlaySheetBase ret = null;
+		if ( data.isRel() ) {
+			RelationshipLoadingPlaySheet sheet = new RelationshipLoadingPlaySheet( data );
+			showerrs.addActionListener( sheet );
+			ret = sheet;
+		}
+		else {
+			ret = new NodeLoadingPlaySheet( data );
+		}
 
-		if ( sheet.getLoadingModel().hasConformanceErrors()
-				|| sheet.getLoadingModel().hasModelErrors() ) {
+		addTab( ret );
+
+		if ( ret.getLoadingModel().hasConformanceErrors()
+				|| ret.getLoadingModel().hasModelErrors() ) {
 			CloseableTab tab
-					= LoadingPlaySheetFrame.this.getTabComponent( sheet );
+					= LoadingPlaySheetFrame.this.getTabComponent( ret );
 			tab.setMark( MarkType.ERROR );
 		}
 
-		return sheet;
+		return ret;
 	}
 
-	public final RelationshipLoadingPlaySheet add( RelationshipLoadingSheetData data ) {
-		RelationshipLoadingPlaySheet sheet = new RelationshipLoadingPlaySheet( data );
-		rels.add( sheet );
-		addTab( sheet );
-
-		if ( sheet.getLoadingModel().hasConformanceErrors()
-				|| sheet.getLoadingModel().hasModelErrors() ) {
-			CloseableTab tab
-					= LoadingPlaySheetFrame.this.getTabComponent( sheet );
-			tab.setMark( MarkType.ERROR );
-		}
-
-		conformer.setEnabled( true );
-		showerrs.addActionListener( sheet );
-
-		return sheet;
+	public void addTab( LoadingPlaySheetBase c ) {
+		super.addTab( c );
+		sheets.add( c );
 	}
 
 	@Override
@@ -237,14 +213,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 							ImportData data = rdr.readOneFile( fileToLoad );
 							addProgress( "Finished reading " + fileToLoad, progressPerFile );
 
-							for ( NodeLoadingSheetData n : data.getNodes() ) {
-								if ( doconformance && !dometamodel ) {
-									el.checkModelConformance( n, getEngine(), false );
-								}
-								add( n );
-							}
-
-							for ( RelationshipLoadingSheetData n : data.getRels() ) {
+							for ( LoadingSheetData n : data.getSheets() ) {
 								List<LoadingNodeAndPropertyValues> errs = null;
 								if ( doconformance ) {
 									errs = el.checkConformance( n, getEngine(), false );
@@ -287,10 +256,9 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		jtb.add( loader );
 		jtb.add( addtab );
 
-		if ( isLoadable() ) {
-			jtb.add( conformer );
-			jtb.add( showerrs );
-		}
+		jtb.add( conformer );
+		jtb.add( showerrs );
+
 		showerrs.repaint();
 
 		super.populateToolbar( jtb );
@@ -299,8 +267,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	@Override
 	public void closeTab( PlaySheetCentralComponent c ) {
 		if ( c instanceof RelationshipLoadingPlaySheet ) {
-			rels.remove( RelationshipLoadingPlaySheet.class.cast( c ) );
-			conformer.setEnabled( !rels.isEmpty() );
+			sheets.remove( RelationshipLoadingPlaySheet.class.cast( c ) );
+			checkConformerButtonStatus();
 		}
 		super.closeTab( c );
 	}
@@ -309,14 +277,25 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		toload.addAll( files );
 	}
 
+	private void checkConformerButtonStatus() {
+		boolean enableconf = false;
+		for ( LoadingPlaySheetBase l : sheets ) {
+			if ( l.getLoadingModel().isRel() ) {
+				enableconf = true;
+			}
+		}
+
+		conformer.setEnabled( enableconf );
+	}
+
 	public RelationshipLoadingPlaySheet addTab( String relname, List<Value[]> data,
 			List<String> headings ) {
 		RelationshipLoadingPlaySheet grid
 				= new RelationshipLoadingPlaySheet( relname, data, headings );
 		grid.setTitle( "Import Data Review" );
 		addTab( grid );
-		rels.add( grid );
-		conformer.setEnabled( !rels.isEmpty() );
+		sheets.add( grid );
+		checkConformerButtonStatus();
 		showerrs.addActionListener( grid );
 		hideProgress();
 
@@ -328,7 +307,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		grid.setTitle( "Import Data Review" );
 		addTab( grid );
 		grid.create( data, headings );
-		nodes.add( grid );
+		sheets.add( grid );
 		hideProgress();
 
 		return grid;
@@ -336,11 +315,9 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 	private int announceErrors() {
 		int errors = 0;
-		for ( NodeLoadingPlaySheet node : nodes ) {
+		for ( LoadingPlaySheetBase node : sheets ) {
 			errors += node.getLoadingModel().getConformanceErrorCount();
-		}
-		for ( RelationshipLoadingPlaySheet node : rels ) {
-			errors += node.getLoadingModel().getConformanceErrorCount();
+			errors += node.getLoadingModel().getModelErrorColumns().size();
 		}
 
 		if ( errors > 0 ) {
@@ -351,6 +328,26 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		}
 
 		return errors;
+	}
+
+	private IEngine askForEngine( String title ) {
+
+		RepositoryList repos = new RepositoryList();
+		Collection<IEngine> engines = DIHelper.getInstance().getEngineMap().values();
+		repos.getRepositoryModel().addAll( engines );
+		LabeledPairRenderer<IEngine> renderer = new LabeledPairRenderer<>();
+		repos.setCellRenderer( renderer );
+		for ( IEngine eng : engines ) {
+			renderer.cache( eng, MetadataQuery.getEngineLabel( eng ) );
+		}
+
+		int ans = JOptionPane.showOptionDialog( null, new JScrollPane( repos ),
+				"Select Engine to " + title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,
+				null, new String[]{ title, "Cancel" }, title );
+		if ( 0 == ans && null != repos.getSelectedValue() ) {
+			return repos.getSelectedValue();
+		}
+		return null;
 	}
 
 	private class LoadingAction extends AbstractAction {
@@ -368,37 +365,15 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		@Override
 		public void actionPerformed( ActionEvent e ) {
-			IEngine tengine = getEngine();
-			if ( null == tengine ) {
-				RepositoryList repos = new RepositoryList();
-				Collection<IEngine> engines = DIHelper.getInstance().getEngineMap().values();
-				repos.getRepositoryModel().addAll( engines );
-				LabeledPairRenderer<IEngine> renderer = new LabeledPairRenderer<>();
-				repos.setCellRenderer( renderer );
-				for ( IEngine eng : engines ) {
-					renderer.cache( eng, MetadataQuery.getEngineLabel( eng ) );
-				}
+			final IEngine engine = ( null == getEngine()
+					? askForEngine( "Load" ) : getEngine() );
 
-				int ans = JOptionPane.showOptionDialog( null, new JScrollPane( repos ),
-						"Select Engine to Load", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-						null, new String[]{ "Load", "Cancel" }, "Load" );
-				if ( 0 == ans && null != repos.getSelectedValue() ) {
-					tengine = repos.getSelectedValue();
-				}
-			}
-
-			if ( null == tengine ) {
+			if ( null == engine ) {
 				Utility.showMessage( "Load canceled" );
 				return;
 			}
 
-			final IEngine engine = tengine;
-
-			List<LoadingPlaySheetBase> playsheets = new ArrayList<>();
-			playsheets.addAll( nodes );
-			playsheets.addAll( rels );
-
-			for ( LoadingPlaySheetBase ps : playsheets ) {
+			for ( LoadingPlaySheetBase ps : sheets ) {
 				if ( !ps.okToLoad() ) {
 					selectTab( ps );
 					if ( !ps.correct() ) {
@@ -411,7 +386,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			if ( askForLoad( engine ) ) {
 				final int ok[] = { 0 };
 				String t = "Committing data to " + engine;
-				int progressPerTab = 100 / playsheets.size();
+				int progressPerTab = 100 / sheets.size();
 
 				ProgressTask pt = new ProgressTask( t, new Runnable() {
 
@@ -420,23 +395,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						updateProgress( "Preparing data", 0 );
 						ImportData importdata = ImportData.forEngine( engine );
 
-						for ( NodeLoadingPlaySheet c : nodes ) {
+						for ( LoadingPlaySheetBase c : sheets ) {
 							String text = "Preparing tab: " + c.getTitle();
 							addProgress( text, progressPerTab );
 							log.debug( text );
 
-							NodeLoadingSheetData lsd
-									= c.getLoadingModel().toNodeLoadingSheetData( c.getTitle() );
-							importdata.add( lsd );
-						}
-
-						for ( RelationshipLoadingPlaySheet c : rels ) {
-							String text = "Preparing tab: " + c.getTitle();
-							addProgress( text, progressPerTab );
-							log.debug( text );
-
-							RelationshipLoadingSheetData lsd
-									= c.getLoadingModel().toRelationshipLoadingSheetData( c.getTitle() );
+							LoadingSheetData lsd = c.getLoadingModel().toLoadingSheet( c.getTitle() );
 							importdata.add( lsd );
 						}
 
@@ -456,7 +420,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 							el.release();
 
 							if ( !( null == errs || errs.isEmpty() ) ) {
-								for ( LoadingSheetData lsd : errs.getRels() ) {
+								for ( LoadingSheetData lsd : errs.getSheets() ) {
 									for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
 										if ( nap.hasError() ) {
 											ok[0]++;
@@ -544,12 +508,18 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		@Override
 		public void actionPerformed( ActionEvent e ) {
-			IEngine eng = LoadingPlaySheetFrame.this.getEngine();
+			final IEngine eng = ( null == getEngine()
+					? askForEngine( "Check" ) : getEngine() );
+
+			if ( null == eng ) {
+				return;
+			}
+
 			showerrs.setEnabled( true );
 
 			final String t = "Checking Conformance against "
-					+ MetadataQuery.getEngineLabel( getEngine() );
-			int progressPerTab = 100 / ( rels.size() + nodes.size() );
+					+ MetadataQuery.getEngineLabel( eng );
+			int progressPerTab = 100 / sheets.size();
 			boolean ok[] = { true };
 			ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
 
@@ -557,15 +527,15 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				public void run() {
 					EngineLoader el = new EngineLoader();
 					updateProgress( t, 0 );
-					el.preloadCaches( getEngine() );
+					el.preloadCaches( eng );
 
-					for ( NodeLoadingPlaySheet node : nodes ) {
+					for ( LoadingPlaySheetBase node : sheets ) {
 						String text = "Checking quality of: " + node.getTitle();
 						addProgress( text, progressPerTab );
 						log.debug( text );
 
 						LoadingSheetData lsd
-								= node.getLoadingModel().toNodeLoadingSheetData( getTabTitle( node ) );
+								= node.getLoadingModel().toLoadingSheet( getTabTitle( node ) );
 						List<LoadingNodeAndPropertyValues> errors
 								= el.checkConformance( lsd, eng, false );
 						el.checkModelConformance( lsd, eng, false );
@@ -577,30 +547,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						}
 
 						CloseableTab ct = getTabComponent( node );
-						ct.setMark( errors.isEmpty() || lsd.hasModelErrors()
-								? MarkType.NONE : MarkType.ERROR );
-					}
 
-					for ( RelationshipLoadingPlaySheet rel : rels ) {
-						String text = "Checking quality of: " + rel.getTitle();
-						addProgress( text, progressPerTab );
-						log.debug( text );
-
-						LoadingSheetData lsd
-								= rel.getLoadingModel().toRelationshipLoadingSheetData( getTabTitle( rel ) );
-						List<LoadingNodeAndPropertyValues> errors
-								= el.checkConformance( lsd, eng, false );
-						el.checkModelConformance( lsd, eng, false );
-						rel.setConformanceErrors( errors );
-						rel.setModelErrors( lsd );
-
-						if ( !errors.isEmpty() ) {
-							ok[0] = false;
-						}
-
-						CloseableTab ct = getTabComponent( rel );
-						ct.setMark( errors.isEmpty() || lsd.hasModelErrors()
-								? MarkType.NONE : MarkType.ERROR );
+						boolean noerrs = errors.isEmpty();
+						boolean nomods = !lsd.hasModelErrors();
+						ct.setMark( noerrs && nomods ? MarkType.NONE : MarkType.ERROR );
+						ct.repaint();
 					}
 
 					el.release();
@@ -647,7 +598,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			// both, we need to ask
 			boolean hasgoods = false;
 			boolean hasbads = false;
-			for ( RelationshipLoadingPlaySheet lsd : LoadingPlaySheetFrame.this.rels ) {
+			for ( LoadingPlaySheetBase lsd : LoadingPlaySheetFrame.this.sheets ) {
 				if ( lsd.getLoadingModel().hasConformanceErrors() ) {
 					hasbads = true;
 				}
@@ -720,37 +671,33 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		}
 
 		private void fillImportData( ImportData tofill, boolean dogoods, boolean dobads ) {
-			for ( NodeLoadingPlaySheet lsd : LoadingPlaySheetFrame.this.nodes ) {
+			for ( LoadingPlaySheetBase lsd : LoadingPlaySheetFrame.this.sheets ) {
 				String tabname = getTabTitle( lsd );
 
-				NodeLoadingSheetData nlsd
-						= lsd.getLoadingModel().toNodeLoadingSheetData( tabname );
-				if ( dogoods ) {
-					// we can't have conformance errors on node sheets
-					tofill.add( nlsd );
-				}
-			}
+				LoadingSheetData newlsd;
+				if ( lsd.getLoadingModel().isRel() ) {
+					LoadingSheetData rlsd = lsd.getLoadingModel().toLoadingSheet( tabname );
 
-			for ( RelationshipLoadingPlaySheet lsd : LoadingPlaySheetFrame.this.rels ) {
-				String tabname = getTabTitle( lsd );
+					LoadingSheetData newrels = LoadingSheetData.copyHeadersOf( rlsd );
+					newrels.setProperties( rlsd.getPropertiesAndDataTypes() );
 
-				RelationshipLoadingSheetData rlsd
-						= lsd.getLoadingModel().toRelationshipLoadingSheetData( tabname );
-
-				RelationshipLoadingSheetData newrels
-						= new RelationshipLoadingSheetData( rlsd.getName(), rlsd.getSubjectType(),
-								rlsd.getObjectType(), rlsd.getRelname(), rlsd.getPropertiesAndDataTypes() );
-
-				for ( LoadingNodeAndPropertyValues node : rlsd.getData() ) {
-					if ( node.hasError() && dobads ) {
-						newrels.add( node );
+					for ( LoadingNodeAndPropertyValues node : rlsd.getData() ) {
+						if ( node.hasError() && dobads ) {
+							newrels.add( node );
+						}
+						else if ( !node.hasError() && dogoods ) {
+							newrels.add( node );
+						}
 					}
-					else if ( !node.hasError() && dogoods ) {
-						newrels.add( node );
+
+					tofill.add( newrels );
+				}
+				else {
+					newlsd = lsd.getLoadingModel().toLoadingSheet( tabname );
+					if ( dogoods ) {
+						tofill.add( newlsd );
 					}
 				}
-
-				tofill.add( newrels );
 			}
 		}
 	}
@@ -769,12 +716,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null,
 					new String[]{ "Create", "Cancel" }, "Create" );
 			if ( 0 == ans ) {
-				if ( panel.isNodeSheet() ) {
-					add( panel.getNodeSheetData() );
-				}
-				else {
-					add( panel.getRelSheetData() );
-				}
+        LoadingSheetData lsd = panel.getSheet();
+			  LoadingPlaySheetBase base = ( lsd.isRel()
+					? new RelationshipLoadingPlaySheet( lsd, true )
+					: new NodeLoadingPlaySheet( lsd, true ) );
+        addTab( base );        
 			}
 		}
 	}

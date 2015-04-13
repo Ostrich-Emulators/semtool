@@ -507,7 +507,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
   	             add(set.getValue("perspectiveURI").stringValue());
   	           }
   	        };  	        
-  	        Collection<String> r = AbstractEngine.getSelect( lqa, rc, true ); 	        
+  	        Collection<String> r = AbstractSesameEngine.getSelect( lqa, rc, true ); 	        
   	        uris.addAll( r );
   	        
   	        if(uris.isEmpty() == false){
@@ -544,7 +544,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
   	              add(Integer.valueOf(set.getValue("index").stringValue()));
   	           }
   	        }; 	        
-  	        Collection<Integer> r = AbstractEngine.getSelect( lqa, rc, true );
+  	        Collection<Integer> r = AbstractSesameEngine.getSelect( lqa, rc, true );
   	        indices.addAll( r );
   	        
   	        if(indices.isEmpty() == false){
@@ -577,7 +577,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
                add(set.getValue("insightURI").stringValue());
              }
           };
-          Collection<String> r = AbstractEngine.getSelect( lqa, rc, true );
+          Collection<String> r = AbstractSesameEngine.getSelect( lqa, rc, true );
           uris.addAll( r );
 
       }catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {

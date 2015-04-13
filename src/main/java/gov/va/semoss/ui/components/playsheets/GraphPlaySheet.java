@@ -394,10 +394,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			vsht.emptySelected();
 		}
 
-		//view.getRenderContext().getGraphicsContext().setStroke(s);
 		view.setBackground( Color.WHITE );
-
-		//view.setGraphMouse(mc);
 		view.getRenderContext().setVertexLabelTransformer( vlt );
 		view.getRenderContext().setEdgeLabelTransformer( elt );
 		view.getRenderContext().setVertexStrokeTransformer( vst );
@@ -411,17 +408,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		view.getRenderContext().setEdgeFontTransformer( elft );
 		view.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.CNTR );
 		view.getRenderContext().setLabelOffset( 0 );
-		//view.getRenderContext().set;
-		// view.getRenderContext().setVertexIconTransformer(new DBCMVertexIconTransformer());
 		view.setVertexToolTipTransformer( vtt );
 		view.setEdgeToolTipTransformer( ett );
-		//view.getRenderContext().setVertexIconTransformer(vit);
+
 		PickedStateListener psl = new PickedStateListener( view, this );
 		PickedState<SEMOSSVertex> ps = view.getPickedVertexState();
 		ps.addItemListener( psl );
-		controlData.setViewer( view );
 
+		controlData.setViewer( view);
 		searchPanel.setViewer( view );
+		
 		log.debug( "Completed Visualization >>>> " );
 	}
 
@@ -794,21 +790,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void runAnalytics() {
-	}
+	public void runAnalytics() {}
 
 	private void processControlData( SEMOSSEdge edge ) {
-		String edgeType = edge.getProperty( Constants.EDGE_TYPE ) + "";
-		for ( String key : edge.getProperties().keySet() ) {
-			controlData.addProperty( edgeType, key );
-		}
+		for ( String property : edge.getProperties().keySet() )
+			controlData.addProperty( edge.getEdgeType(), property );
 	}
 
-	private void processControlData( SEMOSSVertex vert ) {
-		String vertType = vert.getProperty( Constants.VERTEX_TYPE ) + "";
-		for ( String key : vert.getProperties().keySet() ) {
-			controlData.addProperty( vertType, key );
-		}
+	private void processControlData( SEMOSSVertex vertex ) {
+		for ( String property : vertex.getProperties().keySet() )
+			controlData.addProperty( vertex.getType(), property );
 	}
 
 	@Override

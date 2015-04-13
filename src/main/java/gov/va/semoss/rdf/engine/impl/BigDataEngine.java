@@ -22,24 +22,11 @@ package gov.va.semoss.rdf.engine.impl;
 import com.bigdata.journal.IIndexManager;
 import com.bigdata.journal.ITx;
 import com.bigdata.journal.Journal;
-import java.util.Date;
 
 import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.Update;
-import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.sail.SailException;
-
-import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 
@@ -65,20 +52,15 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 import org.openrdf.model.Statement;
-import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.RepositoryResult;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.api.ModificationExecutor;
-import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutionException;
-import org.openrdf.model.Model;
-import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.DC;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.OWL;
@@ -93,7 +75,7 @@ import org.openrdf.sail.memory.MemoryStore;
  * Big data engine serves to connect the .jnl files, which contain the RDF
  * database, to the java engine.
  */
-public class BigDataEngine extends AbstractEngine implements IEngine {
+public class BigDataEngine extends AbstractSesameEngine {
 
 	private static final Logger log = Logger.getLogger( BigDataEngine.class );
 
@@ -102,7 +84,6 @@ public class BigDataEngine extends AbstractEngine implements IEngine {
 	private BigdataSailRepositoryConnection rc = null;
 	private BigdataSail sail = null;
 	private BigdataSailRepository insightrepo = null;
-	private boolean connected = false;
 	private Server server = null;
 	private java.net.URI serverurl = null;
 	private InsightManagerImpl insightEngine = null;
@@ -156,9 +137,9 @@ public class BigDataEngine extends AbstractEngine implements IEngine {
 	}
 
 	@Override
-	protected Properties loadAllProperties( Properties props, File... searchpath )
-			throws IOException {
-		Properties ret = super.loadAllProperties( props, searchpath );
+	protected Properties loadAllProperties( Properties props, String engineName,
+			File... searchpath ) throws IOException {
+		Properties ret = super.loadAllProperties( props, engineName, searchpath );
 
 		String rwspropfile
 				= ret.getProperty( Constants.SMSS_RWSTORE_KEY, "RWStore.properties" );
@@ -176,51 +157,8 @@ public class BigDataEngine extends AbstractEngine implements IEngine {
 	}
 
 	@Override
-	protected void finishLoading( Properties props ) throws RepositoryException {
-		connected = true;
-		refreshSchemaData();
-
-		Map<String, String> namespaces = new LinkedHashMap<>();
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
-		namespaces.put( DC.PREFIX, DC.NAMESPACE );
-
-		//namespaces.put( "rel", getSchemaBuilder().getRelationUri().toString() );
-		//namespaces.put( "concept", getSchemaBuilder().getConceptNamespace().toString() );
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-
-		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
-			rc.setNamespace( en.getKey(), en.getValue() );
-		}
-	}
-
-	protected void refreshSchemaData() {
-		// load everything from the SEMOSS namespace as our OWL dataset
-		UriBuilder owlb = getSchemaBuilder();
-		if ( null == owlb ) {
-			throw new UnsupportedOperationException(
-					"Cannot determine base relationships before calling setOwlStarter" );
-		}
-
-		String q = "SELECT ?uri { ?uri rdfs:subClassOf+ ?root }";
-		OneVarListQueryAdapter<URI> uris
-				= OneVarListQueryAdapter.getUriList( q, "uri" );
-		uris.bind( "root", owlb.getConceptUri().build() );
-		try {
-			List<Statement> stmts = new ArrayList<>();
-			for ( URI uri : query( uris ) ) {
-				stmts.addAll( Iterations.asList( rc.getStatements( uri, null, null,
-						false ) ) );
-			}
-			setOwlData( stmts );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( "could not retrieve OWL data", e );
-		}
+	protected RepositoryConnection getRawConnection() {
+		return rc;
 	}
 
 	@Override
@@ -341,253 +279,10 @@ public class BigDataEngine extends AbstractEngine implements IEngine {
 		super.closeDB();
 
 		try {
-			rc.commit();
-		}
-		catch ( Exception e1 ) {
-			log.warn( "could not commit last transaction", e1 );
-		}
-
-		try {
-			rc.close();
-		}
-		catch ( Exception e1 ) {
-			log.warn( "could not close kb connection", e1 );
-		}
-
-		try {
-			insightrepo.shutDown();
-		}
-		catch ( Exception e1 ) {
-			log.warn( "could not close insight kb repository", e1 );
-		}
-
-		try {
-			repo.shutDown();
-		}
-		catch ( Exception e1 ) {
-			log.warn( "could not shut down kb repository", e1 );
-		}
-
-		try {
 			journal.close();
 		}
 		catch ( Exception e1 ) {
 			log.warn( "could not close journal file", e1 );
-		}
-
-		connected = false;
-	}
-
-	/**
-	 * Runs the passed string query against the engine and returns graph query
-	 * results. The query passed must be in the structure of a CONSTRUCT SPARQL
-	 * query. The exact format of the results will be dependent on the type of the
-	 * engine, but regardless the results are able to be graphed.
-	 *
-	 * @param query the string version of the query to be run against the engine
-	 *
-	 * @return the graph query results
-	 */
-	@Override
-	public GraphQueryResult execGraphQuery( String query ) {
-		GraphQueryResult res = null;
-		try {
-			GraphQuery sagq = rc.prepareGraphQuery( QueryLanguage.SPARQL, query );
-			res = sagq.evaluate();
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-		return res;
-	}
-
-	/**
-	 * Runs the passed string query against the engine as a SELECT query. The
-	 * query passed must be in the structure of a SELECT SPARQL query and the
-	 * result format will depend on the engine type.
-	 *
-	 * @param query the string version of the SELECT query to be run against the
-	 * engine
-	 *
-	 * @return triple query results that can be displayed as a grid
-	 */
-	@Override
-	public TupleQueryResult execSelectQuery( String query ) {
-
-		TupleQueryResult sparqlResults = null;
-
-		try {
-			TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, query );
-			log.debug( "SPARQL: " + query );
-			tq.setIncludeInferred( true /*
-			 * includeInferred
-			 */ );
-			sparqlResults = tq.evaluate();
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-		return sparqlResults;
-	}
-
-	/**
-	 * Runs the passed string query against the engine as an INSERT query. The
-	 * query passed must be in the structure of an INSERT SPARQL query or an
-	 * INSERT DATA SPARQL query and there are no returned results. The query will
-	 * result in the specified triples getting added to the data store.
-	 *
-	 * @param query the INSERT or INSERT DATA SPARQL query to be run against the
-	 * engine
-	 *
-	 * @throws org.openrdf.sail.SailException
-	 * @throws org.openrdf.query.UpdateExecutionException
-	 * @throws org.openrdf.repository.RepositoryException
-	 * @throws org.openrdf.query.MalformedQueryException
-	 */
-	@Override
-	public void execInsertQuery( String query )
-			throws SailException, UpdateExecutionException, RepositoryException, MalformedQueryException {
-
-		Update up = rc.prepareUpdate( QueryLanguage.SPARQL, query );
-		//sc.addStatement(vf.createURI("<http://semoss.org/ontologies/Concept/Service/tom2>"),vf.createURI("<http://semoss.org/ontologies/Relation/Exposes>"),vf.createURI("<http://semoss.org/ontologies/Concept/BusinessLogicUnit/tom1>"));
-		log.debug( "SPARQL: " + query );
-		//tq.setIncludeInferred(true /* includeInferred */);
-		//tq.evaluate();
-		rc.begin();
-		up.execute();
-		//rc.commit();
-		InferenceEngine ie = sail.getInferenceEngine();
-		ie.computeClosure( null );
-		AbstractEngine.updateLastModifiedDate( rc, getBaseUri() );
-		rc.commit();
-	}
-
-	@Override
-	public boolean execAskQuery( String query ) {
-		boolean response = false;
-		try {
-			BooleanQuery bq = rc.prepareBooleanQuery( QueryLanguage.SPARQL, query );
-			log.debug( "SPARQL: " + query );
-			response = bq.evaluate();
-		}
-		catch ( MalformedQueryException | RepositoryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-
-		return response;
-	}
-
-	/**
-	 * Gets the type of the engine. The engine type is often used to determine
-	 * what API to use while running queries agains the engine.
-	 *
-	 * @return the type of the engine
-	 */
-	@Override
-	public ENGINE_TYPE getEngineType() {
-		return IEngine.ENGINE_TYPE.SESAME;
-	}
-
-	/**
-	 * Processes a SELECT query just like {@link #execSelectQuery(String)} but
-	 * then parses the results to get only their instance names. These instance
-	 * names are then returned as the Vector of Strings.
-	 *
-	 * @param sparqlQuery the SELECT SPARQL query to be run against the engine
-	 *
-	 * @return the Vector of Strings representing the instance names of all of the
-	 * query results
-	 */
-	@Override
-	public Collection<URI> getEntityOfType( String sparqlQuery ) {
-		try {
-			if ( sparqlQuery != null ) {
-				OneVarListQueryAdapter<URI> qea
-						= OneVarListQueryAdapter.getUriList( sparqlQuery, Constants.ENTITY );
-				qea.useInferred( true );
-				return getSelect( qea, rc, supportsSparqlBindings() );
-			}
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-		return new ArrayList<>();
-	}
-
-	/**
-	 * Returns whether or not an engine is currently connected to the data store.
-	 * The connection becomes true between calls to {@link #openDB(java.util.Properties)
-	 * }
-	 * and {@link #closeDB()}.
-	 *
-	 * @return true if the engine is connected to its data store and false if it
-	 * is not
-	 */
-	@Override
-	public boolean isConnected() {
-		return connected;
-	}
-
-	/**
-	 * Method addStatement. Processes a given subject, predicate, object triple
-	 * and adds the statement to the SailConnection.
-	 *
-	 * @param subject String - RDF Subject for the triple
-	 * @param predicate String - RDF Predicate for the triple
-	 * @param object Object - RDF Object for the triple
-	 * @param concept boolean - True if the statement is a concept
-	 */
-	@Override
-	public void addStatement( String subject, String predicate, Object object,
-			boolean concept ) {
-		//logger.debug("Updating Triple " + subject + "<>" + predicate + "<>" + object);
-		try {
-			URI newSub;
-			URI newPred;
-			String subString;
-			String predString;
-			String sub = subject.trim();
-			String pred = predicate.trim();
-			ValueFactory vf = rc.getValueFactory();
-
-			subString = Utility.getUriCompatibleString( sub, false );
-			newSub = vf.createURI( subString );
-
-			predString = Utility.getUriCompatibleString( pred, false );
-			newPred = vf.createURI( predString );
-
-			if ( !concept ) {
-				if ( object.getClass() == Double.class ) {
-					log.debug( "Found Double " + object );
-					rc.add(
-							new StatementImpl( newSub, newPred, vf.createLiteral(
-											( (Double) object ) ) ) );
-				}
-
-				else if ( object.getClass() == Date.class ) {
-					log.debug( "Found Date " + object );
-					rc.add(
-							new StatementImpl( newSub, newPred, vf.createLiteral( Date.class
-											.cast( object ) ) ) );
-				}
-				else {
-					log.debug( "Found String " + object );
-					String value = object + "";
-					// try to see if it already has properties then add to it
-					String cleanValue
-							= value.replaceAll( "/", "-" ).replaceAll( "\"", "'" );
-					rc.add( new StatementImpl( newSub, newPred, vf.createLiteral(
-							cleanValue ) ) );
-				}
-			}
-			else {
-				rc.add(
-						new StatementImpl( newSub, newPred, vf.createURI( object + "" ) ) );
-			}
-
-		}
-		catch ( RepositoryException e ) {
-			log.error( e );
 		}
 	}
 
@@ -597,27 +292,13 @@ public class BigDataEngine extends AbstractEngine implements IEngine {
 			log.debug( "start calculating inferences" );
 			InferenceEngine ie = sail.getInferenceEngine();
 			ie.computeClosure( null );
-			AbstractEngine.updateLastModifiedDate( rc, getBaseUri() );
+			updateLastModifiedDate();
 			rc.commit();
 			log.debug( "done calculating inferences" );
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
 		}
-	}
-
-	@Override
-	public Map<String, String> getNamespaces() {
-		Map<String, String> ret = new HashMap<>();
-		try {
-			for ( Namespace ns : Iterations.asList( rc.getNamespaces() ) ) {
-				ret.put( ns.getPrefix(), ns.getName() );
-			}
-		}
-		catch ( RepositoryException re ) {
-			log.warn( "could not retrieve namespaces", re );
-		}
-		return ret;
 	}
 
 	public static Properties generateProperties( File jnl ) {
@@ -628,45 +309,6 @@ public class BigDataEngine extends AbstractEngine implements IEngine {
 		props.setProperty( Constants.SMSS_VERSION_KEY, "1.0" );
 
 		return props;
-	}
-
-	@Override
-	public void commit() {
-		try {
-			rc.commit();
-		}
-		catch ( RepositoryException e ) {
-			log.error( e );
-		}
-	}
-
-	@Override
-	public <T> T query( QueryExecutor<T> exe )
-			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		if ( isConnected() ) {
-			return getSelect( exe, rc, supportsSparqlBindings() );
-		}
-
-		throw new RepositoryException( "The engine is not connected" );
-	}
-
-	@Override
-	public Model construct( String q )
-			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		return getConstruct( q, rc );
-	}
-
-	@Override
-	public void execute( ModificationExecutor exe ) throws RepositoryException {
-		try {
-			exe.exec( rc );
-			AbstractEngine.updateLastModifiedDate( rc, getBaseUri() );
-			rc.commit();
-		}
-		catch ( RepositoryException e ) {
-			rc.rollback();
-			throw e;
-		}
 	}
 
 	/**
@@ -737,12 +379,6 @@ public class BigDataEngine extends AbstractEngine implements IEngine {
 		catch ( Exception ioe ) {
 			log.error( ioe );
 		}
-	}
-
-	@Override
-	public boolean supportsSparqlBindings() {
-		// if we ever get remote BD working, we need to return false 
-		return true;
 	}
 
 	/**

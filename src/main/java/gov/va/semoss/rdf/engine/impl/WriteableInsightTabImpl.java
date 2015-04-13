@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +30,7 @@ import gov.va.semoss.model.vocabulary.SPL;
 import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
@@ -55,50 +57,27 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * @param insight -- (Insight) Insight to which new Parameter will be added.
 	   */
 	  @Override
-	  public boolean addParameter(Insight insight){
+	  public boolean addParameter(Insight insight, double dblRandom){
 		  boolean boolReturnValue = false;
-		  
-		  String query_1 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-			      + "DELETE{ ?perspective olo:slot ?slot .} "
-			      + "WHERE{ ?slot olo:item <" + insight.getIdStr() + "> . "
-			      + "?perspective olo:slot ?slot .}";
+	      ValueFactory insightVF = rc.getValueFactory();
+	      UriBuilder uriBuilder; 
+	      String strRandom = String.valueOf(dblRandom);
+	      
+		  try{
+	          rc.begin();
+	          
+	          URI insightURI = insight.getId();				
+			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+	          URI constraintURI = uriBuilder.add("constraint-" + strRandom).build();				
+	          rc.add( insightURI, SPIN.constraint, constraintURI );	          
+	          rc.add( constraintURI, RDFS.LABEL, insightVF.createLiteral("New Parameter: " + strRandom) );
+	          rc.add( constraintURI, SPL.valueType, insightVF.createURI("http://semoss.org/ontologies/Concept/parameter-" + strRandom));
+	          rc.add( constraintURI, SPL.predicate, insightVF.createLiteral("") );
 
-		      String query_2 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
-		       	  + "DELETE{ ?constraint ?p ?o .} "
-		      	  + "WHERE{ <" + insight.getIdStr() + "> spin:constraint ?constraint . "
-		      	  + "?constraint ?p ?o .} ";
-
-		      String query_3 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
-		    	  + "DELETE{ ?body ?p ?o .} "
-		   	      + "WHERE{ <" + insight.getIdStr() + "> spin:body ?body . "
-		   	      + "?body ?p ?o .} ";
-		   	       
-			  String query_4 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-				  + "DELETE{ <" + insight.getIdStr() + "> ?p ?o .} "
-				  + "WHERE{ <" + insight.getIdStr() + "> ?p ?o .} ";
-
-			  String query_5 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-				 + "DELETE{ ?slot ?p ?o .} "
-				 + "WHERE{ ?slot olo:item <" + insight.getIdStr() + "> . "
-				 + "?slot ?p ?o .} ";
-
-			  try{
-		         rc.begin();
-		         Update uq_1 = rc.prepareUpdate(QueryLanguage.SPARQL, query_1);
-		         Update uq_2 = rc.prepareUpdate(QueryLanguage.SPARQL, query_2);
-		         Update uq_3 = rc.prepareUpdate(QueryLanguage.SPARQL, query_3);
-		         Update uq_4 = rc.prepareUpdate(QueryLanguage.SPARQL, query_4);
-		         Update uq_5 = rc.prepareUpdate(QueryLanguage.SPARQL, query_5);
-		         uq_1.execute();
-		         uq_2.execute();
-		         uq_3.execute();
-		         uq_4.execute();
-		         uq_5.execute();
-		         
-		         rc.commit();
-		         
-		         //Import Insights into the repository:
-		         boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          rc.commit();
+	          
+	          //Import Insights into the repository:
+	          boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
 		         
 			  }catch(Exception e){
 			     log.error( e, e );
@@ -109,6 +88,61 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 			     }
 			  }
 		  
+	 	  return boolReturnValue;
+	  }
+	  
+	  /**   Deletes a Parameter from an Insight in the triple-store on disk.
+	   * 
+       * @param insight -- (Insight) Insight containing the Parameter to delete.
+       * 
+       * @param parameter -- (Parameter) Parameter to delete.
+       */
+	  @Override
+	  public boolean deleteParameter(Insight insight, Parameter parameter){
+		  boolean boolReturnValue = false;
+		  
+		  String insightUriString = "<" + insight.getId() + ">";
+		  String parameterUriString = "<" + parameter.getParameterURI() + ">";
+		  
+		  String query_1 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+		      + "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
+			  + "DELETE{ ?defaultValue ?p ?o .} "
+			  + "WHERE{ " + parameterUriString + " spl:defaultValue ?defaultValue . "
+			  + insightUriString + " spin:constraint " + parameterUriString + ". " 
+			  + "?defaultValue ?p ?o .}";
+				  	  
+		  String query_2 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+		      + "DELETE{ " + parameterUriString + " ?p ?o .} "
+		      + "WHERE{ " + insightUriString + " spin:constraint " + parameterUriString + " . "
+		      + parameterUriString + " ?p ?o .}";
+
+		  String query_3 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+			  + "DELETE{ " + insightUriString + " spin:constraint " + parameterUriString + " .} "
+			  + "WHERE{ " + insightUriString + " spin:constraint " + parameterUriString + " .}";
+
+		  try{
+	         rc.begin();
+	         
+	         Update uq_1 = rc.prepareUpdate(QueryLanguage.SPARQL, query_1);
+	         Update uq_2 = rc.prepareUpdate(QueryLanguage.SPARQL, query_2);
+	         Update uq_3 = rc.prepareUpdate(QueryLanguage.SPARQL, query_3);
+	         uq_1.execute();
+	         uq_2.execute();
+	         uq_3.execute();
+	         
+	         rc.commit();
+	                  
+             //Import Insights into the repository:
+             boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+
+		  }catch(Exception e){
+		     log.error( e, e );
+		     try{
+		        rc.rollback();
+		     }catch(Exception ee){
+		        log.warn( ee, ee );
+		     }
+		  }
 	 	  return boolReturnValue;
 	  }
 

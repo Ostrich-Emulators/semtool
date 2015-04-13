@@ -44,6 +44,8 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFHandlerException;
 import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportFileReader;
+import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
@@ -636,7 +638,7 @@ public class EngineUtil implements Runnable {
 		insights.addAll( createInsightStatements( modelquestions ) );
 
 		File smssfile = createEngine( dbtopdir, engine, new URIImpl( baseuri ),
-				modelsmss, modelmap );
+				modelsmss, modelmap, dometamodel );
 
 		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
 
@@ -652,10 +654,10 @@ public class EngineUtil implements Runnable {
 					re );
 		}
 
-		try {
-			EngineLoader el = new EngineLoader( stageInMemory );
+		EngineLoader el = new EngineLoader( stageInMemory );
+
+		try {			
 			el.loadToEngine( toload, bde, dometamodel, conformanceErrors );
-			el.release();
 			if ( calcInfers ) {
 				bde.calculateInferences();
 			}
@@ -664,6 +666,7 @@ public class EngineUtil implements Runnable {
 			throw new EngineManagementException( e );
 		}
 		finally {
+			el.release();
 			DIHelper.getInstance().unregisterEngine( bde );
 			bde.closeDB();
 		}
@@ -760,7 +763,7 @@ public class EngineUtil implements Runnable {
 
 				rdfhandler = new RepositoryCopier( rc );
 
-				ModificationExecutor copier = new ModificationExecutor() {
+				ModificationExecutor copier = new ModificationExecutorAdapter() {
 
 					@Override
 					public void exec( RepositoryConnection conn ) throws RepositoryException {
@@ -770,11 +773,6 @@ public class EngineUtil implements Runnable {
 						catch ( RepositoryException | RDFHandlerException e ) {
 							log.error( e );
 						}
-					}
-
-					@Override
-					public boolean execInTransaction() {
-						return false;
 					}
 				};
 
@@ -865,7 +863,8 @@ public class EngineUtil implements Runnable {
 	}
 
 	public static File createEngine( File enginedir, String dbname, URI baseuri,
-			File modelsmss, File modelmap ) throws IOException, EngineManagementException {
+			File modelsmss, File modelmap, boolean dometamodel )
+			throws IOException, EngineManagementException {
 
 		if ( null != modelmap && modelmap.exists() ) {
 			try {
@@ -907,6 +906,14 @@ public class EngineUtil implements Runnable {
 		try {
 			repo.initialize();
 			RepositoryConnection rc = repo.getConnection();
+
+			if ( dometamodel ) {
+				rc.begin();
+				List<Statement> stmts
+						= getStatementsFromResource( "/models/semoss.ttl", RDFFormat.TURTLE );
+				rc.add( stmts );
+				rc.commit();
+			}
 
 			// add the metadata
 			if ( null != baseuri ) {
@@ -1044,13 +1051,10 @@ public class EngineUtil implements Runnable {
 
 		InMemorySesameEngine mem = new InMemorySesameEngine();
 		try ( InputStream is = EngineUtil.class.getResourceAsStream( resource ) ) {
-			RepositoryConnection rc = mem.getRepositoryConnection();
+			RepositoryConnection rc = mem.getRawConnection();
 			rc.add( is, Constants.DEFAULT_SEMOSS_URI, fmt );
 			rc.commit();
-
-			for ( Statement s : Iterations.asList( rc.getStatements( null, null, null, false ) ) ) {
-				stmts.add( s );
-			}
+			stmts.addAll( Iterations.asList( rc.getStatements( null, null, null, false ) ) );
 		}
 		catch ( Exception e ) {
 			log.warn( "could not open/parse model resource: " + resource, e );

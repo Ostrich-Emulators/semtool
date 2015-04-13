@@ -93,7 +93,9 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
 	}
 
 	public void setModelErrors( LoadingSheetData lsd ) {
-		getLoadingModel().setModelErrors( lsd );
+		getLoadingModel().setModelErrors( lsd );		
+		getTable().getTableHeader().repaint();
+		
 		setErrorLabel();
 	}
 
@@ -111,7 +113,7 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
 			if ( 1 != cerrs ) {
 				msg.append( "s" );
 			}
-			msg.append( ", " ).append( merrs ).append( "Model Error" );
+			msg.append( ", " ).append( merrs ).append( " Model Error" );
 			if ( 1 != merrs ) {
 				msg.append( "s" );
 			}

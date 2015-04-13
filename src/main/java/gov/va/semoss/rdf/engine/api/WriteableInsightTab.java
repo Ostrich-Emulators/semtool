@@ -3,6 +3,7 @@ package gov.va.semoss.rdf.engine.api;
 import java.util.Collection;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 
 public interface WriteableInsightTab {
@@ -10,7 +11,15 @@ public interface WriteableInsightTab {
 	   * 
 	   * @param insight -- (Insight) Insight to which new Parameter will be added.
 	   */
-	  public boolean addParameter(Insight insight);
+	  public boolean addParameter(Insight insight, double dblRandom);
+	  
+	  /**   Deletes a Parameter from an Insight in the triple-store on disk.
+	   * 
+       * @param insight -- (Insight) Insight containing the Parameter to delete.
+       * 
+       * @param parameter -- (Parameter) Parameter to delete.
+       */
+	  public boolean deleteParameter(Insight insight, Parameter parameter);
 	  
 	  /**   Deletes the current Insight from from the database, and removes its
 	   * reference from all Perspectives.

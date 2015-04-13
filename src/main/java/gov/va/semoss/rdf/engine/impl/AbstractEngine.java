@@ -19,23 +19,15 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
-import info.aduna.iteration.Iterations;
 import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.sail.SailException;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
@@ -47,32 +39,12 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
-import org.openrdf.sail.memory.MemoryStore;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.api.ModificationExecutor;
-import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import org.openrdf.model.Model;
@@ -90,9 +62,7 @@ public abstract class AbstractEngine implements IEngine {
 
 	private String engineName = null;
 	protected Properties prop = new Properties();
-	private RepositoryConnection owlRc;
 	private InsightManager insightEngine;
-	protected String map = null;
 	private UriBuilder schemabuilder;
 	private UriBuilder databuilder;
 
@@ -133,7 +103,7 @@ public abstract class AbstractEngine implements IEngine {
 		try {
 			File[] searchpath = makeSearchPath( initprops );
 
-			prop = loadAllProperties( initprops, searchpath );
+			prop = loadAllProperties( initprops, engineName, searchpath );
 			startLoading( prop );
 
 			String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
@@ -147,7 +117,13 @@ public abstract class AbstractEngine implements IEngine {
 			}
 
 			String owlstarter = prop.getProperty( Constants.SEMOSS_URI,
-			DIHelper.getInstance().getProperty( Constants.SEMOSS_URI ) );
+					DIHelper.getInstance().getProperty( Constants.SEMOSS_URI ) );
+			if ( null == owlstarter ) {
+				log.warn( "no schema URI set anywhere...using "
+						+ Constants.DEFAULT_SEMOSS_URI );
+				owlstarter = Constants.DEFAULT_SEMOSS_URI;
+			}
+
 			setSchemaBuilder( UriBuilder.getBuilder( owlstarter ) );
 
 			String dreamerfileloc = prop.getProperty( Constants.DREAMER );
@@ -184,18 +160,9 @@ public abstract class AbstractEngine implements IEngine {
 	 *
 	 * @param ontoloc the location of the owl file. It is guaranteed to exist
 	 */
-	protected void loadLegacyOwl( String ontoloc ) {
-		try {
-			owlRc.begin();
-			owlRc.add( new File( ontoloc ), ontoloc, RDFFormat.RDFXML );
-			owlRc.commit();
-		}
-		catch ( IOException | RDFParseException | RepositoryException e ) {
-			log.error( e, e );
-		}
-	}
+	protected abstract void loadLegacyOwl( String ontoloc );
 
-	protected Properties loadAllProperties( Properties props,
+	protected Properties loadAllProperties( Properties props, String ename,
 			File... searchpath ) throws IOException {
 
 		Properties newprops = Utility.copyProperties( props );
@@ -203,7 +170,7 @@ public abstract class AbstractEngine implements IEngine {
 		Properties dreamerProp = new Properties( ontoProp );
 
 		String questionPropFile = props.getProperty( Constants.DREAMER,
-				getDefaultName( Constants.DREAMER, engineName ) );
+				getDefaultName( Constants.DREAMER, ename ) );
 		File dreamer = searchFor( questionPropFile, searchpath );
 		if ( null != dreamer ) {
 			try {
@@ -216,13 +183,13 @@ public abstract class AbstractEngine implements IEngine {
 		}
 
 		File owlf = searchFor( props.getProperty( Constants.OWLFILE,
-				getDefaultName( Constants.OWLFILE, engineName ) ), searchpath );
+				getDefaultName( Constants.OWLFILE, ename ) ), searchpath );
 		if ( owlf != null ) {
 			newprops.setProperty( Constants.OWLFILE, owlf.getCanonicalPath() );
 		}
 
 		File ontof = searchFor( props.getProperty( Constants.ONTOLOGY,
-				getDefaultName( Constants.ONTOLOGY, engineName ) ), searchpath );
+				getDefaultName( Constants.ONTOLOGY, ename ) ), searchpath );
 		if ( ontof != null ) {
 			newprops.setProperty( Constants.ONTOLOGY, ontof.getCanonicalPath() );
 			Utility.loadProp( ontof, ontoProp );
@@ -282,29 +249,12 @@ public abstract class AbstractEngine implements IEngine {
 	 * @throws RepositoryException
 	 */
 	protected void startLoading( Properties props ) throws RepositoryException {
-		owlRc = createOwlRc();
 		insightEngine = createInsightManager();
 	}
 
-	protected RepositoryConnection createOwlRc() throws RepositoryException {
-		ForwardChainingRDFSInferencer inferencer
-				= new ForwardChainingRDFSInferencer( new MemoryStore() );
-		SailRepository owlRepo = new SailRepository( inferencer );
-		owlRepo.initialize();
-		return owlRepo.getConnection();
-	}
-
-	protected InsightManager createInsightManager() throws RepositoryException {
-		log.debug( "creating default (in-memory) insight repository" );
-		ForwardChainingRDFSInferencer inferer
-				= new ForwardChainingRDFSInferencer( new MemoryStore() );
-		InsightManagerImpl imi
-				= new InsightManagerImpl( new SailRepository( inferer ) );
-		return imi;
-	}
+	protected abstract InsightManager createInsightManager() throws RepositoryException;
 
 	protected void finishLoading( Properties props ) throws RepositoryException {
-
 	}
 
 	@Override
@@ -328,43 +278,26 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public void closeDB() {
-		log.debug( "closing db: " + getEngineName() );
-		if ( null != owlRc ) {
-			try {
-				owlRc.close();
-			}
-			catch ( Exception e ) {
-				log.warn( e, e );
-			}
+	public org.openrdf.model.URI getBaseUri() {
+		return databuilder.toUri();
+	}
 
-			try {
-				owlRc.getRepository().shutDown();
-			}
-			catch ( Exception e ) {
-				log.warn( e, e );
-			}
-		}
+	protected void setDataBuilder( UriBuilder b ) {
+		databuilder = b;
+	}
+
+	@Override
+	public void closeDB() {
 		if ( null != insightEngine ) {
 			insightEngine.release();
 		}
 	}
 
 	/**
-	 * Runs the passed string query against the engine as an INSERT query. The
-	 * query passed must be in the structure of an INSERT SPARQL query or an
-	 * INSERT DATA SPARQL query and there are no returned results. The query will
-	 * result in the specified triples getting added to the data store.
-	 *
-	 * @param query the INSERT or INSERT DATA SPARQL query to be run against the
-	 * engine
+	 * Update the "last modified" date of the dataset. This operation should fail
+	 * silently if necessary
 	 */
-	@Override
-	public void execInsertQuery( String query ) throws SailException,
-			UpdateExecutionException, RepositoryException,
-			MalformedQueryException {
-		log.error( "execInsertQuery is not implemented" );
-	}
+	protected abstract void updateLastModifiedDate();
 
 	/**
 	 * Returns whether or not an engine is currently connected to the data store.
@@ -400,27 +333,6 @@ public abstract class AbstractEngine implements IEngine {
 		return engineName;
 	}
 
-	@Override
-	public void addStatement( String subject, String predicate, Object object,
-			boolean concept ) {
-		log.error( "addStatement not implemented" );
-	}
-
-	/**
-	 * Method removeStatement. Processes a given subject, predicate, object triple
-	 * and removes the statement to the SailConnection.
-	 *
-	 * @param subject	String - RDF Subject for the triple
-	 * @param predicate	String - RDF Predicate for the triple
-	 * @param object	Object - RDF Object for the triple
-	 * @param concept	boolean - True if the statement is a concept
-	 */
-	@Override
-	public void removeStatement( String subject, String predicate, Object object,
-			boolean concept ) {
-		log.error( "removeStatement not implemented" );
-	}
-
 	/**
 	 * Commits the database.
 	 */
@@ -444,80 +356,6 @@ public abstract class AbstractEngine implements IEngine {
 		}
 	}
 
-	/**
-	 * Adds a new property to the properties list.
-	 *
-	 * @param name String - The name of the property.
-	 * @param value String - The value of the property.
-	 */
-	@Override
-	public void addConfiguration( String name, String value ) {
-		prop.put( name, value );
-	}
-
-	// gets the from neighborhood for a given node
-	@Override
-	public Collection<String> getFromNeighbors( String nodeType, int neighborHood ) {
-		// this is where this node is the from node
-		OneVarListQueryAdapter<String> qea
-				= OneVarListQueryAdapter.getStringList( fromSparql, "entity" );
-		qea.bindURI( "nodeType", nodeType );
-		return getSelectNoEx( qea, owlRc, true );
-	}
-
-	// gets the to nodes
-	@Override
-	public Collection<String> getToNeighbors( String nodeType, int neighborHood ) {
-		// this is where this node is the to node
-		OneVarListQueryAdapter<String> qea
-				= OneVarListQueryAdapter.getStringList( toSparql, "entity" );
-		qea.bindURI( "nodeType", nodeType );
-		return getSelectNoEx( qea, owlRc, true );
-	}
-
-	// gets the from neighborhood for a given node
-	public Map<String, List<String>> getFromNeighborsWithVerbs( String nodeType,
-			int neighborHood ) {
-		// this is where this node is the from node
-		final Map<String, List<String>> ret = new HashMap<>();
-		QueryExecutor<Void> vqa = new QueryExecutorAdapter<Void>(
-				fromSparqlWithVerbs ) {
-					@Override
-					public void handleTuple( BindingSet set, ValueFactory fac ) {
-						String verb = set.getValue( "ret" ).stringValue();
-						String node = set.getValue( "entity" ).stringValue();
-						if ( !ret.containsKey( verb ) ) {
-							ret.put( verb, new ArrayList<String>() );
-						}
-						ret.get( verb ).add( node );
-					}
-				};
-		vqa.bindURI( "noteType", nodeType );
-		getSelectNoEx( vqa, owlRc, true );
-		return ret;
-	}
-
-	// gets the to nodes
-	public Map<String, List<String>> getToNeighborsWithVerbs( String nodeType,
-			int neighborHood ) {
-		// this is where this node is the to node
-		final Map<String, List<String>> ret = new HashMap<>();
-		QueryExecutor<Void> vqa = new QueryExecutorAdapter<Void>( toSparqlWithVerbs ) {
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				String verb = set.getValue( "ret" ).stringValue();
-				String node = set.getValue( "entity" ).stringValue();
-				if ( !ret.containsKey( verb ) ) {
-					ret.put( verb, new ArrayList<>() );
-				}
-				ret.get( verb ).add( node );
-			}
-		};
-		vqa.bindURI( "noteType", nodeType );
-		getSelectNoEx( vqa, owlRc, true );
-		return ret;
-	}
-
 	// gets the from and to nodes
 	@Override
 	public Collection<String> getNeighbors( String nodeType, int neighborHood ) {
@@ -527,39 +365,38 @@ public abstract class AbstractEngine implements IEngine {
 		return from;
 	}
 
-	public static final <T> T getSelect( QueryExecutor<T> query,
-			RepositoryConnection rc, boolean dobindings ) throws RepositoryException,
-			MalformedQueryException, QueryEvaluationException {
+	// gets the from neighborhood for a given node
+	@Override
+	public Collection<String> getFromNeighbors( String nodeType, int neighborHood ) {
+		// this is where this node is the from node
+		OneVarListQueryAdapter<String> qea
+				= OneVarListQueryAdapter.getStringList( fromSparql, "entity" );
+		qea.bindURI( "nodeType", nodeType );
 
-		String sparql = ( dobindings ? query.getSparql() : query.bindAndGetSparql() );
-
-		ValueFactory vfac = new ValueFactoryImpl();
-		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql );
-		if ( dobindings ) {
-			tq.setIncludeInferred( query.usesInferred() );
-			query.setBindings( tq, vfac );
-		}
-
-		TupleQueryResult rslt = tq.evaluate();
-		query.start( rslt.getBindingNames() );
-		while ( rslt.hasNext() ) {
-			query.handleTuple( rslt.next(), vfac );
-		}
-		query.done();
-		rslt.close();
-		return query.getResults();
-	}
-
-	public static final <T> T getSelectNoEx( QueryExecutor<T> query,
-			RepositoryConnection rc,
-			boolean dobindings ) {
 		try {
-			return getSelect( query, rc, dobindings );
+			return query( qea );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( "could not execute select: " + query.getSparql(), e );
-			return null;
+			log.error( e, e );
 		}
+		return new ArrayList<>();
+	}
+
+	// gets the to nodes
+	@Override
+	public Collection<String> getToNeighbors( String nodeType, int neighborHood ) {
+		// this is where this node is the to node
+		OneVarListQueryAdapter<String> qea
+				= OneVarListQueryAdapter.getStringList( toSparql, "entity" );
+		qea.bindURI( "nodeType", nodeType );
+
+		try {
+			return query( qea );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			log.error( e, e );
+		}
+		return new ArrayList<>();
 	}
 
 	public static Model getConstruct( String sparql, RepositoryConnection rc )
@@ -572,52 +409,6 @@ public abstract class AbstractEngine implements IEngine {
 		}
 		gqr.close();
 		return model;
-	}
-
-	@Override
-	public Collection<String> getParamValues( String name, String type,
-			String insightId ) {
-		String query = DIHelper.getInstance().getProperty(
-				"TYPE" + "_" + Constants.QUERY );
-		return getParamValues( name, type, insightId, query );
-	}
-
-	@Override
-	public Collection<String> getParamValues( String name, String type,
-			String insightId,
-			String query ) {
-		// TODO
-		// try to see if this type is available with direct values
-		List<String> uris = new ArrayList<>();
-		String TYPEOPTION = type + "_" + Constants.OPTION;
-		String options = getProperty( TYPEOPTION );
-		String customQuery = query;
-		if ( options != null ) {
-			uris.addAll( Arrays.asList( options.split( "; " ) ) );
-		}
-		else {
-			// this needs to be retrieved through SPARQL
-			// need to use custom query if it has been specified on the dreamer
-			// otherwise use generic fill query
-			String sparqlQuery;
-			if ( customQuery != null ) {
-				sparqlQuery = customQuery;
-			}
-			else {
-				sparqlQuery
-						= DIHelper.getInstance().
-						getProperty( "TYPE" + "_" + Constants.QUERY );
-			}
-
-			Map<String, String> paramTable = new HashMap<>();
-			paramTable.put( Constants.ENTITY, type );
-			sparqlQuery = Utility.fillParam( sparqlQuery, paramTable );
-
-			for ( URI entity : getEntityOfType( sparqlQuery ) ) {
-				uris.add( entity.stringValue() );
-			}
-		}
-		return uris;
 	}
 
 	@Override
@@ -640,28 +431,6 @@ public abstract class AbstractEngine implements IEngine {
 	@Override
 	public void setInsightManager( InsightManager ie ) {
 		this.insightEngine = ie;
-	}
-
-	@Override
-	public void setMap( String map ) {
-		this.map = map;
-	}
-
-	@Override
-	public <T> T query( QueryExecutor<T> exe )
-			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		throw new UnsupportedOperationException( "Not yet implemented" );
-	}
-
-	@Override
-	public Model construct( String q )
-			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		throw new UnsupportedOperationException( "Not yet implemented" );
-	}
-
-	@Override
-	public void execute( ModificationExecutor exe ) throws RepositoryException {
-		throw new UnsupportedOperationException( "Not yet implemented" );
 	}
 
 	protected static File searchFor( String filename, File... dirs ) {
@@ -765,8 +534,12 @@ public abstract class AbstractEngine implements IEngine {
 
 	@Override
 	public String toString() {
-		return engineName;
+		StringBuilder sb = new StringBuilder( engineName );
+		sb.append( " (base:" ).append( getBaseUri() ).append( ")" );
+		return sb.toString();
 	}
+
+	public abstract boolean supportsSparqlBindings();
 
 	@Override
 	public boolean serverIsRunning() {
@@ -793,131 +566,8 @@ public abstract class AbstractEngine implements IEngine {
 		return null;
 	}
 
-	/**
-	 * Does this engine support binding variables within the Sparql execution?
-	 *
-	 * @return true, if the engine supports sparql variable binding
-	 */
-	public boolean supportsSparqlBindings() {
-		return true;
-	}
-
-	public static void updateLastModifiedDate( RepositoryConnection rc,
-			Resource baseuri ) {
-		// updates the base uri's last modified key
-		// 1) if we don't know it already, figure out what our base uri is
-		// 2) remove any last modified value
-		// 3) add the new last modified value
-
-		ValueFactory vf = rc.getValueFactory();
-		try {
-			if ( null == baseuri ) {
-				RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
-						MetadataConstants.VOID_DS, false );
-				List<Statement> stmts = Iterations.asList( rr );
-				for ( Statement s : stmts ) {
-					baseuri = s.getSubject();
-				}
-			}
-
-			if ( null == baseuri ) {
-				log.warn( "cannot update last modified date when no base uri is set" );
-			}
-			else {
-				rc.remove( baseuri, MetadataConstants.DCT_MODIFIED, null );
-
-				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
-						vf.createLiteral( QueryExecutorAdapter.getCal( new Date() ) ) ) );
-			}
-		}
-		catch ( RepositoryException e ) {
-			log.warn( "could not update last modified date", e );
-		}
-	}
-
-	@Override
-	public org.openrdf.model.URI getBaseUri() {
-		return databuilder.toUri();
-	}
-
-	protected void setDataBuilder( UriBuilder b ) {
-		databuilder = b;
-	}
-
 	@Override
 	public void calculateInferences() throws RepositoryException {
 		// nothing to do
-	}
-
-	@Override
-	public Collection<Statement> getOwlData() {
-		final List<Statement> stmts = new ArrayList<>();
-
-		try {
-			for ( Statement st : Iterations.asList( owlRc.getStatements( null, null,
-					null, false ) ) ) {
-				// re-box, because BigData doesn't play nicely
-				Resource s = new URIImpl( st.getSubject().stringValue() );
-				URI p = new URIImpl( st.getPredicate().stringValue() );
-				Value o = st.getObject();
-				stmts.add( new StatementImpl( s, p, o ) );
-			}
-		}
-		catch ( RepositoryException re ) {
-			log.warn( re, re );
-		}
-
-		return stmts;
-	}
-
-	@Override
-	public void setOwlData( Collection<Statement> stmts ) {
-		try {
-			owlRc.clear();
-			owlRc.commit();
-			addOwlData( stmts );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public void addOwlData( Collection<Statement> stmts ) {
-		try {
-			owlRc.add( stmts );
-			owlRc.commit();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public void addOwlData( Statement stmt ) {
-		try {
-			owlRc.add( stmt );
-			owlRc.commit();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public void removeOwlData( Statement stmt ) {
-		try {
-			owlRc.remove( stmt );
-			owlRc.commit();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public Map<String, String> getNamespaces() {
-		log.warn( "Namespace handling not yet implemented" );
-		return new HashMap<>();
 	}
 }

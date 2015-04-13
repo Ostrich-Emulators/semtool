@@ -50,10 +50,6 @@ public class POIReader implements ImportFileReader {
 
 	private ImportData readNonloadingSheet( XSSFWorkbook workbook ) {
 		ImportData id = new ImportData();
-		ImportMetadata im = id.getMetadata();
-//		im.setDataBuilder( getDataBuilder().toString() );
-//		im.setSchemaBuilder( getSchemaBuilder().toString() );
-//		im.setBase( getSchemaBuilder().build() );
 
 		int sheets = workbook.getNumberOfSheets();
 		for ( int sheetnum = 0; sheetnum < sheets; sheetnum++ ) {
@@ -61,8 +57,7 @@ public class POIReader implements ImportFileReader {
 			XSSFRow firstRow = sheet.getRow( 0 );
 
 			String subjectType = firstRow.getCell( 0 ).getStringCellValue();
-			NodeLoadingSheetData nlsd
-					= new NodeLoadingSheetData( sheet.getSheetName(), subjectType );
+			LoadingSheetData nlsd = new LoadingSheetData( sheet.getSheetName(), subjectType );
 			ValueFactory vf = new ValueFactoryImpl();
 
 			Map<Integer, String> propnames = new HashMap<>();
@@ -89,6 +84,26 @@ public class POIReader implements ImportFileReader {
 		}
 
 		return id;
+	}
+
+	@Override
+	public ImportMetadata getMetadata( File file ) throws IOException {
+		logger.debug( "getting metadata from file: " + file );
+		final XSSFWorkbook workbook
+				= new XSSFWorkbook( new FileInputStream( file ) );
+
+		XSSFSheet lSheet = workbook.getSheet( "Loader" );
+
+		String metadataSheetName = findMetadataSheetName( lSheet );
+		if ( null == metadataSheetName ) {
+			return new ImportMetadata();
+		}
+
+		ImportData data = new ImportData();
+
+		XSSFSheet metadataSheet = workbook.getSheet( metadataSheetName );
+		loadMetadata( metadataSheet, data );
+		return data.getMetadata();
 	}
 
 	@Override
@@ -218,7 +233,7 @@ public class POIReader implements ImportFileReader {
 				logger.debug( "setting data namespaces to " + propValue );
 				metas.setDataBuilder( propValue );
 			}
-			else if( "@base".equals( propName ) ){
+			else if ( "@base".equals( propName ) ) {
 				logger.debug( "setting base URI to " + propValue );
 				ValueFactory vf = new ValueFactoryImpl();
 				metas.setBase( vf.createURI( propValue ) );
@@ -305,18 +320,13 @@ public class POIReader implements ImportFileReader {
 		SheetConfig sc = new SheetConfig( lSheet );
 		Map<String, Integer> properties = sc.getPropertyColumns();
 
-		NodeLoadingSheetData nlsd
-				= new NodeLoadingSheetData( sheetToLoad, sc.getSubjectType(),
-						properties.keySet() );
-		RelationshipLoadingSheetData rlsd
-				= new RelationshipLoadingSheetData( sheetToLoad, sc.getSubjectType(),
-						sc.getObjectType(), sc.getRelationName(), properties.keySet() );
-		if ( sc.isRelationSheet() ) {
-			id.add( rlsd );
-		}
-		else {
-			id.add( nlsd );
-		}
+		LoadingSheetData lsd = ( sc.isRelationSheet()
+				? LoadingSheetData.relsheet( sheetToLoad, sc.getSubjectType(),
+						sc.getObjectType(), sc.getRelationName() )
+				: LoadingSheetData.nodesheet( sheetToLoad, sc.getSubjectType() ) );
+		lsd.addProperties( properties.keySet() );
+
+		id.add( lsd );
 
 		if ( logger.isDebugEnabled() ) {
 			int props = sc.getPropertyNames().size();
@@ -356,12 +366,12 @@ public class POIReader implements ImportFileReader {
 
 					//createRelationship( subjectType, sc.getObjectType(), subjectName,
 					//		objectName, sc.getRelationName(), props, rc );
-					rlsd.add( subjectName, objectName, props );
+					lsd.add( subjectName, objectName, props );
 				}
 			}
 			else {
 				//addNodeWithProperties( subjectType, subjectName, props, rc );
-				nlsd.add( subjectName, props );
+				lsd.add( subjectName, props );
 			}
 
 			counter++;
@@ -420,7 +430,7 @@ public class POIReader implements ImportFileReader {
 				// and stop processing headers when the first empty one
 				// is found.
 				XSSFCell cell = firstRow.getCell( i );
-				if( cell == null ) {
+				if ( cell == null ) {
 					break;
 				}
 				proplkp.put( cell.getStringCellValue(), i );

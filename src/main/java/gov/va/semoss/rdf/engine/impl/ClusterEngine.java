@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
 
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -20,7 +19,7 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import java.util.List;
 
-public class ClusterEngine extends AbstractEngine {
+public class ClusterEngine extends AbstractSesameEngine {
 
 	private static final Logger log = Logger.getLogger( ClusterEngine.class );
 	// for every class type and relation it tells you which
@@ -55,6 +54,11 @@ public class ClusterEngine extends AbstractEngine {
 
 	}
 
+	@Override
+	protected RepositoryConnection getRawConnection(){
+		return rc;
+	}
+	
 	// You register a database with the name server
 	// in this case you register an engine
 	// when registered all the questions are parsed out
@@ -124,35 +128,5 @@ public class ClusterEngine extends AbstractEngine {
 //      }
 //    }
 //    return finalVector;
-	}
-
-	@Override
-	public Collection<URI> getEntityOfType( String sparqlQuery ) {
-		throw new UnsupportedOperationException( "Not supported yet." );
-	}
-
-	@Override
-	public boolean execAskQuery( String query ) {
-		throw new UnsupportedOperationException( "Not supported yet." );
-	}
-
-	@Override
-	public Object execGraphQuery( String query ) {
-		throw new UnsupportedOperationException( "Not supported yet." );
-	}
-
-	@Override
-	public Object execSelectQuery( String query ) {
-		throw new UnsupportedOperationException( "Not supported yet." );
-	}
-
-	@Override
-	public ENGINE_TYPE getEngineType() {
-		throw new UnsupportedOperationException( "Not supported yet." );
-	}
-
-	@Override
-	public InsightManager getInsightManager() {
-		return insights;
 	}
 }

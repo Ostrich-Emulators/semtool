@@ -55,7 +55,6 @@ public class RepositoryCopier implements RDFHandler {
   public void endRDF() throws RDFHandlerException {
     try {
       log.debug( "committing " + totalAdds + " statements..." );
-      AbstractEngine.updateLastModifiedDate( conn, null );
       conn.commit();
     }
     catch ( Exception e ) {

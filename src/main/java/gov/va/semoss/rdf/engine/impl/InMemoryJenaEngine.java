@@ -27,10 +27,18 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateAction;
+import gov.va.semoss.rdf.engine.api.InsightManager;
+import gov.va.semoss.rdf.engine.api.ModificationExecutor;
+import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 
 /**
  * Holds the database in memory, and uses the Jena API to facilitate querying of RDF data sources.
@@ -146,6 +154,81 @@ public class InMemoryJenaEngine extends AbstractEngine implements IEngine {
 	public boolean execAskQuery(String query) {
 		// TODO: Don't return null
     throw new UnsupportedOperationException( "Not supported yet." );
+	}
+
+	@Override
+	protected void loadLegacyOwl( String ontoloc ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	protected InsightManager createInsightManager() throws RepositoryException {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	protected void updateLastModifiedDate() {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public boolean supportsSparqlBindings() {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void addStatement( String subject, String predicate, Object object, boolean concept ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void removeStatement( String subject, String predicate, Object object, boolean concept ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public Map<String, String> getNamespaces() {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public Collection<Statement> getOwlData() {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void setOwlData( Collection<Statement> stmts ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void addOwlData( Collection<Statement> stmts ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void addOwlData( Statement stmt ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void removeOwlData( Statement stmt ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public <T> T query( QueryExecutor<T> exe ) throws RepositoryException, MalformedQueryException, QueryEvaluationException {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public org.openrdf.model.Model construct( String query ) throws RepositoryException, MalformedQueryException, QueryEvaluationException {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void execute( ModificationExecutor exe ) throws RepositoryException {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
 	}
 
 }

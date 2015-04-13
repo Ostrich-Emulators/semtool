@@ -42,9 +42,9 @@ import gov.va.semoss.util.Utility;
 import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -57,6 +57,7 @@ import org.openrdf.model.Value;
  */
 public class XlsWriter {
 
+	private static final int TAB_ROWLIMIT = 999999;
 	private static final Logger log = Logger.getLogger( XlsWriter.class );
 	protected static final Pattern NUMERIC = Pattern.compile( "^\\d+.?\\d*$" );
 
@@ -87,7 +88,7 @@ public class XlsWriter {
 
 	/**
 	 * Writes the given data to the output file. This file (and it's parents) will
-	 * be created if they don't already exist
+	 * be created if they don't already exist.
 	 *
 	 * @param data
 	 * @param output
@@ -99,104 +100,115 @@ public class XlsWriter {
 
 		XSSFCellStyle errorstyle = wb.createCellStyle();
 		errorstyle.setFillPattern( XSSFCellStyle.SOLID_FOREGROUND );
-    errorstyle.setFillForegroundColor( new XSSFColor( Color.PINK ) );
+		errorstyle.setFillForegroundColor( new XSSFColor( Color.PINK ) );
 
-		for ( NodeLoadingSheetData nodes : data.getNodes() ) {
+		for ( LoadingSheetData nodes : data.getNodes() ) {
 			List<String> props = new ArrayList<>( nodes.getProperties() );
-			String name = generateSheetName( nodes.getName(), sheetNamesSoFar );
-			XSSFSheet sheet = wb.createSheet( name );
 
-			makeHeaderRow( sheet, nodes, props );
+			int counter = 0;
+			while ( counter < nodes.getData().size() ) {
+				String name = generateSheetName( nodes.getName(), sheetNamesSoFar );
+				XSSFSheet sheet = wb.createSheet( name );
 
-			int rownum = 0;
-			for ( LoadingNodeAndPropertyValues nap : nodes.getData() ) {
-				// the first row needs to have the header values
-				XSSFRow row = sheet.createRow( ++rownum );
+				makeHeaderRow( sheet, nodes, props );
 
-				Cell cell1 = row.createCell( 1 );
-				cell1.setCellValue( nap.getSubject() );
-				if ( nap.isSubjectError() ) {
-					cell1.setCellStyle( errorstyle );
-				}
+				int rownum = 0;
+				ListIterator<LoadingNodeAndPropertyValues> napit
+						= nodes.getData().listIterator( counter );
+				while ( napit.hasNext() && rownum < TAB_ROWLIMIT ) {
+					LoadingNodeAndPropertyValues nap = napit.next();
 
-				int col = 2;
-				for ( String prop : props ) {
-					Value val = nap.get( prop );
-					if ( null != val ) {
-						Cell cellx = row.createCell( col );
-						cellx.setCellValue( val.stringValue() );
+					// the first row needs to have the header values
+					XSSFRow row = sheet.createRow( ++rownum );
+
+					Cell cell1 = row.createCell( 1 );
+					cell1.setCellValue( nap.getSubject() );
+					if ( nap.isSubjectError() ) {
+						cell1.setCellStyle( errorstyle );
 					}
-					col++;
+
+					int col = 2;
+					for ( String prop : props ) {
+						Value val = nap.get( prop );
+						if ( null != val ) {
+							Cell cellx = row.createCell( col );
+							cellx.setCellValue( val.stringValue() );
+						}
+						col++;
+					}
 				}
+
+				counter += TAB_ROWLIMIT;
 			}
 		}
 
-		for ( RelationshipLoadingSheetData rels : data.getRels() ) {
+		for ( LoadingSheetData rels : data.getRels() ) {
+			int counter = 0;
 			List<String> props = new ArrayList<>( rels.getProperties() );
-			String name = generateSheetName( rels.getName(), sheetNamesSoFar );
 
-			XSSFSheet sheet = wb.createSheet( name );
+			while ( counter < rels.getData().size() ) {
+				String name = generateSheetName( rels.getName(), sheetNamesSoFar );
 
-			if ( rels.hasErrors() ) {
-				sheet.setTabColor( IndexedColors.ROSE.getIndex() );
-			}
+				XSSFSheet sheet = wb.createSheet( name );
 
-			makeHeaderRow( sheet, rels, props );
-
-			int rownum = 0;
-			for ( LoadingNodeAndPropertyValues nap : rels.getData() ) {
-				XSSFRow row = sheet.createRow( rownum + 1 );
-
-				if ( 0 == rownum ) {
-					// cell needs the relation name
-					Cell cell0 = row.createCell( 0 );
-					cell0.setCellValue( rels.getRelname() );
+				if ( rels.hasErrors() ) {
+					sheet.setTabColor( IndexedColors.ROSE.getIndex() );
 				}
 
-				Cell cell1 = row.createCell( 1 );
-				cell1.setCellValue( nap.getSubject() );
-				if ( nap.isSubjectError() ) {
-					cell1.setCellStyle( errorstyle );
-				}
+				makeHeaderRow( sheet, rels, props );
 
-				Cell cell2 = row.createCell( 2 );
-				cell2.setCellValue( nap.getObject() );
-				if ( nap.isObjectError() ) {
-					cell2.setCellStyle( errorstyle );
-				}
+				int rownum = 0;
 
-				int col = 3;
-				for ( String prop : props ) {
-					Value val = nap.get( prop );
-					if ( null != val ) {
-						Cell cellx = row.createCell( col );
-						cellx.setCellValue( val.stringValue() );
+				// write the relationship cell before the loop (in case of an empty sheet)
+				XSSFRow relrow = sheet.createRow( 1 );
+				Cell cell0 = relrow.createCell( 0 );
+				cell0.setCellValue( rels.getRelname() );
+
+				ListIterator<LoadingNodeAndPropertyValues> napit
+						= rels.getData().listIterator( counter );
+				while ( napit.hasNext() && rownum < TAB_ROWLIMIT ) {
+					LoadingNodeAndPropertyValues nap = napit.next();
+
+					// if we're on the first row, we already have it, so don't remake it
+					XSSFRow row = ( 0 == rownum ? relrow : sheet.createRow( rownum + 1 ) );
+
+					Cell cell1 = row.createCell( 1 );
+					cell1.setCellValue( nap.getSubject() );
+					if ( nap.isSubjectError() ) {
+						cell1.setCellStyle( errorstyle );
 					}
-					col++;
+
+					Cell cell2 = row.createCell( 2 );
+					cell2.setCellValue( nap.getObject() );
+					if ( nap.isObjectError() ) {
+						cell2.setCellStyle( errorstyle );
+					}
+
+					int col = 3;
+					for ( String prop : props ) {
+						Value val = nap.get( prop );
+						if ( null != val ) {
+							Cell cellx = row.createCell( col );
+							cellx.setCellValue( val.stringValue() );
+						}
+						col++;
+					}
+					rownum++;
 				}
-				rownum++;
+
+				counter += TAB_ROWLIMIT;
 			}
 		}
 
 		output.getParentFile().mkdirs();
-		try ( OutputStream newExcelFile = new BufferedOutputStream( new FileOutputStream( output ) ) ) {
+		try ( OutputStream newExcelFile
+				= new BufferedOutputStream( new FileOutputStream( output ) ) ) {
 			wb.write( newExcelFile );
 		}
 	}
 
 	protected XSSFWorkbook createWorkbook( ImportData importdata ) {
-		final String metaSheetName = "MetadataInfo";
 		ImportMetadata data = importdata.getMetadata();
-		XSSFWorkbook wb = new XSSFWorkbook();
-
-		XSSFSheet loader = wb.createSheet( "Loader" );
-		List<String> tabnames = new ArrayList<>();
-		Set<String> sheetnames = new HashSet<>();
-		for ( LoadingSheetData lsd : importdata.getAllData() ) {
-			String tname = generateSheetName( lsd.getName(), sheetnames );
-			tabnames.add( tname );
-		}
-		writeLoadingSheet( loader, tabnames, metaSheetName );
 
 		List<String[]> mddata = new ArrayList<>();
 		if ( null != data.getSchemaBuilder() ) {
@@ -224,8 +236,33 @@ public class XlsWriter {
 				stmt.getPredicate().stringValue(), stmt.getObject().stringValue() } );
 		}
 
-		XSSFSheet metadata = wb.createSheet( metaSheetName );
-		writeSheet( metadata, mddata );
+		XSSFWorkbook wb = new XSSFWorkbook();
+		XSSFSheet loader = wb.createSheet( "Loader" );
+
+		List<String> tabnames = new ArrayList<>();
+		Set<String> sheetnames = new HashSet<>();
+
+		for ( LoadingSheetData lsd : importdata.getSheets() ) {
+			int count = 0;
+
+			// if we have too many rows for one tab, we have
+			// to separate this sheet data into multiple tabs
+			while ( count < lsd.getData().size() ) {
+				String tname = generateSheetName( lsd.getName(), sheetnames );
+				tabnames.add( tname );
+				count += TAB_ROWLIMIT;
+			}
+		}
+
+		// don't write a metadata sheet if we don't have anything to put in it
+		final String metaSheetName = ( mddata.isEmpty() ? null : "MetadataInfo" );
+
+		writeLoadingSheet( loader, tabnames, metaSheetName );
+
+		if ( !mddata.isEmpty() ) {
+			XSSFSheet metadata = wb.createSheet( metaSheetName );
+			writeSheet( metadata, mddata );
+		}
 
 		return wb;
 	}
@@ -323,34 +360,26 @@ public class XlsWriter {
 		}
 
 		int inc = 10;
+		final String loopkey = nodeKey;
 		while ( keySet.contains( nodeKey ) ) {
-			nodeKey = nodeKey.substring( 0, maxSheetNameLength - 2 ) + ( inc++ );
+			boolean firstloop = loopkey.equals( nodeKey );
+
+			// we don't have to chop off anything on the first loop unless it's too long
+			if ( firstloop ) {
+				if ( nodeKey.length() > maxSheetNameLength - 2 ) {
+					nodeKey = nodeKey.substring( 0, maxSheetNameLength - 2 );
+				}
+			}
+			else {
+				// on subsequent loops, we need to chop off the last thing we added
+				nodeKey = nodeKey.substring( 0, nodeKey.length() - 2 );
+			}
+
+			nodeKey = nodeKey + ( inc++ );
 		}
 		keySet.add( nodeKey );
 
 		return nodeKey;
-	}
-
-	private static void styleCell( Cell cell0, String name, int row, int col,
-			Map<SheetRowCol, CellFormatting> cellformatting, Map<CellFormatting, CellStyle> styles,
-			XSSFWorkbook wb ) {
-
-		if ( cellformatting.isEmpty() ) {
-			return;
-		}
-
-		SheetRowCol src = new SheetRowCol( name, row, col );
-		if ( cellformatting.containsKey( src ) ) {
-			CellFormatting fmt = cellformatting.get( src );
-			if ( !styles.containsKey( fmt ) ) {
-				XSSFCellStyle style = wb.createCellStyle();
-				style.setFillPattern( XSSFCellStyle.FINE_DOTS );
-				style.setFillBackgroundColor( new XSSFColor( fmt.background ) );
-				styles.put( fmt, style );
-			}
-
-			cell0.setCellStyle( styles.get( fmt ) );
-		}
 	}
 
 	public static class NodeAndPropertyValues extends HashMap<URI, Value> {

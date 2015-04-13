@@ -6,8 +6,6 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
-import gov.va.semoss.poi.main.NodeLoadingSheetData;
-import gov.va.semoss.poi.main.RelationshipLoadingSheetData;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import java.util.Arrays;
 import org.apache.log4j.Logger;
@@ -38,29 +36,16 @@ public class AddTabPanel extends javax.swing.JPanel {
 		return nodetype.isSelected();
 	}
 
-	public NodeLoadingSheetData getNodeSheetData() {
+	public LoadingSheetData getSheet() {
 		String subj = subjectClass.getText();
-		NodeLoadingSheetData sheet = new NodeLoadingSheetData( subj, subj );
-		addProps( sheet );
-		return sheet;
-	}
 
-	public RelationshipLoadingSheetData getRelSheetData() {
-		String subj = subjectClass.getText();
-		StringBuilder name = new StringBuilder( subj );
-
-		RelationshipLoadingSheetData sheet;
 		String obj = objectClass.getText();
 		String relname = relClass.getText();
-		name.append( "-" ).append( relname ).append( "-" ).append( obj );
 
-		sheet = new RelationshipLoadingSheetData( name.toString(), subj, obj, relname );
-		addProps( sheet );
+		LoadingSheetData lsd = ( reltype.isSelected()
+				? LoadingSheetData.relsheet( subj, obj, relname )
+				: LoadingSheetData.nodesheet( subj ) );
 
-		return sheet;
-	}
-
-	private void addProps( LoadingSheetData lsd ) {
 		for ( int r = 0; r < model.getRealRowCount(); r++ ) {
 			URI dt = null;
 			Object pval = model.getValueAt( r, 0 );
@@ -79,6 +64,8 @@ public class AddTabPanel extends javax.swing.JPanel {
 				lsd.addProperty( pval.toString(), dt );
 			}
 		}
+
+		return lsd;
 	}
 
 	/**

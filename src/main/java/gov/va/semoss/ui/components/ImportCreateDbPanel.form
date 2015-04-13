@@ -34,8 +34,8 @@
                           <Component id="file" max="32767" attributes="0"/>
                           <Component id="dbname" max="32767" attributes="0"/>
                           <Component id="dbdir" pref="429" max="32767" attributes="0"/>
-                          <Component id="baseuri" alignment="1" max="32767" attributes="0"/>
                           <Component id="questionfile" alignment="0" max="32767" attributes="0"/>
+                          <Component id="baseuri" alignment="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" attributes="0">
@@ -108,11 +108,6 @@
     <Component class="javax.swing.JLabel" name="urilbl">
       <Properties>
         <Property name="text" type="java.lang.String" value="Designate Base URI"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="baseuri">
-      <Properties>
-        <Property name="toolTipText" type="java.lang.String" value="The URI to which the resource names being imported will be appended"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
@@ -213,6 +208,14 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Check Quality"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="baseuri">
+      <Properties>
+        <Property name="editable" type="boolean" value="true"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+      </AuxValues>
     </Component>
   </SubComponents>
 </Form>

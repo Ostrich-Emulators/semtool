@@ -53,7 +53,6 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
-import static gov.va.semoss.rdf.engine.impl.AbstractEngine.getSelect;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
@@ -372,7 +371,7 @@ public class InsightManagerImpl implements InsightManager {
             label.append( resultSet.getBinding("label").getValue().stringValue() );
           }
       };
-      getSelect( qea, rc, false );
+      AbstractSesameEngine.getSelect( qea, rc, false );
   }
   catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
     // TODO Auto-generated catch block
@@ -404,7 +403,7 @@ public class InsightManagerImpl implements InsightManager {
         }
       };
 
-      uris.addAll( AbstractEngine.getSelect( lqa, rc, true ) );
+      uris.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
     }
     catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
       log.error( e, e );
@@ -428,7 +427,7 @@ public class InsightManagerImpl implements InsightManager {
 	        String query = "PREFIX " + SPIN.PREFIX  + ": <" + SPIN.NAMESPACE + "> "
 	        	   + "PREFIX " + SPL.PREFIX  + ": <" + SPL.NAMESPACE + "> "
 	        	   + "PREFIX " + SP.PREFIX  + ": <" + SP.NAMESPACE + "> "
-	        	   + "SELECT DISTINCT ?label ?variable ?valueType ?defaultValue ?defaultQuery WHERE { "
+	        	   + "SELECT DISTINCT ?parameter ?label ?variable ?valueType ?defaultValue ?defaultQuery WHERE { "
 	     		   + "BIND(" + insightUriString + " AS ?uri) . "
 	     		   + "OPTIONAL{ ?uri spin:constraint ?parameter . "
 	               + "?parameter spl:valueType ?valueType ; rdfs:label ?label ; spl:predicate ?variable . "
@@ -443,7 +442,7 @@ public class InsightManagerImpl implements InsightManager {
 	           }
 	        };
 		    log.debug("Parameter-er... " + query );
-	        colInsightParameters.addAll( AbstractEngine.getSelect( lqa, rc, true ) );
+	        colInsightParameters.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
 	       
 	    }catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 	      log.error( e, e );
@@ -526,7 +525,7 @@ public class InsightManagerImpl implements InsightManager {
       };
 
       log.debug( "Insighter... " + isp + " / " + insightURI );
-      getSelect( qea, rc, false );
+      AbstractSesameEngine.getSelect( qea, rc, false );
     }
     catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
       // TODO Auto-generated catch block
@@ -571,7 +570,7 @@ public class InsightManagerImpl implements InsightManager {
 	          }
 	      };
 	      log.debug("Playsheeter... " + query );
-	      colPlaysheet.addAll(AbstractEngine.getSelect(lqa, rc, true));
+	      colPlaysheet.addAll(AbstractSesameEngine.getSelect(lqa, rc, true));
 	      
 	  }catch(RepositoryException | MalformedQueryException | QueryEvaluationException e){
 	      log.error( e, e );

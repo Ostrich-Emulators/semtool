@@ -217,14 +217,6 @@ public interface IEngine extends IExplorable {
 	public void saveConfiguration();
 
 	/**
-	 * Adds a new property to the engine
-	 *
-	 * @param name String - The name of the property.
-	 * @param value String - The value of the property.
-	 */
-	public void addConfiguration( String name, String value );
-
-	/**
 	 * Gets a prefix-to-namespace mapping
 	 * @return 
 	 */
@@ -285,18 +277,8 @@ public interface IEngine extends IExplorable {
 	 */
 	public void removeOwlData( Statement stmt );
 
-	// sets the rdbms map, if it exists
-	public void setMap( String map );
-
 	// get property
 	public String getProperty( String key );
-
-	// gets the param values for a parameter
-	public Collection<String> getParamValues( String label, String type, String insightId, String query );
-
-  // gets the param values for a parameter
-	// overloaded query - I just need to make the query optional
-	public Collection<String> getParamValues( String label, String type, String insightId );
 
 	/**
 	 * Returns a copy of this engine's properties

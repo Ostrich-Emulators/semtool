@@ -47,6 +47,10 @@ public final class ImportMetadata {
 	}
 
 	public static ImportMetadata forEngine( IEngine eng ) {
+		if ( null == eng ) {
+			return new ImportMetadata();
+		}
+
 		ImportMetadata metas = new ImportMetadata( eng.getBaseUri(),
 				eng.getSchemaBuilder(), eng.getDataBuilder() );
 		metas.setNamespaces( eng.getNamespaces() );
@@ -100,10 +104,10 @@ public final class ImportMetadata {
 		return extras;
 	}
 
-	public void addExtra( URI sub, String val ){
+	public void addExtra( URI sub, String val ) {
 		extras.put( sub, val );
 	}
-	
+
 	public ImportMetadata setNamespaces( Map<String, String> ns ) {
 		namespaces.clear();
 		return addNamespaces( ns );

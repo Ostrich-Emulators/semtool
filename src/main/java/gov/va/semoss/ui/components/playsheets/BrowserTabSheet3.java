@@ -19,16 +19,16 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JButton;
-
 import gov.va.semoss.om.SEMOSSVertex;
+
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JButton;
 
 /**
  * This class is used in chart listeners to create the appropriate browser and
@@ -55,7 +55,7 @@ public class BrowserTabSheet3 extends BrowserPlaySheet2 implements ActionListene
 		add( pullData, BorderLayout.NORTH );
 		add( browser.getView().getComponent(), BorderLayout.CENTER );
 	}
-
+	
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
 		pullData();

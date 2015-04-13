@@ -75,7 +75,6 @@ import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
 import gov.va.semoss.util.CSSApplication;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
@@ -103,6 +102,8 @@ import gov.va.semoss.ui.actions.ImportInsightsAction;
 import gov.va.semoss.ui.actions.ImportLoadingSheetAction;
 import gov.va.semoss.ui.actions.MergeAction;
 import gov.va.semoss.ui.actions.MountAction;
+import gov.va.semoss.ui.actions.NewLoadingSheetAction;
+import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
@@ -131,8 +132,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
-
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -241,8 +241,9 @@ public class PlayPane extends JFrame {
 	private final EndpointAction sparqler = new EndpointAction( UIPROGRESS, this );
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
-	//private final ImportLoadingSheetAction importxls
-	//		= new ImportLoadingSheetAction( UIPROGRESS, "Open", this, "open-file3" );
+	private final OpenAction importxls = new OpenAction( UIPROGRESS, this );
+	private final NewLoadingSheetAction newls
+			= new NewLoadingSheetAction( UIPROGRESS, this );
 	private final ImportInsightsAction resetInsights
 			= new ImportInsightsAction( UIPROGRESS, true, this );
 	private final ImportInsightsAction importInsights
@@ -545,8 +546,6 @@ public class PlayPane extends JFrame {
 				if ( null != engine ) {
 					sparqler.setEnabled( engine.isServerSupported() );
 				}
-
-				// importxls.setEngine( engine ); // set the engine, but always enabled
 			}
 		} );
 	}
@@ -1338,7 +1337,8 @@ public class PlayPane extends JFrame {
 		} );
 
 		JMenu file = new JMenu( "File" );
-		//file.add( importxls );
+		file.add( importxls );
+		file.add( newls );
 
 		file.setMnemonic( KeyEvent.VK_F );
 		exiter.setMnemonic( KeyEvent.VK_X );

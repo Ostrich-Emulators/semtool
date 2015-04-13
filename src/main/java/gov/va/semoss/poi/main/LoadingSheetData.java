@@ -27,7 +27,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  *
  * @author ryan
  */
-public abstract class LoadingSheetData {
+public class LoadingSheetData {
 
 	private static final Logger log = Logger.getLogger( LoadingSheetData.class );
 	private String subjectType;
@@ -45,24 +45,24 @@ public abstract class LoadingSheetData {
 	private final List<LoadingNodeAndPropertyValues> data = new ArrayList<>();
 	private final String tabname;
 
-	public LoadingSheetData( String tabtitle, String type ) {
+	protected LoadingSheetData( String tabtitle, String type ) {
 		this( tabtitle, type, new HashMap<>() );
 	}
 
-	public LoadingSheetData( String tabtitle, String type, Collection<String> props ) {
+	protected LoadingSheetData( String tabtitle, String type, Collection<String> props ) {
 		this( tabtitle, type, null, null, props );
 	}
 
-	public LoadingSheetData( String tabtitle, String type, Map<String, URI> props ) {
+	protected LoadingSheetData( String tabtitle, String type, Map<String, URI> props ) {
 		this( tabtitle, type, null, null, props );
 	}
 
-	public LoadingSheetData( String tabtitle, String sType, String oType,
+	protected LoadingSheetData( String tabtitle, String sType, String oType,
 			String relname ) {
 		this( tabtitle, sType, oType, relname, new HashMap<>() );
 	}
 
-	public LoadingSheetData( String tabtitle, String sType, String oType,
+	protected LoadingSheetData( String tabtitle, String sType, String oType,
 			String relname, Collection<String> props ) {
 		this( tabtitle, sType, oType, relname );
 		for ( String p : props ) {
@@ -70,7 +70,7 @@ public abstract class LoadingSheetData {
 		}
 	}
 
-	public LoadingSheetData( String tabtitle, String sType, String oType,
+	protected LoadingSheetData( String tabtitle, String sType, String oType,
 			String relname, Map<String, URI> props ) {
 		subjectType = sType;
 		tabname = tabtitle;
@@ -259,6 +259,23 @@ public abstract class LoadingSheetData {
 		return nap;
 	}
 
+	public LoadingNodeAndPropertyValues add( String slabel, String olabel ) {
+		cacheNapLabel( slabel );
+		cacheNapLabel( olabel );
+
+		LoadingNodeAndPropertyValues nap
+				= new LoadingNodeAndPropertyValues( slabel, olabel );
+		add( nap );
+		return nap;
+	}
+
+	public LoadingNodeAndPropertyValues add( String slabel, String olabel,
+			Map<String, Value> props ) {
+		LoadingNodeAndPropertyValues nap = add( slabel, olabel );
+		nap.putAll( props );
+		return nap;
+	}
+
 	public List<String> getHeaders() {
 		List<String> heads = new ArrayList<>();
 		heads.add( getSubjectType() );
@@ -320,13 +337,44 @@ public abstract class LoadingSheetData {
 
 	@Override
 	public String toString() {
-		return getName() + " with " + getData().size() + " naps";
+		return getName() + ( isRel() ? "(rel)" : "(node)" ) + " with " + getData().size() + " naps";
+	}
+
+	public static LoadingSheetData copyHeadersOf( LoadingSheetData model ) {
+		if ( model.isRel() ) {
+			return new LoadingSheetData( model.getName(), model.getSubjectType(),
+					model.getObjectType(), model.getRelname(), model.getPropertiesAndDataTypes() );
+		}
+		else {
+			return new LoadingSheetData( model.getName(), model.getSubjectType(),
+					model.getPropertiesAndDataTypes() );
+		}
+	}
+
+	public static LoadingSheetData nodesheet( String subject ) {
+		return nodesheet( subject, subject );
+	}
+
+	public static LoadingSheetData nodesheet( String tabname, String subject ) {
+		return new LoadingSheetData( tabname, subject );
+	}
+
+	public static LoadingSheetData relsheet( String subject, String object,
+			String relname ) {
+		StringBuilder sb = new StringBuilder( subject ).append( "-" );
+		sb.append( relname ).append( "-" ).append( object );
+		return relsheet( sb.toString(), subject, object, relname );
+	}
+
+	public static LoadingSheetData relsheet( String tabname, String subject,
+			String object, String relname ) {
+		return new LoadingSheetData( tabname, subject, object, relname );
 	}
 
 	public class LoadingNodeAndPropertyValues extends HashMap<String, Value> {
 
-		private final String subject;
-		private final String object;
+		private String subject;
+		private String object;
 		private boolean subjectIsError = false;
 		private boolean objectIsError = false;
 
@@ -345,6 +393,14 @@ public abstract class LoadingSheetData {
 
 		public String getObject() {
 			return object;
+		}
+		
+		public void setSubject( String s ){
+			subject = s;
+		}
+
+		public void setObject( String s ){
+			object = s;
 		}
 
 		public boolean hasError() {

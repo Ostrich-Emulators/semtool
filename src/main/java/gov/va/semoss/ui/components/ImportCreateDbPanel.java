@@ -6,7 +6,10 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportFileReader;
+import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
@@ -16,8 +19,6 @@ import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.main.SemossPreferences;
@@ -25,7 +26,10 @@ import gov.va.semoss.util.DIHelper;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.JOptionPane;
+import org.openrdf.model.URI;
 
 /**
  *
@@ -33,10 +37,10 @@ import javax.swing.JOptionPane;
  */
 public class ImportCreateDbPanel extends javax.swing.JPanel {
 
-	private boolean loadable = false;
+	private static final Logger log = Logger.getLogger( ImportCreateDbPanel.class );
+	private static final String METADATABASEURI = "Use Loading Sheet Metadata";
 
-	private static final Logger log = Logger.
-			getLogger( ImportCreateDbPanel.class );
+	private boolean loadable = false;
 
 	/**
 	 * Creates new form ExistingDbPanel
@@ -57,7 +61,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		dbdir.getChooser().setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
 		dbdir.setFileTextFromInit();
 
-		baseuri.setText( prefs.get( "lastontopath", "http://va.gov/ontologies" ) );
+		baseuri.addItem( METADATABASEURI );
+		for ( String uri : prefs.get( "lastontopath", "http://va.gov/ontologies" ).split( ";" ) ) {
+			baseuri.addItem( uri );
+		}
 
 		JFileChooser chsr = file.getChooser();
 		chsr.
@@ -96,7 +103,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		};
 
 		dbname.getDocument().addDocumentListener( dl );
-		baseuri.getDocument().addDocumentListener( dl );
 		dbdir.addDocumentListener( dl );
 
 		SemossPreferences vc = SemossPreferences.getInstance();
@@ -105,16 +111,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	}
 
 	private void checkOk() {
-		URI uri = null;
-		try {
-			uri = new URIImpl( baseuri.getText() );
-		}
-		catch ( Exception e ) {
-			// don't care
-		}
-
-		loadable = ( !( null == dbdir.getFirstFile()
-				|| dbname.getText().isEmpty() || null == uri ) );
+		loadable = !( null == dbdir.getFirstFile() || dbname.getText().isEmpty() );
 	}
 
 	public boolean isLoadable() {
@@ -133,7 +130,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     jLabel2 = new javax.swing.JLabel();
     file = new gov.va.semoss.ui.components.FileBrowsePanel();
     urilbl = new javax.swing.JLabel();
-    baseuri = new javax.swing.JTextField();
     jLabel3 = new javax.swing.JLabel();
     dbname = new javax.swing.JTextField();
     questionlbl = new javax.swing.JLabel();
@@ -146,13 +142,12 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     calcInfers = new javax.swing.JCheckBox();
     metamodel = new javax.swing.JCheckBox();
     conformer = new javax.swing.JCheckBox();
+    baseuri = new javax.swing.JComboBox<String>();
 
     jLabel2.setLabelFor(file);
     jLabel2.setText("Select File(s) to Import");
 
     urilbl.setText("Designate Base URI");
-
-    baseuri.setToolTipText("The URI to which the resource names being imported will be appended");
 
     jLabel3.setText("New Database Name");
 
@@ -200,6 +195,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
     conformer.setText("Check Quality");
 
+    baseuri.setEditable(true);
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -220,8 +217,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
               .addComponent(file, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
               .addComponent(dbname)
               .addComponent(dbdir, javax.swing.GroupLayout.DEFAULT_SIZE, 429, Short.MAX_VALUE)
-              .addComponent(baseuri, javax.swing.GroupLayout.Alignment.TRAILING)
-              .addComponent(questionfile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+              .addComponent(questionfile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+              .addComponent(baseuri, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
           .addGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(conformer)
@@ -300,11 +297,65 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 	public void doCreate() {
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
-		prefs.put( "lastontopath", baseuri.getText() );
+
+		String mybase = baseuri.getSelectedItem().toString();
+
 		final boolean stageInMemory = memoryStaging.isSelected();
 		final boolean calc = calcInfers.isSelected();
 		final boolean dometamodel = metamodel.isSelected();
 		final boolean conformance = conformer.isSelected();
+
+		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
+			Set<String> bases = new HashSet<>();
+
+			EngineLoader el = new EngineLoader( false );
+
+			String choice = null;
+			try {
+				for ( File f : file.getFiles() ) {
+					ImportFileReader reader = el.getReader( f );
+					ImportMetadata metadata = reader.getMetadata( f );
+
+					URI baser = metadata.getBase();
+					if ( null != baser ) {
+						choice = metadata.getBase().stringValue();
+						bases.add( choice );
+					}
+				}
+			}
+			catch ( IOException e ) {
+				log.warn( e, e );
+			}
+
+			if ( bases.isEmpty() ) {
+				mybase = (String) JOptionPane.showInputDialog( null,
+						"Please specify a base URI", "Missing Base URI",
+						JOptionPane.QUESTION_MESSAGE );
+			}
+			else if ( bases.size() == 1 ) {
+				mybase = choice;
+			}
+			else {
+				mybase = (String) JOptionPane.showInputDialog( null,
+						"Please select a base URI", "Multiple Base URIs Found",
+						JOptionPane.QUESTION_MESSAGE, null, bases.toArray(), choice );
+			}
+		}
+
+		final String baseUri = mybase;
+
+		// save our list of base uris back to our preferences
+		StringBuilder basestr = new StringBuilder( mybase );
+		Set<String> bases = new HashSet<>();
+		for ( int i = 0; i < baseuri.getItemCount(); i++ ) {
+			String item = baseuri.getItemAt( i );
+			if ( !bases.contains( item ) ) {
+				basestr.append( ";" ).append( item );
+				bases.add( baseuri.getItemAt( i ) );
+			}
+		}
+		prefs.put( "lastontopath", basestr.toString() );
+		
 
 		ProgressTask pt = new ProgressTask( "Creating Database from "
 				+ file.getDelimitedPaths(), new Runnable() {
@@ -326,8 +377,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 											"Your database has been successfully created!" );
 
 									if ( conformance && !errors.isEmpty() ) {
-										LoadingPlaySheetFrame psf 
-												= new LoadingPlaySheetFrame( eng, errors );
+										LoadingPlaySheetFrame psf
+										= new LoadingPlaySheetFrame( eng, errors );
 										psf.setTitle( "Conformance Check Errors" );
 										DIHelper.getInstance().getDesktop().add( psf );
 									}
@@ -336,10 +387,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 						};
 
 						eutil.addEngineOpListener( eol );
-						
+
 						try {
 							smss[0] = EngineUtil.createNew( dbdir.getFirstFile(),
-									dbname.getText(), baseuri.getText(), null, null,
+									dbname.getText(), baseUri, null, null,
 									questionfile.getFirstPath(), file.getFiles(),
 									stageInMemory, calc, dometamodel, errors );
 							EngineUtil.getInstance().mount( smss[0], true );
@@ -354,7 +405,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JTextField baseuri;
+  private javax.swing.JComboBox<String> baseuri;
   private javax.swing.JCheckBox calcInfers;
   private javax.swing.JCheckBox conformer;
   private gov.va.semoss.ui.components.FileBrowsePanel dbdir;

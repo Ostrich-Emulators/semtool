@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.ui.swing.custom;
 
-import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
 /**
@@ -142,10 +143,9 @@ public class CustomDesktopPane extends JDesktopPane {
 
 			log.debug( "file drop" );
 
-			LoadingPlaySheetFrame psf
-					= new LoadingPlaySheetFrame( null, files, false, false, false, false );
-			DIHelper.getInstance().getDesktop().add( psf );
-			OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( psf.getLoadingTask() );
+			OpenAction oa = new OpenAction( PlayPane.UIPROGRESS,
+					JOptionPane.getFrameForComponent( CustomDesktopPane.this ), files );
+			oa.actionPerformed( null );
 
 			dtde.dropComplete( true );
 		}

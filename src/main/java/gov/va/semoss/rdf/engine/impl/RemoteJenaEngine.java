@@ -43,7 +43,7 @@ import org.openrdf.repository.RepositoryException;
 /**
  * References the RDF source from a remote engine and uses the Jena API to query a database stored in an RDF file (.jnl file).
  */
-public class RemoteJenaEngine extends AbstractEngine implements IEngine {
+public abstract class RemoteJenaEngine extends AbstractEngine {
 	
 	Model jenaModel = null;
 	Logger logger = Logger.getLogger(getClass());

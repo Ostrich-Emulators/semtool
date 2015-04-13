@@ -21,7 +21,6 @@ package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.poi.main.RelationshipLoadingSheetData;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import java.awt.BorderLayout;
@@ -64,9 +63,9 @@ public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase implement
 		String stype = list.remove( 0 );
 		String otype = list.remove( 0 );
 
-		RelationshipLoadingSheetData lsd
-				= new RelationshipLoadingSheetData( stype + "-" + rel + "-" + otype,
-						stype, otype, rel, list );
+		LoadingSheetData lsd = LoadingSheetData.relsheet( stype, otype, rel );
+		lsd.addProperties( list );
+
 		for ( Value[] val : valdata ) {
 			LoadingNodeAndPropertyValues nap
 					= lsd.add( val[0].stringValue(), val[1].stringValue() );
@@ -80,11 +79,20 @@ public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase implement
 	}
 
 	public RelationshipLoadingPlaySheet( LoadingSheetData lsd ) {
+		this( lsd, false );
+	}
+
+	public RelationshipLoadingPlaySheet( LoadingSheetData lsd, boolean allowInserts ) {
 		super( new LoadingSheetModel( lsd ) );
+
 		defaultRelationship = lsd.getRelname();
 		init();
+
+		getModel().setReadOnly( !allowInserts );
+		getModel().setAllowInsertsInPlace( allowInserts );
+
 		setTitle( lsd.getName() );
-		setHeaders( lsd.getHeaders() );		
+		setHeaders( lsd.getHeaders() );
 	}
 
 	private void init() {

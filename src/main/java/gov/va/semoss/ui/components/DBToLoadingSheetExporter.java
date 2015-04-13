@@ -1,8 +1,8 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.poi.main.NodeLoadingSheetData;
 import java.text.DateFormat;
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
-import gov.va.semoss.poi.main.RelationshipLoadingSheetData;
 import gov.va.semoss.poi.main.XlsWriter.NodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
@@ -76,11 +75,11 @@ public class DBToLoadingSheetExporter {
 		return data;
 	}
 
-	private static NodeLoadingSheetData convertToNodeLoadingSheetData( URI subjectType,
+	private static LoadingSheetData convertToNodes( URI subjectType,
 			Collection<NodeAndPropertyValues> data, Set<URI> properties,
 			Map<URI, String> labels ) {
 		String sheetname = labels.get( subjectType );
-		NodeLoadingSheetData ret = new NodeLoadingSheetData( sheetname, sheetname );
+		LoadingSheetData ret = LoadingSheetData.nodesheet( sheetname );
 		for ( URI prop : properties ) {
 			ret.addProperty( labels.get( prop ) );
 		}
@@ -97,17 +96,14 @@ public class DBToLoadingSheetExporter {
 		return ret;
 	}
 
-	private static RelationshipLoadingSheetData convertToRelationshipLoadingSheetData( URI subjectType,
+	private static LoadingSheetData convertToRelationshipLoadingSheetData( URI subjectType,
 			URI predType, URI objectType, Collection<NodeAndPropertyValues> data, Set<URI> properties,
 			Map<URI, String> labels ) {
 		String stname = labels.get( subjectType );
 		String otname = labels.get( objectType );
 		String relname = labels.get( predType );
 
-		String sheetname = stname + "-" + relname + "-" + otname;
-
-		RelationshipLoadingSheetData ret
-				= new RelationshipLoadingSheetData( sheetname, stname, otname, relname );
+		LoadingSheetData ret = LoadingSheetData.relsheet( stname, otname, relname );
 		for ( URI prop : properties ) {
 			ret.addProperty( labels.get( prop ) );
 		}
@@ -136,8 +132,8 @@ public class DBToLoadingSheetExporter {
 			Collection<NodeAndPropertyValues> hash
 					= getConceptInstanceData( subjectType, properties, labels );
 
-			NodeLoadingSheetData nlsd
-					= convertToNodeLoadingSheetData( subjectType, hash, properties, labels );
+			LoadingSheetData nlsd
+					= convertToNodes( subjectType, hash, properties, labels );
 			data.add( nlsd );
 		}
 	}
@@ -157,7 +153,7 @@ public class DBToLoadingSheetExporter {
 			Collection<NodeAndPropertyValues> list = getOneRelationshipsData( spo[0], spo[1],
 					spo[2], properties, labels );
 
-			RelationshipLoadingSheetData rlsd
+			LoadingSheetData rlsd
 					= convertToRelationshipLoadingSheetData( spo[0], spo[1], spo[2], list,
 							properties, labels );
 			data.add( rlsd );
@@ -296,7 +292,7 @@ public class DBToLoadingSheetExporter {
 				+ "?in ?relationship ?out . "
 				+ "?relationship ?subprop ?verb ."
 				+ "}";
-		
+
 		OneVarListQueryAdapter<URI> qe
 				= OneVarListQueryAdapter.getUriList( query, "verb" );
 		qe.bind( "subprop", RDFS.SUBPROPERTYOF );

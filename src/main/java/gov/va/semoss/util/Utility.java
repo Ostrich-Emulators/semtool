@@ -665,9 +665,9 @@ public class Utility {
 			engineClass = engineClass.replaceAll( "prerna", "gov.va.semoss" );
 			engine = (IEngine) Class.forName( engineClass ).newInstance();
 			engine.setEngineName( engineName );
-			if ( props.getProperty( "MAP" ) != null ) {
-				engine.setMap( props.getProperty( "MAP" ) );
-			}
+			//if ( props.getProperty( "MAP" ) != null ) {
+			//	engine.setMap( props.getProperty( "MAP" ) );
+			//}
 
 			engine.openDB( props );
 			DIHelper.getInstance().registerEngine( engine );
@@ -1055,25 +1055,6 @@ public class Utility {
 			fos.close();
 		}
 		zipFile.close();
-	}
-
-	/**
-	 * Prepares a string for use in a dynamic Sparql query, where " and ' are
-	 * delimiters. The double-quote, ", is changed to ``, and the single-quote, ',
-	 * is changed to `.
-	 *
-	 * @param quotedString -- (String) The string containing double and single
-	 * quotes.
-	 *
-	 * @return legalizeQuotes -- (String) The cleaned string, as described above.
-	 */
-	public static String legalizeQuotes( String quotedString ) {
-		String strReturnValue = quotedString;
-
-		strReturnValue = strReturnValue.replace( '\'', '`' );
-		strReturnValue = strReturnValue.replaceAll( "\"", "``" );
-
-		return strReturnValue;
 	}
 	
 	public static void addModelToJTable(AbstractTableModel tableModel, String tableKey) {
