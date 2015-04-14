@@ -376,14 +376,6 @@ public class UriBuilder {
 			}
 			return sb.toString();
 			
-			
-			
-			/*
-			return ( isValidUriChars( rawWithUnderscores ) )
-					? rawWithUnderscores
-					: RandomStringUtils.randomAlphabetic( 1 ) + UUID.randomUUID().toString()
-			;
-			*/
 		}
 	}
 }

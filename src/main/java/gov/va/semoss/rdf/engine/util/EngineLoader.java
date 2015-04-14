@@ -44,7 +44,6 @@ import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.UniqueSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 
@@ -531,12 +530,7 @@ public class EngineLoader {
 	private URI ensureUnique( URI uri, String rawlabel ) {
 		if ( duplicates.contains( uri ) ) {
 			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
-			// Assuming if not set that the default sanitizer is used:
-			// dupefixer.setSanitizer( new UniqueSanitizer() );
-			uri = dupefixer.build( rawlabel );
-			if ( duplicates.contains( uri ) ) {
-				uri = dupefixer.randomUri();
-			}
+			uri = dupefixer.randomUri();
 			duplicates.add( uri );
 		}
 		return uri;
