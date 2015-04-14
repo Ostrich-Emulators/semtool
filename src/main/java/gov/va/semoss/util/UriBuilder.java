@@ -32,6 +32,8 @@ public class UriBuilder {
 	private UriSanitizer sanitizer;
 	private boolean lastIsConcatenator;
 	private static final Pattern CONCAT_PAT = Pattern.compile( "(.*)([/#:])$" );
+	private static final int localPartLength = 36; // TBD: qualify this limit, consider making a semoss property
+	private static final Pattern PUNCTUATION = Pattern.compile( "\\p{Punct}", Pattern.UNICODE_CHARACTER_CLASS );
 
 	/**
 	 * Sets the class to use when a user calls
@@ -339,20 +341,24 @@ public class UriBuilder {
 		return sanitizer;
 	}
 
+	private static String truncateLocalPart( String longString ) {
+		final int lastCharIndex = localPartLength - 1;
+		return longString.substring(0, lastCharIndex );
+	}
 	public static class DefaultSanitizer implements UriSanitizer {
 
 		@Override
 		public String sanitize( String raw ) {
 			// Check if the string is already valid:
 			if ( isValidUriChars( raw ) ) {
-				return raw; 
+					return ( raw.length() > localPartLength ) ? truncateLocalPart(raw) : raw ; 
 			}
 			
-			// Attempt a simple sanitization:
+			// Attempt a simple sanitizing:
 			String rawWithUnderscores = raw.trim().replaceAll( "\\s+", "_" );
 
 			if( isValidUriChars( rawWithUnderscores) ) {
-				return rawWithUnderscores;
+					return ( rawWithUnderscores.length() > localPartLength  ) ? truncateLocalPart(rawWithUnderscores) : rawWithUnderscores;
 			}
 			
 			// Still not clean enough, sanitize as per full-blown XML rules:
@@ -363,6 +369,9 @@ public class UriBuilder {
 				// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
 				if( XMLChar.isNCName( c ) ) {
 					sb.append( c );
+				}
+				else if ( PUNCTUATION.matcher( Character.toString(c) ).matches() ) {
+					sb.append( '-' );
 				}
 			}
 			return sb.toString();
