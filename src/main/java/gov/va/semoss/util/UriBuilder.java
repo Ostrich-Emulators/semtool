@@ -374,6 +374,8 @@ public class UriBuilder {
 					sb.append( '-' );
 				}
 			}
+			// return truncateLocalPart( sb.toString() );
+			// TBD: the above truncation is breaking DB creation for some reason.  Investigate this and reset the width accordingly.
 			return sb.toString();
 			
 		}
