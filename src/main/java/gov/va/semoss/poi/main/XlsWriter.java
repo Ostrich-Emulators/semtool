@@ -33,27 +33,29 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openrdf.model.URI;
-import gov.va.semoss.util.Utility;
 import java.awt.Color;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 
 /**
  * Create a workbook containing data formated in the Microsoft Excel Sheet
- * Format
+ * Format. This class has two modes of operation: the ImportData mode, and the
+ * raw mode. In raw mode, callers should use {@link #createWorkbook() },
+ * {@link #createTab(java.lang.String) }, {@link #addRow(java.lang.String[]) }
+ * and {@link #write(java.io.File) } to generate the XLS file. In ImportData
+ * mode, just use the all-in-one function
+ * {@link #write(gov.va.semoss.poi.main.ImportData, java.io.File) } instead.
  */
 public class XlsWriter {
 
@@ -61,29 +63,40 @@ public class XlsWriter {
 	private static final Logger log = Logger.getLogger( XlsWriter.class );
 	protected static final Pattern NUMERIC = Pattern.compile( "^\\d+.?\\d*$" );
 
-	private final Map<URI, String> labelcache = new HashMap<>();
+	private XSSFWorkbook currentwb;
+	private XSSFSheet currentsheet;
+	private XSSFRow currentrow;
+	private String desiredtabname;
+	private final List<String> currentheader = new ArrayList<>();
+	private int rowcount = 0;
+	private final Set<String> currentnames = new HashSet<>();
+	private int maxtabrows = TAB_ROWLIMIT;
 
-	private void makeHeaderRow( XSSFSheet sheet, LoadingSheetData b,
-			Collection<String> props ) {
-		// make the headers
-		XSSFRow row = sheet.createRow( 0 );
-		int col;
+	/**
+	 * Sets the max rows that can be added to a tab before continuing the data on
+	 * another tab. This must be less than {@link #TAB_ROWLIMIT}
+	 *
+	 * @param rowspertab
+	 */
+	public void setTabRowLimit( int rowspertab ) {
+		if ( rowspertab < 1 || rowspertab > TAB_ROWLIMIT ) {
+			log.warn( "cannot set rows/tab to " + rowspertab + "; using "
+					+ TAB_ROWLIMIT + " instead" );
+			rowspertab = TAB_ROWLIMIT;
+		}
+		maxtabrows = rowspertab;
+	}
 
-		if ( b.isRel() ) {
-			row.createCell( 0 ).setCellValue( "Relation" );
-			row.createCell( 1 ).setCellValue( b.getSubjectType() );
-			row.createCell( 2 ).setCellValue( b.getObjectType() );
-			col = 3;
-		}
-		else {
-			col = 2;
-			row.createCell( 0 ).setCellValue( "Node" );
-			row.createCell( 1 ).setCellValue( b.getSubjectType() );
-		}
+	public XSSFWorkbook getCurrentWb() {
+		return currentwb;
+	}
 
-		for ( String prop : props ) {
-			row.createCell( col++ ).setCellValue( prop );
-		}
+	public XSSFSheet getCurrentSheet() {
+		return currentsheet;
+	}
+
+	public XSSFRow getCurrentRow() {
+		return currentrow;
 	}
 
 	/**
@@ -95,119 +108,224 @@ public class XlsWriter {
 	 * @throws IOException
 	 */
 	public void write( ImportData data, File output ) throws IOException {
-		XSSFWorkbook wb = createWorkbook( data );
-		Set<String> sheetNamesSoFar = new HashSet<>();
+		createWorkbook( data );
 
-		XSSFCellStyle errorstyle = wb.createCellStyle();
-		errorstyle.setFillPattern( XSSFCellStyle.SOLID_FOREGROUND );
-		errorstyle.setFillForegroundColor( new XSSFColor( Color.PINK ) );
+		CellStyle errorstyle = currentwb.createCellStyle();
+		errorstyle.setFillPattern( CellStyle.SOLID_FOREGROUND );
+		errorstyle.setFillForegroundColor( IndexedColors.PINK.getIndex() );
 
 		for ( LoadingSheetData nodes : data.getNodes() ) {
 			List<String> props = new ArrayList<>( nodes.getProperties() );
+			createTab( nodes.getName(), makeHeaderRow( nodes, props ) );
 
-			int counter = 0;
-			while ( counter < nodes.getData().size() ) {
-				String name = generateSheetName( nodes.getName(), sheetNamesSoFar );
-				XSSFSheet sheet = wb.createSheet( name );
+			// +2 -> 1 for the blank first col and 1 for the subject type
+			String[] row = new String[2 + props.size()];
+			CellStyle[] fmts = new CellStyle[2 + props.size()];
 
-				makeHeaderRow( sheet, nodes, props );
+			for ( LoadingNodeAndPropertyValues nap : nodes.getData() ) {
+				row[1] = nap.getSubject();
+				fmts[1] = ( nap.isSubjectError() ? errorstyle : null );
 
-				int rownum = 0;
-				ListIterator<LoadingNodeAndPropertyValues> napit
-						= nodes.getData().listIterator( counter );
-				while ( napit.hasNext() && rownum < TAB_ROWLIMIT ) {
-					LoadingNodeAndPropertyValues nap = napit.next();
-
-					// the first row needs to have the header values
-					XSSFRow row = sheet.createRow( ++rownum );
-
-					Cell cell1 = row.createCell( 1 );
-					cell1.setCellValue( nap.getSubject() );
-					if ( nap.isSubjectError() ) {
-						cell1.setCellStyle( errorstyle );
-					}
-
-					int col = 2;
-					for ( String prop : props ) {
-						Value val = nap.get( prop );
-						if ( null != val ) {
-							Cell cellx = row.createCell( col );
-							cellx.setCellValue( val.stringValue() );
-						}
-						col++;
-					}
+				int col = 2;
+				for ( String prop : props ) {
+					Value val = nap.get( prop );
+					row[col++] = ( null == val ? null : val.stringValue() );
 				}
 
-				counter += TAB_ROWLIMIT;
+				addRow( row, fmts );
 			}
 		}
 
 		for ( LoadingSheetData rels : data.getRels() ) {
-			int counter = 0;
 			List<String> props = new ArrayList<>( rels.getProperties() );
+			createTab( rels.getName(), makeHeaderRow( rels, props ) );
 
-			while ( counter < rels.getData().size() ) {
-				String name = generateSheetName( rels.getName(), sheetNamesSoFar );
+			// +3 -> 1 for the blank first col and 1 for the subject type, 1 for object type
+			String[] row = new String[3 + props.size()];
+			CellStyle[] fmts = new CellStyle[3 + props.size()];
 
-				XSSFSheet sheet = wb.createSheet( name );
+			if ( rels.getData().isEmpty() ) {
+				// no rows to add, but still add the relationship name field
+				row[0] = rels.getRelname();
+			}
 
+			for ( LoadingNodeAndPropertyValues nap : rels.getData() ) {
 				if ( rels.hasErrors() ) {
-					sheet.setTabColor( IndexedColors.ROSE.getIndex() );
+					currentsheet.setTabColor( IndexedColors.ROSE.getIndex() );
 				}
 
-				makeHeaderRow( sheet, rels, props );
+				// do we need the relation name in the first column?
+				row[0] = ( nextRowIsFirstRowOfTab() ? rels.getRelname() : null );
 
-				int rownum = 0;
+				row[1] = nap.getSubject();
+				fmts[1] = ( nap.isSubjectError() ? errorstyle : null );
 
-				// write the relationship cell before the loop (in case of an empty sheet)
-				XSSFRow relrow = sheet.createRow( 1 );
-				Cell cell0 = relrow.createCell( 0 );
-				cell0.setCellValue( rels.getRelname() );
+				row[2] = nap.getObject();
+				fmts[2] = ( nap.isObjectError() ? errorstyle : null );
 
-				ListIterator<LoadingNodeAndPropertyValues> napit
-						= rels.getData().listIterator( counter );
-				while ( napit.hasNext() && rownum < TAB_ROWLIMIT ) {
-					LoadingNodeAndPropertyValues nap = napit.next();
-
-					// if we're on the first row, we already have it, so don't remake it
-					XSSFRow row = ( 0 == rownum ? relrow : sheet.createRow( rownum + 1 ) );
-
-					Cell cell1 = row.createCell( 1 );
-					cell1.setCellValue( nap.getSubject() );
-					if ( nap.isSubjectError() ) {
-						cell1.setCellStyle( errorstyle );
-					}
-
-					Cell cell2 = row.createCell( 2 );
-					cell2.setCellValue( nap.getObject() );
-					if ( nap.isObjectError() ) {
-						cell2.setCellStyle( errorstyle );
-					}
-
-					int col = 3;
-					for ( String prop : props ) {
-						Value val = nap.get( prop );
-						if ( null != val ) {
-							Cell cellx = row.createCell( col );
-							cellx.setCellValue( val.stringValue() );
-						}
-						col++;
-					}
-					rownum++;
+				int col = 3;
+				for ( String prop : props ) {
+					Value val = nap.get( prop );
+					row[col++] = ( null == val ? null : val.stringValue() );
 				}
 
-				counter += TAB_ROWLIMIT;
+				addRow( row, fmts );
 			}
 		}
 
+		write( output );
+	}
+
+	/**
+	 * Is the next row the first one of the tab (excluding headers)?
+	 *
+	 * @return true if the next call to {@link #addRow(java.lang.String[],
+	 * org.apache.poi.xssf.usermodel.XSSFCellStyle[]) } will be the first row of
+	 * the tab
+	 */
+	protected boolean nextRowIsFirstRowOfTab() {
+		if ( maxtabrows == rowcount ) {
+			return true;
+		}
+
+		if ( currentheader.isEmpty() ) {
+			return ( 0 == rowcount );
+		}
+		return ( 1 == rowcount );
+	}
+
+	public void createWorkbook() {
+		currentwb = new XSSFWorkbook();
+	}
+
+	/**
+	 * Convenience function to
+	 * {@link #createTab(java.lang.String, java.lang.String[])} without a header
+	 * row
+	 *
+	 * @param tabname the desired tab name
+	 * @return the actual tab name
+	 */
+	public String createTab( String tabname ) {
+		return createTab( tabname, new String[0] );
+	}
+
+	/**
+	 * Creates a new tab, but adds a header row that will be propagated to any new
+	 * tabs if the number of rows added &gt; {@link #TAB_ROWLIMIT}. Subsequent
+	 * calls to {@link #addRow(java.lang.String[]) } will write to this new tab
+	 *
+	 * @param tabname the desired tab name
+	 * @param headerrow the header row to duplicate if new tabs must be created
+	 * @return the actual tab name
+	 */
+	public String createTab( String tabname, String[] headerrow ) {
+		currentheader.clear();
+		desiredtabname = tabname;
+		String realname = generateSheetName( tabname, currentnames );
+		currentsheet = currentwb.createSheet( realname );
+		rowcount = 0;
+
+		if ( !( null == headerrow || 0 == headerrow.length ) ) {
+			currentheader.addAll( Arrays.asList( headerrow ) );
+			addRow( headerrow );
+		}
+
+		return realname;
+	}
+
+	/**
+	 * Creates a new row in the current tab. If the current tab has more than
+	 * {@link #TAB_ROWLIMIT} rows, a new tab (with a duplicate header row, if set)
+	 * will be created and the row added to that tab instead.
+	 *
+	 * @param values the data
+	 */
+	public void addRow( String[] values ) {
+		addRow( values, null );
+	}
+
+	/**
+	 * Adds a new row to the current tab. If the new row requires a new tab to
+	 * also be created, do it
+	 *
+	 * @param values the row data
+	 * @param formatting cell formatting
+	 * @return true, if a new tab is created, else false
+	 */
+	public boolean addRow( String[] values, CellStyle[] formatting ) {
+		boolean newtab = ( maxtabrows == rowcount );
+
+		if ( newtab ) {
+			// need to make a new tab
+			createTab( desiredtabname, currentheader.toArray( new String[0] ) );
+		}
+
+		currentrow = currentsheet.createRow( rowcount++ );
+		for ( int col = 0; col < values.length; col++ ) {
+			Cell cell = currentrow.createCell( col );
+			if ( null != formatting ) {
+				if ( formatting.length > col && null != formatting[col] ) {
+					cell.setCellStyle( formatting[col] );
+				}
+			}
+
+			String val = values[col];
+			if ( null != val ) {
+				if ( NUMERIC.matcher( val ).find() ) {
+					cell.setCellType( Cell.CELL_TYPE_NUMERIC );
+					cell.setCellValue( Double.parseDouble( val ) );
+				}
+				else {
+					cell.setCellValue( val.replaceAll( "\"", "" ) );
+				}
+			}
+		}
+
+		return newtab;
+	}
+
+	/**
+	 * Writes the current worksheet to the given file. Any parent directories will
+	 * be created automatically
+	 *
+	 * @param output the file to write to
+	 * @throws IOException
+	 */
+	public void write( File output ) throws IOException {
 		output.getParentFile().mkdirs();
 		try ( OutputStream newExcelFile
 				= new BufferedOutputStream( new FileOutputStream( output ) ) ) {
-			wb.write( newExcelFile );
+			currentwb.write( newExcelFile );
 		}
 	}
 
-	protected XSSFWorkbook createWorkbook( ImportData importdata ) {
+	private String[] makeHeaderRow( LoadingSheetData b, Collection<String> props ) {
+		// make the headers
+
+		List<String> heads = new ArrayList<>();
+		int col;
+
+		if ( b.isRel() ) {
+			heads.add( "Relation" );
+			heads.add( b.getSubjectType() );
+			heads.add( b.getObjectType() );
+			col = 3;
+		}
+		else {
+			col = 2;
+			heads.add( "Node" );
+			heads.add( b.getSubjectType() );
+		}
+
+		for ( String prop : props ) {
+			heads.add( prop );
+		}
+
+		return heads.toArray( new String[0] );
+	}
+
+	private void createWorkbook( ImportData importdata ) {
 		ImportMetadata data = importdata.getMetadata();
 
 		List<String[]> mddata = new ArrayList<>();
@@ -236,8 +354,7 @@ public class XlsWriter {
 				stmt.getPredicate().stringValue(), stmt.getObject().stringValue() } );
 		}
 
-		XSSFWorkbook wb = new XSSFWorkbook();
-		XSSFSheet loader = wb.createSheet( "Loader" );
+		createWorkbook();
 
 		List<String> tabnames = new ArrayList<>();
 		Set<String> sheetnames = new HashSet<>();
@@ -250,21 +367,21 @@ public class XlsWriter {
 			while ( count < lsd.getData().size() ) {
 				String tname = generateSheetName( lsd.getName(), sheetnames );
 				tabnames.add( tname );
-				count += TAB_ROWLIMIT;
+				count += maxtabrows;
 			}
 		}
 
 		// don't write a metadata sheet if we don't have anything to put in it
 		final String metaSheetName = ( mddata.isEmpty() ? null : "MetadataInfo" );
 
-		writeLoadingSheet( loader, tabnames, metaSheetName );
+		writeLoadingSheet( tabnames, metaSheetName );
 
 		if ( !mddata.isEmpty() ) {
-			XSSFSheet metadata = wb.createSheet( metaSheetName );
-			writeSheet( metadata, mddata );
+			XlsWriter.this.createTab( metaSheetName );
+			for ( String[] row : mddata ) {
+				addRow( row );
+			}
 		}
-
-		return wb;
 	}
 
 	/**
@@ -272,9 +389,8 @@ public class XlsWriter {
 	 *
 	 * @param nodes
 	 * @param metaSheetName if not null, add a metadata tab with this info
-	 * @param loader the worksheet to write the data to
 	 */
-	protected void writeLoadingSheet( XSSFSheet loader, Collection<String> nodes,
+	protected void writeLoadingSheet( Collection<String> nodes,
 			String metaSheetName ) {
 
 		List<String[]> data = new ArrayList<>();
@@ -286,64 +402,20 @@ public class XlsWriter {
 			data.add( new String[]{ metaSheetName, "Metadata" } );
 		}
 
-		writeSheet( loader, data );
-	}
-
-	protected void writeSheet( XSSFSheet loader, Collection<String[]> data ) {
-
-		int count = 0;
-		for ( String[] celldata : data ) {
-			XSSFRow row = loader.createRow( count++ );
-			int col = 0;
-			for ( String val : celldata ) {
-				XSSFCell cell = row.createCell( col++ );
-				if ( !( null == val || val.isEmpty() ) ) {
-					if ( NUMERIC.matcher( val ).find() ) {
-						cell.setCellType( Cell.CELL_TYPE_NUMERIC );
-						cell.setCellValue( Double.parseDouble( val ) );
-					}
-					else {
-						cell.setCellValue( val.replaceAll( "\"", "" ) );
-					}
-				}
-			}
-		}
-	}
-
-	public void addLabels( Map<URI, String> newlabels ) {
-		labelcache.putAll( newlabels );
-	}
-
-	protected String getLabel( URI uri ) {
-		if ( !labelcache.containsKey( uri ) ) {
-			labelcache.put( uri, uri.getLocalName() );
-		}
-		return labelcache.get( uri );
-	}
-
-	protected Map<URI, String> sortProperties( Collection<URI> properties ) {
-		Map<URI, String> ret = new HashMap<>();
-		for ( URI p : properties ) {
-			ret.put( p, getLabel( p ) );
-		}
-
-		return Utility.sortUrisByLabel( ret );
-	}
-
-	protected void writePropertiesToArray( NodeAndPropertyValues npv,
-			Collection<URI> properties, String[] vals, int startpos ) {
-		for ( URI prop : properties ) {
-			Value v = npv.get( prop );
-			vals[startpos++] = ( null == v ? null : v.stringValue() );
+		XlsWriter.this.createTab( "Loader" );
+		for ( String[] row : data ) {
+			addRow( row );
 		}
 	}
 
 	/**
 	 * Common logic for finding a name for an excel workbook worksheet that is
-	 * unique for that workbook and not longer than 32 characters
+	 * unique for that workbook and not longer than 32 characters. Each call to
+	 * this function with the same <code>nodeKey</code> will generate a different
+	 * name (Excel tabs cannot have identical names).
 	 *
 	 * @param nodeKey String to start with
-	 * @param keySet Set of names that are aleady in use. the return of this
+	 * @param keySet Set of names that are already in use. the return of this
 	 * function is automatically added to this set
 	 *
 	 * @return
