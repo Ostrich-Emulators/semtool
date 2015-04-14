@@ -531,8 +531,12 @@ public class EngineLoader {
 	private URI ensureUnique( URI uri, String rawlabel ) {
 		if ( duplicates.contains( uri ) ) {
 			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
-			dupefixer.setSanitizer( new UniqueSanitizer() );
+			// Assuming if not set that the default sanitizer is used:
+			// dupefixer.setSanitizer( new UniqueSanitizer() );
 			uri = dupefixer.build( rawlabel );
+			if ( duplicates.contains( uri ) ) {
+				uri = dupefixer.randomUri();
+			}
 			duplicates.add( uri );
 		}
 		return uri;
