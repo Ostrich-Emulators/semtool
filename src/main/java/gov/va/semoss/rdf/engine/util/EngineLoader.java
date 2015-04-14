@@ -527,10 +527,10 @@ public class EngineLoader {
 		}
 	}
 
-	private URI ensureUnique( URI uri, String rawlabel ) {
+	private URI ensureUnique( URI uri ) {
 		if ( duplicates.contains( uri ) ) {
 			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
-			uri = dupefixer.randomUri();
+			uri = dupefixer.uniqueUri();
 			duplicates.add( uri );
 		}
 		return uri;
@@ -590,7 +590,7 @@ public class EngineLoader {
 				connector = typebuilder.add( rellocalname ).build();
 			}
 
-			connector = ensureUnique( connector, rellocalname );
+			connector = ensureUnique( connector );
 			relationCache.put( lkey, connector );
 		}
 
@@ -640,7 +640,7 @@ public class EngineLoader {
 					subject = metas.getDataBuilder().add( rawlabel ).build();
 				}
 
-				subject = ensureUnique( subject, rawlabel );
+				subject = ensureUnique( subject );
 			}
 			dataNodes.put( key, subject );
 		}

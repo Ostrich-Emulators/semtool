@@ -132,7 +132,7 @@ public class UriBuilder {
 		return copy().add( extra ).build();
 	}
 
-	public URI randomUri() {
+	public URI uniqueUri() {
 		StringBuilder uristr = new StringBuilder( content );
 		uristr.append( RandomStringUtils.randomAlphabetic( 1 ) );
 		uristr.append( UUID.randomUUID().toString() );
