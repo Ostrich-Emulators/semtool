@@ -15,6 +15,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import static gov.va.semoss.util.Utility.isValidUriChars;
+import org.apache.xerces.util.XMLChar;
 
 /**
  * A class that helps to build URIs.
@@ -31,6 +32,8 @@ public class UriBuilder {
 	private UriSanitizer sanitizer;
 	private boolean lastIsConcatenator;
 	private static final Pattern CONCAT_PAT = Pattern.compile( "(.*)([/#:])$" );
+	private static final int localPartLength = 36; // TBD: qualify this limit, consider making a semoss property
+	private static final Pattern PUNCTUATION = Pattern.compile( "\\p{Punct}", Pattern.UNICODE_CHARACTER_CLASS );
 
 	/**
 	 * Sets the class to use when a user calls
@@ -338,19 +341,41 @@ public class UriBuilder {
 		return sanitizer;
 	}
 
+	private static String truncateLocalPart( String longString ) {
+		final int lastCharIndex = localPartLength - 1;
+		return longString.substring(0, lastCharIndex );
+	}
 	public static class DefaultSanitizer implements UriSanitizer {
 
 		@Override
 		public String sanitize( String raw ) {
+			// Check if the string is already valid:
 			if ( isValidUriChars( raw ) ) {
-				return raw; 
+					return ( raw.length() > localPartLength ) ? truncateLocalPart(raw) : raw ; 
 			}
 			
-			String rawWithUnderscores = raw.trim().replaceAll( "\\s+", "_" );
-			return ( isValidUriChars( rawWithUnderscores ) )
-					? rawWithUnderscores
-					: RandomStringUtils.randomAlphabetic( 1 ) + UUID.randomUUID().toString()
-			;
+			// Attempt a simple sanitizing:
+			String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
+
+			if( isValidUriChars( rawWithUnderscores) ) {
+					return ( rawWithUnderscores.length() > localPartLength  ) ? truncateLocalPart(rawWithUnderscores) : rawWithUnderscores;
+			}
+			
+			// Still not clean enough, sanitize as per full-blown XML rules:
+			StringBuilder sb = new StringBuilder(); 
+			for(int i = 0; i < rawWithUnderscores.length(); i++) {
+				char c = rawWithUnderscores.charAt(i);
+				// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
+				// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
+				if( XMLChar.isNCName( c ) ) {
+					sb.append( c );
+				}
+				else if ( PUNCTUATION.matcher( Character.toString(c) ).matches() ) {
+					sb.append( '-' );
+				}
+			}
+			return sb.toString();
+			
 		}
 	}
 }
