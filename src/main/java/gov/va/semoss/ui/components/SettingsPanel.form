@@ -25,7 +25,6 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="graphprops" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="graphsearch" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="eps" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="calcInfers" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="jButton1" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -44,12 +43,10 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="graphsearch" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="eps" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
               <Component id="calcInfers" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jButton1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel2" min="-2" pref="155" max="-2" attributes="0"/>
@@ -69,12 +66,6 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Graph Search"/>
         <Property name="toolTipText" type="java.lang.String" value="Enables/Disables the graph search window on the Display Pane tab"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="eps">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Enable high quality vector graph export (*.eps)"/>
-        <Property name="toolTipText" type="java.lang.String" value="Enables/Disables the high quality vector graph export portion of the export vector image of graph icon on the Display Pane Tab"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="calcInfers">
