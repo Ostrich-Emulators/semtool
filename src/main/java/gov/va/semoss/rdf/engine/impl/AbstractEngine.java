@@ -534,8 +534,8 @@ public abstract class AbstractEngine implements IEngine {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder( engineName );
-		sb.append( " (base:" ).append( getBaseUri() ).append( ")" );
+		StringBuilder sb = new StringBuilder( null == engineName ? "unnamed" : engineName );
+		sb.append( " (base:" ).append( null == getBaseUri() ? "unknown" : getBaseUri() ).append( ")" );
 		return sb.toString();
 	}
 
