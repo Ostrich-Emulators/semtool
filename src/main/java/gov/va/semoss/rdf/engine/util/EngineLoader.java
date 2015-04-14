@@ -6,7 +6,6 @@
 package gov.va.semoss.rdf.engine.util;
 
 import com.bigdata.rdf.sail.BigdataSail;
-//import com.bigdata.rdf.sail.BigdataSailFactory;
 import com.bigdata.rdf.sail.remote.BigdataSailFactory;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
@@ -45,6 +44,7 @@ import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.UniqueSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 
@@ -93,12 +93,13 @@ public class EngineLoader {
 	private final List<Statement> owls = new ArrayList<>();
 	private BigdataSailRepositoryConnection myrc;
 	private File stagingdir;
-	private Map<String, URI> schemaNodes = new HashMap<>();
-	private Map<ConceptInstanceCacheKey, URI> dataNodes = new HashMap<>();
-	private Map<String, URI> relationClassCache = new HashMap<>();
-	private Map<String, URI> relationCache = new HashMap<>();
+	private final Map<String, URI> schemaNodes = new HashMap<>();
+	private final Map<ConceptInstanceCacheKey, URI> dataNodes = new HashMap<>();
+	private final Map<String, URI> relationClassCache = new HashMap<>();
+	private final Map<String, URI> relationCache = new HashMap<>();
 	private final ValueFactory vf;
-	private Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
+	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
+	private final Set<URI> duplicates = new HashSet<>();
 
 	public EngineLoader( boolean inmem ) {
 		stageInMemory = inmem;
@@ -527,6 +528,16 @@ public class EngineLoader {
 		}
 	}
 
+	private URI ensureUnique( URI uri, String rawlabel ) {
+		if ( duplicates.contains( uri ) ) {
+			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
+			dupefixer.setSanitizer( new UniqueSanitizer() );
+			uri = dupefixer.build( rawlabel );
+			duplicates.add( uri );
+		}
+		return uri;
+	}
+
 	private URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas ) throws RepositoryException {
 
@@ -565,22 +576,23 @@ public class EngineLoader {
 		keybuilder.append( nap.getObjectType() );
 		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
 		keybuilder.append( nap.getObject() );
-		
+
 		String lkey = keybuilder.toString();
 		if ( !relationCache.containsKey( lkey ) ) {
 			URI connector;
+			String rellocalname;
 			if ( alreadyMadeRel ) {
-				String rellocalname
-						= srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
+				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
 				connector = metas.getDataBuilder().getRelationUri().build( rellocalname );
 			}
 			else {
 				UriBuilder typebuilder
 						= metas.getDataBuilder().getRelationUri().add( sheet.getRelname() );
-				String rellocalname
-						= srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
+				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
 				connector = typebuilder.add( rellocalname ).build();
 			}
+
+			connector = ensureUnique( connector, rellocalname );
 			relationCache.put( lkey, connector );
 		}
 
@@ -621,7 +633,6 @@ public class EngineLoader {
 			else {
 				if ( metas.isAutocreateMetamodel() ) {
 					UriBuilder nodebuilder = metas.getDataBuilder().getConceptUri();
-
 					if ( !typename.contains( ":" ) ) {
 						nodebuilder.add( typename );
 					}
@@ -630,6 +641,8 @@ public class EngineLoader {
 				else {
 					subject = metas.getDataBuilder().add( rawlabel ).build();
 				}
+
+				subject = ensureUnique( subject, rawlabel );
 			}
 			dataNodes.put( key, subject );
 		}
@@ -906,7 +919,7 @@ public class EngineLoader {
 				= Iterations.asList( myrc.getStatements( null, null, null, false ) );
 
 		// we're done importing the files, so add all the statements to our engine
-		ModificationExecutor mea = new ModificationExecutorAdapter(){
+		ModificationExecutor mea = new ModificationExecutorAdapter() {
 			@Override
 			public void exec( RepositoryConnection conn ) throws RepositoryException {
 				initNamespaces( conn );
@@ -917,9 +930,9 @@ public class EngineLoader {
 				}
 
 				// NOTE: no commit here
-			}			
+			}
 		};
-		
+
 		engine.execute( mea );
 
 		if ( log.isTraceEnabled() ) {
