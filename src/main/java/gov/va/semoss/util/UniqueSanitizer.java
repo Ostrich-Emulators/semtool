@@ -17,7 +17,6 @@ import org.apache.commons.lang.RandomStringUtils;
  */
 public class UniqueSanitizer implements UriSanitizer {
 
-	private final Pattern PAT = Pattern.compile( "([a-z])" );
 
 	@Override
 	public String sanitize( String raw ) {
@@ -25,7 +24,7 @@ public class UniqueSanitizer implements UriSanitizer {
 			return raw;
 		}
 
-		String rawWithUnderscores = raw.trim().replaceAll( "\\s+", "_" );
+		String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
 		return ( isValidUriChars( rawWithUnderscores )
 				? rawWithUnderscores
 				: RandomStringUtils.randomAlphabetic( 1 ) + UUID.randomUUID().toString() );

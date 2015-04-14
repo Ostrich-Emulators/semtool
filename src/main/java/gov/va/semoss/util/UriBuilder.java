@@ -355,7 +355,7 @@ public class UriBuilder {
 			}
 			
 			// Attempt a simple sanitizing:
-			String rawWithUnderscores = raw.trim().replaceAll( "\\s+", "_" );
+			String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
 
 			if( isValidUriChars( rawWithUnderscores) ) {
 					return ( rawWithUnderscores.length() > localPartLength  ) ? truncateLocalPart(rawWithUnderscores) : rawWithUnderscores;
