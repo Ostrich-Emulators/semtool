@@ -33,20 +33,18 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openrdf.model.URI;
 import java.awt.Color;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 
@@ -69,9 +67,37 @@ public class XlsWriter {
 	private XSSFSheet currentsheet;
 	private XSSFRow currentrow;
 	private String desiredtabname;
-	private final Set<String> currentnames = new HashSet<>();
 	private final List<String> currentheader = new ArrayList<>();
 	private int rowcount = 0;
+	private final Set<String> currentnames = new HashSet<>();
+	private int maxtabrows = TAB_ROWLIMIT;
+
+	/**
+	 * Sets the max rows that can be added to a tab before continuing the data on
+	 * another tab. This must be less than {@link #TAB_ROWLIMIT}
+	 *
+	 * @param rowspertab
+	 */
+	public void setTabRowLimit( int rowspertab ) {
+		if ( rowspertab < 1 || rowspertab > TAB_ROWLIMIT ) {
+			log.warn( "cannot set rows/tab to " + rowspertab + "; using "
+					+ TAB_ROWLIMIT + " instead" );
+			rowspertab = TAB_ROWLIMIT;
+		}
+		maxtabrows = rowspertab;
+	}
+
+	public XSSFWorkbook getCurrentWb() {
+		return currentwb;
+	}
+
+	public XSSFSheet getCurrentSheet() {
+		return currentsheet;
+	}
+
+	public XSSFRow getCurrentRow() {
+		return currentrow;
+	}
 
 	/**
 	 * Writes the given data to the output file. This file (and it's parents) will
@@ -84,9 +110,9 @@ public class XlsWriter {
 	public void write( ImportData data, File output ) throws IOException {
 		createWorkbook( data );
 
-		XSSFCellStyle errorstyle = currentwb.createCellStyle();
-		errorstyle.setFillPattern( XSSFCellStyle.SOLID_FOREGROUND );
-		errorstyle.setFillForegroundColor( new XSSFColor( Color.PINK ) );
+		CellStyle errorstyle = currentwb.createCellStyle();
+		errorstyle.setFillPattern( CellStyle.SOLID_FOREGROUND );
+		errorstyle.setFillForegroundColor( IndexedColors.PINK.getIndex() );
 
 		for ( LoadingSheetData nodes : data.getNodes() ) {
 			List<String> props = new ArrayList<>( nodes.getProperties() );
@@ -94,7 +120,7 @@ public class XlsWriter {
 
 			// +2 -> 1 for the blank first col and 1 for the subject type
 			String[] row = new String[2 + props.size()];
-			XSSFCellStyle[] fmts = new XSSFCellStyle[2 + props.size()];
+			CellStyle[] fmts = new CellStyle[2 + props.size()];
 
 			for ( LoadingNodeAndPropertyValues nap : nodes.getData() ) {
 				row[1] = nap.getSubject();
@@ -116,7 +142,7 @@ public class XlsWriter {
 
 			// +3 -> 1 for the blank first col and 1 for the subject type, 1 for object type
 			String[] row = new String[3 + props.size()];
-			XSSFCellStyle[] fmts = new XSSFCellStyle[3 + props.size()];
+			CellStyle[] fmts = new CellStyle[3 + props.size()];
 
 			if ( rels.getData().isEmpty() ) {
 				// no rows to add, but still add the relationship name field
@@ -150,10 +176,6 @@ public class XlsWriter {
 		write( output );
 	}
 
-	private boolean nextRowWillCreateTab() {
-		return ( TAB_ROWLIMIT == rowcount );
-	}
-
 	/**
 	 * Is the next row the first one of the tab (excluding headers)?
 	 *
@@ -161,8 +183,15 @@ public class XlsWriter {
 	 * org.apache.poi.xssf.usermodel.XSSFCellStyle[]) } will be the first row of
 	 * the tab
 	 */
-	private boolean nextRowIsFirstRowOfTab() {
-		return ( currentheader.isEmpty() ? 0 == rowcount : 1 == rowcount );
+	protected boolean nextRowIsFirstRowOfTab() {
+		if ( maxtabrows == rowcount ) {
+			return true;
+		}
+
+		if ( currentheader.isEmpty() ) {
+			return ( 0 == rowcount );
+		}
+		return ( 1 == rowcount );
 	}
 
 	public void createWorkbook() {
@@ -224,8 +253,8 @@ public class XlsWriter {
 	 * @param formatting cell formatting
 	 * @return true, if a new tab is created, else false
 	 */
-	public boolean addRow( String[] values, XSSFCellStyle[] formatting ) {
-		boolean newtab = ( TAB_ROWLIMIT == rowcount );
+	public boolean addRow( String[] values, CellStyle[] formatting ) {
+		boolean newtab = ( maxtabrows == rowcount );
 
 		if ( newtab ) {
 			// need to make a new tab
@@ -338,7 +367,7 @@ public class XlsWriter {
 			while ( count < lsd.getData().size() ) {
 				String tname = generateSheetName( lsd.getName(), sheetnames );
 				tabnames.add( tname );
-				count += TAB_ROWLIMIT;
+				count += maxtabrows;
 			}
 		}
 
