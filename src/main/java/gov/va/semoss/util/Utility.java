@@ -77,6 +77,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xerces.util.XMLChar;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -99,7 +100,7 @@ public class Utility {
 	private static final Logger log = Logger.getLogger( Utility.class );
 	// private static final Pattern VALIDCHARS = Pattern.compile( "[A-Za-z0-9_.-]+" );
 	// updating to allow for unicode letter chars
-	private static final Pattern VALIDCHARS = Pattern.compile( "[\\w.-]+", Pattern.UNICODE_CHARACTER_CLASS );
+	// private static final Pattern VALIDCHARS = Pattern.compile( "[\\w.-]+", Pattern.UNICODE_CHARACTER_CLASS );
 	private static int id = 0;
 
 	/**
@@ -760,7 +761,10 @@ public class Utility {
 	}
 
 	public static boolean isValidUriChars( String raw ) {
-		return VALIDCHARS.matcher( raw ).matches();
+		// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
+		// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
+		return XMLChar.isValidNCName( raw );
+		// return VALIDCHARS.matcher( raw ).matches();
 	}
 
 	/**

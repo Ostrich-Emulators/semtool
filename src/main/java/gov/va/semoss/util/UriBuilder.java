@@ -15,6 +15,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import static gov.va.semoss.util.Utility.isValidUriChars;
+import org.apache.xerces.util.XMLChar;
 
 /**
  * A class that helps to build URIs.
@@ -342,15 +343,38 @@ public class UriBuilder {
 
 		@Override
 		public String sanitize( String raw ) {
+			// Check if the string is already valid:
 			if ( isValidUriChars( raw ) ) {
 				return raw; 
 			}
 			
+			// Attempt a simple sanitization:
 			String rawWithUnderscores = raw.trim().replaceAll( "\\s+", "_" );
+
+			if( isValidUriChars( rawWithUnderscores) ) {
+				return rawWithUnderscores;
+			}
+			
+			// Still not clean enough, sanitize as per full-blown XML rules:
+			StringBuilder sb = new StringBuilder(); 
+			for(int i = 0; i < rawWithUnderscores.length(); i++) {
+				char c = rawWithUnderscores.charAt(i);
+				// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
+				// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
+				if( XMLChar.isNCName( c ) ) {
+					sb.append( c );
+				}
+			}
+			return sb.toString();
+			
+			
+			
+			/*
 			return ( isValidUriChars( rawWithUnderscores ) )
 					? rawWithUnderscores
 					: RandomStringUtils.randomAlphabetic( 1 ) + UUID.randomUUID().toString()
 			;
+			*/
 		}
 	}
 }
