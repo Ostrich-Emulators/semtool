@@ -97,7 +97,6 @@ public class Constants {
 	public static final String GPSSudowl = "GPS_SUDOWL_DEFAULT";
 	public static final String GPSSearch = "GPS_SEARCH_DEFAULT";
 	public static final String GPSProp = "GPS_PROPERTIES_DEFAULT";
-	public static final String EPSExport = "EPS_EXPORT";
 	public static final String highQualityExport = "GPSHighQualityExport";
 	public static final String sudowlCheck = "sudowlCheck";
 	public static final String searchCheck = "searchCheck";

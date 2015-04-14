@@ -206,7 +206,8 @@ public class PlaySheetFrame extends JInternalFrame {
 						// assume the pscc knows what to do with empty data
 						dsize = 0;
 						cmp.create( null, null );
-					} else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
+					}
+					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
 						updateProgress( "Preparing Display", 80 );
 						Model model = engine.construct( lqa.getSparql() );
 						cmp.create( model );

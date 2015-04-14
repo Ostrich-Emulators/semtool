@@ -83,9 +83,10 @@ public class ExportUtility {
 				writePDF(component, fileLocation);
 			}
 
-			Utility.showMessage( "Export successful: " + fileLocation );
+			Utility.showExportMessage( JOptionPane.getFrameForComponent( component ), 
+					"Export successful: " + fileLocation, "Export Successful", file );
 		}
-		catch ( Exception e ) {
+		catch ( IOException | DocumentException e ) {
 			Utility.showError( "Graph export failed." );
 			log.error( e, e );
 		}
