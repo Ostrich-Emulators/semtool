@@ -359,10 +359,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method createVisualizer.
 	 */
 	protected void createVisualizer() {
-		view = new VisualizationViewer<SEMOSSVertex,SEMOSSEdge>( layout2Use );
+		view = new VisualizationViewer<>( layout2Use );
 		view.setPreferredSize( this.layout2Use.getSize() );
 		view.setBounds( 10000000, 10000000, 10000000, 100000000 );
-		view.setRenderer( new BasicRenderer<SEMOSSVertex,SEMOSSEdge>() );
+		view.setRenderer( new BasicRenderer<>() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
 		view.setGraphMouse( new GraphNodeListener( this ) );

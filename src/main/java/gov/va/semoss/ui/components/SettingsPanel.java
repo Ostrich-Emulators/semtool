@@ -53,7 +53,6 @@ public class SettingsPanel extends javax.swing.JPanel {
 		Map<JCheckBox, String> map = new HashMap<>();
 		map.put( graphsearch, Constants.GPSSearch );
 		map.put( graphprops, Constants.GPSProp );
-		map.put( eps, Constants.EPSExport );
 		map.put( calcInfers, Constants.CALC_INFERENCES_PREF );
 
 		for ( Map.Entry<JCheckBox, String> e : map.entrySet() ) {
@@ -98,7 +97,6 @@ public class SettingsPanel extends javax.swing.JPanel {
 
     graphprops = new javax.swing.JCheckBox();
     graphsearch = new javax.swing.JCheckBox();
-    eps = new javax.swing.JCheckBox();
     calcInfers = new javax.swing.JCheckBox();
     jButton1 = new javax.swing.JButton();
     jPanel1 = new javax.swing.JPanel();
@@ -117,9 +115,6 @@ public class SettingsPanel extends javax.swing.JPanel {
 
     graphsearch.setText("Graph Search");
     graphsearch.setToolTipText("Enables/Disables the graph search window on the Display Pane tab");
-
-    eps.setText("Enable high quality vector graph export (*.eps)");
-    eps.setToolTipText("Enables/Disables the high quality vector graph export portion of the export vector image of graph icon on the Display Pane Tab");
 
     calcInfers.setText("Compute dependent relationships following load");
 
@@ -208,7 +203,6 @@ public class SettingsPanel extends javax.swing.JPanel {
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(graphprops)
               .addComponent(graphsearch)
-              .addComponent(eps)
               .addComponent(calcInfers)
               .addComponent(jButton1))
             .addGap(0, 0, Short.MAX_VALUE)))
@@ -222,12 +216,10 @@ public class SettingsPanel extends javax.swing.JPanel {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(graphsearch)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(eps)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(calcInfers)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(jButton1)
-        .addGap(18, 18, 18)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -261,7 +253,6 @@ public class SettingsPanel extends javax.swing.JPanel {
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox calcInfers;
   private javax.swing.JTextField email;
-  private javax.swing.JCheckBox eps;
   private javax.swing.JTextField fullname;
   private javax.swing.JCheckBox graphprops;
   private javax.swing.JCheckBox graphsearch;
