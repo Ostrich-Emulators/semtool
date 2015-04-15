@@ -7,7 +7,7 @@ import org.openrdf.model.impl.NamespaceImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
- * Minimal vocabulary of the VA SEMOSS Insights.
+ * Minimal vocabulary to support VA SEMOSS Insights.
  *
  */
 public class VAS {
