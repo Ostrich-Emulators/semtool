@@ -13,11 +13,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -30,6 +32,7 @@ import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -38,14 +41,22 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  *
  * @author ryan
  */
-public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
+public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements ActionListener {
 
 	private final JLabel errorLabel = new JLabel();
 	private final EditHeaderAction editheaders = new EditHeaderAction();
+	private final ConformanceRenderer renderer = new ConformanceRenderer();
+	private final ConformanceRowFilter filter = new ConformanceRowFilter();
 
 	protected LoadingPlaySheetBase( LoadingSheetModel mod ) {
 		super( mod );
 		errorLabel.setBorder( BorderFactory.createEmptyBorder( 0, 5, 0, 5 ) );
+
+		JTable tbl = getTable();
+		tbl.setDefaultRenderer( String.class, renderer );
+		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
+		sorter.setRowFilter( filter );
+		tbl.setRowSorter( sorter );
 	}
 
 	@Override
@@ -58,6 +69,13 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
 		for ( int col = 0; col < tcm.getColumnCount(); col++ ) {
 			tcm.getColumn( col ).setHeaderRenderer( mhr );
 		}
+	}
+
+	@Override
+	public void actionPerformed( ActionEvent ae ) {
+		AbstractButton btn = AbstractButton.class.cast( ae.getSource() );
+		filter.setFiltering( btn.isSelected() );
+		getModel().fireTableDataChanged();
 	}
 
 	/**
@@ -93,9 +111,9 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
 	}
 
 	public void setModelErrors( LoadingSheetData lsd ) {
-		getLoadingModel().setModelErrors( lsd );		
+		getLoadingModel().setModelErrors( lsd );
 		getTable().getTableHeader().repaint();
-		
+
 		setErrorLabel();
 	}
 

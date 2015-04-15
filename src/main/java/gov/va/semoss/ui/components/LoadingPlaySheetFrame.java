@@ -62,10 +62,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private boolean doconformance;
 	private boolean calcinfers;
 	private boolean doreplace;
-	
+
 	private final List<File> toload = new ArrayList<>();
 	private final List<LoadingPlaySheetBase> sheets = new ArrayList<>();
-	
+
 	private final ConformanceAction conformer = new ConformanceAction();
 	private final LoadingAction loader = new LoadingAction();
 	private final JCheckBox showerrs = new JCheckBox( "Show Only Errors" );
@@ -123,16 +123,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	public final LoadingPlaySheetBase add( LoadingSheetData data ) {
-		LoadingPlaySheetBase ret = null;
-		if ( data.isRel() ) {
-			RelationshipLoadingPlaySheet sheet = new RelationshipLoadingPlaySheet( data );
-			showerrs.addActionListener( sheet );
-			ret = sheet;
-		}
-		else {
-			ret = new NodeLoadingPlaySheet( data );
-		}
+		LoadingPlaySheetBase ret = ( data.isRel()
+				? new RelationshipLoadingPlaySheet( data )
+				: new NodeLoadingPlaySheet( data ) );
 
+		showerrs.addActionListener( ret );
 		addTab( ret );
 
 		if ( ret.getLoadingModel().hasConformanceErrors()
@@ -716,11 +711,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null,
 					new String[]{ "Create", "Cancel" }, "Create" );
 			if ( 0 == ans ) {
-        LoadingSheetData lsd = panel.getSheet();
-			  LoadingPlaySheetBase base = ( lsd.isRel()
-					? new RelationshipLoadingPlaySheet( lsd, true )
-					: new NodeLoadingPlaySheet( lsd, true ) );
-        addTab( base );        
+				LoadingSheetData lsd = panel.getSheet();
+				LoadingPlaySheetBase base = ( lsd.isRel()
+						? new RelationshipLoadingPlaySheet( lsd, true )
+						: new NodeLoadingPlaySheet( lsd, true ) );
+				addTab( base );
 			}
 		}
 	}

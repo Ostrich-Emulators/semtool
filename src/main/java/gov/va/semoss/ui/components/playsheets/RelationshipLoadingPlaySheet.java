@@ -40,14 +40,12 @@ import org.openrdf.model.Value;
 
 /**
  */
-public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase implements ActionListener {
+public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase  {
 
 	private static final Logger log
 			= Logger.getLogger( RelationshipLoadingPlaySheet.class );
 	private final JTextField relationship = new JTextField();
 	private final String defaultRelationship;
-	private final ConformanceRenderer renderer = new ConformanceRenderer();
-	private final ConformanceRowFilter filter = new ConformanceRowFilter();
 
 	public RelationshipLoadingPlaySheet( String rel, List<Value[]> valdata,
 			List<String> headers ) {
@@ -104,19 +102,6 @@ public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase implement
 		pnl.add( relationship, BorderLayout.CENTER );
 
 		add( pnl, BorderLayout.NORTH );
-
-		JTable tbl = getTable();
-		tbl.setDefaultRenderer( String.class, renderer );
-		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
-		sorter.setRowFilter( filter );
-		tbl.setRowSorter( sorter );
-	}
-
-	@Override
-	public void actionPerformed( ActionEvent ae ) {
-		AbstractButton btn = AbstractButton.class.cast( ae.getSource() );
-		filter.setFiltering( btn.isSelected() );
-		getModel().fireTableDataChanged();
 	}
 
 	@Override
