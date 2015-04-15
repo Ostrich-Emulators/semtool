@@ -350,34 +350,34 @@ public class UriBuilder {
 		@Override
 		public String sanitize( String raw ) {
 			// Check if the string is already valid:
-			if ( isValidUriChars( raw ) ) {
-					return ( raw.length() > localPartLength ) ? truncateLocalPart(raw) : raw ; 
-			}
-			
-			// Attempt a simple sanitizing:
-			String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
+			String sanitized = raw;
+			if (! isValidUriChars( raw ) ) {
+				// Attempt a simple sanitizing:
+				String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
 
-			if( isValidUriChars( rawWithUnderscores) ) {
-					return ( rawWithUnderscores.length() > localPartLength  ) ? truncateLocalPart(rawWithUnderscores) : rawWithUnderscores;
-			}
-			
-			// Still not clean enough, sanitize as per full-blown XML rules:
-			StringBuilder sb = new StringBuilder(); 
-			for(int i = 0; i < rawWithUnderscores.length(); i++) {
-				char c = rawWithUnderscores.charAt(i);
-				// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
-				// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
-				if( XMLChar.isNCName( c ) ) {
-					sb.append( c );
+				if( isValidUriChars( rawWithUnderscores) ) {
+					sanitized = rawWithUnderscores;
 				}
-				else if ( PUNCTUATION.matcher( Character.toString(c) ).matches() ) {
-					sb.append( '-' );
+				else {
+					// Still not clean enough, sanitize as per full-blown XML rules:
+					StringBuilder sb = new StringBuilder(); 
+					for(int i = 0; i < rawWithUnderscores.length(); i++) {
+						char c = rawWithUnderscores.charAt(i);
+						// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
+						// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
+						if( XMLChar.isNCName( c ) ) {
+							sb.append( c );
+						}
+						else if ( PUNCTUATION.matcher( Character.toString(c) ).matches() ) {
+							sb.append( '-' );
+						}
+						sanitized = sb.toString();
+					}
 				}
 			}
-			// return truncateLocalPart( sb.toString() );
-			// TBD: the above truncation is breaking DB creation for some reason.  Investigate this and reset the width accordingly.
-			return sb.toString();
-			
+
+			return ( sanitized.length() > localPartLength  ) ? truncateLocalPart( sanitized ) : sanitized ;
 		}
+			
 	}
 }

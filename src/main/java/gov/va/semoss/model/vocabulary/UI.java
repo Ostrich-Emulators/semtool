@@ -16,10 +16,13 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class UI {
 
+	/**
+	 * UI SPIN Base URI: hhttp://uispin.org/ui
+	 */
 	public final static String BASE_URI = "http://uispin.org/ui";
 	
 	/**
-	 * SPIN SPARQL Syntax schema namespace: http://uispin.org/ui#
+	 * UI SPIN schema namespace: http://uispin.org/ui#
 	 */
 	public final static String NAMESPACE = BASE_URI + "#";
 

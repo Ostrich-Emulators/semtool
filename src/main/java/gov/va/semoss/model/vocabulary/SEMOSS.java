@@ -7,15 +7,18 @@ import org.openrdf.model.impl.NamespaceImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
- * Minimal vocabulary of the VA SEMOSS Insights.
+ * Vocabulary of the SEMOSS Metamodel.
  *
  */
 public class SEMOSS {
 
+	/**
+	 * The SEMOSS Metamodel Base URI: http://semoss.org/ontologies
+	 */
 	public final static String BASE_URI = "http://semoss.org/ontologies";
 	
 	/**
-	 * V-CAMP SEMOSS Tool namespace: http://semoss.org/ontologie/
+	 * The SEMOSS Metamodel schema namespace: http://semoss.org/ontologies/
 	 */
 	public final static String NAMESPACE = BASE_URI + "/";
 
@@ -26,7 +29,7 @@ public class SEMOSS {
 
 	/**
 	 * An immutable {@link Namespace} constant that represents the SEMOSS
-	 * Tool namespace.
+	 * namespace.
 	 */
 	public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
 	
@@ -34,12 +37,12 @@ public class SEMOSS {
 	// ----- Classes ------
 	
 	/**
-	 * http://va.gov/ontologies/Concept
+	 * http://semoss.org/ontologies/Concept
 	 */
 	public final static URI Concept;
 	
 	/**
-	 * http://va.gov/ontologies/Relation
+	 * http://semoss.org/ontologies/Relation
 	 */
 	public final static URI Relation;
 
@@ -47,7 +50,7 @@ public class SEMOSS {
 	// ----- Properties ------
 	
 	/**
-	 * http://va.gov/ontologies/has
+	 * http://semoss.org/ontologies/has
 	 */
 	public static final URI has;
 
@@ -56,7 +59,7 @@ public class SEMOSS {
 		final ValueFactory factory = ValueFactoryImpl.getInstance();
 		
 		// ----- Classes ------
-		Concept = factory.createURI(NAMESPACE, "Concept");
+		Concept  = factory.createURI(NAMESPACE, "Concept");
 		Relation = factory.createURI(NAMESPACE, "Relation");
 		
 		// ----- Properties ------

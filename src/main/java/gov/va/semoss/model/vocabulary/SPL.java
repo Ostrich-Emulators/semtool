@@ -12,10 +12,13 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class SPL {
 
+	/**
+	 * SPIN Standard Modules Library Base URI: hhttp://uispin.org/ui
+	 */
 	public final static String BASE_URI = "http://spinrdf.org/spl";
 	
 	/**
-	 * SPIN Standard Modules Library namespace: http://spinrdf.org/spl#
+	 * SPIN Standard Modules Library schema namespace: http://spinrdf.org/spl#
 	 */
 	public final static String NAMESPACE = BASE_URI + "#";
 

@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.actions;
 
+import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
@@ -37,6 +38,7 @@ import java.io.FileWriter;
 import javax.swing.JOptionPane;
 
 import org.openrdf.model.Namespace;
+import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sail.memory.MemoryStore;
@@ -116,6 +118,7 @@ public class ExportInsightsAction extends DbAction {
 							rc.setNamespace( OLO.PREFIX, OLO.NAMESPACE );
 							rc.setNamespace( UI.PREFIX, UI.NAMESPACE );
 							rc.setNamespace( MetadataConstants.VA_INSIGHTS_PREFIX, MetadataConstants.VA_INSIGHTS_NS );
+					        rc.setNamespace( ARG.PREFIX, ARG.NAMESPACE );
 
 							getEngine().execute( new ModificationExecutorAdapter() {
 
@@ -128,6 +131,8 @@ public class ExportInsightsAction extends DbAction {
 							} );
 
 							try ( FileWriter fw = new FileWriter( exportfile ) ) {
+								fw.write( "# imports: " + SPIN.BASE_URI + "\r\n" );
+								fw.write( "# imports: " + SP.BASE_URI + "\r\n" );
 								rc.export( new TurtleWriter( fw ) );
 							}
 							catch ( Exception ioe ) {

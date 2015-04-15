@@ -42,6 +42,7 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.turtle.TurtleWriter;
 
+import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
@@ -195,6 +196,7 @@ public class InsightManagerImpl implements InsightManager {
         tw.handleNamespace( SP.PREFIX, SP.NAMESPACE );
         tw.handleNamespace( SPL.PREFIX, SPL.NAMESPACE );
         tw.handleNamespace( SPIN.PREFIX, SPIN.NAMESPACE );
+        tw.handleNamespace( ARG.PREFIX, ARG.NAMESPACE );
         rc.export( tw );
       }
       catch ( RDFHandlerException | IOException ioe ) {
@@ -263,7 +265,13 @@ public class InsightManagerImpl implements InsightManager {
 
           URI spinBody = vf.
               createURI( MetadataConstants.VA_INSIGHTS_NS, insightKey + "-" + type );
-          rc.add( spinBody, RDF.TYPE, SP.Construct );
+          // The *_Questions.properties files have only SELECT and CONSTRUCT queries:
+          if( "SELECT".equals( type.toUpperCase() ) ) {
+        	  rc.add( spinBody, RDF.TYPE, SP.Select );        	  
+          }
+          else {
+        	  rc.add( spinBody, RDF.TYPE, SP.Construct );
+          }
           // TODO: The following works fine and the query text is correct in RDF (verified via Insights export)
           // However, following retrieval from the insights-kb, the quotation marks are being stripped away
           // which then makes the query text invalid.  Trace this down and address.  IO5 is a good example to
@@ -299,8 +307,10 @@ public class InsightManagerImpl implements InsightManager {
 
             rc.add( argumentURI, RDF.TYPE, SPL.Argument );
             rc.add( argumentURI, RDFS.LABEL, vf.createLiteral( paramKey ) );
-            rc.add( argumentURI, SPL.predicate, 
-								vf.createURI( SP.NAMESPACE, "arg" + paramCount++ ) );
+            
+            URI parameterURI = vf.createURI( ARG.NAMESPACE, paramKey );
+            rc.add( parameterURI, RDFS.LABEL, vf.createLiteral( paramKey ) );
+            rc.add( argumentURI, SPL.predicate, parameterURI );
             rc.add( argumentURI, SPL.valueType, vf.createURI( paramType ) );
 
             /*
@@ -430,7 +440,7 @@ public class InsightManagerImpl implements InsightManager {
 	        	   + "SELECT DISTINCT ?parameter ?label ?variable ?valueType ?defaultValue ?defaultQuery WHERE { "
 	     		   + "BIND(" + insightUriString + " AS ?uri) . "
 	     		   + "OPTIONAL{ ?uri spin:constraint ?parameter . "
-	               + "?parameter spl:valueType ?valueType ; rdfs:label ?label ; spl:predicate ?variable . "
+	               + "?parameter spl:valueType ?valueType ; spl:predicate [ rdfs:label ?variable ] . "
 	     		   + "OPTIONAL{ ?parameter spl:defaultValue ?defaultValue OPTIONAL { ?defaultValue sp:text ?defaultQuery }}} }";     
 	        
 	        ListQueryAdapter<Parameter> lqa = new ListQueryAdapter<Parameter>( query ) {
@@ -507,7 +517,7 @@ public class InsightManagerImpl implements InsightManager {
           + "BIND(" + perspectiveUriString + "AS ?perspective) . "
           + "OPTIONAL{ " + insightUriString + " spin:body [ sp:text ?sparql ] } "
           + "OPTIONAL{ " + insightUriString + " spin:constraint ?parameter . "
-          + "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterVariable . OPTIONAL{ ?parameter spl:defaultValue ?parameterDefaultValue OPTIONAL { ?parameterDefaultValue sp:text ?defaultValueQuery }} } "
+          + "?parameter spl:valueType ?parameterValueType ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{ ?parameter spl:defaultValue ?parameterDefaultValue OPTIONAL { ?parameterDefaultValue sp:text ?defaultValueQuery }} } "
           + "OPTIONAL{ " + insightUriString + " vas:isLegacy ?isLegacy } "
           + "OPTIONAL{ " + insightUriString + " dcterms:description ?description } "
           + "OPTIONAL{ " + insightUriString + " dcterms:creator ?creator } "

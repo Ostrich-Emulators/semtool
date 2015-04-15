@@ -7,15 +7,18 @@ import org.openrdf.model.impl.NamespaceImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
- * Minimal vocabulary of the VA SEMOSS Insights.
+ * Minimal vocabulary to support VA SEMOSS Insights.
  *
  */
 public class VAS {
 
+	/**
+	 * V-CAMP SEMOSS Tool Base URI: http://semoss.org/ontologies
+	 */
 	public final static String BASE_URI = "http://va.gov/ontologies/semoss";
 	
 	/**
-	 * V-CAMP SEMOSS Tool namespace: http://va.gov/ontologies/semoss#
+	 * V-CAMP SEMOSS Tool schema namespace: http://va.gov/ontologies/semoss#
 	 */
 	public final static String NAMESPACE = BASE_URI + "#";
 
