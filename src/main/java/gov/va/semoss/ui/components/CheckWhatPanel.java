@@ -161,7 +161,7 @@ public final class CheckWhatPanel extends javax.swing.JPanel {
     jLabel2 = new javax.swing.JLabel();
 
     doConcepts.setSelected(true);
-    doConcepts.setText("Concepts");
+    doConcepts.setText("Nodes");
     doConcepts.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         doConceptsActionPerformed(evt);
