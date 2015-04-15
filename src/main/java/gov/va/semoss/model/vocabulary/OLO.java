@@ -12,6 +12,9 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class OLO {
 
+	/**
+	 * Ordered List Ontology Base URI: http://purl.org/ontology/olo/core
+	 */
 	public final static String BASE_URI = "http://purl.org/ontology/olo/core";
 	
 	/**

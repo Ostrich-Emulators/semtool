@@ -13,6 +13,9 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class SPIN {
 
+	/**
+	 * SPIN SPARQL Syntax Base URI: hhttp://uispin.org/ui
+	 */	
 	public final static String BASE_URI = "http://spinrdf.org/spin";
 	
 	/**

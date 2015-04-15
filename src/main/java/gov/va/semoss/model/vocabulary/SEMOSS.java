@@ -18,7 +18,7 @@ public class SEMOSS {
 	public final static String BASE_URI = "http://semoss.org/ontologies";
 	
 	/**
-	 * The SEMOSS Metamodel namespace: http://semoss.org/ontologies/
+	 * The SEMOSS Metamodel schema namespace: http://semoss.org/ontologies/
 	 */
 	public final static String NAMESPACE = BASE_URI + "/";
 
