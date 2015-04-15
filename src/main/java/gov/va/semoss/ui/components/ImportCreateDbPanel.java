@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import org.openrdf.model.URI;
 
@@ -62,8 +63,13 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		dbdir.setFileTextFromInit();
 
 		baseuri.addItem( METADATABASEURI );
+		Set<String> seen = new HashSet<>();
+		seen.add( METADATABASEURI );
 		for ( String uri : prefs.get( "lastontopath", "http://va.gov/ontologies" ).split( ";" ) ) {
-			baseuri.addItem( uri );
+			if( !seen.contains( uri ) ){
+				baseuri.addItem( uri );
+				seen.add( uri );
+			}
 		}
 
 		JFileChooser chsr = file.getChooser();
@@ -307,6 +313,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
 			Set<String> bases = new HashSet<>();
+			mybase = null;
 
 			EngineLoader el = new EngineLoader( false );
 
@@ -328,9 +335,28 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			}
 
 			if ( bases.isEmpty() ) {
-				mybase = (String) JOptionPane.showInputDialog( null,
-						"Please specify a base URI", "Missing Base URI",
-						JOptionPane.QUESTION_MESSAGE );
+				JComboBox box = new JComboBox();
+				box.addItem( "" );
+				
+				Set<String> seen = new HashSet<>();
+				seen.add( METADATABASEURI );
+				for ( int i = 0; i < baseuri.getItemCount(); i++ ) {
+					String item = baseuri.getItemAt( i );
+					if ( !seen.contains( item ) ) {
+						box.addItem( item );
+						seen.add( item );
+					}
+				}
+				box.setEditable( true );
+
+				int opt = JOptionPane.showOptionDialog( null, box, "Specify the Base URI",
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+						null, null );
+				if ( JOptionPane.OK_OPTION != opt ) {
+					log.debug( "create canceled" );
+					return;
+				}
+				mybase = box.getSelectedItem().toString();
 			}
 			else if ( bases.size() == 1 ) {
 				mybase = choice;
@@ -355,7 +381,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			}
 		}
 		prefs.put( "lastontopath", basestr.toString() );
-		
 
 		ProgressTask pt = new ProgressTask( "Creating Database from "
 				+ file.getDelimitedPaths(), new Runnable() {
