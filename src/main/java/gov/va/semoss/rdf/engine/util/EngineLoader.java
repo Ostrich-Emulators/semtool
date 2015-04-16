@@ -350,6 +350,16 @@ public class EngineLoader {
 		}
 	}
 
+	public void clear() {
+		try {
+			myrc.clear();
+			initNamespaces( myrc );
+		}
+		catch ( Exception e ) {
+			log.warn( e, e );
+		}
+	}
+
 	public void release() {
 		try {
 			myrc.close();

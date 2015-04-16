@@ -45,8 +45,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.event.InternalFrameEvent;
-import javax.swing.event.InternalFrameListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.log4j.Logger;
@@ -69,13 +67,13 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private final List<File> toload = new ArrayList<>();
 	private final List<LoadingPlaySheetBase> sheets = new ArrayList<>();
 
-	private final ConformanceAction conformer = new ConformanceAction();
 	private final LoadingAction loader = new LoadingAction();
 	private final JCheckBox showerrs = new JCheckBox( "Show Only Errors" );
 	private final SaveAllAction saveall = new SaveAllAction();
 	private final AddAction addtab = new AddAction();
-	private EngineLoader realtimer = null;
-	private final JToggleButton timertoggle = new JToggleButton();
+	private EngineLoader realtimer = new EngineLoader();
+	private final JToggleButton timertoggle
+			= new JToggleButton( new ConformanceAction() );
 
 	public LoadingPlaySheetFrame( IEngine eng ) {
 		this( eng, true, true, false, false );
@@ -91,60 +89,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		doreplace = replace;
 		setTitle( "Import Data Review" );
 
-		timertoggle.setAction( new AbstractAction( "Real-time QA" ) {
-
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				if ( timertoggle.isSelected() ) {
-					realtimer = new EngineLoader();
-					realtimer.preloadCaches( getEngine() );
-				}
-				else {
-					realtimer.release();
-					realtimer = null;
-				}
-
-				conformer.setEnabled( !timertoggle.isSelected() );
-
-				for ( LoadingPlaySheetBase b : sheets ) {
-					b.getLoadingModel().setRealTimeEngineLoader( realtimer );
-				}
-			}
-		} );
-
-		addInternalFrameListener( new InternalFrameListener() {
-
-			@Override
-			public void internalFrameOpened( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameClosing( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameClosed( InternalFrameEvent ife ) {
-				if ( null != realtimer ) {
-					realtimer.release();
-				}
-			}
-
-			@Override
-			public void internalFrameIconified( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameDeiconified( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameActivated( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameDeactivated( InternalFrameEvent ife ) {
-			}
-		} );
+		timertoggle.setText( null );
+		if ( doconformance ) {
+			timertoggle.doClick();
+		}
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
@@ -180,6 +128,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		}
 
 		hideProgress();
+	}
+
+	@Override
+	protected void onFrameClose() {
+		realtimer.release();
 	}
 
 	@Override
@@ -235,17 +188,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			public void run() {
 				boolean somethingToShow = false;
 
-				EngineLoader el = new EngineLoader();
-				if ( doconformance ) {
-					jBar.setString( "Preparing Load" );
-					el.preloadCaches( getEngine() );
-				}
-
 				int progressPerFile = 100 / toload.size();
 				boolean alreadyShownRdfError = false;
 				for ( File fileToLoad : toload ) {
 					jBar.setString( "Reading " + fileToLoad );
-					ImportFileReader rdr = el.getReader( fileToLoad );
+					ImportFileReader rdr = realtimer.getReader( fileToLoad );
 					log.debug( "importing file:" + fileToLoad );
 					if ( null == rdr ) {
 						if ( !isLoadable() ) {
@@ -258,7 +205,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 								log.warn( "cannot check quality for file: " + fileToLoad );
 							}
 
-							el.loadToEngine( Arrays.asList( fileToLoad ), getEngine(),
+							realtimer.loadToEngine( Arrays.asList( fileToLoad ), getEngine(),
 									dometamodel, null );
 						}
 						catch ( RepositoryException | IOException e ) {
@@ -281,9 +228,9 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 							for ( LoadingSheetData n : data.getSheets() ) {
 								List<LoadingNodeAndPropertyValues> errs = null;
 								if ( doconformance ) {
-									errs = el.checkConformance( n, getEngine(), false );
+									errs = realtimer.checkConformance( n, getEngine(), false );
 									if ( !dometamodel ) {
-										el.checkModelConformance( n, getEngine(), false );
+										realtimer.checkModelConformance( n, getEngine(), false );
 									}
 								}
 								add( n );
@@ -322,7 +269,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		jtb.add( addtab );
 
 		jtb.add( timertoggle );
-		jtb.add( conformer );
 		jtb.add( showerrs );
 
 		showerrs.repaint();
@@ -334,24 +280,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	public void closeTab( PlaySheetCentralComponent c ) {
 		if ( c instanceof RelationshipLoadingPlaySheet ) {
 			sheets.remove( RelationshipLoadingPlaySheet.class.cast( c ) );
-			checkConformerButtonStatus();
 		}
 		super.closeTab( c );
 	}
 
 	private void populateForFiles( Collection<File> files ) {
 		toload.addAll( files );
-	}
-
-	private void checkConformerButtonStatus() {
-		boolean enableconf = false;
-		for ( LoadingPlaySheetBase l : sheets ) {
-			if ( l.getLoadingModel().isRel() ) {
-				enableconf = true;
-			}
-		}
-
-		conformer.setEnabled( enableconf );
 	}
 
 	public RelationshipLoadingPlaySheet addTab( String relname, List<Value[]> data,
@@ -361,7 +295,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		grid.setTitle( "Import Data Review" );
 		addTab( grid );
 		sheets.add( grid );
-		checkConformerButtonStatus();
 		showerrs.addActionListener( grid );
 		hideProgress();
 
@@ -569,11 +502,31 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		public ConformanceAction() {
 			super( "Check Quality", DbAction.getIcon( "conformance-check" ) );
 			putValue( Action.SHORT_DESCRIPTION,
-					"Check that both ends of a relationship are already defined" );
+					"Check that nodes in this sheet are already defined" );
 		}
 
 		@Override
 		public void actionPerformed( ActionEvent e ) {
+			boolean sel = timertoggle.isSelected();
+
+			if ( sel ) {
+				realtimer = new EngineLoader();
+				realtimer.preloadCaches( getEngine() );
+
+				if ( !sheets.isEmpty() ) {
+					recheckConformance();
+				}
+			}
+			else {
+				realtimer.clear();
+			}
+
+			for ( LoadingPlaySheetBase b : sheets ) {
+				b.getLoadingModel().setRealTimeEngineLoader( sel ? realtimer : null );
+			}
+		}
+
+		private void recheckConformance() {
 			final IEngine eng = ( null == getEngine()
 					? askForEngine( "Check" ) : getEngine() );
 
@@ -591,9 +544,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 				@Override
 				public void run() {
-					EngineLoader el = new EngineLoader();
 					updateProgress( t, 0 );
-					el.preloadCaches( eng );
 
 					for ( LoadingPlaySheetBase node : sheets ) {
 						String text = "Checking quality of: " + node.getTitle();
@@ -603,8 +554,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						LoadingSheetData lsd
 								= node.getLoadingModel().toLoadingSheet( getTabTitle( node ) );
 						List<LoadingNodeAndPropertyValues> errors
-								= el.checkConformance( lsd, eng, false );
-						el.checkModelConformance( lsd, eng, false );
+								= realtimer.checkConformance( lsd, eng, false );
+						realtimer.checkModelConformance( lsd, eng, false );
 						node.setModelErrors( lsd );
 						node.setConformanceErrors( errors );
 
@@ -619,8 +570,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						ct.setMark( noerrs && nomods ? MarkType.NONE : MarkType.ERROR );
 						ct.repaint();
 					}
-
-					el.release();
 				}
 			} ) {
 

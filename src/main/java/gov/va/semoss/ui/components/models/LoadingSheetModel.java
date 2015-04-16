@@ -27,7 +27,7 @@ public class LoadingSheetModel extends ValueTableModel {
 	private static final Logger log = Logger.getLogger( LoadingSheetModel.class );
 	private LoadingSheetData sheetdata;
 	private int errorcount = 0;
-	private EngineLoader realtime = null;
+	private EngineLoader realtimer = null;
 
 	public LoadingSheetModel() {
 		super( true );
@@ -39,7 +39,7 @@ public class LoadingSheetModel extends ValueTableModel {
 	}
 
 	public void setRealTimeEngineLoader( EngineLoader el ) {
-		realtime = el;
+		realtimer = el;
 	}
 
 	public boolean isRel() {
@@ -57,6 +57,17 @@ public class LoadingSheetModel extends ValueTableModel {
 		super.setHeaders( heads );
 		if ( null != sheetdata ) {
 			sheetdata.setHeaders( heads );
+
+			if ( null != realtimer ) {
+				LoadingSheetData lsd
+						= realtimer.checkModelConformance( sheetdata, null, false );
+				setModelErrors( lsd );
+
+				// need to recheck the whole loading sheet now
+				List<LoadingNodeAndPropertyValues> errors
+						= realtimer.checkConformance( lsd, null, false );
+				setConformanceErrors( errors );
+			}
 		}
 	}
 
@@ -97,15 +108,15 @@ public class LoadingSheetModel extends ValueTableModel {
 			}
 
 			// do a real-time conformance check?
-			if ( null != realtime && ( 0 == c || ( 1 == c && isRel() ) ) ) {
+			if ( null != realtimer && ( 0 == c || ( 1 == c && isRel() ) ) ) {
 				if ( 0 == c ) {
 					boolean iserr
-							= !realtime.instanceExists( nap.getSubjectType(), nap.getSubject() );
+							= !realtimer.instanceExists( nap.getSubjectType(), nap.getSubject() );
 					nap.setSubjectIsError( iserr );
 				}
 				else {
 					boolean iserr
-							= !realtime.instanceExists( nap.getObjectType(), nap.getObject() );
+							= !realtimer.instanceExists( nap.getObjectType(), nap.getObject() );
 					nap.setObjectIsError( iserr );
 				}
 
