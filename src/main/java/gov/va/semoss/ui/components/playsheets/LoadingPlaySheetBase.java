@@ -59,7 +59,7 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 
 		tbl.getColumnModel().getColumn( 0 ).setCellRenderer( renderer );
 		if ( mod.isRel() ) {
-			tbl.getColumnModel().getColumn( 0 ).setCellRenderer( renderer );
+			tbl.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );
 		}
 
 		// tbl.setDefaultRenderer( String.class, renderer );
@@ -71,13 +71,8 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 
 			@Override
 			public void tableChanged( TableModelEvent e ) {
-				// not sure why we need to reset the header renderer so much
+				// not sure why we need to reset the renderer so much
 				TableColumnModel tcm = tbl.getColumnModel();
-				ModelHeaderRenderer mhr = new ModelHeaderRenderer( tbl );
-				for ( int col = 0; col < tcm.getColumnCount(); col++ ) {
-					tcm.getColumn( col ).setHeaderRenderer( mhr );
-				}
-
 				tcm.getColumn( 0 ).setCellRenderer( renderer );
 				if( LoadingPlaySheetBase.this.getLoadingModel().isRel() ){
 					tcm.getColumn( 1 ).setCellRenderer( renderer );			
@@ -178,8 +173,6 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 
 		errorLabel.setVisible( getLoadingModel().isRealTimeChecking() );
 		errorLabel.repaint();
-
-		getTable().getTableHeader().repaint();
 	}
 
 	protected class ConformanceRenderer extends DefaultTableCellRenderer {
@@ -233,7 +226,12 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		public boolean include( RowFilter.Entry<? extends ValueTableModel, ? extends Integer> entry ) {
 			LoadingSheetModel lsm = LoadingSheetModel.class.cast( entry.getModel() );
 			LoadingSheetData.LoadingNodeAndPropertyValues nap = lsm.getNap( entry.getIdentifier() );
-			return ( filtering ? nap.hasError() : true );
+			// log.debug( nap );
+			
+			if( filtering ){
+				return ( null == nap ? true : nap.hasError() );
+			}
+			return true;
 		}
 	}
 

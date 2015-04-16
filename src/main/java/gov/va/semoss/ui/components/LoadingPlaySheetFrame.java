@@ -92,6 +92,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
+		
+		showerrs.setVisible( doconformance );
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
@@ -322,6 +324,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		RepositoryList repos = new RepositoryList();
 		Collection<IEngine> engines = DIHelper.getInstance().getEngineMap().values();
+		if ( 1 == engines.size() ) {
+			return engines.iterator().next();
+		}
+
 		repos.getRepositoryModel().addAll( engines );
 		LabeledPairRenderer<IEngine> renderer = new LabeledPairRenderer<>();
 		repos.setCellRenderer( renderer );
@@ -529,7 +535,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			else {
 				realtimer.clear();
 				showerrs.setVisible( false );
-				showerrs.setSelected( false );
+				if( showerrs.isSelected() ){
+					// stop filtering rows if we're not doing QA checks
+					showerrs.doClick();
+				}
 				for ( LoadingPlaySheetBase b : sheets ) {
 					b.getLoadingModel().setRealTimeEngineLoader( null );
 				}
@@ -564,8 +573,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 						ok[0] = ( noerrs && nomods );
 						ct.setMark( noerrs && nomods ? MarkType.NONE : MarkType.ERROR );
-						ct.repaint();		
-					}					
+						ct.repaint();
+					}
 				}
 			} ) {
 
