@@ -7,11 +7,11 @@ package gov.va.semoss.ui.components.models;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.rdf.engine.util.EngineLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
@@ -27,15 +27,19 @@ public class LoadingSheetModel extends ValueTableModel {
 	private static final Logger log = Logger.getLogger( LoadingSheetModel.class );
 	private LoadingSheetData sheetdata;
 	private int errorcount = 0;
+	private EngineLoader realtime = null;
 
 	public LoadingSheetModel() {
 		super( true );
-
 	}
 
 	public LoadingSheetModel( LoadingSheetData naps ) {
 		this();
 		setLoadingSheetData( naps );
+	}
+
+	public void setRealTimeEngineLoader( EngineLoader el ) {
+		realtime = el;
 	}
 
 	public boolean isRel() {
@@ -67,6 +71,8 @@ public class LoadingSheetModel extends ValueTableModel {
 		}
 		else {
 			LoadingNodeAndPropertyValues nap = sheetdata.getData().get( r );
+			final boolean hadError = nap.hasError();
+
 			if ( 0 == c ) {
 				nap.setSubject( aValue.toString() );
 			}
@@ -87,6 +93,26 @@ public class LoadingSheetModel extends ValueTableModel {
 					String prop = sheetdata.getHeaders().get( c );
 					// FIXME: handle datatypes
 					nap.put( prop, vf.createLiteral( aValue.toString() ) );
+				}
+			}
+
+			// do a real-time conformance check?
+			if ( null != realtime && ( 0 == c || ( 1 == c && isRel() ) ) ) {
+				if ( 0 == c ) {
+					boolean iserr
+							= !realtime.instanceExists( nap.getSubjectType(), nap.getSubject() );
+					nap.setSubjectIsError( iserr );
+				}
+				else {
+					boolean iserr
+							= !realtime.instanceExists( nap.getObjectType(), nap.getObject() );
+					nap.setObjectIsError( iserr );
+				}
+
+				boolean hasError = nap.hasError();
+				if ( hasError != hadError ) {
+					// if we have an error, then we didn't use to, so our errors go up
+					errorcount += ( hasError ? 1 : -1 );
 				}
 			}
 		}

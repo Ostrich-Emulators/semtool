@@ -38,16 +38,11 @@ public class CheckConsistencyAction extends DbAction {
 	private static final int WARNING_LIMIT = 1500;
 	private final Frame frame;
 	private final CheckWhatPanel checkwhat = new CheckWhatPanel( true, true );
-	private StringDistance distancer = new LevensteinDistance();
 
 	public CheckConsistencyAction( String optg, Frame frame ) {
 		super( optg, CONSISTENCYCHECK, "conformance-check" );
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Check Database Consistency" );
-	}
-
-	public void setDistanceAlg( StringDistance sd ) {
-		distancer = sd;
 	}
 
 	@Override

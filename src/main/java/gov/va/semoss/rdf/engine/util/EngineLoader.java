@@ -303,13 +303,11 @@ public class EngineLoader {
 	public void separateConformanceErrors( ImportData data, ImportData errors,
 			IEngine engine ) {
 		if ( null != errors ) {
-			for ( LoadingSheetData d : data.getRels() ) {
+			for ( LoadingSheetData d : data.getSheets() ) {
 				List<LoadingNodeAndPropertyValues> errs = checkConformance( d, engine, false );
 
 				if ( !errs.isEmpty() ) {
-					LoadingSheetData errdata
-							= LoadingSheetData.relsheet( d.getName(), d.getSubjectType(),
-									d.getObjectType(), d.getRelname() );
+					LoadingSheetData errdata = LoadingSheetData.copyHeadersOf( d );
 					errdata.setProperties( d.getPropertiesAndDataTypes() );
 					errors.add( errdata );
 
@@ -389,28 +387,40 @@ public class EngineLoader {
 			preloadCaches( eng );
 		}
 
-		if ( data.isRel() ) {
-			String stype = data.getSubjectType();
-			String otype = data.getObjectType();
+		String stype = data.getSubjectType();
+		String otype = data.getObjectType();
 
-			for ( LoadingNodeAndPropertyValues nap : data.getData() ) {
-				// check that the subject and object are in our instance cache
-				ConceptInstanceCacheKey skey
-						= new ConceptInstanceCacheKey( stype, nap.getSubject() );
+		for ( LoadingNodeAndPropertyValues nap : data.getData() ) {
+			// check that the subject and object are in our instance cache
+			ConceptInstanceCacheKey skey
+					= new ConceptInstanceCacheKey( stype, nap.getSubject() );
+			nap.setSubjectIsError( !dataNodes.containsKey( skey ) );
+
+			if ( data.isRel() ) {
 				ConceptInstanceCacheKey okey
 						= new ConceptInstanceCacheKey( otype, nap.getObject() );
-
-				nap.setSubjectIsError( !dataNodes.containsKey( skey ) );
 				nap.setObjectIsError( !dataNodes.containsKey( okey ) );
+			}
 
-				if ( nap.hasError() ) {
-					// log.debug( nap );
-					failures.add( nap );
-				}
+			if ( nap.hasError() ) {
+				failures.add( nap );
 			}
 		}
 
 		return failures;
+	}
+
+	/**
+	 * Checks for an instance of the given type and label.
+	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} MUST be called
+	 * prior to this function to have any hope at a true result
+	 *
+	 * @param type
+	 * @param label
+	 * @return true, if the type/label matches a cached value
+	 */
+	public boolean instanceExists( String type, String label ) {
+		return dataNodes.containsKey( new ConceptInstanceCacheKey( type, label ) );
 	}
 
 	/**

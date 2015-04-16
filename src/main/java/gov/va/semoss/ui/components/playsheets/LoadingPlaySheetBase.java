@@ -6,6 +6,8 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
 import gov.va.semoss.ui.components.models.ValueTableModel;
@@ -13,11 +15,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -27,9 +31,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.RowFilter;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
+import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -38,14 +49,31 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  *
  * @author ryan
  */
-public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
+public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements ActionListener {
 
+	private static final Logger log = Logger.getLogger( LoadingPlaySheetBase.class );
 	private final JLabel errorLabel = new JLabel();
 	private final EditHeaderAction editheaders = new EditHeaderAction();
+	private final ConformanceRenderer renderer = new ConformanceRenderer();
+	private final ConformanceRowFilter filter = new ConformanceRowFilter();
 
 	protected LoadingPlaySheetBase( LoadingSheetModel mod ) {
 		super( mod );
 		errorLabel.setBorder( BorderFactory.createEmptyBorder( 0, 5, 0, 5 ) );
+
+		JTable tbl = getTable();
+		tbl.setDefaultRenderer( String.class, renderer );
+		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
+		sorter.setRowFilter( filter );
+		tbl.setRowSorter( sorter );
+
+		tbl.getModel().addTableModelListener( new TableModelListener() {
+
+			@Override
+			public void tableChanged( TableModelEvent e ) {
+				setErrorLabel();
+			}
+		} );
 	}
 
 	@Override
@@ -58,6 +86,13 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
 		for ( int col = 0; col < tcm.getColumnCount(); col++ ) {
 			tcm.getColumn( col ).setHeaderRenderer( mhr );
 		}
+	}
+
+	@Override
+	public void actionPerformed( ActionEvent ae ) {
+		AbstractButton btn = AbstractButton.class.cast( ae.getSource() );
+		filter.setFiltering( btn.isSelected() );
+		getModel().fireTableDataChanged();
 	}
 
 	/**
@@ -93,9 +128,9 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
 	}
 
 	public void setModelErrors( LoadingSheetData lsd ) {
-		getLoadingModel().setModelErrors( lsd );		
+		getLoadingModel().setModelErrors( lsd );
 		getTable().getTableHeader().repaint();
-		
+
 		setErrorLabel();
 	}
 
@@ -156,16 +191,24 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet {
 				LoadingSheetModel lsm = LoadingSheetModel.class.cast( table.getModel() );
 				LoadingSheetData.LoadingNodeAndPropertyValues nap = lsm.getNap( row );
 
-				setBackground( table.getBackground() );
-				setToolTipText( "This relationship endpoint is valid" );
+				if ( null == nap ) {
+					super.getTableCellRendererComponent( table, value, isSelected, hasFocus,
+							fakerow, column );
+					setToolTipText( "Add a new row to this table" );
+					return this;
+				}
+				else {
+					setBackground( table.getBackground() );
+					setToolTipText( "This endpoint is valid" );
 
-				if ( nap.hasError() ) {
-					// we have an error, but don't know if it's in the current column					
-					if ( ( 0 == column && nap.isSubjectError() )
-							|| ( 1 == column && nap.isObjectError() ) ) {
-						setBackground( Color.PINK );
-						String type = getHeaders().get( column );
-						setToolTipText( "There is no existing " + type + " named " + value );
+					if ( nap.hasError() ) {
+						// we have an error, but don't know if it's in the current column					
+						if ( ( 0 == column && nap.isSubjectError() )
+								|| ( 1 == column && nap.isObjectError() ) ) {
+							setBackground( Color.PINK );
+							String type = getHeaders().get( column );
+							setToolTipText( "There is no existing " + type + " named " + value );
+						}
 					}
 				}
 			}
