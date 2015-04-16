@@ -411,6 +411,19 @@ public class EngineLoader {
 	}
 
 	/**
+	 * Checks for an instance of the given type and label.
+	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} MUST be called
+	 * prior to this function to have any hope at a true result
+	 *
+	 * @param type
+	 * @param label
+	 * @return true, if the type/label matches a cached value
+	 */
+	public boolean instanceExists( String type, String label ) {
+		return dataNodes.containsKey( new ConceptInstanceCacheKey( type, label ) );
+	}
+
+	/**
 	 * Checks that the Loading Sheet's {@link LoadingSheetData#subjectType},
 	 * {@link LoadingSheetData#objectType}, and
 	 * {@link LoadingSheetData#getProperties()} exist in the given engine

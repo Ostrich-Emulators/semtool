@@ -43,7 +43,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.log4j.Logger;
@@ -71,6 +74,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private final JCheckBox showerrs = new JCheckBox( "Show Only Errors" );
 	private final SaveAllAction saveall = new SaveAllAction();
 	private final AddAction addtab = new AddAction();
+	private EngineLoader realtimer = null;
+	private final JToggleButton timertoggle = new JToggleButton();
 
 	public LoadingPlaySheetFrame( IEngine eng ) {
 		this( eng, true, true, false, false );
@@ -85,6 +90,61 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		doconformance = conform;
 		doreplace = replace;
 		setTitle( "Import Data Review" );
+
+		timertoggle.setAction( new AbstractAction( "Real-time QA" ) {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				if ( timertoggle.isSelected() ) {
+					realtimer = new EngineLoader();
+					realtimer.preloadCaches( getEngine() );
+				}
+				else {
+					realtimer.release();
+					realtimer = null;
+				}
+
+				conformer.setEnabled( !timertoggle.isSelected() );
+
+				for ( LoadingPlaySheetBase b : sheets ) {
+					b.getLoadingModel().setRealTimeEngineLoader( realtimer );
+				}
+			}
+		} );
+
+		addInternalFrameListener( new InternalFrameListener() {
+
+			@Override
+			public void internalFrameOpened( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameClosing( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameClosed( InternalFrameEvent ife ) {
+				if ( null != realtimer ) {
+					realtimer.release();
+				}
+			}
+
+			@Override
+			public void internalFrameIconified( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameDeiconified( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameActivated( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameDeactivated( InternalFrameEvent ife ) {
+			}
+		} );
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
@@ -122,10 +182,17 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		hideProgress();
 	}
 
+	@Override
+	public void setEngine( IEngine engine ) {
+		super.setEngine( engine );
+		timertoggle.setEnabled( null != engine );
+	}
+
 	public final LoadingPlaySheetBase add( LoadingSheetData data ) {
 		LoadingPlaySheetBase ret = ( data.isRel()
 				? new RelationshipLoadingPlaySheet( data )
 				: new NodeLoadingPlaySheet( data ) );
+		ret.getLoadingModel().setReadOnly( false );
 
 		showerrs.addActionListener( ret );
 		addTab( ret );
@@ -143,6 +210,9 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	public void addTab( LoadingPlaySheetBase c ) {
 		super.addTab( c );
 		sheets.add( c );
+		for ( LoadingPlaySheetBase b : sheets ) {
+			b.getLoadingModel().setRealTimeEngineLoader( realtimer );
+		}
 	}
 
 	@Override
@@ -251,6 +321,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		jtb.add( loader );
 		jtb.add( addtab );
 
+		jtb.add( timertoggle );
 		jtb.add( conformer );
 		jtb.add( showerrs );
 
