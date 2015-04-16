@@ -182,12 +182,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public void processView() throws PropertyVetoException {
 		createVisualizer();
-		//setMaximum( true );
-//		updateProgressBar( "80%...Creating Visualization", 80 );
-
 		addPanel();
-//		setSelected( false );
-//		setSelected( true );
 	}
 
 	/**
@@ -794,12 +789,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	private void processControlData( SEMOSSEdge edge ) {
 		for ( String property : edge.getProperties().keySet() )
-			controlData.addProperty( edge.getEdgeType(), property );
+			controlData.addEdgeProperty( edge.getEdgeType(), property );
 	}
 
 	private void processControlData( SEMOSSVertex vertex ) {
 		for ( String property : vertex.getProperties().keySet() )
-			controlData.addProperty( vertex.getType(), property );
+			controlData.addVertexProperty( vertex.getType(), property );
 	}
 
 	@Override

@@ -111,7 +111,6 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public Class<?> getColumnClass(int column) {
-		logger.debug("Getting column class for column: " + column);
 		Object edgeVal = data.getEdgeVal(0, column);
 		if (edgeVal == null)
 			edgeVal = "";
