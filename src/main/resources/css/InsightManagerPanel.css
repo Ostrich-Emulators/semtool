@@ -1,0 +1,51 @@
+.root{
+    -fx-font-size: 14pt;
+    -fx-font-family: "Tahoma";
+    -fx-background-image: url("../images/insightManagerBackground2.jpg");
+    -fx-background-position: left top;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+}
+.tab-pane > .tab-header-area > .tab-header-background{
+    -fx-background-image: url("../images/insightManagerBackground.jpg");
+    -fx-background-size: cover;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: yellow;
+}
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
+/*    -fx-border-style: none;*/
+    -fx-border-width: 0;
+/*    -fx-border-color: none;*/
+}
+.tab-pane > .tab-content-area {
+  -fx-border-color: #000000;
+}
+
+.text-field, .text-area{
+  -fx-font-size: 0.9em;
+}
+
+.combo-box-base{
+    -fx-font-size: 0.9em;
+}
+
+.list-view{
+    -fx-font-size: 0.9em;
+}
+
+.mylistview .list-cell:filled:selected:focused, .mylistview .list-cell:filled:selected {
+    -fx-background-color: linear-gradient(#328BDB 0%, #207BCF 25%, #1973C9 75%, #0A65BF 100%);
+    -fx-text-fill: white;
+}
+
+.mylistview .list-cell:even { 
+    -fx-background-color: lightgray;
+}
+.mylistview .list-cell:odd { 
+    -fx-background-color: white;
+}
+.mylistview .list-cell:filled:hover {
+    -fx-background-color: green;
+    -fx-text-fill: white;
+}

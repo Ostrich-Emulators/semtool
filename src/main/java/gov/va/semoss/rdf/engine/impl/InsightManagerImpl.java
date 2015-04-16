@@ -306,7 +306,7 @@ public class InsightManagerImpl implements InsightManager {
             rc.add( insightURI, SPIN.constraint, argumentURI );
 
             rc.add( argumentURI, RDF.TYPE, SPL.Argument );
-            rc.add( argumentURI, RDFS.LABEL, vf.createLiteral( paramKey ) );
+            rc.add( argumentURI, RDFS.LABEL, vf.createLiteral( paramKey.replaceAll("([a-z])([A-Z])", "$1 $2") ) );
             
             URI parameterURI = vf.createURI( ARG.NAMESPACE, paramKey );
             rc.add( parameterURI, RDFS.LABEL, vf.createLiteral( paramKey ) );
@@ -440,7 +440,7 @@ public class InsightManagerImpl implements InsightManager {
 	        	   + "SELECT DISTINCT ?parameter ?label ?variable ?valueType ?defaultValue ?defaultQuery WHERE { "
 	     		   + "BIND(" + insightUriString + " AS ?uri) . "
 	     		   + "OPTIONAL{ ?uri spin:constraint ?parameter . "
-	               + "?parameter spl:valueType ?valueType ; spl:predicate [ rdfs:label ?variable ] . "
+	               + "?parameter spl:valueType ?valueType ; rdfs:label ?label ; spl:predicate [ rdfs:label ?variable ] . "
 	     		   + "OPTIONAL{ ?parameter spl:defaultValue ?defaultValue OPTIONAL { ?defaultValue sp:text ?defaultQuery }}} }";     
 	        
 	        ListQueryAdapter<Parameter> lqa = new ListQueryAdapter<Parameter>( query ) {
