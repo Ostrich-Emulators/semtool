@@ -6,6 +6,8 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
 import gov.va.semoss.ui.components.models.ValueTableModel;
@@ -29,10 +31,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.RowFilter;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
+import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -43,6 +51,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements ActionListener {
 
+	private static final Logger log = Logger.getLogger( LoadingPlaySheetBase.class );
 	private final JLabel errorLabel = new JLabel();
 	private final EditHeaderAction editheaders = new EditHeaderAction();
 	private final ConformanceRenderer renderer = new ConformanceRenderer();
@@ -57,6 +66,14 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
 		sorter.setRowFilter( filter );
 		tbl.setRowSorter( sorter );
+
+		tbl.getModel().addTableModelListener( new TableModelListener() {
+
+			@Override
+			public void tableChanged( TableModelEvent e ) {
+				setErrorLabel();
+			}
+		} );
 	}
 
 	@Override
@@ -174,16 +191,24 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 				LoadingSheetModel lsm = LoadingSheetModel.class.cast( table.getModel() );
 				LoadingSheetData.LoadingNodeAndPropertyValues nap = lsm.getNap( row );
 
-				setBackground( table.getBackground() );
-				setToolTipText( "This relationship endpoint is valid" );
+				if ( null == nap ) {
+					super.getTableCellRendererComponent( table, value, isSelected, hasFocus,
+							fakerow, column );
+					setToolTipText( "Add a new row to this table" );
+					return this;
+				}
+				else {
+					setBackground( table.getBackground() );
+					setToolTipText( "This endpoint is valid" );
 
-				if ( nap.hasError() ) {
-					// we have an error, but don't know if it's in the current column					
-					if ( ( 0 == column && nap.isSubjectError() )
-							|| ( 1 == column && nap.isObjectError() ) ) {
-						setBackground( Color.PINK );
-						String type = getHeaders().get( column );
-						setToolTipText( "There is no existing " + type + " named " + value );
+					if ( nap.hasError() ) {
+						// we have an error, but don't know if it's in the current column					
+						if ( ( 0 == column && nap.isSubjectError() )
+								|| ( 1 == column && nap.isObjectError() ) ) {
+							setBackground( Color.PINK );
+							String type = getHeaders().get( column );
+							setToolTipText( "There is no existing " + type + " named " + value );
+						}
 					}
 				}
 			}
