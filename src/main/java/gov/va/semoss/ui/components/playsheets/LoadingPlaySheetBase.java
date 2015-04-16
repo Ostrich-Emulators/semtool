@@ -16,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
@@ -57,7 +56,13 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		errorLabel.setBorder( BorderFactory.createEmptyBorder( 0, 5, 0, 5 ) );
 
 		JTable tbl = getTable();
-		tbl.setDefaultRenderer( String.class, renderer );
+
+		tbl.getColumnModel().getColumn( 0 ).setCellRenderer( renderer );
+		if ( mod.isRel() ) {
+			tbl.getColumnModel().getColumn( 0 ).setCellRenderer( renderer );
+		}
+
+		// tbl.setDefaultRenderer( String.class, renderer );
 		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
 		sorter.setRowFilter( filter );
 		tbl.setRowSorter( sorter );
@@ -66,6 +71,18 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 
 			@Override
 			public void tableChanged( TableModelEvent e ) {
+				// not sure why we need to reset the header renderer so much
+				TableColumnModel tcm = tbl.getColumnModel();
+				ModelHeaderRenderer mhr = new ModelHeaderRenderer( tbl );
+				for ( int col = 0; col < tcm.getColumnCount(); col++ ) {
+					tcm.getColumn( col ).setHeaderRenderer( mhr );
+				}
+
+				tcm.getColumn( 0 ).setCellRenderer( renderer );
+				if( LoadingPlaySheetBase.this.getLoadingModel().isRel() ){
+					tcm.getColumn( 1 ).setCellRenderer( renderer );			
+				}
+				
 				setErrorLabel();
 			}
 		} );
@@ -117,18 +134,6 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		return LoadingSheetModel.class.cast( getModel() );
 	}
 
-	public void setConformanceErrors( Collection<LoadingSheetData.LoadingNodeAndPropertyValues> errs ) {
-		getLoadingModel().setConformanceErrors( errs );
-		setErrorLabel();
-	}
-
-	public void setModelErrors( LoadingSheetData lsd ) {
-		getLoadingModel().setModelErrors( lsd );
-		getTable().getTableHeader().repaint();
-
-		setErrorLabel();
-	}
-
 	protected void setErrorLabel() {
 		StringBuilder msg = new StringBuilder();
 
@@ -170,7 +175,11 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		errorLabel.setText( msg.toString() );
 		errorLabel.setOpaque( true );
 		errorLabel.setBackground( conf || mod ? Color.PINK : this.getBackground() );
+
+		errorLabel.setVisible( getLoadingModel().isRealTimeChecking() );
 		errorLabel.repaint();
+
+		getTable().getTableHeader().repaint();
 	}
 
 	protected class ConformanceRenderer extends DefaultTableCellRenderer {
@@ -189,6 +198,7 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 				if ( null == nap ) {
 					super.getTableCellRendererComponent( table, value, isSelected, hasFocus,
 							fakerow, column );
+					setBackground( table.getBackground() );
 					setToolTipText( "Add a new row to this table" );
 					return this;
 				}

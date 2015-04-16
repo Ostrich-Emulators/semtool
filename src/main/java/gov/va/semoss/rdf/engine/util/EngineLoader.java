@@ -354,6 +354,12 @@ public class EngineLoader {
 		try {
 			myrc.clear();
 			initNamespaces( myrc );
+
+			owls.clear();
+			schemaNodes.clear();
+			dataNodes.clear();
+			relationClassCache.clear();
+			relationCache.clear();
 		}
 		catch ( Exception e ) {
 			log.warn( e, e );

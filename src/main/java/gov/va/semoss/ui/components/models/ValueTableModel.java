@@ -173,7 +173,8 @@ public class ValueTableModel extends AbstractTableModel {
 	/**
 	 * Same as {@link #getRowCount()}, but be sure to ignore extra row if
 	 * {@link #allowsInsertsInPlace()} returns <code>true</code>
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getRealRowCount() {
 		return data.size();
@@ -230,7 +231,7 @@ public class ValueTableModel extends AbstractTableModel {
 		Class<?> k = getColumnClass( c );
 
 		boolean isinsert = isInsertRow( r );
-		
+
 		if ( isinsert ) {
 			Object objs[] = new Object[getColumnCount()];
 			data.add( objs );
@@ -241,7 +242,7 @@ public class ValueTableModel extends AbstractTableModel {
 		if ( isinsert ) {
 			fireTableRowsInserted( r, r );
 		}
-		else{
+		else {
 			fireTableCellUpdated( r, c );
 		}
 	}

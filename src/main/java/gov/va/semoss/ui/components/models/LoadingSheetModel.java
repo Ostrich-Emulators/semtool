@@ -40,6 +40,42 @@ public class LoadingSheetModel extends ValueTableModel {
 
 	public void setRealTimeEngineLoader( EngineLoader el ) {
 		realtimer = el;
+		checkForErrors();
+	}
+
+	public boolean isRealTimeChecking() {
+		return ( null != realtimer );
+	}
+
+	public void checkForErrors() {
+		if ( null == realtimer ) {
+			// no error checking, so reset all errors
+			for ( LoadingNodeAndPropertyValues nap : sheetdata.getData() ) {
+				nap.setSubjectIsError( false );
+				nap.setObjectIsError( false );
+			}
+
+			sheetdata.setSubjectTypeIsError( false );
+			sheetdata.setObjectTypeIsError( false );
+
+			for ( String prop : sheetdata.getProperties() ) {
+				sheetdata.setPropertyIsError( prop, false );
+			}
+			errorcount = 0;
+			fireTableDataChanged();
+		}
+		else {
+			// check everything when we have a non-null engine loader
+			LoadingSheetData lsd
+					= realtimer.checkModelConformance( sheetdata, null, false );
+			setModelErrors( lsd );
+
+			// need to recheck the whole loading sheet now
+			List<LoadingNodeAndPropertyValues> errors
+					= realtimer.checkConformance( lsd, null, false );
+			setConformanceErrors( errors );
+			errorcount = errors.size();
+		}
 	}
 
 	public boolean isRel() {
@@ -57,17 +93,7 @@ public class LoadingSheetModel extends ValueTableModel {
 		super.setHeaders( heads );
 		if ( null != sheetdata ) {
 			sheetdata.setHeaders( heads );
-
-			if ( null != realtimer ) {
-				LoadingSheetData lsd
-						= realtimer.checkModelConformance( sheetdata, null, false );
-				setModelErrors( lsd );
-
-				// need to recheck the whole loading sheet now
-				List<LoadingNodeAndPropertyValues> errors
-						= realtimer.checkConformance( lsd, null, false );
-				setConformanceErrors( errors );
-			}
+			checkForErrors();
 		}
 	}
 
@@ -78,7 +104,16 @@ public class LoadingSheetModel extends ValueTableModel {
 		ValueFactory vf = new ValueFactoryImpl();
 
 		if ( isinsert ) {
-			sheetdata.add( aValue.toString() );
+			LoadingNodeAndPropertyValues nap = sheetdata.add( aValue.toString() );
+
+			if ( null != realtimer ) {
+				boolean iserr = !realtimer.instanceExists( nap.getSubjectType(),
+						nap.getSubject() );
+				nap.setSubjectIsError( iserr );
+				if( iserr ){
+					errorcount++;
+				}
+			}
 		}
 		else {
 			LoadingNodeAndPropertyValues nap = sheetdata.getData().get( r );

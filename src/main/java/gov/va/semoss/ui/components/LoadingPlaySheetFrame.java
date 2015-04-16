@@ -16,6 +16,7 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.CloseableTab.MarkType;
+import gov.va.semoss.ui.components.models.LoadingSheetModel;
 import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.NodeLoadingPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
@@ -71,7 +72,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private final JCheckBox showerrs = new JCheckBox( "Show Only Errors" );
 	private final SaveAllAction saveall = new SaveAllAction();
 	private final AddAction addtab = new AddAction();
-	private EngineLoader realtimer = new EngineLoader();
+	private final EngineLoader realtimer = new EngineLoader();
 	private final JToggleButton timertoggle
 			= new JToggleButton( new ConformanceAction() );
 
@@ -90,9 +91,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		setTitle( "Import Data Review" );
 
 		timertoggle.setText( null );
-		if ( doconformance ) {
-			timertoggle.doClick();
-		}
+		timertoggle.setSelected( doconformance );
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
@@ -135,19 +134,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		realtimer.release();
 	}
 
-	@Override
-	public void setEngine( IEngine engine ) {
-		super.setEngine( engine );
-		timertoggle.setEnabled( null != engine );
-	}
-
 	public final LoadingPlaySheetBase add( LoadingSheetData data ) {
 		LoadingPlaySheetBase ret = ( data.isRel()
 				? new RelationshipLoadingPlaySheet( data )
 				: new NodeLoadingPlaySheet( data ) );
 		ret.getLoadingModel().setReadOnly( false );
 
-		showerrs.addActionListener( ret );
 		addTab( ret );
 
 		if ( ret.getLoadingModel().hasConformanceErrors()
@@ -163,9 +155,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	public void addTab( LoadingPlaySheetBase c ) {
 		super.addTab( c );
 		sheets.add( c );
-		for ( LoadingPlaySheetBase b : sheets ) {
-			b.getLoadingModel().setRealTimeEngineLoader( realtimer );
-		}
+		showerrs.addActionListener( c );
+
+		EngineLoader el = ( timertoggle.isSelected() ? realtimer : null );
+		c.getLoadingModel().setRealTimeEngineLoader( el );
 	}
 
 	@Override
@@ -188,6 +181,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			public void run() {
 				boolean somethingToShow = false;
 
+				if ( doconformance ) {
+					updateProgress( "Preparing Load", 0 );
+					realtimer.clear();
+					realtimer.preloadCaches( getEngine() );
+				}
+
 				int progressPerFile = 100 / toload.size();
 				boolean alreadyShownRdfError = false;
 				for ( File fileToLoad : toload ) {
@@ -195,6 +194,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					ImportFileReader rdr = realtimer.getReader( fileToLoad );
 					log.debug( "importing file:" + fileToLoad );
 					if ( null == rdr ) {
+						// no reader for this filetype, but we could 
+						// still have an RDF file (which we can load)
 						if ( !isLoadable() ) {
 							Utility.showError( "You must specify a database to receive this data" );
 							return;
@@ -220,23 +221,14 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						}
 					}
 					else {
+						// we have a reader, so we can load to importdata if needed
 						try {
 							somethingToShow = true;
 							ImportData data = rdr.readOneFile( fileToLoad );
 							addProgress( "Finished reading " + fileToLoad, progressPerFile );
 
 							for ( LoadingSheetData n : data.getSheets() ) {
-								List<LoadingNodeAndPropertyValues> errs = null;
-								if ( doconformance ) {
-									errs = realtimer.checkConformance( n, getEngine(), false );
-									if ( !dometamodel ) {
-										realtimer.checkModelConformance( n, getEngine(), false );
-									}
-								}
 								add( n );
-								if ( null != errs ) {
-									showerrs.setEnabled( true );
-								}
 							}
 						}
 						catch ( Exception ee ) {
@@ -294,8 +286,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				= new RelationshipLoadingPlaySheet( relname, data, headings );
 		grid.setTitle( "Import Data Review" );
 		addTab( grid );
-		sheets.add( grid );
-		showerrs.addActionListener( grid );
 		hideProgress();
 
 		return grid;
@@ -304,9 +294,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	public NodeLoadingPlaySheet addTab( List<Value[]> data, List<String> headings ) {
 		NodeLoadingPlaySheet grid = new NodeLoadingPlaySheet();
 		grid.setTitle( "Import Data Review" );
-		addTab( grid );
 		grid.create( data, headings );
-		sheets.add( grid );
+		addTab( grid );
 		hideProgress();
 
 		return grid;
@@ -510,31 +499,45 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			boolean sel = timertoggle.isSelected();
 
 			if ( sel ) {
-				realtimer = new EngineLoader();
-				realtimer.preloadCaches( getEngine() );
+				IEngine eng = ( null == getEngine()
+						? LoadingPlaySheetFrame.this.askForEngine( "Check" ) : getEngine() );
 
-				if ( !sheets.isEmpty() ) {
-					recheckConformance();
+				if ( null == eng ) {
+					Utility.showMessage( "QA Check canceled" );
+					timertoggle.setSelected( false );
 				}
+
+				ProgressTask pt = new ProgressTask( "Preparing QA Checks", new Runnable() {
+
+					@Override
+					public void run() {
+						realtimer.clear();
+						realtimer.preloadCaches( eng );
+					}
+
+				} ) {
+					@Override
+					public void done() {
+						super.done();
+						if ( !sheets.isEmpty() ) {
+							recheckConformance( eng );
+						}
+					}
+				};
+				OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 			}
 			else {
 				realtimer.clear();
-			}
-
-			for ( LoadingPlaySheetBase b : sheets ) {
-				b.getLoadingModel().setRealTimeEngineLoader( sel ? realtimer : null );
+				showerrs.setVisible( false );
+				showerrs.setSelected( false );
+				for ( LoadingPlaySheetBase b : sheets ) {
+					b.getLoadingModel().setRealTimeEngineLoader( null );
+				}
 			}
 		}
 
-		private void recheckConformance() {
-			final IEngine eng = ( null == getEngine()
-					? askForEngine( "Check" ) : getEngine() );
-
-			if ( null == eng ) {
-				return;
-			}
-
-			showerrs.setEnabled( true );
+		private void recheckConformance( final IEngine eng ) {
+			showerrs.setVisible( true );
 
 			final String t = "Checking Conformance against "
 					+ MetadataQuery.getEngineLabel( eng );
@@ -551,25 +554,18 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						addProgress( text, progressPerTab );
 						log.debug( text );
 
-						LoadingSheetData lsd
-								= node.getLoadingModel().toLoadingSheet( getTabTitle( node ) );
-						List<LoadingNodeAndPropertyValues> errors
-								= realtimer.checkConformance( lsd, eng, false );
-						realtimer.checkModelConformance( lsd, eng, false );
-						node.setModelErrors( lsd );
-						node.setConformanceErrors( errors );
-
-						if ( !errors.isEmpty() ) {
-							ok[0] = false;
-						}
+						LoadingSheetModel lsm = node.getLoadingModel();
+						lsm.setRealTimeEngineLoader( realtimer );
 
 						CloseableTab ct = getTabComponent( node );
 
-						boolean noerrs = errors.isEmpty();
-						boolean nomods = !lsd.hasModelErrors();
+						boolean noerrs = !lsm.hasConformanceErrors();
+						boolean nomods = !lsm.hasModelErrors();
+
+						ok[0] = ( noerrs && nomods );
 						ct.setMark( noerrs && nomods ? MarkType.NONE : MarkType.ERROR );
-						ct.repaint();
-					}
+						ct.repaint();		
+					}					
 				}
 			} ) {
 
@@ -581,10 +577,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						String msg = "Quality check found " + errs
 								+ ( 1 == errs ? " error" : " errors" );
 						setLabel( msg );
-
-						if ( !showerrs.isSelected() ) {
-							showerrs.doClick();
-						}
 					}
 				}
 			};
