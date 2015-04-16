@@ -44,6 +44,7 @@ import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
+import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
 import gov.va.semoss.ui.swing.custom.CustomAruiStyle;
@@ -137,6 +138,7 @@ public class PlayPane extends JFrame {
 
 	private static final long serialVersionUID = -715188668604903980L;
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
+	private final String IMANAGE = "iManagePanel";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
 	private final String LOGGING = "loggingpanel";
@@ -155,6 +157,7 @@ public class PlayPane extends JFrame {
 	//The "Custom Sparql Query" window, and related controls,
 	//exist in a separate class:
 	private final CustomSparqlPanel csp = new CustomSparqlPanel();
+	private InsightManagerPanel iManagePanel;
 
 	// Right graphPanel desktopPane
 	private JDesktopPane desktopPane;
@@ -552,6 +555,11 @@ public class PlayPane extends JFrame {
 		if ( !lpref ) {
 			rightTabs.remove( loggingPanel );
 		}
+
+		boolean ipref = prefs.getBoolean( IMANAGE, false );
+		if ( !ipref ) {
+			rightTabs.remove( iManagePanel );
+		}
 	}
 
 	protected JTabbedPane makeLeftPane() {
@@ -596,6 +604,10 @@ public class PlayPane extends JFrame {
 				}
 			}
 		} );
+
+		iManagePanel = new InsightManagerPanel( repoList );
+		rightView.insertTab( "Insight Manager", null, iManagePanel,
+				"Manage perspectives and insights", 2 );
 
 		return rightView;
 	}
@@ -777,12 +789,12 @@ public class PlayPane extends JFrame {
 	}
 
 	private JPanel makeFilterPanel() {
-		JPanel panel = new JPanel();
-		panel.setBackground( SystemColor.control );
 		GridBagLayout panelLayout = new GridBagLayout();
 		panelLayout.columnWeights = new double[]{ 1.0 };
 		panelLayout.rowWeights    = new double[]{ 1.0, 1.0, 1.0, 0.0 };
-		panel.setLayout( panelLayout );
+
+		JPanel panel = new JPanel( panelLayout );
+		panel.setBackground( SystemColor.control );
 
 		filterTable   = initJTableAndAddTo(panel, true);
 		propertyTable = initJTableAndAddTo(panel, true);
@@ -803,14 +815,11 @@ public class PlayPane extends JFrame {
 	private JTable initJTableAndAddTo(JPanel panel, boolean useGBC) {
 		JTable table = new JTable();
 		table.setShowGrid( true );
-//        table.setPreferredScrollableViewportSize(new Dimension(320, 120));
-        
-//        JScrollPane scrollPane = new JScrollPane(table);
+
 		if (useGBC)
 			panel.add( new JScrollPane(table), getGBC() );
 		else
 			panel.add( new JScrollPane(table) );
-//		scrollPane.validate();
 		
 		return table;
 	}
@@ -1202,6 +1211,28 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
+		final JCheckBoxMenuItem iManage = new JCheckBoxMenuItem( "Insight Manager tab",
+				getProp( prefs, IMANAGE ) );
+		iManage.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				boolean ischecked = iManage.isSelected();
+				prefs.putBoolean( IMANAGE, ischecked );
+				DIHelper.getInstance().getCoreProp().setProperty( IMANAGE,
+						Boolean.toString( ischecked ) );
+
+				if ( ischecked ) {
+					iManagePanel.insightManagerPanelWorker();
+					rightTabs.addTab( "Insight Manager", null, iManagePanel,
+							"Manage perspectives and insights" );
+				}
+				else {
+					rightTabs.remove( iManagePanel );
+				}
+			}
+		} );
+		iManage.setToolTipText( "Enables/Disables insight manager tab" );
+
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
 		view.add( gcos );
@@ -1212,6 +1243,7 @@ public class PlayPane extends JFrame {
 		view.add( statbar );
 		view.add( sudowl );
 		view.add( tb );
+		view.add( iManage );
 		return view;
 	}
 

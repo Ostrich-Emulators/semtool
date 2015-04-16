@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.*?>
+
+<Pane styleClass="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.semoss.ui.components.insight.manager.InsightManagerController">
+  <stylesheets>
+    <URL value="@/css/InsightManagerPanel.css" />
+  </stylesheets>
+   <children>
+   <TabPane fx:id="tbpTabbedPane" blendMode="RED" layoutX="3.0" layoutY="-3.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+     <tabs>
+       <Tab text="Perspective">
+         <content>
+           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="578.0" prefWidth="959.0">
+                  <children>
+                     <GridPane layoutX="7.0" layoutY="-1.0" prefHeight="604.0" prefWidth="964.0">
+                       <columnConstraints>
+                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="298.0" minWidth="10.0" prefWidth="114.0" />
+                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="863.0" minWidth="10.0" prefWidth="850.0" />
+                       </columnConstraints>
+                       <rowConstraints>
+                         <RowConstraints maxHeight="86.0" minHeight="9.0" prefHeight="61.0" vgrow="NEVER" />
+                         <RowConstraints maxHeight="293.0" minHeight="8.0" prefHeight="50.0" vgrow="SOMETIMES" />
+                         <RowConstraints maxHeight="497.0" minHeight="10.0" prefHeight="410.0" vgrow="NEVER" />
+                           <RowConstraints maxHeight="203.0" minHeight="1.0" prefHeight="65.0" vgrow="SOMETIMES" />
+                       </rowConstraints>
+                        <children>
+                           <Label prefHeight="33.0" prefWidth="46.0" text="Title:" GridPane.halignment="RIGHT">
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </Label>
+                           <Label text="Description:" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                                 <GridPane.margin>
+                                    <Insets right="10.0" top="12.0" />
+                                 </GridPane.margin>
+                              </Label>
+                           <Label text="Insights:" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </Label>
+                           <HBox alignment="CENTER" prefHeight="60.0" prefWidth="964.0" GridPane.columnSpan="2" GridPane.rowIndex="3" GridPane.valignment="BOTTOM">
+                              <children>
+                                 <Button fx:id="btnAddInsight" mnemonicParsing="false" text="Add Insight" textAlignment="CENTER">
+                                    <HBox.margin>
+                                       <Insets right="5.0" />
+                                    </HBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                 </Button>
+                                    <Button fx:id="btnRemoveInsight" mnemonicParsing="false" text="Remove Insight" textAlignment="CENTER">
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                    </Button>
+                                 <Button fx:id="btnAddPerspective" mnemonicParsing="false" text="Add Perspective" textAlignment="CENTER">
+                                    <HBox.margin>
+                                       <Insets right="5.0" />
+                                    </HBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                 </Button>
+                                    <Button fx:id="btnDeletePerspective" mnemonicParsing="false" text="Delete Perspective">
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                    </Button>
+                                 <Button fx:id="btnSavePerspective" mnemonicParsing="false" text="Save Perspective" textAlignment="CENTER">
+                                    <HBox.margin>
+                                       <Insets right="5.0" />
+                                    </HBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                 </Button>
+                                 <Button fx:id="btnReloadPerspective" mnemonicParsing="false" text="Reload" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font></Button>
+                              </children>
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" />
+                                 </GridPane.margin>
+                           </HBox>
+                           <TextArea fx:id="txtaPerspectiveDesc" maxHeight="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" right="10.0" />
+                                 </GridPane.margin>
+                              </TextArea>
+                           <ListView fx:id="lstvInsights" prefHeight="320.0" prefWidth="840.0" styleClass="mylistview" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" right="10.0" />
+                                 </GridPane.margin>
+                           </ListView>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                 <children>
+                                    <ComboBox fx:id="cboPerspectiveTitle" prefHeight="25.0" />
+                                    <TextField fx:id="txtPerspectiveTitle" HBox.hgrow="ALWAYS">
+                                       <HBox.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </HBox.margin>
+                                    </TextField>
+                                 </children>
+                              </HBox>
+                        </children>
+                     </GridPane>
+                  </children>
+                  </AnchorPane>
+         </content>
+       </Tab>
+       <Tab text="Insight">
+         <content>
+           <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <GridPane>
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="503.0" minWidth="10.0" prefWidth="499.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="503.0" minWidth="10.0" prefWidth="499.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="55.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="93.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="93.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="255.0" minHeight="0.0" prefHeight="208.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="255.0" minHeight="10.0" prefHeight="142.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="224.0" minHeight="10.0" prefHeight="60.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="172.0" minHeight="0.0" prefHeight="56.0" vgrow="NEVER" />
+                          </rowConstraints>
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="147.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
+                                 <children>
+                                    <Button fx:id="btnAddParameter_Inst" mnemonicParsing="false" text="Add Parameter" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnDeleteParameter_Inst" mnemonicParsing="false" text="Delete Parameter" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnDeleteInsight_Inst" mnemonicParsing="false" text="Delete Insight" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnSaveInsight_Inst" mnemonicParsing="false" text="Save Insight" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnReloadInsight_Inst" mnemonicParsing="false" text="Reload" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                              <TextArea fx:id="txtaQuery_Inst" prefHeight="101.0" prefWidth="448.0" wrapText="true" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" />
+                                 </GridPane.margin>
+                              </TextArea>
+                              <HBox prefHeight="80.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.valignment="CENTER">
+                                 <children>
+                                    <Label text="Question:">
+                                       <HBox.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="15.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <TextField fx:id="txtQuestion_Inst" prefHeight="35.0" prefWidth="888.0">
+                                       <HBox.margin>
+                                          <Insets bottom="10.0" right="10.0" top="10.0" />
+                                       </HBox.margin>
+                                    </TextField>
+                                 </children>
+                              </HBox>
+                              <GridPane prefHeight="85.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="78.0" minHeight="10.0" prefHeight="51.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="Author:" GridPane.halignment="LEFT">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="txtCreator_Inst" prefHeight="25.0" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <Label text="Date Created:" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="txtCreated_Inst" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" right="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <Label text="Last Update:" GridPane.columnIndex="2" GridPane.halignment="LEFT">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="txtModified_Inst" editable="false" prefHeight="25.0" prefWidth="448.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" right="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                 </children>
+                              </GridPane>
+                              <GridPane prefHeight="46.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="1">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="290.0" minWidth="10.0" prefWidth="123.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="532.0" minWidth="10.0" prefWidth="209.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="620.0" minWidth="10.0" prefWidth="139.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="539.0" minWidth="10.0" prefWidth="500.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="Display with:">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <ComboBox fx:id="cboDisplayWith_Inst" prefHeight="25.0" GridPane.columnIndex="1" />
+                                    <Label text="Renderer Class:" GridPane.columnIndex="2" />
+                                    <TextField fx:id="txtRendererClass_Inst" GridPane.columnIndex="3">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                 </children>
+                              </GridPane>
+                              <GridPane prefHeight="90.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="325.0" minWidth="10.0" prefWidth="175.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="495.0" minWidth="10.0" prefWidth="321.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="475.0" minWidth="10.0" prefWidth="475.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints maxHeight="40.0" minHeight="5.0" prefHeight="22.0" />
+                                    <RowConstraints maxHeight="106.0" minHeight="0.0" prefHeight="106.0" vgrow="ALWAYS" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="Parameter:">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <ListView fx:id="lstvParameter_Inst" prefHeight="85.0" prefWidth="448.0" styleClass="mylistview" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" right="10.0" />
+                                       </GridPane.margin>
+                                    </ListView>
+                                    <ListView fx:id="lstvInsightPerspective_Inst" prefHeight="101.0" prefWidth="448.0" styleClass="mylistview" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" />
+                                       </GridPane.margin>
+                                    </ListView>
+                                    <TextArea fx:id="txtaInsightDesc_Inst" prefHeight="52.0" prefWidth="448.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" />
+                                       </GridPane.margin>
+                                    </TextArea>
+                                    <Label text="Perspective:" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="Description:" GridPane.columnIndex="2" GridPane.halignment="LEFT">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                 </children>
+                              </GridPane>
+                              <CheckBox fx:id="chkLegacyQuery_Inst" mnemonicParsing="false" text="Legacy Query" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets right="15.0" />
+                                 </GridPane.margin>
+                              </CheckBox>
+                              <Label text="Query:" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets left="10.0" />
+                                 </GridPane.margin>
+                              </Label>
+                           </children>
+                        </GridPane>
+                     </children></AnchorPane>
+         </content>
+       </Tab>
+            <Tab fx:id="tabParameter" text="Parameter">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <GridPane layoutX="15.0" layoutY="2.0" prefHeight="588.0" prefWidth="969.0">
+                           <children>
+                              <Label text="Type:" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                                 <GridPane.margin>
+                                    <Insets right="10.0" top="15.0" />
+                                 </GridPane.margin>
+                              </Label>
+                              <HBox alignment="CENTER" prefHeight="86.0" prefWidth="969.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
+                                 <children>
+                                    <Button fx:id="btnSaveParameter_Parm" mnemonicParsing="false" text="Save Parameter" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnReloadParameter_Parm" mnemonicParsing="false" text="Reload" textAlignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                              <TextArea id="txtaDefault_Parm" fx:id="txtaDefaultQuery_parm" prefHeight="293.0" prefWidth="860.0" GridPane.columnSpan="2" GridPane.rowIndex="5" GridPane.vgrow="NEVER">
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" />
+                                 </GridPane.margin>
+                              </TextArea>
+                              <TextField fx:id="txtValueType_parm" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <GridPane GridPane.columnSpan="2">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="238.0" minWidth="10.0" prefWidth="110.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="474.0" minWidth="10.0" prefWidth="400.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="0.0" prefWidth="91.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="400.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="Variable:" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" top="15.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField id="txtVariable_Parm" fx:id="txtVariable_parm" prefHeight="0.0" prefWidth="394.0" GridPane.columnIndex="3">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" right="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <TextField fx:id="txtLabel_parm" prefHeight="15.0" prefWidth="366.0" GridPane.columnIndex="1">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" right="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <Label text="Name:" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" top="15.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                 </children>
+                              </GridPane>
+                              <Label text="Default Query:" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                                 <padding>
+                                    <Insets left="10.0" />
+                                 </padding>
+                              </Label>
+                              <TextField fx:id="txtDefaultValue_parm" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <Label text="Default Value:" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets left="10.0" />
+                                 </GridPane.margin>
+                              </Label>
+                           </children>
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="373.0" minWidth="10.0" prefWidth="73.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="893.0" minWidth="10.0" prefWidth="845.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints maxHeight="445.0" minHeight="10.0" prefHeight="61.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="503.0" minHeight="0.0" prefHeight="56.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="614.0" minHeight="10.0" prefHeight="46.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="614.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="614.0" minHeight="10.0" prefHeight="43.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="614.0" minHeight="0.0" prefHeight="284.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="285.0" minHeight="0.0" prefHeight="56.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+     </tabs>
+   </TabPane>
+   </children>
+</Pane>
