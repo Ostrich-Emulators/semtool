@@ -19,74 +19,9 @@
  */
 package gov.va.semoss.ui.components;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.SystemColor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.lang.reflect.Method;
-
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.InternalFrameListener;
-
-import org.apache.log4j.Logger;
-
-import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.api.IChakraListener;
-import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
-import gov.va.semoss.ui.swing.custom.CustomAruiStyle;
-import gov.va.semoss.ui.swing.custom.CustomButton;
-import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
-import gov.va.semoss.util.CSSApplication;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
-import aurelienribon.ui.css.Style;
-import aurelienribon.ui.css.swing.SwingStyle;
-
-import com.ibm.icu.util.StringTokenizer;
-
-import java.lang.reflect.Field;
-
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
@@ -107,17 +42,43 @@ import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
+import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
+import gov.va.semoss.ui.swing.custom.CustomAruiStyle;
+import gov.va.semoss.ui.swing.custom.CustomButton;
+import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
+import gov.va.semoss.util.CSSApplication;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
+import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -125,14 +86,48 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.InternalFrameListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+
+import aurelienribon.ui.css.Style;
+import aurelienribon.ui.css.swing.SwingStyle;
+
+import com.ibm.icu.util.StringTokenizer;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -160,29 +155,26 @@ public class PlayPane extends JFrame {
 	//The "Custom Sparql Query" window, and related controls,
 	//exist in a separate class:
 	private final CustomSparqlPanel csp = new CustomSparqlPanel();
-	//private JSeparator separator_1;
 
 	// Right graphPanel desktopPane
 	private JDesktopPane desktopPane;
 	public JButton refreshButton;
 	public JTable filterTable, edgeTable, propertyTable;
-	private JScrollPane filterSliders;
 
 	// left cosmetic panel components
+	private JPanel cosmeticsPanel;
 	public JTable colorShapeTable, sizeTable;
-	public JButton btnResetDefaults = new CustomButton( "Reset Defaults" ); //JPM unused
 
 	// Left label panel
+	private JPanel filterPanel;
 	public JTable labelTable, tooltipTable;
 
 	// SUDOWL Panel Components
 	private JPanel owlPanel;
-	private JPanel cosmeticsPanel;
-	private JPanel filterPanel;
 	private LoggingPanel loggingPanel;
 	public JTable objectPropertiesTable, dataPropertiesTable;
 	public JTextField dataPropertiesString, objectPropertiesString;
-	public JButton btnRepaintGraph;
+	public JButton btnRepaintGraph, saveSudowl;
 
 	// Custom Update Components
 	public JButton btnCustomUpdate;
@@ -195,6 +187,7 @@ public class PlayPane extends JFrame {
 			importMapFileNameField, dbPropFileNameField, questionFileNameField,
 			dbSelectorField, dbImportURLField, dbImportUsernameField;
 	public JPasswordField dbImportPWField;
+	
 	//V-CAMP RTM Import ("rtmLoadButton"):
 	public JButton mapBrowseBtn, dbPropBrowseButton, questionBrowseButton,
 			btnShowAdvancedImportFeatures, importButton, rtmLoadButton, fileBrowseBtn,
@@ -204,11 +197,7 @@ public class PlayPane extends JFrame {
 			lblDBImportURL, lblDesignateBaseUri, lblDBImportUsername, lblDBImportPW,
 			lblDBImportDriverType;
 
-	public JButton saveSudowl;
-	public JButton vcampModuleBtn;
-	protected final JTabbedPane leftTabs;
-	protected final JTabbedPane rightTabs;
-
+	protected final JTabbedPane leftTabs, rightTabs;
 	private final StatusBar statusbar;
 
 	private final DbAction creater = new CreateDbAction( UIPROGRESS, this );
@@ -226,7 +215,6 @@ public class PlayPane extends JFrame {
 			ExportTtlAction.Style.RDF, this );
 	private final DbAction exportinsights
 			= new ExportInsightsAction( UIPROGRESS, this );
-	//**//
 	private final DbAction expall = new ExportLoadingSheetAction( UIPROGRESS,
 			this, true, true );
 	private final DbAction exprels = new ExportLoadingSheetAction( UIPROGRESS,
@@ -248,7 +236,6 @@ public class PlayPane extends JFrame {
 			= new ImportInsightsAction( UIPROGRESS, true, this );
 	private final ImportInsightsAction importInsights
 			= new ImportInsightsAction( UIPROGRESS, false, this );
-	// private final ImportCapBPAction importCapBp = new ImportCapBPAction( UIPROGRESS, this );
 	private final CheckConsistencyAction consistencyCheck
 			= new CheckConsistencyAction( UIPROGRESS, this );
 	private final JMenu windowSelector = new JMenu( "Window" );
@@ -278,7 +265,7 @@ public class PlayPane extends JFrame {
 		// for each field go into the properties file and find any of the
 		// listeners
 		// Drop down scrollbars
-		for ( JComboBox combo : new JComboBox[]{ questionSelector, perspectiveSelector } ) {
+		for ( JComboBox<?> combo : new JComboBox[]{ questionSelector, perspectiveSelector } ) {
 			Object popup = combo.getUI().getAccessibleChild( combo, 0 );
 			Component c = Container.class.cast( popup ).getComponent( 0 );
 			if ( c instanceof JScrollPane ) {
@@ -291,7 +278,6 @@ public class PlayPane extends JFrame {
 
 		// run through the view components
 		for ( Field field : fields ) {
-			// logger.info(fields[fieldIndex].getName());
 			Object obj = field.get( this );
 			String fieldName = field.getName();
 
@@ -451,25 +437,23 @@ public class PlayPane extends JFrame {
 				combinedSplitPane.setDividerLocation( 0.75 );
 			}
 		} );
+		
 		initMenuItems();
 		initRepoList();
 		DIHelper.getInstance().setRepoList( repoList );
 
 		playsheetToolbar = new JToolBar();
-
 		rightTabs = makeRightPane();
 		leftTabs = makeLeftPane();
-		mainSplitPane
-				= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, leftTabs, rightTabs );
+		
+		mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftTabs, rightTabs);
 		mainSplitPane.setOneTouchExpandable( true );
 		mainSplitPane.setDividerLocation( 300 );
-
 		mainSplitPane.setContinuousLayout( true );
 
-		//Add the Custom Sparql Query window by referencing
-		//an external class:
+		//Add the Custom Sparql Query window by referencing an external class:
 		customSparqlPanel = csp.addCustomSparqlPanel();
-		combinedSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, mainSplitPane, customSparqlPanel );
+		combinedSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, mainSplitPane, customSparqlPanel);
 		combinedSplitPane.setOneTouchExpandable( true );
 		combinedSplitPane.setDividerLocation( 900 );
 
@@ -487,24 +471,16 @@ public class PlayPane extends JFrame {
 
 		syncUIWithMenuBar();
 
-		// UIManager.put("nimbusBase", Color.BLUE);
-		// UIManager.put("nimbusBlueGrey", new Color(102,0,0));
-		// UIManager.put("control", Color.WHITE);
 		SwingStyle.init(); // for swing rules and functions
 		CustomAruiStyle.init(); // for custom components rules and functions
+		
 		// Components to style
-		// Style.registerTargetClassName(lblLearningMaterials, ".label");
 		Style.registerTargetClassName( submitButton, ".createBtn" );
 		Style.registerTargetClassName( btnRepaintGraph, ".standardButton" );
-		Style.registerTargetClassName( vcampModuleBtn, ".standardButton" );
-
-		Style.registerTargetClassName( btnResetDefaults, ".standardButton" );
 		Style.registerTargetClassName( refreshButton, ".standardButton" );
 		Style.registerTargetClassName( saveSudowl, ".standardButton" );
-		//Style.registerTargetClassName( pptTrainingBtn, ".standardButton" );
-		//Style.registerTargetClassName( htmlTrainingBtn, ".standardButton" );
 
-		CSSApplication app = new CSSApplication( getContentPane() );
+		new CSSApplication( getContentPane() );
 		DIHelper.getInstance().setLocalProperty( Constants.MAIN_FRAME, this );
 	}
 
@@ -624,20 +600,6 @@ public class PlayPane extends JFrame {
 		return rightView;
 	}
 
-	private JPanel makeGraphCosmeticsPanel() {
-		JPanel graphCosmeticsPanel = new JPanel( new GridLayout( 1, 0 ) );
-
-		colorShapeTable = new JTable();
-		colorShapeTable.setShowGrid( true );
-
-		JScrollPane colorShapeScrollPane = new JScrollPane( colorShapeTable );
-		colorShapeScrollPane.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		graphCosmeticsPanel.add( colorShapeScrollPane );
-//		graphCosmeticsPanel.add( btnResetDefaults );
-
-		return graphCosmeticsPanel;
-	}
-
 	/**
 	 * Splits the database selector from the categories/questions in the left
 	 * pane. The divider is moveable by mouse, and drags the database window's
@@ -662,6 +624,8 @@ public class PlayPane extends JFrame {
 		paramPanel = pnl.getParamPanel();
 
 		Action handleQuestionKeys = new AbstractAction() {
+			private static final long serialVersionUID = -4945632514443349830L;
+
 			@Override
 			public void actionPerformed( final ActionEvent e ) {
 				Runnable runner = new Runnable() {
@@ -677,6 +641,7 @@ public class PlayPane extends JFrame {
 				OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 			}
 		};
+		
 		submitButton.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getInputMap( JComponent.WHEN_FOCUSED ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getActionMap().put( "handleQuestionKeys", handleQuestionKeys );
@@ -773,8 +738,7 @@ public class PlayPane extends JFrame {
 		owly.add( objectPropertiesString, gbc_objectPropertiesString );
 		objectPropertiesString.setColumns( 10 );
 
-		btnRepaintGraph = new CustomButton( "Refresh" );
-		btnRepaintGraph.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
+		btnRepaintGraph = initCustomButton("Refresh");
 		GridBagConstraints gbc_btnRepaintGraph = new GridBagConstraints();
 		gbc_btnRepaintGraph.insets = new Insets( 0, 0, 5, 0 );
 		gbc_btnRepaintGraph.gridx = 0;
@@ -784,9 +748,7 @@ public class PlayPane extends JFrame {
 		scrollPane_7.getVerticalScrollBar().setUI( new NewScrollBarUI() );
 		scrollPane_8.getVerticalScrollBar().setUI( new NewScrollBarUI() );
 
-		saveSudowl = new CustomButton( "Refresh" );
-		saveSudowl.setText( "Save" );
-		saveSudowl.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
+		saveSudowl = initCustomButton("Save");
 		GridBagConstraints gbc_saveSudowl = new GridBagConstraints();
 		gbc_saveSudowl.gridx = 0;
 		gbc_saveSudowl.gridy = 7;
@@ -795,148 +757,76 @@ public class PlayPane extends JFrame {
 		return owly;
 	}
 
+	private JPanel makeGraphCosmeticsPanel() {
+		JPanel panel = new JPanel( new GridLayout( 1, 1 ) );
+		panel.setBackground( SystemColor.control );
+
+		colorShapeTable = initJTableAndAddTo(panel, false);
+
+		return panel;
+	}
+
 	private JPanel makeOutputPanel() {
-		JPanel outputPanel = new JPanel();
-		outputPanel.setBackground( SystemColor.control );
-		GridBagLayout gbl_outputPanel = new GridBagLayout();
-		gbl_outputPanel.columnWidths = new int[]{ 231 };
-		gbl_outputPanel.rowHeights = new int[]{ 0, 0, 350, 0, 350, 150 };
-		gbl_outputPanel.columnWeights = new double[]{ 1.0 };
-		gbl_outputPanel.rowWeights = new double[]{ 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE };
-		outputPanel.setLayout( gbl_outputPanel );
-
-		JLabel lblLabelDisplay = new JLabel( "Label Display" );
-		lblLabelDisplay.setToolTipText( "Customize the appearance of the node labels as displayed on the graph" );
-		lblLabelDisplay.setFont( new Font( "Tahoma", Font.BOLD, 12 ) );
-		lblLabelDisplay.setForeground( Color.BLACK );
-		lblLabelDisplay.setBackground( Color.BLACK );
-		GridBagConstraints gbc_lblLabelDisplay = new GridBagConstraints();
-		gbc_lblLabelDisplay.insets = new Insets( 0, 0, 5, 0 );
-		gbc_lblLabelDisplay.gridx = 0;
-		gbc_lblLabelDisplay.gridy = 1;
-		outputPanel.add( lblLabelDisplay, gbc_lblLabelDisplay );
-
-		JScrollPane scrollPane_3 = new JScrollPane( (Component) null );
-		scrollPane_3.setPreferredSize( new Dimension( 150, 350 ) );
-		scrollPane_3.setMinimumSize( new Dimension( 150, 350 ) );
-		scrollPane_3.setMaximumSize( new Dimension( 150, 350 ) );
-		scrollPane_3.setForeground( Color.GRAY );
-		scrollPane_3.setBorder( null );
-		scrollPane_3.setBackground( Color.WHITE );
-		GridBagConstraints gbc_scrollPane_3 = new GridBagConstraints();
-		gbc_scrollPane_3.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_3.insets = new Insets( 0, 0, 5, 0 );
-		gbc_scrollPane_3.gridx = 0;
-		gbc_scrollPane_3.gridy = 2;
-		outputPanel.add( scrollPane_3, gbc_scrollPane_3 );
-
-		labelTable = new JTable();
-		labelTable.setAutoResizeMode( JTable.AUTO_RESIZE_LAST_COLUMN );
-		scrollPane_3.setViewportView( labelTable );
-		labelTable.setShowGrid( true );
-		labelTable.setShowHorizontalLines( true );
-		labelTable.setShowVerticalLines( true );
-
-		JLabel lblDisplayTooltip = new JLabel( "Tooltip Display" );
-		lblDisplayTooltip.setToolTipText( "Customize the appearance of the node labels displayed as mouseover events" );
-		lblDisplayTooltip.setFont( new Font( "Tahoma", Font.BOLD, 12 ) );
-		lblDisplayTooltip.setBackground( Color.BLACK );
-		lblDisplayTooltip.setForeground( Color.BLACK );
-		GridBagConstraints gbc_lblDisplayTooltip = new GridBagConstraints();
-		gbc_lblDisplayTooltip.insets = new Insets( 0, 0, 5, 0 );
-		gbc_lblDisplayTooltip.gridx = 0;
-		gbc_lblDisplayTooltip.gridy = 3;
-		outputPanel.add( lblDisplayTooltip, gbc_lblDisplayTooltip );
-
-		JScrollPane scrollPane_6 = new JScrollPane();
-		scrollPane_6.setMaximumSize( new Dimension( 150, 350 ) );
-		scrollPane_6.setPreferredSize( new Dimension( 150, 350 ) );
-		scrollPane_6.setMinimumSize( new Dimension( 150, 350 ) );
-		GridBagConstraints gbc_scrollPane_6 = new GridBagConstraints();
-		gbc_scrollPane_6.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_6.gridx = 0;
-		gbc_scrollPane_6.gridy = 4;
-		outputPanel.add( scrollPane_6, gbc_scrollPane_6 );
-
-		tooltipTable = new JTable();
-		scrollPane_6.setViewportView( tooltipTable );
-		tooltipTable.setShowGrid( true );
-		tooltipTable.setShowHorizontalLines( true );
-		tooltipTable.setShowVerticalLines( true );
-
-		scrollPane_3.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		scrollPane_6.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-
-		return outputPanel;
+		JPanel panel = new JPanel( new GridLayout( 2, 1 ) );
+		panel.setBackground( SystemColor.control );
+		
+		labelTable   = initJTableAndAddTo(panel, false);
+		tooltipTable = initJTableAndAddTo(panel, false);
+		
+		return panel;
 	}
 
 	private JPanel makeFilterPanel() {
 		JPanel panel = new JPanel();
-
 		panel.setBackground( SystemColor.control );
-		GridBagLayout gbl_filterPanel = new GridBagLayout();
-		gbl_filterPanel.columnWidths = new int[]{ 239, 0 };
-		gbl_filterPanel.rowHeights = new int[]{ 44, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_filterPanel.columnWeights = new double[]{ 1.0, Double.MIN_VALUE };
-		gbl_filterPanel.rowWeights = new double[]{ 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		panel.setLayout( gbl_filterPanel );
+		GridBagLayout panelLayout = new GridBagLayout();
+		panelLayout.columnWeights = new double[]{ 1.0 };
+		panelLayout.rowWeights    = new double[]{ 1.0, 1.0, 1.0, 0.0 };
+		panel.setLayout( panelLayout );
 
-		filterTable = new JTable();
-		filterTable.setShowGrid( true );
-		filterTable.setShowHorizontalLines( true );
-		filterTable.setShowVerticalLines( true );
+		filterTable   = initJTableAndAddTo(panel, true);
+		propertyTable = initJTableAndAddTo(panel, true);
+		edgeTable     = initJTableAndAddTo(panel, true);
 
-		JScrollPane scrollPane_2 = new JScrollPane( filterTable );
-		GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
-		gbc_scrollPane_2.gridheight = 2;
-		gbc_scrollPane_2.insets = new Insets( 0, 0, 5, 0 );
-		gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_2.gridx = 0;
-		gbc_scrollPane_2.gridy = 0;
-		panel.add( scrollPane_2, gbc_scrollPane_2 );
-
-		filterSliders = new JScrollPane();
-		GridBagConstraints gbc_filterSliders = new GridBagConstraints();
-		gbc_filterSliders.insets = new Insets( 0, 0, 5, 0 );
-		gbc_filterSliders.fill = GridBagConstraints.BOTH;
-		gbc_filterSliders.gridx = 0;
-		gbc_filterSliders.gridy = 2;
-		panel.add( filterSliders, gbc_filterSliders );
-
-		propertyTable = new JTable();
-		filterSliders.setViewportView( propertyTable );
-		propertyTable.setShowGrid( true );
-		propertyTable.setShowHorizontalLines( true );
-		propertyTable.setShowVerticalLines( true );
-
-		JScrollPane scrollPane_4 = new JScrollPane();
-		GridBagConstraints gbc_scrollPane_4 = new GridBagConstraints();
-		gbc_scrollPane_4.insets = new Insets( 0, 0, 5, 0 );
-		gbc_scrollPane_4.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_4.gridx = 0;
-		gbc_scrollPane_4.gridy = 3;
-		panel.add( scrollPane_4, gbc_scrollPane_4 );
-
-		edgeTable = new JTable();
-		scrollPane_4.setViewportView( edgeTable );
-		edgeTable.setShowGrid( true );
-		edgeTable.setShowHorizontalLines( true );
-		edgeTable.setShowVerticalLines( true );
-
-		// scrollPane_2.setColumnHeaderView(filterTable);
-		refreshButton = new CustomButton( "Refresh Graph" );
-		refreshButton.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
-		GridBagConstraints gbc_refreshGraph = new GridBagConstraints();
-		gbc_refreshGraph.insets = new Insets( 0, 0, 5, 0 );
-		gbc_refreshGraph.gridx = 0;
-		gbc_refreshGraph.gridy = 6;
-		panel.add( refreshButton, gbc_refreshGraph );
-
-		scrollPane_2.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		scrollPane_4.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		filterSliders.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-
+		refreshButton = initCustomButton("Refresh Graph");
+		panel.add( refreshButton, getGBC(GridBagConstraints.NONE) );
+		
 		return panel;
+	}
+
+	private CustomButton initCustomButton(String title) {
+		CustomButton button = new CustomButton( title );
+		button.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
+		return button;
+	}
+	
+	private JTable initJTableAndAddTo(JPanel panel, boolean useGBC) {
+		JTable table = new JTable();
+		table.setShowGrid( true );
+//        table.setPreferredScrollableViewportSize(new Dimension(320, 120));
+        
+//        JScrollPane scrollPane = new JScrollPane(table);
+		if (useGBC)
+			panel.add( new JScrollPane(table), getGBC() );
+		else
+			panel.add( new JScrollPane(table) );
+//		scrollPane.validate();
+		
+		return table;
+	}
+
+	private int gbcY = 0;
+	private GridBagConstraints getGBC() {
+		return getGBC(GridBagConstraints.BOTH);
+	}
+
+	private GridBagConstraints getGBC(int fill) {
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets( 0, 0, 5, 0 );
+		gbc.fill = fill;
+		gbc.gridx = 0;
+		gbc.gridy = gbcY++;
+		return gbc;
 	}
 
 	private JComponent makeGraphTab() {
@@ -960,8 +850,8 @@ public class PlayPane extends JFrame {
 				final JInternalFrame[] frames = desktopPane.getAllFrames();
 				//The following declarations are to enable/disable the "Overlay" CheckBox
 				//When necessary:
-				JDesktopPane pane = DIHelper.getInstance().getDesktop();
-				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
+//				JDesktopPane pane = DIHelper.getInstance().getDesktop();
+//				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
 
 				if ( 0 == frames.length ) {
 					appendChkBox.setSelected( false );
@@ -1149,6 +1039,7 @@ public class PlayPane extends JFrame {
 		JMenuItem helpitem = new JMenuItem( "About SEMOSS Tool" );
 		help.add( helpitem );
 		help.add( new AbstractAction( "Options" ) {
+			private static final long serialVersionUID = -5306914853342321083L;
 
 			@Override
 			public void actionPerformed( ActionEvent ae ) {

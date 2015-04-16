@@ -27,14 +27,10 @@ import java.awt.Shape;
 import java.util.Hashtable;
 import java.util.Random;
 
-import org.apache.log4j.Logger;
-
 /**
  * This is the table that stores all the shapes and colors for nodes on the graph play sheet.
  */
 public class TypeColorShapeTable {
-	private static final Logger logger = Logger.getLogger(TypeColorShapeTable.class);
-
 	private static TypeColorShapeTable instance = new TypeColorShapeTable();
 
 	private Hashtable<String, Shape>        shapeHash = new Hashtable<String, Shape>();
@@ -159,8 +155,6 @@ public class TypeColorShapeTable {
 	 * @param vertex - the vertex for whom we are setting the shape
 	 */
 	public boolean initializeShape(SEMOSSVertex vertex) {
-		logger.debug("Initializing shape for vertex:" + vertex.getLabel() + ", of type: " + vertex.getType());
-
 		//first check to see if we've seen this type before
 		if(shapeHash.containsKey(vertex.getType())) {
 			return setShape(null, vertex);
@@ -192,8 +186,6 @@ public class TypeColorShapeTable {
 	 * @param vertex
 	 * @return Color - the color based on the type and vertex name*/
 	public boolean initializeColor(SEMOSSVertex vertex) {
-		logger.debug("Initializing color for vertex:" + vertex.getLabel() + ", of type: " + vertex.getType());
-
 		// first check if we've seen the type before
 		if(colorHash.containsKey(vertex.getType())) {
 			return setColor(null, vertex);

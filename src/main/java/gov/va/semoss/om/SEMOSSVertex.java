@@ -89,8 +89,8 @@ public class SEMOSSVertex {
 
 	private void initVertex(String uriString, String instanceName,
 			String className) {
-		logger.debug("Vertex (Name, Type, URI): (" + instanceName + ", "
-				+ className + ", " + uriString + ")");
+		logger.debug("Initializing Vertex (Name, Type, URI): (" + 
+			instanceName + ", " + className + ", " + uriString + ")");
 
 		putProperty(Constants.URI_KEY, uriString);
 		putProperty(Constants.VERTEX_NAME, instanceName);

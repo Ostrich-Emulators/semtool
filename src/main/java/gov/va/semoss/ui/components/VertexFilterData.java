@@ -34,6 +34,7 @@ import javax.swing.table.AbstractTableModel;
  * This class is used to filter vertex data.
  */
 public class VertexFilterData extends AbstractTableModel {
+	private static final long serialVersionUID = 5877171695108692808L;
 	private static final Logger logger = Logger.getLogger(VertexFilterData.class);
 
 	private final Map<String, List<SEMOSSVertex>> typeHash = new HashMap<>();
@@ -41,7 +42,6 @@ public class VertexFilterData extends AbstractTableModel {
 	private static final String[] columnNames = { "Show", "Node", "Instance" };
 	private static final Class<?>[] classNames = { Boolean.class, Object.class, Object.class };
 
-	
 	private String[] edgeTypeNames = { "Edge Type", "Filter" };
 	private String[] propertyNames = { "Name ", "Value" };
 	private String[] nodeTypes;
@@ -88,9 +88,6 @@ public class VertexFilterData extends AbstractTableModel {
 	@Override
 	public Object getValueAt(int row, int column) {
 		String val = rows[row][column];
-		if (column == 0) {
-			logger.debug(row + "<>" + column + "<>" + val);
-		}
 		if (val != null && val.equalsIgnoreCase("true")) {
 			return true;
 		} else if (val != null && val.equalsIgnoreCase("false")) {
@@ -126,6 +123,9 @@ public class VertexFilterData extends AbstractTableModel {
 	}
 
 	public Object getEdgeVal(int r, int c) {
+		if (edgeRows == null)
+			return null;
+		
 		return edgeRows[r][c];
 	}
 
@@ -239,8 +239,6 @@ public class VertexFilterData extends AbstractTableModel {
 	 * @return String[][] Array containing information about vertex properties.
 	 */
 	public String[][] fillRows() {
-		logger.debug("Fill Rows Called >>>>>>>>>>>>>>" + count);
-
 		Map<String, Boolean> oldshowvals = new HashMap<>();
 		if (null != rows) {
 			for (Object[] oldvals : rows) {
@@ -571,14 +569,11 @@ public class VertexFilterData extends AbstractTableModel {
 	 */
 	public void setPropValueAt(SEMOSSVertex vert, String val, int row,
 			int column) {
-		// will not be called for now
-		// but when called it will set it
 		String[][] propertyRows = propHash.get(vert);
 		String key = propertyRows[row][0];
 		propertyRows[row][column] = val;
 		propHash.put(vert, propertyRows);
 		vert.putProperty(key, val + "");
-
 	}
 
 	/**
@@ -652,8 +647,6 @@ public class VertexFilterData extends AbstractTableModel {
 	 *            Column index.
 	 */
 	public void setPropValueAt(SEMOSSEdge edge, String val, int row, int column) {
-		// will not be called for now
-		// but when called it will set it
 		String[][] propertyRows = edgeHash.get(edge);
 		String key = propertyRows[row][0];
 		propertyRows[row][column] = val;
