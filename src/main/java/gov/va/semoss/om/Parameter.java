@@ -92,7 +92,14 @@ public class Parameter {
 		}
 		Value variableValue = resultSet.getValue("variable");
 		if(variableValue != null){
-			this.strVariable = variableValue.stringValue();
+			//A complete URI is loaded for the variable name. We only want the 
+			//user to modify the actual name, so only that should be displayed:
+			String[] aryVariable = variableValue.stringValue().split("\\#");
+			if(aryVariable.length > 1){
+			   this.strVariable = aryVariable[1];
+			}else{
+			   this.strVariable = aryVariable[0];
+			}
 		}
 		Value valueTypeValue = resultSet.getValue("valueType");
 		if(valueTypeValue != null){

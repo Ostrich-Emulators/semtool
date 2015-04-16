@@ -1,27 +1,15 @@
 package gov.va.semoss.rdf.engine.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
@@ -37,7 +25,6 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
@@ -45,7 +32,6 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	  private WriteableInsightManager wim;
 	  private RepositoryConnection rc;
 	  private static final Logger log = Logger.getLogger(WriteablePerspectiveTab.class);
-	  private final Pattern pattern = Pattern.compile("^(\\w+)(.*)$");
 	  
 	  public WriteableInsightTabImpl(WriteableInsightManagerImpl wim){
 		  this.wim = wim;
@@ -57,21 +43,21 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * @param insight -- (Insight) Insight to which new Parameter will be added.
 	   */
 	  @Override
-	  public boolean addParameter(Insight insight, double dblRandom){
+	  public boolean addParameter(Insight insight){
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
 	      UriBuilder uriBuilder; 
-	      String strRandom = String.valueOf(dblRandom);
+	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 	      
 		  try{
 	          rc.begin();
 	          
 	          URI insightURI = insight.getId();				
 			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI constraintURI = uriBuilder.add("constraint-" + strRandom).build();				
+	          URI constraintURI = uriBuilder.add("constraint-" + strUniqueIdentifier).build();				
 	          rc.add( insightURI, SPIN.constraint, constraintURI );	          
-	          rc.add( constraintURI, RDFS.LABEL, insightVF.createLiteral("New Parameter: " + strRandom) );
-	          rc.add( constraintURI, SPL.valueType, insightVF.createURI("http://semoss.org/ontologies/Concept/parameter-" + strRandom));
+	          rc.add( constraintURI, RDFS.LABEL, insightVF.createLiteral("New Parameter: " + strUniqueIdentifier) );
+	          rc.add( constraintURI, SPL.valueType, insightVF.createURI("http://semoss.org/ontologies/Concept/parameter-" + strUniqueIdentifier));
 	          rc.add( constraintURI, SPL.predicate, insightVF.createLiteral("") );
 
 	          rc.commit();
@@ -351,8 +337,6 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	  public boolean addExistingInsight(Insight insight, Perspective perspective){
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
-		  Literal now = insightVF.createLiteral( new Date() );
-		  Literal creator = insightVF.createLiteral( "Imported By " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 	      UriBuilder uriBuilder; 
 
 		  try{
