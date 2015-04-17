@@ -29,4 +29,16 @@ public class MultiMap<T, V> extends HashMap<T, List<V>> {
 		return put( key, list );
 	}
 
+	/**
+	 * Gets a guaranteed not-null list of Vs. This is different from 
+	 * {@link #get(java.lang.Object) } in that it will never return
+	 * <code>null</code>
+	 *
+	 * @param key the key to get
+	 * @return a list
+	 */
+	public List<V> getNN( T key ) {
+		List<V> v = get( key );
+		return ( null == v ? new ArrayList<>() : v );
+	}
 }

@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.lucene.search.spell.LevensteinDistance;
-import org.apache.lucene.search.spell.StringDistance;
 import org.openrdf.model.URI;
 
 /**

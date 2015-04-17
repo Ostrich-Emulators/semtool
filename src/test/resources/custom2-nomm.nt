@@ -1,11 +1,3 @@
-<http://seman.tc/data/northwind> <http://purl.org/dc/terms/creator> "North Wind, LLC" .
-<http://seman.tc/data/northwind> <http://www.w3.org/2002/07/owl#versionIRI> <http://seman.tc/data/northwind/0.9> .
-<http://seman.tc/data/northwind/M4b758ad465ff47ed3006af6e2d9c15e1> <http://www.w3.org/2000/01/rdf-schema#label> "Paris sp\u00E9cialit\u00E9s"@fr .
-<http://seman.tc/data/northwind/VCAMPApplicationModule> <http://www.w3.org/2000/01/rdf-schema#subclassOf> <http://seman.tc/data/northwind/ApplicationModule> .
-<http://seman.tc/data/northwind> <http://www.w3.org/2000/01/rdf-schema#label> "North Wind Corporate Database" .
-<http://seman.tc/data/northwind> <http://www.w3.org/2002/07/owl#versionInfo> "0.9 (beta)" .
-<http://seman.tc/data/northwind> <http://purl.org/dc/terms/description> "This is the \"North Wind\" Testing Database" .
-<http://seman.tc/data/northwind> <http://purl.org/dc/terms/publisher> "North Wind, LLC <info@com.northwind>" .
 <http://seman.tc/data/northwind/I3a8002d4363ed6e94b0c5176924fb7d2> <http://schema.org/jobTitle> "Owner" .
 <http://seman.tc/data/northwind/I3a8002d4363ed6e94b0c5176924fb7d2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Person> .
 <http://seman.tc/data/northwind/M4b758ad465ff47ed3006af6e2d9c15e1> <http://schema.org/addressCountry> "France" .
@@ -16,3 +8,5 @@
 <http://seman.tc/data/northwind/M4b758ad465ff47ed3006af6e2d9c15e1> <http://schema.org/telephone> "(1) 42.34.22.66" .
 <http://seman.tc/data/northwind/M4b758ad465ff47ed3006af6e2d9c15e1> <http://seman.tc/data/northwind/Relation/Y66564fa073cb785c57d6d372d5ab4aec> <http://seman.tc/data/northwind/I3a8002d4363ed6e94b0c5176924fb7d2> .
 <http://seman.tc/data/northwind/M4b758ad465ff47ed3006af6e2d9c15e1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#CorporateCustomer> .
+<http://seman.tc/data/northwind/M4b758ad465ff47ed3006af6e2d9c15e1> <http://www.w3.org/2000/01/rdf-schema#label> "Paris sp\u00E9cialit\u00E9s"@fr .
+<http://seman.tc/data/northwind/VCAMPApplicationModule> <http://www.w3.org/2000/01/rdf-schema#subclassOf> <http://seman.tc/data/northwind/ApplicationModule> .

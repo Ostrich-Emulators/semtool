@@ -2,6 +2,9 @@ package gov.va.semoss.poi.main;
 
 import com.bigdata.rdf.model.BigdataValueFactory;
 import com.bigdata.rdf.model.BigdataValueFactoryImpl;
+import gov.va.semoss.model.vocabulary.SEMOSS;
+import gov.va.semoss.model.vocabulary.VAC;
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import info.aduna.iteration.Iterations;
 import java.io.FileNotFoundException;
@@ -173,6 +176,11 @@ public abstract class AbstractFileReader {
 		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
 		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
 		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put( VAC.PREFIX, VAC.NAMESPACE );
+		namespaces.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
+		
+		
 		conn.getMetadata().setNamespaces( namespaces );
 	}
 
