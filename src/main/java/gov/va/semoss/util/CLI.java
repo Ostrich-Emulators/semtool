@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import java.util.Properties;
-import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
@@ -119,7 +119,7 @@ public class CLI {
 		options.addOption( update );
 		options.addOptionGroup( createOrUpdate );
 
-		CommandLineParser parser = new DefaultParser();
+		CommandLineParser parser = new BasicParser();
 
 		try {
 			cmd = parser.parse( options, args );
