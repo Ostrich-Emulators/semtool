@@ -889,8 +889,7 @@ public class PlayPane extends JFrame {
 					windowSelector.add( i );
 				}
 
-				JMenuItem closeall = new JMenuItem( "Close All" );
-				closeall.addActionListener( new ActionListener() {
+				JMenuItem closeall = new JMenuItem( new AbstractAction( "Close All" ) {
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -901,8 +900,38 @@ public class PlayPane extends JFrame {
 					}
 				} );
 
+				JMenuItem tilev = new JMenuItem( new AbstractAction( "Tile Vertically" ) {
+
+					@Override
+					public void actionPerformed( ActionEvent ae ) {
+						Dimension d = desktopPane.getSize();
+						final int hPerWindow = d.height / frames.length;
+						int y = 0;
+						for ( JInternalFrame f : frames ) {
+							f.setBounds( 0, y, d.width, hPerWindow );
+							y += hPerWindow;
+						}
+					}
+				} );
+
+				JMenuItem tileh = new JMenuItem( new AbstractAction( "Tile Horizontally" ) {
+
+					@Override
+					public void actionPerformed( ActionEvent ae ) {
+						Dimension d = desktopPane.getSize();
+						final int wPerWindow = d.width / frames.length;
+						int x = 0;
+						for ( JInternalFrame f : frames ) {
+							f.setBounds( x, 0, wPerWindow, d.height );
+							x += wPerWindow;
+						}
+					}
+				} );
+
 				if ( windowSelector.isEnabled() ) {
 					windowSelector.addSeparator();
+					windowSelector.add( tilev );
+					windowSelector.add( tileh );
 					windowSelector.add( closeall );
 				}
 			}

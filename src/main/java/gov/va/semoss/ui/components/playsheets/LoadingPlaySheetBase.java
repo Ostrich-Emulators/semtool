@@ -6,8 +6,6 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
-import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
 import gov.va.semoss.ui.components.models.ValueTableModel;
@@ -18,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
@@ -31,12 +28,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.RowFilter;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
@@ -62,7 +56,13 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		errorLabel.setBorder( BorderFactory.createEmptyBorder( 0, 5, 0, 5 ) );
 
 		JTable tbl = getTable();
-		tbl.setDefaultRenderer( String.class, renderer );
+
+		tbl.getColumnModel().getColumn( 0 ).setCellRenderer( renderer );
+		if ( mod.isRel() ) {
+			tbl.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );
+		}
+
+		// tbl.setDefaultRenderer( String.class, renderer );
 		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
 		sorter.setRowFilter( filter );
 		tbl.setRowSorter( sorter );
@@ -71,6 +71,13 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 
 			@Override
 			public void tableChanged( TableModelEvent e ) {
+				// not sure why we need to reset the renderer so much
+				TableColumnModel tcm = tbl.getColumnModel();
+				tcm.getColumn( 0 ).setCellRenderer( renderer );
+				if( LoadingPlaySheetBase.this.getLoadingModel().isRel() ){
+					tcm.getColumn( 1 ).setCellRenderer( renderer );			
+				}
+				
 				setErrorLabel();
 			}
 		} );
@@ -122,18 +129,6 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		return LoadingSheetModel.class.cast( getModel() );
 	}
 
-	public void setConformanceErrors( Collection<LoadingSheetData.LoadingNodeAndPropertyValues> errs ) {
-		getLoadingModel().setConformanceErrors( errs );
-		setErrorLabel();
-	}
-
-	public void setModelErrors( LoadingSheetData lsd ) {
-		getLoadingModel().setModelErrors( lsd );
-		getTable().getTableHeader().repaint();
-
-		setErrorLabel();
-	}
-
 	protected void setErrorLabel() {
 		StringBuilder msg = new StringBuilder();
 
@@ -175,6 +170,8 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		errorLabel.setText( msg.toString() );
 		errorLabel.setOpaque( true );
 		errorLabel.setBackground( conf || mod ? Color.PINK : this.getBackground() );
+
+		errorLabel.setVisible( getLoadingModel().isRealTimeChecking() );
 		errorLabel.repaint();
 	}
 
@@ -194,6 +191,7 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 				if ( null == nap ) {
 					super.getTableCellRendererComponent( table, value, isSelected, hasFocus,
 							fakerow, column );
+					setBackground( table.getBackground() );
 					setToolTipText( "Add a new row to this table" );
 					return this;
 				}
@@ -228,7 +226,12 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		public boolean include( RowFilter.Entry<? extends ValueTableModel, ? extends Integer> entry ) {
 			LoadingSheetModel lsm = LoadingSheetModel.class.cast( entry.getModel() );
 			LoadingSheetData.LoadingNodeAndPropertyValues nap = lsm.getNap( entry.getIdentifier() );
-			return ( filtering ? nap.hasError() : true );
+			// log.debug( nap );
+			
+			if( filtering ){
+				return ( null == nap ? true : nap.hasError() );
+			}
+			return true;
 		}
 	}
 

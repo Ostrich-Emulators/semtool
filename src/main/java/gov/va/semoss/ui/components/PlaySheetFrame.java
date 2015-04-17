@@ -37,6 +37,8 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;
@@ -56,7 +58,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	private final HideableTabbedPane tabs = new HideableTabbedPane();
 	private IEngine engine = null;
 	protected final JProgressBar jBar = new JProgressBar();
-	
+
 	public PlaySheetFrame( IEngine eng ) {
 		super( "", true, true, true, true );
 
@@ -106,6 +108,44 @@ public class PlaySheetFrame extends JInternalFrame {
 			}
 		} );
 
+		addInternalFrameListener( new InternalFrameListener() {
+
+			@Override
+			public void internalFrameOpened( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameClosing( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameClosed( InternalFrameEvent ife ) {
+				onFrameClose();
+			}
+
+			@Override
+			public void internalFrameIconified( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameDeiconified( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameActivated( InternalFrameEvent ife ) {
+			}
+
+			@Override
+			public void internalFrameDeactivated( InternalFrameEvent ife ) {
+			}
+		} );
+	}
+
+	/**
+	 * Gets called immediately before this frame is closed
+	 */
+	protected void onFrameClose() {
+		// nothing by default
 	}
 
 	public void setEngine( IEngine engine ) {
@@ -311,7 +351,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	protected CloseableTab getTabComponent( PlaySheetCentralComponent pscc ) {
 		int idx = tabs.indexOfComponent( pscc );
 		return ( idx < 0 ? null : tabs.getTabComponentAt( idx ) );
-	}	
+	}
 
 	protected class DisappearingProgressBarTask extends ProgressTask {
 
