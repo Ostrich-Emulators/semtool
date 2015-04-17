@@ -117,9 +117,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	/**
-	 * Initiates the loading process with the given properties. If overridden,
-	 * subclasses should be sure to call their superclass's version of this
-	 * function in addition to whatever other processing they do.
+	 * Initiates the loading process with the given properties. Subclasses will
+	 * usually use this function to open their repositories before the rest of the
+	 * loading process occurs. If overridden, subclasses should be sure to call
+	 * their superclass's version of this function in addition to whatever other
+	 * processing they do.
 	 *
 	 * @param props
 	 * @throws RepositoryException
@@ -128,6 +130,29 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void startLoading( Properties props ) throws RepositoryException {
 		super.startLoading( props );
 		owlRc = createOwlRc();
+	}
+
+	@Override
+	protected void isetBaseUri( String base ) {
+		if ( base.isEmpty() ) {
+			try {
+				// if the baseuri isn't already set, then query the kb for void:Dataset
+				RepositoryResult<Statement> rr
+						= getRawConnection().getStatements( null, RDF.TYPE,
+								MetadataConstants.VOID_DS, false );
+				List<Statement> stmts = Iterations.asList( rr );
+				for ( Statement s : stmts ) {
+					setDataBuilder( UriBuilder.getBuilder( s.getSubject().stringValue() ) );
+					setBaseUri( getDataBuilder().toUri() );
+				}
+			}
+			catch ( RepositoryException e ) {
+				log.error( e, e );
+			}
+		}
+		else {
+			setBaseUri( new URIImpl( base ) );
+		}
 	}
 
 	@Override

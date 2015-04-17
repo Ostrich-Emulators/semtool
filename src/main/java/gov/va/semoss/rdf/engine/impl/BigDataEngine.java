@@ -23,9 +23,6 @@ import com.bigdata.journal.IIndexManager;
 import com.bigdata.journal.ITx;
 import com.bigdata.journal.Journal;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
@@ -38,12 +35,10 @@ import com.bigdata.rdf.sail.CreateKBTask;
 import com.bigdata.rdf.sail.webapp.NanoSparqlServer;
 import com.bigdata.rdf.store.AbstractTripleStore;
 import com.bigdata.rdf.task.AbstractApiTask;
-import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -57,15 +52,9 @@ import org.openrdf.repository.RepositoryResult;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
-import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
-import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutionException;
-import org.openrdf.model.vocabulary.DC;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
@@ -126,14 +115,6 @@ public class BigDataEngine extends AbstractSesameEngine {
 		super.startLoading( props );
 
 		rc = repo.getConnection();
-
-		// if the baseuri isn't already set, then query the kb for void:Dataset
-		RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
-				MetadataConstants.VOID_DS, false );
-		List<Statement> stmts = Iterations.asList( rr );
-		for ( Statement s : stmts ) {
-			setDataBuilder( UriBuilder.getBuilder( s.getSubject().stringValue() ) );
-		}
 	}
 
 	@Override
