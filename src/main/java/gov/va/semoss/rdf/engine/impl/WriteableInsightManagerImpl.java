@@ -16,6 +16,7 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
+import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.util.DeterministicSanitizer;
@@ -62,6 +63,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
   
   private WriteablePerspectiveTabImpl wpt;
   private WriteableInsightTabImpl wit;
+  private WriteableParameterTabImpl wprmt;
   
   public WriteableInsightManagerImpl( InsightManager im ) {
     super( new SailRepository( new ForwardChainingRDFSInferencer( new MemoryStore() ) ) );
@@ -76,6 +78,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
     
     wpt = new WriteablePerspectiveTabImpl(this);
     wit = new WriteableInsightTabImpl(this);
+    wprmt = new WriteableParameterTabImpl(this);
     //Get current repository from the "InsightManagerImpl":
     //repo = im.getRepository();    
   }
@@ -300,6 +303,16 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
   @Override
   public WriteableInsightTab getWriteableInsightTab(){
 	  return wit;
+  }
+ 
+  /**   Provides access to methods that persist changes to "Parameter" tab data.
+   * 
+   * @return getWriteableParameterTab -- (WriteableParameterTab)
+   *    Methods described above.
+   */
+  @Override
+  public WriteableParameterTab getWriteableParameterTab(){
+	  return wprmt;
   }
     
 }//End WriteableInsightManager class.

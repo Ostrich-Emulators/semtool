@@ -18,44 +18,114 @@
  ******************************************************************************/
 package gov.va.semoss.ui.components;
 
-import edu.uci.ics.jung.visualization.VisualizationViewer;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 
 import javax.swing.table.AbstractTableModel;
+
+import org.apache.log4j.Logger;
+
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.util.PropComparator;
 
 /**
  * This class is used to keep track of specific properties for a table.
  */
 public class ControlDataTable {
-	private Object[][] rows = new Object[0][4];
-	private Hashtable<String, ArrayList<String>> selectedList = new Hashtable<String, ArrayList<String>>();
-	private Hashtable<String, String> unselectedList = new Hashtable<String, String>();
-	private Hashtable<String, String> propertyOn  = new Hashtable<String, String>();
+	private static Logger logger = Logger.getLogger(ControlDataTable.class);
+	
+	private Object[][] rows = new Object[0][5];
+	private Class<?>[] rowClasses = {String.class, String.class, Boolean.class, Boolean.class, String.class };
+	private int rowCount = 0;
+	
+	private Hashtable<String, ArrayList<String>> properties = new Hashtable<String, ArrayList<String>>();
+	private Hashtable<String, String> propertyShow    = new Hashtable<String, String>();
+	private Hashtable<String, String> propertyShowTT  = new Hashtable<String, String>();
+	private Hashtable<String, String> propertyHide    = new Hashtable<String, String>();
+
+	private Hashtable<String, ArrayList<String>> labelSelectedList = new Hashtable<String, ArrayList<String>>();
+	private Hashtable<String, String> labelUnselectedList = new Hashtable<String, String>();
+	private Hashtable<String, ArrayList<String>> tooltipSelectedList = new Hashtable<String, ArrayList<String>>();
+	private Hashtable<String, String> tooltipUnselectedList = new Hashtable<String, String>();
 
 	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
 	private ControlDataTableModel tableModel;
 	
-	public ControlDataTable(Hashtable<String, String> _propertyOn, String[] columnNames) {
-		propertyOn = _propertyOn;
+	public ControlDataTable(Hashtable<String, String> _propertyShow, Hashtable<String, String> _propertyShowTT, Hashtable<String, String> _propertyHide, String[] columnNames) {
+		propertyShow = _propertyShow;
+		propertyShowTT = _propertyShowTT;
+		propertyHide = _propertyHide;
 		tableModel = new ControlDataTableModel( columnNames );
 	}
 
+	/**
+	 * Adds a property of a specific type to the property hashtable.
+	 * 
+	 * @param type
+	 *            Type of property.
+	 * @param property
+	 *            Property.
+	 */
+	public void addProperty(String type, String property) {
+		ArrayList<String> propertyListByType = properties.get(type);
+		if (propertyListByType == null)
+			propertyListByType = new ArrayList<String>();
+		
+		if (!propertyListByType.contains(property) && !propertyHide.containsKey(property)) {
+			propertyListByType.add(property);
+			rowCount++;
+		}
+		
+		properties.put(type, propertyListByType);
+	}
+	
+	/**
+	 * Generates all the rows in the control panel for the specified table and properties
+	 */
+	public void populateAllRows() {
+		populateFirstRow();
+
+		ArrayList<String> types = new ArrayList<String>(properties.keySet());
+		Collections.sort(types);
+		
+		int rowIndex = 1;
+		for (String type:types) {
+			
+			ArrayList<String> propertiesForThisType = properties.get(type);
+			Collections.sort(propertiesForThisType, new PropComparator());
+			
+			boolean firstRow = true;
+			for (String property:propertiesForThisType) {
+				if (propertyHide.containsKey(property)) 
+					continue;
+
+				populateRow(rowIndex, type, property, firstRow);
+				
+				logger.debug("Adding Row-- " + rowIndex + "<>" + type + "<>" + property);
+				firstRow = false;
+				rowIndex++;
+			}
+		}
+		
+		tableModel.fireTableDataChanged();
+	}
+	
 	/**
 	 * Populates the first row.
 	 * columns are: Type, Property, Boolean
 	 * 
 	 * @param rowCount: total number of rows
 	 */
-	public void populateFirstRow(int rowCount) {
-		rows = new Object[rowCount + 1][4];
+	public void populateFirstRow() {
+		rows = new Object[rowCount + 1][5];
 		rows[0][0] = "SELECT ALL";
 		rows[0][1] = "";
 		rows[0][2] = new Boolean(true);
-		rows[0][3] = "SELECT ALL";
+		rows[0][3] = new Boolean(true);
+		rows[0][4] = "SELECT ALL";
 	}
 
 	/**
@@ -70,29 +140,21 @@ public class ControlDataTable {
 	public void populateRow(int rowIndex, String type, String property, boolean firstRow) {
 		rows[rowIndex][0] = "";
 		rows[rowIndex][1] = property;
-		rows[rowIndex][2] = isSelected(type, property);
-		rows[rowIndex][3] = type;
+		rows[rowIndex][2] = isSelected(labelSelectedList, type, property);
+		rows[rowIndex][3] = isSelected(tooltipSelectedList, type, property);
+		rows[rowIndex][4] = type;
 
 		if (firstRow)
 			rows[rowIndex][0] = type;
 
-		if (propertyOn.containsKey(property) && !unselectedList.containsKey(type))
+		if (propertyShow.containsKey(property) && !labelUnselectedList.containsKey(type))
 			setValue(new Boolean(true), rowIndex, 2);
+
+		if (propertyShowTT.containsKey(property) && !tooltipUnselectedList.containsKey(type))
+			setValue(new Boolean(true), rowIndex, 3);
 	}
 
-	/**
-	 * Checks if property for a certain type is selected.
-	 * 
-	 * @param selectedList
-	 *            List of properties.
-	 * @param type
-	 *            Property type.
-	 * @param property
-	 *            Property.
-	 * 
-	 * @return boolean True if a property is selected.
-	 */
-	private Boolean isSelected(String type, String property) {
+	private Boolean isSelected(Hashtable<String, ArrayList<String>> selectedList, String type, String property) {
 		if (!selectedList.containsKey(type)) 
 			return false;
 		
@@ -115,30 +177,59 @@ public class ControlDataTable {
 	 *            Column number.
 	 */
 	public void setValue(Object val, int row, int column) {
+		rows[row][column] = val;
+		
+		if (column == 2) {
+			setValue(labelSelectedList, labelUnselectedList, val, row, column);
+		} else if (column == 3) {
+			setValue(tooltipSelectedList, tooltipUnselectedList, val, row, column);
+		}
+	}
+
+
+	/**
+	 * Sets value at a particular row and column location.
+	 * 
+	 * @param val
+	 *            Label value.
+	 * @param row
+	 *            Row number.
+	 * @param column
+	 *            Column number.
+	 */
+	public void setValue(Hashtable<String, ArrayList<String>> selectedList, Hashtable<String, String> unselectedList, Object valueObject, int row, int column) {
+		if (!(valueObject instanceof Boolean))
+			return;
+		Boolean valBoolean = (Boolean) valueObject;
+		
 		if (row == 0) {
 			// if it is the header row--select all
 			for (int i=1; i<rows.length; i++)
-				setValue(val, i, 2);
+				setValue(selectedList, unselectedList, valBoolean, i, column);
 		}
 		
-		String type = rows[row][3] + "";
-		ArrayList<String> typePropList = new ArrayList<String>();
-		if (selectedList.containsKey(type))
-			typePropList = selectedList.get(type);
+		String type = rows[row][4] + "";
+		String property = rows[row][1] + "";
 		
-		if (val instanceof Boolean) {
-			if ((Boolean) val)
-				typePropList.add(rows[row][1] + "");
-			else {
-				typePropList.remove(rows[row][1] + "");
-				unselectedList.put(type, type);
+		ArrayList<String> typePropList = selectedList.get(type);
+		if (typePropList == null)
+			typePropList = new ArrayList<String>();
+		
+		if (valBoolean) {
+			if (!typePropList.contains(property)) {
+				typePropList.add(property);
+				unselectedList.remove(type, type);
 			}
+		} else {
+			typePropList.remove(property);
+			unselectedList.put(type, type);
 		}
 		
-		rows[row][column] = val;
+		rows[row][column] = valBoolean;
+		tableModel.fireTableCellUpdated(row, column);
 		selectedList.put(type, typePropList);
 	}
-
+	
 	/**
 	 * Gets label value from a particular row and column location.
 	 * 
@@ -150,6 +241,9 @@ public class ControlDataTable {
 	 * @return Object Label value.
 	 */
 	public Object getCell(int row, int column) {
+		if (row >= rows.length || column >= rows[0].length)
+			return null;
+		
 		return rows[row][column];
 	}
 
@@ -162,7 +256,19 @@ public class ControlDataTable {
 	 * @return Vector<String> List of properties.
 	 */
 	public ArrayList<String> getSelectedProperties(String type) {
-		return selectedList.get(type);
+		return labelSelectedList.get(type);
+	}
+	
+	/**
+	 * Gets tooltip properties of a specific type.
+	 * 
+	 * @param type
+	 *            Type of property to retrieve.
+	 * 
+	 * @return Vector<String> List of properties.
+	 */
+	public ArrayList<String> getSelectedPropertiesTT(String type) {
+		return tooltipSelectedList.get(type);
 	}
 	
 	public ControlDataTableModel getTableModel() {
@@ -173,7 +279,7 @@ public class ControlDataTable {
 		viewer = _viewer;
 	}
 	
-	class ControlDataTableModel extends AbstractTableModel {
+	public class ControlDataTableModel extends AbstractTableModel {
 		private static final long serialVersionUID = 502758220766389041L;
 		private String[] columnNames;
 
@@ -240,12 +346,7 @@ public class ControlDataTable {
 		 */
 		@Override
 		public Class<?> getColumnClass(int column) {
-			if (getCell(0, column)==null) {
-				return String.class;
-			}
-
-			Class<?> theClass = getCell(0, column).getClass();
-			return theClass;
+			return rowClasses[column];
 		}
 
 		/**
@@ -259,7 +360,7 @@ public class ControlDataTable {
 		 * @return boolean True if cell is editable.
 		 */
 		public boolean isCellEditable(int row, int column) {
-			if (column == 2)
+			if (column == 2 || column == 3)
 				return true;
 
 			return false;
@@ -278,7 +379,9 @@ public class ControlDataTable {
 		public void setValueAt(Object value, int row, int column) {
 			setValue(value, row, column);
 			fireTableDataChanged();
-			viewer.repaint();
+			
+			if (viewer != null)
+				viewer.repaint();
 		}
 	}
 }

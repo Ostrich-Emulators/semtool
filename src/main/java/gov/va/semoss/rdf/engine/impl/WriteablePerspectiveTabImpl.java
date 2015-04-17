@@ -63,16 +63,17 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		  Literal now = insightVF.createLiteral( new Date() );
 		  Literal creator = insightVF.createLiteral( "Imported By " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 	      UriBuilder uriBuilder; 
+	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
 	          URI perspectiveURI = perspective.getUri();				
 			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI slot = uriBuilder.add(perspective.getLabel() + " slot " + perspective.getInsights().size()).build();				
+	          URI slot = uriBuilder.add(perspective.getLabel() + "-slot-" + strUniqueIdentifier).build();				
 	          rc.add( perspectiveURI, OLO.slot, slot );
 
 			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI insightURI = uriBuilder.add(perspective.getLabel() + " slot " + perspective.getInsights().size()).build();				
+	          URI insightURI = uriBuilder.add(perspective.getLabel() + "-insight-" + strUniqueIdentifier).build();				
 	          
 	          rc.add( slot, OLO.item, insightURI );
 	          rc.add( slot, OLO.index, insightVF.createLiteral(999));          
@@ -247,12 +248,13 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		  Literal title = insightVF.createLiteral(strTitle);
 		  Literal description = insightVF.createLiteral(strDescription);
 	      UriBuilder uriBuilder; 
+	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
 	          
 			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI perspectiveURI = uriBuilder.add(strTitle).build();				
+	          URI perspectiveURI = uriBuilder.add(strTitle + "-perspective-" + strUniqueIdentifier).build();				
 			  rc.add( perspectiveURI, RDF.TYPE, VAS.Perspective );
 			  rc.add( perspectiveURI, RDFS.LABEL, title);
 			  rc.add( perspectiveURI, DCTERMS.DESCRIPTION, description);
@@ -262,11 +264,11 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 
 			  if(addDummyInsight == true){
 			 	  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-		          URI slot = uriBuilder.add(strTitle + " slot 1").build();				
+		          URI slot = uriBuilder.add(strTitle + "-slot-" + strUniqueIdentifier).build();				
 		          rc.add( perspectiveURI, OLO.slot, slot );
 	
 				  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-		          URI insightURI = uriBuilder.add(strTitle + " slot 1").build();				
+		          URI insightURI = uriBuilder.add(strTitle + "-insight-" + strUniqueIdentifier).build();				
 		          
 		          rc.add( slot, OLO.item, insightURI );
 		          rc.add( slot, OLO.index, insightVF.createLiteral(1));          

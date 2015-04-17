@@ -18,162 +18,72 @@
  ******************************************************************************/
 package gov.va.semoss.ui.components;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-
-import org.apache.log4j.Logger;
-
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.PropComparator;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * This class is used to keep track of all the properties within the tool.
  */
 public class ControlData {
-	private static Logger logger = Logger.getLogger(ControlData.class);
-	
-	private ControlDataTable labels, tooltips;
-	private Hashtable<String, ArrayList<String>> properties = new Hashtable<String, ArrayList<String>>();
-	private Hashtable<String, String> propHide = new Hashtable<String, String>();
-	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
-	private int rowCount = 0;
+	private ControlDataTable vertexCDT, edgeCDT;
 	
 	/**
 	 * Constructor for ControlData.
 	 */
 	public ControlData() {
 		// put what we want to show first in all of these things
-		Hashtable<String, String> propOn  = new Hashtable<String, String>();
-		propOn.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
-		labels = new ControlDataTable(propOn, new String[] {"Type", "Property", "Show" });
-
-		Hashtable<String, String> propOnT = new Hashtable<String, String>();
-		propOnT.put(Constants.EDGE_NAME, Constants.EDGE_NAME);
-		propOnT.put(Constants.EDGE_TYPE, Constants.EDGE_TYPE);
-		propOnT.put(Constants.URI_KEY, Constants.URI_KEY);
-		propOnT.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
-		propOnT.put(Constants.VERTEX_TYPE, Constants.VERTEX_TYPE);
-		tooltips = new ControlDataTable(propOnT, new String[] {"Type", "Property", "Show" });
+		Hashtable<String, String> propertyHide  = new Hashtable<String, String>();
+		propertyHide.put(Constants.VERTEX_COLOR, Constants.VERTEX_COLOR);
 		
-		propHide.put(Constants.VERTEX_COLOR, Constants.VERTEX_COLOR);
+		Hashtable<String, String> propertyShow  = new Hashtable<String, String>();
+		propertyShow.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
+
+		Hashtable<String, String> propertyShowTT = new Hashtable<String, String>();
+		propertyShowTT.put(Constants.EDGE_NAME, Constants.EDGE_NAME);
+		propertyShowTT.put(Constants.EDGE_TYPE, Constants.EDGE_TYPE);
+		propertyShowTT.put(Constants.URI_KEY, Constants.URI_KEY);
+		propertyShowTT.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
+		propertyShowTT.put(Constants.VERTEX_TYPE, Constants.VERTEX_TYPE);
+		
+		vertexCDT = new ControlDataTable(propertyShow, propertyShowTT, propertyHide, new String[] {"Vertex Type", "Property", "Label", "Tooltip" });
+		edgeCDT   = new ControlDataTable(propertyShow, propertyShowTT, propertyHide, new String[] {"Edge Type", "Property", "Label", "Tooltip" });
 	}
 
 	/**
 	 * Generates all the rows in the control panel.
 	 */
 	public void generateAllRows() {
-		labels.populateFirstRow(rowCount);
-		tooltips.populateFirstRow(rowCount);
-
-		ArrayList<String> types = new ArrayList<String>(properties.keySet());
-		Collections.sort(types);
-		
-		int rowIndex = 1;
-		for (String type:types) {
-			
-			ArrayList<String> propertiesForThisType = properties.get(type);
-			Collections.sort(propertiesForThisType, new PropComparator());
-			
-			boolean firstRow = true;
-			for (String property:propertiesForThisType) {
-				if (propHide.containsKey(property)) 
-					continue;
-
-				labels.populateRow(rowIndex, type, property, firstRow);
-				tooltips.populateRow(rowIndex, type, property, firstRow);
-				
-				logger.debug("Adding Rows -- " + rowIndex + "<>" + type + "<>" + property);
-				firstRow = false;
-				rowIndex++;
-			}
-		}
+		vertexCDT.populateAllRows();
+		edgeCDT.populateAllRows();
 	}
 	
 	/**
-	 * Sets label value at a particular row and column location.
-	 * 
-	 * @param val
-	 *            Label value.
-	 * @param row
-	 *            Row number.
-	 * @param column
-	 *            Column number.
-	 */
-	public void setLabelValueAt(Object val, int row, int column) {
-		labels.setValue(val, row, column);
-		viewer.repaint();
-	}
-
-	/**
-	 * Sets tooltip value at a particular row and column location.
-	 * 
-	 * @param val
-	 *            Tooltip value.
-	 * @param row
-	 *            Row number.
-	 * @param column
-	 *            Column number.
-	 */
-	public void setTooltipValueAt(Object val, int row, int column) {
-		tooltips.setValue(val, row, column);
-		viewer.repaint();
-	}
-	
-	/**
-	 * Adds a property of a specific type to the property hashtable.
+	 * Adds a property of a specific type to the edge ControlDataTable.
 	 * 
 	 * @param type
 	 *            Type of property.
 	 * @param property
 	 *            Property.
 	 */
-	public void addProperty(String type, String property) {
-		ArrayList<String> propertyListByType = properties.get(type);
-		if (propertyListByType == null)
-			propertyListByType = new ArrayList<String>();
-		
-		if (!propertyListByType.contains(property) && !propHide.containsKey(property)) {
-			propertyListByType.add(property);
-			rowCount++;
-		}
-		
-		properties.put(type, propertyListByType);
+	public void addEdgeProperty(String type, String property) {
+		edgeCDT.addProperty(type, property);
 	}
-
-	public int getRowCount() {
-		return rowCount;
-	}
-
+	
 	/**
-	 * Gets label value from a particular row and column location.
+	 * Adds a property of a specific type to the vertex ControlDataTable.
 	 * 
-	 * @param row
-	 *            Row number.
-	 * @param column
-	 *            Column number.
-	 * 
-	 * @return Object Label value.
+	 * @param type
+	 *            Type of property.
+	 * @param property
+	 *            Property.
 	 */
-	public Object getLabel(int row, int column) {
-		return labels.getCell(row, column);
-	}
-
-	/**
-	 * Gets tooltip value at a particular row and column location.
-	 * 
-	 * @param row
-	 *            Row number.
-	 * @param column
-	 *            Column number.
-	 * 
-	 * @return Object Tooltip value.
-	 */
-	public Object getToolTip(int row, int column) {
-		return tooltips.getCell(row, column);
+	public void addVertexProperty(String type, String property) {
+		vertexCDT.addProperty(type, property);
 	}
 
 	/**
@@ -185,7 +95,21 @@ public class ControlData {
 	 * @return Vector<String> List of properties.
 	 */
 	public ArrayList<String> getSelectedProperties(String type) {
-		return labels.getSelectedProperties(type);
+		ArrayList<String> vertexProperties = vertexCDT.getSelectedProperties(type);
+		ArrayList<String> edgeProperties = edgeCDT.getSelectedProperties(type);
+		
+		if (vertexProperties == null && edgeProperties == null)
+			return new ArrayList<String>();
+		
+		if (vertexProperties == null || vertexProperties.size() == 0)
+			return edgeProperties;
+		
+		if (edgeProperties == null || edgeProperties.size() == 0)
+			return vertexProperties;
+		
+		vertexProperties.addAll(edgeProperties);
+		
+		return vertexProperties;
 	}
 
 	/**
@@ -197,21 +121,33 @@ public class ControlData {
 	 * @return Vector<String> List of properties.
 	 */
 	public ArrayList<String> getSelectedPropertiesTT(String type) {
-		return tooltips.getSelectedProperties(type);
+		ArrayList<String> vertexProperties = vertexCDT.getSelectedPropertiesTT(type);
+		ArrayList<String> edgeProperties = edgeCDT.getSelectedPropertiesTT(type);
+		
+		if (vertexProperties == null && edgeProperties == null)
+			return new ArrayList<String>();
+		
+		if (vertexProperties == null || vertexProperties.size() == 0)
+			return edgeProperties;
+		
+		if (edgeProperties == null || edgeProperties.size() == 0)
+			return vertexProperties;
+		
+		vertexProperties.addAll(edgeProperties);
+		
+		return vertexProperties;
 	}
 	
-	public void setViewer(VisualizationViewer<SEMOSSVertex, SEMOSSEdge> _viewer) {
-		viewer = _viewer;
-		
-		labels.setViewer(viewer);
-		tooltips.setViewer(viewer);
+	public void setViewer(VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer) {
+		vertexCDT.setViewer(viewer);
+		edgeCDT.setViewer(viewer);
 	}
 
-	public ControlDataTable getLabels() {
-		return labels;
+	public ControlDataTable.ControlDataTableModel getVertexTableModel() {
+		return vertexCDT.getTableModel();
 	}
 	
-	public ControlDataTable getTooltips() {
-		return tooltips;
+	public ControlDataTable.ControlDataTableModel getEdgeTableModel() {
+		return edgeCDT.getTableModel();
 	}
 }

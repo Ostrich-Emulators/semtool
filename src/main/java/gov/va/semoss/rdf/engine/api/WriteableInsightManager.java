@@ -99,4 +99,12 @@ public interface WriteableInsightManager extends InsightManager {
    *    Methods described above.
    */
   public WriteableInsightTab getWriteableInsightTab();
-}
+
+  /**   Provides access to methods that persist changes to "Parameter" tab data.
+   * 
+   * @return getWriteableParameterTab -- (WriteableParameterTab)
+   *    Methods described above.
+   */
+  public WriteableParameterTab getWriteableParameterTab(); 
+  
+}//End "WriteableInsightManager" interface.

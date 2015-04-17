@@ -11,7 +11,7 @@ public interface WriteableInsightTab {
 	   * 
 	   * @param insight -- (Insight) Insight to which new Parameter will be added.
 	   */
-	  public boolean addParameter(Insight insight, double dblRandom);
+	  public boolean addParameter(Insight insight);
 	  
 	  /**   Deletes a Parameter from an Insight in the triple-store on disk.
 	   * 

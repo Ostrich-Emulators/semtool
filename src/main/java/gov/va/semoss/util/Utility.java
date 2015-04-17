@@ -70,8 +70,10 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -96,11 +98,7 @@ import com.ibm.icu.util.Calendar;
  * workbooks.
  */
 public class Utility {
-
 	private static final Logger log = Logger.getLogger( Utility.class );
-	// private static final Pattern VALIDCHARS = Pattern.compile( "[A-Za-z0-9_.-]+" );
-	// updating to allow for unicode letter chars
-	// private static final Pattern VALIDCHARS = Pattern.compile( "[\\w.-]+", Pattern.UNICODE_CHARACTER_CLASS );
 	private static int id = 0;
 
 	/**
@@ -1062,9 +1060,17 @@ public class Utility {
 	}
 	
 	public static void addModelToJTable(AbstractTableModel tableModel, String tableKey) {
-		DIHelper.getJTable( tableKey ).setModel( tableModel );
+		JTable table = DIHelper.getJTable( tableKey );
+		table.setModel( tableModel );
 		tableModel.fireTableDataChanged();
-		log.debug( "Added the " + tableKey + " table model." );
+		
+		for (int i=0; i<tableModel.getColumnCount(); i++) {
+			if (Boolean.class.equals( tableModel.getColumnClass(i) )) {
+				TableColumnModel columnModel = table.getColumnModel();
+				if (i < columnModel.getColumnCount())
+					columnModel.getColumn(i).setPreferredWidth(35);
+			}
+		}
 	}
 
 	public static void resetJTable(String tableKey) {
