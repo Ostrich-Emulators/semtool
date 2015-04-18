@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.poi.main.FileLoadingException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
@@ -330,7 +331,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 					}
 				}
 			}
-			catch ( IOException e ) {
+			catch ( FileLoadingException | IOException e ) {
 				log.warn( e, e );
 			}
 

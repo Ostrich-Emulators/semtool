@@ -54,7 +54,7 @@ import javax.swing.JToolBar;
  * This class extends JDesktopPane in order to create a custom desktop pane.
  */
 public class CustomDesktopPane extends JDesktopPane {
-
+	public static final int CASCADE_STEPSIZE = 25;
 	private static final Logger log = Logger.getLogger( CustomDesktopPane.class );
 
 	// check to see if our image is in the jar, and if not, check the filesystem
@@ -98,7 +98,7 @@ public class CustomDesktopPane extends JDesktopPane {
 	public Component add( Component toadd ) {
 		Component frames[] = getAllFrames();
 		// we want to stagger the top left corner of the window
-		int topleft = 20 * ( null == frames ? 0 : frames.length );
+		int topleft = CASCADE_STEPSIZE * ( null == frames ? 0 : frames.length );
 		Component cmp = super.add( toadd );
 
 		if ( null != tblistener && toadd instanceof JInternalFrame ) {

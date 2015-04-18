@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.poi.main.FileLoadingException;
 import gov.va.semoss.poi.main.ImportData;
 import java.awt.Frame;
 import java.io.File;
@@ -287,7 +288,7 @@ public class ImportExistingDbPanel extends JPanel {
 							// if we get here, no exceptions have been thrown, so we're good
 							successfulImport[0] = true;
 						}
-						catch ( RepositoryException | IOException ioe ) {
+						catch ( FileLoadingException | RepositoryException | IOException ioe ) {
 							log.error( ioe, ioe );
 						}
 					}

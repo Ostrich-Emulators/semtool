@@ -190,7 +190,7 @@ public class PlayPane extends JFrame {
 			importMapFileNameField, dbPropFileNameField, questionFileNameField,
 			dbSelectorField, dbImportURLField, dbImportUsernameField;
 	public JPasswordField dbImportPWField;
-	
+
 	//V-CAMP RTM Import ("rtmLoadButton"):
 	public JButton mapBrowseBtn, dbPropBrowseButton, questionBrowseButton,
 			btnShowAdvancedImportFeatures, importButton, rtmLoadButton, fileBrowseBtn,
@@ -440,7 +440,7 @@ public class PlayPane extends JFrame {
 				combinedSplitPane.setDividerLocation( 0.75 );
 			}
 		} );
-		
+
 		initMenuItems();
 		initRepoList();
 		DIHelper.getInstance().setRepoList( repoList );
@@ -448,15 +448,15 @@ public class PlayPane extends JFrame {
 		playsheetToolbar = new JToolBar();
 		rightTabs = makeRightPane();
 		leftTabs = makeLeftPane();
-		
-		mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftTabs, rightTabs);
+
+		mainSplitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, leftTabs, rightTabs );
 		mainSplitPane.setOneTouchExpandable( true );
 		mainSplitPane.setDividerLocation( 300 );
 		mainSplitPane.setContinuousLayout( true );
 
 		//Add the Custom Sparql Query window by referencing an external class:
 		customSparqlPanel = csp.addCustomSparqlPanel();
-		combinedSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, mainSplitPane, customSparqlPanel);
+		combinedSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, mainSplitPane, customSparqlPanel );
 		combinedSplitPane.setOneTouchExpandable( true );
 		combinedSplitPane.setDividerLocation( 900 );
 
@@ -476,7 +476,7 @@ public class PlayPane extends JFrame {
 
 		SwingStyle.init(); // for swing rules and functions
 		CustomAruiStyle.init(); // for custom components rules and functions
-		
+
 		// Components to style
 		Style.registerTargetClassName( submitButton, ".createBtn" );
 		Style.registerTargetClassName( btnRepaintGraph, ".standardButton" );
@@ -653,7 +653,7 @@ public class PlayPane extends JFrame {
 				OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 			}
 		};
-		
+
 		submitButton.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getInputMap( JComponent.WHEN_FOCUSED ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getActionMap().put( "handleQuestionKeys", handleQuestionKeys );
@@ -750,7 +750,7 @@ public class PlayPane extends JFrame {
 		owly.add( objectPropertiesString, gbc_objectPropertiesString );
 		objectPropertiesString.setColumns( 10 );
 
-		btnRepaintGraph = initCustomButton("Refresh");
+		btnRepaintGraph = initCustomButton( "Refresh" );
 		GridBagConstraints gbc_btnRepaintGraph = new GridBagConstraints();
 		gbc_btnRepaintGraph.insets = new Insets( 0, 0, 5, 0 );
 		gbc_btnRepaintGraph.gridx = 0;
@@ -760,7 +760,7 @@ public class PlayPane extends JFrame {
 		scrollPane_7.getVerticalScrollBar().setUI( new NewScrollBarUI() );
 		scrollPane_8.getVerticalScrollBar().setUI( new NewScrollBarUI() );
 
-		saveSudowl = initCustomButton("Save");
+		saveSudowl = initCustomButton( "Save" );
 		GridBagConstraints gbc_saveSudowl = new GridBagConstraints();
 		gbc_saveSudowl.gridx = 0;
 		gbc_saveSudowl.gridy = 7;
@@ -773,7 +773,7 @@ public class PlayPane extends JFrame {
 		JPanel panel = new JPanel( new GridLayout( 1, 1 ) );
 		panel.setBackground( SystemColor.control );
 
-		colorShapeTable = initJTableAndAddTo(panel, false);
+		colorShapeTable = initJTableAndAddTo( panel, false );
 
 		return panel;
 	}
@@ -781,55 +781,58 @@ public class PlayPane extends JFrame {
 	private JPanel makeOutputPanel() {
 		JPanel panel = new JPanel( new GridLayout( 2, 1 ) );
 		panel.setBackground( SystemColor.control );
-		
-		labelTable   = initJTableAndAddTo(panel, false);
-		tooltipTable = initJTableAndAddTo(panel, false);
-		
+
+		labelTable = initJTableAndAddTo( panel, false );
+		tooltipTable = initJTableAndAddTo( panel, false );
+
 		return panel;
 	}
 
 	private JPanel makeFilterPanel() {
 		GridBagLayout panelLayout = new GridBagLayout();
 		panelLayout.columnWeights = new double[]{ 1.0 };
-		panelLayout.rowWeights    = new double[]{ 1.0, 1.0, 1.0, 0.0 };
+		panelLayout.rowWeights = new double[]{ 1.0, 1.0, 1.0, 0.0 };
 
 		JPanel panel = new JPanel( panelLayout );
 		panel.setBackground( SystemColor.control );
 
-		filterTable   = initJTableAndAddTo(panel, true);
-		propertyTable = initJTableAndAddTo(panel, true);
-		edgeTable     = initJTableAndAddTo(panel, true);
+		filterTable = initJTableAndAddTo( panel, true );
+		propertyTable = initJTableAndAddTo( panel, true );
+		edgeTable = initJTableAndAddTo( panel, true );
 
-		refreshButton = initCustomButton("Refresh Graph");
-		panel.add( refreshButton, getGBC(GridBagConstraints.NONE) );
-		
+		refreshButton = initCustomButton( "Refresh Graph" );
+		panel.add( refreshButton, getGBC( GridBagConstraints.NONE ) );
+
 		return panel;
 	}
 
-	private CustomButton initCustomButton(String title) {
+	private CustomButton initCustomButton( String title ) {
 		CustomButton button = new CustomButton( title );
 		button.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
 		return button;
 	}
-	
-	private JTable initJTableAndAddTo(JPanel panel, boolean useGBC) {
+
+	private JTable initJTableAndAddTo( JPanel panel, boolean useGBC ) {
 		JTable table = new JTable();
 		table.setShowGrid( true );
 
-		if (useGBC)
-			panel.add( new JScrollPane(table), getGBC() );
-		else
-			panel.add( new JScrollPane(table) );
-		
+		if ( useGBC ) {
+			panel.add( new JScrollPane( table ), getGBC() );
+		}
+		else {
+			panel.add( new JScrollPane( table ) );
+		}
+
 		return table;
 	}
 
 	private int gbcY = 0;
+
 	private GridBagConstraints getGBC() {
-		return getGBC(GridBagConstraints.BOTH);
+		return getGBC( GridBagConstraints.BOTH );
 	}
 
-	private GridBagConstraints getGBC(int fill) {
+	private GridBagConstraints getGBC( int fill ) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets( 0, 0, 5, 0 );
 		gbc.fill = fill;
@@ -857,10 +860,6 @@ public class PlayPane extends JFrame {
 			private void refresh() {
 				windowSelector.removeAll();
 				final JInternalFrame[] frames = desktopPane.getAllFrames();
-				//The following declarations are to enable/disable the "Overlay" CheckBox
-				//When necessary:
-//				JDesktopPane pane = DIHelper.getInstance().getDesktop();
-//				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
 
 				if ( 0 == frames.length ) {
 					appendChkBox.setSelected( false );
@@ -868,26 +867,27 @@ public class PlayPane extends JFrame {
 
 				windowSelector.setEnabled( 0 < frames.length );
 				csp.appendSparqlQueryChkBox.setEnabled( frames.length > 0 );
-				for ( final JInternalFrame f : frames ) {
-					JMenuItem i = new JMenuItem( f.getTitle() );
-					i.setIcon( f.getFrameIcon() );
-					i.addActionListener( new ActionListener() {
 
-						@Override
-						public void actionPerformed( ActionEvent e ) {
+				JMenuItem closeone = new JMenuItem( new AbstractAction( "Close" ) {
+
+					@Override
+					public void actionPerformed( ActionEvent ae ) {
+						JInternalFrame f = desktopPane.getSelectedFrame();
+						if ( null != f ) {
+							f.dispose();
+						}
+
+						JInternalFrame remainingframes[] = desktopPane.getAllFrames();
+						if ( remainingframes.length > 0 ) {
 							try {
-								rightTabs.setSelectedComponent( desktopPane );
-								desktopPane.getDesktopManager().deiconifyFrame( f );
-								f.setSelected( true );
+								remainingframes[0].setSelected( true );
 							}
-							catch ( Exception ex ) {
-								// don't really care
-								logger.warn( ex, ex );
+							catch ( Exception e ) {
+								// don't care
 							}
 						}
-					} );
-					windowSelector.add( i );
-				}
+					}
+				} );
 
 				JMenuItem closeall = new JMenuItem( new AbstractAction( "Close All" ) {
 
@@ -928,12 +928,56 @@ public class PlayPane extends JFrame {
 					}
 				} );
 
+				JMenuItem tilec = new JMenuItem( new AbstractAction( "Cascade" ) {
+
+					@Override
+					public void actionPerformed( ActionEvent ae ) {
+						Dimension d = desktopPane.getSize();
+						int x = 0;
+						for ( JInternalFrame f : frames ) {
+							try {
+								f.setSelected( true );
+							}
+							catch ( Exception e ) {
+								// ignore
+							}
+							f.setBounds( x, x, d.width - x, d.height - x );
+							x += CustomDesktopPane.CASCADE_STEPSIZE;
+						}
+					}
+				} );
+
 				if ( windowSelector.isEnabled() ) {
+					windowSelector.add( closeone );
+					windowSelector.add( closeall );
 					windowSelector.addSeparator();
 					windowSelector.add( tilev );
 					windowSelector.add( tileh );
-					windowSelector.add( closeall );
+					windowSelector.add( tilec );
+					windowSelector.addSeparator();
 				}
+
+				for ( final JInternalFrame f : frames ) {
+					JMenuItem i = new JMenuItem( f.getTitle() );
+					i.setIcon( f.getFrameIcon() );
+					i.addActionListener( new ActionListener() {
+
+						@Override
+						public void actionPerformed( ActionEvent e ) {
+							try {
+								rightTabs.setSelectedComponent( desktopPane );
+								desktopPane.getDesktopManager().deiconifyFrame( f );
+								f.setSelected( true );
+							}
+							catch ( Exception ex ) {
+								// don't really care
+								logger.warn( ex, ex );
+							}
+						}
+					} );
+					windowSelector.add( i );
+				}
+
 			}
 		} );
 

@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.poi.main.FileLoadingException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -38,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import java.util.Properties;
-import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
@@ -119,7 +120,7 @@ public class CLI {
 		options.addOption( update );
 		options.addOptionGroup( createOrUpdate );
 
-		CommandLineParser parser = new DefaultParser();
+		CommandLineParser parser = new BasicParser();
 
 		try {
 			cmd = parser.parse( options, args );
@@ -220,10 +221,10 @@ public class CLI {
 				throw new FileNotFoundException( "Cound not find: " + update );
 			}
 
-			if( null == smss ){
+			if ( null == smss ) {
 				throw new FileNotFoundException( "No journal found" );
 			}
-			
+
 			IEngine engine = Utility.loadEngine( smss );
 			if ( replace ) {
 				ImportDataProcessor.clearEngine( engine, loads );
@@ -235,7 +236,7 @@ public class CLI {
 				el.release();
 				// if we get here, no exceptions have been thrown, so we're good
 			}
-			catch ( RepositoryException | IOException ioe ) {
+			catch ( FileLoadingException | RepositoryException | IOException ioe ) {
 				logger.error( ioe, ioe );
 			}
 		}

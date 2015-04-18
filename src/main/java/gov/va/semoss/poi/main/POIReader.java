@@ -21,6 +21,7 @@ package gov.va.semoss.poi.main;
 
 import static gov.va.semoss.poi.main.AbstractFileReader.getRDFStringValue;
 import static gov.va.semoss.poi.main.AbstractFileReader.getUriFromRawString;
+import gov.va.semoss.poi.main.FileLoadingException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,8 +38,12 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiMap;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.poi.ss.usermodel.Cell;
 import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
@@ -47,6 +52,11 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 public class POIReader implements ImportFileReader {
 
 	private static final Logger logger = Logger.getLogger( POIReader.class );
+
+	private static enum SheetType {
+
+		METADATA, NODE, RELATION, LOADER, UNKNOWN, EMPTY
+	};
 
 	private ImportData readNonloadingSheet( XSSFWorkbook workbook ) {
 		ImportData id = new ImportData();
@@ -87,83 +97,98 @@ public class POIReader implements ImportFileReader {
 	}
 
 	@Override
-	public ImportMetadata getMetadata( File file ) throws IOException {
+	public ImportMetadata getMetadata( File file ) throws IOException, FileLoadingException {
 		logger.debug( "getting metadata from file: " + file );
 		final XSSFWorkbook workbook
 				= new XSSFWorkbook( new FileInputStream( file ) );
 
-		XSSFSheet lSheet = workbook.getSheet( "Loader" );
-
-		String metadataSheetName = findMetadataSheetName( lSheet );
-		if ( null == metadataSheetName ) {
-			return new ImportMetadata();
+		ImportData data = new ImportData();
+		for ( String name : categorizeSheets( workbook ).get( SheetType.METADATA ) ) {
+			XSSFSheet metadataSheet = workbook.getSheet( name );
+			loadMetadata( metadataSheet, data );
 		}
 
-		ImportData data = new ImportData();
-
-		XSSFSheet metadataSheet = workbook.getSheet( metadataSheetName );
-		loadMetadata( metadataSheet, data );
 		return data.getMetadata();
 	}
 
 	@Override
-	public ImportData readOneFile( File file ) throws IOException {
+	public ImportData readOneFile( File file ) throws IOException, FileLoadingException {
 		final XSSFWorkbook workbook
 				= new XSSFWorkbook( new FileInputStream( file ) );
 
-		XSSFSheet lSheet = workbook.getSheet( "Loader" );
-
-		if ( null == lSheet ) {
-			logger.warn( "Trying to import sheet with no loader tab" );
-			// there's no "Loader" sheet, so we don't have a LoadingSheet file
-			return readNonloadingSheet( workbook );
-		}
+		MultiMap<SheetType, String> typeToSheetNameLkp = categorizeSheets( workbook );
 
 		ImportData data = new ImportData();
 		AbstractFileReader.initNamespaces( data );
 
-		String metadataSheetName = findMetadataSheetName( lSheet );
-		if ( null == metadataSheetName ) {
-			data.getMetadata().setLegacyMode( true );
+		// we have sheets without a specified type, so open like a regular spreadsheet
+		if ( !typeToSheetNameLkp.getNN( SheetType.UNKNOWN ).isEmpty() ) {
+			logger.warn( "Trying to import sheet with no loader tab" );
+			return readNonloadingSheet( workbook );
 		}
-		else {
-			XSSFSheet metadataSheet = workbook.getSheet( metadataSheetName );
+
+		for ( String sheetname : typeToSheetNameLkp.getNN( SheetType.METADATA ) ) {
+			XSSFSheet metadataSheet = workbook.getSheet( sheetname );
 			loadMetadata( metadataSheet, data );
 		}
 
-		// load the rest of the sheets
-		for ( int rIndex = 1; rIndex <= lSheet.getLastRowNum(); rIndex++ ) {
-			XSSFRow row = lSheet.getRow( rIndex );
-			if ( row == null ) {
-				continue;
-			}
-
-			XSSFCell cell0 = row.getCell( 0 );
-			XSSFCell cell1 = row.getCell( 1 );
-			if ( cell0 == null || cell1 == null ) {
-				continue;
-			}
-
-			String sheetNameToLoad = cell0.getStringCellValue();
-			String sheetTypeToLoad = cell1.getStringCellValue();
-			if ( sheetNameToLoad.isEmpty() || sheetTypeToLoad.isEmpty() ) {
-				continue;
-			}
-
-			if ( sheetTypeToLoad.contains( "Matrix" ) ) {
-				// I don't know what this is
-			}
-			else if ( !sheetTypeToLoad.trim().equalsIgnoreCase( Constants.METADATA_SHEET_NAME ) ) {
-				// we're skipping the METADATA sheet
-				loadSheet( sheetNameToLoad, workbook, data );
-			}
+		for ( String sheetname : typeToSheetNameLkp.getNN( SheetType.NODE ) ) {
+			loadSheet( sheetname, workbook, data );
 		}
 
-		// rc.commit();
+		for ( String sheetname : typeToSheetNameLkp.getNN( SheetType.RELATION ) ) {
+			loadSheet( sheetname, workbook, data );
+		}
+
 		return data;
 	}
 
-	private String findMetadataSheetName( XSSFSheet lSheet ) {
+	private MultiMap<SheetType, String> categorizeSheets( XSSFWorkbook workbook )
+			throws FileLoadingException {
+		MultiMap<SheetType, String> typeToSheetNameLkp = new MultiMap<>();
+		// figure out what this spreadsheet contains...if we have a "Loader" tab,
+		// only worry about those sheets named in it. Otherwise, go through every
+		// sheet and figure out what we have
+
+		XSSFSheet lSheet = workbook.getSheet( "Loader" );
+		if ( null == lSheet ) {
+			// no loader sheet, so check through all the sheets
+			for ( int i = 0; i < workbook.getNumberOfSheets(); i++ ) {
+				String name = workbook.getSheetName( i );
+				SheetType st = getSheetType( workbook, name );
+				if ( SheetType.EMPTY != st ) {
+					typeToSheetNameLkp.add( st, name );
+				}
+			}
+		}
+		else {
+			// we have a loader sheet, so only worry about the sheets named in it
+			typeToSheetNameLkp.add( SheetType.LOADER, "Loader" );
+
+			Map<String, SheetType> fromloading = categorizeFromLoadingSheet( lSheet );
+			for ( Map.Entry<String, SheetType> en : fromloading.entrySet() ) {
+				String name = en.getKey();
+				SheetType loadertype = en.getValue();
+				SheetType realtype = getSheetType( workbook, name );
+
+				if ( SheetType.EMPTY != realtype ) {
+					if ( SheetType.METADATA == loadertype && SheetType.METADATA != realtype ) {
+						throw new FileLoadingException( ErrorType.INCONSISTENT_DATA,
+								"Sheet " + name + " does not include \"Metadata\" keyword in cell A1" );
+					}
+					else {
+						typeToSheetNameLkp.add( realtype, name );
+					}
+				}
+			}
+		}
+
+		return typeToSheetNameLkp;
+	}
+
+	private static Map<String, SheetType> categorizeFromLoadingSheet( XSSFSheet lSheet ) {
+		Map<String, SheetType> map = new HashMap<>();
+
 		for ( int rIndex = 1; rIndex <= lSheet.getLastRowNum(); rIndex++ ) {
 			XSSFRow row = lSheet.getRow( rIndex );
 			if ( row == null ) {
@@ -182,13 +207,34 @@ public class POIReader implements ImportFileReader {
 				continue;
 			}
 
-			if ( sheetTypeToLoad.trim().equalsIgnoreCase( Constants.METADATA_SHEET_NAME ) ) {
-				return sheetNameToLoad;
-			}
+			map.put( sheetNameToLoad, ( "Metadata".equals( sheetNameToLoad )
+					? SheetType.METADATA : SheetType.UNKNOWN ) );
 		}
 
-		logger.debug( "no metadata sheet found" );
-		return null;
+		return map;
+	}
+
+	private SheetType getSheetType( XSSFWorkbook workbook, String sheetname ) {
+		XSSFSheet sheet = workbook.getSheet( sheetname );
+		XSSFRow row = sheet.getRow( 0 );
+		if ( null == row ) {
+			return SheetType.EMPTY;
+		}
+
+		// see what's in cell A1
+		Cell cell = row.getCell( 0 );
+		String type = cell.getStringCellValue();
+
+		switch ( type ) {
+			case "Metadata":
+				return SheetType.METADATA;
+			case "Relation":
+				return SheetType.RELATION;
+			case "Node":
+				return SheetType.NODE;
+			default:
+				return SheetType.UNKNOWN;
+		}
 	}
 
 	private void loadMetadata( XSSFSheet metadataSheet, ImportData data ) {
@@ -197,10 +243,19 @@ public class POIReader implements ImportFileReader {
 		}
 
 		data.getMetadata().setLegacyMode( false );
+		// we want to load the base uri first, data-namespace, schema-namespace,
+		// prefixes, and finally triples. so read everything first, and load later
+		String datanamespace = null;
+		String schemanamespace = null;
+		String baseuri = null;
+		Map<String, String> namespaces = new HashMap<>();
+		List<String[]> triples = new ArrayList<>();
 
 		logger.debug( ( metadataSheet.getLastRowNum() + 1 )
 				+ " metadata rows to interpret" );
 		ImportMetadata metas = data.getMetadata();
+
+		// read the data
 		for ( int i = 0; i <= metadataSheet.getLastRowNum(); i++ ) {
 			XSSFRow row = metadataSheet.getRow( i );
 			if ( row == null ) {
@@ -208,8 +263,8 @@ public class POIReader implements ImportFileReader {
 				continue;
 			}
 
-			XSSFCell cell0 = row.getCell( 0 );
-			XSSFCell cell2 = row.getCell( 2 );
+			XSSFCell cell0 = row.getCell( 1 );
+			XSSFCell cell2 = row.getCell( 3 );
 			if ( cellIsEmpty( cell0 ) || cellIsEmpty( cell2 ) ) {
 				logger.warn( "skipping row: " + i + " (empty cell)" );
 				continue;
@@ -221,57 +276,56 @@ public class POIReader implements ImportFileReader {
 			String propName = cell0.getStringCellValue();
 			String propValue = cell2.getStringCellValue();
 
-			XSSFCell cell1 = row.getCell( 1 );
+			XSSFCell cell1 = row.getCell( 2 );
 			String propertyMiddleColumn = ( cellIsEmpty( cell1 )
 					? "" : cell1.getStringCellValue() );
 
 			if ( "@schema-namespace".equals( propName ) ) {
-				logger.debug( "setting schema namespace to " + propValue );
-				metas.setSchemaBuilder( propValue );
+				schemanamespace = propValue;
 			}
 			else if ( "@data-namespace".equals( propName ) ) {
-				logger.debug( "setting data namespaces to " + propValue );
-				metas.setDataBuilder( propValue );
+				datanamespace = propValue;
 			}
 			else if ( "@base".equals( propName ) ) {
-				logger.debug( "setting base URI to " + propValue );
-				ValueFactory vf = new ValueFactoryImpl();
-				metas.setBase( vf.createURI( propValue ) );
+				baseuri = propValue;
 			}
 			else if ( "@prefix".equals( propName ) ) {
-				logger.debug( "registering namespace: "
-						+ propertyMiddleColumn + " => " + propValue );
-				metas.setNamespace( propertyMiddleColumn, propValue );
-			}
-			else if ( "@triple".equals( propName ) ) {
-				XSSFCell cell3 = row.getCell( 3 );
-				if ( !cellIsEmpty( cell3 ) ) {
-					logger.debug( "adding custom triple: "
-							+ propertyMiddleColumn + " => " + propValue + " => " + cell3 );
-
-					metas.add( new StatementImpl( getUriFromRawString( propertyMiddleColumn, data ),
-							getUriFromRawString( propValue, data ),
-							getUriFromRawString( cell3.getStringCellValue(), data ) ) );
-				}
-			}
-			else if ( "@createModel".equals( propName ) ) {
-				logger.debug( "setting autocreate model to: "
-						+ Boolean.parseBoolean( propValue ) );
-				try {
-					metas.setAutocreateMetamodel( Boolean.parseBoolean( propValue ) );
-				}
-				catch ( Exception e ) {
-					logger.warn( "@createModel flag set but without a boolean value in "
-							+ "the third column. Couldnt parse boolean out of: " + propValue, e );
-				}
-			}
-			else if ( !propName.startsWith( "@" ) ) {
-				data.getMetadata().addExtra(
-						getUriFromRawString( propName, data ), propValue );
+				namespaces.put( propertyMiddleColumn, propValue );
 			}
 			else {
-				logger.warn( "Metadata key " + propName + " not recognized." );
+				if ( !propertyMiddleColumn.isEmpty() ) {
+					triples.add( new String[]{ propName, propertyMiddleColumn, propValue } );
+				}
 			}
+		}
+
+		// now set the data
+		if ( null != baseuri ) {
+			logger.debug( "setting base uri to " + baseuri );
+			metas.setBase( new URIImpl( baseuri ) );
+		}
+		if ( null != datanamespace ) {
+			logger.debug( "setting data namespace to " + datanamespace );
+			metas.setDataBuilder( datanamespace );
+		}
+		if ( null != schemanamespace ) {
+			logger.debug( "setting schema namespace to " + schemanamespace );
+			metas.setSchemaBuilder( schemanamespace );
+		}
+
+		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
+			logger.debug( "registering namespace: "
+					+ en.getKey() + " => " + en.getValue() );
+			metas.setNamespace( en.getKey(), en.getValue() );
+		}
+
+		for ( String[] triple : triples ) {
+			logger.debug( "adding custom triple: "
+					+ triple[0] + " => " + triple[1] + " => " + triple[2] );
+
+			metas.add( new StatementImpl( getUriFromRawString( triple[0], data ),
+					getUriFromRawString( triple[1], data ),
+					getUriFromRawString( triple[2], data ) ) );
 		}
 	}
 

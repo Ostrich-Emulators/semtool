@@ -1,5 +1,6 @@
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.poi.main.FileLoadingException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,7 +15,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
@@ -22,7 +22,6 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.main.ImportRDBMSProcessor;
 import gov.va.semoss.util.DIHelper;
-import org.openrdf.model.impl.LinkedHashModel;
 
 public class ImportDataProcessor {
 
@@ -110,7 +109,7 @@ public class ImportDataProcessor {
     try{
       el.loadToEngine( filesToImport, eng, true, null );
     }
-    catch( RepositoryException | IOException e ){
+    catch( FileLoadingException | RepositoryException | IOException e ){
       logger.error( e,e );
       success = false;
     }

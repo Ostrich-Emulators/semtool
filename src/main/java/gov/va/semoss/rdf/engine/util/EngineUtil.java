@@ -9,6 +9,7 @@ import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.poi.main.FileLoadingException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -44,8 +45,6 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFHandlerException;
 import gov.va.semoss.poi.main.ImportData;
-import gov.va.semoss.poi.main.ImportFileReader;
-import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
@@ -662,7 +661,7 @@ public class EngineUtil implements Runnable {
 				bde.calculateInferences();
 			}
 		}
-		catch ( RepositoryException e ) {
+		catch ( FileLoadingException | RepositoryException e ) {
 			throw new EngineManagementException( e );
 		}
 		finally {

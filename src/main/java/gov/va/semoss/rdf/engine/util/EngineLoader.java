@@ -32,6 +32,7 @@ import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.poi.main.AbstractFileReader;
 import gov.va.semoss.poi.main.CSVReader;
+import gov.va.semoss.poi.main.FileLoadingException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
@@ -195,10 +196,11 @@ public class EngineLoader {
 	 * <code>createmetamodel</code> is false
 	 * @throws RepositoryException
 	 * @throws IOException
+	 * @throws gov.va.semoss.poi.main.FileLoadingException
 	 */
 	public Collection<Statement> loadToEngine( Collection<File> toload, IEngine engine,
 			boolean createmetamodel, ImportData conformanceErrors )
-			throws RepositoryException, IOException {
+			throws RepositoryException, IOException, FileLoadingException {
 
 		Set<Statement> mmstmts = new HashSet<>();
 

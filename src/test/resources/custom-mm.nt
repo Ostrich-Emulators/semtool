@@ -1,11 +1,3 @@
-<http://seman.tc/data/northwind> <http://purl.org/dc/terms/creator> "North Wind, LLC" .
-<http://seman.tc/data/northwind> <http://www.w3.org/2002/07/owl#versionIRI> <http://seman.tc/data/northwind/0.9> .
-<http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation> .
-<http://seman.tc/models/northwind#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Contains> .
-<http://seman.tc/data/northwind> <http://www.w3.org/2000/01/rdf-schema#label> "Northwind Corporate Database"^^<http://www.w3.org/2001/XMLSchema#string> .
-<http://seman.tc/data/northwind> <http://www.w3.org/2002/07/owl#versionInfo> "0.9"^^<http://www.w3.org/2001/XMLSchema#float> .
-<http://seman.tc/data/northwind> <http://purl.org/dc/terms/description> "This is the \"North Wind\" Testing Database" .
-<http://seman.tc/data/northwind> <http://purl.org/dc/terms/publisher> "North Wind, LLC <info@com.northwind>" .
 <http://schema.org/subject> <http://www.w3.org/2000/01/rdf-schema#label> <http://junk/just-for-fun> .
 <http://seman.tc/data/northwind/Concept/Category/Beverages> <http://purl.org/dc/terms/Description> "Soft drinks, coffees, teas, beers, and ales" .
 <http://seman.tc/data/northwind/Concept/Category/Beverages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
@@ -218,3 +210,5 @@
 <http://seman.tc/models/northwind#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
 <http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
 <http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/2000/01/rdf-schema#label> "Category" .
+<http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation> .
+<http://seman.tc/models/northwind#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Contains> .
