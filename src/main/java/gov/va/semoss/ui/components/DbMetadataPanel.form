@@ -19,8 +19,6 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="w2lbl" max="32767" attributes="0"/>
-                  <Component id="wlbl" max="32767" attributes="0"/>
                   <Component id="tlbl" alignment="1" max="32767" attributes="0"/>
                   <Component id="slbl" alignment="1" max="32767" attributes="0"/>
                   <Component id="olbl" alignment="1" max="32767" attributes="0"/>
@@ -40,8 +38,6 @@
                   <Component id="smss" alignment="0" max="32767" attributes="0"/>
                   <Component id="poc" alignment="0" max="32767" attributes="0"/>
                   <Component id="title" alignment="0" max="32767" attributes="0"/>
-                  <Component id="owlinfo" alignment="0" max="32767" attributes="0"/>
-                  <Component id="owliri" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
           </Group>
@@ -72,11 +68,6 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="wlbl" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="owlinfo" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="clbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="created" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
@@ -90,12 +81,7 @@
                   <Component id="blbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="voiduri" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="w2lbl" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="owliri" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="mlbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="smss" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -209,8 +195,9 @@
     </Component>
     <Component class="javax.swing.JTextField" name="voiduri">
       <Properties>
+        <Property name="editable" type="boolean" value="false"/>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ee" green="ee" red="ee" type="rgb"/>
+          <Color blue="c0" green="c0" id="lightGray" palette="1" red="c0" type="palette"/>
         </Property>
       </Properties>
     </Component>
@@ -226,32 +213,6 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="smss">
-      <Properties>
-        <Property name="editable" type="boolean" value="false"/>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="c0" green="c0" id="lightGray" palette="1" red="c0" type="palette"/>
-        </Property>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="wlbl">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Version Info"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="owlinfo">
-      <Properties>
-        <Property name="editable" type="boolean" value="false"/>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="c0" green="c0" id="lightGray" palette="1" red="c0" type="palette"/>
-        </Property>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="w2lbl">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Version IRI"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="owliri">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">

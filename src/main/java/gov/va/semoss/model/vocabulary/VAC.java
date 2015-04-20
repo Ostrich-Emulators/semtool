@@ -1,7 +1,9 @@
 package gov.va.semoss.model.vocabulary;
 
 import org.openrdf.model.Namespace;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.NamespaceImpl;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * Minimal vocabulary to support VA SEMOSS Insights.
@@ -23,6 +25,8 @@ public class VAC {
 	 * Recommend prefix for the V-CAMP SEMOSS Tool namespace: "vas"
 	 */
 	public final static String PREFIX = "vac";
+
+	public final static URI SOFTWARE_AGENT = new URIImpl( NAMESPACE + "softwareAgent" );
 
 	/**
 	 * An immutable {@link Namespace} constant that represents the VA SEMOSS Tool

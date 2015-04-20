@@ -50,6 +50,7 @@ import gov.va.semoss.util.UriBuilder;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 
@@ -102,7 +103,7 @@ public abstract class AbstractEngine implements IEngine {
 
 	/**
 	 * Opens the database. This function calls (in this order) {@link #loadAllProperties(java.util.Properties,
-	 * java.lang.String, java.io.File...) }, {@link #isetBaseUri(java.lang.String) },
+	 * java.lang.String, java.io.File...) }, {@link #setUris(java.lang.String, java.lang.String) },
 	 * {@link #finishLoading(java.util.Properties) }
 	 *
 	 * @param initprops
@@ -116,8 +117,6 @@ public abstract class AbstractEngine implements IEngine {
 			startLoading( prop );
 
 			String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
-			isetBaseUri( baseuristr );
-
 			String owlstarter = prop.getProperty( Constants.SEMOSS_URI,
 					DIHelper.getInstance().getProperty( Constants.SEMOSS_URI ) );
 			if ( null == owlstarter ) {
@@ -125,8 +124,7 @@ public abstract class AbstractEngine implements IEngine {
 						+ Constants.DEFAULT_SEMOSS_URI );
 				owlstarter = Constants.DEFAULT_SEMOSS_URI;
 			}
-
-			setSchemaBuilder( UriBuilder.getBuilder( owlstarter ) );
+			baseuri = setUris( baseuristr, owlstarter );
 
 			String dreamerfileloc = prop.getProperty( Constants.DREAMER );
 			if ( null != dreamerfileloc ) {
@@ -305,21 +303,15 @@ public abstract class AbstractEngine implements IEngine {
 
 	/**
 	 * An extension point for subclasses to set their base uris during the load
-	 * process
+	 * process. This function should set the {@link #baseuri},
+	 * {@link #databuilder}, {@link #schemabuilder}
 	 *
-	 * @param uri the property value from the properties file (possibly empty)
+	 * @param data the data builder uri property value from the properties file
+	 * (possibly empty)
+	 * @param schema the schema builder uri (never empty)
+	 * @return this database's unique id. this will include some sort of UUID
 	 */
-	protected void isetBaseUri( String uri ) {
-		if ( !uri.isEmpty() ) {
-			try {
-				setDataBuilder( UriBuilder.getBuilder( uri ) );
-				setBaseUri( databuilder.toUri() );
-			}
-			catch ( Exception e ) {
-				log.warn( "no base uri set: " + uri, e );
-			}
-		}
-	}
+	protected abstract URI setUris( String data, String schema );
 
 	@Override
 	public void closeDB() {

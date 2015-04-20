@@ -133,26 +133,35 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	@Override
-	protected void isetBaseUri( String base ) {
-		if ( base.isEmpty() ) {
+	protected URI setUris( String data, String schema ) {
+		URI baseuri = null;
+		if ( data.isEmpty() ) {
 			try {
 				// if the baseuri isn't already set, then query the kb for void:Dataset
 				RepositoryResult<Statement> rr
-						= getRawConnection().getStatements( null, RDF.TYPE,
-								MetadataConstants.VOID_DS, false );
+						= getRawConnection().getStatements(null, RDF.TYPE, VAS.DATABASE, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
-					setDataBuilder( UriBuilder.getBuilder( s.getSubject().stringValue() ) );
-					setBaseUri( getDataBuilder().toUri() );
+					baseuri = URI.class.cast( s.getSubject() );
+					break;
 				}
+
 			}
 			catch ( RepositoryException e ) {
 				log.error( e, e );
 			}
 		}
 		else {
-			setBaseUri( new URIImpl( base ) );
+			baseuri = new URIImpl( data );
 		}
+
+		if ( null == baseuri ) {
+			log.fatal( "no base uri set" );
+		}
+
+		setSchemaBuilder( UriBuilder.getBuilder( schema ) );
+		setDataBuilder( UriBuilder.getBuilder( baseuri ) );
+		return baseuri;
 	}
 
 	@Override
@@ -475,7 +484,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		try {
 			if ( null == baseuri ) {
 				RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
-						MetadataConstants.VOID_DS, false );
+						VAS.DATABASE, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = s.getSubject();

@@ -103,7 +103,7 @@ public class POIReader implements ImportFileReader {
 				= new XSSFWorkbook( new FileInputStream( file ) );
 
 		ImportData data = new ImportData();
-		for ( String name : categorizeSheets( workbook ).get( SheetType.METADATA ) ) {
+		for ( String name : categorizeSheets( workbook ).getNN( SheetType.METADATA ) ) {
 			XSSFSheet metadataSheet = workbook.getSheet( name );
 			loadMetadata( metadataSheet, data );
 		}

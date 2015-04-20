@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.query.util;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import java.util.Map;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -64,7 +65,7 @@ public class MetadataQueryTest {
       repo.initialize();
       RepositoryConnection rc = repo.getConnection();
       engine.setRepositoryConnection( rc );
-      rc.add( bldr.toUri(), RDF.TYPE, MetadataConstants.VOID_DS );
+      rc.add( bldr.toUri(), RDF.TYPE, VAS.DATABASE );
     }
     catch ( Exception e ) {
     }

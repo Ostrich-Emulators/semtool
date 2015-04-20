@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.poi.main;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
@@ -86,7 +87,7 @@ public final class ImportMetadata {
 		extras.clear();
 		for ( Map.Entry<URI, String> en : exs.entrySet() ) {
 			// don't write the void#dataset value, because it's the same for every KB
-			if ( !en.getKey().equals( MetadataConstants.VOID_DS ) ) {
+			if ( !en.getKey().equals( VAS.DATABASE ) ) {
 				extras.put( en.getKey(), en.getValue() );
 			}
 		}

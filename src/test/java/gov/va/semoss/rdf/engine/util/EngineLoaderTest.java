@@ -18,26 +18,25 @@ import gov.va.semoss.util.UriBuilder.DefaultSanitizer;
 import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -99,38 +98,17 @@ public class EngineLoaderTest {
 	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
 
 	private InMemorySesameEngine engine;
-	private File destination;
+	private File dbfile;
 
 	private IEngine extractKb() {
-		if ( null != destination ) {
-			FileUtils.deleteQuietly( destination );
+		if ( null != dbfile ) {
+			FileUtils.deleteQuietly( dbfile );
 		}
-		destination = null;
 
-		try ( ZipInputStream zis = new ZipInputStream( new FileInputStream(
-				"src/test/resources/emptydb.zip" ) ) ) {
-			destination = File.createTempFile( "semoss-test-", "" );
-			destination.delete();
-			destination.mkdir();
-
-			ZipEntry entry;
-			while ( null != ( entry = zis.getNextEntry() ) ) {
-				File outfile = new File( destination, entry.getName() );
-				if ( entry.isDirectory() ) {
-					outfile.mkdirs();
-				}
-				else {
-					try ( FileOutputStream fout = new FileOutputStream( outfile ) ) {
-						byte bytes[] = new byte[1024 * 1024];
-						int read = -1;
-						while ( -1 != ( read = zis.read( bytes ) ) ) {
-							fout.write( bytes, 0, read );
-						}
-						zis.closeEntry();
-					}
-				}
-			}
-
+		try {
+			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
+			Files.copy( new File( "src/test/resources/test.jnl" ).toPath(),
+					dbfile.toPath(), StandardCopyOption.REPLACE_EXISTING );
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
@@ -141,12 +119,9 @@ public class EngineLoaderTest {
 		data.setSanitizer( new DefaultSanitizer() );
 		schema.setSanitizer( new DefaultSanitizer() );
 
-		File dbdir = new File( destination, "emptydb" );
-		File smss = new File( dbdir, "emptydb.jnl" );
-		Properties props = BigDataEngine.generateProperties( smss );
+		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		props.setProperty( Constants.SMSS_LOCATION, smss.getAbsolutePath() );
 		BigDataEngine eng = new BigDataEngine() {
 			@Override
 			public UriBuilder getDataBuilder() {
@@ -161,7 +136,7 @@ public class EngineLoaderTest {
 
 	private void removeKb( IEngine eng ) {
 		eng.closeDB();
-		FileUtils.deleteQuietly( destination );
+		FileUtils.deleteQuietly( dbfile );
 	}
 
 	@BeforeClass
@@ -401,7 +376,7 @@ public class EngineLoaderTest {
 		el.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
 		el.release();
 		OneVarListQueryAdapter<URI> o
-				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o }",
+				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o . FILTER( isUri( ?uri ) ) }",
 						"uri" );
 		List<URI> oldlist = eng.query( o );
 
@@ -421,7 +396,7 @@ public class EngineLoaderTest {
 		el.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
 		el.release();
 		OneVarListQueryAdapter<URI> o
-				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o }",
+				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o . FILTER( isUri( ?uri ) ) }",
 						"uri" );
 		List<URI> oldlist = eng.query( o );
 

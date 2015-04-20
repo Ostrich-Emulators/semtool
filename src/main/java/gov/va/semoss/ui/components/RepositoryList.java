@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class RepositoryList extends JList<IEngine> {
 				sb.append( "Location: " ).append( FilenameUtils.getFullPathNoEndSeparator( loc ) );
 			}
 
-			String onto = metadata.get( MetadataConstants.VOID_DS );
+			String onto = metadata.get( VAS.DATABASE );
 			if ( null != onto ) {
 				if ( sb.length() > 0 ) {
 					sb.append( "<br>" );
@@ -297,11 +298,11 @@ public class RepositoryList extends JList<IEngine> {
 
 				add.setSize( c.getWidth(), h );
 				add.paint( g2 );
-				
+
 				create.setSize( c.getWidth(), h );
 				g2.translate( 0, h );
-				create.paint( g2 );				
-				
+				create.paint( g2 );
+
 				g2.dispose();
 			}
 		}
@@ -343,12 +344,12 @@ public class RepositoryList extends JList<IEngine> {
 			fireIntervalAdded( e, engines.size() - 1, engines.size() - 1 );
 		}
 
-		public void addAll( Collection<IEngine> engins ){
-			for( IEngine eng : engins ){
+		public void addAll( Collection<IEngine> engins ) {
+			for ( IEngine eng : engins ) {
 				add( eng );
 			}
 		}
-		
+
 		public Collection<IEngine> getElements() {
 			return new ArrayList<>( engines );
 		}

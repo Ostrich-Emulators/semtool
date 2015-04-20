@@ -51,6 +51,8 @@ public class VAS {
 	 */
 	public final static URI Perspective;
 
+	public final static URI DATABASE;
+	public final static URI REIFICATION;
     
 	// ----- Properties ------
 	
@@ -77,6 +79,10 @@ public class VAS {
 		DataView = factory.createURI(NAMESPACE, "DataView");
 		Functions = factory.createURI(NAMESPACE, "Functions");
 		Perspective = factory.createURI(NAMESPACE, "Perspective");
+		
+		// the vas:DATABASE type
+		DATABASE = factory.createURI(NAMESPACE, "Database");
+		REIFICATION = factory.createURI( NAMESPACE, "reification" );
 		
 		// ----- Properties ------
 		insight = factory.createURI(NAMESPACE, "insight");

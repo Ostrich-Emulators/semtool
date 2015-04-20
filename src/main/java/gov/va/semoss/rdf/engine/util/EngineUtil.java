@@ -8,6 +8,7 @@ package gov.va.semoss.rdf.engine.util;
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
+import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.FileLoadingException;
 import java.io.File;
@@ -35,7 +36,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
@@ -636,8 +636,7 @@ public class EngineUtil implements Runnable {
 				= getStatementsFromResource( "/models/va-semoss.ttl", RDFFormat.TURTLE );
 		insights.addAll( createInsightStatements( modelquestions ) );
 
-		File smssfile = createEngine( dbtopdir, engine, new URIImpl( baseuri ),
-				modelsmss, modelmap, dometamodel );
+		File smssfile = createEngine( dbtopdir, engine, modelsmss, modelmap, dometamodel );
 
 		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
 
@@ -655,7 +654,7 @@ public class EngineUtil implements Runnable {
 
 		EngineLoader el = new EngineLoader( stageInMemory );
 
-		try {			
+		try {
 			el.loadToEngine( toload, bde, dometamodel, conformanceErrors );
 			if ( calcInfers ) {
 				bde.calculateInferences();
@@ -808,17 +807,21 @@ public class EngineUtil implements Runnable {
 			QueryEvaluationException, IOException {
 		ValueFactory vf = conn.getValueFactory();
 
+		if ( true ) {
+			throw new UnsupportedOperationException( "this function needs to be "
+					+ "refactored to handle new metadata schema" );
+		}
+
 		// delete any metadata that might exist from the repository copy
 		Collection<Statement> stmts = Iterations.asList( conn.getStatements( null,
-				MetadataConstants.VOID_DS, null, false ) );
+				VAS.DATABASE, null, false ) );
 		for ( Statement s : stmts ) {
 			conn.remove( s.getSubject(), null, null );
 		}
 
 		EngineUtil.add( conn, metadata.getBaseUri(), RDFS.LABEL,
 				metadata.getTitle(), vf );
-		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE,
-				MetadataConstants.VOID_DS ) );
+		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE,	VAS.DATABASE ) );
 		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_DESC,
 				"Cloned from " + from.getEngineName(), vf );
 		Date now = new Date();
@@ -827,10 +830,7 @@ public class EngineUtil implements Runnable {
 		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_MODIFIED,
 				now, vf );
 
-		URI agenturi
-				= from.getDataBuilder().getCoreUri( Constants.SOFTWARE_AGENT_LOCALNAME );
-
-		EngineUtil.add( conn, metadata.getBaseUri(), agenturi,
+		EngineUtil.add( conn, metadata.getBaseUri(), VAC.SOFTWARE_AGENT,
 				System.getProperty( "build.name", "unknown" ), vf );
 
 		MetadataQuery mq = new MetadataQuery();
@@ -861,9 +861,8 @@ public class EngineUtil implements Runnable {
 
 	}
 
-	public static File createEngine( File enginedir, String dbname, URI baseuri,
-			File modelsmss, File modelmap, boolean dometamodel )
-			throws IOException, EngineManagementException {
+	public static File createEngine( File enginedir, String dbname, File modelsmss,
+			File modelmap, boolean dometamodel ) throws IOException, EngineManagementException {
 
 		if ( null != modelmap && modelmap.exists() ) {
 			try {
@@ -914,48 +913,50 @@ public class EngineUtil implements Runnable {
 				rc.commit();
 			}
 
+			URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+
 			// add the metadata
-			if ( null != baseuri ) {
-				rc.begin();
-				ValueFactory vf = rc.getValueFactory();
-				rc.add( new StatementImpl( baseuri, RDF.TYPE,
-						MetadataConstants.VOID_DS ) );
-				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATED,
-						vf.createLiteral( QueryExecutorAdapter.getCal( new Date() ) ) ) );
+			rc.begin();
+			ValueFactory vf = rc.getValueFactory();
+			rc.add( new StatementImpl( baseuri, RDF.TYPE, VAS.DATABASE ) );
+			Date today = new Date();
+			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATED,
+					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
+			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
+					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
-				URI agenturi = UriBuilder.getBuilder( baseuri ).
-						getCoreUri( Constants.SOFTWARE_AGENT_LOCALNAME );
+			// we don't have these constants yet
+			// rc.add( new StatementImpl( baseuri, VAS.REIFICATION, VAS.ReificationModel ) );
+			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
+					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
 
-				rc.add( new StatementImpl( baseuri, agenturi,
-						vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
+			Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
+			String username = prefs.get( Constants.USERPREF_NAME, "" );
+			String email = prefs.get( Constants.USERPREF_EMAIL, "" );
+			String org = prefs.get( Constants.USERPREF_ORG, "" );
 
-				Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
-				String username = prefs.get( Constants.USERPREF_NAME, "" );
-				String email = prefs.get( Constants.USERPREF_EMAIL, "" );
-				String org = prefs.get( Constants.USERPREF_ORG, "" );
-
-				if ( !( username.isEmpty() && email.isEmpty() ) ) {
-					StringBuilder poc = new StringBuilder();
-					if ( username.isEmpty() ) {
-						poc.append( email );
-					}
-					else {
-						poc.append( username );
-					}
-					if ( !email.isEmpty() ) {
-						poc.append( " <" ).append( email ).append( ">" );
-					}
-
-					rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_PUBLISHER,
-							vf.createLiteral( poc.toString() ) ) );
+			if ( !( username.isEmpty() && email.isEmpty() ) ) {
+				StringBuilder poc = new StringBuilder();
+				if ( username.isEmpty() ) {
+					poc.append( email );
 				}
-				if ( !org.isEmpty() ) {
-					rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATOR,
-							vf.createLiteral( org ) ) );
+				else {
+					poc.append( username );
+				}
+				if ( !email.isEmpty() ) {
+					poc.append( " <" ).append( email ).append( ">" );
 				}
 
-				rc.commit();
+				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_PUBLISHER,
+						vf.createLiteral( poc.toString() ) ) );
 			}
+			if ( !org.isEmpty() ) {
+				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATOR,
+						vf.createLiteral( org ) ) );
+			}
+
+			rc.commit();
+
 			rc.close();
 			repo.shutDown();
 		}
@@ -1022,7 +1023,7 @@ public class EngineUtil implements Runnable {
 	public static void clear( IEngine engine ) throws RepositoryException {
 		try {
 			final Map<URI, String> metas = engine.query( new MetadataQuery() );
-			metas.remove( MetadataConstants.VOID_DS );
+			metas.remove( VAS.DATABASE );
 
 			engine.execute( new ModificationExecutorAdapter() {
 
