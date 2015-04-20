@@ -124,7 +124,7 @@ public abstract class AbstractEngine implements IEngine {
 						+ Constants.DEFAULT_SEMOSS_URI );
 				owlstarter = Constants.DEFAULT_SEMOSS_URI;
 			}
-			baseuri = setUris( baseuristr, owlstarter );
+			baseuri = new URIImpl( setUris( baseuristr, owlstarter ).stringValue() );
 
 			String dreamerfileloc = prop.getProperty( Constants.DREAMER );
 			if ( null != dreamerfileloc ) {

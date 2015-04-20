@@ -587,7 +587,7 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @param dbtopdir directory about where the engine will be placed.
 	 * @param engine the engine name
-	 * @param baseuri the base uri of the new engine
+	 * @param defaultBaseUri the base uri of the new engine
 	 * @param smss the custom smss file. If null or empty, will use the sample
 	 * file from the Defaults directory
 	 * @param map the custom ontology properties file. Can be null null or empty
@@ -607,7 +607,7 @@ public class EngineUtil implements Runnable {
 	 * @throws java.io.IOException
 	 * @throws gov.va.semoss.rdf.engine.util.EngineManagementException
 	 */
-	public static File createNew( File dbtopdir, String engine, String baseuri,
+	public static File createNew( File dbtopdir, String engine, URI defaultBaseUri,
 			String smss, String map, String questions, Collection<File> toload,
 			boolean stageInMemory, boolean calcInfers, boolean dometamodel,
 			ImportData conformanceErrors ) throws IOException, EngineManagementException {
@@ -653,6 +653,7 @@ public class EngineUtil implements Runnable {
 		}
 
 		EngineLoader el = new EngineLoader( stageInMemory );
+		el.setDefaultBaseUri( defaultBaseUri );
 
 		try {
 			el.loadToEngine( toload, bde, dometamodel, conformanceErrors );

@@ -27,11 +27,16 @@ import gov.va.semoss.util.DIHelper;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  *
@@ -67,7 +72,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		Set<String> seen = new HashSet<>();
 		seen.add( METADATABASEURI );
 		for ( String uri : prefs.get( "lastontopath", "http://va.gov/ontologies" ).split( ";" ) ) {
-			if( !seen.contains( uri ) ){
+			if ( !seen.contains( uri ) ) {
 				baseuri.addItem( uri );
 				seen.add( uri );
 			}
@@ -303,8 +308,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	}
 
 	public void doCreate() {
-		Preferences prefs = Preferences.userNodeForPackage( getClass() );
-
 		String mybase = baseuri.getSelectedItem().toString();
 
 		final boolean stageInMemory = memoryStaging.isSelected();
@@ -312,76 +315,37 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		final boolean dometamodel = metamodel.isSelected();
 		final boolean conformance = conformer.isSelected();
 
-		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
-			Set<String> bases = new HashSet<>();
-			mybase = null;
+		Collection<File> files = file.getFiles();
 
-			EngineLoader el = new EngineLoader( false );
+		URI defaultBase = null;
+		if ( !files.isEmpty() ) {
+			if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
+				Set<URI> uris = new HashSet<>();
+				Preferences prefs = Preferences.userNodeForPackage( getClass() );
+				String basepref = prefs.get( "lastontopath", "http://va.gov/ontologies/" );
+				for ( String b : basepref.split( ";" ) ) {
+					uris.add( new URIImpl( b ) );
+				}
 
-			String choice = null;
-			try {
-				for ( File f : file.getFiles() ) {
-					ImportFileReader reader = el.getReader( f );
-					ImportMetadata metadata = reader.getMetadata( f );
+				defaultBase = getDefaultBaseUri( files, uris );
 
-					URI baser = metadata.getBase();
-					if ( null != baser ) {
-						choice = metadata.getBase().stringValue();
-						bases.add( choice );
+				// save the default base for next time
+				uris.add( defaultBase );
+				StringBuilder sb = new StringBuilder();
+				for ( URI u : uris ) {
+					if ( 0 != sb.length() ) {
+						sb.append( ";" );
 					}
+					sb.append( u.stringValue() );
 				}
-			}
-			catch ( FileLoadingException | IOException e ) {
-				log.warn( e, e );
-			}
-
-			if ( bases.isEmpty() ) {
-				JComboBox box = new JComboBox();
-				box.addItem( "" );
-				
-				Set<String> seen = new HashSet<>();
-				seen.add( METADATABASEURI );
-				for ( int i = 0; i < baseuri.getItemCount(); i++ ) {
-					String item = baseuri.getItemAt( i );
-					if ( !seen.contains( item ) ) {
-						box.addItem( item );
-						seen.add( item );
-					}
-				}
-				box.setEditable( true );
-
-				int opt = JOptionPane.showOptionDialog( null, box, "Specify the Base URI",
-						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-						null, null );
-				if ( JOptionPane.OK_OPTION != opt ) {
-					log.debug( "create canceled" );
-					return;
-				}
-				mybase = box.getSelectedItem().toString();
-			}
-			else if ( bases.size() == 1 ) {
-				mybase = choice;
-			}
-			else {
-				mybase = (String) JOptionPane.showInputDialog( null,
-						"Please select a base URI", "Multiple Base URIs Found",
-						JOptionPane.QUESTION_MESSAGE, null, bases.toArray(), choice );
+				prefs.put( "lastontopath", sb.toString() );
 			}
 		}
-
-		final String baseUri = mybase;
-
-		// save our list of base uris back to our preferences
-		StringBuilder basestr = new StringBuilder( mybase );
-		Set<String> bases = new HashSet<>();
-		for ( int i = 0; i < baseuri.getItemCount(); i++ ) {
-			String item = baseuri.getItemAt( i );
-			if ( !bases.contains( item ) ) {
-				basestr.append( ";" ).append( item );
-				bases.add( baseuri.getItemAt( i ) );
-			}
+		else {
+			defaultBase = new URIImpl( mybase );
 		}
-		prefs.put( "lastontopath", basestr.toString() );
+
+		final URI defaultBaseUri = defaultBase;
 
 		ProgressTask pt = new ProgressTask( "Creating Database from "
 				+ file.getDelimitedPaths(), new Runnable() {
@@ -416,9 +380,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 						try {
 							smss[0] = EngineUtil.createNew( dbdir.getFirstFile(),
-									dbname.getText(), baseUri, null, null,
-									questionfile.getFirstPath(), file.getFiles(),
-									stageInMemory, calc, dometamodel, errors );
+									dbname.getText(), defaultBaseUri, null, null,
+									questionfile.getFirstPath(), files, stageInMemory, calc,
+									dometamodel, errors );
 							EngineUtil.getInstance().mount( smss[0], true );
 						}
 						catch ( IOException | EngineManagementException ioe ) {
@@ -449,4 +413,70 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private javax.swing.JLabel urilbl;
   // End of variables declaration//GEN-END:variables
 
+	/**
+	 * Checks every file to make sure it has a base uri set. If any files are
+	 * missing a base uri, ask the user to specify one
+	 *
+	 * @param files the files to check
+	 * @param choices choices for a dropdown for the user
+	 * @return the URI the user chose, or null if the user canceled
+	 */
+	public static URI getDefaultBaseUri( Collection<File> files, Collection<URI> choices ) {
+		Set<String> bases = new HashSet<>();
+
+		EngineLoader el = new EngineLoader();
+
+		URI choice = null;
+		boolean everyFileHasBase = true;
+
+		try {
+			for ( File f : files ) {
+				ImportFileReader reader = el.getReader( f );
+				ImportMetadata metadata = reader.getMetadata( f );
+
+				URI baser = metadata.getBase();
+				if ( null == baser ) {
+					everyFileHasBase = false;
+				}
+				else {
+					bases.add( metadata.getBase().stringValue() );
+				}
+			}
+		}
+		catch ( FileLoadingException | IOException e ) {
+			log.warn( e, e );
+		}
+
+		if ( !everyFileHasBase ) {
+			if ( bases.isEmpty() ) {
+				JComboBox<String> box = new JComboBox<>();
+				box.addItem( "" );
+
+				for ( URI item : choices ) {
+					box.addItem( item.stringValue() );
+				}
+				box.setEditable( true );
+
+				JPanel pnl = new JPanel();
+				pnl.setLayout( new BoxLayout( pnl, BoxLayout.LINE_AXIS ) );
+				pnl.add( new JLabel( "<html>Not all the files have Base URIs set.<br>"
+						+ "Please specify a Base URI to use<br>when one is not provided." ) );
+				JPanel junk = new JPanel();
+				junk.add( box );
+				pnl.add( junk );
+
+				int opt = JOptionPane.showOptionDialog( null, pnl, "Specify the Base URI",
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+						null, null );
+				if ( JOptionPane.OK_OPTION != opt ) {
+					log.debug( "create canceled" );
+					return null;
+				}
+
+				choice = new URIImpl( box.getSelectedItem().toString() );
+			}
+		}
+
+		return choice;
+	}
 }

@@ -48,6 +48,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.ParseException;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 
 public class CLI {
@@ -203,7 +204,7 @@ public class CLI {
 			smss = EngineUtil.createNew(
 					outputFileDir,
 					databaseFileName,
-					baseURI, null, null,
+					new URIImpl( baseURI ), null, null,
 					insightFile,
 					loads,
 					stageInMemory,

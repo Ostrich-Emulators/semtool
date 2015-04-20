@@ -7,7 +7,6 @@ package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.FileLoadingException.ErrorType;
 import java.io.File;
-import static jdk.nashorn.internal.runtime.Debug.id;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;

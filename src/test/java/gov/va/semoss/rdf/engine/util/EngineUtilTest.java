@@ -21,6 +21,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  *
@@ -79,7 +80,7 @@ public class EngineUtilTest {
 		topdir.mkdirs();
 
 		try {
-			EngineUtil.createNew( topdir, "testdb", "http://va.gov/ontologies",
+			EngineUtil.createNew( topdir, "testdb", new URIImpl( "http://va.gov/ontologies" ),
 					null, null, null, Arrays.asList( LEGACY ), true, true, true, null );
 		}
 		finally {

@@ -40,6 +40,7 @@ import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
@@ -100,6 +101,7 @@ public class EngineLoader {
 	private final ValueFactory vf;
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
 	private final Set<URI> duplicates = new HashSet<>();
+	private URI defaultBaseUri;
 
 	public EngineLoader( boolean inmem ) {
 		stageInMemory = inmem;
@@ -121,6 +123,10 @@ public class EngineLoader {
 
 	public EngineLoader() {
 		this( true );
+	}
+
+	public void setDefaultBaseUri( URI base ) {
+		defaultBaseUri = base;
 	}
 
 	public void setReader( String extension, ImportFileReader rdr ) {
@@ -233,14 +239,14 @@ public class EngineLoader {
 
 					// fill in anything not already set. In legacy mode, nothing is set,
 					// but the metadata tab might not set these variables, either
+					if ( null == im.getBase() ) {
+						im.setBase( defaultBaseUri );
+					}
 					if ( null == im.getSchemaBuilder() ) {
 						im.setSchemaBuilder( engine.getSchemaBuilder().toString() );
 					}
 					if ( null == im.getDataBuilder() ) {
-						im.setDataBuilder( engine.getDataBuilder().toString() );
-					}
-					if ( null == im.getBase() ) {
-						im.setBase( engine.getBaseUri() );
+						im.setDataBuilder( im.getBase().stringValue() );
 					}
 
 					loadIntermediateData( data, engine, conformanceErrors );
@@ -287,6 +293,9 @@ public class EngineLoader {
 			for ( LoadingSheetData r : data.getRels() ) {
 				addToEngine( r, engine, data.getMetadata() );
 			}
+
+			URI ebase = engine.getBaseUri();
+			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );

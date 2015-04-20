@@ -24,8 +24,8 @@ public class MetadataConstants {
 
 	public static final String VOID_PREFIX = "void";
 	public static final String VOID_NS = "http://rdfs.org/ns/void#";
+	public static final URI VOID_SUBSET = new URIImpl( VOID_NS + "subset" );
 
-	public static final URI VOID_DS = new URIImpl( VOID_NS + "Dataset" );
 	public static final URI DCT_CREATED = DCTERMS.CREATED;
 	public static final URI DCT_MODIFIED = DCTERMS.MODIFIED;
 
