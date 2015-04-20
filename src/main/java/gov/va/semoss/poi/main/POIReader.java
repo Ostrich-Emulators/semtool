@@ -186,8 +186,22 @@ public class POIReader implements ImportFileReader {
 		return typeToSheetNameLkp;
 	}
 
-	private static Map<String, SheetType> categorizeFromLoadingSheet( XSSFSheet lSheet ) {
+	private static Map<String, SheetType> categorizeFromLoadingSheet( XSSFSheet lSheet )
+			throws FileLoadingException {
 		Map<String, SheetType> map = new HashMap<>();
+		XSSFRow header = lSheet.getRow( 0 );
+		XSSFCell a1 = header.getCell( 0 );
+		XSSFCell b1 = header.getCell( 1 );
+		String a1val = ( cellIsEmpty( a1 ) ? "" : a1.getStringCellValue() );
+		String b1val = ( cellIsEmpty( b1 ) ? "" : b1.getStringCellValue() );
+		boolean mustHaveType = !cellIsEmpty( b1 );
+
+		if ( !"Sheet Name".equals( a1val ) ) {
+			throw new FileLoadingException( ErrorType.MISSING_DATA, "Cell A1 must be \"Sheet Name\"" );
+		}
+		if ( mustHaveType && !"Type".equals( b1val ) ) {
+			throw new FileLoadingException( ErrorType.MISSING_DATA, "Cell B1 must be \"Type\"" );
+		}
 
 		for ( int rIndex = 1; rIndex <= lSheet.getLastRowNum(); rIndex++ ) {
 			XSSFRow row = lSheet.getRow( rIndex );
@@ -195,16 +209,27 @@ public class POIReader implements ImportFileReader {
 				continue;
 			}
 
-			XSSFCell cell0 = row.getCell( 0 );
-			XSSFCell cell1 = row.getCell( 1 );
-			if ( cell0 == null || cell1 == null ) {
-				continue;
+			if ( row.getLastCellNum() > 2 ) {
+				throw new FileLoadingException( ErrorType.UNTYPED_DATA,
+						"Too much data is row " + rIndex );
 			}
 
-			String sheetNameToLoad = cell0.getStringCellValue();
-			String sheetTypeToLoad = cell1.getStringCellValue();
-			if ( sheetNameToLoad.isEmpty() || sheetTypeToLoad.isEmpty() ) {
-				continue;
+			String sheetNameToLoad = getString( row.getCell( 0 ) );
+			String sheetTypeToLoad = getString( row.getCell( 1 ) );
+			if ( sheetNameToLoad.isEmpty() || ( sheetTypeToLoad.isEmpty() && mustHaveType ) ) {
+				if ( sheetNameToLoad.isEmpty() ) {
+					throw new FileLoadingException( ErrorType.MISSING_DATA,
+							"No sheet name on row " + rIndex );
+				}
+				else {
+					throw new FileLoadingException( ErrorType.MISSING_DATA,
+							"No type specified for sheet " + sheetNameToLoad );
+				}
+			}
+			if ( mustHaveType
+					&& !( "Metadata".equals( sheetTypeToLoad ) || "Usual".equals( sheetTypeToLoad ) ) ) {
+				throw new FileLoadingException( ErrorType.INCONSISTENT_DATA,
+						"Invalid type specified: " + sheetTypeToLoad );
 			}
 
 			map.put( sheetNameToLoad, ( "Metadata".equals( sheetNameToLoad )
@@ -355,12 +380,22 @@ public class POIReader implements ImportFileReader {
 		return propHash;
 	}
 
-	private boolean cellIsEmpty( XSSFCell cell ) {
+	private static boolean cellIsEmpty( Cell cell ) {
 		if ( null == cell || cell.getCellType() == XSSFCell.CELL_TYPE_BLANK
 				|| cell.toString().isEmpty() ) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Always return a non-null string (will be "" for null cells).
+	 *
+	 * @param cell
+	 * @return
+	 */
+	private static String getString( Cell cell ) {
+		return ( cellIsEmpty( cell ) ? "" : cell.getStringCellValue() );
 	}
 
 	private void loadSheet( String sheetToLoad, XSSFWorkbook workbook, ImportData id ) {

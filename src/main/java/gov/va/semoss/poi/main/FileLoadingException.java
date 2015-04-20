@@ -13,9 +13,9 @@ public class FileLoadingException extends Exception {
 
 	public static enum ErrorType {
 
-		UNKNOWN, INCONSISTENT_DATA, UNTYPED_DATA
+		UNKNOWN, INCONSISTENT_DATA, UNTYPED_DATA, MISSING_DATA
 	};
-	private final ErrorType error;
+	public final ErrorType error;
 
 	public FileLoadingException() {
 		error = ErrorType.UNKNOWN;

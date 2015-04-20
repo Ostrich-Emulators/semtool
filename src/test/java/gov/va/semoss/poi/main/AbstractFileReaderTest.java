@@ -20,7 +20,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
