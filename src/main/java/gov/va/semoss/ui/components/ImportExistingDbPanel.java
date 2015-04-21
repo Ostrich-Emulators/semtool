@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
 import java.awt.Frame;
 import java.io.File;
@@ -117,7 +117,7 @@ public class ImportExistingDbPanel extends JPanel {
 			try {
 				iedp.doImport();
 			}
-			catch ( IOException | FileLoadingException fle ) {
+			catch ( IOException | ImportValidationException fle ) {
 				log.error( fle, fle );
 				Utility.showError( fle.getLocalizedMessage() );
 			}
@@ -287,7 +287,7 @@ public class ImportExistingDbPanel extends JPanel {
     );
   }// </editor-fold>//GEN-END:initComponents
 
-	public void doImport() throws IOException, FileLoadingException {
+	public void doImport() throws IOException, ImportValidationException {
 		final boolean replace = replaceCheck.isSelected();
 		final boolean stageInMemory = memoryStaging.isSelected();
 		final boolean calc = calcInfers.isSelected();
@@ -377,7 +377,7 @@ public class ImportExistingDbPanel extends JPanel {
 							// if we get here, no exceptions have been thrown, so we're good
 							successfulImport[0] = true;
 						}
-						catch ( FileLoadingException | RepositoryException | IOException ioe ) {
+						catch ( ImportValidationException | RepositoryException | IOException ioe ) {
 							log.error( ioe, ioe );
 						}
 					}

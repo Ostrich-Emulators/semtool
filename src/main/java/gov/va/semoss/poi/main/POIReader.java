@@ -21,7 +21,7 @@ package gov.va.semoss.poi.main;
 
 import static gov.va.semoss.poi.main.AbstractFileReader.getRDFStringValue;
 import static gov.va.semoss.poi.main.AbstractFileReader.getUriFromRawString;
-import gov.va.semoss.poi.main.FileLoadingException.ErrorType;
+import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public class POIReader implements ImportFileReader {
 
 	private static enum SheetType {
 
-		METADATA, NODE, RELATION, LOADER, UNKNOWN, EMPTY
+		METADATA, NODE, RELATION, LOADER, UNKNOWN, UNSPECIFIED, EMPTY
 	};
 
 	private ImportData readNonloadingSheet( XSSFWorkbook workbook ) {
@@ -104,7 +104,7 @@ public class POIReader implements ImportFileReader {
 	}
 
 	@Override
-	public ImportMetadata getMetadata( File file ) throws IOException, FileLoadingException {
+	public ImportMetadata getMetadata( File file ) throws IOException, ImportValidationException {
 		logger.debug( "getting metadata from file: " + file );
 		final XSSFWorkbook workbook
 				= new XSSFWorkbook( new FileInputStream( file ) );
@@ -122,7 +122,7 @@ public class POIReader implements ImportFileReader {
 	}
 
 	@Override
-	public ImportData readOneFile( File file ) throws IOException, FileLoadingException {
+	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
 		final XSSFWorkbook workbook
 				= new XSSFWorkbook( new FileInputStream( file ) );
 		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
@@ -155,7 +155,7 @@ public class POIReader implements ImportFileReader {
 	}
 
 	private MultiMap<SheetType, String> categorizeSheets( XSSFWorkbook workbook )
-			throws FileLoadingException {
+			throws ImportValidationException {
 		MultiMap<SheetType, String> typeToSheetNameLkp = new MultiMap<>();
 		// figure out what this spreadsheet contains...if we have a "Loader" tab,
 		// only worry about those sheets named in it. Otherwise, go through every
@@ -183,13 +183,18 @@ public class POIReader implements ImportFileReader {
 				SheetType realtype = getSheetType( workbook, name );
 
 				if ( SheetType.EMPTY != realtype ) {
-					if ( SheetType.METADATA == loadertype && SheetType.METADATA != realtype ) {
-						throw new FileLoadingException( ErrorType.INCONSISTENT_DATA,
-								"Sheet " + name + " does not include \"Metadata\" keyword in cell A1" );
+					if ( SheetType.UNSPECIFIED != loadertype ) {
+						if ( SheetType.METADATA == loadertype && SheetType.METADATA != realtype ) {
+							throw new ImportValidationException( ErrorType.INVALID_TYPE,
+									"Sheet " + name + " does not include \"Metadata\" keyword in cell A1" );
+						}
+						else if ( SheetType.METADATA == realtype && SheetType.METADATA != loadertype ) {
+							throw new ImportValidationException( ErrorType.WRONG_TABTYPE,
+									"Loader Sheet data type for " + name + " conflicts with sheet type" );
+						}
 					}
-					else {
-						typeToSheetNameLkp.add( realtype, name );
-					}
+
+					typeToSheetNameLkp.add( realtype, name );
 				}
 			}
 		}
@@ -198,7 +203,7 @@ public class POIReader implements ImportFileReader {
 	}
 
 	private static Map<String, SheetType> categorizeFromLoadingSheet( XSSFSheet lSheet )
-			throws FileLoadingException {
+			throws ImportValidationException {
 		Map<String, SheetType> map = new HashMap<>();
 		XSSFRow header = lSheet.getRow( 0 );
 		XSSFCell a1 = header.getCell( 0 );
@@ -208,10 +213,10 @@ public class POIReader implements ImportFileReader {
 		boolean mustHaveType = !cellIsEmpty( b1 );
 
 		if ( !"Sheet Name".equals( a1val ) ) {
-			throw new FileLoadingException( ErrorType.MISSING_DATA, "Cell A1 must be \"Sheet Name\"" );
+			throw new ImportValidationException( ErrorType.MISSING_DATA, "Cell A1 must be \"Sheet Name\"" );
 		}
 		if ( mustHaveType && !"Type".equals( b1val ) ) {
-			throw new FileLoadingException( ErrorType.MISSING_DATA, "Cell B1 must be \"Type\"" );
+			throw new ImportValidationException( ErrorType.MISSING_DATA, "Cell B1 must be \"Type\"" );
 		}
 
 		for ( int rIndex = 1; rIndex <= lSheet.getLastRowNum(); rIndex++ ) {
@@ -221,7 +226,7 @@ public class POIReader implements ImportFileReader {
 			}
 
 			if ( row.getLastCellNum() > 2 ) {
-				throw new FileLoadingException( ErrorType.UNTYPED_DATA,
+				throw new ImportValidationException( ErrorType.UNTYPED_DATA,
 						"Too much data is row " + rIndex );
 			}
 
@@ -229,38 +234,55 @@ public class POIReader implements ImportFileReader {
 			String sheetTypeToLoad = getString( row.getCell( 1 ) );
 			if ( sheetNameToLoad.isEmpty() || ( sheetTypeToLoad.isEmpty() && mustHaveType ) ) {
 				if ( sheetNameToLoad.isEmpty() ) {
-					throw new FileLoadingException( ErrorType.MISSING_DATA,
+					throw new ImportValidationException( ErrorType.MISSING_DATA,
 							"No sheet name on row " + rIndex );
 				}
 				else {
-					throw new FileLoadingException( ErrorType.MISSING_DATA,
+					throw new ImportValidationException( ErrorType.MISSING_DATA,
 							"No type specified for sheet " + sheetNameToLoad );
 				}
 			}
 			if ( mustHaveType
 					&& !( METADATA.equals( sheetTypeToLoad ) || USUAL.equals( sheetTypeToLoad ) ) ) {
-				throw new FileLoadingException( ErrorType.INCONSISTENT_DATA,
+				throw new ImportValidationException( ErrorType.INVALID_TYPE,
 						"Invalid type specified: " + sheetTypeToLoad );
 			}
 
-			map.put( sheetNameToLoad, ( METADATA.equals( sheetNameToLoad )
-					? SheetType.METADATA : SheetType.UNKNOWN ) );
+			if ( mustHaveType ) {
+				map.put( sheetNameToLoad, ( METADATA.equals( sheetTypeToLoad )
+						? SheetType.METADATA : SheetType.UNKNOWN ) );
+			}
+			else {
+				map.put( sheetNameToLoad, SheetType.UNSPECIFIED );
+			}
 		}
 
 		return map;
 	}
 
-	private SheetType getSheetType( XSSFWorkbook workbook, String sheetname ) {
+	private SheetType getSheetType( XSSFWorkbook workbook, String sheetname )
+			throws ImportValidationException {
 		XSSFSheet sheet = workbook.getSheet( sheetname );
-		XSSFRow row = sheet.getRow( 0 );
-		int lastrow = sheet.getLastRowNum();
-		if ( null == row || 0 == lastrow ) {
+
+		if ( null == sheet ) {
+			throw new ImportValidationException( ErrorType.MISSING_DATA,
+					"Missing sheet: " + sheetname );
+		}
+
+		XSSFRow row0 = sheet.getRow( 0 );
+		XSSFRow row1 = sheet.getRow( 1 );
+		if ( null == row0 || null == row1 ) {
 			// make sure we have some "data" in this sheet
 			return SheetType.EMPTY;
 		}
 
+		if ( getString( row1.getCell( 1 ) ).isEmpty() ) {
+			// no data in the first data cell...assume we're empty
+			return SheetType.EMPTY;
+		}
+
 		// see what's in cell A1
-		String type = getString( row.getCell( 0 ) );
+		String type = getString( row0.getCell( 0 ) );
 
 		switch ( type ) {
 			case METADATA:
@@ -274,7 +296,8 @@ public class POIReader implements ImportFileReader {
 		}
 	}
 
-	private void loadMetadata( XSSFSheet metadataSheet, ImportData data ) {
+	private void loadMetadata( XSSFSheet metadataSheet, ImportData data )
+			throws ImportValidationException {
 		if ( metadataSheet == null ) {
 			return;
 		}
@@ -313,13 +336,31 @@ public class POIReader implements ImportFileReader {
 			String propertyMiddleColumn = getString( row.getCell( 2 ) );
 
 			if ( "@schema-namespace".equals( propName ) ) {
-				schemanamespace = propValue;
+				if ( null == schemanamespace ) {
+					schemanamespace = propValue;
+				}
+				else {
+					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+							"Multiple @schema-namespace lines in Metadata sheet" );
+				}
 			}
 			else if ( "@data-namespace".equals( propName ) ) {
-				datanamespace = propValue;
+				if ( null == datanamespace ) {
+					datanamespace = propValue;
+				}
+				else {
+					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+							"Multiple @schema-namespace lines in Metadata sheet" );
+				}
 			}
 			else if ( "@base".equals( propName ) ) {
-				baseuri = propValue;
+				if ( null == baseuri ) {
+					baseuri = propValue;
+				}
+				else {
+					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+							"Multiple @base lines in Metadata sheet" );
+				}
 			}
 			else if ( "@prefix".equals( propName ) ) {
 				namespaces.put( propertyMiddleColumn, propValue );
@@ -356,9 +397,14 @@ public class POIReader implements ImportFileReader {
 			logger.debug( "adding custom triple: "
 					+ triple[0] + " => " + triple[1] + " => " + triple[2] );
 
-			metas.add( new StatementImpl( getUriFromRawString( triple[0], data ),
-					getUriFromRawString( triple[1], data ),
-					getRDFStringValue( triple[2], data, vf ) ) );
+			try {
+				metas.add( new StatementImpl( getUriFromRawString( triple[0], data ),
+						getUriFromRawString( triple[1], data ),
+						getRDFStringValue( triple[2], data, vf ) ) );
+			}
+			catch ( Exception e ) {
+				throw new ImportValidationException( ErrorType.INVALID_DATA, e );
+			}
 		}
 	}
 

@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.LoadingSheetData;
@@ -212,7 +212,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 							realtimer.loadToEngine( Arrays.asList( fileToLoad ), getEngine(),
 									dometamodel, null );
 						}
-						catch ( FileLoadingException | RepositoryException | IOException e ) {
+						catch ( ImportValidationException | RepositoryException | IOException e ) {
 							log.error( e, e );
 						}
 

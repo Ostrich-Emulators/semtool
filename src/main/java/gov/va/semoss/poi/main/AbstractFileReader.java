@@ -81,6 +81,11 @@ public abstract class AbstractFileReader {
 		ValueFactory vf = new ValueFactoryImpl();
 		URI uri = null;
 
+		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
+			uri = vf.createURI( raw.substring( 1, raw.length() - 1 ) );
+			return uri;
+		}
+
 		// if raw starts with <something>://, then assume it's just a URI
 		Matcher m = URISTARTPATTERN.matcher( raw );
 		if ( m.matches() ) {

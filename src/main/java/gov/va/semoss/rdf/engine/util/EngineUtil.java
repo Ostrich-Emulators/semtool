@@ -10,7 +10,7 @@ import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -664,7 +664,7 @@ public class EngineUtil implements Runnable {
 				bde.calculateInferences();
 			}
 		}
-		catch ( FileLoadingException | RepositoryException e ) {
+		catch ( ImportValidationException | RepositoryException e ) {
 			throw new EngineManagementException( e );
 		}
 		finally {

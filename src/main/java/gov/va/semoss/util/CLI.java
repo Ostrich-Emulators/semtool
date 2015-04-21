@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.util;
 
-import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -237,7 +237,7 @@ public class CLI {
 				el.release();
 				// if we get here, no exceptions have been thrown, so we're good
 			}
-			catch ( FileLoadingException | RepositoryException | IOException ioe ) {
+			catch ( ImportValidationException | RepositoryException | IOException ioe ) {
 				logger.error( ioe, ioe );
 			}
 		}

@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
@@ -306,14 +306,14 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			try {
 				icdp.doCreate();
 			}
-			catch ( IOException | FileLoadingException e ) {
+			catch ( IOException | ImportValidationException e ) {
 				log.error( e, e );
 				Utility.showError( e.getLocalizedMessage() );
 			}
 		}
 	}
 
-	public void doCreate() throws FileLoadingException, IOException {
+	public void doCreate() throws ImportValidationException, IOException {
 		String mybase = baseuri.getSelectedItem().toString();
 
 		final boolean stageInMemory = memoryStaging.isSelected();
@@ -435,11 +435,11 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	 * @param choices choices for a dropdown for the user
 	 * @return the URI the user chose, null if the user canceled, or
 	 * {@link Constants#ANYNODE} if every file has a base URI specified
-	 * @throws gov.va.semoss.poi.main.FileLoadingException
+	 * @throws gov.va.semoss.poi.main.ImportValidationException
 	 * @throws java.io.IOException
 	 */
 	public static URI getDefaultBaseUri( Collection<File> files, Collection<URI> choices )
-			throws FileLoadingException, IOException {
+			throws ImportValidationException, IOException {
 		Set<String> bases = new HashSet<>();
 
 		EngineLoader el = new EngineLoader();

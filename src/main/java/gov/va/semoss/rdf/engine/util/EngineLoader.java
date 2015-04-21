@@ -31,8 +31,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.poi.main.CSVReader;
-import gov.va.semoss.poi.main.FileLoadingException;
-import gov.va.semoss.poi.main.FileLoadingException.ErrorType;
+import gov.va.semoss.poi.main.ImportValidationException;
+import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
@@ -214,11 +214,11 @@ public class EngineLoader {
 	 * <code>createmetamodel</code> is false
 	 * @throws RepositoryException
 	 * @throws IOException
-	 * @throws gov.va.semoss.poi.main.FileLoadingException
+	 * @throws gov.va.semoss.poi.main.ImportValidationException
 	 */
 	public Collection<Statement> loadToEngine( Collection<File> toload, IEngine engine,
 			boolean createmetamodel, ImportData conformanceErrors )
-			throws RepositoryException, IOException, FileLoadingException {
+			throws RepositoryException, IOException, ImportValidationException {
 
 		Set<Statement> mmstmts = new HashSet<>();
 
@@ -256,7 +256,7 @@ public class EngineLoader {
 					}
 
 					if ( null == im.getBase() ) {
-						throw new FileLoadingException( ErrorType.MISSING_DATA,
+						throw new ImportValidationException( ErrorType.MISSING_DATA,
 								"No Base URI specified in either the EngineLoader or the file" );
 					}
 
