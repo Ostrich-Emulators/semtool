@@ -124,7 +124,6 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				}
 			}
 		} );
-
 	}
 
 	private void doSave() {

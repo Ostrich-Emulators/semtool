@@ -43,10 +43,10 @@ import org.openrdf.model.impl.URIImpl;
  * @author ryan
  */
 public class ImportCreateDbPanel extends javax.swing.JPanel {
-
+	
 	private static final Logger log = Logger.getLogger( ImportCreateDbPanel.class );
-	private static final String METADATABASEURI = "Use Loading Sheet Metadata";
-
+	public static final String METADATABASEURI = "Use Loading Sheet Metadata";
+	
 	private boolean loadable = false;
 
 	/**
@@ -54,20 +54,20 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	 */
 	public ImportCreateDbPanel() {
 		initComponents();
-
+		
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		file.setPreferencesKeys( prefs, "lastpath" );
 		file.setMultipleFilesOk( true );
-
+		
 		questionfile.setPreferencesKeys( prefs, "lastquestionspath" );
-
+		
 		questionfile.getChooser().setFileFilter( FileBrowsePanel.getInsightTypesFilter() );
-
+		
 		dbdir.setPreferencesKeys( prefs, "lastdbcreatepath" );
 		dbdir.setMultipleFilesOk( false );
 		dbdir.getChooser().setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
 		dbdir.setFileTextFromInit();
-
+		
 		baseuri.addItem( METADATABASEURI );
 		Set<String> seen = new HashSet<>();
 		seen.add( METADATABASEURI );
@@ -77,7 +77,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				seen.add( uri );
 			}
 		}
-
+		
 		JFileChooser chsr = file.getChooser();
 		chsr.
 				addChoosableFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
@@ -90,42 +90,42 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter(
 				"N3 Files", "n3" ) );
 		chsr.setFileFilter( FileBrowsePanel.getAllImportTypesFilter() );
-
+		
 		loadable = false;
 		DocumentListener dl = new DocumentListener() {
-
+			
 			@Override
 			public void insertUpdate( DocumentEvent e ) {
 				check();
 			}
-
+			
 			@Override
 			public void removeUpdate( DocumentEvent e ) {
 				check();
 			}
-
+			
 			@Override
 			public void changedUpdate( DocumentEvent e ) {
 				check();
 			}
-
+			
 			private void check() {
 				checkOk();
 			}
 		};
-
+		
 		dbname.getDocument().addDocumentListener( dl );
 		dbdir.addDocumentListener( dl );
-
+		
 		SemossPreferences vc = SemossPreferences.getInstance();
 		calcInfers.setSelected( PlayPane.
 				getProp( vc, Constants.CALC_INFERENCES_PREF ) );
 	}
-
+	
 	private void checkOk() {
 		loadable = !( null == dbdir.getFirstFile() || dbname.getText().isEmpty() );
 	}
-
+	
 	public boolean isLoadable() {
 		return loadable;
 	}
@@ -278,7 +278,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	public static void showDialog( Frame frame ) {
 		Object options[] = { "Create DB", "Cancel" };
 		ImportCreateDbPanel icdp = new ImportCreateDbPanel();
-
+		
 		boolean ok = false;
 		boolean docreate = false;
 		while ( !ok ) {
@@ -286,7 +286,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 					"Create New Database", JOptionPane.YES_NO_OPTION,
 					JOptionPane.PLAIN_MESSAGE, null, options, options[0] );
 			ok = icdp.isLoadable();
-
+			
 			if ( 0 == opt ) {
 				if ( ok ) {
 					docreate = true;
@@ -301,22 +301,28 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				ok = true;
 			}
 		}
-
+		
 		if ( docreate ) {
-			icdp.doCreate();
+			try {
+				icdp.doCreate();
+			}
+			catch ( IOException | FileLoadingException e ) {
+				log.error( e, e );
+				Utility.showError( e.getLocalizedMessage() );
+			}
 		}
 	}
-
-	public void doCreate() {
+	
+	public void doCreate() throws FileLoadingException, IOException {
 		String mybase = baseuri.getSelectedItem().toString();
-
+		
 		final boolean stageInMemory = memoryStaging.isSelected();
 		final boolean calc = calcInfers.isSelected();
 		final boolean dometamodel = metamodel.isSelected();
 		final boolean conformance = conformer.isSelected();
-
+		
 		Collection<File> files = file.getFiles();
-
+		
 		URI defaultBase = null;
 		if ( !files.isEmpty() ) {
 			if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
@@ -326,7 +332,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				for ( String b : basepref.split( ";" ) ) {
 					uris.add( new URIImpl( b ) );
 				}
-
+				
 				defaultBase = getDefaultBaseUri( files, uris );
 
 				// save the default base for next time
@@ -351,9 +357,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		else {
 			defaultBase = new URIImpl( mybase );
 		}
-
+		
 		final URI defaultBaseUri = defaultBase;
-
+		
 		ProgressTask pt = new ProgressTask( "Creating Database from "
 				+ file.getDelimitedPaths(), new Runnable() {
 					@Override
@@ -361,9 +367,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 						final File smss[] = { null };
 						ImportData errors = ( conformance ? new ImportData() : null );
 						final EngineUtil eutil = EngineUtil.getInstance();
-
+						
 						EngineOperationListener eol = new EngineOperationAdapter() {
-
+							
 							@Override
 							public void engineOpened( IEngine eng ) {
 								String smssloc = eng.getProperty( Constants.SMSS_LOCATION );
@@ -372,7 +378,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 									eutil.removeEngineOpListener( this );
 									Utility.showMessage(
 											"Your database has been successfully created!" );
-
+									
 									if ( conformance && !errors.isEmpty() ) {
 										LoadingPlaySheetFrame psf
 										= new LoadingPlaySheetFrame( eng, errors );
@@ -382,9 +388,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 								}
 							}
 						};
-
+						
 						eutil.addEngineOpListener( eol );
-
+						
 						try {
 							smss[0] = EngineUtil.createNew( dbdir.getFirstFile(),
 									dbname.getText(), defaultBaseUri, null, null,
@@ -428,33 +434,31 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	 * @param choices choices for a dropdown for the user
 	 * @return the URI the user chose, null if the user canceled, or
 	 * {@link Constants#ANYNODE} if every file has a base URI specified
+	 * @throws gov.va.semoss.poi.main.FileLoadingException
+	 * @throws java.io.IOException
 	 */
-	public static URI getDefaultBaseUri( Collection<File> files, Collection<URI> choices ) {
+	public static URI getDefaultBaseUri( Collection<File> files, Collection<URI> choices )
+			throws FileLoadingException, IOException {
 		Set<String> bases = new HashSet<>();
-
+		
 		EngineLoader el = new EngineLoader();
-
+		
 		URI choice = null;
 		boolean everyFileHasBase = true;
-
-		try {
-			for ( File f : files ) {
-				ImportFileReader reader = el.getReader( f );
-				ImportMetadata metadata = reader.getMetadata( f );
-
-				URI baser = metadata.getBase();
-				if ( null == baser ) {
-					everyFileHasBase = false;
-				}
-				else {
-					bases.add( metadata.getBase().stringValue() );
-				}
+		
+		for ( File f : files ) {
+			ImportFileReader reader = el.getReader( f );
+			ImportMetadata metadata = reader.getMetadata( f );
+			
+			URI baser = metadata.getBase();
+			if ( null == baser ) {
+				everyFileHasBase = false;
+			}
+			else {
+				bases.add( metadata.getBase().stringValue() );
 			}
 		}
-		catch ( FileLoadingException | IOException e ) {
-			log.warn( e, e );
-		}
-
+		
 		if ( everyFileHasBase ) {
 			// nothing to do here
 			return Constants.ANYNODE;
@@ -463,12 +467,12 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			if ( bases.isEmpty() ) {
 				JComboBox<String> box = new JComboBox<>();
 				box.addItem( "" );
-
+				
 				for ( URI item : choices ) {
 					box.addItem( item.stringValue() );
 				}
 				box.setEditable( true );
-
+				
 				JPanel pnl = new JPanel();
 				pnl.setLayout( new BoxLayout( pnl, BoxLayout.LINE_AXIS ) );
 				pnl.add( new JLabel( "<html>Not all the files have Base URIs set.<br>"
@@ -476,7 +480,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				JPanel junk = new JPanel();
 				junk.add( box );
 				pnl.add( junk );
-
+				
 				int opt = JOptionPane.showOptionDialog( null, pnl, "Specify the Base URI",
 						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
 						null, null );
@@ -484,11 +488,11 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 					log.debug( "create canceled" );
 					return null;
 				}
-
+				
 				choice = new URIImpl( box.getSelectedItem().toString() );
 			}
 		}
-
+		
 		return choice;
 	}
 }
