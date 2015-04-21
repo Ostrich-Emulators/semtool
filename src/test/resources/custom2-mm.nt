@@ -1,3 +1,6 @@
+<http://semoss.va.gov/database/gbedef053-8437-444c-8ddd-2e6047914aa0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://seman.tc/data/northwind/Concept/I3a8002d4363ed6e94b0c5176924fb7d2> <http://schema.org/jobTitle> "Owner" .
 <http://seman.tc/data/northwind/Concept/I3a8002d4363ed6e94b0c5176924fb7d2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Person> .
 <http://seman.tc/data/northwind/Concept/I3a8002d4363ed6e94b0c5176924fb7d2> <http://www.w3.org/2000/01/rdf-schema#label> "Marie Bertrand" .
@@ -16,3 +19,4 @@
 <http://seman.tc/models/northwind#Concept> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
 <http://seman.tc/models/northwind#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
 <http://seman.tc/models/northwind#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Contains> .
+<http://semoss.va.gov/database/gbedef053-8437-444c-8ddd-2e6047914aa0> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

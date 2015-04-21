@@ -19,6 +19,9 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
+import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.DIHelper;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
@@ -26,7 +29,14 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.util.UriBuilder;
+import info.aduna.iteration.Iterations;
+import java.util.List;
+import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -35,11 +45,11 @@ import org.openrdf.sail.memory.MemoryStore;
  * of RDF data sources.
  */
 public class InMemorySesameEngine extends AbstractSesameEngine {
-	
+
 	private static final Logger log = Logger.getLogger( InMemorySesameEngine.class );
 	private RepositoryConnection rc = null;
 	private boolean iControlMyRc = false;
-	
+
 	public InMemorySesameEngine() {
 		SailRepository repo = new SailRepository( new MemoryStore() );
 		try {
@@ -54,11 +64,11 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 				log.error( ex, ex );
 			}
 		}
-		
+
 		setRepositoryConnection( rc );
 		iControlMyRc = true;
 	}
-	
+
 	public InMemorySesameEngine( RepositoryConnection rc ) {
 		setRepositoryConnection( rc );
 	}
@@ -72,20 +82,40 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	public final void setRepositoryConnection( RepositoryConnection rc ) {
 		this.rc = rc;
 		iControlMyRc = false;
-		
+
 		try {
 			startLoading( new Properties() );
+
+			URI baseuri = null;
+			// if the baseuri isn't already set, then query the kb for void:Dataset
+			RepositoryResult<Statement> rr
+					= rc.getStatements( null, RDF.TYPE, VAS.DATABASE, false );
+			List<Statement> stmts = Iterations.asList( rr );
+			for ( Statement s : stmts ) {
+				baseuri = URI.class.cast( s.getSubject() );
+				break;
+			}
+
+			if ( null == baseuri ) {
+				// no base uri in the DB, so make a new one
+				baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+				rc.begin();
+				rc.add( baseuri, RDF.TYPE, VAS.DATABASE );
+				rc.commit();
+			}
+			
+			setBaseUri( baseuri );
 		}
 		catch ( RepositoryException re ) {
 			log.warn( re, re );
 		}
 	}
-	
+
 	public void setBuilders( UriBuilder data, UriBuilder schema ) {
 		this.setDataBuilder( data );
 		this.setSchemaBuilder( schema );
 	}
-	
+
 	@Override
 	public void setDataBuilder( UriBuilder data ) {
 		super.setDataBuilder( data );
@@ -100,12 +130,11 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	public RepositoryConnection getRawConnection() {
 		return this.rc;
 	}
-	
+
 	@Override
 	public void openDB( Properties props ) {
 		// no meaning to this now
 	}
-	
 
 	/**
 	 * Closes the data base associated with the engine. This will prevent further
@@ -121,7 +150,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			catch ( Exception e ) {
 				log.error( e, e );
 			}
-			
+
 			Repository repo = rc.getRepository();
 			try {
 				repo.shutDown();

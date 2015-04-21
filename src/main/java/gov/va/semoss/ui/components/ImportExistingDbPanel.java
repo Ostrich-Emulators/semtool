@@ -364,7 +364,8 @@ public class ImportExistingDbPanel extends JPanel {
 							ImportData errs = ( conformance ? ImportData.forEngine( eng )
 									: null );
 							EngineLoader el = new EngineLoader( stageInMemory );
-							el.setDefaultBaseUri( defaultBaseUri );
+							el.setDefaultBaseUri( defaultBaseUri,
+									defaultBaseUri.stringValue().equals( baseuri.getSelectedItem().toString() ) );
 							el.loadToEngine( file.getFiles(), engine, dometamodel, errs );
 							el.release();
 

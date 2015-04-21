@@ -1,3 +1,6 @@
+<http://semoss.va.gov/database/l83678e82-3aae-46b9-82c9-0f08bd56353d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://schema.org/subject> <http://www.w3.org/2000/01/rdf-schema#label> <http://junk/just-for-fun> .
 <http://seman.tc/data/northwind/Beverages> <http://purl.org/dc/terms/Description> "Soft drinks, coffees, teas, beers, and ales" .
 <http://seman.tc/data/northwind/Beverages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
@@ -112,3 +115,4 @@
 <http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> <http://www.w3.org/2000/01/rdf-schema#label> "carnes preparadas"@es .
 <http://seman.tc/data/northwind/Y6fb185e92be8114afa4b9e554f3acd84> <http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> .
 <http://seman.tc/data/northwind/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://semoss.va.gov/database/l83678e82-3aae-46b9-82c9-0f08bd56353d> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

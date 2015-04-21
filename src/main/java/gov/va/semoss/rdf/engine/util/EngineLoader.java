@@ -32,6 +32,7 @@ import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.poi.main.FileLoadingException.ErrorType;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
@@ -101,12 +102,13 @@ public class EngineLoader {
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
 	private final Set<URI> duplicates = new HashSet<>();
 	private URI defaultBaseUri;
+	private boolean forceBaseUri;
 
 	public static enum CacheType {
 
 		CONCEPTCLASS, CONCEPT, RELATIONCLASS, RELATION
 	};
-	
+
 	public EngineLoader( boolean inmem ) {
 		stageInMemory = inmem;
 		try {
@@ -129,7 +131,14 @@ public class EngineLoader {
 		this( true );
 	}
 
-	public void setDefaultBaseUri( URI base ) {
+	/**
+	 * Sets the Base URI when loading files.
+	 *
+	 * @param base the default URI to use
+	 * @param overrideFile if true, use <code>base</code> instead of anything
+	 * specified in the loading files
+	 */
+	public void setDefaultBaseUri( URI base, boolean overrideFile ) {
 		defaultBaseUri = base;
 	}
 
@@ -245,9 +254,16 @@ public class EngineLoader {
 					if ( null == im.getBase() ) {
 						im.setBase( defaultBaseUri );
 					}
+
+					if ( null == im.getBase() ) {
+						throw new FileLoadingException( ErrorType.MISSING_DATA,
+								"No Base URI specified in either the EngineLoader or the file" );
+					}
+
 					if ( null == im.getSchemaBuilder() ) {
 						im.setSchemaBuilder( engine.getSchemaBuilder().toString() );
 					}
+
 					if ( null == im.getDataBuilder() ) {
 						im.setDataBuilder( im.getBase().stringValue() );
 					}

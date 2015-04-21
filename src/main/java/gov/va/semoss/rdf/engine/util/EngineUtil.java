@@ -588,6 +588,8 @@ public class EngineUtil implements Runnable {
 	 * @param dbtopdir directory about where the engine will be placed.
 	 * @param engine the engine name
 	 * @param defaultBaseUri the base uri of the new engine
+	 * @param defaultBaseOverridesFiles if true, use <code>defaultBaseUri</code>
+	 * instead of whatever is specified in the loading files
 	 * @param smss the custom smss file. If null or empty, will use the sample
 	 * file from the Defaults directory
 	 * @param map the custom ontology properties file. Can be null null or empty
@@ -608,9 +610,10 @@ public class EngineUtil implements Runnable {
 	 * @throws gov.va.semoss.rdf.engine.util.EngineManagementException
 	 */
 	public static File createNew( File dbtopdir, String engine, URI defaultBaseUri,
-			String smss, String map, String questions, Collection<File> toload,
-			boolean stageInMemory, boolean calcInfers, boolean dometamodel,
-			ImportData conformanceErrors ) throws IOException, EngineManagementException {
+			boolean defaultBaseOverridesFiles, String smss, String map, String questions,
+			Collection<File> toload, boolean stageInMemory, boolean calcInfers,
+			boolean dometamodel, ImportData conformanceErrors )
+			throws IOException, EngineManagementException {
 
 		dbtopdir.mkdirs();
 
@@ -653,7 +656,7 @@ public class EngineUtil implements Runnable {
 		}
 
 		EngineLoader el = new EngineLoader( stageInMemory );
-		el.setDefaultBaseUri( defaultBaseUri );
+		el.setDefaultBaseUri( defaultBaseUri, defaultBaseOverridesFiles );
 
 		try {
 			el.loadToEngine( toload, bde, dometamodel, conformanceErrors );
@@ -822,7 +825,7 @@ public class EngineUtil implements Runnable {
 
 		EngineUtil.add( conn, metadata.getBaseUri(), RDFS.LABEL,
 				metadata.getTitle(), vf );
-		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE,	VAS.DATABASE ) );
+		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE, VAS.DATABASE ) );
 		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_DESC,
 				"Cloned from " + from.getEngineName(), vf );
 		Date now = new Date();

@@ -81,11 +81,10 @@ public class EngineUtilTest {
 
 		try {
 			EngineUtil.createNew( topdir, "testdb", new URIImpl( "http://va.gov/ontologies" ),
-					null, null, null, Arrays.asList( LEGACY ), true, true, true, null );
+					true, null, null, null, Arrays.asList( LEGACY ), true, true, true, null );
 		}
 		finally {
 			FileUtils.deleteQuietly( topdir );
 		}
 	}
-
 }

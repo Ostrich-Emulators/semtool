@@ -42,6 +42,7 @@ import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -52,6 +53,12 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 public class POIReader implements ImportFileReader {
 
 	private static final Logger logger = Logger.getLogger( POIReader.class );
+
+	private static final String METADATA = "Metadata";
+	private static final String USUAL = "Usual";
+	private static final String LOADER = "Loader";
+	private static final String RELATION = "Relation";
+	private static final String NODE = "Node";
 
 	private static enum SheetType {
 
@@ -101,6 +108,7 @@ public class POIReader implements ImportFileReader {
 		logger.debug( "getting metadata from file: " + file );
 		final XSSFWorkbook workbook
 				= new XSSFWorkbook( new FileInputStream( file ) );
+		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
 
 		ImportData data = new ImportData();
 		AbstractFileReader.initNamespaces( data );
@@ -117,6 +125,7 @@ public class POIReader implements ImportFileReader {
 	public ImportData readOneFile( File file ) throws IOException, FileLoadingException {
 		final XSSFWorkbook workbook
 				= new XSSFWorkbook( new FileInputStream( file ) );
+		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
 
 		MultiMap<SheetType, String> typeToSheetNameLkp = categorizeSheets( workbook );
 
@@ -165,7 +174,7 @@ public class POIReader implements ImportFileReader {
 		}
 		else {
 			// we have a loader sheet, so only worry about the sheets named in it
-			typeToSheetNameLkp.add( SheetType.LOADER, "Loader" );
+			typeToSheetNameLkp.add( SheetType.LOADER, LOADER );
 
 			Map<String, SheetType> fromloading = categorizeFromLoadingSheet( lSheet );
 			for ( Map.Entry<String, SheetType> en : fromloading.entrySet() ) {
@@ -229,12 +238,12 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 			if ( mustHaveType
-					&& !( "Metadata".equals( sheetTypeToLoad ) || "Usual".equals( sheetTypeToLoad ) ) ) {
+					&& !( METADATA.equals( sheetTypeToLoad ) || USUAL.equals( sheetTypeToLoad ) ) ) {
 				throw new FileLoadingException( ErrorType.INCONSISTENT_DATA,
 						"Invalid type specified: " + sheetTypeToLoad );
 			}
 
-			map.put( sheetNameToLoad, ( "Metadata".equals( sheetNameToLoad )
+			map.put( sheetNameToLoad, ( METADATA.equals( sheetNameToLoad )
 					? SheetType.METADATA : SheetType.UNKNOWN ) );
 		}
 
@@ -244,20 +253,21 @@ public class POIReader implements ImportFileReader {
 	private SheetType getSheetType( XSSFWorkbook workbook, String sheetname ) {
 		XSSFSheet sheet = workbook.getSheet( sheetname );
 		XSSFRow row = sheet.getRow( 0 );
-		if ( null == row ) {
+		int lastrow = sheet.getLastRowNum();
+		if ( null == row || 0 == lastrow ) {
+			// make sure we have some "data" in this sheet
 			return SheetType.EMPTY;
 		}
 
 		// see what's in cell A1
-		Cell cell = row.getCell( 0 );
-		String type = cell.getStringCellValue();
+		String type = getString( row.getCell( 0 ) );
 
 		switch ( type ) {
-			case "Metadata":
+			case METADATA:
 				return SheetType.METADATA;
-			case "Relation":
+			case RELATION:
 				return SheetType.RELATION;
-			case "Node":
+			case NODE:
 				return SheetType.NODE;
 			default:
 				return SheetType.UNKNOWN;
@@ -297,15 +307,10 @@ public class POIReader implements ImportFileReader {
 				continue;
 			}
 
-			cell0.setCellType( XSSFCell.CELL_TYPE_STRING );
-			cell2.setCellType( XSSFCell.CELL_TYPE_STRING );
-
 			String propName = cell0.getStringCellValue();
 			String propValue = cell2.getStringCellValue();
 
-			XSSFCell cell1 = row.getCell( 2 );
-			String propertyMiddleColumn = ( cellIsEmpty( cell1 )
-					? "" : cell1.getStringCellValue() );
+			String propertyMiddleColumn = getString( row.getCell( 2 ) );
 
 			if ( "@schema-namespace".equals( propName ) ) {
 				schemanamespace = propValue;
@@ -384,11 +389,7 @@ public class POIReader implements ImportFileReader {
 	}
 
 	private static boolean cellIsEmpty( Cell cell ) {
-		if ( null == cell || cell.getCellType() == XSSFCell.CELL_TYPE_BLANK
-				|| cell.toString().isEmpty() ) {
-			return true;
-		}
-		return false;
+		return ( null == cell );
 	}
 
 	/**

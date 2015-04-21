@@ -5,9 +5,11 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -44,6 +46,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -168,6 +171,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.setReader( "csv", rdr );
 		el.loadToEngine( Arrays.asList( CSVDATA ), engine, true, null );
 		el.release();
@@ -191,6 +195,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.setReader( "csv", rdr );
 		el.loadToEngine( Arrays.asList( CSVDATA ), engine, false, null );
 		el.release();
@@ -216,6 +221,7 @@ public class EngineLoaderTest {
 
 		EngineLoader el = new EngineLoader();
 		el.setReader( "csv", rdr );
+		el.setDefaultBaseUri( BASEURI, true );
 		el.loadToEngine( Arrays.asList( CSVDATA2 ), engine, true, null );
 		el.release();
 
@@ -238,6 +244,7 @@ public class EngineLoaderTest {
 
 		ImportData id = new ImportData();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( LEGACY ), engine, true, id );
 		el.release();
 
@@ -260,6 +267,7 @@ public class EngineLoaderTest {
 
 		ImportData id = new ImportData();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( LEGACY ), engine, false, id );
 		el.release();
 
@@ -281,6 +289,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
 		Collection<Statement> owls
 				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, true, errors );
@@ -305,6 +314,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
 		el.loadToEngine( Arrays.asList( CUSTOM2 ), engine, true, errors );
 		el.release();
@@ -327,6 +337,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );		
 		ImportData errors = new ImportData();
 		el.loadToEngine( Arrays.asList( CUSTOM2 ), engine, false, errors );
 		el.release();
@@ -349,6 +360,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		Collection<Statement> owls
 				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, false, null );
 		el.release();
@@ -373,6 +385,7 @@ public class EngineLoaderTest {
 		// data in the KB (basically, make sure the caching works)
 		IEngine eng = extractKb();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
 		el.release();
 		OneVarListQueryAdapter<URI> o
@@ -381,6 +394,7 @@ public class EngineLoaderTest {
 		List<URI> oldlist = eng.query( o );
 
 		EngineLoader el2 = new EngineLoader();
+		el2.setDefaultBaseUri( BASEURI, false );
 		el2.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
 		el2.release();
 		List<URI> newlist = engine.query( o );
@@ -393,6 +407,7 @@ public class EngineLoaderTest {
 		// same as the two_loads1 test, but in the custom metamodel mode
 		IEngine eng = extractKb();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
 		el.release();
 		OneVarListQueryAdapter<URI> o
@@ -401,6 +416,7 @@ public class EngineLoaderTest {
 		List<URI> oldlist = eng.query( o );
 
 		EngineLoader el2 = new EngineLoader();
+		el2.setDefaultBaseUri( BASEURI, false );
 		el2.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
 		el2.release();
 
@@ -462,6 +478,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( TICKET608 ), engine, true, null );
 		el.release();
 

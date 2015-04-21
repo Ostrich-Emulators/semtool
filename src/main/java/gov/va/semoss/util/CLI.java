@@ -204,7 +204,7 @@ public class CLI {
 			smss = EngineUtil.createNew(
 					outputFileDir,
 					databaseFileName,
-					new URIImpl( baseURI ), null, null,
+					new URIImpl( baseURI ), true, null, null,
 					insightFile,
 					loads,
 					stageInMemory,
