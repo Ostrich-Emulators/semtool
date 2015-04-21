@@ -297,7 +297,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	public NodeLoadingPlaySheet addTab( List<Value[]> data, List<String> headings ) {
 		NodeLoadingPlaySheet grid = new NodeLoadingPlaySheet();
 		grid.setTitle( "Import Data Review" );
-		grid.create( data, headings );
+		grid.create( data, headings, getEngine() );
 		addTab( grid );
 		hideProgress();
 

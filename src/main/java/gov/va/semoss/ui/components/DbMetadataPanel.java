@@ -30,7 +30,6 @@ import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
-import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -41,8 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 
@@ -102,7 +99,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 			@Override
 			public void mouseClicked( MouseEvent e ) {
 				final URI uri = subsets.getSelectedValue();
-				ValueTableModel gps = new ValueTableModel( false );
+				GridPlaySheet gps = new GridPlaySheet();
 
 				ListQueryAdapter<Value[]> q = new ListQueryAdapter( "SELECT ?p ?o { ?s ?p ?o }" ) {
 
@@ -116,10 +113,9 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				q.bind( "s", uri );
 				try {
 					List<Value[]> rows = engine.query( q );
-					gps.setData( GridPlaySheet.convertUrisToLabels( rows, engine ),
-							Arrays.asList( "Property", "Value" ) );
+					gps.create( rows, Arrays.asList( "Property", "Value" ), engine );
 
-					JOptionPane.showMessageDialog( created, new JScrollPane( new JTable( gps ) ),
+					JOptionPane.showMessageDialog( created,gps,
 							"Properties of " + uri, JOptionPane.INFORMATION_MESSAGE
 					);
 				}
@@ -213,8 +209,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 							"o" );
 			q.bind( "base", engine.getBaseUri() );
 			q.bind( "subset", MetadataConstants.VOID_SUBSET );
-			List<URI> subsets = engine.query( q );
-			for ( URI u : subsets ) {
+			List<URI> subsetUris = engine.query( q );
+			for ( URI u : subsetUris ) {
 				subsetmodel.addElement( u );
 			}
 		}

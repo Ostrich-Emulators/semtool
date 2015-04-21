@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,7 +45,7 @@ public class ParallelCoordinatesPlaySheet extends BrowserPlaySheet2 {
 	}
 
 	@Override
-	public void create( List<Value[]> data, List<String> heads ) {
+	public void create( List<Value[]> data, List<String> heads, IEngine engine ) {
 		setHeaders( heads );
 		
 		convertUrisToLabels( data, getPlaySheetFrame().getEngine() );

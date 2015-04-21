@@ -89,7 +89,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return playframe;
 	}
 
-	public void create( List<Value[]> data, List<String> headers ) {
+	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
 		log.error( "into create: " + data.size() + " items" );
 	}
 
@@ -114,7 +114,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 				s.getObject() } );
 		}
 
-		create( valdata, Arrays.asList( "Subject", "Predicate", "Object" ) );
+		create( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), null );
 	}
 
 	public void overlay( Model m ) {

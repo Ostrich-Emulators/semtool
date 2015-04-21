@@ -316,7 +316,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		}
 
 		GridRAWPlaySheet grid = new GridRAWPlaySheet();
-		grid.create( data, heads );
+		grid.create( data, heads, playSheet.getPlaySheetFrame().getEngine() );
 		playSheet.getPlaySheetFrame().addTab( "Hops Downstream From " + selectedNodes,
 				grid );
 	}

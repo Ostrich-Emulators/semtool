@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class HeatMapPlaySheet extends BrowserPlaySheet2 {
 	}
 
 	@Override
-	public void create( List<Value[]> data, List<String> headers ) {
+	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
 
 		convertUrisToLabels( data, getPlaySheetFrame().getEngine() );

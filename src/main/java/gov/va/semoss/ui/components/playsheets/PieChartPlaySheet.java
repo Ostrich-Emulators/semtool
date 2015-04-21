@@ -1,5 +1,6 @@
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -20,7 +21,7 @@ public class PieChartPlaySheet extends BrowserPlaySheet2 {
 	}
 
 	@Override
-	public void create( List<Value[]> data, List<String> headers ) {
+	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
 		float valuesTotal = 0L;
 

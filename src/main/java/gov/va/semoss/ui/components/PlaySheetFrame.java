@@ -245,7 +245,7 @@ public class PlaySheetFrame extends JInternalFrame {
 						// uh oh...no sparql given
 						// assume the pscc knows what to do with empty data
 						dsize = 0;
-						cmp.create( null, null );
+						cmp.create( null, null, getEngine() );
 					}
 					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
 						updateProgress( "Preparing Display", 80 );
@@ -256,7 +256,7 @@ public class PlaySheetFrame extends JInternalFrame {
 					else {
 						List<Value[]> data = engine.query( lqa );
 						updateProgress( "Preparing Display", 80 );
-						cmp.create( data, lqa.getBindingNames() );
+						cmp.create( data, lqa.getBindingNames(), getEngine() );
 						dsize = data.size();
 					}
 
@@ -309,7 +309,7 @@ public class PlaySheetFrame extends JInternalFrame {
 							PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
 							pscc.setTitle( titleIfNeeded );
 							PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
-							pscc.create( data, headers );
+							pscc.create( data, headers, getEngine() );
 						}
 						catch ( InstantiationException | IllegalAccessException e ) {
 							log.error( e, e );

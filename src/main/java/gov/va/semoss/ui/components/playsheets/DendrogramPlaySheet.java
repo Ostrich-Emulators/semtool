@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +41,7 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 
 	//need to re-engineer and use recursion
 	@Override
-	public void create( List<Value[]> valdata, List<String> headers ) {
+	public void create( List<Value[]> valdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
 		List<String[]> newdata = convertEverythingToStrings( valdata,
 				getPlaySheetFrame().getEngine() );

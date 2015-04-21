@@ -58,6 +58,7 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaConstructStatement;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
@@ -837,7 +838,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void create( List<Value[]> data, List<String> headers ) {
+	public void create( List<Value[]> valdata, List<String> headers, IEngine engine ) {
 		createData();
 
 		try {

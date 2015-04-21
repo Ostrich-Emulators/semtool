@@ -299,6 +299,8 @@ public class EngineLoader {
 
 			URI ebase = engine.getBaseUri();
 			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
+			myrc.add( data.getMetadata().getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
+			myrc.add( data.getMetadata().getBase(), RDF.TYPE, OWL.ONTOLOGY );
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
