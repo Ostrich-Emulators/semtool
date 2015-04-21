@@ -199,6 +199,11 @@ public class POIReader implements ImportFileReader {
 			}
 		}
 
+		if ( typeToSheetNameLkp.getNN( SheetType.METADATA ).size() > 1 ) {
+			throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+					"Too many metadata tabs in loading file" );
+		}
+
 		return typeToSheetNameLkp;
 	}
 
