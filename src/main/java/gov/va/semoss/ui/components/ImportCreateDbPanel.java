@@ -330,15 +330,22 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				defaultBase = getDefaultBaseUri( files, uris );
 
 				// save the default base for next time
-				uris.add( defaultBase );
-				StringBuilder sb = new StringBuilder();
-				for ( URI u : uris ) {
-					if ( 0 != sb.length() ) {
-						sb.append( ";" );
-					}
-					sb.append( u.stringValue() );
+				if ( null == defaultBase ) {
+					return; // user canceled
 				}
-				prefs.put( "lastontopath", sb.toString() );
+				else if ( !Constants.ANYNODE.equals( defaultBase ) ) {
+					// user specified something
+					uris.add( defaultBase );
+					StringBuilder sb = new StringBuilder();
+					for ( URI u : uris ) {
+						if ( 0 != sb.length() ) {
+							sb.append( ";" );
+						}
+						sb.append( u.stringValue() );
+					}
+					prefs.put( "lastontopath", sb.toString() );
+				}
+				// else {} // every file has a base URI specified
 			}
 		}
 		else {
@@ -419,7 +426,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	 *
 	 * @param files the files to check
 	 * @param choices choices for a dropdown for the user
-	 * @return the URI the user chose, or null if the user canceled
+	 * @return the URI the user chose, null if the user canceled, or
+	 * {@link Constants#ANYNODE} if every file has a base URI specified
 	 */
 	public static URI getDefaultBaseUri( Collection<File> files, Collection<URI> choices ) {
 		Set<String> bases = new HashSet<>();
@@ -447,7 +455,11 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			log.warn( e, e );
 		}
 
-		if ( !everyFileHasBase ) {
+		if ( everyFileHasBase ) {
+			// nothing to do here
+			return Constants.ANYNODE;
+		}
+		else {
 			if ( bases.isEmpty() ) {
 				JComboBox<String> box = new JComboBox<>();
 				box.addItem( "" );

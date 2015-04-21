@@ -28,9 +28,23 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
+import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
+import gov.va.semoss.ui.components.models.ValueTableModel;
+import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import java.awt.HeadlessException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import org.openrdf.model.Value;
+import org.openrdf.query.BindingSet;
 
 /**
  *
@@ -43,6 +57,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 	private final Map<URI, JTextField> fieldlkp = new HashMap<>();
 	private URI baseuri = null;
 	private boolean loadable = false;
+	DefaultListModel<URI> subsetmodel = new DefaultListModel<>();
 
 	/**
 	 * Creates new form DbPropertiesPanel
@@ -61,6 +76,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		fieldlkp.put( MetadataConstants.DCT_PUBLISHER, poc );
 		fieldlkp.put( MetadataConstants.DCT_CREATED, created );
 		fieldlkp.put( MetadataConstants.DCT_MODIFIED, update );
+		fieldlkp.put( VAS.REIFICATION, edgemodel );
 		fieldlkp.put( VAS.DATABASE, voiduri );
 
 		voiduri.setEditable( null == baseuri );
@@ -80,6 +96,39 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		if ( null != engine ) {
 			refresh();
 		}
+
+		subsets.addMouseListener( new MouseAdapter() {
+
+			@Override
+			public void mouseClicked( MouseEvent e ) {
+				final URI uri = subsets.getSelectedValue();
+				ValueTableModel gps = new ValueTableModel( false );
+
+				ListQueryAdapter<Value[]> q = new ListQueryAdapter( "SELECT ?p ?o { ?s ?p ?o }" ) {
+
+					@Override
+					public void handleTuple( BindingSet set, ValueFactory fac ) {
+						Value data[] = { set.getValue( "p" ), set.getValue( "o" ) };
+						add( data );
+					}
+				};
+
+				q.bind( "s", uri );
+				try {
+					List<Value[]> rows = engine.query( q );
+					gps.setData( GridPlaySheet.convertUrisToLabels( rows, engine ),
+							Arrays.asList( "Property", "Value" ) );
+
+					JOptionPane.showMessageDialog( created, new JScrollPane( new JTable( gps ) ),
+							"Properties of " + uri, JOptionPane.INFORMATION_MESSAGE
+					);
+				}
+				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException | HeadlessException ex ) {
+					log.error( ex, ex );
+				}
+			}
+		} );
+
 	}
 
 	private void doSave() {
@@ -157,6 +206,17 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 					fieldlkp.get( pred ).setText( val );
 				}
 			}
+
+			subsetmodel.clear();
+			OneVarListQueryAdapter<URI> q
+					= OneVarListQueryAdapter.getUriList( "SELECT ?o { ?base ?subset ?o }",
+							"o" );
+			q.bind( "base", engine.getBaseUri() );
+			q.bind( "subset", MetadataConstants.VOID_SUBSET );
+			List<URI> subsets = engine.query( q );
+			for ( URI u : subsets ) {
+				subsetmodel.addElement( u );
+			}
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e );
@@ -179,6 +239,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
+    jScrollPane1 = new javax.swing.JScrollPane();
+    jList1 = new javax.swing.JList();
     tlbl = new javax.swing.JLabel();
     title = new javax.swing.JTextField();
     slbl = new javax.swing.JLabel();
@@ -195,6 +257,18 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
     voiduri = new javax.swing.JTextField();
     mlbl = new javax.swing.JLabel();
     smss = new javax.swing.JTextField();
+    jLabel1 = new javax.swing.JLabel();
+    edgemodel = new javax.swing.JTextField();
+    jLabel2 = new javax.swing.JLabel();
+    jScrollPane2 = new javax.swing.JScrollPane();
+    subsets = new javax.swing.JList<URI>();
+
+    jList1.setModel(new javax.swing.AbstractListModel() {
+      String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+      public int getSize() { return strings.length; }
+      public Object getElementAt(int i) { return strings[i]; }
+    });
+    jScrollPane1.setViewportView(jList1);
 
     tlbl.setLabelFor(title);
     tlbl.setText("Title");
@@ -240,21 +314,35 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
     smss.setEditable(false);
     smss.setBackground(java.awt.Color.lightGray);
 
+    jLabel1.setText("Edge Model");
+
+    edgemodel.setEditable(false);
+    edgemodel.setBackground(java.awt.Color.lightGray);
+
+    jLabel2.setText("Datasets");
+
+    subsets.setModel(subsetmodel);
+    subsets.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    jScrollPane2.setViewportView(subsets);
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addGap(0, 0, 0)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-          .addComponent(tlbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(slbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(olbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(clbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(llbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(blbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(mlbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(plbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+            .addComponent(tlbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(slbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(olbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(clbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(llbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(blbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(mlbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(plbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addComponent(jLabel1)
+          .addComponent(jLabel2))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(summary, javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE)
@@ -264,8 +352,9 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
           .addComponent(voiduri)
           .addComponent(smss)
           .addComponent(poc)
-          .addComponent(title))
-        .addGap(0, 0, 0))
+          .addComponent(title)
+          .addComponent(edgemodel)
+          .addComponent(jScrollPane2)))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -286,7 +375,11 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(plbl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
           .addComponent(poc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGap(2, 2, 2)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel1)
+          .addComponent(edgemodel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addGap(1, 1, 1)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(clbl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
           .addComponent(created, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -302,7 +395,11 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(mlbl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
           .addComponent(smss, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addGap(0, 0, 0))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel2)
+          .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -311,6 +408,12 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
   private javax.swing.JLabel blbl;
   private javax.swing.JLabel clbl;
   private javax.swing.JTextField created;
+  private javax.swing.JTextField edgemodel;
+  private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel2;
+  private javax.swing.JList jList1;
+  private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JLabel llbl;
   private javax.swing.JLabel mlbl;
   private javax.swing.JLabel olbl;
@@ -319,6 +422,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
   private javax.swing.JTextField poc;
   private javax.swing.JLabel slbl;
   private javax.swing.JTextField smss;
+  private javax.swing.JList<URI> subsets;
   private javax.swing.JTextField summary;
   private javax.swing.JTextField title;
   private javax.swing.JLabel tlbl;

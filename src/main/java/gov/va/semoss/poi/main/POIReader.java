@@ -346,13 +346,14 @@ public class POIReader implements ImportFileReader {
 			metas.setNamespace( en.getKey(), en.getValue() );
 		}
 
+		ValueFactory vf = new ValueFactoryImpl();
 		for ( String[] triple : triples ) {
 			logger.debug( "adding custom triple: "
 					+ triple[0] + " => " + triple[1] + " => " + triple[2] );
 
 			metas.add( new StatementImpl( getUriFromRawString( triple[0], data ),
 					getUriFromRawString( triple[1], data ),
-					getUriFromRawString( triple[2], data ) ) );
+					getRDFStringValue( triple[2], data, vf ) ) );
 		}
 	}
 

@@ -30,7 +30,6 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
-import gov.va.semoss.poi.main.AbstractFileReader;
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.FileLoadingException;
 import gov.va.semoss.poi.main.ImportData;
@@ -103,6 +102,11 @@ public class EngineLoader {
 	private final Set<URI> duplicates = new HashSet<>();
 	private URI defaultBaseUri;
 
+	public static enum CacheType {
+
+		CONCEPTCLASS, CONCEPT, RELATIONCLASS, RELATION
+	};
+	
 	public EngineLoader( boolean inmem ) {
 		stageInMemory = inmem;
 		try {
@@ -158,8 +162,7 @@ public class EngineLoader {
 		return rc;
 	}
 
-	public void cacheUris( AbstractFileReader.CacheType type,
-			Map<String, URI> newtocache ) {
+	public void cacheUris( CacheType type, Map<String, URI> newtocache ) {
 
 		// for ( Map.Entry<String, URI> en : newtocache.entrySet() ) {
 		//	log.debug( type + " : " + en.getKey() + " -> " + en.getValue() );
@@ -519,14 +522,14 @@ public class EngineLoader {
 				}
 			}
 
-			cacheUris( AbstractFileReader.CacheType.RELATIONCLASS, cacheo );
-			cacheUris( AbstractFileReader.CacheType.RELATION, cacheb );
+			cacheUris( CacheType.RELATIONCLASS, cacheo );
+			cacheUris( CacheType.RELATION, cacheb );
 
 			vqa.bind( "isa", RDFS.SUBCLASSOF );
 			uri = owlb.getConceptUri().build();
 			vqa.bind( "type", uri );
 			engine.query( vqa );
-			cacheUris( AbstractFileReader.CacheType.CONCEPTCLASS, map );
+			cacheUris( CacheType.CONCEPTCLASS, map );
 
 			vqa.bind( "isa", RDF.TYPE );
 			Map<String, URI> concepts = new HashMap<>( map );
