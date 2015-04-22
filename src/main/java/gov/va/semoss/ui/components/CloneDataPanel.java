@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -171,7 +172,7 @@ public class CloneDataPanel extends javax.swing.JPanel {
     try {
       MetadataQuery mq = new MetadataQuery();
       metas = engine.query( mq );
-      String uri = metas.get( MetadataConstants.VOID_DS );
+      String uri = metas.get( VAS.DATABASE );
       if ( null != uri ) {
         cdp.setBaseUri( uri );
       }

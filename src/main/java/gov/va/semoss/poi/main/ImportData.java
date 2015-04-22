@@ -110,4 +110,15 @@ public final class ImportData {
 
 		return names;
 	}
+
+	public LoadingSheetData getSheet( String name ) {
+		for ( LoadingSheetData lsd : sheets ) {
+			if ( lsd.getName().equals( name ) ) {
+				return lsd;
+			}
+		}
+
+		return null;
+	}
+
 }

@@ -231,4 +231,9 @@ public class InMemoryJenaEngine extends AbstractEngine implements IEngine {
 		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
 	}
 
+	@Override
+	protected URI setUris( String uri, String schema ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
 }

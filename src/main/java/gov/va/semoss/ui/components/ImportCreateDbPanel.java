@@ -5,7 +5,8 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
@@ -27,11 +28,17 @@ import gov.va.semoss.util.DIHelper;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonModel;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  *
@@ -40,7 +47,7 @@ import org.openrdf.model.URI;
 public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger( ImportCreateDbPanel.class );
-	private static final String METADATABASEURI = "Use Loading Sheet Metadata";
+	public static final String METADATABASEURI = "Use Loading Sheet Metadata";
 
 	private boolean loadable = false;
 
@@ -67,7 +74,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		Set<String> seen = new HashSet<>();
 		seen.add( METADATABASEURI );
 		for ( String uri : prefs.get( "lastontopath", "http://va.gov/ontologies" ).split( ";" ) ) {
-			if( !seen.contains( uri ) ){
+			if ( !seen.contains( uri ) ) {
 				baseuri.addItem( uri );
 				seen.add( uri );
 			}
@@ -134,6 +141,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
+    edgegroup = new javax.swing.ButtonGroup();
     jLabel2 = new javax.swing.JLabel();
     file = new gov.va.semoss.ui.components.FileBrowsePanel();
     urilbl = new javax.swing.JLabel();
@@ -150,6 +158,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     metamodel = new javax.swing.JCheckBox();
     conformer = new javax.swing.JCheckBox();
     baseuri = new javax.swing.JComboBox<String>();
+    jPanel2 = new javax.swing.JPanel();
+    semossEdgeModel = new javax.swing.JRadioButton();
+    rdrEdgeModel = new javax.swing.JRadioButton();
+    w3cEdgeModel = new javax.swing.JRadioButton();
 
     jLabel2.setLabelFor(file);
     jLabel2.setText("Select File(s) to Import");
@@ -204,6 +216,39 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
     baseuri.setEditable(true);
 
+    jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), "Reification Model", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
+
+    edgegroup.add(semossEdgeModel);
+    semossEdgeModel.setSelected(true);
+    semossEdgeModel.setText("SEMOSS");
+
+    edgegroup.add(rdrEdgeModel);
+    rdrEdgeModel.setText("RDR");
+
+    edgegroup.add(w3cEdgeModel);
+    w3cEdgeModel.setText("W3C");
+
+    javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+    jPanel2.setLayout(jPanel2Layout);
+    jPanel2Layout.setHorizontalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(semossEdgeModel)
+          .addComponent(rdrEdgeModel)
+          .addComponent(w3cEdgeModel))
+        .addGap(0, 53, Short.MAX_VALUE))
+    );
+    jPanel2Layout.setVerticalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addComponent(semossEdgeModel)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(rdrEdgeModel)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(w3cEdgeModel))
+    );
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -232,6 +277,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
               .addComponent(calcInfers)
               .addComponent(metamodel)
               .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(18, 18, 18)
+            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGap(0, 0, Short.MAX_VALUE))))
     );
     layout.setVerticalGroup(
@@ -255,18 +302,20 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
           .addComponent(questionfile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(file, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(jLabel2)
+          .addComponent(file, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(layout.createSequentialGroup()
-            .addComponent(jLabel2)
-            .addGap(18, 18, 18)
-            .addComponent(calcInfers)))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(metamodel)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(conformer)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(calcInfers)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(metamodel)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(conformer)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+          .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -298,13 +347,17 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		}
 
 		if ( docreate ) {
-			icdp.doCreate();
+			try {
+				icdp.doCreate();
+			}
+			catch ( IOException | ImportValidationException e ) {
+				log.error( e, e );
+				Utility.showError( e.getLocalizedMessage() );
+			}
 		}
 	}
 
-	public void doCreate() {
-		Preferences prefs = Preferences.userNodeForPackage( getClass() );
-
+	public void doCreate() throws ImportValidationException, IOException {
 		String mybase = baseuri.getSelectedItem().toString();
 
 		final boolean stageInMemory = memoryStaging.isSelected();
@@ -312,76 +365,54 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		final boolean dometamodel = metamodel.isSelected();
 		final boolean conformance = conformer.isSelected();
 
+		URI reif = null;
+		if ( semossEdgeModel.isSelected() ) {
+			reif = VAS.SEMOSS_REIFICATION;
+		}
+		else if ( rdrEdgeModel.isSelected() ) {
+			reif = VAS.RDR_REIFICATION;
+		}
+		else if ( w3cEdgeModel.isSelected() ) {
+			reif = VAS.W3C_REIFICATION;
+		}
+		else {
+			throw new IllegalArgumentException( "Unknown reification: " + reif );
+		}
+		final URI reifUri = reif;
+
+		Collection<File> files = file.getFiles();
+
+		URI defaultBase = null;
 		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
-			Set<String> bases = new HashSet<>();
-			mybase = null;
+			Set<URI> uris = new HashSet<>();
+			Preferences prefs = Preferences.userNodeForPackage( getClass() );
+			String basepref = prefs.get( "lastontopath", "http://va.gov/ontologies/" );
+			for ( String b : basepref.split( ";" ) ) {
+				uris.add( new URIImpl( b ) );
+			}
 
-			EngineLoader el = new EngineLoader( false );
+			defaultBase = ( files.isEmpty() ? Constants.ANYNODE : getDefaultBaseUri( files, uris ) );
 
-			String choice = null;
-			try {
-				for ( File f : file.getFiles() ) {
-					ImportFileReader reader = el.getReader( f );
-					ImportMetadata metadata = reader.getMetadata( f );
-
-					URI baser = metadata.getBase();
-					if ( null != baser ) {
-						choice = metadata.getBase().stringValue();
-						bases.add( choice );
+			// save the default base for next time
+			if ( null == defaultBase ) {
+				return; // user canceled
+			}
+			else if ( !Constants.ANYNODE.equals( defaultBase ) ) {
+				// user specified something
+				uris.add( defaultBase );
+				StringBuilder sb = new StringBuilder();
+				for ( URI u : uris ) {
+					if ( 0 != sb.length() ) {
+						sb.append( ";" );
 					}
+					sb.append( u.stringValue() );
 				}
+				prefs.put( "lastontopath", sb.toString() );
 			}
-			catch ( FileLoadingException | IOException e ) {
-				log.warn( e, e );
-			}
-
-			if ( bases.isEmpty() ) {
-				JComboBox box = new JComboBox();
-				box.addItem( "" );
-				
-				Set<String> seen = new HashSet<>();
-				seen.add( METADATABASEURI );
-				for ( int i = 0; i < baseuri.getItemCount(); i++ ) {
-					String item = baseuri.getItemAt( i );
-					if ( !seen.contains( item ) ) {
-						box.addItem( item );
-						seen.add( item );
-					}
-				}
-				box.setEditable( true );
-
-				int opt = JOptionPane.showOptionDialog( null, box, "Specify the Base URI",
-						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-						null, null );
-				if ( JOptionPane.OK_OPTION != opt ) {
-					log.debug( "create canceled" );
-					return;
-				}
-				mybase = box.getSelectedItem().toString();
-			}
-			else if ( bases.size() == 1 ) {
-				mybase = choice;
-			}
-			else {
-				mybase = (String) JOptionPane.showInputDialog( null,
-						"Please select a base URI", "Multiple Base URIs Found",
-						JOptionPane.QUESTION_MESSAGE, null, bases.toArray(), choice );
-			}
+			// else {} // every file has a base URI specified
 		}
 
-		final String baseUri = mybase;
-
-		// save our list of base uris back to our preferences
-		StringBuilder basestr = new StringBuilder( mybase );
-		Set<String> bases = new HashSet<>();
-		for ( int i = 0; i < baseuri.getItemCount(); i++ ) {
-			String item = baseuri.getItemAt( i );
-			if ( !bases.contains( item ) ) {
-				basestr.append( ";" ).append( item );
-				bases.add( baseuri.getItemAt( i ) );
-			}
-		}
-		prefs.put( "lastontopath", basestr.toString() );
+		final URI defaultBaseUri = defaultBase;
 
 		ProgressTask pt = new ProgressTask( "Creating Database from "
 				+ file.getDelimitedPaths(), new Runnable() {
@@ -416,9 +447,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 						try {
 							smss[0] = EngineUtil.createNew( dbdir.getFirstFile(),
-									dbname.getText(), baseUri, null, null,
-									questionfile.getFirstPath(), file.getFiles(),
-									stageInMemory, calc, dometamodel, errors );
+									dbname.getText(), defaultBaseUri,
+									defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ),
+									reifUri, null, null, questionfile.getFirstPath(), files, stageInMemory,
+									calc, dometamodel, errors );
 							EngineUtil.getInstance().mount( smss[0], true );
 						}
 						catch ( IOException | EngineManagementException ioe ) {
@@ -437,16 +469,90 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private gov.va.semoss.ui.components.FileBrowsePanel dbdir;
   private javax.swing.JTextField dbname;
   private javax.swing.JRadioButton diskStaging;
+  private javax.swing.ButtonGroup edgegroup;
   private gov.va.semoss.ui.components.FileBrowsePanel file;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JPanel jPanel2;
   private javax.swing.JRadioButton memoryStaging;
   private javax.swing.JCheckBox metamodel;
   private gov.va.semoss.ui.components.FileBrowsePanel questionfile;
   private javax.swing.JLabel questionlbl;
+  private javax.swing.JRadioButton rdrEdgeModel;
+  private javax.swing.JRadioButton semossEdgeModel;
   private javax.swing.JLabel urilbl;
+  private javax.swing.JRadioButton w3cEdgeModel;
   // End of variables declaration//GEN-END:variables
 
+	/**
+	 * Checks every file to make sure it has a base uri set. If any files are
+	 * missing a base uri, ask the user to specify one
+	 *
+	 * @param files the files to check
+	 * @param choices choices for a dropdown for the user
+	 * @return the URI the user chose, null if the user canceled, or
+	 * {@link Constants#ANYNODE} if every file has a base URI specified
+	 * @throws gov.va.semoss.poi.main.ImportValidationException
+	 * @throws java.io.IOException
+	 */
+	public static URI getDefaultBaseUri( Collection<File> files, Collection<URI> choices )
+			throws ImportValidationException, IOException {
+		Set<String> bases = new HashSet<>();
+
+		EngineLoader el = new EngineLoader();
+
+		URI choice = null;
+		boolean everyFileHasBase = true;
+
+		for ( File f : files ) {
+			ImportFileReader reader = el.getReader( f );
+			ImportMetadata metadata = reader.getMetadata( f );
+
+			URI baser = metadata.getBase();
+			if ( null == baser ) {
+				everyFileHasBase = false;
+			}
+			else {
+				bases.add( metadata.getBase().stringValue() );
+			}
+		}
+
+		if ( everyFileHasBase ) {
+			// nothing to do here
+			return Constants.ANYNODE;
+		}
+		else {
+			if ( bases.isEmpty() ) {
+				JComboBox<String> box = new JComboBox<>();
+				box.addItem( "" );
+
+				for ( URI item : choices ) {
+					box.addItem( item.stringValue() );
+				}
+				box.setEditable( true );
+
+				JPanel pnl = new JPanel();
+				pnl.setLayout( new BoxLayout( pnl, BoxLayout.LINE_AXIS ) );
+				pnl.add( new JLabel( "<html>Not all the files have Base URIs set.<br>"
+						+ "Please specify a Base URI to use<br>when one is not provided." ) );
+				JPanel junk = new JPanel();
+				junk.add( box );
+				pnl.add( junk );
+
+				int opt = JOptionPane.showOptionDialog( null, pnl, "Specify the Base URI",
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+						null, null );
+				if ( JOptionPane.OK_OPTION != opt ) {
+					log.debug( "create canceled" );
+					return null;
+				}
+
+				choice = new URIImpl( box.getSelectedItem().toString() );
+			}
+		}
+
+		return choice;
+	}
 }

@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.poi.main.FileLoadingException;
+import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
 import java.awt.Frame;
 import java.io.File;
@@ -30,6 +30,10 @@ import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.ui.main.SemossPreferences;
+import java.util.HashSet;
+import java.util.Set;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -40,7 +44,7 @@ import org.openrdf.repository.RepositoryException;
  * @author ryan
  */
 public class ImportExistingDbPanel extends JPanel {
-	
+
 	private static final Logger log = Logger.getLogger( ImportExistingDbPanel.class );
 	private IEngine engine;
 
@@ -50,10 +54,10 @@ public class ImportExistingDbPanel extends JPanel {
 	public ImportExistingDbPanel() {
 		this( null );
 	}
-	
+
 	public ImportExistingDbPanel( IEngine eng ) {
 		initComponents();
-		
+
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		file.setPreferencesKeys( prefs, "lastpath" );
 		file.setMultipleFilesOk( true );
@@ -64,21 +68,31 @@ public class ImportExistingDbPanel extends JPanel {
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "N-Triples Files", "nt" ) );
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "N3 Files", "n3" ) );
 		chsr.setFileFilter( FileBrowsePanel.getAllImportTypesFilter() );
-		
+
 		setEngine( eng );
-		
+
 		SemossPreferences vc = SemossPreferences.getInstance();
 		calcInfers.setSelected( PlayPane.getProp( vc, Constants.CALC_INFERENCES_PREF ) );
+
+		baseuri.addItem( ImportCreateDbPanel.METADATABASEURI );
+		Set<String> seen = new HashSet<>();
+		seen.add( ImportCreateDbPanel.METADATABASEURI );
+		for ( String uri : prefs.get( "lastontopath", "http://va.gov/ontologies" ).split( ";" ) ) {
+			if ( !seen.contains( uri ) ) {
+				baseuri.addItem( uri );
+				seen.add( uri );
+			}
+		}
 	}
-	
+
 	public void setFiles( Collection<File> files ) {
 		file.setFileText( files );
 	}
-	
+
 	public static void showDialog( Frame frame, IEngine eng, Collection<File> files ) {
 		ImportExistingDbPanel iedp = new ImportExistingDbPanel( eng );
 		iedp.setFiles( files );
-		
+
 		String ename = null;
 		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
 		try {
@@ -89,18 +103,24 @@ public class ImportExistingDbPanel extends JPanel {
 			// don't care
 			log.debug( e, e );
 		}
-		
+
 		if ( null == ename ) {
 			ename = eng.getEngineName();
 		}
-		
+
 		Object options[] = { "Import to " + ename, "Cancel" };
-		
+
 		int opt = JOptionPane.showOptionDialog( frame, iedp,
 				"Import External File(s)", JOptionPane.YES_NO_OPTION,
 				JOptionPane.PLAIN_MESSAGE, null, options, options[0] );
 		if ( 0 == opt ) {
-			iedp.doImport();
+			try {
+				iedp.doImport();
+			}
+			catch ( IOException | ImportValidationException fle ) {
+				log.error( fle, fle );
+				Utility.showError( fle.getLocalizedMessage() );
+			}
 		}
 	}
 
@@ -136,6 +156,8 @@ public class ImportExistingDbPanel extends JPanel {
     calcInfers = new javax.swing.JCheckBox();
     metamodel = new javax.swing.JCheckBox();
     conformer = new javax.swing.JCheckBox();
+    jLabel1 = new javax.swing.JLabel();
+    baseuri = new javax.swing.JComboBox<String>();
 
     javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
     jPanel2.setLayout(jPanel2Layout);
@@ -198,18 +220,18 @@ public class ImportExistingDbPanel extends JPanel {
         replaceCheckActionPerformed(evt);
       }
     });
-    jPanel3.add(replaceCheck);
 
     calcInfers.setSelected(true);
     calcInfers.setText("Compute Dependent Relationships");
-    jPanel3.add(calcInfers);
 
     metamodel.setSelected(true);
     metamodel.setText("Create Metamodel");
-    jPanel3.add(metamodel);
 
     conformer.setText("Check Quality");
-    jPanel3.add(conformer);
+
+    jLabel1.setText("Designate Base URI");
+
+    baseuri.setEditable(true);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -220,9 +242,20 @@ public class ImportExistingDbPanel extends JPanel {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(file, javax.swing.GroupLayout.DEFAULT_SIZE, 371, Short.MAX_VALUE))
       .addGroup(layout.createSequentialGroup()
+        .addComponent(jLabel1)
+        .addGap(33, 33, 33)
+        .addComponent(baseuri, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+      .addGroup(layout.createSequentialGroup()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+          .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addGroup(layout.createSequentialGroup()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(replaceCheck)
+              .addComponent(calcInfers)
+              .addComponent(metamodel)
+              .addComponent(conformer))
+            .addGap(207, 207, 207)
+            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         .addGap(0, 0, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
@@ -233,27 +266,81 @@ public class ImportExistingDbPanel extends JPanel {
           .addComponent(file, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
           .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(layout.createSequentialGroup()
+            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(0, 0, Short.MAX_VALUE))
+          .addGroup(layout.createSequentialGroup()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+              .addComponent(jLabel1)
+              .addComponent(baseuri, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(replaceCheck)
+            .addGap(0, 0, 0)
+            .addComponent(calcInfers)
+            .addGap(0, 0, 0)
+            .addComponent(metamodel)
+            .addGap(0, 0, 0)
+            .addComponent(conformer)))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
-	public void doImport() {
+	public void doImport() throws IOException, ImportValidationException {
 		final boolean replace = replaceCheck.isSelected();
 		final boolean stageInMemory = memoryStaging.isSelected();
 		final boolean calc = calcInfers.isSelected();
 		final boolean dometamodel = metamodel.isSelected();
 		final boolean conformance = conformer.isSelected();
 		final boolean gridy = togridbtn.isSelected();
-		
+
 		if ( gridy || ( ( replace && runOverrideCheck( file.getFiles() ) )
 				|| ( !replace && runCheck() ) ) ) {
-			
+
 			final IEngine eng
 					= ( null == engine ? DIHelper.getInstance().getRdfEngine() : engine );
-			
+
+			Collection<File> files = file.getFiles();
+
+			URI defaultBase = null;
+			String mybase = baseuri.getSelectedItem().toString();
+
+			if ( null == mybase || mybase.isEmpty()
+					|| ImportCreateDbPanel.METADATABASEURI.equals( mybase ) ) {
+				Set<URI> uris = new HashSet<>();
+				Preferences prefs = Preferences.userNodeForPackage( getClass() );
+				String basepref = prefs.get( "lastontopath", "http://va.gov/ontologies/" );
+				for ( String b : basepref.split( ";" ) ) {
+					uris.add( new URIImpl( b ) );
+				}
+
+				defaultBase = ImportCreateDbPanel.getDefaultBaseUri( files, uris );
+
+				// save the default base for next time
+				if ( null == defaultBase ) {
+					return; // user canceled
+				}
+				else if ( !Constants.ANYNODE.equals( defaultBase ) ) {
+					// user specified something
+					uris.add( defaultBase );
+					StringBuilder sb = new StringBuilder();
+					for ( URI u : uris ) {
+						if ( 0 != sb.length() ) {
+							sb.append( ";" );
+						}
+						sb.append( u.stringValue() );
+					}
+					prefs.put( "lastontopath", sb.toString() );
+				}
+				// else {} // every file has a base URI specified
+			}
+			else {
+				defaultBase = new URIImpl( mybase );
+			}
+
+			final URI defaultBaseUri = defaultBase;
+
 			ProgressTask pt;
 			if ( gridy ) {
 				LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( engine,
@@ -263,11 +350,11 @@ public class ImportExistingDbPanel extends JPanel {
 			}
 			else {
 				final boolean successfulImport[] = { false };
-				
+
 				String t = ( replace ? "Replacing data in " : "Adding data to " )
 						+ eng.getEngineName() + " from " + file.getDelimitedPaths();
 				pt = new ProgressTask( t, new Runnable() {
-					
+
 					@Override
 					public void run() {
 						if ( replace ) {
@@ -277,9 +364,11 @@ public class ImportExistingDbPanel extends JPanel {
 							ImportData errs = ( conformance ? ImportData.forEngine( eng )
 									: null );
 							EngineLoader el = new EngineLoader( stageInMemory );
+							el.setDefaultBaseUri( defaultBaseUri,
+									defaultBaseUri.stringValue().equals( baseuri.getSelectedItem().toString() ) );
 							el.loadToEngine( file.getFiles(), engine, dometamodel, errs );
 							el.release();
-							
+
 							if ( !( null == errs || errs.isEmpty() ) ) {
 								LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( eng, errs );
 								psf.setTitle( "Quality Check Errors" );
@@ -288,12 +377,12 @@ public class ImportExistingDbPanel extends JPanel {
 							// if we get here, no exceptions have been thrown, so we're good
 							successfulImport[0] = true;
 						}
-						catch ( FileLoadingException | RepositoryException | IOException ioe ) {
+						catch ( ImportValidationException | RepositoryException | IOException ioe ) {
 							log.error( ioe, ioe );
 						}
 					}
 				} ) {
-					
+
 					@Override
 					public void done() {
 						super.done();
@@ -310,18 +399,20 @@ public class ImportExistingDbPanel extends JPanel {
 			OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 		}
 	}
-	
+
 
   private void replaceCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replaceCheckActionPerformed
   }//GEN-LAST:event_replaceCheckActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JComboBox<String> baseuri;
   private javax.swing.ButtonGroup buttonGroup1;
   private javax.swing.JCheckBox calcInfers;
   private javax.swing.JCheckBox conformer;
   private javax.swing.JRadioButton diskStaging;
   private gov.va.semoss.ui.components.FileBrowsePanel file;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
@@ -342,24 +433,24 @@ public class ImportExistingDbPanel extends JPanel {
 				buttons, buttons[1] );
 		return response == 1;
 	}
-	
+
 	private boolean runOverrideCheck( Collection<File> fileNames ) {
-		
+
 		StringBuilder replacedString = new StringBuilder();
-		
+
 		for ( File onefile : fileNames ) {
 			try ( FileInputStream fis = new FileInputStream( onefile ) ) {
 				XSSFWorkbook book = new XSSFWorkbook( fis );
 				XSSFSheet lSheet = book.getSheet( "Loader" );
 				int lastRow = lSheet.getLastRowNum();
-				
+
 				List<String> nodes = new ArrayList<>();
 				List<String[]> relationships = new ArrayList<>();
 				for ( int rIndex = 1; rIndex <= lastRow; rIndex++ ) {
 					XSSFRow sheetNameRow = lSheet.getRow( rIndex );
 					XSSFCell cell = sheetNameRow.getCell( 0 );
 					XSSFSheet sheet = book.getSheet( cell.getStringCellValue() );
-					
+
 					XSSFRow row = sheet.getRow( 0 );
 					String sheetType = "";
 					if ( row.getCell( 0 ) != null ) {
@@ -377,12 +468,12 @@ public class ImportExistingDbPanel extends JPanel {
 						if ( row.getCell( 1 ) != null && row.getCell( 2 ) != null ) {
 							subject = row.getCell( 1 ).getStringCellValue();
 							object = row.getCell( 2 ).getStringCellValue();
-							
+
 							row = sheet.getRow( 1 );
 							if ( row.getCell( 0 ) != null ) {
 								relationship = row.getCell( 0 ).getStringCellValue();
 							}
-							
+
 							relationships.add( new String[]{ subject, relationship, object } );
 						}
 					}
@@ -399,7 +490,7 @@ public class ImportExistingDbPanel extends JPanel {
 				log.error( e );
 			}
 		}
-		
+
 		Object[] buttons = { "Cancel", "Continue" };
 		int response = JOptionPane.showOptionDialog( null,
 				"This move cannot be undone.\nPlease make sure the excel file is formatted "
@@ -410,5 +501,5 @@ public class ImportExistingDbPanel extends JPanel {
 				buttons, buttons[1] );
 		return response == 1;
 	}
-	
+
 }

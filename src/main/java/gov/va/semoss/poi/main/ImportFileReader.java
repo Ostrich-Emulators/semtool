@@ -20,10 +20,10 @@ public interface ImportFileReader {
 	 * @param f the file to parse
 	 * @return the data
 	 * @throws IOException If there is a problem opening the file
-	 * @throws gov.va.semoss.poi.main.FileLoadingException If the file can be
+	 * @throws gov.va.semoss.poi.main.ImportValidationException If the file can be
 	 * opened, but some other problem prevents it from being parsed
 	 */
-	public abstract ImportData readOneFile( File f ) throws IOException, FileLoadingException;
+	public abstract ImportData readOneFile( File f ) throws IOException, ImportValidationException;
 
 	/**
 	 * Reads the file as little as possible to return the metadata. This function
@@ -33,7 +33,7 @@ public interface ImportFileReader {
 	 * @param f the file to read
 	 * @return the metadata from the file
 	 * @throws IOException
-	 * @throws gov.va.semoss.poi.main.FileLoadingException
+	 * @throws gov.va.semoss.poi.main.ImportValidationException
 	 */
-	public abstract ImportMetadata getMetadata( File f ) throws IOException, FileLoadingException;
+	public abstract ImportMetadata getMetadata( File f ) throws IOException, ImportValidationException;
 }

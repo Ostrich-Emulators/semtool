@@ -125,7 +125,8 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 
 		GridRAWPlaySheet newGps = new GridRAWPlaySheet();
 		newGps.setTitle( "EXPORT: " + gps.getTitle() );
-		newGps.create( vals, Arrays.asList( "Vertex or Edge Label", "Property", "Value" ) );
+		newGps.create( vals, Arrays.asList( "Vertex or Edge Label", "Property", "Value" ),
+				gps.getEngine() );
 		gps.getPlaySheetFrame().addTab( "Graph as Table", newGps );
 	}
 

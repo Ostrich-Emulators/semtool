@@ -16,7 +16,7 @@ public class VAS {
 	 * V-CAMP SEMOSS Tool Base URI: http://semoss.org/ontologies
 	 */
 	public final static String BASE_URI = "http://va.gov/ontologies/semoss";
-	
+
 	/**
 	 * V-CAMP SEMOSS Tool schema namespace: http://va.gov/ontologies/semoss#
 	 */
@@ -28,32 +28,34 @@ public class VAS {
 	public final static String PREFIX = "vas";
 
 	/**
-	 * An immutable {@link Namespace} constant that represents the VA SEMOSS
-	 * Tool namespace.
+	 * An immutable {@link Namespace} constant that represents the VA SEMOSS Tool
+	 * namespace.
 	 */
-	public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
-	
+	public static final Namespace NS = new NamespaceImpl( PREFIX, NAMESPACE );
 
 	// ----- Classes ------
-	
 	/**
 	 * http://semoss.va.gov#DataView
 	 */
 	public final static URI DataView;
-	
+
 	/**
 	 * http://semoss.va.gov#Functions
 	 */
 	public final static URI Functions;
-	
+
 	/**
 	 * http://semoss.va.gov#Perspective
 	 */
 	public final static URI Perspective;
 
-    
+	public final static URI DATABASE;
+	public final static URI REIFICATION;
+	public final static URI SEMOSS_REIFICATION;
+	public final static URI RDR_REIFICATION;
+	public final static URI W3C_REIFICATION;
+
 	// ----- Properties ------
-	
 	/**
 	 * http://semoss.va.gov#insight
 	 */
@@ -69,18 +71,24 @@ public class VAS {
 	 */
 	public static final URI isLegacy;
 
-	
 	static {
 		final ValueFactory factory = ValueFactoryImpl.getInstance();
-		
+
 		// ----- Classes ------
-		DataView = factory.createURI(NAMESPACE, "DataView");
-		Functions = factory.createURI(NAMESPACE, "Functions");
-		Perspective = factory.createURI(NAMESPACE, "Perspective");
-		
+		DataView = factory.createURI( NAMESPACE, "DataView" );
+		Functions = factory.createURI( NAMESPACE, "Functions" );
+		Perspective = factory.createURI( NAMESPACE, "Perspective" );
+
+		// the vas:DATABASE type
+		DATABASE = factory.createURI( NAMESPACE, "Database" );
+		REIFICATION = factory.createURI( NAMESPACE, "reification" );
+		SEMOSS_REIFICATION = factory.createURI( NAMESPACE, "VASEMOSS-Reification" );
+		RDR_REIFICATION = factory.createURI( NAMESPACE, "RDR-Reification" );
+		W3C_REIFICATION = factory.createURI( NAMESPACE, "W3C-Reification" );
+
 		// ----- Properties ------
-		insight = factory.createURI(NAMESPACE, "insight");
-		icon = factory.createURI(NAMESPACE, "icon");
-		isLegacy = factory.createURI(NAMESPACE, "isLegacy");
+		insight = factory.createURI( NAMESPACE, "insight" );
+		icon = factory.createURI( NAMESPACE, "icon" );
+		isLegacy = factory.createURI( NAMESPACE, "isLegacy" );
 	}
 }

@@ -12,12 +12,10 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.ui.components.DBToLoadingSheetExporterTest;
 import gov.va.semoss.util.Utility;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -36,7 +34,7 @@ public class BigDataEngineTest {
 
 	private static final Logger log
 			= Logger.getLogger( DBToLoadingSheetExporterTest.class );
-	private File destination;
+	private File dbfile;
 	private IEngine eng;
 
 	public BigDataEngineTest() {
@@ -51,35 +49,14 @@ public class BigDataEngineTest {
 	}
 
 	private void extractKb() {
-		if ( null != destination ) {
-			FileUtils.deleteQuietly( destination );
+		if ( null != dbfile ) {
+			FileUtils.deleteQuietly( dbfile );
 		}
-		destination = null;
 
-		try ( ZipInputStream zis = new ZipInputStream( new FileInputStream(
-				"src/test/resources/testdb.zip" ) ) ) {
-			destination = File.createTempFile( "semoss-test-", "" );
-			destination.delete();
-			destination.mkdir();
-
-			ZipEntry entry;
-			while ( null != ( entry = zis.getNextEntry() ) ) {
-				File outfile = new File( destination, entry.getName() );
-				if ( entry.isDirectory() ) {
-					outfile.mkdirs();
-				}
-				else {
-					try ( FileOutputStream fout = new FileOutputStream( outfile ) ) {
-						byte bytes[] = new byte[1024 * 1024];
-						int read = -1;
-						while ( -1 != ( read = zis.read( bytes ) ) ) {
-							fout.write( bytes, 0, read );
-						}
-						zis.closeEntry();
-					}
-				}
-			}
-
+		try {
+			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
+			Files.copy( new File( "src/test/resources/test.jnl" ).toPath(),
+					dbfile.toPath(), StandardCopyOption.REPLACE_EXISTING );
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
@@ -90,10 +67,8 @@ public class BigDataEngineTest {
 	public void setUp() {
 		extractKb();
 
-		File dbdir = new File( destination, "testdb" );
-		File smss = new File( dbdir, "testdb.smss" );
 		try {
-			eng = Utility.loadEngine( smss );
+			eng = Utility.loadEngine( dbfile );
 		}
 		catch ( IOException ioe ) {
 			log.error( ioe, ioe );
@@ -103,7 +78,7 @@ public class BigDataEngineTest {
 	@After
 	public void tearDown() {
 		Utility.closeEngine( eng );
-		FileUtils.deleteQuietly( destination );
+		FileUtils.deleteQuietly( dbfile );
 	}
 
 	@Test
@@ -113,7 +88,7 @@ public class BigDataEngineTest {
 		Collection<Perspective> oldps = im.getPerspectives();
 		Collection<Perspective> newps = wim.getPerspectives();
 		assertEquals( "wim not the same as im", oldps.size(), newps.size() );
-		
+
 		String pname = "test perspective";
 		Perspective p = new Perspective( pname );
 		URI uri = wim.add( p );
@@ -121,10 +96,10 @@ public class BigDataEngineTest {
 
 		wim.commit();
 
-		assertEquals( "perspective not added", oldps.size()+1,
+		assertEquals( "perspective not added", oldps.size() + 1,
 				im.getPerspectives().size() );
-		
-		assertEquals( "commit failed", im.getPerspectives().size(), 
+
+		assertEquals( "commit failed", im.getPerspectives().size(),
 				wim.getPerspectives().size() );
 		wim.release();
 	}

@@ -1,5 +1,6 @@
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.ArrayList;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class ColumnChartPlaySheet extends BrowserPlaySheet2 {
 	}
 
 	@Override
-	public void create( List<Value[]> newdata, List<String> headers ) {
+	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
 		convertUrisToLabels( newdata, getPlaySheetFrame().getEngine() );
 

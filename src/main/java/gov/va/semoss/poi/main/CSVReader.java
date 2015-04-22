@@ -95,12 +95,12 @@ public class CSVReader implements ImportFileReader {
 	}
 
 	@Override
-	public ImportMetadata getMetadata( File file ) throws IOException, FileLoadingException {
+	public ImportMetadata getMetadata( File file ) throws IOException, ImportValidationException {
 		return new ImportMetadata(); // no metadata for CSVs
 	}
 
 	@Override
-	public ImportData readOneFile( File file ) throws IOException, FileLoadingException {
+	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
 		ImportData data = new ImportData();
 		ImportMetadata im = data.getMetadata();
 		im.setLegacyMode( true );

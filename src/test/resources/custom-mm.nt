@@ -1,3 +1,6 @@
+<http://semoss.va.gov/database/Y40e83ce1-906e-4158-a8d8-e31b8a5cbb45> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://schema.org/subject> <http://www.w3.org/2000/01/rdf-schema#label> <http://junk/just-for-fun> .
 <http://seman.tc/data/northwind/Concept/Category/Beverages> <http://purl.org/dc/terms/Description> "Soft drinks, coffees, teas, beers, and ales" .
 <http://seman.tc/data/northwind/Concept/Category/Beverages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
@@ -212,3 +215,4 @@
 <http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/2000/01/rdf-schema#label> "Category" .
 <http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation> .
 <http://seman.tc/models/northwind#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Contains> .
+<http://semoss.va.gov/database/Y40e83ce1-906e-4158-a8d8-e31b8a5cbb45> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

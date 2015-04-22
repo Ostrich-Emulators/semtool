@@ -1,5 +1,6 @@
-<http://junk.com/testfiles/Y6fb185e92be8114afa4b9e554f3acd84> <http://junk.com/testfiles/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://junk.com/testfiles/W87ef52d611a9e479ee89efd3c70384c8> .
-<http://junk.com/testfiles/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
+<http://semoss.va.gov/database/Dd892329a-d929-489c-bc74-f863a158c0bf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://junk.com/testfiles/Beverages> <http://owl.junk.com/testfiles/Description> "Soft drinks, coffees, teas, beers, and ales" .
 <http://junk.com/testfiles/Beverages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Category> .
 <http://junk.com/testfiles/Casters> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Sugar> .
@@ -107,3 +108,6 @@
 <http://junk.com/testfiles/Tunnbr\u00F6d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
 <http://junk.com/testfiles/W87ef52d611a9e479ee89efd3c70384c8> <http://owl.junk.com/testfiles/Description> "Prepared meats" .
 <http://junk.com/testfiles/W87ef52d611a9e479ee89efd3c70384c8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Category> .
+<http://junk.com/testfiles/Y6fb185e92be8114afa4b9e554f3acd84> <http://junk.com/testfiles/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://junk.com/testfiles/W87ef52d611a9e479ee89efd3c70384c8> .
+<http://junk.com/testfiles/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
+<http://semoss.va.gov/database/Dd892329a-d929-489c-bc74-f863a158c0bf> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

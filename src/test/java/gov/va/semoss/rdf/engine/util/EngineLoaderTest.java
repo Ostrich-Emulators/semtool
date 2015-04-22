@@ -7,6 +7,7 @@ package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
@@ -18,26 +19,25 @@ import gov.va.semoss.util.UriBuilder.DefaultSanitizer;
 import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -98,39 +98,21 @@ public class EngineLoaderTest {
 	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
 	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
 
+	private static final File TEST10 = new File( "src/test/resources/test10.xlsx" );
+	private static final File TEST10_EXP = new File( "src/test/resources/test10.nt" );
+
 	private InMemorySesameEngine engine;
-	private File destination;
+	private File dbfile;
 
 	private IEngine extractKb() {
-		if ( null != destination ) {
-			FileUtils.deleteQuietly( destination );
+		if ( null != dbfile ) {
+			FileUtils.deleteQuietly( dbfile );
 		}
-		destination = null;
 
-		try ( ZipInputStream zis = new ZipInputStream( new FileInputStream(
-				"src/test/resources/emptydb.zip" ) ) ) {
-			destination = File.createTempFile( "semoss-test-", "" );
-			destination.delete();
-			destination.mkdir();
-
-			ZipEntry entry;
-			while ( null != ( entry = zis.getNextEntry() ) ) {
-				File outfile = new File( destination, entry.getName() );
-				if ( entry.isDirectory() ) {
-					outfile.mkdirs();
-				}
-				else {
-					try ( FileOutputStream fout = new FileOutputStream( outfile ) ) {
-						byte bytes[] = new byte[1024 * 1024];
-						int read = -1;
-						while ( -1 != ( read = zis.read( bytes ) ) ) {
-							fout.write( bytes, 0, read );
-						}
-						zis.closeEntry();
-					}
-				}
-			}
-
+		try {
+			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
+			Files.copy( new File( "src/test/resources/test.jnl" ).toPath(),
+					dbfile.toPath(), StandardCopyOption.REPLACE_EXISTING );
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
@@ -141,12 +123,9 @@ public class EngineLoaderTest {
 		data.setSanitizer( new DefaultSanitizer() );
 		schema.setSanitizer( new DefaultSanitizer() );
 
-		File dbdir = new File( destination, "emptydb" );
-		File smss = new File( dbdir, "emptydb.jnl" );
-		Properties props = BigDataEngine.generateProperties( smss );
+		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		props.setProperty( Constants.SMSS_LOCATION, smss.getAbsolutePath() );
 		BigDataEngine eng = new BigDataEngine() {
 			@Override
 			public UriBuilder getDataBuilder() {
@@ -161,7 +140,7 @@ public class EngineLoaderTest {
 
 	private void removeKb( IEngine eng ) {
 		eng.closeDB();
-		FileUtils.deleteQuietly( destination );
+		FileUtils.deleteQuietly( dbfile );
 	}
 
 	@BeforeClass
@@ -193,6 +172,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.setReader( "csv", rdr );
 		el.loadToEngine( Arrays.asList( CSVDATA ), engine, true, null );
 		el.release();
@@ -216,6 +196,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.setReader( "csv", rdr );
 		el.loadToEngine( Arrays.asList( CSVDATA ), engine, false, null );
 		el.release();
@@ -241,6 +222,7 @@ public class EngineLoaderTest {
 
 		EngineLoader el = new EngineLoader();
 		el.setReader( "csv", rdr );
+		el.setDefaultBaseUri( BASEURI, true );
 		el.loadToEngine( Arrays.asList( CSVDATA2 ), engine, true, null );
 		el.release();
 
@@ -263,6 +245,7 @@ public class EngineLoaderTest {
 
 		ImportData id = new ImportData();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( LEGACY ), engine, true, id );
 		el.release();
 
@@ -285,6 +268,7 @@ public class EngineLoaderTest {
 
 		ImportData id = new ImportData();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( LEGACY ), engine, false, id );
 		el.release();
 
@@ -306,6 +290,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
 		Collection<Statement> owls
 				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, true, errors );
@@ -330,6 +315,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
 		el.loadToEngine( Arrays.asList( CUSTOM2 ), engine, true, errors );
 		el.release();
@@ -352,6 +338,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
 		el.loadToEngine( Arrays.asList( CUSTOM2 ), engine, false, errors );
 		el.release();
@@ -374,6 +361,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		Collection<Statement> owls
 				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, false, null );
 		el.release();
@@ -398,14 +386,16 @@ public class EngineLoaderTest {
 		// data in the KB (basically, make sure the caching works)
 		IEngine eng = extractKb();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
 		el.release();
 		OneVarListQueryAdapter<URI> o
-				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o }",
+				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o . FILTER( isUri( ?uri ) ) }",
 						"uri" );
 		List<URI> oldlist = eng.query( o );
 
 		EngineLoader el2 = new EngineLoader();
+		el2.setDefaultBaseUri( BASEURI, false );
 		el2.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
 		el2.release();
 		List<URI> newlist = engine.query( o );
@@ -418,14 +408,16 @@ public class EngineLoaderTest {
 		// same as the two_loads1 test, but in the custom metamodel mode
 		IEngine eng = extractKb();
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
 		el.release();
 		OneVarListQueryAdapter<URI> o
-				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o }",
+				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o . FILTER( isUri( ?uri ) ) }",
 						"uri" );
 		List<URI> oldlist = eng.query( o );
 
 		EngineLoader el2 = new EngineLoader();
+		el2.setDefaultBaseUri( BASEURI, false );
 		el2.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
 		el2.release();
 
@@ -487,6 +479,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
 		el.loadToEngine( Arrays.asList( TICKET608 ), engine, true, null );
 		el.release();
 
@@ -499,6 +492,28 @@ public class EngineLoaderTest {
 		}
 
 		compareData( engine.getRawConnection(), getExpectedGraph( TICKET608_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
+	}
+
+	@Test
+	public void testLoadingSheet10() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		el.loadToEngine( Arrays.asList( TEST10 ), engine, true, null );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test10.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TEST10_EXP ),
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
@@ -595,6 +610,5 @@ public class EngineLoaderTest {
 		assertEquals( label + " predicates mismatch", exp.predicates(), tst.predicates() );
 		assertEquals( label + " subjects mismatch", exp.subjects(), tst.subjects() );
 		assertEquals( label + " subjects mismatch", exp.objects(), tst.objects() );
-
 	}
 }

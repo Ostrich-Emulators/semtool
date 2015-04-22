@@ -5,8 +5,8 @@
  */
 package gov.va.semoss.rdf.query.util;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.openrdf.model.URI;
@@ -31,21 +31,18 @@ import org.openrdf.repository.RepositoryException;
  */
 public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
 
-	private static final SimpleDateFormat SDF
-			= new SimpleDateFormat( "yyyy-mm-dd'T'hh:MM:ss.SSS'Z'" );
-
 	public MetadataQuery() {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
 		result = new HashMap<>();
-		bind( "dataset", MetadataConstants.VOID_DS );
+		bind( "dataset", VAS.DATABASE );
 	}
 
 	public MetadataQuery( URI uri ) {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
 		result = new HashMap<>();
-		bind( "dataset", MetadataConstants.VOID_DS );
+		bind( "dataset", VAS.DATABASE );
 		// special handling when we're trying to figure out the base uri
-		bind( "p", ( MetadataConstants.VOID_DS.equals( uri ) ? RDF.TYPE : uri ) );
+		bind( "p", ( VAS.DATABASE.equals( uri ) ? RDF.TYPE : uri ) );
 	}
 
 	/**
@@ -68,7 +65,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
     // for baseuri, we need the subject, not the object
 		// and also, we use the VOID_DS as the key elsewhere in the code
 		if ( RDF.TYPE.equals( pred ) ) {
-			pred = MetadataConstants.VOID_DS;
+			pred = VAS.DATABASE;
 			val = set.getValue( "db" ).stringValue();
 		}
 		else if ( pred.getNamespace().equals( DC.NAMESPACE ) ) {

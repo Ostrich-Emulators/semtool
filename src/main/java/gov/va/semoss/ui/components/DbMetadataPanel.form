@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <NonVisualComponents>
+    <Container class="javax.swing.JScrollPane" name="jScrollPane1">
+      <AuxValues>
+        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+      </AuxValues>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JList" name="jList1">
+          <Properties>
+            <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
+              <StringArray count="5">
+                <StringItem index="0" value="Item 1"/>
+                <StringItem index="1" value="Item 2"/>
+                <StringItem index="2" value="Item 3"/>
+                <StringItem index="3" value="Item 4"/>
+                <StringItem index="4" value="Item 5"/>
+              </StringArray>
+            </Property>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+  </NonVisualComponents>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
@@ -18,17 +42,19 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="w2lbl" max="32767" attributes="0"/>
-                  <Component id="wlbl" max="32767" attributes="0"/>
-                  <Component id="tlbl" alignment="1" max="32767" attributes="0"/>
-                  <Component id="slbl" alignment="1" max="32767" attributes="0"/>
-                  <Component id="olbl" alignment="1" max="32767" attributes="0"/>
-                  <Component id="clbl" alignment="1" max="32767" attributes="0"/>
-                  <Component id="llbl" alignment="1" max="32767" attributes="0"/>
-                  <Component id="blbl" alignment="1" max="32767" attributes="0"/>
-                  <Component id="mlbl" alignment="1" max="32767" attributes="0"/>
-                  <Component id="plbl" alignment="1" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="tlbl" alignment="1" max="32767" attributes="0"/>
+                      <Component id="slbl" alignment="1" max="32767" attributes="0"/>
+                      <Component id="olbl" alignment="1" max="32767" attributes="0"/>
+                      <Component id="clbl" alignment="1" max="32767" attributes="0"/>
+                      <Component id="llbl" alignment="1" max="32767" attributes="0"/>
+                      <Component id="blbl" alignment="1" max="32767" attributes="0"/>
+                      <Component id="mlbl" alignment="1" max="32767" attributes="0"/>
+                      <Component id="plbl" alignment="1" max="32767" attributes="0"/>
+                  </Group>
+                  <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -40,10 +66,9 @@
                   <Component id="smss" alignment="0" max="32767" attributes="0"/>
                   <Component id="poc" alignment="0" max="32767" attributes="0"/>
                   <Component id="title" alignment="0" max="32767" attributes="0"/>
-                  <Component id="owlinfo" alignment="0" max="32767" attributes="0"/>
-                  <Component id="owliri" alignment="0" max="32767" attributes="0"/>
+                  <Component id="edgemodel" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jScrollPane2" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -70,12 +95,12 @@
                   <Component id="plbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="poc" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="wlbl" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="owlinfo" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="edgemodel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="clbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="created" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -90,17 +115,17 @@
                   <Component id="blbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="voiduri" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="w2lbl" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="owliri" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="mlbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="smss" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                  <Component id="jScrollPane2" min="-2" pref="110" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -209,8 +234,9 @@
     </Component>
     <Component class="javax.swing.JTextField" name="voiduri">
       <Properties>
+        <Property name="editable" type="boolean" value="false"/>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ee" green="ee" red="ee" type="rgb"/>
+          <Color blue="c0" green="c0" id="lightGray" palette="1" red="c0" type="palette"/>
         </Property>
       </Properties>
     </Component>
@@ -233,25 +259,12 @@
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="wlbl">
+    <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Version Info"/>
+        <Property name="text" type="java.lang.String" value="Edge Model"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="owlinfo">
-      <Properties>
-        <Property name="editable" type="boolean" value="false"/>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="c0" green="c0" id="lightGray" palette="1" red="c0" type="palette"/>
-        </Property>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="w2lbl">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Version IRI"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="owliri">
+    <Component class="javax.swing.JTextField" name="edgemodel">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -259,5 +272,30 @@
         </Property>
       </Properties>
     </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Datasets"/>
+      </Properties>
+    </Component>
+    <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+      <AuxValues>
+        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+      </AuxValues>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JList" name="subsets">
+          <Properties>
+            <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="subsetmodel" type="code"/>
+            </Property>
+            <Property name="selectionMode" type="int" value="0"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;URI&gt;"/>
+          </AuxValues>
+        </Component>
+      </SubComponents>
+    </Container>
   </SubComponents>
 </Form>

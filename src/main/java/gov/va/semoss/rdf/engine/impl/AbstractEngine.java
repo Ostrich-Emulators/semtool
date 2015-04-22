@@ -48,7 +48,9 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import org.openrdf.model.Model;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 
@@ -65,6 +67,7 @@ public abstract class AbstractEngine implements IEngine {
 	private InsightManager insightEngine;
 	private UriBuilder schemabuilder;
 	private UriBuilder databuilder;
+	private URI baseuri;
 
 	public static final String fromSparql = "SELECT DISTINCT ?entity WHERE { "
 			+ "{?rel <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://semoss.org/ontologies/Relation>} "
@@ -98,6 +101,13 @@ public abstract class AbstractEngine implements IEngine {
 			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?y}"
 			+ "}";
 
+	/**
+	 * Opens the database. This function calls (in this order) {@link #loadAllProperties(java.util.Properties,
+	 * java.lang.String, java.io.File...) }, {@link #setUris(java.lang.String, java.lang.String) },
+	 * {@link #finishLoading(java.util.Properties) }
+	 *
+	 * @param initprops
+	 */
 	@Override
 	public void openDB( Properties initprops ) {
 		try {
@@ -107,15 +117,6 @@ public abstract class AbstractEngine implements IEngine {
 			startLoading( prop );
 
 			String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
-			if ( !baseuristr.isEmpty() ) {
-				try {
-					setDataBuilder( UriBuilder.getBuilder( baseuristr ) );
-				}
-				catch ( Exception e ) {
-					log.warn( "no base uri set: " + baseuristr, e );
-				}
-			}
-
 			String owlstarter = prop.getProperty( Constants.SEMOSS_URI,
 					DIHelper.getInstance().getProperty( Constants.SEMOSS_URI ) );
 			if ( null == owlstarter ) {
@@ -123,8 +124,7 @@ public abstract class AbstractEngine implements IEngine {
 						+ Constants.DEFAULT_SEMOSS_URI );
 				owlstarter = Constants.DEFAULT_SEMOSS_URI;
 			}
-
-			setSchemaBuilder( UriBuilder.getBuilder( owlstarter ) );
+			baseuri = new URIImpl( setUris( baseuristr, owlstarter ).stringValue() );
 
 			String dreamerfileloc = prop.getProperty( Constants.DREAMER );
 			if ( null != dreamerfileloc ) {
@@ -162,6 +162,17 @@ public abstract class AbstractEngine implements IEngine {
 	 */
 	protected abstract void loadLegacyOwl( String ontoloc );
 
+	/**
+	 * Loads and optionally modifies the given properties. This is the first step
+	 * in {@link #openDB(java.util.Properties) }
+	 *
+	 * @param props the properties
+	 * @param ename the engine name
+	 * @param searchpath where to look for any files specified in
+	 * <code>props</code>
+	 * @return the modified properties
+	 * @throws IOException
+	 */
 	protected Properties loadAllProperties( Properties props, String ename,
 			File... searchpath ) throws IOException {
 
@@ -273,18 +284,34 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public UriBuilder getDataBuilder() { 
+	public UriBuilder getDataBuilder() {
 		return databuilder;
-	}
-
-	@Override
-	public org.openrdf.model.URI getBaseUri() {
-		return databuilder.toUri();
 	}
 
 	protected void setDataBuilder( UriBuilder b ) {
 		databuilder = b;
 	}
+
+	@Override
+	public org.openrdf.model.URI getBaseUri() {
+		return baseuri;
+	}
+
+	protected void setBaseUri( URI base ) {
+		baseuri = base;
+	}
+
+	/**
+	 * An extension point for subclasses to set their base uris during the load
+	 * process. This function should set the {@link #baseuri},
+	 * {@link #databuilder}, {@link #schemabuilder}
+	 *
+	 * @param data the data builder uri property value from the properties file
+	 * (possibly empty)
+	 * @param schema the schema builder uri (never empty)
+	 * @return this database's unique id. this will include some sort of UUID
+	 */
+	protected abstract URI setUris( String data, String schema );
 
 	@Override
 	public void closeDB() {

@@ -442,7 +442,6 @@ public class Constants {
 	public static final String DEFAULTUI_KEY = "DefaultUI";
 
 	public static final String CALC_INFERENCES_PREF = "calculateInferences";
-	public static final String SOFTWARE_AGENT_LOCALNAME = "softwareAgent";
 	public static final String INSIGHTKB = "insights";
 
 	public static final String USERPREF_NAME = "userFullName";

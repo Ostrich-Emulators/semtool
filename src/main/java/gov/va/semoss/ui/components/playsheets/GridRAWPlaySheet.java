@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.SaveAllGridAction;
 import gov.va.semoss.ui.actions.SaveGridAction;
@@ -128,7 +129,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void create( List<Value[]> data, List<String> newheaders ) {
+	public void create( List<Value[]> data, List<String> newheaders, IEngine engine ) {
 		setHeaders( newheaders );
 		log.debug( "into create: " + data.size() + " items" );
 		model.setData( data, newheaders );

@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -46,7 +47,7 @@ public class CountyHeatMapPlaySheet extends BrowserPlaySheet2 {
 	}
 
 	@Override
-	public void create( List<Value[]> newdata, List<String> headers ) {
+	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
 		Set<Map<String, Object>> data = new HashSet<>();
 		String[] var = headers.toArray( new String[0] );

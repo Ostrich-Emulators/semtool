@@ -117,9 +117,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	/**
-	 * Initiates the loading process with the given properties. If overridden,
-	 * subclasses should be sure to call their superclass's version of this
-	 * function in addition to whatever other processing they do.
+	 * Initiates the loading process with the given properties. Subclasses will
+	 * usually use this function to open their repositories before the rest of the
+	 * loading process occurs. If overridden, subclasses should be sure to call
+	 * their superclass's version of this function in addition to whatever other
+	 * processing they do.
 	 *
 	 * @param props
 	 * @throws RepositoryException
@@ -128,6 +130,38 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void startLoading( Properties props ) throws RepositoryException {
 		super.startLoading( props );
 		owlRc = createOwlRc();
+	}
+
+	@Override
+	protected URI setUris( String data, String schema ) {
+		URI baseuri = null;
+		if ( data.isEmpty() ) {
+			try {
+				// if the baseuri isn't already set, then query the kb for void:Dataset
+				RepositoryResult<Statement> rr
+						= getRawConnection().getStatements(null, RDF.TYPE, VAS.DATABASE, false );
+				List<Statement> stmts = Iterations.asList( rr );
+				for ( Statement s : stmts ) {
+					baseuri = URI.class.cast( s.getSubject() );
+					break;
+				}
+
+			}
+			catch ( RepositoryException e ) {
+				log.error( e, e );
+			}
+		}
+		else {
+			baseuri = new URIImpl( data );
+		}
+
+		if ( null == baseuri ) {
+			log.fatal( "no base uri set" );
+		}
+
+		setSchemaBuilder( UriBuilder.getBuilder( schema ) );
+		setDataBuilder( UriBuilder.getBuilder( baseuri ) );
+		return baseuri;
 	}
 
 	@Override
@@ -450,7 +484,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		try {
 			if ( null == baseuri ) {
 				RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
-						MetadataConstants.VOID_DS, false );
+						VAS.DATABASE, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = s.getSubject();

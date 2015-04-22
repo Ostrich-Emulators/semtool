@@ -45,9 +45,8 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 	}
 
 	@Override
-	public void create( List<Value[]> data, List<String> newheaders ) {
-		IEngine eng = this.getPlaySheetFrame().getEngine();
-		super.create( convertUrisToLabels( data, eng ), newheaders );
+	public void create( List<Value[]> data, List<String> newheaders, IEngine engine ) {
+		super.create( convertUrisToLabels( data, engine ), newheaders, engine );
 	}
 
 	@Override
