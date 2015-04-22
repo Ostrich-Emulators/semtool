@@ -106,13 +106,6 @@ public class DBToLoadingSheetExporterTest {
 						RDFS.SUBCLASSOF, vf.createURI( "http://semoss.org/ontologies/bar" ) ) );
 
 				conn.add( owls );
-
-				try {
-					conn.export( new NTriplesWriter( new FileWriter( "/tmp/x.nt" ) ) );
-				}
-				catch ( IOException | RepositoryException | RDFHandlerException e ) {
-					log.error( e, e );
-				}
 			}
 		} );
 
