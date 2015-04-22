@@ -590,6 +590,7 @@ public class EngineUtil implements Runnable {
 	 * @param defaultBaseUri the base uri of the new engine
 	 * @param defaultBaseOverridesFiles if true, use <code>defaultBaseUri</code>
 	 * instead of whatever is specified in the loading files
+	 * @param reificationModel
 	 * @param smss the custom smss file. If null or empty, will use the sample
 	 * file from the Defaults directory
 	 * @param map the custom ontology properties file. Can be null null or empty
@@ -610,9 +611,9 @@ public class EngineUtil implements Runnable {
 	 * @throws gov.va.semoss.rdf.engine.util.EngineManagementException
 	 */
 	public static File createNew( File dbtopdir, String engine, URI defaultBaseUri,
-			boolean defaultBaseOverridesFiles, String smss, String map, String questions,
-			Collection<File> toload, boolean stageInMemory, boolean calcInfers,
-			boolean dometamodel, ImportData conformanceErrors )
+			boolean defaultBaseOverridesFiles, URI reificationModel, String smss, 
+			String map, String questions, Collection<File> toload, boolean stageInMemory, 
+			boolean calcInfers, boolean dometamodel, ImportData conformanceErrors )
 			throws IOException, EngineManagementException {
 
 		dbtopdir.mkdirs();
@@ -639,7 +640,8 @@ public class EngineUtil implements Runnable {
 				= getStatementsFromResource( "/models/va-semoss.ttl", RDFFormat.TURTLE );
 		insights.addAll( createInsightStatements( modelquestions ) );
 
-		File smssfile = createEngine( dbtopdir, engine, modelsmss, modelmap, dometamodel );
+		File smssfile = createEngine( dbtopdir, engine, reificationModel, modelsmss, 
+				modelmap, dometamodel );
 
 		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
 
@@ -865,8 +867,9 @@ public class EngineUtil implements Runnable {
 
 	}
 
-	public static File createEngine( File enginedir, String dbname, File modelsmss,
-			File modelmap, boolean dometamodel ) throws IOException, EngineManagementException {
+	public static File createEngine( File enginedir, String dbname, URI reificationModel, 
+			File modelsmss, File modelmap, boolean dometamodel ) 
+			throws IOException, EngineManagementException {
 
 		if ( null != modelmap && modelmap.exists() ) {
 			try {
@@ -929,8 +932,8 @@ public class EngineUtil implements Runnable {
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
-			// we don't have these constants yet
-			// rc.add( new StatementImpl( baseuri, VAS.REIFICATION, VAS.ReificationModel ) );
+			rc.add( new StatementImpl( baseuri, VAS.REIFICATION, reificationModel ) );
+
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
 

@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -204,7 +205,8 @@ public class CLI {
 			smss = EngineUtil.createNew(
 					outputFileDir,
 					databaseFileName,
-					new URIImpl( baseURI ), true, null, null,
+					new URIImpl( baseURI ), true, VAS.SEMOSS_REIFICATION, 
+					null, null,
 					insightFile,
 					loads,
 					stageInMemory,

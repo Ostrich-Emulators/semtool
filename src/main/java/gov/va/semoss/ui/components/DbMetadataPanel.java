@@ -33,6 +33,7 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.Utility;
 import java.awt.HeadlessException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -201,6 +202,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 					fieldlkp.get( pred ).setText( val );
 				}
 			}
+			
+			// FIXME: need to use label for reification model
 
 			subsetmodel.clear();
 			OneVarListQueryAdapter<URI> q

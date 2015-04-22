@@ -53,6 +53,7 @@ public class VAS {
 	public final static URI REIFICATION;
 	public final static URI SEMOSS_REIFICATION;
 	public final static URI RDR_REIFICATION;
+	public final static URI W3C_REIFICATION;
 
 	// ----- Properties ------
 	/**
@@ -83,6 +84,7 @@ public class VAS {
 		REIFICATION = factory.createURI( NAMESPACE, "reification" );
 		SEMOSS_REIFICATION = factory.createURI( NAMESPACE, "VASEMOSS-Reification" );
 		RDR_REIFICATION = factory.createURI( NAMESPACE, "RDR-Reification" );
+		W3C_REIFICATION = factory.createURI( NAMESPACE, "W3C-Reification" );
 
 		// ----- Properties ------
 		insight = factory.createURI( NAMESPACE, "insight" );

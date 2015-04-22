@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.util.Constants;
@@ -81,7 +82,8 @@ public class EngineUtilTest {
 
 		try {
 			EngineUtil.createNew( topdir, "testdb", new URIImpl( "http://va.gov/ontologies" ),
-					true, null, null, null, Arrays.asList( LEGACY ), true, true, true, null );
+					true, VAS.SEMOSS_REIFICATION, null, null, null, Arrays.asList( LEGACY ),
+					true, true, true, null );
 		}
 		finally {
 			FileUtils.deleteQuietly( topdir );

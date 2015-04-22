@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
@@ -31,6 +32,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -139,6 +141,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
+    edgegroup = new javax.swing.ButtonGroup();
     jLabel2 = new javax.swing.JLabel();
     file = new gov.va.semoss.ui.components.FileBrowsePanel();
     urilbl = new javax.swing.JLabel();
@@ -155,6 +158,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     metamodel = new javax.swing.JCheckBox();
     conformer = new javax.swing.JCheckBox();
     baseuri = new javax.swing.JComboBox<String>();
+    jPanel2 = new javax.swing.JPanel();
+    semossEdgeModel = new javax.swing.JRadioButton();
+    rdrEdgeModel = new javax.swing.JRadioButton();
+    w3cEdgeModel = new javax.swing.JRadioButton();
 
     jLabel2.setLabelFor(file);
     jLabel2.setText("Select File(s) to Import");
@@ -209,6 +216,39 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
     baseuri.setEditable(true);
 
+    jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), "Reification Model", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
+
+    edgegroup.add(semossEdgeModel);
+    semossEdgeModel.setSelected(true);
+    semossEdgeModel.setText("SEMOSS");
+
+    edgegroup.add(rdrEdgeModel);
+    rdrEdgeModel.setText("RDR");
+
+    edgegroup.add(w3cEdgeModel);
+    w3cEdgeModel.setText("W3C");
+
+    javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+    jPanel2.setLayout(jPanel2Layout);
+    jPanel2Layout.setHorizontalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(semossEdgeModel)
+          .addComponent(rdrEdgeModel)
+          .addComponent(w3cEdgeModel))
+        .addGap(0, 53, Short.MAX_VALUE))
+    );
+    jPanel2Layout.setVerticalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addComponent(semossEdgeModel)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(rdrEdgeModel)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(w3cEdgeModel))
+    );
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -237,6 +277,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
               .addComponent(calcInfers)
               .addComponent(metamodel)
               .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(18, 18, 18)
+            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGap(0, 0, Short.MAX_VALUE))))
     );
     layout.setVerticalGroup(
@@ -260,18 +302,20 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
           .addComponent(questionfile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(file, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(jLabel2)
+          .addComponent(file, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(layout.createSequentialGroup()
-            .addComponent(jLabel2)
-            .addGap(18, 18, 18)
-            .addComponent(calcInfers)))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(metamodel)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(conformer)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(calcInfers)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(metamodel)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(conformer)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+          .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -321,41 +365,51 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		final boolean dometamodel = metamodel.isSelected();
 		final boolean conformance = conformer.isSelected();
 
+		URI reif = null;
+		if ( semossEdgeModel.isSelected() ) {
+			reif = VAS.SEMOSS_REIFICATION;
+		}
+		else if ( rdrEdgeModel.isSelected() ) {
+			reif = VAS.RDR_REIFICATION;
+		}
+		else if ( w3cEdgeModel.isSelected() ) {
+			reif = VAS.W3C_REIFICATION;
+		}
+		else {
+			throw new IllegalArgumentException( "Unknown reification: " + reif );
+		}
+		final URI reifUri = reif;
+
 		Collection<File> files = file.getFiles();
 
 		URI defaultBase = null;
-		if ( !files.isEmpty() ) {
-			if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
-				Set<URI> uris = new HashSet<>();
-				Preferences prefs = Preferences.userNodeForPackage( getClass() );
-				String basepref = prefs.get( "lastontopath", "http://va.gov/ontologies/" );
-				for ( String b : basepref.split( ";" ) ) {
-					uris.add( new URIImpl( b ) );
-				}
-
-				defaultBase = getDefaultBaseUri( files, uris );
-
-				// save the default base for next time
-				if ( null == defaultBase ) {
-					return; // user canceled
-				}
-				else if ( !Constants.ANYNODE.equals( defaultBase ) ) {
-					// user specified something
-					uris.add( defaultBase );
-					StringBuilder sb = new StringBuilder();
-					for ( URI u : uris ) {
-						if ( 0 != sb.length() ) {
-							sb.append( ";" );
-						}
-						sb.append( u.stringValue() );
-					}
-					prefs.put( "lastontopath", sb.toString() );
-				}
-				// else {} // every file has a base URI specified
+		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
+			Set<URI> uris = new HashSet<>();
+			Preferences prefs = Preferences.userNodeForPackage( getClass() );
+			String basepref = prefs.get( "lastontopath", "http://va.gov/ontologies/" );
+			for ( String b : basepref.split( ";" ) ) {
+				uris.add( new URIImpl( b ) );
 			}
-		}
-		else {
-			defaultBase = new URIImpl( mybase );
+
+			defaultBase = ( files.isEmpty() ? Constants.ANYNODE : getDefaultBaseUri( files, uris ) );
+
+			// save the default base for next time
+			if ( null == defaultBase ) {
+				return; // user canceled
+			}
+			else if ( !Constants.ANYNODE.equals( defaultBase ) ) {
+				// user specified something
+				uris.add( defaultBase );
+				StringBuilder sb = new StringBuilder();
+				for ( URI u : uris ) {
+					if ( 0 != sb.length() ) {
+						sb.append( ";" );
+					}
+					sb.append( u.stringValue() );
+				}
+				prefs.put( "lastontopath", sb.toString() );
+			}
+			// else {} // every file has a base URI specified
 		}
 
 		final URI defaultBaseUri = defaultBase;
@@ -395,7 +449,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 							smss[0] = EngineUtil.createNew( dbdir.getFirstFile(),
 									dbname.getText(), defaultBaseUri,
 									defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ),
-									null, null, questionfile.getFirstPath(), files, stageInMemory,
+									reifUri, null, null, questionfile.getFirstPath(), files, stageInMemory,
 									calc, dometamodel, errors );
 							EngineUtil.getInstance().mount( smss[0], true );
 						}
@@ -415,16 +469,21 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private gov.va.semoss.ui.components.FileBrowsePanel dbdir;
   private javax.swing.JTextField dbname;
   private javax.swing.JRadioButton diskStaging;
+  private javax.swing.ButtonGroup edgegroup;
   private gov.va.semoss.ui.components.FileBrowsePanel file;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JPanel jPanel2;
   private javax.swing.JRadioButton memoryStaging;
   private javax.swing.JCheckBox metamodel;
   private gov.va.semoss.ui.components.FileBrowsePanel questionfile;
   private javax.swing.JLabel questionlbl;
+  private javax.swing.JRadioButton rdrEdgeModel;
+  private javax.swing.JRadioButton semossEdgeModel;
   private javax.swing.JLabel urilbl;
+  private javax.swing.JRadioButton w3cEdgeModel;
   // End of variables declaration//GEN-END:variables
 
 	/**
