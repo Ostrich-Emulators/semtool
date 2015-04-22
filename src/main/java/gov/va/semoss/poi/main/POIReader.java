@@ -32,9 +32,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -43,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -65,13 +64,13 @@ public class POIReader implements ImportFileReader {
 		METADATA, NODE, RELATION, LOADER, UNKNOWN, UNSPECIFIED, EMPTY
 	};
 
-	private ImportData readNonloadingSheet( XSSFWorkbook workbook ) {
+	private ImportData readNonloadingSheet( Workbook workbook ) {
 		ImportData id = new ImportData();
 
 		int sheets = workbook.getNumberOfSheets();
 		for ( int sheetnum = 0; sheetnum < sheets; sheetnum++ ) {
-			XSSFSheet sheet = workbook.getSheetAt( sheetnum );
-			XSSFRow firstRow = sheet.getRow( 0 );
+			Sheet sheet = workbook.getSheetAt( sheetnum );
+			Row firstRow = sheet.getRow( 0 );
 
 			String subjectType = firstRow.getCell( 0 ).getStringCellValue();
 			LoadingSheetData nlsd = new LoadingSheetData( sheet.getSheetName(), subjectType );
@@ -87,7 +86,7 @@ public class POIReader implements ImportFileReader {
 
 			int rows = sheet.getLastRowNum();
 			for ( int r = 1; r <= rows; r++ ) {
-				XSSFRow row = sheet.getRow( r );
+				Row row = sheet.getRow( r );
 				String nodename = row.getCell( 0 ).getStringCellValue();
 				LoadingNodeAndPropertyValues nap = nlsd.add( nodename );
 
@@ -106,15 +105,14 @@ public class POIReader implements ImportFileReader {
 	@Override
 	public ImportMetadata getMetadata( File file ) throws IOException, ImportValidationException {
 		logger.debug( "getting metadata from file: " + file );
-		final XSSFWorkbook workbook
-				= new XSSFWorkbook( new FileInputStream( file ) );
+		final Workbook workbook = new XSSFWorkbook( new FileInputStream( file ) );
 		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
 
 		ImportData data = new ImportData();
 		AbstractFileReader.initNamespaces( data );
 
 		for ( String name : categorizeSheets( workbook ).getNN( SheetType.METADATA ) ) {
-			XSSFSheet metadataSheet = workbook.getSheet( name );
+			Sheet metadataSheet = workbook.getSheet( name );
 			loadMetadata( metadataSheet, data );
 		}
 
@@ -123,8 +121,10 @@ public class POIReader implements ImportFileReader {
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
-		final XSSFWorkbook workbook
-				= new XSSFWorkbook( new FileInputStream( file ) );
+		return read( new XSSFWorkbook( new FileInputStream( file ) ) );
+	}
+
+	public ImportData read( Workbook workbook ) throws ImportValidationException {
 		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
 
 		MultiMap<SheetType, String> typeToSheetNameLkp = categorizeSheets( workbook );
@@ -139,7 +139,7 @@ public class POIReader implements ImportFileReader {
 		}
 
 		for ( String sheetname : typeToSheetNameLkp.getNN( SheetType.METADATA ) ) {
-			XSSFSheet metadataSheet = workbook.getSheet( sheetname );
+			Sheet metadataSheet = workbook.getSheet( sheetname );
 			loadMetadata( metadataSheet, data );
 		}
 
@@ -154,14 +154,14 @@ public class POIReader implements ImportFileReader {
 		return data;
 	}
 
-	private MultiMap<SheetType, String> categorizeSheets( XSSFWorkbook workbook )
+	private MultiMap<SheetType, String> categorizeSheets( Workbook workbook )
 			throws ImportValidationException {
 		MultiMap<SheetType, String> typeToSheetNameLkp = new MultiMap<>();
 		// figure out what this spreadsheet contains...if we have a "Loader" tab,
 		// only worry about those sheets named in it. Otherwise, go through every
 		// sheet and figure out what we have
 
-		XSSFSheet lSheet = workbook.getSheet( "Loader" );
+		Sheet lSheet = workbook.getSheet( "Loader" );
 		if ( null == lSheet ) {
 			// no loader sheet, so check through all the sheets
 			for ( int i = 0; i < workbook.getNumberOfSheets(); i++ ) {
@@ -207,12 +207,12 @@ public class POIReader implements ImportFileReader {
 		return typeToSheetNameLkp;
 	}
 
-	private static Map<String, SheetType> categorizeFromLoadingSheet( XSSFSheet lSheet )
+	private static Map<String, SheetType> categorizeFromLoadingSheet( Sheet lSheet )
 			throws ImportValidationException {
 		Map<String, SheetType> map = new HashMap<>();
-		XSSFRow header = lSheet.getRow( 0 );
-		XSSFCell a1 = header.getCell( 0 );
-		XSSFCell b1 = header.getCell( 1 );
+		Row header = lSheet.getRow( 0 );
+		Cell a1 = header.getCell( 0 );
+		Cell b1 = header.getCell( 1 );
 		String a1val = ( cellIsEmpty( a1 ) ? "" : a1.getStringCellValue() );
 		String b1val = ( cellIsEmpty( b1 ) ? "" : b1.getStringCellValue() );
 		boolean mustHaveType = !cellIsEmpty( b1 );
@@ -225,7 +225,7 @@ public class POIReader implements ImportFileReader {
 		}
 
 		for ( int rIndex = 1; rIndex <= lSheet.getLastRowNum(); rIndex++ ) {
-			XSSFRow row = lSheet.getRow( rIndex );
+			Row row = lSheet.getRow( rIndex );
 			if ( row == null ) {
 				continue;
 			}
@@ -265,17 +265,17 @@ public class POIReader implements ImportFileReader {
 		return map;
 	}
 
-	private SheetType getSheetType( XSSFWorkbook workbook, String sheetname )
+	private SheetType getSheetType( Workbook workbook, String sheetname )
 			throws ImportValidationException {
-		XSSFSheet sheet = workbook.getSheet( sheetname );
+		Sheet sheet = workbook.getSheet( sheetname );
 
 		if ( null == sheet ) {
 			throw new ImportValidationException( ErrorType.MISSING_DATA,
 					"Missing sheet: " + sheetname );
 		}
 
-		XSSFRow row0 = sheet.getRow( 0 );
-		XSSFRow row1 = sheet.getRow( 1 );
+		Row row0 = sheet.getRow( 0 );
+		Row row1 = sheet.getRow( 1 );
 		if ( null == row0 || null == row1 ) {
 			// make sure we have some "data" in this sheet
 			return SheetType.EMPTY;
@@ -301,7 +301,7 @@ public class POIReader implements ImportFileReader {
 		}
 	}
 
-	private void loadMetadata( XSSFSheet metadataSheet, ImportData data )
+	private void loadMetadata( Sheet metadataSheet, ImportData data )
 			throws ImportValidationException {
 		if ( metadataSheet == null ) {
 			return;
@@ -322,14 +322,14 @@ public class POIReader implements ImportFileReader {
 
 		// read the data
 		for ( int i = 0; i <= metadataSheet.getLastRowNum(); i++ ) {
-			XSSFRow row = metadataSheet.getRow( i );
+			Row row = metadataSheet.getRow( i );
 			if ( row == null ) {
 				logger.warn( "skipping row: " + i + " (doesn't exist?)" );
 				continue;
 			}
 
-			XSSFCell cell0 = row.getCell( 1 );
-			XSSFCell cell2 = row.getCell( 3 );
+			Cell cell0 = row.getCell( 1 );
+			Cell cell2 = row.getCell( 3 );
 			if ( cellIsEmpty( cell0 ) || cellIsEmpty( cell2 ) ) {
 				logger.warn( "skipping row: " + i + " (empty cell)" );
 				continue;
@@ -413,17 +413,17 @@ public class POIReader implements ImportFileReader {
 		}
 	}
 
-	private Map<String, Value> getPropertyValues( XSSFRow row, SheetConfig props,
+	private Map<String, Value> getPropertyValues( Row row, SheetConfig props,
 			Map<String, Integer> properties, ImportData id ) {
 		Map<String, Value> propHash = new HashMap<>();
 
 		ValueFactory vf = new ValueFactoryImpl();
 		for ( Map.Entry<String, Integer> prop : properties.entrySet() ) {
 			String propName = prop.getKey();
-			XSSFCell cellValue = row.getCell( prop.getValue() );
+			Cell cellValue = row.getCell( prop.getValue() );
 			if ( !cellIsEmpty( cellValue ) ) {
-				if ( cellValue.getCellType() != XSSFCell.CELL_TYPE_NUMERIC ) {
-					cellValue.setCellType( XSSFCell.CELL_TYPE_STRING );
+				if ( cellValue.getCellType() != Cell.CELL_TYPE_NUMERIC ) {
+					cellValue.setCellType( Cell.CELL_TYPE_STRING );
 					propHash.put( propName,
 							getRDFStringValue( cellValue.getStringCellValue(), id, vf ) );
 				}
@@ -453,8 +453,8 @@ public class POIReader implements ImportFileReader {
 		return ( cellIsEmpty( cell ) ? "" : cell.getStringCellValue() );
 	}
 
-	private void loadSheet( String sheetToLoad, XSSFWorkbook workbook, ImportData id ) {
-		XSSFSheet lSheet = workbook.getSheet( sheetToLoad );
+	private void loadSheet( String sheetToLoad, Workbook workbook, ImportData id ) {
+		Sheet lSheet = workbook.getSheet( sheetToLoad );
 		if ( lSheet == null ) {
 			logger.warn( "Excel tab " + sheetToLoad + " not found, skipping..." );
 			return;
@@ -482,19 +482,19 @@ public class POIReader implements ImportFileReader {
 
 		int counter = 0;
 		for ( int rowIndex = 1; rowIndex <= lSheet.getLastRowNum(); rowIndex++ ) {
-			XSSFRow thisRow = lSheet.getRow( rowIndex );
+			Row thisRow = lSheet.getRow( rowIndex );
 			if ( null == thisRow ) {
 				logger.warn( "skipping row " + rowIndex + " (doesn't exist?)" );
 				continue;
 			}
 
-			XSSFCell instanceSubjectNodeCell = thisRow.getCell( 1 );
+			Cell instanceSubjectNodeCell = thisRow.getCell( 1 );
 			if ( cellIsEmpty( instanceSubjectNodeCell ) ) {
 				logger.warn( "skipping row " + rowIndex + " (no instance name)" );
 				continue;
 			}
 
-			instanceSubjectNodeCell.setCellType( XSSFCell.CELL_TYPE_STRING );
+			instanceSubjectNodeCell.setCellType( Cell.CELL_TYPE_STRING );
 
 			String subjectName = instanceSubjectNodeCell.getStringCellValue();
 
@@ -503,9 +503,9 @@ public class POIReader implements ImportFileReader {
 			if ( sc.isRelationSheet() ) {
 				// relationship sheets need the object's name as well as the subject's
 
-				XSSFCell instanceObjectNodeCell = thisRow.getCell( 2 );
+				Cell instanceObjectNodeCell = thisRow.getCell( 2 );
 				if ( !cellIsEmpty( instanceObjectNodeCell ) ) {
-					instanceObjectNodeCell.setCellType( XSSFCell.CELL_TYPE_STRING );
+					instanceObjectNodeCell.setCellType( Cell.CELL_TYPE_STRING );
 					String objectName = instanceObjectNodeCell.getStringCellValue();
 
 					//createRelationship( subjectType, sc.getObjectType(), subjectName,
@@ -539,8 +539,8 @@ public class POIReader implements ImportFileReader {
 		private final String objectType;
 		private final String relationName;
 
-		public SheetConfig( XSSFSheet wk ) {
-			XSSFRow firstRow = wk.getRow( 0 );
+		public SheetConfig( Sheet wk ) {
+			Row firstRow = wk.getRow( 0 );
 
 			// determine if relationship or property sheet
 			String sheetType = firstRow.getCell( 0 ).getStringCellValue();
@@ -554,7 +554,7 @@ public class POIReader implements ImportFileReader {
 				objectType = firstRow.getCell( 2 ).getStringCellValue();
 				// if relationship, properties start at column 2
 				firstpropcol = 3;
-				XSSFRow secondRow = wk.getRow( 1 );
+				Row secondRow = wk.getRow( 1 );
 				relationName = secondRow.getCell( 0 ).getStringCellValue();
 			}
 			else {
@@ -573,7 +573,7 @@ public class POIReader implements ImportFileReader {
 				// So we check to make sure the header cell has content
 				// and stop processing headers when the first empty one
 				// is found.
-				XSSFCell cell = firstRow.getCell( i );
+				Cell cell = firstRow.getCell( i );
 				if ( cell == null ) {
 					break;
 				}
