@@ -33,6 +33,7 @@ public class POIReaderTest {
 	private static final File FAIL7 = new File( "src/test/resources/loaderfail7.xlsx" );
 	private static final File FAIL8 = new File( "src/test/resources/loaderfail8.xlsx" );
 	private static final File FAIL9 = new File( "src/test/resources/loaderfail9.xlsx" );
+	private static final File TEST11 = new File( "src/test/resources/test11.xlsx" );
 
 	public POIReaderTest() {
 	}
@@ -170,5 +171,15 @@ public class POIReaderTest {
 				throw e;
 			}
 		}
+	}
+
+	@Test
+	public void testLoadingSheet11() throws Exception {
+		POIReader rdr = new POIReader();
+		ImportData data = rdr.readOneFile( TEST11 );
+		assertEquals( 1, data.getSheet( "Humans" ).getData().size() );
+		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
+		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
+		assertEquals( "Yugo", data.getSheet( "Purchases" ).getData().get( 0 ).getObject() );
 	}
 }

@@ -58,6 +58,7 @@ public class POIReader implements ImportFileReader {
 	private static final String LOADER = "Loader";
 	private static final String RELATION = "Relation";
 	private static final String NODE = "Node";
+	private static final String COMMENTSTART = "#";
 
 	private static enum SheetType {
 
@@ -213,9 +214,9 @@ public class POIReader implements ImportFileReader {
 		Row header = lSheet.getRow( 0 );
 		Cell a1 = header.getCell( 0 );
 		Cell b1 = header.getCell( 1 );
-		String a1val = ( cellIsEmpty( a1 ) ? "" : a1.getStringCellValue() );
-		String b1val = ( cellIsEmpty( b1 ) ? "" : b1.getStringCellValue() );
-		boolean mustHaveType = !cellIsEmpty( b1 );
+		String a1val = getString( a1 );
+		String b1val = getString( b1 );
+		boolean mustHaveType = !isEmpty( b1 );
 
 		if ( !"Sheet Name".equals( a1val ) ) {
 			throw new ImportValidationException( ErrorType.MISSING_DATA, "Cell A1 must be \"Sheet Name\"" );
@@ -224,19 +225,29 @@ public class POIReader implements ImportFileReader {
 			throw new ImportValidationException( ErrorType.MISSING_DATA, "Cell B1 must be \"Type\"" );
 		}
 
-		for ( int rIndex = 1; rIndex <= lSheet.getLastRowNum(); rIndex++ ) {
+		int rIndex = nextRow( lSheet, 0 );
+		while ( -1 != rIndex ) {
 			Row row = lSheet.getRow( rIndex );
 			if ( row == null ) {
 				continue;
 			}
 
-			if ( row.getLastCellNum() > 2 ) {
-				throw new ImportValidationException( ErrorType.UNTYPED_DATA,
-						"Too much data is row " + rIndex );
+			Cell rowx = row.getCell( 2 );
+			if ( !( isEmpty( rowx ) || isComment( rowx ) ) ) {
+				throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+						"Too much data in row " + rIndex );
 			}
 
 			String sheetNameToLoad = getString( row.getCell( 0 ) );
 			String sheetTypeToLoad = getString( row.getCell( 1 ) );
+
+			if ( sheetNameToLoad.startsWith( COMMENTSTART ) ) {
+				continue;
+			}
+			if ( sheetTypeToLoad.startsWith( COMMENTSTART ) ) {
+				sheetTypeToLoad = "";
+			}
+
 			if ( sheetNameToLoad.isEmpty() || ( sheetTypeToLoad.isEmpty() && mustHaveType ) ) {
 				if ( sheetNameToLoad.isEmpty() ) {
 					throw new ImportValidationException( ErrorType.MISSING_DATA,
@@ -260,6 +271,8 @@ public class POIReader implements ImportFileReader {
 			else {
 				map.put( sheetNameToLoad, SheetType.UNSPECIFIED );
 			}
+
+			rIndex = nextRow( lSheet, rIndex );
 		}
 
 		return map;
@@ -275,7 +288,8 @@ public class POIReader implements ImportFileReader {
 		}
 
 		Row row0 = sheet.getRow( 0 );
-		Row row1 = sheet.getRow( 1 );
+		int next = nextRow( sheet, 0 );
+		Row row1 = sheet.getRow( next );
 		if ( null == row0 || null == row1 ) {
 			// make sure we have some "data" in this sheet
 			return SheetType.EMPTY;
@@ -286,7 +300,6 @@ public class POIReader implements ImportFileReader {
 			return SheetType.EMPTY;
 		}
 
-		// see what's in cell A1
 		String type = getString( row0.getCell( 0 ) );
 
 		switch ( type ) {
@@ -321,24 +334,34 @@ public class POIReader implements ImportFileReader {
 		ImportMetadata metas = data.getMetadata();
 
 		// read the data
-		for ( int i = 0; i <= metadataSheet.getLastRowNum(); i++ ) {
+		int i = nextRow( metadataSheet, -1 );
+		while ( -1 != i ) {
 			Row row = metadataSheet.getRow( i );
 			if ( row == null ) {
 				logger.warn( "skipping row: " + i + " (doesn't exist?)" );
+				i = nextRow( metadataSheet, i );
 				continue;
 			}
 
-			Cell cell0 = row.getCell( 1 );
-			Cell cell2 = row.getCell( 3 );
-			if ( cellIsEmpty( cell0 ) || cellIsEmpty( cell2 ) ) {
+			Cell cell1 = row.getCell( 1 );
+			Cell cell2 = row.getCell( 2 );
+			Cell cell3 = row.getCell( 3 );
+
+			if ( isComment( cell1 ) || isComment( cell3 ) || isComment( cell2 ) ) {
+				logger.warn( "skipping row: " + i + " (commented)" );
+				i = nextRow( metadataSheet, i );
+				continue;
+			}
+
+			if ( isEmpty( cell1 ) || isEmpty( cell3 ) ) {
 				logger.warn( "skipping row: " + i + " (empty cell)" );
+				i = nextRow( metadataSheet, i );
 				continue;
 			}
 
-			String propName = cell0.getStringCellValue();
-			String propValue = cell2.getStringCellValue();
-
-			String propertyMiddleColumn = getString( row.getCell( 2 ) );
+			String propName = cell1.getStringCellValue();
+			String propValue = cell3.getStringCellValue();
+			String propertyMiddleColumn = getString( cell2 );
 
 			if ( "@schema-namespace".equals( propName ) ) {
 				if ( null == schemanamespace ) {
@@ -375,6 +398,8 @@ public class POIReader implements ImportFileReader {
 					triples.add( new String[]{ propName, propertyMiddleColumn, propValue } );
 				}
 			}
+
+			i = nextRow( metadataSheet, i );
 		}
 
 		// now set the data
@@ -421,7 +446,12 @@ public class POIReader implements ImportFileReader {
 		for ( Map.Entry<String, Integer> prop : properties.entrySet() ) {
 			String propName = prop.getKey();
 			Cell cellValue = row.getCell( prop.getValue() );
-			if ( !cellIsEmpty( cellValue ) ) {
+
+			if ( !isEmpty( cellValue ) ) {
+				if ( isComment( cellValue ) ) {
+					continue;
+				}
+
 				if ( cellValue.getCellType() != Cell.CELL_TYPE_NUMERIC ) {
 					cellValue.setCellType( Cell.CELL_TYPE_STRING );
 					propHash.put( propName,
@@ -439,7 +469,7 @@ public class POIReader implements ImportFileReader {
 		return propHash;
 	}
 
-	private static boolean cellIsEmpty( Cell cell ) {
+	private static boolean isEmpty( Cell cell ) {
 		return ( null == cell );
 	}
 
@@ -450,7 +480,42 @@ public class POIReader implements ImportFileReader {
 	 * @return
 	 */
 	private static String getString( Cell cell ) {
-		return ( cellIsEmpty( cell ) ? "" : cell.getStringCellValue() );
+		return ( isEmpty( cell ) ? "" : cell.getStringCellValue() );
+	}
+
+	private static boolean isComment( Cell cell ) {
+		if ( isEmpty( cell ) ) {
+			return false;
+		}
+
+		if ( Cell.CELL_TYPE_NUMERIC == cell.getCellType() ) {
+			return false;
+		}
+
+		return getString( cell ).startsWith( COMMENTSTART );
+	}
+
+	/**
+	 * Gets the next non-comment row from the worksheet, or -1 if there isn't one.
+	 * This function is useful in the case that a sheet contains a comment
+	 * starting in column 1
+	 *
+	 * @param sheet the sheet to scan
+	 * @param lastrow the last row we found
+	 * @return the next row number
+	 */
+	private static int nextRow( Sheet sheet, int currentRow ) {
+		Row row = null;
+		if ( currentRow < 0 ) {
+			currentRow = -1; // start with row 0 in the following loop
+		}
+
+		while ( null != ( row = sheet.getRow( ++currentRow ) ) ) {
+			if ( !isComment( row.getCell( 0 ) ) ) {
+				return currentRow;
+			}
+		}
+		return -1;
 	}
 
 	private void loadSheet( String sheetToLoad, Workbook workbook, ImportData id ) {
@@ -481,7 +546,8 @@ public class POIReader implements ImportFileReader {
 		}
 
 		int counter = 0;
-		for ( int rowIndex = 1; rowIndex <= lSheet.getLastRowNum(); rowIndex++ ) {
+		int rowIndex = nextRow( lSheet, 0 );
+		while ( -1 != rowIndex ) {
 			Row thisRow = lSheet.getRow( rowIndex );
 			if ( null == thisRow ) {
 				logger.warn( "skipping row " + rowIndex + " (doesn't exist?)" );
@@ -489,7 +555,7 @@ public class POIReader implements ImportFileReader {
 			}
 
 			Cell instanceSubjectNodeCell = thisRow.getCell( 1 );
-			if ( cellIsEmpty( instanceSubjectNodeCell ) ) {
+			if ( isEmpty( instanceSubjectNodeCell ) ) {
 				logger.warn( "skipping row " + rowIndex + " (no instance name)" );
 				continue;
 			}
@@ -504,7 +570,7 @@ public class POIReader implements ImportFileReader {
 				// relationship sheets need the object's name as well as the subject's
 
 				Cell instanceObjectNodeCell = thisRow.getCell( 2 );
-				if ( !cellIsEmpty( instanceObjectNodeCell ) ) {
+				if ( !isEmpty( instanceObjectNodeCell ) ) {
 					instanceObjectNodeCell.setCellType( Cell.CELL_TYPE_STRING );
 					String objectName = instanceObjectNodeCell.getStringCellValue();
 
@@ -519,6 +585,7 @@ public class POIReader implements ImportFileReader {
 			}
 
 			counter++;
+			rowIndex = nextRow( lSheet, rowIndex );
 		}
 
 		logger.debug( "Done processing: " + sheetToLoad );
