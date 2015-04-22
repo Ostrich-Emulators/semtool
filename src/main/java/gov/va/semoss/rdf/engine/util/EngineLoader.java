@@ -869,6 +869,10 @@ public class EngineLoader {
 	}
 
 	private static boolean isUri( String raw, Map<String, String> namespaces ) {
+		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
+			raw = raw.substring( 1, raw.length() - 1 );
+		}
+
 		Matcher m = URISTARTPATTERN.matcher( raw );
 		if ( m.matches() ) {
 			return true;
@@ -889,6 +893,10 @@ public class EngineLoader {
 	protected URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
 		//resolve namespace
 		URI uri = null;
+
+		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
+			raw = raw.substring( 1, raw.length() - 1 );
+		}
 
 		// if raw starts with <something>://, then assume it's just a URI
 		Matcher m = URISTARTPATTERN.matcher( raw );

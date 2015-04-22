@@ -5,11 +5,10 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
-import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -34,8 +33,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,7 +45,6 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -99,6 +97,9 @@ public class EngineLoaderTest {
 	private static final URI OWLSTART = new URIImpl( "http://owl.junk.com/testfiles" );
 	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
 	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
+
+	private static final File TEST10 = new File( "src/test/resources/test10.xlsx" );
+	private static final File TEST10_EXP = new File( "src/test/resources/test10.nt" );
 
 	private InMemorySesameEngine engine;
 	private File dbfile;
@@ -337,7 +338,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
-		el.setDefaultBaseUri( BASEURI, false );		
+		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
 		el.loadToEngine( Arrays.asList( CUSTOM2 ), engine, false, errors );
 		el.release();
@@ -494,6 +495,28 @@ public class EngineLoaderTest {
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
+	@Test
+	public void testLoadingSheet10() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		el.loadToEngine( Arrays.asList( TEST10 ), engine, true, null );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test10.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TEST10_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
+	}
+
 	private Model getExpectedGraph( File rdf ) {
 		SailRepository repo = new SailRepository( new MemoryStore() );
 		RepositoryConnection expectedrc = null;
@@ -587,6 +610,5 @@ public class EngineLoaderTest {
 		assertEquals( label + " predicates mismatch", exp.predicates(), tst.predicates() );
 		assertEquals( label + " subjects mismatch", exp.subjects(), tst.subjects() );
 		assertEquals( label + " subjects mismatch", exp.objects(), tst.objects() );
-
 	}
 }
