@@ -404,6 +404,7 @@
 								<configuration>
 									<rules>
 										<!--  implmentation is needed only for Maven 2  -->
+										<!--
 										<rule implementation="org.jacoco.maven.RuleConfiguration">
 											<element>BUNDLE</element>
 											<limits>
@@ -412,7 +413,6 @@
 													<value>COVEREDRATIO</value>
 													<minimum>0.95</minimum>			
 												</limit>
-												<!--  implmentation is needed only for Maven 2  -->
 												<limit implementation="org.jacoco.report.check.Limit">
 													<counter>COMPLEXITY</counter>
 													<value>COVEREDRATIO</value>
@@ -420,7 +420,8 @@
 												</limit>
 											</limits>
 										</rule>
-									</rules>
+										-->
+									</rules>									
 								</configuration>
 							</execution>
 						</executions>

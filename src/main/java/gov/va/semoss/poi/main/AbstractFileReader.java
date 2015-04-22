@@ -37,9 +37,6 @@ public abstract class AbstractFileReader {
 			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
 	private static final Logger logger = Logger.getLogger( AbstractFileReader.class );
 
-	public AbstractFileReader() {
-	}
-
 	/**
 	 * Method to add the common namespaces into the namespace hash of our
 	 * RepositoryConnection. This function starts and commits a transaction.
@@ -143,7 +140,7 @@ public abstract class AbstractFileReader {
 					return vf.createLiteral( val, type );
 				}
 				catch ( Exception e ) {
-					logger.warn( "probably misinterpreting as string(unknown type URI?) :"
+					logger.warn( "probably misinterpreting as string (unknown type URI?) :"
 							+ rawval, e );
 				}
 			}
