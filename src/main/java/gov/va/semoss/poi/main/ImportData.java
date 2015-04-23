@@ -9,7 +9,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.openrdf.model.Statement;
 
 /**
  *
@@ -43,7 +42,7 @@ public final class ImportData {
 	}
 
 	public ImportData add( Collection<LoadingSheetData> newsheets,
-			Collection<Statement> stmts ) {
+			Collection<String[]> stmts ) {
 
 		sheets.addAll( newsheets );
 		metadata.addAll( stmts );
@@ -89,7 +88,7 @@ public final class ImportData {
 		return new ArrayList<>( sheets );
 	}
 
-	public Collection<Statement> getStatements() {
+	public Collection<String[]> getStatements() {
 		return metadata.getStatements();
 	}
 

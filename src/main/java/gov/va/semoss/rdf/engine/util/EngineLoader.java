@@ -10,6 +10,9 @@ import com.bigdata.rdf.sail.remote.BigdataSailFactory;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
+import gov.va.semoss.model.vocabulary.SEMOSS;
+import gov.va.semoss.model.vocabulary.VAC;
+import gov.va.semoss.model.vocabulary.VAS;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +66,7 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -153,18 +157,22 @@ public class EngineLoader {
 		BigdataSailRepository repo;
 		Properties props = new Properties();
 		props.setProperty( BigdataSail.Options.BUFFER_CAPACITY, "100000" );
-		if ( !stageInMemory ) {
+		props.setProperty( BigdataSail.Options.INITIAL_EXTENT, "10485760" );
+		if ( stageInMemory ) {
+			repo = BigdataSailFactory.createRepository( props,
+					(BigdataSailFactory.Option) null );
+		}
+		else {
 			stagingdir = File.createTempFile( "semoss-staging-", "" );
 			stagingdir.delete(); // get rid of the file, and make it a directory
 			stagingdir.mkdirs();
 			log.debug( "staging load in: " + stagingdir );
 
-			props.setProperty( BigdataSail.Options.FILE,
-					new File( stagingdir, "stage.jnl" ).getAbsolutePath() );
+			String jnl = new File( stagingdir, "stage.jnl" ).getAbsolutePath();
+			repo = BigdataSailFactory.createRepository( props, jnl,
+					(BigdataSailFactory.Option) null );
 		}
 
-		repo = BigdataSailFactory.createRepository( props,
-				(BigdataSailFactory.Option) null );
 		repo.initialize();
 		BigdataSailRepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
@@ -173,22 +181,17 @@ public class EngineLoader {
 	}
 
 	public void cacheUris( CacheType type, Map<String, URI> newtocache ) {
-
-		// for ( Map.Entry<String, URI> en : newtocache.entrySet() ) {
-		//	log.debug( type + " : " + en.getKey() + " -> " + en.getValue() );
-		// }
-		switch ( type ) {
-			case CONCEPTCLASS:
-				schemaNodes.putAll( newtocache );
-				break;
-			case RELATIONCLASS:
-				relationClassCache.putAll( newtocache );
-				break;
-			case RELATION:
-				relationCache.putAll( newtocache );
-				break;
-			default:
-				throw new IllegalArgumentException( "unhandled cache type: " + type );
+		if ( CacheType.CONCEPTCLASS == type ) {
+			schemaNodes.putAll( newtocache );
+		}
+		else if ( CacheType.RELATIONCLASS == type ) {
+			relationClassCache.putAll( newtocache );
+		}
+		else if ( CacheType.RELATION == type ) {
+			relationCache.putAll( newtocache );
+		}
+		else {
+			throw new IllegalArgumentException( "unhandled cache type: " + type );
 		}
 	}
 
@@ -224,36 +227,32 @@ public class EngineLoader {
 		Set<Statement> mmstmts = new HashSet<>();
 
 		for ( File fileToLoad : toload ) {
-			try {
-				ImportFileReader reader = getReader( fileToLoad );
-				if ( null == reader ) {
-					String ext = FilenameUtils.getExtension( fileToLoad.getName() ).toLowerCase();
-					switch ( ext ) {
-						case "ttl":
-							add( RDFFormat.TURTLE, fileToLoad );
-							break;
-						case "n3":
-							add( RDFFormat.N3, fileToLoad );
-							break;
-						case "nt":
-							add( RDFFormat.NTRIPLES, fileToLoad );
-							break;
-						case "rdf":
-							add( RDFFormat.RDFXML, fileToLoad );
-							break;
-						default:
-							log.error( "unhandled file type: " + fileToLoad );
-					}
-				}
-				else {
-					ImportData data = reader.readOneFile( fileToLoad );
-					ImportMetadata im = data.getMetadata();
-					im.setAutocreateMetamodel( createmetamodel );
-					loadIntermediateData( data, engine, conformanceErrors );
+			ImportFileReader reader = getReader( fileToLoad );
+			if ( null == reader ) {
+				String ext = FilenameUtils.getExtension( fileToLoad.getName() ).toLowerCase();
+				switch ( ext ) {
+					case "ttl":
+						add( RDFFormat.TURTLE, fileToLoad );
+						break;
+					case "n3":
+						add( RDFFormat.N3, fileToLoad );
+						break;
+					case "nt":
+						add( RDFFormat.NTRIPLES, fileToLoad );
+						break;
+					case "rdf":
+						add( RDFFormat.RDFXML, fileToLoad );
+						break;
+					default:
+						throw new ImportValidationException( ErrorType.INVALID_DATA,
+								"unhandled file type: " + fileToLoad );
 				}
 			}
-			catch ( IOException | RepositoryException e ) {
-				log.error( e, e );
+			else {
+				ImportData data = reader.readOneFile( fileToLoad );
+				ImportMetadata im = data.getMetadata();
+				im.setAutocreateMetamodel( createmetamodel );
+				loadIntermediateData( data, engine, conformanceErrors );
 			}
 
 			mmstmts.addAll( moveLoadingRcToEngine( engine, createmetamodel ) );
@@ -291,16 +290,21 @@ public class EngineLoader {
 			im.setDataBuilder( im.getBase().stringValue() );
 		}
 
+		// we want to search all namespaces, but use the metadata's first
+		Map<String, String> namespaces = engine.getNamespaces();
+		namespaces.putAll( data.getMetadata().getNamespaces() );
+
 		try {
-			myrc.add( data.getStatements() );
-
-			// we want to search all namespaces, but use the metadata's first
-			Map<String, String> namespaces = engine.getNamespaces();
-			namespaces.putAll( data.getMetadata().getNamespaces() );
-
-			for ( Map.Entry<URI, String> en : data.getMetadata().getExtras().entrySet() ) {
-				myrc.add( data.getMetadata().getBase(), en.getKey(),
-						getRDFStringValue( en.getValue(), namespaces ) );
+			List<Statement> stmts = new ArrayList<>();
+			for ( String[] stmt : data.getStatements() ) {
+				Statement st = new StatementImpl(
+						EngineLoader.getUriFromRawString( stmt[0], namespaces ),
+						EngineLoader.getUriFromRawString( stmt[1], namespaces ),
+						EngineLoader.getRDFStringValue( stmt[2], namespaces, vf ) );
+				stmts.add( st );
+			}
+			if ( !stmts.isEmpty() ) {
+				myrc.add( stmts );
 			}
 
 			for ( LoadingSheetData n : data.getNodes() ) {
@@ -367,8 +371,7 @@ public class EngineLoader {
 		return owls;
 	}
 
-	private void add( RDFFormat format, File f )
-			throws IOException, RepositoryException {
+	private void add( RDFFormat format, File f ) throws IOException, RepositoryException {
 		try {
 			log.debug( "adding data from " + format + " file: " + f );
 			myrc.add( f, f.toURI().toString(), format );
@@ -420,8 +423,8 @@ public class EngineLoader {
 	 *
 	 * @param data the data to check
 	 * @param eng the engine to check against
-	 * @param loadcaches call {@link EngineUtil#preloadCaches(gov.va.semoss.rdf.engine.api.IEngine,
-	 * gov.va.semoss.rdf.engine.util.EngineLoader) } first
+	 * @param loadcaches call
+	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} first
 	 * @return a list of all {@link LoadingNodeAndPropertyValues} that fail the
 	 * check
 	 */
@@ -709,7 +712,7 @@ public class EngineLoader {
 			// we have something with a colon in it, so we need to figure out if it's
 			// a namespace-prefixed string, or just a string with a colon in it
 
-			Value val = getRDFStringValue( rawlabel, namespaces );
+			Value val = getRDFStringValue( rawlabel, namespaces, myrc.getValueFactory() );
 			// check if we have a prefixed URI
 			URI u = getUriFromRawString( rawlabel, namespaces );
 			savelabel = ( savelabel && null == u );
@@ -888,12 +891,14 @@ public class EngineLoader {
 		return false;
 	}
 
-	protected URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
+	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
 		//resolve namespace
+		ValueFactory vf = new ValueFactoryImpl();
 		URI uri = null;
 
 		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
-			raw = raw.substring( 1, raw.length() - 1 );
+			uri = vf.createURI( raw.substring( 1, raw.length() - 1 ) );
+			return uri;
 		}
 
 		// if raw starts with <something>://, then assume it's just a URI
@@ -917,14 +922,17 @@ public class EngineLoader {
 				log.error( "cannot resolve namespace for: " + raw + " (too many colons)" );
 			}
 		}
-		else {
-			uri = vf.createURI( raw );
-		}
+		//else {
+		// since this will will always throw an error (it can't be an absolute URI)
+		// we'll just return null, as usual
+		//uri = vf.createURI( raw );
+		//}
 
 		return uri;
 	}
 
-	protected Value getRDFStringValue( String rawval, Map<String, String> namespaces ) {
+	public static Value getRDFStringValue( String rawval, Map<String, String> namespaces,
+			ValueFactory vf ) {
 		// if rawval looks like a URI, assume it is
 		Matcher urimatcher = URISTARTPATTERN.matcher( rawval );
 		if ( urimatcher.matches() ) {
@@ -950,11 +958,18 @@ public class EngineLoader {
 				String typestr = m.group( 2 );
 				try {
 					URI type = getUriFromRawString( typestr, namespaces );
-					return vf.createLiteral( val, type );
+					if ( null == type ) {
+						// will get caught immediately
+						throw new NullPointerException( "unknown type URI" );
+					}
+					else {
+						return vf.createLiteral( val, type );
+					}
 				}
 				catch ( Exception e ) {
-					log.warn( "probably misinterpreting as string(unknown type URI?) :"
+					log.warn( "probably misinterpreting as string (unknown type URI?) :"
 							+ rawval, e );
+					val = rawval;
 				}
 			}
 		}
@@ -1047,7 +1062,7 @@ public class EngineLoader {
 	 * "Cleans" a value for BigData
 	 *
 	 * @param v the value that needs cleaning
-	 * @param vf
+	 * @param vf the value factory to make the new Value from
 	 * @return a value that won't make BigData bomb
 	 */
 	public static Value cleanValue( Value v, ValueFactory vf ) {
@@ -1103,6 +1118,10 @@ public class EngineLoader {
 		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
 		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
 		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put( VAC.PREFIX, VAC.NAMESPACE );
+		namespaces.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
+
 		conn.getMetadata().setNamespaces( namespaces );
 	}
 

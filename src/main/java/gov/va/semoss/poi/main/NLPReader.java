@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryConnection;
 
-public class NLPReader extends AbstractFileReader {
+public class NLPReader { //extends AbstractFileReader {
 
   private static final Logger log = Logger.getLogger( NLPReader.class );
 

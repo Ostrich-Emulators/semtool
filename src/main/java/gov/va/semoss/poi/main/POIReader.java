@@ -19,10 +19,9 @@
  */
 package gov.va.semoss.poi.main;
 
-import static gov.va.semoss.poi.main.AbstractFileReader.getRDFStringValue;
-import static gov.va.semoss.poi.main.AbstractFileReader.getUriFromRawString;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.rdf.engine.util.EngineLoader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -42,7 +41,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -110,7 +108,6 @@ public class POIReader implements ImportFileReader {
 		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
 
 		ImportData data = new ImportData();
-		AbstractFileReader.initNamespaces( data );
 
 		for ( String name : categorizeSheets( workbook ).getNN( SheetType.METADATA ) ) {
 			Sheet metadataSheet = workbook.getSheet( name );
@@ -131,7 +128,7 @@ public class POIReader implements ImportFileReader {
 		MultiMap<SheetType, String> typeToSheetNameLkp = categorizeSheets( workbook );
 
 		ImportData data = new ImportData();
-		AbstractFileReader.initNamespaces( data );
+		EngineLoader.initNamespaces( data );
 
 		// we have sheets without a specified type, so open like a regular spreadsheet
 		if ( !typeToSheetNameLkp.getNN( SheetType.UNKNOWN ).isEmpty() ) {
@@ -320,18 +317,18 @@ public class POIReader implements ImportFileReader {
 			return;
 		}
 
-		data.getMetadata().setLegacyMode( false );
+		ImportMetadata metas = data.getMetadata();
+		metas.setLegacyMode( false );
 		// we want to load the base uri first, data-namespace, schema-namespace,
 		// prefixes, and finally triples. so read everything first, and load later
 		String datanamespace = null;
 		String schemanamespace = null;
 		String baseuri = null;
-		Map<String, String> namespaces = new HashMap<>();
+		Map<String, String> namespaces = metas.getNamespaces();
 		List<String[]> triples = new ArrayList<>();
 
 		logger.debug( ( metadataSheet.getLastRowNum() + 1 )
 				+ " metadata rows to interpret" );
-		ImportMetadata metas = data.getMetadata();
 
 		// read the data
 		int i = nextRow( metadataSheet, -1 );
@@ -391,7 +388,7 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 			else if ( "@prefix".equals( propName ) ) {
-				namespaces.put( propertyMiddleColumn, propValue );
+				namespaces.put( propertyMiddleColumn.replaceAll( ":$", ""), propValue );
 			}
 			else {
 				if ( !propertyMiddleColumn.isEmpty() ) {
@@ -422,15 +419,14 @@ public class POIReader implements ImportFileReader {
 			metas.setNamespace( en.getKey(), en.getValue() );
 		}
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = new ValueFactoryImpl();		
+		
 		for ( String[] triple : triples ) {
 			logger.debug( "adding custom triple: "
 					+ triple[0] + " => " + triple[1] + " => " + triple[2] );
 
 			try {
-				metas.add( new StatementImpl( getUriFromRawString( triple[0], data ),
-						getUriFromRawString( triple[1], data ),
-						getRDFStringValue( triple[2], data, vf ) ) );
+				metas.add( triple[0], triple[1], triple[2] );
 			}
 			catch ( Exception e ) {
 				throw new ImportValidationException( ErrorType.INVALID_DATA, e );
@@ -454,8 +450,9 @@ public class POIReader implements ImportFileReader {
 
 				if ( cellValue.getCellType() != Cell.CELL_TYPE_NUMERIC ) {
 					cellValue.setCellType( Cell.CELL_TYPE_STRING );
-					propHash.put( propName,
-							getRDFStringValue( cellValue.getStringCellValue(), id, vf ) );
+					propHash.put( propName,							
+							EngineLoader.getRDFStringValue( cellValue.getStringCellValue(),
+									id.getMetadata().getNamespaces(), vf ) );
 				}
 				else if ( DateUtil.isCellDateFormatted( cellValue ) ) {
 					propHash.put( propName, vf.createLiteral( cellValue.getDateCellValue() ) );

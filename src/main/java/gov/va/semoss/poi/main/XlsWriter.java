@@ -45,7 +45,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 
 /**
@@ -345,13 +344,8 @@ public class XlsWriter {
 			mddata.add( new String[]{ "@prefix", en.getKey(), en.getValue() } );
 		}
 
-		for ( Map.Entry<URI, String> en : data.getExtras().entrySet() ) {
-			mddata.add( new String[]{ en.getKey().toString(), null, en.getValue() } );
-		}
-
-		for ( Statement stmt : data.getStatements() ) {
-			mddata.add( new String[]{ "@triple", stmt.getSubject().stringValue(),
-				stmt.getPredicate().stringValue(), stmt.getObject().stringValue() } );
+		for ( String [] stmt : data.getStatements() ) {
+			mddata.add( new String[]{ "@triple", stmt[0], stmt[1], stmt[2] } );
 		}
 
 		createWorkbook();

@@ -7,7 +7,6 @@ package gov.va.semoss.poi.main;
 
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.util.UriBuilder;
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -31,7 +29,7 @@ public final class ImportMetadata {
 	private static final Logger log = Logger.getLogger( ImportMetadata.class );
 	private final Map<String, String> namespaces = new HashMap<>();
 	private final Map<URI, String> extras = new HashMap<>();
-	private final List<Statement> statements = new ArrayList<>();
+	private final List<String[]> statements = new ArrayList<>();
 	private URI base;
 	private UriBuilder databuilder;
 	private UriBuilder schemabuilder;
@@ -75,7 +73,6 @@ public final class ImportMetadata {
 
 	public void setAll( ImportMetadata im ) {
 		setNamespaces( im.getNamespaces() );
-		setExtras( im.getExtras() );
 		setStatements( im.getStatements() );
 		base = im.getBase();
 		databuilder = im.getDataBuilder();
@@ -99,14 +96,6 @@ public final class ImportMetadata {
 
 	public void setLegacyMode( boolean legacy ) {
 		this.legacy = legacy;
-	}
-
-	public Map<URI, String> getExtras() {
-		return extras;
-	}
-
-	public void addExtra( URI sub, String val ) {
-		extras.put( sub, val );
 	}
 
 	public ImportMetadata setNamespaces( Map<String, String> ns ) {
@@ -163,21 +152,58 @@ public final class ImportMetadata {
 		return ( null == schemabuilder ? null : schemabuilder.copy() );
 	}
 
-	public Collection<Statement> getStatements() {
+	/**
+	 *
+	 * @return list of String[3]s
+	 */
+	public Collection<String[]> getStatements() {
 		return statements;
 	}
 
-	public ImportMetadata setStatements( Collection<Statement> stmts ) {
+	public ImportMetadata setStatements( Collection<String[]> stmts ) {
 		statements.clear();
 		return addAll( stmts );
 	}
 
-	public void add( Statement s ) {
-		statements.add( s );
+	/**
+	 * Adds a "statement" to our list
+	 *
+	 * @param s
+	 * @param p
+	 * @param o
+	 * @throws java.lang.IllegalArgumentException if either of the first two
+	 * values are empty
+	 * @throws java.lang.NullPointerException is any of the values is null
+	 */
+	public void add( String s, String p, String o ) {
+		if ( null == s || null == p || null == o ) {
+			throw new NullPointerException( "argument cannot be null" );
+		}
+
+		if ( s.isEmpty() || p.isEmpty() ) {
+			throw new IllegalArgumentException( "argument cannot be empty" );
+		}
+
+		statements.add( new String[]{ s, p, o } );
 	}
 
-	public ImportMetadata addAll( Collection<Statement> stmts ) {
-		statements.addAll( stmts );
+	/**
+	 * Add all the String[3]s to our list of statements
+	 *
+	 * @param stmts
+	 * @return this
+	 * @throws IllegalArgumentException if any of the String[3]s isn't the right
+	 * size, or has null values
+	 */
+	public ImportMetadata addAll( Collection<String[]> stmts ) {
+		for ( String[] stm : stmts ) {
+			if ( 3 == stm.length ) {
+				add( stm[0], stm[1], stm[2] );
+			}
+			else {
+				throw new IllegalArgumentException( "statement array size != 3" );
+			}
+		}
 		return this;
 	}
 }
