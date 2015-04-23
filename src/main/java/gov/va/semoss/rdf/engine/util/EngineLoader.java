@@ -106,7 +106,7 @@ public class EngineLoader {
 
 	public static enum CacheType {
 
-		CONCEPTCLASS, CONCEPT, RELATIONCLASS, RELATION
+		CONCEPTCLASS, RELATIONCLASS, RELATION
 	};
 
 	public EngineLoader( boolean inmem ) {
@@ -140,6 +140,7 @@ public class EngineLoader {
 	 */
 	public void setDefaultBaseUri( URI base, boolean overrideFile ) {
 		defaultBaseUri = base;
+		forceBaseUri = overrideFile;
 	}
 
 	public void setReader( String extension, ImportFileReader rdr ) {
@@ -248,26 +249,6 @@ public class EngineLoader {
 					ImportData data = reader.readOneFile( fileToLoad );
 					ImportMetadata im = data.getMetadata();
 					im.setAutocreateMetamodel( createmetamodel );
-
-					// fill in anything not already set. In legacy mode, nothing is set,
-					// but the metadata tab might not set these variables, either
-					if ( null == im.getBase() ) {
-						im.setBase( defaultBaseUri );
-					}
-
-					if ( null == im.getBase() ) {
-						throw new ImportValidationException( ErrorType.MISSING_DATA,
-								"No Base URI specified in either the EngineLoader or the file" );
-					}
-
-					if ( null == im.getSchemaBuilder() ) {
-						im.setSchemaBuilder( engine.getSchemaBuilder().toString() );
-					}
-
-					if ( null == im.getDataBuilder() ) {
-						im.setDataBuilder( im.getBase().stringValue() );
-					}
-
 					loadIntermediateData( data, engine, conformanceErrors );
 				}
 			}
@@ -282,14 +263,33 @@ public class EngineLoader {
 	}
 
 	public void loadToEngine( ImportData data, IEngine engine,
-			ImportData conformanceErrors ) throws RepositoryException, IOException {
-		preloadCaches( engine );
+			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
 		loadIntermediateData( data, engine, conformanceErrors );
 		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
 	}
 
 	private void loadIntermediateData( ImportData data, IEngine engine,
-			ImportData conformanceErrors ) {
+			ImportData conformanceErrors ) throws ImportValidationException {
+
+		ImportMetadata im = data.getMetadata();
+		// fill in anything not already set. In legacy mode, nothing is set,
+		// but the metadata tab might not set these variables, either
+		if ( null == im.getBase() || forceBaseUri ) {
+			im.setBase( defaultBaseUri );
+		}
+
+		if ( null == im.getBase() ) {
+			throw new ImportValidationException( ErrorType.MISSING_DATA,
+					"No Base URI specified in either the EngineLoader or the file" );
+		}
+
+		if ( null == im.getSchemaBuilder() ) {
+			im.setSchemaBuilder( engine.getSchemaBuilder().toString() );
+		}
+
+		if ( null == im.getDataBuilder() ) {
+			im.setDataBuilder( im.getBase().stringValue() );
+		}
 
 		try {
 			myrc.add( data.getStatements() );
@@ -395,6 +395,8 @@ public class EngineLoader {
 	}
 
 	public void release() {
+		clear();
+
 		try {
 			myrc.close();
 		}

@@ -7,8 +7,13 @@ package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportMetadata;
+import gov.va.semoss.poi.main.ImportValidationException;
+import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
+import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -27,14 +32,19 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,6 +53,7 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
@@ -515,6 +526,323 @@ public class EngineLoaderTest {
 
 		compareData( engine.getRawConnection(), getExpectedGraph( TEST10_EXP ),
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
+	}
+
+	@Test
+	public void testSetDefaultBaseUriOverride() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), true );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+		id.getMetadata().setBase( new URIImpl( "http://base.foo.bar" ) );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		el.loadToEngine( id, engine, errs );
+
+		OneVarListQueryAdapter<URI> q
+				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		q.bind( "db", engine.getBaseUri() );
+		q.bind( "subset", MetadataConstants.VOID_SUBSET );
+		List<URI> uris = engine.query( q );
+		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
+	}
+
+	@Test
+	public void testSetDefaultBaseUri() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+		id.getMetadata().setBase( new URIImpl( "http://base.foo.bar" ) );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		el.loadToEngine( id, engine, errs );
+
+		OneVarListQueryAdapter<URI> q
+				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		q.bind( "db", engine.getBaseUri() );
+		q.bind( "subset", MetadataConstants.VOID_SUBSET );
+		List<URI> uris = engine.query( q );
+		assertEquals( "http://base.foo.bar", uris.get( 0 ).stringValue() );
+	}
+
+	@Test
+	public void testSetDefaultBaseUriDefault() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		el.loadToEngine( id, engine, errs );
+
+		OneVarListQueryAdapter<URI> q
+				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		q.bind( "db", engine.getBaseUri() );
+		q.bind( "subset", MetadataConstants.VOID_SUBSET );
+		List<URI> uris = engine.query( q );
+		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
+	}
+
+	@Test( expected = ImportValidationException.class )
+	public void testSetDefaultBaseUriNoSet() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		//el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		try {
+			el.loadToEngine( id, engine, errs );
+		}
+		catch ( ImportValidationException e ) {
+			if ( ErrorType.MISSING_DATA == e.error ) {
+				throw e;
+			}
+		}
+
+	}
+
+	@Test
+	public void testOnDiskCtor() {
+		assertNotNull( new EngineLoader( false ) );
+	}
+
+	@Test
+	public void testGetReader() {
+		EngineLoader el = new EngineLoader();
+		POIReader rdr = new POIReader();
+		el.setReader( "xekd", rdr );
+		assertEquals( rdr, el.getReader( new File( "test.xekd" ) ) );
+	}
+
+	// @Test
+	public void testLoadToEngine_4args() throws Exception {
+		System.out.println( "loadToEngine" );
+		Collection<File> toload = null;
+		IEngine engine = null;
+		boolean createmetamodel = false;
+		ImportData conformanceErrors = null;
+		EngineLoader instance = new EngineLoader();
+		Collection<Statement> expResult = null;
+		Collection<Statement> result = instance.loadToEngine( toload, engine, createmetamodel, conformanceErrors );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testLoadToEngine_3args() throws Exception {
+		System.out.println( "loadToEngine" );
+		ImportData data = null;
+		IEngine engine = null;
+		ImportData conformanceErrors = null;
+		EngineLoader instance = new EngineLoader();
+		instance.loadToEngine( data, engine, conformanceErrors );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testSeparateConformanceErrors() {
+		System.out.println( "separateConformanceErrors" );
+		ImportData data = null;
+		ImportData errors = null;
+		IEngine engine = null;
+		EngineLoader instance = new EngineLoader();
+		instance.separateConformanceErrors( data, errors, engine );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testGetOwlData() {
+		System.out.println( "getOwlData" );
+		EngineLoader instance = new EngineLoader();
+		Collection<Statement> expResult = null;
+		Collection<Statement> result = instance.getOwlData();
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	@Test
+	public void testClear() {
+		String type = "test";
+		String label = "label";
+		EngineLoader instance = new EngineLoader();
+		Map<String, URI> types = new HashMap<>();
+		types.put( label, BASEURI );
+		instance.cacheConceptInstances( types, type );
+		instance.clear();
+		assertFalse( instance.instanceExists( type, label ) );
+	}
+
+	// @Test
+	public void testRelease() {
+		EngineLoader instance = new EngineLoader();
+		instance.release();
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testCheckConformance() {
+		System.out.println( "checkConformance" );
+		LoadingSheetData data = null;
+		IEngine eng = null;
+		boolean loadcaches = false;
+		EngineLoader instance = new EngineLoader();
+		List<LoadingSheetData.LoadingNodeAndPropertyValues> expResult = null;
+		List<LoadingSheetData.LoadingNodeAndPropertyValues> result = instance.checkConformance( data, eng, loadcaches );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	@Test
+	public void testInstanceExists() {
+		String type = "test";
+		String label = "label";
+		EngineLoader instance = new EngineLoader();
+		Map<String, URI> types = new HashMap<>();
+		types.put( label, BASEURI );
+		instance.cacheConceptInstances( types, type );
+		assertTrue( instance.instanceExists( type, label ) );
+		assertFalse( instance.instanceExists( type, "notthere" ) );
+	}
+
+	// @Test
+	public void testCheckModelConformance() {
+		System.out.println( "checkModelConformance" );
+		LoadingSheetData data = null;
+		IEngine eng = null;
+		boolean loadcaches = false;
+		EngineLoader instance = new EngineLoader();
+		LoadingSheetData expResult = null;
+		LoadingSheetData result = instance.checkModelConformance( data, eng, loadcaches );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testPreloadCaches() {
+		System.out.println( "preloadCaches" );
+		IEngine engine = null;
+		EngineLoader instance = new EngineLoader();
+		instance.preloadCaches( engine );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testAddProperties() throws Exception {
+		System.out.println( "addProperties" );
+		URI subject = null;
+		Map<String, Value> properties = null;
+		Map<String, String> namespaces = null;
+		LoadingSheetData sheet = null;
+		ImportMetadata metas = null;
+		EngineLoader instance = new EngineLoader();
+		instance.addProperties( subject, properties, namespaces, sheet, metas );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testGetUriFromRawString() {
+		System.out.println( "getUriFromRawString" );
+		String raw = "";
+		Map<String, String> namespaces = null;
+		EngineLoader instance = new EngineLoader();
+		URI expResult = null;
+		URI result = instance.getUriFromRawString( raw, namespaces );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testGetRDFStringValue() {
+		System.out.println( "getRDFStringValue" );
+		String rawval = "";
+		Map<String, String> namespaces = null;
+		EngineLoader instance = new EngineLoader();
+		Value expResult = null;
+		Value result = instance.getRDFStringValue( rawval, namespaces );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testCleanStatement() {
+		System.out.println( "cleanStatement" );
+		Statement stmt = null;
+		ValueFactory vf = null;
+		Statement expResult = null;
+		Statement result = EngineLoader.cleanStatement( stmt, vf );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testCleanValue() {
+		System.out.println( "cleanValue" );
+		Value v = null;
+		ValueFactory vf = null;
+		Value expResult = null;
+		Value result = EngineLoader.cleanValue( v, vf );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testInitNamespaces() {
+		System.out.println( "initNamespaces" );
+		ImportData conn = null;
+		EngineLoader.initNamespaces( conn );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
 	}
 
 	private Model getExpectedGraph( File rdf ) {

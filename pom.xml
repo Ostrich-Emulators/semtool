@@ -389,9 +389,10 @@
 						<version>0.7.4.201502262128</version>
 						<configuration>
 							<excludes>
-								<exclude>src/main/java/gov/va/semoss/ui/components/playsheets/*</exclude>
-								<exclude>src/main/java/gov/va/semoss/ui/components/renderers/*</exclude>
-								<exclude>src/main/java/gov/va/semoss/ui/actions/*</exclude>
+								<!-- these excludes don't seem to work -->
+								<exclude>src/main/java/gov/va/semoss/ui/components/playsheets/**/*</exclude>
+								<exclude>src/main/java/gov/va/semoss/ui/components/renderers/**/*</exclude>
+								<exclude>src/main/java/gov/va/semoss/ui/actions/**/*</exclude>
 							</excludes>
 						</configuration>
 						<executions>
