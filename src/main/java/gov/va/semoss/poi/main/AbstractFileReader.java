@@ -29,6 +29,9 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 public abstract class AbstractFileReader {
 
+	public AbstractFileReader() {
+	}
+
 	protected static final Pattern NAMEPATTERN
 			= Pattern.compile( "(?:(?:\"([^\"]+)\")|([^@]+))@([a-z-A-Z]{1,8})" );
 	protected static final Pattern DTPATTERN
@@ -58,20 +61,6 @@ public abstract class AbstractFileReader {
 
 		conn.getMetadata().setNamespaces( namespaces );
 	}
-
-	/**
-	 * Imports the file into the given repository connection. It is not necessary
-	 * for this function to call {@link RepositoryConnection#commit()}, as the
-	 * caller will do so upon completion.
-	 *
-	 * @param f the file to load
-	 * @param rcOWL the connection to load it into
-	 *
-	 * @throws java.io.IOException
-	 * @throws RepositoryException
-	 */
-	protected abstract void importOneFile( File f, RepositoryConnection rcOWL )
-			throws IOException, RepositoryException;
 
 	protected static URI getUriFromRawString( String raw, ImportData id ) {
 		//resolve namespace
@@ -104,9 +93,11 @@ public abstract class AbstractFileReader {
 				logger.error( "cannot resolve namespace for: " + raw + " (too many colons)" );
 			}
 		}
-		else {
-			uri = vf.createURI( raw );
-		}
+		//else {
+			// since this will will always throw an error (it can't be an absolute URI)
+			// we'll just return null, as usual
+			//uri = vf.createURI( raw );
+		//}
 
 		return uri;
 	}
@@ -137,11 +128,18 @@ public abstract class AbstractFileReader {
 				String typestr = m.group( 2 );
 				try {
 					URI type = getUriFromRawString( typestr, id );
-					return vf.createLiteral( val, type );
+					if ( null == type ) {
+						// will get caught immediately
+						throw new NullPointerException( "unknown type URI" );
+					}
+					else {
+						return vf.createLiteral( val, type );
+					}
 				}
 				catch ( Exception e ) {
 					logger.warn( "probably misinterpreting as string (unknown type URI?) :"
 							+ rawval, e );
+					val = rawval;
 				}
 			}
 		}

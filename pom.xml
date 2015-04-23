@@ -387,6 +387,13 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>0.7.4.201502262128</version>
+						<configuration>
+							<excludes>
+								<exclude>src/main/java/gov/va/semoss/ui/components/playsheets/*</exclude>
+								<exclude>src/main/java/gov/va/semoss/ui/components/renderers/*</exclude>
+								<exclude>src/main/java/gov/va/semoss/ui/actions/*</exclude>
+							</excludes>
+						</configuration>
 						<executions>
 							<execution>
 								<id>pre-unit-test</id>
@@ -413,7 +420,7 @@
 													<value>COVEREDRATIO</value>
 													<minimum>0.95</minimum>			
 												</limit>
-												<limit implementation="org.jacoco.report.check.Limit">
+														<limit implementation="org.jacoco.report.check.Limit">
 													<counter>COMPLEXITY</counter>
 													<value>COVEREDRATIO</value>
 													<minimum>0.75</minimum>

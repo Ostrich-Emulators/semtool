@@ -363,10 +363,6 @@ public class EngineLoader {
 		return rdr;
 	}
 
-	public RepositoryConnection getConnection() {
-		return myrc;
-	}
-
 	public Collection<Statement> getOwlData() {
 		return owls;
 	}

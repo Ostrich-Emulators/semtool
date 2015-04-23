@@ -21,11 +21,11 @@ public final class ImportData {
 	private ImportMetadata metadata;
 
 	public ImportData() {
-		metadata = new ImportMetadata();
+		this( new ImportMetadata() );
 	}
 
 	public ImportData( ImportMetadata md ) {
-		metadata = md;
+		setMetadata( md );
 	}
 
 	public static ImportData forEngine( IEngine eng ) {
@@ -51,7 +51,7 @@ public final class ImportData {
 		return this;
 	}
 
-	public ImportData setMetadata( ImportMetadata im ) {
+	public final ImportData setMetadata( ImportMetadata im ) {
 		metadata = im;
 		return this;
 	}
