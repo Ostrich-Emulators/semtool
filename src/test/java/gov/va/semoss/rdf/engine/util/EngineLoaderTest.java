@@ -5,10 +5,17 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import com.bigdata.rdf.model.BigdataValueFactoryImpl;
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportMetadata;
+import gov.va.semoss.poi.main.ImportValidationException;
+import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
+import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -19,6 +26,8 @@ import gov.va.semoss.util.UriBuilder.DefaultSanitizer;
 import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -27,14 +36,22 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,11 +60,14 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -333,6 +353,69 @@ public class EngineLoaderTest {
 	}
 
 	@Test
+	public void testImportRDF() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		ImportData errors = new ImportData();
+		EngineLoader el = new EngineLoader();
+		el.loadToEngine( Arrays.asList( TICKET584_EXP ), engine, true, errors );
+
+		// cleanup
+		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.DATABASE );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"import-rdf.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TICKET584_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
+	}
+
+	@Test( expected = FileNotFoundException.class )
+	public void testImportRDFFail() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		ImportData errors = new ImportData();
+		EngineLoader el = new EngineLoader();
+		try {
+			el.loadToEngine( Arrays.asList( new File( "notexisting.rdf" ) ),
+					engine, true, errors );
+		}
+		finally {
+			el.release();
+		}
+	}
+
+	@Test( expected = ImportValidationException.class )
+	public void testImportRDFFail2() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		ImportData errors = new ImportData();
+		EngineLoader el = new EngineLoader();
+		try {
+			el.loadToEngine( Arrays.asList( new File( "notexisting" ) ),
+					engine, true, errors );
+		}
+		catch ( ImportValidationException e ) {
+			if ( ErrorType.INVALID_DATA == e.error ) {
+				throw e;
+			}
+		}
+		finally {
+			el.release();
+		}
+	}
+
+	@Test
 	public void testImportNamespaceHeavyXlsModernNoMetamodel() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
@@ -515,6 +598,429 @@ public class EngineLoaderTest {
 
 		compareData( engine.getRawConnection(), getExpectedGraph( TEST10_EXP ),
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
+	}
+
+	@Test
+	public void testSetDefaultBaseUriOverride() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), true );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+		id.getMetadata().setBase( new URIImpl( "http://base.foo.bar" ) );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		el.loadToEngine( id, engine, errs );
+
+		OneVarListQueryAdapter<URI> q
+				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		q.bind( "db", engine.getBaseUri() );
+		q.bind( "subset", MetadataConstants.VOID_SUBSET );
+		List<URI> uris = engine.query( q );
+		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
+	}
+
+	@Test
+	public void testSetDefaultBaseUri() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+		id.getMetadata().setBase( new URIImpl( "http://base.foo.bar" ) );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		el.loadToEngine( id, engine, errs );
+
+		OneVarListQueryAdapter<URI> q
+				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		q.bind( "db", engine.getBaseUri() );
+		q.bind( "subset", MetadataConstants.VOID_SUBSET );
+		List<URI> uris = engine.query( q );
+		assertEquals( "http://base.foo.bar", uris.get( 0 ).stringValue() );
+	}
+
+	@Test
+	public void testSetDefaultBaseUriDefault() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		el.loadToEngine( id, engine, errs );
+
+		OneVarListQueryAdapter<URI> q
+				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		q.bind( "db", engine.getBaseUri() );
+		q.bind( "subset", MetadataConstants.VOID_SUBSET );
+		List<URI> uris = engine.query( q );
+		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
+	}
+
+	@Test( expected = ImportValidationException.class )
+	public void testSetDefaultBaseUriNoSet() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		//el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+
+		ImportData errs = new ImportData();
+		ImportData id = new ImportData();
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
+		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
+		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
+
+		id.add( lsd );
+		lsd.add( "uno" );
+
+		try {
+			el.loadToEngine( id, engine, errs );
+		}
+		catch ( ImportValidationException e ) {
+			if ( ErrorType.MISSING_DATA == e.error ) {
+				throw e;
+			}
+		}
+
+	}
+
+	@Test
+	public void testInitNamespaces() {
+		ImportData data = new ImportData();
+		EngineLoader.initNamespaces( data );
+		assertEquals( 9, data.getMetadata().getNamespaces().size() );
+		assertEquals( VAS.NAMESPACE, data.getMetadata().getNamespaces().get( VAS.PREFIX ) );
+	}
+
+	@Test
+	public void testGetUriFromRawString1() {
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+
+		// ryan:int is an invalid datatype, so this is a string
+		Value val = EngineLoader.getRDFStringValue( "\"16\"^^ryan:int", namespaces,
+				new ValueFactoryImpl() );
+		assertEquals( "\"16\"^^ryan:int", val.stringValue() );
+	}
+
+	@Test
+	public void testGetUriFromRawString2() {
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
+
+		// ryan:int is an invalid datatype, so this is a string
+		Value val = EngineLoader.getRDFStringValue( "\"16\"^^xsd:int", namespaces,
+				new ValueFactoryImpl() );
+		assertEquals( "16", val.stringValue() );
+	}
+
+	@Test
+	public void testGetRDFStringValue1() {
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		Value val = EngineLoader.getUriFromRawString( "vas:foobar", namespaces );
+		assertEquals( VAS.NAMESPACE + "foobar", val.stringValue() );
+	}
+
+	@Test
+	public void testGetRDFStringValue2() {
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		Value val = EngineLoader.getUriFromRawString( "vat:foobar", namespaces );
+		assertNull( val );
+	}
+
+	@Test
+	public void testGetRDFStringValue3() {
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		Value val = EngineLoader.getUriFromRawString( "vat:test:foobar", namespaces );
+		assertNull( val );
+	}
+
+	@Test
+	public void testGetRDFStringValue4() {
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		Value val = EngineLoader.getUriFromRawString( VAS.NAMESPACE + "foobar",
+				namespaces );
+		assertEquals( VAS.NAMESPACE + "foobar", val.stringValue() );
+	}
+
+	@Test
+	public void testGetRDFStringValue5() {
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		Value val = EngineLoader.getUriFromRawString( "foobar", namespaces );
+		assertNull( val );
+	}
+
+	@Test
+	public void testGetReader() {
+		EngineLoader el = new EngineLoader();
+		POIReader rdr = new POIReader();
+		el.setReader( "xekd", rdr );
+		assertEquals( rdr, el.getReader( new File( "test.xekd" ) ) );
+		el.release();
+	}
+
+	// @Test
+	public void testLoadToEngine_4args() throws Exception {
+		System.out.println( "loadToEngine" );
+		Collection<File> toload = null;
+		IEngine engine = null;
+		boolean createmetamodel = false;
+		ImportData conformanceErrors = null;
+		EngineLoader instance = new EngineLoader();
+		Collection<Statement> expResult = null;
+		Collection<Statement> result = instance.loadToEngine( toload, engine, createmetamodel, conformanceErrors );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testLoadToEngine_3args() throws Exception {
+		System.out.println( "loadToEngine" );
+		ImportData data = null;
+		IEngine engine = null;
+		ImportData conformanceErrors = null;
+		EngineLoader instance = new EngineLoader();
+		instance.loadToEngine( data, engine, conformanceErrors );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testSeparateConformanceErrors() {
+		System.out.println( "separateConformanceErrors" );
+		ImportData data = null;
+		ImportData errors = null;
+		IEngine engine = null;
+		EngineLoader instance = new EngineLoader();
+		instance.separateConformanceErrors( data, errors, engine );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	@Test
+	public void testClear() {
+		EngineLoader el = new EngineLoader();
+		Map<String, URI> types = new HashMap<>();
+		types.put( "rawlabel", BASEURI );
+		el.cacheConceptInstances( types, "testType" );
+		el.clear();
+		assertFalse( el.instanceExists( "testType", "rawlabel" ) );
+		el.release();
+	}
+
+	@Test
+	public void testRelease() throws IOException {
+		// this is a little hard to test because everything is private.
+		// but when we stage to disk, we will get a file on the filesystem
+		// that we can check gets deleted. We'll check before we run anything,
+		// after we've created the file, and then that it gets deleted.
+		File f = File.createTempFile( "semoss-staging-", "" );
+		f.delete();
+
+		FileFilter lister = new FileFilter() {
+
+			@Override
+			public boolean accept( File pathname ) {
+				if ( pathname.isDirectory() && pathname.getName().startsWith( "semoss-staging-" ) ) {
+					return new File( pathname, "stage.jnl" ).exists();
+				}
+				return false;
+			}
+		};
+
+		Set<File> before
+				= new HashSet<>( Arrays.asList( f.getParentFile().listFiles( lister ) ) );
+
+		EngineLoader el = new EngineLoader( false );
+
+		Set<File> after
+				= new HashSet<>( Arrays.asList( f.getParentFile().listFiles( lister ) ) );
+
+		after.removeAll( before );
+
+		// hopefully have just one file left--the one that just got created
+		assertEquals( 1, after.size() );
+
+		el.release();
+
+		assertTrue( !after.iterator().next().exists() );
+	}
+
+	// @Test
+	public void testCheckConformance() {
+		System.out.println( "checkConformance" );
+		LoadingSheetData data = null;
+		IEngine eng = null;
+		boolean loadcaches = false;
+		EngineLoader instance = new EngineLoader();
+		List<LoadingSheetData.LoadingNodeAndPropertyValues> expResult = null;
+		List<LoadingSheetData.LoadingNodeAndPropertyValues> result = instance.checkConformance( data, eng, loadcaches );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	@Test
+	public void testInstanceExists() {
+		String type = "test";
+		String label = "label";
+		EngineLoader el = new EngineLoader();
+		Map<String, URI> types = new HashMap<>();
+		types.put( label, BASEURI );
+		el.cacheConceptInstances( types, type );
+		assertTrue( el.instanceExists( type, label ) );
+		assertFalse( el.instanceExists( type, "notthere" ) );
+		el.release();
+	}
+
+	@Test( expected = IllegalArgumentException.class )
+	public void testCacheUris() throws Exception {
+		EngineLoader el = new EngineLoader();
+		el.cacheUris( null, new HashMap<>() );
+		el.release();
+	}
+
+	@Test
+	public void testPreloadCaches() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
+				UriBuilder.getBuilder( OWLSTART ) );
+
+		RepositoryConnection rc = engine.getRawConnection();
+
+		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
+				RDF.TYPE, new URIImpl( "http://owl.junk.com/testfiles/Category" ) );
+		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
+				RDFS.LABEL, rc.getValueFactory().createLiteral( "Beverages" ) );
+
+		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
+				RDFS.LABEL, rc.getValueFactory().createLiteral( "Chai:Beverages" ) );
+		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+
+		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Category" ),
+				RDFS.SUBCLASSOF, new URIImpl( "http://owl.junk.com/testfiles/Concept" ) );
+		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Category" ), RDFS.LABEL,
+				rc.getValueFactory().createLiteral( "Category" ) );
+
+		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
+		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ), RDFS.LABEL,
+				rc.getValueFactory().createLiteral( "Description" ) );
+
+		EngineLoader el = new EngineLoader();
+		el.preloadCaches( engine );
+		el.release();
+	}
+
+	// @Test
+	public void testCheckModelConformance() {
+		System.out.println( "checkModelConformance" );
+		LoadingSheetData data = null;
+		IEngine eng = null;
+		boolean loadcaches = false;
+		EngineLoader instance = new EngineLoader();
+		LoadingSheetData expResult = null;
+		LoadingSheetData result = instance.checkModelConformance( data, eng, loadcaches );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testAddProperties() throws Exception {
+		System.out.println( "addProperties" );
+		URI subject = null;
+		Map<String, Value> properties = null;
+		Map<String, String> namespaces = null;
+		LoadingSheetData sheet = null;
+		ImportMetadata metas = null;
+		EngineLoader instance = new EngineLoader();
+		instance.addProperties( subject, properties, namespaces, sheet, metas );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testGetUriFromRawString() {
+		System.out.println( "getUriFromRawString" );
+		String raw = "";
+		Map<String, String> namespaces = null;
+		EngineLoader instance = new EngineLoader();
+		URI expResult = null;
+		URI result = instance.getUriFromRawString( raw, namespaces );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testGetRDFStringValue() {
+		System.out.println( "getRDFStringValue" );
+		String rawval = "";
+		Map<String, String> namespaces = null;
+		EngineLoader instance = new EngineLoader();
+		Value expResult = null;
+		Value result = instance.getRDFStringValue( rawval, namespaces, new ValueFactoryImpl() );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	// @Test
+	public void testCleanStatement() {
+		System.out.println( "cleanStatement" );
+		Statement stmt = null;
+		ValueFactory vf = null;
+		Statement expResult = null;
+		Statement result = EngineLoader.cleanStatement( stmt, vf );
+		assertEquals( expResult, result );
+		// TODO review the generated test code and remove the default call to fail.
+		fail( "The test case is a prototype." );
+	}
+
+	@Test
+	public void testCleanValue() {
+		ValueFactory vf = BigdataValueFactoryImpl.getInstance( "kb" );
+		Value old = vf.createLiteral( "this is a test" );
+		Value result = EngineLoader.cleanValue( old, new ValueFactoryImpl() );
+
+		assertEquals( LiteralImpl.class, result.getClass() );
+		assertNotEquals( old.getClass(), result.getClass() );
 	}
 
 	private Model getExpectedGraph( File rdf ) {

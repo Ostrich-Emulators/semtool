@@ -435,7 +435,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 							LoadingPlaySheetFrame.this.dispose();
 						}
-						catch ( RepositoryException | IOException e ) {
+						catch ( RepositoryException | IOException | ImportValidationException e ) {
 							log.error( e, e );
 						}
 					}

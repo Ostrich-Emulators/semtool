@@ -9,11 +9,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.openrdf.model.URI;
@@ -22,10 +20,7 @@ import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.sail.memory.MemoryStore;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 
 /**
@@ -34,134 +29,135 @@ import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
  */
 public class ListQueryAdapterTest {
 
-  private static final InMemorySesameEngine engine;
-  private static final URI ENTITYONE
-      = new URIImpl( "http://www.7delta.com/entities#one" );
-  private static final URI TYPEONE
-      = new URIImpl( "http://www.7delta.com/types#one" );
-  private static final URI TYPEB
-      = new URIImpl( "http://www.7delta.com/booltype" );
-  private static final URI TYPED
-      = new URIImpl( "http://www.7delta.com/doubletype" );
-  private static final URI TYPES
-      = new URIImpl( "http://www.7delta.com/stringtype" );
-  private static final URI TYPEI
-      = new URIImpl( "http://www.7delta.com/inttype" );
-  private static final URI TYPEA
-      = new URIImpl( "http://www.7delta.com/datetype" );
-  private static final Date date = new Date();
+	private static final InMemorySesameEngine engine;
+	private static final URI ENTITYONE
+			= new URIImpl( "http://www.7delta.com/entities#one" );
+	private static final URI TYPEONE
+			= new URIImpl( "http://www.7delta.com/types#one" );
+	private static final URI TYPEB
+			= new URIImpl( "http://www.7delta.com/booltype" );
+	private static final URI TYPED
+			= new URIImpl( "http://www.7delta.com/doubletype" );
+	private static final URI TYPES
+			= new URIImpl( "http://www.7delta.com/stringtype" );
+	private static final URI TYPEI
+			= new URIImpl( "http://www.7delta.com/inttype" );
+	private static final URI TYPEA
+			= new URIImpl( "http://www.7delta.com/datetype" );
+	private static final Date date = new Date();
 
-  private final ListQueryAdapter<IdObj> queryer
-      = new ListQueryAdapter<IdObj>( "SELECT ?id ?obj WHERE { ?id ?pred ?obj }" ) {
+	private final ListQueryAdapter<IdObj> queryer
+			= new ListQueryAdapter<IdObj>( "SELECT ?id ?obj WHERE { ?id ?pred ?obj }" ) {
 
-        @Override
-        public void handleTuple( BindingSet set, ValueFactory fac ) {
-          String id = set.getValue( "id" ).stringValue();
-          String obj = set.getValue( "obj" ).stringValue();
-          add( new IdObj( id, obj ) );
-        }
-      };
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					String id = set.getValue( "id" ).stringValue();
+					String obj = set.getValue( "obj" ).stringValue();
+					add( new IdObj( id, obj ) );
+				}
+			};
 
-  static {
-    Properties props = new Properties();
-    props.setProperty( "log4j.rootLogger", "INFO, stdout" );
-    props.setProperty( "log4j.appender.stdout", "org.apache.log4j.ConsoleAppender" );
-    props.setProperty( "log4j.appender.stdout.layout", "org.apache.log4j.PatternLayout" );
-    props.setProperty( "log4j.appender.stdout.layout.ConversionPattern",
-        "%d{yyyy-MMM-dd HH:mm:ss,SSS} [%-5p] %c:%L - %m%n" );
+	static {
+		engine = new InMemorySesameEngine();
+		RepositoryConnection rc = engine.getRawConnection();
+		try {
+			GregorianCalendar gCalendar = new GregorianCalendar();
+			gCalendar.setTime( date );
+			XMLGregorianCalendar xmlcal = null;
+			try {
+				xmlcal = DatatypeFactory.newInstance().newXMLGregorianCalendar( gCalendar );
+			}
+			catch ( DatatypeConfigurationException ex ) {
+			}
 
-    PropertyConfigurator.configure( props );
+			ValueFactory vf = rc.getValueFactory();
+			rc.add( new StatementImpl( ENTITYONE, RDF.TYPE, TYPEONE ) );
+			rc.add( new StatementImpl( ENTITYONE, TYPEB, vf.createLiteral( true ) ) );
+			rc.add( new StatementImpl( ENTITYONE, TYPED, vf.createLiteral( 1.0 ) ) );
+			rc.add( new StatementImpl( ENTITYONE, TYPEI, vf.createLiteral( 1 ) ) );
+			rc.add( new StatementImpl( ENTITYONE, TYPES, vf.createLiteral( "string" ) ) );
+			rc.add( new StatementImpl( ENTITYONE, TYPES, vf.createLiteral( "cuerda", "es" ) ) );
+			rc.add( new StatementImpl( ENTITYONE, TYPEA, vf.createLiteral( xmlcal ) ) );
+		}
+		catch ( Exception e ) {
+		}
+	}
 
-    engine = new InMemorySesameEngine();
-    Repository repo = new SailRepository( new MemoryStore() );
-    try {
-      repo.initialize();
-      RepositoryConnection rc = repo.getConnection();
-      engine.setRepositoryConnection( rc );
+	@Test
+	public void testClear() throws Exception {
+		queryer.bind( "pred", TYPES );
+		engine.query( queryer );
+		queryer.clear();
+		assertTrue( queryer.getResults().isEmpty() );
+	}
 
-      GregorianCalendar gCalendar = new GregorianCalendar();
-      gCalendar.setTime( date );
-      XMLGregorianCalendar xmlcal = null;
-      try {
-        xmlcal = DatatypeFactory.newInstance().newXMLGregorianCalendar( gCalendar );
-      }
-      catch ( DatatypeConfigurationException ex ) {
-      }
+	@Test
+	public void testQuery1() throws Exception {
+		queryer.bind( "pred", TYPES );
+		List<IdObj> list = engine.query( queryer );
+		assertTrue( 2 == list.size() );
+	}
 
-      ValueFactory vf = rc.getValueFactory();
-      rc.add( new StatementImpl( ENTITYONE, RDF.TYPE, TYPEONE ) );
-      rc.add( new StatementImpl( ENTITYONE, TYPEB, vf.createLiteral( true ) ) );
-      rc.add( new StatementImpl( ENTITYONE, TYPED, vf.createLiteral( 1.0 ) ) );
-      rc.add( new StatementImpl( ENTITYONE, TYPEI, vf.createLiteral( 1 ) ) );
-      rc.add( new StatementImpl( ENTITYONE, TYPES, vf.createLiteral( "string" ) ) );
-      rc.add( new StatementImpl( ENTITYONE, TYPES, vf.createLiteral( "cuerda", "es" ) ) );
-      rc.add( new StatementImpl( ENTITYONE, TYPEA, vf.createLiteral( xmlcal ) ) );
-    }
-    catch ( Exception e ) {
+	@Test
+	public void testQuery2() throws Exception {
+		queryer.bind( "pred", TYPEONE ); // we use TYPEONE as an object, not a predicate
+		List<IdObj> list = engine.query( queryer );
+		assertTrue( list.isEmpty() );
+	}
 
-    }
-  }
+	@Test
+	public void testQuery3() throws Exception {
+		queryer.bind( "pred", "we shouldn't find this" );
+		List<IdObj> list = engine.query( queryer );
+		assertTrue( list.isEmpty() );
+	}
 
-  @Test
-  public void testClear() throws Exception {
-    queryer.bind( "pred", TYPES );
-    engine.query( queryer );
-    queryer.clear();
-    assertTrue( queryer.getResults().isEmpty() );
-  }
+	@Test
+	public void testQuery4() throws Exception {
+		ListQueryAdapter<IdObj> q = new ListQueryAdapter<IdObj>() {
 
-  @Test
-  public void testQuery1() throws Exception {
-    queryer.bind( "pred", TYPES );
-    List<IdObj> list = engine.query( queryer );
-    assertTrue( 2 == list.size() );
-  }
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				// nothing to do
+			}
+		};
+		q.setSparql( queryer.getSparql() );
+		q.bind( "pred", "we shouldn't find this" );
+		List<IdObj> list = engine.query( q );
+		assertTrue( list.isEmpty() );
+	}
 
-  @Test
-  public void testQuery2() throws Exception {
-    queryer.bind( "pred", TYPEONE ); // we use TYPEONE as an object, not a predicate
-    List<IdObj> list = engine.query( queryer );
-    assertTrue( list.isEmpty() );
-  }
+	class IdObj {
 
-  @Test
-  public void testQuery3() throws Exception {
-    queryer.bind( "pred", "we shouldn't find this" );
-    List<IdObj> list = engine.query( queryer );
-    assertTrue( list.isEmpty() );
-  }
+		String id;
+		String obj;
 
-  class IdObj {
+		public IdObj( String id, String obj ) {
+			this.id = id;
+			this.obj = obj;
+		}
 
-    String id;
-    String obj;
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 59 * hash + Objects.hashCode( this.id );
+			hash = 59 * hash + Objects.hashCode( this.obj );
+			return hash;
+		}
 
-    public IdObj( String id, String obj ) {
-      this.id = id;
-      this.obj = obj;
-    }
-
-    @Override
-    public int hashCode() {
-      int hash = 7;
-      hash = 59 * hash + Objects.hashCode( this.id );
-      hash = 59 * hash + Objects.hashCode( this.obj );
-      return hash;
-    }
-
-    @Override
-    public boolean equals( Object obj ) {
-      if ( obj == null ) {
-        return false;
-      }
-      if ( getClass() != obj.getClass() ) {
-        return false;
-      }
-      final IdObj other = (IdObj) obj;
-      if ( !Objects.equals( this.id, other.id ) ) {
-        return false;
-      }
-      return Objects.equals( this.obj, other.obj );
-    }
-  }
+		@Override
+		public boolean equals( Object obj ) {
+			if ( obj == null ) {
+				return false;
+			}
+			if ( getClass() != obj.getClass() ) {
+				return false;
+			}
+			final IdObj other = (IdObj) obj;
+			if ( !Objects.equals( this.id, other.id ) ) {
+				return false;
+			}
+			return Objects.equals( this.obj, other.obj );
+		}
+	}
 }

@@ -1,15 +1,11 @@
 package gov.va.semoss.poi.main;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
-public class NLPReader extends AbstractFileReader {
+public class NLPReader { //extends AbstractFileReader {
 
   private static final Logger log = Logger.getLogger( NLPReader.class );
 
@@ -46,11 +42,5 @@ public class NLPReader extends AbstractFileReader {
       //	createRelationship("predicate", "predicatecount", Triples.get(i).getPred(), Triples.get(i).getPrednum(),"numofpredicate", temp);
       //	createRelationship("object", "objectcount", Triples.get(i).getObj2(), Triples.get(i).getObj2num(),"numofobject", temp);
 //    }
-  }
-
-  @Override
-  protected void importOneFile( File file, RepositoryConnection rc ) throws IOException, RepositoryException {
-		// TODO Auto-generated method stub
-
   }
 }
