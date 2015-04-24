@@ -5,6 +5,7 @@ import info.aduna.io.IOUtil;
 
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.AbstractAction;
@@ -39,18 +40,26 @@ public class OpenSystemFileAction extends AbstractAction {
 		super( text, getIcon( imagePart ) );
 
 		putValue( AbstractAction.SHORT_DESCRIPTION, description );
-
+		putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_U);
 		this.filePath = filePath;
 
 		setEnabled( true );
 	}
-
+	/*
+	public void OpenSystemFileActionwithSC(String text, String description, String filePath,
+			String imagePart, String shortCut){
+		putValue( AbstractAction.SHORT_DESCRIPTION, description );
+		putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_L);
+		setEnabled( true );
+	}
+	*/
 	public static OpenSystemFileAction getHelpManual() {
 		try {
 			return new OpenSystemFileAction( "V-CAMP SEMOSS User Manual",
-					"Opens the local V-CAMP SEMOSS User Manual",
+					"Opens Local VCAMP SEMOSS User Manual",
 					"/help/V-CAMP SEMOSS Tool User Manual.pdf",
 					"helpbook" );
+			
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
