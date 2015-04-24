@@ -1390,7 +1390,7 @@ public class PlayPane extends JFrame {
 		menu.add( windowSelector );
 
 		if ( null != help ) {
-			menu.add( Box.createHorizontalGlue() );
+		//	menu.add( Box.createHorizontalGlue() );
 			menu.add( help );
 		}
 
