@@ -25,6 +25,7 @@ import gov.va.semoss.ui.actions.SaveAllGridAction;
 import gov.va.semoss.ui.actions.SaveGridAction;
 import gov.va.semoss.ui.components.LineNumberTableRowHeader;
 import gov.va.semoss.ui.components.NewScrollBarUI;
+import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.URIEditor;
 import java.awt.BorderLayout;
@@ -35,6 +36,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -120,6 +123,14 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 
 		saveall.setPlaySheetFrame( getPlaySheetFrame() );
 		jtb.add( saveall );
+	}
+
+	@Override
+	public Map<String, Action> getActions() {
+		Map<String, Action> map = super.getActions();
+		map.put( PlaySheetFrame.SAVE, saveGridAction );
+		map.put( PlaySheetFrame.SAVE_ALL, saveall );
+		return map;
 	}
 
 	@Override

@@ -19,8 +19,10 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -52,8 +54,16 @@ import org.openrdf.repository.RepositoryException;
  */
 public class PlaySheetFrame extends JInternalFrame {
 
+	public static final String FONT_UP = "fontup";
+	public static final String FONT_DOWN = "fontdown";
+	public static final String SAVE = "save";
+	public static final String SAVE_ALL = "saveall";
+	public static final String EXPORT = "export";
+
 	private static final long serialVersionUID = 7908827976216133994L;
 	private static final Logger log = Logger.getLogger( PlaySheetFrame.class );
+	private final Action fontup = new FontSizeAction( 1 );
+	private final Action fontdown = new FontSizeAction( -1 );
 
 	private final HideableTabbedPane tabs = new HideableTabbedPane();
 	private IEngine engine = null;
@@ -332,9 +342,27 @@ public class PlaySheetFrame extends JInternalFrame {
 			String tabTitle = tabs.getTitleAt( tabs.getSelectedIndex() );
 			getActivePlaySheet().populateToolBar( tb, tabTitle );
 
-			tb.add( new FontSizeAction( 1 ) );
-			tb.add( new FontSizeAction( -1 ) );
+			tb.add( fontup );
+			tb.add( fontdown );
 		}
+	}
+
+	/**
+	 * Gets a String-to-Action mapping for this instance and it's currently-active
+	 * tab. The keys of the map are class-specific
+	 *
+	 * @return a mapping
+	 */
+	public Map<String, Action> getActions() {
+		Map<String, Action> map = new HashMap<>();
+		map.put( FONT_UP, fontup );
+		map.put( FONT_DOWN, fontdown );
+
+		if ( null != getActivePlaySheet() ) {
+			map.putAll( getActivePlaySheet().getActions() );
+		}
+
+		return map;
 	}
 
 	private void changeFont( float incr ) {

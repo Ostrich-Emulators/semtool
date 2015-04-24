@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -58,7 +59,11 @@ import org.openrdf.repository.RepositoryException;
  * @author ryan
  */
 public class LoadingPlaySheetFrame extends PlaySheetFrame {
-
+	public static final String LOAD = "load";
+	public static final String NEWTAB = "newtab";
+	public static final String REALTIME_QA = "realtime";
+	public static final String SHOW_ERRS = "showerrors";
+			
 	private static final Logger log = Logger.getLogger( LoadingPlaySheetFrame.class );
 
 	private boolean dometamodel;
@@ -73,9 +78,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private final JCheckBox showerrs = new JCheckBox( "Show Only Errors" );
 	private final SaveAllAction saveall = new SaveAllAction();
 	private final AddAction addtab = new AddAction();
+	private final ConformanceAction cnfr = new ConformanceAction();
+
 	private final EngineLoader realtimer = new EngineLoader();
-	private final JToggleButton timertoggle
-			= new JToggleButton( new ConformanceAction() );
+	private final JToggleButton timertoggle	= new JToggleButton( cnfr );
 
 	public LoadingPlaySheetFrame( IEngine eng ) {
 		this( eng, true, true, false, false );
@@ -270,6 +276,21 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		super.populateToolbar( jtb );
 	}
+	
+		@Override
+	public Map<String, Action> getActions() {
+		Map<String, Action> map = super.getActions();
+		map.put( PlaySheetFrame.SAVE, saveall );
+		map.put( PlaySheetFrame.SAVE_ALL, saveall );
+		
+		map.put( LOAD, loader );
+		map.put( NEWTAB, addtab );
+		map.put( REALTIME_QA, cnfr );		
+		
+		return map;
+	}
+
+	
 
 	@Override
 	public void closeTab( PlaySheetCentralComponent c ) {
