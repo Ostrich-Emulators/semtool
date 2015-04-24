@@ -8,9 +8,13 @@ package gov.va.semoss.ui.actions;
 import java.awt.Desktop;
 import java.net.URI;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
+
 import javax.swing.AbstractAction;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
@@ -34,9 +38,10 @@ public class OpenURLAction extends DbAction {
 	 * @param imagePart the image name locator
 	 */
 	public OpenURLAction( String text, String description, String uristr,
-			String imagePart ) {
+			String imagePart, int shortCut ) {
 		super( null, text, imagePart );
 		putValue( AbstractAction.SHORT_DESCRIPTION, description );
+		putValue(AbstractAction.MNEMONIC_KEY, shortCut);
 		if ( ( null == uristr || uristr.isEmpty() ) ) {
 			log.error( "missing/empty URL for action: " + text );
 		}
@@ -55,35 +60,36 @@ public class OpenURLAction extends DbAction {
 
 	public static OpenURLAction getTracAction() {
 		return new OpenURLAction( "Report an Issue",
-				"Opens a browser to the V-CAMP bug reporting system",
-				DIHelper.getInstance().getProperty( Constants.HELPURI_KEY ), "trac" );
+				"Opens a Browser to the V-CAMP Issue Reporting systems",
+				DIHelper.getInstance().getProperty( Constants.HELPURI_KEY ), "trac", KeyEvent.VK_R );
+		
 	}
 
 	public static OpenURLAction getLatestReleaseAction() {
 		return new OpenURLAction( "Get the Latest Release",
-				"Opens a browser to the latest V-CAMP stable release",
+				"Opens a Browser to the latest VCAMP Stable application",
 				DIHelper.getInstance().getProperty( Constants.LATESTRELEASE_KEY ),
-				"VCAMP-Tool" );
+				"VCAMP-Tool", KeyEvent.VK_G );
 	}
 
 	public static OpenURLAction getExperimentalReleaseAction() {
 		return new OpenURLAction( "Get the Experimental Release",
 				"Opens a browser to the latest V-CAMP experimental release",
 				DIHelper.getInstance().getProperty( Constants.EXPERIMENTALRELEASE_KEY ),
-				"VCAMP-Labs" );
+				"VCAMP-Labs", KeyEvent.VK_E );
 	}
 
 	public static OpenURLAction getSemossAction() {
 		return new OpenURLAction( "SEMOSS User Manual",
 				"Opens a browser to the online SEMOSS user manual",
-				"http://semoss.org/userdocs.html", "whitelogo" );
+				"http://semoss.org/userdocs.html", "whitelogo", KeyEvent.VK_M );
 	}
 
 	public static OpenURLAction getLicense() {
 		return new OpenURLAction( "Read the Software License",
-				"Opens a browser to the V-CAMP SEMOSS Tool license",
+				"Opens the Browser to V-CAMP SEMOSS Tool License",
 				DIHelper.getInstance().getProperty( Constants.LICENSEURI_KEY ),
-				"license" );
+				"license", KeyEvent.VK_L );
 	}
 
 	public static OpenURLAction getHelpManual() {
@@ -91,7 +97,7 @@ public class OpenURLAction extends DbAction {
 			return new OpenURLAction( "V-CAMP SEMOSS User Manual",
 					"Opens the local V-CAMP SEMOSS User Manual",
 					OpenURLAction.class.getResource( "/help/V-CAMP SEMOSS Tool User Manual.pdf" ).toURI().toString(),
-					"helpbook" );
+					"helpbook", KeyEvent.VK_M );
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
