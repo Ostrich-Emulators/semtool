@@ -40,7 +40,7 @@ public class OpenSystemFileAction extends AbstractAction {
 		super( text, getIcon( imagePart ) );
 
 		putValue( AbstractAction.SHORT_DESCRIPTION, description );
-		putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_U);
+		putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_M);
 		this.filePath = filePath;
 
 		setEnabled( true );
