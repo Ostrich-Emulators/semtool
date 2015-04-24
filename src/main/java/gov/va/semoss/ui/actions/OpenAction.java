@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.actions;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.FileBrowsePanel;
@@ -14,11 +15,14 @@ import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import org.apache.commons.io.FilenameUtils;
@@ -54,11 +58,16 @@ public class OpenAction extends DbAction {
 			Preferences prefs = Preferences.userNodeForPackage( getClass() );
 			File f = FileBrowsePanel.getLocationForEmptyPref( prefs, "lastimpdir" );
 
+			Set<File> openedDbs = new HashSet<>();
+			for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
+				openedDbs.add( new File( eng.getProperty( Constants.SMSS_LOCATION ) ) );
+			}
+
 			JFileChooser chsr = new JFileChooser( f );
 			chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
 			chsr.setFileView( new SemossFileView() );
 			chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
-			chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "Database Files", "jnl" ) );
+			chsr.addChoosableFileFilter( FileBrowsePanel.getDatabaseFilter( openedDbs ) );
 			chsr.setDialogTitle( "Select File to Import" );
 			chsr.setMultiSelectionEnabled( true );
 
