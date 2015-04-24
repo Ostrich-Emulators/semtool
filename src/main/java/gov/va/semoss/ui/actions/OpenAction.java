@@ -5,20 +5,24 @@
  */
 package gov.va.semoss.ui.actions;
 
+import gov.va.semoss.rdf.engine.util.EngineManagementException;
+import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
+import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
 import gov.va.semoss.util.DIHelper;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -32,7 +36,7 @@ public class OpenAction extends DbAction {
 	public OpenAction( String optg, Frame frame ) {
 		super( optg, "Open File", "open-file3" );
 		this.frame = frame;
-		putValue( SHORT_DESCRIPTION, "Import Spreadsheet" );
+		putValue( SHORT_DESCRIPTION, "Open Files" );
 	}
 
 	public OpenAction( String optg, Frame frame, Collection<File> toadd ) {
@@ -54,29 +58,62 @@ public class OpenAction extends DbAction {
 			chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
 			chsr.setFileView( new SemossFileView() );
 			chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
+			chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "Database Files", "jnl" ) );
 			chsr.setDialogTitle( "Select File to Import" );
 			chsr.setMultiSelectionEnabled( true );
 
 			if ( JFileChooser.APPROVE_OPTION == chsr.showOpenDialog( frame ) ) {
 				prefs.put( "lastimpdir", chsr.getSelectedFile().getParent() );
-		
-        for( File file : chsr.getSelectedFiles() ){
-          if( file.exists() ){
-            files.add( file );
-          }
-        }
+
+				for ( File file : chsr.getSelectedFiles() ) {
+					if ( file.exists() ) {
+						files.add( file );
+					}
+				}
 			}
 		}
 
- 		return !files.isEmpty();
+		return !files.isEmpty();
 	}
 
 	@Override
 	public ProgressTask getTask( ActionEvent ae ) {
-		LoadingPlaySheetFrame psf
-				= new LoadingPlaySheetFrame( null, files, false, false, false, false );
-		DIHelper.getInstance().getDesktop().add( psf );
-		files.clear(); // get ready for the next time we get called
-		return psf.getLoadingTask();
+		// remove any database files before loading loading sheets
+		List<File> journals = new ArrayList<>();
+		List<File> sheets = new ArrayList<>();
+		for ( File f : files ) {
+			if ( "jnl".equals( FilenameUtils.getExtension( f.getName() ) ) ) {
+				journals.add( f );
+			}
+			else {
+				sheets.add( f );
+			}
+		}
+		files.clear();
+
+		ProgressTask pt = new ProgressTask( "Opening Files", new Runnable() {
+
+			@Override
+			public void run() {
+				if ( !sheets.isEmpty() ) {
+					LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( null, sheets,
+							false, false, false, false );
+					DIHelper.getInstance().getDesktop().add( psf );
+					OperationsProgress.getInstance( opprogName ).add( psf.getLoadingTask() );
+				}
+				if ( !journals.isEmpty() ) {
+					for ( File f : journals ) {
+						try {
+							EngineUtil.getInstance().mount( f, true );
+						}
+						catch ( EngineManagementException e ) {
+							Logger.getLogger( OpenAction.class ).error( e, e );
+						}
+					}
+				}
+			}
+		} );
+
+		return pt;
 	}
 }

@@ -23,36 +23,56 @@ import gov.va.semoss.ui.components.ProgressTask;
  */
 public class UnmountAction extends DbAction {
 
-  private static final Logger log = Logger.getLogger( UnmountAction.class );
-  private Frame frame;
+	private static final Logger log = Logger.getLogger( UnmountAction.class );
+	private final boolean dynamicTitle;
+	private Frame frame;
 
-  public UnmountAction( Frame frame ) {
-    super( null, UNMOUNT, "rmdb" );
-    putValue( AbstractAction.SHORT_DESCRIPTION, "Unmount a database" );
-  }
+	/**
+	 * Creates a new action with a dynamic label
+	 *
+	 * @param frame
+	 */
+	public UnmountAction( Frame frame ) {
+		super( null, UNMOUNT, "rmdb" );
+		putValue( AbstractAction.SHORT_DESCRIPTION, "Unmount a database" );
+		dynamicTitle = true;
+	}
 
-  @Override
-  public void setEngine( IEngine eng ) {
-    super.setEngine( eng );
+	/**
+	 * Creates a new action with a static label
+	 *
+	 * @param frame
+	 * @param title
+	 */
+	public UnmountAction( Frame frame, String title ) {
+		super( null, UNMOUNT, "rmdb" );
+		putValue( AbstractAction.SHORT_DESCRIPTION, "Unmount a database" );
+		putValue( AbstractAction.NAME, title );
+		dynamicTitle = false;
+	}
 
-    if ( null != eng ) {
-      putValue( AbstractAction.NAME, UNMOUNT + " " + getEngineName() );
-    }
-  }
+	@Override
+	public void setEngine( IEngine eng ) {
+		super.setEngine( eng );
 
-  @Override
-  public void actionPerformed( ActionEvent e ) {
-    if ( null != getEngine() ) {
-      int val = JOptionPane.showConfirmDialog( frame, "Really detach "
-          + getEngineName() + "?", "Confirm Detach", JOptionPane.YES_NO_OPTION );
-      if ( JOptionPane.YES_OPTION == val ) {
-        EngineUtil.getInstance().unmount( getEngine() );
-      }
-    }
-  }
+		if ( null != eng && dynamicTitle ) {
+			putValue( AbstractAction.NAME, UNMOUNT + " " + getEngineName() );
+		}
+	}
 
-  @Override
-  protected ProgressTask getTask( ActionEvent ae ) {
-    throw new UnsupportedOperationException( "Not supported yet." );
-  }
+	@Override
+	public void actionPerformed( ActionEvent e ) {
+		if ( null != getEngine() ) {
+			int val = JOptionPane.showConfirmDialog( frame, "Really detach "
+					+ getEngineName() + "?", "Confirm Detach", JOptionPane.YES_NO_OPTION );
+			if ( JOptionPane.YES_OPTION == val ) {
+				EngineUtil.getInstance().unmount( getEngine() );
+			}
+		}
+	}
+
+	@Override
+	protected ProgressTask getTask( ActionEvent ae ) {
+		throw new UnsupportedOperationException( "Not supported yet." );
+	}
 }

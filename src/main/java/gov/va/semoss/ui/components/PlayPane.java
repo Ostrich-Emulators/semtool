@@ -228,7 +228,7 @@ public class PlayPane extends JFrame {
 			= new ExportSpecificNodesToLoadingSheetAction( UIPROGRESS, this );
 	private final DbAction expSpecRels
 			= new ExportSpecificRelationshipsToLoadingSheetAction( UIPROGRESS, this );
-	private final DbAction unmounter = new UnmountAction( this );
+	private final DbAction unmounter = new UnmountAction( this, "Close (Detach) DB" );
 	private final EndpointAction sparqler = new EndpointAction( UIPROGRESS, this );
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
@@ -1391,18 +1391,21 @@ public class PlayPane extends JFrame {
 
 		fileMenuSave.setEnabled( false );
 		fileMenuSaveAll.setEnabled( false );
-		fileMenu.add( fileMenuSave );
-		fileMenu.add( fileMenuSaveAll );
 
-		fileMenu.add( importxls );
-		fileMenu.add( newls );
+		JMenu newmenu = new JMenu( "New" );
+		fileMenu.add( newmenu );
+		newmenu.add( creater ).setText( "Database" );
+		newmenu.add( newls ).setText( "Loading Sheet" );
 
 		fileMenu.setMnemonic( KeyEvent.VK_F );
 		exiter.setMnemonic( KeyEvent.VK_X );
 
-		fileMenu.add( mounter );
-		fileMenu.add( creater );
+		fileMenu.add( importxls ).setText( "Open..." );
 		fileMenu.add( unmounter );
+
+		fileMenu.addSeparator();
+		fileMenu.add( fileMenuSave );
+		fileMenu.add( fileMenuSaveAll );
 
 		JMenu exptop2 = new JMenu( "Export" );
 		exptop2.add( exportttl );
