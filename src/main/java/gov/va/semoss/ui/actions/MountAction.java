@@ -22,6 +22,7 @@ import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
 
@@ -50,41 +51,10 @@ public class MountAction extends DbAction {
     // we want to hide smss files that are already loaded
     final Set<File> loaded = new HashSet<>();
     for ( IEngine engo : DIHelper.getInstance().getEngineMap().values() ) {
-      loaded.add( new File( engo.getProperty( Constants.SMSS_LOCATION ).toLowerCase() ) );
+      loaded.add( new File( engo.getProperty( Constants.SMSS_LOCATION ) ) );
     }
-
-    chsr.setFileFilter( new FileFilter() {
-
-      @Override
-      public boolean accept( File f ) {
-        if ( f.isDirectory() ) {
-          return true;
-        }
-
-        // if we have a SMSS file and a directory with the same name as the
-        // smss file (excluding the ".smss" extension, we can use it
-        String fname = f.getName().toLowerCase();
-        if ( fname.endsWith( ".jnl" ) ) {
-          // we can show the jnl so long as there is no smss file present
-          for ( File f2 : f.getParentFile().listFiles() ) {
-            if ( f2.getName().toLowerCase().endsWith( ".smss" ) ) {
-              return false;
-            }
-          }
-          return true;
-        }
-
-        if ( fname.endsWith( ".smss" ) ) {
-          return ( !loaded.contains( f.getAbsoluteFile() ) );
-        }
-        return false;
-      }
-
-      @Override
-      public String getDescription() {
-        return "Database control files (*.smss, *.jnl)";
-      }
-    } );
+		
+		chsr.setFileFilter( FileBrowsePanel.getDatabaseFilter( loaded ) );
 
     chsr.setApproveButtonText( "Attach" );
     chsr.setFileView(new SemossFileView() );

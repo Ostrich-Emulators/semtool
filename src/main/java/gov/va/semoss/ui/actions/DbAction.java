@@ -42,7 +42,7 @@ public abstract class DbAction extends AbstractAction {
   public static final String ENDPOINT = "Start SparQL Endpoint";
 	public static final String CONSISTENCYCHECK = "Check Consistency";
 
-  private final String opprogName;
+  public final String opprogName;
   private IEngine engine;
 
   public DbAction( String opprog ) {

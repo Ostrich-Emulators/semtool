@@ -87,13 +87,11 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -129,6 +127,9 @@ import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
 import com.ibm.icu.util.StringTokenizer;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.event.InternalFrameEvent;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -160,7 +161,7 @@ public class PlayPane extends JFrame {
 	private InsightManagerPanel iManagePanel;
 
 	// Right graphPanel desktopPane
-	private JDesktopPane desktopPane;
+	private CustomDesktopPane desktopPane;
 	public JButton refreshButton;
 	public JTable filterTable, edgeTable, propertyTable;
 
@@ -228,7 +229,7 @@ public class PlayPane extends JFrame {
 			= new ExportSpecificNodesToLoadingSheetAction( UIPROGRESS, this );
 	private final DbAction expSpecRels
 			= new ExportSpecificRelationshipsToLoadingSheetAction( UIPROGRESS, this );
-	private final DbAction unmounter = new UnmountAction( this );
+	private final DbAction unmounter = new UnmountAction( this, "Close (Detach) DB" );
 	private final EndpointAction sparqler = new EndpointAction( UIPROGRESS, this );
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
@@ -241,7 +242,11 @@ public class PlayPane extends JFrame {
 			= new ImportInsightsAction( UIPROGRESS, false, this );
 	private final CheckConsistencyAction consistencyCheck
 			= new CheckConsistencyAction( UIPROGRESS, this );
-	private final JMenu windowSelector = new JMenu( "Window" );
+	protected final JMenu windowSelector = new JMenu( "Window" );
+	protected final JMenu fileMenu = new JMenu( "File" );
+	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
+	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As..." );
+	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
 
 	private final JToolBar toolbar;
 	private final JToolBar playsheetToolbar;
@@ -485,6 +490,24 @@ public class PlayPane extends JFrame {
 
 		new CSSApplication( getContentPane() );
 		DIHelper.getInstance().setLocalProperty( Constants.MAIN_FRAME, this );
+
+		this.addWindowListener( new WindowAdapter() {
+
+			@Override
+			public void windowClosing( WindowEvent e ) {
+				JInternalFrame frames[] = desktopPane.getAllFrames();
+				for ( JInternalFrame jif : frames ) {
+					if ( jif instanceof PlaySheetFrame ) {
+						// signal the frame that it's closing
+						PlaySheetFrame.class.cast( jif ).dispose();
+					}
+				}
+
+				super.windowClosing( e );
+			}
+
+		} );
+
 	}
 
 	public RepositoryList getRepoList() {
@@ -843,8 +866,70 @@ public class PlayPane extends JFrame {
 
 	private JComponent makeGraphTab() {
 		desktopPane = new CustomDesktopPane( playsheetToolbar );
+		desktopPane.registerFrameListener( new InternalFrameListener() {
+
+			@Override
+			public void internalFrameOpened( InternalFrameEvent e ) {
+			}
+
+			@Override
+			public void internalFrameClosing( InternalFrameEvent e ) {
+			}
+
+			@Override
+			public void internalFrameClosed( InternalFrameEvent e ) {
+			}
+
+			@Override
+			public void internalFrameIconified( InternalFrameEvent e ) {
+			}
+
+			@Override
+			public void internalFrameDeiconified( InternalFrameEvent e ) {
+			}
+
+			@Override
+			public void internalFrameActivated( InternalFrameEvent e ) {
+				fileMenuSave.setEnabled( false );
+				fileMenuSaveAs.setEnabled( false );
+				fileMenuSaveAll.setEnabled( false );
+
+				JInternalFrame jif = e.getInternalFrame();
+
+				if ( jif instanceof PlaySheetFrame ) {
+					// populate the file menu
+					PlaySheetFrame psf = PlaySheetFrame.class.cast( jif );
+					Map<String, Action> actions = psf.getActions();
+					if ( actions.containsKey( PlaySheetFrame.SAVE ) ) {
+						String s = fileMenuSave.getText();
+						fileMenuSave.setAction( actions.get( PlaySheetFrame.SAVE ) );
+						fileMenuSave.setEnabled( true );
+						fileMenuSave.setText( s );
+					}
+					if ( actions.containsKey( PlaySheetFrame.SAVE_AS ) ) {
+						String s = fileMenuSaveAs.getText();
+						fileMenuSaveAs.setAction( actions.get( PlaySheetFrame.SAVE_AS ) );
+						fileMenuSaveAs.setEnabled( true );
+						fileMenuSaveAs.setText( s );
+					}
+					if ( actions.containsKey( PlaySheetFrame.SAVE_ALL ) ) {
+						String s = fileMenuSaveAll.getText();
+						fileMenuSaveAll.setAction( actions.get( PlaySheetFrame.SAVE_ALL ) );
+						fileMenuSaveAll.setEnabled( true );
+						fileMenuSaveAll.setText( s );
+					}
+				}
+			}
+
+			@Override
+			public void internalFrameDeactivated( InternalFrameEvent e ) {
+				fileMenuSave.setEnabled( false );
+				fileMenuSaveAll.setEnabled( false );
+			}
+		} );
 
 		DIHelper.getInstance().setDesktop( desktopPane );
+
 		desktopPane.addContainerListener( new ContainerListener() {
 
 			@Override
@@ -858,9 +943,8 @@ public class PlayPane extends JFrame {
 			}
 
 			private void refresh() {
-				windowSelector.removeAll();
 				final JInternalFrame[] frames = desktopPane.getAllFrames();
-
+				windowSelector.removeAll();
 				if ( 0 == frames.length ) {
 					appendChkBox.setSelected( false );
 				}
@@ -1045,6 +1129,8 @@ public class PlayPane extends JFrame {
 
 	protected JMenu buildDatabaseMenu() {
 		final JMenu db = new JMenu( "Database" );
+		db.setEnabled( false );
+
 		db.add( toggler );
 		db.add( proper );
 		db.addSeparator();
@@ -1109,6 +1195,8 @@ public class PlayPane extends JFrame {
 								PlayPane.this ) );
 					}
 				}
+
+				db.setEnabled( null != engine );
 			}
 		};
 		repoList.addListSelectionListener( lsl );
@@ -1332,45 +1420,59 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JMenu file = new JMenu( "File" );
-		file.add( importxls );
-		file.add( newls );
+		fileMenuSave.setEnabled( false );
+		fileMenuSaveAs.setEnabled( false );
+		fileMenuSaveAll.setEnabled( false );
 
-		file.setMnemonic( KeyEvent.VK_F );
+		JMenu newmenu = new JMenu( "New" );
+		newmenu.setMnemonic( KeyEvent.VK_N );
+		fileMenu.add( newmenu );
+		JMenuItem jmi = newmenu.add( creater );
+		jmi.setText( "Database" );
+		jmi.setMnemonic( KeyEvent.VK_D );
+		jmi = newmenu.add( newls );
+		jmi.setText( "Loading Sheet" );
+		jmi.setMnemonic( KeyEvent.VK_L );
+
+		fileMenu.setMnemonic( KeyEvent.VK_F );
 		exiter.setMnemonic( KeyEvent.VK_X );
+		jmi = fileMenu.add( importxls );
+		jmi.setText( "Open..." );
+		fileMenu.addSeparator();
+		fileMenu.add( unmounter );
 
-		file.add( mounter );
-		file.add( creater );
-		file.add( unmounter );
+		fileMenu.add( fileMenuSave );
+		fileMenu.add( fileMenuSaveAs );
+		fileMenu.add( fileMenuSaveAll );
 
-		JMenu exptop2 = new JMenu( "Export" );
-		exptop2.add( exportttl );
-		exptop2.add( exportnt );
-		exptop2.add( exportrdf );
-		exptop2.setIcon( DbAction.getIcon( "exportdb" ) );
-		JMenu loadingsheets2 = new JMenu( "Loading Sheets" );
-		exptop2.add( loadingsheets2 );
-		loadingsheets2.add( expnodes );
-		loadingsheets2.add( expSpecNodes );
-		loadingsheets2.add( exprels );
-		loadingsheets2.add( expSpecRels );
-		loadingsheets2.add( expall );
-		exptop2.add( exportinsights );
+//		JMenu exptop2 = new JMenu( "Export" );
+//		exptop2.add( exportttl );
+//		exptop2.add( exportnt );
+//		exptop2.add( exportrdf );
+//		exptop2.setIcon( DbAction.getIcon( "exportdb" ) );
+//		JMenu loadingsheets2 = new JMenu( "Loading Sheets" );
+//		exptop2.add( loadingsheets2 );
+//		loadingsheets2.add( expnodes );
+//		loadingsheets2.add( expSpecNodes );
+//		loadingsheets2.add( exprels );
+//		loadingsheets2.add( expSpecRels );
+//		loadingsheets2.add( expall );
+//		exptop2.add( exportinsights );
+//
+//		JMenu importtop2 = new JMenu( "Import" );
+//		importtop2.setIcon( DbAction.getIcon( "importdb" ) );
+//		importtop2.add( importls );
+//		JMenu insights2 = new JMenu( "Insights" );
+//		insights2.add( resetInsights );
+//		insights2.add( importInsights );
+//		importtop2.add( insights2 );
+//
+//		fileMenu.add( exptop2 );
+//		fileMenu.add( importtop2 );
+		fileMenu.addSeparator();
+		fileMenu.add( exiter );
 
-		JMenu importtop2 = new JMenu( "Import" );
-		importtop2.setIcon( DbAction.getIcon( "importdb" ) );
-		importtop2.add( importls );
-		JMenu insights2 = new JMenu( "Insights" );
-		insights2.add( resetInsights );
-		insights2.add( importInsights );
-		importtop2.add( insights2 );
-
-		file.add( exptop2 );
-		file.add( importtop2 );
-		file.addSeparator();
-		file.add( exiter );
-
-		menu.add( file );
+		menu.add( fileMenu );
 
 		JMenu db = buildDatabaseMenu();
 		JMenu help = buildHelpMenu();
@@ -1390,7 +1492,7 @@ public class PlayPane extends JFrame {
 		menu.add( windowSelector );
 
 		if ( null != help ) {
-		//	menu.add( Box.createHorizontalGlue() );
+			//	menu.add( Box.createHorizontalGlue() );
 			menu.add( help );
 		}
 
