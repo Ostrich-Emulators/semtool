@@ -1,6 +1,7 @@
 package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.poi.main.XlsWriter;
+import gov.va.semoss.ui.components.models.ValueTableModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JFileChooser;
-import javax.swing.JTable;
 
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -26,8 +26,9 @@ import org.supercsv.prefs.CsvPreference.Builder;
  *
  */
 public class SaveGridAction extends AbstractSavingAction {
+
 	private static final long serialVersionUID = 3476209795433405175L;
-	private JTable table = new JTable();
+	private ValueTableModel table = null;
 
 	public SaveGridAction( boolean issaveas ) {
 		super( "Save", issaveas );
@@ -40,7 +41,7 @@ public class SaveGridAction extends AbstractSavingAction {
 	 *
 	 * @param table -- (JTable) Display for grid data.
 	 */
-	public void setTable( JTable table ) {
+	public void setTable( ValueTableModel table ) {
 		this.table = table;
 	}
 
@@ -107,6 +108,9 @@ public class SaveGridAction extends AbstractSavingAction {
 			}
 			writer.write( map, heads );
 		}
+		
+		writer.close();
+		table.setNeedsSave( false );
 	}
 
 	/**
@@ -132,6 +136,7 @@ public class SaveGridAction extends AbstractSavingAction {
 		}
 
 		writer.write( file );
+		table.setNeedsSave( false );
 	}
 
 	private String[] headerArr() {

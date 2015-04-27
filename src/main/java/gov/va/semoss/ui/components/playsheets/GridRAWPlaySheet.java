@@ -40,6 +40,7 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
@@ -116,13 +117,18 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
 		save.setDefaultFileName( tabTitle );
-		save.setTable( table );
+		save.setTable( model );
 		saveas.setDefaultFileName( tabTitle );
-		saveas.setTable( table );
+		saveas.setTable( model );
 		jtb.add( save );
 
 		saveall.setPlaySheetFrame( getPlaySheetFrame() );
 		jtb.add( saveall );
+	}
+
+	@Override
+	public boolean hasChanges() {
+		return model.needsSave();
 	}
 
 	@Override

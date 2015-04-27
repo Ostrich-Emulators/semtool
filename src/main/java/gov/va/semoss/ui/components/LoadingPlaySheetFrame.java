@@ -142,6 +142,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	@Override
 	protected void onFrameClose() {
 		realtimer.release();
+		super.onFrameClose();
 	}
 
 	public final LoadingPlaySheetBase add( LoadingSheetData data ) {

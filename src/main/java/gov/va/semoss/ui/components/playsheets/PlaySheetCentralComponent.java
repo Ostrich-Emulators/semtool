@@ -70,6 +70,10 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return title;
 	}
 
+	public boolean hasChanges(){
+		return false;
+	}
+	
 	protected void setHeaders( List<String> newheaders ) {
 		headers.clear();
 		headers.addAll( newheaders );

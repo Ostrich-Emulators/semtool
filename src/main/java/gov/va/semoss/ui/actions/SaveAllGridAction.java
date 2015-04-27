@@ -4,21 +4,14 @@ import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import java.io.File;
-import java.io.FileOutputStream;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Collection;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Action to save a Grid or Raw Grid to a CSV or tab-delimited text file, or to
@@ -77,5 +70,6 @@ public class SaveAllGridAction extends AbstractSavingAction {
 			}
 		}
 		writer.write( file );
+		
 	}
 }

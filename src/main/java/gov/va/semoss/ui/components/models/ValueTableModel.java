@@ -67,6 +67,7 @@ public class ValueTableModel extends AbstractTableModel {
 	private boolean useraw;
 	private boolean readonly;
 	private boolean allowInsertsInPlace = false;
+	private boolean saveme = false;
 
 	public ValueTableModel() {
 		this( true );
@@ -228,6 +229,7 @@ public class ValueTableModel extends AbstractTableModel {
 
 	@Override
 	public void setValueAt( Object aValue, int r, int c ) {
+		saveme = true;
 		Class<?> k = getColumnClass( c );
 
 		boolean isinsert = isInsertRow( r );
@@ -245,6 +247,14 @@ public class ValueTableModel extends AbstractTableModel {
 		else {
 			fireTableCellUpdated( r, c );
 		}
+	}
+
+	public void setNeedsSave( boolean b ) {
+		saveme = b;
+	}
+
+	public boolean needsSave() {
+		return saveme;
 	}
 
 	@Override
