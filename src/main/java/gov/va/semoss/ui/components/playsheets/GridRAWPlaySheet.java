@@ -58,8 +58,9 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	private static final Logger log = Logger.getLogger( GridPlaySheet.class );
 	private final ValueTableModel model;
 	private final JTable table;
-	private final SaveGridAction saveGridAction;
-	private final SaveAllGridAction saveall;
+	private final SaveGridAction save = new SaveGridAction( false );
+	private final SaveGridAction saveas = new SaveGridAction( true );
+	private final SaveAllGridAction saveall = new SaveAllGridAction();
 
 	public GridRAWPlaySheet() {
 		this( new ValueTableModel() );
@@ -69,9 +70,6 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		model = mod;
 		table = new JTable( model );
 		setLayout( new BorderLayout() );
-
-		saveGridAction = new SaveGridAction();
-		saveall = new SaveAllGridAction();
 
 		final JScrollPane jsp = new JScrollPane( table );
 		table.setAutoCreateRowSorter( true );
@@ -83,7 +81,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		table.getInputMap( JComponent.WHEN_FOCUSED ).
 				put( KeyStroke.getKeyStroke( KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK ),
 						"saveGridAction" );
-		table.getActionMap().put( "saveGridAction", saveGridAction );
+		table.getActionMap().put( "saveGridAction", save );
 
 		table.setCellSelectionEnabled( true );
 
@@ -117,9 +115,11 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 
 	@Override
 	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
-		saveGridAction.setDefaultFileName( tabTitle );
-		saveGridAction.setTable( table );
-		jtb.add( saveGridAction );
+		save.setDefaultFileName( tabTitle );
+		save.setTable( table );
+		saveas.setDefaultFileName( tabTitle );
+		saveas.setTable( table );
+		jtb.add( save );
 
 		saveall.setPlaySheetFrame( getPlaySheetFrame() );
 		jtb.add( saveall );
@@ -128,8 +128,9 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public Map<String, Action> getActions() {
 		Map<String, Action> map = super.getActions();
-		map.put( PlaySheetFrame.SAVE, saveGridAction );
+		map.put( PlaySheetFrame.SAVE, save );
 		map.put( PlaySheetFrame.SAVE_ALL, saveall );
+		map.put( PlaySheetFrame.SAVE_AS, saveas );
 		return map;
 	}
 

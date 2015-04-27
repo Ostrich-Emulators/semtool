@@ -882,16 +882,22 @@ public class PlayPane extends JFrame {
 					PlaySheetFrame psf = PlaySheetFrame.class.cast( jif );
 					Map<String, Action> actions = psf.getActions();
 					if ( actions.containsKey( PlaySheetFrame.SAVE ) ) {
+						String s = fileMenuSave.getText();
 						fileMenuSave.setAction( actions.get( PlaySheetFrame.SAVE ) );
 						fileMenuSave.setEnabled( true );
+						fileMenuSave.setText( s );
 					}
 					if ( actions.containsKey( PlaySheetFrame.SAVE_AS ) ) {
+						String s = fileMenuSaveAs.getText();
 						fileMenuSaveAs.setAction( actions.get( PlaySheetFrame.SAVE_AS ) );
 						fileMenuSaveAs.setEnabled( true );
+						fileMenuSaveAs.setText( s );
 					}
 					if ( actions.containsKey( PlaySheetFrame.SAVE_ALL ) ) {
+						String s = fileMenuSaveAll.getText();
 						fileMenuSaveAll.setAction( actions.get( PlaySheetFrame.SAVE_ALL ) );
 						fileMenuSaveAll.setEnabled( true );
+						fileMenuSaveAll.setText( s );
 					}
 				}
 			}

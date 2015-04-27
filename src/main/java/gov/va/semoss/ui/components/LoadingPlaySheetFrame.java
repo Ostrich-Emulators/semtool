@@ -15,6 +15,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
+import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.CloseableTab.MarkType;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
@@ -27,7 +28,6 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultIcons;
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -59,11 +59,12 @@ import org.openrdf.repository.RepositoryException;
  * @author ryan
  */
 public class LoadingPlaySheetFrame extends PlaySheetFrame {
+
 	public static final String LOAD = "load";
 	public static final String NEWTAB = "newtab";
 	public static final String REALTIME_QA = "realtime";
 	public static final String SHOW_ERRS = "showerrors";
-			
+
 	private static final Logger log = Logger.getLogger( LoadingPlaySheetFrame.class );
 
 	private boolean dometamodel;
@@ -81,7 +82,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private final ConformanceAction cnfr = new ConformanceAction();
 
 	private final EngineLoader realtimer = new EngineLoader();
-	private final JToggleButton timertoggle	= new JToggleButton( cnfr );
+	private final JToggleButton timertoggle = new JToggleButton( cnfr );
 
 	public LoadingPlaySheetFrame( IEngine eng ) {
 		this( eng, true, true, false, false );
@@ -99,7 +100,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
-		
+
 		showerrs.setVisible( doconformance );
 	}
 
@@ -276,21 +277,19 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		super.populateToolbar( jtb );
 	}
-	
-		@Override
+
+	@Override
 	public Map<String, Action> getActions() {
 		Map<String, Action> map = super.getActions();
 		map.put( PlaySheetFrame.SAVE, saveall );
 		map.put( PlaySheetFrame.SAVE_ALL, saveall );
-		
+
 		map.put( LOAD, loader );
 		map.put( NEWTAB, addtab );
-		map.put( REALTIME_QA, cnfr );		
-		
+		map.put( REALTIME_QA, cnfr );
+
 		return map;
 	}
-
-	
 
 	@Override
 	public void closeTab( PlaySheetCentralComponent c ) {
@@ -557,7 +556,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			else {
 				realtimer.clear();
 				showerrs.setVisible( false );
-				if( showerrs.isSelected() ){
+				if ( showerrs.isSelected() ) {
 					// stop filtering rows if we're not doing QA checks
 					showerrs.doClick();
 				}
@@ -616,21 +615,28 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		}
 	}
 
-	private class SaveAllAction extends AbstractAction {
+	private class SaveAllAction extends AbstractSavingAction {
 
 		public SaveAllAction() {
-			super( "Save as Loading Sheets",
-					DefaultIcons.defaultIcons.get( DefaultIcons.SAVE ) );
-			putValue( Action.SHORT_DESCRIPTION, "Saves this data as a Loading Sheet" );
+			super( "Save as Loading Sheets", DefaultIcons.defaultIcons.get( DefaultIcons.SAVE ),
+					false, Preferences.userNodeForPackage( DBToLoadingSheetExporter.class ),
+					"lastexp " );
+			setToolTip( "Saves this data as a Loading Sheet" );
+
+			setDefaultFileName( "Custom_Loading_Sheet_" );
+			setAppendDate( true );
 		}
 
 		@Override
-		public void actionPerformed( ActionEvent e ) {
-			Preferences prefs = Preferences.userNodeForPackage( DBToLoadingSheetExporter.class );
-			File lastexp = FileBrowsePanel.getLocationForEmptyPref( prefs, "lastexp" );
-			File suggestion
-					= DBToLoadingSheetExporter.getDefaultExportFile( lastexp, "Custom", false );
+		protected void finishFileChooser( JFileChooser chsr ) {
+			chsr.setAcceptAllFileFilterUsed( false );
+			FileFilter xlsxFilter
+					= new FileNameExtensionFilter( "Excel Workbook (*.xlsx)", "xlsx" );
+			chsr.setFileFilter( xlsxFilter );
+		}
 
+		@Override
+		public void saveTo( File file ) throws IOException {
 			// if we only have sheets with errors, or sheets with no errors, there's
 			// no need to ask the user what they want to export. if we have some of
 			// both, we need to ask
@@ -661,51 +667,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
-			JFileChooser fileChooser = new JFileChooser( lastexp );
-			fileChooser.setSelectedFile( suggestion );
-			fileChooser.setAcceptAllFileFilterUsed( false );
-			FileFilter xlsxFilter
-					= new FileNameExtensionFilter( "Excel Workbook (*.xlsx)", "xlsx" );
-			fileChooser.setFileFilter( xlsxFilter );
+			ImportData data = ImportData.forEngine( getEngine() );
+			fillImportData( data, dogoods, dobads );
 
-			int returnVal = fileChooser.showSaveDialog( LoadingPlaySheetFrame.this );
-
-			if ( returnVal == JFileChooser.APPROVE_OPTION ) {
-				File file = fileChooser.getSelectedFile();
-				prefs.put( "lastexp", file.getParent() );
-				fileChooser.setVisible( false );
-
-				//Make sure that the file name has the selected extension:
-				String fileName = file.getAbsolutePath();
-				String extension = ".xlsx";
-				if ( !fileName.endsWith( extension ) ) {
-					file = new File( fileName + extension );
-				}
-
-				if ( file.exists() ) {
-					int rslt = JOptionPane.showConfirmDialog( rootPane,
-							"File exists. Overwrite?", "Overwrite?", JOptionPane.YES_NO_OPTION );
-					if ( rslt != JOptionPane.YES_OPTION ) {
-						return;
-					}
-				}
-
-				ImportData data = ImportData.forEngine( getEngine() );
-				fillImportData( data, dogoods, dobads );
-
-				XlsWriter writer = new XlsWriter();
-
-				try {
-					writer.write( data, file );
-					Utility.showExportMessage( null, "Loading Sheets saved to " + file,
-							"Save Success", file );
-				}
-				catch ( IOException | HeadlessException ex ) {
-					log.error( ex, ex );
-					Utility.showError( "There was an error saving the Loading sheets\n"
-							+ ex.getLocalizedMessage() );
-				}
-			}
+			XlsWriter writer = new XlsWriter();
+			writer.write( data, file );
 		}
 
 		private void fillImportData( ImportData tofill, boolean dogoods, boolean dobads ) {
@@ -737,6 +703,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					}
 				}
 			}
+		}
+
+		@Override
+		protected String getSuccessMessage( File file ) {
+			return "Loading Sheets saved to " + file;
 		}
 	}
 
