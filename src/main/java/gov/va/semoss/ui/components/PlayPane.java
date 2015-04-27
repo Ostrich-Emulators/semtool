@@ -87,7 +87,6 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -128,6 +127,8 @@ import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
 import com.ibm.icu.util.StringTokenizer;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.event.InternalFrameEvent;
 
 /**
@@ -489,6 +490,24 @@ public class PlayPane extends JFrame {
 
 		new CSSApplication( getContentPane() );
 		DIHelper.getInstance().setLocalProperty( Constants.MAIN_FRAME, this );
+
+		this.addWindowListener( new WindowAdapter() {
+
+			@Override
+			public void windowClosing( WindowEvent e ) {
+				JInternalFrame frames[] = desktopPane.getAllFrames();
+				for ( JInternalFrame jif : frames ) {
+					if ( jif instanceof PlaySheetFrame ) {
+						// signal the frame that it's closing
+						PlaySheetFrame.class.cast( jif ).dispose();
+					}
+				}
+
+				super.windowClosing( e );
+			}
+
+		} );
+
 	}
 
 	public RepositoryList getRepoList() {

@@ -182,9 +182,9 @@ public class PlaySheetFrame extends JInternalFrame {
 					: JOptionPane.YES_NO_CANCEL_OPTION );
 			String[] options = optactions.keySet().toArray( new String[0] );
 
-			int ret = JOptionPane.showOptionDialog( this, "Unsaved Data. Save it? ",
-					"Save Unsaved Data?", dtype, JOptionPane.QUESTION_MESSAGE, null,
-					options, options[0] );
+			int ret = JOptionPane.showOptionDialog( this, "Playsheet " + pscc.getTitle()
+					+ " has unsaved data. Save it? ", "Save Unsaved Data?", dtype,
+					JOptionPane.QUESTION_MESSAGE, null, options, options[0] );
 
 			Action a = optactions.get( options[ret] );
 
