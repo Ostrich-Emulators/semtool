@@ -245,10 +245,15 @@ public class POIReader implements ImportFileReader {
 				sheetTypeToLoad = "";
 			}
 
+			if ( sheetNameToLoad.isEmpty() && sheetTypeToLoad.isEmpty() ) {
+				logger.debug( "empty row at " + ( rIndex + 1 ) + "...skipping rest of tab" );
+				break;
+			}
+
 			if ( sheetNameToLoad.isEmpty() || ( sheetTypeToLoad.isEmpty() && mustHaveType ) ) {
 				if ( sheetNameToLoad.isEmpty() ) {
 					throw new ImportValidationException( ErrorType.MISSING_DATA,
-							"No sheet name on row " + rIndex );
+							"No sheet name on row " + ( rIndex + 1 ) );
 				}
 				else {
 					throw new ImportValidationException( ErrorType.MISSING_DATA,
@@ -388,7 +393,7 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 			else if ( "@prefix".equals( propName ) ) {
-				namespaces.put( propertyMiddleColumn.replaceAll( ":$", ""), propValue );
+				namespaces.put( propertyMiddleColumn.replaceAll( ":$", "" ), propValue );
 			}
 			else {
 				if ( !propertyMiddleColumn.isEmpty() ) {
@@ -419,8 +424,8 @@ public class POIReader implements ImportFileReader {
 			metas.setNamespace( en.getKey(), en.getValue() );
 		}
 
-		ValueFactory vf = new ValueFactoryImpl();		
-		
+		ValueFactory vf = new ValueFactoryImpl();
+
 		for ( String[] triple : triples ) {
 			logger.debug( "adding custom triple: "
 					+ triple[0] + " => " + triple[1] + " => " + triple[2] );
@@ -450,7 +455,7 @@ public class POIReader implements ImportFileReader {
 
 				if ( cellValue.getCellType() != Cell.CELL_TYPE_NUMERIC ) {
 					cellValue.setCellType( Cell.CELL_TYPE_STRING );
-					propHash.put( propName,							
+					propHash.put( propName,
 							EngineLoader.getRDFStringValue( cellValue.getStringCellValue(),
 									id.getMetadata().getNamespaces(), vf ) );
 				}
