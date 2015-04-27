@@ -57,6 +57,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	public static final String FONT_UP = "fontup";
 	public static final String FONT_DOWN = "fontdown";
 	public static final String SAVE = "save";
+	public static final String SAVE_AS = "saveas";
 	public static final String SAVE_ALL = "saveall";
 	public static final String EXPORT = "export";
 

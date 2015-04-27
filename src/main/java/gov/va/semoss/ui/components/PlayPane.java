@@ -244,6 +244,7 @@ public class PlayPane extends JFrame {
 	protected final JMenu windowSelector = new JMenu( "Window" );
 	protected final JMenu fileMenu = new JMenu( "File" );
 	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
+	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As..." );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
 
 	private final JToolBar toolbar;
@@ -871,6 +872,7 @@ public class PlayPane extends JFrame {
 			@Override
 			public void internalFrameActivated( InternalFrameEvent e ) {
 				fileMenuSave.setEnabled( false );
+				fileMenuSaveAs.setEnabled( false );
 				fileMenuSaveAll.setEnabled( false );
 
 				JInternalFrame jif = e.getInternalFrame();
@@ -882,6 +884,10 @@ public class PlayPane extends JFrame {
 					if ( actions.containsKey( PlaySheetFrame.SAVE ) ) {
 						fileMenuSave.setAction( actions.get( PlaySheetFrame.SAVE ) );
 						fileMenuSave.setEnabled( true );
+					}
+					if ( actions.containsKey( PlaySheetFrame.SAVE_AS ) ) {
+						fileMenuSaveAs.setAction( actions.get( PlaySheetFrame.SAVE_AS ) );
+						fileMenuSaveAs.setEnabled( true );
 					}
 					if ( actions.containsKey( PlaySheetFrame.SAVE_ALL ) ) {
 						fileMenuSaveAll.setAction( actions.get( PlaySheetFrame.SAVE_ALL ) );
@@ -1390,47 +1396,54 @@ public class PlayPane extends JFrame {
 		} );
 
 		fileMenuSave.setEnabled( false );
+		fileMenuSaveAs.setEnabled( false );
 		fileMenuSaveAll.setEnabled( false );
 
 		JMenu newmenu = new JMenu( "New" );
+		newmenu.setMnemonic( KeyEvent.VK_N );
 		fileMenu.add( newmenu );
-		newmenu.add( creater ).setText( "Database" );
-		newmenu.add( newls ).setText( "Loading Sheet" );
+		JMenuItem jmi = newmenu.add( creater );
+		jmi.setText( "Database" );
+		jmi.setMnemonic( KeyEvent.VK_D );
+		jmi = newmenu.add( newls );
+		jmi.setText( "Loading Sheet" );
+		jmi.setMnemonic( KeyEvent.VK_L );
 
 		fileMenu.setMnemonic( KeyEvent.VK_F );
 		exiter.setMnemonic( KeyEvent.VK_X );
-
-		fileMenu.add( importxls ).setText( "Open..." );
+		jmi = fileMenu.add( importxls );
+		jmi.setText( "Open..." );
+		fileMenu.addSeparator();
 		fileMenu.add( unmounter );
 
-		fileMenu.addSeparator();
 		fileMenu.add( fileMenuSave );
+		fileMenu.add( fileMenuSaveAs );
 		fileMenu.add( fileMenuSaveAll );
 
-		JMenu exptop2 = new JMenu( "Export" );
-		exptop2.add( exportttl );
-		exptop2.add( exportnt );
-		exptop2.add( exportrdf );
-		exptop2.setIcon( DbAction.getIcon( "exportdb" ) );
-		JMenu loadingsheets2 = new JMenu( "Loading Sheets" );
-		exptop2.add( loadingsheets2 );
-		loadingsheets2.add( expnodes );
-		loadingsheets2.add( expSpecNodes );
-		loadingsheets2.add( exprels );
-		loadingsheets2.add( expSpecRels );
-		loadingsheets2.add( expall );
-		exptop2.add( exportinsights );
-
-		JMenu importtop2 = new JMenu( "Import" );
-		importtop2.setIcon( DbAction.getIcon( "importdb" ) );
-		importtop2.add( importls );
-		JMenu insights2 = new JMenu( "Insights" );
-		insights2.add( resetInsights );
-		insights2.add( importInsights );
-		importtop2.add( insights2 );
-
-		fileMenu.add( exptop2 );
-		fileMenu.add( importtop2 );
+//		JMenu exptop2 = new JMenu( "Export" );
+//		exptop2.add( exportttl );
+//		exptop2.add( exportnt );
+//		exptop2.add( exportrdf );
+//		exptop2.setIcon( DbAction.getIcon( "exportdb" ) );
+//		JMenu loadingsheets2 = new JMenu( "Loading Sheets" );
+//		exptop2.add( loadingsheets2 );
+//		loadingsheets2.add( expnodes );
+//		loadingsheets2.add( expSpecNodes );
+//		loadingsheets2.add( exprels );
+//		loadingsheets2.add( expSpecRels );
+//		loadingsheets2.add( expall );
+//		exptop2.add( exportinsights );
+//
+//		JMenu importtop2 = new JMenu( "Import" );
+//		importtop2.setIcon( DbAction.getIcon( "importdb" ) );
+//		importtop2.add( importls );
+//		JMenu insights2 = new JMenu( "Insights" );
+//		insights2.add( resetInsights );
+//		insights2.add( importInsights );
+//		importtop2.add( insights2 );
+//
+//		fileMenu.add( exptop2 );
+//		fileMenu.add( importtop2 );
 		fileMenu.addSeparator();
 		fileMenu.add( exiter );
 
@@ -1454,7 +1467,7 @@ public class PlayPane extends JFrame {
 		menu.add( windowSelector );
 
 		if ( null != help ) {
-		//	menu.add( Box.createHorizontalGlue() );
+			//	menu.add( Box.createHorizontalGlue() );
 			menu.add( help );
 		}
 
