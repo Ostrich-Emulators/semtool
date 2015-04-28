@@ -224,6 +224,7 @@ public class EngineLoader {
 			boolean createmetamodel, ImportData conformanceErrors )
 			throws RepositoryException, IOException, ImportValidationException {
 
+		preloadCaches( engine );
 		Set<Statement> mmstmts = new HashSet<>();
 
 		for ( File fileToLoad : toload ) {
@@ -263,6 +264,7 @@ public class EngineLoader {
 
 	public void loadToEngine( ImportData data, IEngine engine,
 			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
+		preloadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
 		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
 	}
@@ -512,7 +514,6 @@ public class EngineLoader {
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				map.put( set.getValue( "label" ).stringValue(),
 						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
-
 			}
 
 			@Override
@@ -525,8 +526,8 @@ public class EngineLoader {
 		UriBuilder owlb = engine.getSchemaBuilder();
 
 		try {
-			URI uri = owlb.getRelationUri().build();
-			vqa.bind( "type", uri );
+			URI type = owlb.getRelationUri().build();
+			vqa.bind( "type", type );
 			vqa.bind( "isa", RDFS.SUBPROPERTYOF );
 			engine.query( vqa );
 
@@ -545,8 +546,8 @@ public class EngineLoader {
 			cacheUris( CacheType.RELATION, cacheb );
 
 			vqa.bind( "isa", RDFS.SUBCLASSOF );
-			uri = owlb.getConceptUri().build();
-			vqa.bind( "type", uri );
+			type = owlb.getConceptUri().build();
+			vqa.bind( "type", type );
 			engine.query( vqa );
 			cacheUris( CacheType.CONCEPTCLASS, map );
 
@@ -746,7 +747,8 @@ public class EngineLoader {
 			ImportMetadata metas ) throws RepositoryException {
 
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
-			String relkey = sheet.getName() + entry.getKey();
+			// String relkey = sheet.getName() + entry.getKey();
+			String relkey = entry.getKey();
 
 			URI predicate = relationClassCache.get( relkey );
 
@@ -774,7 +776,6 @@ public class EngineLoader {
 
 		String stype = sheet.getSubjectType();
 		String scachekey = stype;
-		URI suri;
 		if ( !schemaNodes.containsKey( scachekey ) ) {
 			boolean nodeAlreadyMade = isUri( stype, namespaces );
 
@@ -789,7 +790,6 @@ public class EngineLoader {
 				myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 			}
 		}
-		suri = schemaNodes.get( stype );
 
 		if ( sheet.isRel() ) {
 			String otype = sheet.getObjectType();
@@ -841,7 +841,8 @@ public class EngineLoader {
 
 		for ( String propname : sheet.getProperties() ) {
 			// property names are unique per sheet
-			String relkey = sheet.getName() + propname;
+			//String relkey = sheet.getName() + propname;
+			String relkey = propname;
 			boolean alreadyMadeProp = isUri( propname, namespaces );
 
 			if ( !relationClassCache.containsKey( relkey ) ) {
