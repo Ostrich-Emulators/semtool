@@ -19,7 +19,11 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.model.vocabulary.SEMOSS;
+import gov.va.semoss.model.vocabulary.VAC;
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
@@ -49,6 +53,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -83,13 +88,16 @@ import org.apache.xerces.util.XMLChar;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.model.vocabulary.FOAF;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
-
-import com.ibm.icu.util.Calendar;
 
 /**
  * The Utility class contains a variety of miscellaneous functions implemented
@@ -98,8 +106,24 @@ import com.ibm.icu.util.Calendar;
  * workbooks.
  */
 public class Utility {
+
 	private static final Logger log = Logger.getLogger( Utility.class );
 	private static int id = 0;
+
+	public static final Map<String, String> DEFAULTNAMESPACES = new HashMap<>();
+
+	static {
+		DEFAULTNAMESPACES.put( RDF.PREFIX, RDF.NAMESPACE );
+		DEFAULTNAMESPACES.put( RDFS.PREFIX, RDFS.NAMESPACE );
+		DEFAULTNAMESPACES.put( OWL.PREFIX, OWL.NAMESPACE );
+		DEFAULTNAMESPACES.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
+		DEFAULTNAMESPACES.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
+		DEFAULTNAMESPACES.put( FOAF.PREFIX, FOAF.NAMESPACE );
+		DEFAULTNAMESPACES.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
+		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
+		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
+		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
+	}
 
 	/**
 	 * Matches the given query against a specified pattern. While the next
@@ -343,7 +367,7 @@ public class Utility {
 	 *
 	 * @param urilabels a mapping of URIs to their labels. Say, the results of
 	 * null	null	null	null null null null null null	null	null	null	null	null	null
-	 * null	null	 {@link #getInstanceLabels(java.util.Collection, 
+	 * null	null	null	null	 {@link #getInstanceLabels(java.util.Collection, 
    * gov.va.semoss.rdf.engine.api.IEngine) }
 	 *
 	 * @return the results
@@ -1058,22 +1082,23 @@ public class Utility {
 		}
 		zipFile.close();
 	}
-	
-	public static void addModelToJTable(AbstractTableModel tableModel, String tableKey) {
+
+	public static void addModelToJTable( AbstractTableModel tableModel, String tableKey ) {
 		JTable table = DIHelper.getJTable( tableKey );
 		table.setModel( tableModel );
 		tableModel.fireTableDataChanged();
-		
-		for (int i=0; i<tableModel.getColumnCount(); i++) {
-			if (Boolean.class.equals( tableModel.getColumnClass(i) )) {
+
+		for ( int i = 0; i < tableModel.getColumnCount(); i++ ) {
+			if ( Boolean.class.equals( tableModel.getColumnClass( i ) ) ) {
 				TableColumnModel columnModel = table.getColumnModel();
-				if (i < columnModel.getColumnCount())
-					columnModel.getColumn(i).setPreferredWidth(35);
+				if ( i < columnModel.getColumnCount() ) {
+					columnModel.getColumn( i ).setPreferredWidth( 35 );
+				}
 			}
 		}
 	}
 
-	public static void resetJTable(String tableKey) {
+	public static void resetJTable( String tableKey ) {
 		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
 		log.debug( "Resetting the " + tableKey + " table model." );
 	}

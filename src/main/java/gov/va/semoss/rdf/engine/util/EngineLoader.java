@@ -50,6 +50,7 @@ import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 
 import java.io.BufferedWriter;
@@ -1096,34 +1097,16 @@ public class EngineLoader {
 	 * @throws org.openrdf.repository.RepositoryException
 	 */
 	private static void initNamespaces( RepositoryConnection conn ) throws RepositoryException {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
 
 		conn.begin();
-		for ( Map.Entry<String, String> e : namespaces.entrySet() ) {
+		for ( Map.Entry<String, String> e : Utility.DEFAULTNAMESPACES.entrySet() ) {
 			conn.setNamespace( e.getKey(), e.getValue() );
 		}
 		conn.commit();
 	}
 
 	public static void initNamespaces( ImportData conn ) {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		namespaces.put( VAC.PREFIX, VAC.NAMESPACE );
-		namespaces.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
-
-		conn.getMetadata().setNamespaces( namespaces );
+		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 	}
 
 	public static class ConceptInstanceCacheKey {
