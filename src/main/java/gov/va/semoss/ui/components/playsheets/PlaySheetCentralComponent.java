@@ -22,6 +22,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -46,6 +47,7 @@ import org.openrdf.model.impl.LiteralImpl;
  * @author ryan
  */
 public abstract class PlaySheetCentralComponent extends JComponent implements IPlaySheet {
+
 	private static final long serialVersionUID = 3695436192569801799L;
 	private static final Logger log
 			= Logger.getLogger( PlaySheetCentralComponent.class );
@@ -68,9 +70,23 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return title;
 	}
 
+	public boolean hasChanges(){
+		return false;
+	}
+	
 	protected void setHeaders( List<String> newheaders ) {
 		headers.clear();
 		headers.addAll( newheaders );
+	}
+
+	/**
+	 * Gets a map of String-to-Actions from this tab.
+	 *
+	 * @see PlaySheetFrame#getActions()
+	 * @return a (by default, empty) mapping of actions
+	 */
+	public Map<String, Action> getActions() {
+		return new HashMap<>();
 	}
 
 	/**
@@ -134,13 +150,13 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 					@Override
 					public void actionPerformed( ActionEvent e ) {
-						ExportUtility.doGraphExportWithDialogue(PlaySheetCentralComponent.this);
+						ExportUtility.doGraphExportWithDialogue( PlaySheetCentralComponent.this );
 					}
-					
+
 				};
 
-		aa.putValue( Action.SHORT_DESCRIPTION, "Export Image" );		
-		tb.add( aa );				
+		aa.putValue( Action.SHORT_DESCRIPTION, "Export Image" );
+		tb.add( aa );
 	}
 
 	/**
@@ -190,7 +206,6 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return list;
 	}
 
-	
 	public void overlay( List<Value[]> data, List<String> headers ) {
 		log.error( "into overlay: " + data.size() + " items" );
 	}

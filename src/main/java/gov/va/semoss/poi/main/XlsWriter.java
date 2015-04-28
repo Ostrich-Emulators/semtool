@@ -284,6 +284,19 @@ public class XlsWriter {
 		return newtab;
 	}
 
+	public boolean addRow( Object[] values ) {
+		return addRow( values, null );
+	}
+
+	public boolean addRow( Object[] values, CellStyle[] formatting ) {
+		String[] rows = new String[values.length];
+		for ( int i = 0; i < rows.length; i++ ) {
+			rows[i] = ( null == values[i] ? null : values[i].toString() );
+		}
+
+		return addRow( rows, formatting );
+	}
+
 	/**
 	 * Writes the current worksheet to the given file. Any parent directories will
 	 * be created automatically
@@ -344,7 +357,7 @@ public class XlsWriter {
 			mddata.add( new String[]{ "@prefix", en.getKey(), en.getValue() } );
 		}
 
-		for ( String [] stmt : data.getStatements() ) {
+		for ( String[] stmt : data.getStatements() ) {
 			mddata.add( new String[]{ "@triple", stmt[0], stmt[1], stmt[2] } );
 		}
 

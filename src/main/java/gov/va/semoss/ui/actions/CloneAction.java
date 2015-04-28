@@ -45,7 +45,7 @@ public class CloneAction extends DbAction {
   public void setEngine( IEngine eng ) {
     super.setEngine( eng );
 
-    StringBuilder name = new StringBuilder( "Clone " );
+    StringBuilder name = new StringBuilder( "Copy " );
     if ( !copydata ) {
       name.append( "Configuration of " );
     }

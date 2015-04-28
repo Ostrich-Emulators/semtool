@@ -20,7 +20,7 @@ import gov.va.semoss.ui.components.ProgressTask;
  */
 public abstract class DbAction extends AbstractAction {
 
-  public static final String MERGE = "Copy Data to";
+  public static final String MERGE = "DataBase";
   public static final String PROPS = "About Database";
   public static final String CLONE = "Copy ";
   public static final String CLONECONF = "Clone Setup (no data) ";
@@ -42,7 +42,7 @@ public abstract class DbAction extends AbstractAction {
   public static final String ENDPOINT = "Start SparQL Endpoint";
 	public static final String CONSISTENCYCHECK = "Quality Checks";
 
-  private final String opprogName;
+  public final String opprogName;
   private IEngine engine;
 
   public DbAction( String opprog ) {
