@@ -6,8 +6,12 @@
 package gov.va.semoss.ui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
 import javax.swing.AbstractAction;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -26,6 +30,7 @@ public class PinAction extends DbAction {
   public PinAction( String optg ) {
     super( optg, PIN, "dbpin" );
     putValue( AbstractAction.SHORT_DESCRIPTION, "Pin/Unpin the database" );
+	putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_P);
   }
 
   @Override

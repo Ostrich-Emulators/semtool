@@ -2,10 +2,12 @@ package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.XlsWriter;
+
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDFS;
@@ -40,7 +43,9 @@ import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
+
 import java.io.IOException;
+
 import javax.swing.JCheckBox;
 
 /**
@@ -73,7 +78,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 
 		this.owner = _owner;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Export Specific Relationships" );
-
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
 		query.bind( "subclass", RDFS.SUBCLASSOF );
 	}
 

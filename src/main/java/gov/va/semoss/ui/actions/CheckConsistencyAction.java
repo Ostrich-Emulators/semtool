@@ -7,11 +7,16 @@ package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.rdf.engine.util.EngineConsistencyChecker;
 import gov.va.semoss.rdf.engine.util.EngineConsistencyChecker.Hit;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.ui.components.CheckWhatPanel;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.util.Utility;
@@ -19,11 +24,13 @@ import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.playsheets.ConsistencyPlaySheet;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
+
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.openrdf.model.URI;
 
 /**
@@ -41,6 +48,7 @@ public class CheckConsistencyAction extends DbAction {
 		super( optg, CONSISTENCYCHECK, "conformance-check" );
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Check Database Consistency" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_Q );
 	}
 
 	@Override

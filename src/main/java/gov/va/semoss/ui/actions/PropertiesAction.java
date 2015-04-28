@@ -7,8 +7,12 @@ package gov.va.semoss.ui.actions;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
 import javax.swing.AbstractAction;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.ui.components.DbMetadataPanel;
 import gov.va.semoss.ui.components.ProgressTask;
 
@@ -25,6 +29,7 @@ public class PropertiesAction extends DbAction {
     super( null, PROPS, "properties" );
     this.frame = frame;
     putValue( AbstractAction.SHORT_DESCRIPTION, "View/Edit the properties" );
+    putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_A );
   }
 
   @Override

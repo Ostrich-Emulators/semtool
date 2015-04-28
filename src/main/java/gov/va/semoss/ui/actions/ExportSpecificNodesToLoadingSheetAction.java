@@ -6,8 +6,10 @@
 package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.ui.actions.DbAction;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
@@ -28,6 +30,7 @@ public class ExportSpecificNodesToLoadingSheetAction extends DbAction {
 		
 		parent = _parent;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Export Specific Nodes" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
 	}
 
 	@Override
