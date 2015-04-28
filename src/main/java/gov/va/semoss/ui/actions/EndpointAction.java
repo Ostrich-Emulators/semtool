@@ -8,11 +8,15 @@ package gov.va.semoss.ui.actions;
 import java.awt.Desktop;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.ServerSocket;
+
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -31,6 +35,7 @@ public class EndpointAction extends DbAction {
     super( optg, ENDPOINT, "world" );
     this.frame = frame;
     putValue( AbstractAction.SHORT_DESCRIPTION, "Start/Stop the SPARQL endpoint" );
+    putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
   }
 
   @Override

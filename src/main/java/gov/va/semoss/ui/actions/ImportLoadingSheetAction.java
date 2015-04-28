@@ -6,10 +6,16 @@
 package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.ui.components.ImportCreateDbPanel;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
+import javax.swing.AbstractAction;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.ui.components.ImportExistingDbPanel;
 import gov.va.semoss.ui.components.ProgressTask;
 
@@ -30,6 +36,7 @@ public class ImportLoadingSheetAction extends DbAction {
 			String iconname ) {
 		super( optg, name, iconname );
 		putValue( SHORT_DESCRIPTION, "Import loading sheets" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_E );
 	}
 
 	@Override

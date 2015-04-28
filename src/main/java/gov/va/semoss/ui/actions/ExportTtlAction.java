@@ -7,13 +7,16 @@ package gov.va.semoss.ui.actions;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.prefs.Preferences;
+
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+
 import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -21,12 +24,15 @@ import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
+
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.main.SemossPreferences;
+
 import java.util.Map;
+
 import javax.swing.JOptionPane;
 
 /**
@@ -55,12 +61,15 @@ public class ExportTtlAction extends DbAction {
 		switch ( exportAs ) {
 			case NT:
 				desc = "an N-Triples";
+				putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_N );
 				break;
 			case TTL:
 				desc = "a Turtle";
+				putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_T );
 				break;
 			default:
 				desc = "an RDF";
+				putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_R );
 		}
 		putValue( AbstractAction.SHORT_DESCRIPTION,
 				"Export the database as " + desc + " file" );

@@ -7,10 +7,14 @@ package gov.va.semoss.ui.actions;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
+
 import javax.swing.AbstractAction;
+
 import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryException;
+
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
@@ -34,6 +38,7 @@ public class CloneAction extends DbAction {
     this.frame = frame;
     this.copydata = copydata;
     putValue( AbstractAction.SHORT_DESCRIPTION, "Duplicate a database" );
+    putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
   }
 
   @Override

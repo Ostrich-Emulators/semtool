@@ -10,18 +10,25 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.prefs.Preferences;
+
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
+
 import java.io.IOException;
 import java.util.Collection;
+
 import org.openrdf.model.URI;
 
 /**
@@ -42,6 +49,8 @@ public class ImportInsightsAction extends DbAction {
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION,
 				( clearfirst ? "Replace" : "Add" ) + " insights from a file" );
+		putValue( AbstractAction.MNEMONIC_KEY,
+				( clearfirst ? KeyEvent.VK_R : KeyEvent.VK_A )  );
 		clear = clearfirst;
 	}
 
