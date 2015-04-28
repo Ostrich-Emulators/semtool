@@ -121,6 +121,9 @@ public class EngineLoaderTest {
 	private static final File TEST10 = new File( "src/test/resources/test10.xlsx" );
 	private static final File TEST10_EXP = new File( "src/test/resources/test10.nt" );
 
+	private static final File TEST14 = new File( "src/test/resources/test14.xlsx" );
+	private static final File TEST14_EXP = new File( "src/test/resources/test14.nt" );
+
 	private InMemorySesameEngine engine;
 	private File dbfile;
 
@@ -1021,6 +1024,29 @@ public class EngineLoaderTest {
 
 		assertEquals( LiteralImpl.class, result.getClass() );
 		assertNotEquals( old.getClass(), result.getClass() );
+	}
+
+	@Test
+	public void testLoadingSheet14() throws Exception {
+
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		el.loadToEngine( Arrays.asList( TEST14 ), engine, true, null );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test14.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TEST14_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
 	private Model getExpectedGraph( File rdf ) {
