@@ -175,6 +175,12 @@ public class POIReader implements ImportFileReader {
 			typeToSheetNameLkp.add( SheetType.LOADER, LOADER );
 
 			Map<String, SheetType> fromloading = categorizeFromLoadingSheet( lSheet );
+
+			if ( fromloading.isEmpty() ) {
+				throw new ImportValidationException( ErrorType.MISSING_DATA,
+						"No data to process" );
+			}
+
 			for ( Map.Entry<String, SheetType> en : fromloading.entrySet() ) {
 				String name = en.getKey();
 				SheetType loadertype = en.getValue();

@@ -35,6 +35,7 @@ public class POIReaderTest {
 	private static final File FAIL9 = new File( "src/test/resources/loaderfail9.xlsx" );
 	private static final File TEST11 = new File( "src/test/resources/test11.xlsx" );
 	private static final File TEST12 = new File( "src/test/resources/test12.xlsx" );
+	private static final File TEST13 = new File( "src/test/resources/test13.xlsx" );
 
 	public POIReaderTest() {
 	}
@@ -192,5 +193,18 @@ public class POIReaderTest {
 		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
 		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
 		assertEquals( "Yugo", data.getSheet( "Purchases" ).getData().get( 0 ).getObject() );
+	}
+
+	@Test( expected = ImportValidationException.class )
+	public void testLoadingSheet13() throws Exception {
+		POIReader rdr = new POIReader();
+		try {
+			rdr.readOneFile( TEST13 );
+		}
+		catch ( ImportValidationException e ) {
+			if ( ErrorType.MISSING_DATA == e.error ) {
+				throw e;
+			}
+		}
 	}
 }
