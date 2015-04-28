@@ -203,6 +203,12 @@ public class POIReader implements ImportFileReader {
 			}
 		}
 
+		if ( 1 == typeToSheetNameLkp.keySet().size()
+				&& typeToSheetNameLkp.containsKey( SheetType.METADATA ) ) {
+			throw new ImportValidationException( ErrorType.MISSING_DATA,
+					"No data to process" );
+		}
+
 		if ( typeToSheetNameLkp.getNN( SheetType.METADATA ).size() > 1 ) {
 			throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
 					"Too many metadata tabs in loading file" );
@@ -429,8 +435,6 @@ public class POIReader implements ImportFileReader {
 					+ en.getKey() + " => " + en.getValue() );
 			metas.setNamespace( en.getKey(), en.getValue() );
 		}
-
-		ValueFactory vf = new ValueFactoryImpl();
 
 		for ( String[] triple : triples ) {
 			logger.debug( "adding custom triple: "

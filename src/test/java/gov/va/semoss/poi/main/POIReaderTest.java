@@ -36,6 +36,7 @@ public class POIReaderTest {
 	private static final File TEST11 = new File( "src/test/resources/test11.xlsx" );
 	private static final File TEST12 = new File( "src/test/resources/test12.xlsx" );
 	private static final File TEST13 = new File( "src/test/resources/test13.xlsx" );
+	private static final File TEST16 = new File( "src/test/resources/test16.xlsx" );
 
 	public POIReaderTest() {
 	}
@@ -200,6 +201,19 @@ public class POIReaderTest {
 		POIReader rdr = new POIReader();
 		try {
 			rdr.readOneFile( TEST13 );
+		}
+		catch ( ImportValidationException e ) {
+			if ( ErrorType.MISSING_DATA == e.error ) {
+				throw e;
+			}
+		}
+	}
+	
+	@Test( expected = ImportValidationException.class )
+	public void testLoadingSheet16() throws Exception {
+		POIReader rdr = new POIReader();
+		try {
+			rdr.readOneFile( TEST16 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.MISSING_DATA == e.error ) {
