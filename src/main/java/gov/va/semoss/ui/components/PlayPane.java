@@ -1100,10 +1100,10 @@ public class PlayPane extends JFrame {
 		importtop.setToolTipText("Import Database Operations");
 		importtop.setMnemonic(KeyEvent.VK_I);
 		db.add( importtop );
-		JMenu iDatabase = new JMenu( "Database" );
-		iDatabase.setToolTipText("Import Database Operations");
-		iDatabase.setMnemonic(KeyEvent.VK_D);
-		importtop.add( iDatabase );
+		//JMenu iDatabase = new JMenu( "Database" );
+		//iDatabase.setToolTipText("Import Database Operations");
+		//iDatabase.setMnemonic(KeyEvent.VK_D);
+		//importtop.add( iDatabase );
 		importtop.add( importls );
 		
 		JMenu insights = new JMenu( "Insights" );
