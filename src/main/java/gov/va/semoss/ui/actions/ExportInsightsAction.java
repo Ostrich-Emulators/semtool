@@ -17,6 +17,7 @@ import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.prefs.Preferences;
 
@@ -63,6 +64,7 @@ public class ExportInsightsAction extends DbAction {
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION,
 				"Export the insights as a Turtle file" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_I );
 	}
 
 	@Override

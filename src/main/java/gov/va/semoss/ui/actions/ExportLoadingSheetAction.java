@@ -7,13 +7,18 @@ package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.XlsWriter;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.prefs.Preferences;
+
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.ui.components.DBToLoadingSheetExporter;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
@@ -21,7 +26,9 @@ import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
 import gov.va.semoss.util.DIHelper;
+
 import java.io.IOException;
+
 import javax.swing.JOptionPane;
 
 /**
@@ -49,12 +56,15 @@ public class ExportLoadingSheetAction extends DbAction {
 
 		if ( donodes && dorels ) {
 			putValue( AbstractAction.SHORT_DESCRIPTION, "Export all nodes and relationships as loading sheets" );
+			putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
 		}
 		else if ( donodes ) {
 			putValue( AbstractAction.SHORT_DESCRIPTION, "Export all nodes as loading sheets" );
+			putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_A );
 		}
 		else {
 			putValue( AbstractAction.SHORT_DESCRIPTION, "Export all relationships as loading sheets" );
+			putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_A );
 		}
 	}
 

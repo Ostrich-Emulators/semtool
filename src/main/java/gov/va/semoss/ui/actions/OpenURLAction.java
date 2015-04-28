@@ -61,7 +61,7 @@ public class OpenURLAction extends DbAction {
 	public static OpenURLAction getTracAction() {
 		return new OpenURLAction( "Report an Issue",
 				"Opens a Browser to the V-CAMP Issue Reporting systems",
-				DIHelper.getInstance().getProperty( Constants.HELPURI_KEY ), "trac", KeyEvent.VK_R );
+				DIHelper.getInstance().getProperty( Constants.HELPURI_KEY ), "trac", KeyEvent.VK_I );
 		
 	}
 
@@ -69,7 +69,7 @@ public class OpenURLAction extends DbAction {
 		return new OpenURLAction( "Get the Latest Release",
 				"Opens a Browser to the latest VCAMP Stable application",
 				DIHelper.getInstance().getProperty( Constants.LATESTRELEASE_KEY ),
-				"VCAMP-Tool", KeyEvent.VK_G );
+				"VCAMP-Tool", KeyEvent.VK_S );
 	}
 
 	public static OpenURLAction getExperimentalReleaseAction() {

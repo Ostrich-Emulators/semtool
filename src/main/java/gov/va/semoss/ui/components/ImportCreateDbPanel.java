@@ -85,6 +85,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				addChoosableFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter(
 				"Turtle Files", "ttl" ) );
+		
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter(
 				"RDF/XML Files", "rdf" ) );
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter(

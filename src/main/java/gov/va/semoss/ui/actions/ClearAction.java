@@ -7,17 +7,23 @@ package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.CopyWhatPanel;
 import gov.va.semoss.ui.components.ProgressTask;
+
 import java.io.IOException;
 
 /**
@@ -34,6 +40,7 @@ public class ClearAction extends DbAction {
 		super( optg, CLEAR, "erasedb" );
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Empty the data from a database" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_L );
 	}
 
 	@Override
