@@ -74,8 +74,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		fieldlkp.put( MetadataConstants.DCT_PUBLISHER, poc );
 		fieldlkp.put( MetadataConstants.DCT_CREATED, created );
 		fieldlkp.put( MetadataConstants.DCT_MODIFIED, update );
-		fieldlkp.put( VAS.REIFICATION, edgemodel );
-		fieldlkp.put( VAS.DATABASE, voiduri );
+		fieldlkp.put( VAS.reification, edgemodel );
+		fieldlkp.put( VAS.Database, voiduri );
 
 		voiduri.setEditable( null == baseuri );
 		voiduri.setBackground( null == baseuri ? title.getBackground()
@@ -132,7 +132,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		// if it's enabled, we HAVE to save the baseuri first so the 
 		// other fields have a URI to save to
 		for ( Map.Entry<URI, JTextField> entry : fieldlkp.entrySet() ) {
-			if ( !VAS.DATABASE.equals( entry.getKey() ) ) {
+			if ( !VAS.Database.equals( entry.getKey() ) ) {
 				DbMetadataPanel.this.actionPerformed( new ActionEvent( entry.getValue(),
 						i++, entry.getKey().stringValue() ) );
 			}
@@ -190,8 +190,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
 		try {
 			Map<URI, String> metadata = eng.query( new MetadataQuery() );
-			if ( metadata.containsKey( VAS.DATABASE ) ) {
-				baseuri = new URIImpl( metadata.get( VAS.DATABASE ) );
+			if ( metadata.containsKey( VAS.Database ) ) {
+				baseuri = new URIImpl( metadata.get( VAS.Database ) );
 			}
 
 			for ( Map.Entry<URI, String> en : metadata.entrySet() ) {
@@ -441,9 +441,9 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					ValueFactory fac = conn.getValueFactory();
-					if ( uri.equals( VAS.DATABASE ) ) {
+					if ( uri.equals( VAS.Database ) ) {
 						baseuri = fac.createURI( val );
-						conn.add( baseuri, RDF.TYPE, VAS.DATABASE );
+						conn.add( baseuri, RDF.TYPE, VAS.Database );
 					}
 					else {
 						if ( conn.hasStatement( baseuri, uri, null, false ) ) {

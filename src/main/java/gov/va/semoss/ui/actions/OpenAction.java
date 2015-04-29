@@ -9,14 +9,18 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.FileBrowsePanel;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +28,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
+
+import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
@@ -41,6 +48,7 @@ public class OpenAction extends DbAction {
 		super( optg, "Open File", "open-file3" );
 		this.frame = frame;
 		putValue( SHORT_DESCRIPTION, "Open Files" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_O );
 	}
 
 	public OpenAction( String optg, Frame frame, Collection<File> toadd ) {

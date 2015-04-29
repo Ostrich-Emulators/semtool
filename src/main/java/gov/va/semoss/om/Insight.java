@@ -1,5 +1,7 @@
 package gov.va.semoss.om;
 
+import gov.va.semoss.util.Utility;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +20,7 @@ public class Insight {
 	//Name of the question:
 	String label = null;
 	//Query Parameters:
-	Map<String, Map<String, Value>> parameters = new HashMap<>();
+	Map<String, Map<String, String>> parameters = new HashMap<>();
 	//Sparql for the question:
 	String sparql = null;
 	//Database id indicating Insight location.
@@ -28,6 +30,8 @@ public class Insight {
 	String entityType = null;
 	//The layout used to render this insight:
 	String output = null;
+	//A renderer class for the Insight (if standard playsheets aren't used):
+	String rendererClass = null;
 	//Whether the query uses legacy internal parameter specifications:
 	boolean isLegacy = false;
 	//Description of Insight:
@@ -40,7 +44,11 @@ public class Insight {
 	String modified = null;
 
 	HashMap<String, Integer> order = new HashMap<String, Integer>();
-	boolean defautlValueIsQuery = false;
+	
+	//The default value of this Insight is a Sparql query in most cases.
+	//Some Insights depend upon Java renderer classes, instead of queries.
+	//For these cases, this value may be altered from within the InsightManager:
+	boolean defautlValueIsQuery = true;
 	
 	//InsightParameters:
 	Collection<Parameter> colInsightParameters = new ArrayList<Parameter>();
@@ -116,31 +124,42 @@ public class Insight {
 		return this.colInsightParameters;
 	}
 
-	public void setParameter( String variable, URI type, Value defaultValue ) {
-		Map<String, Value> attributes = new HashMap<>();
-		attributes.put( "type", type );
-		if ( defaultValue != null ) {
-			attributes.put( "defaultValue", defaultValue );
+	public void setParameter( String variable, String label, String type, String defaultQuery ) {
+		Map<String, String> attributes = new HashMap<>();
+		attributes.put("parameterLabel", label);
+		attributes.put("parameterValueType", type);
+		if ( defaultQuery != null ) {
+			attributes.put("parameterQuery", defaultQuery);
 		}
-
-		parameters.put( variable, attributes );
+		parameters.put(variable, attributes);
 	}
 
-	public Map<String, Map<String, Value>> getParameters() {
+	public Map<String, Map<String, String>> getParameters() {
 		return this.parameters;
 	}
 
 	public Set<String> getParametersKeySet() {
 		return this.parameters.keySet();
 	}
-
-	public URI getParameterType( String parameterName ) {
-		return (URI) this.parameters.get( parameterName ).get( "type" );
+	
+	public String getParameterLabel( String parameterVariableName ) {
+		return this.parameters.get(parameterVariableName).get("parameterLabel");
 	}
 
-	// presently the default value is always a query string, but this could change
-	public Value getParameterDefaultValue( String parameterName ) {
-		return this.parameters.get( parameterName ).get( "defaultValue" );
+	public String getParameterType( String parameterVariableName ) {
+		return this.parameters.get(parameterVariableName).get("parameterValueType");
+	}
+
+	public String getParameterQuery( String parameterVariableName ) {
+		return this.parameters.get( parameterVariableName ).get("parameterQuery");
+	}
+
+	public void setRendererClass( String rendererClass ) {
+		this.rendererClass = rendererClass;
+	}
+
+	public String getRendererClass() {
+		return this.rendererClass;
 	}
 
 	public void setIsLegacy( boolean isLegacy ) {
@@ -250,16 +269,26 @@ public class Insight {
 		}
 
 		if ( resultSet.getValue( "parameterVariable" ) != null ) {
-			Value parameterDefaultValue;
-			if ( resultSet.getValue( "defaultValueQuery" ) == null ) {
-				parameterDefaultValue = resultSet.getValue( "parameterDefaultValueQuery" );
+			String parameterVariable = resultSet.getValue( "parameterVariable").stringValue();
+			String parameterLabel;
+			if(resultSet.getValue("parameterLabel") != null){
+			   parameterLabel = resultSet.getValue( "parameterLabel" ).stringValue();
+			}else{
+			   parameterLabel = parameterVariable;
 			}
-			else {
-				parameterDefaultValue = resultSet.getValue( "defaultValueQuery" );
-				setDefaultValueIsQuery( true );
+			String parameterType = resultSet.getValue( "parameterValueType").stringValue();
+			String parameterQuery;
+			if(resultSet.getValue("parameterQuery") != null){
+			   parameterQuery = resultSet.getValue("parameterQuery").stringValue();
+			}else{
+			   parameterQuery = "";
 			}
-
-			setParameter( resultSet.getValue( "parameterVariable" ).stringValue(), (URI) resultSet.getValue( "parameterValueType" ), parameterDefaultValue );
+			setParameter( parameterVariable, parameterLabel, parameterType, parameterQuery );
+		}
+		
+		Value rendererClass = resultSet.getValue("rendererClass");
+		if(rendererClass != null) {
+			setRendererClass( rendererClass.stringValue());
 		}
 
 		Value isLegacyValue = resultSet.getValue( "isLegacy" );
@@ -281,7 +310,8 @@ public class Insight {
 				+ ", entityType: " + getEntityType()
 				+ ", label: " + getLabel()
 				+ ", sparql: " + getSparql()
-				+ ", output: " + getOutput() + "]";
+				+ ", output: " + getOutput() 
+				+ " (or renderer class: " + getRendererClass() + ")]";
 	}
 
 }

@@ -246,6 +246,11 @@ public class InsightTabController extends InsightManagerController {
 				break;
 			}
 		}
+		if(imc.txtRendererClass_Inst.getText() != null){
+		  insight.setRendererClass(imc.legalizeQuotes(imc.txtRendererClass_Inst.getText().trim()));
+		}else{
+		  insight.setRendererClass("");
+		}
 		insight.setIsLegacy(imc.chkLegacyQuery_Inst.isSelected());
 		insight.setSparql(imc.legalizeQuotes(imc.txtaQuery_Inst.getText().trim()));
 		insight.setDescription(imc.legalizeQuotes(imc.txtaInsightDesc_Inst.getText().trim()));

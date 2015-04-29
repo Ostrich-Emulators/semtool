@@ -89,7 +89,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			URI baseuri = null;
 			// if the baseuri isn't already set, then query the kb for void:Dataset
 			RepositoryResult<Statement> rr
-					= rc.getStatements( null, RDF.TYPE, VAS.DATABASE, false );
+					= rc.getStatements( null, RDF.TYPE, VAS.Database, false );
 			List<Statement> stmts = Iterations.asList( rr );
 			for ( Statement s : stmts ) {
 				baseuri = URI.class.cast( s.getSubject() );
@@ -100,7 +100,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 				// no base uri in the DB, so make a new one
 				baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
 				rc.begin();
-				rc.add( baseuri, RDF.TYPE, VAS.DATABASE );
+				rc.add( baseuri, RDF.TYPE, VAS.Database );
 				rc.commit();
 			}
 			

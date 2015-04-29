@@ -105,7 +105,7 @@ public class RepositoryList extends JList<IEngine> {
 				sb.append( "Location: " ).append( FilenameUtils.getFullPathNoEndSeparator( loc ) );
 			}
 
-			String onto = metadata.get( VAS.DATABASE );
+			String onto = metadata.get( VAS.Database );
 			if ( null != onto ) {
 				if ( sb.length() > 0 ) {
 					sb.append( "<br>" );

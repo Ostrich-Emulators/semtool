@@ -84,7 +84,7 @@ public final class ImportMetadata {
 		extras.clear();
 		for ( Map.Entry<URI, String> en : exs.entrySet() ) {
 			// don't write the void#dataset value, because it's the same for every KB
-			if ( !en.getKey().equals( VAS.DATABASE ) ) {
+			if ( !en.getKey().equals( VAS.Database ) ) {
 				extras.put( en.getKey(), en.getValue() );
 			}
 		}

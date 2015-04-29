@@ -54,7 +54,11 @@ public class SP {
 	 * http://spinrdf.org/sp#text
 	 */
 	public final static URI text;
-
+    
+	/**
+	 * http://spinrdf.org/sp#query
+	 */
+	public final static URI query;
 	
 	static {
 		final ValueFactory factory = ValueFactoryImpl.getInstance();
@@ -66,5 +70,7 @@ public class SP {
 		
 		// ----- Properties ------
 		text = factory.createURI(NAMESPACE, "text");
+		
+		query = factory.createURI(NAMESPACE, "query");
 	}
 }

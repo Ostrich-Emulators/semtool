@@ -814,14 +814,14 @@ public class EngineUtil implements Runnable {
 
 		// delete any metadata that might exist from the repository copy
 		Collection<Statement> stmts = Iterations.asList( conn.getStatements( null,
-				VAS.DATABASE, null, false ) );
+				VAS.Database, null, false ) );
 		for ( Statement s : stmts ) {
 			conn.remove( s.getSubject(), null, null );
 		}
 
 		EngineUtil.add( conn, metadata.getBaseUri(), RDFS.LABEL,
 				metadata.getTitle(), vf );
-		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE, VAS.DATABASE ) );
+		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE, VAS.Database ) );
 		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_DESC,
 				"Cloned from " + from.getEngineName(), vf );
 		Date now = new Date();
@@ -923,14 +923,14 @@ public class EngineUtil implements Runnable {
 			// add the metadata
 			rc.begin();
 			ValueFactory vf = rc.getValueFactory();
-			rc.add( new StatementImpl( baseuri, RDF.TYPE, VAS.DATABASE ) );
+			rc.add( new StatementImpl( baseuri, RDF.TYPE, VAS.Database ) );
 			Date today = new Date();
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
-			rc.add( new StatementImpl( baseuri, VAS.REIFICATION,
+			rc.add( new StatementImpl( baseuri, VAS.ReificationModel,
 					ecb.getReificationModel() ) );
 
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
@@ -1029,7 +1029,7 @@ public class EngineUtil implements Runnable {
 	public static void clear( IEngine engine ) throws RepositoryException {
 		try {
 			final Map<URI, String> metas = engine.query( new MetadataQuery() );
-			metas.remove( VAS.DATABASE );
+			metas.remove( VAS.Database );
 
 			engine.execute( new ModificationExecutorAdapter() {
 

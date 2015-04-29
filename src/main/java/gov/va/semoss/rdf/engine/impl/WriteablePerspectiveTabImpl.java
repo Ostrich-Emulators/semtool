@@ -95,7 +95,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	          rc.add(spinBody, SP.text, insightVF.createLiteral(sparql));
 
 	          rc.add( insightURI, RDF.TYPE, SPIN.Function );
-	          rc.add( insightURI, RDFS.SUBCLASSOF, VAS.Functions );
+	          rc.add( insightURI, RDFS.SUBCLASSOF, VAS.InsightProperties );
 	          rc.add( insightURI, RDFS.LABEL, insightVF.createLiteral("New (" + perspective.getLabel() + ") Insight" ));
 	          rc.add( insightURI, SPIN.body, spinBody );
 	          rc.add( insightURI, UI.dataView, dataViewURI );
@@ -290,7 +290,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		          rc.add(spinBody, SP.text, insightVF.createLiteral(sparql));
 	
 		          rc.add( insightURI, RDF.TYPE, SPIN.Function );
-		          rc.add( insightURI, RDFS.SUBCLASSOF, VAS.Functions );
+		          rc.add( insightURI, RDFS.SUBCLASSOF, VAS.InsightProperties );
 		          rc.add( insightURI, RDFS.LABEL, insightVF.createLiteral("New ("+strTitle+") Insight" ));
 		          rc.add( insightURI, SPIN.body, spinBody );
 		          rc.add( insightURI, UI.dataView, dataViewURI );

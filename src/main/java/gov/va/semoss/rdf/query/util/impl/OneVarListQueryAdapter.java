@@ -57,7 +57,7 @@ public abstract class OneVarListQueryAdapter<T> extends ListQueryAdapter<T> {
   protected abstract T getValue( Value val, ValueFactory fac );
 
   public static OneVarListQueryAdapter<URI> getUriList( String sparql, String var ) {
-    return new OneVarListQueryAdapter<URI>( sparql, var ) {
+	  return new OneVarListQueryAdapter<URI>( sparql, var ) {
 
       @Override
       protected URI getValue( Value value, ValueFactory fac ) {

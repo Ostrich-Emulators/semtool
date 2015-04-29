@@ -42,11 +42,25 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.util.StringUtil;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.QueryExecutor;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
+import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
+import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
+import gov.va.semoss.rdf.query.util.impl.SimpleQueryAdapterImpl;
 import gov.va.semoss.ui.helpers.EntityFiller;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
@@ -61,9 +75,8 @@ public class ParamPanel extends JPanel implements ActionListener {
 
   Map<String, String> knownValues = new HashMap<>();
   List<ParamComboBox> dependentBoxes = new ArrayList<>();
-  List<IEngine> selectedEngines;
   Insight insight = null;
-
+  Map<String, Map<String, String>> parameterMasterHash = null;
   /**
    * Constructor for ParamPanel.
    */
@@ -92,72 +105,103 @@ public class ParamPanel extends JPanel implements ActionListener {
     List<JLabel> labels = new ArrayList<>();
     GridBagConstraints gbc_element;
 
+    
+    //Create a master Parameters HashMap: 
+    //  1.) For legacy Insight, consult the query first and extract from BIND statements. 
+    //      If any of these have external parameters defined, then use the external queries
+    //      instead.
+    //  2.) For non-legacy Insight, use the "insight.getParameters()". 
+    //-------------------------------------------------------------------------------------
+    parameterMasterHash = new HashMap<>();
+    //Legacy Insight:
+    if(insight.getIsLegacy() == true){
+    	Map<String, Map<String, String>> paramTypeQueryHashFromSparql = Utility.getParamTypeQueryHash(insight.getSparql());
+    	for(Map.Entry<String, Map<String, String>> e: paramTypeQueryHashFromSparql.entrySet()){
+		   String variable = e.getKey();
+		   String type = e.getValue().get("parameterValueType");
+  		   String query = e.getValue().get("parameterQuery");
+		   Map<String, String> parameterElement = new HashMap<>();
+		   
+  		   if(insight.getParameters().get(variable) != null &&
+  			  insight.getParameterQuery(variable) != null &&
+  			  insight.getParameterQuery(variable).equals("") == false){
+  			  parameterElement.put("label", insight.getParameterLabel(variable));
+  			  parameterElement.put("type", insight.getParameterType(variable));
+   	          //When preparing Sparql to execute, we must remove all new-line characters:
+  			  parameterElement.put("query", insight.getParameterQuery(variable).replace('\n', ' '));
+  			  parameterMasterHash.put(variable, parameterElement);
+  		   }else{
+   			  parameterElement.put("label", variable);
+   			  parameterElement.put("type", type);
+   			  parameterElement.put("query", query);
+   			  parameterMasterHash.put(variable, parameterElement);
+  		   }
+    	}
+    //Non-legacy Insight:
+    }else{
+    	for(String variable: insight.getParametersKeySet()){
+ 		   Map<String, String> parameterElement = new HashMap<>();
+		   parameterElement.put("label", insight.getParameterLabel(variable));
+		   parameterElement.put("type", insight.getParameterType(variable));
+	       //When preparing Sparql to execute, we must remove all new-line characters:
+		   parameterElement.put("query", insight.getParameterQuery(variable).replace('\n', ' '));
+		   parameterMasterHash.put(variable, parameterElement);
+    	}
+    }
+    
+    //Iterate over parameters in Master Hash:
+    //---------------------------------------
     int elementInt = 0;
     List<String> setParams = new ArrayList<>();
-
-    // Iterate over params retrieved from query
     
-    for ( String parameterName: insight.getParametersKeySet() ) {
-      JLabel label = new JLabel( parameterName );
-      label.setFont( new Font( "Tahoma", Font.PLAIN, 12 ) );
-      label.setForeground( Color.DARK_GRAY );
+    for(Map.Entry<String, Map<String, String>> e: parameterMasterHash.entrySet()){
+		String strVariable = e.getKey();
+		String strLabel = e.getValue().get("label");
+		String strType = e.getValue().get("type");
+		String strQuery = e.getValue().get("query");
+        JLabel label = new JLabel(strLabel);
+        label.setFont( new Font( "Tahoma", Font.PLAIN, 12 ) );
+        label.setForeground( Color.DARK_GRAY );
 
-      //Execute the logic for filling the information here
-      final String parameterType = insight.getParameterType( parameterName ).stringValue();
-      final ParamComboBox field = new ParamComboBox( Arrays.asList( ParamComboBox.FETCHING ) );
-      // final LabeledUriPairRenderer renderer = new LabeledUriPairRenderer();
-      // field.setRenderer( renderer );
-      field.setFont( new Font( "Tahoma", Font.PLAIN, 11 ) );
-      field.setParamName( parameterName );
-      field.setEditable( false );
-      field.setPreferredSize( new Dimension( 100, 25 ) );
-      field.setMinimumSize( new Dimension( 100, 25 ) );
-      //field.setMaximumSize(new Dimension(200, 32767));
-      field.setBackground( new Color( 119, 136, 153 ) ); //Dropdown background color
+        //Execute the logic for filling the information here
+        final ParamComboBox field = new ParamComboBox( Arrays.asList( ParamComboBox.FETCHING ) );
+        field.setFont( new Font( "Tahoma", Font.PLAIN, 11 ) );
+        field.setParamName(strVariable);
+        field.setEditable( false );
+        field.setPreferredSize( new Dimension( 100, 25 ) );
+        field.setMinimumSize( new Dimension( 100, 25 ) );
+        field.setBackground( new Color( 119, 136, 153 ) ); //Dropdown background color
 
-      // get the list
-      RepositoryList list = DIHelper.getInstance().getRepoList();
-      // get the selected repository
-      selectedEngines = list.getSelectedValuesList();
-
-      String query = "";
-      if( insight.getDefaultValueIsQuery() ) {
-    	  query = insight.getParameterDefaultValue( parameterName ).stringValue();
-      }
-      
-    
-
-	  //see if the query needs to be filled
-      //if it does, set it as a dependent box
-      if ( checkIfFullQuery( query ) ) {
-        for ( IEngine engine : selectedEngines ) {
-          EntityFiller filler = new EntityFiller();
-          if ( query != null && !query.isEmpty() ) {
-            filler.setExternalQuery( query );
-          }
-          filler.fill( field, engine, parameterType );
-          
-          // renderer.addMapToCache( field.getLabelMap() );
-
-          final Preferences prefs = Preferences.userNodeForPackage( getClass() );
-          String lastoption = prefs.get( parameterType, "" );
-          field.setSelectedItem( lastoption );
-          field.addActionListener( new ActionListener() {
-
-            @Override
-            public void actionPerformed( ActionEvent e ) {
-              prefs.put( parameterType, field.getSelectedItem().toString() );
-            }
-          } );
-        }
-        setSelected( field );
-        setParams.add( field.getParamName() );
-        field.addActionListener( this );
-      }
-      else {
-        setDependencies( field, query );
-        field.setType( parameterType );
-      }
+		  //see if the query needs to be filled
+	      //if it does, set it as a dependent box
+	      if(checkIfFullQuery(strQuery)){
+	          IEngine engine = DIHelper.getInstance().getRdfEngine();
+	    	  
+	          EntityFiller filler = new EntityFiller();
+	          if (strQuery != null && !strQuery.isEmpty()) {
+	            filler.setExternalQuery(strQuery);
+	          }
+	          filler.fill(field, engine, strType);
+	
+	          final Preferences prefs = Preferences.userNodeForPackage( getClass() );
+	          String lastoption = prefs.get(strType, "" );
+	          field.setSelectedItem( lastoption );
+	          field.addActionListener( new ActionListener() {
+	
+	            @Override
+	            public void actionPerformed( ActionEvent e ) {
+	              prefs.put(strType, field.getSelectedItem().toString() );
+	            }
+	          } );
+	        
+	        setSelected( field );
+	        setParams.add( field.getParamName() );
+	        field.addActionListener( this );
+	      }
+	      else {
+	        setDependencies(field, strQuery);
+	        field.setType(strType);
+	      }
 
       gbc_element = new GridBagConstraints();
       gbc_element.anchor = GridBagConstraints.WEST;
@@ -207,6 +251,7 @@ public class ParamPanel extends JPanel implements ActionListener {
     fillParams( setParams );
   }
 
+
   /**
    * Fills the list of parameters with newly changed parameters based on whether
    * the list is full from a previous query.
@@ -225,13 +270,12 @@ public class ParamPanel extends JPanel implements ActionListener {
 
         if ( checkIfFullQuery( query ) ) {
           String entityType = field.getType();
-          for ( IEngine engine : selectedEngines ) {
-            EntityFiller filler = new EntityFiller();
-            if ( query != null && !query.isEmpty() ) {
-              filler.setExternalQuery( query );
-            }
-            filler.fill( field, engine, entityType );
+          IEngine engine = DIHelper.getInstance().getRdfEngine();
+          EntityFiller filler = new EntityFiller();
+          if(query != null && !query.isEmpty() ) {
+             filler.setExternalQuery( query );
           }
+          filler.fill( field, engine, entityType );
           setSelected( field );
           newChangedParams.add( field.getParamName() );
           field.addActionListener( this );

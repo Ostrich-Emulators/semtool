@@ -34,15 +34,15 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
 	public MetadataQuery() {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
 		result = new HashMap<>();
-		bind( "dataset", VAS.DATABASE );
+		bind( "dataset", VAS.Database );
 	}
 
 	public MetadataQuery( URI uri ) {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
 		result = new HashMap<>();
-		bind( "dataset", VAS.DATABASE );
+		bind( "dataset", VAS.Database );
 		// special handling when we're trying to figure out the base uri
-		bind( "p", ( VAS.DATABASE.equals( uri ) ? RDF.TYPE : uri ) );
+		bind( "p", ( VAS.Database.equals( uri ) ? RDF.TYPE : uri ) );
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
     // for baseuri, we need the subject, not the object
 		// and also, we use the VOID_DS as the key elsewhere in the code
 		if ( RDF.TYPE.equals( pred ) ) {
-			pred = VAS.DATABASE;
+			pred = VAS.Database;
 			val = set.getValue( "db" ).stringValue();
 		}
 		else if ( pred.getNamespace().equals( DC.NAMESPACE ) ) {

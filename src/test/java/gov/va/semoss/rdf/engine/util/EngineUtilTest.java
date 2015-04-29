@@ -83,7 +83,7 @@ public class EngineUtilTest {
 		try {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb")
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
-					.setReificationModel( VAS.SEMOSS_REIFICATION )
+					.setReificationModel( VAS.VASEMOSS_Reification )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.setBooleans( true, true, true );
 			EngineUtil.createNew( ecb, null );

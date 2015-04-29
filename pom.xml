@@ -5,7 +5,7 @@
 	<artifactId>va-semoss</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>SEMOSS</name>
+	<name>VA SEMOSS</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -17,10 +17,8 @@
 	</properties>
   
 	<scm>
-		<connection>scm:svn:http://104.130.3.174/svn/vcamp/SEMOSS_SRC/branches/dev</connection>
-		<developerConnection>scm:svn:http://104.130.3.174/svn/vcamp/SEMOSS_SRC/branches/dev</developerConnection>
-		<tag>HEAD</tag>
-		<url>http://104.130.3.174/svn/vcamp/SEMOSS_SRC/branches/dev</url>
+		<connection>scm:git:https://github.com/Mantech/va-semoss.git</connection>
+		<url>https://github.com/Mantech/va-semoss</url>
 	</scm>
     
 	<dependencies>
@@ -528,12 +526,12 @@
 	</build>
 
 	<issueManagement>
-		<url>http://104.130.3.174/trac</url>
-		<system>Trac</system>
+		<url>https://github.com/Mantech/va-semoss/issues</url>
+		<system>GitHub</system>
 	</issueManagement>
 	<ciManagement>
 		<system>Jenkins</system>
-		<url>http://104.130.3.174:8888/</url>
+		<url>http://104.130.3.174:8888/view/GitHub%20Builds/job/VA-SEMOSS%20GitHub%20All%20Branches/</url>
 	</ciManagement>
   
 	<repositories>
@@ -560,4 +558,5 @@
 		<url>http://va.gov</url>
 		<name>U.S. Department of Veterans Affairs</name>
 	</organization>
+	<url>https://github.com/Mantech/va-semoss</url>
 </project>
