@@ -41,6 +41,7 @@ public class LoadingSheetData {
 
 	// property name => datatype lookup
 	private final Map<String, URI> propcache = new LinkedHashMap<>();
+	private final Set<String> proplink = new HashSet<>();
 	private final Set<String> napcache = new HashSet<>();
 	private final List<LoadingNodeAndPropertyValues> data = new ArrayList<>();
 	private final String tabname;
@@ -185,6 +186,10 @@ public class LoadingSheetData {
 
 	public Collection<String> getProperties() {
 		return propcache.keySet();
+	}
+
+	public boolean hasProperties() {
+		return !propcache.isEmpty();
 	}
 
 	public final void addProperties( Collection<String> props ) {
@@ -340,6 +345,27 @@ public class LoadingSheetData {
 		return getName() + ( isRel() ? "(rel)" : "(node)" ) + " with " + getData().size() + " naps";
 	}
 
+	/**
+	 * Looks through all properties of this sheet to see if any are actually a
+	 * link to the {@link #subjectType} of one of the given sheets
+	 *
+	 * @param others
+	 */
+	public void findPropertyLinks( Collection<LoadingSheetData> others ) {
+		proplink.clear();
+		for ( String propname : propcache.keySet() ) {
+			for ( LoadingSheetData lsd : others ) {
+				if ( lsd.getSubjectType().equals( propname ) ) {
+					proplink.add( propname );
+				}
+			}
+		}
+	}
+
+	public boolean isLink( String propname ) {
+		return proplink.contains( propname );
+	}
+
 	public static LoadingSheetData copyHeadersOf( LoadingSheetData model ) {
 		if ( model.isRel() ) {
 			return new LoadingSheetData( model.getName(), model.getSubjectType(),
@@ -394,12 +420,12 @@ public class LoadingSheetData {
 		public String getObject() {
 			return object;
 		}
-		
-		public void setSubject( String s ){
+
+		public void setSubject( String s ) {
 			subject = s;
 		}
 
-		public void setObject( String s ){
+		public void setObject( String s ) {
 			object = s;
 		}
 

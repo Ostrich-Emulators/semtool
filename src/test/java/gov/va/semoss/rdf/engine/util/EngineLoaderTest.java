@@ -1090,7 +1090,7 @@ public class EngineLoaderTest {
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
-	// @Test
+	@Test
 	public void testLoadingSheet17() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );

@@ -237,6 +237,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						try {
 							somethingToShow = true;
 							ImportData data = rdr.readOneFile( fileToLoad );
+							data.findPropertyLinks();
 							addProgress( "Finished reading " + fileToLoad, progressPerFile );
 
 							if ( null == lastloaded ) {
