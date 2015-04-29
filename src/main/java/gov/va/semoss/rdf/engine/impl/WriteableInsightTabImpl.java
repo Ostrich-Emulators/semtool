@@ -257,6 +257,10 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 		  String rendererClass = insight.getRendererClass();
 		  String isLegacy = String.valueOf(insight.getIsLegacy());
 		  String sparql = insight.getSparql();
+
+		  //Make sure that embedded new-line characters can be persisted:
+		  sparql = sparql.replace("\n", "\\n"); 
+          
 		  String description = insight.getDescription();
 		  String creator = insight.getCreator();
 		  String modified = insight.getModified();

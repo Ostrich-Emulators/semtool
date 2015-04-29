@@ -1,5 +1,9 @@
 package gov.va.semoss.rdf.engine.impl;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.Writer;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
@@ -48,6 +52,10 @@ public class WriteableParameterTabImpl implements WriteableParameterTab {
 		  String variable = parameter.getVariable().trim();
 		  String valueType = parameter.getValueType().trim();
 		  String defaultQuery = parameter.getDefaultQuery().trim();
+
+		  //Make sure that embedded new-line characters can be persisted:
+          defaultQuery = defaultQuery.replace("\n", "\\n"); 
+          
 	      ValueFactory insightVF = rc.getValueFactory();
 	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 	      UriBuilder uriBuilder;  		  

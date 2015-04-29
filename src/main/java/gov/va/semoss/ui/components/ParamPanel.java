@@ -42,6 +42,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.util.StringUtil;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -126,7 +127,8 @@ public class ParamPanel extends JPanel implements ActionListener {
   			  insight.getParameterQuery(variable).equals("") == false){
   			  parameterElement.put("label", insight.getParameterLabel(variable));
   			  parameterElement.put("type", insight.getParameterType(variable));
-  			  parameterElement.put("query", insight.getParameterQuery(variable));
+   	          //When preparing Sparql to execute, we must remove all new-line characters:
+  			  parameterElement.put("query", insight.getParameterQuery(variable).replace('\n', ' '));
   			  parameterMasterHash.put(variable, parameterElement);
   		   }else{
    			  parameterElement.put("label", variable);
@@ -141,7 +143,8 @@ public class ParamPanel extends JPanel implements ActionListener {
  		   Map<String, String> parameterElement = new HashMap<>();
 		   parameterElement.put("label", insight.getParameterLabel(variable));
 		   parameterElement.put("type", insight.getParameterType(variable));
-		   parameterElement.put("query", insight.getParameterQuery(variable));
+	       //When preparing Sparql to execute, we must remove all new-line characters:
+		   parameterElement.put("query", insight.getParameterQuery(variable).replace('\n', ' '));
 		   parameterMasterHash.put(variable, parameterElement);
     	}
     }

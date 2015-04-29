@@ -141,8 +141,8 @@ public class ExecuteQueryProcessor {
 		QuestionPlaySheetStore.getInstance().idCount++;
 		playSheetTitle.append( " (" ).
 				append( QuestionPlaySheetStore.getInstance().getIDCount() ).append( ")" );
-
-		String sparql = getSparql( insight, paramHash );
+        //When preparing Sparql to execute, we must remove all new-line characters:
+		String sparql = getSparql( insight, paramHash ).replace('\n', ' ');
 		return prepareQueryOutputPlaySheet( engine, sparql, insight.getOutput(),
 				playSheetTitle.toString(), insight, appending );
 	}
