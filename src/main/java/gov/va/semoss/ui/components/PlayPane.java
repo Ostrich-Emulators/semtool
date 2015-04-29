@@ -896,9 +896,10 @@ public class PlayPane extends JFrame {
 
 			@Override
 			public void internalFrameActivated( InternalFrameEvent e ) {
-				fileMenuSave.setEnabled( false );
-				fileMenuSaveAs.setEnabled( false );
-				fileMenuSaveAll.setEnabled( false );
+			
+			//	fileMenuSave.setEnabled( false );
+			//	fileMenuSaveAs.setEnabled( false );
+			//	fileMenuSaveAll.setEnabled( false );
 
 				JInternalFrame jif = e.getInternalFrame();
 
@@ -913,16 +914,16 @@ public class PlayPane extends JFrame {
 						fileMenuSave.setText( s );
 					}
 					if ( actions.containsKey( PlaySheetFrame.SAVE_AS ) ) {
-						String s = fileMenuSaveAs.getText();
+						String sa = fileMenuSaveAs.getText();
 						fileMenuSaveAs.setAction( actions.get( PlaySheetFrame.SAVE_AS ) );
 						fileMenuSaveAs.setEnabled( true );
-						fileMenuSaveAs.setText( s );
+						fileMenuSaveAs.setText( sa );
 					}
 					if ( actions.containsKey( PlaySheetFrame.SAVE_ALL ) ) {
-						String s = fileMenuSaveAll.getText();
+						String sA = fileMenuSaveAll.getText();
 						fileMenuSaveAll.setAction( actions.get( PlaySheetFrame.SAVE_ALL ) );
 						fileMenuSaveAll.setEnabled( true );
-						fileMenuSaveAll.setText( s );
+						fileMenuSaveAll.setText( sA );
 					}
 				}
 			}
@@ -930,6 +931,7 @@ public class PlayPane extends JFrame {
 			@Override
 			public void internalFrameDeactivated( InternalFrameEvent e ) {
 				fileMenuSave.setEnabled( false );
+				fileMenuSaveAs.setEnabled( false );
 				fileMenuSaveAll.setEnabled( false );
 			}
 		} );
@@ -1470,6 +1472,7 @@ public class PlayPane extends JFrame {
 		fileMenuSaveAll.setEnabled( false );
 
 		JMenu newmenu = new JMenu( "New" );
+		newmenu.setToolTipText("Create a new Database or Loading Sheet");
 		newmenu.setMnemonic( KeyEvent.VK_N );
 		fileMenu.add( newmenu );
 		JMenuItem jmi = newmenu.add( creater );
@@ -1480,14 +1483,25 @@ public class PlayPane extends JFrame {
 		jmi.setMnemonic( KeyEvent.VK_L );
 
 		fileMenu.setMnemonic( KeyEvent.VK_F );
+		fileMenu.setToolTipText("File Operations");
 		exiter.setMnemonic( KeyEvent.VK_X );
+		exiter.setToolTipText("Exit the V-CAMP SEMOSS Tool");
+
 		jmi = fileMenu.add( importxls );
 		jmi.setText( "Open..." );
+		jmi.setToolTipText("Open Files to Import");
+		jmi.setMnemonic( KeyEvent.VK_O );
 		fileMenu.addSeparator();
 		fileMenu.add( unmounter );
-
+		unmounter.setEnabled(false);
+		fileMenuSave.setToolTipText("Save changes");
+		fileMenuSave.setMnemonic( KeyEvent.VK_S );
 		fileMenu.add( fileMenuSave );
+		fileMenuSaveAs.setToolTipText("Save to a new file name");
+		fileMenuSaveAs.setMnemonic( KeyEvent.VK_A);
 		fileMenu.add( fileMenuSaveAs );
+		fileMenuSaveAll.setToolTipText("Save all changes");
+		fileMenuSaveAll.setMnemonic( KeyEvent.VK_V );
 		fileMenu.add( fileMenuSaveAll );
 
 //		JMenu exptop2 = new JMenu( "Export" );
@@ -1523,7 +1537,8 @@ public class PlayPane extends JFrame {
 		JMenu help = buildHelpMenu();
 		JMenu view = buildViewMenu();
 		JMenu tools = buildToolMenuBar();
-
+		
+		
 		if ( null != db ) {
 			menu.add( db );
 		}

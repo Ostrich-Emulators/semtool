@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -27,15 +28,15 @@ import org.supercsv.prefs.CsvPreference.Builder;
  * @author Thomas
  *
  */
-public class SaveGridAction extends AbstractSavingAction {
+public class SaveAsGridAction extends AbstractSavingAction {
 
 	private static final long serialVersionUID = 3476209795433405175L;
 	private ValueTableModel table = null;
 
-	public SaveGridAction( boolean issaveas ) {
+	public SaveAsGridAction( boolean issaveas ) {
 		super( "Save As", issaveas );
-		setToolTip( "Save changes" );
-		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
+		setToolTip( "Save to a new file name" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_A );
 		setAppendDate( true );
 	}
 
