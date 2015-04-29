@@ -17,7 +17,7 @@
 	</properties>
   
 	<scm>
-		<connection>https://github.com/Mantech/va-semoss.git</connection>
+		<connection>scm:git:https://github.com/Mantech/va-semoss.git</connection>
 		<url>https://github.com/Mantech/va-semoss</url>
 	</scm>
     
