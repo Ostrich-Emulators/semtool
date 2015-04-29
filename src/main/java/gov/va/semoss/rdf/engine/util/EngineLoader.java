@@ -60,6 +60,7 @@ import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -291,12 +292,19 @@ public class EngineLoader {
 		try {
 			List<Statement> stmts = new ArrayList<>();
 			for ( String[] stmt : data.getStatements() ) {
-				Statement st = new StatementImpl(
-						getUriFromRawString( stmt[0], namespaces ),
-						getUriFromRawString( stmt[1], namespaces ),
-						getRDFStringValue( stmt[2], namespaces, vf ) );
+				URI s = getUriFromRawString( stmt[0], namespaces );
+				URI p = getUriFromRawString( stmt[1], namespaces );
+				Value o = getRDFStringValue( stmt[2], namespaces, vf );
+
+				if ( null == s || null == p || null == o ) {
+					throw new ImportValidationException( ErrorType.INVALID_DATA,
+							"Could not create metadata statement" + Arrays.toString( stmt ) );
+				}
+
+				Statement st = new StatementImpl( s, p, o );
 				stmts.add( st );
 			}
+
 			if ( !stmts.isEmpty() ) {
 				myrc.add( stmts );
 			}
@@ -821,19 +829,19 @@ public class EngineLoader {
 	}
 
 	public EdgeModeler getEdgeModeler( IEngine eng ) {
-		MetadataQuery mq = new MetadataQuery( VAS.REIFICATION );
+		MetadataQuery mq = new MetadataQuery( VAS.reification );
 		EdgeModeler modeler = null;
 		try {
 			eng.query( mq );
 			String val = mq.getOne();
 			URI reif = ( null == val ? Constants.ANYNODE : new URIImpl( val ) );
-			if ( VAS.SEMOSS_REIFICATION.equals( reif ) || Constants.ANYNODE == reif ) {
+			if ( VAS.VASEMOSS_Reification.equals( reif ) || Constants.ANYNODE == reif ) {
 				modeler = new LegacyEdgeModeler();
 			}
-			else if ( VAS.W3C_REIFICATION.equals( reif ) ) {
+			else if ( VAS.W3C_Reification.equals( reif ) ) {
 
 			}
-			else if ( VAS.RDR_REIFICATION.equals( reif ) ) {
+			else if ( VAS.RDR_Reification.equals( reif ) ) {
 
 			}
 			else {

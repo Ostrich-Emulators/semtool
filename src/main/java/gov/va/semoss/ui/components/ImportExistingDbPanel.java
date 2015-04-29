@@ -349,7 +349,7 @@ public class ImportExistingDbPanel extends JPanel {
 				pt = psf.getLoadingTask();
 			}
 			else {
-				final boolean successfulImport[] = { false };
+				final String error[] = new String[1];
 
 				String t = ( replace ? "Replacing data in " : "Adding data to " )
 						+ eng.getEngineName() + " from " + file.getDelimitedPaths();
@@ -374,11 +374,10 @@ public class ImportExistingDbPanel extends JPanel {
 								psf.setTitle( "Quality Check Errors" );
 								DIHelper.getInstance().getDesktop().add( psf );
 							}
-							// if we get here, no exceptions have been thrown, so we're good
-							successfulImport[0] = true;
 						}
 						catch ( ImportValidationException | RepositoryException | IOException ioe ) {
 							log.error( ioe, ioe );
+							error[0] = ioe.getLocalizedMessage();
 						}
 					}
 				} ) {
@@ -387,11 +386,11 @@ public class ImportExistingDbPanel extends JPanel {
 					public void done() {
 						super.done();
 						//finally, show whether or not successful
-						if ( successfulImport[0] ) {
+						if ( null == error[0] ) {
 							Utility.showMessage( "Your database has been successfully updated!" );
 						}
 						else {
-							Utility.showError( "Import has failed." );
+							Utility.showError( "Import has failed: " + error[0] );
 						}
 					}
 				};
