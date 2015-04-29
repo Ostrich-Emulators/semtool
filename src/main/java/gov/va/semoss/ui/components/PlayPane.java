@@ -43,7 +43,6 @@ import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.api.IChakraListener;
-import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
@@ -127,6 +126,8 @@ import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
 import com.ibm.icu.util.StringTokenizer;
+import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
+import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.event.InternalFrameEvent;
@@ -399,6 +400,11 @@ public class PlayPane extends JFrame {
 		String wloc = prefs.get( "windowLocation", "" );
 
 		initPreferenceValues( prefs );
+
+		VocabularyRegistry.registerVocabulary( "semoss",
+				getClass().getResource( "/models/semoss.ttl" ), true );
+		VocabularyRegistry.registerVocabulary( "va-semoss",
+				getClass().getResource( "/models/va-semoss.ttl" ), true );
 
 		AbstractRDFPlaySheet.setDefaultIcons( DefaultPlaySheetIcons.defaultIcons );
 
@@ -1137,84 +1143,79 @@ public class PlayPane extends JFrame {
 		db.addSeparator();
 		//Export
 		JMenu exptop = new JMenu( "Export" );
-		exptop.setToolTipText("Export Database Activities");
-		exptop.setMnemonic(KeyEvent.VK_E);
+		exptop.setToolTipText( "Export Database Activities" );
+		exptop.setMnemonic( KeyEvent.VK_E );
 		exptop.add( exportttl );
 		exptop.add( exportnt );
 		exptop.add( exportrdf );
 		exptop.setIcon( DbAction.getIcon( "exportdb" ) );
-		
-		
-		
-		
-		
+
 		//db.add( cloneconfer );
 		//db.add( clearer );
-		
 		//Loading Sheets
 		JMenu loadingsheets = new JMenu( "Loading Sheets" );
-		loadingsheets.setToolTipText("Export the Loading Sheets");
-		loadingsheets.setMnemonic(KeyEvent.VK_L);
+		loadingsheets.setToolTipText( "Export the Loading Sheets" );
+		loadingsheets.setMnemonic( KeyEvent.VK_L );
 		exptop.add( loadingsheets );
 		//Nodes
 		JMenu nodes = new JMenu( "Nodes" );
-		nodes.setToolTipText("Export the Nodes");
-		nodes.setMnemonic(KeyEvent.VK_N);
+		nodes.setToolTipText( "Export the Nodes" );
+		nodes.setMnemonic( KeyEvent.VK_N );
 		loadingsheets.add( nodes );
 		//Nodes SubMenu
 		nodes.add( expnodes );
 		nodes.add( expSpecNodes );
 		//RelationShips
 		JMenu relationS = new JMenu( "RelationShips" );
-		relationS.setToolTipText("Export the Relations");
-		relationS.setMnemonic(KeyEvent.VK_R);
+		relationS.setToolTipText( "Export the Relations" );
+		relationS.setMnemonic( KeyEvent.VK_R );
 		loadingsheets.add( relationS );
 		//RelationShips SubMenu
 		relationS.add( exprels );
 		relationS.add( expSpecRels );
-		
+
 		loadingsheets.add( expall );
 		exptop.add( exportinsights );
 		db.add( exptop );
 
 		JMenu importtop = new JMenu( "Import" );
-		importtop.setToolTipText("Import Database Operations");
-		importtop.setMnemonic(KeyEvent.VK_I);
-		
+		importtop.setToolTipText( "Import Database Operations" );
+		importtop.setMnemonic( KeyEvent.VK_I );
+
 		importtop.setIcon( DbAction.getIcon( "importdb" ) );
-		importtop.setToolTipText("Import Database Operations");
-		importtop.setMnemonic(KeyEvent.VK_I);
+		importtop.setToolTipText( "Import Database Operations" );
+		importtop.setMnemonic( KeyEvent.VK_I );
 		db.add( importtop );
 		//JMenu iDatabase = new JMenu( "Database" );
 		//iDatabase.setToolTipText("Import Database Operations");
 		//iDatabase.setMnemonic(KeyEvent.VK_D);
 		//importtop.add( iDatabase );
 		final JMenu mergeroot = new JMenu( DbAction.MERGE );
-		mergeroot.setToolTipText("Merge the Data between databases");
-		mergeroot.setMnemonic(KeyEvent.VK_D);
+		mergeroot.setToolTipText( "Merge the Data between databases" );
+		mergeroot.setMnemonic( KeyEvent.VK_D );
 		mergeroot.setEnabled( false );
 		importtop.add( mergeroot );
 		importtop.add( importls );
-		
+
 		JMenu insights = new JMenu( "Insights" );
-		insights.setToolTipText("Import Insight Operations");
-		insights.setMnemonic(KeyEvent.VK_I);
+		insights.setToolTipText( "Import Insight Operations" );
+		insights.setMnemonic( KeyEvent.VK_I );
 
 		insights.add( resetInsights );
 		insights.add( importInsights );
 		importtop.add( insights );
 
 		db.setMnemonic( KeyEvent.VK_D );
-		db.setToolTipText("Database operations");
-		
+		db.setToolTipText( "Database operations" );
+
 		db.add( cloner );
 		db.add( cloneconfer );
 		db.add( clearer );
 
 	//	final JMenu mergeroot = new JMenu( DbAction.MERGE );
-	//	mergeroot.setEnabled( false );
+		//	mergeroot.setEnabled( false );
 		//db.add( mergeroot );
-	//	iDatabase.add( mergeroot );
+		//	iDatabase.add( mergeroot );
 		//db.add( unmounter );
 		db.addSeparator();
 		db.add( sparqler );
@@ -1229,8 +1230,8 @@ public class PlayPane extends JFrame {
 			@Override
 			public void valueChanged( ListSelectionEvent e ) {
 			//	if ( e.getValueIsAdjusting() ) {
-			//		return;
-			//	}
+				//		return;
+				//	}
 
 				IEngine engine = repoList.getSelectedValue();
 				mergeroot.removeAll();

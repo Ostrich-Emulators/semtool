@@ -81,9 +81,12 @@ public class EngineUtilTest {
 		topdir.mkdirs();
 
 		try {
-			EngineUtil.createNew( topdir, "testdb", new URIImpl( "http://va.gov/ontologies" ),
-					true, VAS.SEMOSS_REIFICATION, null, null, null, Arrays.asList( LEGACY ),
-					true, true, true, null );
+			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb")
+					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
+					.setReificationModel( VAS.SEMOSS_REIFICATION )
+					.setFiles( Arrays.asList( LEGACY ) )
+					.setBooleans( true, true, true );
+			EngineUtil.createNew( ecb, null );
 		}
 		finally {
 			FileUtils.deleteQuietly( topdir );

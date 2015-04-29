@@ -132,6 +132,7 @@ public class DefaultPlaySheetIcons {
 
 	public static void setDefaultIcon( Class<?> k, String imgloc ) {
 		setDefaultIcon( k.getName(), imgloc );
+		knownClasses.add( k );
 	}
 
 	public static void setDefaultIcon( String key, String imgloc ) {

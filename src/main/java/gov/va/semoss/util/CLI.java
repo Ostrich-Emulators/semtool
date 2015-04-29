@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
 import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
@@ -201,17 +202,14 @@ public class CLI {
 			if ( !outputFileDir.exists() ) {
 				throw new FileNotFoundException( "Directory does not exist: " + outputFileDir.getPath() );
 			}
-
+			
 			smss = EngineUtil.createNew(
-					outputFileDir,
-					databaseFileName,
-					new URIImpl( baseURI ), true, VAS.SEMOSS_REIFICATION, 
-					null, null,
-					insightFile,
-					loads,
-					stageInMemory,
-					closure,
-					createMetamodel,
+					new EngineCreateBuilder( outputFileDir, databaseFileName )
+					.setDefaultBaseUri( new URIImpl( baseURI ), true )
+					.setReificationModel( VAS.SEMOSS_REIFICATION )
+					.setDefaultsFiles( null, null, insightFile )
+					.setFiles( loads )
+					.setBooleans( stageInMemory, closure, createMetamodel ),
 					errors
 			);
 		}

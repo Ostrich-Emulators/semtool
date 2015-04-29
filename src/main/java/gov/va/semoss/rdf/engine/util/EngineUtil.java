@@ -66,12 +66,15 @@ import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.prefs.Preferences;
 import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
@@ -585,23 +588,7 @@ public class EngineUtil implements Runnable {
 	/**
 	 * Creates an empty database by copying data from the db/Default directory
 	 *
-	 * @param dbtopdir directory about where the engine will be placed.
-	 * @param engine the engine name
-	 * @param defaultBaseUri the base uri of the new engine
-	 * @param defaultBaseOverridesFiles if true, use <code>defaultBaseUri</code>
-	 * instead of whatever is specified in the loading files
-	 * @param reificationModel
-	 * @param smss the custom smss file. If null or empty, will use the sample
-	 * file from the Defaults directory
-	 * @param map the custom ontology properties file. Can be null null or empty
-	 * @param questions the custom questions file. If null or empty, will use the
-	 * sample file from the Defaults directory
-	 * @param toload the files to load. An {@link IllegalArgumentException} will
-	 * be thrown if this list is empty
-	 * @param stageInMemory load intermediate data to memory; if false, write it
-	 * to disk
-	 * @param calcInfers should the engine calculate inferences after the load?
-	 * @param dometamodel should the loader create the metamodel from the load?
+	 * @param ecb how the new database should be created
 	 * @param conformanceErrors if not null, conformance will be checked, and
 	 * errors will be placed here
 	 *
@@ -610,42 +597,47 @@ public class EngineUtil implements Runnable {
 	 * @throws java.io.IOException
 	 * @throws gov.va.semoss.rdf.engine.util.EngineManagementException
 	 */
-	public static File createNew( File dbtopdir, String engine, URI defaultBaseUri,
-			boolean defaultBaseOverridesFiles, URI reificationModel, String smss, 
-			String map, String questions, Collection<File> toload, boolean stageInMemory, 
-			boolean calcInfers, boolean dometamodel, ImportData conformanceErrors )
+	public static File createNew( EngineCreateBuilder ecb, ImportData conformanceErrors )
 			throws IOException, EngineManagementException {
 
+		File dbtopdir = ecb.getEngineDir();
 		dbtopdir.mkdirs();
 
-		File modelmap = ( null == map || map.isEmpty() ? null : new File( map ) );
-		File modelsmss = ( null == smss || smss.isEmpty() ? null : new File( smss ) );
+		File modelmap = ecb.getMap();
+		File modelsmss = ecb.getSmss();
 
-		File modelquestions;
-		if ( null == questions || questions.isEmpty() ) {
+		File modelquestions = ecb.getQuestions();
+		if ( null == modelquestions ) {
 			String ddreamer = "/defaultdb/"
 					+ AbstractEngine.getDefaultName( Constants.DREAMER, "Default" );
 			File f = File.createTempFile( "semoss-tmp-dreamer-", "prop" );
 			FileUtils.copyInputStreamToFile( EngineUtil.class
 					.getResourceAsStream( ddreamer ), f );
 			modelquestions = f;
-
+			ecb.setDefaultsFiles( modelsmss, modelmap, modelquestions );
 			f.deleteOnExit();
 		}
-		else {
-			modelquestions = new File( questions );
+
+		File smssfile = createEngine( ecb );
+		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
+		URI baseuri = bde.getBaseUri();
+
+		List<Statement> insights = new ArrayList<>();
+		for ( URL url : ecb.getVocabularies() ) {
+			insights.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+			insights.add( new StatementImpl( baseuri, OWL.IMPORTS,
+					new URIImpl( url.toExternalForm() ) ) );
 		}
 
-		List<Statement> insights
-				= getStatementsFromResource( "/models/va-semoss.ttl", RDFFormat.TURTLE );
-		insights.addAll( createInsightStatements( modelquestions ) );
-
-		File smssfile = createEngine( dbtopdir, engine, reificationModel, modelsmss, 
-				modelmap, dometamodel );
-
-		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
-
 		try {
+			bde.execute( new ModificationExecutorAdapter() {
+
+				@Override
+				public void exec( RepositoryConnection conn ) throws RepositoryException {
+					conn.add( insights );
+				}
+			} );
+
 			WriteableInsightManager wim = bde.getWriteableInsightManager();
 
 			wim.addRawStatements( insights );
@@ -657,12 +649,12 @@ public class EngineUtil implements Runnable {
 					re );
 		}
 
-		EngineLoader el = new EngineLoader( stageInMemory );
-		el.setDefaultBaseUri( defaultBaseUri, defaultBaseOverridesFiles );
+		EngineLoader el = new EngineLoader( ecb.isStageInMemory() );
+		el.setDefaultBaseUri( ecb.getDefaultBaseUri(), ecb.isDefaultBaseOverridesFiles() );
 
 		try {
-			el.loadToEngine( toload, bde, dometamodel, conformanceErrors );
-			if ( calcInfers ) {
+			el.loadToEngine( ecb.getFiles(), bde, ecb.isDoMetamodel(), conformanceErrors );
+			if ( ecb.isCalcInfers() ) {
 				bde.calculateInferences();
 			}
 		}
@@ -688,19 +680,21 @@ public class EngineUtil implements Runnable {
 	 * "properties" file). If null, this function will clear all insights from the
 	 * engine without adding anything
 	 * @param clearfirst remove the current insights before adding the new ones?
+	 * @param vocabs list of vocabularies to import
 	 *
 	 * @throws IOException
 	 * @throws EngineManagementException
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
-			boolean clearfirst ) throws IOException, EngineManagementException {
+			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
 		List<Statement> stmts = new ArrayList<>();
 		if ( null != insightsfile ) {
 			stmts.addAll( createInsightStatements( insightsfile ) );
 		}
 
-		// need to re-seed the initial model statements, like during KB creation
-		stmts.addAll( getStatementsFromResource( "/models/va-semoss.ttl", RDFFormat.TURTLE ) );
+		for ( URL url : vocabs ) {
+			stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+		}
 
 		insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
 		notify();
@@ -867,9 +861,12 @@ public class EngineUtil implements Runnable {
 
 	}
 
-	public static File createEngine( File enginedir, String dbname, URI reificationModel, 
-			File modelsmss, File modelmap, boolean dometamodel ) 
+	public static File createEngine( EngineCreateBuilder ecb )
 			throws IOException, EngineManagementException {
+
+		String dbname = ecb.getEngineName();
+		File enginedir = ecb.getEngineDir();
+		File modelmap = ecb.getMap();
 
 		if ( null != modelmap && modelmap.exists() ) {
 			try {
@@ -883,6 +880,7 @@ public class EngineUtil implements Runnable {
 		}
 
 		Properties smssprops = new Properties();
+		File modelsmss = ecb.getSmss();
 		if ( null == modelsmss || !modelsmss.exists() ) {
 			String dprop = "/defaultdb/Default.properties";
 			smssprops.load( EngineUtil.class.getResourceAsStream( dprop ) );
@@ -912,11 +910,11 @@ public class EngineUtil implements Runnable {
 			repo.initialize();
 			RepositoryConnection rc = repo.getConnection();
 
-			if ( dometamodel ) {
+			if ( ecb.isDoMetamodel() ) {
 				rc.begin();
-				List<Statement> stmts
-						= getStatementsFromResource( "/models/semoss.ttl", RDFFormat.TURTLE );
-				rc.add( stmts );
+				for ( URL url : ecb.getVocabularies() ) {
+					rc.add( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+				}
 				rc.commit();
 			}
 
@@ -932,7 +930,8 @@ public class EngineUtil implements Runnable {
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
-			rc.add( new StatementImpl( baseuri, VAS.REIFICATION, reificationModel ) );
+			rc.add( new StatementImpl( baseuri, VAS.REIFICATION,
+					ecb.getReificationModel() ) );
 
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
@@ -1052,12 +1051,12 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	private static List<Statement> getStatementsFromResource( String resource,
+	private static List<Statement> getStatementsFromResource( URL resource,
 			RDFFormat fmt ) {
 		List<Statement> stmts = new ArrayList<>();
 
 		InMemorySesameEngine mem = new InMemorySesameEngine();
-		try ( InputStream is = EngineUtil.class.getResourceAsStream( resource ) ) {
+		try ( InputStream is = resource.openStream() ) {
 			RepositoryConnection rc = mem.getRawConnection();
 			rc.add( is, Constants.DEFAULT_SEMOSS_URI, fmt );
 			rc.commit();

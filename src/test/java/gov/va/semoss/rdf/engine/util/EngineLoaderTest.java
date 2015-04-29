@@ -65,6 +65,7 @@ import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -120,6 +121,15 @@ public class EngineLoaderTest {
 
 	private static final File TEST10 = new File( "src/test/resources/test10.xlsx" );
 	private static final File TEST10_EXP = new File( "src/test/resources/test10.nt" );
+
+	private static final File TEST14 = new File( "src/test/resources/test14.xlsx" );
+	private static final File TEST14_EXP = new File( "src/test/resources/test14.nt" );
+
+	private static final File TEST15 = new File( "src/test/resources/test15.xlsx" );
+	private static final File TEST15_EXP = new File( "src/test/resources/test15.nt" );
+
+	private static final File TEST17 = new File( "src/test/resources/test17.xlsx" );
+	private static final File TEST17_EXP = new File( "src/test/resources/test17.nt" );
 
 	private InMemorySesameEngine engine;
 	private File dbfile;
@@ -513,6 +523,8 @@ public class EngineLoaderTest {
 	public void testTicket583() throws Exception {
 		RepositoryConnection rc = engine.getRawConnection();
 		rc.add( TICKETBASE, null, RDFFormat.TURTLE );
+		engine.setBuilders( UriBuilder.getBuilder( "http://example.org/ex1" ),
+				UriBuilder.getBuilder( "http://foo.bar/model#" ) );
 
 		EngineLoader el = new EngineLoader();
 		el.loadToEngine( Arrays.asList( TICKET583 ), engine, false, null );
@@ -715,7 +727,7 @@ public class EngineLoaderTest {
 	public void testInitNamespaces() {
 		ImportData data = new ImportData();
 		EngineLoader.initNamespaces( data );
-		assertEquals( 9, data.getMetadata().getNamespaces().size() );
+		assertEquals( 10, data.getMetadata().getNamespaces().size() );
 		assertEquals( VAS.NAMESPACE, data.getMetadata().getNamespaces().get( VAS.PREFIX ) );
 	}
 
@@ -1021,6 +1033,82 @@ public class EngineLoaderTest {
 
 		assertEquals( LiteralImpl.class, result.getClass() );
 		assertNotEquals( old.getClass(), result.getClass() );
+	}
+
+	@Test
+	public void testLoadingSheet14() throws Exception {
+
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		el.loadToEngine( Arrays.asList( TEST14 ), engine, true, null );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test14.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TEST14_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
+	}
+
+	@Test
+	public void testLoadingSheet15() throws Exception {
+
+		engine.setBuilders( UriBuilder.getBuilder( "http://sales.data/purchases#" ),
+				UriBuilder.getBuilder( "http://sales.data/schema#" ) );
+
+		engine.getRawConnection().add( new URIImpl( "http://sales.data/purchases/2015/vocab" ),
+				RDF.TYPE, OWL.ONTOLOGY );
+		engine.getRawConnection().add( new URIImpl( "http://sales.data/schema#xyz" ),
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://sales.data/schema#Relation" ) );
+		engine.getRawConnection().add( new URIImpl( "http://sales.data/schema#xyz" ),
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://sales.data/schema#Relation/Contains" ) );
+		engine.getRawConnection().add( new URIImpl( "http://sales.data/schema#xyz" ),
+				RDFS.LABEL, new LiteralImpl( "508 Compliant?" ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		el.loadToEngine( Arrays.asList( TEST15 ), engine, true, null );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test15.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TEST15_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
+	}
+
+	@Test
+	public void testLoadingSheet17() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
+				UriBuilder.getBuilder( OWLSTART ) );
+
+		EngineLoader el = new EngineLoader();
+		el.loadToEngine( Arrays.asList( TEST17 ), engine, true, null );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test17.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TEST17_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
 	private Model getExpectedGraph( File rdf ) {

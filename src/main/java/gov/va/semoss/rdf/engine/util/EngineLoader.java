@@ -11,8 +11,6 @@ import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
 import gov.va.semoss.model.vocabulary.SEMOSS;
-import gov.va.semoss.model.vocabulary.VAC;
-import gov.va.semoss.model.vocabulary.VAS;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,6 +48,7 @@ import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 
 import java.io.BufferedWriter;
@@ -67,10 +66,7 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -224,6 +220,7 @@ public class EngineLoader {
 			boolean createmetamodel, ImportData conformanceErrors )
 			throws RepositoryException, IOException, ImportValidationException {
 
+		preloadCaches( engine );
 		Set<Statement> mmstmts = new HashSet<>();
 
 		for ( File fileToLoad : toload ) {
@@ -250,6 +247,7 @@ public class EngineLoader {
 			}
 			else {
 				ImportData data = reader.readOneFile( fileToLoad );
+				data.findPropertyLinks();
 				ImportMetadata im = data.getMetadata();
 				im.setAutocreateMetamodel( createmetamodel );
 				loadIntermediateData( data, engine, conformanceErrors );
@@ -263,6 +261,7 @@ public class EngineLoader {
 
 	public void loadToEngine( ImportData data, IEngine engine,
 			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
+		preloadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
 		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
 	}
@@ -307,14 +306,17 @@ public class EngineLoader {
 				myrc.add( stmts );
 			}
 
+			// create all metamodel triples, even if we don't add them to the repository
+			createMetamodel( data, namespaces );
+
 			for ( LoadingSheetData n : data.getNodes() ) {
-				addToEngine( n, engine, data.getMetadata() );
+				addToEngine( n, engine, data );
 			}
 
 			separateConformanceErrors( data, conformanceErrors, engine );
 
 			for ( LoadingSheetData r : data.getRels() ) {
-				addToEngine( r, engine, data.getMetadata() );
+				addToEngine( r, engine, data );
 			}
 
 			URI ebase = engine.getBaseUri();
@@ -512,7 +514,6 @@ public class EngineLoader {
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				map.put( set.getValue( "label" ).stringValue(),
 						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
-
 			}
 
 			@Override
@@ -525,8 +526,8 @@ public class EngineLoader {
 		UriBuilder owlb = engine.getSchemaBuilder();
 
 		try {
-			URI uri = owlb.getRelationUri().build();
-			vqa.bind( "type", uri );
+			URI type = owlb.getRelationUri().build();
+			vqa.bind( "type", type );
 			vqa.bind( "isa", RDFS.SUBPROPERTYOF );
 			engine.query( vqa );
 
@@ -545,8 +546,8 @@ public class EngineLoader {
 			cacheUris( CacheType.RELATION, cacheb );
 
 			vqa.bind( "isa", RDFS.SUBCLASSOF );
-			uri = owlb.getConceptUri().build();
-			vqa.bind( "type", uri );
+			type = owlb.getConceptUri().build();
+			vqa.bind( "type", type );
 			engine.query( vqa );
 			cacheUris( CacheType.CONCEPTCLASS, map );
 
@@ -565,14 +566,12 @@ public class EngineLoader {
 	}
 
 	private void addToEngine( LoadingSheetData sheet, IEngine engine,
-			ImportMetadata metas ) throws RepositoryException {
+			ImportData alldata ) throws RepositoryException {
 
 		// we want to search all namespaces, but use the metadata's first
+		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-
-		// create all metamodel triples, even if we don't add them to the repository
-		createMetamodel( sheet, namespaces, metas );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
@@ -669,17 +668,18 @@ public class EngineLoader {
 		return connector;
 	}
 
-	private URI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas )
-			throws RepositoryException {
-
-		String typename = nap.getSubjectType();
-		String rawlabel = nap.getSubject();
-
-		URI typeuri = schemaNodes.get( typename );
+	/**
+	 * Adds just a node to the dataset (no properties, nothing else)
+	 *
+	 * @param typelabel
+	 * @param rawlabel
+	 * @param namespaces
+	 * @return
+	 */
+	private URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
+			ImportMetadata metas ) throws RepositoryException {
 
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
-
 		ConceptInstanceCacheKey key = new ConceptInstanceCacheKey( typename, rawlabel );
 		if ( !dataNodes.containsKey( key ) ) {
 			URI subject;
@@ -705,7 +705,16 @@ public class EngineLoader {
 		}
 
 		URI subject = dataNodes.get( key );
-		myrc.add( subject, RDF.TYPE, typeuri );
+		myrc.add( subject, RDF.TYPE, schemaNodes.get( typename ) );
+		return subject;
+	}
+
+	private URI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
+			LoadingSheetData sheet, ImportMetadata metas ) throws RepositoryException {
+
+		String typename = nap.getSubjectType();
+		String rawlabel = nap.getSubject();
+		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas );
 
 		boolean savelabel = metas.isAutocreateMetamodel();
 		if ( !metas.isLegacyMode() && rawlabel.contains( ":" ) ) {
@@ -746,11 +755,16 @@ public class EngineLoader {
 			ImportMetadata metas ) throws RepositoryException {
 
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
-			String relkey = sheet.getName() + entry.getKey();
+			String relkey = entry.getKey();
 
 			URI predicate = relationClassCache.get( relkey );
 
 			Value value = entry.getValue();
+			if ( sheet.isLink( relkey ) ) {
+				// our "value" is really the label of another node, so find that node
+				value = addSimpleNode( relkey, value.stringValue(), namespaces, metas );
+			}
+
 			// not sure if we even use these values anymore
 			switch ( value.toString() ) {
 				case Constants.PROCESS_CURRENT_DATE:
@@ -767,103 +781,111 @@ public class EngineLoader {
 		}
 	}
 
-	private void createMetamodel( LoadingSheetData sheet, Map<String, String> namespaces,
-			ImportMetadata metas ) throws RepositoryException {
+	private void createMetamodel( ImportData alldata, Map<String, String> namespaces )
+			throws RepositoryException {
+		ImportMetadata metas = alldata.getMetadata();
 		UriBuilder schema = metas.getSchemaBuilder();
 		boolean save = metas.isAutocreateMetamodel();
 
-		String stype = sheet.getSubjectType();
-		String scachekey = stype;
-		URI suri;
-		if ( !schemaNodes.containsKey( scachekey ) ) {
-			boolean nodeAlreadyMade = isUri( stype, namespaces );
+		for ( LoadingSheetData sheet : alldata.getSheets() ) {
 
-			URI uri = ( nodeAlreadyMade
-					? getUriFromRawString( stype, namespaces )
-					: schema.build( stype ) );
-			schemaNodes.put( scachekey, uri );
-
-			if ( save && !nodeAlreadyMade ) {
-				myrc.add( uri, RDF.TYPE, OWL.CLASS );
-				myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
-				myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
-			}
-		}
-		suri = schemaNodes.get( stype );
-
-		if ( sheet.isRel() ) {
-			String otype = sheet.getObjectType();
-			String ocachekey = otype;
-			if ( !schemaNodes.containsKey( ocachekey ) ) {
-				boolean nodeAlreadyMade = isUri( otype, namespaces );
+			String stype = sheet.getSubjectType();
+			if ( !schemaNodes.containsKey( stype ) ) {
+				boolean nodeAlreadyMade = isUri( stype, namespaces );
 
 				URI uri = ( nodeAlreadyMade
-						? getUriFromRawString( otype, namespaces )
-						: schema.build( otype ) );
-
-				schemaNodes.put( ocachekey, uri );
+						? getUriFromRawString( stype, namespaces )
+						: schema.build( stype ) );
+				schemaNodes.put( stype, uri );
 
 				if ( save && !nodeAlreadyMade ) {
 					myrc.add( uri, RDF.TYPE, OWL.CLASS );
-					myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
+					myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
 					myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 				}
 			}
 
-			String rellabel = sheet.getRelname();
-			String longNodeType = stype + rellabel + otype;
+			if ( sheet.isRel() ) {
+				String otype = sheet.getObjectType();
+				if ( !schemaNodes.containsKey( otype ) ) {
+					boolean nodeAlreadyMade = isUri( otype, namespaces );
 
-			if ( !relationClassCache.containsKey( longNodeType ) ) {
-				boolean relationAlreadyMade = isUri( rellabel, namespaces );
+					URI uri = ( nodeAlreadyMade
+							? getUriFromRawString( otype, namespaces )
+							: schema.build( otype ) );
 
-				URI ret = ( relationAlreadyMade
-						? getUriFromRawString( rellabel, namespaces )
-						: schema.getRelationUri( rellabel ) );
-				URI relation = schema.getRelationUri().build();
+					schemaNodes.put( otype, uri );
 
-				relationClassCache.put( longNodeType, ret );
-
-				if ( save ) {
-					if ( !relationAlreadyMade ) {
-						myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
-						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
-						myrc.add( ret, RDFS.SUBPROPERTYOF, relation );
+					if ( save && !nodeAlreadyMade ) {
+						myrc.add( uri, RDF.TYPE, OWL.CLASS );
+						myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
+						myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 					}
-					// myrc.add( suri, ret, schemaNodes.get( ocachekey ) );
+				}
 
-					myrc.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
+				String rellabel = sheet.getRelname();
+				String longNodeType = stype + rellabel + otype;
 
-					myrc.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-					myrc.add( relation, RDF.TYPE, RDF.PROPERTY );
+				if ( !relationClassCache.containsKey( longNodeType ) ) {
+					boolean relationAlreadyMade = isUri( rellabel, namespaces );
+
+					URI ret = ( relationAlreadyMade
+							? getUriFromRawString( rellabel, namespaces )
+							: schema.getRelationUri( rellabel ) );
+					URI relation = schema.getRelationUri().build();
+
+					relationClassCache.put( longNodeType, ret );
+
+					if ( save ) {
+						if ( !relationAlreadyMade ) {
+							myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
+							myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
+							myrc.add( ret, RDFS.SUBPROPERTYOF, relation );
+						}
+						// myrc.add( suri, ret, schemaNodes.get( ocachekey ) );
+
+						myrc.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
+
+						myrc.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
+						myrc.add( relation, RDF.TYPE, RDF.PROPERTY );
+					}
 				}
 			}
-		}
 
-		for ( String propname : sheet.getProperties() ) {
-			// property names are unique per sheet
-			String relkey = sheet.getName() + propname;
-			boolean alreadyMadeProp = isUri( propname, namespaces );
+			for ( String propname : sheet.getProperties() ) {
+			// check to see if we're actually a link to some
+				// other node (and not really a new property
+				if ( sheet.isLink( propname ) || schemaNodes.containsKey( propname ) ) {
+					log.debug( "linking " + propname + " as a " + SEMOSS.has
+							+ " relationship to " + schemaNodes.get( propname ) );
 
-			if ( !relationClassCache.containsKey( relkey ) ) {
-				URI predicate;
-				if ( alreadyMadeProp ) {
-					predicate = getUriFromRawString( propname, namespaces );
+					relationClassCache.put( propname, SEMOSS.has );
+					continue;
 				}
-				else {
-					// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
-					predicate = schema.build( propname );
+
+				boolean alreadyMadeProp = isUri( propname, namespaces );
+
+				if ( !relationClassCache.containsKey( propname ) ) {
+					URI predicate;
+					if ( alreadyMadeProp ) {
+						predicate = getUriFromRawString( propname, namespaces );
+					}
+					else {
+						// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
+						predicate = schema.build( propname );
+					}
+					relationClassCache.put( propname, predicate );
 				}
-				relationClassCache.put( relkey, predicate );
-			}
-			URI predicate = relationClassCache.get( relkey );
+				URI predicate = relationClassCache.get( propname );
 
-			if ( save && !alreadyMadeProp ) {
-				myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-				// myrc.add( predicate, RDF.TYPE, schema.getContainsUri() );
-				myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+				if ( save && !alreadyMadeProp ) {
+					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
+					// myrc.add( predicate, RDF.TYPE, schema.getContainsUri() );
+					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
 
-				if ( !metas.isLegacyMode() ) {
-					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
+					if ( !metas.isLegacyMode() ) {
+						myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
+					}
 				}
 			}
 		}
@@ -1095,34 +1117,16 @@ public class EngineLoader {
 	 * @throws org.openrdf.repository.RepositoryException
 	 */
 	private static void initNamespaces( RepositoryConnection conn ) throws RepositoryException {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
 
 		conn.begin();
-		for ( Map.Entry<String, String> e : namespaces.entrySet() ) {
+		for ( Map.Entry<String, String> e : Utility.DEFAULTNAMESPACES.entrySet() ) {
 			conn.setNamespace( e.getKey(), e.getValue() );
 		}
 		conn.commit();
 	}
 
 	public static void initNamespaces( ImportData conn ) {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		namespaces.put( VAC.PREFIX, VAC.NAMESPACE );
-		namespaces.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
-
-		conn.getMetadata().setNamespaces( namespaces );
+		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 	}
 
 	public static class ConceptInstanceCacheKey {
