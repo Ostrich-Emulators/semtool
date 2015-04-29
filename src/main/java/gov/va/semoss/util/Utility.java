@@ -509,36 +509,6 @@ public class Utility {
 	}
 
 	/**
-	 * Runs a check to see if calculations have already been performed.
-	 *
-	 * @param query (calculation) to be run on a specific engine.
-	 *
-	 * @return True if calculations have been performed.
-	 */
-	public static boolean runCheck( String query ) {
-		boolean check = true;
-
-		RepositoryList list = DIHelper.getInstance().getRepoList();
-		// get the selected repository
-		List<IEngine> repos = list.getSelectedValuesList();
-
-		SesameJenaSelectWrapper selectWrapper = null;
-		for ( IEngine engine : repos ) {
-			selectWrapper = new SesameJenaSelectWrapper();
-			selectWrapper.setEngine( engine );
-			selectWrapper.setQuery( query );
-			selectWrapper.executeQuery();
-		}
-
-		//if the wrapper is not empty, calculations have already been performed.
-		if ( null != selectWrapper && !selectWrapper.hasNext() ) {
-			check = false;
-		}
-
-		return check;
-	}
-
-	/**
 	 * Displays error message.
 	 *
 	 * @param text to be displayed.
@@ -625,7 +595,7 @@ public class Utility {
 	}
 
 	/**
-	 * Method round.
+	 * Rounds the given value to the given number of decimal places
 	 *
 	 * @param valueToRound double
 	 * @param numberOfDecimalPlaces int
@@ -636,22 +606,6 @@ public class Utility {
 		double multipicationFactor = Math.pow( 10, numberOfDecimalPlaces );
 		double interestedInZeroDPs = valueToRound * multipicationFactor;
 		return Math.round( interestedInZeroDPs ) / multipicationFactor;
-	}
-
-	/**
-	 * Used to round a value to a specific number of decimal places.
-	 *
-	 * @param valueToRound to round.
-	 *
-	 * @return Rounded value.
-	 */
-	public static String sciToDollar( double valueToRound ) {
-		double roundedValue = Math.round( valueToRound );
-		DecimalFormat df = new DecimalFormat( "#0" );
-		NumberFormat formatter = NumberFormat.getCurrencyInstance();
-		df.format( roundedValue );
-		String retString = formatter.format( roundedValue );
-		return retString;
 	}
 
 	/**
@@ -848,24 +802,6 @@ public class Utility {
 		}
 
 		return sb.toString();
-	}
-
-	/**
-	 * Creates an excel workbook
-	 *
-	 * @param wb XSSFWorkbook to write to
-	 * @param fileLoc String containing the path to save the workbook
-	 */
-	public static void writeWorkbook( XSSFWorkbook wb, String fileLoc ) {
-		try ( FileOutputStream newExcelFile = new FileOutputStream( fileLoc ) ) {
-
-			wb.write( newExcelFile );
-		}
-		catch ( IOException e ) {
-			showMessage( "Could not create file " + fileLoc
-					+ ".\nPlease check directory structure/permissions." );
-			log.error( e );
-		}
 	}
 
 	public static Map<String, Object> getParamsFromString( String params ) {
