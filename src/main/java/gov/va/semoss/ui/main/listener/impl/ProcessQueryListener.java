@@ -40,6 +40,7 @@ import gov.va.semoss.ui.components.ExecuteQueryProcessor;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.api.IPlaySheet;
+import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.ui.helpers.PlaysheetCreateRunner;
 import gov.va.semoss.ui.helpers.PlaysheetOverlayRunner;
 import gov.va.semoss.util.Constants;
@@ -128,9 +129,9 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 		//get Swing UI and set ParamHash";
 		JPanel panel = (JPanel) DIHelper.getInstance().getLocalProp( Constants.PARAM_PANEL_FIELD );
 		DIHelper.getInstance().setLocalProperty( Constants.UNDO_BOOLEAN, false );
+
 		// get the currently visible panel
 		Component[] comps = panel.getComponents();
-
 		JComponent curPanel = null;
 		for ( Component comp : comps ) {
 			if ( comp.isVisible() ) {
@@ -140,22 +141,21 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 		}
 
 		IPlaySheet oldplaysheet = null;
-		Map<String, String> paramHash = new HashMap<>();
+		Map<String, String> paramHash = new HashMap<>();;
 		if ( null != curPanel ) {
 			// get all the param field
 			Component[] fields = curPanel.getComponents();
+
 			for ( Component field : fields ) {
 				if ( field instanceof ParamComboBox ) {
-					ParamComboBox pcb = ParamComboBox.class.cast( field );
-					String fieldName = pcb.getParamName();
-					URI uriFill = pcb.getItemAt( pcb.getSelectedIndex() );
-					paramHash.put( fieldName, uriFill.stringValue() );
+	                String fieldName = ( (ParamComboBox) field ).getParamName();
+	                String fieldValue = ( (ParamComboBox) field ).getSelectedItem() + "";
+	                String uriFill = ( (ParamComboBox) field ).getURI( fieldValue );
+	                if ( uriFill == null ) {
+	                   uriFill = fieldValue;
+	                }
+	                paramHash.put( fieldName, uriFill );
 				}
-			}
-
-			if ( oldstyle ) {
-				oldplaysheet = exQueryProcessor.processQuestionQuery( eng, insight,
-						paramHash, appending );
 			}
 		}
 

@@ -5,6 +5,7 @@ import java.awt.Robot;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -15,12 +16,15 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
@@ -32,6 +36,8 @@ import gov.va.semoss.util.Utility;
 
 
 public class  InsightManagerController implements Initializable{
+	protected final String ICON_LOCATION = "/images/icons16/";
+	
 	protected IEngine engine;
 	@FXML
 	protected TabPane tbpTabbedPane;
@@ -82,8 +88,6 @@ public class  InsightManagerController implements Initializable{
     @FXML
     protected TextField txtValueType_parm;
     @FXML
-    protected TextField txtDefaultValue_parm;
-    @FXML
     protected TextArea txtaDefaultQuery_parm;
 	@FXML
 	protected Tab tabParameter;
@@ -115,6 +119,8 @@ public class  InsightManagerController implements Initializable{
 	protected Button btnReloadInsight_Inst;
 	
     protected ParameterTabController prmtc;	
+    @FXML
+    protected Button btnBuildQuery_Parm;
 	@FXML
 	protected Button btnSaveParameter_Parm;
 	@FXML
@@ -194,6 +200,7 @@ public class  InsightManagerController implements Initializable{
                  //When the selected "Insight" changes, re-populate fields on the "Insight" tab:
 	             //-----------------------------------------------------------------------------
 	             populateQuestionTextField(intCurPerspectiveIndex, intCurInsightIndex);
+	             populateRendererClassTextField(intCurPerspectiveIndex, intCurInsightIndex);
 	             populateLegacyQueryCheckBox(intCurPerspectiveIndex, intCurInsightIndex);
 	             populateQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex);	
 	             populatePlaysheetComboBox(intCurPerspectiveIndex, intCurInsightIndex);
@@ -202,6 +209,21 @@ public class  InsightManagerController implements Initializable{
 	             populateCreatedTextField(intCurPerspectiveIndex, intCurInsightIndex);
 	             populateModifiedTextField(intCurPerspectiveIndex, intCurInsightIndex);
 	             populateInsightParameterListView(intCurPerspectiveIndex, intCurInsightIndex);
+	     	     //Whenever the "Parameters" list-view is reloaded,
+	     	     //if it has no elements, disable the "Parameter" tab:
+	             if(lstvParameter_Inst.getItems() == null || 
+	            	lstvParameter_Inst.getItems().get(0).equals("")){
+	     			 tabParameter.setDisable(true);
+	     		 //Otherwise, enable the "Parameter" tab only if
+	     		 //the "Renderer Class" text-field is empty:
+	     		 }else{
+	     		     if(txtRendererClass_Inst.getText() == null || 
+	     		    	txtRendererClass_Inst.getText().trim().isEmpty()){
+		     			 tabParameter.setDisable(false);
+	     		     }else{
+	     			     tabParameter.setDisable(true);
+	     		     }
+	     		 }
 	             populateInsightPerspectivesListView(intCurPerspectiveIndex, intCurInsightIndex);
 	          }				   
 		   });
@@ -229,7 +251,6 @@ public class  InsightManagerController implements Initializable{
 	             populateNameTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);	          				   
 			     populateVariableTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
 			     populateTypeTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
-			     populateDefaultValueTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
 			     populateDefaultQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
 			  }
 		   });
@@ -241,7 +262,7 @@ public class  InsightManagerController implements Initializable{
 	    	  chkLegacyQuery_Inst.setDisable(false);
 	    	  txtaQuery_Inst.setDisable(false);
 	    	  lstvParameter_Inst.setDisable(false);
-	    	  tabParameter.setDisable(false);
+	    	  tabParameter.setDisable(false);			   
 	       }else{
 	    	  cboDisplayWith_Inst.setDisable(true);
 	    	  chkLegacyQuery_Inst.setDisable(true);
@@ -256,12 +277,19 @@ public class  InsightManagerController implements Initializable{
 			   @Override
 			   public void changed(ObservableValue<?> ov, Object t, Object t1) {
 				  String strNewText = (String) t1;
-			      if(strNewText.trim().isEmpty()){
+			      if(strNewText == null || strNewText.trim().isEmpty()){
 			    	  cboDisplayWith_Inst.setDisable(false);
 			    	  chkLegacyQuery_Inst.setDisable(false);
 			    	  txtaQuery_Inst.setDisable(false);
 			    	  lstvParameter_Inst.setDisable(false);
-			    	  tabParameter.setDisable(false);
+			    	  //If the "Renderer Class" text-field becomes empty, enable the 
+			    	  //"Parameter" tab only if external Parameters are defined:
+			          if(lstvParameter_Inst.getItems() == null || 
+			             lstvParameter_Inst.getItems().get(0).equals("")){
+			     		  tabParameter.setDisable(true);
+			     	  }else{
+			     		  tabParameter.setDisable(false);
+			     	  }
 			      }else{
 			    	  cboDisplayWith_Inst.setDisable(true);
 			    	  chkLegacyQuery_Inst.setDisable(true);
@@ -435,6 +463,28 @@ public class  InsightManagerController implements Initializable{
 	    for(Insight element: arylInsights){
 		   lstvInsights.getItems().add(element.getOrderedLabel(((Perspective) arylPerspectives.get(perspectiveIndex)).getUri()));
 	    }
+        //Cell Factory for "Insight" list-view to display PlaySheet icons
+	    //to the left of Insight labels:
+	    lstvInsights.setCellFactory(listView -> new ListCell<String>() {
+	        private ImageView imageView = new ImageView();
+	        @Override
+	        public void updateItem(String item, boolean empty) {
+	            super.updateItem(item, empty);
+	            if (empty) {
+	                setText(null);
+	                setGraphic(null);
+	            }else{
+	                setText(item);
+	            	try{
+	                   Image image = new Image(getInsightIcon(item));
+	                   imageView.setImage(image);
+	                   setGraphic(imageView);
+	            	}catch(Exception e){
+		               setGraphic(null);
+	            	}
+	            }
+	        }
+	    });	     
 	    //Navigate to the previously selected Insight (or the first Insight under
 	    //the Perspective, if the previously selected Insight has been moved):
     	lstvInsights.getSelectionModel().selectFirst();
@@ -446,6 +496,33 @@ public class  InsightManagerController implements Initializable{
 	    }
  	}
 	
+	/**   Returns a PlaySheet icon for the passed-in Insight label. The array-list
+	 * of Insights is consulted along with the array-list of PlaySheets. The base
+	 * path to all icons is defined at the top of this class, in "ICON_LOCATION".
+	 * 
+	 * @param strInsightLabel -- (String) The label of the Insight for which an icon
+	 *    is required.
+	 *    
+	 * @return getInsightIcon -- (String) The file-path to the icon, described above.
+	 */
+	private String getInsightIcon(String strInsightLabel){
+		String strReturnValue = "";
+		
+		for(Insight insight: arylInsights){
+			if(insight.getOrderedLabel(((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getUri()).equals(strInsightLabel)){
+			   for(PlaySheet playsheet: arylPlaySheets){
+				   if(insight.getOutput().equals(playsheet.getViewClass())){
+					  if(playsheet.getIcon() != null){
+					     strReturnValue = ICON_LOCATION + playsheet.getIcon();
+					  }
+					  break;
+				   }
+			   }
+			   break;
+			}
+		}
+		return strReturnValue;
+	}
 //----------------------------------------------------------------------------------------------------
 //                                   I n s i g h t   T a b
 //----------------------------------------------------------------------------------------------------
@@ -477,6 +554,64 @@ public class  InsightManagerController implements Initializable{
  	    		cboDisplayWith_Inst.getSelectionModel().select(playsheet.getLabel());	
  	    	}
 	    }
+        //Cell Factory for "Display with" combo-box list-view to display 
+	    //PlaySheet icons to the left of Playsheet labels:
+ 	    cboDisplayWith_Inst.setCellFactory(ListView -> new ListCell<String>() {
+	        private ImageView imageView = new ImageView();
+	        @Override
+	        public void updateItem(String item, boolean empty) {
+	            super.updateItem(item, empty);
+	            if (empty) {
+	                setText(null);
+	                setGraphic(null);
+	            }else{
+                    setText(item);
+                    try{
+	                   Image image = new Image(getPlaySheetIcon(item));
+	                   imageView.setImage(image);
+	                   setGraphic(imageView);
+                    }catch(Exception e){
+                       setGraphic(null);
+                    }
+	            } 
+	        }
+	    });	
+ 	    //Necessary to display an icon on the button area of the combo-box:
+ 	    cboDisplayWith_Inst.setButtonCell(cboDisplayWith_Inst.getCellFactory().call(null));
+	}
+	
+	/**   Returns a PlaySheet icon for the passed-in PlaySheet label. The array-list
+	 * of PlaySheets is consulted. The base path to all icons is defined at the top 
+	 * of this class, in "ICON_LOCATION".
+	 * 
+	 * @param strPlaySheetLabel -- (String) The label of the PlaySheet for which an 
+	 *    icon is required.
+	 *    
+	 * @return getPlaySheetIcon -- (String) The file-path to the icon, described above.
+	 */
+	private String getPlaySheetIcon(String strPlaySheetLabel){
+	   String strReturnValue = "";
+	   
+	   for(PlaySheet playsheet: arylPlaySheets){
+		   if(playsheet.getLabel().equals(strPlaySheetLabel)){
+			  if(playsheet.getIcon() != null){
+			     strReturnValue = ICON_LOCATION + playsheet.getIcon();
+			  }
+			  break;
+		   }
+	   }
+	   return strReturnValue;
+	}
+
+	/**   Populates the Renderer-Class text-field from the 
+	 * currently selected Insight.
+	 * 
+	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
+	 * @param insightIndex -- (int) Index of currently selected Insight.
+	 */
+	private void populateRendererClassTextField(int perspectiveIndex, int insightIndex){
+  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
+	    txtRendererClass_Inst.setText(((Insight) arylInsights.get(insightIndex)).getRendererClass());		   
 	}
 	
 	/**   Populates the legacy-query check-box with a check from the 
@@ -526,7 +661,7 @@ public class  InsightManagerController implements Initializable{
 	    	     lstvParameter_Inst.getSelectionModel().select(prevParameterLabel);
 	    	     break;
 	    	 }
-	    }	    
+	    }
 	}
 	
 	/**   Populates the Insight Perspectives list-view with all Perspectives,
@@ -649,20 +784,6 @@ public class  InsightManagerController implements Initializable{
         txtValueType_parm.setText(arylParameters.get(parameterIndex).getValueType());
 	}
 	
-	/**   Populates the "Default Value" text-field with the "defaultValue" property from  
-	 * the currently selected Parameter.
-	 * 
-	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-	 * @param insightIndex -- (int) Index of currently selected Insight.
-	 * @param parameterIndex -- (int) Index of currently selected Parameter.
-	 */
-	private void populateDefaultValueTextField(int perspectiveIndex, int insightIndex, int parameterIndex){
- 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-        Insight insight = arylInsights.get(insightIndex);
-        ArrayList<Parameter> arylParameters = (ArrayList<Parameter>)insight.getInsightParameters();
-        txtDefaultValue_parm.setText(arylParameters.get(parameterIndex).getDefaultValue());
-	}
-
 	/**   Populates the "Default Query" text-field with the "defaultQuery" property from  
 	 * the currently selected Parameter.
 	 * 

@@ -141,7 +141,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			try {
 				// if the baseuri isn't already set, then query the kb for void:Dataset
 				RepositoryResult<Statement> rr
-						= getRawConnection().getStatements( null, RDF.TYPE, VAS.DATABASE, false );
+						= getRawConnection().getStatements( null, RDF.TYPE, VAS.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = URI.class.cast( s.getSubject() );
@@ -181,7 +181,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	protected URI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
 		URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
-		rc.add( baseuri, RDF.TYPE, VAS.DATABASE );
+		rc.add( baseuri, RDF.TYPE, VAS.Database );
 
 		// see if we have some old metadata we can move over, too
 		VoidQueryAdapter q = new VoidQueryAdapter( "SELECT ?pred ?val { ?uri a ?voidds . ?uri ?pred ?val}" ) {
@@ -522,7 +522,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		try {
 			if ( null == baseuri ) {
 				RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
-						VAS.DATABASE, false );
+						VAS.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = s.getSubject();

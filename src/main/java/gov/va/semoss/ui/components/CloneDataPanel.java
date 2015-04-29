@@ -172,7 +172,7 @@ public class CloneDataPanel extends javax.swing.JPanel {
     try {
       MetadataQuery mq = new MetadataQuery();
       metas = engine.query( mq );
-      String uri = metas.get( VAS.DATABASE );
+      String uri = metas.get( VAS.Database );
       if ( null != uri ) {
         cdp.setBaseUri( uri );
       }

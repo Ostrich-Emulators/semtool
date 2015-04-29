@@ -11,6 +11,7 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
 import org.openrdf.repository.RepositoryConnection;
 
+import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
@@ -55,10 +56,19 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	          URI insightURI = insight.getId();				
 			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
 	          URI constraintURI = uriBuilder.add("constraint-" + strUniqueIdentifier).build();				
-	          rc.add( insightURI, SPIN.constraint, constraintURI );	          
-	          rc.add( constraintURI, RDFS.LABEL, insightVF.createLiteral("New Parameter: " + strUniqueIdentifier) );
-	          rc.add( constraintURI, SPL.valueType, insightVF.createURI("http://semoss.org/ontologies/Concept/parameter-" + strUniqueIdentifier));
-	          rc.add( constraintURI, SPL.predicate, insightVF.createLiteral("") );
+			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+	          URI valueTypeURI = uriBuilder.add("valueType-" + strUniqueIdentifier).build();				
+              URI predicateURI = insightVF.createURI(ARG.NAMESPACE + "predicate-" + strUniqueIdentifier);
+			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+	          URI queryURI = uriBuilder.add("query-" + strUniqueIdentifier).build();				
+	   
+              rc.add( insightURI, SPIN.constraint, constraintURI );	          
+	          rc.add( constraintURI, RDFS.LABEL, insightVF.createLiteral("New Parameter " + strUniqueIdentifier) );
+	          rc.add( constraintURI, SPL.valueType, valueTypeURI);
+	          rc.add( constraintURI, SPL.predicate, predicateURI);
+	          rc.add( predicateURI, RDFS.LABEL, insightVF.createLiteral("newParameter-" + strUniqueIdentifier));
+	          rc.add( constraintURI, SP.query, queryURI);
+	          rc.add( queryURI, SP.text, insightVF.createLiteral(""));
 
 	          rc.commit();
 	          
@@ -91,18 +101,25 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 		  String parameterUriString = "<" + parameter.getParameterURI() + ">";
 		  
 		  String query_1 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
-		      + "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
-			  + "DELETE{ ?defaultValue ?p ?o .} "
-			  + "WHERE{ " + parameterUriString + " spl:defaultValue ?defaultValue . "
-			  + insightUriString + " spin:constraint " + parameterUriString + ". " 
-			  + "?defaultValue ?p ?o .}";
-				  	  
+		      + "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
+			  + "DELETE{ ?query ?p ?o .} "
+			  + "WHERE{ " + parameterUriString + " sp:query ?query . "
+			  + insightUriString + " spin:constraint " + parameterUriString + " . " 
+			  + "?query ?p ?o .}";
+				  	  		  
 		  String query_2 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+		      + "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
+			  + "DELETE{ ?predicate ?p ?o .} "
+			  + "WHERE{ " + parameterUriString + " spl:predicate ?predicate . "
+			  + insightUriString + " spin:constraint " + parameterUriString + " . " 
+			  + "?predicate ?p ?o .}";
+				  	  
+		  String query_3 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 		      + "DELETE{ " + parameterUriString + " ?p ?o .} "
 		      + "WHERE{ " + insightUriString + " spin:constraint " + parameterUriString + " . "
 		      + parameterUriString + " ?p ?o .}";
 
-		  String query_3 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+		  String query_4 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 			  + "DELETE{ " + insightUriString + " spin:constraint " + parameterUriString + " .} "
 			  + "WHERE{ " + insightUriString + " spin:constraint " + parameterUriString + " .}";
 
@@ -112,9 +129,11 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	         Update uq_1 = rc.prepareUpdate(QueryLanguage.SPARQL, query_1);
 	         Update uq_2 = rc.prepareUpdate(QueryLanguage.SPARQL, query_2);
 	         Update uq_3 = rc.prepareUpdate(QueryLanguage.SPARQL, query_3);
+	         Update uq_4 = rc.prepareUpdate(QueryLanguage.SPARQL, query_4);
 	         uq_1.execute();
 	         uq_2.execute();
 	         uq_3.execute();
+	         uq_4.execute();
 	         
 	         rc.commit();
 	                  
@@ -150,23 +169,37 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 		      + "?perspective olo:slot ?slot .}";
 
 	      String query_2 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+	    	  + "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
+		      + "DELETE{ ?query ?p ?o .} "
+		   	  + "WHERE{ <" + insight.getIdStr() + "> spin:constraint ?constraint . "
+		   	  + "?constraint sp:query ?query . "
+		   	  + "?query ?p ?o .}";
+
+	      String query_3 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+		      + "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
+			  + "DELETE{ ?predicate ?p ?o .} "
+			  + "WHERE{ <" + insight.getIdStr() + "> spin:constraint ?constraint . "
+			  + "?constraint spl:predicate ?predicate . "
+			  + "?predicate ?p ?o .} ";
+
+	      String query_4 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 	       	  + "DELETE{ ?constraint ?p ?o .} "
 	      	  + "WHERE{ <" + insight.getIdStr() + "> spin:constraint ?constraint . "
 	      	  + "?constraint ?p ?o .} ";
 
-	      String query_3 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
+	      String query_5 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 	    	  + "DELETE{ ?body ?p ?o .} "
 	   	      + "WHERE{ <" + insight.getIdStr() + "> spin:body ?body . "
 	   	      + "?body ?p ?o .} ";
 	   	       
-		  String query_4 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
+		  String query_6 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
 			  + "DELETE{ <" + insight.getIdStr() + "> ?p ?o .} "
 			  + "WHERE{ <" + insight.getIdStr() + "> ?p ?o .} ";
 
-		  String query_5 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-			 + "DELETE{ ?slot ?p ?o .} "
-			 + "WHERE{ ?slot olo:item <" + insight.getIdStr() + "> . "
-			 + "?slot ?p ?o .} ";
+		  String query_7 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
+			  + "DELETE{ ?slot ?p ?o .} "
+			  + "WHERE{ ?slot olo:item <" + insight.getIdStr() + "> . "
+			  + "?slot ?p ?o .} ";
 
 		  try{
 	         rc.begin();
@@ -175,11 +208,15 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	         Update uq_3 = rc.prepareUpdate(QueryLanguage.SPARQL, query_3);
 	         Update uq_4 = rc.prepareUpdate(QueryLanguage.SPARQL, query_4);
 	         Update uq_5 = rc.prepareUpdate(QueryLanguage.SPARQL, query_5);
+	         Update uq_6 = rc.prepareUpdate(QueryLanguage.SPARQL, query_6);
+	         Update uq_7 = rc.prepareUpdate(QueryLanguage.SPARQL, query_7);
 	         uq_1.execute();
 	         uq_2.execute();
 	         uq_3.execute();
 	         uq_4.execute();
 	         uq_5.execute();
+	         uq_6.execute();
+	         uq_7.execute();
 	         
 	         rc.commit();
 	         
@@ -217,6 +254,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 		  String insightURI_String = "<" + insight.getIdStr() + ">";
 		  String question = insight.getLabel();
 		  String dataViewOutput = insight.getOutput();
+		  String rendererClass = insight.getRendererClass();
 		  String isLegacy = String.valueOf(insight.getIsLegacy());
 		  String sparql = insight.getSparql();
 		  String description = insight.getDescription();
@@ -232,7 +270,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
              + "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
              + "DELETE{ ?insightURI rdfs:label ?question . "
              + "?insightURI ui:dataView ?dataViewOutput . "
-//             + "?insightURI ui:dataView [ alternateClass ?rendererClass ] . "
+             + "?insightURI vas:rendererClass ?rendererClass . "
              + "?insightURI vas:isLegacy ?isLegacy . "
              + "?body sp:text ?sparql . "
              + "?insightURI dcterms:description ?description . "
@@ -240,6 +278,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
              + "?insightURI dcterms:modified ?modified .} "
              + "INSERT{ ?insightURI rdfs:label \"" + question + "\" . "
              + "?insightURI ui:dataView vas:" + dataViewOutput + " . "
+             + "?insightURI vas:rendererClass \"" + rendererClass + "\" . "
              + "?insightURI vas:isLegacy " + isLegacy + " . "
              + "?body sp:text \"" + sparql + "\" . "
              + "?insightURI dcterms:description \"" + description + "\" . "
@@ -248,6 +287,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
              + "WHERE { BIND(" + insightURI_String + " AS ?insightURI) . "
              + "?insightURI rdfs:label ?question . "
              + "?insightURI ui:dataView ?dataViewOutput . "
+             + "OPTIONAL{ ?insightURI vas:rendererClass ?rendererClass } "
              + "OPTIONAL{ ?insightURI vas:isLegacy ?isLegacy } "
              + "OPTIONAL{ ?insightURI spin:body ?body . "
              + "?body sp:text ?sparql } "

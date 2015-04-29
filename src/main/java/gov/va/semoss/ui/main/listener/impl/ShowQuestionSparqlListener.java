@@ -30,11 +30,22 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.QueryExecutor;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
+import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
+import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.ui.components.api.IChakraListener;
+import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
@@ -74,7 +85,8 @@ public class ShowQuestionSparqlListener implements IChakraListener {
 		String sparql = Utility.normalizeParam(insight.getSparql());
 		// when get current sparql question btn is pressed
         if ( btnGetQuestionSparql.isEnabled() ) {
-		   // code is taken from QuestionListener performs param filling so that the query that is inputed is complete
+
+           // code is taken from QuestionListener performs param filling so that the query that is inputed is complete
 
            // populate query to display based on parameters 
            JPanel panel = (JPanel) DIHelper.getInstance().getLocalProp( Constants.PARAM_PANEL_FIELD );
@@ -103,9 +115,12 @@ public class ShowQuestionSparqlListener implements IChakraListener {
                 }
                 paramHash.put( fieldName, uriFill );
              }
+           }          
+           if(insight.getIsLegacy() == true){
+              sparql = gov.va.semoss.util.Utility.fillParam(sparql, paramHash );
+           }else{
+              sparql = NonLegacyQueryBuilder.buildNonLegacyInsightQuery(insight.getSparql(), paramHash);
            }
-           sparql = gov.va.semoss.util.Utility.fillParam( sparql, paramHash );
-
            //Set the sparql area with the query:
            if ( area.getTabCount() == 1 ) {
               area.setSelectedIndex( 0 );
@@ -130,6 +145,7 @@ public class ShowQuestionSparqlListener implements IChakraListener {
            }
         }
 	}
+	
 	
 	/**
 	 * Method setView. Sets a JComponent that the listener will access and/or modify when an action event occurs.  
