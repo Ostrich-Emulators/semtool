@@ -200,6 +200,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 				int progressPerFile = 100 / toload.size();
 				boolean alreadyShownRdfError = false;
+				File lastloaded = null;
 				for ( File fileToLoad : toload ) {
 					jBar.setString( "Reading " + fileToLoad );
 					ImportFileReader rdr = realtimer.getReader( fileToLoad );
@@ -236,13 +237,18 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						try {
 							somethingToShow = true;
 							ImportData data = rdr.readOneFile( fileToLoad );
+							data.findPropertyLinks();
 							addProgress( "Finished reading " + fileToLoad, progressPerFile );
+
+							if ( null == lastloaded ) {
+								lastloaded = fileToLoad;
+							}
 
 							for ( LoadingSheetData n : data.getSheets() ) {
 								add( n );
 							}
 						}
-						catch ( Exception ee ) {
+						catch ( IOException | ImportValidationException ee ) {
 							log.error( ee, ee );
 						}
 					}
@@ -250,6 +256,10 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 				if ( somethingToShow ) {
 					LoadingPlaySheetFrame.this.selectTab( 0 );
+					if ( !toload.isEmpty() && null != lastloaded ) {
+						LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
+					}
+
 					announceErrors();
 				}
 				else {
@@ -621,7 +631,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		public SaveAllAction() {
 			super( "Save as Loading Sheets", DefaultIcons.defaultIcons.get( DefaultIcons.SAVE ),
 					false, Preferences.userNodeForPackage( DBToLoadingSheetExporter.class ),
-					"lastexp " );
+					"lastexp" );
 			setToolTip( "Saves this data as a Loading Sheet" );
 
 			setDefaultFileName( "Custom_Loading_Sheet_" );

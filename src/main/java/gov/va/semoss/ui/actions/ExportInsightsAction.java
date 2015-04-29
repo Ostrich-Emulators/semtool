@@ -39,7 +39,6 @@ import java.io.FileWriter;
 import javax.swing.JOptionPane;
 
 import org.openrdf.model.Namespace;
-import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sail.memory.MemoryStore;
@@ -120,7 +119,7 @@ public class ExportInsightsAction extends DbAction {
 							rc.setNamespace( OLO.PREFIX, OLO.NAMESPACE );
 							rc.setNamespace( UI.PREFIX, UI.NAMESPACE );
 							rc.setNamespace( MetadataConstants.VA_INSIGHTS_PREFIX, MetadataConstants.VA_INSIGHTS_NS );
-					        rc.setNamespace( ARG.PREFIX, ARG.NAMESPACE );
+					    rc.setNamespace( ARG.PREFIX, ARG.NAMESPACE );
 
 							getEngine().execute( new ModificationExecutorAdapter() {
 

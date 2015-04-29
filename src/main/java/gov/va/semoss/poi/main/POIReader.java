@@ -36,6 +36,7 @@ import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -175,6 +176,12 @@ public class POIReader implements ImportFileReader {
 			typeToSheetNameLkp.add( SheetType.LOADER, LOADER );
 
 			Map<String, SheetType> fromloading = categorizeFromLoadingSheet( lSheet );
+
+			if ( fromloading.isEmpty() ) {
+				throw new ImportValidationException( ErrorType.MISSING_DATA,
+						"No data to process" );
+			}
+
 			for ( Map.Entry<String, SheetType> en : fromloading.entrySet() ) {
 				String name = en.getKey();
 				SheetType loadertype = en.getValue();
@@ -195,6 +202,12 @@ public class POIReader implements ImportFileReader {
 					typeToSheetNameLkp.add( realtype, name );
 				}
 			}
+		}
+
+		if ( 1 == typeToSheetNameLkp.keySet().size()
+				&& typeToSheetNameLkp.containsKey( SheetType.METADATA ) ) {
+			throw new ImportValidationException( ErrorType.MISSING_DATA,
+					"No data to process" );
 		}
 
 		if ( typeToSheetNameLkp.getNN( SheetType.METADATA ).size() > 1 ) {
@@ -245,10 +258,15 @@ public class POIReader implements ImportFileReader {
 				sheetTypeToLoad = "";
 			}
 
+			if ( sheetNameToLoad.isEmpty() && sheetTypeToLoad.isEmpty() ) {
+				logger.debug( "empty row at " + ( rIndex + 1 ) + "...skipping rest of tab" );
+				break;
+			}
+
 			if ( sheetNameToLoad.isEmpty() || ( sheetTypeToLoad.isEmpty() && mustHaveType ) ) {
 				if ( sheetNameToLoad.isEmpty() ) {
 					throw new ImportValidationException( ErrorType.MISSING_DATA,
-							"No sheet name on row " + rIndex );
+							"No sheet name on row " + ( rIndex + 1 ) );
 				}
 				else {
 					throw new ImportValidationException( ErrorType.MISSING_DATA,
@@ -388,7 +406,7 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 			else if ( "@prefix".equals( propName ) ) {
-				namespaces.put( propertyMiddleColumn.replaceAll( ":$", ""), propValue );
+				namespaces.put( propertyMiddleColumn.replaceAll( ":$", "" ), propValue );
 			}
 			else {
 				if ( !propertyMiddleColumn.isEmpty() ) {
@@ -419,8 +437,6 @@ public class POIReader implements ImportFileReader {
 			metas.setNamespace( en.getKey(), en.getValue() );
 		}
 
-		ValueFactory vf = new ValueFactoryImpl();		
-		
 		for ( String[] triple : triples ) {
 			logger.debug( "adding custom triple: "
 					+ triple[0] + " => " + triple[1] + " => " + triple[2] );
@@ -450,7 +466,7 @@ public class POIReader implements ImportFileReader {
 
 				if ( cellValue.getCellType() != Cell.CELL_TYPE_NUMERIC ) {
 					cellValue.setCellType( Cell.CELL_TYPE_STRING );
-					propHash.put( propName,							
+					propHash.put( propName,
 							EngineLoader.getRDFStringValue( cellValue.getStringCellValue(),
 									id.getMetadata().getNamespaces(), vf ) );
 				}

@@ -75,6 +75,10 @@ public abstract class AbstractSavingAction extends AbstractAction {
 		this.defaultFileName = defaultFileName;
 	}
 
+	public void setSaveFile( File f ) {
+		lastsave = f;
+	}
+
 	protected String getSuccessMessage( File expfile ) {
 		return "Saved to " + expfile;
 	}

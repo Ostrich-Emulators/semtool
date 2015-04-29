@@ -31,6 +31,7 @@ import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.sail.SailException;
 import gov.va.semoss.util.UriBuilder;
+import java.util.HashMap;
 import java.util.Map;
 import org.openrdf.model.Model;
 
@@ -60,16 +61,16 @@ public interface IEngine extends IExplorable {
 
 	/**
 	 * Opens a database as defined by these properties. What is included in the
-	 * properties is dependent on the type of engine that is being initiated.
-	 * This is the function that first initializes an engine. One property in
+	 * properties is dependent on the type of engine that is being initiated. This
+	 * is the function that first initializes an engine. One property in
 	 * particular should ALWAYS be included in the Properties argument:
-	 * {@link Constants#SMSS_LOCATION}. Also, {@link Constants#SMSS_SEARCHPATH} is 
+	 * {@link Constants#SMSS_LOCATION}. Also, {@link Constants#SMSS_SEARCHPATH} is
 	 * a semicolon-delimited set of paths that can be set to specify where to look
 	 * for supporting files listed in the Properties.
 	 *
-	 * @param props contains all information regarding the data store and how
-	 * the engine should be instantiated. Dependent on what type of engine is
-	 * being instantiated.
+	 * @param props contains all information regarding the data store and how the
+	 * engine should be instantiated. Dependent on what type of engine is being
+	 * instantiated.
 	 */
 	public void openDB( Properties props );
 
@@ -218,10 +219,11 @@ public interface IEngine extends IExplorable {
 
 	/**
 	 * Gets a prefix-to-namespace mapping
-	 * @return 
+	 *
+	 * @return
 	 */
 	public Map<String, String> getNamespaces();
-	 
+
 	/**
 	 * Sets the start of the URI to be used for separating OWL statements from
 	 * data statements (e.g., http://semoss.org/ontologies)
@@ -299,9 +301,9 @@ public interface IEngine extends IExplorable {
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
 
-	public Model construct( String query ) 
+	public Model construct( String query )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
-	
+
 	/**
 	 * Executes the given modification on the repository connection. The block
 	 * will be executed within a transaction.
