@@ -680,20 +680,21 @@ public class EngineUtil implements Runnable {
 	 * "properties" file). If null, this function will clear all insights from the
 	 * engine without adding anything
 	 * @param clearfirst remove the current insights before adding the new ones?
+	 * @param vocabs list of vocabularies to import
 	 *
 	 * @throws IOException
 	 * @throws EngineManagementException
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
-			boolean clearfirst ) throws IOException, EngineManagementException {
+			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
 		List<Statement> stmts = new ArrayList<>();
 		if ( null != insightsfile ) {
 			stmts.addAll( createInsightStatements( insightsfile ) );
 		}
 
-		// need to re-seed the initial model statements, like during KB creation
-		stmts.addAll( getStatementsFromResource( getClass().getResource( "/models/va-semoss.ttl" ),
-				RDFFormat.TURTLE ) );
+		for ( URL url : vocabs ) {
+			stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+		}
 
 		insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
 		notify();

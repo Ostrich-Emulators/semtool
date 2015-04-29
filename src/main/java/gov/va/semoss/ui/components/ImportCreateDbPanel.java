@@ -17,7 +17,6 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
@@ -30,15 +29,10 @@ import gov.va.semoss.util.DIHelper;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -56,7 +50,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	public static final String METADATABASEURI = "Use Loading Sheet Metadata";
 
 	private boolean loadable = false;
-	private final List<JCheckBox> vocabBoxes = new ArrayList<>();
 
 	/**
 	 * Creates new form ExistingDbPanel
@@ -88,8 +81,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		}
 
 		JFileChooser chsr = file.getChooser();
-		chsr.
-				addChoosableFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
+		chsr.addChoosableFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter(
 				"Turtle Files", "ttl" ) );
 
@@ -130,13 +122,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		SemossPreferences vc = SemossPreferences.getInstance();
 		calcInfers.setSelected( PlayPane.
 				getProp( vc, Constants.CALC_INFERENCES_PREF ) );
-
-		Map<String, Boolean> vocabs = VocabularyRegistry.getVocabularies2();
-		for ( Map.Entry<String, Boolean> en : vocabs.entrySet() ) {
-			JCheckBox jcb = new JCheckBox( en.getKey(), en.getValue() );
-			vocabPanel.add( jcb );
-			vocabBoxes.add( jcb );
-		}
 	}
 
 	private void checkOk() {
@@ -177,7 +162,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     semossEdgeModel = new javax.swing.JRadioButton();
     rdrEdgeModel = new javax.swing.JRadioButton();
     w3cEdgeModel = new javax.swing.JRadioButton();
-    vocabPanel = new javax.swing.JPanel();
+    vocabPanel = new gov.va.semoss.ui.components.VocabularyPanel();
 
     jLabel2.setLabelFor(file);
     jLabel2.setText("Select File(s) to Import");
@@ -265,9 +250,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
         .addComponent(w3cEdgeModel))
     );
 
-    vocabPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), "Vocabularies", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
-    vocabPanel.setLayout(new javax.swing.BoxLayout(vocabPanel, javax.swing.BoxLayout.PAGE_AXIS));
-
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -299,7 +281,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
             .addGap(18, 18, 18)
             .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(vocabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+            .addComponent(vocabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addContainerGap())))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -327,16 +310,19 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(layout.createSequentialGroup()
-            .addComponent(calcInfers)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(metamodel)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(conformer)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-          .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(vocabPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addComponent(calcInfers)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(metamodel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(conformer)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+              .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 0, Short.MAX_VALUE))
+          .addComponent(vocabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -468,14 +454,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 						eutil.addEngineOpListener( eol );
 
 						try {
-							List<URL> vocabularies = new ArrayList<>();
-							for ( JCheckBox jcb : vocabBoxes ) {
-								if ( jcb.isSelected() ) {
-									String label = jcb.getText();
-									vocabularies.add( VocabularyRegistry.getURL( label ) );
-								}
-							}
-
 							EngineCreateBuilder ecb
 							= new EngineCreateBuilder( dbdir.getFirstFile(), dbname.getText() );
 							ecb.setDefaultBaseUri( defaultBaseUri,
@@ -484,7 +462,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 							.setDefaultsFiles( null, null, questionfile.getFirstFile() )
 							.setFiles( files )
 							.setBooleans( stageInMemory, calc, dometamodel )
-							.setVocabularies( vocabularies );
+							.setVocabularies( vocabPanel.getSelectedVocabularies() );
 
 							smss[0] = EngineUtil.createNew( ecb, errors );
 							EngineUtil.getInstance().mount( smss[0], true );
@@ -519,7 +497,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private javax.swing.JRadioButton rdrEdgeModel;
   private javax.swing.JRadioButton semossEdgeModel;
   private javax.swing.JLabel urilbl;
-  private javax.swing.JPanel vocabPanel;
+  private gov.va.semoss.ui.components.VocabularyPanel vocabPanel;
   private javax.swing.JRadioButton w3cEdgeModel;
   // End of variables declaration//GEN-END:variables
 
