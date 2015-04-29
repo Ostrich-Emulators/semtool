@@ -5,12 +5,14 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.rdf.engine.edgemodelers.EdgeModeler;
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.remote.BigdataSailFactory;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
 import gov.va.semoss.model.vocabulary.SEMOSS;
+import gov.va.semoss.model.vocabulary.VAS;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,8 +45,12 @@ import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFromRawString;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
+import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
@@ -54,18 +60,15 @@ import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
@@ -82,13 +85,6 @@ import org.openrdf.rio.ntriples.NTriplesWriter;
  */
 public class EngineLoader {
 
-	protected static final Pattern NAMEPATTERN
-			= Pattern.compile( "(?:(?:\"([^\"]+)\")|([^@]+))@([a-z-A-Z]{1,8})" );
-	protected static final Pattern DTPATTERN
-			= Pattern.compile( "\"([^\\\\^]+)\"\\^\\^(.*)" );
-	protected static final Pattern URISTARTPATTERN
-			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
-
 	private static final Logger log = Logger.getLogger( EngineLoader.class );
 	private final boolean stageInMemory;
 	private final List<Statement> owls = new ArrayList<>();
@@ -100,7 +96,6 @@ public class EngineLoader {
 	private final Map<String, URI> relationCache = new HashMap<>();
 	private final ValueFactory vf;
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
-	private final Set<URI> duplicates = new HashSet<>();
 	private URI defaultBaseUri;
 	private boolean forceBaseUri;
 
@@ -297,9 +292,9 @@ public class EngineLoader {
 			List<Statement> stmts = new ArrayList<>();
 			for ( String[] stmt : data.getStatements() ) {
 				Statement st = new StatementImpl(
-						EngineLoader.getUriFromRawString( stmt[0], namespaces ),
-						EngineLoader.getUriFromRawString( stmt[1], namespaces ),
-						EngineLoader.getRDFStringValue( stmt[2], namespaces, vf ) );
+						getUriFromRawString( stmt[0], namespaces ),
+						getUriFromRawString( stmt[1], namespaces ),
+						getRDFStringValue( stmt[2], namespaces, vf ) );
 				stmts.add( st );
 			}
 			if ( !stmts.isEmpty() ) {
@@ -572,211 +567,16 @@ public class EngineLoader {
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
+		EdgeModeler modeler = getEdgeModeler( engine );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
-				addRel( nap, namespaces, sheet, metas );
+				modeler.addRel( nap, namespaces, sheet, metas, myrc );
 			}
 		}
 		else {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
-				addNode( nap, namespaces, sheet, metas );
-			}
-		}
-	}
-
-	private URI ensureUnique( URI uri ) {
-		if ( duplicates.contains( uri ) ) {
-			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
-			uri = dupefixer.uniqueUri();
-			duplicates.add( uri );
-		}
-		return uri;
-	}
-
-	private URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas ) throws RepositoryException {
-
-		String stype = nap.getSubjectType();
-		String srawlabel = nap.getSubject();
-
-		String otype = nap.getObjectType();
-		String orawlabel = nap.getObject();
-
-		// get both ends of the relationship...
-		ConceptInstanceCacheKey skey = new ConceptInstanceCacheKey( stype, srawlabel );
-		if ( !dataNodes.containsKey( skey ) ) {
-			LoadingNodeAndPropertyValues filler
-					= sheet.new LoadingNodeAndPropertyValues( srawlabel );
-			addNode( filler, namespaces, sheet, metas );
-		}
-		URI subject = dataNodes.get( skey );
-
-		ConceptInstanceCacheKey okey = new ConceptInstanceCacheKey( otype, orawlabel );
-		if ( !dataNodes.containsKey( okey ) ) {
-			LoadingSheetData lsd = LoadingSheetData.nodesheet( sheet.getName(), otype );
-			LoadingNodeAndPropertyValues filler = lsd.add( orawlabel );
-			addNode( filler, namespaces, lsd, metas );
-		}
-		URI object = dataNodes.get( okey );
-
-		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
-
-		// ... and get a relationship that ties them together
-		StringBuilder keybuilder = new StringBuilder( nap.getSubjectType() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getSubject() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( sheet.getRelname() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getObjectType() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getObject() );
-
-		String lkey = keybuilder.toString();
-		if ( !relationCache.containsKey( lkey ) ) {
-			URI connector;
-			String rellocalname;
-			if ( alreadyMadeRel ) {
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
-				connector = metas.getDataBuilder().getRelationUri().build( rellocalname );
-			}
-			else {
-				UriBuilder typebuilder
-						= metas.getDataBuilder().getRelationUri().add( sheet.getRelname() );
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
-				connector = typebuilder.add( rellocalname ).build();
-			}
-
-			connector = ensureUnique( connector );
-			relationCache.put( lkey, connector );
-		}
-
-		String typekey = stype + sheet.getRelname() + otype;
-		URI relClassBaseURI = relationClassCache.get( typekey );
-
-		URI connector = relationCache.get( lkey );
-		if ( metas.isAutocreateMetamodel() ) {
-			myrc.add( connector, RDFS.SUBPROPERTYOF, relClassBaseURI );
-			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel
-					+ Constants.RELATION_LABEL_CONCATENATOR + orawlabel ) );
-		}
-		myrc.add( subject, connector, object );
-
-		addProperties( connector, nap, namespaces, sheet, metas );
-
-		return connector;
-	}
-
-	/**
-	 * Adds just a node to the dataset (no properties, nothing else)
-	 *
-	 * @param typelabel
-	 * @param rawlabel
-	 * @param namespaces
-	 * @return
-	 */
-	private URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
-			ImportMetadata metas ) throws RepositoryException {
-
-		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
-		ConceptInstanceCacheKey key = new ConceptInstanceCacheKey( typename, rawlabel );
-		if ( !dataNodes.containsKey( key ) ) {
-			URI subject;
-
-			if ( nodeIsAlreadyUri ) {
-				subject = getUriFromRawString( rawlabel, namespaces );
-			}
-			else {
-				if ( metas.isAutocreateMetamodel() ) {
-					UriBuilder nodebuilder = metas.getDataBuilder().getConceptUri();
-					if ( !typename.contains( ":" ) ) {
-						nodebuilder.add( typename );
-					}
-					subject = nodebuilder.add( rawlabel ).build();
-				}
-				else {
-					subject = metas.getDataBuilder().add( rawlabel ).build();
-				}
-
-				subject = ensureUnique( subject );
-			}
-			dataNodes.put( key, subject );
-		}
-
-		URI subject = dataNodes.get( key );
-		myrc.add( subject, RDF.TYPE, schemaNodes.get( typename ) );
-		return subject;
-	}
-
-	private URI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas ) throws RepositoryException {
-
-		String typename = nap.getSubjectType();
-		String rawlabel = nap.getSubject();
-		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas );
-
-		boolean savelabel = metas.isAutocreateMetamodel();
-		if ( !metas.isLegacyMode() && rawlabel.contains( ":" ) ) {
-			// we have something with a colon in it, so we need to figure out if it's
-			// a namespace-prefixed string, or just a string with a colon in it
-
-			Value val = getRDFStringValue( rawlabel, namespaces, myrc.getValueFactory() );
-			// check if we have a prefixed URI
-			URI u = getUriFromRawString( rawlabel, namespaces );
-			savelabel = ( savelabel && null == u );
-			rawlabel = val.stringValue();
-		}
-
-		// if we have a label property, skip this label-making
-		// (it'll get handled in the addProperties function later)
-		if ( savelabel && !nap.hasProperty( RDFS.LABEL, namespaces ) ) {
-			myrc.add( subject, RDFS.LABEL, vf.createLiteral( rawlabel ) );
-		}
-
-		addProperties( subject, nap, namespaces, sheet, metas );
-
-		return subject;
-	}
-
-	/**
-	 * Create statements for all of the properties of the instanceURI
-	 *
-	 * @param subject URI containing the subject instance URI
-	 * @param properties Map<String, Object> that contains all properties
-	 * @param namespaces
-	 * @param sheet
-	 * @param metas
-	 *
-	 * @throws RepositoryException
-	 */
-	protected void addProperties( URI subject, Map<String, Value> properties,
-			Map<String, String> namespaces, LoadingSheetData sheet,
-			ImportMetadata metas ) throws RepositoryException {
-
-		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
-			String relkey = entry.getKey();
-
-			URI predicate = relationClassCache.get( relkey );
-
-			Value value = entry.getValue();
-			if ( sheet.isLink( relkey ) ) {
-				// our "value" is really the label of another node, so find that node
-				value = addSimpleNode( relkey, value.stringValue(), namespaces, metas );
-			}
-
-			// not sure if we even use these values anymore
-			switch ( value.toString() ) {
-				case Constants.PROCESS_CURRENT_DATE:
-					myrc.add( subject, predicate,
-							vf.createLiteral( getCal( new Date() ) ) );
-					break;
-				case Constants.PROCESS_CURRENT_USER:
-					myrc.add( subject, predicate,
-							vf.createLiteral( System.getProperty( "user.name" ) ) );
-					break;
-				default:
-					myrc.add( subject, predicate, value );
+				modeler.addNode( nap, namespaces, sheet, metas, myrc );
 			}
 		}
 	}
@@ -853,7 +653,7 @@ public class EngineLoader {
 			}
 
 			for ( String propname : sheet.getProperties() ) {
-			// check to see if we're actually a link to some
+				// check to see if we're actually a link to some
 				// other node (and not really a new property
 				if ( sheet.isLink( propname ) || schemaNodes.containsKey( propname ) ) {
 					log.debug( "linking " + propname + " as a " + SEMOSS.has
@@ -889,115 +689,6 @@ public class EngineLoader {
 				}
 			}
 		}
-	}
-
-	private static boolean isUri( String raw, Map<String, String> namespaces ) {
-		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
-			raw = raw.substring( 1, raw.length() - 1 );
-		}
-
-		Matcher m = URISTARTPATTERN.matcher( raw );
-		if ( m.matches() ) {
-			return true;
-		}
-
-		if ( raw.contains( ":" ) ) {
-			String[] pieces = raw.split( ":" );
-			if ( 2 == pieces.length ) {
-				String namespace = namespaces.get( pieces[0] );
-				if ( !( null == namespace || namespace.trim().isEmpty() ) ) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
-		//resolve namespace
-		ValueFactory vf = new ValueFactoryImpl();
-		URI uri = null;
-
-		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
-			uri = vf.createURI( raw.substring( 1, raw.length() - 1 ) );
-			return uri;
-		}
-
-		// if raw starts with <something>://, then assume it's just a URI
-		Matcher m = URISTARTPATTERN.matcher( raw );
-		if ( m.matches() ) {
-			return vf.createURI( raw );
-		}
-
-		if ( raw.contains( ":" ) ) {
-			String[] pieces = raw.split( ":" );
-			if ( 2 == pieces.length ) {
-				String namespace = namespaces.get( pieces[0] );
-				if ( null == namespace || namespace.trim().isEmpty() ) {
-					log.warn( "No namespace found for raw value: " + raw );
-				}
-				else {
-					uri = vf.createURI( namespace, pieces[1] );
-				}
-			}
-			else {
-				log.error( "cannot resolve namespace for: " + raw + " (too many colons)" );
-			}
-		}
-		//else {
-		// since this will will always throw an error (it can't be an absolute URI)
-		// we'll just return null, as usual
-		//uri = vf.createURI( raw );
-		//}
-
-		return uri;
-	}
-
-	public static Value getRDFStringValue( String rawval, Map<String, String> namespaces,
-			ValueFactory vf ) {
-		// if rawval looks like a URI, assume it is
-		Matcher urimatcher = URISTARTPATTERN.matcher( rawval );
-		if ( urimatcher.matches() ) {
-			return vf.createURI( rawval );
-		}
-
-		Matcher m = NAMEPATTERN.matcher( rawval );
-		String val;
-		String lang;
-		if ( m.matches() ) {
-			String g1 = m.group( 1 );
-			String g2 = m.group( 2 );
-			val = ( null == g1 ? g2 : g1 );
-			lang = m.group( 3 );
-		}
-		else {
-			val = rawval;
-			lang = "";
-
-			m = DTPATTERN.matcher( rawval );
-			if ( m.matches() ) {
-				val = m.group( 1 );
-				String typestr = m.group( 2 );
-				try {
-					URI type = getUriFromRawString( typestr, namespaces );
-					if ( null == type ) {
-						// will get caught immediately
-						throw new NullPointerException( "unknown type URI" );
-					}
-					else {
-						return vf.createLiteral( val, type );
-					}
-				}
-				catch ( Exception e ) {
-					log.warn( "probably misinterpreting as string (unknown type URI?) :"
-							+ rawval, e );
-					val = rawval;
-				}
-			}
-		}
-
-		return ( lang.isEmpty() ? vf.createLiteral( val )
-				: vf.createLiteral( val, lang ) );
 	}
 
 	/**
@@ -1127,6 +818,36 @@ public class EngineLoader {
 
 	public static void initNamespaces( ImportData conn ) {
 		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
+	}
+
+	public EdgeModeler getEdgeModeler( IEngine eng ) {
+		MetadataQuery mq = new MetadataQuery( VAS.REIFICATION );
+		EdgeModeler modeler = null;
+		try {
+			eng.query( mq );
+			String val = mq.getOne();
+			URI reif = ( null == val ? Constants.ANYNODE : new URIImpl( val ) );
+			if ( VAS.SEMOSS_REIFICATION.equals( reif ) || Constants.ANYNODE == reif ) {
+				modeler = new LegacyEdgeModeler();
+			}
+			else if ( VAS.W3C_REIFICATION.equals( reif ) ) {
+
+			}
+			else if ( VAS.RDR_REIFICATION.equals( reif ) ) {
+
+			}
+			else {
+				throw new IllegalArgumentException( "Unknown reification model: " + reif );
+			}
+
+			modeler.setCaches( schemaNodes, dataNodes, relationClassCache, relationCache );
+
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
+
+		}
+
+		return modeler;
 	}
 
 	public static class ConceptInstanceCacheKey {
