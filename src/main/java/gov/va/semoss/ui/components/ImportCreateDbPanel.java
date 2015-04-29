@@ -374,13 +374,13 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 		URI reif = null;
 		if ( semossEdgeModel.isSelected() ) {
-			reif = VAS.SEMOSS_REIFICATION;
+			reif = VAS.VASEMOSS_Reification;
 		}
 		else if ( rdrEdgeModel.isSelected() ) {
-			reif = VAS.RDR_REIFICATION;
+			reif = VAS.RDR_Reification;
 		}
 		else if ( w3cEdgeModel.isSelected() ) {
-			reif = VAS.W3C_REIFICATION;
+			reif = VAS.W3C_Reification;
 		}
 		else {
 			throw new IllegalArgumentException( "Unknown reification: " + reif );

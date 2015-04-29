@@ -177,6 +177,38 @@ public class Utility {
 
 		return paramHash;
 	}
+	
+
+	/**  Extracts parameter bindings from the passed-in query of the form,
+	 * "<@name-http:value@>", into a hash of variable names, types, and parameter
+	 * queries (created from types), suitable for Insight parameter drop-downs on 
+	 * the left-pane of the tool.
+	 * 
+	 * @param query -- (String) The Insight's Sparql query.
+	 * 
+	 * @return -- (Map<String, Map<String, String>>) The hash described above.
+	 */
+	public static Map<String, Map<String, String>> getParamTypeQueryHash( String query ) {
+		Map<String, Map<String, String>> paramQueryHash = new HashMap<>();
+		Pattern pattern = Pattern.compile( "[@]{1}\\w+[-]*[\\w/.:]+[@]" );
+
+		Matcher matcher = pattern.matcher( query );
+		while ( matcher.find() ) {
+			String data = matcher.group();
+			data = data.substring( 1, data.length() - 1 );
+			String paramVariable = data.substring( 0, data.indexOf( "-" ) );
+			String paramType = data.substring( data.indexOf( "-" ) + 1 );
+			String paramQuery = "SELECT ?entity WHERE{ ?entity a <" + paramType + "> .}";
+
+			log.debug( "paramTypeQueryhash row: " + paramVariable + ", " + paramType + ", " + paramQuery );
+			Map<String, String> paramElement = new HashMap<>();
+			paramElement.put("parameterValueType", paramType);
+			paramElement.put("parameterQuery", paramQuery);
+			paramQueryHash.put(paramVariable, paramElement);
+		}
+		return paramQueryHash;
+	}
+	
 
 	/**
 	 * Matches the given query against a specified pattern. While the next

@@ -206,7 +206,7 @@ public class CLI {
 			smss = EngineUtil.createNew(
 					new EngineCreateBuilder( outputFileDir, databaseFileName )
 					.setDefaultBaseUri( new URIImpl( baseURI ), true )
-					.setReificationModel( VAS.SEMOSS_REIFICATION )
+					.setReificationModel( VAS.VASEMOSS_Reification )
 					.setDefaultsFiles( null, null, insightFile )
 					.setFiles( loads )
 					.setBooleans( stageInMemory, closure, createMetamodel ),

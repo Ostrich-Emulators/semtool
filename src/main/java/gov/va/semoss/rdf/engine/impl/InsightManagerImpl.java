@@ -252,8 +252,7 @@ public class InsightManagerImpl implements InsightManager {
           rc.add( slot, OLO.item, insightURI );
           rc.add( slot, OLO.index, vf.createLiteral( order ) );          
 
-          String dataViewName
-							= legacyDataViewName.replaceFirst( "prerna", "gov.va.semoss" );
+          String dataViewName = legacyDataViewName.replaceFirst( "prerna", "gov.va.semoss" );
           dataViewName = dataViewName.replaceFirst( "veera", "gov.va.vcamp" );
           URI dataViewURI = vf.createURI( VAS.NAMESPACE, dataViewName );
 
@@ -278,11 +277,12 @@ public class InsightManagerImpl implements InsightManager {
           // work with, change 'M' to "M" for testing.
           rc.add( spinBody, SP.text, vf.createLiteral( sparql.replaceAll( "\"","\\\"" ) ) ); // verify this
 
-          rc.add( insightURI, RDF.TYPE, SPIN.Function );
-          rc.add( insightURI, RDFS.SUBCLASSOF, VAS.Functions );
+          rc.add( insightURI, RDF.TYPE, SPIN.MagicProperty );
+          rc.add( insightURI, RDFS.SUBCLASSOF, VAS.InsightProperties );
           rc.add( insightURI, RDFS.LABEL, vf.createLiteral( insightLabel ) );
           rc.add( insightURI, SPIN.body, spinBody );
           rc.add( insightURI, UI.dataView, dataViewURI );
+          rc.add( insightURI, VAS.rendererClass, vf.createLiteral( "" ) );
           rc.add( insightURI, VAS.isLegacy, vf.createLiteral( true ) );
           
           //REMOVE THIS Line for Production:
@@ -296,7 +296,6 @@ public class InsightManagerImpl implements InsightManager {
           Map<String, String> paramHash = Utility.getParams( sparql );
 
           // need to find a way to handle multiple param types
-          int paramCount = 1;
           for ( String param : paramHash.keySet() ) {
             String paramKey = param.substring( 0, param.indexOf( "-" ) );
             String paramType = param.substring( param.indexOf( "-" ) + 1 );
@@ -309,9 +308,19 @@ public class InsightManagerImpl implements InsightManager {
             rc.add( argumentURI, RDFS.LABEL, vf.createLiteral( paramKey.replaceAll("([a-z])([A-Z])", "$1 $2") ) );
             
             URI parameterURI = vf.createURI( ARG.NAMESPACE, paramKey );
+            rc.add( parameterURI, RDF.TYPE, RDF.PROPERTY );
             rc.add( parameterURI, RDFS.LABEL, vf.createLiteral( paramKey ) );
             rc.add( argumentURI, SPL.predicate, parameterURI );
             rc.add( argumentURI, SPL.valueType, vf.createURI( paramType ) );
+            
+            /*
+             * Add the default query that retrieves parameter options:
+             */
+            URI paramQuery = vf.
+                    createURI( MetadataConstants.VA_INSIGHTS_NS, insightKey + "-" + paramKey + "-Query" );
+            rc.add( paramQuery, RDF.TYPE, SP.Select );  
+            rc.add( paramQuery, SP.text, vf.createLiteral( "SELECT ?" + paramKey + "?label WHERE{ ?" + paramKey + " a <" + paramType + "> }; rdfs:label ?label" ) );
+            rc.add( argumentURI, SP.query, paramQuery );
 
             /*
              * Special case for the Generic-Perspective which has two dependent
@@ -437,11 +446,11 @@ public class InsightManagerImpl implements InsightManager {
 	        String query = "PREFIX " + SPIN.PREFIX  + ": <" + SPIN.NAMESPACE + "> "
 	        	   + "PREFIX " + SPL.PREFIX  + ": <" + SPL.NAMESPACE + "> "
 	        	   + "PREFIX " + SP.PREFIX  + ": <" + SP.NAMESPACE + "> "
-	        	   + "SELECT DISTINCT ?parameter ?label ?variable ?valueType ?defaultValue ?defaultQuery WHERE { "
+	        	   + "SELECT DISTINCT ?parameter ?label ?variable ?valueType ?query WHERE { "
 	     		   + "BIND(" + insightUriString + " AS ?uri) . "
 	     		   + "OPTIONAL{ ?uri spin:constraint ?parameter . "
 	               + "?parameter spl:valueType ?valueType ; rdfs:label ?label ; spl:predicate [ rdfs:label ?variable ] . "
-	     		   + "OPTIONAL{ ?parameter spl:defaultValue ?defaultValue OPTIONAL { ?defaultValue sp:text ?defaultQuery }}} }";     
+	     		   + "OPTIONAL{?parameter sp:query [ sp:text ?query ] } } }";   
 	        
 	        ListQueryAdapter<Parameter> lqa = new ListQueryAdapter<Parameter>( query ) {
 	           @Override
@@ -451,7 +460,7 @@ public class InsightManagerImpl implements InsightManager {
 		            add(parameter);
 	           }
 	        };
-		    log.debug("Parameter-er... " + query );
+		    log.debug("Parameter query... " + query );
 	        colInsightParameters.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
 	       
 	    }catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
@@ -512,12 +521,13 @@ public class InsightManagerImpl implements InsightManager {
           + "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
           + "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
           + "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
-          + "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterValueType ?parameterDefaultValue ?defaultValueQuery ?isLegacy ?perspective ?description ?creator ?created ?modified ?order WHERE { "
+          + "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?perspective ?description ?creator ?created ?modified ?order WHERE { "
           + insightUriString + " rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
           + "BIND(" + perspectiveUriString + "AS ?perspective) . "
           + "OPTIONAL{ " + insightUriString + " spin:body [ sp:text ?sparql ] } "
           + "OPTIONAL{ " + insightUriString + " spin:constraint ?parameter . "
-          + "?parameter spl:valueType ?parameterValueType ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{ ?parameter spl:defaultValue ?parameterDefaultValue OPTIONAL { ?parameterDefaultValue sp:text ?defaultValueQuery }} } "
+          + "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] }} "
+          + "OPTIONAL{ " + insightUriString + " vas:rendererClass ?rendererClass } "
           + "OPTIONAL{ " + insightUriString + " vas:isLegacy ?isLegacy } "
           + "OPTIONAL{ " + insightUriString + " dcterms:description ?description } "
           + "OPTIONAL{ " + insightUriString + " dcterms:creator ?creator } "

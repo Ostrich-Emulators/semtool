@@ -372,7 +372,7 @@ public class EngineLoaderTest {
 		el.loadToEngine( Arrays.asList( TICKET584_EXP ), engine, true, errors );
 
 		// cleanup
-		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.DATABASE );
+		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.Database );
 		el.release();
 
 		if ( log.isTraceEnabled() ) {

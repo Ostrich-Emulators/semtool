@@ -65,7 +65,7 @@ public class MetadataQueryTest {
       repo.initialize();
       RepositoryConnection rc = repo.getConnection();
       engine.setRepositoryConnection( rc );
-      rc.add( bldr.toUri(), RDF.TYPE, VAS.DATABASE );
+      rc.add( bldr.toUri(), RDF.TYPE, VAS.Database );
     }
     catch ( Exception e ) {
     }
