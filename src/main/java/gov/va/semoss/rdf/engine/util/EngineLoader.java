@@ -10,9 +10,6 @@ import com.bigdata.rdf.sail.remote.BigdataSailFactory;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
-import gov.va.semoss.model.vocabulary.SEMOSS;
-import gov.va.semoss.model.vocabulary.VAC;
-import gov.va.semoss.model.vocabulary.VAS;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,10 +65,7 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -311,13 +305,13 @@ public class EngineLoader {
 			}
 
 			for ( LoadingSheetData n : data.getNodes() ) {
-				addToEngine( n, engine, data.getMetadata() );
+				addToEngine( n, engine, data );
 			}
 
 			separateConformanceErrors( data, conformanceErrors, engine );
 
 			for ( LoadingSheetData r : data.getRels() ) {
-				addToEngine( r, engine, data.getMetadata() );
+				addToEngine( r, engine, data );
 			}
 
 			URI ebase = engine.getBaseUri();
@@ -567,14 +561,15 @@ public class EngineLoader {
 	}
 
 	private void addToEngine( LoadingSheetData sheet, IEngine engine,
-			ImportMetadata metas ) throws RepositoryException {
+			ImportData alldata ) throws RepositoryException {
 
 		// we want to search all namespaces, but use the metadata's first
+		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
 
 		// create all metamodel triples, even if we don't add them to the repository
-		createMetamodel( sheet, namespaces, metas );
+		createMetamodel( sheet, namespaces, alldata );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
@@ -771,19 +766,19 @@ public class EngineLoader {
 	}
 
 	private void createMetamodel( LoadingSheetData sheet, Map<String, String> namespaces,
-			ImportMetadata metas ) throws RepositoryException {
+			ImportData alldata ) throws RepositoryException {
+		ImportMetadata metas = alldata.getMetadata();
 		UriBuilder schema = metas.getSchemaBuilder();
 		boolean save = metas.isAutocreateMetamodel();
 
 		String stype = sheet.getSubjectType();
-		String scachekey = stype;
-		if ( !schemaNodes.containsKey( scachekey ) ) {
+		if ( !schemaNodes.containsKey( stype ) ) {
 			boolean nodeAlreadyMade = isUri( stype, namespaces );
 
 			URI uri = ( nodeAlreadyMade
 					? getUriFromRawString( stype, namespaces )
 					: schema.build( stype ) );
-			schemaNodes.put( scachekey, uri );
+			schemaNodes.put( stype, uri );
 
 			if ( save && !nodeAlreadyMade ) {
 				myrc.add( uri, RDF.TYPE, OWL.CLASS );
@@ -794,15 +789,14 @@ public class EngineLoader {
 
 		if ( sheet.isRel() ) {
 			String otype = sheet.getObjectType();
-			String ocachekey = otype;
-			if ( !schemaNodes.containsKey( ocachekey ) ) {
+			if ( !schemaNodes.containsKey( otype ) ) {
 				boolean nodeAlreadyMade = isUri( otype, namespaces );
 
 				URI uri = ( nodeAlreadyMade
 						? getUriFromRawString( otype, namespaces )
 						: schema.build( otype ) );
 
-				schemaNodes.put( ocachekey, uri );
+				schemaNodes.put( otype, uri );
 
 				if ( save && !nodeAlreadyMade ) {
 					myrc.add( uri, RDF.TYPE, OWL.CLASS );
@@ -841,12 +835,9 @@ public class EngineLoader {
 		}
 
 		for ( String propname : sheet.getProperties() ) {
-			// property names are unique per sheet
-			//String relkey = sheet.getName() + propname;
-			String relkey = propname;
 			boolean alreadyMadeProp = isUri( propname, namespaces );
 
-			if ( !relationClassCache.containsKey( relkey ) ) {
+			if ( !relationClassCache.containsKey( propname ) ) {
 				URI predicate;
 				if ( alreadyMadeProp ) {
 					predicate = getUriFromRawString( propname, namespaces );
@@ -855,9 +846,9 @@ public class EngineLoader {
 					// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
 					predicate = schema.build( propname );
 				}
-				relationClassCache.put( relkey, predicate );
+				relationClassCache.put( propname, predicate );
 			}
-			URI predicate = relationClassCache.get( relkey );
+			URI predicate = relationClassCache.get( propname );
 
 			if ( save && !alreadyMadeProp ) {
 				myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );

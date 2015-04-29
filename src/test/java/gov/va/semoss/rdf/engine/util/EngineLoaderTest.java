@@ -128,6 +128,9 @@ public class EngineLoaderTest {
 	private static final File TEST15 = new File( "src/test/resources/test15.xlsx" );
 	private static final File TEST15_EXP = new File( "src/test/resources/test15.nt" );
 
+	private static final File TEST17 = new File( "src/test/resources/test17.xlsx" );
+	private static final File TEST17_EXP = new File( "src/test/resources/test17.nt" );
+
 	private InMemorySesameEngine engine;
 	private File dbfile;
 
@@ -724,7 +727,7 @@ public class EngineLoaderTest {
 	public void testInitNamespaces() {
 		ImportData data = new ImportData();
 		EngineLoader.initNamespaces( data );
-		assertEquals( 9, data.getMetadata().getNamespaces().size() );
+		assertEquals( 10, data.getMetadata().getNamespaces().size() );
 		assertEquals( VAS.NAMESPACE, data.getMetadata().getNamespaces().get( VAS.PREFIX ) );
 	}
 
@@ -1084,6 +1087,27 @@ public class EngineLoaderTest {
 		}
 
 		compareData( engine.getRawConnection(), getExpectedGraph( TEST15_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
+	}
+
+	// @Test
+	public void testLoadingSheet17() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
+				UriBuilder.getBuilder( OWLSTART ) );
+
+		EngineLoader el = new EngineLoader();
+		el.loadToEngine( Arrays.asList( TEST17 ), engine, true, null );
+		el.release();
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test17.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		}
+
+		compareData( engine.getRawConnection(), getExpectedGraph( TEST17_EXP ),
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
