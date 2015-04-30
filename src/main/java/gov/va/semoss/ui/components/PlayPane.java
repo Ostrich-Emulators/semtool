@@ -1315,7 +1315,29 @@ public class PlayPane extends JFrame {
 
 				if ( preflistenermap.containsKey( cmd ) ) {
 					JPanel panel = preflistenermap.get( cmd );
+					
 					if ( ischecked ) {
+					// Enable- Disable Logic
+						if (cmd == "graphfilter"){
+							item.setToolTipText("Disable the Graph Filter Tab ");
+						}
+						else if (cmd == "loggingpanel") {
+							item.setToolTipText("Disable the Logging Tab");
+
+						}
+						else if (cmd == "graphcosmetics") {
+							item.setToolTipText("Disable the Graph Cosmetics Tab");
+
+						}
+						else if (cmd == "GPS_SUDOWL_DEFAULT") {
+							item.setToolTipText("Disable the SUDOWL Tab");
+
+						}
+						else {
+							item.setToolTipText("Disable "+cmd);
+						}
+						
+						
 						if ( owlPanel == panel ) {
 							leftTabs.addTab( "SUDOWL", null, owlPanel, null );
 						}
@@ -1330,9 +1352,28 @@ public class PlayPane extends JFrame {
 						else if ( loggingPanel == panel ) {
 							rightTabs.addTab( "Logging", null, loggingPanel,
 									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
-						}
+						} 
 					}
 					else {
+						if (cmd == "graphfilter"){
+							item.setToolTipText("Enable the Graph Filter Tab ");
+						}
+						else if (cmd == "loggingpanel") {
+							item.setToolTipText("Enable the Logging Tab");
+
+						}
+						else if (cmd == "graphcosmetics") {
+							item.setToolTipText("Enable the Graph Cosmetics Tab");
+
+						}
+						else if (cmd == "GPS_SUDOWL_DEFAULT") {
+							item.setToolTipText("Enable the SUDOWL Tab");
+
+						}
+						else {
+							item.setToolTipText("Enable "+cmd);
+						}
+						
 						if ( loggingPanel == panel ) {
 							rightTabs.remove( panel );
 
@@ -1344,21 +1385,35 @@ public class PlayPane extends JFrame {
 				}
 			}
 		};
-
+		
+		//Sudo Tab
 		final JCheckBoxMenuItem sudowl = new JCheckBoxMenuItem( "SUDOWL tab",
 				getProp( prefs, Constants.GPSSudowl ) );
 		sudowl.setActionCommand( Constants.GPSSudowl );
 		sudowl.addActionListener( preflistener );
-		sudowl.setToolTipText( "Enables/Disables the SUDOWL tab" );
+		//sudowl.setToolTipText( "Enables/Disables the SUDOWL tab" );
+		if (getProp( prefs, Constants.GPSSudowl )  == true)
+			sudowl.setToolTipText( "Disable the Status bar" );
+		else
+			sudowl.setToolTipText( "Enable the Status bar" );
 
+		//Status Tab
 		final JCheckBoxMenuItem statbar = new JCheckBoxMenuItem( "Status Bar",
 				prefs.getBoolean( "showStatus", true ) );
-
+		if (prefs.getBoolean( "showStatus", true ) == true)
+			statbar.setToolTipText( "Disable the Status bar" );
+		else
+			statbar.setToolTipText( "Enable the Status bar" );
+		
 		statbar.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				statusbar.setVisible( statbar.isSelected() );
 				prefs.putBoolean( "showStatus", statusbar.isVisible() );
+				if ( statusbar.isVisible() ) 
+					statbar.setToolTipText( "Disable the Status bar" );
+				else
+					statbar.setToolTipText( "Enable the Status bar" );
 			}
 		} );
 
@@ -1366,33 +1421,61 @@ public class PlayPane extends JFrame {
 				getProp( prefs, GCOSMETICS ) );
 		gcos.setActionCommand( GCOSMETICS );
 		gcos.addActionListener( preflistener );
-		gcos.setToolTipText( "Enables/Disables graph cosmetics tab" );
+	//	gcos.setToolTipText( "Enables/Disables graph cosmetics tab" );
+		
+		if (getProp( prefs, GCOSMETICS ) == true)
+			gcos.setToolTipText( "Disable the Graph Cosmetics Tab" );
+		else
+			gcos.setToolTipText( "Enable the Graph Cosmetics Tab" );
 
 		final JCheckBoxMenuItem gfilt = new JCheckBoxMenuItem( "Graph Filter tab",
 				getProp( prefs, GFILTER ) );
 		gfilt.setActionCommand( GFILTER );
 		gfilt.addActionListener( preflistener );
-		gfilt.setToolTipText( "Enables/Disables graph filter tab" );
+	//	gfilt.setToolTipText( "Enables/Disables graph filter tab" );
+		
+		if (getProp( prefs, GFILTER ) == true)
+			gfilt.setToolTipText( "Disable the Graph Filter Tab" );
+		else
+			gfilt.setToolTipText( "Enable the Graph Filter Tab" );
+
 
 		final JCheckBoxMenuItem logging = new JCheckBoxMenuItem( "Logging tab",
 				getProp( prefs, LOGGING ) );
 		logging.setActionCommand( LOGGING );
 		logging.addActionListener( preflistener );
-		logging.setToolTipText( "Enables/Disables logging tab" );
-
+		//logging.setToolTipText( "Enables/Disables logging tab" );
+		
+		
+		if (getProp( prefs, LOGGING ) == true)
+			logging.setToolTipText( "Disable the Logging Tab" );
+		else
+			logging.setToolTipText( "Enable the Logging Tab" );
+		
+		//Tool Bar
 		final JCheckBoxMenuItem tb = new JCheckBoxMenuItem( "Tool Bar",
 				prefs.getBoolean( "showToolBar", true ) );
 
+		if (prefs.getBoolean( "showToolBar", true ) == true)
+			tb.setToolTipText( "Disable the Tool Bar" );
+		else
+			tb.setToolTipText( "Enable the Tool Bar" );
+		
 		tb.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				toolbar.setVisible( tb.isSelected() );
 				prefs.putBoolean( "showToolBar", toolbar.isVisible() );
+				if ( toolbar.isVisible() ) 
+					tb.setToolTipText( "Disable the Tool bar" );
+				else
+					tb.setToolTipText( "Enable the Tool bar" );
 			}
 		} );
 
 		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Menu", true );
-		splithider.setToolTipText( "Shows/Hides left menu area" );
+		splithider.setToolTipText( "Disable the Left menu" );
+		
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
@@ -1400,13 +1483,22 @@ public class PlayPane extends JFrame {
 				leftTabs.setVisible( !leftTabs.isVisible() );
 				if ( leftTabs.isVisible() ) {
 					mainSplitPane.setDividerLocation( 0.25 );
+					splithider.setToolTipText( "Disable the Left menu" );
+				}else{
+					splithider.setToolTipText( "Enable the Left menu" );
 				}
 			}
 		} );
 
 		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Area",
 				getProp( prefs, QUERYPANEL ) );
-		hidecsp.setToolTipText( "Shows/Hides query area" );
+		//hidecsp.setToolTipText( "Shows/Hides query area" );
+		
+		if (getProp( prefs, QUERYPANEL ) == true)
+			hidecsp.setToolTipText( "Disable the Query Area" );
+		else
+			hidecsp.setToolTipText( "Enable the Query Area" );
+		
 		hidecsp.addActionListener( new ActionListener() {
 
 			@Override
@@ -1415,12 +1507,20 @@ public class PlayPane extends JFrame {
 				prefs.putBoolean( QUERYPANEL, customSparqlPanel.isVisible() );
 				if ( customSparqlPanel.isVisible() ) {
 					combinedSplitPane.setDividerLocation( 0.75 );
+					hidecsp.setToolTipText( "Disable the Query Area" );
+				} else {
+					hidecsp.setToolTipText( "Enable the Query Area" );
 				}
 			}
 		} );
 
 		final JCheckBoxMenuItem iManage = new JCheckBoxMenuItem( "Insight Manager tab",
 				getProp( prefs, IMANAGE ) );
+		if (getProp( prefs, IMANAGE ) == true)
+			iManage.setToolTipText( "Disable the Insite Manager Tab" );
+		else
+			iManage.setToolTipText( "Enable the Insite Manager Tab" );
+		
 		iManage.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
@@ -1433,25 +1533,38 @@ public class PlayPane extends JFrame {
 					iManagePanel.insightManagerPanelWorker();
 					rightTabs.addTab( "Insight Manager", null, iManagePanel,
 							"Manage perspectives and insights" );
+					iManage.setToolTipText( "Disable the Insite Manager Tab" );
 				}
 				else {
 					rightTabs.remove( iManagePanel );
+					iManage.setToolTipText( "Enable the Insite Manager Tab" );
 				}
 			}
 		} );
-		iManage.setToolTipText( "Enables/Disables insight manager tab" );
+		//iManage.setToolTipText( "Enables/Disables insight manager tab" );
 
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
+		view.setToolTipText("Enable or disable the V-CAMP application tabs");
 		view.add( gcos );
+		gcos.setMnemonic(KeyEvent.VK_C);
 		view.add( gfilt );
-		view.add( splithider );
-		view.add( logging );
-		view.add( hidecsp );
-		view.add( statbar );
-		view.add( sudowl );
-		view.add( tb );
+		gfilt.setMnemonic(KeyEvent.VK_F);
 		view.add( iManage );
+		iManage.setMnemonic(KeyEvent.VK_I);
+		view.add( splithider );
+		splithider.setMnemonic(KeyEvent.VK_M);
+		view.add( logging );
+		logging.setMnemonic(KeyEvent.VK_L);
+		view.add( hidecsp );
+		hidecsp.setMnemonic(KeyEvent.VK_Q);
+		view.add( statbar );
+		statbar.setMnemonic(KeyEvent.VK_S);
+		view.add( sudowl );
+		sudowl.setMnemonic(KeyEvent.VK_O);
+		view.add( tb );
+		tb.setMnemonic(KeyEvent.VK_T);
+		
 		return view;
 	}
 
