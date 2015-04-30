@@ -153,7 +153,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 
 		fileChooser.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( false ) );
 		fileChooser.setFileView( new SemossFileView() );
-		fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
+		fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 		fileChooser.setDialogTitle( "Select Name and Location for Export File" );
 		fileChooser.setSelectedFile(
 				DBToLoadingSheetExporter.getDefaultExportFile( fileChooser.getCurrentDirectory(), exportType, false )
