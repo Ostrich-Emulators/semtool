@@ -1081,7 +1081,7 @@ public class EngineLoaderTest {
 		compare( "dairy products", expected, test,
 				null, RDFS.LABEL, new LiteralImpl( "Dairy Products" ) );
 		compare( "chai-beverages link", expected, test,
-				null, RDFS.LABEL, new LiteralImpl( "Chai:Beverages" ) );
+				null, RDFS.LABEL, new LiteralImpl( "Chai Category Beverages" ) );
 
 		URI bev
 				= base.getRelationUri().add( "Category" ).add( "Chai_x_Beverages" ).build();

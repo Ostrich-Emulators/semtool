@@ -127,7 +127,7 @@
 <http://junk.com/testfiles/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Manchego La Pastora:Dairy Products" .
 <http://junk.com/testfiles/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Category> .
 <http://junk.com/testfiles/Relation/Category/Chai_x_Beverages> <http://owl.junk.com/testfiles/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://junk.com/testfiles/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chai:Beverages" .
+<http://junk.com/testfiles/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chai Category Beverages" .
 <http://junk.com/testfiles/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Category> .
 <http://junk.com/testfiles/Relation/Category/Chang_x_Beverages> <http://owl.junk.com/testfiles/extraprop> "colon:something" .
 <http://junk.com/testfiles/Relation/Category/Chang_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chang:Beverages" .
