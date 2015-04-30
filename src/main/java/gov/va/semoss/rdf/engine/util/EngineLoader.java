@@ -345,7 +345,8 @@ public class EngineLoader {
 			IEngine engine ) {
 		if ( null != errors ) {
 			for ( LoadingSheetData d : data.getSheets() ) {
-				List<LoadingNodeAndPropertyValues> errs = checkConformance( d, engine, false );
+				List<LoadingNodeAndPropertyValues> errs
+						= checkConformance( d, engine, false );
 
 				if ( !errs.isEmpty() ) {
 					LoadingSheetData errdata = LoadingSheetData.copyHeadersOf( d );

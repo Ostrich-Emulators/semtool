@@ -12,6 +12,7 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
@@ -49,7 +50,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -736,43 +736,55 @@ public class EngineLoaderTest {
 		el.release();
 	}
 
-	// @Test
-	public void testLoadToEngine_4args() throws Exception {
-		System.out.println( "loadToEngine" );
-		Collection<File> toload = null;
-		IEngine engine = null;
-		boolean createmetamodel = false;
-		ImportData conformanceErrors = null;
-		EngineLoader instance = new EngineLoader();
-		Collection<Statement> expResult = null;
-		Collection<Statement> result = instance.loadToEngine( toload, engine, createmetamodel, conformanceErrors );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
-	}
-
-	// @Test
+	@Test
 	public void testLoadToEngine_3args() throws Exception {
-		System.out.println( "loadToEngine" );
-		ImportData data = null;
-		IEngine engine = null;
-		ImportData conformanceErrors = null;
-		EngineLoader instance = new EngineLoader();
-		instance.loadToEngine( data, engine, conformanceErrors );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		POIReader poi = new POIReader();
+		ImportData data = poi.readOneFile( LEGACY );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		el.loadToEngine( data, engine, null );
+		el.release();
+
+		compareData( engine.getRawConnection(), getExpectedGraph( LEGACY_EXP ),
+				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
 
-	// @Test
-	public void testSeparateConformanceErrors() {
-		System.out.println( "separateConformanceErrors" );
-		ImportData data = null;
-		ImportData errors = null;
-		IEngine engine = null;
-		EngineLoader instance = new EngineLoader();
-		instance.separateConformanceErrors( data, errors, engine );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
+	@Test
+	public void testSeparateConformanceErrors() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( OWLSTART ) );
+
+		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
+
+		EngineLoader el = new EngineLoader();
+		el.preloadCaches( engine );
+
+		ImportData test = new ImportData();
+		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
+		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
+
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "Category" );
+		LoadingNodeAndPropertyValues wrong = lsd.add( "Seefood" );
+		LoadingNodeAndPropertyValues right = lsd.add( "Seafood" );
+		test.add( lsd );
+
+		ImportData errs = new ImportData();
+		el.separateConformanceErrors( test, errs, engine );
+		el.release();
+
+		LoadingSheetData errlsd = errs.getSheet( "Category" );
+		LoadingSheetData oklsd = test.getSheet( "Category" );
+		assertEquals( wrong, errlsd.getData().get( 0 ) );
+		assertEquals( 1, errlsd.getData().size() );
+
+		assertEquals( right, oklsd.getData().get( 0 ) );
+		assertEquals( 1, oklsd.getData().size() );
+
+		assertNotEquals( errlsd, oklsd );
 	}
 
 	@Test
@@ -822,20 +834,6 @@ public class EngineLoaderTest {
 		el.release();
 
 		assertTrue( !after.iterator().next().exists() );
-	}
-
-	// @Test
-	public void testCheckConformance() {
-		System.out.println( "checkConformance" );
-		LoadingSheetData data = null;
-		IEngine eng = null;
-		boolean loadcaches = false;
-		EngineLoader instance = new EngineLoader();
-		List<LoadingSheetData.LoadingNodeAndPropertyValues> expResult = null;
-		List<LoadingSheetData.LoadingNodeAndPropertyValues> result = instance.checkConformance( data, eng, loadcaches );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
 	}
 
 	@Test
@@ -892,30 +890,30 @@ public class EngineLoaderTest {
 		el.release();
 	}
 
-	// @Test
-	public void testCheckModelConformance() {
-		System.out.println( "checkModelConformance" );
-		LoadingSheetData data = null;
-		IEngine eng = null;
-		boolean loadcaches = false;
-		EngineLoader instance = new EngineLoader();
-		LoadingSheetData expResult = null;
-		LoadingSheetData result = instance.checkModelConformance( data, eng, loadcaches );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
-	}
+	@Test
+	public void testCheckModelConformance() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( OWLSTART ) );
 
-	// @Test
-	public void testCleanStatement() {
-		System.out.println( "cleanStatement" );
-		Statement stmt = null;
-		ValueFactory vf = null;
-		Statement expResult = null;
-		Statement result = EngineLoader.cleanStatement( stmt, vf );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
+		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
+
+		EngineLoader el = new EngineLoader();
+		el.preloadCaches( engine );
+
+		ImportData test = new ImportData();
+		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
+		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
+
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "Category-x" );
+		LoadingNodeAndPropertyValues wrong = lsd.add( "Seefood" );
+		LoadingNodeAndPropertyValues right = lsd.add( "Seafood" );
+		test.add( lsd );
+
+		LoadingSheetData errs = el.checkModelConformance( lsd, engine, false );
+		el.release();
+
+		assertTrue( errs.hasModelErrors() );
+		assertTrue( errs.hasSubjectTypeError() );
 	}
 
 	@Test
@@ -930,7 +928,6 @@ public class EngineLoaderTest {
 
 	@Test
 	public void testLoadingSheet14() throws Exception {
-
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
@@ -953,7 +950,6 @@ public class EngineLoaderTest {
 
 	@Test
 	public void testLoadingSheet15() throws Exception {
-
 		engine.setBuilders( UriBuilder.getBuilder( "http://sales.data/purchases#" ),
 				UriBuilder.getBuilder( "http://sales.data/schema#" ) );
 
