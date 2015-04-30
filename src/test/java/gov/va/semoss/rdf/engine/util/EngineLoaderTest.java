@@ -9,7 +9,6 @@ import com.bigdata.rdf.model.BigdataValueFactoryImpl;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.CSVReader;
 import gov.va.semoss.poi.main.ImportData;
-import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData;
@@ -49,7 +48,6 @@ import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -68,7 +66,6 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -720,7 +717,6 @@ public class EngineLoaderTest {
 				throw e;
 			}
 		}
-
 	}
 
 	@Test
@@ -729,69 +725,6 @@ public class EngineLoaderTest {
 		EngineLoader.initNamespaces( data );
 		assertEquals( 10, data.getMetadata().getNamespaces().size() );
 		assertEquals( VAS.NAMESPACE, data.getMetadata().getNamespaces().get( VAS.PREFIX ) );
-	}
-
-	@Test
-	public void testGetUriFromRawString1() {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-
-		// ryan:int is an invalid datatype, so this is a string
-		Value val = EngineLoader.getRDFStringValue( "\"16\"^^ryan:int", namespaces,
-				new ValueFactoryImpl() );
-		assertEquals( "\"16\"^^ryan:int", val.stringValue() );
-	}
-
-	@Test
-	public void testGetUriFromRawString2() {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-
-		// ryan:int is an invalid datatype, so this is a string
-		Value val = EngineLoader.getRDFStringValue( "\"16\"^^xsd:int", namespaces,
-				new ValueFactoryImpl() );
-		assertEquals( "16", val.stringValue() );
-	}
-
-	@Test
-	public void testGetRDFStringValue1() {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		Value val = EngineLoader.getUriFromRawString( "vas:foobar", namespaces );
-		assertEquals( VAS.NAMESPACE + "foobar", val.stringValue() );
-	}
-
-	@Test
-	public void testGetRDFStringValue2() {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		Value val = EngineLoader.getUriFromRawString( "vat:foobar", namespaces );
-		assertNull( val );
-	}
-
-	@Test
-	public void testGetRDFStringValue3() {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		Value val = EngineLoader.getUriFromRawString( "vat:test:foobar", namespaces );
-		assertNull( val );
-	}
-
-	@Test
-	public void testGetRDFStringValue4() {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		Value val = EngineLoader.getUriFromRawString( VAS.NAMESPACE + "foobar",
-				namespaces );
-		assertEquals( VAS.NAMESPACE + "foobar", val.stringValue() );
-	}
-
-	@Test
-	public void testGetRDFStringValue5() {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		Value val = EngineLoader.getUriFromRawString( "foobar", namespaces );
-		assertNull( val );
 	}
 
 	@Test
@@ -968,46 +901,6 @@ public class EngineLoaderTest {
 		EngineLoader instance = new EngineLoader();
 		LoadingSheetData expResult = null;
 		LoadingSheetData result = instance.checkModelConformance( data, eng, loadcaches );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
-	}
-
-	// @Test
-	public void testAddProperties() throws Exception {
-		System.out.println( "addProperties" );
-		URI subject = null;
-		Map<String, Value> properties = null;
-		Map<String, String> namespaces = null;
-		LoadingSheetData sheet = null;
-		ImportMetadata metas = null;
-		EngineLoader instance = new EngineLoader();
-		instance.addProperties( subject, properties, namespaces, sheet, metas );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
-	}
-
-	// @Test
-	public void testGetUriFromRawString() {
-		System.out.println( "getUriFromRawString" );
-		String raw = "";
-		Map<String, String> namespaces = null;
-		EngineLoader instance = new EngineLoader();
-		URI expResult = null;
-		URI result = instance.getUriFromRawString( raw, namespaces );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
-	}
-
-	// @Test
-	public void testGetRDFStringValue() {
-		System.out.println( "getRDFStringValue" );
-		String rawval = "";
-		Map<String, String> namespaces = null;
-		EngineLoader instance = new EngineLoader();
-		Value expResult = null;
-		Value result = instance.getRDFStringValue( rawval, namespaces, new ValueFactoryImpl() );
 		assertEquals( expResult, result );
 		// TODO review the generated test code and remove the default call to fail.
 		fail( "The test case is a prototype." );

@@ -21,6 +21,7 @@ package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +37,6 @@ import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -303,19 +303,21 @@ public class POIReader implements ImportFileReader {
 		}
 
 		Row row0 = sheet.getRow( 0 );
+
 		int next = nextRow( sheet, 0 );
-		Row row1 = sheet.getRow( next );
-		if ( null == row0 || null == row1 ) {
+		if ( null == row0 ) {
 			// make sure we have some "data" in this sheet
 			return SheetType.EMPTY;
 		}
 
-		if ( getString( row1.getCell( 1 ) ).isEmpty() ) {
-			// no data in the first data cell...assume we're empty
-			return SheetType.EMPTY;
-		}
-
 		String type = getString( row0.getCell( 0 ) );
+		Row row1 = sheet.getRow( next );
+		if ( !METADATA.equals( type ) ) {
+			if ( null == row1 || getString( row1.getCell( 1 ) ).isEmpty() ) {
+				// no data in the first data cell...assume we're empty
+				return SheetType.EMPTY;
+			}
+		}
 
 		switch ( type ) {
 			case METADATA:
@@ -467,7 +469,7 @@ public class POIReader implements ImportFileReader {
 				if ( cellValue.getCellType() != Cell.CELL_TYPE_NUMERIC ) {
 					cellValue.setCellType( Cell.CELL_TYPE_STRING );
 					propHash.put( propName,
-							EngineLoader.getRDFStringValue( cellValue.getStringCellValue(),
+							getRDFStringValue( cellValue.getStringCellValue(),
 									id.getMetadata().getNamespaces(), vf ) );
 				}
 				else if ( DateUtil.isCellDateFormatted( cellValue ) ) {
