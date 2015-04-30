@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.poi.main;
 
+import cern.colt.Arrays;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
@@ -64,35 +65,53 @@ public class POIReader implements ImportFileReader {
 		METADATA, NODE, RELATION, LOADER, UNKNOWN, UNSPECIFIED, EMPTY
 	};
 
-	private ImportData readNonloadingSheet( Workbook workbook ) {
+	public ImportData readNonloadingSheet( File file ) throws IOException {
+		return readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
+	}
+
+	public ImportData readNonloadingSheet( Workbook workbook ) {
 		ImportData id = new ImportData();
 
 		int sheets = workbook.getNumberOfSheets();
 		for ( int sheetnum = 0; sheetnum < sheets; sheetnum++ ) {
 			Sheet sheet = workbook.getSheetAt( sheetnum );
-			Row firstRow = sheet.getRow( 0 );
 
-			String subjectType = firstRow.getCell( 0 ).getStringCellValue();
-			LoadingSheetData nlsd = new LoadingSheetData( sheet.getSheetName(), subjectType );
-			ValueFactory vf = new ValueFactoryImpl();
-
-			Map<Integer, String> propnames = new HashMap<>();
-			int lastpropcol = firstRow.getLastCellNum();
-			for ( int col = 1; col < lastpropcol; col++ ) {
-				String prop = firstRow.getCell( col ).getStringCellValue();
-				propnames.put( col, prop );
-				nlsd.addProperty( prop );
+			// we need to shoehorn the arbitrary data from a spreadsheet into our
+			// ImportData class, which has restrictions on the data...we're going
+			// to do it by figuring out the row with the most columns, and then
+			// naming all the columns with A, B, C...AA, AB...
+			// then load everything as if it was plain data
+			// first, figure out our max number of columns
+			int rows = sheet.getLastRowNum();
+			int maxcols = Integer.MIN_VALUE;
+			for ( int r = 0; r <= rows; r++ ) {
+				Row row = sheet.getRow( r );
+				int cols = (int) row.getLastCellNum();
+				if ( cols > maxcols ) {
+					maxcols = cols;
+				}
 			}
 
-			int rows = sheet.getLastRowNum();
-			for ( int r = 1; r <= rows; r++ ) {
-				Row row = sheet.getRow( r );
-				String nodename = row.getCell( 0 ).getStringCellValue();
-				LoadingNodeAndPropertyValues nap = nlsd.add( nodename );
+			// second, make "properties" for each column
+			LoadingSheetData nlsd
+					= new LoadingSheetData( workbook.getSheetName( sheetnum ), "A" );
+			for ( int c = 1; c < maxcols; c++ ) {
+				nlsd.addProperty( Integer.toString( c ) );
+			}
 
-				for ( Map.Entry<Integer, String> en : propnames.entrySet() ) {
-					String val = row.getCell( en.getKey() ).getStringCellValue();
-					nap.put( en.getValue(), vf.createLiteral( val ) );
+			// lastly, fill the sheets
+			ValueFactory vf = new ValueFactoryImpl();
+			for ( int r = 0; r <= rows; r++ ) {
+				Row row = sheet.getRow( r );
+				LoadingNodeAndPropertyValues nap
+						= nlsd.add( getString( row.getCell( 0 ) ) );
+
+				int lastpropcol = row.getLastCellNum();
+				for ( int c = 1; c <= lastpropcol; c++ ) {
+					String val = getString( row.getCell( c ) );
+					if ( !val.isEmpty() ) {
+						nap.put( Integer.toString( c ), vf.createLiteral( val ) );
+					}
 				}
 			}
 
@@ -132,9 +151,10 @@ public class POIReader implements ImportFileReader {
 		EngineLoader.initNamespaces( data );
 
 		// we have sheets without a specified type, so open like a regular spreadsheet
-		if ( !typeToSheetNameLkp.getNN( SheetType.UNKNOWN ).isEmpty() ) {
-			logger.warn( "Trying to import sheet with no loader tab" );
-			return readNonloadingSheet( workbook );
+		List<String> unknowns = typeToSheetNameLkp.getNN( SheetType.UNKNOWN );
+		if ( !unknowns.isEmpty() ) {
+			throw new ImportValidationException( ErrorType.NOT_A_LOADING_SHEET,
+					"Unknown type for tab(s): " + Arrays.toString( unknowns.toArray() ) );
 		}
 
 		for ( String sheetname : typeToSheetNameLkp.getNN( SheetType.METADATA ) ) {
@@ -495,7 +515,13 @@ public class POIReader implements ImportFileReader {
 	 * @return
 	 */
 	private static String getString( Cell cell ) {
-		return ( isEmpty( cell ) ? "" : cell.getStringCellValue() );
+		if ( isEmpty( cell ) ) {
+			return "";
+		}
+		if ( Cell.CELL_TYPE_NUMERIC == cell.getCellType() ) {
+			return Double.toString( cell.getNumericCellValue() );
+		}
+		return cell.getStringCellValue();
 	}
 
 	private static boolean isComment( Cell cell ) {
