@@ -898,22 +898,56 @@ public class EngineLoaderTest {
 		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
 
 		EngineLoader el = new EngineLoader();
-		el.preloadCaches( engine );
-
 		ImportData test = new ImportData();
 		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
 		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
 
-		LoadingSheetData lsd = LoadingSheetData.nodesheet( "Category-x" );
-		LoadingNodeAndPropertyValues wrong = lsd.add( "Seefood" );
-		LoadingNodeAndPropertyValues right = lsd.add( "Seafood" );
+		LoadingSheetData lsd
+				= LoadingSheetData.relsheet( "Product-x", "Category-x", "Category-y" );
+		lsd.addProperty( "extraprop-x" );
 		test.add( lsd );
 
-		LoadingSheetData errs = el.checkModelConformance( lsd, engine, false );
+		LoadingSheetData errs = el.checkModelConformance( lsd, engine, true );
 		el.release();
 
 		assertTrue( errs.hasModelErrors() );
 		assertTrue( errs.hasSubjectTypeError() );
+		assertTrue( errs.hasObjectTypeError() );
+		assertTrue( errs.propertyIsError( "extraprop-x" ) );
+	}
+
+	@Test( expected = ImportValidationException.class )
+	public void testBadTriple() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( OWLSTART ) );
+
+		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		
+		ImportData test = new ImportData();
+		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
+		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
+
+		test.getMetadata().add( "<http://foo.bar.bah/bash"/*missing >*/,
+				RDFS.LABEL.toString(), "a label" );
+		LoadingSheetData lsd
+				= LoadingSheetData.relsheet( "Product-x", "Category-x", "Category-y" );
+		test.add( lsd );
+
+		try {
+			el.loadToEngine( test, engine, null );
+		}
+		catch ( ImportValidationException e ) {
+			if ( ErrorType.INVALID_DATA == e.error ) {
+				throw e;
+			}
+		}
+		finally {
+			el.release();
+		}
+
 	}
 
 	@Test
