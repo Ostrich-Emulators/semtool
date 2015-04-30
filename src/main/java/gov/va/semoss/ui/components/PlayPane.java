@@ -1545,7 +1545,7 @@ public class PlayPane extends JFrame {
 
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
-		view.setToolTipText("Open View Menu");
+		view.setToolTipText("Enable or disable the V-CAMP application tabs");
 		view.add( gcos );
 		gcos.setMnemonic(KeyEvent.VK_C);
 		view.add( gfilt );
