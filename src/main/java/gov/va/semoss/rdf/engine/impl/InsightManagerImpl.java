@@ -446,11 +446,11 @@ public class InsightManagerImpl implements InsightManager {
 	        String query = "PREFIX " + SPIN.PREFIX  + ": <" + SPIN.NAMESPACE + "> "
 	        	   + "PREFIX " + SPL.PREFIX  + ": <" + SPL.NAMESPACE + "> "
 	        	   + "PREFIX " + SP.PREFIX  + ": <" + SP.NAMESPACE + "> "
-	        	   + "SELECT DISTINCT ?parameter ?label ?variable ?valueType ?query WHERE { "
+	        	   + "SELECT DISTINCT ?parameter ?parameterLabel ?parameterVariable ?parameterValueType ?parameterQuery WHERE { "
 	     		   + "BIND(" + insightUriString + " AS ?uri) . "
 	     		   + "OPTIONAL{ ?uri spin:constraint ?parameter . "
-	               + "?parameter spl:valueType ?valueType ; rdfs:label ?label ; spl:predicate [ rdfs:label ?variable ] . "
-	     		   + "OPTIONAL{?parameter sp:query [ sp:text ?query ] } } }";   
+	               + "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . "
+	     		   + "OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] } } }";   
 	        
 	        ListQueryAdapter<Parameter> lqa = new ListQueryAdapter<Parameter>( query ) {
 	           @Override

@@ -648,7 +648,6 @@ public class  InsightManagerController implements Initializable{
 	private void populateInsightParameterListView(int perspectiveIndex, int insightIndex){
  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
 	    ArrayList<Parameter> arylInsightParameters = (ArrayList<Parameter>) ((Insight) arylInsights.get(insightIndex)).getInsightParameters();	   
-
 	    lstvParameter_Inst.getItems().clear();
 	    for(Parameter parameter: arylInsightParameters){
 	       lstvParameter_Inst.getItems().add(parameter.getLabel());
