@@ -158,24 +158,25 @@ public class  InsightManagerController implements Initializable{
            cboPerspectiveTitle.valueProperty().addListener(new ChangeListener<Object>() {
 		        @Override 
 		        public void changed(ObservableValue<?> ov, Object t, Object t1) {
-		        	
-		        	//Get selected "Perspective":
-		            Perspective perspective = new Perspective();
-		            intCurPerspectiveIndex = 0;
-		            for(int i = 0; i < arylPerspectives.size(); i++){
-		            	perspective = (Perspective) arylPerspectives.get(i);
-		            	if((perspective.getLabel().equals((String) t1))){
-		            		intCurPerspectiveIndex = i;
-		            		break;
-		            	}
-		            }
-					arylInsights = ((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getInsights();
-					 
-		            //When the selected "Perspective" changes, re-populate fields on the "Perspective" tab:
-		            //-------------------------------------------------------------------------------------
-		            populatePerspectiveTitleTextField(intCurPerspectiveIndex);
-		            populatePerspectiveDescTextArea(intCurPerspectiveIndex);		        	
-		 		    populateInsightListView(intCurPerspectiveIndex);
+		        	if(arylPerspectives != null && arylPerspectives.size() > 0){
+			        	//Get selected "Perspective":
+			            Perspective perspective = new Perspective();
+			            intCurPerspectiveIndex = 0;
+			            for(int i = 0; i < arylPerspectives.size(); i++){
+			            	perspective = (Perspective) arylPerspectives.get(i);
+			            	if((perspective.getLabel().equals((String) t1))){
+			            		intCurPerspectiveIndex = i;
+			            		break;
+			            	}
+			            }
+						arylInsights = ((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getInsights();
+						 
+			            //When the selected "Perspective" changes, re-populate fields on the "Perspective" tab:
+			            //-------------------------------------------------------------------------------------
+			            populatePerspectiveTitleTextField(intCurPerspectiveIndex);
+			            populatePerspectiveDescTextArea(intCurPerspectiveIndex);		        	
+			 		    populateInsightListView(intCurPerspectiveIndex);
+		        	}
 		 		}    
 		   });	
            
@@ -285,6 +286,7 @@ public class  InsightManagerController implements Initializable{
 			    	  //If the "Renderer Class" text-field becomes empty, enable the 
 			    	  //"Parameter" tab only if external Parameters are defined:
 			          if(lstvParameter_Inst.getItems() == null || 
+			        	 lstvParameter_Inst.getItems().size() == 0 ||	  
 			             lstvParameter_Inst.getItems().get(0).equals("")){
 			     		  tabParameter.setDisable(true);
 			     	  }else{
