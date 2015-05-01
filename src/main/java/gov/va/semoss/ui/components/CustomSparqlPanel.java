@@ -10,29 +10,19 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Field;
-import java.util.Date;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSlider;
-import javax.swing.JTextArea;
-import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
@@ -45,18 +35,14 @@ import org.apache.log4j.Logger;
 
 import aurelienribon.ui.css.Style;
 
-import com.ibm.icu.util.StringTokenizer;
-
 import gov.va.semoss.om.Insight;
-import gov.va.semoss.ui.components.api.IChakraListener;
-import gov.va.semoss.ui.main.listener.impl.SubmitSparqlQueryListener;
-import gov.va.semoss.util.Constants;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.tabbedqueries.TabbedQueries;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-import java.lang.reflect.InvocationTargetException;
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
 
@@ -69,12 +55,15 @@ import javax.swing.event.InternalFrameEvent;
  */
 public class CustomSparqlPanel extends JPanel {
 
-	public JComboBox<String> playSheetComboBox;
-	public JButton btnGetQuestionSparql, btnShowHint, btnSubmitSparqlQuery;
-	public JCheckBox appendSparqlQueryChkBox;
-	public JCheckBox mainTabOverlayChkBox;
-	public TabbedQueries sparqlArea;
 	private static final Logger logger = Logger.getLogger( CustomSparqlPanel.class );
+
+	private JComboBox<String> playSheetComboBox;
+	private JButton btnGetQuestionSparql, btnShowHint, btnSubmitSparqlQuery;
+	private final JCheckBox appendSparqlQueryChkBox;
+	private JCheckBox mainTabOverlayChkBox;
+	private JComboBox<Insight> insights;
+	private TabbedQueries sparqlArea;
+	private final SubmitAction submitter = new SubmitAction();
 
 	public CustomSparqlPanel() {
 		setLayout( new GridBagLayout() );
@@ -156,7 +145,7 @@ public class CustomSparqlPanel extends JPanel {
 		gbc_btnGetQuestionSparql.gridy = 3;
 		add( btnGetQuestionSparql, gbc_btnGetQuestionSparql );
 
-		btnSubmitSparqlQuery = new JButton();
+		btnSubmitSparqlQuery = new JButton( submitter );
 		btnSubmitSparqlQuery.setEnabled( false );
 		btnSubmitSparqlQuery.setFont( new Font( "Tahoma", Font.BOLD, 12 ) );
 		btnSubmitSparqlQuery.setText( "Submit Query" );
@@ -208,26 +197,11 @@ public class CustomSparqlPanel extends JPanel {
 				}
 				//Submit Sparql query via the keystrokes <Ctrl><Enter>, from any selected component in the tool,
 				//and show status in the status-bar:
-				Action handleQueryKeys = new AbstractAction() {
-					@Override
-					public void actionPerformed( final ActionEvent e ) {
-						Runnable runner = new Runnable() {
-							SubmitSparqlQueryListener submitSparqlQueryListener = new SubmitSparqlQueryListener();
-
-							@Override
-							public void run() {
-								submitSparqlQueryListener.actionPerformed( e );
-							}
-						};
-						ProgressTask pt = getProgressTask( runner, btnSubmitSparqlQuery );
-						OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
-					}
-				};
 				try {
 					if ( sparqlArea.getEditorOfSelectedTab() != null ) {
 						sparqlArea.getEditorOfSelectedTab().getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK ), "handleQueryKeys" );
 						sparqlArea.getEditorOfSelectedTab().getInputMap( JComponent.WHEN_FOCUSED ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK ), "handleQueryKeys" );
-						sparqlArea.getEditorOfSelectedTab().getActionMap().put( "handleQueryKeys", handleQueryKeys );
+						sparqlArea.getEditorOfSelectedTab().getActionMap().put( "handleQueryKeys", submitter );
 						//Only enables the "Submit Query" button if text (including spaces) 
 						//has been entered into the currently selected editor:
 						sparqlArea.getEditorOfSelectedTab().getDocument().addDocumentListener( new DocumentListener() {
@@ -271,106 +245,65 @@ public class CustomSparqlPanel extends JPanel {
 		gbc_sparqlArea.gridy = 0;
 		add( sparqlArea, gbc_sparqlArea );
 		sparqlArea.setPreferredSize( new Dimension( 200, 80 ) );
-		
-		SubmitSparqlQueryListener ssql = new SubmitSparqlQueryListener();
-		btnSubmitSparqlQuery.addActionListener( ssql );
-	}
-	
-	/**
-	 * All public UI components declared above must be assigned listeners.
-	 *
-	 * NOTE: This method must be called near the beginning of "start()" in
-	 * "PlayPane.java".
-	 */
-	public void loadCustomSparqlPanelListeners() {
-		try {
-			// load all the listeners
-			// cast it to IChakraListener
-			// for each listener specify what is the view field - Listener_VIEW
-			// for each listener specify the right panel field -
-			// Listener_RIGHT_PANEL
-			// utilize reflection to get all the fields
-			// for each field go into the properties file and find any of the
-			// listeners
-			// Drop down scrollbars
 
-			java.lang.reflect.Field[] fields = CustomSparqlPanel.class.getFields();
+		btnGetQuestionSparql.addActionListener( new ActionListener() {
 
-			// run through the view components
-			for ( Field field : fields ) {
-				// logger.info(fields[fieldIndex].getName());
-				Object obj = field.get( this );
-				logger.debug( "Object set to " + obj );
-				String fieldName = field.getName();
-				if ( obj instanceof JComboBox || obj instanceof JButton
-						|| obj instanceof JToggleButton || obj instanceof JSlider
-						|| obj instanceof JInternalFrame
-						|| obj instanceof JRadioButton || obj instanceof JTextArea ) {
-					// load the controllers
-					// find the view
-					// right view and listener
-					String ctrlNames
-							= DIHelper.getInstance().getProperty( fieldName + "_" + Constants.CONTROL );
-					if ( !( ctrlNames == null || ctrlNames.isEmpty() ) ) {
-						logger.debug( "Listeners >>>>  " + ctrlNames + "   for field " + fieldName );
-						StringTokenizer listenerTokens = new StringTokenizer( ctrlNames, ";" );
-						while ( listenerTokens.hasMoreTokens() ) {
-							String ctrlName = listenerTokens.nextToken();
-							logger.debug( "Processing widget " + ctrlName );
-							String className = DIHelper.getInstance().getProperty( ctrlName );
-							final IChakraListener listener
-									= IChakraListener.class.cast( Class.forName( className ).
-											getConstructor().newInstance() );
-							// in the future this could be a list
-							// add it to this object
-							logger.debug( "Listener " + ctrlName + "<>" + listener );
-							// check to if this is a combobox or button
-							if ( obj instanceof JComboBox<?> ) {
-								( (JComboBox<?>) obj ).addActionListener( listener );
-							}
-							else if ( obj instanceof JButton ) {
-								final JButton btn = JButton.class.cast( obj );
-								btn.addActionListener( new ActionListener() {
-									@Override
-									public void actionPerformed( final ActionEvent e ) {
-										Runnable runner = new Runnable() {
-											@Override
-											public void run() {
-												listener.actionPerformed( e );
-											}
-										};
-										ProgressTask pt = getProgressTask( runner, btn );
-										OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
-									}
-								} );
-							}
-							else if ( obj instanceof JRadioButton ) {
-								( (JRadioButton) obj ).addActionListener( listener );
-							}
-							else if ( obj instanceof JToggleButton ) {
-								( (JToggleButton) obj ).addActionListener( listener );
-							}
-							else if ( obj instanceof JSlider ) {
-								( (JSlider) obj ).addChangeListener( (ChangeListener) listener );
-							}
-							else if ( obj instanceof JTextArea ) {
-								( (JTextArea) obj ).addFocusListener( (FocusListener) listener );
-							}
-							else {
-								( (JInternalFrame) obj ).addInternalFrameListener( (InternalFrameListener) listener );
-							}
-							logger.debug( ctrlName + ":" + listener );
-							DIHelper.getInstance().setLocalProperty( ctrlName, listener );
-						}
-					}
-				}
-				logger.debug( "Loading <" + fieldName + "> <> " + obj );
-				DIHelper.getInstance().setLocalProperty( fieldName, obj );
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
+				sparqlArea.setTextOfSelectedTab( selected.getSparql() );
 			}
-		}
-		catch ( SecurityException | IllegalArgumentException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InstantiationException | InvocationTargetException e ) {
-			logger.error( "Some listeners could not be attached to UI components", e );
-		}
+		} );
+
+		btnShowHint.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				String selectedPlaySheet = (String) playSheetComboBox.getSelectedItem();
+
+				// playsheet starting with "*" are those that are not included in predefined
+				// list in util.PlaySheetEnum
+				if ( selectedPlaySheet.startsWith( "*" ) ) {
+					//Set the sparql area with no hint:
+					if ( sparqlArea.getTabCount() == 1 ) {
+						sparqlArea.setSelectedIndex( 0 );
+					}
+					sparqlArea.setTextOfSelectedTab( "Hint: not available" );
+				}
+				else {
+					//Set the sparql area with the hint:
+					if ( sparqlArea.getTabCount() == 1 ) {
+						sparqlArea.setSelectedIndex( 0 );
+					}
+					sparqlArea.setTextOfSelectedTab( PlaySheetEnum.getHintFromName( selectedPlaySheet ) );
+				}
+			}
+		} );
+
+	}
+
+	public void setOverlayCheckBox( JCheckBox box ) {
+		mainTabOverlayChkBox = box;
+	}
+
+	public void setInsightsComboBox( JComboBox<Insight> ins ) {
+		assert ( insights == null );
+		insights = ins;
+
+		insights.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
+				//If a question has no Sparql associated with it (as pulled from an external source),
+				//then disable the Copy-Down button, in the "Custom Sparql Query" window:
+				btnGetQuestionSparql.setEnabled( !"NULL".equals( selected.getSparql() ) );
+			}
+		} );
+	}
+
+	public void enableAppend( boolean bb ) {
+		appendSparqlQueryChkBox.setEnabled( bb );
 	}
 
 	public InternalFrameListener makeDesktopListener() {
@@ -398,8 +331,7 @@ public class CustomSparqlPanel extends JPanel {
 
 			@Override
 			public void internalFrameActivated( InternalFrameEvent e ) {
-				JComboBox<Insight> cmb = (JComboBox) DIHelper.getInstance().getLocalProp( Constants.QUESTION_LIST_FIELD );
-				Insight insight = cmb.getItemAt( cmb.getSelectedIndex() );
+				Insight insight = insights.getItemAt( insights.getSelectedIndex() );
 				if ( null == insight ) {
 					return;
 				}
@@ -411,24 +343,21 @@ public class CustomSparqlPanel extends JPanel {
 				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
 
 				String output = insight.getOutput();
-				JCheckBox appendChkBox = (JCheckBox) DIHelper.getInstance().getLocalProp( Constants.APPEND );
 
 				// the frame will be activated before there's a playsheet attached to it
 				// make sure we have a playsheet before continuing
 				PlaySheetCentralComponent pscc = psf.getActivePlaySheet();
 				if ( null != pscc && output.equals( pscc.getClass().getCanonicalName() ) ) {
-					appendChkBox.setEnabled( true );
+					mainTabOverlayChkBox.setEnabled( true );
 				}
 				else {
-					appendChkBox.setEnabled( false );
+					mainTabOverlayChkBox.setEnabled( false );
 				}
 			}
 
 			@Override
 			public void internalFrameDeactivated( InternalFrameEvent e ) {
-				//Disable "Overlay" CheckBox. (Note: The Activated method may re-enable this CheckBox):
-				JCheckBox appendChkBox = (JCheckBox) DIHelper.getInstance().getLocalProp( Constants.APPEND );
-				appendChkBox.setEnabled( false );
+				mainTabOverlayChkBox.setEnabled( false );
 			}
 		};
 	}
@@ -449,76 +378,95 @@ public class CustomSparqlPanel extends JPanel {
 		return ( JOptionPane.YES_OPTION == response );
 	}
 
-	/**
-	 * Returns a ProgressTask object for running the current custom Sparql query,
-	 * based upon the Runnable object passed in. Displays status in the progress
-	 * bar at the bottom of the tool. Also, handles dialogs concerning SQL-UPDATE
-	 * queries.
-	 *
-	 * @param runner -- (Runnable) The "actionPerformed(...)" method of a
-	 * listener.
-	 *
-	 * @return -- (ProgressTask) Described above.
-	 */
-	private ProgressTask getProgressTask( Runnable runner, final JButton btn ) {
-		ProgressTask pt = new ProgressTask( "Executing Query", runner ) {
-			private boolean boolCancelUpdate = false;
-			private String strSelectedPlaySheet = "";
+	private class SubmitAction extends AbstractAction {
 
-			@Override
-			public void runOp() {
-				strSelectedPlaySheet = playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
-				//Store the currently selected playsheet with the currently
-				//selected query tab:
-				sparqlArea.setTagOfSelectedTab( strSelectedPlaySheet );
+		public SubmitAction() {
+			super( "Submit Query" );
+		}
 
-				if ( strSelectedPlaySheet.equals( "Update Query" ) && btn == btnSubmitSparqlQuery ) {
-					if( okToUpdate() ){
-						boolCancelUpdate = false;
-						setStartTime( new Date() );
-						getOp().run();
-					}
-					else {
-						boolCancelUpdate = true;
-					}
-				}
-				else {
-					boolCancelUpdate = true;
-					setStartTime( new Date() );
-					getOp().run();
-				}
-			}
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			String playSheetString = playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
+			//Store the currently selected playsheet with the currently
+			//selected query tab:
+			sparqlArea.setTagOfSelectedTab( playSheetString );
+			boolean appending = appendSparqlQueryChkBox.isSelected();
 
-			@Override
-			public void done() {
-				super.done();
-				//Don't show row counts for "Hint" and "Copy Down":
-				if ( btn.equals( btnShowHint ) == true || btn.equals( btnGetQuestionSparql ) == true ) {
-					return;
-				}
-				//Display row count in status bar for Grid and Raw Grid queries:
-				//--------------------------------------------------------------
-				if ( strSelectedPlaySheet.equals( "Grid" ) || strSelectedPlaySheet.equals( "Raw Grid" ) ) {
-					try {
-						Thread.sleep( 500 );
-					}
-					catch ( InterruptedException e ) {
-					}
+			ExecuteQueryProcessor exQueryProcessor = new ExecuteQueryProcessor();
+			exQueryProcessor.setAppendBoolean( appending );
+			exQueryProcessor.setCustomBoolean( false );
 
-					if ( Utility.getRowCount() > 0 ) {
-						setLabel( "Fetched " + Integer.toString( Utility.getRowCount() ) + " rows" );
+			//Setup playsheet, exQueryProcessor will also take care of append or create query: 
+			String query = sparqlArea.getTextOfSelectedTab();
 
-					}
-				}
-				if ( strSelectedPlaySheet.equals( "Update Query" )
-						&& boolCancelUpdate == false ) {
-					JOptionPane.showMessageDialog( sparqlArea, "Completed Execution in "
-							+ Utility.getDuration( getStartTime(), getStopTime() ), "Update Query", JOptionPane.PLAIN_MESSAGE );
+			IEngine eng = DIHelper.getInstance().getRdfEngine();
+
+			if ( playSheetString.equals( "Update Query" ) ) {
+				if ( okToUpdate() ) {
+					// this is an update query
+					ProgressTask pt = new ProgressTask( "Executing Update", new Runnable() {
+
+						@Override
+						public void run() {
+							exQueryProcessor.processCustomQuery( query, playSheetString, appending );
+						}
+					} );
+
+					OperationsProgress op = OperationsProgress.getInstance( PlayPane.UIPROGRESS );
+					op.add( pt );
 				}
 			}
-		};
+			else {
+				// run a regular query
+				JDesktopPane pane = DIHelper.getInstance().getDesktop();
+				String tabTitle = sparqlArea.getTitleAt( sparqlArea.getSelectedIndex() );
 
-		return pt;
+				try {
+					String classname = PlaySheetEnum.getClassFromName( playSheetString );
+					Class<?> k = Class.forName( classname );
+					if ( PlaySheetCentralComponent.class.isAssignableFrom( k ) ) {
+						doitNewSkool( classname, query, eng, appending, pane, tabTitle );
+					}
+				}
+				catch ( ClassNotFoundException ex ) {
+					// don't care
+					logger.error( ex, ex );
+				}
+			}
+		}
+
+		private void doitNewSkool( String output, String query, IEngine eng,
+				boolean appending, JDesktopPane pane, String title ) {
+
+			ProgressTask pt = null;
+			if ( appending ) {
+				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
+
+				pt = psf.getOverlayTask( query, title, title );
+			}
+			else {
+				PlaySheetCentralComponent pscc = null;
+				try {
+					Object o = Class.forName( output ).newInstance();
+					pscc = PlaySheetCentralComponent.class.cast( o );
+				}
+				catch ( ClassNotFoundException | InstantiationException | IllegalAccessException e ) {
+					throw new IllegalArgumentException( output
+							+ " not yet updated to the new handling", e );
+				}
+				PlaySheetFrame psf = ( GraphPlaySheet.class.isAssignableFrom( pscc.getClass() )
+						? new GraphPlaySheetFrame( eng ) : new PlaySheetFrame( eng ) );
+				pscc.setTitle( title );
+				psf.addTab( title, pscc );
+
+				psf.setTitle( title );
+				DIHelper.getInstance().getDesktop().add( psf );
+
+				pt = psf.getCreateTask( query );
+			}
+
+			OperationsProgress op = OperationsProgress.getInstance( PlayPane.UIPROGRESS );
+			op.add( pt );
+		}
 	}
-
 }

@@ -156,10 +156,10 @@ public class Constants {
 
 	public static final String DESCR = "DESCRIPTION";
 	public static final String QUERY = "QUERY";
-	public static final String SUBMIT_SPARQL_QUERY = "btnSubmitSparqlQuery";
-	public static final String APPEND_SPARQL_QUERY = "appendSparqlQueryChkBox";
-	public static final String GET_CURRENT_SPARQL = "btnGetQuestionSparql";
-	public static final String SHOW_HINT = "btnShowHint";
+	//public static final String SUBMIT_SPARQL_QUERY = "btnSubmitSparqlQuery";
+	//public static final String APPEND_SPARQL_QUERY = "appendSparqlQueryChkBox";
+	//public static final String GET_CURRENT_SPARQL = "btnGetQuestionSparql";
+	//public static final String SHOW_HINT = "btnShowHint";
 	public static final String SHOW_PLAYSHEETS_LIST = "btnShowPlaySheets";
 	public static final String ENGINE_NAME = "ENGINE";
 	public static final String ENGINES = "ENGINES";

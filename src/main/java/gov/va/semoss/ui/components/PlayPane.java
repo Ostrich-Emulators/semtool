@@ -260,7 +260,7 @@ public class PlayPane extends JFrame {
 	public void start() throws Exception {
 		//Since the "Custom Sparql Query" window, and related controls, 
 		//exist in a separate class, load all of their listeners first:
-		customSparqlPanel.loadCustomSparqlPanelListeners();
+		// customSparqlPanel.loadCustomSparqlPanelListeners();
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
 
 		// load all the listeners
@@ -457,6 +457,8 @@ public class PlayPane extends JFrame {
 		playsheetToolbar = new JToolBar();
 		rightTabs = makeRightPane();
 		leftTabs = makeLeftPane();
+		customSparqlPanel.setOverlayCheckBox( appendChkBox );
+		customSparqlPanel.setInsightsComboBox( questionSelector );
 
 		mainSplitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, leftTabs, rightTabs );
 		mainSplitPane.setOneTouchExpandable( true );
@@ -955,7 +957,7 @@ public class PlayPane extends JFrame {
 				}
 
 				windowSelector.setEnabled( 0 < frames.length );
-				customSparqlPanel.appendSparqlQueryChkBox.setEnabled( frames.length > 0 );
+				customSparqlPanel.enableAppend( frames.length > 0 );
 
 				JMenuItem closeone = new JMenuItem( new AbstractAction( "Close" ) {
 
@@ -985,7 +987,7 @@ public class PlayPane extends JFrame {
 						for ( final JInternalFrame f : frames ) {
 							f.dispose();
 						}
-						customSparqlPanel.appendSparqlQueryChkBox.setEnabled( false );
+						customSparqlPanel.enableAppend( false );
 					}
 				} );
 
