@@ -43,7 +43,6 @@ import javax.swing.event.ChangeListener;
 
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
-import static jline.ANSIBuffer.ANSICodes.save;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;

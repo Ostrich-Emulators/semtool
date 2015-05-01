@@ -156,9 +156,6 @@ public class PlayPane extends JFrame {
 	public JCheckBox appendChkBox;
 	public RepositoryList repoList = new RepositoryList();
 
-	//The "Custom Sparql Query" window, and related controls,
-	//exist in a separate class:
-	private final CustomSparqlPanel csp = new CustomSparqlPanel();
 	private InsightManagerPanel iManagePanel;
 
 	// Right graphPanel desktopPane
@@ -253,7 +250,7 @@ public class PlayPane extends JFrame {
 	private final JToolBar playsheetToolbar;
 	private final JSplitPane mainSplitPane;
 	private final JSplitPane combinedSplitPane;
-	private final JPanel customSparqlPanel;
+	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
 
 	/**
 	 * Launch the application.
@@ -263,7 +260,8 @@ public class PlayPane extends JFrame {
 	public void start() throws Exception {
 		//Since the "Custom Sparql Query" window, and related controls, 
 		//exist in a separate class, load all of their listeners first:
-		csp.loadCustomSparqlPanelListeners();
+		customSparqlPanel.loadCustomSparqlPanelListeners();
+		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
 
 		// load all the listeners
 		// cast it to IChakraListener
@@ -466,7 +464,6 @@ public class PlayPane extends JFrame {
 		mainSplitPane.setContinuousLayout( true );
 
 		//Add the Custom Sparql Query window by referencing an external class:
-		customSparqlPanel = csp.addCustomSparqlPanel();
 		combinedSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, mainSplitPane, customSparqlPanel );
 		combinedSplitPane.setOneTouchExpandable( true );
 		combinedSplitPane.setDividerLocation( 900 );
@@ -958,7 +955,7 @@ public class PlayPane extends JFrame {
 				}
 
 				windowSelector.setEnabled( 0 < frames.length );
-				csp.appendSparqlQueryChkBox.setEnabled( frames.length > 0 );
+				customSparqlPanel.appendSparqlQueryChkBox.setEnabled( frames.length > 0 );
 
 				JMenuItem closeone = new JMenuItem( new AbstractAction( "Close" ) {
 
@@ -988,7 +985,7 @@ public class PlayPane extends JFrame {
 						for ( final JInternalFrame f : frames ) {
 							f.dispose();
 						}
-						csp.appendSparqlQueryChkBox.setEnabled( false );
+						customSparqlPanel.appendSparqlQueryChkBox.setEnabled( false );
 					}
 				} );
 
