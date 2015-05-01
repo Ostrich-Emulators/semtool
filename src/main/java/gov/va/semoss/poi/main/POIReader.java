@@ -75,6 +75,7 @@ public class POIReader implements ImportFileReader {
 		int sheets = workbook.getNumberOfSheets();
 		for ( int sheetnum = 0; sheetnum < sheets; sheetnum++ ) {
 			Sheet sheet = workbook.getSheetAt( sheetnum );
+			String sheetname = workbook.getSheetName( sheetnum );
 
 			// we need to shoehorn the arbitrary data from a spreadsheet into our
 			// ImportData class, which has restrictions on the data...we're going
@@ -86,15 +87,16 @@ public class POIReader implements ImportFileReader {
 			int maxcols = Integer.MIN_VALUE;
 			for ( int r = 0; r <= rows; r++ ) {
 				Row row = sheet.getRow( r );
-				int cols = (int) row.getLastCellNum();
-				if ( cols > maxcols ) {
-					maxcols = cols;
+				if ( null != row ) {
+					int cols = (int) row.getLastCellNum();
+					if ( cols > maxcols ) {
+						maxcols = cols;
+					}
 				}
 			}
 
 			// second, make "properties" for each column
-			LoadingSheetData nlsd
-					= new LoadingSheetData( workbook.getSheetName( sheetnum ), "A" );
+			LoadingSheetData nlsd = new LoadingSheetData( sheetname, "A" );
 			for ( int c = 1; c < maxcols; c++ ) {
 				nlsd.addProperty( Integer.toString( c ) );
 			}
@@ -103,19 +105,23 @@ public class POIReader implements ImportFileReader {
 			ValueFactory vf = new ValueFactoryImpl();
 			for ( int r = 0; r <= rows; r++ ) {
 				Row row = sheet.getRow( r );
-				LoadingNodeAndPropertyValues nap
-						= nlsd.add( getString( row.getCell( 0 ) ) );
+				if ( null != row ) {
+					LoadingNodeAndPropertyValues nap
+							= nlsd.add( getString( row.getCell( 0 ) ) );
 
-				int lastpropcol = row.getLastCellNum();
-				for ( int c = 1; c <= lastpropcol; c++ ) {
-					String val = getString( row.getCell( c ) );
-					if ( !val.isEmpty() ) {
-						nap.put( Integer.toString( c ), vf.createLiteral( val ) );
+					int lastpropcol = row.getLastCellNum();
+					for ( int c = 1; c <= lastpropcol; c++ ) {
+						String val = getString( row.getCell( c ) );
+						if ( !val.isEmpty() ) {
+							nap.put( Integer.toString( c ), vf.createLiteral( val ) );
+						}
 					}
 				}
 			}
 
-			id.add( nlsd );
+			if( !nlsd.isEmpty() ){
+				id.add( nlsd );
+			}
 		}
 
 		return id;
@@ -170,11 +176,11 @@ public class POIReader implements ImportFileReader {
 			loadSheet( sheetname, workbook, data );
 		}
 
-		if( data.isEmpty() ){
+		if ( data.isEmpty() ) {
 			throw new ImportValidationException( ErrorType.NOT_A_LOADING_SHEET,
 					"There is no loadable data in this worksheet" );
 		}
-		
+
 		return data;
 	}
 

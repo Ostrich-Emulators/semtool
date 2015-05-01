@@ -20,6 +20,7 @@ import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.CloseableTab.MarkType;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
+import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.NodeLoadingPlaySheet;
@@ -270,9 +271,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 										ValueFactory vf = new ValueFactoryImpl();
 										ImportData data = xlsreader.readNonloadingSheet( fileToLoad );
 										for ( LoadingSheetData lsd : data.getSheets() ) {
-											List<Value[]> vals = new ArrayList<>();
-											GridRAWPlaySheet grid = new GridRAWPlaySheet();
+											ValueTableModel vtm = new ValueTableModel();
+											vtm.setAllowInsertsInPlace( true );
+											vtm.setReadOnly( false );
+											GridRAWPlaySheet grid = new GridRAWPlaySheet( vtm );
 
+											List<Value[]> vals = new ArrayList<>();
 											for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
 												vals.add( nap.convertToValueArray( vf ) );
 											}
