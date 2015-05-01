@@ -12,7 +12,6 @@ public class Parameter {
     private String strLabel;
     private String strVariable;
     private String strValueType;
-    private String strDefaultValue;
     private String strDefaultQuery;
     private String strParameterURI;
     
@@ -23,7 +22,6 @@ public class Parameter {
     	this.strLabel = strLabel;
     	this.strVariable = strVariable;
     	this.strValueType = strValueType;
-    	this.strDefaultValue = strDefaultValue;
     	this.strDefaultQuery = strDefaultQuery;
     }
 
@@ -55,13 +53,6 @@ public class Parameter {
     public void setValueType(String strValueType){
     	this.strValueType = strValueType;
     }
-    //Parameter default value:
-    public String getDefaultValue(){
-    	return this.strDefaultValue;
-    }
-    public void setDefaultValue(String strDefaultValue){
-    	this.strDefaultValue = strDefaultValue;
-    }
     //Parameter default query:
     public String getDefaultQuery(){
     	return this.strDefaultQuery;
@@ -79,18 +70,17 @@ public class Parameter {
     	this.strLabel = "";
     	this.strVariable = "";
     	this.strValueType = "";
-    	this.strDefaultValue = "";
     	this.strDefaultQuery = "";
     	
 		Value ParameterURI_Value = resultSet.getValue("parameter");
 		if(ParameterURI_Value != null){
 			this.strParameterURI = ParameterURI_Value.stringValue();
 		}
-		Value labelValue = resultSet.getValue("label");
+		Value labelValue = resultSet.getValue("parameterLabel");
 		if(labelValue != null){
 			this.strLabel = labelValue.stringValue();
 		}
-		Value variableValue = resultSet.getValue("variable");
+		Value variableValue = resultSet.getValue("parameterVariable");
 		if(variableValue != null){
 			//A complete URI is loaded for the variable name. We only want the 
 			//user to modify the actual name, so only that should be displayed:
@@ -101,15 +91,11 @@ public class Parameter {
 			   this.strVariable = aryVariable[0];
 			}
 		}
-		Value valueTypeValue = resultSet.getValue("valueType");
+		Value valueTypeValue = resultSet.getValue("parameterValueType");
 		if(valueTypeValue != null){
 			this.strValueType = valueTypeValue.stringValue();
 		}
-		Value defaultValueValue = resultSet.getValue("defaultValue");
-		if(defaultValueValue != null){
-			this.strDefaultValue = defaultValueValue.stringValue();
-		}
-		Value defaultQueryValue = resultSet.getValue("defaultQuery");
+		Value defaultQueryValue = resultSet.getValue("parameterQuery");
 		if(defaultQueryValue != null){
 			this.strDefaultQuery = defaultQueryValue.stringValue();
 		}
@@ -121,7 +107,6 @@ public class Parameter {
 				+ ", label: " + this.strLabel
 				+ ", variable: " + this.strVariable
 				+ ", valueType: " + this.strValueType
-				+ ", defaultValue: " + this.strDefaultValue
 				+ ", defaultQuery: " + this.strDefaultQuery + "]";
 	}
 
