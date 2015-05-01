@@ -428,7 +428,8 @@ public class EngineLoader {
 	 * non-conforming.
 	 *
 	 * @param data the data to check
-	 * @param eng the engine to check against
+	 * @param eng the engine to check against. Can be null if
+	 * <code>loadcaches</code> is false
 	 * @param loadcaches call
 	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} first
 	 * @return a list of all {@link LoadingNodeAndPropertyValues} that fail the
@@ -503,7 +504,7 @@ public class EngineLoader {
 		}
 
 		for ( Map.Entry<String, URI> en : data.getPropertiesAndDataTypes().entrySet() ) {
-			data.setPropertyIsError( en.getKey(), !schemaNodes.containsKey( en.getKey() ) );
+			data.setPropertyIsError( en.getKey(), !relationClassCache.containsKey( en.getKey() ) );
 		}
 
 		return data;

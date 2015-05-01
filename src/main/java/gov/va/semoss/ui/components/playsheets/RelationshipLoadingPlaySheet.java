@@ -21,26 +21,25 @@ package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
-import gov.va.semoss.ui.components.models.ValueTableModel;
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.table.TableRowSorter;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 
 /**
  */
-public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase  {
+public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase {
 
 	private static final Logger log
 			= Logger.getLogger( RelationshipLoadingPlaySheet.class );
@@ -102,6 +101,22 @@ public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase  {
 		pnl.add( relationship, BorderLayout.CENTER );
 
 		add( pnl, BorderLayout.NORTH );
+
+		relationship.addKeyListener( new KeyAdapter() {
+
+			@Override
+			public void keyReleased( KeyEvent e ) {
+				LoadingSheetModel model = getLoadingModel();
+
+				if ( model.isRealTimeChecking() ) {
+					model.setRelationshipName( relationship.getText() );
+					RelationshipLoadingPlaySheet.this.setErrorLabel();
+				}
+
+				lbl.setIcon( model.getModelErrorColumns().contains( -1 )
+						? DbAction.getIcon( "error" ) : null );
+			}
+		} );
 	}
 
 	@Override
