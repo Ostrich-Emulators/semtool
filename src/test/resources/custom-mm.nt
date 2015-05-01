@@ -120,7 +120,7 @@
 <http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Manchego La Pastora:Dairy Products" .
 <http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://schema.org/extraprop> "1.2"^^<http://www.w3.org/2001/XMLSchema#float> .
-<http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chai:Beverages" .
+<http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chai Category Beverages" .
 <http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
 <http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chang:Beverages" .

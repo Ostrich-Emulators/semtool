@@ -101,18 +101,17 @@ public class SaveGridAction extends AbstractSavingAction {
 		Builder prefb = new CsvPreference.Builder( (char) CsvPreference.STANDARD_PREFERENCE.getQuoteChar(),
 				(int) delimiter, CsvPreference.STANDARD_PREFERENCE.getEndOfLineSymbols() );
 
-		CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() );
-		writer.writeHeader( heads );
-
-		for ( int r = 0; r < table.getRowCount(); r++ ) {
-			Map<String, Object> map = new HashMap<>();
-			for ( int c = 0; c < heads.length; c++ ) {
-				map.put( heads[c], table.getValueAt( r, c ).toString() );
+		try (CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() )) {
+			writer.writeHeader( heads );
+			
+			for ( int r = 0; r < table.getRowCount(); r++ ) {
+				Map<String, Object> map = new HashMap<>();
+				for ( int c = 0; c < heads.length; c++ ) {
+					map.put( heads[c], table.getValueAt( r, c ).toString() );
+				}
+				writer.write( map, heads );
 			}
-			writer.write( map, heads );
 		}
-		
-		writer.close();
 		table.setNeedsSave( false );
 	}
 
@@ -130,7 +129,7 @@ public class SaveGridAction extends AbstractSavingAction {
 		writer.createWorkbook();
 		writer.createTab( "Grid Data", heads );
 
-		for ( int r = 0; r < table.getRowCount(); r++ ) {
+		for ( int r = 0; r < table.getRealRowCount(); r++ ) {
 			String[] row = new String[heads.length];
 			for ( int c = 0; c < heads.length; c++ ) {
 				row[c] = table.getValueAt( r, c ).toString();

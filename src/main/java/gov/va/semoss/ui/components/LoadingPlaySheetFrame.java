@@ -10,6 +10,7 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
@@ -19,6 +20,8 @@ import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.CloseableTab.MarkType;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
+import gov.va.semoss.ui.components.models.ValueTableModel;
+import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.NodeLoadingPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
@@ -50,8 +53,11 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
 
 /**
@@ -187,6 +193,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		String t = "Loading data" + ( isLoadable() ? " to "
 				+ MetadataQuery.getEngineLabel( getEngine() ) : "" );
+		final String error[] = new String[1];
 		ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
 			@Override
 			public void run() {
@@ -235,7 +242,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					else {
 						// we have a reader, so we can load to importdata if needed
 						try {
-							somethingToShow = true;
 							ImportData data = rdr.readOneFile( fileToLoad );
 							data.findPropertyLinks();
 							addProgress( "Finished reading " + fileToLoad, progressPerFile );
@@ -247,9 +253,63 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 							for ( LoadingSheetData n : data.getSheets() ) {
 								add( n );
 							}
+
+							somethingToShow = true;
 						}
-						catch ( IOException | ImportValidationException ee ) {
+						catch ( ImportValidationException ive ) {
+							// see if we can load it as a plain excel file
+							if ( "xlsx".equalsIgnoreCase( FilenameUtils.getExtension( fileToLoad.getName() ) ) ) {
+								int val = JOptionPane.showConfirmDialog( rootPane,
+										fileToLoad + " does not appear to be a\nLoading sheet. Open anyway?",
+										"Not a Loading Sheet File", JOptionPane.YES_NO_OPTION,
+										JOptionPane.QUESTION_MESSAGE );
+								if ( JOptionPane.YES_OPTION == val ) {
+									POIReader xlsreader = new POIReader();
+									try {
+										PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
+										psf.setTitle( fileToLoad.getName() );
+										ValueFactory vf = new ValueFactoryImpl();
+										ImportData data = xlsreader.readNonloadingSheet( fileToLoad );
+										for ( LoadingSheetData lsd : data.getSheets() ) {
+											ValueTableModel vtm = new ValueTableModel();
+											vtm.setAllowInsertsInPlace( true );
+											vtm.setReadOnly( false );
+											GridRAWPlaySheet grid = new GridRAWPlaySheet( vtm );
+
+											List<Value[]> vals = new ArrayList<>();
+											for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+												vals.add( nap.convertToValueArray( vf ) );
+											}
+											grid.create( vals, lsd.getHeaders(), getEngine() );
+											grid.setTitle( lsd.getName() );
+
+											Action save = grid.getActions().get( LoadingPlaySheetFrame.SAVE );
+											save.putValue( AbstractSavingAction.LASTSAVE, fileToLoad );
+											Action saveall = grid.getActions().get( LoadingPlaySheetFrame.SAVE_ALL );
+											saveall.putValue( AbstractSavingAction.LASTSAVE, fileToLoad );
+
+											psf.addTab( grid );
+											psf.hideProgress();
+										}
+
+										LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
+
+										LoadingPlaySheetFrame.this.getDesktopPane().add( psf );
+									}
+									catch ( Exception eee ) {
+										log.error( eee, eee );
+										error[0] = eee.getLocalizedMessage();
+									}
+								}
+							}
+							else {
+								log.error( ive, ive );
+								error[0] = ive.getLocalizedMessage();
+							}
+						}
+						catch ( IOException ee ) {
 							log.error( ee, ee );
+							error[0] = ee.getLocalizedMessage();
 						}
 					}
 				}
@@ -266,7 +326,15 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					LoadingPlaySheetFrame.this.dispose();
 				}
 			}
-		} );
+		} ) {
+			@Override
+			public void done() {
+				super.done();
+				if ( null != error[0] ) {
+					Utility.showError( error[0] );
+				}
+			}
+		};
 
 		return pt;
 	}

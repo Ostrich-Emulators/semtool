@@ -14,7 +14,7 @@ public class ImportValidationException extends Exception {
 	public static enum ErrorType {
 
 		UNKNOWN, INCONSISTENT_DATA, UNTYPED_DATA, MISSING_DATA, WRONG_TABTYPE,
-		INVALID_TYPE, TOO_MUCH_DATA, INVALID_DATA
+		INVALID_TYPE, TOO_MUCH_DATA, INVALID_DATA, NOT_A_LOADING_SHEET
 	};
 	public final ErrorType error;
 

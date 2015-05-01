@@ -90,7 +90,7 @@ public class ExportLoadingSheetAction extends DbAction {
 		chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( false ) );
 		chsr.setFileView( new SemossFileView() );
 
-		chsr.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
+		chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
 		chsr.setDialogTitle( "Select Export File" );
 		
 		String what = ( dorels && donodes ? "Complete_Database" : donodes ? "Nodes" : "Relationships");

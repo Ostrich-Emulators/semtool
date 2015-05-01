@@ -367,14 +367,26 @@ public class LoadingSheetData {
 	}
 
 	public static LoadingSheetData copyHeadersOf( LoadingSheetData model ) {
+		LoadingSheetData lsd;
 		if ( model.isRel() ) {
-			return new LoadingSheetData( model.getName(), model.getSubjectType(),
+			lsd = new LoadingSheetData( model.getName(), model.getSubjectType(),
 					model.getObjectType(), model.getRelname(), model.getPropertiesAndDataTypes() );
 		}
 		else {
-			return new LoadingSheetData( model.getName(), model.getSubjectType(),
+			lsd = new LoadingSheetData( model.getName(), model.getSubjectType(),
 					model.getPropertiesAndDataTypes() );
 		}
+
+		if ( model.hasModelErrors() ) {
+			lsd.setSubjectTypeIsError( model.hasSubjectTypeError() );
+			lsd.setObjectTypeIsError( model.hasObjectTypeError() );
+			lsd.setRelationIsError( model.hasRelationError() );
+			for ( String p : model.getProperties() ) {
+				lsd.setPropertyIsError( p, model.propertyIsError( p ) );
+			}
+		}
+
+		return lsd;
 	}
 
 	public static LoadingSheetData nodesheet( String subject ) {

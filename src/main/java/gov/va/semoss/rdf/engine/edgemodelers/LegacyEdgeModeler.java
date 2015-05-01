@@ -46,7 +46,6 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		}
 		URI subject = getCachedInstance( stype, srawlabel );
 
-		ConceptInstanceCacheKey okey = new ConceptInstanceCacheKey( otype, orawlabel );
 		if ( !hasCachedInstance( otype, orawlabel ) ) {
 			LoadingSheetData lsd = LoadingSheetData.nodesheet( sheet.getName(), otype );
 			LoadingNodeAndPropertyValues filler = lsd.add( orawlabel );
@@ -92,10 +91,10 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		URI connector = getCachedRelation( lkey );
 		if ( metas.isAutocreateMetamodel() ) {
 			ValueFactory vf = myrc.getValueFactory();
-			
+
 			myrc.add( connector, RDFS.SUBPROPERTYOF, relClassBaseURI );
-			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel
-					+ Constants.RELATION_LABEL_CONCATENATOR + orawlabel ) );
+			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
+					+ sheet.getRelname() + " " + orawlabel ) );
 		}
 		myrc.add( subject, connector, object );
 

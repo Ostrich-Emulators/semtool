@@ -130,11 +130,17 @@ public class POIReaderTest {
 		assertEquals( 2, data.getSheets().size() );
 	}
 
-	@Test
+	@Test( expected = ImportValidationException.class )
 	public void testFailLoadingSheet6() throws Exception {
 		POIReader rdr = new POIReader();
-		ImportData data = rdr.readOneFile( FAIL6 );
-		assertTrue( data.isEmpty() );
+		try {
+			rdr.readOneFile( FAIL6 );
+		}
+		catch( ImportValidationException e ){
+			if ( ErrorType.NOT_A_LOADING_SHEET == e.error ) {
+				throw e;
+			}			
+		}
 	}
 
 	@Test( expected = ImportValidationException.class )
@@ -208,7 +214,7 @@ public class POIReaderTest {
 			}
 		}
 	}
-	
+
 	@Test( expected = ImportValidationException.class )
 	public void testLoadingSheet16() throws Exception {
 		POIReader rdr = new POIReader();

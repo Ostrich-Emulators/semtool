@@ -469,7 +469,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 						}
 						catch ( IOException | EngineManagementException ioe ) {
 							log.error( ioe, ioe );
-							Utility.showError( ioe.getLocalizedMessage() );
+							Utility.showError( ioe.getMessage() );
 						}
 					}
 				} );

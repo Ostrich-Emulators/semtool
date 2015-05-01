@@ -659,7 +659,7 @@ public class EngineUtil implements Runnable {
 			}
 		}
 		catch ( ImportValidationException | RepositoryException e ) {
-			throw new EngineManagementException( e );
+			throw new EngineManagementException( e.getMessage(), e );
 		}
 		finally {
 			el.release();

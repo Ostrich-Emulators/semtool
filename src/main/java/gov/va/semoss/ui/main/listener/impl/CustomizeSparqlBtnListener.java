@@ -51,46 +51,49 @@ public class CustomizeSparqlBtnListener implements IChakraListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		TabbedQueries area = (TabbedQueries) DIHelper.getInstance().getLocalProp(Constants.SPARQL_AREA_FIELD);
-
-		JComboBox playSheetComboBox = (JComboBox) DIHelper.getInstance()
-				.getLocalProp(Constants.PLAYSHEET_COMBOBOXLIST);
-		JButton btnShowHint = (JButton) DIHelper.getInstance().getLocalProp(
-				Constants.SHOW_HINT);
-		JButton btnGetQuestionSparql = (JButton) DIHelper.getInstance()
-				.getLocalProp(Constants.GET_CURRENT_SPARQL);
-		String selectedPlaySheet = (String) playSheetComboBox.getSelectedItem();
+		throw new UnsupportedOperationException( "this method has been completed refactored" );
 		
-			//Necessary, because this listener serves the "Custom" Sparqle button,
-			//as well as the "PlaySheet" combo-box. So, it may be called when the
-			//only action taken was a change in that combo-box--in which case,
-			//TabbedQueries should be left alone:
-			if(area.isEnabled() == false){
-			   area.enableTabbedQueries();
-			}
-			btnShowHint.setEnabled(true);
-			playSheetComboBox.setEnabled(true);
-			btnGetQuestionSparql.setEnabled(true);
-
-		if (playSheetComboBox.isEnabled()) {
-			if(area.getSelectedIndex() >= 0){
-			   // playsheet starting with "*" are those that are not included in predefined
-			   // list in util.PlaySheetEnum:
-			   if (selectedPlaySheet.startsWith("*") && area.getTextOfSelectedTab().isEmpty()){
-			   	   area.setTextOfSelectedTab("Hint: not available");
-			   } 
-			   // if sparql area is empty and user switches to a different playsheet
-			   else if (area.getTextOfSelectedTab().isEmpty()){
-				   //Set text with current playsheet hint:
-				   area.setTextOfSelectedTab(PlaySheetEnum.getHintFromName(selectedPlaySheet));
-			   } 
-			   //If sparql area currently has a hint...
-			   else if (area.getTextOfSelectedTab().startsWith("Hint:")){
-				   //Set text with current playsheet hint:
-				   area.setTextOfSelectedTab(PlaySheetEnum.getHintFromName(selectedPlaySheet));
-			   }
-			}
-		}		
+		
+//		TabbedQueries area = (TabbedQueries) DIHelper.getInstance().getLocalProp(Constants.SPARQL_AREA_FIELD);
+//
+//		JComboBox playSheetComboBox = (JComboBox) DIHelper.getInstance()
+//				.getLocalProp(Constants.PLAYSHEET_COMBOBOXLIST);
+//		JButton btnShowHint = (JButton) DIHelper.getInstance().getLocalProp(
+//				Constants.SHOW_HINT);
+//		JButton btnGetQuestionSparql = (JButton) DIHelper.getInstance()
+//				.getLocalProp(Constants.GET_CURRENT_SPARQL);
+//		String selectedPlaySheet = (String) playSheetComboBox.getSelectedItem();
+//		
+//			//Necessary, because this listener serves the "Custom" Sparqle button,
+//			//as well as the "PlaySheet" combo-box. So, it may be called when the
+//			//only action taken was a change in that combo-box--in which case,
+//			//TabbedQueries should be left alone:
+//			if(area.isEnabled() == false){
+//			   area.enableTabbedQueries();
+//			}
+//			btnShowHint.setEnabled(true);
+//			playSheetComboBox.setEnabled(true);
+//			btnGetQuestionSparql.setEnabled(true);
+//
+//		if (playSheetComboBox.isEnabled()) {
+//			if(area.getSelectedIndex() >= 0){
+//			   // playsheet starting with "*" are those that are not included in predefined
+//			   // list in util.PlaySheetEnum:
+//			   if (selectedPlaySheet.startsWith("*") && area.getTextOfSelectedTab().isEmpty()){
+//			   	   area.setTextOfSelectedTab("Hint: not available");
+//			   } 
+//			   // if sparql area is empty and user switches to a different playsheet
+//			   else if (area.getTextOfSelectedTab().isEmpty()){
+//				   //Set text with current playsheet hint:
+//				   area.setTextOfSelectedTab(PlaySheetEnum.getHintFromName(selectedPlaySheet));
+//			   } 
+//			   //If sparql area currently has a hint...
+//			   else if (area.getTextOfSelectedTab().startsWith("Hint:")){
+//				   //Set text with current playsheet hint:
+//				   area.setTextOfSelectedTab(PlaySheetEnum.getHintFromName(selectedPlaySheet));
+//			   }
+//			}
+//		}		
 	}
 
 	/**

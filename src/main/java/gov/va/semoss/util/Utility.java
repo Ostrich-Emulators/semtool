@@ -177,15 +177,15 @@ public class Utility {
 
 		return paramHash;
 	}
-	
 
-	/**  Extracts parameter bindings from the passed-in query of the form,
+	/**
+	 * Extracts parameter bindings from the passed-in query of the form,
 	 * "<@name-http:value@>", into a hash of variable names, types, and parameter
-	 * queries (created from types), suitable for Insight parameter drop-downs on 
+	 * queries (created from types), suitable for Insight parameter drop-downs on
 	 * the left-pane of the tool.
-	 * 
+	 *
 	 * @param query -- (String) The Insight's Sparql query.
-	 * 
+	 *
 	 * @return -- (Map<String, Map<String, String>>) The hash described above.
 	 */
 	public static Map<String, Map<String, String>> getParamTypeQueryHash( String query ) {
@@ -202,13 +202,12 @@ public class Utility {
 
 			log.debug( "paramTypeQueryhash row: " + paramVariable + ", " + paramType + ", " + paramQuery );
 			Map<String, String> paramElement = new HashMap<>();
-			paramElement.put("parameterValueType", paramType);
-			paramElement.put("parameterQuery", paramQuery);
-			paramQueryHash.put(paramVariable, paramElement);
+			paramElement.put( "parameterValueType", paramType );
+			paramElement.put( "parameterQuery", paramQuery );
+			paramQueryHash.put( paramVariable, paramElement );
 		}
 		return paramQueryHash;
 	}
-	
 
 	/**
 	 * Matches the given query against a specified pattern. While the next
@@ -364,7 +363,12 @@ public class Utility {
 				= new StringBuilder( "SELECT ?s ?label WHERE { ?s rdfs:label ?label }" );
 		sb.append( " VALUES ?s {" );
 		for ( URI uri : uris ) {
-			sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+			if ( null == uri ) {
+				log.warn( "trying to find the label of a null URI? (probably a bug)" );
+			}
+			else {
+				sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+			}
 		}
 		sb.append( "}" );
 
@@ -399,7 +403,7 @@ public class Utility {
 	 *
 	 * @param urilabels a mapping of URIs to their labels. Say, the results of
 	 * null	null	null	null null null null null null	null	null	null	null	null	null
-	 * null	null	null	null	 {@link #getInstanceLabels(java.util.Collection, 
+	 * null	null	null	null	null	 {@link #getInstanceLabels(java.util.Collection, 
    * gov.va.semoss.rdf.engine.api.IEngine) }
 	 *
 	 * @return the results

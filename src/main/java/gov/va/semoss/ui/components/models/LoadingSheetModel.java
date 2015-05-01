@@ -57,6 +57,7 @@ public class LoadingSheetModel extends ValueTableModel {
 
 			sheetdata.setSubjectTypeIsError( false );
 			sheetdata.setObjectTypeIsError( false );
+			sheetdata.setRelationIsError( false );
 
 			for ( String prop : sheetdata.getProperties() ) {
 				sheetdata.setPropertyIsError( prop, false );
@@ -110,7 +111,7 @@ public class LoadingSheetModel extends ValueTableModel {
 				boolean iserr = !realtimer.instanceExists( nap.getSubjectType(),
 						nap.getSubject() );
 				nap.setSubjectIsError( iserr );
-				if( iserr ){
+				if ( iserr ) {
 					errorcount++;
 				}
 			}
@@ -237,6 +238,16 @@ public class LoadingSheetModel extends ValueTableModel {
 		fireTableDataChanged();
 	}
 
+	public void setRelationshipName( String relname ) {
+		sheetdata.setRelname( relname );
+		LoadingSheetData lsd = realtimer.checkModelConformance( sheetdata, null, false );
+		setModelErrors( lsd );
+	}
+	
+	public LoadingSheetData copyLoadingSheetHeaders(){
+		return LoadingSheetData.copyHeadersOf( sheetdata );
+	}
+
 	public boolean hasModelErrors() {
 		return sheetdata.hasModelErrors();
 	}
@@ -254,7 +265,11 @@ public class LoadingSheetModel extends ValueTableModel {
 			errors.add( 1 );
 		}
 
-		int i = 2;
+		if( sheetdata.hasRelationError() ){
+			errors.add( -1 );
+		}
+		
+		int i = ( isRel() ? 2 : 1 );
 		for ( String p : sheetdata.getProperties() ) {
 			if ( sheetdata.propertyIsError( p ) ) {
 				errors.add( i );
