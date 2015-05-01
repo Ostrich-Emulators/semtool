@@ -125,21 +125,21 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
   vac:description "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^xsd:string ;
-  vas:icon "questions_grid1_16.png"^^xsd:string ;
+  vas:icon "questions_grid2_16.png"^^xsd:string ;
   rdfs:label "Grid"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet>
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
   vac:description "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
-  vas:icon "questions_raw_grid1_16.png"^^xsd:string ;
+  vas:icon "questions_raw_grid2_16.png"^^xsd:string ;
   rdfs:label "Raw Grid"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridScatterSheet>
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
   vac:description "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^xsd:string ;
-  vas:icon "questions_scatter_grid1_16.png"^^xsd:string ;
+  vas:icon "questions_grid_scatter1_16.png"^^xsd:string ;
   rdfs:label "Grid Scatter"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet>
@@ -180,7 +180,7 @@ Visualizes Latitude/Longitude coordinates on a map of OCONUS."""^^xsd:string ;
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
   vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships.  "^^xsd:string ;
-  vas:icon "questions_sankey_diagram_16.png"^^xsd:string ;
+  vas:icon "questions_sankey1_16.png"^^xsd:string ;
   rdfs:label "Sankey Diagram"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet>
