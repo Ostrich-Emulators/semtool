@@ -170,6 +170,11 @@ public class POIReader implements ImportFileReader {
 			loadSheet( sheetname, workbook, data );
 		}
 
+		if( data.isEmpty() ){
+			throw new ImportValidationException( ErrorType.NOT_A_LOADING_SHEET,
+					"There is no loadable data in this worksheet" );
+		}
+		
 		return data;
 	}
 
