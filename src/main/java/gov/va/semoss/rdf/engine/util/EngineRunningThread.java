@@ -50,27 +50,17 @@ public class EngineRunningThread<T extends Repository, V extends RepositoryConne
 	}
 
 	/**
-	 * Sets the repository to initialize and get a connection from. This function
-	 * blocks until the repository connection is created
+	 * Sets the repository to initialize and get a connection from.
 	 *
 	 * @param repo the repository to initialize and get a connection from
+	 * @param l this latch will be counted down when the release is complete
 	 */
-	public synchronized V startup( T repo ) {
+	public synchronized void startup( T repo, CountDownLatch l ) {
 		this.repo = repo;
 		startup = true;
 		stopping = false;
-		latch = new CountDownLatch( 1 );
+		latch = l;
 		notifyAll();
-
-		try {
-			// block until the connection is ready
-			latch.await();
-		}
-		catch ( InterruptedException e ) {
-			log.error( e, e );
-		}
-
-		return getConnection();
 	}
 
 	@Override

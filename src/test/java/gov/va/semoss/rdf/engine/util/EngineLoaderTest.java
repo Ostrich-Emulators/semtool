@@ -625,6 +625,7 @@ public class EngineLoaderTest {
 		lsd.add( "uno" );
 
 		el.loadToEngine( id, engine, errs );
+		el.release();
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
@@ -653,6 +654,7 @@ public class EngineLoaderTest {
 		lsd.add( "uno" );
 
 		el.loadToEngine( id, engine, errs );
+		el.release();
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
@@ -680,6 +682,7 @@ public class EngineLoaderTest {
 		lsd.add( "uno" );
 
 		el.loadToEngine( id, engine, errs );
+		el.release();
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
@@ -714,6 +717,10 @@ public class EngineLoaderTest {
 				throw e;
 			}
 		}
+		finally{
+			el.release();
+		}
+		
 	}
 
 	@Test
@@ -819,7 +826,6 @@ public class EngineLoaderTest {
 		finally {
 			el.release();
 		}
-
 	}
 
 	@Test

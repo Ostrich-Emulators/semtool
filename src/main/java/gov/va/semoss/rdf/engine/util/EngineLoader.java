@@ -63,7 +63,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import java.util.concurrent.CountDownLatch;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
@@ -162,7 +161,6 @@ public class EngineLoader {
 		repo.initialize();
 		BigdataSailRepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
-
 		return rc;
 	}
 
