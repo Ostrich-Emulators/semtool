@@ -413,7 +413,14 @@ public class POIReader implements ImportFileReader {
 
 			if ( "@base".equals( propName ) ) {
 				if ( null == baseuri ) {
-					baseuri = propValue.replaceAll("[<>]", "");
+					if ( propValue.startsWith("<") && propValue.endsWith(">") ) {
+						baseuri = propValue.replaceAll("[<>]", "");
+					}
+					else {
+						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA, // incorrect error type, check with ryan
+								"@base value does not appear to be a URI: \"" + propValue +"\"" );	
+					}
+
 				}
 				else {
 					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
@@ -422,6 +429,11 @@ public class POIReader implements ImportFileReader {
 			}
 			else if ( "@prefix".equals( propName ) ) {
 				// validate that this is necessary:
+				if (! (propValue.startsWith("<") && propValue.endsWith(">")) ) {
+					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA, // incorrect error type, check with ryan
+							"@prefix value does not appear to be a URI: \"" + propValue +"\"");	
+				}
+				
 				propValue = propValue.replaceAll("[<>]", "");
 				if ( ":schema".equals( propertyMiddleColumn ) ) {
 					if ( null == schemanamespace ) {
