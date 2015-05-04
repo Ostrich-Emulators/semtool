@@ -413,7 +413,7 @@ public class POIReader implements ImportFileReader {
 
 			if ( "@base".equals( propName ) ) {
 				if ( null == baseuri ) {
-					baseuri = propValue;
+					baseuri = propValue.replaceAll("[<>]", "");
 				}
 				else {
 					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
