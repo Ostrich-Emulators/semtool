@@ -119,7 +119,7 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 
-			if( !nlsd.isEmpty() ){
+			if ( !nlsd.isEmpty() ) {
 				id.add( nlsd );
 			}
 		}
@@ -411,27 +411,15 @@ public class POIReader implements ImportFileReader {
 			String propValue = cell3.getStringCellValue();
 			String propertyMiddleColumn = getString( cell2 );
 
-			if ( "@schema-namespace".equals( propName ) ) {
-				if ( null == schemanamespace ) {
-					schemanamespace = propValue;
-				}
-				else {
-					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
-							"Multiple @schema-namespace lines in Metadata sheet" );
-				}
-			}
-			else if ( "@data-namespace".equals( propName ) ) {
-				if ( null == datanamespace ) {
-					datanamespace = propValue;
-				}
-				else {
-					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
-							"Multiple @schema-namespace lines in Metadata sheet" );
-				}
-			}
-			else if ( "@base".equals( propName ) ) {
+			if ( "@base".equals( propName ) ) {
 				if ( null == baseuri ) {
-					baseuri = propValue;
+					if ( propValue.startsWith( "<" ) && propValue.endsWith( ">" ) ) {
+						baseuri = propValue.substring( 1, propValue.length() - 1 );
+					}
+					else {
+						throw new ImportValidationException( ErrorType.INVALID_DATA,
+								"@base value does not appear to be a URI: \"" + propValue + "\"" );
+					}
 				}
 				else {
 					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
@@ -439,7 +427,48 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 			else if ( "@prefix".equals( propName ) ) {
-				namespaces.put( propertyMiddleColumn.replaceAll( ":$", "" ), propValue );
+				// validate that this is necessary:
+				if ( !( propValue.startsWith( "<" ) && propValue.endsWith( ">" ) ) ) {
+					throw new ImportValidationException( ErrorType.INVALID_DATA,
+							"@prefix value does not appear to be a URI: \"" + propValue + "\"" );
+				}
+
+				propValue = propValue.substring( 1, propValue.length() - 1 );
+				if ( ":schema".equals( propertyMiddleColumn ) ) {
+					if ( null == schemanamespace ) {
+						schemanamespace = propValue;
+					}
+					else {
+						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+								"Multiple :schema lines in Metadata sheet" );
+					}
+				}
+				else if ( ":data".equals( propertyMiddleColumn ) ) {
+					if ( null == datanamespace ) {
+						datanamespace = propValue;
+					}
+					else {
+						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+								"Multiple :data lines in Metadata sheet" );
+					}
+				}
+				else if ( ":".equals( propertyMiddleColumn ) ) {
+					/*
+					 * The default namespace, ":", applies to all un-prefixed data elements.
+					 * Specifically setting the schema or data namespace will override the
+					 * default namespace.
+					 */
+					if ( null == schemanamespace ) {
+						schemanamespace = propValue;
+					}
+					if ( null == datanamespace ) {
+						datanamespace = propValue;
+					}
+					// we may still need to set the default namespace to handle RDF exports. keep an eye on this.
+				}
+				else {
+					namespaces.put( propertyMiddleColumn.replaceAll( ":$", "" ), propValue );
+				}
 			}
 			else {
 				if ( !propertyMiddleColumn.isEmpty() ) {
