@@ -119,7 +119,7 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 
-			if( !nlsd.isEmpty() ){
+			if ( !nlsd.isEmpty() ) {
 				id.add( nlsd );
 			}
 		}
@@ -413,14 +413,13 @@ public class POIReader implements ImportFileReader {
 
 			if ( "@base".equals( propName ) ) {
 				if ( null == baseuri ) {
-					if ( propValue.startsWith("<") && propValue.endsWith(">") ) {
-						baseuri = propValue.replaceAll("[<>]", "");
+					if ( propValue.startsWith( "<" ) && propValue.endsWith( ">" ) ) {
+						baseuri = propValue.substring( 1, propValue.length() - 1 );
 					}
 					else {
-						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA, // incorrect error type, check with ryan
-								"@base value does not appear to be a URI: \"" + propValue +"\"" );	
+						throw new ImportValidationException( ErrorType.INVALID_DATA,
+								"@base value does not appear to be a URI: \"" + propValue + "\"" );
 					}
-
 				}
 				else {
 					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
@@ -429,12 +428,12 @@ public class POIReader implements ImportFileReader {
 			}
 			else if ( "@prefix".equals( propName ) ) {
 				// validate that this is necessary:
-				if (! (propValue.startsWith("<") && propValue.endsWith(">")) ) {
-					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA, // incorrect error type, check with ryan
-							"@prefix value does not appear to be a URI: \"" + propValue +"\"");	
+				if ( !( propValue.startsWith( "<" ) && propValue.endsWith( ">" ) ) ) {
+					throw new ImportValidationException( ErrorType.INVALID_DATA,
+							"@prefix value does not appear to be a URI: \"" + propValue + "\"" );
 				}
-				
-				propValue = propValue.replaceAll("[<>]", "");
+
+				propValue = propValue.substring( 1, propValue.length() - 1 );
 				if ( ":schema".equals( propertyMiddleColumn ) ) {
 					if ( null == schemanamespace ) {
 						schemanamespace = propValue;
