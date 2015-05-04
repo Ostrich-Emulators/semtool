@@ -516,7 +516,7 @@ public class EngineLoaderTest {
 		assertEquals( oldlist, newlist );
 	}
 
-	// @Test
+	@Test
 	public void testTicket583() throws Exception {
 		RepositoryConnection rc = engine.getRawConnection();
 		rc.add( TICKETBASE, null, RDFFormat.TURTLE );
