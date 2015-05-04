@@ -20,8 +20,6 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
@@ -31,9 +29,10 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.util.List;
+import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryResult;
@@ -103,7 +102,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 				rc.add( baseuri, RDF.TYPE, VAS.Database );
 				rc.commit();
 			}
-			
+
 			setBaseUri( baseuri );
 		}
 		catch ( RepositoryException re ) {
@@ -129,6 +128,18 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	@Override
 	public RepositoryConnection getRawConnection() {
 		return this.rc;
+	}
+
+	public Model toModel() throws RepositoryException {
+		TreeModel model = new TreeModel();
+
+		RepositoryResult<Statement> stmts
+				= rc.getStatements( null, null, null, false );
+		while ( stmts.hasNext() ) {
+			model.add( stmts.next() );
+		}
+
+		return model;
 	}
 
 	@Override

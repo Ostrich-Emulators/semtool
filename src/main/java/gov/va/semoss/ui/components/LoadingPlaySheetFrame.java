@@ -10,18 +10,16 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.CloseableTab.MarkType;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
-import gov.va.semoss.ui.components.models.ValueTableModel;
-import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.NodeLoadingPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
@@ -35,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -53,11 +50,8 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
 
 /**
@@ -87,7 +81,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private final AddAction addtab = new AddAction();
 	private final ConformanceAction cnfr = new ConformanceAction();
 
-	private final EngineLoader realtimer = new EngineLoader();
+	private final QaChecker realtimer = new QaChecker();
 	private final JToggleButton timertoggle = new JToggleButton( cnfr );
 
 	public LoadingPlaySheetFrame( IEngine eng ) {
@@ -145,12 +139,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		hideProgress();
 	}
 
-	@Override
-	protected void onFrameClose() {
-		realtimer.release();
-		super.onFrameClose();
-	}
-
 	public final LoadingPlaySheetBase add( LoadingSheetData data ) {
 		LoadingPlaySheetBase ret = ( data.isRel()
 				? new RelationshipLoadingPlaySheet( data )
@@ -174,8 +162,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		sheets.add( c );
 		showerrs.addActionListener( c );
 
-		EngineLoader el = ( timertoggle.isSelected() ? realtimer : null );
-		c.getLoadingModel().setRealTimeEngineLoader( el );
+		QaChecker el = ( timertoggle.isSelected() ? realtimer : null );
+		c.getLoadingModel().setQaChecker( el );
 	}
 
 	@Override
@@ -190,141 +178,50 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	public ProgressTask getLoadingTask() {
-
 		String t = "Loading data" + ( isLoadable() ? " to "
 				+ MetadataQuery.getEngineLabel( getEngine() ) : "" );
 		final String error[] = new String[1];
 		ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
 			@Override
 			public void run() {
-				boolean somethingToShow = false;
 
 				if ( doconformance ) {
 					updateProgress( "Preparing Load", 0 );
 					realtimer.clear();
-					realtimer.preloadCaches( getEngine() );
+					realtimer.loadCaches( getEngine() );
 				}
 
 				int progressPerFile = 100 / toload.size();
-				boolean alreadyShownRdfError = false;
 				File lastloaded = null;
 				for ( File fileToLoad : toload ) {
 					jBar.setString( "Reading " + fileToLoad );
-					ImportFileReader rdr = realtimer.getReader( fileToLoad );
+					ImportFileReader rdr = EngineLoader.getDefaultReader( fileToLoad );
 					log.debug( "importing file:" + fileToLoad );
-					if ( null == rdr ) {
-						// no reader for this filetype, but we could 
-						// still have an RDF file (which we can load)
-						if ( !isLoadable() ) {
-							Utility.showError( "You must specify a database to receive this data" );
-							return;
-						}
-
-						try {
-							if ( doconformance ) {
-								log.warn( "cannot check quality for file: " + fileToLoad );
-							}
-
-							realtimer.loadToEngine( Arrays.asList( fileToLoad ), getEngine(),
-									dometamodel, null );
-						}
-						catch ( ImportValidationException | RepositoryException | IOException e ) {
-							log.error( e, e );
-						}
-
+					try {
+						ImportData data = rdr.readOneFile( fileToLoad );
+						data.findPropertyLinks();
 						addProgress( "Finished reading " + fileToLoad, progressPerFile );
 
-						if ( !alreadyShownRdfError ) {
-							alreadyShownRdfError = true;
-							Utility.showMessage( "Data from non-CSV or XLS files cannot be previewed" );
+						if ( null == lastloaded ) {
+							lastloaded = fileToLoad;
+						}
+
+						for ( LoadingSheetData n : data.getSheets() ) {
+							add( n );
 						}
 					}
-					else {
-						// we have a reader, so we can load to importdata if needed
-						try {
-							ImportData data = rdr.readOneFile( fileToLoad );
-							data.findPropertyLinks();
-							addProgress( "Finished reading " + fileToLoad, progressPerFile );
-
-							if ( null == lastloaded ) {
-								lastloaded = fileToLoad;
-							}
-
-							for ( LoadingSheetData n : data.getSheets() ) {
-								add( n );
-							}
-
-							somethingToShow = true;
-						}
-						catch ( ImportValidationException ive ) {
-							// see if we can load it as a plain excel file
-							if ( "xlsx".equalsIgnoreCase( FilenameUtils.getExtension( fileToLoad.getName() ) ) ) {
-								int val = JOptionPane.showConfirmDialog( rootPane,
-										fileToLoad + " does not appear to be a\nLoading sheet. Open anyway?",
-										"Not a Loading Sheet File", JOptionPane.YES_NO_OPTION,
-										JOptionPane.QUESTION_MESSAGE );
-								if ( JOptionPane.YES_OPTION == val ) {
-									POIReader xlsreader = new POIReader();
-									try {
-										PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
-										psf.setTitle( fileToLoad.getName() );
-										ValueFactory vf = new ValueFactoryImpl();
-										ImportData data = xlsreader.readNonloadingSheet( fileToLoad );
-										for ( LoadingSheetData lsd : data.getSheets() ) {
-											ValueTableModel vtm = new ValueTableModel();
-											vtm.setAllowInsertsInPlace( true );
-											vtm.setReadOnly( false );
-											GridRAWPlaySheet grid = new GridRAWPlaySheet( vtm );
-
-											List<Value[]> vals = new ArrayList<>();
-											for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
-												vals.add( nap.convertToValueArray( vf ) );
-											}
-											grid.create( vals, lsd.getHeaders(), getEngine() );
-											grid.setTitle( lsd.getName() );
-
-											Action save = grid.getActions().get( LoadingPlaySheetFrame.SAVE );
-											save.putValue( AbstractSavingAction.LASTSAVE, fileToLoad );
-											Action saveall = grid.getActions().get( LoadingPlaySheetFrame.SAVE_ALL );
-											saveall.putValue( AbstractSavingAction.LASTSAVE, fileToLoad );
-
-											psf.addTab( grid );
-											psf.hideProgress();
-										}
-
-										LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
-
-										LoadingPlaySheetFrame.this.getDesktopPane().add( psf );
-									}
-									catch ( Exception eee ) {
-										log.error( eee, eee );
-										error[0] = eee.getLocalizedMessage();
-									}
-								}
-							}
-							else {
-								log.error( ive, ive );
-								error[0] = ive.getLocalizedMessage();
-							}
-						}
-						catch ( IOException ee ) {
-							log.error( ee, ee );
-							error[0] = ee.getLocalizedMessage();
-						}
+					catch ( IOException | ImportValidationException eee ) {
+						log.error( eee, eee );
+						error[0] = eee.getLocalizedMessage();
 					}
 				}
 
-				if ( somethingToShow ) {
-					LoadingPlaySheetFrame.this.selectTab( 0 );
-					if ( !toload.isEmpty() && null != lastloaded ) {
-						LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
-					}
-
-					announceErrors();
+				LoadingPlaySheetFrame.this.selectTab( 0 );
+				if ( null != lastloaded ) {
+					LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
 				}
-				else {
-					LoadingPlaySheetFrame.this.dispose();
-				}
+				announceErrors();
+				
 			}
 		} ) {
 			@Override
@@ -618,7 +515,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					@Override
 					public void run() {
 						realtimer.clear();
-						realtimer.preloadCaches( eng );
+						realtimer.loadCaches( eng );
 					}
 
 				} ) {
@@ -640,7 +537,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					showerrs.doClick();
 				}
 				for ( LoadingPlaySheetBase b : sheets ) {
-					b.getLoadingModel().setRealTimeEngineLoader( null );
+					b.getLoadingModel().setQaChecker( null );
 				}
 			}
 		}
@@ -664,7 +561,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						log.debug( text );
 
 						LoadingSheetModel lsm = node.getLoadingModel();
-						lsm.setRealTimeEngineLoader( realtimer );
+						lsm.setQaChecker( realtimer );
 
 						CloseableTab ct = getTabComponent( node );
 

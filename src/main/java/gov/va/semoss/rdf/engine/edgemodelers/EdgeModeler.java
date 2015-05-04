@@ -8,7 +8,7 @@ package gov.va.semoss.rdf.engine.edgemodelers;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.rdf.engine.util.EngineLoader;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import java.util.Map;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -46,8 +46,5 @@ public interface EdgeModeler {
 			ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException;
 
 	
-	public void setCaches( Map<String, URI> schemaNodes,
-			Map<EngineLoader.ConceptInstanceCacheKey, URI> dataNodes,
-			Map<String, URI> relationClassCache,
-			Map<String, URI> relationCache );
+	public void setQaChecker( QaChecker qaer );
 }

@@ -38,7 +38,8 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
 /**
- *
+ * Checks the values from a Loading Sheet against the values in an existing engine.
+ * This is a string-based checking, based on a particular sound algorithm
  * @author ryan
  */
 public class EngineConsistencyChecker {

@@ -73,7 +73,11 @@ public class PlaySheetFrame extends JInternalFrame {
 	private IEngine engine = null;
 
 	public PlaySheetFrame( IEngine eng ) {
-		super( "", true, true, true, true );
+		this( eng, "" );
+	}
+
+	public PlaySheetFrame( IEngine eng, String title ) {
+		super( title, true, true, true, true );
 
 		UIDefaults nimbusOverrides = new UIDefaults();
 		UIDefaults defaults = UIManager.getLookAndFeelDefaults();

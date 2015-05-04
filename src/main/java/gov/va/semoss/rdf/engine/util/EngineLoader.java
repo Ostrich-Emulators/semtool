@@ -51,7 +51,6 @@ import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
@@ -62,7 +61,6 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import org.openrdf.model.BNode;
@@ -71,7 +69,6 @@ import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.rio.RDFFormat;
@@ -87,23 +84,25 @@ import org.openrdf.rio.ntriples.NTriplesWriter;
 public class EngineLoader {
 
 	private static final Logger log = Logger.getLogger( EngineLoader.class );
+	private static final Map<String, ImportFileReader> defaultExtReaderLkp
+			= new HashMap<>();
 	private final boolean stageInMemory;
 	private final List<Statement> owls = new ArrayList<>();
 	private BigdataSailRepositoryConnection myrc;
 	private File stagingdir;
-	private final Map<String, URI> schemaNodes = new HashMap<>();
-	private final Map<ConceptInstanceCacheKey, URI> dataNodes = new HashMap<>();
-	private final Map<String, URI> relationClassCache = new HashMap<>();
-	private final Map<String, URI> relationCache = new HashMap<>();
 	private final ValueFactory vf;
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
 	private URI defaultBaseUri;
 	private boolean forceBaseUri;
+	private QaChecker qaer = new QaChecker();
 
-	public static enum CacheType {
-
-		CONCEPTCLASS, RELATIONCLASS, RELATION
-	};
+	static {
+		POIReader poi = new POIReader();
+		CSVReader csv = new CSVReader();
+		defaultExtReaderLkp.put( "xlsx", poi );
+		defaultExtReaderLkp.put( "xls", poi );
+		defaultExtReaderLkp.put( "csv", csv );
+	}
 
 	public EngineLoader( boolean inmem ) {
 		stageInMemory = inmem;
@@ -115,12 +114,6 @@ public class EngineLoader {
 		}
 
 		vf = myrc.getValueFactory();
-
-		POIReader poi = new POIReader();
-		CSVReader csv = new CSVReader();
-		extReaderLkp.put( "xlsx", poi );
-		extReaderLkp.put( "xls", poi );
-		extReaderLkp.put( "csv", csv );
 	}
 
 	public EngineLoader() {
@@ -168,34 +161,7 @@ public class EngineLoader {
 		repo.initialize();
 		BigdataSailRepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
-
 		return rc;
-	}
-
-	public void cacheUris( CacheType type, Map<String, URI> newtocache ) {
-		if ( CacheType.CONCEPTCLASS == type ) {
-			schemaNodes.putAll( newtocache );
-		}
-		else if ( CacheType.RELATIONCLASS == type ) {
-			relationClassCache.putAll( newtocache );
-		}
-		else if ( CacheType.RELATION == type ) {
-			relationCache.putAll( newtocache );
-		}
-		else {
-			throw new IllegalArgumentException( "unhandled cache type: " + type );
-		}
-	}
-
-	public void cacheConceptInstances( Map<String, URI> instances, String typelabel ) {
-		for ( Map.Entry<String, URI> en : instances.entrySet() ) {
-			String l = en.getKey();
-			URI uri = en.getValue();
-
-			ConceptInstanceCacheKey key = new ConceptInstanceCacheKey( typelabel, l );
-			//log.debug( "conceptinstances : " + key + " -> " + en.getValue() );
-			dataNodes.put( key, uri );
-		}
 	}
 
 	/**
@@ -216,7 +182,7 @@ public class EngineLoader {
 			boolean createmetamodel, ImportData conformanceErrors )
 			throws RepositoryException, IOException, ImportValidationException {
 
-		preloadCaches( engine );
+		qaer.loadCaches( engine );
 		Set<Statement> mmstmts = new HashSet<>();
 
 		for ( File fileToLoad : toload ) {
@@ -257,7 +223,7 @@ public class EngineLoader {
 
 	public void loadToEngine( ImportData data, IEngine engine,
 			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
-		preloadCaches( engine );
+		qaer.loadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
 		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
 	}
@@ -316,7 +282,7 @@ public class EngineLoader {
 				addToEngine( n, engine, data );
 			}
 
-			separateConformanceErrors( data, conformanceErrors, engine );
+			qaer.separateConformanceErrors( data, conformanceErrors, engine );
 
 			for ( LoadingSheetData r : data.getRels() ) {
 				addToEngine( r, engine, data );
@@ -333,43 +299,24 @@ public class EngineLoader {
 	}
 
 	/**
-	 * Separates any non-conforming data from the loading data. This removes the
-	 * offending data from <code>data</code> and puts them in <code>errors</code>
+	 * Gets a reader for the given file, based on extension. If no reader has been
+	 * explicitly set using {@link #setReader(java.lang.String, gov.va.semoss.poi.main.ImportFileReader)
+	 * }, then this function relies on {@link #getDefaultReader(java.io.File) }
+	 * to determine the appropriate reader for this file.
 	 *
-	 * @param data the data to check for errors
-	 * @param errors where to put non-conforming data. If null, this function does
-	 * nothing
-	 * @param engine the engine to check against
+	 * @param toload
+	 * @return
 	 */
-	public void separateConformanceErrors( ImportData data, ImportData errors,
-			IEngine engine ) {
-		if ( null != errors ) {
-			for ( LoadingSheetData d : data.getSheets() ) {
-				List<LoadingNodeAndPropertyValues> errs
-						= checkConformance( d, engine, false );
-
-				if ( !errs.isEmpty() ) {
-					LoadingSheetData errdata = LoadingSheetData.copyHeadersOf( d );
-					errdata.setProperties( d.getPropertiesAndDataTypes() );
-					errors.add( errdata );
-
-					Set<LoadingNodeAndPropertyValues> errvals = new HashSet<>();
-					List<LoadingNodeAndPropertyValues> reldata = d.getData();
-
-					for ( LoadingNodeAndPropertyValues nap : errs ) {
-						errvals.add( nap );
-						errdata.add( nap );
-					}
-
-					reldata.removeAll( errvals );
-				}
-			}
-		}
-	}
-
 	public ImportFileReader getReader( File toload ) {
 		String ext = FilenameUtils.getExtension( toload.getName() ).toLowerCase();
-		ImportFileReader rdr = extReaderLkp.get( ext );
+		ImportFileReader rdr = ( extReaderLkp.containsKey( ext )
+				? extReaderLkp.get( ext ) : getDefaultReader( toload ) );
+		return rdr;
+	}
+
+	public static ImportFileReader getDefaultReader( File toload ) {
+		String ext = FilenameUtils.getExtension( toload.getName() ).toLowerCase();
+		ImportFileReader rdr = defaultExtReaderLkp.get( ext );
 		return rdr;
 	}
 
@@ -393,10 +340,7 @@ public class EngineLoader {
 			initNamespaces( myrc );
 
 			owls.clear();
-			schemaNodes.clear();
-			dataNodes.clear();
-			relationClassCache.clear();
-			relationCache.clear();
+			qaer.clear();
 		}
 		catch ( Exception e ) {
 			log.warn( e, e );
@@ -420,154 +364,6 @@ public class EngineLoader {
 		}
 
 		FileUtils.deleteQuietly( stagingdir );
-	}
-
-	/**
-	 * Checks conformance of the given data. The <code>data</code> argument will
-	 * be updated when errors are found. Only relationship data can be
-	 * non-conforming.
-	 *
-	 * @param data the data to check
-	 * @param eng the engine to check against. Can be null if
-	 * <code>loadcaches</code> is false
-	 * @param loadcaches call
-	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} first
-	 * @return a list of all {@link LoadingNodeAndPropertyValues} that fail the
-	 * check
-	 */
-	public List<LoadingNodeAndPropertyValues> checkConformance( LoadingSheetData data,
-			IEngine eng, boolean loadcaches ) {
-		List<LoadingNodeAndPropertyValues> failures = new ArrayList<>();
-
-		if ( loadcaches ) {
-			preloadCaches( eng );
-		}
-
-		String stype = data.getSubjectType();
-		String otype = data.getObjectType();
-
-		for ( LoadingNodeAndPropertyValues nap : data.getData() ) {
-			// check that the subject and object are in our instance cache
-			ConceptInstanceCacheKey skey
-					= new ConceptInstanceCacheKey( stype, nap.getSubject() );
-			nap.setSubjectIsError( !dataNodes.containsKey( skey ) );
-
-			if ( data.isRel() ) {
-				ConceptInstanceCacheKey okey
-						= new ConceptInstanceCacheKey( otype, nap.getObject() );
-				nap.setObjectIsError( !dataNodes.containsKey( okey ) );
-			}
-
-			if ( nap.hasError() ) {
-				failures.add( nap );
-			}
-		}
-
-		return failures;
-	}
-
-	/**
-	 * Checks for an instance of the given type and label.
-	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} MUST be called
-	 * prior to this function to have any hope at a true result
-	 *
-	 * @param type
-	 * @param label
-	 * @return true, if the type/label matches a cached value
-	 */
-	public boolean instanceExists( String type, String label ) {
-		return dataNodes.containsKey( new ConceptInstanceCacheKey( type, label ) );
-	}
-
-	/**
-	 * Checks that the Loading Sheet's {@link LoadingSheetData#subjectType},
-	 * {@link LoadingSheetData#objectType}, and
-	 * {@link LoadingSheetData#getProperties()} exist in the given engine
-	 *
-	 * @param data the data to check
-	 * @param eng the engine to check against
-	 * @param loadcaches call {@link EngineUtil#preloadCaches(gov.va.semoss.rdf.engine.api.IEngine,
-	 * gov.va.semoss.rdf.engine.util.EngineLoader) } first
-	 * @return the same loading sheet as the <code>data</code> arg
-	 */
-	public LoadingSheetData checkModelConformance( LoadingSheetData data,
-			IEngine eng, boolean loadcaches ) {
-		if ( loadcaches ) {
-			preloadCaches( eng );
-		}
-
-		data.setSubjectTypeIsError( !schemaNodes.containsKey( data.getSubjectType() ) );
-
-		if ( data.isRel() ) {
-			data.setObjectTypeIsError( !schemaNodes.containsKey( data.getObjectType() ) );
-			data.setRelationIsError( !relationClassCache.containsKey( data.getRelname() ) );
-		}
-
-		for ( Map.Entry<String, URI> en : data.getPropertiesAndDataTypes().entrySet() ) {
-			data.setPropertyIsError( en.getKey(), !relationClassCache.containsKey( en.getKey() ) );
-		}
-
-		return data;
-	}
-
-	public void preloadCaches( IEngine engine ) {
-		final Map<String, URI> map = new HashMap<>();
-		String subpropq = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . ?uri ?isa ?type }";
-		VoidQueryAdapter vqa = new VoidQueryAdapter( subpropq ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				map.put( set.getValue( "label" ).stringValue(),
-						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
-			}
-
-			@Override
-			public void start( List<String> bnames ) {
-				super.start( bnames );
-				map.clear();
-			}
-		};
-		vqa.useInferred( true );
-		UriBuilder owlb = engine.getSchemaBuilder();
-
-		try {
-			URI type = owlb.getRelationUri().build();
-			vqa.bind( "type", type );
-			vqa.bind( "isa", RDFS.SUBPROPERTYOF );
-			engine.query( vqa );
-
-			Map<String, URI> cacheo = new HashMap<>();
-			Map<String, URI> cacheb = new HashMap<>();
-			for ( Map.Entry<String, URI> en : map.entrySet() ) {
-				if ( owlb.contains( en.getValue() ) ) {
-					cacheo.put( en.getKey(), en.getValue() );
-				}
-				else {
-					cacheb.put( en.getKey(), en.getValue() );
-				}
-			}
-
-			cacheUris( CacheType.RELATIONCLASS, cacheo );
-			cacheUris( CacheType.RELATION, cacheb );
-
-			vqa.bind( "isa", RDFS.SUBCLASSOF );
-			type = owlb.getConceptUri().build();
-			vqa.bind( "type", type );
-			engine.query( vqa );
-			cacheUris( CacheType.CONCEPTCLASS, map );
-
-			vqa.bind( "isa", RDF.TYPE );
-			Map<String, URI> concepts = new HashMap<>( map );
-			for ( Map.Entry<String, URI> en : concepts.entrySet() ) {
-				vqa.bind( "type", en.getValue() );
-
-				engine.query( vqa );
-				cacheConceptInstances( map, en.getKey() );
-			}
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( e, e );
-		}
 	}
 
 	private void addToEngine( LoadingSheetData sheet, IEngine engine,
@@ -600,13 +396,13 @@ public class EngineLoader {
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
 
 			String stype = sheet.getSubjectType();
-			if ( !schemaNodes.containsKey( stype ) ) {
+			if ( !qaer.hasCachedInstanceClass( stype ) ) {
 				boolean nodeAlreadyMade = isUri( stype, namespaces );
 
 				URI uri = ( nodeAlreadyMade
 						? getUriFromRawString( stype, namespaces )
 						: schema.build( stype ) );
-				schemaNodes.put( stype, uri );
+				qaer.cacheInstanceClass( uri, stype );
 
 				if ( save && !nodeAlreadyMade ) {
 					myrc.add( uri, RDF.TYPE, OWL.CLASS );
@@ -617,14 +413,14 @@ public class EngineLoader {
 
 			if ( sheet.isRel() ) {
 				String otype = sheet.getObjectType();
-				if ( !schemaNodes.containsKey( otype ) ) {
+				if ( !qaer.hasCachedInstanceClass( otype ) ) {
 					boolean nodeAlreadyMade = isUri( otype, namespaces );
 
 					URI uri = ( nodeAlreadyMade
 							? getUriFromRawString( otype, namespaces )
 							: schema.build( otype ) );
 
-					schemaNodes.put( otype, uri );
+					qaer.cacheInstanceClass( uri, otype );
 
 					if ( save && !nodeAlreadyMade ) {
 						myrc.add( uri, RDF.TYPE, OWL.CLASS );
@@ -636,7 +432,7 @@ public class EngineLoader {
 				String rellabel = sheet.getRelname();
 				String longNodeType = stype + rellabel + otype;
 
-				if ( !relationClassCache.containsKey( longNodeType ) ) {
+				if ( !qaer.hasCachedRelationClass( longNodeType ) ) {
 					boolean relationAlreadyMade = isUri( rellabel, namespaces );
 
 					URI ret = ( relationAlreadyMade
@@ -644,7 +440,7 @@ public class EngineLoader {
 							: schema.getRelationUri( rellabel ) );
 					URI relation = schema.getRelationUri().build();
 
-					relationClassCache.put( longNodeType, ret );
+					qaer.cacheRelationClass( ret, longNodeType );
 
 					if ( save ) {
 						if ( !relationAlreadyMade ) {
@@ -665,17 +461,17 @@ public class EngineLoader {
 			for ( String propname : sheet.getProperties() ) {
 				// check to see if we're actually a link to some
 				// other node (and not really a new property
-				if ( sheet.isLink( propname ) || schemaNodes.containsKey( propname ) ) {
+				if ( sheet.isLink( propname ) || qaer.hasCachedInstanceClass( propname ) ) {
 					log.debug( "linking " + propname + " as a " + SEMOSS.has
-							+ " relationship to " + schemaNodes.get( propname ) );
+							+ " relationship to " + qaer.getCachedInstanceClass( propname ) );
 
-					relationClassCache.put( propname, SEMOSS.has );
+					qaer.cacheRelationClass( SEMOSS.has, propname );
 					continue;
 				}
 
 				boolean alreadyMadeProp = isUri( propname, namespaces );
 
-				if ( !relationClassCache.containsKey( propname ) ) {
+				if ( !qaer.hasCachedRelationClass( propname ) ) {
 					URI predicate;
 					if ( alreadyMadeProp ) {
 						predicate = getUriFromRawString( propname, namespaces );
@@ -684,9 +480,9 @@ public class EngineLoader {
 						// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
 						predicate = schema.build( propname );
 					}
-					relationClassCache.put( propname, predicate );
+					qaer.cacheRelationClass( predicate, propname );
 				}
-				URI predicate = relationClassCache.get( propname );
+				URI predicate = qaer.getCachedRelationClass( propname );
 
 				if ( save && !alreadyMadeProp ) {
 					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
@@ -850,60 +646,12 @@ public class EngineLoader {
 				throw new IllegalArgumentException( "Unknown reification model: " + reif );
 			}
 
-			modeler.setCaches( schemaNodes, dataNodes, relationClassCache, relationCache );
-
+			modeler.setQaChecker( qaer );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
 
 		}
 
 		return modeler;
-	}
-
-	public static class ConceptInstanceCacheKey {
-
-		private final String typelabel;
-		private final String rawlabel;
-
-		public ConceptInstanceCacheKey( String typelabel, String conceptlabel ) {
-			this.typelabel = typelabel;
-			this.rawlabel = conceptlabel;
-		}
-
-		public String getTypeLabel() {
-			return typelabel;
-		}
-
-		public String getConceptLabel() {
-			return rawlabel;
-		}
-
-		@Override
-		public String toString() {
-			return "instance " + typelabel + "<->" + rawlabel;
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 7;
-			hash = 89 * hash + Objects.hashCode( this.typelabel );
-			hash = 89 * hash + Objects.hashCode( this.rawlabel );
-			return hash;
-		}
-
-		@Override
-		public boolean equals( Object obj ) {
-			if ( obj == null ) {
-				return false;
-			}
-			if ( getClass() != obj.getClass() ) {
-				return false;
-			}
-			final ConceptInstanceCacheKey other = (ConceptInstanceCacheKey) obj;
-			if ( !Objects.equals( this.typelabel, other.typelabel ) ) {
-				return false;
-			}
-			return ( Objects.equals( this.rawlabel, other.rawlabel ) );
-		}
 	}
 }

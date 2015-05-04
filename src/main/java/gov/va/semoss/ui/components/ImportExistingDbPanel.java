@@ -28,6 +28,7 @@ import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
+import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.ui.main.SemossPreferences;
 import java.util.HashSet;
@@ -343,10 +344,8 @@ public class ImportExistingDbPanel extends JPanel {
 
 			ProgressTask pt;
 			if ( gridy ) {
-				LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( engine,
-						file.getFiles(), calc, dometamodel, conformance, replace );
-				DIHelper.getInstance().getDesktop().add( psf );
-				pt = psf.getLoadingTask();
+				pt = OpenAction.openFiles( DIHelper.getInstance().getDesktop(),
+						file.getFiles(), engine, calc, dometamodel, conformance, replace );
 			}
 			else {
 				final String error[] = new String[1];

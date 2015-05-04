@@ -7,7 +7,7 @@ package gov.va.semoss.ui.components.models;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.rdf.engine.util.EngineLoader;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class LoadingSheetModel extends ValueTableModel {
 	private static final Logger log = Logger.getLogger( LoadingSheetModel.class );
 	private LoadingSheetData sheetdata;
 	private int errorcount = 0;
-	private EngineLoader realtimer = null;
+	private QaChecker realtimer = null;
 
 	public LoadingSheetModel() {
 		super( true );
@@ -38,7 +38,7 @@ public class LoadingSheetModel extends ValueTableModel {
 		setLoadingSheetData( naps );
 	}
 
-	public void setRealTimeEngineLoader( EngineLoader el ) {
+	public void setQaChecker( QaChecker el ) {
 		realtimer = el;
 		checkForErrors();
 	}
