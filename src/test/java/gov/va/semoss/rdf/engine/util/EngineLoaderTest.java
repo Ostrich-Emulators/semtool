@@ -12,7 +12,6 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData;
-import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
@@ -36,10 +35,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
@@ -47,7 +44,6 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -81,6 +77,12 @@ import org.openrdf.sail.memory.MemoryStore;
 public class EngineLoaderTest {
 
 	private static final Logger log = Logger.getLogger( EngineLoaderTest.class );
+
+	private static final URI BASEURI = new URIImpl( "http://junk.com/testfiles" );
+	private static final URI OWLSTART = new URIImpl( "http://owl.junk.com/testfiles" );
+	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
+	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
+
 	private static final File CSVLOADER = new File( "src/test/resources/airplanes.txt" );
 	private static final File CSVDATA = new File( "src/test/resources/airplanes.csv" );
 	private static final File CSV_EXP = new File( "src/test/resources/airplanes-mm.nt" );
@@ -110,11 +112,6 @@ public class EngineLoaderTest {
 
 	private static final File TICKET608 = new File( "src/test/resources/ticket608.xlsx" );
 	private static final File TICKET608_EXP = new File( "src/test/resources/ticket608.nt" );
-
-	private static final URI BASEURI = new URIImpl( "http://junk.com/testfiles" );
-	private static final URI OWLSTART = new URIImpl( "http://owl.junk.com/testfiles" );
-	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
-	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
 
 	private static final File TEST10 = new File( "src/test/resources/test10.xlsx" );
 	private static final File TEST10_EXP = new File( "src/test/resources/test10.nt" );
@@ -754,51 +751,6 @@ public class EngineLoaderTest {
 	}
 
 	@Test
-	public void testSeparateConformanceErrors() throws Exception {
-		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
-				UriBuilder.getBuilder( OWLSTART ) );
-
-		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
-
-		EngineLoader el = new EngineLoader();
-		el.preloadCaches( engine );
-
-		ImportData test = new ImportData();
-		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
-		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
-
-		LoadingSheetData lsd = LoadingSheetData.nodesheet( "Category" );
-		LoadingNodeAndPropertyValues wrong = lsd.add( "Seefood" );
-		LoadingNodeAndPropertyValues right = lsd.add( "Seafood" );
-		test.add( lsd );
-
-		ImportData errs = new ImportData();
-		el.separateConformanceErrors( test, errs, engine );
-		el.release();
-
-		LoadingSheetData errlsd = errs.getSheet( "Category" );
-		LoadingSheetData oklsd = test.getSheet( "Category" );
-		assertEquals( wrong, errlsd.getData().get( 0 ) );
-		assertEquals( 1, errlsd.getData().size() );
-
-		assertEquals( right, oklsd.getData().get( 0 ) );
-		assertEquals( 1, oklsd.getData().size() );
-
-		assertNotEquals( errlsd, oklsd );
-	}
-
-	@Test
-	public void testClear() {
-		EngineLoader el = new EngineLoader();
-		Map<String, URI> types = new HashMap<>();
-		types.put( "rawlabel", BASEURI );
-		el.cacheConceptInstances( types, "testType" );
-		el.clear();
-		assertFalse( el.instanceExists( "testType", "rawlabel" ) );
-		el.release();
-	}
-
-	@Test
 	public void testRelease() throws IOException {
 		// this is a little hard to test because everything is private.
 		// but when we stage to disk, we will get a file on the filesystem
@@ -836,86 +788,6 @@ public class EngineLoaderTest {
 		assertTrue( !after.iterator().next().exists() );
 	}
 
-	@Test
-	public void testInstanceExists() {
-		String type = "test";
-		String label = "label";
-		EngineLoader el = new EngineLoader();
-		Map<String, URI> types = new HashMap<>();
-		types.put( label, BASEURI );
-		el.cacheConceptInstances( types, type );
-		assertTrue( el.instanceExists( type, label ) );
-		assertFalse( el.instanceExists( type, "notthere" ) );
-		el.release();
-	}
-
-	@Test( expected = IllegalArgumentException.class )
-	public void testCacheUris() throws Exception {
-		EngineLoader el = new EngineLoader();
-		el.cacheUris( null, new HashMap<>() );
-		el.release();
-	}
-
-	@Test
-	public void testPreloadCaches() throws Exception {
-		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
-				UriBuilder.getBuilder( OWLSTART ) );
-
-		RepositoryConnection rc = engine.getRawConnection();
-
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
-				RDF.TYPE, new URIImpl( "http://owl.junk.com/testfiles/Category" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
-				RDFS.LABEL, rc.getValueFactory().createLiteral( "Beverages" ) );
-
-		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				RDFS.LABEL, rc.getValueFactory().createLiteral( "Chai:Beverages" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
-
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Category" ),
-				RDFS.SUBCLASSOF, new URIImpl( "http://owl.junk.com/testfiles/Concept" ) );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Category" ), RDFS.LABEL,
-				rc.getValueFactory().createLiteral( "Category" ) );
-
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ), RDFS.LABEL,
-				rc.getValueFactory().createLiteral( "Description" ) );
-
-		EngineLoader el = new EngineLoader();
-		el.preloadCaches( engine );
-		el.release();
-	}
-
-	@Test
-	public void testCheckModelConformance() throws Exception {
-		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
-				UriBuilder.getBuilder( OWLSTART ) );
-
-		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
-
-		EngineLoader el = new EngineLoader();
-		ImportData test = new ImportData();
-		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
-		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
-
-		LoadingSheetData lsd
-				= LoadingSheetData.relsheet( "Product-x", "Category-x", "Category-y" );
-		lsd.addProperty( "extraprop-x" );
-		test.add( lsd );
-
-		LoadingSheetData errs = el.checkModelConformance( lsd, engine, true );
-		el.release();
-
-		assertTrue( errs.hasModelErrors() );
-		assertTrue( errs.hasSubjectTypeError() );
-		assertTrue( errs.hasObjectTypeError() );
-		assertTrue( errs.propertyIsError( "extraprop-x" ) );
-	}
-
 	@Test( expected = ImportValidationException.class )
 	public void testBadTriple() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
@@ -925,7 +797,7 @@ public class EngineLoaderTest {
 
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
-		
+
 		ImportData test = new ImportData();
 		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
 		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );

@@ -5,7 +5,15 @@
  */
 package gov.va.semoss.ui.actions;
 
+import static com.ibm.icu.impl.PluralRulesLoader.loader;
+import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportFileReader;
+import gov.va.semoss.poi.main.ImportValidationException;
+import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
+import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.FileBrowsePanel;
@@ -16,24 +24,37 @@ import java.awt.event.KeyEvent;
 
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.OperationsProgress;
+import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
+import gov.va.semoss.ui.components.models.ValueTableModel;
+import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.repository.RepositoryException;
 
 /**
  *
@@ -41,6 +62,7 @@ import org.apache.log4j.Logger;
  */
 public class OpenAction extends DbAction {
 
+	private static final Logger log = Logger.getLogger( OpenAction.class );
 	private final List<File> files = new ArrayList<>();
 	private final Frame frame;
 
@@ -51,41 +73,31 @@ public class OpenAction extends DbAction {
 		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_O );
 	}
 
-	public OpenAction( String optg, Frame frame, Collection<File> toadd ) {
-		this( optg, frame );
-		files.addAll( toadd );
-	}
-
-	public void setFiles( Collection<File> file ) {
-		files.addAll( file );
-	}
-
 	@Override
 	public boolean preAction( ActionEvent ae ) {
-		if ( files.isEmpty() ) {
-			Preferences prefs = Preferences.userNodeForPackage( getClass() );
-			File f = FileBrowsePanel.getLocationForEmptyPref( prefs, "lastimpdir" );
+		files.clear();
+		Preferences prefs = Preferences.userNodeForPackage( getClass() );
+		File f = FileBrowsePanel.getLocationForEmptyPref( prefs, "lastimpdir" );
 
-			Set<File> openedDbs = new HashSet<>();
-			for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
-				openedDbs.add( new File( eng.getProperty( Constants.SMSS_LOCATION ) ) );
-			}
+		Set<File> openedDbs = new HashSet<>();
+		for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
+			openedDbs.add( new File( eng.getProperty( Constants.SMSS_LOCATION ) ) );
+		}
 
-			JFileChooser chsr = new JFileChooser( f );
-			chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
-			chsr.setFileView( new SemossFileView() );
-			chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
-			chsr.addChoosableFileFilter( FileBrowsePanel.getDatabaseFilter( openedDbs ) );
-			chsr.setDialogTitle( "Select File to Import" );
-			chsr.setMultiSelectionEnabled( true );
+		JFileChooser chsr = new JFileChooser( f );
+		chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
+		chsr.setFileView( new SemossFileView() );
+		chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
+		chsr.addChoosableFileFilter( FileBrowsePanel.getDatabaseFilter( openedDbs ) );
+		chsr.setDialogTitle( "Select File to Import" );
+		chsr.setMultiSelectionEnabled( true );
 
-			if ( JFileChooser.APPROVE_OPTION == chsr.showOpenDialog( frame ) ) {
-				prefs.put( "lastimpdir", chsr.getSelectedFile().getParent() );
+		if ( JFileChooser.APPROVE_OPTION == chsr.showOpenDialog( frame ) ) {
+			prefs.put( "lastimpdir", chsr.getSelectedFile().getParent() );
 
-				for ( File file : chsr.getSelectedFiles() ) {
-					if ( file.exists() ) {
-						files.add( file );
-					}
+			for ( File file : chsr.getSelectedFiles() ) {
+				if ( file.exists() ) {
+					files.add( file );
 				}
 			}
 		}
@@ -95,29 +107,98 @@ public class OpenAction extends DbAction {
 
 	@Override
 	public ProgressTask getTask( ActionEvent ae ) {
-		// remove any database files before loading loading sheets
+		ProgressTask pt = openFiles( DIHelper.getInstance().getDesktop(),
+				new ArrayList<>( files ), getEngine() );
+		files.clear(); // clear for next time
+		return pt;
+	}
+
+	/**
+	 * Opens a set of unknown files as best as possible. This function will open a
+	 * {@link LoadingPlaySheetFrame} for previewable files, plus a regular
+	 * grid-filled {@link PlaySheetFrame} for any previewable-but-not loading
+	 * sheet files, and attempt to straight load any RDF-type files
+	 *
+	 * @param pane
+	 * @param toload
+	 * @param engine
+	 * @return
+	 */
+	public static ProgressTask openFiles( JDesktopPane pane,
+			Collection<File> toload, IEngine engine ) {
+		return openFiles( pane, toload, engine, false, false, false, false );
+	}
+
+	public static ProgressTask openFiles( JDesktopPane pane,
+			Collection<File> toload, IEngine engine, boolean calc, 
+			boolean dometamodel, boolean conformance, boolean replace  ) {
+
+		// things are easier if we figure out what we can read, and what we 
+		// can't before we bother processing.
+		List<File> noreader = new ArrayList<>();
 		List<File> journals = new ArrayList<>();
-		List<File> sheets = new ArrayList<>();
-		for ( File f : files ) {
-			if ( "jnl".equals( FilenameUtils.getExtension( f.getName() ) ) ) {
-				journals.add( f );
+		Map<File, ImportFileReader> readers = new HashMap<>();
+
+		for ( File fileToLoad : toload ) {
+			ImportFileReader rdr = EngineLoader.getDefaultReader( fileToLoad );
+			if ( null == rdr ) {
+				if ( "jnl".equalsIgnoreCase( FilenameUtils.getExtension( "jnl" ) ) ) {
+					journals.add( fileToLoad );
+				}
+				else {
+					// no reader for this filetype, but we could 
+					// still have an RDF file (which we can load)
+					noreader.add( fileToLoad );
+				}
 			}
 			else {
-				sheets.add( f );
+				readers.put( fileToLoad, rdr );
 			}
 		}
-		files.clear();
 
-		ProgressTask pt = new ProgressTask( "Opening Files", new Runnable() {
+		List<File> loadingsheets = new ArrayList<>();
+		List<File> nonloadingsheets = new ArrayList<>();
+		for ( Map.Entry<File, ImportFileReader> en : readers.entrySet() ) {
+			// need to figure out if this file can be opened in the LoadingPlaySheetFrame
+			// or if we need a regular grid PSF.
+			File fileToLoad = en.getKey();
+			ImportFileReader rdr = en.getValue();
+			try {
+				// we read the whole file to see if we throw any exceptions
+				// FIXME: this ain't a great plan
+				rdr.readOneFile( fileToLoad ); // see if an exception gets thrown
+				loadingsheets.add( fileToLoad );
+			}
+			catch ( IOException e ) {
+				log.error( e, e );
+			}
+			catch ( ImportValidationException ive ) {
+				if ( "xlsx".equalsIgnoreCase( FilenameUtils.getExtension( fileToLoad.getName() ) ) ) {
+					nonloadingsheets.add( fileToLoad );
+				}
+			}
+		}
 
+		ProgressTask progress = new ProgressTask( "Loading Files", new Runnable() {
 			@Override
 			public void run() {
-				if ( !sheets.isEmpty() ) {
-					LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( null, sheets,
-							false, false, false, false );
-					DIHelper.getInstance().getDesktop().add( psf );
-					OperationsProgress.getInstance( opprogName ).add( psf.getLoadingTask() );
+				if ( !loadingsheets.isEmpty() ) {
+					LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( engine, 
+							loadingsheets, calc, dometamodel, conformance, replace );
+					pane.add( psf );
+					psf.getLoadingTask().getOp().run();
 				}
+
+				if ( !( nonloadingsheets.isEmpty() && noreader.isEmpty() ) ) {
+					if ( !noreader.isEmpty() ) {
+						addTriples( noreader, engine, pane );
+					}
+
+					if ( !nonloadingsheets.isEmpty() ) {
+						addGrids( nonloadingsheets, engine, pane );
+					}
+				}
+
 				if ( !journals.isEmpty() ) {
 					for ( File f : journals ) {
 						try {
@@ -131,6 +212,75 @@ public class OpenAction extends DbAction {
 			}
 		} );
 
-		return pt;
+		return progress;
+	}
+
+	private static void addTriples( Collection<File> noreader, IEngine engine,
+			JDesktopPane pane ) {
+		PlaySheetFrame psf = new PlaySheetFrame( engine, "Triples Data" );
+		pane.add( psf );
+		int progressPerFile = 100 / noreader.size();
+
+		for ( File f : noreader ) {
+			psf.addProgress( "Reading " + f, progressPerFile );
+
+			InMemorySesameEngine eng = new InMemorySesameEngine();
+			EngineLoader loader = new EngineLoader();
+			try {
+				loader.loadToEngine( Arrays.asList( f ), eng, false, null );
+				GridRAWPlaySheet grid = new GridRAWPlaySheet();
+				grid.setTitle( f.toString() );
+				grid.create( eng.toModel() );
+				psf.add( grid );
+			}
+			catch ( RepositoryException | IOException | ImportValidationException e ) {
+				log.error( e, e );
+			}
+			finally {
+				loader.release();
+				engine.closeDB();
+			}
+		}
+	}
+
+	public static void addGrids( Collection<File> xslxes, IEngine engine,
+			JDesktopPane pane ) {
+		int progressPerFile = 100 / xslxes.size();
+		PlaySheetFrame psf = new PlaySheetFrame( engine, "Import Data" );
+		pane.add( psf );
+
+		POIReader xlsreader = new POIReader();
+		for ( File fileToLoad : xslxes ) {
+			psf.addProgress( "Reading " + fileToLoad, progressPerFile );
+			try {
+				psf.setTitle( fileToLoad.getName() );
+				ValueFactory vf = new ValueFactoryImpl();
+				ImportData data = xlsreader.readNonloadingSheet( fileToLoad );
+				for ( LoadingSheetData lsd : data.getSheets() ) {
+					ValueTableModel vtm = new ValueTableModel();
+					vtm.setAllowInsertsInPlace( true );
+					vtm.setReadOnly( false );
+					GridRAWPlaySheet grid = new GridRAWPlaySheet( vtm );
+
+					List<Value[]> vals = new ArrayList<>();
+					for ( LoadingSheetData.LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+						vals.add( nap.convertToValueArray( vf ) );
+					}
+					grid.create( vals, lsd.getHeaders(), engine );
+					grid.setTitle( lsd.getName() );
+
+					Action save = grid.getActions().get( LoadingPlaySheetFrame.SAVE );
+					save.putValue( AbstractSavingAction.LASTSAVE, fileToLoad );
+					Action saveall = grid.getActions().get( LoadingPlaySheetFrame.SAVE_ALL );
+					saveall.putValue( AbstractSavingAction.LASTSAVE, fileToLoad );
+
+					psf.addTab( grid );
+					psf.hideProgress();
+				}
+			}
+			catch ( Exception eee ) {
+				log.error( eee, eee );
+			}
+		}
 	}
 }

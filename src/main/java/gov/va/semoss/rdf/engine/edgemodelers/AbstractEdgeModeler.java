@@ -6,8 +6,7 @@
 package gov.va.semoss.rdf.engine.edgemodelers;
 
 import gov.va.semoss.poi.main.ImportMetadata;
-import gov.va.semoss.rdf.engine.util.EngineLoader;
-import gov.va.semoss.rdf.engine.util.EngineLoader.ConceptInstanceCacheKey;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.util.UriBuilder;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,11 +36,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	protected static final Pattern URISTARTPATTERN
 			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
 	private final Set<URI> duplicates = new HashSet<>();
-
-	private Map<String, URI> schemaNodes;
-	private Map<ConceptInstanceCacheKey, URI> dataNodes;
-	private Map<String, URI> relationClassCache;
-	private Map<String, URI> relationCache;
+	private QaChecker qaer = new QaChecker();
 
 	public static boolean isUri( String raw, Map<String, String> namespaces ) {
 		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
@@ -167,8 +162,8 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
 
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
-		EngineLoader.ConceptInstanceCacheKey key = new EngineLoader.ConceptInstanceCacheKey( typename, rawlabel );
-		if ( !dataNodes.containsKey( key ) ) {
+		
+		if( !qaer.hasCachedInstance( typename, rawlabel ) ){
 			URI subject;
 
 			if ( nodeIsAlreadyUri ) {
@@ -188,11 +183,11 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 				subject = ensureUnique( subject );
 			}
-			dataNodes.put( key, subject );
+			qaer.cacheInstance( subject, typename, rawlabel );
 		}
 
-		URI subject = dataNodes.get( key );
-		myrc.add( subject, RDF.TYPE, schemaNodes.get( typename ) );
+		URI subject = qaer.getCachedInstance( typename, rawlabel );
+		myrc.add( subject, RDF.TYPE, qaer.getCachedInstanceClass( typename ) );
 		return subject;
 	}
 
@@ -206,60 +201,55 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	@Override
-	public void setCaches( Map<String, URI> schemaNodes,
-			Map<ConceptInstanceCacheKey, URI> dataNodes,
-			Map<String, URI> relationClassCache, Map<String, URI> relationCache ) {
-		this.schemaNodes = schemaNodes;
-		this.dataNodes = dataNodes;
-		this.relationClassCache = relationClassCache;
-		this.relationCache = relationCache;
-	}
-
-	public URI getCachedRelationClass( String name ) {
-		return relationClassCache.get( name );
+	public void setQaChecker( QaChecker q ){
+		qaer = q;
 	}
 
 	public URI getCachedRelation( String name ) {
-		return relationCache.get( name );
+		return qaer.getCachedRelation( name );
 	}
 
 	public URI getCachedInstance( String typename, String rawlabel ) {
-		return dataNodes.get( new ConceptInstanceCacheKey( typename, rawlabel ) );
+		return qaer.getCachedInstance( typename, rawlabel );
 	}
 
+	public URI getCachedRelationClass( String name ){
+		return qaer.getCachedRelationClass( name );
+	}
+	
 	public URI getCachedInstanceClass( String name ) {
-		return schemaNodes.get( name );
+		return qaer.getCachedInstanceClass( name );
 	}
 
 	public boolean hasCachedRelationClass( String name ) {
-		return relationClassCache.containsKey( name );
+		return qaer.hasCachedRelationClass( name );
 	}
 
 	public boolean hasCachedRelation( String name ) {
-		return relationCache.containsKey( name );
+		return qaer.hasCachedRelation( name );
 	}
 
 	public boolean hasCachedInstance( String typename, String rawlabel ) {
-		return dataNodes.containsKey( new ConceptInstanceCacheKey( typename, rawlabel ) );
+		return qaer.hasCachedInstance( typename, rawlabel );
 	}
 
-	public boolean hasCachedSchemaNode( String name ) {
-		return schemaNodes.containsKey( name );
+	public boolean hasCachedInstanceClass( String name ) {
+		return qaer.hasCachedInstanceClass( name );
 	}
 
-	public void cacheSchemaNode( URI uri, String label ) {
-		schemaNodes.put( label, uri );
+	public void cacheInstanceClass( URI uri, String label ) {
+		qaer.cacheInstanceClass( uri, label );
 	}
 
 	public void cacheRelationNode( URI uri, String label ) {
-		relationCache.put( label, uri );
+		qaer.cacheRelationNode( uri, label );
 	}
 
 	public void cacheRelationClass( URI uri, String label ) {
-		relationClassCache.put( label, uri );
+		qaer.cacheRelationClass( uri, label );
 	}
 
 	public void cacheInstance( URI uri, String typelabel, String rawlabel ) {
-		dataNodes.put( new ConceptInstanceCacheKey( typelabel, rawlabel ), uri );
+		qaer.cacheInstance( uri, typelabel, rawlabel );
 	}
 }
