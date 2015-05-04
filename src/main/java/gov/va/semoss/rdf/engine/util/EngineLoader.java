@@ -95,7 +95,6 @@ public class EngineLoader {
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
 	private URI defaultBaseUri;
 	private boolean forceBaseUri;
-	private EngineRunningThread<BigdataSailRepository, BigdataSailRepositoryConnection> runner;
 	private QaChecker qaer = new QaChecker();
 
 	static {
@@ -160,10 +159,8 @@ public class EngineLoader {
 					(BigdataSailFactory.Option) null );
 		}
 
-		runner = new EngineRunningThread<>();
-		runner.start();
-		BigdataSailRepositoryConnection rc = runner.startup( repo );
-		//BigdataSailRepositoryConnection rc = repo.getConnection();
+		repo.initialize();
+		BigdataSailRepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
 
 		return rc;
@@ -355,13 +352,17 @@ public class EngineLoader {
 	public void release() {
 		clear();
 
-		CountDownLatch l = new CountDownLatch( 1 );
-		runner.release( l );
 		try {
-			l.await();
+			myrc.close();
 		}
-		catch ( InterruptedException ie ) {
-			log.warn( ie, ie );
+		catch ( Exception ioe ) {
+			log.warn( ioe, ioe );
+		}
+		try {
+			myrc.getRepository().shutDown();
+		}
+		catch ( Exception ioe ) {
+			log.warn( ioe, ioe );
 		}
 
 		FileUtils.deleteQuietly( stagingdir );
@@ -497,7 +498,7 @@ public class EngineLoader {
 			}
 		}
 	}
-	
+
 	/**
 	 * Moves the statements from the loading RC to the given engine. The internal
 	 * repository is committed before the copy happens
