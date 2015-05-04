@@ -516,13 +516,11 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			throws ImportValidationException, IOException {
 		Set<String> bases = new HashSet<>();
 
-		EngineLoader el = new EngineLoader();
-
 		URI choice = null;
 		boolean everyFileHasBase = true;
 
 		for ( File f : files ) {
-			ImportFileReader reader = el.getReader( f );
+			ImportFileReader reader = EngineLoader.getDefaultReader( f );
 			ImportMetadata metadata = reader.getMetadata( f );
 
 			URI baser = metadata.getBase();

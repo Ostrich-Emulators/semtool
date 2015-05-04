@@ -294,10 +294,16 @@ public class CustomSparqlPanel extends JPanel {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
-				//If a question has no Sparql associated with it (as pulled from an external source),
-				//then disable the Copy-Down button, in the "Custom Sparql Query" window:
-				btnGetQuestionSparql.setEnabled( !"NULL".equals( selected.getSparql() ) );
+				int idx = insights.getSelectedIndex();
+				if ( idx >= 0 ) {
+					Insight selected = insights.getItemAt( insights.getSelectedIndex() );
+					//If a question has no Sparql associated with it (as pulled from an external source),
+					//then disable the Copy-Down button, in the "Custom Sparql Query" window:
+					btnGetQuestionSparql.setEnabled( !"NULL".equals( selected.getSparql() ) );
+				}
+				else {
+					btnGetQuestionSparql.setEnabled( false );
+				}
 			}
 		} );
 	}
