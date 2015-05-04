@@ -421,13 +421,15 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 			else if ( "@prefix".equals( propName ) ) {
+				// validate that this is necessary:
+				propValue = propValue.replaceAll("[<>]", "");
 				if ( ":schema".equals( propertyMiddleColumn ) ) {
 					if ( null == schemanamespace ) {
 						schemanamespace = propValue;
 					}
 					else {
 						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
-								"Multiple @schema-namespace lines in Metadata sheet" );
+								"Multiple :schema lines in Metadata sheet" );
 					}
 				}
 				else if ( ":data".equals( propertyMiddleColumn ) ) {
@@ -436,7 +438,7 @@ public class POIReader implements ImportFileReader {
 					}
 					else {
 						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
-								"Multiple @schema-namespace lines in Metadata sheet" );
+								"Multiple :data lines in Metadata sheet" );
 					}
 				}
 				else if ( ":".equals( propertyMiddleColumn ) ) {
