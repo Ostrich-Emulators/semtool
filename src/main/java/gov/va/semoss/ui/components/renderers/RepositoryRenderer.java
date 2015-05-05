@@ -38,21 +38,8 @@ public class RepositoryRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent( JList list, Object val, int idx,
 			boolean sel, boolean hasfocus ) {
 
-		IEngine eng = IEngine.class.cast( val );
-
-		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
-		String title = null;
-		try {
-			eng.query( mq );
-			title = mq.getOne();
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// don't care
-		}
-
-		if ( null == title ) {
-			title = eng.getEngineName();
-		}
+		IEngine eng = IEngine.class.cast( val );		
+		String title = MetadataQuery.getEngineLabel( eng );
 
 		boolean pinned = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) );
 		super.getListCellRendererComponent( list, title, idx, sel, hasfocus );

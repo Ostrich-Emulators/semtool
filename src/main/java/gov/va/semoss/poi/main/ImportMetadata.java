@@ -56,7 +56,8 @@ public final class ImportMetadata {
 
 		try {
 			MetadataQuery mq = new MetadataQuery();
-			metas.setExtras( eng.query( mq ) );
+			eng.query( mq );
+			metas.setExtras( mq.asStrings() );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );

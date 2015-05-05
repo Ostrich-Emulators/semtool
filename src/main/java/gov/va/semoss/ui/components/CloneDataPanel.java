@@ -6,13 +6,10 @@
 package gov.va.semoss.ui.components;
 
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import javax.swing.JDialog;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDFS;
@@ -139,7 +136,9 @@ public class CloneDataPanel extends javax.swing.JPanel {
 
 		Map<URI, String> metas = null;
 		try {
-			metas = engine.query( new MetadataQuery() );
+			MetadataQuery mq = new MetadataQuery();
+			engine.query( mq );
+			metas = mq.asStrings();
 
 			if ( !metas.containsKey( RDFS.LABEL ) ) {
 				metas.put( RDFS.LABEL, engine.getEngineName() );

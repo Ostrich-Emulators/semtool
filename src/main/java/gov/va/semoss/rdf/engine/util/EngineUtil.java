@@ -264,7 +264,7 @@ public class EngineUtil implements Runnable {
 			fromWasOpened = true;
 		}
 
-		Map<URI, String> metas = new HashMap<>();
+		Map<URI, Value> metas = new HashMap<>();
 		try {
 			metas.putAll( from.query( new MetadataQuery() ) );
 		}
@@ -330,7 +330,7 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	public void clone( IEngine from, DbCloneMetadata metadata, 	boolean addToRepoList ) 
+	public void clone( IEngine from, DbCloneMetadata metadata, boolean addToRepoList )
 			throws RepositoryException, IOException, EngineManagementException {
 		// cloning is done in 4 steps:
 		// 1) Copy the RDF statements from one engine to the other
@@ -744,7 +744,7 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @throws RepositoryException
 	 */
-	private static void fillRepo( final IEngine from, Properties props, 
+	private static void fillRepo( final IEngine from, Properties props,
 			final DbCloneMetadata metadata ) throws RepositoryException {
 		BigdataSail bdSail = new BigdataSail( props );
 		BigdataSailRepository repo = new BigdataSailRepository( bdSail );
@@ -803,48 +803,40 @@ public class EngineUtil implements Runnable {
 	private static void makeNewMetadata( final IEngine from, final DbCloneMetadata metadata,
 			final RepositoryConnection conn ) throws RepositoryException, MalformedQueryException,
 			QueryEvaluationException, IOException {
-		ValueFactory vf = conn.getValueFactory();
 
-		if ( true ) {
-			throw new UnsupportedOperationException( "this function needs to be "
-					+ "refactored to handle new metadata schema" );
-		}
+		ValueFactory vf = conn.getValueFactory();
 
 		// delete any metadata that might exist from the repository copy
 		Collection<Statement> stmts = Iterations.asList( conn.getStatements( null,
-				VAS.Database, null, false ) );
+				null, VAS.Database, false ) );
 		for ( Statement s : stmts ) {
 			conn.remove( s.getSubject(), null, null );
 		}
 
-		URI base = AbstractEngine.getNewBaseUri();
-		EngineUtil.add( conn, base, RDFS.LABEL, metadata.getTitle(), vf );
-		conn.add( new StatementImpl( base, RDF.TYPE, VAS.Database ) );
-		EngineUtil.add( conn, base, MetadataConstants.DCT_DESC,
-				"Cloned from " + from.getEngineName(), vf );
+		URI newbase = AbstractEngine.getNewBaseUri();
+		EngineUtil.add( conn, newbase, RDFS.LABEL, metadata.getTitle(), vf );
+		conn.add( new StatementImpl( newbase, RDF.TYPE, VAS.Database ) );
+
 		Date now = new Date();
-		EngineUtil.add( conn, base, MetadataConstants.DCT_CREATED,
-				now, vf );
-		EngineUtil.add( conn, base, MetadataConstants.DCT_MODIFIED,
-				now, vf );
-
-		EngineUtil.add( conn, base, VAC.SOFTWARE_AGENT,
-				System.getProperty( "build.name", "unknown" ), vf );
-
-		MetadataQuery mq = new MetadataQuery();
-
 		// FIXME: we can't tell from these queries if we're retrieving the "right"
 		// metadata from the source KB. We don't have any way of identifying the 
 		// DB's base URI (and there could be many).
-		Map<URI, String> oldmetadata = from.query( mq );
-		if ( oldmetadata.containsKey( MetadataConstants.DCT_CONTRIB ) ) {
-			EngineUtil.add( conn, base, MetadataConstants.DCT_CONTRIB,
-					oldmetadata.get( MetadataConstants.DCT_CONTRIB ), vf );
+
+		Map<URI, Value> oldmetas = from.query( new MetadataQuery() );
+		oldmetas.put( VAC.SOFTWARE_AGENT,
+				vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) );
+
+		// remove these keys, because we're going to add them later
+		oldmetas.remove( MetadataConstants.DCT_CREATED );
+		oldmetas.remove( MetadataConstants.DCT_MODIFIED );
+		for ( Map.Entry<URI, Value> en : oldmetas.entrySet() ) {
+			conn.add( newbase,
+					URI.class.cast( EngineLoader.cleanValue( en.getKey(), vf ) ),
+					EngineLoader.cleanValue( en.getValue(), vf ) );
 		}
-		if ( oldmetadata.containsKey( MetadataConstants.DCT_PUBLISHER ) ) {
-			EngineUtil.add( conn, base, MetadataConstants.DCT_PUBLISHER,
-					oldmetadata.get( MetadataConstants.DCT_PUBLISHER ), vf );
-		}
+
+		EngineUtil.add( conn, newbase, MetadataConstants.DCT_CREATED, now, vf );
+		EngineUtil.add( conn, newbase, MetadataConstants.DCT_MODIFIED, now, vf );
 	}
 
 	private static void add( RepositoryConnection conn, URI dburi, URI pred,
@@ -1026,7 +1018,7 @@ public class EngineUtil implements Runnable {
 
 	public static void clear( IEngine engine ) throws RepositoryException {
 		try {
-			final Map<URI, String> metas = engine.query( new MetadataQuery() );
+			final Map<URI, Value> metas = engine.query( new MetadataQuery() );
 			metas.remove( VAS.Database );
 
 			engine.execute( new ModificationExecutorAdapter() {
@@ -1034,12 +1026,13 @@ public class EngineUtil implements Runnable {
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					conn.remove( (Resource) null, null, null );
-
 					ValueFactory vf = conn.getValueFactory();
+
 					// re-add the metadata
-					for ( Map.Entry<URI, String> en : metas.entrySet() ) {
-						conn.add( engine.getBaseUri(), en.getKey(),
-								vf.createLiteral( en.getValue() ) );
+					for ( Map.Entry<URI, Value> en : metas.entrySet() ) {
+						conn.add( engine.getBaseUri(),
+								URI.class.cast( EngineLoader.cleanValue( en.getKey(), vf ) ),
+								EngineLoader.cleanValue( en.getValue(), vf ) );
 					}
 				}
 			} );

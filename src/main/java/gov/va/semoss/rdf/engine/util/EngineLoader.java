@@ -631,8 +631,8 @@ public class EngineLoader {
 		EdgeModeler modeler = null;
 		try {
 			eng.query( mq );
-			String val = mq.getOne();
-			URI reif = ( null == val ? Constants.ANYNODE : new URIImpl( val ) );
+			Value val = mq.getOne();
+			URI reif = ( null == val ? Constants.ANYNODE : URI.class.cast( val ) );
 			if ( VAS.VASEMOSS_Reification.equals( reif ) || Constants.ANYNODE == reif ) {
 				modeler = new LegacyEdgeModeler();
 			}
