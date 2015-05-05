@@ -393,6 +393,7 @@ public class PlayPane extends JFrame {
 		setTitle( "SEMOSS - Analytics Environment" );
 		windowSelector.setEnabled( false );
 		windowSelector.setMnemonic( KeyEvent.VK_W );
+		windowSelector.setToolTipText("Manage Opened Windows");
 
 		final Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		String wloc = prefs.get( "windowLocation", "" );
@@ -961,6 +962,7 @@ public class PlayPane extends JFrame {
 
 				JMenuItem closeone = new JMenuItem( new AbstractAction( "Close" ) {
 
+					
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
 						JInternalFrame f = desktopPane.getSelectedFrame();
@@ -1040,16 +1042,28 @@ public class PlayPane extends JFrame {
 
 				if ( windowSelector.isEnabled() ) {
 					windowSelector.add( closeone );
+					closeone.setToolTipText("Close the current Window");
+					closeone.setMnemonic(KeyEvent.VK_C);
 					windowSelector.add( closeall );
+					closeall.setToolTipText("Close all Windows");
+					closeall.setMnemonic(KeyEvent.VK_A);
 					windowSelector.addSeparator();
-					windowSelector.add( tilev );
 					windowSelector.add( tileh );
+					tileh.setToolTipText("Arrange Windows in horizontal tiles");
+					tileh.setMnemonic(KeyEvent.VK_H);
+					windowSelector.add( tilev );
+					tilev.setToolTipText("Arrange Windows in vertical tiles");
+					tilev.setMnemonic(KeyEvent.VK_V);
 					windowSelector.add( tilec );
+					tilec.setToolTipText("Arrange Windows in cascade");
+					tilec.setMnemonic(KeyEvent.VK_S);
 					windowSelector.addSeparator();
 				}
-
+				
+				int numI = 0;
 				for ( final JInternalFrame f : frames ) {
-					JMenuItem i = new JMenuItem( f.getTitle() );
+					numI++;
+					JMenuItem i = new JMenuItem( numI+". "+f.getTitle() );
 					i.setIcon( f.getFrameIcon() );
 					i.addActionListener( new ActionListener() {
 
@@ -1199,9 +1213,10 @@ public class PlayPane extends JFrame {
 		JMenu insights = new JMenu( "Insights" );
 		insights.setToolTipText( "Import Insight Operations" );
 		insights.setMnemonic( KeyEvent.VK_I );
-
-		insights.add( resetInsights );
+		
+		//Ticket #792
 		insights.add( importInsights );
+		insights.add( resetInsights );
 		importtop.add( insights );
 
 		db.setMnemonic( KeyEvent.VK_D );
