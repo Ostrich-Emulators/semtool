@@ -86,6 +86,7 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -126,10 +127,13 @@ import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
 import com.ibm.icu.util.StringTokenizer;
+
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.event.InternalFrameEvent;
 
 /**
@@ -238,6 +242,7 @@ public class PlayPane extends JFrame {
 			= new ImportInsightsAction( UIPROGRESS, true, this );
 	private final ImportInsightsAction importInsights
 			= new ImportInsightsAction( UIPROGRESS, false, this );
+	
 	private final CheckConsistencyAction consistencyCheck
 			= new CheckConsistencyAction( UIPROGRESS, this );
 	protected final JMenu windowSelector = new JMenu( "Window" );
@@ -594,7 +599,7 @@ public class PlayPane extends JFrame {
 	protected JTabbedPane makeLeftPane() {
 		JTabbedPane leftView = new JTabbedPane( JTabbedPane.TOP );
 		JComponent main = makeMainTab();
-		leftView.addTab( "Database Explorer", null, main,
+		leftView.addTab( "Database Explorer", DbAction.getIcon( "db_explorer1" ), main,
 				"Ask the SEMOSS database a question" );
 
 		owlPanel = makeOwlTab();
@@ -616,13 +621,12 @@ public class PlayPane extends JFrame {
 
 	protected JTabbedPane makeRightPane() {
 		final JTabbedPane rightView = new JTabbedPane( JTabbedPane.TOP );
-
 		JComponent graphPanel = makeGraphTab();
-		rightView.addTab( "Display Pane", null, graphPanel,
+		rightView.addTab( "Display Pane", DbAction.getIcon( "display_tab1" ), graphPanel,
 				"Display response to questions (queries)" );
 
 		loggingPanel = new LoggingPanel();
-		rightView.addTab( "Logging", null, loggingPanel,
+		rightView.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 				"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
 		rightView.addChangeListener( new ChangeListener() {
 
@@ -1218,26 +1222,19 @@ public class PlayPane extends JFrame {
 		insights.add( importInsights );
 		insights.add( resetInsights );
 		importtop.add( insights );
-
+		//Insite Manager Icon
+		insights.setIcon( DbAction.getIcon( "insight_manager_tab1" ) );
+		//importInsights
 		db.setMnemonic( KeyEvent.VK_D );
 		db.setToolTipText( "Database operations" );
 
 		db.add( cloner );
 		db.add( cloneconfer );
 		db.add( clearer );
-
-	//	final JMenu mergeroot = new JMenu( DbAction.MERGE );
-		//	mergeroot.setEnabled( false );
-		//db.add( mergeroot );
-		//	iDatabase.add( mergeroot );
-		//db.add( unmounter );
 		db.addSeparator();
 		db.add( sparqler );
 		sparqler.setEnabled( false );
 		db.add( proper );
-		db.addSeparator();
-		//db.add( mounter );
-		//db.add( creater );
 		db.setEnabled( false );
 		ListSelectionListener lsl = new ListSelectionListener() {
 
@@ -1337,7 +1334,6 @@ public class PlayPane extends JFrame {
 						}
 						else if (cmd == "loggingpanel") {
 							item.setToolTipText("Disable the Logging Tab");
-
 						}
 						else if (cmd == "graphcosmetics") {
 							item.setToolTipText("Disable the Graph Cosmetics Tab");
@@ -1364,7 +1360,7 @@ public class PlayPane extends JFrame {
 									"Customize graph display" );
 						}
 						else if ( loggingPanel == panel ) {
-							rightTabs.addTab( "Logging", null, loggingPanel,
+							rightTabs.addTab( "Logging",  DbAction.getIcon( "log_tab1" ), loggingPanel,
 									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
 						} 
 					}
@@ -1569,6 +1565,8 @@ public class PlayPane extends JFrame {
 		view.add( splithider );
 		splithider.setMnemonic(KeyEvent.VK_M);
 		view.add( logging );
+		//Icon for the Menu Item
+		//logging.setIcon( DbAction.getIcon( "log_tab1" ));
 		logging.setMnemonic(KeyEvent.VK_L);
 		view.add( hidecsp );
 		hidecsp.setMnemonic(KeyEvent.VK_Q);
