@@ -18,8 +18,8 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.rdf.engine.util.EngineUtil.DbCloneMetadata;
+import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 
 /**
@@ -33,6 +33,10 @@ public class CloneDataPanel extends javax.swing.JPanel {
 	 */
 	public CloneDataPanel() {
 		initComponents();
+
+		Preferences prefs = Preferences.userNodeForPackage( DbCloneMetadata.class );
+		dbdir.setPreferencesKeys( prefs, "lastclonedir" );
+		dbdir.setFileTextFromInit();
 	}
 
 	public void setDbDir( File dir ) {
@@ -54,7 +58,7 @@ public class CloneDataPanel extends javax.swing.JPanel {
     dbname = new javax.swing.JTextField();
     jLabel3 = new javax.swing.JLabel();
     title = new javax.swing.JTextField();
-    config = new javax.swing.JCheckBox();
+    insights = new javax.swing.JCheckBox();
     data = new javax.swing.JCheckBox();
 
     jLabel1.setText("Location");
@@ -63,8 +67,8 @@ public class CloneDataPanel extends javax.swing.JPanel {
 
     jLabel3.setText("Title");
 
-    config.setSelected(true);
-    config.setText("Configuration");
+    insights.setSelected(true);
+    insights.setText("Insights");
 
     data.setSelected(true);
     data.setText("Data");
@@ -88,7 +92,7 @@ public class CloneDataPanel extends javax.swing.JPanel {
               .addComponent(dbdir, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)))
           .addGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(config)
+              .addComponent(insights)
               .addComponent(data))
             .addGap(0, 0, Short.MAX_VALUE)))
         .addContainerGap())
@@ -109,19 +113,19 @@ public class CloneDataPanel extends javax.swing.JPanel {
           .addComponent(title, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
           .addComponent(jLabel3))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(config)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(data)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(insights)
         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JCheckBox config;
   private javax.swing.JCheckBox data;
   private gov.va.semoss.ui.components.FileBrowsePanel dbdir;
   private javax.swing.JTextField dbname;
+  private javax.swing.JCheckBox insights;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
@@ -129,9 +133,9 @@ public class CloneDataPanel extends javax.swing.JPanel {
   // End of variables declaration//GEN-END:variables
 
 	public static DbCloneMetadata showDialog( Frame frame, IEngine engine,
-			boolean doconfig, boolean dodata ) {
+			boolean doinsights, boolean dodata ) {
 		final CloneDataPanel cdp = new CloneDataPanel();
-		cdp.config.setSelected( doconfig );
+		cdp.insights.setSelected( doinsights );
 		cdp.data.setSelected( dodata );
 
 		Map<URI, String> metas = null;
@@ -154,21 +158,13 @@ public class CloneDataPanel extends javax.swing.JPanel {
 		cdp.title.setText( "Clone of " + metas.get( RDFS.LABEL )
 				+ new SimpleDateFormat( " yyyyMMdd_HHmmss" ).format( time ) );
 
-		File smssloc = new File( engine.getProperty( Constants.SMSS_LOCATION ) );
-		smssloc = smssloc.getParentFile();
-		String smssversion = engine.getProperty( Constants.SMSS_VERSION_KEY );
-		if ( null != smssversion && Double.parseDouble( smssversion ) >= 1.0 ) {
-			smssloc = smssloc.getParentFile();
-		}
-		cdp.dbdir.setFileText( smssloc );
-
 		int ans = JOptionPane.showOptionDialog( frame, cdp, "Clone Database",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null,
 				new String[]{ "Clone", "Cancel" }, "Clone" );
 		if ( 0 == ans ) {
 			return new DbCloneMetadata( cdp.dbdir.getFirstFile(),
 					cdp.dbname.getText(), cdp.title.getText(),
-					cdp.config.isSelected(), cdp.data.isSelected() );
+					cdp.insights.isSelected(), cdp.data.isSelected() );
 
 		}
 		return null;

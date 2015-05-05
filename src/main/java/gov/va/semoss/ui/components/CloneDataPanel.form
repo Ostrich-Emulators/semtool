@@ -16,7 +16,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
@@ -34,8 +34,8 @@
                   </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="config" min="-2" max="-2" attributes="0"/>
-                          <Component id="data" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="insights" min="-2" max="-2" attributes="0"/>
+                          <Component id="data" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
@@ -63,9 +63,9 @@
                   <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="config" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
               <Component id="data" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="insights" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -93,10 +93,10 @@
     </Component>
     <Component class="javax.swing.JTextField" name="title">
     </Component>
-    <Component class="javax.swing.JCheckBox" name="config">
+    <Component class="javax.swing.JCheckBox" name="insights">
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Configuration"/>
+        <Property name="text" type="java.lang.String" value="Insights"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="data">

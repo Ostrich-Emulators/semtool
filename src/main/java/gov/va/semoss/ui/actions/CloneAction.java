@@ -54,7 +54,7 @@ public class CloneAction extends DbAction {
   @Override
   protected ProgressTask getTask( ActionEvent ae ) {
     StringBuilder name = new StringBuilder( "Cloning " );
-    if ( md.isConfig() && !md.isData() ) {
+    if ( md.isInsights() && !md.isData() ) {
       name.append( "Configuration of " );
     }
     name.append( getEngineName() );
