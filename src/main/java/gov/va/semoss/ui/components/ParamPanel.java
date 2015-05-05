@@ -42,26 +42,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.util.StringUtil;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.om.Insight;
-import gov.va.semoss.om.Parameter;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.api.QueryExecutor;
-import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
-import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
-import gov.va.semoss.rdf.query.util.impl.SimpleQueryAdapterImpl;
-import gov.va.semoss.ui.helpers.EntityFiller;
+import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 
@@ -177,7 +162,7 @@ public class ParamPanel extends JPanel implements ActionListener {
 	      if(checkIfFullQuery(strQuery)){
 	          IEngine engine = DIHelper.getInstance().getRdfEngine();
 	    	  
-	          EntityFiller filler = new EntityFiller();
+	          NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
 	          if (strQuery != null && !strQuery.isEmpty()) {
 	            filler.setExternalQuery(strQuery);
 	          }
@@ -271,7 +256,7 @@ public class ParamPanel extends JPanel implements ActionListener {
         if ( checkIfFullQuery( query ) ) {
           String entityType = field.getType();
           IEngine engine = DIHelper.getInstance().getRdfEngine();
-          EntityFiller filler = new EntityFiller();
+          NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
           if(query != null && !query.isEmpty() ) {
              filler.setExternalQuery( query );
           }

@@ -34,14 +34,17 @@ public class ParameterTabController extends InsightManagerController {
 	}
 	
 	/**   Click-handler for the "Build Query from Type" button. Builds and inserts a simple Sparql 
-	 * query into the "Parameter Query" field to fetches instances of the URI entered in the "Type"
-	 * field.
+	 * query into the "Parameter Query" field to fetch instances of the URI entered in the "Type"
+	 * field with associated labels. The entered "Variable" name is returned with "?label". 
 	 * 
 	 * @param event
 	 */
 	private void handleBuildQuery(ActionEvent event){
+		String strVariable = "?" + imc.legalizeQuotes(imc.txtVariable_parm.getText().trim());
 		String strValueType = imc.legalizeQuotes(imc.txtValueType_parm.getText().trim());
-		String generatedQuery = "SELECT ?entity WHERE{ ?entity a <" + strValueType + "> .}";
+		String generatedQuery = "SELECT " + strVariable + " ?label" +
+		   " WHERE{ " + strVariable + " a <" + strValueType + "> . " +
+		   strVariable + " rdfs:label ?label .}";
 		imc.txtaDefaultQuery_parm.setText(generatedQuery);
 	}
 	
