@@ -206,8 +206,7 @@ public class PlayPane extends JFrame {
 	private final DbAction mounter = new MountAction( UIPROGRESS, this );
 	private final DbAction toggler = new PinAction( UIPROGRESS );
 	private final DbAction proper = new PropertiesAction( this );
-	private final DbAction cloner = new CloneAction( UIPROGRESS, this, true );
-	private final DbAction cloneconfer = new CloneAction( UIPROGRESS, this, false );
+	private final DbAction cloner = new CloneAction( UIPROGRESS, this );
 	private final DbAction clearer = new ClearAction( UIPROGRESS, this );
 	private final DbAction exportttl = new ExportTtlAction( UIPROGRESS,
 			ExportTtlAction.Style.TTL, this );
@@ -543,7 +542,7 @@ public class PlayPane extends JFrame {
 				IEngine engine = repoList.getSelectedValue();
 
 				DbAction actions[] = {
-					toggler, proper, cloner, cloneconfer, clearer, exportttl, exportnt,
+					toggler, proper, cloner, clearer, exportttl, exportnt,
 					exportrdf, exportinsights, expall, exprels, expnodes, expSpecNodes,
 					expSpecRels, unmounter, sparqler, importls, consistencyCheck };
 				for ( DbAction dba : actions ) {
@@ -1208,7 +1207,6 @@ public class PlayPane extends JFrame {
 		db.setToolTipText( "Database operations" );
 
 		db.add( cloner );
-		db.add( cloneconfer );
 		db.add( clearer );
 
 	//	final JMenu mergeroot = new JMenu( DbAction.MERGE );

@@ -31,12 +31,10 @@ public class CloneAction extends DbAction {
   private static final Logger log = Logger.getLogger( CloneAction.class );
   private final Frame frame;
   private EngineUtil.DbCloneMetadata md = null;
-  private final boolean copydata;
 
-  public CloneAction( String optg, Frame frame, boolean copydata ) {
-    super( optg, copydata ? CLONE : CLONECONF, copydata ? "clone" : "clonesetup" );
+  public CloneAction( String optg, Frame frame ) {
+    super( optg, CLONE );
     this.frame = frame;
-    this.copydata = copydata;
     putValue( AbstractAction.SHORT_DESCRIPTION, "Duplicate a database" );
     putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
   }
@@ -44,26 +42,19 @@ public class CloneAction extends DbAction {
   @Override
   public void setEngine( IEngine eng ) {
     super.setEngine( eng );
-
-    StringBuilder name = new StringBuilder( "Copy " );
-    if ( !copydata ) {
-      name.append( "Configuration of " );
-    }
-    name.append( getEngineName() );
-
-    putValue( AbstractAction.NAME, name.toString() );
+    putValue( AbstractAction.NAME, "Copy "+getEngineName() );
   }
 
   @Override
   public boolean preAction( ActionEvent ae ) {
-    md = CloneDataPanel.showDialog( frame, getEngine() );
+    md = CloneDataPanel.showDialog( frame, getEngine(), true, true );
     return ( null != md );
   }
 
   @Override
   protected ProgressTask getTask( ActionEvent ae ) {
     StringBuilder name = new StringBuilder( "Cloning " );
-    if ( !copydata ) {
+    if ( md.isConfig() && !md.isData() ) {
       name.append( "Configuration of " );
     }
     name.append( getEngineName() );
@@ -72,7 +63,7 @@ public class CloneAction extends DbAction {
       @Override
       public void run() {
         try {
-          EngineUtil.getInstance().clone( getEngine(), md, copydata, true );
+          EngineUtil.getInstance().clone( getEngine(), md, true );
         }
         catch ( RepositoryException | IOException | EngineManagementException ex ) {
           Utility.showError( ex.getMessage() );

@@ -180,7 +180,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	protected URI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
-		URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+		URI baseuri = getNewBaseUri();
 		rc.add( baseuri, RDF.TYPE, VAS.Database );
 
 		// see if we have some old metadata we can move over, too

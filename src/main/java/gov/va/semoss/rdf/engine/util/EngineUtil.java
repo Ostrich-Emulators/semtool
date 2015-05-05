@@ -318,9 +318,9 @@ public class EngineUtil implements Runnable {
 
 		try {
 			DbCloneMetadata metadata = new DbCloneMetadata( dbdir, newname,
-					metas.get( RDFS.LABEL ) + sfx, from.getBaseUri() );
+					metas.get( RDFS.LABEL ) + sfx, true, true );
 
-			EngineUtil.getInstance().clone( from, metadata, true, true );
+			EngineUtil.getInstance().clone( from, metadata, true );
 		}
 
 		finally {
@@ -330,8 +330,8 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	public void clone( IEngine from, DbCloneMetadata metadata, boolean copydata,
-			boolean addToRepoList ) throws RepositoryException, IOException, EngineManagementException {
+	public void clone( IEngine from, DbCloneMetadata metadata, 	boolean addToRepoList ) 
+			throws RepositoryException, IOException, EngineManagementException {
 		// cloning is done in 4 steps:
 		// 1) Copy the RDF statements from one engine to the other
 		// 2) Copy the OWL, Ontology, and DREAMER files to the new location
@@ -351,7 +351,7 @@ public class EngineUtil implements Runnable {
 		props.setProperty( Constants.SMSS_VERSION_KEY, "1.0" );
 
 		// get all the required files in the dbdir
-		File dbdir = new File( metadata.getLocation(), metadata.getName() );
+		File dbdir = metadata.getLocation();
 		dbdir.mkdirs();
 
 		// FIXME: we're assuming we always want a BigData clone
@@ -368,7 +368,7 @@ public class EngineUtil implements Runnable {
 
 		rws.setProperty( BigdataSail.Options.FILE, jnlpath );
 
-		fillRepo( from, rws, copydata, metadata );
+		fillRepo( from, rws, metadata );
 		// we don't need to set the FILE property because it follows the convention
 		// we just needed it for the fillRepo call
 
@@ -432,8 +432,7 @@ public class EngineUtil implements Runnable {
 			props.store( fw, newName );
 		}
 
-		mount( smss, addToRepoList,
-				true );
+		mount( smss, addToRepoList, true );
 	}
 
 	/**
@@ -745,19 +744,18 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @throws RepositoryException
 	 */
-	private static void fillRepo( final IEngine from, Properties props, boolean copydata,
+	private static void fillRepo( final IEngine from, Properties props, 
 			final DbCloneMetadata metadata ) throws RepositoryException {
 		BigdataSail bdSail = new BigdataSail( props );
 		BigdataSailRepository repo = new BigdataSailRepository( bdSail );
 		BigdataSailRepositoryConnection rc = null;
-		//final TurtleWriter writer;
 		final RepositoryCopier rdfhandler;
 		try {
 			repo.initialize();
 			rc = repo.getConnection();
 			rc.begin();
 
-			if ( copydata ) {
+			if ( metadata.isData() ) {
 
 				rdfhandler = new RepositoryCopier( rc );
 
@@ -819,18 +817,18 @@ public class EngineUtil implements Runnable {
 			conn.remove( s.getSubject(), null, null );
 		}
 
-		EngineUtil.add( conn, metadata.getBaseUri(), RDFS.LABEL,
-				metadata.getTitle(), vf );
-		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE, VAS.Database ) );
-		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_DESC,
+		URI base = AbstractEngine.getNewBaseUri();
+		EngineUtil.add( conn, base, RDFS.LABEL, metadata.getTitle(), vf );
+		conn.add( new StatementImpl( base, RDF.TYPE, VAS.Database ) );
+		EngineUtil.add( conn, base, MetadataConstants.DCT_DESC,
 				"Cloned from " + from.getEngineName(), vf );
 		Date now = new Date();
-		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_CREATED,
+		EngineUtil.add( conn, base, MetadataConstants.DCT_CREATED,
 				now, vf );
-		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_MODIFIED,
+		EngineUtil.add( conn, base, MetadataConstants.DCT_MODIFIED,
 				now, vf );
 
-		EngineUtil.add( conn, metadata.getBaseUri(), VAC.SOFTWARE_AGENT,
+		EngineUtil.add( conn, base, VAC.SOFTWARE_AGENT,
 				System.getProperty( "build.name", "unknown" ), vf );
 
 		MetadataQuery mq = new MetadataQuery();
@@ -840,11 +838,11 @@ public class EngineUtil implements Runnable {
 		// DB's base URI (and there could be many).
 		Map<URI, String> oldmetadata = from.query( mq );
 		if ( oldmetadata.containsKey( MetadataConstants.DCT_CONTRIB ) ) {
-			EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_CONTRIB,
+			EngineUtil.add( conn, base, MetadataConstants.DCT_CONTRIB,
 					oldmetadata.get( MetadataConstants.DCT_CONTRIB ), vf );
 		}
 		if ( oldmetadata.containsKey( MetadataConstants.DCT_PUBLISHER ) ) {
-			EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_PUBLISHER,
+			EngineUtil.add( conn, base, MetadataConstants.DCT_PUBLISHER,
 					oldmetadata.get( MetadataConstants.DCT_PUBLISHER ), vf );
 		}
 	}
@@ -1076,13 +1074,16 @@ public class EngineUtil implements Runnable {
 		private final File location;
 		private final String name;
 		private final String title;
-		private final URI baseuri;
+		private final boolean config;
+		private final boolean data;
 
-		public DbCloneMetadata( File location, String dbname, String title, URI baseuri ) {
+		public DbCloneMetadata( File location, String dbname, String title,
+				boolean config, boolean data ) {
 			this.location = location;
 			this.title = title;
-			this.baseuri = baseuri;
 			this.name = dbname;
+			this.config = config;
+			this.data = data;
 		}
 
 		public File getLocation() {
@@ -1093,12 +1094,16 @@ public class EngineUtil implements Runnable {
 			return title;
 		}
 
-		public URI getBaseUri() {
-			return baseuri;
-		}
-
 		public String getName() {
 			return name;
+		}
+
+		public boolean isConfig() {
+			return config;
+		}
+
+		public boolean isData() {
+			return data;
 		}
 	}
 
