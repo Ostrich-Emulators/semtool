@@ -47,6 +47,9 @@ public class SemossEdgeModelerTest {
 	private static final Logger log = Logger.getLogger( SemossEdgeModelerTest.class );
 	private static final ValueFactory vf = new ValueFactoryImpl();
 	private static final Date now = new Date();
+	private static final String SCHEMA = "http://semoss.org/ontologies/";
+	private static final String DATA = "http://va.gov/ontologies/";
+
 	private QaChecker qaer;
 	private InMemorySesameEngine engine;
 	private ImportMetadata metadata;
@@ -66,10 +69,9 @@ public class SemossEdgeModelerTest {
 	@Before
 	public void setUp() throws RepositoryException {
 		engine = new InMemorySesameEngine();
-		engine.setBuilders( UriBuilder.getBuilder( "http://sales.data/purchases#" ),
-				UriBuilder.getBuilder( "http://sales.data/schema#" ) );
-		engine.getRawConnection().setNamespace( "vcamp", "http://sales.data/purchases#" );
-		engine.getRawConnection().setNamespace( "semoss", "http://sales.data/schema#" );
+		engine.setBuilders( UriBuilder.getBuilder( DATA ), UriBuilder.getBuilder( SCHEMA ) );
+		engine.getRawConnection().setNamespace( "vcamp", DATA );
+		engine.getRawConnection().setNamespace( "semoss", SCHEMA );
 
 		loader = new EngineLoader();
 		loader.setDefaultBaseUri( new URIImpl( "http://sales.data/purchases/2015" ),
@@ -109,12 +111,28 @@ public class SemossEdgeModelerTest {
 		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
-		instance.addRel( rel, new HashMap<>(), rels, metadata, engine.getRawConnection() );
+		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(), 
+				engine.getRawConnection() );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"semossedge-rel.ttl" ) ) ) ) {
+				engine.getRawConnection().export( new TurtleWriter( w ) );
+			}
+		}
+	}
+
+	@Test
+	public void testCreateMetamodel() throws Exception {
+
+		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"semossedge-mm.ttl" ) ) ) ) {
 				engine.getRawConnection().export( new TurtleWriter( w ) );
 			}
 		}
