@@ -31,7 +31,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 	public SemossEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}
-	
+
 	@Override
 	public URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
@@ -111,7 +111,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 	public URI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
 			throws RepositoryException {
-		
+
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
 		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc );
@@ -155,6 +155,8 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			if ( sheet.isLink( propname ) ) {
 				// our "value" is really the label of another node, so find that node
 				value = addSimpleNode( propname, value.stringValue(), namespaces, metas, myrc );
+				predicate = getCachedRelationClass( sheet.getSubjectType(),
+						sheet.getObjectType(), propname );
 			}
 
 			myrc.add( subject, predicate, value );

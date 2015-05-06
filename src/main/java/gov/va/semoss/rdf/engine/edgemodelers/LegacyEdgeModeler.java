@@ -160,16 +160,15 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		ValueFactory vf = myrc.getValueFactory();
 
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
-			String relkey = entry.getKey();
-
-			URI predicate = getCachedPropertyClass( relkey );
+			String propname = entry.getKey();
+			URI predicate = getCachedPropertyClass( propname );
 
 			Value value = entry.getValue();
-			if ( sheet.isLink( relkey ) ) {
+			if ( sheet.isLink( propname ) ) {
 				// our "value" is really the label of another node, so find that node
-				value = addSimpleNode( relkey, value.stringValue(), namespaces, metas, myrc );
+				value = addSimpleNode( propname, value.stringValue(), namespaces, metas, myrc );
 				predicate = getCachedRelationClass( sheet.getSubjectType(),
-						sheet.getObjectType(), relkey );
+						sheet.getObjectType(), propname );
 			}
 
 			// not sure if we even use these values anymore
