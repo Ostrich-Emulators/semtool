@@ -292,6 +292,10 @@ public class EngineLoader {
 			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, OWL.ONTOLOGY );
+
+			if ( null != data.getMetadata().getSourceOfData() ) {
+				myrc.add( ebase, OWL.IMPORTS, data.getMetadata().getSourceOfData() );
+			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
@@ -503,6 +507,7 @@ public class EngineLoader {
 	 *
 	 * @param engine
 	 * @param copyowls
+	 * @param fileJustLoaded the file that was just loaded
 	 * @return the metamodel statements. Will always be empty if
 	 * <code>copyowls</code> is false
 	 * @throws RepositoryException

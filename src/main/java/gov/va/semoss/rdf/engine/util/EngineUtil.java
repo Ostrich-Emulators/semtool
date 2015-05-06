@@ -58,7 +58,6 @@ import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
 import java.net.URL;
@@ -68,9 +67,7 @@ import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
@@ -549,13 +546,10 @@ public class EngineUtil implements Runnable {
 
 		File smssfile = createEngine( ecb );
 		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
-		URI baseuri = bde.getBaseUri();
+		List<Statement> vocabs = new ArrayList<>();
 
-		List<Statement> insights = new ArrayList<>();
 		for ( URL url : ecb.getVocabularies() ) {
-			insights.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
-			insights.add( new StatementImpl( baseuri, OWL.IMPORTS,
-					new URIImpl( url.toExternalForm() ) ) );
+			vocabs.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
 		}
 
 		try {
@@ -563,13 +557,16 @@ public class EngineUtil implements Runnable {
 
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
-					conn.add( insights );
+					conn.add( vocabs );
 				}
 			} );
 
 			WriteableInsightManager wim = bde.getWriteableInsightManager();
 
-			wim.addRawStatements( insights );
+			if ( null != ecb.getQuestions() ) {
+				vocabs.addAll( createInsightStatements( ecb.getQuestions() ) );
+			}
+			wim.addRawStatements( vocabs );
 			wim.commit();
 			wim.release();
 		}
@@ -694,18 +691,6 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	private static void add( RepositoryConnection conn, URI dburi, URI pred,
-			String val, ValueFactory fac ) throws RepositoryException {
-		conn.add( new StatementImpl( dburi, pred, fac.createLiteral( val ) ) );
-	}
-
-	private static void add( RepositoryConnection conn, URI dburi, URI pred,
-			Date val, ValueFactory fac ) throws RepositoryException {
-		conn.add( new StatementImpl( dburi, pred,
-				fac.createLiteral( QueryExecutorAdapter.getCal( val ) ) ) );
-
-	}
-
 	public static File createEngine( EngineCreateBuilder ecb )
 			throws IOException, EngineManagementException {
 
@@ -763,7 +748,7 @@ public class EngineUtil implements Runnable {
 				rc.commit();
 			}
 
-			URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+			URI baseuri = AbstractEngine.getNewBaseUri();
 
 			// add the metadata
 			rc.begin();

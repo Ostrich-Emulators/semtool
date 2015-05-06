@@ -93,9 +93,9 @@ public class RepositoryList extends JList<IEngine> {
 		StringBuilder sb = new StringBuilder();
 		try {
 			Map<URI, Value> metadata = eng.query( new MetadataQuery() );
-			String summary = metadata.get( MetadataConstants.DCT_DESC ).stringValue();
+			Value summary = metadata.get( MetadataConstants.DCT_DESC );
 			if ( null != summary ) {
-				sb.append( "Summary: " ).append( summary );
+				sb.append( "Summary: " ).append( summary.stringValue() );
 			}
 
 			String loc = eng.getProperty( Constants.SMSS_LOCATION );

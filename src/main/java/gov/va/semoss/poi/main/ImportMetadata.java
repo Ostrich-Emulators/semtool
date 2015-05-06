@@ -35,6 +35,7 @@ public final class ImportMetadata {
 	private UriBuilder schemabuilder;
 	private boolean autocreateModel = true;
 	private boolean legacy = false;
+	private URI sourceOfData;
 
 	public ImportMetadata() {
 	}
@@ -64,6 +65,19 @@ public final class ImportMetadata {
 		}
 
 		return metas;
+	}
+
+	public void setSourceOfData( URI s ) {
+		sourceOfData = s;
+	}
+
+	/**
+	 * Retrieves the source of the data, if set.
+	 *
+	 * @return the URI of the data source, or null
+	 */
+	public URI getSourceOfData() {
+		return sourceOfData;
 	}
 
 	public void clear() {
