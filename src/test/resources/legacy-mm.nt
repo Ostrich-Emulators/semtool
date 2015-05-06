@@ -10,9 +10,9 @@
 <http://junk.com/testfiles/Concept/Category/Confections> <http://owl.junk.com/testfiles/Description> "Desserts, candies, and sweet breads" .
 <http://junk.com/testfiles/Concept/Category/Confections> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Category> .
 <http://junk.com/testfiles/Concept/Category/Confections> <http://www.w3.org/2000/01/rdf-schema#label> "Confections" .
-<http://junk.com/testfiles/Concept/Category/I32b9362b68f85875109bfff5b519485b> <http://owl.junk.com/testfiles/Description> "Cheeses" .
-<http://junk.com/testfiles/Concept/Category/I32b9362b68f85875109bfff5b519485b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Category> .
-<http://junk.com/testfiles/Concept/Category/I32b9362b68f85875109bfff5b519485b> <http://www.w3.org/2000/01/rdf-schema#label> "Dairy Products" .
+<http://junk.com/testfiles/Concept/Category/Dairy_Products> <http://owl.junk.com/testfiles/Description> "Cheeses" .
+<http://junk.com/testfiles/Concept/Category/Dairy_Products> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Category> .
+<http://junk.com/testfiles/Concept/Category/Dairy_Products> <http://www.w3.org/2000/01/rdf-schema#label> "Dairy Products" .
 <http://junk.com/testfiles/Concept/Category/K9a3fe86e20c408956c561beddf8fb956> <http://owl.junk.com/testfiles/Description> "a test item" .
 <http://junk.com/testfiles/Concept/Category/K9a3fe86e20c408956c561beddf8fb956> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Category> .
 <http://junk.com/testfiles/Concept/Category/K9a3fe86e20c408956c561beddf8fb956> <http://www.w3.org/2000/01/rdf-schema#label> "cat:colon" .
@@ -40,7 +40,7 @@
 <http://junk.com/testfiles/Concept/Product/E0d5bad031547be1f7fe7e228ffcd57aa> <http://junk.com/testfiles/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://junk.com/testfiles/Concept/Category/Confections> .
 <http://junk.com/testfiles/Concept/Product/E0d5bad031547be1f7fe7e228ffcd57aa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
 <http://junk.com/testfiles/Concept/Product/E0d5bad031547be1f7fe7e228ffcd57aa> <http://www.w3.org/2000/01/rdf-schema#label> "Sir Rodney's Marmalade" .
-<http://junk.com/testfiles/Concept/Product/E63a96ac40a464f73b3c3752c2586b260> <http://junk.com/testfiles/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://junk.com/testfiles/Concept/Category/I32b9362b68f85875109bfff5b519485b> .
+<http://junk.com/testfiles/Concept/Product/E63a96ac40a464f73b3c3752c2586b260> <http://junk.com/testfiles/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://junk.com/testfiles/Concept/Category/Dairy_Products> .
 <http://junk.com/testfiles/Concept/Product/E63a96ac40a464f73b3c3752c2586b260> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
 <http://junk.com/testfiles/Concept/Product/E63a96ac40a464f73b3c3752c2586b260> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Manchego La Pastora" .
 <http://junk.com/testfiles/Concept/Product/F56baa3c2d8f3e3c32744563747a28d92> <http://junk.com/testfiles/Relation/Category/Kb48374119b00d39089d9ff2e59d45e50> <http://junk.com/testfiles/Concept/Category/Condiments> .
@@ -91,7 +91,7 @@
 <http://junk.com/testfiles/Concept/Product/Pavlova> <http://junk.com/testfiles/Relation/Category/Pavlova_x_Confections> <http://junk.com/testfiles/Concept/Category/Confections> .
 <http://junk.com/testfiles/Concept/Product/Pavlova> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
 <http://junk.com/testfiles/Concept/Product/Pavlova> <http://www.w3.org/2000/01/rdf-schema#label> "Pavlova" .
-<http://junk.com/testfiles/Concept/Product/Qc88016920f943656f9ebcceaf3bb6198> <http://junk.com/testfiles/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://junk.com/testfiles/Concept/Category/I32b9362b68f85875109bfff5b519485b> .
+<http://junk.com/testfiles/Concept/Product/Qc88016920f943656f9ebcceaf3bb6198> <http://junk.com/testfiles/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://junk.com/testfiles/Concept/Category/Dairy_Products> .
 <http://junk.com/testfiles/Concept/Product/Qc88016920f943656f9ebcceaf3bb6198> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
 <http://junk.com/testfiles/Concept/Product/Qc88016920f943656f9ebcceaf3bb6198> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Cabrales" .
 <http://junk.com/testfiles/Concept/Product/Ra315185ee8709c338c7fb631d9d869b9> <http://junk.com/testfiles/Relation/Category/E5a1e8fe14eed82a4fbdfb415a0169012> <http://junk.com/testfiles/Concept/Category/Confections> .

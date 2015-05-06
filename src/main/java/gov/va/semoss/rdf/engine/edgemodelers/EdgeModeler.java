@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.engine.edgemodelers;
 
+import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
@@ -36,7 +37,7 @@ public interface EdgeModeler {
 	 */
 	public URI addRel( LoadingNodeAndPropertyValues nap,
 			Map<String, String> namespaces, LoadingSheetData sheet,
-			ImportMetadata metas, RepositoryConnection rc )	throws RepositoryException;
+			ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException;
 
 	/**
 	 * Adds a new node to the repository
@@ -74,4 +75,18 @@ public interface EdgeModeler {
 			ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException;
 
 	public void setQaChecker( QaChecker qaer );
+
+	/**
+	 * Creates the metamodel for the given data using the given namespaces
+	 *
+	 * @param alldata the data that contains the model nodes. This
+	 * {@link ImportData#getMetadata()} must pass the 
+	 * {@link AbstractEdgeModeler#isValidMetadata(gov.va.semoss.poi.main.ImportMetadata) }
+	 * check
+	 * @param namespaces the namespaces to use for resolving metamodel elements
+	 * @param rc where to put the
+	 * @throws RepositoryException
+	 */
+	public void createMetamodel( ImportData alldata, Map<String, String> namespaces,
+			RepositoryConnection rc ) throws RepositoryException;
 }

@@ -34,7 +34,8 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.rio.turtle.TurtleWriter;
 
 /**
  *
@@ -57,10 +58,13 @@ public class SemossEdgeModelerTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws RepositoryException {
 		engine = new InMemorySesameEngine();
 		engine.setBuilders( UriBuilder.getBuilder( "http://sales.data/purchases#" ),
 				UriBuilder.getBuilder( "http://sales.data/schema#" ) );
+		engine.getRawConnection().setNamespace( "vcamp", "http://sales.data/purchases#" );
+		engine.getRawConnection().setNamespace( "semoss", "http://sales.data/schema#" );
+
 		loader = new EngineLoader();
 		loader.setDefaultBaseUri( new URIImpl( "http://sales.data/purchases/2015" ),
 				false );
@@ -69,15 +73,19 @@ public class SemossEdgeModelerTest {
 		metadata.setDataBuilder( "http://sales.data/purchases#" );
 
 		qaer = new QaChecker();
-		qaer.cacheInstanceClass( engine.getSchemaBuilder().uniqueUri(), "Human Being" );
-		qaer.cacheInstanceClass( engine.getSchemaBuilder().uniqueUri(), "Car" );
+		qaer.cacheInstanceClass( engine.getSchemaBuilder().build( "Human Being" ),
+				"Human Being" );
+		qaer.cacheInstanceClass( engine.getSchemaBuilder().build( "Car" ), "Car" );
 
-		qaer.cacheRelationClass( engine.getSchemaBuilder().uniqueUri(),
+		qaer.cacheRelationClass( engine.getSchemaBuilder().build( "Human Being Purchased Car" ),
 				"Human Being", "Car", "Purchased" );
-		qaer.cacheRelationClass( engine.getSchemaBuilder().uniqueUri(),
-				"First Name", "", "" );
-		qaer.cacheRelationClass( engine.getSchemaBuilder().uniqueUri(),
-				"Last Name", "", "" );
+
+		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "First_Name" ),
+				"First Name" );
+		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "Last Name" ),
+				"Last Name" );
+		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "Price" ), "Price" );
+		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "Date" ), "Date" );
 	}
 
 	@After
@@ -88,6 +96,7 @@ public class SemossEdgeModelerTest {
 
 	@Test
 	public void testAddRel() throws Exception {
+
 		LoadingSheetData lsd
 				= LoadingSheetData.relsheet( "Human Being", "Car", "Purchased" );
 		lsd.addProperties( Arrays.asList( "Price", "Date" ) );
@@ -103,8 +112,8 @@ public class SemossEdgeModelerTest {
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
-					"semossedge-rel.nt" ) ) ) ) {
-				engine.getRawConnection().export( new NTriplesWriter( w ) );
+					"semossedge-rel.ttl" ) ) ) ) {
+				engine.getRawConnection().export( new TurtleWriter( w ) );
 			}
 		}
 	}
