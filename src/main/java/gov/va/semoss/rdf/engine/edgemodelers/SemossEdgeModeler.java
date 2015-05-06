@@ -148,7 +148,6 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
 			String propname = entry.getKey();
-
 			URI predicate = getCachedPropertyClass( propname );
 
 			Value value = entry.getValue();
