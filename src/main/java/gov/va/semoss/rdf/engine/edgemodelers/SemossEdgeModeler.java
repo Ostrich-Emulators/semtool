@@ -8,10 +8,9 @@ package gov.va.semoss.rdf.engine.edgemodelers;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
-import java.util.Date;
 import java.util.Map;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -26,6 +25,13 @@ import org.openrdf.repository.RepositoryException;
  */
 public class SemossEdgeModeler extends AbstractEdgeModeler {
 
+	public SemossEdgeModeler() {
+	}
+
+	public SemossEdgeModeler( QaChecker qa ) {
+		super( qa );
+	}
+	
 	@Override
 	public URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
@@ -84,8 +90,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationNode( connector, lkey );
 		}
 
-		String typekey = stype + sheet.getRelname() + otype;
-		URI relClassBaseURI = getCachedRelationClass( typekey );
+		URI relClassBaseURI = getCachedRelationClass( stype, otype, sheet.getRelname() );
 
 		URI connector = getCachedRelation( lkey );
 		if ( metas.isAutocreateMetamodel() ) {
@@ -104,8 +109,9 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 	@Override
 	public URI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
-
+			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
+			throws RepositoryException {
+		
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
 		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc );
@@ -134,48 +140,24 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		return subject;
 	}
 
-	/**
-	 * Create statements for all of the properties of the instanceURI
-	 *
-	 * @param subject URI containing the subject instance URI
-	 * @param properties Map<String, Object> that contains all properties
-	 * @param namespaces
-	 * @param sheet
-	 * @param metas
-	 *
-	 * @throws RepositoryException
-	 */
 	@Override
 	public void addProperties( URI subject, Map<String, Value> properties,
 			Map<String, String> namespaces, LoadingSheetData sheet,
-			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
-
-		ValueFactory vf = myrc.getValueFactory();
+			ImportMetadata metas, RepositoryConnection myrc )
+			throws RepositoryException {
 
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
-			String relkey = entry.getKey();
+			String propname = entry.getKey();
 
-			URI predicate = getCachedRelationClass( relkey );
+			URI predicate = getCachedPropertyClass( propname );
 
 			Value value = entry.getValue();
-			if ( sheet.isLink( relkey ) ) {
+			if ( sheet.isLink( propname ) ) {
 				// our "value" is really the label of another node, so find that node
-				value = addSimpleNode( relkey, value.stringValue(), namespaces, metas, myrc );
+				value = addSimpleNode( propname, value.stringValue(), namespaces, metas, myrc );
 			}
 
-			// not sure if we even use these values anymore
-			switch ( value.toString() ) {
-				case Constants.PROCESS_CURRENT_DATE:
-					myrc.add( subject, predicate,
-							vf.createLiteral( getCal( new Date() ) ) );
-					break;
-				case Constants.PROCESS_CURRENT_USER:
-					myrc.add( subject, predicate,
-							vf.createLiteral( System.getProperty( "user.name" ) ) );
-					break;
-				default:
-					myrc.add( subject, predicate, value );
-			}
+			myrc.add( subject, predicate, value );
 		}
 	}
 }

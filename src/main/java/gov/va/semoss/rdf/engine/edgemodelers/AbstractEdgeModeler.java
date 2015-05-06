@@ -6,6 +6,8 @@
 package gov.va.semoss.rdf.engine.edgemodelers;
 
 import gov.va.semoss.poi.main.ImportMetadata;
+import gov.va.semoss.poi.main.ImportValidationException;
+import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.util.UriBuilder;
 import java.util.HashSet;
@@ -27,7 +29,7 @@ import org.openrdf.repository.RepositoryException;
  * @author ryan
  */
 public abstract class AbstractEdgeModeler implements EdgeModeler {
-
+	
 	private static final Logger log = Logger.getLogger( AbstractEdgeModeler.class );
 	protected static final Pattern NAMEPATTERN
 			= Pattern.compile( "(?:(?:\"([^\"]+)\")|([^@]+))@([a-z-A-Z]{1,8})" );
@@ -36,18 +38,26 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	protected static final Pattern URISTARTPATTERN
 			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
 	private final Set<URI> duplicates = new HashSet<>();
-	private QaChecker qaer = new QaChecker();
-
+	private QaChecker qaer;
+	
+	public AbstractEdgeModeler() {
+		this( new QaChecker() );
+	}
+	
+	public AbstractEdgeModeler( QaChecker qa ) {
+		qaer = qa;
+	}
+	
 	public static boolean isUri( String raw, Map<String, String> namespaces ) {
 		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
 			raw = raw.substring( 1, raw.length() - 1 );
 		}
-
+		
 		Matcher m = URISTARTPATTERN.matcher( raw );
 		if ( m.matches() ) {
 			return true;
 		}
-
+		
 		if ( raw.contains( ":" ) ) {
 			String[] pieces = raw.split( ":" );
 			if ( 2 == pieces.length ) {
@@ -59,12 +69,12 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		}
 		return false;
 	}
-
+	
 	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
 		//resolve namespace
 		ValueFactory vf = new ValueFactoryImpl();
 		URI uri = null;
-
+		
 		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
 			uri = vf.createURI( raw.substring( 1, raw.length() - 1 ) );
 			return uri;
@@ -75,7 +85,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		if ( m.matches() ) {
 			return vf.createURI( raw );
 		}
-
+		
 		if ( raw.contains( ":" ) ) {
 			String[] pieces = raw.split( ":" );
 			if ( 2 == pieces.length ) {
@@ -99,7 +109,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 		return uri;
 	}
-
+	
 	public static Value getRDFStringValue( String rawval, Map<String, String> namespaces,
 			ValueFactory vf ) {
 		// if rawval looks like a URI, assume it is
@@ -107,7 +117,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		if ( urimatcher.matches() ) {
 			return vf.createURI( rawval );
 		}
-
+		
 		Matcher m = NAMEPATTERN.matcher( rawval );
 		String val;
 		String lang;
@@ -120,7 +130,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		else {
 			val = rawval;
 			lang = "";
-
+			
 			m = DTPATTERN.matcher( rawval );
 			if ( m.matches() ) {
 				val = m.group( 1 );
@@ -142,9 +152,35 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				}
 			}
 		}
-
+		
 		return ( lang.isEmpty() ? vf.createLiteral( val )
 				: vf.createLiteral( val, lang ) );
+	}
+
+	/**
+	 * Checks that the given ImportMetadata is valid for importing data
+	 * (basically, does it have a {@link ImportMetadata#databuilder} set).
+	 *
+	 * @param metas the data to check
+	 * @return true, if the ImportMetadata can be used for importing data
+	 */
+	public static boolean isValidMetadata( ImportMetadata metas ) {
+		return ( null != metas.getDataBuilder() );
+	}
+
+	/**
+	 * Same as {@link #isValidMetadata(gov.va.semoss.poi.main.ImportMetadata)},
+	 * but throw an exception if
+	 * {@link #isValidMetadata(gov.va.semoss.poi.main.ImportMetadata)} returns
+	 * <code>false</code>
+	 *
+	 * @param metas the data to check
+	 */
+	public static void isValidMetadataEx( ImportMetadata metas ) throws ImportValidationException {
+		if ( !isValidMetadata( metas ) ) {
+			throw new ImportValidationException( ErrorType.MISSING_DATA,
+					"Invalid metadata" );
+		}
 	}
 
 	/**
@@ -160,12 +196,12 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	 */
 	protected URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
 			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
-
+		
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
 		
-		if( !qaer.hasCachedInstance( typename, rawlabel ) ){
+		if ( !qaer.hasCachedInstance( typename, rawlabel ) ) {
 			URI subject;
-
+			
 			if ( nodeIsAlreadyUri ) {
 				subject = getUriFromRawString( rawlabel, namespaces );
 			}
@@ -180,17 +216,17 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				else {
 					subject = metas.getDataBuilder().add( rawlabel ).build();
 				}
-
+				
 				subject = ensureUnique( subject );
 			}
 			qaer.cacheInstance( subject, typename, rawlabel );
 		}
-
+		
 		URI subject = qaer.getCachedInstance( typename, rawlabel );
 		myrc.add( subject, RDF.TYPE, qaer.getCachedInstanceClass( typename ) );
 		return subject;
 	}
-
+	
 	protected URI ensureUnique( URI uri ) {
 		if ( duplicates.contains( uri ) ) {
 			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
@@ -199,57 +235,69 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		}
 		return uri;
 	}
-
+	
 	@Override
-	public void setQaChecker( QaChecker q ){
+	public void setQaChecker( QaChecker q ) {
 		qaer = q;
 	}
-
+	
 	public URI getCachedRelation( String name ) {
 		return qaer.getCachedRelation( name );
 	}
-
+	
 	public URI getCachedInstance( String typename, String rawlabel ) {
 		return qaer.getCachedInstance( typename, rawlabel );
-	}
-
-	public URI getCachedRelationClass( String name ){
-		return qaer.getCachedRelationClass( name );
 	}
 	
 	public URI getCachedInstanceClass( String name ) {
 		return qaer.getCachedInstanceClass( name );
 	}
-
-	public boolean hasCachedRelationClass( String name ) {
-		return qaer.hasCachedRelationClass( name );
+	
+	public URI getCachedRelationClass( String s, String o, String p ) {
+		return qaer.getCachedRelationClass( s, o, p );
 	}
-
+	
+	public URI getCachedPropertyClass( String name ) {
+		return qaer.getCachedPropertyClass( name );
+	}
+	
+	public boolean hasCachedPropertyClass( String name ) {
+		return qaer.hasCachedPropertyClass( name );
+	}
+	
+	public boolean hasCachedRelationClass( String s, String o, String p ) {
+		return qaer.hasCachedRelationClass( s, o, p );
+	}
+	
 	public boolean hasCachedRelation( String name ) {
 		return qaer.hasCachedRelation( name );
 	}
-
+	
 	public boolean hasCachedInstance( String typename, String rawlabel ) {
 		return qaer.hasCachedInstance( typename, rawlabel );
 	}
-
+	
 	public boolean hasCachedInstanceClass( String name ) {
 		return qaer.hasCachedInstanceClass( name );
 	}
-
+	
 	public void cacheInstanceClass( URI uri, String label ) {
 		qaer.cacheInstanceClass( uri, label );
 	}
-
+	
 	public void cacheRelationNode( URI uri, String label ) {
 		qaer.cacheRelationNode( uri, label );
 	}
-
-	public void cacheRelationClass( URI uri, String label ) {
-		qaer.cacheRelationClass( uri, label );
+	
+	public void cacheRelationClass( URI uri, String sub, String obj, String rel ) {
+		qaer.cacheRelationClass( uri, sub, obj, rel );
 	}
-
+	
 	public void cacheInstance( URI uri, String typelabel, String rawlabel ) {
 		qaer.cacheInstance( uri, typelabel, rawlabel );
+	}
+	
+	public void cachePropertyClass( URI uri, String name ) {
+		qaer.cachePropertyClass( uri, name );
 	}
 }

@@ -50,6 +50,7 @@ import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFr
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
 import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
+import gov.va.semoss.rdf.engine.util.QaChecker.RelationClassCacheKey;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.Constants;
@@ -69,8 +70,6 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -371,7 +370,7 @@ public class EngineLoader {
 	}
 
 	private void addToEngine( LoadingSheetData sheet, IEngine engine,
-			ImportData alldata ) throws RepositoryException {
+			ImportData alldata ) throws ImportValidationException, RepositoryException {
 
 		// we want to search all namespaces, but use the metadata's first
 		ImportMetadata metas = alldata.getMetadata();
@@ -434,9 +433,8 @@ public class EngineLoader {
 				}
 
 				String rellabel = sheet.getRelname();
-				String longNodeType = stype + rellabel + otype;
 
-				if ( !qaer.hasCachedRelationClass( longNodeType ) ) {
+				if ( !qaer.hasCachedRelationClass( stype, otype, rellabel ) ) {
 					boolean relationAlreadyMade = isUri( rellabel, namespaces );
 
 					URI ret = ( relationAlreadyMade
@@ -444,7 +442,7 @@ public class EngineLoader {
 							: schema.getRelationUri( rellabel ) );
 					URI relation = schema.getRelationUri().build();
 
-					qaer.cacheRelationClass( ret, longNodeType );
+					qaer.cacheRelationClass( ret, stype, otype, rellabel );
 
 					if ( save ) {
 						if ( !relationAlreadyMade ) {
@@ -469,13 +467,14 @@ public class EngineLoader {
 					log.debug( "linking " + propname + " as a " + SEMOSS.has
 							+ " relationship to " + qaer.getCachedInstanceClass( propname ) );
 
-					qaer.cacheRelationClass( SEMOSS.has, propname );
+					qaer.cacheRelationClass( SEMOSS.has,
+							new RelationClassCacheKey( sheet.getSubjectType(), sheet.getObjectType(), propname ) );
 					continue;
 				}
 
 				boolean alreadyMadeProp = isUri( propname, namespaces );
 
-				if ( !qaer.hasCachedRelationClass( propname ) ) {
+				if ( !qaer.hasCachedPropertyClass( propname ) ) {
 					URI predicate;
 					if ( alreadyMadeProp ) {
 						predicate = getUriFromRawString( propname, namespaces );
@@ -484,9 +483,9 @@ public class EngineLoader {
 						// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
 						predicate = schema.build( propname );
 					}
-					qaer.cacheRelationClass( predicate, propname );
+					qaer.cachePropertyClass( predicate, propname );
 				}
-				URI predicate = qaer.getCachedRelationClass( propname );
+				URI predicate = qaer.getCachedPropertyClass( propname );
 
 				if ( save && !alreadyMadeProp ) {
 					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
@@ -638,10 +637,10 @@ public class EngineLoader {
 
 		EdgeModeler modeler = null;
 		if ( Constants.NONODE == reif ) {
-			modeler = new LegacyEdgeModeler();
+			modeler = new LegacyEdgeModeler( qaer );
 		}
 		else if ( VAS.VASEMOSS_Reification.equals( reif ) ) {
-			modeler = new SemossEdgeModeler();
+			modeler = new SemossEdgeModeler( qaer );
 		}
 		else if ( VAS.W3C_Reification.equals( reif ) ) {
 			throw new IllegalArgumentException( "W3C reification is not yet implemented" );
@@ -652,8 +651,6 @@ public class EngineLoader {
 		else {
 			throw new IllegalArgumentException( "Unknown reification model: " + reif );
 		}
-
-		modeler.setQaChecker( qaer );
 
 		return modeler;
 	}

@@ -8,6 +8,7 @@ package gov.va.semoss.rdf.engine.edgemodelers;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
@@ -25,6 +26,13 @@ import org.openrdf.repository.RepositoryException;
  * @author ryan
  */
 public class LegacyEdgeModeler extends AbstractEdgeModeler {
+
+	public LegacyEdgeModeler() {
+	}
+
+	public LegacyEdgeModeler( QaChecker qa ) {
+		super( qa );
+	}
 
 	@Override
 	public URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
@@ -84,8 +92,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationNode( connector, lkey );
 		}
 
-		String typekey = stype + sheet.getRelname() + otype;
-		URI relClassBaseURI = getCachedRelationClass( typekey );
+		URI relClassBaseURI = getCachedRelationClass( stype, otype, sheet.getRelname() );
 
 		URI connector = getCachedRelation( lkey );
 		if ( metas.isAutocreateMetamodel() ) {
@@ -155,7 +162,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
 			String relkey = entry.getKey();
 
-			URI predicate = getCachedRelationClass( relkey );
+			URI predicate = getCachedPropertyClass( relkey );
 
 			Value value = entry.getValue();
 			if ( sheet.isLink( relkey ) ) {
