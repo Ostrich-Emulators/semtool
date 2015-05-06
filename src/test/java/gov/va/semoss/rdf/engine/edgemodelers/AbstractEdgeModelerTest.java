@@ -6,6 +6,7 @@
 package gov.va.semoss.rdf.engine.edgemodelers;
 
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
@@ -177,6 +178,11 @@ public class AbstractEdgeModelerTest {
 
 		@Override
 		public void addProperties( URI subject, Map<String, Value> properties, Map<String, String> namespaces, LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException {
+			throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		}
+
+		@Override
+		public void createMetamodel( ImportData alldata, Map<String, String> namespaces, RepositoryConnection rc ) throws RepositoryException {
 			throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
 		}
 	}

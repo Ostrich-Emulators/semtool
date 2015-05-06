@@ -1,7 +1,7 @@
-<http://semoss.va.gov/database/Y40e83ce1-906e-4158-a8d8-e31b8a5cbb45> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/u4b5877f7-dcc9-4d1d-98d4-aa40fd486096> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
-<http://schema.org/subject> <http://www.w3.org/2000/01/rdf-schema#label> <http://junk/just-for-fun> .
+<http://schema.org/subject> <http://www.w3.org/2000/01/rdf-schema#label> "<http://junk/just-for-fun>" .
 <http://seman.tc/data/northwind/Concept/Category/Beverages> <http://purl.org/dc/terms/Description> "Soft drinks, coffees, teas, beers, and ales" .
 <http://seman.tc/data/northwind/Concept/Category/Beverages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
 <http://seman.tc/data/northwind/Concept/Category/Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Refrescos, caf\u00E9s, t\u00E9s, cervezas"@es .
@@ -117,91 +117,91 @@
 <http://seman.tc/data/northwind/Concept/Product/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
 <http://seman.tc/data/northwind/Concept/Product/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/2000/01/rdf-schema#label> "Th\u00FCringer Rostbratwurst" .
 <http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Manchego La Pastora:Dairy Products" .
+<http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Manchego La Pastora Category Dairy Products" .
 <http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://schema.org/extraprop> "1.2"^^<http://www.w3.org/2001/XMLSchema#float> .
 <http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chai Category Beverages" .
 <http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chang:Beverages" .
+<http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Chang Category Beverages" .
 <http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> <http://www.w3.org/2000/01/rdf-schema#label> "Gustaf's Kn\u00E4ckebr\u00F6d:Grains/Cereals" .
+<http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> <http://www.w3.org/2000/01/rdf-schema#label> "Gustaf's Kn\u00E4ckebr\u00F6d Category Grains/Cereals" .
 <http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> <http://www.w3.org/2000/01/rdf-schema#label> "Uncle Bob's Organic Dried Pears:Produce" .
+<http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> <http://www.w3.org/2000/01/rdf-schema#label> "Uncle Bob's Organic Dried Pears Category Produce" .
 <http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/E5a1e8fe14eed82a4fbdfb415a0169012> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/E5a1e8fe14eed82a4fbdfb415a0169012> <http://www.w3.org/2000/01/rdf-schema#label> "Teatime Chocolate Biscuits:Confections" .
+<http://seman.tc/data/northwind/Relation/Category/E5a1e8fe14eed82a4fbdfb415a0169012> <http://www.w3.org/2000/01/rdf-schema#label> "Teatime Chocolate Biscuits Category Confections" .
 <http://seman.tc/data/northwind/Relation/Category/E5a1e8fe14eed82a4fbdfb415a0169012> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Gde372ee0359f5dacdffe7e8343294b0e> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Gde372ee0359f5dacdffe7e8343294b0e> <http://www.w3.org/2000/01/rdf-schema#label> "Northwoods Cranberry Sauce:Condiments" .
+<http://seman.tc/data/northwind/Relation/Category/Gde372ee0359f5dacdffe7e8343294b0e> <http://www.w3.org/2000/01/rdf-schema#label> "Northwoods Cranberry Sauce Category Condiments" .
 <http://seman.tc/data/northwind/Relation/Category/Gde372ee0359f5dacdffe7e8343294b0e> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> <http://www.w3.org/2000/01/rdf-schema#label> "Ikura:Seafood" .
+<http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> <http://www.w3.org/2000/01/rdf-schema#label> "Ikura Category Seafood" .
 <http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/K1153067c792696d2d09c8eee1d5e1725> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/K1153067c792696d2d09c8eee1d5e1725> <http://www.w3.org/2000/01/rdf-schema#label> "Schoggi Schokolade:Confections" .
+<http://seman.tc/data/northwind/Relation/Category/K1153067c792696d2d09c8eee1d5e1725> <http://www.w3.org/2000/01/rdf-schema#label> "Schoggi Schokolade Category Confections" .
 <http://seman.tc/data/northwind/Relation/Category/K1153067c792696d2d09c8eee1d5e1725> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Kb0260b663aad53caddfc42536983aad6> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Kb0260b663aad53caddfc42536983aad6> <http://www.w3.org/2000/01/rdf-schema#label> "Guaran\u00E1 Fant\u00E1stica:Beverages" .
+<http://seman.tc/data/northwind/Relation/Category/Kb0260b663aad53caddfc42536983aad6> <http://www.w3.org/2000/01/rdf-schema#label> "Guaran\u00E1 Fant\u00E1stica Category Beverages" .
 <http://seman.tc/data/northwind/Relation/Category/Kb0260b663aad53caddfc42536983aad6> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> <http://www.w3.org/2000/01/rdf-schema#label> "Konbu:Seafood" .
+<http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> <http://www.w3.org/2000/01/rdf-schema#label> "Konbu Category Seafood" .
 <http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/L87d596b1e1f701f7b38b803a76511f01> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/L87d596b1e1f701f7b38b803a76511f01> <http://www.w3.org/2000/01/rdf-schema#label> "NuNuCa Nu\u00DF-Nougat-Creme:Confections" .
+<http://seman.tc/data/northwind/Relation/Category/L87d596b1e1f701f7b38b803a76511f01> <http://www.w3.org/2000/01/rdf-schema#label> "NuNuCa Nu\u00DF-Nougat-Creme Category Confections" .
 <http://seman.tc/data/northwind/Relation/Category/L87d596b1e1f701f7b38b803a76511f01> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://www.w3.org/2000/01/rdf-schema#label> "Th\u00FCringer Rostbratwurst:Meat/Poultry" .
+<http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://www.w3.org/2000/01/rdf-schema#label> "Th\u00FCringer Rostbratwurst Category Meat/Poultry" .
 <http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/N3664e5198c2583a3732327b315a91614> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/N3664e5198c2583a3732327b315a91614> <http://www.w3.org/2000/01/rdf-schema#label> "Genen Shouyu:Condiments" .
+<http://seman.tc/data/northwind/Relation/Category/N3664e5198c2583a3732327b315a91614> <http://www.w3.org/2000/01/rdf-schema#label> "Genen Shouyu Category Condiments" .
 <http://seman.tc/data/northwind/Relation/Category/N3664e5198c2583a3732327b315a91614> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Nd2230249abc44b5ed06c99b34f6f57ae> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Nd2230249abc44b5ed06c99b34f6f57ae> <http://www.w3.org/2000/01/rdf-schema#label> "Carnarvon Tigers:Seafood" .
+<http://seman.tc/data/northwind/Relation/Category/Nd2230249abc44b5ed06c99b34f6f57ae> <http://www.w3.org/2000/01/rdf-schema#label> "Carnarvon Tigers Category Seafood" .
 <http://seman.tc/data/northwind/Relation/Category/Nd2230249abc44b5ed06c99b34f6f57ae> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Cabrales:Dairy Products" .
+<http://seman.tc/data/northwind/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://www.w3.org/2000/01/rdf-schema#label> "Queso Cabrales Category Dairy Products" .
 <http://seman.tc/data/northwind/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/O9b134401beb13725e7c9aea5df57a1e4> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/O9b134401beb13725e7c9aea5df57a1e4> <http://www.w3.org/2000/01/rdf-schema#label> "R\u00F6ssle Sauerkraut:Produce" .
+<http://seman.tc/data/northwind/Relation/Category/O9b134401beb13725e7c9aea5df57a1e4> <http://www.w3.org/2000/01/rdf-schema#label> "R\u00F6ssle Sauerkraut Category Produce" .
 <http://seman.tc/data/northwind/Relation/Category/O9b134401beb13725e7c9aea5df57a1e4> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/P7ea07c2f9825c93d58d32640016ba720> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/P7ea07c2f9825c93d58d32640016ba720> <http://www.w3.org/2000/01/rdf-schema#label> "Gumb\u00E4r Gummib\u00E4rchen:Confections" .
+<http://seman.tc/data/northwind/Relation/Category/P7ea07c2f9825c93d58d32640016ba720> <http://www.w3.org/2000/01/rdf-schema#label> "Gumb\u00E4r Gummib\u00E4rchen Category Confections" .
 <http://seman.tc/data/northwind/Relation/Category/P7ea07c2f9825c93d58d32640016ba720> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> <http://www.w3.org/2000/01/rdf-schema#label> "Pavlova:Confections" .
+<http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> <http://www.w3.org/2000/01/rdf-schema#label> "Pavlova Category Confections" .
 <http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> <http://www.w3.org/2000/01/rdf-schema#label> "Mishi Kobe Niku:Meat/Poultry" .
+<http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> <http://www.w3.org/2000/01/rdf-schema#label> "Mishi Kobe Niku Category Meat/Poultry" .
 <http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> <http://www.w3.org/2000/01/rdf-schema#label> "Tunnbr\u00F6d:Grains/Cereals" .
+<http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> <http://www.w3.org/2000/01/rdf-schema#label> "Tunnbr\u00F6d Category Grains/Cereals" .
 <http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> <http://www.w3.org/2000/01/rdf-schema#label> "Sir Rodney's Scones:Confections" .
+<http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> <http://www.w3.org/2000/01/rdf-schema#label> "Sir Rodney's Scones Category Confections" .
 <http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/T492c4c55f4aa7a1e25d3d0e9fc626667> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/T492c4c55f4aa7a1e25d3d0e9fc626667> <http://www.w3.org/2000/01/rdf-schema#label> "Aniseed Syrup:Condiments" .
+<http://seman.tc/data/northwind/Relation/Category/T492c4c55f4aa7a1e25d3d0e9fc626667> <http://www.w3.org/2000/01/rdf-schema#label> "Aniseed Syrup Category Condiments" .
 <http://seman.tc/data/northwind/Relation/Category/T492c4c55f4aa7a1e25d3d0e9fc626667> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://www.w3.org/2000/01/rdf-schema#label> "Sir Rodney's Marmalade:Confections" .
+<http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://www.w3.org/2000/01/rdf-schema#label> "Sir Rodney's Marmalade Category Confections" .
 <http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> <http://www.w3.org/2000/01/rdf-schema#label> "Tofu:Produce" .
+<http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> <http://www.w3.org/2000/01/rdf-schema#label> "Tofu Category Produce" .
 <http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> <http://www.w3.org/2000/01/rdf-schema#label> "Grandma's Boysenberry Spread:Condiments" .
+<http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> <http://www.w3.org/2000/01/rdf-schema#label> "Grandma's Boysenberry Spread Category Condiments" .
 <http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> <http://www.w3.org/2000/01/rdf-schema#label> "Alice Mutton:Meat/Poultry" .
+<http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> <http://www.w3.org/2000/01/rdf-schema#label> "Alice Mutton Category Meat/Poultry" .
 <http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> <http://www.w3.org/2000/01/rdf-schema#label> "Chef Anton's Cajun Seasoning:Condiments" .
+<http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> <http://www.w3.org/2000/01/rdf-schema#label> "Chef Anton's Cajun Seasoning Category Condiments" .
 <http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> <http://www.w3.org/2000/01/rdf-schema#label> "Chef Anton's Gumbo Mix:Condiments" .
+<http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> <http://www.w3.org/2000/01/rdf-schema#label> "Chef Anton's Gumbo Mix Category Condiments" .
 <http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Category> .
 <http://seman.tc/models/northwind#Category> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
 <http://seman.tc/models/northwind#Category> <http://www.w3.org/2000/01/rdf-schema#label> "Category" .
@@ -215,4 +215,5 @@
 <http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/2000/01/rdf-schema#label> "Category" .
 <http://seman.tc/models/northwind#Relation/Category> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation> .
 <http://seman.tc/models/northwind#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Contains> .
-<http://semoss.va.gov/database/Y40e83ce1-906e-4158-a8d8-e31b8a5cbb45> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.va.gov/database/u4b5877f7-dcc9-4d1d-98d4-aa40fd486096> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/custom.xlsx> .
+<http://semoss.va.gov/database/u4b5877f7-dcc9-4d1d-98d4-aa40fd486096> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

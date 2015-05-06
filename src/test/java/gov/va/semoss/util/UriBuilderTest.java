@@ -21,7 +21,6 @@ import org.openrdf.model.impl.URIImpl;
 public class UriBuilderTest {
 
   private static final String OWLSTART = "http://owl.junk.com/testfiles/";
-  private static final String OWLSTART_NOSLASH = "http://owl.junk.com/testfiles";
 
   public UriBuilderTest() {
   }
@@ -124,7 +123,7 @@ public class UriBuilderTest {
   public void testSanitizer2() {
     UriBuilder bldr = UriBuilder.getBuilder( OWLSTART );
     URI uri = bldr.add( "concept shmoncept" ).build();
-    URI exp = new URIImpl( OWLSTART + "C17898a69eccedb712f4dc39ae0e7ed36" );
+    URI exp = new URIImpl( OWLSTART + "concept_shmoncept" );
     assertEquals( exp, uri );
   }
 }

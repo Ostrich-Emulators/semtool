@@ -50,6 +50,7 @@ import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFr
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
 import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
+import gov.va.semoss.rdf.engine.util.QaChecker.RelationClassCacheKey;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.Constants;
@@ -69,8 +70,6 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -276,7 +275,8 @@ public class EngineLoader {
 			}
 
 			// create all metamodel triples, even if we don't add them to the repository
-			createMetamodel( data, namespaces );
+			EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationModel( engine ) );
+			modeler.createMetamodel( data, namespaces, myrc );
 
 			for ( LoadingSheetData n : data.getNodes() ) {
 				addToEngine( n, engine, data );
@@ -371,7 +371,7 @@ public class EngineLoader {
 	}
 
 	private void addToEngine( LoadingSheetData sheet, IEngine engine,
-			ImportData alldata ) throws RepositoryException {
+			ImportData alldata ) throws ImportValidationException, RepositoryException {
 
 		// we want to search all namespaces, but use the metadata's first
 		ImportMetadata metas = alldata.getMetadata();
@@ -387,116 +387,6 @@ public class EngineLoader {
 		else {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
 				modeler.addNode( nap, namespaces, sheet, metas, myrc );
-			}
-		}
-	}
-
-	private void createMetamodel( ImportData alldata, Map<String, String> namespaces )
-			throws RepositoryException {
-		ImportMetadata metas = alldata.getMetadata();
-		UriBuilder schema = metas.getSchemaBuilder();
-		boolean save = metas.isAutocreateMetamodel();
-
-		for ( LoadingSheetData sheet : alldata.getSheets() ) {
-
-			String stype = sheet.getSubjectType();
-			if ( !qaer.hasCachedInstanceClass( stype ) ) {
-				boolean nodeAlreadyMade = isUri( stype, namespaces );
-
-				URI uri = ( nodeAlreadyMade
-						? getUriFromRawString( stype, namespaces )
-						: schema.build( stype ) );
-				qaer.cacheInstanceClass( uri, stype );
-
-				if ( save && !nodeAlreadyMade ) {
-					myrc.add( uri, RDF.TYPE, OWL.CLASS );
-					myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
-					myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
-				}
-			}
-
-			if ( sheet.isRel() ) {
-				String otype = sheet.getObjectType();
-				if ( !qaer.hasCachedInstanceClass( otype ) ) {
-					boolean nodeAlreadyMade = isUri( otype, namespaces );
-
-					URI uri = ( nodeAlreadyMade
-							? getUriFromRawString( otype, namespaces )
-							: schema.build( otype ) );
-
-					qaer.cacheInstanceClass( uri, otype );
-
-					if ( save && !nodeAlreadyMade ) {
-						myrc.add( uri, RDF.TYPE, OWL.CLASS );
-						myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
-						myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
-					}
-				}
-
-				String rellabel = sheet.getRelname();
-				String longNodeType = stype + rellabel + otype;
-
-				if ( !qaer.hasCachedRelationClass( longNodeType ) ) {
-					boolean relationAlreadyMade = isUri( rellabel, namespaces );
-
-					URI ret = ( relationAlreadyMade
-							? getUriFromRawString( rellabel, namespaces )
-							: schema.getRelationUri( rellabel ) );
-					URI relation = schema.getRelationUri().build();
-
-					qaer.cacheRelationClass( ret, longNodeType );
-
-					if ( save ) {
-						if ( !relationAlreadyMade ) {
-							myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
-							myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
-							myrc.add( ret, RDFS.SUBPROPERTYOF, relation );
-						}
-						// myrc.add( suri, ret, schemaNodes.get( ocachekey ) );
-
-						myrc.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
-
-						myrc.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-						myrc.add( relation, RDF.TYPE, RDF.PROPERTY );
-					}
-				}
-			}
-
-			for ( String propname : sheet.getProperties() ) {
-				// check to see if we're actually a link to some
-				// other node (and not really a new property
-				if ( sheet.isLink( propname ) || qaer.hasCachedInstanceClass( propname ) ) {
-					log.debug( "linking " + propname + " as a " + SEMOSS.has
-							+ " relationship to " + qaer.getCachedInstanceClass( propname ) );
-
-					qaer.cacheRelationClass( SEMOSS.has, propname );
-					continue;
-				}
-
-				boolean alreadyMadeProp = isUri( propname, namespaces );
-
-				if ( !qaer.hasCachedRelationClass( propname ) ) {
-					URI predicate;
-					if ( alreadyMadeProp ) {
-						predicate = getUriFromRawString( propname, namespaces );
-					}
-					else {
-						// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
-						predicate = schema.build( propname );
-					}
-					qaer.cacheRelationClass( predicate, propname );
-				}
-				URI predicate = qaer.getCachedRelationClass( propname );
-
-				if ( save && !alreadyMadeProp ) {
-					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-					// myrc.add( predicate, RDF.TYPE, schema.getContainsUri() );
-					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
-
-					if ( !metas.isLegacyMode() ) {
-						myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-					}
-				}
 			}
 		}
 	}
@@ -638,10 +528,10 @@ public class EngineLoader {
 
 		EdgeModeler modeler = null;
 		if ( Constants.NONODE == reif ) {
-			modeler = new LegacyEdgeModeler();
+			modeler = new LegacyEdgeModeler( qaer );
 		}
 		else if ( VAS.VASEMOSS_Reification.equals( reif ) ) {
-			modeler = new SemossEdgeModeler();
+			modeler = new SemossEdgeModeler( qaer );
 		}
 		else if ( VAS.W3C_Reification.equals( reif ) ) {
 			throw new IllegalArgumentException( "W3C reification is not yet implemented" );
@@ -652,8 +542,6 @@ public class EngineLoader {
 		else {
 			throw new IllegalArgumentException( "Unknown reification model: " + reif );
 		}
-
-		modeler.setQaChecker( qaer );
 
 		return modeler;
 	}
