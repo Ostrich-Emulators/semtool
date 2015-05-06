@@ -42,9 +42,9 @@ public class ParameterTabController extends InsightManagerController {
 	private void handleBuildQuery(ActionEvent event){
 		String strVariable = "?" + imc.legalizeQuotes(imc.txtVariable_parm.getText().trim());
 		String strValueType = imc.legalizeQuotes(imc.txtValueType_parm.getText().trim());
-		String generatedQuery = "SELECT " + strVariable + " ?label" +
-		   " WHERE{ " + strVariable + " a <" + strValueType + "> . " +
-		   strVariable + " rdfs:label ?label .}";
+		String generatedQuery = "SELECT " + strVariable + " ?label " +
+		   "\nWHERE{\n    " + strVariable + " a <" + strValueType + "> . \n    " +
+		   strVariable + " rdfs:label ?label . \n}";
 		imc.txtaDefaultQuery_parm.setText(generatedQuery);
 	}
 	
