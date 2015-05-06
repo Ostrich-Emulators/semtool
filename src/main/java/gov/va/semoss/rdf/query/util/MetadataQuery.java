@@ -16,9 +16,8 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import java.util.Date;
+import gov.va.semoss.util.Constants;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -112,5 +111,26 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 			// don't care
 		}
 		return label;
+	}
+
+	/**
+	 * Gets the reification model URI from the given engine
+	 *
+	 * @param engine
+	 * @return return the reification model, or {@link Constants#NONODE} if none
+	 * is defined
+	 */
+	public static URI getReificationModel( IEngine engine ) {
+		URI reif = Constants.NONODE;
+		MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
+		try {
+			engine.query( mq );
+			Value str = mq.getOne();
+			reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			// don't care
+		}
+		return reif;
 	}
 }

@@ -377,7 +377,7 @@ public class EngineLoader {
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-		EdgeModeler modeler = getEdgeModeler( engine );
+		EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationModel( engine ) );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
@@ -631,35 +631,29 @@ public class EngineLoader {
 		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 	}
 
-	public EdgeModeler getEdgeModeler( IEngine eng ) {
-		MetadataQuery mq = new MetadataQuery( VAS.reification );
+	public EdgeModeler getEdgeModeler( URI reif ) {
+		if ( null == reif ) {
+			reif = Constants.NONODE;
+		}
+
 		EdgeModeler modeler = null;
-		try {
-			eng.query( mq );
-			Value val = mq.getOne();
-			URI reif = ( null == val ? Constants.ANYNODE : URI.class.cast( val ) );
-
-			if ( Constants.ANYNODE == reif ) {
-				modeler = new LegacyEdgeModeler();
-			}
-			else if ( VAS.VASEMOSS_Reification.equals( reif ) ) {
-				modeler = new SemossEdgeModeler();
-			}
-			else if ( VAS.W3C_Reification.equals( reif ) ) {
-
-			}
-			else if ( VAS.RDR_Reification.equals( reif ) ) {
-
-			}
-			else {
-				throw new IllegalArgumentException( "Unknown reification model: " + reif );
-			}
-
-			modeler.setQaChecker( qaer );
+		if ( Constants.NONODE == reif ) {
+			modeler = new LegacyEdgeModeler();
 		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
-
+		else if ( VAS.VASEMOSS_Reification.equals( reif ) ) {
+			modeler = new SemossEdgeModeler();
 		}
+		else if ( VAS.W3C_Reification.equals( reif ) ) {
+			throw new IllegalArgumentException( "W3C reification is not yet implemented" );
+		}
+		else if ( VAS.RDR_Reification.equals( reif ) ) {
+			throw new IllegalArgumentException( "RDR reification is not yet implemented" );
+		}
+		else {
+			throw new IllegalArgumentException( "Unknown reification model: " + reif );
+		}
+
+		modeler.setQaChecker( qaer );
 
 		return modeler;
 	}
