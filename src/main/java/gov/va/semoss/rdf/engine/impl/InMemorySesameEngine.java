@@ -97,7 +97,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 
 			if ( null == baseuri ) {
 				// no base uri in the DB, so make a new one
-				baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+				baseuri = getNewBaseUri();
 				rc.begin();
 				rc.add( baseuri, RDF.TYPE, VAS.Database );
 				rc.commit();

@@ -62,21 +62,15 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
-import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
-import java.util.LinkedHashMap;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.model.vocabulary.DC;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -180,7 +174,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	protected URI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
-		URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+		URI baseuri = getNewBaseUri();
 		rc.add( baseuri, RDF.TYPE, VAS.Database );
 
 		// see if we have some old metadata we can move over, too

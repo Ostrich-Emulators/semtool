@@ -599,4 +599,9 @@ public abstract class AbstractEngine implements IEngine {
 	public void calculateInferences() throws RepositoryException {
 		// nothing to do
 	}
+
+	public static final URI getNewBaseUri() {
+		URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+		return baseuri;
+	}
 }

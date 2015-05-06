@@ -49,6 +49,7 @@ import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFSt
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFromRawString;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
+import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.Constants;
@@ -67,7 +68,6 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -292,6 +292,10 @@ public class EngineLoader {
 			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, OWL.ONTOLOGY );
+
+			if ( null != data.getMetadata().getSourceOfData() ) {
+				myrc.add( ebase, OWL.IMPORTS, data.getMetadata().getSourceOfData() );
+			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
@@ -373,7 +377,7 @@ public class EngineLoader {
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-		EdgeModeler modeler = getEdgeModeler( engine );
+		EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationModel( engine ) );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
@@ -503,6 +507,7 @@ public class EngineLoader {
 	 *
 	 * @param engine
 	 * @param copyowls
+	 * @param fileJustLoaded the file that was just loaded
 	 * @return the metamodel statements. Will always be empty if
 	 * <code>copyowls</code> is false
 	 * @throws RepositoryException
@@ -626,31 +631,29 @@ public class EngineLoader {
 		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 	}
 
-	public EdgeModeler getEdgeModeler( IEngine eng ) {
-		MetadataQuery mq = new MetadataQuery( VAS.reification );
+	public EdgeModeler getEdgeModeler( URI reif ) {
+		if ( null == reif ) {
+			reif = Constants.NONODE;
+		}
+
 		EdgeModeler modeler = null;
-		try {
-			eng.query( mq );
-			String val = mq.getOne();
-			URI reif = ( null == val ? Constants.ANYNODE : new URIImpl( val ) );
-			if ( VAS.VASEMOSS_Reification.equals( reif ) || Constants.ANYNODE == reif ) {
-				modeler = new LegacyEdgeModeler();
-			}
-			else if ( VAS.W3C_Reification.equals( reif ) ) {
-
-			}
-			else if ( VAS.RDR_Reification.equals( reif ) ) {
-
-			}
-			else {
-				throw new IllegalArgumentException( "Unknown reification model: " + reif );
-			}
-
-			modeler.setQaChecker( qaer );
+		if ( Constants.NONODE == reif ) {
+			modeler = new LegacyEdgeModeler();
 		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
-
+		else if ( VAS.VASEMOSS_Reification.equals( reif ) ) {
+			modeler = new SemossEdgeModeler();
 		}
+		else if ( VAS.W3C_Reification.equals( reif ) ) {
+			throw new IllegalArgumentException( "W3C reification is not yet implemented" );
+		}
+		else if ( VAS.RDR_Reification.equals( reif ) ) {
+			throw new IllegalArgumentException( "RDR reification is not yet implemented" );
+		}
+		else {
+			throw new IllegalArgumentException( "Unknown reification model: " + reif );
+		}
+
+		modeler.setQaChecker( qaer );
 
 		return modeler;
 	}

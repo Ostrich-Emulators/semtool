@@ -40,7 +40,7 @@ public class VocabularyPanel extends javax.swing.JPanel {
 		for ( JCheckBox jcb : vocabs ) {
 			if ( jcb.isSelected() ) {
 				String label = jcb.getText();
-				VocabularyRegistry.getURL( label );
+				urls.add( VocabularyRegistry.getURL( label ) );
 			}
 		}
 
