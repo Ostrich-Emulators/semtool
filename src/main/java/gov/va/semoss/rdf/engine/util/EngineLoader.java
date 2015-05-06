@@ -49,6 +49,7 @@ import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFSt
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFromRawString;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
+import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.Constants;
@@ -67,7 +68,6 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -638,8 +638,12 @@ public class EngineLoader {
 			eng.query( mq );
 			Value val = mq.getOne();
 			URI reif = ( null == val ? Constants.ANYNODE : URI.class.cast( val ) );
-			if ( VAS.VASEMOSS_Reification.equals( reif ) || Constants.ANYNODE == reif ) {
+
+			if ( Constants.ANYNODE == reif ) {
 				modeler = new LegacyEdgeModeler();
+			}
+			else if ( VAS.VASEMOSS_Reification.equals( reif ) ) {
+				modeler = new SemossEdgeModeler();
 			}
 			else if ( VAS.W3C_Reification.equals( reif ) ) {
 
