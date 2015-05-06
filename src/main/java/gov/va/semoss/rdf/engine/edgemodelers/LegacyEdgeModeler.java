@@ -168,6 +168,8 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			if ( sheet.isLink( relkey ) ) {
 				// our "value" is really the label of another node, so find that node
 				value = addSimpleNode( relkey, value.stringValue(), namespaces, metas, myrc );
+				predicate = getCachedRelationClass( sheet.getSubjectType(),
+						sheet.getObjectType(), relkey );
 			}
 
 			// not sure if we even use these values anymore

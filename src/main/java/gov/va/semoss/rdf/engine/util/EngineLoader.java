@@ -397,7 +397,6 @@ public class EngineLoader {
 		boolean save = metas.isAutocreateMetamodel();
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
-
 			String stype = sheet.getSubjectType();
 			if ( !qaer.hasCachedInstanceClass( stype ) ) {
 				boolean nodeAlreadyMade = isUri( stype, namespaces );
@@ -459,7 +458,9 @@ public class EngineLoader {
 					}
 				}
 			}
-
+		}
+		
+		for ( LoadingSheetData sheet : alldata.getSheets() ) {
 			for ( String propname : sheet.getProperties() ) {
 				// check to see if we're actually a link to some
 				// other node (and not really a new property
