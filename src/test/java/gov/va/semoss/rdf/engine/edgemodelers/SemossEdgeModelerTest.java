@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.engine.edgemodelers;
 
+import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
@@ -50,6 +51,11 @@ public class SemossEdgeModelerTest {
 	private InMemorySesameEngine engine;
 	private ImportMetadata metadata;
 	private EngineLoader loader;
+	private LoadingSheetData rels;
+	private LoadingSheetData nodes;
+	private LoadingNodeAndPropertyValues rel;
+	private LoadingNodeAndPropertyValues node;
+	private ImportData data;
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -69,23 +75,26 @@ public class SemossEdgeModelerTest {
 		loader.setDefaultBaseUri( new URIImpl( "http://sales.data/purchases/2015" ),
 				false );
 
-		metadata = new ImportMetadata();
-		metadata.setDataBuilder( "http://sales.data/purchases#" );
-
 		qaer = new QaChecker();
-		qaer.cacheInstanceClass( engine.getSchemaBuilder().build( "Human Being" ),
-				"Human Being" );
-		qaer.cacheInstanceClass( engine.getSchemaBuilder().build( "Car" ), "Car" );
 
-		qaer.cacheRelationClass( engine.getSchemaBuilder().build( "Human Being Purchased Car" ),
-				"Human Being", "Car", "Purchased" );
+		rels = LoadingSheetData.relsheet( "Human Being", "Car", "Purchased" );
+		rels.addProperties( Arrays.asList( "Price", "Date" ) );
 
-		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "First_Name" ),
-				"First Name" );
-		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "Last Name" ),
-				"Last Name" );
-		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "Price" ), "Price" );
-		qaer.cachePropertyClass( engine.getSchemaBuilder().build( "Date" ), "Date" );
+		Map<String, Value> relprops = new HashMap<>();
+		relprops.put( "Price", vf.createLiteral( "3000 USD" ) );
+		relprops.put( "Date", vf.createLiteral( now ) );
+		rel = rels.add( "Yuri", "Yugo", relprops );
+
+		nodes = LoadingSheetData.nodesheet( "Human Being" );
+		nodes.addProperties( Arrays.asList( "First Name", "Last Name" ) );
+		Map<String, Value> nodeprops = new HashMap<>();
+		nodeprops.put( "First Name", vf.createLiteral( "Yuri" ) );
+		nodeprops.put( "Last Name", vf.createLiteral( "Gargarin" ) );
+		node = nodes.add( "Yuri", nodeprops );
+
+		data = ImportData.forEngine( engine );
+		data.add( rels );
+		data.add( nodes );
 	}
 
 	@After
@@ -97,17 +106,10 @@ public class SemossEdgeModelerTest {
 	@Test
 	public void testAddRel() throws Exception {
 
-		LoadingSheetData lsd
-				= LoadingSheetData.relsheet( "Human Being", "Car", "Purchased" );
-		lsd.addProperties( Arrays.asList( "Price", "Date" ) );
-
-		Map<String, Value> props = new HashMap<>();
-		props.put( "Price", vf.createLiteral( "3000 USD" ) );
-		props.put( "Date", vf.createLiteral( now ) );
-		LoadingNodeAndPropertyValues nap = lsd.add( "Yuri", "Yugo", props );
-
 		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
-		instance.addRel( nap, new HashMap<>(), lsd, metadata, engine.getRawConnection() );
+		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+
+		instance.addRel( rel, new HashMap<>(), rels, metadata, engine.getRawConnection() );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
