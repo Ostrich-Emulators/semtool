@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +64,7 @@ public class SemossEdgeModelerTest {
 
 	private static final Logger log = Logger.getLogger( SemossEdgeModelerTest.class );
 	private static final ValueFactory vf = new ValueFactoryImpl();
-	private static final Date now = new Date();
+	private static final Date now;
 	private static final String SCHEMA = "http://semoss.org/ontologies/";
 	private static final String DATA = "http://va.gov/ontologies/";
 
@@ -78,6 +79,13 @@ public class SemossEdgeModelerTest {
 	private LoadingSheetData rels;
 	private LoadingSheetData nodes;
 	private ImportData data;
+
+	static {
+		Calendar cal = Calendar.getInstance();
+		cal.set( 2031, 9, 22, 6, 58, 59 );
+		cal.set( Calendar.MILLISECOND, 15 );
+		now = cal.getTime();
+	}
 
 	@BeforeClass
 	public static void setUpClass() {

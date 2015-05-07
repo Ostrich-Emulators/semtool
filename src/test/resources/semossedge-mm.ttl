@@ -5,6 +5,8 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+semoss:Last_Name a owl:DatatypeProperty .
+
 semoss:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf semoss:Concept .
@@ -25,5 +27,4 @@ semoss:Date rdfs:label "Date" ;
 semoss:First_Name rdfs:label "First Name" ;
 	a owl:DatatypeProperty .
 
-semoss:Last_Name rdfs:label "Last Name" ;
-	a owl:DatatypeProperty .
+semoss:Last_Name rdfs:label "Last Name" .
