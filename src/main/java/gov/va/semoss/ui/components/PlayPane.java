@@ -558,7 +558,13 @@ public class PlayPane extends JFrame {
 				}
 				if ( null != engine ) {
 					sparqler.setEnabled( engine.isServerSupported() );
+					boolean ispinned = Boolean.parseBoolean( engine.getProperty( Constants.PIN_KEY ));
+				     // if (ispinned) {
+				     // putValue( AbstractAction.SMALL_ICON, ( DbAction.getIcon( "db_copy1") ));
+				     // }
+					
 				}
+				
 			}
 		} );
 	}
@@ -1259,6 +1265,7 @@ public class PlayPane extends JFrame {
 		db.addSeparator();
 		db.add( sparqler );
 		sparqler.setEnabled( false );
+	
 		db.add( proper );
 		db.setEnabled( false );
 		ListSelectionListener lsl = new ListSelectionListener() {
@@ -1636,6 +1643,7 @@ public class PlayPane extends JFrame {
 		JMenu newmenu = new JMenu( "New" );
 		newmenu.setToolTipText("Create a new Database or Loading Sheet");
 		newmenu.setMnemonic( KeyEvent.VK_N );
+		newmenu.setIcon( DbAction.getIcon( "file-new1"));
 		fileMenu.add( newmenu );
 		JMenuItem jmi = newmenu.add( creater );
 		jmi.setText( "Database" );
@@ -1667,7 +1675,7 @@ public class PlayPane extends JFrame {
 		fileMenuSaveAll.setToolTipText("Save all changes");
 		fileMenuSaveAll.setMnemonic( KeyEvent.VK_V );
 		fileMenuSaveAll.setIcon( DbAction.getIcon( "save_alldiskette1"));
-		fileMenu.add( fileMenuSaveAll );
+	//	fileMenu.add( fileMenuSaveAll );
 
 //		JMenu exptop2 = new JMenu( "Export" );
 //		exptop2.add( exportttl );
@@ -1694,6 +1702,7 @@ public class PlayPane extends JFrame {
 //		fileMenu.add( exptop2 );
 //		fileMenu.add( importtop2 );
 		fileMenu.addSeparator();
+		exiter.setIcon( DbAction.getIcon( "exit1"));
 		fileMenu.add( exiter );
 
 		menu.add( fileMenu );
