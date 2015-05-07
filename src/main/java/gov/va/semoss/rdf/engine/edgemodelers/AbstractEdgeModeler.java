@@ -201,25 +201,10 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
 
 		if ( !qaer.hasCachedInstance( typename, rawlabel ) ) {
-			URI subject;
-
-			if ( nodeIsAlreadyUri ) {
-				subject = getUriFromRawString( rawlabel, namespaces );
-			}
-			else {
-				if ( metas.isAutocreateMetamodel() ) {
-					UriBuilder nodebuilder = metas.getDataBuilder().getConceptUri();
-					if ( !typename.contains( ":" ) ) {
-						nodebuilder.add( typename );
-					}
-					subject = nodebuilder.add( rawlabel ).build();
-				}
-				else {
-					subject = metas.getDataBuilder().add( rawlabel ).build();
-				}
-
-				subject = ensureUnique( subject );
-			}
+			URI subject = ( nodeIsAlreadyUri
+					? getUriFromRawString( rawlabel, namespaces )
+					: metas.getDataBuilder().add( rawlabel ).build() );
+			subject = ensureUnique( subject );
 			qaer.cacheInstance( subject, typename, rawlabel );
 		}
 

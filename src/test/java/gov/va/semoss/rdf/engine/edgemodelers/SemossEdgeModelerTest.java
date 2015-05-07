@@ -34,6 +34,10 @@ import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.turtle.TurtleWriter;
@@ -74,6 +78,10 @@ public class SemossEdgeModelerTest {
 		engine.setBuilders( UriBuilder.getBuilder( DATA ), UriBuilder.getBuilder( SCHEMA ) );
 		engine.getRawConnection().setNamespace( "vcamp", DATA );
 		engine.getRawConnection().setNamespace( "semoss", SCHEMA );
+		engine.getRawConnection().setNamespace( RDFS.PREFIX, RDFS.NAMESPACE );
+		engine.getRawConnection().setNamespace( RDF.PREFIX, RDF.NAMESPACE );
+		engine.getRawConnection().setNamespace( OWL.PREFIX, OWL.NAMESPACE );
+		engine.getRawConnection().setNamespace( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
 
 		loader = new EngineLoader();
 		loader.setDefaultBaseUri( new URIImpl( "http://sales.data/purchases/2015" ),

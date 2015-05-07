@@ -82,33 +82,24 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 		String lkey = keybuilder.toString();
 		if ( !hasCachedRelation( lkey ) ) {
-			URI connector;
-			String rellocalname;
-			if ( alreadyMadeRel ) {
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
-				connector = metas.getDataBuilder().getRelationUri().build( rellocalname );
-			}
-			else {
-				UriBuilder typebuilder
-						= metas.getDataBuilder().getRelationUri().add( sheet.getRelname() );
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
-				connector = typebuilder.add( rellocalname ).build();
-			}
-
+			String rellocalname = srawlabel + "_" + sheet.getRelname() + "_"
+					+ orawlabel;
+			URI connector = metas.getDataBuilder().build( rellocalname );
 			connector = ensureUnique( connector );
 			cacheRelationNode( connector, lkey );
 		}
-
-		URI relClassBaseURI = getCachedRelationClass( stype, otype, sheet.getRelname() );
 
 		URI connector = getCachedRelation( lkey );
 		if ( metas.isAutocreateMetamodel() ) {
 			ValueFactory vf = myrc.getValueFactory();
 
-			myrc.add( connector, RDFS.SUBPROPERTYOF, relClassBaseURI );
+			myrc.add( connector, RDF.TYPE, metas.getSchemaBuilder().getRelationUri().build() );
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
 					+ sheet.getRelname() + " " + orawlabel ) );
+			URI pred = getCachedRelationClass( stype, otype, sheet.getRelname() );
+			myrc.add( connector, RDF.PREDICATE, pred );
 		}
+
 		myrc.add( subject, connector, object );
 
 		addProperties( connector, nap, namespaces, sheet, metas, myrc );
@@ -220,9 +211,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 					URI ret = ( relationAlreadyMade
 							? getUriFromRawString( rellabel, namespaces )
-							: schema.getRelationUri( rellabel ) );
-					URI relation = schema.getRelationUri().build();
-
+							: schema.build( rellabel ) );
 					cacheRelationClass( ret, stype, otype, rellabel );
 
 					if ( save && !relationAlreadyMade ) {
@@ -254,16 +243,12 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 							: schema.build( propname ) );
 					cachePropertyClass( predicate, propname );
 				}
-				
+
 				URI predicate = getCachedPropertyClass( propname );
 
 				if ( save && !alreadyMadeProp ) {
 					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
 					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
-
-					if ( !metas.isLegacyMode() ) {
-						myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-					}
 				}
 			}
 		}
