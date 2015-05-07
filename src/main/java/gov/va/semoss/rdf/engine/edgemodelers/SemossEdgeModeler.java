@@ -46,11 +46,13 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
 			throws RepositoryException {
 
-		String stype = nap.getSubjectType();
-		String srawlabel = nap.getSubject();
+		final String stype = nap.getSubjectType();
+		final String srawlabel = nap.getSubject();
 
-		String otype = nap.getObjectType();
-		String orawlabel = nap.getObject();
+		final String otype = nap.getObjectType();
+		final String orawlabel = nap.getObject();
+
+		final String relname = sheet.getRelname();
 
 		// get both ends of the relationship...
 		if ( !hasCachedInstance( stype, srawlabel ) ) {
@@ -80,17 +82,25 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
 		keybuilder.append( nap.getObject() );
 
-		String lkey = keybuilder.toString();
-		if ( !hasCachedRelation( lkey ) ) {
-			String rellocalname = srawlabel + "_" + sheet.getRelname() + "_"
-					+ orawlabel;
-			URI connector = metas.getDataBuilder().build( rellocalname );
+		String connectorkey = keybuilder.toString();
+		if ( !hasCachedRelation( connectorkey ) ) {
+			URI connector = null;
+			if ( nap.isEmpty() ) {
+				connector = getCachedRelationClass( stype, otype, relname );
+			}
+			else {
+				// make a new edge so we can add properties
+				String rellocalname = srawlabel + "_" + sheet.getRelname() + "_"
+						+ orawlabel;
+				connector = metas.getDataBuilder().build( rellocalname );
+			}
+
 			connector = ensureUnique( connector );
-			cacheRelationNode( connector, lkey );
+			cacheRelationNode( connector, connectorkey );
 		}
 
-		URI connector = getCachedRelation( lkey );
-		if ( metas.isAutocreateMetamodel() ) {
+		URI connector = getCachedRelation( connectorkey );
+		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
 			ValueFactory vf = myrc.getValueFactory();
 
 			myrc.add( connector, RDF.TYPE, metas.getSchemaBuilder().getRelationUri().build() );
@@ -184,6 +194,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 				if ( save && !nodeAlreadyMade ) {
 					myrc.add( uri, RDF.TYPE, OWL.CLASS );
 					myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
+					myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 				}
 			}
 
@@ -201,6 +212,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 					if ( save && !nodeAlreadyMade ) {
 						myrc.add( uri, RDF.TYPE, OWL.CLASS );
 						myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
+						myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 					}
 				}
 
@@ -216,6 +228,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 					if ( save && !relationAlreadyMade ) {
 						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
+						myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
 					}
 				}
 			}
@@ -248,7 +261,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 				if ( save && !alreadyMadeProp ) {
 					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+					myrc.add( predicate, RDF.TYPE, OWL.DATATYPEPROPERTY );
 				}
 			}
 		}
