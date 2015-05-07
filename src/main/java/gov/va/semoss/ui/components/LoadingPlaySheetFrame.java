@@ -96,8 +96,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		dometamodel = meta;
 		doconformance = conform;
 		doreplace = replace;
-		setTitle( "Import Data Review" );
-
+	//	setTitle( "Import Data Review 4" );
+	//	fileToLoad.getName()
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
 
@@ -122,7 +122,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	public LoadingPlaySheetFrame( IEngine eng, ImportData data ) {
 		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
 
-		setTitle( "Import Data Review" );
+		setTitle( "Import Data Review " );
+		
 
 		LoadingPlaySheetBase first = null;
 		for ( LoadingSheetData n : data.getSheets() ) {
