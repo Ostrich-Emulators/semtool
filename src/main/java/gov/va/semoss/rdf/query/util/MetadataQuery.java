@@ -123,14 +123,16 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 	 */
 	public static ReificationStyle getReificationStyle( IEngine engine ) {
 		URI reif = Constants.NONODE;
-		MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
-		try {
-			engine.query( mq );
-			Value str = mq.getOne();
-			reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// don't care
+		if ( null != engine ) {
+			MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
+			try {
+				engine.query( mq );
+				Value str = mq.getOne();
+				reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+				// don't care
+			}
 		}
 
 		return ReificationStyle.fromUri( reif );
