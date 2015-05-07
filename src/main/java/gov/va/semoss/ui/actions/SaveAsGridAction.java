@@ -37,6 +37,7 @@ public class SaveAsGridAction extends AbstractSavingAction {
 		super( "Save As", issaveas );
 		setToolTip( "Save to a new file name" );
 		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_A );
+		putValue( AbstractAction.SMALL_ICON,DbAction.getIcon( "save_as_diskette1"));
 		setAppendDate( true );
 	}
 

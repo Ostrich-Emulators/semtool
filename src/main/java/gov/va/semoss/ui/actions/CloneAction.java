@@ -37,6 +37,8 @@ public class CloneAction extends DbAction {
     this.frame = frame;
     putValue( AbstractAction.SHORT_DESCRIPTION, "Duplicate a database" );
     putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
+    putValue( AbstractAction.SMALL_ICON, DbAction.getIcon( "db_copy1") );
+    
   }
 
   @Override
