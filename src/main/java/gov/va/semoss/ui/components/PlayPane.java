@@ -86,6 +86,7 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -600,7 +601,13 @@ public class PlayPane extends JFrame {
 		JComponent main = makeMainTab();
 		leftView.addTab( "Database Explorer", DbAction.getIcon( "db_explorer1" ), main,
 				"Ask the SEMOSS database a question" );
-
+		JLabel dislbl = new JLabel("Database Explorer");
+		Icon disicon = DbAction.getIcon( "db_explorer1" );
+		dislbl.setIcon(disicon);
+		dislbl.setIconTextGap(5);
+		dislbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		leftView.setTabComponentAt(0, dislbl);
+		
 		owlPanel = makeOwlTab();
 		leftView.addTab( "SUDOWL", null, owlPanel, null );
 
@@ -623,10 +630,22 @@ public class PlayPane extends JFrame {
 		JComponent graphPanel = makeGraphTab();
 		rightView.addTab( "Display Pane", DbAction.getIcon( "display_tab1" ), graphPanel,
 				"Display response to questions (queries)" );
+		JLabel dislbl = new JLabel("Display Pane");
+		Icon disicon = DbAction.getIcon( "display_tab1" );
+		dislbl.setIcon(disicon);
+		dislbl.setIconTextGap(5);
+		dislbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		rightView.setTabComponentAt(0, dislbl);
 
 		loggingPanel = new LoggingPanel();
 		rightView.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 				"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
+		JLabel loglbl = new JLabel("Logging");
+		Icon logicon = DbAction.getIcon( "log_tab1" );
+		loglbl.setIcon(logicon);
+		loglbl.setIconTextGap(5);
+		loglbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		rightView.setTabComponentAt(1, loglbl);
 		rightView.addChangeListener( new ChangeListener() {
 
 			@Override
@@ -1360,6 +1379,12 @@ public class PlayPane extends JFrame {
 						else if ( loggingPanel == panel ) {
 							rightTabs.addTab( "Logging",  DbAction.getIcon( "log_tab1" ), loggingPanel,
 									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
+							JLabel loglbl = new JLabel("Logging");
+							Icon logicon = DbAction.getIcon( "log_tab1" );
+							loglbl.setIcon(logicon);
+							loglbl.setIconTextGap(5);
+							loglbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+							rightTabs.setTabComponentAt(2, loglbl);
 						} 
 					}
 					else {
