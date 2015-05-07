@@ -36,6 +36,7 @@ public class SaveGridAction extends AbstractSavingAction {
 		super( "Save As", issaveas );
 		setToolTip( "Save changes" );
 		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
+		putValue (AbstractAction.SMALL_ICON, DbAction.getIcon( "save_diskette1"));
 		setAppendDate( true );
 	}
 

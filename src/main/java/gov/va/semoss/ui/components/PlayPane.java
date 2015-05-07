@@ -1073,12 +1073,15 @@ public class PlayPane extends JFrame {
 					windowSelector.add( tileh );
 					tileh.setToolTipText("Arrange Windows in horizontal tiles");
 					tileh.setMnemonic(KeyEvent.VK_H);
+					tileh.setIcon(DbAction.getIcon( "window_tile_horizontal1"));
 					windowSelector.add( tilev );
 					tilev.setToolTipText("Arrange Windows in vertical tiles");
 					tilev.setMnemonic(KeyEvent.VK_V);
+					tilev.setIcon(DbAction.getIcon( "window_tile_vertical1"));
 					windowSelector.add( tilec );
 					tilec.setToolTipText("Arrange Windows in cascade");
 					tilec.setMnemonic(KeyEvent.VK_S);
+					tilec.setIcon(DbAction.getIcon( "window_cascade1" ));
 					windowSelector.addSeparator();
 				}
 				
@@ -1644,12 +1647,15 @@ public class PlayPane extends JFrame {
 		unmounter.setEnabled(false);
 		fileMenuSave.setToolTipText("Save changes");
 		fileMenuSave.setMnemonic( KeyEvent.VK_S );
+		fileMenuSave.setIcon( DbAction.getIcon( "save_diskette1"));
 		fileMenu.add( fileMenuSave );
 		fileMenuSaveAs.setToolTipText("Save to a new file name");
 		fileMenuSaveAs.setMnemonic( KeyEvent.VK_A);
+		fileMenuSaveAs.setIcon( DbAction.getIcon( "save_as_diskette1"));
 		fileMenu.add( fileMenuSaveAs );
 		fileMenuSaveAll.setToolTipText("Save all changes");
 		fileMenuSaveAll.setMnemonic( KeyEvent.VK_V );
+		fileMenuSaveAll.setIcon( DbAction.getIcon( "save_alldiskette1"));
 		fileMenu.add( fileMenuSaveAll );
 
 //		JMenu exptop2 = new JMenu( "Export" );

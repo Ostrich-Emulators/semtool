@@ -32,6 +32,7 @@ public class SaveAllGridAction extends AbstractSavingAction {
 		super( "Save All", DbAction.getIcon( "save_alldiskette1" ), true );
 		setToolTip( "Save all changes" );
 		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_V );
+		putValue( AbstractAction.SMALL_ICON, DbAction.getIcon( "save_alldiskette1"));
 		setAppendDate( true );
 		setDefaultFileName( "Grids" );
 	}
