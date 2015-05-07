@@ -86,6 +86,7 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -600,7 +601,13 @@ public class PlayPane extends JFrame {
 		JComponent main = makeMainTab();
 		leftView.addTab( "Database Explorer", DbAction.getIcon( "db_explorer1" ), main,
 				"Ask the SEMOSS database a question" );
-
+		JLabel dislbl = new JLabel("Database Explorer");
+		Icon disicon = DbAction.getIcon( "db_explorer1" );
+		dislbl.setIcon(disicon);
+		dislbl.setIconTextGap(5);
+		dislbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		leftView.setTabComponentAt(0, dislbl);
+		
 		owlPanel = makeOwlTab();
 		leftView.addTab( "SUDOWL", null, owlPanel, null );
 
@@ -623,10 +630,22 @@ public class PlayPane extends JFrame {
 		JComponent graphPanel = makeGraphTab();
 		rightView.addTab( "Display Pane", DbAction.getIcon( "display_tab1" ), graphPanel,
 				"Display response to questions (queries)" );
+		JLabel dislbl = new JLabel("Display Pane");
+		Icon disicon = DbAction.getIcon( "display_tab1" );
+		dislbl.setIcon(disicon);
+		dislbl.setIconTextGap(5);
+		dislbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		rightView.setTabComponentAt(0, dislbl);
 
 		loggingPanel = new LoggingPanel();
 		rightView.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 				"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
+		JLabel loglbl = new JLabel("Logging");
+		Icon logicon = DbAction.getIcon( "log_tab1" );
+		loglbl.setIcon(logicon);
+		loglbl.setIconTextGap(5);
+		loglbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		rightView.setTabComponentAt(1, loglbl);
 		rightView.addChangeListener( new ChangeListener() {
 
 			@Override
@@ -640,7 +659,12 @@ public class PlayPane extends JFrame {
 		iManagePanel = new InsightManagerPanel( repoList );
 		rightView.insertTab( "Insight Manager", null, iManagePanel,
 				"Manage perspectives and insights", 2 );
-
+		JLabel perlbl = new JLabel("Insight Manager");
+		Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
+		perlbl.setIcon(pericon);
+		perlbl.setIconTextGap(5);
+		perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		rightView.setTabComponentAt(2, perlbl);
 		return rightView;
 	}
 
@@ -1054,12 +1078,15 @@ public class PlayPane extends JFrame {
 					windowSelector.add( tileh );
 					tileh.setToolTipText("Arrange Windows in horizontal tiles");
 					tileh.setMnemonic(KeyEvent.VK_H);
+					tileh.setIcon(DbAction.getIcon( "window_tile_horizontal1"));
 					windowSelector.add( tilev );
 					tilev.setToolTipText("Arrange Windows in vertical tiles");
 					tilev.setMnemonic(KeyEvent.VK_V);
+					tilev.setIcon(DbAction.getIcon( "window_tile_vertical1"));
 					windowSelector.add( tilec );
 					tilec.setToolTipText("Arrange Windows in cascade");
 					tilec.setMnemonic(KeyEvent.VK_S);
+					tilec.setIcon(DbAction.getIcon( "window_cascade1" ));
 					windowSelector.addSeparator();
 				}
 				
@@ -1358,8 +1385,14 @@ public class PlayPane extends JFrame {
 									"Customize graph display" );
 						}
 						else if ( loggingPanel == panel ) {
-							rightTabs.addTab( "Logging",  DbAction.getIcon( "log_tab1" ), loggingPanel,
-									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
+							rightTabs.insertTab( "Logging",  DbAction.getIcon( "log_tab1" ), loggingPanel,
+									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team", 2 );
+							JLabel loglbl = new JLabel("Logging");
+							Icon logicon = DbAction.getIcon( "log_tab1" );
+							loglbl.setIcon(logicon);
+							loglbl.setIconTextGap(5);
+							loglbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+							rightTabs.setTabComponentAt(2, loglbl);
 						} 
 					}
 					else {
@@ -1539,8 +1572,14 @@ public class PlayPane extends JFrame {
 
 				if ( ischecked ) {
 					iManagePanel.insightManagerPanelWorker();
-					rightTabs.addTab( "Insight Manager", null, iManagePanel,
-							"Manage perspectives and insights" );
+					rightTabs.insertTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1"), iManagePanel,
+							"Manage perspectives and insights", 3 );
+					JLabel perlbl = new JLabel("Insight Manager");
+					Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
+					perlbl.setIcon(pericon);
+					perlbl.setIconTextGap(5);
+					perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+					rightTabs.setTabComponentAt(3, perlbl);
 					iManage.setToolTipText( "Disable the Insite Manager Tab" );
 				}
 				else {
@@ -1619,12 +1658,15 @@ public class PlayPane extends JFrame {
 		unmounter.setEnabled(false);
 		fileMenuSave.setToolTipText("Save changes");
 		fileMenuSave.setMnemonic( KeyEvent.VK_S );
+		fileMenuSave.setIcon( DbAction.getIcon( "save_diskette1"));
 		fileMenu.add( fileMenuSave );
 		fileMenuSaveAs.setToolTipText("Save to a new file name");
 		fileMenuSaveAs.setMnemonic( KeyEvent.VK_A);
+		fileMenuSaveAs.setIcon( DbAction.getIcon( "save_as_diskette1"));
 		fileMenu.add( fileMenuSaveAs );
 		fileMenuSaveAll.setToolTipText("Save all changes");
 		fileMenuSaveAll.setMnemonic( KeyEvent.VK_V );
+		fileMenuSaveAll.setIcon( DbAction.getIcon( "save_alldiskette1"));
 		fileMenu.add( fileMenuSaveAll );
 
 //		JMenu exptop2 = new JMenu( "Export" );
