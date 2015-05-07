@@ -185,6 +185,40 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			}
 		}
 	}
+	
+	@Override
+	protected URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
+			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
+
+		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
+
+		if ( !hasCachedInstance( typename, rawlabel ) ) {
+			URI subject;
+
+			if ( nodeIsAlreadyUri ) {
+				subject = getUriFromRawString( rawlabel, namespaces );
+			}
+			else {
+				if ( metas.isAutocreateMetamodel() ) {
+					UriBuilder nodebuilder = metas.getDataBuilder().getConceptUri();
+					if ( !typename.contains( ":" ) ) {
+						nodebuilder.add( typename );
+					}
+					subject = nodebuilder.add( rawlabel ).build();
+				}
+				else {
+					subject = metas.getDataBuilder().add( rawlabel ).build();
+				}
+
+				subject = ensureUnique( subject );
+			}
+			cacheInstance( subject, typename, rawlabel );
+		}
+
+		URI subject = getCachedInstance( typename, rawlabel );
+		myrc.add( subject, RDF.TYPE, getCachedInstanceClass( typename ) );
+		return subject;
+	}
 
 	@Override
 	public void createMetamodel( ImportData alldata, Map<String, String> namespaces,
