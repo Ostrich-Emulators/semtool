@@ -43,7 +43,6 @@ public class PinAction extends DbAction {
           = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) );
       putValue( AbstractAction.NAME, ( ispinned ? "Unpin " : "Pin " )
           + getEngineName() );
-      putValue(EndpointAction.SMALL_ICON, DbAction.getIcon( "db_copy1") );
     }
 
   }

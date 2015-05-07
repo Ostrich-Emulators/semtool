@@ -231,7 +231,7 @@ public class PlayPane extends JFrame {
 			= new ExportSpecificNodesToLoadingSheetAction( UIPROGRESS, this );
 	private final DbAction expSpecRels
 			= new ExportSpecificRelationshipsToLoadingSheetAction( UIPROGRESS, this );
-	private final DbAction unmounter = new UnmountAction( this, "Close (Detach) DB" );
+	private final DbAction unmounter = new UnmountAction( this, "Close DB" );
 	private final EndpointAction sparqler = new EndpointAction( UIPROGRESS, this );
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
