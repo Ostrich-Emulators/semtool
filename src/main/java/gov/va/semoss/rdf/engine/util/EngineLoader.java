@@ -11,8 +11,6 @@ import com.bigdata.rdf.sail.remote.BigdataSailFactory;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
-import gov.va.semoss.model.vocabulary.SEMOSS;
-import gov.va.semoss.model.vocabulary.VAS;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,15 +43,13 @@ import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFromRawString;
-import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
 import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
-import gov.va.semoss.rdf.engine.util.QaChecker.RelationClassCacheKey;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
@@ -69,7 +65,6 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -275,7 +270,7 @@ public class EngineLoader {
 			}
 
 			// create all metamodel triples, even if we don't add them to the repository
-			EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationModel( engine ) );
+			EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
 			modeler.createMetamodel( data, namespaces, myrc );
 
 			for ( LoadingSheetData n : data.getNodes() ) {
@@ -377,7 +372,7 @@ public class EngineLoader {
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-		EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationModel( engine ) );
+		EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
@@ -521,26 +516,17 @@ public class EngineLoader {
 		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 	}
 
-	public EdgeModeler getEdgeModeler( URI reif ) {
-		if ( null == reif ) {
-			reif = Constants.NONODE;
-		}
-
+	public EdgeModeler getEdgeModeler( ReificationStyle reif ) {
 		EdgeModeler modeler = null;
-		if ( Constants.NONODE == reif ) {
-			modeler = new LegacyEdgeModeler( qaer );
-		}
-		else if ( VAS.VASEMOSS_Reification.equals( reif ) ) {
-			modeler = new SemossEdgeModeler( qaer );
-		}
-		else if ( VAS.W3C_Reification.equals( reif ) ) {
-			throw new IllegalArgumentException( "W3C reification is not yet implemented" );
-		}
-		else if ( VAS.RDR_Reification.equals( reif ) ) {
-			throw new IllegalArgumentException( "RDR reification is not yet implemented" );
-		}
-		else {
-			throw new IllegalArgumentException( "Unknown reification model: " + reif );
+		switch ( reif ) {
+			case SEMOSS:
+				modeler = new SemossEdgeModeler( qaer );
+				break;
+			case LEGACY:
+				modeler = new LegacyEdgeModeler( qaer );
+				break;
+			default:
+				throw new IllegalArgumentException( "Unhandled reification style: " + reif );
 		}
 
 		return modeler;

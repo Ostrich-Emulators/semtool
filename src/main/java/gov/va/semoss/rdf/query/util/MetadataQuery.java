@@ -16,6 +16,7 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.util.Constants;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDFS;
@@ -120,7 +121,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 	 * @return return the reification model, or {@link Constants#NONODE} if none
 	 * is defined
 	 */
-	public static URI getReificationModel( IEngine engine ) {
+	public static ReificationStyle getReificationStyle( IEngine engine ) {
 		URI reif = Constants.NONODE;
 		MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
 		try {
@@ -131,6 +132,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			// don't care
 		}
-		return reif;
+
+		return ReificationStyle.fromUri( reif );
 	}
 }

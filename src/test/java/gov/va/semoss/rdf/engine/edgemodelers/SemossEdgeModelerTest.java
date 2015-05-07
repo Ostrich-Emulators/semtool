@@ -68,6 +68,8 @@ public class SemossEdgeModelerTest {
 
 	@Before
 	public void setUp() throws RepositoryException {
+		// this data duplicates the data from test12.xlsx
+		
 		engine = new InMemorySesameEngine();
 		engine.setBuilders( UriBuilder.getBuilder( DATA ), UriBuilder.getBuilder( SCHEMA ) );
 		engine.getRawConnection().setNamespace( "vcamp", DATA );

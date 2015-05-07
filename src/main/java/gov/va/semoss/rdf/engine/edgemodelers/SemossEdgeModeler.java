@@ -193,7 +193,6 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 				if ( save && !nodeAlreadyMade ) {
 					myrc.add( uri, RDF.TYPE, OWL.CLASS );
 					myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
-					myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 				}
 			}
 
@@ -211,7 +210,6 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 					if ( save && !nodeAlreadyMade ) {
 						myrc.add( uri, RDF.TYPE, OWL.CLASS );
 						myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
-						myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 					}
 				}
 
@@ -227,18 +225,8 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 					cacheRelationClass( ret, stype, otype, rellabel );
 
-					if ( save ) {
-						if ( !relationAlreadyMade ) {
-							myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
-							myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
-							myrc.add( ret, RDFS.SUBPROPERTYOF, relation );
-						}
-						// myrc.add( suri, ret, schemaNodes.get( ocachekey ) );
-
-						myrc.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
-
-						myrc.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-						myrc.add( relation, RDF.TYPE, RDF.PROPERTY );
+					if ( save && !relationAlreadyMade ) {
+						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
 					}
 				}
 			}
@@ -261,21 +249,16 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 				boolean alreadyMadeProp = isUri( propname, namespaces );
 
 				if ( !hasCachedPropertyClass( propname ) ) {
-					URI predicate;
-					if ( alreadyMadeProp ) {
-						predicate = getUriFromRawString( propname, namespaces );
-					}
-					else {
-						// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
-						predicate = schema.build( propname );
-					}
+					URI predicate = ( alreadyMadeProp
+							? getUriFromRawString( propname, namespaces )
+							: schema.build( propname ) );
 					cachePropertyClass( predicate, propname );
 				}
+				
 				URI predicate = getCachedPropertyClass( propname );
 
 				if ( save && !alreadyMadeProp ) {
 					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-					// myrc.add( predicate, RDF.TYPE, schema.getContainsUri() );
 					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
 
 					if ( !metas.isLegacyMode() ) {
