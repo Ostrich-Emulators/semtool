@@ -6,16 +6,21 @@
 package gov.va.semoss.ui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.AbstractAction;
+
 import org.apache.log4j.Logger;
+
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.components.CopyWhatPanel;
 import gov.va.semoss.ui.components.ProgressTask;
+
 import java.awt.Dimension;
 import java.awt.Frame;
+
 import javax.swing.JOptionPane;
 
 /**
@@ -33,6 +38,8 @@ public class MergeAction extends DbAction {
 		super( opprog, MERGE );
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Merge two databases" );
+		putValue( AbstractAction.SMALL_ICON, DbAction.getIcon( "semossjnl" ) );
+
 	}
 
 	public MergeAction( String opprog, IEngine from, IEngine to, Frame f ) {

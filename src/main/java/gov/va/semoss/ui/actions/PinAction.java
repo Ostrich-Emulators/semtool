@@ -31,18 +31,21 @@ public class PinAction extends DbAction {
     super( optg, PIN, "dbpin" );
     putValue( AbstractAction.SHORT_DESCRIPTION, "Pin/Unpin the database" );
 	putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_P);
+	
   }
 
   @Override
   public void setEngine( IEngine eng ) {
     super.setEngine( eng );
-
+    
     if ( null != eng ) {
       ispinned
           = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) );
       putValue( AbstractAction.NAME, ( ispinned ? "Unpin " : "Pin " )
           + getEngineName() );
+      putValue(EndpointAction.SMALL_ICON, DbAction.getIcon( "db_copy1") );
     }
+
   }
 
   @Override

@@ -1205,6 +1205,8 @@ public class PlayPane extends JFrame {
 		JMenu loadingsheets = new JMenu( "Loading Sheets" );
 		loadingsheets.setToolTipText( "Export the Loading Sheets" );
 		loadingsheets.setMnemonic( KeyEvent.VK_L );
+		loadingsheets.setIcon( DbAction.getIcon( "import_data_review" ) );
+		
 		exptop.add( loadingsheets );
 		//Nodes
 		JMenu nodes = new JMenu( "Nodes" );
@@ -1242,6 +1244,7 @@ public class PlayPane extends JFrame {
 		final JMenu mergeroot = new JMenu( DbAction.MERGE );
 		mergeroot.setToolTipText( "Merge the Data between databases" );
 		mergeroot.setMnemonic( KeyEvent.VK_D );
+		mergeroot.setIcon( DbAction.getIcon( "semossjnl" ) );
 		mergeroot.setEnabled( false );
 		importtop.add( mergeroot );
 		importtop.add( importls );

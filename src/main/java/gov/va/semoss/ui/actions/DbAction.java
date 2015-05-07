@@ -33,7 +33,7 @@ public abstract class DbAction extends AbstractAction {
   public static final String IMPORTLS = "External File(s)";
   public static final String EXPORTTTL = "Turtle (.ttl)";
   public static final String EXPORTNT = "N-Triples (.nt)";
-  public static final String EXPORTRDF = "RDF (.rdf)";
+  public static final String EXPORTRDF = "RDF/XML (.rdf)";
   public static final String EXPORTLS = "Complete Database";
   public static final String EXPORTLSNODES = "All Nodes";
   public static final String EXPORTLSSOMENODES = "Specific Nodes";
