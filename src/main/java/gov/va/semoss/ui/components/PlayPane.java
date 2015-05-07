@@ -659,7 +659,12 @@ public class PlayPane extends JFrame {
 		iManagePanel = new InsightManagerPanel( repoList );
 		rightView.insertTab( "Insight Manager", null, iManagePanel,
 				"Manage perspectives and insights", 2 );
-
+		JLabel perlbl = new JLabel("Insight Manager");
+		Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
+		perlbl.setIcon(pericon);
+		perlbl.setIconTextGap(5);
+		perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+		rightView.setTabComponentAt(2, perlbl);
 		return rightView;
 	}
 
@@ -1380,8 +1385,8 @@ public class PlayPane extends JFrame {
 									"Customize graph display" );
 						}
 						else if ( loggingPanel == panel ) {
-							rightTabs.addTab( "Logging",  DbAction.getIcon( "log_tab1" ), loggingPanel,
-									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
+							rightTabs.insertTab( "Logging",  DbAction.getIcon( "log_tab1" ), loggingPanel,
+									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team", 2 );
 							JLabel loglbl = new JLabel("Logging");
 							Icon logicon = DbAction.getIcon( "log_tab1" );
 							loglbl.setIcon(logicon);
@@ -1567,8 +1572,14 @@ public class PlayPane extends JFrame {
 
 				if ( ischecked ) {
 					iManagePanel.insightManagerPanelWorker();
-					rightTabs.addTab( "Insight Manager", null, iManagePanel,
-							"Manage perspectives and insights" );
+					rightTabs.insertTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1"), iManagePanel,
+							"Manage perspectives and insights", 3 );
+					JLabel perlbl = new JLabel("Insight Manager");
+					Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
+					perlbl.setIcon(pericon);
+					perlbl.setIconTextGap(5);
+					perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
+					rightTabs.setTabComponentAt(3, perlbl);
 					iManage.setToolTipText( "Disable the Insite Manager Tab" );
 				}
 				else {
