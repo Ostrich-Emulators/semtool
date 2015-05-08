@@ -65,6 +65,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				jrb.setActionCommand( rs.toString() );
 				edgegroup.add( jrb );
 				edgemodelPanel.add( jrb );
+
+				jrb.setSelected( ReificationStyle.SEMOSS == rs );
 			}
 		}
 
@@ -226,9 +228,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     baseuri.setEditable(true);
 
     edgemodelPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), "Reification Model", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
-    edgemodelPanel.setLayout(new javax.swing.BoxLayout(edgemodelPanel, javax.swing.BoxLayout.LINE_AXIS));
-
-    vocabPanel.setLayout(new javax.swing.BoxLayout(vocabPanel, javax.swing.BoxLayout.LINE_AXIS));
+    edgemodelPanel.setLayout(new javax.swing.BoxLayout(edgemodelPanel, javax.swing.BoxLayout.PAGE_AXIS));
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
