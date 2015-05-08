@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/c1e560419-384c-4ea6-9f0d-64e1c35baa4e> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/Ne210663e-82b0-4c2f-a1ef-dfa90e257d86> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://junk.com/testfiles/Concept/Apple/R309993226195c3e742d872c054840c44> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Apple> .
@@ -9,9 +9,9 @@
 <http://junk.com/testfiles/Concept/Person/John> <http://junk.com/testfiles/Relation/likes/B67583e903e11939fc8613dfebc7b0ef0> <http://junk.com/testfiles/Concept/Apple/R309993226195c3e742d872c054840c44> .
 <http://junk.com/testfiles/Concept/Person/John> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Person> .
 <http://junk.com/testfiles/Concept/Person/John> <http://www.w3.org/2000/01/rdf-schema#label> "John" .
-<http://junk.com/testfiles/Relation/hates/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#label> "John:Golden Delicious" .
+<http://junk.com/testfiles/Relation/hates/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#label> "John hates Golden Delicious" .
 <http://junk.com/testfiles/Relation/hates/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/hates> .
-<http://junk.com/testfiles/Relation/likes/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#label> "John:Golden Delicious" .
+<http://junk.com/testfiles/Relation/likes/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#label> "John likes Golden Delicious" .
 <http://junk.com/testfiles/Relation/likes/B67583e903e11939fc8613dfebc7b0ef0> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/likes> .
 <http://seman.tc/models/northwind#Apple> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
 <http://seman.tc/models/northwind#Apple> <http://www.w3.org/2000/01/rdf-schema#label> "Apple" .
@@ -31,4 +31,5 @@
 <http://seman.tc/models/northwind#Relation/likes> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
 <http://seman.tc/models/northwind#Relation/likes> <http://www.w3.org/2000/01/rdf-schema#label> "likes" .
 <http://seman.tc/models/northwind#Relation/likes> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation> .
-<http://semoss.va.gov/database/c1e560419-384c-4ea6-9f0d-64e1c35baa4e> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.va.gov/database/Ne210663e-82b0-4c2f-a1ef-dfa90e257d86> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/ticket608.xlsx> .
+<http://semoss.va.gov/database/Ne210663e-82b0-4c2f-a1ef-dfa90e257d86> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

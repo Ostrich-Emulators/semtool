@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/Sf0db6b2a-a4dc-4213-8a9b-619c736a1f40> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/abace6757-d186-47ac-8b7d-749e12041ab0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://junk.com/testfiles/Concept/Date/Ab2d6fb8879d236570d2e314ce96e3130> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Date> .
@@ -217,83 +217,83 @@
 <http://junk.com/testfiles/Concept/Type/Z1666af38e021c15cbc0e328d3a7a2659> <http://www.w3.org/2000/01/rdf-schema#label> "Zeppelin L-1 (airship)" .
 <http://junk.com/testfiles/Concept/Type/Z7981b7ae778d032cb436600485bc7e54> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
 <http://junk.com/testfiles/Concept/Type/Z7981b7ae778d032cb436600485bc7e54> <http://www.w3.org/2000/01/rdf-schema#label> "Zeppelin L-34 (airship)" .
-<http://junk.com/testfiles/Relation/has/A2ef3c7a8b3fe1bdc9fc74b3e6e83618c> <http://www.w3.org/2000/01/rdf-schema#label> "3/5/1915-Tienen, Belgium:3/5/1915" .
+<http://junk.com/testfiles/Relation/has/A2ef3c7a8b3fe1bdc9fc74b3e6e83618c> <http://www.w3.org/2000/01/rdf-schema#label> "3/5/1915-Tienen, Belgium has 3/5/1915" .
 <http://junk.com/testfiles/Relation/has/A2ef3c7a8b3fe1bdc9fc74b3e6e83618c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Ad061643757d478df0f2de665ccc6a03b> <http://www.w3.org/2000/01/rdf-schema#label> "7/28/1916-Near Jambol, Bulgeria:7/28/1916" .
+<http://junk.com/testfiles/Relation/has/Ad061643757d478df0f2de665ccc6a03b> <http://www.w3.org/2000/01/rdf-schema#label> "7/28/1916-Near Jambol, Bulgeria has 7/28/1916" .
 <http://junk.com/testfiles/Relation/has/Ad061643757d478df0f2de665ccc6a03b> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/B74b57ca3eb4fca39c3106e4ecf49dbee> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-College Park, Maryland:8/16/1920" .
+<http://junk.com/testfiles/Relation/has/B74b57ca3eb4fca39c3106e4ecf49dbee> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-College Park, Maryland has 8/16/1920" .
 <http://junk.com/testfiles/Relation/has/B74b57ca3eb4fca39c3106e4ecf49dbee> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/B75419f205ba15ca4ee1b22eb4e635874> <http://www.w3.org/2000/01/rdf-schema#label> "11/28/1916-Off West Hartlepool, England:Zeppelin L-34 (airship)" .
+<http://junk.com/testfiles/Relation/has/B75419f205ba15ca4ee1b22eb4e635874> <http://www.w3.org/2000/01/rdf-schema#label> "11/28/1916-Off West Hartlepool, England has Zeppelin L-34 (airship)" .
 <http://junk.com/testfiles/Relation/has/B75419f205ba15ca4ee1b22eb4e635874> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/B95683e0c069ec07b2c65d14234cad07a> <http://www.w3.org/2000/01/rdf-schema#label> "9/24/1916-Billericay, England:Billericay, England" .
+<http://junk.com/testfiles/Relation/has/B95683e0c069ec07b2c65d14234cad07a> <http://www.w3.org/2000/01/rdf-schema#label> "9/24/1916-Billericay, England has Billericay, England" .
 <http://junk.com/testfiles/Relation/has/B95683e0c069ec07b2c65d14234cad07a> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/B95c961154a35a2790b38364c1c14038c> <http://www.w3.org/2000/01/rdf-schema#label> "10/1/1916-Potters Bar, England:Potters Bar, England" .
+<http://junk.com/testfiles/Relation/has/B95c961154a35a2790b38364c1c14038c> <http://www.w3.org/2000/01/rdf-schema#label> "10/1/1916-Potters Bar, England has Potters Bar, England" .
 <http://junk.com/testfiles/Relation/has/B95c961154a35a2790b38364c1c14038c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Cb6c2aa8eeec6f517ce51821e8a5a593b> <http://www.w3.org/2000/01/rdf-schema#label> "9/3/1915-Off Cuxhaven, Germany:Off Cuxhaven, Germany" .
+<http://junk.com/testfiles/Relation/has/Cb6c2aa8eeec6f517ce51821e8a5a593b> <http://www.w3.org/2000/01/rdf-schema#label> "9/3/1915-Off Cuxhaven, Germany has Off Cuxhaven, Germany" .
 <http://junk.com/testfiles/Relation/has/Cb6c2aa8eeec6f517ce51821e8a5a593b> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Ce615a33db40a5bbee96c9e6c9459739c> <http://www.w3.org/2000/01/rdf-schema#label> "10/1/1916-Potters Bar, England:Zeppelin L-31 (airship)" .
+<http://junk.com/testfiles/Relation/has/Ce615a33db40a5bbee96c9e6c9459739c> <http://www.w3.org/2000/01/rdf-schema#label> "10/1/1916-Potters Bar, England has Zeppelin L-31 (airship)" .
 <http://junk.com/testfiles/Relation/has/Ce615a33db40a5bbee96c9e6c9459739c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/D7710024246acc1199e98fbee05296409> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-College Park, Maryland:College Park, Maryland" .
+<http://junk.com/testfiles/Relation/has/D7710024246acc1199e98fbee05296409> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-College Park, Maryland has College Park, Maryland" .
 <http://junk.com/testfiles/Relation/has/D7710024246acc1199e98fbee05296409> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Dc6ca768616a3035640b66fefc0bf89c3> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-Bedford, England:8/16/1920" .
+<http://junk.com/testfiles/Relation/has/Dc6ca768616a3035640b66fefc0bf89c3> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-Bedford, England has 8/16/1920" .
 <http://junk.com/testfiles/Relation/has/Dc6ca768616a3035640b66fefc0bf89c3> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Dc7f06a7383c1e2b069afd9460399e41c> <http://www.w3.org/2000/01/rdf-schema#label> "3/5/1915-Tienen, Belgium:Zeppelin L-8 (airship)" .
+<http://junk.com/testfiles/Relation/has/Dc7f06a7383c1e2b069afd9460399e41c> <http://www.w3.org/2000/01/rdf-schema#label> "3/5/1915-Tienen, Belgium has Zeppelin L-8 (airship)" .
 <http://junk.com/testfiles/Relation/has/Dc7f06a7383c1e2b069afd9460399e41c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Ge446f149130644302650562f03d3946c> <http://www.w3.org/2000/01/rdf-schema#label> "8/6/1913-Victoria, British Columbia, Canada:8/6/1913" .
+<http://junk.com/testfiles/Relation/has/Ge446f149130644302650562f03d3946c> <http://www.w3.org/2000/01/rdf-schema#label> "8/6/1913-Victoria, British Columbia, Canada has 8/6/1913" .
 <http://junk.com/testfiles/Relation/has/Ge446f149130644302650562f03d3946c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Gf20072e0d689641f92c1e43b1746b4fa> <http://www.w3.org/2000/01/rdf-schema#label> "9/24/1916-Billericay, England:9/24/1916" .
+<http://junk.com/testfiles/Relation/has/Gf20072e0d689641f92c1e43b1746b4fa> <http://www.w3.org/2000/01/rdf-schema#label> "9/24/1916-Billericay, England has 9/24/1916" .
 <http://junk.com/testfiles/Relation/has/Gf20072e0d689641f92c1e43b1746b4fa> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/H8730e176923fce96481870bbd7897225> <http://www.w3.org/2000/01/rdf-schema#label> "9/24/1916-Billericay, England:Zeppelin L-32 (airship)" .
+<http://junk.com/testfiles/Relation/has/H8730e176923fce96481870bbd7897225> <http://www.w3.org/2000/01/rdf-schema#label> "9/24/1916-Billericay, England has Zeppelin L-32 (airship)" .
 <http://junk.com/testfiles/Relation/has/H8730e176923fce96481870bbd7897225> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Hdc6ebf67e3990c73399116e50dcfa701> <http://www.w3.org/2000/01/rdf-schema#label> "9/3/1915-Off Cuxhaven, Germany:9/3/1915" .
+<http://junk.com/testfiles/Relation/has/Hdc6ebf67e3990c73399116e50dcfa701> <http://www.w3.org/2000/01/rdf-schema#label> "9/3/1915-Off Cuxhaven, Germany has 9/3/1915" .
 <http://junk.com/testfiles/Relation/has/Hdc6ebf67e3990c73399116e50dcfa701> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/J281711f872ce13e0eaf413a25e5f786c> <http://www.w3.org/2000/01/rdf-schema#label> "9/9/1913-Over the North Sea:Over the North Sea" .
+<http://junk.com/testfiles/Relation/has/J281711f872ce13e0eaf413a25e5f786c> <http://www.w3.org/2000/01/rdf-schema#label> "9/9/1913-Over the North Sea has Over the North Sea" .
 <http://junk.com/testfiles/Relation/has/J281711f872ce13e0eaf413a25e5f786c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/J5dbab73e0e9c22e27a8cf3bd3be5fcd2> <http://www.w3.org/2000/01/rdf-schema#label> "11/21/1916-Mainz, Germany:Mainz, Germany" .
+<http://junk.com/testfiles/Relation/has/J5dbab73e0e9c22e27a8cf3bd3be5fcd2> <http://www.w3.org/2000/01/rdf-schema#label> "11/21/1916-Mainz, Germany has Mainz, Germany" .
 <http://junk.com/testfiles/Relation/has/J5dbab73e0e9c22e27a8cf3bd3be5fcd2> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Ja4efa1cd73e72b00d14c24fcbb532a3e> <http://www.w3.org/2000/01/rdf-schema#label> "7/28/1916-Near Jambol, Bulgeria:Near Jambol, Bulgeria" .
+<http://junk.com/testfiles/Relation/has/Ja4efa1cd73e72b00d14c24fcbb532a3e> <http://www.w3.org/2000/01/rdf-schema#label> "7/28/1916-Near Jambol, Bulgeria has Near Jambol, Bulgeria" .
 <http://junk.com/testfiles/Relation/has/Ja4efa1cd73e72b00d14c24fcbb532a3e> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/L12f41bca388ff8a3e712b22206ea23ad> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-College Park, Maryland:De Havilland DH-4" .
+<http://junk.com/testfiles/Relation/has/L12f41bca388ff8a3e712b22206ea23ad> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-College Park, Maryland has De Havilland DH-4" .
 <http://junk.com/testfiles/Relation/has/L12f41bca388ff8a3e712b22206ea23ad> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/L95193c7dd22f1ce5223420ecbdd097f0> <http://www.w3.org/2000/01/rdf-schema#label> "11/21/1916-Mainz, Germany:11/21/1916" .
+<http://junk.com/testfiles/Relation/has/L95193c7dd22f1ce5223420ecbdd097f0> <http://www.w3.org/2000/01/rdf-schema#label> "11/21/1916-Mainz, Germany has 11/21/1916" .
 <http://junk.com/testfiles/Relation/has/L95193c7dd22f1ce5223420ecbdd097f0> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Leee291ecd595de000bbf9b46a24c43ac> <http://www.w3.org/2000/01/rdf-schema#label> "7/28/1916-Near Jambol, Bulgeria:Schutte-Lanz S-L-10 (airship)" .
+<http://junk.com/testfiles/Relation/has/Leee291ecd595de000bbf9b46a24c43ac> <http://www.w3.org/2000/01/rdf-schema#label> "7/28/1916-Near Jambol, Bulgeria has Schutte-Lanz S-L-10 (airship)" .
 <http://junk.com/testfiles/Relation/has/Leee291ecd595de000bbf9b46a24c43ac> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Ma05aef18b9cbd1a450246bab58af85fb> <http://www.w3.org/2000/01/rdf-schema#label> "8/6/1913-Victoria, British Columbia, Canada:Curtiss seaplane" .
+<http://junk.com/testfiles/Relation/has/Ma05aef18b9cbd1a450246bab58af85fb> <http://www.w3.org/2000/01/rdf-schema#label> "8/6/1913-Victoria, British Columbia, Canada has Curtiss seaplane" .
 <http://junk.com/testfiles/Relation/has/Ma05aef18b9cbd1a450246bab58af85fb> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/N27ea932c11b992dcfc08ec5660d9b3ba> <http://www.w3.org/2000/01/rdf-schema#label> "10/1/1916-Potters Bar, England:10/1/1916" .
+<http://junk.com/testfiles/Relation/has/N27ea932c11b992dcfc08ec5660d9b3ba> <http://www.w3.org/2000/01/rdf-schema#label> "10/1/1916-Potters Bar, England has 10/1/1916" .
 <http://junk.com/testfiles/Relation/has/N27ea932c11b992dcfc08ec5660d9b3ba> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/N2b4bff2ce00cb7dcda8c26a2d29cea22> <http://www.w3.org/2000/01/rdf-schema#label> "11/21/1916-Mainz, Germany:Super Zeppelin (airship)" .
+<http://junk.com/testfiles/Relation/has/N2b4bff2ce00cb7dcda8c26a2d29cea22> <http://www.w3.org/2000/01/rdf-schema#label> "11/21/1916-Mainz, Germany has Super Zeppelin (airship)" .
 <http://junk.com/testfiles/Relation/has/N2b4bff2ce00cb7dcda8c26a2d29cea22> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Ndc99f98e59161a197c15db19820141ad> <http://www.w3.org/2000/01/rdf-schema#label> "8/6/1913-Victoria, British Columbia, Canada:Victoria, British Columbia, Canada" .
+<http://junk.com/testfiles/Relation/has/Ndc99f98e59161a197c15db19820141ad> <http://www.w3.org/2000/01/rdf-schema#label> "8/6/1913-Victoria, British Columbia, Canada has Victoria, British Columbia, Canada" .
 <http://junk.com/testfiles/Relation/has/Ndc99f98e59161a197c15db19820141ad> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/O2be09e659d13027597d9ec0334412c62> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-Bedford, England:Bedford, England" .
+<http://junk.com/testfiles/Relation/has/O2be09e659d13027597d9ec0334412c62> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-Bedford, England has Bedford, England" .
 <http://junk.com/testfiles/Relation/has/O2be09e659d13027597d9ec0334412c62> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Pc236047f6fdf500fbf5354136e6287af> <http://www.w3.org/2000/01/rdf-schema#label> "10/17/1913-Near Johannisthal, Germany:10/17/1913" .
+<http://junk.com/testfiles/Relation/has/Pc236047f6fdf500fbf5354136e6287af> <http://www.w3.org/2000/01/rdf-schema#label> "10/17/1913-Near Johannisthal, Germany has 10/17/1913" .
 <http://junk.com/testfiles/Relation/has/Pc236047f6fdf500fbf5354136e6287af> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/R3fbaf1efd3d4d7bca7e8d3a94ae35405> <http://www.w3.org/2000/01/rdf-schema#label> "7/12/1912-AtlantiCity, New Jersey:7/12/1912" .
+<http://junk.com/testfiles/Relation/has/R3fbaf1efd3d4d7bca7e8d3a94ae35405> <http://www.w3.org/2000/01/rdf-schema#label> "7/12/1912-AtlantiCity, New Jersey has 7/12/1912" .
 <http://junk.com/testfiles/Relation/has/R3fbaf1efd3d4d7bca7e8d3a94ae35405> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Re9cffb8af0a5ba534f8437367c02b4bf> <http://www.w3.org/2000/01/rdf-schema#label> "9/9/1913-Over the North Sea:Zeppelin L-1 (airship)" .
+<http://junk.com/testfiles/Relation/has/Re9cffb8af0a5ba534f8437367c02b4bf> <http://www.w3.org/2000/01/rdf-schema#label> "9/9/1913-Over the North Sea has Zeppelin L-1 (airship)" .
 <http://junk.com/testfiles/Relation/has/Re9cffb8af0a5ba534f8437367c02b4bf> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/S489fc90d212f23c9b691ce5534ca7306> <http://www.w3.org/2000/01/rdf-schema#label> "7/12/1912-AtlantiCity, New Jersey:Dirigible" .
+<http://junk.com/testfiles/Relation/has/S489fc90d212f23c9b691ce5534ca7306> <http://www.w3.org/2000/01/rdf-schema#label> "7/12/1912-AtlantiCity, New Jersey has Dirigible" .
 <http://junk.com/testfiles/Relation/has/S489fc90d212f23c9b691ce5534ca7306> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Sbc1df863c958359f70bbb6de053e8ba2> <http://www.w3.org/2000/01/rdf-schema#label> "9/9/1913-Over the North Sea:9/9/1913" .
+<http://junk.com/testfiles/Relation/has/Sbc1df863c958359f70bbb6de053e8ba2> <http://www.w3.org/2000/01/rdf-schema#label> "9/9/1913-Over the North Sea has 9/9/1913" .
 <http://junk.com/testfiles/Relation/has/Sbc1df863c958359f70bbb6de053e8ba2> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/U4ec3af605ff2db42ff323e8f62b542f5> <http://www.w3.org/2000/01/rdf-schema#label> "7/12/1912-AtlantiCity, New Jersey:AtlantiCity, New Jersey" .
+<http://junk.com/testfiles/Relation/has/U4ec3af605ff2db42ff323e8f62b542f5> <http://www.w3.org/2000/01/rdf-schema#label> "7/12/1912-AtlantiCity, New Jersey has AtlantiCity, New Jersey" .
 <http://junk.com/testfiles/Relation/has/U4ec3af605ff2db42ff323e8f62b542f5> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Ue73afb29c8db3138e05b64e1c67a3117> <http://www.w3.org/2000/01/rdf-schema#label> "9/3/1915-Off Cuxhaven, Germany:Zeppelin L-10 (airship)" .
+<http://junk.com/testfiles/Relation/has/Ue73afb29c8db3138e05b64e1c67a3117> <http://www.w3.org/2000/01/rdf-schema#label> "9/3/1915-Off Cuxhaven, Germany has Zeppelin L-10 (airship)" .
 <http://junk.com/testfiles/Relation/has/Ue73afb29c8db3138e05b64e1c67a3117> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Vd5ce810428e2cdd521d512fe1468f10d> <http://www.w3.org/2000/01/rdf-schema#label> "11/28/1916-Off West Hartlepool, England:Off West Hartlepool, England" .
+<http://junk.com/testfiles/Relation/has/Vd5ce810428e2cdd521d512fe1468f10d> <http://www.w3.org/2000/01/rdf-schema#label> "11/28/1916-Off West Hartlepool, England has Off West Hartlepool, England" .
 <http://junk.com/testfiles/Relation/has/Vd5ce810428e2cdd521d512fe1468f10d> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/W819273b005238912aeab03be1e0ea64f> <http://www.w3.org/2000/01/rdf-schema#label> "10/17/1913-Near Johannisthal, Germany:Near Johannisthal, Germany" .
+<http://junk.com/testfiles/Relation/has/W819273b005238912aeab03be1e0ea64f> <http://www.w3.org/2000/01/rdf-schema#label> "10/17/1913-Near Johannisthal, Germany has Near Johannisthal, Germany" .
 <http://junk.com/testfiles/Relation/has/W819273b005238912aeab03be1e0ea64f> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/X529086c18b8e4a788c90cacc2cfafbbe> <http://www.w3.org/2000/01/rdf-schema#label> "10/17/1913-Near Johannisthal, Germany:Zeppelin L-2 (airship)" .
+<http://junk.com/testfiles/Relation/has/X529086c18b8e4a788c90cacc2cfafbbe> <http://www.w3.org/2000/01/rdf-schema#label> "10/17/1913-Near Johannisthal, Germany has Zeppelin L-2 (airship)" .
 <http://junk.com/testfiles/Relation/has/X529086c18b8e4a788c90cacc2cfafbbe> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Y82b32f979126ffb71807b9f15cc5ee59> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-Bedford, England:Armstrong-Whitworth F-K-8" .
+<http://junk.com/testfiles/Relation/has/Y82b32f979126ffb71807b9f15cc5ee59> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-Bedford, England has Armstrong-Whitworth F-K-8" .
 <http://junk.com/testfiles/Relation/has/Y82b32f979126ffb71807b9f15cc5ee59> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Y88e9666496fc3fbbfe4c56f529fab78e> <http://www.w3.org/2000/01/rdf-schema#label> "11/28/1916-Off West Hartlepool, England:11/28/1916" .
+<http://junk.com/testfiles/Relation/has/Y88e9666496fc3fbbfe4c56f529fab78e> <http://www.w3.org/2000/01/rdf-schema#label> "11/28/1916-Off West Hartlepool, England has 11/28/1916" .
 <http://junk.com/testfiles/Relation/has/Y88e9666496fc3fbbfe4c56f529fab78e> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
-<http://junk.com/testfiles/Relation/has/Za35514da4d6217e76a69c121811f0500> <http://www.w3.org/2000/01/rdf-schema#label> "3/5/1915-Tienen, Belgium:Tienen, Belgium" .
+<http://junk.com/testfiles/Relation/has/Za35514da4d6217e76a69c121811f0500> <http://www.w3.org/2000/01/rdf-schema#label> "3/5/1915-Tienen, Belgium has Tienen, Belgium" .
 <http://junk.com/testfiles/Relation/has/Za35514da4d6217e76a69c121811f0500> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/has> .
 <http://owl.junk.com/testfiles/Aboard> <http://www.w3.org/2000/01/rdf-schema#label> "Aboard" .
 <http://owl.junk.com/testfiles/Aboard> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
@@ -333,4 +333,5 @@
 <http://owl.junk.com/testfiles/Type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
 <http://owl.junk.com/testfiles/Type> <http://www.w3.org/2000/01/rdf-schema#label> "Type" .
 <http://owl.junk.com/testfiles/Type> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://owl.junk.com/testfiles/Concept> .
-<http://semoss.va.gov/database/Sf0db6b2a-a4dc-4213-8a9b-619c736a1f40> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.va.gov/database/abace6757-d186-47ac-8b7d-749e12041ab0> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/airplanes.csv> .
+<http://semoss.va.gov/database/abace6757-d186-47ac-8b7d-749e12041ab0> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

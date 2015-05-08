@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/k1f3b7623-cab5-48cc-bf47-8e1c07dbdf2a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/K2b89f5ab-eaed-4f2e-95d1-4f8074529002> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://sales.data/purchases/2015> <http://www.w3.org/2000/01/rdf-schema#label> "\"Purchase Dataset\"" .
@@ -10,7 +10,7 @@
 <http://sales.data/purchases#Concept/Yuri> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri" .
 <http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://sales.data/schema#Date> "2014-11-09T05:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 <http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://sales.data/schema#Price> "3000 USD" .
-<http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://www.w3.org/2000/01/rdf-schema#label> "<http://sales.data/purchases#Yuri>:Yugo" .
+<http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://www.w3.org/2000/01/rdf-schema#label> "<http://sales.data/purchases#Yuri> <http://sales.data/schema#Purchased> Yugo" .
 <http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Purchased> .
 <http://sales.data/purchases#Yuri> <http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://sales.data/purchases#Concept/Yugo> .
 <http://sales.data/purchases#Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#P7acd8665537e042014530e6fe347abaf> .
@@ -29,4 +29,5 @@
 <http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
 <http://sales.data/schema#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
 <http://sales.data/schema#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
-<http://semoss.va.gov/database/k1f3b7623-cab5-48cc-bf47-8e1c07dbdf2a> <http://rdfs.org/ns/void#subset> <http://sales.data/purchases/2015> .
+<http://semoss.va.gov/database/K2b89f5ab-eaed-4f2e-95d1-4f8074529002> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/test10.xlsx> .
+<http://semoss.va.gov/database/K2b89f5ab-eaed-4f2e-95d1-4f8074529002> <http://rdfs.org/ns/void#subset> <http://sales.data/purchases/2015> .

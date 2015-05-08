@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/gbedef053-8437-444c-8ddd-2e6047914aa0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/df9727c3b-d647-4528-a783-d7f817fe0ea3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://seman.tc/data/northwind/Concept/I3a8002d4363ed6e94b0c5176924fb7d2> <http://schema.org/jobTitle> "Owner" .
@@ -13,10 +13,11 @@
 <http://seman.tc/data/northwind/Concept/M4b758ad465ff47ed3006af6e2d9c15e1> <http://seman.tc/data/northwind/Relation/Y66564fa073cb785c57d6d372d5ab4aec> <http://seman.tc/data/northwind/Concept/I3a8002d4363ed6e94b0c5176924fb7d2> .
 <http://seman.tc/data/northwind/Concept/M4b758ad465ff47ed3006af6e2d9c15e1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#CorporateCustomer> .
 <http://seman.tc/data/northwind/Concept/M4b758ad465ff47ed3006af6e2d9c15e1> <http://www.w3.org/2000/01/rdf-schema#label> "Paris sp\u00E9cialit\u00E9s"@fr .
-<http://seman.tc/data/northwind/Relation/Y66564fa073cb785c57d6d372d5ab4aec> <http://www.w3.org/2000/01/rdf-schema#label> "Paris sp\u00E9cialit\u00E9s:Marie Bertrand" .
+<http://seman.tc/data/northwind/Relation/Y66564fa073cb785c57d6d372d5ab4aec> <http://www.w3.org/2000/01/rdf-schema#label> "Paris sp\u00E9cialit\u00E9s schema:contactPoint Marie Bertrand" .
 <http://seman.tc/data/northwind/Relation/Y66564fa073cb785c57d6d372d5ab4aec> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://schema.org/contactPoint> .
-<http://seman.tc/data/northwind/VCAMPApplicationModule> <http://www.w3.org/2000/01/rdf-schema#subclassOf> <http://seman.tc/data/northwind/ApplicationModule> .
+<http://seman.tc/data/northwind/VCAMPApplicationModule> <http://www.w3.org/2000/01/rdf-schema#subclassOf> "<http://seman.tc/data/northwind/ApplicationModule>" .
 <http://seman.tc/models/northwind#Concept> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
 <http://seman.tc/models/northwind#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
 <http://seman.tc/models/northwind#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://seman.tc/models/northwind#Relation/Contains> .
-<http://semoss.va.gov/database/gbedef053-8437-444c-8ddd-2e6047914aa0> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.va.gov/database/df9727c3b-d647-4528-a783-d7f817fe0ea3> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/custom2.xlsx> .
+<http://semoss.va.gov/database/df9727c3b-d647-4528-a783-d7f817fe0ea3> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

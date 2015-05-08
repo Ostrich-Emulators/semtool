@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/Aca9d9635-0187-4658-851c-d8bc441724f7> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/a8f57f7ab-fd2c-42c5-bb1d-6c8943039fdc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://owl.junk.com/testfiles/ApplicationModule> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
 <http://owl.junk.com/testfiles/ApplicationModule> <http://www.w3.org/2000/01/rdf-schema#label> "ApplicationModule" .
 <http://owl.junk.com/testfiles/ApplicationModule> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://owl.junk.com/testfiles/Concept> .
@@ -23,7 +23,8 @@
 <http://owl.junk.com/testfiles/UseCaseID> <http://www.w3.org/2000/01/rdf-schema#label> "UseCaseID" .
 <http://owl.junk.com/testfiles/UseCaseID> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
 <http://owl.junk.com/testfiles/UseCaseID> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Contains> .
-<http://semoss.va.gov/database/Aca9d9635-0187-4658-851c-d8bc441724f7> <http://rdfs.org/ns/void#subset> <http://va.gov/ontologies> .
+<http://semoss.va.gov/database/a8f57f7ab-fd2c-42c5-bb1d-6c8943039fdc> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/test17.xlsx> .
+<http://semoss.va.gov/database/a8f57f7ab-fd2c-42c5-bb1d-6c8943039fdc> <http://rdfs.org/ns/void#subset> <http://va.gov/ontologies> .
 <http://va.gov/ontologies> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://va.gov/ontologies> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://va.gov/ontologies/> <http://www.w3.org/2000/01/rdf-schema#label> "\"Node as Attribute Test Dataset\"" .
