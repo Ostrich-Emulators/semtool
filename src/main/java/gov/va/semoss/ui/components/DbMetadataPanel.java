@@ -26,8 +26,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
+import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
@@ -443,7 +443,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		final String val = fieldlkp.get( uri ).getText();
 
 		try {
-			eng.execute( new ModificationExecutor() {
+			eng.execute( new ModificationExecutorAdapter( true ) {
 
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
@@ -463,17 +463,14 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 						}
 					}
 				}
-
-				@Override
-
-				public boolean execInTransaction() {
-					return true;
-				}
 			} );
+			
+			if( RDFS.LABEL.equals( uri ) ){
+				eng.setEngineName( val );
+			}
 		}
 		catch ( Exception e ) {
 			log.error( "could not update db metadata", e );
 		}
-
 	}
 }

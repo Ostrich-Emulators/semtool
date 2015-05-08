@@ -62,12 +62,17 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -210,6 +215,8 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
+
+		setEngineName( MetadataQuery.getEngineLabel( this ) );
 
 		RepositoryConnection rc = getRawConnection();
 		rc.begin();
@@ -354,23 +361,41 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		return ret;
 	}
 
+	private static String processNamespaces( String rawsparql ) {
+		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
+		namespaces.putAll( Utility.DEFAULTNAMESPACES );
+
+		Set<String> existingNamespaces = new HashSet<>();
+		if ( rawsparql.toUpperCase().contains( "PREFIX" ) ) {
+			Pattern pat = Pattern.compile( "prefix[\\s]+([A-Za-z0-9_-]+)[\\s]*:",
+					Pattern.CASE_INSENSITIVE );
+			Matcher m = pat.matcher( rawsparql );
+			while ( m.find() ) {
+				existingNamespaces.add( m.group( 1 ) );
+			}
+		}
+
+		StringBuilder sparql = new StringBuilder();
+		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
+			if ( !existingNamespaces.contains( en.getKey() ) ) {
+				sparql.append( "PREFIX " ).append( en.getKey() );
+				sparql.append( ": <" ).append( en.getValue() ).append( "> " );
+			}
+		}
+
+		sparql.append( rawsparql );
+		return sparql.toString();
+	}
+
 	public static final <T> T getSelect( QueryExecutor<T> query,
 			RepositoryConnection rc, boolean dobindings ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
 
-		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
-		namespaces.putAll( Utility.DEFAULTNAMESPACES );
-		
-		StringBuilder sparql = new StringBuilder();
-		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
-			sparql.append( "PREFIX " ).append( en.getKey() );
-			sparql.append( ": <" ).append( en.getValue() ).append( "> " );
-		}
-
-		sparql.append( dobindings ? query.getSparql() : query.bindAndGetSparql() );
+		String sparql = processNamespaces( dobindings ? query.getSparql()
+				: query.bindAndGetSparql() );
 
 		ValueFactory vfac = new ValueFactoryImpl();
-		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql.toString() );
+		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql );
 		if ( dobindings ) {
 			tq.setIncludeInferred( query.usesInferred() );
 			query.setBindings( tq, vfac );
@@ -402,19 +427,9 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	public static Model getConstruct( String sparqlstr, RepositoryConnection rc )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		
-		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
-		namespaces.putAll( Utility.DEFAULTNAMESPACES );
-		
-		StringBuilder sparql = new StringBuilder();
-		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
-			sparql.append( "PREFIX " ).append( en.getKey() );
-			sparql.append( ": <" ).append( en.getValue() ).append( "> " );
-		}
 
-		sparql.append( sparqlstr );
-
-		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql.toString() );
+		String sparql = processNamespaces( sparqlstr );
+		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql );
 		Model model = new LinkedHashModel();
 		GraphQueryResult gqr = tq.evaluate();
 		while ( gqr.hasNext() ) {
