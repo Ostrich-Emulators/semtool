@@ -120,6 +120,7 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 
 	@Override
 	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
+		setupToolBarButtons( tabTitle );
 		jtb.add( errorLabel );
 		jtb.add( editheaders );
 		setErrorLabel();

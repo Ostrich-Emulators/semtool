@@ -118,12 +118,16 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		} );
 	}
 
-	@Override
-	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
+	protected void setupToolBarButtons( final String tabTitle ){
 		save.setDefaultFileName( tabTitle );
 		save.setTable( model );
 		saveas.setDefaultFileName( tabTitle );
-		saveas.setTable( model );
+		saveas.setTable( model );		
+	}
+	
+	@Override
+	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
+		setupToolBarButtons( tabTitle );
 		jtb.add( save );
 
 		saveall.setPlaySheetFrame( getPlaySheetFrame() );

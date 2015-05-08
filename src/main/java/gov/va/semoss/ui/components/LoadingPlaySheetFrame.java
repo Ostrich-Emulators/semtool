@@ -122,7 +122,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	public LoadingPlaySheetFrame( IEngine eng, ImportData data ) {
 		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
 
-		setTitle( "Import Data Review " );
+		setTitle( "Import Data Review" );
 		
 
 		LoadingPlaySheetBase first = null;
