@@ -8,14 +8,17 @@ package gov.va.semoss.ui.actions;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.ui.components.AddTabPanel;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.NodeLoadingPlaySheet;
 import gov.va.semoss.ui.components.playsheets.RelationshipLoadingPlaySheet;
 import gov.va.semoss.util.DIHelper;
+
 import javax.swing.JOptionPane;
 
 /**
@@ -30,6 +33,7 @@ public class NewLoadingSheetAction extends DbAction {
 		super( optg, "Create Loading Sheet", "open-file3" );
 		this.frame = frame;
 		putValue( SHORT_DESCRIPTION, "Create a new Loading Sheet Workbook" );
+		putValue( SMALL_ICON, DbAction.getIcon( "input_review_add1" ) );
 	}
 
 	@Override
