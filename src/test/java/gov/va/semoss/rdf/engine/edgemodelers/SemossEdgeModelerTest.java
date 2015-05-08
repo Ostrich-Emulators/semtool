@@ -206,7 +206,7 @@ public class SemossEdgeModelerTest {
 
 	@Test
 	public void testAddRel2() throws Exception {
-		LoadingNodeAndPropertyValues rel = rels.add( "Yuri", "Yugo" );
+		LoadingNodeAndPropertyValues rel = rels.add( "Alan", "Cadillac" );
 
 		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
