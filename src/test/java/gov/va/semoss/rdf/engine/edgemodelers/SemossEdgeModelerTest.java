@@ -72,6 +72,7 @@ public class SemossEdgeModelerTest {
 	private static final File REL2 = new File( "src/test/resources/semossedge-rel2.ttl" );
 	private static final File META = new File( "src/test/resources/semossedge-mm.ttl" );
 	private static final File NODE = new File( "src/test/resources/semossedge-node.ttl" );
+	private static final File NODE2 = new File( "src/test/resources/semossedge-node2.ttl" );
 
 	private QaChecker qaer;
 	private InMemorySesameEngine engine;
@@ -238,5 +239,24 @@ public class SemossEdgeModelerTest {
 				engine.getRawConnection() );
 
 		compare( engine, NODE );
+	}
+
+	@Test
+	public void testAdd2Nodes() throws Exception {
+		Map<String, Value> props = new HashMap<>();
+		props.put( "First Name", vf.createLiteral( "Yuri" ) );
+		props.put( "Last Name", vf.createLiteral( "Gagarin" ) );
+		LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
+		LoadingNodeAndPropertyValues node2 = nodes.add( "Yuri", props );
+
+		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+
+		instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
+				engine.getRawConnection() );
+		instance.addNode( node2, new HashMap<>(), rels, data.getMetadata(),
+				engine.getRawConnection() );
+
+		compare( engine, NODE2 );
 	}
 }

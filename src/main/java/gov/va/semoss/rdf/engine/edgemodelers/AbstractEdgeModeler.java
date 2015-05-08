@@ -197,19 +197,21 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	 * @throws org.openrdf.repository.RepositoryException
 	 */
 	protected URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
-			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
+			ImportMetadata metas, RepositoryConnection myrc, boolean checkCacheFirst )
+			throws RepositoryException {
 
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
 
-		if ( !qaer.hasCachedInstance( typename, rawlabel ) ) {
+		if ( ( checkCacheFirst && !hasCachedInstance( typename, rawlabel ) )
+				|| !checkCacheFirst ) {
 			URI subject = ( nodeIsAlreadyUri
 					? getUriFromRawString( rawlabel, namespaces )
 					: metas.getDataBuilder().add( rawlabel ).build() );
 			subject = ensureUnique( subject );
-			qaer.cacheInstance( subject, typename, rawlabel );
+			cacheInstance( subject, typename, rawlabel );
 		}
 
-		URI subject = qaer.getCachedInstance( typename, rawlabel );
+		URI subject = getCachedInstance( typename, rawlabel );
 		myrc.add( subject, RDF.TYPE, qaer.getCachedInstanceClass( typename ) );
 		return subject;
 	}
@@ -270,25 +272,31 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 	public void cacheInstanceClass( URI uri, String label ) {
 		qaer.cacheInstanceClass( uri, label );
+		duplicates.add( uri );
 	}
 
 	public void cacheRelationNode( URI uri, String label ) {
 		qaer.cacheRelationNode( uri, label );
+		duplicates.add( uri );
 	}
 
 	public void cacheRelationClass( URI uri, String sub, String obj, String rel ) {
 		qaer.cacheRelationClass( uri, sub, obj, rel );
+		duplicates.add( uri );
 	}
 
 	public void cacheInstance( URI uri, String typelabel, String rawlabel ) {
 		qaer.cacheInstance( uri, typelabel, rawlabel );
+		duplicates.add( uri );
 	}
 
 	public void cachePropertyClass( URI uri, String name ) {
 		qaer.cachePropertyClass( uri, name );
+		duplicates.add( uri );
 	}
 
 	public void cacheRelationClass( URI uri, RelationClassCacheKey key ) {
 		qaer.cacheRelationClass( uri, key );
+		duplicates.add( uri );
 	}
 }

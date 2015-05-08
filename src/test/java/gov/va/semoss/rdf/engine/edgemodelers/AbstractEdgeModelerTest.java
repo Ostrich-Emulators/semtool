@@ -140,22 +140,6 @@ public class AbstractEdgeModelerTest {
 	}
 
 	// @Test
-	public void testAddSimpleNode() throws Exception {
-		System.out.println( "addSimpleNode" );
-		String typename = "";
-		String rawlabel = "";
-		Map<String, String> namespaces = null;
-		ImportMetadata metas = null;
-		RepositoryConnection myrc = null;
-		AbstractEdgeModeler instance = new AbstractEdgeModelerImpl();
-		URI expResult = null;
-		URI result = instance.addSimpleNode( typename, rawlabel, namespaces, metas, myrc );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
-	}
-
-	// @Test
 	public void testEnsureUnique() {
 		System.out.println( "ensureUnique" );
 		URI uri = null;
