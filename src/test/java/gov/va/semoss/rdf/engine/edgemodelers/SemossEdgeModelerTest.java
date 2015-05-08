@@ -31,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import org.junit.BeforeClass;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -246,17 +248,20 @@ public class SemossEdgeModelerTest {
 		Map<String, Value> props = new HashMap<>();
 		props.put( "First Name", vf.createLiteral( "Yuri" ) );
 		props.put( "Last Name", vf.createLiteral( "Gagarin" ) );
+		
+		// adding two nodes with identical properties
+		// testing to make sure we get two different URIs back
 		LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
 		LoadingNodeAndPropertyValues node2 = nodes.add( "Yuri", props );
 
 		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
-		instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
+		URI one = instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
-		instance.addNode( node2, new HashMap<>(), rels, data.getMetadata(),
+		URI two = instance.addNode( node2, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
 
-		compare( engine, NODE2 );
+		assertNotEquals( one, two );
 	}
 }
