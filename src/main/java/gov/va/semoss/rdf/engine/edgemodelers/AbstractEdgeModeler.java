@@ -139,8 +139,9 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				try {
 					URI type = getUriFromRawString( typestr, namespaces );
 					if ( null == type ) {
-						// will get caught immediately
-						throw new NullPointerException( "unknown type URI" );
+						log.warn( "probably misinterpreting as string (unknown type URI?) :"
+								+ rawval );
+						val = rawval;
 					}
 					else {
 						return vf.createLiteral( val, type );
