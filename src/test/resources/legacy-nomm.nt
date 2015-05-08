@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/M2c121232-db44-484b-9c04-a311c3c0f438> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/ua09591f7-135b-4f2d-978e-ab906df1de59> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://junk.com/testfiles/Beverages> <http://owl.junk.com/testfiles/Description> "Soft drinks, coffees, teas, beers, and ales" .
@@ -110,5 +110,5 @@
 <http://junk.com/testfiles/W87ef52d611a9e479ee89efd3c70384c8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Category> .
 <http://junk.com/testfiles/Y6fb185e92be8114afa4b9e554f3acd84> <http://junk.com/testfiles/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://junk.com/testfiles/W87ef52d611a9e479ee89efd3c70384c8> .
 <http://junk.com/testfiles/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Product> .
-<http://semoss.va.gov/database/M2c121232-db44-484b-9c04-a311c3c0f438> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/legacy.xlsx> .
-<http://semoss.va.gov/database/M2c121232-db44-484b-9c04-a311c3c0f438> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.va.gov/database/ua09591f7-135b-4f2d-978e-ab906df1de59> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/legacy.xlsx> .
+<http://semoss.va.gov/database/ua09591f7-135b-4f2d-978e-ab906df1de59> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

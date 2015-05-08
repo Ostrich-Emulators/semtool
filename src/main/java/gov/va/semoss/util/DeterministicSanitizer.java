@@ -16,34 +16,40 @@ import org.apache.commons.codec.digest.DigestUtils;
  */
 public class DeterministicSanitizer implements UriSanitizer {
 
-  private final Pattern PAT = Pattern.compile( "([a-z])" );
+	private final Pattern PAT = Pattern.compile( "([a-z])" );
 
-  @Override
-  public String sanitize( String raw ) {
-    if ( Utility.isValidUriChars( raw ) ) {
-      return raw;
-    }
+	@Override
+	public String sanitize( String raw ) {
+		if ( Utility.isValidUriChars( raw ) ) {
+			return raw;
+		}
 
-    String md5 = DigestUtils.md5Hex( raw );
+		// Attempt a simple sanitizing:
+		String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
+		if ( Utility.isValidUriChars( rawWithUnderscores ) ) {
+			return rawWithUnderscores;
+		}
+
+		String md5 = DigestUtils.md5Hex( raw );
     // md5 might start with a number, so determinisitically decide on an
-    // reasonably-random leading character. Here, we just add up the indexes of
-    // the alpha characters, then use that to generate a new character
-    Matcher m = PAT.matcher( md5 );
-    int counter = 17;
-    final int length = md5.length();
-    final int limit = length / 2;
-    while ( m.find() ) {
-      long end = m.end( 1 );
-      if ( end > limit ) {
-        // don't want letters at the end to be too significant, so shrink them
-        end -= limit;
-      }
+		// reasonably-random leading character. Here, we just add up the indexes of
+		// the alpha characters, then use that to generate a new character
+		Matcher m = PAT.matcher( md5 );
+		int counter = 17;
+		final int length = md5.length();
+		final int limit = length / 2;
+		while ( m.find() ) {
+			long end = m.end( 1 );
+			if ( end > limit ) {
+				// don't want letters at the end to be too significant, so shrink them
+				end -= limit;
+			}
 
-      counter += end;
-    }
+			counter += end;
+		}
 
-    counter = counter % 26;
-    char leading = (char) ( 65 + counter ); // get ascii char A-Z
-    return leading + md5;
-  }
+		counter = counter % 26;
+		char leading = (char) ( 65 + counter ); // get ascii char A-Z
+		return leading + md5;
+	}
 }

@@ -7,6 +7,7 @@ package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.util.Constants;
 import java.io.File;
@@ -83,7 +84,7 @@ public class EngineUtilTest {
 		try {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb")
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
-					.setReificationModel( VAS.VASEMOSS_Reification )
+					.setReificationModel( ReificationStyle.LEGACY )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.setBooleans( true, true, true );
 			EngineUtil.createNew( ecb, null );

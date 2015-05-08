@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import org.openrdf.model.URI;
 public class EngineCreateBuilder {
 
 	private URI defaultBaseUri;
-	private URI reificationModel;
+	private ReificationStyle reificationModel;
 	private File smss;
 	private File map;
 	private File questions;
@@ -43,7 +44,7 @@ public class EngineCreateBuilder {
 		return this;
 	}
 
-	public EngineCreateBuilder setReificationModel( URI model ) {
+	public EngineCreateBuilder setReificationModel( ReificationStyle model ) {
 		reificationModel = model;
 		return this;
 	}
@@ -112,7 +113,7 @@ public class EngineCreateBuilder {
 		return defaultBaseOverridesFiles;
 	}
 
-	public URI getReificationModel() {
+	public ReificationStyle getReificationModel() {
 		return reificationModel;
 	}
 

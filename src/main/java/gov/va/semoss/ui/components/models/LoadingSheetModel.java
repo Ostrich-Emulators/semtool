@@ -67,8 +67,7 @@ public class LoadingSheetModel extends ValueTableModel {
 		}
 		else {
 			// check everything when we have a non-null engine loader
-			LoadingSheetData lsd
-					= realtimer.checkModelConformance( sheetdata, null, false );
+			LoadingSheetData lsd = realtimer.checkModelConformance( sheetdata );
 			setModelErrors( lsd );
 
 			// need to recheck the whole loading sheet now
@@ -240,7 +239,7 @@ public class LoadingSheetModel extends ValueTableModel {
 
 	public void setRelationshipName( String relname ) {
 		sheetdata.setRelname( relname );
-		LoadingSheetData lsd = realtimer.checkModelConformance( sheetdata, null, false );
+		LoadingSheetData lsd = realtimer.checkModelConformance( sheetdata );
 		setModelErrors( lsd );
 	}
 	

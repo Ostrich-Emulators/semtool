@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
 import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
@@ -206,7 +207,7 @@ public class CLI {
 			smss = EngineUtil.createNew(
 					new EngineCreateBuilder( outputFileDir, databaseFileName )
 					.setDefaultBaseUri( new URIImpl( baseURI ), true )
-					.setReificationModel( VAS.VASEMOSS_Reification )
+					.setReificationModel( ReificationStyle.LEGACY )
 					.setDefaultsFiles( null, null, insightFile )
 					.setFiles( loads )
 					.setBooleans( stageInMemory, closure, createMetamodel ),

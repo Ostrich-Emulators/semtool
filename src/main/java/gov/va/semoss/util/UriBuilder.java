@@ -378,6 +378,5 @@ public class UriBuilder {
 
 			return ( sanitized.length() > localPartLength  ) ? truncateLocalPart( sanitized ) : sanitized ;
 		}
-			
 	}
 }

@@ -44,6 +44,7 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.impl.AbstractEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
@@ -342,7 +343,7 @@ public class EngineUtil implements Runnable {
 
 		EngineCreateBuilder ecb
 				= new EngineCreateBuilder( metadata.getLocation(), metadata.getName() );
-		ecb.setReificationModel( reification );
+		ecb.setReificationModel( ReificationStyle.fromUri( reification ) );
 
 		File newsmss = EngineUtil.createNew( ecb, null );
 		IEngine neweng = Utility.loadEngine( newsmss );
@@ -761,7 +762,7 @@ public class EngineUtil implements Runnable {
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
 			rc.add( new StatementImpl( baseuri, VAS.ReificationModel,
-					ecb.getReificationModel() ) );
+					ecb.getReificationModel().uri ) );
 
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );

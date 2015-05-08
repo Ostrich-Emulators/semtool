@@ -6,15 +6,10 @@
 package gov.va.semoss.ui.components.renderers;
 
 import java.awt.Component;
-import java.awt.Font;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.util.Constants;

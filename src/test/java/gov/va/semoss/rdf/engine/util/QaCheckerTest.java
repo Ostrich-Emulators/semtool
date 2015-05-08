@@ -14,6 +14,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import java.io.File;
+import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
@@ -31,11 +32,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.ntriples.NTriplesWriter;
 
 /**
  *
@@ -142,7 +145,7 @@ public class QaCheckerTest {
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		RepositoryConnection rc = engine.getRawConnection();
-
+		rc.begin();
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
 				RDF.TYPE, new URIImpl( "http://owl.junk.com/testfiles/Category" ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
@@ -165,8 +168,19 @@ public class QaCheckerTest {
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ), RDFS.LABEL,
 				rc.getValueFactory().createLiteral( "Description" ) );
 
+		rc.add( new URIImpl( "http://sales.data/schema#xyz" ),
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+		rc.add( new URIImpl( "http://sales.data/schema#xyz" ),
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
+		rc.add( new URIImpl( "http://sales.data/schema#xyz" ),
+				RDFS.LABEL, new LiteralImpl( "508 Compliant?" ) );
+		rc.commit();
+
 		QaChecker el = new QaChecker();
 		el.loadCaches( engine );
+
+		assertTrue( el.hasCachedPropertyClass( "Description" ) );
+		assertTrue( el.hasCachedPropertyClass( "508 Compliant?" ) );
 	}
 
 	@Test
@@ -176,7 +190,7 @@ public class QaCheckerTest {
 
 		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
 
-		QaChecker el = new QaChecker();
+		QaChecker el = new QaChecker( engine );
 		ImportData test = new ImportData();
 		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
 		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
@@ -186,7 +200,7 @@ public class QaCheckerTest {
 		lsd.addProperty( "extraprop-x" );
 		test.add( lsd );
 
-		LoadingSheetData errs = el.checkModelConformance( lsd, engine, true );
+		LoadingSheetData errs = el.checkModelConformance( lsd );
 
 		assertTrue( errs.hasModelErrors() );
 		assertTrue( errs.hasSubjectTypeError() );
@@ -201,8 +215,7 @@ public class QaCheckerTest {
 
 		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
 
-		QaChecker el = new QaChecker();
-		el.loadCaches( engine );
+		QaChecker el = new QaChecker( engine );
 
 		ImportData test = new ImportData();
 		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
