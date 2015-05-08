@@ -99,7 +99,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				}
 			}
 			else {
-				log.error( "cannot resolve namespace for: " + raw + " (too many colons)" );
+				log.warn( "cannot resolve namespace for: " + raw + " (too many colons)" );
 			}
 		}
 		//else {
