@@ -644,6 +644,8 @@ public class InsightManagerImpl implements InsightManager {
          
          //Import Insights into the repository:
          boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+         //Give the left-pane drop-downs enough time to refresh from the import:
+	     Thread.sleep(2000);
          
 	  }catch(Exception e){
 	     log.error( e, e );

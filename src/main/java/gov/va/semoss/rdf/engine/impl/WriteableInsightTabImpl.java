@@ -47,20 +47,20 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	  public boolean addParameter(Insight insight){
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
-	      UriBuilder uriBuilder; 
 	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 	      
 		  try{
 	          rc.begin();
 	          
 	          URI insightURI = insight.getId();				
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI constraintURI = uriBuilder.add("constraint-" + strUniqueIdentifier).build();				
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI valueTypeURI = uriBuilder.add("valueType-" + strUniqueIdentifier).build();				
-              URI predicateURI = insightVF.createURI(ARG.NAMESPACE + "predicate-" + strUniqueIdentifier);
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI queryURI = uriBuilder.add("query-" + strUniqueIdentifier).build();				
+              String constraintUriName = "constraint-" + strUniqueIdentifier;
+			  URI constraintURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, constraintUriName);				
+			  String valueTypeUriName = "valueType-" + strUniqueIdentifier;
+	          URI valueTypeURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, valueTypeUriName);
+	          String predicateUriName = "predicate-" + strUniqueIdentifier;
+              URI predicateURI = insightVF.createURI(ARG.NAMESPACE + predicateUriName);
+			  String queryUriName = "query-" + strUniqueIdentifier;
+	          URI queryURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, queryUriName);				
 	   
               rc.add( insightURI, SPIN.constraint, constraintURI );	          
 	          rc.add( constraintURI, RDFS.LABEL, insightVF.createLiteral("New Parameter " + strUniqueIdentifier) );
@@ -74,6 +74,8 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	          
 	          //Import Insights into the repository:
 	          boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          //Give the left-pane drop-downs enough time to refresh from the import:
+		      Thread.sleep(2000);
 		         
 			  }catch(Exception e){
 			     log.error( e, e );
@@ -139,6 +141,8 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	                  
              //Import Insights into the repository:
              boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	         //Give the left-pane drop-downs enough time to refresh from the import:
+		     Thread.sleep(2000);
 
 		  }catch(Exception e){
 		     log.error( e, e );
@@ -222,6 +226,8 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	         
 	         //Import Insights into the repository:
 	         boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	         //Give the left-pane drop-downs enough time to refresh from the import:
+		     Thread.sleep(2000);
 	         
 		  }catch(Exception e){
 		     log.error( e, e );
@@ -317,6 +323,8 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 
 	          //Import Insights into the repository:
 	          boolTriplesImportedToDb = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          //Give the left-pane drop-downs enough time to refresh from the import:
+		      Thread.sleep(2000);
 			        
 		  }catch(Exception e){
 			  e.printStackTrace();
@@ -381,14 +389,14 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	  public boolean addExistingInsight(Insight insight, Perspective perspective){
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
-	      UriBuilder uriBuilder; 
+	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
 	          
 	          URI perspectiveURI = perspective.getUri();				
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI slot = uriBuilder.add(perspective.getLabel() + "-slot-" + String.valueOf(perspective.getInsights().size() + 1)).build();				
+			  String slotUriName = perspective.getLabel() + "-slot-" + strUniqueIdentifier;
+	          URI slot = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName);				
 	          rc.add( perspectiveURI, OLO.slot, slot );
 
 	          rc.add( slot, OLO.item, insight.getId() );

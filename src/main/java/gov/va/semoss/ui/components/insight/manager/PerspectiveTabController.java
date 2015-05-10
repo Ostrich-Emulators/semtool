@@ -163,8 +163,10 @@ public class PerspectiveTabController extends InsightManagerController{
 		Task<Boolean> addPerspective = new Task<Boolean>(){
 		   @Override 
 	       protected Boolean call() throws Exception{
-			   return imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().addPerspective(strTitle, strDescription, true);
-	       }
+			   boolean boolReturnValue = false;
+			   boolReturnValue = imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().addPerspective(strTitle, strDescription, true);
+               return boolReturnValue;
+		   }
 		};
         //Define a listener to update the JavaFX UI when the Task completes:
 	    addPerspective.stateProperty().addListener(new ChangeListener<Worker.State>(){
@@ -186,7 +188,7 @@ public class PerspectiveTabController extends InsightManagerController{
            }
         });
 		if(strTitle.equals("") == false
-		   && imc.cboPerspectiveTitle.getSelectionModel().getSelectedItem().trim().equals(strTitle) == false){
+		   && imc.cboPerspectiveTitle.getSelectionModel().getSelectedItem().getLabel().trim().equals(strTitle) == false){
 		     //Run the Task on a separate Thread:
 	         new Thread(addPerspective).start();
 		}else{
@@ -204,7 +206,9 @@ public class PerspectiveTabController extends InsightManagerController{
 		Task<Boolean> deletePerspective = new Task<Boolean>(){
 		   @Override 
 		   protected Boolean call() throws Exception{
-		      return imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().deletePerspective(perspective);
+			  boolean boolReturnValue = false;
+			  boolReturnValue = imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().deletePerspective(perspective);
+              return boolReturnValue;
 		   }
 		};
         //Define a listener to update the JavaFX UI when the Task completes:
@@ -321,10 +325,10 @@ public class PerspectiveTabController extends InsightManagerController{
 	 	        //Reload the UI from the database:
 	            imc.loadData(imc.txtPerspectiveTitle.getText().trim(), 
 	               imc.arylInsights.get(imc.intCurInsightIndex).getOrderedLabel(imc.arylPerspectives.get(imc.intCurPerspectiveIndex).getUri()), null); 	            
-	          }
-	       });
-		   //Run the Task on a separate Thread:
-		   new Thread(associateInsights).start();
+	        }
+	    });
+		//Run the Task on a separate Thread:
+		new Thread(associateInsights).start();
 	}
 	
 }//End PerspectiveTabController class.
