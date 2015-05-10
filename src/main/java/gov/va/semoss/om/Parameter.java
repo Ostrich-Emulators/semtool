@@ -103,11 +103,7 @@ public class Parameter {
 
 	@Override
 	public String toString() {
-		return "Parameter [parameterURI: " + this.strParameterURI
-				+ ", label: " + this.strLabel
-				+ ", variable: " + this.strVariable
-				+ ", valueType: " + this.strValueType
-				+ ", defaultQuery: " + this.strDefaultQuery + "]";
+		return strLabel;
 	}
 
 }//End "Parameter" class.

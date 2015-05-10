@@ -42,6 +42,9 @@ public class Insight {
 	String created = null;
 	//Date Modified:
 	String modified = null;
+	//A URI string of the containing Perspective,
+	//for use in the "toString()" method:
+	private String perspective;
 
 	HashMap<String, Integer> order = new HashMap<String, Integer>();
 	
@@ -298,20 +301,31 @@ public class Insight {
 		// an insight order is always with respect to some perspective
 		Value ordr = resultSet.getValue( "order" );
 		if ( ordr != null ) {
-			Value perspective = resultSet.getValue( "perspective" );
-			setOrder( perspective.stringValue(), Integer.parseInt( ordr.stringValue() ) );
+			perspective = resultSet.getValue( "perspective" ).stringValue();
+			setOrder( perspective, Integer.parseInt( ordr.stringValue() ) );
 		}
 	}
 
+//	@Override
+//	public String toString() {
+//		return "Insight [id: " + getId()
+//				+ ", databaseID: " + getDatabaseID()
+//				+ ", entityType: " + getEntityType()
+//				+ ", label: " + getLabel()
+//				+ ", sparql: " + getSparql()
+//				+ ", output: " + getOutput() 
+//				+ " (or renderer class: " + getRendererClass() + ")]";
+//	}
+	
 	@Override
 	public String toString() {
-		return "Insight [id: " + getId()
-				+ ", databaseID: " + getDatabaseID()
-				+ ", entityType: " + getEntityType()
-				+ ", label: " + getLabel()
-				+ ", sparql: " + getSparql()
-				+ ", output: " + getOutput() 
-				+ " (or renderer class: " + getRendererClass() + ")]";
+		String strReturnValue = "";
+		if(perspective.contains("Detached-Insight-Perspective")){
+			strReturnValue = label;
+		}else{
+			strReturnValue = getOrderedLabel();
+		}
+		return strReturnValue;
 	}
 
 }

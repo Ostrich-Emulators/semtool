@@ -62,18 +62,17 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	      ValueFactory insightVF = rc.getValueFactory();
 		  Literal now = insightVF.createLiteral( new Date() );
 		  Literal creator = insightVF.createLiteral( "Imported By " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
-	      UriBuilder uriBuilder; 
 	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
 	          URI perspectiveURI = perspective.getUri();				
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI slot = uriBuilder.add(perspective.getLabel() + "-slot-" + strUniqueIdentifier).build();				
+              String slotUriName = perspective.getLabel() + "-slot-" + strUniqueIdentifier;
+              URI slot = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName);
 	          rc.add( perspectiveURI, OLO.slot, slot );
 
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI insightURI = uriBuilder.add(perspective.getLabel() + "-insight-" + strUniqueIdentifier).build();				
+              String insightUriName = perspective.getLabel() + "-insight-" + strUniqueIdentifier;
+	          URI insightURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, insightUriName);
 	          
 	          rc.add( slot, OLO.item, insightURI );
 	          rc.add( slot, OLO.index, insightVF.createLiteral(999));          
@@ -89,8 +88,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	             type = matcher.group( 1 );
 	          }
 
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI spinBody = uriBuilder.add(insightURI.toString()  + "-" + type).build();
+              String spinBodyUriName = perspective.getLabel() + "-insight-body-" + strUniqueIdentifier;
+              URI spinBody = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName);
 	          rc.add( spinBody, RDF.TYPE, SP.Select );
 	          rc.add(spinBody, SP.text, insightVF.createLiteral(sparql));
 
@@ -113,6 +112,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	          
 	          //Import Insights into the repository:
 	          boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          //Give the left-pane drop-downs enough time to refresh from the import:
+		      Thread.sleep(2000);
 
 		  }catch(Exception e){
 			  e.printStackTrace();
@@ -215,6 +216,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	         if(doImport == true){
 	            //Import Insights into the repository:
 	            boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	            //Give the left-pane drop-downs enough time to refresh from the import:
+		        Thread.sleep(2000);
 	         }else{
 	        	boolReturnValue = true;
 	         }
@@ -247,14 +250,12 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		  Literal creator = insightVF.createLiteral( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 		  Literal title = insightVF.createLiteral(strTitle);
 		  Literal description = insightVF.createLiteral(strDescription);
-	      UriBuilder uriBuilder; 
 	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
 	          
-			  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	          URI perspectiveURI = uriBuilder.add(strTitle + "-perspective-" + strUniqueIdentifier).build();				
+			  URI perspectiveURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, strTitle);				
 			  rc.add( perspectiveURI, RDF.TYPE, VAS.Perspective );
 			  rc.add( perspectiveURI, RDFS.LABEL, title);
 			  rc.add( perspectiveURI, DCTERMS.DESCRIPTION, description);
@@ -263,12 +264,12 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 			  rc.add( perspectiveURI, DCTERMS.CREATOR, creator );
 
 			  if(addDummyInsight == true){
-			 	  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-		          URI slot = uriBuilder.add(strTitle + "-slot-" + strUniqueIdentifier).build();				
+			 	  String slotUriName = strTitle + "-slot-" + strUniqueIdentifier;
+		          URI slot = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName);				
 		          rc.add( perspectiveURI, OLO.slot, slot );
 	
-				  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-		          URI insightURI = uriBuilder.add(strTitle + "-insight-" + strUniqueIdentifier).build();				
+                  String insightUriName = strTitle + "-insight-" + strUniqueIdentifier;
+				  URI insightURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, insightUriName);				
 		          
 		          rc.add( slot, OLO.item, insightURI );
 		          rc.add( slot, OLO.index, insightVF.createLiteral(1));          
@@ -284,8 +285,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		            type = matcher.group( 1 );
 		          }
 	
-				  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-		          URI spinBody = uriBuilder.add(insightURI.toString()  + "-" + type).build();
+                  String spinBodyUriName = strTitle + "-insight-body-" + strUniqueIdentifier;
+				  URI spinBody = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName);
 		          rc.add(spinBody, RDF.TYPE, SP.Construct );
 		          rc.add(spinBody, SP.text, insightVF.createLiteral(sparql));
 	
@@ -303,6 +304,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	          
 	          //Import Insights into the repository:
 	          boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+              //Give the left-pane drop-downs enough time to refresh from the import:
+	          Thread.sleep(2000);
 	          
 		  }catch(Exception e){
 			  e.printStackTrace();
@@ -371,6 +374,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	         
 	         //Import Insights into the repository:
 	         boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+             //Give the left-pane drop-downs enough time to refresh from the import:
+	         Thread.sleep(2000);
 	         
 		  }catch(Exception e){
 		     log.error( e, e );
@@ -413,6 +418,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	         rc.commit();
 	         //Import Insights into the repository:
 	         boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+             //Give the left-pane drop-downs enough time to refresh from the import:
+	         Thread.sleep(2000);
 		        
 		  }catch(Exception e){
 			  e.printStackTrace();
@@ -436,11 +443,10 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	  public boolean saveDetachedInsights(){
     	 boolean boolReturnValue = true;
 	     ValueFactory insightVF = rc.getValueFactory();
-	     UriBuilder uriBuilder; 
 	     Collection<String> colDanglingInsights = new ArrayList<String>();
   		
-    	 uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-    	 URI perspectiveURI = uriBuilder.add("ZZZ-Detached-Insight-Perspective").build();		
+    	 String perspectiveUriName = "ZZZ-Detached-Insight-Perspective";
+    	 URI perspectiveURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, perspectiveUriName);		
 
     	 //Fetch a collection of dangling Insight URI's:
     	 colDanglingInsights.addAll(getDanglingInsights());
@@ -449,21 +455,15 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
     		 boolReturnValue = addPerspective("ZZZ-Detached-Insight-Perspective", 
     			"Perspective for dangling Insights", true);
     	 }
-		 //Give previous task a little time to finish:
-		 try{
-			Thread.sleep(2000);
-		 }catch (InterruptedException e){
-			e.printStackTrace();
-		 }    	 
     	 
     	 if(boolReturnValue == true && colDanglingInsights.size() > 0){
 	    	 try{
 		    	rc.begin();
 		    	
-		    	Math.random();
 	    	    for(String insightURI: colDanglingInsights){
-	    	        uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-	    	        URI slot = uriBuilder.add("ZZZ-Detached-Insight-Perspective-slot-" + String.valueOf(Math.random())).build();				
+	    		    String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
+	    	        String slotUriName = "ZZZ-Detached-Insight-Perspective-slot-" + strUniqueIdentifier;
+	    	        URI slot = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName);				
 	    	        rc.add(perspectiveURI, OLO.slot, slot);
 	    	        rc.add(slot, OLO.item,  insightVF.createURI(insightURI));
 	    	        int intIndex = getNextInsightIndex(perspectiveURI);
@@ -473,6 +473,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	    	    
 		        //Import Insights into the repository:
 		        boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	            //Give the left-pane drop-downs enough time to refresh from the import:
+		        Thread.sleep(2000);
 		        
 			  }catch(Exception e){
 				  e.printStackTrace();

@@ -58,11 +58,10 @@ public class WriteableParameterTabImpl implements WriteableParameterTab {
           
 	      ValueFactory insightVF = rc.getValueFactory();
 	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
-	      UriBuilder uriBuilder;  		  
           String predicateUriString = "<" + insightVF.createURI(ARG.NAMESPACE + "predicate-" + 
              strUniqueIdentifier) + ">";
-		  uriBuilder = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
-          String queryUriString = "<" + uriBuilder.add("query-" + strUniqueIdentifier).build() + ">";				
+		  String queryUriName = "query-" + strUniqueIdentifier;
+          String queryUriString = "<" + insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, queryUriName) + ">";				
 		  
 		  String query_1 = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 		      + "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
@@ -123,6 +122,8 @@ public class WriteableParameterTabImpl implements WriteableParameterTab {
 
 	          //Import Parameters into the repository:
 	          boolParameterSaved = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          //Give the left-pane drop-downs enough time to refresh from the import:
+		      Thread.sleep(2000);
 			        
 		  }catch(Exception e){
 			  e.printStackTrace();

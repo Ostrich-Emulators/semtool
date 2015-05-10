@@ -6,8 +6,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -25,6 +28,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.util.Callback;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
@@ -42,23 +46,23 @@ public class  InsightManagerController implements Initializable{
 	@FXML
 	protected TabPane tbpTabbedPane;
 	@FXML
-	protected ComboBox<String> cboPerspectiveTitle;
-	protected ArrayList<Perspective> arylPerspectives;
+	protected ComboBox<Perspective> cboPerspectiveTitle;
+	protected ObservableList<Perspective> arylPerspectives;
 	protected int intCurPerspectiveIndex;
 	@FXML
 	protected TextField txtPerspectiveTitle;
 	@FXML
 	protected TextArea txtaPerspectiveDesc;	
 	@FXML
-	protected ListView<String> lstvInsights;
-	protected ArrayList<Insight> arylInsights;
+	protected ListView<Insight> lstvInsights;
+	protected ObservableList<Insight> arylInsights;
 	protected int intCurInsightIndex;
 	protected String prevQuestionLabel;
 	@FXML
 	protected TextField txtQuestion_Inst;
 	@FXML
-	protected ComboBox<String> cboDisplayWith_Inst;
-	protected ArrayList<PlaySheet> arylPlaySheets;
+	protected ComboBox<PlaySheet> cboDisplayWith_Inst;
+	protected ObservableList<PlaySheet> arylPlaySheets;
 	@FXML
 	protected TextField txtRendererClass_Inst;
 	@FXML
@@ -66,13 +70,13 @@ public class  InsightManagerController implements Initializable{
 	@FXML
 	protected TextArea txtaQuery_Inst;
 	@FXML
-	protected ListView<String> lstvParameter_Inst;
-	protected ArrayList<Parameter> arylInsightParameters;
+	protected ListView<Parameter> lstvParameter_Inst;
+	protected ObservableList<Parameter> arylInsightParameters;
 	protected int intCurParameterIndex;
 	protected String prevParameterLabel;
 	@FXML
-	protected ListView<String> lstvInsightPerspective_Inst;
-	protected ArrayList<String> arylInsightPerspectives;
+	protected ListView<Perspective> lstvInsightPerspective_Inst;
+	protected ArrayList<Perspective> arylInsightPerspectives;
 	@FXML
 	protected TextArea txtaInsightDesc_Inst;
 	@FXML
@@ -138,9 +142,9 @@ public class  InsightManagerController implements Initializable{
 		
 		//If the engine has been loaded, then populate controls, otherwise skip:
 		if(engine != null){
-		   arylPerspectives = new ArrayList<Perspective>();
-		   arylPlaySheets = new ArrayList<PlaySheet>();
-		   arylInsightParameters = new ArrayList<Parameter>();
+		   arylPerspectives = FXCollections.observableArrayList();
+		   arylPlaySheets = FXCollections.observableArrayList();
+		   arylInsightParameters = FXCollections.observableArrayList();
 		   //The Insight Perspective list-view must handle multiple selections:
 		   lstvInsightPerspective_Inst.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		   //Instantiate button-handlers for the "Perspective" tab:
@@ -153,23 +157,23 @@ public class  InsightManagerController implements Initializable{
 		   loadPlaySheetsAndData();
 		   
 		   //If the "Perspective" changes on the "Perspective" tab, then repopulate its text-field, 
-		   //its "Description", and its associated "Insights:
+		   //its "Description", and its associated "Insights":
 		   //--------------------------------------------------------------------------------------
            cboPerspectiveTitle.valueProperty().addListener(new ChangeListener<Object>() {
 		        @Override 
 		        public void changed(ObservableValue<?> ov, Object t, Object t1) {
-		        	if(arylPerspectives != null && arylPerspectives.size() > 0){
+		        	if(t1 != null && arylPerspectives != null && arylPerspectives.size() > 0){
 			        	//Get selected "Perspective":
 			            Perspective perspective = new Perspective();
 			            intCurPerspectiveIndex = 0;
 			            for(int i = 0; i < arylPerspectives.size(); i++){
 			            	perspective = (Perspective) arylPerspectives.get(i);
-			            	if((perspective.getLabel().equals((String) t1))){
+			            	if((perspective.getUri().equals(((Perspective) t1).getUri()))){
 			            		intCurPerspectiveIndex = i;
 			            		break;
 			            	}
 			            }
-						arylInsights = ((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getInsights();
+						arylInsights = FXCollections.observableArrayList(((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getInsights());
 						 
 			            //When the selected "Perspective" changes, re-populate fields on the "Perspective" tab:
 			            //-------------------------------------------------------------------------------------
@@ -186,47 +190,49 @@ public class  InsightManagerController implements Initializable{
            lstvInsights.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Object>(){
 			  @Override
 			  public void changed(ObservableValue<?> ov, Object t, Object t1){
-				 //Get selected "Insight":
-	             Insight insight = new Insight();
-	             intCurInsightIndex = 0;
-	             for(int i = 0; i < arylInsights.size(); i++){
-	            	 insight = (Insight) arylInsights.get(i);
-	            	 if((insight.getOrderedLabel(((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getUri()).equals((String) t1))){
-	            		intCurInsightIndex = i;
-	            		break;
-	            	 }
-	             }
-				 arylInsightParameters = (ArrayList<Parameter>) ((Insight) arylInsights.get(intCurInsightIndex)).getInsightParameters();
+				 if(t1 != null){
+				    //Get selected "Insight":
+	                Insight insight = new Insight();
+	                intCurInsightIndex = 0;
+	                for(int i = 0; i < arylInsights.size(); i++){
+	              	    insight = (Insight) arylInsights.get(i);
+	            	    if((insight.getId()).equals(((Insight) t1).getId())){
+	            		   intCurInsightIndex = i;
+	            		   break;
+	            	    }
+	                }
+				    arylInsightParameters = FXCollections.observableArrayList(arylInsights.get(intCurInsightIndex).getInsightParameters());
 
-                 //When the selected "Insight" changes, re-populate fields on the "Insight" tab:
-	             //-----------------------------------------------------------------------------
-	             populateQuestionTextField(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateRendererClassTextField(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateLegacyQueryCheckBox(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex);	
-	             populatePlaysheetComboBox(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateInsightDescTextArea(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateCreatorTextField(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateCreatedTextField(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateModifiedTextField(intCurPerspectiveIndex, intCurInsightIndex);
-	             populateInsightParameterListView(intCurPerspectiveIndex, intCurInsightIndex);
-	     	     //Whenever the "Parameters" list-view is reloaded,
-	     	     //if it has no elements, disable the "Parameter" tab:
-	             if(lstvParameter_Inst.getItems() == null || 
-	            	lstvParameter_Inst.getItems().get(0).equals("")){
-	     			 tabParameter.setDisable(true);
-	     		 //Otherwise, enable the "Parameter" tab only if
-	     		 //the "Renderer Class" text-field is empty:
-	     		 }else{
-	     		     if(txtRendererClass_Inst.getText() == null || 
-	     		    	txtRendererClass_Inst.getText().trim().isEmpty()){
-		     			 tabParameter.setDisable(false);
-	     		     }else{
-	     			     tabParameter.setDisable(true);
-	     		     }
-	     		 }
-	             populateInsightPerspectivesListView(intCurPerspectiveIndex, intCurInsightIndex);
-	          }				   
+                    //When the selected "Insight" changes, re-populate fields on the "Insight" tab:
+	                //-----------------------------------------------------------------------------
+	                populateQuestionTextField(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateRendererClassTextField(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateLegacyQueryCheckBox(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex);	
+	                populatePlaysheetComboBox(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateInsightDescTextArea(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateCreatorTextField(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateCreatedTextField(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateModifiedTextField(intCurPerspectiveIndex, intCurInsightIndex);
+	                populateInsightParameterListView(intCurPerspectiveIndex, intCurInsightIndex);
+	     	        //Whenever the "Parameters" list-view is reloaded,
+	     	        //if it has no elements, disable the "Parameter" tab:
+	                if(lstvParameter_Inst.getItems() == null || 
+	             	   lstvParameter_Inst.getItems().get(0).getLabel().equals("")){
+	     			    tabParameter.setDisable(true);
+	     		    //Otherwise, enable the "Parameter" tab only if
+	     		    //the "Renderer Class" text-field is empty:
+	     		    }else{
+	     		        if(txtRendererClass_Inst.getText() == null || 
+	     		    	   txtRendererClass_Inst.getText().trim().isEmpty()){
+		     			    tabParameter.setDisable(false);
+	     		        }else{
+	     			        tabParameter.setDisable(true);
+	     		        }
+	     		    }
+	                populateInsightPerspectivesListView(intCurPerspectiveIndex, intCurInsightIndex);
+	             }
+			  }
 		   });
            
            //If the "Parameters" list-view changes on the "Insight" tab, then repopulate
@@ -235,14 +241,12 @@ public class  InsightManagerController implements Initializable{
            lstvParameter_Inst.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Object>(){
 			  @Override
 			  public void changed(ObservableValue<?> ov, Object t, Object t1){
-				 arylInsights = ((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getInsights();
-
 				 //Get selected "Parameter":
 	             Parameter parameter = new Parameter();
 	             intCurParameterIndex = 0;
 	             for(int i = 0; i < arylInsightParameters.size(); i++){
 	            	 parameter = (Parameter) arylInsightParameters.get(i);
-	            	 if(parameter.getLabel().equals((String) t1)){
+	            	 if(parameter.equals((Parameter) t1)){
 	            		intCurParameterIndex = i;
 	            		break;
 	            	 }
@@ -287,7 +291,7 @@ public class  InsightManagerController implements Initializable{
 			    	  //"Parameter" tab only if external Parameters are defined:
 			          if(lstvParameter_Inst.getItems() == null || 
 			        	 lstvParameter_Inst.getItems().size() == 0 ||	  
-			             lstvParameter_Inst.getItems().get(0).equals("")){
+			             lstvParameter_Inst.getItems().get(0).getLabel().equals("")){
 			     		  tabParameter.setDisable(true);
 			     	  }else{
 			     		  tabParameter.setDisable(false);
@@ -330,18 +334,16 @@ public class  InsightManagerController implements Initializable{
      *    "Perspective" or "Insight" tab, this value can be null.
      */
 	protected void loadData(String perspectiveLabel, String prevQuestionLabel, String prevParameterLabel){
-		arylPerspectives.clear();
 		this.prevQuestionLabel = prevQuestionLabel;
 		this.prevParameterLabel = prevParameterLabel;
 	    //Convert mouse-pointer to a "wait" cursor:
 		cboPerspectiveTitle.getScene().setCursor(Cursor.WAIT);
 		
 		//Define a Task to fetch an ArrayList of Perspectives/Insights:
-		Task<ArrayList<Perspective>> getInsightManagerData = new Task<ArrayList<Perspective>>(){
+		Task<ObservableList<Perspective>> getInsightManagerData = new Task<ObservableList<Perspective>>(){
 		    @Override 
-		    protected ArrayList<Perspective> call() throws Exception {
-		    	arylPerspectives.addAll(engine.getInsightManager().getPerspectives());
-		    	   
+		    protected ObservableList<Perspective> call() throws Exception {
+		    	arylPerspectives = FXCollections.observableArrayList(engine.getInsightManager().getPerspectives());
 		    	for(Perspective perspective: arylPerspectives){
 		    		ArrayList<Insight> arylInsights = new ArrayList<Insight>();
 		    		arylInsights.addAll(engine.getInsightManager().getInsights(perspective));
@@ -366,12 +368,12 @@ public class  InsightManagerController implements Initializable{
 	     		   
 	     		    //Populate "Perspectives" combo-box (first, we must change the value, so that 
 	            	//population triggers the change-handler that populates the Insight list-view:
-	            	cboPerspectiveTitle.setValue("");
 	     		    populatePerspectiveComboBox();
 	     		    
 	     		    //If passed-in label is not null, then navigate to that Perspective:
-	     		    if(perspectiveLabel != null && perspectiveLabel.trim().equals("") == false){
-	     		    	cboPerspectiveTitle.getSelectionModel().select(perspectiveLabel);
+	     		    if(cboPerspectiveTitle.getItems().size() != 0 && 
+	     		       perspectiveLabel != null && perspectiveLabel.trim().equals("") == false){
+	     		    	cboPerspectiveTitle.getSelectionModel().select(arylPerspectives.get(intCurPerspectiveIndex));
 
 	     		    //Otherwise, navigate to the first Perspective:
 	     		    }else{
@@ -388,15 +390,14 @@ public class  InsightManagerController implements Initializable{
 	 * combo-box. Designed to be run once when the Insight Manager is loaded initially.
 	 */
 	private void loadPlaySheetsAndData(){		
-		arylPlaySheets.clear();
 	    //Convert mouse-pointer to a "wait" cursor:
 		cboDisplayWith_Inst.getScene().setCursor(Cursor.WAIT);
 		
 		//Define a Task to fetch an ArrayList of PlaySheets:
-		Task<ArrayList<PlaySheet>> getPlaySheetData = new Task<ArrayList<PlaySheet>>(){
+		Task<ObservableList<PlaySheet>> getPlaySheetData = new Task<ObservableList<PlaySheet>>(){
 		    @Override 
-		    protected ArrayList<PlaySheet> call() throws Exception {
-		    	arylPlaySheets.addAll(engine.getInsightManager().getPlaySheets());		    	
+		    protected ObservableList<PlaySheet> call() throws Exception {
+		    	arylPlaySheets = FXCollections.observableArrayList(engine.getInsightManager().getPlaySheets());		    	
 		        return arylPlaySheets;
 		    }
 		};
@@ -422,10 +423,7 @@ public class  InsightManagerController implements Initializable{
 	/**   Populates the Perspective combo-box on the "Perspective" tab.
 	 */
 	protected void populatePerspectiveComboBox(){
-  	    cboPerspectiveTitle.getItems().clear();
- 	    for(int i = 0; i < arylPerspectives.size(); i++){
-		   cboPerspectiveTitle.getItems().add(((Perspective) arylPerspectives.get(i)).getLabel());
-	    }
+  	    cboPerspectiveTitle.setItems(arylPerspectives);
  	}
 
 	/**   Populates the Perspective Title text-field with the title of
@@ -460,25 +458,23 @@ public class  InsightManagerController implements Initializable{
 	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
 	 */
 	protected void populateInsightListView(int perspectiveIndex){
-  	    lstvInsights.getItems().clear();
-  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-	    for(Insight element: arylInsights){
-		   lstvInsights.getItems().add(element.getOrderedLabel(((Perspective) arylPerspectives.get(perspectiveIndex)).getUri()));
-	    }
-        //Cell Factory for "Insight" list-view to display PlaySheet icons
+		Perspective perspective = (Perspective) arylPerspectives.get(perspectiveIndex);
+  	    lstvInsights.setItems(arylInsights);
+
+  	    //Cell Factory for "Insight" list-view to display PlaySheet icons
 	    //to the left of Insight labels:
-	    lstvInsights.setCellFactory(listView -> new ListCell<String>() {
+	    lstvInsights.setCellFactory(listView -> new ListCell<Insight>() {
 	        private ImageView imageView = new ImageView();
 	        @Override
-	        public void updateItem(String item, boolean empty) {
+	        public void updateItem(Insight item, boolean empty) {
 	            super.updateItem(item, empty);
 	            if (empty) {
 	                setText(null);
 	                setGraphic(null);
 	            }else{
-	                setText(item);
+	                setText(item.toString());
 	            	try{
-	                   Image image = new Image(getInsightIcon(item));
+	                   Image image = new Image(getInsightIcon(item.getOrderedLabel(perspective.getUri())));
 	                   imageView.setImage(image);
 	                   setGraphic(imageView);
 	            	}catch(Exception e){
@@ -491,8 +487,8 @@ public class  InsightManagerController implements Initializable{
 	    //the Perspective, if the previously selected Insight has been moved):
     	lstvInsights.getSelectionModel().selectFirst();
 	    for(Insight element: arylInsights){
-	    	 if(element.getOrderedLabel(((Perspective) arylPerspectives.get(perspectiveIndex)).getUri()).equals(prevQuestionLabel)){
-	    	     lstvInsights.getSelectionModel().select(prevQuestionLabel);
+	    	 if(element.getOrderedLabel(perspective.getUri()).equals(prevQuestionLabel)){
+	    	     lstvInsights.getSelectionModel().select(element);
 	    	     break;
 	    	 }
 	    }
@@ -549,27 +545,26 @@ public class  InsightManagerController implements Initializable{
 	private void populatePlaysheetComboBox(int perspectiveIndex, int insightIndex){
   	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
 	    String playSheetClass = ((Insight) arylInsights.get(insightIndex)).getOutput();
-	    cboDisplayWith_Inst.getItems().clear();
+	    cboDisplayWith_Inst.setItems(arylPlaySheets);
  	    for(PlaySheet playsheet: arylPlaySheets){
- 	    	cboDisplayWith_Inst.getItems().add(playsheet.getLabel());
  	    	if(playsheet.getViewClass().equals(playSheetClass)){
- 	    		cboDisplayWith_Inst.getSelectionModel().select(playsheet.getLabel());	
+ 	    		cboDisplayWith_Inst.getSelectionModel().select(playsheet);	
  	    	}
 	    }
         //Cell Factory for "Display with" combo-box list-view to display 
 	    //PlaySheet icons to the left of Playsheet labels:
- 	    cboDisplayWith_Inst.setCellFactory(ListView -> new ListCell<String>() {
+ 	    cboDisplayWith_Inst.setCellFactory(ListView -> new ListCell<PlaySheet>() {
 	        private ImageView imageView = new ImageView();
 	        @Override
-	        public void updateItem(String item, boolean empty) {
+	        public void updateItem(PlaySheet item, boolean empty) {
 	            super.updateItem(item, empty);
 	            if (empty) {
 	                setText(null);
 	                setGraphic(null);
 	            }else{
-                    setText(item);
+                    setText(item.toString());
                     try{
-	                   Image image = new Image(getPlaySheetIcon(item));
+	                   Image image = new Image(getPlaySheetIcon(item.toString()));
 	                   imageView.setImage(image);
 	                   setGraphic(imageView);
                     }catch(Exception e){
@@ -648,18 +643,13 @@ public class  InsightManagerController implements Initializable{
 	 * @param insightIndex -- (int) Index of currently selected Insight.
 	 */
 	private void populateInsightParameterListView(int perspectiveIndex, int insightIndex){
- 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-	    ArrayList<Parameter> arylInsightParameters = (ArrayList<Parameter>) ((Insight) arylInsights.get(insightIndex)).getInsightParameters();	   
-	    lstvParameter_Inst.getItems().clear();
-	    for(Parameter parameter: arylInsightParameters){
-	       lstvParameter_Inst.getItems().add(parameter.getLabel());
-	    }
+		lstvParameter_Inst.setItems(arylInsightParameters);
 	    //Navigate to the previously selected Parameter (or the first Parameter
 	    //under the Insight, if the previously selected Parameter has been moved):
     	lstvParameter_Inst.getSelectionModel().selectFirst();
 	    for(Parameter element: arylInsightParameters){
 	    	 if(element.getLabel().equals(prevParameterLabel)){
-	    	     lstvParameter_Inst.getSelectionModel().select(prevParameterLabel);
+	    	     lstvParameter_Inst.getSelectionModel().select(element);
 	    	     break;
 	    	 }
 	    }
@@ -674,18 +664,17 @@ public class  InsightManagerController implements Initializable{
 	private void populateInsightPerspectivesListView(int perspectiveIndex, int insightIndex){
  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
 	    Insight insight = (Insight) arylInsights.get(insightIndex);
-	    arylInsightPerspectives = new ArrayList<String>();
+	    arylInsightPerspectives = new ArrayList<Perspective>();
           
 	    lstvInsightPerspective_Inst.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-  	    lstvInsightPerspective_Inst.getItems().clear();
+  	    lstvInsightPerspective_Inst.setItems(arylPerspectives);
 
+  	    lstvInsightPerspective_Inst.getSelectionModel().clearSelection();
   	    for(Perspective perspective: arylPerspectives){
-  	    	String label = perspective.getLabel();
-  	    	lstvInsightPerspective_Inst.getItems().add(label);
   	    	for(Insight insight_2: perspective.getInsights()){
   	    		if(insight.getId().equals(insight_2.getId())){
-  	    			lstvInsightPerspective_Inst.getSelectionModel().select(label);
-  	    			arylInsightPerspectives.add(label);
+  	    			lstvInsightPerspective_Inst.getSelectionModel().select(perspective);
+  	    			arylInsightPerspectives.add(perspective);
   	    		}
   	    	}
   	    }
