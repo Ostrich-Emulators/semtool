@@ -34,6 +34,8 @@ import gov.va.semoss.util.DIHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -186,6 +188,8 @@ public class OpenAction extends DbAction {
 					LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( engine, 
 							loadingsheets, calc, dometamodel, conformance, replace );
 					pane.add( psf );
+					int i = loadingsheets.toString().lastIndexOf("\\");
+					psf.setTitle(loadingsheets.toString().substring(i+1, loadingsheets.toString().lastIndexOf("]")));
 					psf.getLoadingTask().getOp().run();
 				}
 

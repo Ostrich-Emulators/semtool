@@ -24,7 +24,7 @@ import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.NodeLoadingPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.playsheets.RelationshipLoadingPlaySheet;
-import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
+import gov.va.semoss.ui.components.renderers.RepositoryRenderer;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultIcons;
 import gov.va.semoss.util.Utility;
@@ -96,8 +96,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		dometamodel = meta;
 		doconformance = conform;
 		doreplace = replace;
-		setTitle( "Import Data Review" );
-
+	//	setTitle( "Import Data Review 4" );
+	//	fileToLoad.getName()
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
 
@@ -123,6 +123,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
 
 		setTitle( "Import Data Review" );
+		
 
 		LoadingPlaySheetBase first = null;
 		for ( LoadingSheetData n : data.getSheets() ) {
@@ -326,11 +327,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		}
 
 		repos.getRepositoryModel().addAll( engines );
-		LabeledPairRenderer<IEngine> renderer = new LabeledPairRenderer<>();
-		repos.setCellRenderer( renderer );
-		for ( IEngine eng : engines ) {
-			renderer.cache( eng, MetadataQuery.getEngineLabel( eng ) );
-		}
+		repos.setCellRenderer( new RepositoryRenderer() );
 
 		int ans = JOptionPane.showOptionDialog( null, new JScrollPane( repos ),
 				"Select Engine to " + title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,

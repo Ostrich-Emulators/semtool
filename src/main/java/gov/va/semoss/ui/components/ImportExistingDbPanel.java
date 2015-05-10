@@ -94,21 +94,7 @@ public class ImportExistingDbPanel extends JPanel {
 		ImportExistingDbPanel iedp = new ImportExistingDbPanel( eng );
 		iedp.setFiles( files );
 
-		String ename = null;
-		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
-		try {
-			eng.query( mq );
-			ename = mq.getOne();
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// don't care
-			log.debug( e, e );
-		}
-
-		if ( null == ename ) {
-			ename = eng.getEngineName();
-		}
-
+		String ename = MetadataQuery.getEngineLabel( eng );
 		Object options[] = { "Import to " + ename, "Cancel" };
 
 		int opt = JOptionPane.showOptionDialog( frame, iedp,

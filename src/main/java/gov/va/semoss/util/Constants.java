@@ -105,6 +105,7 @@ public class Constants {
 
 	//used by ExportSpecificRelationshipsToLoadingSheetAction
 	public static final URI ANYNODE = new URIImpl( "semoss://any" );
+	public static final URI NONODE = new URIImpl( "semoss://none" );
 
 	//Used by POIReader
 	public static final String RELATION_URI_CONCATENATOR = "_x_"; //used in between the in node and out node for relation instance uris.

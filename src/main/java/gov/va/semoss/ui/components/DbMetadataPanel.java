@@ -42,6 +42,7 @@ import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.query.BindingSet;
 
 /**
@@ -74,7 +75,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		fieldlkp.put( MetadataConstants.DCT_PUBLISHER, poc );
 		fieldlkp.put( MetadataConstants.DCT_CREATED, created );
 		fieldlkp.put( MetadataConstants.DCT_MODIFIED, update );
-		fieldlkp.put( VAS.reification, edgemodel );
+		fieldlkp.put( VAS.ReificationModel, edgemodel );
 		fieldlkp.put( VAS.Database, voiduri );
 
 		voiduri.setEditable( null == baseuri );
@@ -116,7 +117,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 					List<Value[]> rows = engine.query( q );
 					gps.create( rows, Arrays.asList( "Property", "Value" ), engine );
 
-					JOptionPane.showMessageDialog( created,gps,
+					JOptionPane.showMessageDialog( created, gps,
 							"Properties of " + uri, JOptionPane.INFORMATION_MESSAGE
 					);
 				}
@@ -189,12 +190,19 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		}
 
 		try {
-			Map<URI, String> metadata = eng.query( new MetadataQuery() );
+			MetadataQuery mq = new MetadataQuery();
+			Map<URI, Value> metadata = eng.query( mq );
 			if ( metadata.containsKey( VAS.Database ) ) {
-				baseuri = new URIImpl( metadata.get( VAS.Database ) );
+				baseuri = URI.class.cast( metadata.get( VAS.Database ) );
 			}
 
-			for ( Map.Entry<URI, String> en : metadata.entrySet() ) {
+			if ( metadata.containsKey( VAS.ReificationModel ) ) {
+				URI reif = URI.class.cast( metadata.get( VAS.ReificationModel ) );
+				metadata.put( VAS.ReificationModel,
+						new LiteralImpl( Utility.getInstanceLabel( reif, eng ) ) );
+			}
+
+			for ( Map.Entry<URI, String> en : mq.asStrings().entrySet() ) {
 				URI pred = en.getKey();
 				String val = en.getValue();
 
@@ -202,9 +210,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 					fieldlkp.get( pred ).setText( val );
 				}
 			}
-			
-			// FIXME: need to use label for reification model
 
+			// FIXME: need to use label for reification model
 			subsetmodel.clear();
 			OneVarListQueryAdapter<URI> q
 					= OneVarListQueryAdapter.getUriList( "SELECT ?o { ?base ?subset ?o }",

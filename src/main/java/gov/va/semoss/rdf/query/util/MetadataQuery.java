@@ -16,6 +16,9 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
+import gov.va.semoss.util.Constants;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -29,7 +32,7 @@ import org.openrdf.repository.RepositoryException;
  *
  * @author ryan
  */
-public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
+public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 
 	public MetadataQuery() {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
@@ -45,6 +48,16 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
 		bind( "p", ( VAS.Database.equals( uri ) ? RDF.TYPE : uri ) );
 	}
 
+	public Map<URI, String> asStrings() {
+		Map<URI, String> vals = new HashMap<>();
+
+		for ( Map.Entry<URI, Value> en : super.getResults().entrySet() ) {
+			vals.put( en.getKey(), en.getValue().stringValue() );
+		}
+
+		return vals;
+	}
+
 	/**
 	 * Returns the one value desired, if this query was given a URI at
 	 * instantiation, or the first (random) key from the result map, or null
@@ -52,21 +65,27 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
 	 * @return the first (random) key of the result map, or null if the map is
 	 * empty
 	 */
-	public String getOne() {
+	public Value getOne() {
 		// if we used the one-URI ctor, get the (only) value, or null
 		return ( result.isEmpty() ? null : result.values().iterator().next() );
+	}
+
+	public String getString() {
+		// if we used the one-URI ctor, get the (only) value, or null
+		Value v = getOne();
+		return ( null == v ? null : v.stringValue() );
 	}
 
 	@Override
 	public void handleTuple( BindingSet set, ValueFactory fac ) {
 		URI pred = fac.createURI( set.getValue( "p" ).stringValue() );
-		String val = set.getValue( "o" ).stringValue();
+		Value val = set.getValue( "o" );
 
-    // for baseuri, we need the subject, not the object
+		// for baseuri, we need the subject, not the object
 		// and also, we use the VOID_DS as the key elsewhere in the code
 		if ( RDF.TYPE.equals( pred ) ) {
 			pred = VAS.Database;
-			val = set.getValue( "db" ).stringValue();
+			val = set.getValue( "db" );
 		}
 		else if ( pred.getNamespace().equals( DC.NAMESPACE ) ) {
 			// silently handle the old DC namespace (ignore our DC-specific URIs)
@@ -84,8 +103,8 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
 		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
 		try {
 			engine.query( mq );
-			String str = mq.getOne();
-			if( null != str ){
+			String str = mq.getString();
+			if ( null != str ) {
 				label = str;
 			}
 		}
@@ -93,5 +112,29 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, String>> {
 			// don't care
 		}
 		return label;
+	}
+
+	/**
+	 * Gets the reification model URI from the given engine
+	 *
+	 * @param engine
+	 * @return return the reification model, or {@link Constants#NONODE} if none
+	 * is defined
+	 */
+	public static ReificationStyle getReificationStyle( IEngine engine ) {
+		URI reif = Constants.NONODE;
+		if ( null != engine ) {
+			MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
+			try {
+				engine.query( mq );
+				Value str = mq.getOne();
+				reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+				// don't care
+			}
+		}
+
+		return ReificationStyle.fromUri( reif );
 	}
 }

@@ -66,7 +66,10 @@ public class POIReader implements ImportFileReader {
 	};
 
 	public ImportData readNonloadingSheet( File file ) throws IOException {
-		return readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
+		ImportData d
+				= readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
+		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		return d;
 	}
 
 	public ImportData readNonloadingSheet( Workbook workbook ) {
@@ -140,12 +143,15 @@ public class POIReader implements ImportFileReader {
 			loadMetadata( metadataSheet, data );
 		}
 
+		data.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
 		return data.getMetadata();
 	}
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
-		return read( new XSSFWorkbook( new FileInputStream( file ) ) );
+		ImportData d = read( new XSSFWorkbook( new FileInputStream( file ) ) );
+		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		return d;
 	}
 
 	public ImportData read( Workbook workbook ) throws ImportValidationException {

@@ -9,8 +9,11 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import static gov.va.semoss.rdf.engine.util.EngineLoader.cleanValue;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +25,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
@@ -39,15 +43,23 @@ import org.openrdf.repository.RepositoryException;
 public class QaChecker {
 
 	private static final Logger log = Logger.getLogger( QaChecker.class );
-	private final Map<String, URI> schemaNodes = new HashMap<>();
 	private final Map<ConceptInstanceCacheKey, URI> dataNodes = new HashMap<>();
-	private final Map<String, URI> relationClassCache = new HashMap<>();
+	private final Map<String, URI> instanceClassCache = new HashMap<>();
+	private final Map<RelationClassCacheKey, URI> relationClassCache = new HashMap<>();
 	private final Map<String, URI> relationCache = new HashMap<>();
+	private final Map<String, URI> propertyClassCache = new HashMap<>();
 
 	public static enum CacheType {
 
-		CONCEPTCLASS, RELATIONCLASS, RELATION
+		CONCEPTCLASS, RELATION, PROPERTYCLASS
 	};
+
+	public QaChecker() {
+	}
+
+	public QaChecker( IEngine eng ) {
+		loadCaches( eng );
+	}
 
 	/**
 	 * Separates any non-conforming data from the loading data. This removes the
@@ -90,88 +102,31 @@ public class QaChecker {
 	 * {@link LoadingSheetData#getProperties()} exist in the given engine
 	 *
 	 * @param data the data to check
-	 * @param eng the engine to check against
-	 * @param loadcaches call {@link EngineUtil#preloadCaches(gov.va.semoss.rdf.engine.api.IEngine,
-	 * gov.va.semoss.rdf.engine.util.EngineLoader) } first
 	 * @return the same loading sheet as the <code>data</code> arg
 	 */
-	public LoadingSheetData checkModelConformance( LoadingSheetData data,
-			IEngine eng, boolean loadcaches ) {
-		if ( loadcaches ) {
-			loadCaches( eng );
-		}
-
-		data.setSubjectTypeIsError( !schemaNodes.containsKey( data.getSubjectType() ) );
+	public LoadingSheetData checkModelConformance( LoadingSheetData data ) {
+		data.setSubjectTypeIsError( !instanceClassCache.containsKey( data.getSubjectType() ) );
 
 		if ( data.isRel() ) {
-			data.setObjectTypeIsError( !schemaNodes.containsKey( data.getObjectType() ) );
-			data.setRelationIsError( !relationClassCache.containsKey( data.getRelname() ) );
+			data.setObjectTypeIsError( !instanceClassCache.containsKey( data.getObjectType() ) );
+
+			data.setRelationIsError( hasCachedRelationClass( data.getSubjectType(),
+					data.getObjectType(), data.getRelname() ) );
 		}
 
 		for ( Map.Entry<String, URI> en : data.getPropertiesAndDataTypes().entrySet() ) {
-			data.setPropertyIsError( en.getKey(), !relationClassCache.containsKey( en.getKey() ) );
+			data.setPropertyIsError( en.getKey(), !propertyClassCache.containsKey( en.getKey() ) );
 		}
 
 		return data;
 	}
 
 	public void loadCaches( IEngine engine ) {
-		final Map<String, URI> map = new HashMap<>();
-		String subpropq = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . ?uri ?isa ?type }";
-		VoidQueryAdapter vqa = new VoidQueryAdapter( subpropq ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				map.put( set.getValue( "label" ).stringValue(),
-						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
-			}
-
-			@Override
-			public void start( List<String> bnames ) {
-				super.start( bnames );
-				map.clear();
-			}
-		};
-		vqa.useInferred( true );
-		UriBuilder owlb = engine.getSchemaBuilder();
-
-		try {
-			URI type = owlb.getRelationUri().build();
-			vqa.bind( "type", type );
-			vqa.bind( "isa", RDFS.SUBPROPERTYOF );
-			engine.query( vqa );
-
-			Map<String, URI> cacheo = new HashMap<>();
-			Map<String, URI> cacheb = new HashMap<>();
-			for ( Map.Entry<String, URI> en : map.entrySet() ) {
-				if ( owlb.contains( en.getValue() ) ) {
-					cacheo.put( en.getKey(), en.getValue() );
-				}
-				else {
-					cacheb.put( en.getKey(), en.getValue() );
-				}
-			}
-
-			cacheUris( CacheType.RELATIONCLASS, cacheo );
-			cacheUris( CacheType.RELATION, cacheb );
-
-			vqa.bind( "isa", RDFS.SUBCLASSOF );
-			type = owlb.getConceptUri().build();
-			vqa.bind( "type", type );
-			engine.query( vqa );
-			cacheUris( CacheType.CONCEPTCLASS, map );
-
-			vqa.bind( "isa", RDF.TYPE );
-			Map<String, URI> concepts = new HashMap<>( map );
-			for ( Map.Entry<String, URI> en : concepts.entrySet() ) {
-				vqa.bind( "type", en.getValue() );
-
-				engine.query( vqa );
-				cacheConceptInstances( map, en.getKey() );
-			}
+		if ( ReificationStyle.LEGACY == MetadataQuery.getReificationStyle( engine ) ) {
+			loadLegacy( engine );
 		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( e, e );
+		else {
+			load( engine );
 		}
 	}
 
@@ -234,13 +189,13 @@ public class QaChecker {
 
 	public void cacheUris( CacheType type, Map<String, URI> newtocache ) {
 		if ( CacheType.CONCEPTCLASS == type ) {
-			schemaNodes.putAll( newtocache );
-		}
-		else if ( CacheType.RELATIONCLASS == type ) {
-			relationClassCache.putAll( newtocache );
+			instanceClassCache.putAll( newtocache );
 		}
 		else if ( CacheType.RELATION == type ) {
 			relationCache.putAll( newtocache );
+		}
+		else if ( CacheType.PROPERTYCLASS == type ) {
+			propertyClassCache.putAll( newtocache );
 		}
 		else {
 			throw new IllegalArgumentException( "unhandled cache type: " + type );
@@ -262,10 +217,11 @@ public class QaChecker {
 	 * Clears the caches
 	 */
 	public void clear() {
-		schemaNodes.clear();
+		instanceClassCache.clear();
 		dataNodes.clear();
 		relationClassCache.clear();
 		relationCache.clear();
+		propertyClassCache.clear();
 	}
 
 	/**
@@ -278,16 +234,26 @@ public class QaChecker {
 	 */
 	public void setCaches( Map<String, URI> schemaNodes,
 			Map<ConceptInstanceCacheKey, URI> dataNodes,
-			Map<String, URI> relationClassCache, Map<String, URI> relationCache ) {
+			Map<RelationClassCacheKey, URI> relationClassCache,
+			Map<String, URI> relationCache, Map<String, URI> propertyClassCache ) {
 		clear();
-		this.schemaNodes.putAll( schemaNodes );
+		this.instanceClassCache.putAll( schemaNodes );
 		this.dataNodes.putAll( dataNodes );
 		this.relationClassCache.putAll( relationClassCache );
 		this.relationCache.putAll( relationCache );
+		this.propertyClassCache.putAll( propertyClassCache );
 	}
 
-	public URI getCachedRelationClass( String name ) {
-		return relationClassCache.get( name );
+	public URI getCachedRelationClass( String sub, String obj, String rel ) {
+		return getCachedRelationClass( new RelationClassCacheKey( sub, obj, rel ) );
+	}
+
+	public URI getCachedRelationClass( RelationClassCacheKey key ) {
+		return relationClassCache.get( key );
+	}
+
+	public URI getCachedPropertyClass( String name ) {
+		return propertyClassCache.get( name );
 	}
 
 	public URI getCachedRelation( String name ) {
@@ -299,11 +265,15 @@ public class QaChecker {
 	}
 
 	public URI getCachedInstanceClass( String name ) {
-		return schemaNodes.get( name );
+		return instanceClassCache.get( name );
 	}
 
-	public boolean hasCachedRelationClass( String name ) {
-		return relationClassCache.containsKey( name );
+	public boolean hasCachedRelationClass( String s, String o, String p ) {
+		return relationClassCache.containsKey( new RelationClassCacheKey( s, o, p ) );
+	}
+
+	public boolean hasCachedPropertyClass( String name ) {
+		return propertyClassCache.containsKey( name );
 	}
 
 	public boolean hasCachedRelation( String name ) {
@@ -319,23 +289,224 @@ public class QaChecker {
 	}
 
 	public boolean hasCachedInstanceClass( String name ) {
-		return schemaNodes.containsKey( name );
+		return instanceClassCache.containsKey( name );
+	}
+
+	public void cachePropertyClass( URI uri, String name ) {
+		propertyClassCache.put( name, uri );
 	}
 
 	public void cacheInstanceClass( URI uri, String label ) {
-		schemaNodes.put( label, uri );
+		instanceClassCache.put( label, uri );
 	}
 
 	public void cacheRelationNode( URI uri, String label ) {
 		relationCache.put( label, uri );
 	}
 
-	public void cacheRelationClass( URI uri, String label ) {
-		relationClassCache.put( label, uri );
+	public void cacheRelationClass( URI uri, RelationClassCacheKey key ) {
+		relationClassCache.put( key, uri );
+	}
+
+	public void cacheRelationClass( URI uri, String subtype, String objtype,
+			String relname ) {
+		cacheRelationClass( uri,
+				new RelationClassCacheKey( subtype, objtype, relname ) );
 	}
 
 	public void cacheInstance( URI uri, String typelabel, String rawlabel ) {
 		dataNodes.put( new ConceptInstanceCacheKey( typelabel, rawlabel ), uri );
+	}
+
+	private void loadLegacy( IEngine engine ) {
+		final Map<String, URI> map = new HashMap<>();
+		String subpropq = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . ?uri ?isa ?type }";
+		VoidQueryAdapter vqa = new VoidQueryAdapter( subpropq ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				map.put( set.getValue( "label" ).stringValue(),
+						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
+			}
+
+			@Override
+			public void start( List<String> bnames ) {
+				super.start( bnames );
+				map.clear();
+			}
+		};
+		vqa.useInferred( true );
+		UriBuilder owlb = engine.getSchemaBuilder();
+		UriBuilder datab = engine.getDataBuilder();
+
+		try {
+			URI type = owlb.getRelationUri().build();
+			vqa.bind( "type", type );
+			vqa.bind( "isa", RDFS.SUBPROPERTYOF );
+			engine.query( vqa );
+
+			Map<String, URI> props = new HashMap<>();
+			Map<String, URI> relations = new HashMap<>();
+			for ( Map.Entry<String, URI> en : map.entrySet() ) {
+				if ( datab.contains( en.getValue() ) ) {
+					relations.put( en.getKey(), en.getValue() );
+				}
+				else {
+					props.put( en.getKey(), en.getValue() );
+				}
+			}
+
+			cacheUris( CacheType.PROPERTYCLASS, props );
+			cacheUris( CacheType.RELATION, relations );
+
+			vqa.bind( "isa", RDFS.SUBCLASSOF );
+			type = owlb.getConceptUri().build();
+			vqa.bind( "type", type );
+			engine.query( vqa );
+			cacheUris( CacheType.CONCEPTCLASS, map );
+
+			vqa.bind( "isa", RDF.TYPE );
+			Map<String, URI> concepts = new HashMap<>( map );
+			for ( Map.Entry<String, URI> en : concepts.entrySet() ) {
+				vqa.bind( "type", en.getValue() );
+
+				engine.query( vqa );
+				cacheConceptInstances( map, en.getKey() );
+			}
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			log.warn( e, e );
+		}
+	}
+
+	private void load( IEngine engine ) {
+		final Map<String, URI> map = new HashMap<>();
+		String subpropq = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . ?uri ?isa ?type }";
+		VoidQueryAdapter vqa = new VoidQueryAdapter( subpropq ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				map.put( set.getValue( "label" ).stringValue(),
+						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
+			}
+
+			@Override
+			public void start( List<String> bnames ) {
+				super.start( bnames );
+				map.clear();
+			}
+		};
+		vqa.useInferred( true );
+		UriBuilder owlb = engine.getSchemaBuilder();
+
+		try {
+			vqa.bind( "type", owlb.getConceptUri().build() );
+			vqa.bind( "isa", RDFS.SUBCLASSOF );
+			engine.query( vqa );
+			cacheUris( CacheType.CONCEPTCLASS, map );
+
+			vqa.bind( "type", OWL.DATATYPEPROPERTY );
+			vqa.bind( "isa", RDF.TYPE );
+			engine.query( vqa );
+			cacheUris( CacheType.PROPERTYCLASS, map );
+
+			// getting relationships to cache is harder, because we need the labels
+			// of all the parts involved.
+			String relq = "SELECT DISTINCT ?reltype ?stypelabel ?otypelabel ?relname WHERE {"
+					+ "?sub ?reltype ?obj ."
+					+ "?reltype a owl:ObjectProperty ."
+					//+ "?sub rdfs:label ?slabel ."
+					//+ "?obj rdfs:label ?olabel ."
+					+ "?reltype rdfs:label ?relname ."
+					+ "?sub a ?subtype ."
+					+ "?subtype rdfs:subClassOf ?concept ."
+					+ "?subtype rdfs:label ?stypelabel ."
+					+ "?obj a ?objtype ."
+					+ "?objtype rdfs:subClassOf ?concept ."
+					+ "?objtype rdfs:label ?otypelabel"
+					+ "}";
+			VoidQueryAdapter vqa2 = new VoidQueryAdapter( relq ) {
+
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					QaChecker.this.cacheRelationClass(
+							URI.class.cast( set.getValue( "reltype" ) ),
+							set.getValue( "stypelabel" ).stringValue(),
+							set.getValue( "otypelabel" ).stringValue(),
+							set.getValue( "relname" ).stringValue() );
+				}
+
+			};
+			vqa2.useInferred( true );
+			vqa2.bind( "concept", owlb.getConceptUri().build() );
+			engine.query( vqa2 );
+
+			String instq = "SELECT DISTINCT ?sub ?rawlabel ?typelabel WHERE {"
+					+ "?sub a ?type ."
+					+ "?sub rdfs:label ?rawlabel ."
+					+ "?type a owl:Class ."
+					+ "?type rdfs:subClassOf ?concept ."
+					+ "?type rdfs:label ?typelabel"
+					+ "}";
+			VoidQueryAdapter vqa3 = new VoidQueryAdapter( instq ) {
+
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					QaChecker.this.cacheInstance(
+							URI.class.cast( set.getValue( "reltype" ) ),
+							set.getValue( "typelabel" ).stringValue(),
+							set.getValue( "rawlabel" ).stringValue() );
+				}
+
+			};
+			vqa3.useInferred( true );
+			vqa3.bind( "concept", owlb.getConceptUri().build() );
+			engine.query( vqa3 );
+
+			String relq2 = "SELECT DISTINCT * WHERE {"
+					+ "  ?sub ?reltype ?obj ."
+					+ "  ?reltype a ?semossrel ."
+					+ "  ?sub rdfs:label ?slabel ."
+					+ "  ?obj rdfs:label ?olabel ."
+					+ "  ?reltype rdfs:label ?relname ."
+					+ "  ?sub a ?subtype ."
+					+ "  ?subtype rdfs:subClassOf ?concept ."
+					+ "  ?subtype rdfs:label ?stypelabel ."
+					+ "  ?obj a ?objtype ."
+					+ "  ?objtype rdfs:subClassOf ?concept ."
+					+ "  ?objtype rdfs:label ?otypelabel"
+					+ "}";
+
+			VoidQueryAdapter vqa4 = new VoidQueryAdapter( relq2 ) {
+
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					StringBuilder sb = new StringBuilder();
+					sb.append( set.getValue( "stypelabel" ).stringValue() );
+					sb.append( Constants.RELATION_LABEL_CONCATENATOR );
+					sb.append( set.getValue( "slabel" ).stringValue() );
+					sb.append( Constants.RELATION_LABEL_CONCATENATOR );
+					sb.append( set.getValue( "reltype" ).stringValue() );
+					sb.append( Constants.RELATION_LABEL_CONCATENATOR );
+					sb.append( set.getValue( "otypelabel" ).stringValue() );
+					sb.append( Constants.RELATION_LABEL_CONCATENATOR );
+					sb.append( set.getValue( "olabel" ).stringValue() );
+
+					QaChecker.this.cacheRelationNode(
+							URI.class.cast( set.getValue( "reltype" ) ), sb.toString() );
+				}
+
+			};
+			vqa4.useInferred( true );
+			vqa4.bind( "concept", owlb.getConceptUri().build() );
+			vqa4.bind( "semossrel", owlb.getRelationUri().build() );
+			engine.query( vqa4 );
+
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			log.warn( e, e );
+		}
+
 	}
 
 	public static class ConceptInstanceCacheKey {
@@ -382,6 +553,54 @@ public class QaChecker {
 				return false;
 			}
 			return ( Objects.equals( this.rawlabel, other.rawlabel ) );
+		}
+	}
+
+	public static class RelationClassCacheKey {
+
+		private final String s;
+		private final String p;
+		private final String o;
+
+		public RelationClassCacheKey( String subtype, String objtype, String relname ) {
+			s = subtype;
+			p = relname;
+			o = objtype;
+		}
+
+		@Override
+		public String toString() {
+			return "rel " + s + "<->" + p + "<->" + o;
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 53 * hash + Objects.hashCode( this.s );
+			hash = 53 * hash + Objects.hashCode( this.p );
+			hash = 53 * hash + Objects.hashCode( this.o );
+			return hash;
+		}
+
+		@Override
+		public boolean equals( Object obj ) {
+			if ( obj == null ) {
+				return false;
+			}
+			if ( getClass() != obj.getClass() ) {
+				return false;
+			}
+			final RelationClassCacheKey other = (RelationClassCacheKey) obj;
+			if ( !Objects.equals( this.s, other.s ) ) {
+				return false;
+			}
+			if ( !Objects.equals( this.p, other.p ) ) {
+				return false;
+			}
+			if ( !Objects.equals( this.o, other.o ) ) {
+				return false;
+			}
+			return true;
 		}
 	}
 }
