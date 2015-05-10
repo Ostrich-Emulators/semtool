@@ -291,7 +291,7 @@ public class  InsightManagerController implements Initializable{
 			    	  //"Parameter" tab only if external Parameters are defined:
 			          if(lstvParameter_Inst.getItems() == null || 
 			        	 lstvParameter_Inst.getItems().size() == 0 ||	  
-			             lstvParameter_Inst.getItems().get(0).equals("")){
+			             lstvParameter_Inst.getItems().get(0).getLabel().equals("")){
 			     		  tabParameter.setDisable(true);
 			     	  }else{
 			     		  tabParameter.setDisable(false);
