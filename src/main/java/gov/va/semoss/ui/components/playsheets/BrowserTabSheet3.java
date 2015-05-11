@@ -49,11 +49,11 @@ public class BrowserTabSheet3 extends BrowserPlaySheet2 implements ActionListene
 		this.gps = ps;
 
 		setLayout( new BorderLayout() );
-		JButton pullData = new JButton( "Pull New Data" );
-		pullData.addActionListener( this );
+		JButton pullDataButton = new JButton( "Pull New Data" );
+		pullDataButton.addActionListener( this );
 
-		add( pullData, BorderLayout.NORTH );
-		add( browser.getView().getComponent(), BorderLayout.CENTER );
+		add( pullDataButton, BorderLayout.NORTH );
+		add( jfxPanel, BorderLayout.CENTER );
 	}
 	
 	@Override

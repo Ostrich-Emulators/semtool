@@ -21,12 +21,14 @@ package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.models.ValueTableModel;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import gov.va.semoss.util.Constants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
@@ -68,7 +70,7 @@ public class ParallelCoordinatesPlaySheet extends BrowserPlaySheet2 {
 		}
 
 		Map<String, Object> allHash = new HashMap<>();
-		allHash.put( DATASERIES, dataArrayList );
+		allHash.put( Constants.DATASERIES, dataArrayList );
 		addDataHash( allHash );
 		createView();
 	}

@@ -33,7 +33,6 @@ import gov.va.semoss.ui.main.listener.impl.HideVertexPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.MSTPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.MousePickingPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.MouseTransformPopupMenuListener;
-import gov.va.semoss.ui.main.listener.impl.NodeEditorListener;
 import gov.va.semoss.ui.main.listener.impl.UnHideVertexPopupMenuListener;
 import gov.va.semoss.util.DIHelper;
 
@@ -97,11 +96,6 @@ public class GraphNodePopup extends JPopupMenu {
 				tab.pullData();
 		    }
 		});
-
-		item = add( "Edit Node" );
-		item.setToolTipText( "Make modifications to the SEMOSS database" );
-		item.addActionListener( new NodeEditorListener( gps, pickedVertex, engine ) );
-		item.setEnabled( pickedVertex != null );
 	}
 
 	private void addHidingOptions() {
