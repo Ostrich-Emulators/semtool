@@ -10,7 +10,6 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
 public class ColumnChartPlaySheet extends BrowserPlaySheet2 {
-
 	private static final long serialVersionUID = 164953538466235737L;
 
 	public ColumnChartPlaySheet() {
