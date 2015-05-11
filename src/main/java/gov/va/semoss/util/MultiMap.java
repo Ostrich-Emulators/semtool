@@ -8,6 +8,7 @@ package gov.va.semoss.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -40,5 +41,15 @@ public class MultiMap<T, V> extends HashMap<T, List<V>> {
 	public List<V> getNN( T key ) {
 		List<V> v = get( key );
 		return ( null == v ? new ArrayList<>() : v );
+	}
+
+	public static <T, V> MultiMap<T, V> flip( Map<V, T> map ) {
+		MultiMap<T, V> multi = new MultiMap<>();
+		for ( Map.Entry<V, T> en : map.entrySet() ) {
+			multi.add( en.getValue(), en.getKey() );
+		}
+		
+		return multi;
+
 	}
 }

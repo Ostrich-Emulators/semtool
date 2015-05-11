@@ -34,7 +34,7 @@ public class RepositoryRenderer extends DefaultListCellRenderer {
 			boolean sel, boolean hasfocus ) {
 
 		IEngine eng = IEngine.class.cast( val );		
-		String title = MetadataQuery.getEngineLabel( eng );
+		String title = eng.getEngineName();//MetadataQuery.getEngineLabel( eng );
 
 		boolean pinned = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) );
 		super.getListCellRendererComponent( list, title, idx, sel, hasfocus );

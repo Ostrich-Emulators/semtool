@@ -186,7 +186,6 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		}
 	}
 	
-	@Override
 	protected URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
 			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
 

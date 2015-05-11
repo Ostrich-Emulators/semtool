@@ -31,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import org.junit.BeforeClass;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -72,6 +74,7 @@ public class SemossEdgeModelerTest {
 	private static final File REL2 = new File( "src/test/resources/semossedge-rel2.ttl" );
 	private static final File META = new File( "src/test/resources/semossedge-mm.ttl" );
 	private static final File NODE = new File( "src/test/resources/semossedge-node.ttl" );
+	private static final File NODE2 = new File( "src/test/resources/semossedge-node2.ttl" );
 
 	private QaChecker qaer;
 	private InMemorySesameEngine engine;
@@ -206,7 +209,7 @@ public class SemossEdgeModelerTest {
 
 	@Test
 	public void testAddRel2() throws Exception {
-		LoadingNodeAndPropertyValues rel = rels.add( "Yuri", "Yugo" );
+		LoadingNodeAndPropertyValues rel = rels.add( "Alan", "Cadillac" );
 
 		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
@@ -238,5 +241,27 @@ public class SemossEdgeModelerTest {
 				engine.getRawConnection() );
 
 		compare( engine, NODE );
+	}
+
+	@Test
+	public void testAdd2Nodes() throws Exception {
+		Map<String, Value> props = new HashMap<>();
+		props.put( "First Name", vf.createLiteral( "Yuri" ) );
+		props.put( "Last Name", vf.createLiteral( "Gagarin" ) );
+		
+		// adding two nodes with identical properties
+		// testing to make sure we get two different URIs back
+		LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
+		LoadingNodeAndPropertyValues node2 = nodes.add( "Yuri", props );
+
+		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+
+		URI one = instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
+				engine.getRawConnection() );
+		URI two = instance.addNode( node2, new HashMap<>(), rels, data.getMetadata(),
+				engine.getRawConnection() );
+
+		assertNotEquals( one, two );
 	}
 }

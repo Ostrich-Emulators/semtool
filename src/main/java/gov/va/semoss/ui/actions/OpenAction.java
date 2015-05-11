@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.ui.actions;
 
-import static com.ibm.icu.impl.PluralRulesLoader.loader;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportValidationException;
@@ -18,13 +17,12 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 
+import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
+import gov.va.semoss.ui.components.PlaySheetFrame;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
-import gov.va.semoss.ui.components.OperationsProgress;
-import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
 import gov.va.semoss.ui.components.models.ValueTableModel;
@@ -32,16 +30,17 @@ import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
+import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.Utility;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.prefs.Preferences;
@@ -51,6 +50,7 @@ import javax.swing.Action;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 
+import javax.swing.JOptionPane;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
@@ -67,6 +67,11 @@ public class OpenAction extends DbAction {
 	private static final Logger log = Logger.getLogger( OpenAction.class );
 	private final List<File> files = new ArrayList<>();
 	private final Frame frame;
+
+	public static enum FileHandling {
+
+		LOADINGSHEET, SPREADSHEET, JOURNAL, TRIPLES, UNKNOWN
+	};
 
 	public OpenAction( String optg, Frame frame ) {
 		super( optg, "Open File", "open-file3" );
@@ -116,6 +121,81 @@ public class OpenAction extends DbAction {
 	}
 
 	/**
+	 * A super-inefficient way to organize the given files. This function tries to
+	 * determine what kind of file it is. Hopefully, this can be done by examining
+	 * the file extension. However, for cases like <code>LOADINGSHEET</code> and
+	 * <code>SPREADSHEET</code>, the files must be opened and parsed to tell what
+	 * we have
+	 *
+	 * @param files
+	 * @return
+	 */
+	public static Map<File, FileHandling> categorizeFiles( Collection<File> files ) {
+		Map<File, FileHandling> map = new HashMap<>();
+
+		for ( File file : files ) {
+			switch ( FilenameUtils.getExtension( file.getName() ).toLowerCase() ) {
+				case "jnl":
+					map.put( file, FileHandling.JOURNAL );
+					break;
+				case "csv":
+					map.put( file, FileHandling.LOADINGSHEET );
+					break;
+				case "rdf":
+				case "nt":
+				case "ttl":
+					map.put( file, FileHandling.TRIPLES );
+					break;
+				case "xlsx":
+					map.put( file, checkLoadingSheetValidity( file ) );
+					break;
+				default:
+					log.warn( "could not determine file type: " + file );
+					map.put( file, FileHandling.UNKNOWN );
+			}
+		}
+
+		return map;
+	}
+
+	private static FileHandling checkLoadingSheetValidity( File fileToLoad ) {
+		ImportFileReader rdr = EngineLoader.getDefaultReader( fileToLoad );
+
+		try {
+			// we read the whole file to see if we throw any exceptions
+			// FIXME: this ain't a great plan
+			rdr.readOneFile( fileToLoad ); // see if an exception gets thrown
+			return FileHandling.LOADINGSHEET;
+		}
+		catch ( ImportValidationException ive ) {
+			if ( "xlsx".equalsIgnoreCase( FilenameUtils.getExtension( fileToLoad.getName() ) ) ) {
+				return FileHandling.SPREADSHEET;
+			}
+		}
+		catch ( IOException e ) {
+			return FileHandling.UNKNOWN;
+		}
+
+		return FileHandling.UNKNOWN;
+	}
+
+	/**
+	 * A convenience function to {@link #openFiles(javax.swing.JDesktopPane,
+	 * java.util.Collection, gov.va.semoss.rdf.engine.api.IEngine, boolean,
+	 * boolean, boolean, boolean) openFiles( pane, toload, engine, false, false,
+	 * false, false )}
+	 *
+	 * @param pane
+	 * @param toload
+	 * @param engine
+	 * @return the progress task to open the files, or null if the user canceled
+	 */
+	public static ProgressTask openFiles( JDesktopPane pane,
+			Collection<File> toload, IEngine engine ) {
+		return openFiles( pane, toload, engine, false, false, false, false );
+	}
+
+	/**
 	 * Opens a set of unknown files as best as possible. This function will open a
 	 * {@link LoadingPlaySheetFrame} for previewable files, plus a regular
 	 * grid-filled {@link PlaySheetFrame} for any previewable-but-not loading
@@ -124,59 +204,46 @@ public class OpenAction extends DbAction {
 	 * @param pane
 	 * @param toload
 	 * @param engine
-	 * @return
+	 * @param calc
+	 * @param dometamodel
+	 * @param conformance
+	 * @param replace
+	 * @return the progress task to open the files, or null if the user canceled
 	 */
 	public static ProgressTask openFiles( JDesktopPane pane,
-			Collection<File> toload, IEngine engine ) {
-		return openFiles( pane, toload, engine, false, false, false, false );
-	}
-
-	public static ProgressTask openFiles( JDesktopPane pane,
-			Collection<File> toload, IEngine engine, boolean calc, 
-			boolean dometamodel, boolean conformance, boolean replace  ) {
+			Collection<File> toload, IEngine engine, boolean calc,
+			boolean dometamodel, boolean conformance, boolean replace ) {
 
 		// things are easier if we figure out what we can read, and what we 
 		// can't before we bother processing.
-		List<File> noreader = new ArrayList<>();
-		List<File> journals = new ArrayList<>();
-		Map<File, ImportFileReader> readers = new HashMap<>();
+		MultiMap<FileHandling, File> map = MultiMap.flip( categorizeFiles( toload ) );
+		List<File> journals = map.getNN( FileHandling.JOURNAL );
+		List<File> triples = map.getNN( FileHandling.TRIPLES );
 
-		for ( File fileToLoad : toload ) {
-			ImportFileReader rdr = EngineLoader.getDefaultReader( fileToLoad );
-			if ( null == rdr ) {
-				if ( "jnl".equalsIgnoreCase( FilenameUtils.getExtension( "jnl" ) ) ) {
-					journals.add( fileToLoad );
-				}
-				else {
-					// no reader for this filetype, but we could 
-					// still have an RDF file (which we can load)
-					noreader.add( fileToLoad );
-				}
-			}
-			else {
-				readers.put( fileToLoad, rdr );
-			}
+		List<File> loadingsheets = map.getNN( FileHandling.LOADINGSHEET );
+		List<File> spreadsheets = map.getNN( FileHandling.SPREADSHEET );
+		List<File> unknowns = map.getNN( FileHandling.UNKNOWN );
+
+		if ( !unknowns.isEmpty() ) {
+			Utility.showError( "Could not read/parse " + unknowns.size()
+					+ " files.\nPlease correct them before continuing.\n"
+					+ Arrays.toString( unknowns.toArray() ) );
+			return null;
 		}
 
-		List<File> loadingsheets = new ArrayList<>();
-		List<File> nonloadingsheets = new ArrayList<>();
-		for ( Map.Entry<File, ImportFileReader> en : readers.entrySet() ) {
-			// need to figure out if this file can be opened in the LoadingPlaySheetFrame
-			// or if we need a regular grid PSF.
-			File fileToLoad = en.getKey();
-			ImportFileReader rdr = en.getValue();
-			try {
-				// we read the whole file to see if we throw any exceptions
-				// FIXME: this ain't a great plan
-				rdr.readOneFile( fileToLoad ); // see if an exception gets thrown
-				loadingsheets.add( fileToLoad );
-			}
-			catch ( IOException e ) {
-				log.error( e, e );
-			}
-			catch ( ImportValidationException ive ) {
-				if ( "xlsx".equalsIgnoreCase( FilenameUtils.getExtension( fileToLoad.getName() ) ) ) {
-					nonloadingsheets.add( fileToLoad );
+		if ( !spreadsheets.isEmpty() ) {
+			ListIterator<File> li = spreadsheets.listIterator();
+			while ( li.hasNext() ) {
+				File spreadsheet = li.next();
+				int ans = JOptionPane.showConfirmDialog( pane,
+						spreadsheet + " does not appear to be a Loading Sheet\nOpen Anyway?",
+						"Loading Sheet Error", JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE, null );
+				if ( JOptionPane.NO_OPTION == ans ) {
+					li.remove();
+				}
+				else if ( JOptionPane.CANCEL_OPTION == ans ) {
+					return null;
 				}
 			}
 		}
@@ -185,22 +252,28 @@ public class OpenAction extends DbAction {
 			@Override
 			public void run() {
 				if ( !loadingsheets.isEmpty() ) {
-					LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( engine, 
+					LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame( engine,
 							loadingsheets, calc, dometamodel, conformance, replace );
 					pane.add( psf );
-					int i = loadingsheets.toString().lastIndexOf("\\");
-					psf.setTitle(loadingsheets.toString().substring(i+1, loadingsheets.toString().lastIndexOf("]")));
+
+					StringBuilder windowTitle = new StringBuilder();
+					for ( File f : loadingsheets ) {
+						if ( 0 != windowTitle.length() ) {
+							windowTitle.append( ", " );
+						}
+						windowTitle.append( f.getName() );
+					}
+
+					psf.setTitle( windowTitle.toString() );
 					psf.getLoadingTask().getOp().run();
 				}
 
-				if ( !( nonloadingsheets.isEmpty() && noreader.isEmpty() ) ) {
-					if ( !noreader.isEmpty() ) {
-						addTriples( noreader, engine, pane );
-					}
+				if ( !triples.isEmpty() ) {
+					addTriples( triples, engine, pane );
+				}
 
-					if ( !nonloadingsheets.isEmpty() ) {
-						addGrids( nonloadingsheets, engine, pane );
-					}
+				if ( !spreadsheets.isEmpty() ) {
+					addGrids( spreadsheets, engine, pane );
 				}
 
 				if ( !journals.isEmpty() ) {

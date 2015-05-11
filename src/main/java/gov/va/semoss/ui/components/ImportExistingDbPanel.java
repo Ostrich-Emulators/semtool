@@ -29,15 +29,17 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.actions.OpenAction;
+import gov.va.semoss.ui.actions.OpenAction.FileHandling;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.util.MultiMap;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.ListIterator;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
 /**
@@ -288,10 +290,33 @@ public class ImportExistingDbPanel extends JPanel {
 			final IEngine eng
 					= ( null == engine ? DIHelper.getInstance().getRdfEngine() : engine );
 
-			Collection<File> files = file.getFiles();
+			Set<File> files = new HashSet<>( file.getFiles() );
 
 			URI defaultBase = null;
 			String mybase = baseuri.getSelectedItem().toString();
+
+			MultiMap<FileHandling, File> handlings
+					= MultiMap.flip( OpenAction.categorizeFiles( files ) );
+			Set<File> errors = new LinkedHashSet<>();
+			errors.addAll( handlings.getNN( FileHandling.JOURNAL ) );
+			errors.addAll( handlings.getNN( FileHandling.UNKNOWN ) );
+			errors.addAll( handlings.getNN( FileHandling.SPREADSHEET ) );
+
+			if ( !( errors.isEmpty() || gridy ) ) {
+				int ans = JOptionPane.showOptionDialog( metamodel,
+						"The following files are not loadable. Continue?\n"
+						+ Arrays.toString( errors.toArray() ),
+						"Loading Problems", JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE, null,
+						new String[]{ "Load Loadable Files", "Cancel" },
+						"Load Loadable Files" );
+				if ( 0 == ans ) {
+					files.removeAll( errors );
+				}
+				else {
+					return;
+				}
+			}
 
 			if ( null == mybase || mybase.isEmpty()
 					|| ImportCreateDbPanel.METADATABASEURI.equals( mybase ) ) {
@@ -302,7 +327,8 @@ public class ImportExistingDbPanel extends JPanel {
 					uris.add( new URIImpl( b ) );
 				}
 
-				defaultBase = ImportCreateDbPanel.getDefaultBaseUri( files, uris );
+				defaultBase = ImportCreateDbPanel.getDefaultBaseUri(
+						handlings.getNN( FileHandling.LOADINGSHEET ), uris );
 
 				// save the default base for next time
 				if ( null == defaultBase ) {
@@ -331,7 +357,7 @@ public class ImportExistingDbPanel extends JPanel {
 			ProgressTask pt;
 			if ( gridy ) {
 				pt = OpenAction.openFiles( DIHelper.getInstance().getDesktop(),
-						file.getFiles(), engine, calc, dometamodel, conformance, replace );
+						files, engine, calc, dometamodel, conformance, replace );
 			}
 			else {
 				final String error[] = new String[1];
@@ -351,7 +377,7 @@ public class ImportExistingDbPanel extends JPanel {
 							EngineLoader el = new EngineLoader( stageInMemory );
 							el.setDefaultBaseUri( defaultBaseUri,
 									defaultBaseUri.stringValue().equals( baseuri.getSelectedItem().toString() ) );
-							el.loadToEngine( file.getFiles(), engine, dometamodel, errs );
+							el.loadToEngine( files, engine, dometamodel, errs );
 							el.release();
 
 							if ( !( null == errs || errs.isEmpty() ) ) {
@@ -380,7 +406,10 @@ public class ImportExistingDbPanel extends JPanel {
 					}
 				};
 			}
-			OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
+
+			if ( null != pt ) {
+				OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
+			}
 		}
 	}
 
