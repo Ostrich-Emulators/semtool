@@ -3,10 +3,13 @@ package gov.va.semoss.ui.actions;
 import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-import java.io.File;
 
+import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -27,7 +30,9 @@ public class SaveAllGridAction extends AbstractSavingAction {
 
 	public SaveAllGridAction() {
 		super( "Save All", DbAction.getIcon( "save_alldiskette1" ), true );
-		setToolTip( "Save All Grids" );
+		setToolTip( "Save all changes" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_V );
+		putValue( AbstractAction.SMALL_ICON, DbAction.getIcon( "save_alldiskette1"));
 		setAppendDate( true );
 		setDefaultFileName( "Grids" );
 	}

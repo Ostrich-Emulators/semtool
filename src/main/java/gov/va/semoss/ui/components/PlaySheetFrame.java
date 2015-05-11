@@ -12,6 +12,7 @@ import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
 
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -43,7 +44,6 @@ import javax.swing.event.ChangeListener;
 
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
-import static jline.ANSIBuffer.ANSICodes.save;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;
@@ -74,7 +74,11 @@ public class PlaySheetFrame extends JInternalFrame {
 	private IEngine engine = null;
 
 	public PlaySheetFrame( IEngine eng ) {
-		super( "", true, true, true, true );
+		this( eng, "" );
+	}
+
+	public PlaySheetFrame( IEngine eng, String title ) {
+		super( title, true, true, true, true );
 
 		UIDefaults nimbusOverrides = new UIDefaults();
 		UIDefaults defaults = UIManager.getLookAndFeelDefaults();
@@ -182,8 +186,8 @@ public class PlaySheetFrame extends JInternalFrame {
 					: JOptionPane.YES_NO_CANCEL_OPTION );
 			String[] options = optactions.keySet().toArray( new String[0] );
 
-			int ret = JOptionPane.showOptionDialog( this, "Playsheet " + pscc.getTitle()
-					+ " has unsaved data. Save it? ", "Save Unsaved Data?", dtype,
+			int ret = JOptionPane.showOptionDialog( this, "Playsheet \"" + pscc.getTitle()
+					+ "\" has unsaved data. Save it? ", "Save Unsaved Data?", dtype,
 					JOptionPane.QUESTION_MESSAGE, null, options, options[0] );
 
 			Action a = optactions.get( options[ret] );
@@ -314,6 +318,7 @@ public class PlaySheetFrame extends JInternalFrame {
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 					log.error( e, e );
+					Utility.showError( e.getLocalizedMessage() );
 				}
 			}
 		} ) {

@@ -6,12 +6,16 @@
 # imports: http://uispin.org/ui
 # imports: http://va.gov/ontologies/core
 
+@prefix arg: <http://spinrdf.org/arg#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix insights: <http://va.gov/vcamp/data/insights#> .
 @prefix olo: <http://purl.org/ontology/olo/core#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sp: <http://spinrdf.org/sp#> .
 @prefix spin: <http://spinrdf.org/spin#> .
+@prefix spl: <http://spinrdf.org/spl#> .
 @prefix ui: <http://uispin.org/ui#> .
 @prefix vac: <http://va.gov/ontologies/core#> .
 @prefix vas: <http://va.gov/ontologies/semoss#> .
@@ -19,7 +23,7 @@
 
 <http://va.gov/ontologies/semoss>
   rdf:type owl:Ontology ;
-  owl:imports <http://purl.org/dc/terms/> ;
+  owl:imports dcterms: ;
   owl:imports olo: ;
   owl:imports <http://rdfs.org/ns/void> ;
   owl:imports <http://spinrdf.org/spin> ;
@@ -42,10 +46,10 @@ vas:Database
   rdfs:label "Database"^^xsd:string ;
   rdfs:subClassOf <http://rdfs.org/ns/void#Dataset> ;
 .
-vas:Functions
-  rdf:type spin:Function ;
-  rdfs:label "Functions"^^xsd:string ;
-  rdfs:subClassOf spin:Functions ;
+vas:InsightProperties
+  rdf:type spin:MagicProperty ;
+  rdfs:label "Insight Properties"^^xsd:string ;
+  rdfs:subClassOf spin:MagicProperties ;
 .
 vas:Perspective
   rdf:type owl:Class ;
@@ -55,7 +59,7 @@ vas:Perspective
   rdfs:subClassOf [
       rdf:type owl:Restriction ;
       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-      owl:onClass vas:Functions ;
+      owl:onClass vas:InsightProperties ;
       owl:onProperty olo:item ;
     ] ;
 .
@@ -121,21 +125,21 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
   vac:description "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^xsd:string ;
-  vas:icon "questions_grid1_16.png"^^xsd:string ;
+  vas:icon "questions_grid2_16.png"^^xsd:string ;
   rdfs:label "Grid"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet>
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
   vac:description "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
-  vas:icon "questions_raw_grid1_16.png"^^xsd:string ;
+  vas:icon "questions_raw_grid2_16.png"^^xsd:string ;
   rdfs:label "Raw Grid"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridScatterSheet>
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
   vac:description "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^xsd:string ;
-  vas:icon "questions_scatter_grid1_16.png"^^xsd:string ;
+  vas:icon "questions_grid_scatter1_16.png"^^xsd:string ;
   rdfs:label "Grid Scatter"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet>
@@ -144,6 +148,12 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
   vac:description "The Play Sheet for creating a heat map diagram. "^^xsd:string ;
   vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   rdfs:label "Heat Map"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
+  vas:icon "questions_metamodel1_16.png"^^xsd:string ;
+  rdfs:label "Metamodel Graph"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.OCONUSMapPlaySheet>
   rdf:type vas:DataView ;
@@ -170,7 +180,7 @@ Visualizes Latitude/Longitude coordinates on a map of OCONUS."""^^xsd:string ;
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
   vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships.  "^^xsd:string ;
-  vas:icon "questions_sankey_diagram_16.png"^^xsd:string ;
+  vas:icon "questions_sankey1_16.png"^^xsd:string ;
   rdfs:label "Sankey Diagram"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet>
@@ -201,12 +211,6 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
   vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   rdfs:label "Dupe Heat Map"^^xsd:string ;
 .
-<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet>
-  rdf:type vas:DataView ;
-  vas:icon "questions_metamodel1_16.png"^^xsd:string ;
-  ui:viewClass "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
-  rdfs:label "Metamodel Graph"^^xsd:string ;
-.
 vas:icon
   rdf:type owl:DatatypeProperty ;
   rdfs:domain ui:Element ;
@@ -215,7 +219,7 @@ vas:icon
 vas:insight
   rdf:type owl:ObjectProperty ;
   rdfs:label "insight"^^xsd:string ;
-  rdfs:range vas:Functions ;
+  rdfs:range vas:InsightProperties ;
 .
 vas:isLegacy
   rdf:type owl:DatatypeProperty ;

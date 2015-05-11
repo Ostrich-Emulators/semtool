@@ -10,6 +10,7 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -51,6 +52,8 @@ public class ImportInsightsAction extends DbAction {
 				( clearfirst ? "Replace" : "Add" ) + " insights from a file" );
 		putValue( AbstractAction.MNEMONIC_KEY,
 				( clearfirst ? KeyEvent.VK_R : KeyEvent.VK_A )  );
+		putValue( AbstractAction.SMALL_ICON,
+				( clearfirst ?  DbAction.getIcon( "insight_replace1" ) :  DbAction.getIcon( "insight_add1" ) )  );
 		clear = clearfirst;
 	}
 
@@ -100,7 +103,7 @@ public class ImportInsightsAction extends DbAction {
 
 							EngineUtil.getInstance().addEngineOpListener( eol );
 							EngineUtil.getInstance().importInsights( getEngine(), importfile,
-									clear );
+									clear, VocabularyRegistry.getVocabularies( true ).values() );
 						}
 						catch ( IOException | EngineManagementException re ) {
 							Utility.showError( re.getLocalizedMessage() );

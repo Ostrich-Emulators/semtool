@@ -35,6 +35,7 @@ public final class ImportMetadata {
 	private UriBuilder schemabuilder;
 	private boolean autocreateModel = true;
 	private boolean legacy = false;
+	private URI sourceOfData;
 
 	public ImportMetadata() {
 	}
@@ -56,13 +57,27 @@ public final class ImportMetadata {
 
 		try {
 			MetadataQuery mq = new MetadataQuery();
-			metas.setExtras( eng.query( mq ) );
+			eng.query( mq );
+			metas.setExtras( mq.asStrings() );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
 		}
 
 		return metas;
+	}
+
+	public void setSourceOfData( URI s ) {
+		sourceOfData = s;
+	}
+
+	/**
+	 * Retrieves the source of the data, if set.
+	 *
+	 * @return the URI of the data source, or null
+	 */
+	public URI getSourceOfData() {
+		return sourceOfData;
 	}
 
 	public void clear() {
@@ -84,7 +99,7 @@ public final class ImportMetadata {
 		extras.clear();
 		for ( Map.Entry<URI, String> en : exs.entrySet() ) {
 			// don't write the void#dataset value, because it's the same for every KB
-			if ( !en.getKey().equals( VAS.DATABASE ) ) {
+			if ( !en.getKey().equals( VAS.Database ) ) {
 				extras.put( en.getKey(), en.getValue() );
 			}
 		}

@@ -1,0 +1,45 @@
+<http://semoss.va.gov/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
+<http://sales.data/purchases/2015> <http://www.w3.org/2000/01/rdf-schema#label> "\"Purchase Dataset\"" .
+<http://sales.data/purchases#Concept/Car/Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Car> .
+<http://sales.data/purchases#Concept/Car/Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Yugo" .
+<http://sales.data/purchases#Concept/P7acd8665537e042014530e6fe347abaf/Yuri> <http://sales.data/purchases#Relation/Purchased/Yuri_x_Yugo> <http://sales.data/purchases#Concept/Car/Yugo> .
+<http://sales.data/purchases#Concept/P7acd8665537e042014530e6fe347abaf/Yuri> <http://sales.data/schema#Ga308c7400e6b52060d02ea7662246099> "No" .
+<http://sales.data/purchases#Concept/P7acd8665537e042014530e6fe347abaf/Yuri> <http://sales.data/schema#Jbc910f8bdf70f29374f496f05be0330c> "Yuri" .
+<http://sales.data/purchases#Concept/P7acd8665537e042014530e6fe347abaf/Yuri> <http://sales.data/schema#Y77587239bf4c54ea493c7033e1dbf636> "Gargarin" .
+<http://sales.data/purchases#Concept/P7acd8665537e042014530e6fe347abaf/Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#P7acd8665537e042014530e6fe347abaf> .
+<http://sales.data/purchases#Concept/P7acd8665537e042014530e6fe347abaf/Yuri> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri" .
+<http://sales.data/purchases#Relation/Purchased/Yuri_x_Yugo> <http://sales.data/schema#Date> "2014-11-09T05:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://sales.data/purchases#Relation/Purchased/Yuri_x_Yugo> <http://sales.data/schema#Price> "3000 USD" .
+<http://sales.data/purchases#Relation/Purchased/Yuri_x_Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri Purchased Yugo" .
+<http://sales.data/purchases#Relation/Purchased/Yuri_x_Yugo> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Purchased> .
+<http://sales.data/schema#Car> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sales.data/schema#Car> <http://www.w3.org/2000/01/rdf-schema#label> "Car" .
+<http://sales.data/schema#Car> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sales.data/schema#Concept> .
+<http://sales.data/schema#Concept> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://sales.data/schema#Date> <http://www.w3.org/2000/01/rdf-schema#label> "Date" .
+<http://sales.data/schema#Date> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
+<http://sales.data/schema#Date> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
+<http://sales.data/schema#Ga308c7400e6b52060d02ea7662246099> <http://www.w3.org/2000/01/rdf-schema#label> "508 Compliant?" .
+<http://sales.data/schema#Ga308c7400e6b52060d02ea7662246099> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
+<http://sales.data/schema#Ga308c7400e6b52060d02ea7662246099> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
+<http://sales.data/schema#Jbc910f8bdf70f29374f496f05be0330c> <http://www.w3.org/2000/01/rdf-schema#label> "First Name" .
+<http://sales.data/schema#Jbc910f8bdf70f29374f496f05be0330c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
+<http://sales.data/schema#Jbc910f8bdf70f29374f496f05be0330c> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
+<http://sales.data/schema#P7acd8665537e042014530e6fe347abaf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sales.data/schema#P7acd8665537e042014530e6fe347abaf> <http://www.w3.org/2000/01/rdf-schema#label> "Human Being" .
+<http://sales.data/schema#P7acd8665537e042014530e6fe347abaf> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sales.data/schema#Concept> .
+<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#label> "Price" .
+<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
+<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
+<http://sales.data/schema#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://sales.data/schema#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
+<http://sales.data/schema#Relation/Purchased> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://sales.data/schema#Relation/Purchased> <http://www.w3.org/2000/01/rdf-schema#label> "Purchased" .
+<http://sales.data/schema#Relation/Purchased> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
+<http://sales.data/schema#Y77587239bf4c54ea493c7033e1dbf636> <http://www.w3.org/2000/01/rdf-schema#label> "Last Name" .
+<http://sales.data/schema#Y77587239bf4c54ea493c7033e1dbf636> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
+<http://sales.data/schema#Y77587239bf4c54ea493c7033e1dbf636> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
+<http://semoss.va.gov/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/test14.xlsx> .
+<http://semoss.va.gov/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://rdfs.org/ns/void#subset> <http://sales.data/purchases/2015> .

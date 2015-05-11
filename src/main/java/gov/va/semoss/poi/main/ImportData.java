@@ -8,7 +8,9 @@ package gov.va.semoss.poi.main;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -120,4 +122,19 @@ public final class ImportData {
 		return null;
 	}
 
+	/**
+	 * Looks through all properties for each sheet to see if the property is
+	 * actually a link to a node in some other sheet
+	 *
+	 * @see LoadingSheetData#findPropertyLinks(java.util.Collection)
+	 */
+	public void findPropertyLinks() {
+		for ( LoadingSheetData sheet : sheets ) {
+			if ( sheet.hasProperties() ) {
+				Set<LoadingSheetData> sheetset = new HashSet<>( sheets );
+				sheetset.remove( sheet ); // don't look at ourselves
+				sheet.findPropertyLinks( sheetset );
+			}
+		}
+	}
 }

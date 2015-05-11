@@ -77,10 +77,7 @@ public class PlaySheet {
 
 	@Override
 	public String toString() {
-		return "PlaySheet [icon: " + this.strIcon
-				+ ", viewClass: " + this.strViewClass
-				+ ", label: " + this.strLabel
-				+ ", description: " + this.strDescription + "]";
+		return strLabel;
 	}
    
 }//End PlaySheet class.

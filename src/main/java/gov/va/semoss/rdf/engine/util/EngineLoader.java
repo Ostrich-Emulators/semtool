@@ -5,14 +5,12 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.rdf.engine.edgemodelers.EdgeModeler;
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.remote.BigdataSailFactory;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
-import gov.va.semoss.model.vocabulary.SEMOSS;
-import gov.va.semoss.model.vocabulary.VAC;
-import gov.va.semoss.model.vocabulary.VAS;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,35 +43,28 @@ import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFromRawString;
+import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
+import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
-import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.FOAF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -86,32 +77,26 @@ import org.openrdf.rio.ntriples.NTriplesWriter;
  */
 public class EngineLoader {
 
-	protected static final Pattern NAMEPATTERN
-			= Pattern.compile( "(?:(?:\"([^\"]+)\")|([^@]+))@([a-z-A-Z]{1,8})" );
-	protected static final Pattern DTPATTERN
-			= Pattern.compile( "\"([^\\\\^]+)\"\\^\\^(.*)" );
-	protected static final Pattern URISTARTPATTERN
-			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
-
 	private static final Logger log = Logger.getLogger( EngineLoader.class );
+	private static final Map<String, ImportFileReader> defaultExtReaderLkp
+			= new HashMap<>();
 	private final boolean stageInMemory;
 	private final List<Statement> owls = new ArrayList<>();
 	private BigdataSailRepositoryConnection myrc;
 	private File stagingdir;
-	private final Map<String, URI> schemaNodes = new HashMap<>();
-	private final Map<ConceptInstanceCacheKey, URI> dataNodes = new HashMap<>();
-	private final Map<String, URI> relationClassCache = new HashMap<>();
-	private final Map<String, URI> relationCache = new HashMap<>();
 	private final ValueFactory vf;
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
-	private final Set<URI> duplicates = new HashSet<>();
 	private URI defaultBaseUri;
 	private boolean forceBaseUri;
+	private QaChecker qaer = new QaChecker();
 
-	public static enum CacheType {
-
-		CONCEPTCLASS, RELATIONCLASS, RELATION
-	};
+	static {
+		POIReader poi = new POIReader();
+		CSVReader csv = new CSVReader();
+		defaultExtReaderLkp.put( "xlsx", poi );
+		defaultExtReaderLkp.put( "xls", poi );
+		defaultExtReaderLkp.put( "csv", csv );
+	}
 
 	public EngineLoader( boolean inmem ) {
 		stageInMemory = inmem;
@@ -123,12 +108,6 @@ public class EngineLoader {
 		}
 
 		vf = myrc.getValueFactory();
-
-		POIReader poi = new POIReader();
-		CSVReader csv = new CSVReader();
-		extReaderLkp.put( "xlsx", poi );
-		extReaderLkp.put( "xls", poi );
-		extReaderLkp.put( "csv", csv );
 	}
 
 	public EngineLoader() {
@@ -176,34 +155,7 @@ public class EngineLoader {
 		repo.initialize();
 		BigdataSailRepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
-
 		return rc;
-	}
-
-	public void cacheUris( CacheType type, Map<String, URI> newtocache ) {
-		if ( CacheType.CONCEPTCLASS == type ) {
-			schemaNodes.putAll( newtocache );
-		}
-		else if ( CacheType.RELATIONCLASS == type ) {
-			relationClassCache.putAll( newtocache );
-		}
-		else if ( CacheType.RELATION == type ) {
-			relationCache.putAll( newtocache );
-		}
-		else {
-			throw new IllegalArgumentException( "unhandled cache type: " + type );
-		}
-	}
-
-	public void cacheConceptInstances( Map<String, URI> instances, String typelabel ) {
-		for ( Map.Entry<String, URI> en : instances.entrySet() ) {
-			String l = en.getKey();
-			URI uri = en.getValue();
-
-			ConceptInstanceCacheKey key = new ConceptInstanceCacheKey( typelabel, l );
-			//log.debug( "conceptinstances : " + key + " -> " + en.getValue() );
-			dataNodes.put( key, uri );
-		}
 	}
 
 	/**
@@ -224,6 +176,7 @@ public class EngineLoader {
 			boolean createmetamodel, ImportData conformanceErrors )
 			throws RepositoryException, IOException, ImportValidationException {
 
+		qaer.loadCaches( engine );
 		Set<Statement> mmstmts = new HashSet<>();
 
 		for ( File fileToLoad : toload ) {
@@ -250,6 +203,7 @@ public class EngineLoader {
 			}
 			else {
 				ImportData data = reader.readOneFile( fileToLoad );
+				data.findPropertyLinks();
 				ImportMetadata im = data.getMetadata();
 				im.setAutocreateMetamodel( createmetamodel );
 				loadIntermediateData( data, engine, conformanceErrors );
@@ -263,6 +217,7 @@ public class EngineLoader {
 
 	public void loadToEngine( ImportData data, IEngine engine,
 			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
+		qaer.loadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
 		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
 	}
@@ -297,30 +252,45 @@ public class EngineLoader {
 		try {
 			List<Statement> stmts = new ArrayList<>();
 			for ( String[] stmt : data.getStatements() ) {
-				Statement st = new StatementImpl(
-						EngineLoader.getUriFromRawString( stmt[0], namespaces ),
-						EngineLoader.getUriFromRawString( stmt[1], namespaces ),
-						EngineLoader.getRDFStringValue( stmt[2], namespaces, vf ) );
+				URI s = getUriFromRawString( stmt[0], namespaces );
+				URI p = getUriFromRawString( stmt[1], namespaces );
+				Value o = getRDFStringValue( stmt[2], namespaces, vf );
+
+				if ( null == s || null == p || null == o ) {
+					throw new ImportValidationException( ErrorType.INVALID_DATA,
+							"Could not create metadata statement" + Arrays.toString( stmt ) );
+				}
+
+				Statement st = new StatementImpl( s, p, o );
 				stmts.add( st );
 			}
+
 			if ( !stmts.isEmpty() ) {
 				myrc.add( stmts );
 			}
 
+			// create all metamodel triples, even if we don't add them to the repository
+			EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
+			modeler.createMetamodel( data, namespaces, myrc );
+
 			for ( LoadingSheetData n : data.getNodes() ) {
-				addToEngine( n, engine, data.getMetadata() );
+				addToEngine( n, engine, data );
 			}
 
-			separateConformanceErrors( data, conformanceErrors, engine );
+			qaer.separateConformanceErrors( data, conformanceErrors, engine );
 
 			for ( LoadingSheetData r : data.getRels() ) {
-				addToEngine( r, engine, data.getMetadata() );
+				addToEngine( r, engine, data );
 			}
 
 			URI ebase = engine.getBaseUri();
 			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, OWL.ONTOLOGY );
+
+			if ( null != data.getMetadata().getSourceOfData() ) {
+				myrc.add( ebase, OWL.IMPORTS, data.getMetadata().getSourceOfData() );
+			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
@@ -328,42 +298,24 @@ public class EngineLoader {
 	}
 
 	/**
-	 * Separates any non-conforming data from the loading data. This removes the
-	 * offending data from <code>data</code> and puts them in <code>errors</code>
+	 * Gets a reader for the given file, based on extension. If no reader has been
+	 * explicitly set using {@link #setReader(java.lang.String, gov.va.semoss.poi.main.ImportFileReader)
+	 * }, then this function relies on {@link #getDefaultReader(java.io.File) }
+	 * to determine the appropriate reader for this file.
 	 *
-	 * @param data the data to check for errors
-	 * @param errors where to put non-conforming data. If null, this function does
-	 * nothing
-	 * @param engine the engine to check against
+	 * @param toload
+	 * @return
 	 */
-	public void separateConformanceErrors( ImportData data, ImportData errors,
-			IEngine engine ) {
-		if ( null != errors ) {
-			for ( LoadingSheetData d : data.getSheets() ) {
-				List<LoadingNodeAndPropertyValues> errs = checkConformance( d, engine, false );
-
-				if ( !errs.isEmpty() ) {
-					LoadingSheetData errdata = LoadingSheetData.copyHeadersOf( d );
-					errdata.setProperties( d.getPropertiesAndDataTypes() );
-					errors.add( errdata );
-
-					Set<LoadingNodeAndPropertyValues> errvals = new HashSet<>();
-					List<LoadingNodeAndPropertyValues> reldata = d.getData();
-
-					for ( LoadingNodeAndPropertyValues nap : errs ) {
-						errvals.add( nap );
-						errdata.add( nap );
-					}
-
-					reldata.removeAll( errvals );
-				}
-			}
-		}
-	}
-
 	public ImportFileReader getReader( File toload ) {
 		String ext = FilenameUtils.getExtension( toload.getName() ).toLowerCase();
-		ImportFileReader rdr = extReaderLkp.get( ext );
+		ImportFileReader rdr = ( extReaderLkp.containsKey( ext )
+				? extReaderLkp.get( ext ) : getDefaultReader( toload ) );
+		return rdr;
+	}
+
+	public static ImportFileReader getDefaultReader( File toload ) {
+		String ext = FilenameUtils.getExtension( toload.getName() ).toLowerCase();
+		ImportFileReader rdr = defaultExtReaderLkp.get( ext );
 		return rdr;
 	}
 
@@ -387,10 +339,7 @@ public class EngineLoader {
 			initNamespaces( myrc );
 
 			owls.clear();
-			schemaNodes.clear();
-			dataNodes.clear();
-			relationClassCache.clear();
-			relationCache.clear();
+			qaer.clear();
 		}
 		catch ( Exception e ) {
 			log.warn( e, e );
@@ -416,566 +365,25 @@ public class EngineLoader {
 		FileUtils.deleteQuietly( stagingdir );
 	}
 
-	/**
-	 * Checks conformance of the given data. The <code>data</code> argument will
-	 * be updated when errors are found. Only relationship data can be
-	 * non-conforming.
-	 *
-	 * @param data the data to check
-	 * @param eng the engine to check against
-	 * @param loadcaches call
-	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} first
-	 * @return a list of all {@link LoadingNodeAndPropertyValues} that fail the
-	 * check
-	 */
-	public List<LoadingNodeAndPropertyValues> checkConformance( LoadingSheetData data,
-			IEngine eng, boolean loadcaches ) {
-		List<LoadingNodeAndPropertyValues> failures = new ArrayList<>();
-
-		if ( loadcaches ) {
-			preloadCaches( eng );
-		}
-
-		String stype = data.getSubjectType();
-		String otype = data.getObjectType();
-
-		for ( LoadingNodeAndPropertyValues nap : data.getData() ) {
-			// check that the subject and object are in our instance cache
-			ConceptInstanceCacheKey skey
-					= new ConceptInstanceCacheKey( stype, nap.getSubject() );
-			nap.setSubjectIsError( !dataNodes.containsKey( skey ) );
-
-			if ( data.isRel() ) {
-				ConceptInstanceCacheKey okey
-						= new ConceptInstanceCacheKey( otype, nap.getObject() );
-				nap.setObjectIsError( !dataNodes.containsKey( okey ) );
-			}
-
-			if ( nap.hasError() ) {
-				failures.add( nap );
-			}
-		}
-
-		return failures;
-	}
-
-	/**
-	 * Checks for an instance of the given type and label.
-	 * {@link #preloadCaches(gov.va.semoss.rdf.engine.api.IEngine)} MUST be called
-	 * prior to this function to have any hope at a true result
-	 *
-	 * @param type
-	 * @param label
-	 * @return true, if the type/label matches a cached value
-	 */
-	public boolean instanceExists( String type, String label ) {
-		return dataNodes.containsKey( new ConceptInstanceCacheKey( type, label ) );
-	}
-
-	/**
-	 * Checks that the Loading Sheet's {@link LoadingSheetData#subjectType},
-	 * {@link LoadingSheetData#objectType}, and
-	 * {@link LoadingSheetData#getProperties()} exist in the given engine
-	 *
-	 * @param data the data to check
-	 * @param eng the engine to check against
-	 * @param loadcaches call {@link EngineUtil#preloadCaches(gov.va.semoss.rdf.engine.api.IEngine,
-	 * gov.va.semoss.rdf.engine.util.EngineLoader) } first
-	 * @return the same loading sheet as the <code>data</code> arg
-	 */
-	public LoadingSheetData checkModelConformance( LoadingSheetData data,
-			IEngine eng, boolean loadcaches ) {
-		if ( loadcaches ) {
-			preloadCaches( eng );
-		}
-
-		data.setSubjectTypeIsError( !schemaNodes.containsKey( data.getSubjectType() ) );
-
-		if ( data.isRel() ) {
-			data.setObjectTypeIsError( !schemaNodes.containsKey( data.getObjectType() ) );
-			data.setRelationIsError( !relationClassCache.containsKey( data.getRelname() ) );
-		}
-
-		for ( Map.Entry<String, URI> en : data.getPropertiesAndDataTypes().entrySet() ) {
-			data.setPropertyIsError( en.getKey(), !schemaNodes.containsKey( en.getKey() ) );
-		}
-
-		return data;
-	}
-
-	public void preloadCaches( IEngine engine ) {
-		final Map<String, URI> map = new HashMap<>();
-		String subpropq = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . ?uri ?isa ?type }";
-		VoidQueryAdapter vqa = new VoidQueryAdapter( subpropq ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				map.put( set.getValue( "label" ).stringValue(),
-						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
-
-			}
-
-			@Override
-			public void start( List<String> bnames ) {
-				super.start( bnames );
-				map.clear();
-			}
-		};
-		vqa.useInferred( true );
-		UriBuilder owlb = engine.getSchemaBuilder();
-
-		try {
-			URI uri = owlb.getRelationUri().build();
-			vqa.bind( "type", uri );
-			vqa.bind( "isa", RDFS.SUBPROPERTYOF );
-			engine.query( vqa );
-
-			Map<String, URI> cacheo = new HashMap<>();
-			Map<String, URI> cacheb = new HashMap<>();
-			for ( Map.Entry<String, URI> en : map.entrySet() ) {
-				if ( owlb.contains( en.getValue() ) ) {
-					cacheo.put( en.getKey(), en.getValue() );
-				}
-				else {
-					cacheb.put( en.getKey(), en.getValue() );
-				}
-			}
-
-			cacheUris( CacheType.RELATIONCLASS, cacheo );
-			cacheUris( CacheType.RELATION, cacheb );
-
-			vqa.bind( "isa", RDFS.SUBCLASSOF );
-			uri = owlb.getConceptUri().build();
-			vqa.bind( "type", uri );
-			engine.query( vqa );
-			cacheUris( CacheType.CONCEPTCLASS, map );
-
-			vqa.bind( "isa", RDF.TYPE );
-			Map<String, URI> concepts = new HashMap<>( map );
-			for ( Map.Entry<String, URI> en : concepts.entrySet() ) {
-				vqa.bind( "type", en.getValue() );
-
-				engine.query( vqa );
-				cacheConceptInstances( map, en.getKey() );
-			}
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( e, e );
-		}
-	}
-
 	private void addToEngine( LoadingSheetData sheet, IEngine engine,
-			ImportMetadata metas ) throws RepositoryException {
+			ImportData alldata ) throws ImportValidationException, RepositoryException {
 
 		// we want to search all namespaces, but use the metadata's first
+		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-
-		// create all metamodel triples, even if we don't add them to the repository
-		createMetamodel( sheet, namespaces, metas );
+		EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
-				addRel( nap, namespaces, sheet, metas );
+				modeler.addRel( nap, namespaces, sheet, metas, myrc );
 			}
 		}
 		else {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
-				addNode( nap, namespaces, sheet, metas );
+				modeler.addNode( nap, namespaces, sheet, metas, myrc );
 			}
 		}
-	}
-
-	private URI ensureUnique( URI uri ) {
-		if ( duplicates.contains( uri ) ) {
-			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
-			uri = dupefixer.uniqueUri();
-			duplicates.add( uri );
-		}
-		return uri;
-	}
-
-	private URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas ) throws RepositoryException {
-
-		String stype = nap.getSubjectType();
-		String srawlabel = nap.getSubject();
-
-		String otype = nap.getObjectType();
-		String orawlabel = nap.getObject();
-
-		// get both ends of the relationship...
-		ConceptInstanceCacheKey skey = new ConceptInstanceCacheKey( stype, srawlabel );
-		if ( !dataNodes.containsKey( skey ) ) {
-			LoadingNodeAndPropertyValues filler
-					= sheet.new LoadingNodeAndPropertyValues( srawlabel );
-			addNode( filler, namespaces, sheet, metas );
-		}
-		URI subject = dataNodes.get( skey );
-
-		ConceptInstanceCacheKey okey = new ConceptInstanceCacheKey( otype, orawlabel );
-		if ( !dataNodes.containsKey( okey ) ) {
-			LoadingSheetData lsd = LoadingSheetData.nodesheet( sheet.getName(), otype );
-			LoadingNodeAndPropertyValues filler = lsd.add( orawlabel );
-			addNode( filler, namespaces, lsd, metas );
-		}
-		URI object = dataNodes.get( okey );
-
-		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
-
-		// ... and get a relationship that ties them together
-		StringBuilder keybuilder = new StringBuilder( nap.getSubjectType() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getSubject() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( sheet.getRelname() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getObjectType() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getObject() );
-
-		String lkey = keybuilder.toString();
-		if ( !relationCache.containsKey( lkey ) ) {
-			URI connector;
-			String rellocalname;
-			if ( alreadyMadeRel ) {
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
-				connector = metas.getDataBuilder().getRelationUri().build( rellocalname );
-			}
-			else {
-				UriBuilder typebuilder
-						= metas.getDataBuilder().getRelationUri().add( sheet.getRelname() );
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
-				connector = typebuilder.add( rellocalname ).build();
-			}
-
-			connector = ensureUnique( connector );
-			relationCache.put( lkey, connector );
-		}
-
-		String typekey = stype + sheet.getRelname() + otype;
-		URI relClassBaseURI = relationClassCache.get( typekey );
-
-		URI connector = relationCache.get( lkey );
-		if ( metas.isAutocreateMetamodel() ) {
-			myrc.add( connector, RDFS.SUBPROPERTYOF, relClassBaseURI );
-			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel
-					+ Constants.RELATION_LABEL_CONCATENATOR + orawlabel ) );
-		}
-		myrc.add( subject, connector, object );
-
-		addProperties( connector, nap, namespaces, sheet, metas );
-
-		return connector;
-	}
-
-	private URI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas )
-			throws RepositoryException {
-
-		String typename = nap.getSubjectType();
-		String rawlabel = nap.getSubject();
-
-		URI typeuri = schemaNodes.get( typename );
-
-		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
-
-		ConceptInstanceCacheKey key = new ConceptInstanceCacheKey( typename, rawlabel );
-		if ( !dataNodes.containsKey( key ) ) {
-			URI subject;
-
-			if ( nodeIsAlreadyUri ) {
-				subject = getUriFromRawString( rawlabel, namespaces );
-			}
-			else {
-				if ( metas.isAutocreateMetamodel() ) {
-					UriBuilder nodebuilder = metas.getDataBuilder().getConceptUri();
-					if ( !typename.contains( ":" ) ) {
-						nodebuilder.add( typename );
-					}
-					subject = nodebuilder.add( rawlabel ).build();
-				}
-				else {
-					subject = metas.getDataBuilder().add( rawlabel ).build();
-				}
-
-				subject = ensureUnique( subject );
-			}
-			dataNodes.put( key, subject );
-		}
-
-		URI subject = dataNodes.get( key );
-		myrc.add( subject, RDF.TYPE, typeuri );
-
-		boolean savelabel = metas.isAutocreateMetamodel();
-		if ( !metas.isLegacyMode() && rawlabel.contains( ":" ) ) {
-			// we have something with a colon in it, so we need to figure out if it's
-			// a namespace-prefixed string, or just a string with a colon in it
-
-			Value val = getRDFStringValue( rawlabel, namespaces, myrc.getValueFactory() );
-			// check if we have a prefixed URI
-			URI u = getUriFromRawString( rawlabel, namespaces );
-			savelabel = ( savelabel && null == u );
-			rawlabel = val.stringValue();
-		}
-
-		// if we have a label property, skip this label-making
-		// (it'll get handled in the addProperties function later)
-		if ( savelabel && !nap.hasProperty( RDFS.LABEL, namespaces ) ) {
-			myrc.add( subject, RDFS.LABEL, vf.createLiteral( rawlabel ) );
-		}
-
-		addProperties( subject, nap, namespaces, sheet, metas );
-
-		return subject;
-	}
-
-	/**
-	 * Create statements for all of the properties of the instanceURI
-	 *
-	 * @param subject URI containing the subject instance URI
-	 * @param properties Map<String, Object> that contains all properties
-	 * @param namespaces
-	 * @param sheet
-	 * @param metas
-	 *
-	 * @throws RepositoryException
-	 */
-	protected void addProperties( URI subject, Map<String, Value> properties,
-			Map<String, String> namespaces, LoadingSheetData sheet,
-			ImportMetadata metas ) throws RepositoryException {
-
-		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
-			String relkey = sheet.getName() + entry.getKey();
-
-			URI predicate = relationClassCache.get( relkey );
-
-			Value value = entry.getValue();
-			// not sure if we even use these values anymore
-			switch ( value.toString() ) {
-				case Constants.PROCESS_CURRENT_DATE:
-					myrc.add( subject, predicate,
-							vf.createLiteral( getCal( new Date() ) ) );
-					break;
-				case Constants.PROCESS_CURRENT_USER:
-					myrc.add( subject, predicate,
-							vf.createLiteral( System.getProperty( "user.name" ) ) );
-					break;
-				default:
-					myrc.add( subject, predicate, value );
-			}
-		}
-	}
-
-	private void createMetamodel( LoadingSheetData sheet, Map<String, String> namespaces,
-			ImportMetadata metas ) throws RepositoryException {
-		UriBuilder schema = metas.getSchemaBuilder();
-		boolean save = metas.isAutocreateMetamodel();
-
-		String stype = sheet.getSubjectType();
-		String scachekey = stype;
-		URI suri;
-		if ( !schemaNodes.containsKey( scachekey ) ) {
-			boolean nodeAlreadyMade = isUri( stype, namespaces );
-
-			URI uri = ( nodeAlreadyMade
-					? getUriFromRawString( stype, namespaces )
-					: schema.build( stype ) );
-			schemaNodes.put( scachekey, uri );
-
-			if ( save && !nodeAlreadyMade ) {
-				myrc.add( uri, RDF.TYPE, OWL.CLASS );
-				myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
-				myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
-			}
-		}
-		suri = schemaNodes.get( stype );
-
-		if ( sheet.isRel() ) {
-			String otype = sheet.getObjectType();
-			String ocachekey = otype;
-			if ( !schemaNodes.containsKey( ocachekey ) ) {
-				boolean nodeAlreadyMade = isUri( otype, namespaces );
-
-				URI uri = ( nodeAlreadyMade
-						? getUriFromRawString( otype, namespaces )
-						: schema.build( otype ) );
-
-				schemaNodes.put( ocachekey, uri );
-
-				if ( save && !nodeAlreadyMade ) {
-					myrc.add( uri, RDF.TYPE, OWL.CLASS );
-					myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
-					myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
-				}
-			}
-
-			String rellabel = sheet.getRelname();
-			String longNodeType = stype + rellabel + otype;
-
-			if ( !relationClassCache.containsKey( longNodeType ) ) {
-				boolean relationAlreadyMade = isUri( rellabel, namespaces );
-
-				URI ret = ( relationAlreadyMade
-						? getUriFromRawString( rellabel, namespaces )
-						: schema.getRelationUri( rellabel ) );
-				URI relation = schema.getRelationUri().build();
-
-				relationClassCache.put( longNodeType, ret );
-
-				if ( save ) {
-					if ( !relationAlreadyMade ) {
-						myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
-						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
-						myrc.add( ret, RDFS.SUBPROPERTYOF, relation );
-					}
-					// myrc.add( suri, ret, schemaNodes.get( ocachekey ) );
-
-					myrc.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
-
-					myrc.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-					myrc.add( relation, RDF.TYPE, RDF.PROPERTY );
-				}
-			}
-		}
-
-		for ( String propname : sheet.getProperties() ) {
-			// property names are unique per sheet
-			String relkey = sheet.getName() + propname;
-			boolean alreadyMadeProp = isUri( propname, namespaces );
-
-			if ( !relationClassCache.containsKey( relkey ) ) {
-				URI predicate;
-				if ( alreadyMadeProp ) {
-					predicate = getUriFromRawString( propname, namespaces );
-				}
-				else {
-					// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
-					predicate = schema.build( propname );
-				}
-				relationClassCache.put( relkey, predicate );
-			}
-			URI predicate = relationClassCache.get( relkey );
-
-			if ( save && !alreadyMadeProp ) {
-				myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-				// myrc.add( predicate, RDF.TYPE, schema.getContainsUri() );
-				myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
-
-				if ( !metas.isLegacyMode() ) {
-					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-				}
-			}
-		}
-	}
-
-	private static boolean isUri( String raw, Map<String, String> namespaces ) {
-		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
-			raw = raw.substring( 1, raw.length() - 1 );
-		}
-
-		Matcher m = URISTARTPATTERN.matcher( raw );
-		if ( m.matches() ) {
-			return true;
-		}
-
-		if ( raw.contains( ":" ) ) {
-			String[] pieces = raw.split( ":" );
-			if ( 2 == pieces.length ) {
-				String namespace = namespaces.get( pieces[0] );
-				if ( !( null == namespace || namespace.trim().isEmpty() ) ) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
-		//resolve namespace
-		ValueFactory vf = new ValueFactoryImpl();
-		URI uri = null;
-
-		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
-			uri = vf.createURI( raw.substring( 1, raw.length() - 1 ) );
-			return uri;
-		}
-
-		// if raw starts with <something>://, then assume it's just a URI
-		Matcher m = URISTARTPATTERN.matcher( raw );
-		if ( m.matches() ) {
-			return vf.createURI( raw );
-		}
-
-		if ( raw.contains( ":" ) ) {
-			String[] pieces = raw.split( ":" );
-			if ( 2 == pieces.length ) {
-				String namespace = namespaces.get( pieces[0] );
-				if ( null == namespace || namespace.trim().isEmpty() ) {
-					log.warn( "No namespace found for raw value: " + raw );
-				}
-				else {
-					uri = vf.createURI( namespace, pieces[1] );
-				}
-			}
-			else {
-				log.error( "cannot resolve namespace for: " + raw + " (too many colons)" );
-			}
-		}
-		//else {
-		// since this will will always throw an error (it can't be an absolute URI)
-		// we'll just return null, as usual
-		//uri = vf.createURI( raw );
-		//}
-
-		return uri;
-	}
-
-	public static Value getRDFStringValue( String rawval, Map<String, String> namespaces,
-			ValueFactory vf ) {
-		// if rawval looks like a URI, assume it is
-		Matcher urimatcher = URISTARTPATTERN.matcher( rawval );
-		if ( urimatcher.matches() ) {
-			return vf.createURI( rawval );
-		}
-
-		Matcher m = NAMEPATTERN.matcher( rawval );
-		String val;
-		String lang;
-		if ( m.matches() ) {
-			String g1 = m.group( 1 );
-			String g2 = m.group( 2 );
-			val = ( null == g1 ? g2 : g1 );
-			lang = m.group( 3 );
-		}
-		else {
-			val = rawval;
-			lang = "";
-
-			m = DTPATTERN.matcher( rawval );
-			if ( m.matches() ) {
-				val = m.group( 1 );
-				String typestr = m.group( 2 );
-				try {
-					URI type = getUriFromRawString( typestr, namespaces );
-					if ( null == type ) {
-						// will get caught immediately
-						throw new NullPointerException( "unknown type URI" );
-					}
-					else {
-						return vf.createLiteral( val, type );
-					}
-				}
-				catch ( Exception e ) {
-					log.warn( "probably misinterpreting as string (unknown type URI?) :"
-							+ rawval, e );
-					val = rawval;
-				}
-			}
-		}
-
-		return ( lang.isEmpty() ? vf.createLiteral( val )
-				: vf.createLiteral( val, lang ) );
 	}
 
 	/**
@@ -984,6 +392,7 @@ public class EngineLoader {
 	 *
 	 * @param engine
 	 * @param copyowls
+	 * @param fileJustLoaded the file that was just loaded
 	 * @return the metamodel statements. Will always be empty if
 	 * <code>copyowls</code> is false
 	 * @throws RepositoryException
@@ -1095,80 +504,31 @@ public class EngineLoader {
 	 * @throws org.openrdf.repository.RepositoryException
 	 */
 	private static void initNamespaces( RepositoryConnection conn ) throws RepositoryException {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
 
 		conn.begin();
-		for ( Map.Entry<String, String> e : namespaces.entrySet() ) {
+		for ( Map.Entry<String, String> e : Utility.DEFAULTNAMESPACES.entrySet() ) {
 			conn.setNamespace( e.getKey(), e.getValue() );
 		}
 		conn.commit();
 	}
 
 	public static void initNamespaces( ImportData conn ) {
-		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( FOAF.PREFIX, FOAF.NAMESPACE );
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		namespaces.put( VAC.PREFIX, VAC.NAMESPACE );
-		namespaces.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
-
-		conn.getMetadata().setNamespaces( namespaces );
+		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 	}
 
-	public static class ConceptInstanceCacheKey {
-
-		private final String typelabel;
-		private final String rawlabel;
-
-		public ConceptInstanceCacheKey( String typelabel, String conceptlabel ) {
-			this.typelabel = typelabel;
-			this.rawlabel = conceptlabel;
+	public EdgeModeler getEdgeModeler( ReificationStyle reif ) {
+		EdgeModeler modeler = null;
+		switch ( reif ) {
+			case SEMOSS:
+				modeler = new SemossEdgeModeler( qaer );
+				break;
+			case LEGACY:
+				modeler = new LegacyEdgeModeler( qaer );
+				break;
+			default:
+				throw new IllegalArgumentException( "Unhandled reification style: " + reif );
 		}
 
-		public String getTypeLabel() {
-			return typelabel;
-		}
-
-		public String getConceptLabel() {
-			return rawlabel;
-		}
-
-		@Override
-		public String toString() {
-			return "instance " + typelabel + "<->" + rawlabel;
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 7;
-			hash = 89 * hash + Objects.hashCode( this.typelabel );
-			hash = 89 * hash + Objects.hashCode( this.rawlabel );
-			return hash;
-		}
-
-		@Override
-		public boolean equals( Object obj ) {
-			if ( obj == null ) {
-				return false;
-			}
-			if ( getClass() != obj.getClass() ) {
-				return false;
-			}
-			final ConceptInstanceCacheKey other = (ConceptInstanceCacheKey) obj;
-			if ( !Objects.equals( this.typelabel, other.typelabel ) ) {
-				return false;
-			}
-			return ( Objects.equals( this.rawlabel, other.rawlabel ) );
-		}
+		return modeler;
 	}
 }

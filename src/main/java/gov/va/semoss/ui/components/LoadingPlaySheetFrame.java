@@ -14,6 +14,7 @@ import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.actions.DbAction;
@@ -23,7 +24,7 @@ import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.NodeLoadingPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.playsheets.RelationshipLoadingPlaySheet;
-import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
+import gov.va.semoss.ui.components.renderers.RepositoryRenderer;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultIcons;
 import gov.va.semoss.util.Utility;
@@ -32,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	private final AddAction addtab = new AddAction();
 	private final ConformanceAction cnfr = new ConformanceAction();
 
-	private final EngineLoader realtimer = new EngineLoader();
+	private final QaChecker realtimer = new QaChecker();
 	private final JToggleButton timertoggle = new JToggleButton( cnfr );
 
 	public LoadingPlaySheetFrame( IEngine eng ) {
@@ -96,8 +96,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		dometamodel = meta;
 		doconformance = conform;
 		doreplace = replace;
-		setTitle( "Import Data Review" );
-
+	//	setTitle( "Import Data Review 4" );
+	//	fileToLoad.getName()
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
 
@@ -123,6 +123,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
 
 		setTitle( "Import Data Review" );
+		
 
 		LoadingPlaySheetBase first = null;
 		for ( LoadingSheetData n : data.getSheets() ) {
@@ -137,12 +138,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		}
 
 		hideProgress();
-	}
-
-	@Override
-	protected void onFrameClose() {
-		realtimer.release();
-		super.onFrameClose();
 	}
 
 	public final LoadingPlaySheetBase add( LoadingSheetData data ) {
@@ -168,8 +163,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		sheets.add( c );
 		showerrs.addActionListener( c );
 
-		EngineLoader el = ( timertoggle.isSelected() ? realtimer : null );
-		c.getLoadingModel().setRealTimeEngineLoader( el );
+		QaChecker el = ( timertoggle.isSelected() ? realtimer : null );
+		c.getLoadingModel().setQaChecker( el );
 	}
 
 	@Override
@@ -184,79 +179,60 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	public ProgressTask getLoadingTask() {
-
 		String t = "Loading data" + ( isLoadable() ? " to "
 				+ MetadataQuery.getEngineLabel( getEngine() ) : "" );
+		final String error[] = new String[1];
 		ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
 			@Override
 			public void run() {
-				boolean somethingToShow = false;
 
 				if ( doconformance ) {
 					updateProgress( "Preparing Load", 0 );
 					realtimer.clear();
-					realtimer.preloadCaches( getEngine() );
+					realtimer.loadCaches( getEngine() );
 				}
 
 				int progressPerFile = 100 / toload.size();
-				boolean alreadyShownRdfError = false;
+				File lastloaded = null;
 				for ( File fileToLoad : toload ) {
 					jBar.setString( "Reading " + fileToLoad );
-					ImportFileReader rdr = realtimer.getReader( fileToLoad );
+					ImportFileReader rdr = EngineLoader.getDefaultReader( fileToLoad );
 					log.debug( "importing file:" + fileToLoad );
-					if ( null == rdr ) {
-						// no reader for this filetype, but we could 
-						// still have an RDF file (which we can load)
-						if ( !isLoadable() ) {
-							Utility.showError( "You must specify a database to receive this data" );
-							return;
-						}
-
-						try {
-							if ( doconformance ) {
-								log.warn( "cannot check quality for file: " + fileToLoad );
-							}
-
-							realtimer.loadToEngine( Arrays.asList( fileToLoad ), getEngine(),
-									dometamodel, null );
-						}
-						catch ( ImportValidationException | RepositoryException | IOException e ) {
-							log.error( e, e );
-						}
-
+					try {
+						ImportData data = rdr.readOneFile( fileToLoad );
+						data.findPropertyLinks();
 						addProgress( "Finished reading " + fileToLoad, progressPerFile );
 
-						if ( !alreadyShownRdfError ) {
-							alreadyShownRdfError = true;
-							Utility.showMessage( "Data from non-CSV or XLS files cannot be previewed" );
+						if ( null == lastloaded ) {
+							lastloaded = fileToLoad;
+						}
+
+						for ( LoadingSheetData n : data.getSheets() ) {
+							add( n );
 						}
 					}
-					else {
-						// we have a reader, so we can load to importdata if needed
-						try {
-							somethingToShow = true;
-							ImportData data = rdr.readOneFile( fileToLoad );
-							addProgress( "Finished reading " + fileToLoad, progressPerFile );
-
-							for ( LoadingSheetData n : data.getSheets() ) {
-								add( n );
-							}
-						}
-						catch ( Exception ee ) {
-							log.error( ee, ee );
-						}
+					catch ( IOException | ImportValidationException eee ) {
+						log.error( eee, eee );
+						error[0] = eee.getLocalizedMessage();
 					}
 				}
 
-				if ( somethingToShow ) {
-					LoadingPlaySheetFrame.this.selectTab( 0 );
-					announceErrors();
+				LoadingPlaySheetFrame.this.selectTab( 0 );
+				if ( null != lastloaded ) {
+					LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
 				}
-				else {
-					LoadingPlaySheetFrame.this.dispose();
+				announceErrors();
+				
+			}
+		} ) {
+			@Override
+			public void done() {
+				super.done();
+				if ( null != error[0] ) {
+					Utility.showError( error[0] );
 				}
 			}
-		} );
+		};
 
 		return pt;
 	}
@@ -351,11 +327,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		}
 
 		repos.getRepositoryModel().addAll( engines );
-		LabeledPairRenderer<IEngine> renderer = new LabeledPairRenderer<>();
-		repos.setCellRenderer( renderer );
-		for ( IEngine eng : engines ) {
-			renderer.cache( eng, MetadataQuery.getEngineLabel( eng ) );
-		}
+		repos.setCellRenderer( new RepositoryRenderer() );
 
 		int ans = JOptionPane.showOptionDialog( null, new JScrollPane( repos ),
 				"Select Engine to " + title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,
@@ -540,7 +512,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					@Override
 					public void run() {
 						realtimer.clear();
-						realtimer.preloadCaches( eng );
+						realtimer.loadCaches( eng );
 					}
 
 				} ) {
@@ -562,7 +534,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					showerrs.doClick();
 				}
 				for ( LoadingPlaySheetBase b : sheets ) {
-					b.getLoadingModel().setRealTimeEngineLoader( null );
+					b.getLoadingModel().setQaChecker( null );
 				}
 			}
 		}
@@ -586,7 +558,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						log.debug( text );
 
 						LoadingSheetModel lsm = node.getLoadingModel();
-						lsm.setRealTimeEngineLoader( realtimer );
+						lsm.setQaChecker( realtimer );
 
 						CloseableTab ct = getTabComponent( node );
 
@@ -621,7 +593,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		public SaveAllAction() {
 			super( "Save as Loading Sheets", DefaultIcons.defaultIcons.get( DefaultIcons.SAVE ),
 					false, Preferences.userNodeForPackage( DBToLoadingSheetExporter.class ),
-					"lastexp " );
+					"lastexp" );
 			setToolTip( "Saves this data as a Loading Sheet" );
 
 			setDefaultFileName( "Custom_Loading_Sheet_" );

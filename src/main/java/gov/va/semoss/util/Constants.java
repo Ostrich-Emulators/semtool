@@ -105,6 +105,7 @@ public class Constants {
 
 	//used by ExportSpecificRelationshipsToLoadingSheetAction
 	public static final URI ANYNODE = new URIImpl( "semoss://any" );
+	public static final URI NONODE = new URIImpl( "semoss://none" );
 
 	//Used by POIReader
 	public static final String RELATION_URI_CONCATENATOR = "_x_"; //used in between the in node and out node for relation instance uris.
@@ -156,10 +157,10 @@ public class Constants {
 
 	public static final String DESCR = "DESCRIPTION";
 	public static final String QUERY = "QUERY";
-	public static final String SUBMIT_SPARQL_QUERY = "btnSubmitSparqlQuery";
-	public static final String APPEND_SPARQL_QUERY = "appendSparqlQueryChkBox";
-	public static final String GET_CURRENT_SPARQL = "btnGetQuestionSparql";
-	public static final String SHOW_HINT = "btnShowHint";
+	//public static final String SUBMIT_SPARQL_QUERY = "btnSubmitSparqlQuery";
+	//public static final String APPEND_SPARQL_QUERY = "appendSparqlQueryChkBox";
+	//public static final String GET_CURRENT_SPARQL = "btnGetQuestionSparql";
+	//public static final String SHOW_HINT = "btnShowHint";
 	public static final String SHOW_PLAYSHEETS_LIST = "btnShowPlaySheets";
 	public static final String ENGINE_NAME = "ENGINE";
 	public static final String ENGINES = "ENGINES";

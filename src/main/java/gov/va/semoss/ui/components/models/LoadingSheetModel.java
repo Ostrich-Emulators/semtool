@@ -7,7 +7,7 @@ package gov.va.semoss.ui.components.models;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import gov.va.semoss.rdf.engine.util.EngineLoader;
+import gov.va.semoss.rdf.engine.util.QaChecker;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class LoadingSheetModel extends ValueTableModel {
 	private static final Logger log = Logger.getLogger( LoadingSheetModel.class );
 	private LoadingSheetData sheetdata;
 	private int errorcount = 0;
-	private EngineLoader realtimer = null;
+	private QaChecker realtimer = null;
 
 	public LoadingSheetModel() {
 		super( true );
@@ -38,7 +38,7 @@ public class LoadingSheetModel extends ValueTableModel {
 		setLoadingSheetData( naps );
 	}
 
-	public void setRealTimeEngineLoader( EngineLoader el ) {
+	public void setQaChecker( QaChecker el ) {
 		realtimer = el;
 		checkForErrors();
 	}
@@ -57,6 +57,7 @@ public class LoadingSheetModel extends ValueTableModel {
 
 			sheetdata.setSubjectTypeIsError( false );
 			sheetdata.setObjectTypeIsError( false );
+			sheetdata.setRelationIsError( false );
 
 			for ( String prop : sheetdata.getProperties() ) {
 				sheetdata.setPropertyIsError( prop, false );
@@ -66,8 +67,7 @@ public class LoadingSheetModel extends ValueTableModel {
 		}
 		else {
 			// check everything when we have a non-null engine loader
-			LoadingSheetData lsd
-					= realtimer.checkModelConformance( sheetdata, null, false );
+			LoadingSheetData lsd = realtimer.checkModelConformance( sheetdata );
 			setModelErrors( lsd );
 
 			// need to recheck the whole loading sheet now
@@ -110,7 +110,7 @@ public class LoadingSheetModel extends ValueTableModel {
 				boolean iserr = !realtimer.instanceExists( nap.getSubjectType(),
 						nap.getSubject() );
 				nap.setSubjectIsError( iserr );
-				if( iserr ){
+				if ( iserr ) {
 					errorcount++;
 				}
 			}
@@ -237,6 +237,16 @@ public class LoadingSheetModel extends ValueTableModel {
 		fireTableDataChanged();
 	}
 
+	public void setRelationshipName( String relname ) {
+		sheetdata.setRelname( relname );
+		LoadingSheetData lsd = realtimer.checkModelConformance( sheetdata );
+		setModelErrors( lsd );
+	}
+	
+	public LoadingSheetData copyLoadingSheetHeaders(){
+		return LoadingSheetData.copyHeadersOf( sheetdata );
+	}
+
 	public boolean hasModelErrors() {
 		return sheetdata.hasModelErrors();
 	}
@@ -254,7 +264,11 @@ public class LoadingSheetModel extends ValueTableModel {
 			errors.add( 1 );
 		}
 
-		int i = 2;
+		if( sheetdata.hasRelationError() ){
+			errors.add( -1 );
+		}
+		
+		int i = ( isRel() ? 2 : 1 );
 		for ( String p : sheetdata.getProperties() ) {
 			if ( sheetdata.propertyIsError( p ) ) {
 				errors.add( i );

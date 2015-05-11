@@ -2,14 +2,16 @@ package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.ui.components.models.ValueTableModel;
+
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JFileChooser;
 
+import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -31,8 +33,10 @@ public class SaveGridAction extends AbstractSavingAction {
 	private ValueTableModel table = null;
 
 	public SaveGridAction( boolean issaveas ) {
-		super( "Save", issaveas );
-		setToolTip( "Save Current Grid" );
+		super( "Save As", issaveas );
+		setToolTip( "Save changes" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
+		putValue (AbstractAction.SMALL_ICON, DbAction.getIcon( "save_diskette1"));
 		setAppendDate( true );
 	}
 
@@ -98,18 +102,17 @@ public class SaveGridAction extends AbstractSavingAction {
 		Builder prefb = new CsvPreference.Builder( (char) CsvPreference.STANDARD_PREFERENCE.getQuoteChar(),
 				(int) delimiter, CsvPreference.STANDARD_PREFERENCE.getEndOfLineSymbols() );
 
-		CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() );
-		writer.writeHeader( heads );
-
-		for ( int r = 0; r < table.getRowCount(); r++ ) {
-			Map<String, Object> map = new HashMap<>();
-			for ( int c = 0; c < heads.length; c++ ) {
-				map.put( heads[c], table.getValueAt( r, c ).toString() );
+		try (CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() )) {
+			writer.writeHeader( heads );
+			
+			for ( int r = 0; r < table.getRowCount(); r++ ) {
+				Map<String, Object> map = new HashMap<>();
+				for ( int c = 0; c < heads.length; c++ ) {
+					map.put( heads[c], table.getValueAt( r, c ).toString() );
+				}
+				writer.write( map, heads );
 			}
-			writer.write( map, heads );
 		}
-		
-		writer.close();
 		table.setNeedsSave( false );
 	}
 
@@ -127,7 +130,7 @@ public class SaveGridAction extends AbstractSavingAction {
 		writer.createWorkbook();
 		writer.createTab( "Grid Data", heads );
 
-		for ( int r = 0; r < table.getRowCount(); r++ ) {
+		for ( int r = 0; r < table.getRealRowCount(); r++ ) {
 			String[] row = new String[heads.length];
 			for ( int c = 0; c < heads.length; c++ ) {
 				row[c] = table.getValueAt( r, c ).toString();

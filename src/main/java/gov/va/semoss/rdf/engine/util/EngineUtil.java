@@ -7,16 +7,13 @@ package gov.va.semoss.rdf.engine.util;
 
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
-import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +23,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
@@ -48,9 +44,9 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
+import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.impl.AbstractEngine;
-import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
@@ -63,15 +59,16 @@ import gov.va.semoss.util.Utility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.prefs.Preferences;
 import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
@@ -242,6 +239,7 @@ public class EngineUtil implements Runnable {
 
 	public void clone( String oldsmss ) throws IOException, RepositoryException,
 			EngineManagementException {
+
 		IEngine from = null;
 		boolean fromWasOpened = false;
 		// see if our copied db is still open
@@ -261,7 +259,7 @@ public class EngineUtil implements Runnable {
 			fromWasOpened = true;
 		}
 
-		Map<URI, String> metas = new HashMap<>();
+		Map<URI, Value> metas = new HashMap<>();
 		try {
 			metas.putAll( from.query( new MetadataQuery() ) );
 		}
@@ -315,9 +313,9 @@ public class EngineUtil implements Runnable {
 
 		try {
 			DbCloneMetadata metadata = new DbCloneMetadata( dbdir, newname,
-					metas.get( RDFS.LABEL ) + sfx, from.getBaseUri() );
+					metas.get( RDFS.LABEL ) + sfx, true, true );
 
-			EngineUtil.getInstance().clone( from, metadata, true, true );
+			EngineUtil.getInstance().clone( from, metadata, true );
 		}
 
 		finally {
@@ -327,110 +325,42 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	public void clone( IEngine from, DbCloneMetadata metadata, boolean copydata,
-			boolean addToRepoList ) throws RepositoryException, IOException, EngineManagementException {
-		// cloning is done in 4 steps:
-		// 1) Copy the RDF statements from one engine to the other
-		// 2) Copy the OWL, Ontology, and DREAMER files to the new location
-		// 
-		// Note: We're removing a lot of keys in this function so we can transition
-		// to using the convention of all db files going in the db directory
-		// instead of scattered about on the filesystem.
+	public void clone( IEngine from, DbCloneMetadata metadata, boolean addToRepoList )
+			throws RepositoryException, IOException, EngineManagementException {
 
-		log.debug( "cloning " + from.getEngineName() + " to " + metadata.getTitle() );
-		Properties props = from.getProperties();
-		String newName = metadata.getName();
-
-		// figure out if we're the "old style" with the smss file above the 
-		// dbdir, or the "new style" where it's inside the db dir
-		// the easiest way is to see if we have a version key, and if we do,
-		// assume we must be in the "new style" if it's above 1.
-		props.setProperty( Constants.SMSS_VERSION_KEY, "1.0" );
-
-		// get all the required files in the dbdir
-		File dbdir = new File( metadata.getLocation(), metadata.getName() );
-		dbdir.mkdirs();
-
-		// FIXME: we're assuming we always want a BigData clone
-		if ( null == props.getProperty( BigdataSail.Options.FILE ) ) {
-			log.warn( "cloning db as BigData store" );
-
+		MetadataQuery mq = new MetadataQuery();
+		Map<URI, Value> oldmetadata = new HashMap<>();
+		try {
+			oldmetadata = from.query( mq );
 		}
-		props.setProperty( Constants.ENGINE_IMPL, BigDataEngine.class.getCanonicalName() );
-		props.setProperty( Constants.SEMOSS_URI, from.getSchemaBuilder().toUri().stringValue() );
-
-		Properties rws = Utility.copyProperties( props );
-		File jnl = new File( dbdir, newName + ".jnl" );
-		String jnlpath = jnl.getCanonicalPath();
-
-		rws.setProperty( BigdataSail.Options.FILE, jnlpath );
-
-		fillRepo( from, rws, copydata, metadata );
-		// we don't need to set the FILE property because it follows the convention
-		// we just needed it for the fillRepo call
-
-		rws.remove( BigdataSail.Options.FILE );
-
-		File rwsfile = new File( dbdir, "RWStore.properties" );
-		try ( FileWriter fw = new FileWriter( rwsfile ) ) {
-			SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss'Z'" );
-			sdf.setTimeZone( TimeZone.getTimeZone( "GMT" ) );
-			rws.store( fw, "cloned from " + from.getEngineName() + " on "
-					+ sdf.format( new Date() ) );
+		catch ( QueryEvaluationException | MalformedQueryException meq ) {
+			log.error( "no metadata to clone", meq );
 		}
 
-		// no need to specify the file, because it follows the convention
-		props.remove( Constants.SMSS_RWSTORE_KEY );
+		URI reification = ( oldmetadata.containsKey( VAS.ReificationModel )
+				? URI.class.cast( oldmetadata.get( VAS.ReificationModel ) )
+				: VAS.VASEMOSS_Reification );
 
-		String owlloc = props.getProperty( Constants.OWLFILE );
-		if ( null != owlloc ) {
-			File oldowl = new File( owlloc );
-			FileUtils.copyFile( oldowl, new File( dbdir,
-					AbstractEngine.getDefaultName( Constants.OWLFILE, newName ) ) );
-			// no need to specify the file, because it follows the convention
+		EngineCreateBuilder ecb
+				= new EngineCreateBuilder( metadata.getLocation(), metadata.getName() );
+		ecb.setReificationModel( ReificationStyle.fromUri( reification ) );
+
+		File newsmss = EngineUtil.createNew( ecb, null );
+		IEngine neweng = Utility.loadEngine( newsmss );
+
+		merge( from, neweng, metadata.isData(), false );
+
+		// copy insights
+		if ( metadata.isInsights() ) {
+			WriteableInsightManager wim = neweng.getWriteableInsightManager();
+			Collection<Statement> stmts = from.getInsightManager().getStatements();
+			wim.addRawStatements( stmts );
+			wim.commit();
 		}
 
-		props.remove( Constants.OWLFILE );
-
-		String dreamloc = props.getProperty( Constants.DREAMER );
-		if ( null != dreamloc ) {
-			File olddreamer = new File( dreamloc );
-			File newdreamer = new File( dbdir,
-					AbstractEngine.getDefaultName( Constants.DREAMER, newName ) );
-			FileUtils.copyFile( olddreamer, newdreamer );
-		}
-
-		// no need to specify the file, because it follows the convention
-		props.remove( Constants.DREAMER );
-
-		String ontoloc = props.getProperty( Constants.ONTOLOGY );
-		if ( null != ontoloc ) {
-			File oldonto = new File( ontoloc );
-			File newonto = new File( dbdir,
-					AbstractEngine.getDefaultName( Constants.ONTOLOGY, newName ) );
-			FileUtils.copyFile( oldonto, newonto );
-		}
-
-		// no need to specify the file, because it follows the convention
-		props.remove( Constants.ONTOLOGY );
-		props.remove( Constants.ENGINE_NAME );
-		props.remove( Constants.SMSS_LOCATION );
-
-		// this is in every props file, but looks like it is a programming mistake
-		props.remove( "Base" );
-		props.remove( Constants.PIN_KEY ); // don't copy the pinning, if it's there
-
-		props.setProperty( Constants.SMSS_VERSION_KEY, "1.0" );
-		props.setProperty( Constants.DEFAULTUI_KEY, "veera.ui" );
-
-		File smss = new File( dbdir, newName + ".smss" );
-		try ( FileWriter fw = new FileWriter( smss ) ) {
-			log.debug( "writing new smss to: " + smss.getAbsolutePath() );
-			props.store( fw, newName );
-		}
-
-		mount( smss, addToRepoList,
-				true );
+		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
+		Utility.closeEngine( neweng );
+		mount( newsmss, addToRepoList, true );
 	}
 
 	/**
@@ -585,23 +515,7 @@ public class EngineUtil implements Runnable {
 	/**
 	 * Creates an empty database by copying data from the db/Default directory
 	 *
-	 * @param dbtopdir directory about where the engine will be placed.
-	 * @param engine the engine name
-	 * @param defaultBaseUri the base uri of the new engine
-	 * @param defaultBaseOverridesFiles if true, use <code>defaultBaseUri</code>
-	 * instead of whatever is specified in the loading files
-	 * @param reificationModel
-	 * @param smss the custom smss file. If null or empty, will use the sample
-	 * file from the Defaults directory
-	 * @param map the custom ontology properties file. Can be null null or empty
-	 * @param questions the custom questions file. If null or empty, will use the
-	 * sample file from the Defaults directory
-	 * @param toload the files to load. An {@link IllegalArgumentException} will
-	 * be thrown if this list is empty
-	 * @param stageInMemory load intermediate data to memory; if false, write it
-	 * to disk
-	 * @param calcInfers should the engine calculate inferences after the load?
-	 * @param dometamodel should the loader create the metamodel from the load?
+	 * @param ecb how the new database should be created
 	 * @param conformanceErrors if not null, conformance will be checked, and
 	 * errors will be placed here
 	 *
@@ -610,45 +524,50 @@ public class EngineUtil implements Runnable {
 	 * @throws java.io.IOException
 	 * @throws gov.va.semoss.rdf.engine.util.EngineManagementException
 	 */
-	public static File createNew( File dbtopdir, String engine, URI defaultBaseUri,
-			boolean defaultBaseOverridesFiles, URI reificationModel, String smss, 
-			String map, String questions, Collection<File> toload, boolean stageInMemory, 
-			boolean calcInfers, boolean dometamodel, ImportData conformanceErrors )
+	public static File createNew( EngineCreateBuilder ecb, ImportData conformanceErrors )
 			throws IOException, EngineManagementException {
 
+		File dbtopdir = ecb.getEngineDir();
 		dbtopdir.mkdirs();
 
-		File modelmap = ( null == map || map.isEmpty() ? null : new File( map ) );
-		File modelsmss = ( null == smss || smss.isEmpty() ? null : new File( smss ) );
+		File modelmap = ecb.getMap();
+		File modelsmss = ecb.getSmss();
 
-		File modelquestions;
-		if ( null == questions || questions.isEmpty() ) {
+		File modelquestions = ecb.getQuestions();
+		if ( null == modelquestions ) {
 			String ddreamer = "/defaultdb/"
 					+ AbstractEngine.getDefaultName( Constants.DREAMER, "Default" );
 			File f = File.createTempFile( "semoss-tmp-dreamer-", "prop" );
 			FileUtils.copyInputStreamToFile( EngineUtil.class
 					.getResourceAsStream( ddreamer ), f );
 			modelquestions = f;
-
+			ecb.setDefaultsFiles( modelsmss, modelmap, modelquestions );
 			f.deleteOnExit();
 		}
-		else {
-			modelquestions = new File( questions );
+
+		File smssfile = createEngine( ecb );
+		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
+		List<Statement> vocabs = new ArrayList<>();
+
+		for ( URL url : ecb.getVocabularies() ) {
+			vocabs.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
 		}
 
-		List<Statement> insights
-				= getStatementsFromResource( "/models/va-semoss.ttl", RDFFormat.TURTLE );
-		insights.addAll( createInsightStatements( modelquestions ) );
-
-		File smssfile = createEngine( dbtopdir, engine, reificationModel, modelsmss, 
-				modelmap, dometamodel );
-
-		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
-
 		try {
+			bde.execute( new ModificationExecutorAdapter() {
+
+				@Override
+				public void exec( RepositoryConnection conn ) throws RepositoryException {
+					conn.add( vocabs );
+				}
+			} );
+
 			WriteableInsightManager wim = bde.getWriteableInsightManager();
 
-			wim.addRawStatements( insights );
+			if ( null != ecb.getQuestions() ) {
+				vocabs.addAll( createInsightStatements( ecb.getQuestions() ) );
+			}
+			wim.addRawStatements( vocabs );
 			wim.commit();
 			wim.release();
 		}
@@ -657,17 +576,17 @@ public class EngineUtil implements Runnable {
 					re );
 		}
 
-		EngineLoader el = new EngineLoader( stageInMemory );
-		el.setDefaultBaseUri( defaultBaseUri, defaultBaseOverridesFiles );
+		EngineLoader el = new EngineLoader( ecb.isStageInMemory() );
+		el.setDefaultBaseUri( ecb.getDefaultBaseUri(), ecb.isDefaultBaseOverridesFiles() );
 
 		try {
-			el.loadToEngine( toload, bde, dometamodel, conformanceErrors );
-			if ( calcInfers ) {
+			el.loadToEngine( ecb.getFiles(), bde, ecb.isDoMetamodel(), conformanceErrors );
+			if ( ecb.isCalcInfers() ) {
 				bde.calculateInferences();
 			}
 		}
 		catch ( ImportValidationException | RepositoryException e ) {
-			throw new EngineManagementException( e );
+			throw new EngineManagementException( e.getMessage(), e );
 		}
 		finally {
 			el.release();
@@ -688,19 +607,21 @@ public class EngineUtil implements Runnable {
 	 * "properties" file). If null, this function will clear all insights from the
 	 * engine without adding anything
 	 * @param clearfirst remove the current insights before adding the new ones?
+	 * @param vocabs list of vocabularies to import
 	 *
 	 * @throws IOException
 	 * @throws EngineManagementException
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
-			boolean clearfirst ) throws IOException, EngineManagementException {
+			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
 		List<Statement> stmts = new ArrayList<>();
 		if ( null != insightsfile ) {
 			stmts.addAll( createInsightStatements( insightsfile ) );
 		}
 
-		// need to re-seed the initial model statements, like during KB creation
-		stmts.addAll( getStatementsFromResource( "/models/va-semoss.ttl", RDFFormat.TURTLE ) );
+		for ( URL url : vocabs ) {
+			stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+		}
 
 		insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
 		notify();
@@ -741,135 +662,42 @@ public class EngineUtil implements Runnable {
 		} );
 	}
 
-	/**
-	 * Creates a new repository by copying the given one, and optionally copies
-	 * the data as well
-	 *
-	 * @param from the engine to copy from
-	 * @param props properties for the new engine
-	 * @param copydata if true, copy the data as well as the configuration
-	 *
-	 * @throws RepositoryException
-	 */
-	private static void fillRepo( final IEngine from, Properties props, boolean copydata,
-			final DbCloneMetadata metadata ) throws RepositoryException {
-		BigdataSail bdSail = new BigdataSail( props );
-		BigdataSailRepository repo = new BigdataSailRepository( bdSail );
-		BigdataSailRepositoryConnection rc = null;
-		//final TurtleWriter writer;
-		final RepositoryCopier rdfhandler;
+	private static void makeNewMetadata( final IEngine from, final IEngine to,
+			String title ) throws RepositoryException {
 		try {
-			repo.initialize();
-			rc = repo.getConnection();
-			rc.begin();
+			final ValueFactory vf = new ValueFactoryImpl();
+			final Map<URI, Value> oldmetas = from.query( new MetadataQuery() );
+			final URI newbase = to.getBaseUri();
+			Date now = new Date();
+			oldmetas.put( VAC.SOFTWARE_AGENT,
+					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) );
+			oldmetas.put( MetadataConstants.DCT_CREATED, vf.createLiteral( now ) );
+			oldmetas.put( MetadataConstants.DCT_MODIFIED, vf.createLiteral( now ) );
+			oldmetas.put( RDFS.LABEL, vf.createLiteral( title ) );
+			oldmetas.remove( VAS.Database );
 
-			if ( copydata ) {
+			to.execute( new ModificationExecutorAdapter( true ) {
 
-				rdfhandler = new RepositoryCopier( rc );
-
-				ModificationExecutor copier = new ModificationExecutorAdapter() {
-
-					@Override
-					public void exec( RepositoryConnection conn ) throws RepositoryException {
-						try {
-							conn.export( rdfhandler );
-						}
-						catch ( RepositoryException | RDFHandlerException e ) {
-							log.error( e );
-						}
+				@Override
+				public void exec( RepositoryConnection conn ) throws RepositoryException {
+					for ( Map.Entry<URI, Value> en : oldmetas.entrySet() ) {
+						Statement s = new StatementImpl( newbase, en.getKey(), en.getValue() );
+						conn.add( EngineLoader.cleanStatement( s, vf ) );
 					}
-				};
-
-				from.execute( copier );
-				rc.flush();
-			}
-			makeNewMetadata( from, metadata, rc );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException | IOException e ) {
-			log.error( "Could not create cloned repository", e );
-		}
-		finally {
-			if ( null != rc ) {
-				try {
-					rc.flush();
-					rc.commit();
-					rc.close();
 				}
-				catch ( Exception e ) {
-					log.warn( e );
-				}
-			}
-			try {
-				bdSail.shutDown();
-			}
-			catch ( Exception e ) {
-				log.warn( "unable to shutdown clone connection", e );
-			}
+			} );
+		}
+		catch ( MalformedQueryException | QueryEvaluationException e ) {
+			log.error( e, e );
 		}
 	}
 
-	private static void makeNewMetadata( final IEngine from, final DbCloneMetadata metadata,
-			final RepositoryConnection conn ) throws RepositoryException, MalformedQueryException,
-			QueryEvaluationException, IOException {
-		ValueFactory vf = conn.getValueFactory();
-
-		if ( true ) {
-			throw new UnsupportedOperationException( "this function needs to be "
-					+ "refactored to handle new metadata schema" );
-		}
-
-		// delete any metadata that might exist from the repository copy
-		Collection<Statement> stmts = Iterations.asList( conn.getStatements( null,
-				VAS.DATABASE, null, false ) );
-		for ( Statement s : stmts ) {
-			conn.remove( s.getSubject(), null, null );
-		}
-
-		EngineUtil.add( conn, metadata.getBaseUri(), RDFS.LABEL,
-				metadata.getTitle(), vf );
-		conn.add( new StatementImpl( metadata.getBaseUri(), RDF.TYPE, VAS.DATABASE ) );
-		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_DESC,
-				"Cloned from " + from.getEngineName(), vf );
-		Date now = new Date();
-		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_CREATED,
-				now, vf );
-		EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_MODIFIED,
-				now, vf );
-
-		EngineUtil.add( conn, metadata.getBaseUri(), VAC.SOFTWARE_AGENT,
-				System.getProperty( "build.name", "unknown" ), vf );
-
-		MetadataQuery mq = new MetadataQuery();
-
-		// FIXME: we can't tell from these queries if we're retrieving the "right"
-		// metadata from the source KB. We don't have any way of identifying the 
-		// DB's base URI (and there could be many).
-		Map<URI, String> oldmetadata = from.query( mq );
-		if ( oldmetadata.containsKey( MetadataConstants.DCT_CONTRIB ) ) {
-			EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_CONTRIB,
-					oldmetadata.get( MetadataConstants.DCT_CONTRIB ), vf );
-		}
-		if ( oldmetadata.containsKey( MetadataConstants.DCT_PUBLISHER ) ) {
-			EngineUtil.add( conn, metadata.getBaseUri(), MetadataConstants.DCT_PUBLISHER,
-					oldmetadata.get( MetadataConstants.DCT_PUBLISHER ), vf );
-		}
-	}
-
-	private static void add( RepositoryConnection conn, URI dburi, URI pred,
-			String val, ValueFactory fac ) throws RepositoryException {
-		conn.add( new StatementImpl( dburi, pred, fac.createLiteral( val ) ) );
-	}
-
-	private static void add( RepositoryConnection conn, URI dburi, URI pred,
-			Date val, ValueFactory fac ) throws RepositoryException {
-		conn.add( new StatementImpl( dburi, pred,
-				fac.createLiteral( QueryExecutorAdapter.getCal( val ) ) ) );
-
-	}
-
-	public static File createEngine( File enginedir, String dbname, URI reificationModel, 
-			File modelsmss, File modelmap, boolean dometamodel ) 
+	public static File createEngine( EngineCreateBuilder ecb )
 			throws IOException, EngineManagementException {
+
+		String dbname = ecb.getEngineName();
+		File enginedir = ecb.getEngineDir();
+		File modelmap = ecb.getMap();
 
 		if ( null != modelmap && modelmap.exists() ) {
 			try {
@@ -883,6 +711,7 @@ public class EngineUtil implements Runnable {
 		}
 
 		Properties smssprops = new Properties();
+		File modelsmss = ecb.getSmss();
 		if ( null == modelsmss || !modelsmss.exists() ) {
 			String dprop = "/defaultdb/Default.properties";
 			smssprops.load( EngineUtil.class.getResourceAsStream( dprop ) );
@@ -912,27 +741,28 @@ public class EngineUtil implements Runnable {
 			repo.initialize();
 			RepositoryConnection rc = repo.getConnection();
 
-			if ( dometamodel ) {
+			if ( ecb.isDoMetamodel() ) {
 				rc.begin();
-				List<Statement> stmts
-						= getStatementsFromResource( "/models/semoss.ttl", RDFFormat.TURTLE );
-				rc.add( stmts );
+				for ( URL url : ecb.getVocabularies() ) {
+					rc.add( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+				}
 				rc.commit();
 			}
 
-			URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
+			URI baseuri = AbstractEngine.getNewBaseUri();
 
 			// add the metadata
 			rc.begin();
 			ValueFactory vf = rc.getValueFactory();
-			rc.add( new StatementImpl( baseuri, RDF.TYPE, VAS.DATABASE ) );
+			rc.add( new StatementImpl( baseuri, RDF.TYPE, VAS.Database ) );
 			Date today = new Date();
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
-			rc.add( new StatementImpl( baseuri, VAS.REIFICATION, reificationModel ) );
+			rc.add( new StatementImpl( baseuri, VAS.ReificationModel,
+					ecb.getReificationModel().uri ) );
 
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
@@ -1029,20 +859,21 @@ public class EngineUtil implements Runnable {
 
 	public static void clear( IEngine engine ) throws RepositoryException {
 		try {
-			final Map<URI, String> metas = engine.query( new MetadataQuery() );
-			metas.remove( VAS.DATABASE );
+			final Map<URI, Value> metas = engine.query( new MetadataQuery() );
+			metas.remove( VAS.Database );
 
 			engine.execute( new ModificationExecutorAdapter() {
 
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					conn.remove( (Resource) null, null, null );
-
 					ValueFactory vf = conn.getValueFactory();
+
 					// re-add the metadata
-					for ( Map.Entry<URI, String> en : metas.entrySet() ) {
-						conn.add( engine.getBaseUri(), en.getKey(),
-								vf.createLiteral( en.getValue() ) );
+					for ( Map.Entry<URI, Value> en : metas.entrySet() ) {
+						conn.add( engine.getBaseUri(),
+								URI.class.cast( EngineLoader.cleanValue( en.getKey(), vf ) ),
+								EngineLoader.cleanValue( en.getValue(), vf ) );
 					}
 				}
 			} );
@@ -1052,12 +883,12 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	private static List<Statement> getStatementsFromResource( String resource,
+	private static List<Statement> getStatementsFromResource( URL resource,
 			RDFFormat fmt ) {
 		List<Statement> stmts = new ArrayList<>();
 
 		InMemorySesameEngine mem = new InMemorySesameEngine();
-		try ( InputStream is = EngineUtil.class.getResourceAsStream( resource ) ) {
+		try ( InputStream is = resource.openStream() ) {
 			RepositoryConnection rc = mem.getRawConnection();
 			rc.add( is, Constants.DEFAULT_SEMOSS_URI, fmt );
 			rc.commit();
@@ -1077,13 +908,16 @@ public class EngineUtil implements Runnable {
 		private final File location;
 		private final String name;
 		private final String title;
-		private final URI baseuri;
+		private final boolean config;
+		private final boolean data;
 
-		public DbCloneMetadata( File location, String dbname, String title, URI baseuri ) {
+		public DbCloneMetadata( File location, String dbname, String title,
+				boolean config, boolean data ) {
 			this.location = location;
 			this.title = title;
-			this.baseuri = baseuri;
 			this.name = dbname;
+			this.config = config;
+			this.data = data;
 		}
 
 		public File getLocation() {
@@ -1094,12 +928,16 @@ public class EngineUtil implements Runnable {
 			return title;
 		}
 
-		public URI getBaseUri() {
-			return baseuri;
-		}
-
 		public String getName() {
 			return name;
+		}
+
+		public boolean isInsights() {
+			return config;
+		}
+
+		public boolean isData() {
+			return data;
 		}
 	}
 

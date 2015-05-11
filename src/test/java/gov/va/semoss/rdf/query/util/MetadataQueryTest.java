@@ -26,6 +26,7 @@ import org.openrdf.sail.memory.MemoryStore;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.util.UriBuilder;
+import org.openrdf.model.Value;
 
 /**
  *
@@ -65,7 +66,7 @@ public class MetadataQueryTest {
       repo.initialize();
       RepositoryConnection rc = repo.getConnection();
       engine.setRepositoryConnection( rc );
-      rc.add( bldr.toUri(), RDF.TYPE, VAS.DATABASE );
+      rc.add( bldr.toUri(), RDF.TYPE, VAS.Database );
     }
     catch ( Exception e ) {
     }
@@ -87,7 +88,8 @@ public class MetadataQueryTest {
     engine.getRawConnection().add( bldr.toUri(), MetadataConstants.DCT_CREATOR,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
-    Map<URI, String> data = engine.query( mq );
+    engine.query( mq );
+		Map<URI, String> data = mq.asStrings();
     assertTrue( 2 == data.size() );
     assertEquals( raw, data.get( MetadataConstants.DCT_CREATOR ) );
   }
@@ -99,7 +101,8 @@ public class MetadataQueryTest {
     engine.getRawConnection().add( bldr.toUri(), DC.PUBLISHER,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
-    Map<URI, String> data = engine.query( mq );
+    engine.query( mq );
+		Map<URI, String> data = mq.asStrings();
 
     assertEquals( raw, data.get( MetadataConstants.DCT_PUBLISHER ) );
     assertTrue( 2 == data.size() );
@@ -112,7 +115,8 @@ public class MetadataQueryTest {
     engine.getRawConnection().add(bldr.toUri(), MetadataConstants.DCT_CREATED,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
-    Map<URI, String> data = engine.query( mq );
+    engine.query( mq );
+		Map<URI, String> data = mq.asStrings();
 
     assertEquals( raw, data.get(MetadataConstants.DCT_CREATED ) );
     assertTrue( 2 == data.size() );
@@ -125,7 +129,8 @@ public class MetadataQueryTest {
     engine.getRawConnection().add( bldr.toUri(), MetadataConstants.DCT_DESC,
         vf.createLiteral( raw ) );
     MetadataQuery mq = new MetadataQuery();
-    Map<URI, String> data = engine.query( mq );
+    engine.query( mq );
+		Map<URI, String> data = mq.asStrings();
 
     assertFalse( data.containsKey(MetadataConstants.DCT_CREATED ) );
     assertTrue( 2 == data.size() );

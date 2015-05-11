@@ -44,6 +44,7 @@ import org.supercsv.prefs.CsvPreference;
 
 import java.io.FileNotFoundException;
 import java.util.Properties;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
@@ -103,6 +104,7 @@ public class CSVReader implements ImportFileReader {
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
 		ImportData data = new ImportData();
 		ImportMetadata im = data.getMetadata();
+		im.setSourceOfData( new URIImpl( file.toURI().toString() ) );
 		im.setLegacyMode( true );
 
 		try ( Reader rdr = new BufferedReader( new FileReader( file ) ) ) {

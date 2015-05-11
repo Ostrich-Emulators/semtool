@@ -47,9 +47,9 @@ public class DefaultPlaySheetIcons {
 				new ImageIcon( Utility.loadImage( "icons16/questions_grid2_16.png" ) ) );
 
 		defaultIcons.put( "(Raw Grid)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_raw_grid2_16.png" ) ) );
+				new ImageIcon( Utility.loadImage( "icons16/excel_16.png" ) ) );
 		defaultIcons.put( GridRAWPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_raw_grid2_16.png" ) ) );
+				new ImageIcon( Utility.loadImage( "icons16/excel_16.png" ) ) );
 
 		defaultIcons.put( "(Grid Scatter)",
 				new ImageIcon( Utility.loadImage( "icons16/questions_grid_scatter1_16.png" ) ) );
@@ -132,6 +132,7 @@ public class DefaultPlaySheetIcons {
 
 	public static void setDefaultIcon( Class<?> k, String imgloc ) {
 		setDefaultIcon( k.getName(), imgloc );
+		knownClasses.add( k );
 	}
 
 	public static void setDefaultIcon( String key, String imgloc ) {

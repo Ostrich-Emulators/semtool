@@ -21,7 +21,6 @@ package gov.va.semoss.ui.main.listener.impl;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -63,16 +62,6 @@ public class QuestionListener implements IChakraListener {
 			// now get the SPARQL query for this id
       //String sparql = DIHelper.getInstance().getProperty(id + "_" + Constants.QUERY);
       String sparql = question.getSparql();
-      
-      //If a question has no Sparql associated with it (as pulled from an external source),
-      //then disable the Copy-Down button, in the "Custom Sparql Query" window:
-      JButton btnGetQuestionSparql = (JButton)DIHelper.getInstance().getLocalProp(Constants.GET_CURRENT_SPARQL);
-      if(sparql.equals("NULL")){
-         btnGetQuestionSparql.setEnabled(false);
-      //Otherwise, enable the button:
-      }else{
-         btnGetQuestionSparql.setEnabled(true);
-      }
       logger.debug( "Sparql is " + sparql );
 
       ParamPanel panel = new ParamPanel();

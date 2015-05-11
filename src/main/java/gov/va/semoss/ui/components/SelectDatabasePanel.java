@@ -205,12 +205,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			// now get the SPARQL query for this id
 			//String sparql = DIHelper.getInstance().getProperty(id + "_" + Constants.QUERY);
 			String sparql = question.getSparql();
-
-			//If a question has no Sparql associated with it (as pulled from an external source),
-			//then disable the Copy-Down button, in the "Custom Sparql Query" window:
-			JButton btnGetQuestionSparql
-					= (JButton) DIHelper.getInstance().getLocalProp( Constants.GET_CURRENT_SPARQL );
-			btnGetQuestionSparql.setEnabled( !sparql.equals( "NULL" ) );
 			log.debug( "Sparql is " + sparql );
 
 			ParamPanel panel = new ParamPanel();

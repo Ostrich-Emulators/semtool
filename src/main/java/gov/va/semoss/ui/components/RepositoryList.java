@@ -53,6 +53,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
 import javax.swing.plaf.LayerUI;
+import org.openrdf.model.Value;
 
 /**
  * A List that contains {@link IEngine} instances.
@@ -91,10 +92,10 @@ public class RepositoryList extends JList<IEngine> {
 
 		StringBuilder sb = new StringBuilder();
 		try {
-			Map<URI, String> metadata = eng.query( new MetadataQuery() );
-			String summary = metadata.get( MetadataConstants.DCT_DESC );
+			Map<URI, Value> metadata = eng.query( new MetadataQuery() );
+			Value summary = metadata.get( MetadataConstants.DCT_DESC );
 			if ( null != summary ) {
-				sb.append( "Summary: " ).append( summary );
+				sb.append( "Summary: " ).append( summary.stringValue() );
 			}
 
 			String loc = eng.getProperty( Constants.SMSS_LOCATION );
@@ -105,7 +106,7 @@ public class RepositoryList extends JList<IEngine> {
 				sb.append( "Location: " ).append( FilenameUtils.getFullPathNoEndSeparator( loc ) );
 			}
 
-			String onto = metadata.get( VAS.DATABASE );
+			String onto = metadata.get( VAS.Database ).stringValue();
 			if ( null != onto ) {
 				if ( sb.length() > 0 ) {
 					sb.append( "<br>" );

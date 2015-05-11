@@ -188,7 +188,7 @@ public class InsightTabController extends InsightManagerController {
            }
         });
 		if(Utility.showWarningOkCancel("Are you sure you want to delete this Insight permanently,\nalong with all Perspective references to it?") == 0){
-		   Collection<String> colEndangeredPerspectives = getEndangeredPerspectiveTitles(insight.getId());
+		   Collection<Perspective> colEndangeredPerspectives = getEndangeredPerspectives(insight.getId());
 		   if(colEndangeredPerspectives.size() == 0){
 			  //Run the Task on a separate Thread:
 		      new Thread(deleteInsight).start();
@@ -200,28 +200,28 @@ public class InsightTabController extends InsightManagerController {
 	    }
 	}
 
-    /**   Returns a list of Perspective labels, where each Perspective has only one
-     * Insight, corresponding to the URI passed in, and where removal of the passed-in
-     * Insight would leave the Perspective with no Insights (This method is designed 
-     * to be called from "handleDeleteInsight(...)".
+    /**   Returns a list of Perspectives, where each Perspective has only one Insight, 
+     * corresponding to the URI passed in, and where removal of the passed-in Insight 
+     * would leave the Perspective with no Insights (This method is designed to be  
+     * called from "handleDeleteInsight(...)".
      * 
      * @param insightURI -- (URI) URI of an Insight.
      * 
-     * @return getEndangeredPerspectiveTitles -- (Collection<String>) Described above.
+     * @return getEndangeredPerspectives -- (Collection<Perspective>) Described above.
      */
-	private Collection<String> getEndangeredPerspectiveTitles(URI insightURI){
-		ArrayList<String> arylPerspectiveTitles = new ArrayList<String>();
+	private Collection<Perspective> getEndangeredPerspectives(URI insightURI){
+		ArrayList<Perspective> arylPerspectives = new ArrayList<Perspective>();
 		
 		for(Perspective perspective: imc.arylPerspectives){
 			ArrayList<Insight> arylInsights = perspective.getInsights();
 			
 			if(arylInsights.size() == 1){
                if(arylInsights.get(0).getId().equals(insightURI)){
-            	   arylPerspectiveTitles.add(perspective.getLabel());
+            	   arylPerspectives.add(perspective);
                }
 			}
 		}		
-		return arylPerspectiveTitles;
+		return arylPerspectives;
 	}
 	
 	/**   Click-handler for the "Save Insight" button. Saves changes to all fields on the "Insight" tab,
@@ -232,19 +232,24 @@ public class InsightTabController extends InsightManagerController {
 	private void handleSaveInsight(ActionEvent event){
 		Perspective perspective = imc.arylPerspectives.get(imc.intCurPerspectiveIndex);
 		Insight insight = imc.arylInsights.get(imc.intCurInsightIndex);
-		Collection<String> colManuallySelectedPerspectiveTitles = imc.lstvInsightPerspective_Inst.getSelectionModel().getSelectedItems();
+		Collection<Perspective> colManuallySelectedPerspectives = imc.lstvInsightPerspective_Inst.getSelectionModel().getSelectedItems();
 		Collection<Perspective> colPerspectivesToAddInsight = new ArrayList<Perspective>();
 		Collection<Perspective> colPerspectivesToRemoveInsight = new ArrayList<Perspective>();
-		Collection<String> colEndangeredPerspectiveTitles = new ArrayList<String>();
+		Collection<Perspective> colEndangeredPerspectives = new ArrayList<Perspective>();
 		Preferences prefs = Preferences.userRoot();
 		
 		//Set Insight fields from "Insight" tab in UI:
 		insight.setLabel(imc.legalizeQuotes(imc.txtQuestion_Inst.getText().trim()));
 		for(PlaySheet playsheet: imc.arylPlaySheets){
-			if(playsheet.getLabel().equals(imc.cboDisplayWith_Inst.getValue())){
+			if(playsheet.equals(imc.cboDisplayWith_Inst.getValue())){
 				insight.setOutput(playsheet.getViewClass());
 				break;
 			}
+		}
+		if(imc.txtRendererClass_Inst.getText() != null){
+		  insight.setRendererClass(imc.legalizeQuotes(imc.txtRendererClass_Inst.getText().trim()));
+		}else{
+		  insight.setRendererClass("");
 		}
 		insight.setIsLegacy(imc.chkLegacyQuery_Inst.isSelected());
 		insight.setSparql(imc.legalizeQuotes(imc.txtaQuery_Inst.getText().trim()));
@@ -253,22 +258,22 @@ public class InsightTabController extends InsightManagerController {
 		insight.setModified(String.valueOf(new Date()));
 
 		//Build a collection of Perspectives that must add this Insight:
-		for(String perspectiveTitle: colManuallySelectedPerspectiveTitles){
-			for(Perspective p_1: imc.arylPerspectives){
-				if(p_1.getLabel().equals(perspectiveTitle)
-				   && imc.arylInsightPerspectives.contains(perspectiveTitle) == false){
+		for(Perspective p_1: colManuallySelectedPerspectives){
+			for(Perspective p_2: imc.arylPerspectives){
+				if(p_2.equals(p_1)
+				   && imc.arylInsightPerspectives.contains(p_1) == false){
 					 colPerspectivesToAddInsight.add(p_1);
 				}
 			}
 		}	
 		//Build a collection of Perspectives that must remove this Insight. 
 		//Be careful not to include Perspectives that have only this Insight left:
-		colEndangeredPerspectiveTitles.addAll(getEndangeredPerspectiveTitles(insight.getId()));
-		for(Perspective p_2: imc.arylPerspectives){
-			if(imc.arylInsightPerspectives.contains(p_2.getLabel()) == true 
-			   && colManuallySelectedPerspectiveTitles.contains(p_2.getLabel()) == false
-			   && colEndangeredPerspectiveTitles.contains(p_2.getLabel()) == false){
-				 colPerspectivesToRemoveInsight.add(p_2);
+		colEndangeredPerspectives.addAll(getEndangeredPerspectives(insight.getId()));
+		for(Perspective p_3: imc.arylPerspectives){
+			if(imc.arylInsightPerspectives.contains(p_3) == true 
+			   && colManuallySelectedPerspectives.contains(p_3) == false
+			   && colEndangeredPerspectives.contains(p_3) == false){
+				 colPerspectivesToRemoveInsight.add(p_3);
 			}
 		}
 		//Define a Task to save the current Insight:

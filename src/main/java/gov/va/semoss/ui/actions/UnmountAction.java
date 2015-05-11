@@ -7,6 +7,7 @@ package gov.va.semoss.ui.actions;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -34,7 +35,8 @@ public class UnmountAction extends DbAction {
 	 */
 	public UnmountAction( Frame frame ) {
 		super( null, UNMOUNT, "rmdb" );
-		putValue( AbstractAction.SHORT_DESCRIPTION, "Unmount a database" );
+		putValue( AbstractAction.SHORT_DESCRIPTION, "Disconnect the selected database" );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
 		dynamicTitle = true;
 	}
 
@@ -46,8 +48,9 @@ public class UnmountAction extends DbAction {
 	 */
 	public UnmountAction( Frame frame, String title ) {
 		super( null, UNMOUNT, "rmdb" );
-		putValue( AbstractAction.SHORT_DESCRIPTION, "Unmount a database" );
+		putValue( AbstractAction.SHORT_DESCRIPTION, "Disconnect the selected database" );
 		putValue( AbstractAction.NAME, title );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
 		dynamicTitle = false;
 	}
 

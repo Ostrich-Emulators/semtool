@@ -24,6 +24,7 @@ import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.CopyWhatPanel;
 import gov.va.semoss.ui.components.ProgressTask;
 
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 /**
@@ -34,17 +35,28 @@ public class ClearAction extends DbAction {
 
 	private static final Logger log = Logger.getLogger( ClearAction.class );
 	private final Frame frame;
-	private final CopyWhatPanel copywhat = new CopyWhatPanel( "Erase What Data?" );
+	private CopyWhatPanel copywhat; 
 
 	public ClearAction( String optg, Frame frame ) {
 		super( optg, CLEAR, "erasedb" );
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Empty the data from a database" );
-		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_L );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_L );		
 	}
 
 	@Override
 	public boolean preAction( ActionEvent ae ) {
+		copywhat = new CopyWhatPanel( "Erase What Data?" );
+		copywhat.showVocabularies( true );
+		
+		copywhat.getDataBox().addActionListener( new ActionListener(){
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				copywhat.enableVocabularies( copywhat.getDataBox().isSelected() );
+			}
+		} );
+
 		int retval = JOptionPane.showConfirmDialog( frame, copywhat,
 				"Clear what data from data from " + getEngineName() + "?",
 				JOptionPane.OK_CANCEL_OPTION );
@@ -70,7 +82,8 @@ public class ClearAction extends DbAction {
 
 							if ( copywhat.isInsightSelected() ) {
 								EngineUtil eu = EngineUtil.getInstance();
-								eu.importInsights( getEngine(), null, true );
+								eu.importInsights( getEngine(), null, true,
+										copywhat.getSelectedVocabularies() );
 							}
 						}
 						catch ( RepositoryException | IOException | EngineManagementException re ) {

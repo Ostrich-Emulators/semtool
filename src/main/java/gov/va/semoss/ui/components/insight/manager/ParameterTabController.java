@@ -22,6 +22,9 @@ public class ParameterTabController extends InsightManagerController {
 	 */
 	public ParameterTabController(InsightManagerController imc){
 		this.imc = imc;
+		this.imc.btnBuildQuery_Parm.setOnAction(this::handleBuildQuery);
+		this.imc.btnBuildQuery_Parm.setTooltip(
+				new Tooltip("Build Parameter query from Type URI."));
 		this.imc.btnSaveParameter_Parm.setOnAction(this::handleSaveParameter);
 		this.imc.btnSaveParameter_Parm.setTooltip(
 				new Tooltip("Save all Parameter fields."));
@@ -29,6 +32,22 @@ public class ParameterTabController extends InsightManagerController {
 		this.imc.btnReloadParameter_Parm.setOnAction(this.imc.ptc::handleReloadPerspectives);
 		this.imc.btnReloadParameter_Parm.setTooltip(new Tooltip(this.imc.btnReloadPerspective.getTooltip().getText()));
 	}
+	
+	/**   Click-handler for the "Build Query from Type" button. Builds and inserts a simple Sparql 
+	 * query into the "Parameter Query" field to fetch instances of the URI entered in the "Type"
+	 * field with associated labels. The entered "Variable" name is returned with "?label". 
+	 * 
+	 * @param event
+	 */
+	private void handleBuildQuery(ActionEvent event){
+		String strVariable = "?" + imc.legalizeQuotes(imc.txtVariable_parm.getText().trim());
+		String strValueType = imc.legalizeQuotes(imc.txtValueType_parm.getText().trim());
+		String generatedQuery = "SELECT " + strVariable + " ?label " +
+		   "\nWHERE{\n    " + strVariable + " a <" + strValueType + "> . \n    " +
+		   strVariable + " rdfs:label ?label . \n}";
+		imc.txtaDefaultQuery_parm.setText(generatedQuery);
+	}
+	
 	
 	/**   Click-handler for the "Save Parameter" button. Saves changes to all fields on the "Parameter" tab.
 	 * 
@@ -42,7 +61,6 @@ public class ParameterTabController extends InsightManagerController {
 		parameter.setLabel(imc.legalizeQuotes(imc.txtLabel_parm.getText().trim()));
 		parameter.setVariable(imc.legalizeQuotes(imc.txtVariable_parm.getText().trim()));
 		parameter.setValueType(imc.legalizeQuotes(imc.txtValueType_parm.getText().trim()));
-		parameter.setDefaultValue(imc.legalizeQuotes(imc.txtDefaultValue_parm.getText().trim()));
 		parameter.setDefaultQuery(imc.legalizeQuotes(imc.txtaDefaultQuery_parm.getText().trim()));
 		
 		//Define a Task to save the current Parameter:

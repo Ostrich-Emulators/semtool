@@ -19,12 +19,15 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.model.vocabulary.SEMOSS;
+import gov.va.semoss.model.vocabulary.VAC;
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.ui.components.RepositoryList;
 import gov.va.semoss.ui.components.UriComboBox.UriLabelPair;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import info.aduna.io.IOUtil;
@@ -44,11 +47,10 @@ import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -78,18 +80,20 @@ import javax.swing.table.TableColumnModel;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xerces.util.XMLChar;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.model.vocabulary.FOAF;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
-
-import com.ibm.icu.util.Calendar;
 
 /**
  * The Utility class contains a variety of miscellaneous functions implemented
@@ -98,8 +102,24 @@ import com.ibm.icu.util.Calendar;
  * workbooks.
  */
 public class Utility {
+
 	private static final Logger log = Logger.getLogger( Utility.class );
 	private static int id = 0;
+
+	public static final Map<String, String> DEFAULTNAMESPACES = new HashMap<>();
+
+	static {
+		DEFAULTNAMESPACES.put( RDF.PREFIX, RDF.NAMESPACE );
+		DEFAULTNAMESPACES.put( RDFS.PREFIX, RDFS.NAMESPACE );
+		DEFAULTNAMESPACES.put( OWL.PREFIX, OWL.NAMESPACE );
+		DEFAULTNAMESPACES.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
+		DEFAULTNAMESPACES.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
+		DEFAULTNAMESPACES.put( FOAF.PREFIX, FOAF.NAMESPACE );
+		DEFAULTNAMESPACES.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
+		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
+		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
+		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
+	}
 
 	/**
 	 * Matches the given query against a specified pattern. While the next
@@ -152,6 +172,37 @@ public class Utility {
 		}
 
 		return paramHash;
+	}
+
+	/**
+	 * Extracts parameter bindings from the passed-in query of the form,
+	 * "<@name-http:value@>", into a hash of variable names, types, and parameter
+	 * queries (created from types), suitable for Insight parameter drop-downs on
+	 * the left-pane of the tool.
+	 *
+	 * @param query -- (String) The Insight's Sparql query.
+	 *
+	 * @return -- (Map<String, Map<String, String>>) The hash described above.
+	 */
+	public static Map<String, Map<String, String>> getParamTypeQueryHash( String query ) {
+		Map<String, Map<String, String>> paramQueryHash = new HashMap<>();
+		Pattern pattern = Pattern.compile( "[@]{1}\\w+[-]*[\\w/.:]+[@]" );
+
+		Matcher matcher = pattern.matcher( query );
+		while ( matcher.find() ) {
+			String data = matcher.group();
+			data = data.substring( 1, data.length() - 1 );
+			String paramVariable = data.substring( 0, data.indexOf( "-" ) );
+			String paramType = data.substring( data.indexOf( "-" ) + 1 );
+			String paramQuery = "SELECT ?entity WHERE{ ?entity a <" + paramType + "> .}";
+
+			log.debug( "paramTypeQueryhash row: " + paramVariable + ", " + paramType + ", " + paramQuery );
+			Map<String, String> paramElement = new HashMap<>();
+			paramElement.put( "parameterValueType", paramType );
+			paramElement.put( "parameterQuery", paramQuery );
+			paramQueryHash.put( paramVariable, paramElement );
+		}
+		return paramQueryHash;
 	}
 
 	/**
@@ -308,7 +359,12 @@ public class Utility {
 				= new StringBuilder( "SELECT ?s ?label WHERE { ?s rdfs:label ?label }" );
 		sb.append( " VALUES ?s {" );
 		for ( URI uri : uris ) {
-			sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+			if ( null == uri ) {
+				log.warn( "trying to find the label of a null URI? (probably a bug)" );
+			}
+			else {
+				sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+			}
 		}
 		sb.append( "}" );
 
@@ -343,7 +399,7 @@ public class Utility {
 	 *
 	 * @param urilabels a mapping of URIs to their labels. Say, the results of
 	 * null	null	null	null null null null null null	null	null	null	null	null	null
-	 * null	null	 {@link #getInstanceLabels(java.util.Collection, 
+	 * null	null	null	null	null	 {@link #getInstanceLabels(java.util.Collection, 
    * gov.va.semoss.rdf.engine.api.IEngine) }
 	 *
 	 * @return the results
@@ -485,36 +541,6 @@ public class Utility {
 	}
 
 	/**
-	 * Runs a check to see if calculations have already been performed.
-	 *
-	 * @param query (calculation) to be run on a specific engine.
-	 *
-	 * @return True if calculations have been performed.
-	 */
-	public static boolean runCheck( String query ) {
-		boolean check = true;
-
-		RepositoryList list = DIHelper.getInstance().getRepoList();
-		// get the selected repository
-		List<IEngine> repos = list.getSelectedValuesList();
-
-		SesameJenaSelectWrapper selectWrapper = null;
-		for ( IEngine engine : repos ) {
-			selectWrapper = new SesameJenaSelectWrapper();
-			selectWrapper.setEngine( engine );
-			selectWrapper.setQuery( query );
-			selectWrapper.executeQuery();
-		}
-
-		//if the wrapper is not empty, calculations have already been performed.
-		if ( null != selectWrapper && !selectWrapper.hasNext() ) {
-			check = false;
-		}
-
-		return check;
-	}
-
-	/**
 	 * Displays error message.
 	 *
 	 * @param text to be displayed.
@@ -601,7 +627,7 @@ public class Utility {
 	}
 
 	/**
-	 * Method round.
+	 * Rounds the given value to the given number of decimal places
 	 *
 	 * @param valueToRound double
 	 * @param numberOfDecimalPlaces int
@@ -612,22 +638,6 @@ public class Utility {
 		double multipicationFactor = Math.pow( 10, numberOfDecimalPlaces );
 		double interestedInZeroDPs = valueToRound * multipicationFactor;
 		return Math.round( interestedInZeroDPs ) / multipicationFactor;
-	}
-
-	/**
-	 * Used to round a value to a specific number of decimal places.
-	 *
-	 * @param valueToRound to round.
-	 *
-	 * @return Rounded value.
-	 */
-	public static String sciToDollar( double valueToRound ) {
-		double roundedValue = Math.round( valueToRound );
-		DecimalFormat df = new DecimalFormat( "#0" );
-		NumberFormat formatter = NumberFormat.getCurrencyInstance();
-		df.format( roundedValue );
-		String retString = formatter.format( roundedValue );
-		return retString;
 	}
 
 	/**
@@ -824,24 +834,6 @@ public class Utility {
 		}
 
 		return sb.toString();
-	}
-
-	/**
-	 * Creates an excel workbook
-	 *
-	 * @param wb XSSFWorkbook to write to
-	 * @param fileLoc String containing the path to save the workbook
-	 */
-	public static void writeWorkbook( XSSFWorkbook wb, String fileLoc ) {
-		try ( FileOutputStream newExcelFile = new FileOutputStream( fileLoc ) ) {
-
-			wb.write( newExcelFile );
-		}
-		catch ( IOException e ) {
-			showMessage( "Could not create file " + fileLoc
-					+ ".\nPlease check directory structure/permissions." );
-			log.error( e );
-		}
 	}
 
 	public static Map<String, Object> getParamsFromString( String params ) {
@@ -1058,22 +1050,23 @@ public class Utility {
 		}
 		zipFile.close();
 	}
-	
-	public static void addModelToJTable(AbstractTableModel tableModel, String tableKey) {
+
+	public static void addModelToJTable( AbstractTableModel tableModel, String tableKey ) {
 		JTable table = DIHelper.getJTable( tableKey );
 		table.setModel( tableModel );
 		tableModel.fireTableDataChanged();
-		
-		for (int i=0; i<tableModel.getColumnCount(); i++) {
-			if (Boolean.class.equals( tableModel.getColumnClass(i) )) {
+
+		for ( int i = 0; i < tableModel.getColumnCount(); i++ ) {
+			if ( Boolean.class.equals( tableModel.getColumnClass( i ) ) ) {
 				TableColumnModel columnModel = table.getColumnModel();
-				if (i < columnModel.getColumnCount())
-					columnModel.getColumn(i).setPreferredWidth(35);
+				if ( i < columnModel.getColumnCount() ) {
+					columnModel.getColumn( i ).setPreferredWidth( 35 );
+				}
 			}
 		}
 	}
 
-	public static void resetJTable(String tableKey) {
+	public static void resetJTable( String tableKey ) {
 		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
 		log.debug( "Resetting the " + tableKey + " table model." );
 	}

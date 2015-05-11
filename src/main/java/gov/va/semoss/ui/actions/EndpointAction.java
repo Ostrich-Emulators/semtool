@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.ProgressTask;
 
@@ -36,6 +37,8 @@ public class EndpointAction extends DbAction {
     this.frame = frame;
     putValue( AbstractAction.SHORT_DESCRIPTION, "Start/Stop the SPARQL endpoint" );
     putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
+    
+    
   }
 
   @Override
@@ -45,6 +48,10 @@ public class EndpointAction extends DbAction {
     if ( null != eng ) {
       putValue( AbstractAction.NAME,
           ( eng.serverIsRunning() ? "Stop" : "Start" ) + " SPARQL endpoint" );
+    //  boolean ispinned = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ));
+     // if (ispinned) {
+     // putValue( AbstractAction.SMALL_ICON, ( DbAction.getIcon( "db_copy1") ));
+     // }
     }
   }
 

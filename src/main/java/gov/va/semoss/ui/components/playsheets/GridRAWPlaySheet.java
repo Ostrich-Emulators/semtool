@@ -22,12 +22,14 @@ package gov.va.semoss.ui.components.playsheets;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.SaveAllGridAction;
+import gov.va.semoss.ui.actions.SaveAsGridAction;
 import gov.va.semoss.ui.actions.SaveGridAction;
 import gov.va.semoss.ui.components.LineNumberTableRowHeader;
 import gov.va.semoss.ui.components.NewScrollBarUI;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.URIEditor;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -37,6 +39,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -47,6 +50,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.JTableHeader;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -60,7 +64,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	private final ValueTableModel model;
 	private final JTable table;
 	private final SaveGridAction save = new SaveGridAction( false );
-	private final SaveGridAction saveas = new SaveGridAction( true );
+	private final SaveAsGridAction saveas = new SaveAsGridAction( true );
 	private final SaveAllGridAction saveall = new SaveAllGridAction();
 
 	public GridRAWPlaySheet() {
@@ -114,12 +118,16 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		} );
 	}
 
-	@Override
-	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
+	protected void setupToolBarButtons( final String tabTitle ){
 		save.setDefaultFileName( tabTitle );
 		save.setTable( model );
 		saveas.setDefaultFileName( tabTitle );
-		saveas.setTable( model );
+		saveas.setTable( model );		
+	}
+	
+	@Override
+	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
+		setupToolBarButtons( tabTitle );
 		jtb.add( save );
 
 		saveall.setPlaySheetFrame( getPlaySheetFrame() );

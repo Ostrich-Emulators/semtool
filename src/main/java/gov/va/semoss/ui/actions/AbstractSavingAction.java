@@ -33,12 +33,12 @@ import org.apache.log4j.Logger;
 public abstract class AbstractSavingAction extends AbstractAction {
 
 	private static final Logger log = Logger.getLogger( AbstractSavingAction.class );
+	public static final String LASTSAVE = "_lastsave";
 	private final boolean saveas;
 	private final Preferences prefs;
 	private final String prefkey;
 	private boolean appendDate = false;
 	private String defaultFileName = "";
-	private File lastsave = null;
 
 	public AbstractSavingAction( String name, Icon icon, boolean issaveas,
 			Preferences prefs, String prefkey ) {
@@ -75,6 +75,10 @@ public abstract class AbstractSavingAction extends AbstractAction {
 		this.defaultFileName = defaultFileName;
 	}
 
+	public void setSaveFile( File f ) {
+		putValue( LASTSAVE, f );
+	}
+
 	protected String getSuccessMessage( File expfile ) {
 		return "Saved to " + expfile;
 	}
@@ -89,6 +93,8 @@ public abstract class AbstractSavingAction extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
+		Object o = getValue( LASTSAVE );
+		File lastsave = ( o instanceof File ? File.class.cast( o ) : null );
 		if ( saveas || null == lastsave ) {
 			File dir = FileBrowsePanel.getLocationForEmptyPref( prefs, prefkey );
 			JFileChooser fileChooser = new JFileChooser( dir );
@@ -117,27 +123,28 @@ public abstract class AbstractSavingAction extends AbstractAction {
 					}
 				}
 			}
+			else {
+				return;
+			}
 		}
 
-		if ( null != lastsave ) {
-			if ( lastsave.exists() ) {
-				int rslt = JOptionPane.showConfirmDialog( null,
-						"File exists. Overwrite?", "Overwrite?", JOptionPane.YES_NO_OPTION );
-				if ( rslt != JOptionPane.YES_OPTION ) {
-					return;
-				}
+		if ( lastsave.exists() ) {
+			int rslt = JOptionPane.showConfirmDialog( null,
+					"File exists. Overwrite?", "Overwrite?", JOptionPane.YES_NO_OPTION );
+			if ( rslt != JOptionPane.YES_OPTION ) {
+				return;
 			}
+		}
 
-			try {
-				saveTo( lastsave );
-				Utility.showExportMessage( null, getSuccessMessage( lastsave ),
-						getSuccessTitle(), lastsave );
-			}
-			catch ( IOException ex ) {
-				log.error( ex, ex );
-				Utility.showError( getFailMessage( lastsave, ex ) );
-				lastsave = null;
-			}
+		try {
+			saveTo( lastsave );
+			Utility.showExportMessage( null, getSuccessMessage( lastsave ),
+					getSuccessTitle(), lastsave );
+		}
+		catch ( IOException ex ) {
+			log.error( ex, ex );
+			Utility.showError( getFailMessage( lastsave, ex ) );
+			lastsave = null;
 		}
 	}
 

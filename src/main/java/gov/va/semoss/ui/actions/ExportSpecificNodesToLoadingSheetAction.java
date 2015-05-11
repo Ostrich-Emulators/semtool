@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.ui.actions;
 
-import gov.va.semoss.ui.actions.DbAction;
-
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

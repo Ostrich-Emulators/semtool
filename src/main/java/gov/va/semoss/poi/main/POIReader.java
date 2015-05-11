@@ -19,8 +19,10 @@
  */
 package gov.va.semoss.poi.main;
 
+import cern.colt.Arrays;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,39 +65,66 @@ public class POIReader implements ImportFileReader {
 		METADATA, NODE, RELATION, LOADER, UNKNOWN, UNSPECIFIED, EMPTY
 	};
 
-	private ImportData readNonloadingSheet( Workbook workbook ) {
+	public ImportData readNonloadingSheet( File file ) throws IOException {
+		ImportData d
+				= readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
+		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		return d;
+	}
+
+	public ImportData readNonloadingSheet( Workbook workbook ) {
 		ImportData id = new ImportData();
 
 		int sheets = workbook.getNumberOfSheets();
 		for ( int sheetnum = 0; sheetnum < sheets; sheetnum++ ) {
 			Sheet sheet = workbook.getSheetAt( sheetnum );
-			Row firstRow = sheet.getRow( 0 );
+			String sheetname = workbook.getSheetName( sheetnum );
 
-			String subjectType = firstRow.getCell( 0 ).getStringCellValue();
-			LoadingSheetData nlsd = new LoadingSheetData( sheet.getSheetName(), subjectType );
-			ValueFactory vf = new ValueFactoryImpl();
-
-			Map<Integer, String> propnames = new HashMap<>();
-			int lastpropcol = firstRow.getLastCellNum();
-			for ( int col = 1; col < lastpropcol; col++ ) {
-				String prop = firstRow.getCell( col ).getStringCellValue();
-				propnames.put( col, prop );
-				nlsd.addProperty( prop );
-			}
-
+			// we need to shoehorn the arbitrary data from a spreadsheet into our
+			// ImportData class, which has restrictions on the data...we're going
+			// to do it by figuring out the row with the most columns, and then
+			// naming all the columns with A, B, C...AA, AB...
+			// then load everything as if it was plain data
+			// first, figure out our max number of columns
 			int rows = sheet.getLastRowNum();
-			for ( int r = 1; r <= rows; r++ ) {
+			int maxcols = Integer.MIN_VALUE;
+			for ( int r = 0; r <= rows; r++ ) {
 				Row row = sheet.getRow( r );
-				String nodename = row.getCell( 0 ).getStringCellValue();
-				LoadingNodeAndPropertyValues nap = nlsd.add( nodename );
-
-				for ( Map.Entry<Integer, String> en : propnames.entrySet() ) {
-					String val = row.getCell( en.getKey() ).getStringCellValue();
-					nap.put( en.getValue(), vf.createLiteral( val ) );
+				if ( null != row ) {
+					int cols = (int) row.getLastCellNum();
+					if ( cols > maxcols ) {
+						maxcols = cols;
+					}
 				}
 			}
 
-			id.add( nlsd );
+			// second, make "properties" for each column
+			LoadingSheetData nlsd = new LoadingSheetData( sheetname, "A" );
+			for ( int c = 1; c < maxcols; c++ ) {
+				nlsd.addProperty( Integer.toString( c ) );
+			}
+
+			// lastly, fill the sheets
+			ValueFactory vf = new ValueFactoryImpl();
+			for ( int r = 0; r <= rows; r++ ) {
+				Row row = sheet.getRow( r );
+				if ( null != row ) {
+					LoadingNodeAndPropertyValues nap
+							= nlsd.add( getString( row.getCell( 0 ) ) );
+
+					int lastpropcol = row.getLastCellNum();
+					for ( int c = 1; c <= lastpropcol; c++ ) {
+						String val = getString( row.getCell( c ) );
+						if ( !val.isEmpty() ) {
+							nap.put( Integer.toString( c ), vf.createLiteral( val ) );
+						}
+					}
+				}
+			}
+
+			if ( !nlsd.isEmpty() ) {
+				id.add( nlsd );
+			}
 		}
 
 		return id;
@@ -114,12 +143,15 @@ public class POIReader implements ImportFileReader {
 			loadMetadata( metadataSheet, data );
 		}
 
+		data.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
 		return data.getMetadata();
 	}
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
-		return read( new XSSFWorkbook( new FileInputStream( file ) ) );
+		ImportData d = read( new XSSFWorkbook( new FileInputStream( file ) ) );
+		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		return d;
 	}
 
 	public ImportData read( Workbook workbook ) throws ImportValidationException {
@@ -131,9 +163,10 @@ public class POIReader implements ImportFileReader {
 		EngineLoader.initNamespaces( data );
 
 		// we have sheets without a specified type, so open like a regular spreadsheet
-		if ( !typeToSheetNameLkp.getNN( SheetType.UNKNOWN ).isEmpty() ) {
-			logger.warn( "Trying to import sheet with no loader tab" );
-			return readNonloadingSheet( workbook );
+		List<String> unknowns = typeToSheetNameLkp.getNN( SheetType.UNKNOWN );
+		if ( !unknowns.isEmpty() ) {
+			throw new ImportValidationException( ErrorType.NOT_A_LOADING_SHEET,
+					"Unknown type for tab(s): " + Arrays.toString( unknowns.toArray() ) );
 		}
 
 		for ( String sheetname : typeToSheetNameLkp.getNN( SheetType.METADATA ) ) {
@@ -147,6 +180,11 @@ public class POIReader implements ImportFileReader {
 
 		for ( String sheetname : typeToSheetNameLkp.getNN( SheetType.RELATION ) ) {
 			loadSheet( sheetname, workbook, data );
+		}
+
+		if ( data.isEmpty() ) {
+			throw new ImportValidationException( ErrorType.NOT_A_LOADING_SHEET,
+					"There is no loadable data in this worksheet" );
 		}
 
 		return data;
@@ -175,6 +213,12 @@ public class POIReader implements ImportFileReader {
 			typeToSheetNameLkp.add( SheetType.LOADER, LOADER );
 
 			Map<String, SheetType> fromloading = categorizeFromLoadingSheet( lSheet );
+
+			if ( fromloading.isEmpty() ) {
+				throw new ImportValidationException( ErrorType.MISSING_DATA,
+						"No data to process" );
+			}
+
 			for ( Map.Entry<String, SheetType> en : fromloading.entrySet() ) {
 				String name = en.getKey();
 				SheetType loadertype = en.getValue();
@@ -195,6 +239,12 @@ public class POIReader implements ImportFileReader {
 					typeToSheetNameLkp.add( realtype, name );
 				}
 			}
+		}
+
+		if ( 1 == typeToSheetNameLkp.keySet().size()
+				&& typeToSheetNameLkp.containsKey( SheetType.METADATA ) ) {
+			throw new ImportValidationException( ErrorType.MISSING_DATA,
+					"No data to process" );
 		}
 
 		if ( typeToSheetNameLkp.getNN( SheetType.METADATA ).size() > 1 ) {
@@ -245,10 +295,15 @@ public class POIReader implements ImportFileReader {
 				sheetTypeToLoad = "";
 			}
 
+			if ( sheetNameToLoad.isEmpty() && sheetTypeToLoad.isEmpty() ) {
+				logger.debug( "empty row at " + ( rIndex + 1 ) + "...skipping rest of tab" );
+				break;
+			}
+
 			if ( sheetNameToLoad.isEmpty() || ( sheetTypeToLoad.isEmpty() && mustHaveType ) ) {
 				if ( sheetNameToLoad.isEmpty() ) {
 					throw new ImportValidationException( ErrorType.MISSING_DATA,
-							"No sheet name on row " + rIndex );
+							"No sheet name on row " + ( rIndex + 1 ) );
 				}
 				else {
 					throw new ImportValidationException( ErrorType.MISSING_DATA,
@@ -285,19 +340,21 @@ public class POIReader implements ImportFileReader {
 		}
 
 		Row row0 = sheet.getRow( 0 );
+
 		int next = nextRow( sheet, 0 );
-		Row row1 = sheet.getRow( next );
-		if ( null == row0 || null == row1 ) {
+		if ( null == row0 ) {
 			// make sure we have some "data" in this sheet
 			return SheetType.EMPTY;
 		}
 
-		if ( getString( row1.getCell( 1 ) ).isEmpty() ) {
-			// no data in the first data cell...assume we're empty
-			return SheetType.EMPTY;
-		}
-
 		String type = getString( row0.getCell( 0 ) );
+		Row row1 = sheet.getRow( next );
+		if ( !METADATA.equals( type ) ) {
+			if ( null == row1 || getString( row1.getCell( 1 ) ).isEmpty() ) {
+				// no data in the first data cell...assume we're empty
+				return SheetType.EMPTY;
+			}
+		}
 
 		switch ( type ) {
 			case METADATA:
@@ -360,27 +417,15 @@ public class POIReader implements ImportFileReader {
 			String propValue = cell3.getStringCellValue();
 			String propertyMiddleColumn = getString( cell2 );
 
-			if ( "@schema-namespace".equals( propName ) ) {
-				if ( null == schemanamespace ) {
-					schemanamespace = propValue;
-				}
-				else {
-					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
-							"Multiple @schema-namespace lines in Metadata sheet" );
-				}
-			}
-			else if ( "@data-namespace".equals( propName ) ) {
-				if ( null == datanamespace ) {
-					datanamespace = propValue;
-				}
-				else {
-					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
-							"Multiple @schema-namespace lines in Metadata sheet" );
-				}
-			}
-			else if ( "@base".equals( propName ) ) {
+			if ( "@base".equals( propName ) ) {
 				if ( null == baseuri ) {
-					baseuri = propValue;
+					if ( propValue.startsWith( "<" ) && propValue.endsWith( ">" ) ) {
+						baseuri = propValue.substring( 1, propValue.length() - 1 );
+					}
+					else {
+						throw new ImportValidationException( ErrorType.INVALID_DATA,
+								"@base value does not appear to be a URI: \"" + propValue + "\"" );
+					}
 				}
 				else {
 					throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
@@ -388,7 +433,48 @@ public class POIReader implements ImportFileReader {
 				}
 			}
 			else if ( "@prefix".equals( propName ) ) {
-				namespaces.put( propertyMiddleColumn.replaceAll( ":$", ""), propValue );
+				// validate that this is necessary:
+				if ( !( propValue.startsWith( "<" ) && propValue.endsWith( ">" ) ) ) {
+					throw new ImportValidationException( ErrorType.INVALID_DATA,
+							"@prefix value does not appear to be a URI: \"" + propValue + "\"" );
+				}
+
+				propValue = propValue.substring( 1, propValue.length() - 1 );
+				if ( ":schema".equals( propertyMiddleColumn ) ) {
+					if ( null == schemanamespace ) {
+						schemanamespace = propValue;
+					}
+					else {
+						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+								"Multiple :schema lines in Metadata sheet" );
+					}
+				}
+				else if ( ":data".equals( propertyMiddleColumn ) ) {
+					if ( null == datanamespace ) {
+						datanamespace = propValue;
+					}
+					else {
+						throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+								"Multiple :data lines in Metadata sheet" );
+					}
+				}
+				else if ( ":".equals( propertyMiddleColumn ) ) {
+					/*
+					 * The default namespace, ":", applies to all un-prefixed data elements.
+					 * Specifically setting the schema or data namespace will override the
+					 * default namespace.
+					 */
+					if ( null == schemanamespace ) {
+						schemanamespace = propValue;
+					}
+					if ( null == datanamespace ) {
+						datanamespace = propValue;
+					}
+					// we may still need to set the default namespace to handle RDF exports. keep an eye on this.
+				}
+				else {
+					namespaces.put( propertyMiddleColumn.replaceAll( ":$", "" ), propValue );
+				}
 			}
 			else {
 				if ( !propertyMiddleColumn.isEmpty() ) {
@@ -419,8 +505,6 @@ public class POIReader implements ImportFileReader {
 			metas.setNamespace( en.getKey(), en.getValue() );
 		}
 
-		ValueFactory vf = new ValueFactoryImpl();		
-		
 		for ( String[] triple : triples ) {
 			logger.debug( "adding custom triple: "
 					+ triple[0] + " => " + triple[1] + " => " + triple[2] );
@@ -450,8 +534,8 @@ public class POIReader implements ImportFileReader {
 
 				if ( cellValue.getCellType() != Cell.CELL_TYPE_NUMERIC ) {
 					cellValue.setCellType( Cell.CELL_TYPE_STRING );
-					propHash.put( propName,							
-							EngineLoader.getRDFStringValue( cellValue.getStringCellValue(),
+					propHash.put( propName,
+							getRDFStringValue( cellValue.getStringCellValue(),
 									id.getMetadata().getNamespaces(), vf ) );
 				}
 				else if ( DateUtil.isCellDateFormatted( cellValue ) ) {
@@ -477,7 +561,20 @@ public class POIReader implements ImportFileReader {
 	 * @return
 	 */
 	private static String getString( Cell cell ) {
-		return ( isEmpty( cell ) ? "" : cell.getStringCellValue() );
+		if ( isEmpty( cell ) ) {
+			return "";
+		}
+
+		switch ( cell.getCellType() ) {
+			case Cell.CELL_TYPE_NUMERIC:
+				return Double.toString( cell.getNumericCellValue() );
+			case Cell.CELL_TYPE_BOOLEAN:
+				return Boolean.toString( cell.getBooleanCellValue() );
+			case Cell.CELL_TYPE_FORMULA:
+				return cell.getCellFormula();
+			default:
+				return cell.getStringCellValue();
+		}
 	}
 
 	private static boolean isComment( Cell cell ) {

@@ -63,7 +63,6 @@ public class RepoListMouseListener extends MouseAdapter {
 	private final PinAction toggler;
 	private final PropertiesAction proper;
 	private final CloneAction cloner;
-	private final CloneAction cloneconfer;
 	private final ClearAction clearer;
 	private final ExportTtlAction exportttl;
 	private final ExportTtlAction exportnt;
@@ -87,8 +86,7 @@ public class RepoListMouseListener extends MouseAdapter {
 		mounter = new MountAction( PlayPane.UIPROGRESS, frame );
 		toggler = new PinAction( PlayPane.UIPROGRESS );
 		proper = new PropertiesAction( frame );
-		cloner = new CloneAction( PlayPane.UIPROGRESS, frame, true );
-		cloneconfer = new CloneAction( PlayPane.UIPROGRESS, frame, false );
+		cloner = new CloneAction( PlayPane.UIPROGRESS, frame );
 		clearer = new ClearAction( PlayPane.UIPROGRESS, frame );
 		exportttl = new ExportTtlAction( PlayPane.UIPROGRESS,
 				ExportTtlAction.Style.TTL, frame );
@@ -155,7 +153,7 @@ public class RepoListMouseListener extends MouseAdapter {
 		JPopupMenu popup = new JPopupMenu();
 
 		if ( null != engine ) {
-			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner, cloneconfer,
+			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner,
 				clearer, exportttl, exportnt, exportrdf, exportinsights, importls,
 				unmounter, sparqler, mounter, exporternodes, exporterrels, expSpecNodes,
 				expSpecRels, exporterwhole, creater, resetInsights, importInsights,
@@ -168,7 +166,6 @@ public class RepoListMouseListener extends MouseAdapter {
 			popup.addSeparator();
 
 			popup.add( cloner );
-			popup.add( cloneconfer );
 			popup.add( clearer );
 			popup.add( consistencyCheck );
 

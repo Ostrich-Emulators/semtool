@@ -41,7 +41,12 @@ public class SPIN {
 	 * http://spinrdf.org/spin#Function
 	 */
     public final static URI Function;
-	
+
+	/**
+	 * http://spinrdf.org/spin#MagicProperties
+	 */
+    
+    public final static URI MagicProperty;
     
 	// ----- Properties ------
     
@@ -62,9 +67,11 @@ public class SPIN {
 		// ----- Classes ------
 		Function = factory.createURI(NAMESPACE, "Function");
 		
+		MagicProperty = factory.createURI(NAMESPACE, "MagicProperty");
+
+		// ----- Properties ------
 		body = factory.createURI(NAMESPACE, "body");
 		
-		// ----- Properties ------
 		constraint = factory.createURI(NAMESPACE, "constraint");
 	}
 }

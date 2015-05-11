@@ -26,8 +26,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
+import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
@@ -42,6 +42,7 @@ import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.query.BindingSet;
 
 /**
@@ -49,7 +50,7 @@ import org.openrdf.query.BindingSet;
  * @author ryan
  */
 public class DbMetadataPanel extends javax.swing.JPanel implements ActionListener {
-
+	
 	private static final Logger log = Logger.getLogger( DbMetadataPanel.class );
 	private IEngine engine;
 	private final Map<URI, JTextField> fieldlkp = new HashMap<>();
@@ -63,60 +64,60 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 	public DbMetadataPanel() {
 		this( null );
 	}
-
+	
 	public DbMetadataPanel( IEngine eng ) {
 		engine = eng;
 		initComponents();
-
+		
 		fieldlkp.put( RDFS.LABEL, title );
 		fieldlkp.put( MetadataConstants.DCT_DESC, summary );
 		fieldlkp.put( MetadataConstants.DCT_CREATOR, organization );
 		fieldlkp.put( MetadataConstants.DCT_PUBLISHER, poc );
 		fieldlkp.put( MetadataConstants.DCT_CREATED, created );
 		fieldlkp.put( MetadataConstants.DCT_MODIFIED, update );
-		fieldlkp.put( VAS.REIFICATION, edgemodel );
-		fieldlkp.put( VAS.DATABASE, voiduri );
-
+		fieldlkp.put( VAS.ReificationModel, edgemodel );
+		fieldlkp.put( VAS.Database, voiduri );
+		
 		voiduri.setEditable( null == baseuri );
 		voiduri.setBackground( null == baseuri ? title.getBackground()
 				: created.getBackground() );
-
+		
 		smss.setText( engine.getProperty( Constants.SMSS_LOCATION ) );
-
+		
 		voiduri.addKeyListener( new KeyAdapter() {
-
+			
 			@Override
 			public void keyTyped( KeyEvent e ) {
 				loadable = ( !voiduri.getText().isEmpty() );
 			}
 		} );
-
+		
 		if ( null != engine ) {
 			refresh();
 		}
-
+		
 		subsets.addMouseListener( new MouseAdapter() {
-
+			
 			@Override
 			public void mouseClicked( MouseEvent e ) {
 				final URI uri = subsets.getSelectedValue();
 				GridPlaySheet gps = new GridPlaySheet();
-
+				
 				ListQueryAdapter<Value[]> q = new ListQueryAdapter( "SELECT ?p ?o { ?s ?p ?o }" ) {
-
+					
 					@Override
 					public void handleTuple( BindingSet set, ValueFactory fac ) {
 						Value data[] = { set.getValue( "p" ), set.getValue( "o" ) };
 						add( data );
 					}
 				};
-
+				
 				q.bind( "s", uri );
 				try {
 					List<Value[]> rows = engine.query( q );
 					gps.create( rows, Arrays.asList( "Property", "Value" ), engine );
-
-					JOptionPane.showMessageDialog( created,gps,
+					
+					JOptionPane.showMessageDialog( created, gps,
 							"Properties of " + uri, JOptionPane.INFORMATION_MESSAGE
 					);
 				}
@@ -126,32 +127,32 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 			}
 		} );
 	}
-
+	
 	private void doSave() {
 		int i = 1;
 		// if it's enabled, we HAVE to save the baseuri first so the 
 		// other fields have a URI to save to
 		for ( Map.Entry<URI, JTextField> entry : fieldlkp.entrySet() ) {
-			if ( !VAS.DATABASE.equals( entry.getKey() ) ) {
+			if ( !VAS.Database.equals( entry.getKey() ) ) {
 				DbMetadataPanel.this.actionPerformed( new ActionEvent( entry.getValue(),
 						i++, entry.getKey().stringValue() ) );
 			}
 		}
 	}
-
+	
 	public boolean isLoadable() {
 		return loadable;
 	}
-
+	
 	public static void showDialog( Frame f, IEngine engine ) {
 		DbMetadataPanel dbdata = new DbMetadataPanel( engine );
-
+		
 		Object options[] = { "Save", "Cancel" };
-
+		
 		boolean ok = false;
 		boolean dosave = false;
 		while ( !ok ) {
-
+			
 			int opt = JOptionPane.showOptionDialog( f, dbdata,
 					"Properties of " + engine.getEngineName(), JOptionPane.YES_NO_OPTION,
 					JOptionPane.PLAIN_MESSAGE, null, options, options[0] );
@@ -169,42 +170,48 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				ok = true;
 			}
 		}
-
+		
 		if ( dosave ) {
 			dbdata.doSave();
 		}
 	}
-
+	
 	public final void refresh() {
 		IEngine eng
 				= ( null == engine ? DIHelper.getInstance().getRdfEngine() : engine );
 		baseuri = null;
-
+		
 		for ( JTextField jtf : fieldlkp.values() ) {
 			jtf.setText( null );
 		}
-
+		
 		if ( null == eng ) {
 			return;
 		}
-
+		
 		try {
-			Map<URI, String> metadata = eng.query( new MetadataQuery() );
-			if ( metadata.containsKey( VAS.DATABASE ) ) {
-				baseuri = new URIImpl( metadata.get( VAS.DATABASE ) );
+			MetadataQuery mq = new MetadataQuery();
+			Map<URI, Value> metadata = eng.query( mq );
+			if ( metadata.containsKey( VAS.Database ) ) {
+				baseuri = URI.class.cast( metadata.get( VAS.Database ) );
 			}
-
-			for ( Map.Entry<URI, String> en : metadata.entrySet() ) {
+			
+			if ( metadata.containsKey( VAS.ReificationModel ) ) {
+				URI reif = URI.class.cast( metadata.get( VAS.ReificationModel ) );
+				metadata.put( VAS.ReificationModel,
+						new LiteralImpl( Utility.getInstanceLabel( reif, eng ) ) );
+			}
+			
+			for ( Map.Entry<URI, String> en : mq.asStrings().entrySet() ) {
 				URI pred = en.getKey();
 				String val = en.getValue();
-
+				
 				if ( fieldlkp.containsKey( pred ) ) {
 					fieldlkp.get( pred ).setText( val );
 				}
 			}
-			
-			// FIXME: need to use label for reification model
 
+			// FIXME: need to use label for reification model
 			subsetmodel.clear();
 			OneVarListQueryAdapter<URI> q
 					= OneVarListQueryAdapter.getUriList( "SELECT ?o { ?base ?subset ?o }",
@@ -224,7 +231,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		voiduri.setEditable( null == baseuri );
 		voiduri.setBackground( null == baseuri ? title.getBackground()
 				: created.getBackground() );
-
+		
 		loadable = ( null != baseuri );
 	}
 
@@ -434,16 +441,16 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				= ( null == engine ? DIHelper.getInstance().getRdfEngine() : engine );
 		final URI uri = new URIImpl( ae.getActionCommand() );
 		final String val = fieldlkp.get( uri ).getText();
-
+		
 		try {
-			eng.execute( new ModificationExecutor() {
-
+			eng.execute( new ModificationExecutorAdapter( true ) {
+				
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					ValueFactory fac = conn.getValueFactory();
-					if ( uri.equals( VAS.DATABASE ) ) {
+					if ( uri.equals( VAS.Database ) ) {
 						baseuri = fac.createURI( val );
-						conn.add( baseuri, RDF.TYPE, VAS.DATABASE );
+						conn.add( baseuri, RDF.TYPE, VAS.Database );
 					}
 					else {
 						if ( conn.hasStatement( baseuri, uri, null, false ) ) {
@@ -456,17 +463,15 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 						}
 					}
 				}
-
-				@Override
-
-				public boolean execInTransaction() {
-					return true;
-				}
 			} );
+			
+			if ( RDFS.LABEL.equals( uri ) ) {
+				eng.setEngineName( val );
+			}
 		}
 		catch ( Exception e ) {
 			log.error( "could not update db metadata", e );
+			Utility.showError( "Could not update the metadata" );
 		}
-
 	}
 }

@@ -62,20 +62,21 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.model.vocabulary.DC;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -88,7 +89,7 @@ import org.openrdf.sail.SailException;
  * engine.
  */
 public abstract class AbstractSesameEngine extends AbstractEngine {
-	
+
 	private static final Logger log = Logger.getLogger( AbstractSesameEngine.class );
 	private RepositoryConnection owlRc;
 
@@ -108,7 +109,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 	}
-	
+
 	protected RepositoryConnection createOwlRc() throws RepositoryException {
 		ForwardChainingRDFSInferencer inferencer
 				= new ForwardChainingRDFSInferencer( new MemoryStore() );
@@ -132,7 +133,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		super.startLoading( props );
 		owlRc = createOwlRc();
 	}
-	
+
 	@Override
 	protected URI setUris( String data, String schema ) {
 		URI baseuri = null;
@@ -140,13 +141,13 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			try {
 				// if the baseuri isn't already set, then query the kb for void:Dataset
 				RepositoryResult<Statement> rr
-						= getRawConnection().getStatements( null, RDF.TYPE, VAS.DATABASE, false );
+						= getRawConnection().getStatements( null, RDF.TYPE, VAS.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = URI.class.cast( s.getSubject() );
 					break;
 				}
-				
+
 				if ( null == baseuri ) {
 					// not set yet, so make one (this is a silent upgrade)
 					RepositoryConnection rc = getRawConnection();
@@ -168,29 +169,29 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		else {
 			baseuri = new URIImpl( data );
 		}
-		
+
 		if ( null == baseuri ) {
 			log.fatal( "no base uri set" );
 		}
-		
+
 		setSchemaBuilder( UriBuilder.getBuilder( schema ) );
 		setDataBuilder( UriBuilder.getBuilder( baseuri ) );
 		return baseuri;
 	}
-	
+
 	protected URI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
-		URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
-		rc.add( baseuri, RDF.TYPE, VAS.DATABASE );
+		URI baseuri = getNewBaseUri();
+		rc.add( baseuri, RDF.TYPE, VAS.Database );
 
 		// see if we have some old metadata we can move over, too
 		VoidQueryAdapter q = new VoidQueryAdapter( "SELECT ?pred ?val { ?uri a ?voidds . ?uri ?pred ?val}" ) {
-			
+
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				URI pred = URI.class.cast( set.getValue( "pred" ) );
-				if ( !( MetadataConstants.OWLIRI.equals( pred ) || RDF.TYPE.equals( pred ) 
+				if ( !( MetadataConstants.OWLIRI.equals( pred ) || RDF.TYPE.equals( pred )
 						|| OWL.VERSIONINFO.equals( pred ) ) ) {
-					
+
 					try {
 						rc.add( baseuri, pred, set.getValue( "val" ) );
 					}
@@ -208,31 +209,23 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 		return baseuri;
-		
+
 	}
-	
+
 	@Override
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
-		
-		Map<String, String> namespaces = new LinkedHashMap<>();
-		namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		namespaces.put( OWL.PREFIX, OWL.NAMESPACE );
-		namespaces.put( RDF.PREFIX, RDF.NAMESPACE );
-		namespaces.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		namespaces.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		namespaces.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
-		namespaces.put( DC.PREFIX, DC.NAMESPACE );
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		
+
+		setEngineName( MetadataQuery.getEngineLabel( this ) );
+
 		RepositoryConnection rc = getRawConnection();
 		rc.begin();
-		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
+		for ( Map.Entry<String, String> en : Utility.DEFAULTNAMESPACES.entrySet() ) {
 			rc.setNamespace( en.getKey(), en.getValue() );
 		}
 		rc.commit();
 	}
-	
+
 	protected void refreshSchemaData() {
 		// load everything from the SEMOSS namespace as our OWL dataset
 		UriBuilder owlb = getSchemaBuilder();
@@ -240,14 +233,14 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			throw new UnsupportedOperationException(
 					"Cannot determine base relationships before setting the schema URI" );
 		}
-		
+
 		String q = "SELECT ?uri { ?uri rdfs:subClassOf+ ?root }";
 		OneVarListQueryAdapter<URI> uris
 				= OneVarListQueryAdapter.getUriList( q, "uri" );
 		uris.bind( "root", owlb.getConceptUri().build() );
 		try {
 			RepositoryConnection rc = getRawConnection();
-			
+
 			List<Statement> stmts = new ArrayList<>();
 			for ( URI uri : query( uris ) ) {
 				stmts.addAll( Iterations.asList( rc.getStatements( uri, null, null,
@@ -259,7 +252,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.warn( "could not retrieve OWL data", e );
 		}
 	}
-	
+
 	@Override
 	protected InsightManager createInsightManager() throws RepositoryException {
 		log.debug( "creating default (in-memory) insight repository" );
@@ -269,7 +262,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 				= new InsightManagerImpl( new SailRepository( inferer ) );
 		return imi;
 	}
-	
+
 	@Override
 	public void closeDB() {
 		log.debug( "closing db: " + getEngineName() );
@@ -280,7 +273,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			catch ( Exception e ) {
 				log.warn( e, e );
 			}
-			
+
 			try {
 				owlRc.getRepository().shutDown();
 			}
@@ -288,7 +281,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 				log.warn( e, e );
 			}
 		}
-		
+
 		super.closeDB();
 	}
 
@@ -367,20 +360,47 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		getSelectNoEx( vqa, owlRc, true );
 		return ret;
 	}
-	
+
+	private static String processNamespaces( String rawsparql ) {
+		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
+		namespaces.putAll( Utility.DEFAULTNAMESPACES );
+
+		Set<String> existingNamespaces = new HashSet<>();
+		if ( rawsparql.toUpperCase().contains( "PREFIX" ) ) {
+			Pattern pat = Pattern.compile( "prefix[\\s]+([A-Za-z0-9_-]+)[\\s]*:",
+					Pattern.CASE_INSENSITIVE );
+			Matcher m = pat.matcher( rawsparql );
+			while ( m.find() ) {
+				existingNamespaces.add( m.group( 1 ) );
+			}
+		}
+
+		StringBuilder sparql = new StringBuilder();
+		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
+			if ( !existingNamespaces.contains( en.getKey() ) ) {
+				sparql.append( "PREFIX " ).append( en.getKey() );
+				sparql.append( ": <" ).append( en.getValue() ).append( "> " );
+			}
+		}
+
+		sparql.append( rawsparql );
+		return sparql.toString();
+	}
+
 	public static final <T> T getSelect( QueryExecutor<T> query,
 			RepositoryConnection rc, boolean dobindings ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
-		
-		String sparql = ( dobindings ? query.getSparql() : query.bindAndGetSparql() );
-		
+
+		String sparql = processNamespaces( dobindings ? query.getSparql()
+				: query.bindAndGetSparql() );
+
 		ValueFactory vfac = new ValueFactoryImpl();
 		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql );
 		if ( dobindings ) {
 			tq.setIncludeInferred( query.usesInferred() );
 			query.setBindings( tq, vfac );
 		}
-		
+
 		TupleQueryResult rslt = tq.evaluate();
 		query.start( rslt.getBindingNames() );
 		while ( rslt.hasNext() ) {
@@ -390,9 +410,9 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		rslt.close();
 		return query.getResults();
 	}
-	
+
 	protected abstract RepositoryConnection getRawConnection();
-	
+
 	public static final <T> T getSelectNoEx( QueryExecutor<T> query,
 			RepositoryConnection rc,
 			boolean dobindings ) {
@@ -404,9 +424,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			return null;
 		}
 	}
-	
-	public static Model getConstruct( String sparql, RepositoryConnection rc )
+
+	public static Model getConstruct( String sparqlstr, RepositoryConnection rc )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
+
+		String sparql = processNamespaces( sparqlstr );
 		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql );
 		Model model = new LinkedHashModel();
 		GraphQueryResult gqr = tq.evaluate();
@@ -416,7 +438,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		gqr.close();
 		return model;
 	}
-	
+
 	@Override
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
@@ -424,29 +446,29 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			RepositoryConnection rc = getRawConnection();
 			return getSelect( exe, rc, supportsSparqlBindings() );
 		}
-		
+
 		throw new RepositoryException( "The engine is not connected" );
 	}
-	
+
 	@Override
 	public Model construct( String q )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		
+
 		RepositoryConnection rc = getRawConnection();
 		return getConstruct( q, rc );
 	}
-	
+
 	@Override
 	public void execute( ModificationExecutor exe ) throws RepositoryException {
 		RepositoryConnection rc = getRawConnection();
-		
+
 		try {
 			if ( exe.execInTransaction() ) {
 				rc.begin();
 			}
-			
+
 			exe.exec( rc );
-			
+
 			if ( exe.execInTransaction() ) {
 				rc.commit();
 			}
@@ -455,7 +477,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			if ( exe.execInTransaction() ) {
 				rc.rollback();
 			}
-			
+
 			throw e;
 		}
 	}
@@ -484,27 +506,27 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 				throw new IllegalArgumentException( "unhandled file type: " + filetype );
 		}
 	}
-	
+
 	@Override
 	public boolean serverIsRunning() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isServerSupported() {
 		return false;
 	}
-	
+
 	@Override
 	public void startServer( int port ) {
 		log.error(
 				"Server mode is not supported. Please check isServerSupported() before calling startServer(int)" );
 	}
-	
+
 	@Override
 	public void stopServer() {
 	}
-	
+
 	@Override
 	public java.net.URI getServerUri() {
 		return null;
@@ -519,7 +541,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	public boolean supportsSparqlBindings() {
 		return true;
 	}
-	
+
 	public static void updateLastModifiedDate( RepositoryConnection rc,
 			Resource baseuri ) {
 		// updates the base uri's last modified key
@@ -531,19 +553,19 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		try {
 			if ( null == baseuri ) {
 				RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
-						VAS.DATABASE, false );
+						VAS.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = s.getSubject();
 				}
 			}
-			
+
 			if ( null == baseuri ) {
 				log.warn( "cannot update last modified date when no base uri is set" );
 			}
 			else {
 				rc.remove( baseuri, MetadataConstants.DCT_MODIFIED, null );
-				
+
 				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
 						vf.createLiteral( QueryExecutorAdapter.getCal( new Date() ) ) ) );
 			}
@@ -552,16 +574,16 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.warn( "could not update last modified date", e );
 		}
 	}
-	
+
 	@Override
 	public void calculateInferences() throws RepositoryException {
 		// nothing to do
 	}
-	
+
 	@Override
 	public Collection<Statement> getOwlData() {
 		final List<Statement> stmts = new ArrayList<>();
-		
+
 		try {
 			for ( Statement st : Iterations.asList( owlRc.getStatements( null, null,
 					null, false ) ) ) {
@@ -575,10 +597,10 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		catch ( RepositoryException re ) {
 			log.warn( re, re );
 		}
-		
+
 		return stmts;
 	}
-	
+
 	@Override
 	public void commit() {
 		try {
@@ -589,7 +611,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 	}
-	
+
 	@Override
 	public void setOwlData( Collection<Statement> stmts ) {
 		try {
@@ -601,7 +623,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 	}
-	
+
 	@Override
 	public void addOwlData( Collection<Statement> stmts ) {
 		try {
@@ -612,7 +634,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 	}
-	
+
 	@Override
 	public void addOwlData( Statement stmt ) {
 		try {
@@ -623,7 +645,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 	}
-	
+
 	@Override
 	public void removeOwlData( Statement stmt ) {
 		try {
@@ -634,13 +656,13 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 	}
-	
+
 	@Override
 	public Map<String, String> getNamespaces() {
 		Map<String, String> ret = new HashMap<>();
 		try {
 			RepositoryConnection rc = getRawConnection();
-			
+
 			for ( Namespace ns : Iterations.asList( rc.getNamespaces() ) ) {
 				ret.put( ns.getPrefix(), ns.getName() );
 			}
@@ -650,7 +672,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 		return ret;
 	}
-	
+
 	@Override
 	protected void updateLastModifiedDate() {
 		RepositoryConnection rc = getRawConnection();
@@ -682,7 +704,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		rc.commit();
 		calculateInferences();
 	}
-	
+
 	@Override
 	public boolean execAskQuery( String query ) {
 		boolean response = false;
@@ -695,7 +717,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		catch ( MalformedQueryException | RepositoryException | QueryEvaluationException e ) {
 			log.error( e );
 		}
-		
+
 		return response;
 	}
 
@@ -714,7 +736,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		try {
 			if ( sparqlQuery != null ) {
 				RepositoryConnection rc = getRawConnection();
-				
+
 				OneVarListQueryAdapter<URI> qea
 						= OneVarListQueryAdapter.getUriList( sparqlQuery, Constants.ENTITY );
 				qea.useInferred( true );
@@ -742,7 +764,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		//logger.debug("Updating Triple " + subject + "<>" + predicate + "<>" + object);
 		try {
 			RepositoryConnection rc = getRawConnection();
-			
+
 			URI newSub;
 			URI newPred;
 			String subString;
@@ -750,13 +772,13 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			String sub = subject.trim();
 			String pred = predicate.trim();
 			ValueFactory vf = rc.getValueFactory();
-			
+
 			subString = Utility.getUriCompatibleString( sub, false );
 			newSub = vf.createURI( subString );
-			
+
 			predString = Utility.getUriCompatibleString( pred, false );
 			newPred = vf.createURI( predString );
-			
+
 			if ( !concept ) {
 				if ( object.getClass() == Double.class ) {
 					log.debug( "Found Double " + object );
@@ -764,7 +786,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 							new StatementImpl( newSub, newPred, vf.createLiteral(
 											( (Double) object ) ) ) );
 				}
-				
+
 				else if ( object.getClass() == Date.class ) {
 					log.debug( "Found Date " + object );
 					rc.add(
@@ -785,7 +807,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 				rc.add(
 						new StatementImpl( newSub, newPred, vf.createURI( object + "" ) ) );
 			}
-			
+
 		}
 		catch ( RepositoryException e ) {
 			log.error( e );
@@ -828,9 +850,9 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	 */
 	@Override
 	public TupleQueryResult execSelectQuery( String query ) {
-		
+
 		TupleQueryResult sparqlResults = null;
-		
+
 		try {
 			RepositoryConnection rc = getRawConnection();
 			TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, query );
@@ -843,12 +865,12 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 		return sparqlResults;
 	}
-	
+
 	@Override
 	public ENGINE_TYPE getEngineType() {
 		return ENGINE_TYPE.SESAME;
 	}
-	
+
 	@Override
 	public void removeStatement( String subject, String predicate, Object object, boolean concept ) {
 		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.

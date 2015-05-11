@@ -15,11 +15,13 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
+import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.QuestionPlaySheetStore;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
+
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 
@@ -139,16 +141,31 @@ public class ExecuteQueryProcessor {
 		QuestionPlaySheetStore.getInstance().idCount++;
 		playSheetTitle.append( " (" ).
 				append( QuestionPlaySheetStore.getInstance().getIDCount() ).append( ")" );
-
-		String sparql = getSparql( insight, paramHash );
+        //When preparing Sparql to execute, we must remove all new-line characters:
+		String sparql = getSparql( insight, paramHash ).replace('\n', ' ');
 		return prepareQueryOutputPlaySheet( engine, sparql, insight.getOutput(),
 				playSheetTitle.toString(), insight, appending );
 	}
 
+	/**   Returns the Insight's Sparql with the selected parameters applied to various
+	 * internal variables. If the Insight is legacy, then the ideosyncratic strings 
+	 * (e.g.: "<@...@>") must first be removed.
+	 * 
+	 * @param insight -- (Insight) The current Insight value object.
+	 * 
+	 * @param paramHash -- (Map<String, String>) The selected parameters to build into
+	 *    the Insight query.
+	 *    
+	 * @return getSparql -- (String) Described above.
+	 */
 	public static String getSparql( Insight insight, Map<String, String> paramHash ) {
 		String sparql = Utility.normalizeParam( insight.getSparql() );
 		logger.debug( "SPARQL " + sparql );
-		sparql = Utility.fillParam( sparql, paramHash );
+        if(insight.getIsLegacy() == true){
+            sparql = Utility.fillParam(sparql, paramHash );
+        }else{
+            sparql = NonLegacyQueryBuilder.buildNonLegacyInsightQuery(insight.getSparql(), paramHash);
+        }
 		return sparql;
 	}
 
