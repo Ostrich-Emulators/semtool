@@ -911,7 +911,7 @@ public class EngineLoaderTest {
 		compareData( engine.getRawConnection(), getExpectedGraph( TEST17_EXP ),
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
-
+	
 	private Model getExpectedGraph( File rdf ) {
 		SailRepository repo = new SailRepository( new MemoryStore() );
 		RepositoryConnection expectedrc = null;

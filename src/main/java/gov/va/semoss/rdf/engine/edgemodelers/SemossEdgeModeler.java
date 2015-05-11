@@ -98,6 +98,8 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 			cacheRelationNode( connector, connectorkey );
 		}
+		
+		myrc.add( subject, getCachedRelationClass( stype, otype, relname ), object );
 
 		URI connector = getCachedRelation( connectorkey );
 		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
@@ -125,7 +127,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
 
-		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc, false );
+		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc, true );
 
 		ValueFactory vf = myrc.getValueFactory();
 		boolean savelabel = metas.isAutocreateMetamodel();
