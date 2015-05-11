@@ -20,27 +20,32 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.PlaySheetFrame;
-import gov.va.semoss.ui.main.listener.impl.BrowserZoomListener;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker;
+import javafx.concurrent.Worker.State;
+import javafx.embed.swing.JFXPanel;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebEvent;
+import javafx.scene.web.WebView;
 
 import javax.swing.JDesktopPane;
-import javax.swing.JPanel;
-import javax.swing.event.InternalFrameEvent;
-import javax.swing.event.InternalFrameListener;
+
+import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.BrowserFactory;
 
 /**
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
@@ -50,86 +55,42 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 	private static final long serialVersionUID = 1142415334918968440L;
 	private static final Logger log = Logger.getLogger( BrowserPlaySheet2.class );
 	
-	public static final String DATASERIES = "dataSeries";
-
-	private Boolean empty = false;
-	protected Browser browser;
-	private final String fileName;
 	private final Map<String, Object> dataHash = new HashMap<>();
+	private final String fileName;
+	
+	protected final JFXPanel jfxPanel = new JFXPanel();
+	protected WebEngine engine;
 
-	public BrowserPlaySheet2( String fnamepiece ) {
-		browser = BrowserFactory.create();
-
-		JPanel panel = new JPanel();
-		panel.setLayout( new BorderLayout() );
-		panel.add( browser.getView().getComponent(), BorderLayout.CENTER );
-
+	public BrowserPlaySheet2( String htmlPath ) {
 		setLayout( new BorderLayout() );
-		add( panel );
+		add(jfxPanel);
 
-		String workingDir = DIHelper.getInstance().getProperty( Constants.BASE_FOLDER );
-		fileName = "file://" + workingDir + fnamepiece;
-	}
-
-	@Override
-	public void setFrame( PlaySheetFrame psf ) {
-		super.setFrame( psf );
-		psf.addInternalFrameListener( new InternalFrameListener() {
-
-			@Override
-			public void internalFrameOpened( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameClosing( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameClosed( InternalFrameEvent ife ) {
-				browser.dispose();
-			}
-
-			@Override
-			public void internalFrameIconified( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameDeiconified( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameActivated( InternalFrameEvent ife ) {
-			}
-
-			@Override
-			public void internalFrameDeactivated( InternalFrameEvent ife ) {
-			}
-		} );
-	}
-
-	public void addDataHash( Map<String, Object> newdata ) {
-		dataHash.putAll( newdata );
-	}
-
-	/**
-	 * Method callIt. Converts a given Hashtable to a Json and passes it to the
-	 * browser.
-	 *
-	 * @param table Hashtable - the correctly formatted data from the SPARQL query
-	 * results.
-	 */
-	public void callIt( Map<String, Object> table ) {
-		String json = new Gson().toJson( table ); 
-		log.debug( "Converted " + json );
+		fileName = "file:///" +
+				DIHelper.getInstance().getProperty( Constants.BASE_FOLDER ) + htmlPath;
 		
-		browser.executeJavaScript( "start('" + json + "');" );
+		Platform.setImplicitExit(false);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				WebView view = new WebView();
+				jfxPanel.setScene(new Scene(view));
+				
+				engine = view.getEngine();
+				engine.setOnAlert(
+					new EventHandler<WebEvent<String>>() {
+						public void handle(WebEvent<String> event) {
+							log.debug("handling event: " + event);
+							if ("document:loaded".equals(event.getData())) {
+								log.debug("Document is loaded.");
+				                callIt();
+							}
+						}
+					}
+				);
+			}
+		});
 	}
-	
-	@Override
-	public void incrementFont( float incr ) {
-		browser.executeJavaScript( "resizeFont(" + incr + ");" );
-	}
-	
+
 	/**
 	 * This is the function that is used to create the first view of any play
 	 * sheet. It often uses a lot of the variables previously set on the play
@@ -146,37 +107,68 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 	 */
 	@Override
 	public void createView() {
-
-		browser.getView().getComponent().addKeyListener( new BrowserZoomListener( browser ) );
-		browser.loadURL( fileName );
-		while ( browser.isLoading() ) {
-			try {
-				TimeUnit.MILLISECONDS.sleep( 50 );
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				engine.load(fileName);
 			}
-			catch ( InterruptedException e ) {
-				// TODO Auto-generated catch block
-				log.error( e, e );
-			}
+		});
+	}
+			
+	
+	/**
+	 * Method callIt. Converts a given Hashtable to a Json and passes it to the
+	 * browser.
+	 *
+	 * @param table Hashtable - the correctly formatted data from the SPARQL query
+	 * results.
+	 */
+	public void callIt() {
+		String json = new Gson().toJson( dataHash );
+		if (null != json && !"".equals(json) && !"{}".equals(json)) {
+			json = json.replace("\\n", " ");
+			json = "'" + json + "'";
 		}
 		
-		refreshView();
+		executeJavaScript("start(" + json + ");");
 	}
-
-	/**
-	 * Method refreshView. Refreshes the view and re-populates the play sheet.
-	 */
-	public void refreshView() {
-		empty = false;
-		if ( dataHash.get( DATASERIES ) instanceof HashSet ) {
-			HashSet<Object> dataSeries = (HashSet<Object>) dataHash.get( DATASERIES );
-			if ( dataSeries == null || dataSeries.isEmpty() ) {
-				empty = true;
-				return;
+	
+	@Override
+	public void incrementFont( float incr ) {
+		executeJavaScript("resizeFont(" + incr + ");");
+	}
+	
+	public void executeJavaScript(String functionNameAndArgs) {
+		log.debug( "Calling javascript method: " + functionNameAndArgs );
+		
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				engine.executeScript( functionNameAndArgs );
 			}
-		}
-		callIt( dataHash );
+		});
 	}
-
+	
+	public void registerFunction(String namespace, Object theClass) {
+		log.debug( "Registering Java class whose methods can be called from javascript. Namespace: " + namespace + ", Java class: " + theClass );
+		
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				engine.getLoadWorker().stateProperty().addListener(
+				    new ChangeListener<State>() {
+				        public void changed(ObservableValue<? extends Worker.State> ov, State oldState, State newState) {
+				            if (newState == Worker.State.SUCCEEDED) {
+								JSObject jsobj = (JSObject) engine.executeScript("window");
+								jsobj.setMember(namespace, theClass);
+				            }
+				        }
+				    }
+			    );
+			}
+		});
+	}
+	
 	/**
 	 * Method createCustomView.
 	 *
@@ -197,22 +189,8 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 		return new HashMap<>();
 	}
 
-	/**
-	 * Method isEmpty.
-	 *
-	 * @return Boolean
-	 */
-	public Boolean isEmpty() {
-		return empty;
-	}
-
-	/**
-	 * Method getBrowser. Gets the current browser.
-	 *
-	 * @return Browser - the current browser.
-	 */
-	public Browser getBrowser() {
-		return this.browser;
+	public void addDataHash( Map<String, Object> newdata ) {
+		dataHash.putAll( newdata );
 	}
 
 	@Override
@@ -223,6 +201,5 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void run() {
-	}
+	public void run() {}
 }

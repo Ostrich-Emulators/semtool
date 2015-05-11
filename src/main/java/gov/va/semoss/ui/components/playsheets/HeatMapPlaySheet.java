@@ -20,9 +20,13 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.util.Constants;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
@@ -31,6 +35,7 @@ import org.openrdf.model.Value;
  */
 public class HeatMapPlaySheet extends BrowserPlaySheet2 {
 	private static final long serialVersionUID = -1884361528714708952L;
+	private static final Logger log = Logger.getLogger( HeatMapPlaySheet.class );
 
 	/**
 	 * Constructor for HeatMapPlaySheet.
@@ -41,38 +46,40 @@ public class HeatMapPlaySheet extends BrowserPlaySheet2 {
 
 	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
-		setHeaders( headers );
-
-		convertUrisToLabels( data, getPlaySheetFrame().getEngine() );
-
-		Map<String, Object> hash = new HashMap<>();
-		String xName = headers.get( 0 );
-		String yName = headers.get( 1 );
-		String zName = headers.get( 2 );
-		for ( Value[] listElement : data ) {
-			Map<String, Object> elementHash = new HashMap<>();
-			String methodName = listElement[0].stringValue();
-			String groupName = listElement[1].stringValue();
-			methodName = methodName.replaceAll( "\"", "" );
-			groupName = groupName.replaceAll( "\"", "" );
-			String key = methodName + "-" + groupName;
-			double count = Literal.class.cast( listElement[2] ).doubleValue();
-			elementHash.put( xName, methodName );     //X-axis value, e.g.: ("ApplicationModule", "BCMA").
-			elementHash.put( yName, groupName );      //Y-axis value, e.g.: ("ApplicationList", "CPRS").
-			elementHash.put( zName, count );         //count value, e.g.:  ("ctd", 20).
-			hash.put( key, elementHash );         //e.g.:               ("BCMA-CPRS", {("ApplicationModule", "BCMA"),
-			//                       ("ApplicationList", "CPRS"), ("ctd", 20)}).
+		try {
+			setHeaders( headers );
+			convertUrisToLabels( data, getPlaySheetFrame().getEngine() );
+	
+			String xName = headers.get(0);
+			String yName = headers.get(1);
+			String zName = headers.get(2);
+			
+			Map<String, Object> hash = new HashMap<String, Object>();
+			for ( Value[] listElement : data ) {
+				String methodName = listElement[0].stringValue().replaceAll( "\"", "" );
+				String  groupName = listElement[1].stringValue().replaceAll( "\"", "" );
+				String key = methodName + "-" + groupName;
+				double count = Literal.class.cast( listElement[2] ).doubleValue();
+				
+				Map<String, Object> elementHash = new HashMap<>();
+				elementHash.put( xName, methodName );  //X-axis value, e.g.: ("ApplicationModule", "BCMA").
+				elementHash.put( yName, groupName );   //Y-axis value, e.g.: ("ApplicationList", "CPRS").
+				elementHash.put( zName, count );       // count value, e.g.: ("ctd", 20).
+				hash.put( key, elementHash );
+			}
+	
+			Map<String, Object> allHash = new HashMap<>();
+			allHash.put( Constants.DATASERIES, hash );
+			String[] var1 = headers.toArray( new String[0] );
+			allHash.put( "title", var1[0] + " vs " + var1[1] );  //e.g.: ("title", "ApplicationModule vs ApplicationList").
+			allHash.put( "xAxisTitle", var1[0] );                //e.g.: ("xAxisTitle", "ApplicationModule").
+			allHash.put( "yAxisTitle", var1[1] );                //e.g.: ("yAxisTitle", "ApplicationList").
+			allHash.put( "value", var1[2] );                     //e.g.: ("value", "ctd").
+	
+			addDataHash( allHash );
+			createView();
+		} catch (Exception e) {
+			log.debug("Exception in create: " + e, e);
 		}
-
-		Map<String, Object> allHash = new HashMap<>();
-		allHash.put( "dataSeries", hash );
-		String[] var1 = headers.toArray( new String[0] );
-		allHash.put( "title", var1[0] + " vs " + var1[1] ); //e.g.: ("title", "ApplicationModule vs ApplicationList").
-		allHash.put( "xAxisTitle", var1[0] );                //e.g.: ("xAxisTitle", "ApplicationModule").
-		allHash.put( "yAxisTitle", var1[1] );                //e.g.: ("yAxisTitle", "ApplicationList").
-		allHash.put( "value", var1[2] );                     //e.g.: ("value", "ctd").
-
-		addDataHash( allHash );
-		createView();
 	}
 }

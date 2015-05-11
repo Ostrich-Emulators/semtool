@@ -1,3 +1,7 @@
+$( document ).ready(function() {
+	alert("document:loaded");
+});
+
 function disable(selector){
     $(selector).prop("disabled",true);
 }

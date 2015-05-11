@@ -177,6 +177,7 @@ public class Constants {
 	public static final String RIGHT_VIEW_FIELD = "rightView";
 	public static final String MAIN_FRAME = "playPane";
 	public static final String DESKTOP_PANE = "desktopPane";
+	public static final String DATASERIES = "dataSeries";
 
 	//colors
 	public static final String BROWN = "BROWN";

@@ -50,52 +50,6 @@
 			<version>55j</version>
 		</dependency>
 		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>jxbrowser</artifactId>
-			<version>4.7</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>jxbrowser-win</artifactId>
-			<version>4.7</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>jxbrowser-mac</artifactId>
-			<version>4.7</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>jxbrowser-unix</artifactId>
-			<version>4.7</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>gecko15</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>gecko</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>webkit</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>ie</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>vcamp.jxbrowser</groupId>
-			<artifactId>runtime-license</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.sksamuel.diff</groupId>
 			<artifactId>diff</artifactId>
 			<version>1.1.11</version>
