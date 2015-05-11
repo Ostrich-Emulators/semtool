@@ -564,10 +564,17 @@ public class POIReader implements ImportFileReader {
 		if ( isEmpty( cell ) ) {
 			return "";
 		}
-		if ( Cell.CELL_TYPE_NUMERIC == cell.getCellType() ) {
-			return Double.toString( cell.getNumericCellValue() );
+
+		switch ( cell.getCellType() ) {
+			case Cell.CELL_TYPE_NUMERIC:
+				return Double.toString( cell.getNumericCellValue() );
+			case Cell.CELL_TYPE_BOOLEAN:
+				return Boolean.toString( cell.getBooleanCellValue() );
+			case Cell.CELL_TYPE_FORMULA:
+				return cell.getCellFormula();
+			default:
+				return cell.getStringCellValue();
 		}
-		return cell.getStringCellValue();
 	}
 
 	private static boolean isComment( Cell cell ) {
