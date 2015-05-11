@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/k5eeb9fc8-5cb3-4e33-ac30-587a528b9be8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/Zc6ba517f-8cf9-4e3e-9084-eff16c1e92c3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://junk.com/testfiles/Concept/Date/Ab2d6fb8879d236570d2e314ce96e3130> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Date> .
@@ -36,7 +36,7 @@
 <http://junk.com/testfiles/Concept/DateLocation/Ce8289c815c0ed6e3e250894e65ac2062> <http://owl.junk.com/testfiles/Time> "10:30"^^<http://www.w3.org/2001/XMLSchema#string> .
 <http://junk.com/testfiles/Concept/DateLocation/Ce8289c815c0ed6e3e250894e65ac2062> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/DateLocation> .
 <http://junk.com/testfiles/Concept/DateLocation/Ce8289c815c0ed6e3e250894e65ac2062> <http://www.w3.org/2000/01/rdf-schema#label> "10/17/1913-Near Johannisthal, Germany" .
-<http://junk.com/testfiles/Concept/DateLocation/D863b645fd8382fb58c20054186c5ae43> <http://junk.com/testfiles/Relation/has/J281711f872ce13e0eaf413a25e5f786c> <http://junk.com/testfiles/Concept/Location/Uc431ca27a6b6ed311e486ef6f6fcad41> .
+<http://junk.com/testfiles/Concept/DateLocation/D863b645fd8382fb58c20054186c5ae43> <http://junk.com/testfiles/Relation/has/J281711f872ce13e0eaf413a25e5f786c> <http://junk.com/testfiles/Concept/Location/Over_the_North_Sea> .
 <http://junk.com/testfiles/Concept/DateLocation/D863b645fd8382fb58c20054186c5ae43> <http://junk.com/testfiles/Relation/has/Re9cffb8af0a5ba534f8437367c02b4bf> <http://junk.com/testfiles/Concept/Type/Z1666af38e021c15cbc0e328d3a7a2659> .
 <http://junk.com/testfiles/Concept/DateLocation/D863b645fd8382fb58c20054186c5ae43> <http://junk.com/testfiles/Relation/has/Sbc1df863c958359f70bbb6de053e8ba2> <http://junk.com/testfiles/Concept/Date/L1a29954e8cab5018478303718d631ceb> .
 <http://junk.com/testfiles/Concept/DateLocation/D863b645fd8382fb58c20054186c5ae43> <http://owl.junk.com/testfiles/Aboard> "20.0"^^<http://www.w3.org/2001/XMLSchema#double> .
@@ -114,7 +114,7 @@
 <http://junk.com/testfiles/Concept/DateLocation/Kd0ea46b343f9eba1d3b02707c520dfc5> <http://www.w3.org/2000/01/rdf-schema#label> "9/3/1915-Off Cuxhaven, Germany" .
 <http://junk.com/testfiles/Concept/DateLocation/Nc464d62cc15b5d705f03901f202159b0> <http://junk.com/testfiles/Relation/has/B74b57ca3eb4fca39c3106e4ecf49dbee> <http://junk.com/testfiles/Concept/Date/L68332f3981c2a46bb1114a8ea9ce94ac> .
 <http://junk.com/testfiles/Concept/DateLocation/Nc464d62cc15b5d705f03901f202159b0> <http://junk.com/testfiles/Relation/has/D7710024246acc1199e98fbee05296409> <http://junk.com/testfiles/Concept/Location/Y09528829017cda8b3cfab3705928656c> .
-<http://junk.com/testfiles/Concept/DateLocation/Nc464d62cc15b5d705f03901f202159b0> <http://junk.com/testfiles/Relation/has/L12f41bca388ff8a3e712b22206ea23ad> <http://junk.com/testfiles/Concept/Type/Ja4041cffe080ed35f31da017081c848f> .
+<http://junk.com/testfiles/Concept/DateLocation/Nc464d62cc15b5d705f03901f202159b0> <http://junk.com/testfiles/Relation/has/L12f41bca388ff8a3e712b22206ea23ad> <http://junk.com/testfiles/Concept/Type/De_Havilland_DH-4> .
 <http://junk.com/testfiles/Concept/DateLocation/Nc464d62cc15b5d705f03901f202159b0> <http://owl.junk.com/testfiles/Aboard> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
 <http://junk.com/testfiles/Concept/DateLocation/Nc464d62cc15b5d705f03901f202159b0> <http://owl.junk.com/testfiles/Fatalities> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
 <http://junk.com/testfiles/Concept/DateLocation/Nc464d62cc15b5d705f03901f202159b0> <http://owl.junk.com/testfiles/Ground> "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
@@ -135,7 +135,7 @@
 <http://junk.com/testfiles/Concept/DateLocation/S6c4333ae14215050364e3bba4df6361a> <http://www.w3.org/2000/01/rdf-schema#label> "11/28/1916-Off West Hartlepool, England" .
 <http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://junk.com/testfiles/Relation/has/Dc6ca768616a3035640b66fefc0bf89c3> <http://junk.com/testfiles/Concept/Date/L68332f3981c2a46bb1114a8ea9ce94ac> .
 <http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://junk.com/testfiles/Relation/has/O2be09e659d13027597d9ec0334412c62> <http://junk.com/testfiles/Concept/Location/J70deece41de15fe74e1dd1c60a403cbd> .
-<http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://junk.com/testfiles/Relation/has/Y82b32f979126ffb71807b9f15cc5ee59> <http://junk.com/testfiles/Concept/Type/G34e095666100bf1510e30a529579d5d0> .
+<http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://junk.com/testfiles/Relation/has/Y82b32f979126ffb71807b9f15cc5ee59> <http://junk.com/testfiles/Concept/Type/Armstrong-Whitworth_F-K-8> .
 <http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://owl.junk.com/testfiles/Aboard> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
 <http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://owl.junk.com/testfiles/Fatalities> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
 <http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://owl.junk.com/testfiles/Ground> "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
@@ -144,7 +144,7 @@
 <http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/DateLocation> .
 <http://junk.com/testfiles/Concept/DateLocation/W55fc0208956d7a0c2645b01044037cd9> <http://www.w3.org/2000/01/rdf-schema#label> "8/16/1920-Bedford, England" .
 <http://junk.com/testfiles/Concept/DateLocation/Wcffa6b018c66d296a456b1f5907830aa> <http://junk.com/testfiles/Relation/has/Ge446f149130644302650562f03d3946c> <http://junk.com/testfiles/Concept/Date/Xfc41ff26bd34b444696a7ab7bf63d6d8> .
-<http://junk.com/testfiles/Concept/DateLocation/Wcffa6b018c66d296a456b1f5907830aa> <http://junk.com/testfiles/Relation/has/Ma05aef18b9cbd1a450246bab58af85fb> <http://junk.com/testfiles/Concept/Type/J36b13670e3f29a7f38b5cef92aee62b9> .
+<http://junk.com/testfiles/Concept/DateLocation/Wcffa6b018c66d296a456b1f5907830aa> <http://junk.com/testfiles/Relation/has/Ma05aef18b9cbd1a450246bab58af85fb> <http://junk.com/testfiles/Concept/Type/Curtiss_seaplane> .
 <http://junk.com/testfiles/Concept/DateLocation/Wcffa6b018c66d296a456b1f5907830aa> <http://junk.com/testfiles/Relation/has/Ndc99f98e59161a197c15db19820141ad> <http://junk.com/testfiles/Concept/Location/E7c49db98dbbae289db8d81724501149c> .
 <http://junk.com/testfiles/Concept/DateLocation/Wcffa6b018c66d296a456b1f5907830aa> <http://owl.junk.com/testfiles/Aboard> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
 <http://junk.com/testfiles/Concept/DateLocation/Wcffa6b018c66d296a456b1f5907830aa> <http://owl.junk.com/testfiles/Fatalities> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
@@ -173,6 +173,8 @@
 <http://junk.com/testfiles/Concept/Location/K44a08673095fe852de970d69fe1812d0> <http://www.w3.org/2000/01/rdf-schema#label> "Potters Bar, England" .
 <http://junk.com/testfiles/Concept/Location/Md5b1843f253f8c3d1022447d34ea4a43> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
 <http://junk.com/testfiles/Concept/Location/Md5b1843f253f8c3d1022447d34ea4a43> <http://www.w3.org/2000/01/rdf-schema#label> "Near Jambol, Bulgeria" .
+<http://junk.com/testfiles/Concept/Location/Over_the_North_Sea> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
+<http://junk.com/testfiles/Concept/Location/Over_the_North_Sea> <http://www.w3.org/2000/01/rdf-schema#label> "Over the North Sea" .
 <http://junk.com/testfiles/Concept/Location/P127f9c4ca300fd001d4932b57829c745> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
 <http://junk.com/testfiles/Concept/Location/P127f9c4ca300fd001d4932b57829c745> <http://www.w3.org/2000/01/rdf-schema#label> "Off West Hartlepool, England" .
 <http://junk.com/testfiles/Concept/Location/R0deefd3f689a795d52bb66e7e8f15b14> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
@@ -183,8 +185,6 @@
 <http://junk.com/testfiles/Concept/Location/T1cb357a13ddafc3313a23a579cd47f9c> <http://www.w3.org/2000/01/rdf-schema#label> "Mainz, Germany" .
 <http://junk.com/testfiles/Concept/Location/U9aba4ac8a2109d75cfc3511ba0d8e6c0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
 <http://junk.com/testfiles/Concept/Location/U9aba4ac8a2109d75cfc3511ba0d8e6c0> <http://www.w3.org/2000/01/rdf-schema#label> "Near Johannisthal, Germany" .
-<http://junk.com/testfiles/Concept/Location/Uc431ca27a6b6ed311e486ef6f6fcad41> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
-<http://junk.com/testfiles/Concept/Location/Uc431ca27a6b6ed311e486ef6f6fcad41> <http://www.w3.org/2000/01/rdf-schema#label> "Over the North Sea" .
 <http://junk.com/testfiles/Concept/Location/Vf2afed4526f94e94b87ad1ff77d1c5a8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
 <http://junk.com/testfiles/Concept/Location/Vf2afed4526f94e94b87ad1ff77d1c5a8> <http://www.w3.org/2000/01/rdf-schema#label> "Tienen, Belgium" .
 <http://junk.com/testfiles/Concept/Location/Xa17839e20a4760e1c21885ad2ec31d84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Location> .
@@ -193,14 +193,14 @@
 <http://junk.com/testfiles/Concept/Location/Y09528829017cda8b3cfab3705928656c> <http://www.w3.org/2000/01/rdf-schema#label> "College Park, Maryland" .
 <http://junk.com/testfiles/Concept/Type/A7278f962a97f58785b5e9c116d15a785> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
 <http://junk.com/testfiles/Concept/Type/A7278f962a97f58785b5e9c116d15a785> <http://www.w3.org/2000/01/rdf-schema#label> "Zeppelin L-32 (airship)" .
+<http://junk.com/testfiles/Concept/Type/Armstrong-Whitworth_F-K-8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
+<http://junk.com/testfiles/Concept/Type/Armstrong-Whitworth_F-K-8> <http://www.w3.org/2000/01/rdf-schema#label> "Armstrong-Whitworth F-K-8" .
+<http://junk.com/testfiles/Concept/Type/Curtiss_seaplane> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
+<http://junk.com/testfiles/Concept/Type/Curtiss_seaplane> <http://www.w3.org/2000/01/rdf-schema#label> "Curtiss seaplane" .
+<http://junk.com/testfiles/Concept/Type/De_Havilland_DH-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
+<http://junk.com/testfiles/Concept/Type/De_Havilland_DH-4> <http://www.w3.org/2000/01/rdf-schema#label> "De Havilland DH-4" .
 <http://junk.com/testfiles/Concept/Type/Dirigible> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
 <http://junk.com/testfiles/Concept/Type/Dirigible> <http://www.w3.org/2000/01/rdf-schema#label> "Dirigible" .
-<http://junk.com/testfiles/Concept/Type/G34e095666100bf1510e30a529579d5d0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
-<http://junk.com/testfiles/Concept/Type/G34e095666100bf1510e30a529579d5d0> <http://www.w3.org/2000/01/rdf-schema#label> "Armstrong-Whitworth F-K-8" .
-<http://junk.com/testfiles/Concept/Type/J36b13670e3f29a7f38b5cef92aee62b9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
-<http://junk.com/testfiles/Concept/Type/J36b13670e3f29a7f38b5cef92aee62b9> <http://www.w3.org/2000/01/rdf-schema#label> "Curtiss seaplane" .
-<http://junk.com/testfiles/Concept/Type/Ja4041cffe080ed35f31da017081c848f> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
-<http://junk.com/testfiles/Concept/Type/Ja4041cffe080ed35f31da017081c848f> <http://www.w3.org/2000/01/rdf-schema#label> "De Havilland DH-4" .
 <http://junk.com/testfiles/Concept/Type/Q15d59e400634584284eebf295fa50da8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
 <http://junk.com/testfiles/Concept/Type/Q15d59e400634584284eebf295fa50da8> <http://www.w3.org/2000/01/rdf-schema#label> "Zeppelin L-10 (airship)" .
 <http://junk.com/testfiles/Concept/Type/Qf12d92b73a182a8ec3e571c233e8d88d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/Type> .
@@ -333,5 +333,5 @@
 <http://owl.junk.com/testfiles/Type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
 <http://owl.junk.com/testfiles/Type> <http://www.w3.org/2000/01/rdf-schema#label> "Type" .
 <http://owl.junk.com/testfiles/Type> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://owl.junk.com/testfiles/Concept> .
-<http://semoss.va.gov/database/k5eeb9fc8-5cb3-4e33-ac30-587a528b9be8> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/airplanes.csv> .
-<http://semoss.va.gov/database/k5eeb9fc8-5cb3-4e33-ac30-587a528b9be8> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.va.gov/database/Zc6ba517f-8cf9-4e3e-9084-eff16c1e92c3> <http://www.w3.org/2002/07/owl#imports> <http://junk.com/testfiles> .
+<http://semoss.va.gov/database/Zc6ba517f-8cf9-4e3e-9084-eff16c1e92c3> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

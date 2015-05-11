@@ -73,6 +73,7 @@ public class SemossEdgeModelerTest {
 	private static final File REL3 = new File( "src/test/resources/semossedge-rel3.ttl" );
 	private static final File META = new File( "src/test/resources/semossedge-mm.ttl" );
 	private static final File NODE = new File( "src/test/resources/semossedge-node.ttl" );
+	private static final File T608 = new File( "src/test/resources/semossedge-608.ttl" );
 
 	private QaChecker qaer;
 	private InMemorySesameEngine engine;
@@ -166,6 +167,11 @@ public class SemossEdgeModelerTest {
 
 	private static void compare( InMemorySesameEngine engine, File expected )
 			throws IOException, RepositoryException, RDFHandlerException {
+		compare( engine, expected, false );
+	}
+
+	private static void compare( InMemorySesameEngine engine, File expected,
+			boolean doCountsOnly ) throws IOException, RepositoryException, RDFHandlerException {
 
 		// get rid of the random database id
 		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.Database );
@@ -184,8 +190,13 @@ public class SemossEdgeModelerTest {
 
 		assertEquals( model.size(), stmts.size() );
 
-		for ( Statement s : stmts ) {
-			assertTrue( model.contains( s ) );
+		if ( doCountsOnly ) {
+			// do counts instead of checking exact URIs
+		}
+		else {
+			for ( Statement s : stmts ) {
+				assertTrue( model.contains( s ) );
+			}
 		}
 	}
 
@@ -258,5 +269,28 @@ public class SemossEdgeModelerTest {
 				engine.getRawConnection() );
 
 		compare( engine, NODE );
+	}
+
+	@Test
+	public void testTicket608() throws Exception {
+		LoadingSheetData apples = LoadingSheetData.relsheet( "Person", "Apple", "likes" );
+		LoadingNodeAndPropertyValues apple = apples.add( "John", "Golden Delicious" );
+
+		LoadingSheetData oranges = LoadingSheetData.relsheet( "Person", "Orange", "hates" );
+		LoadingNodeAndPropertyValues orange = oranges.add( "John", "Golden Delicious" );
+
+		ImportData id = ImportData.forEngine( engine );
+		id.add( apples );
+		id.add( oranges );
+
+		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		instance.createMetamodel( id, new HashMap<>(), engine.getRawConnection() );
+
+		instance.addRel( apple, new HashMap<>(), apples, id.getMetadata(),
+				engine.getRawConnection() );
+		instance.addRel( orange, new HashMap<>(), oranges, id.getMetadata(),
+				engine.getRawConnection() );
+
+		compare( engine, T608, true );
 	}
 }
