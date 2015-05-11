@@ -12,6 +12,8 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
+import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
@@ -19,12 +21,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
@@ -60,9 +64,21 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	  public boolean addInsight(int newOrder, Perspective perspective){
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
-		  Literal now = insightVF.createLiteral( new Date() );
-		  Literal creator = insightVF.createLiteral( "Imported By " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
-	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
+		  Literal now = insightVF.createLiteral( new Date() );		
+		  
+		  Preferences prefs = Preferences.userNodeForPackage(SemossPreferences.class);		
+		  String userPrefName = prefs.get(Constants.USERPREF_NAME, "");
+		  String userPrefOrg = prefs.get(Constants.USERPREF_ORG, "");
+		  Literal creator = insightVF.createLiteral( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
+		  if(userPrefName.equals("") == false || userPrefOrg.equals("") == false){
+			 if(userPrefName.equals("") || userPrefOrg.equals("")){
+				 creator = insightVF.createLiteral(userPrefName + userPrefOrg);
+			 }else{
+				 creator = insightVF.createLiteral(userPrefName + ", " + userPrefOrg);
+			 }
+		  }
+
+		  String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
@@ -235,6 +251,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	  /**   Adds a new Perspective to the triple-store on disk.
 	   * 
 	   * @param strTitle -- (String) Title of Perspective (rdfs:label).
+       * 
+       * @param strUriTitle -- (String) Title of Perspective suitable for a URI (no whitespace).
 	   * 
        * @param strDescription -- (String) Description of Perspective (dcterms:description).
        * 
@@ -243,19 +261,32 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	   * @return addPerspective -- (boolean) Whether the save to disk succeeded.
 	   */
 	  @Override
-	  public boolean addPerspective(String strTitle, String strDescription, boolean addDummyInsight){
+	  public boolean addPerspective(String strTitle, String strUriTitle, String strDescription, boolean addDummyInsight){
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
 		  Literal now = insightVF.createLiteral( new Date() );
+
+		  Preferences prefs = Preferences.userNodeForPackage(SemossPreferences.class);		
+		  String userPrefName = prefs.get(Constants.USERPREF_NAME, "");
+		  String userPrefOrg = prefs.get(Constants.USERPREF_ORG, "");
 		  Literal creator = insightVF.createLiteral( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
+		  if(userPrefName.equals("") == false || userPrefOrg.equals("") == false){
+			 if(userPrefName.equals("") || userPrefOrg.equals("")){
+				 creator = insightVF.createLiteral(userPrefName + userPrefOrg);
+			 }else{
+				 creator = insightVF.createLiteral(userPrefName + ", " + userPrefOrg);
+			 }
+		  }
+
 		  Literal title = insightVF.createLiteral(strTitle);
+		  
 		  Literal description = insightVF.createLiteral(strDescription);
 	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
 	          
-			  URI perspectiveURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, strTitle);				
+			  URI perspectiveURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, strUriTitle);				
 			  rc.add( perspectiveURI, RDF.TYPE, VAS.Perspective );
 			  rc.add( perspectiveURI, RDFS.LABEL, title);
 			  rc.add( perspectiveURI, DCTERMS.DESCRIPTION, description);
@@ -264,11 +295,11 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 			  rc.add( perspectiveURI, DCTERMS.CREATOR, creator );
 
 			  if(addDummyInsight == true){
-			 	  String slotUriName = strTitle + "-slot-" + strUniqueIdentifier;
+			 	  String slotUriName = strUriTitle + "-slot-" + strUniqueIdentifier;
 		          URI slot = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName);				
 		          rc.add( perspectiveURI, OLO.slot, slot );
 	
-                  String insightUriName = strTitle + "-insight-" + strUniqueIdentifier;
+                  String insightUriName = strUriTitle + "-insight-" + strUniqueIdentifier;
 				  URI insightURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, insightUriName);				
 		          
 		          rc.add( slot, OLO.item, insightURI );
@@ -285,7 +316,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		            type = matcher.group( 1 );
 		          }
 	
-                  String spinBodyUriName = strTitle + "-insight-body-" + strUniqueIdentifier;
+                  String spinBodyUriName = strUriTitle + "-insight-body-" + strUniqueIdentifier;
 				  URI spinBody = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName);
 		          rc.add(spinBody, RDF.TYPE, SP.Construct );
 		          rc.add(spinBody, SP.text, insightVF.createLiteral(sparql));
@@ -452,7 +483,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
     	 colDanglingInsights.addAll(getDanglingInsights());
     	 
     	 if(doesPerspectiveExist(perspectiveURI) == false && colDanglingInsights.size() > 0){
-    		 boolReturnValue = addPerspective("ZZZ-Detached-Insight-Perspective", 
+    		 boolReturnValue = addPerspective("ZZZ-Detached-Insight-Perspective", "ZZZ-Detached-Insight-Perspective",
     			"Perspective for dangling Insights", true);
     	 }
     	 

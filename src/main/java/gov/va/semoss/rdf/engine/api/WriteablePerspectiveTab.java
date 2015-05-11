@@ -30,13 +30,15 @@ public interface WriteablePerspectiveTab {
    * 
    * @param strTitle -- (String) Title of Perspective (rdfs:label).
    * 
+   * @param strUriTitle -- (String) Title of Perspective suitable for a URI (no whitespace).
+   * 
    * @param strDescription -- (String) Description of Perspective (dcterms:description).
    * 
    * @param addDummyInsight -- (boolean) Whether to add a dummy Insight to this Perspective.
    * 
    * @return addPerspective -- (boolean) Whether the save to disk succeeded.
    */
-	public boolean addPerspective(String strTitle, String strDescription, boolean addDummyInsight);
+	public boolean addPerspective(String strTitle, String strUriTitle, String strDescription, boolean addDummyInsight);
 	
   /**   Deletes a Perspective, and associated Insights, from the triple-store on disk.
    * 
