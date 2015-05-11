@@ -5,7 +5,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-vcamp:Alan semoss:Purchased vcamp:Cadillac .
+vcamp:g90e72605-29c2-4009-ae66-35019e95f2bc semoss:Last_Name "Gagarin" .
 
 semoss:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
@@ -30,8 +30,11 @@ semoss:First_Name rdfs:label "First Name" ;
 semoss:Last_Name rdfs:label "Last Name" ;
 	a owl:DatatypeProperty .
 
-vcamp:Alan a semoss:Human_Being ;
-	rdfs:label "Alan" .
+vcamp:Yuri a semoss:Human_Being ;
+	rdfs:label "Yuri" ;
+	semoss:First_Name "Yuri" ;
+	semoss:Last_Name "Gagarin" .
 
-vcamp:Cadillac a semoss:Car ;
-	rdfs:label "Cadillac" .
+vcamp:g90e72605-29c2-4009-ae66-35019e95f2bc a semoss:Human_Being ;
+	rdfs:label "Yuri" ;
+	semoss:First_Name "Yuri" .

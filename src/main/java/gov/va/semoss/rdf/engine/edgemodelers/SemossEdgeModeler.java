@@ -93,9 +93,9 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 				String rellocalname = srawlabel + "_" + sheet.getRelname() + "_"
 						+ orawlabel;
 				connector = metas.getDataBuilder().build( rellocalname );
+				connector = ensureUnique( connector );
 			}
 
-			connector = ensureUnique( connector );
 			cacheRelationNode( connector, connectorkey );
 		}
 
@@ -124,11 +124,12 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
-		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc );
+
+		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc, false );
 
 		ValueFactory vf = myrc.getValueFactory();
 		boolean savelabel = metas.isAutocreateMetamodel();
-		if ( !metas.isLegacyMode() && rawlabel.contains( ":" ) ) {
+		if ( rawlabel.contains( ":" ) ) {
 			// we have something with a colon in it, so we need to figure out if it's
 			// a namespace-prefixed string, or just a string with a colon in it
 
@@ -163,7 +164,8 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			Value value = entry.getValue();
 			if ( sheet.isLink( propname ) ) {
 				// our "value" is really the label of another node, so find that node
-				value = addSimpleNode( propname, value.stringValue(), namespaces, metas, myrc );
+				value = addSimpleNode( propname, value.stringValue(), namespaces,
+						metas, myrc, true );
 				predicate = getCachedRelationClass( sheet.getSubjectType(),
 						sheet.getObjectType(), propname );
 			}

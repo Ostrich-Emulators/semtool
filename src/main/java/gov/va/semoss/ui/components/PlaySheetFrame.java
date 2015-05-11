@@ -12,6 +12,7 @@ import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
 
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -317,6 +318,7 @@ public class PlaySheetFrame extends JInternalFrame {
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 					log.error( e, e );
+					Utility.showError( e.getLocalizedMessage() );
 				}
 			}
 		} ) {
