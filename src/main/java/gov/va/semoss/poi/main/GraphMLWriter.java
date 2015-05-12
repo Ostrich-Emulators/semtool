@@ -107,10 +107,14 @@ public class GraphMLWriter implements GraphWriter {
 		}
 	}
 
+	private static String idify( String id ) {
+		return id.replaceAll( "[\\s]+", "" );
+	}
+
 	private static Element addKey( Element root, String id, String _for,
 			String name, String type ) {
 		Element propkey = root.addElement( "key" );
-		propkey.addAttribute( "id", id )
+		propkey.addAttribute( "id", idify( id ) )
 				.addAttribute( "for", _for )
 				.addAttribute( "attr.name", name )
 				.addAttribute( "attr.type", type );
@@ -120,7 +124,7 @@ public class GraphMLWriter implements GraphWriter {
 	private static Element addNode( Element root, LoadingNodeAndPropertyValues nap,
 			Map<String, Element> nodemap ) {
 		Element node = root.addElement( "node" );
-		node.addAttribute( "id", nap.getSubjectType() + nap.getSubject() );
+		node.addAttribute( "id", idify( nap.getSubjectType() + nap.getSubject() ) );
 
 		Element lbl = node.addElement( "data" );
 		lbl.addAttribute( "key", "label" );
@@ -133,7 +137,7 @@ public class GraphMLWriter implements GraphWriter {
 		for ( Map.Entry<String, Value> en : nap.entrySet() ) {
 			String propname = nap.getSheetName();
 			Element prop = node.addElement( "data" );
-			prop.addAttribute( "key", propname + en.getKey() );
+			prop.addAttribute( "key", idify( propname + en.getKey() ) );
 			prop.setText( en.getValue().stringValue() );
 		}
 
@@ -160,9 +164,9 @@ public class GraphMLWriter implements GraphWriter {
 		}
 
 		Element edge = root.addElement( "edge" );
-		edge.addAttribute( "id", name );
-		edge.addAttribute( "source", sid );
-		edge.addAttribute( "target", oid );
+		edge.addAttribute( "id", idify( name ) );
+		edge.addAttribute( "source", idify( sid ) );
+		edge.addAttribute( "target", idify( oid ) );
 
 		Element lbl = edge.addElement( "data" );
 		lbl.addAttribute( "key", "label" );
@@ -175,7 +179,7 @@ public class GraphMLWriter implements GraphWriter {
 		for ( Map.Entry<String, Value> en : nap.entrySet() ) {
 			String propname = nap.getSheetName();
 			Element prop = edge.addElement( "data" );
-			prop.addAttribute( "key", propname + en.getKey() );
+			prop.addAttribute( "key", idify( propname + en.getKey() ) );
 			prop.setText( en.getValue().stringValue() );
 		}
 

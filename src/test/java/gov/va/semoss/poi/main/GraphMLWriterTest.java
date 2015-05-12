@@ -5,11 +5,8 @@
  */
 package gov.va.semoss.poi.main;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,7 +19,6 @@ import org.junit.Test;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.rio.ntriples.NTriplesWriter;
 
 /**
  *
@@ -30,7 +26,7 @@ import org.openrdf.rio.ntriples.NTriplesWriter;
  */
 public class GraphMLWriterTest {
 
-	private static final File EXPECTED = new File( "src/test/resources/graphtest.gml" );
+	private static final File EXPECTED = new File( "src/test/resources/graphtest.graphml" );
 	private static final Logger log = Logger.getLogger( GraphMLWriterTest.class );
 	private static final Date now;
 
