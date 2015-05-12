@@ -58,7 +58,7 @@ public class GraphMLWriterTest {
 
 		Map<String, Value> hprop = new HashMap<>();
 		hprop.put( "First Name", vf.createLiteral( "Yuri" ) );
-		hprop.put( "Lasst Name", vf.createLiteral( "Gagarin" ) );
+		hprop.put( "Last Name", vf.createLiteral( "Gagarin" ) );
 		nodes.add( "Yuri", hprop );
 
 		GraphMLWriter writer = new GraphMLWriter();
