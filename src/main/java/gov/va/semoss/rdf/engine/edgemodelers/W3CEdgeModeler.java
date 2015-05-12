@@ -10,7 +10,6 @@ import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.util.QaChecker;
-import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -24,14 +23,14 @@ import org.openrdf.repository.RepositoryException;
  *
  * @author ryan
  */
-public class SemossEdgeModeler extends AbstractEdgeModeler {
+public class W3CEdgeModeler extends AbstractEdgeModeler {
 
-	private static final Logger log = Logger.getLogger( SemossEdgeModeler.class );
+	private static final Logger log = Logger.getLogger( W3CEdgeModeler.class );
 
-	public SemossEdgeModeler() {
+	public W3CEdgeModeler() {
 	}
 
-	public SemossEdgeModeler( QaChecker qa ) {
+	public W3CEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}
 
@@ -66,7 +65,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
 
 		// ... and get a relationship that ties them together
-		RelationCacheKey connectorkey = new RelationCacheKey( nap.getSubjectType(),
+		QaChecker.RelationCacheKey connectorkey = new QaChecker.RelationCacheKey( nap.getSubjectType(),
 				nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
 
 		if ( !hasCachedRelation( connectorkey ) ) {
