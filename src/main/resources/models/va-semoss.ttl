@@ -8,11 +8,12 @@
 
 @prefix arg: <http://spinrdf.org/arg#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix insights: <http://va.gov/vcamp/data/insights#> .
+@prefix insights: <http://va.gov/dataset/insights#> .
 @prefix olo: <http://purl.org/ontology/olo/core#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix semoss: <http://semoss.org/ontologies/> .
 @prefix sp: <http://spinrdf.org/sp#> .
 @prefix spin: <http://spinrdf.org/spin#> .
 @prefix spl: <http://spinrdf.org/spl#> .
@@ -258,7 +259,7 @@ insights:GQ0 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
 	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
 
 insights:GQ0-SELECT sp:text "SELECT DISTINCT ?source ?relation ?target WHERE { ?relation a owl:ObjectProperty . ?s ?relation ?o . ?s a ?source . ?o a ?target . FILTER( ?source != <http://semoss.org/ontologies/Concept> && ?source != owl:Class && ?source != rdfs:Resource ) FILTER( ?target != <http://semoss.org/ontologies/Concept> && ?target != owl:Class && ?target != rdfs:Resource ) }" ;
-	a sp:Construct .
+	a sp:Select .
 
 insights:GQ1 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
 	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
@@ -274,11 +275,12 @@ insights:GQ1 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
 	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
 
 insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
-	spl:defaultValue insights:GQ1-Concept-Query ;
 	spl:predicate arg:Concept ;
 	spl:valueType semoss:Concept ;
 	a spl:Argument ;
 	rdfs:label "Concept" .
+
+arg:Concept rdfs:label "Concept" .
 
 insights:GQ1-Concept-Query sp:text "SELECT ?entity WHERE { {?entity rdfs:subClassOf <http://semoss.org/ontologies/Concept> ;} }" ;
 	a sp:Select .
@@ -287,12 +289,12 @@ insights:GQ1-CONSTRUCT sp:text "CONSTRUCT {?instance ?instance ?instance} WHERE 
 	a sp:Construct .
 
 insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
-	spl:defaultValue insights:GQ1-Instance-Query ;
 	spl:predicate arg:Instance ;
 	spl:valueType semoss:Concept ;
 	a spl:Argument ;
 	rdfs:label "Instance" .
 
+arg:Instance rdfs:label "Instance" .
+
 insights:GQ1-Instance-Query sp:text "SELECT ?Instance WHERE { {?Instance a <@Concept@> ;} }" ;
 	a sp:Select .
-
