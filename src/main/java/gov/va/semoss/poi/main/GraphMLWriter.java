@@ -101,8 +101,8 @@ public class GraphMLWriter implements GraphWriter {
 
 				Edge edge = graph.addEdge( null, nodes.get( sid ), nodes.get( oid ),
 						nap.getRelname() );
-
 				edges.put( edgeid( nap ), edge );
+				
 				for ( Map.Entry<String, Value> en : nap.entrySet() ) {
 					edge.setProperty( en.getKey(), en.getValue().stringValue() );
 				}
