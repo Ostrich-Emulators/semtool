@@ -1,0 +1,53 @@
+@prefix vcamp: <http://va.gov/ontologies/> .
+@prefix semoss: <http://semoss.org/ontologies/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+semoss:Human_Being a owl:Class ;
+	rdfs:label "Human Being" ;
+	rdfs:subClassOf semoss:Concept .
+
+semoss:Car a owl:Class ;
+	rdfs:label "Car" ;
+	rdfs:subClassOf semoss:Concept .
+
+semoss:Purchased rdfs:label "Purchased" ;
+	a owl:ObjectProperty .
+
+semoss:Price rdfs:label "Price" ;
+	a owl:DatatypeProperty .
+
+semoss:Date rdfs:label "Date" ;
+	a owl:DatatypeProperty .
+
+semoss:First_Name rdfs:label "First Name" ;
+	a owl:DatatypeProperty .
+
+semoss:Last_Name rdfs:label "Last Name" ;
+	a owl:DatatypeProperty .
+
+vcamp:Yuri a semoss:Human_Being ;
+	rdfs:label "Yuri" .
+
+vcamp:Yugo a semoss:Car ;
+	rdfs:label "Yugo" .
+
+vcamp:Yuri semoss:Purchased vcamp:Yugo .
+
+vcamp:Yuri_Purchased_Yugo a rdf:Statement ;
+	rdfs:label "Yuri Purchased Yugo" ;
+	rdf:subject vcamp:Yuri ;
+	rdf:predicate semoss:Purchased ;
+	rdf:object vcamp:Yugo .
+
+vcamp:Yuri vcamp:Yuri_Purchased_Yugo vcamp:Yugo .
+
+vcamp:Yuri_Purchased_Yugo semoss:Price "3000 USD" ;
+	semoss:Date "2031-10-22T06:58:59.015-04:00"^^xsd:dateTime .
+
+vcamp:Pinto a semoss:Car ;
+	rdfs:label "Pinto" .
+
+vcamp:Yuri semoss:Purchased vcamp:Pinto .

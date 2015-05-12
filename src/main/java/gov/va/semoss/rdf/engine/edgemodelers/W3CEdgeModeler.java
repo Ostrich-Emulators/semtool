@@ -62,8 +62,6 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 		}
 		URI object = getCachedInstance( otype, orawlabel );
 
-		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
-
 		// ... and get a relationship that ties them together
 		QaChecker.RelationCacheKey connectorkey = new QaChecker.RelationCacheKey( nap.getSubjectType(),
 				nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
@@ -90,11 +88,15 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
 			ValueFactory vf = myrc.getValueFactory();
 
-			myrc.add( connector, RDF.TYPE, metas.getSchemaBuilder().getRelationUri().build() );
+			myrc.add( connector, RDF.TYPE, RDF.STATEMENT );
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
 					+ sheet.getRelname() + " " + orawlabel ) );
+			
 			URI pred = getCachedRelationClass( stype, otype, sheet.getRelname() );
+
+			myrc.add( connector, RDF.SUBJECT, subject );
 			myrc.add( connector, RDF.PREDICATE, pred );
+			myrc.add( connector, RDF.OBJECT, object );
 		}
 
 		myrc.add( subject, connector, object );
