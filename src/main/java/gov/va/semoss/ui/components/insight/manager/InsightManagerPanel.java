@@ -1,6 +1,7 @@
 package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.ui.components.RepositoryList;
+import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -37,12 +38,14 @@ public class InsightManagerPanel extends JPanel {
             @Override
             public void run() {
                 try{
-                   FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/InsightManagerPanel.fxml"));
-        		   Parent root = loader.load();
-        		   InsightManagerController imController = loader.getController();
-        		   Scene scene = new Scene((Parent) root);
-        		   jfxPanel.setScene(scene);
-        		   imController.setData();
+          		   if(DIHelper.getInstance().getRdfEngine() != null){
+                      FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/InsightManagerPanel.fxml"));
+        		      Parent root = loader.load();
+        		      InsightManagerController imController = loader.getController();
+        		      Scene scene = new Scene((Parent) root);
+               		  jfxPanel.setScene(scene);
+        		      imController.setData();
+        		   }
                 }catch(Exception e){
                 	e.printStackTrace();
                 }
