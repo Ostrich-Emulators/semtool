@@ -18,7 +18,6 @@ import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -137,18 +136,6 @@ public class AbstractEdgeModelerTest {
 		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
 		Value val = getUriFromRawString( "foobar", namespaces );
 		assertNull( val );
-	}
-
-	// @Test
-	public void testEnsureUnique() {
-		System.out.println( "ensureUnique" );
-		URI uri = null;
-		AbstractEdgeModeler instance = new AbstractEdgeModelerImpl();
-		URI expResult = null;
-		URI result = instance.ensureUnique( uri );
-		assertEquals( expResult, result );
-		// TODO review the generated test code and remove the default call to fail.
-		fail( "The test case is a prototype." );
 	}
 
 	public class AbstractEdgeModelerImpl extends AbstractEdgeModeler {

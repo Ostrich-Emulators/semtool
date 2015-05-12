@@ -60,20 +60,20 @@ import org.openrdf.sail.memory.MemoryStore;
  *
  * @author ryan
  */
-public class SemossEdgeModelerTest {
+public class W3CEdgeModelerTest {
 
-	private static final Logger log = Logger.getLogger( SemossEdgeModelerTest.class );
+	private static final Logger log = Logger.getLogger(W3CEdgeModelerTest.class );
 	private static final ValueFactory vf = new ValueFactoryImpl();
 	private static final Date now;
 	private static final String SCHEMA = "http://semoss.org/ontologies/";
 	private static final String DATA = "http://va.gov/ontologies/";
 
-	private static final File REL1 = new File( "src/test/resources/semossedge-rel1.ttl" );
-	private static final File REL2 = new File( "src/test/resources/semossedge-rel2.ttl" );
-	private static final File REL3 = new File( "src/test/resources/semossedge-rel3.ttl" );
-	private static final File META = new File( "src/test/resources/semossedge-mm.ttl" );
-	private static final File NODE = new File( "src/test/resources/semossedge-node.ttl" );
-	private static final File T608 = new File( "src/test/resources/semossedge-608.ttl" );
+	private static final File REL1 = new File( "src/test/resources/w3cedge-rel1.ttl" );
+	private static final File REL2 = new File( "src/test/resources/w3cedge-rel2.ttl" );
+	private static final File REL3 = new File( "src/test/resources/w3cedge-rel3.ttl" );
+	private static final File META = new File( "src/test/resources/w3cedge-mm.ttl" );
+	private static final File NODE = new File( "src/test/resources/w3cedge-node.ttl" );
+	private static final File T608 = new File( "src/test/resources/w3cedge-608.ttl" );
 
 	private QaChecker qaer;
 	private InMemorySesameEngine engine;
@@ -207,7 +207,7 @@ public class SemossEdgeModelerTest {
 		props.put( "Date", vf.createLiteral( now ) );
 		LoadingNodeAndPropertyValues rel = rels.add( "Yuri", "Yugo", props );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
@@ -220,7 +220,7 @@ public class SemossEdgeModelerTest {
 	public void testAddRel2() throws Exception {
 		LoadingNodeAndPropertyValues rel = rels.add( "Alan", "Cadillac" );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
@@ -237,7 +237,7 @@ public class SemossEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel1 = rels.add( "Yuri", "Yugo", props );
 		LoadingNodeAndPropertyValues rel2 = rels.add( "Yuri", "Pinto" );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( rel1, new HashMap<>(), rels, data.getMetadata(),
@@ -250,7 +250,7 @@ public class SemossEdgeModelerTest {
 
 	@Test
 	public void testCreateMetamodel() throws Exception {
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 		compare( engine, META );
 	}
@@ -262,7 +262,7 @@ public class SemossEdgeModelerTest {
 		props.put( "Last Name", vf.createLiteral( "Gagarin" ) );
 		LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
@@ -283,7 +283,7 @@ public class SemossEdgeModelerTest {
 		id.add( apples );
 		id.add( oranges );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
 		instance.createMetamodel( id, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( apple, new HashMap<>(), apples, id.getMetadata(),

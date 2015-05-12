@@ -13,6 +13,7 @@ import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFromRawString;
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.util.QaChecker;
+import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
 import gov.va.semoss.rdf.engine.util.QaChecker.RelationClassCacheKey;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.util.Constants;
@@ -73,17 +74,9 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
 
 		// ... and get a relationship that ties them together
-		StringBuilder keybuilder = new StringBuilder( nap.getSubjectType() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getSubject() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( sheet.getRelname() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getObjectType() );
-		keybuilder.append( Constants.RELATION_LABEL_CONCATENATOR );
-		keybuilder.append( nap.getObject() );
+		RelationCacheKey lkey = new RelationCacheKey( nap.getSubjectType(),
+		nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
 
-		String lkey = keybuilder.toString();
 		if ( !hasCachedRelation( lkey ) ) {
 			URI connector;
 			String rellocalname;
