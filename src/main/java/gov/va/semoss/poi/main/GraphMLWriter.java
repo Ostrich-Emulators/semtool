@@ -62,9 +62,6 @@ public class GraphMLWriter implements GraphWriter {
 		root.addAttribute( QName.get( "schemaLocation", "xsi", "http://www.w3.org/2001/XMLSchema-instance" ),
 				"http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd" );
 
-		Element graph = root.addElement( "graph" )
-				.addAttribute( "id", "G" ).addAttribute( "edgedefault", "directed" );
-
 		Map<String, Element> propertyMap = new HashMap<>();
 		Map<String, Element> nodeMap = new HashMap<>();
 		Map<String, Element> relMap = new HashMap<>();
@@ -75,6 +72,9 @@ public class GraphMLWriter implements GraphWriter {
 		for ( LoadingSheetData lsd : data.getSheets() ) {
 			addPropKeys( lsd, root, propertyMap );
 		}
+
+		Element graph = root.addElement( "graph" )
+				.addAttribute( "id", "G" ).addAttribute( "edgedefault", "directed" );
 
 		for ( LoadingSheetData lsd : data.getNodes() ) {
 			for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="label" for="all" attr.name="label" attr.type="string"/>
+  <key id="type" for="all" attr.name="type" attr.type="string"/>
+  <key id="HumanBeing-Purchased-CarPrice" for="node" attr.name="Price" attr.type="string"/>
+  <key id="HumanBeing-Purchased-CarDate" for="node" attr.name="Date" attr.type="string"/>
+  <key id="HumanBeingFirstName" for="node" attr.name="First Name" attr.type="string"/>
+  <key id="HumanBeingLastName" for="node" attr.name="Last Name" attr.type="string"/>
   <graph id="G" edgedefault="directed">
     <node id="HumanBeingYuri">
       <data key="label">Yuri</data>
@@ -27,10 +33,4 @@
       <data key="type">Purchased</data>
     </edge>
   </graph>
-  <key id="label" for="all" attr.name="label" attr.type="string"/>
-  <key id="type" for="all" attr.name="type" attr.type="string"/>
-  <key id="HumanBeing-Purchased-CarPrice" for="node" attr.name="Price" attr.type="string"/>
-  <key id="HumanBeing-Purchased-CarDate" for="node" attr.name="Date" attr.type="string"/>
-  <key id="HumanBeingFirstName" for="node" attr.name="First Name" attr.type="string"/>
-  <key id="HumanBeingLastName" for="node" attr.name="Last Name" attr.type="string"/>
 </graphml>
