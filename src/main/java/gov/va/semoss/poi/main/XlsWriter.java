@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -56,11 +55,10 @@ import org.openrdf.model.Value;
  * mode, just use the all-in-one function
  * {@link #write(gov.va.semoss.poi.main.ImportData, java.io.File) } instead.
  */
-public class XlsWriter {
+public class XlsWriter implements GraphWriter {
 
-	private static final int TAB_ROWLIMIT = 999999;
 	private static final Logger log = Logger.getLogger( XlsWriter.class );
-	protected static final Pattern NUMERIC = Pattern.compile( "^\\d+.?\\d*$" );
+	private static final int TAB_ROWLIMIT = 999999;
 
 	private XSSFWorkbook currentwb;
 	private XSSFSheet currentsheet;
@@ -98,15 +96,13 @@ public class XlsWriter {
 		return currentrow;
 	}
 
-	/**
-	 * Writes the given data to the output file. This file (and it's parents) will
-	 * be created if they don't already exist.
-	 *
-	 * @param data
-	 * @param output
-	 * @throws IOException
-	 */
+	@Override
 	public void write( ImportData data, File output ) throws IOException {
+		write( data, new FileOutputStream( output ) );
+	}
+
+	@Override
+	public void write( ImportData data, OutputStream output ) throws IOException {
 		createWorkbook( data );
 
 		CellStyle errorstyle = currentwb.createCellStyle();
@@ -308,24 +304,23 @@ public class XlsWriter {
 		output.getParentFile().mkdirs();
 		try ( OutputStream newExcelFile
 				= new BufferedOutputStream( new FileOutputStream( output ) ) ) {
-			currentwb.write( newExcelFile );
+			write( newExcelFile );
 		}
+	}
+
+	public void write( OutputStream output ) throws IOException {
+		currentwb.write( output );
 	}
 
 	private String[] makeHeaderRow( LoadingSheetData b, Collection<String> props ) {
 		// make the headers
-
 		List<String> heads = new ArrayList<>();
-		int col;
-
 		if ( b.isRel() ) {
 			heads.add( "Relation" );
 			heads.add( b.getSubjectType() );
 			heads.add( b.getObjectType() );
-			col = 3;
 		}
 		else {
-			col = 2;
 			heads.add( "Node" );
 			heads.add( b.getSubjectType() );
 		}
