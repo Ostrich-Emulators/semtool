@@ -319,7 +319,7 @@ public class InsightManagerImpl implements InsightManager {
             URI paramQuery = vf.
                     createURI( MetadataConstants.VA_INSIGHTS_NS, insightKey + "-" + paramKey + "-Query" );
             rc.add( paramQuery, RDF.TYPE, SP.Select );  
-            rc.add( paramQuery, SP.text, vf.createLiteral( "SELECT ?" + paramKey + "?label WHERE{ ?" + paramKey + " a <" + paramType + "> }; rdfs:label ?label" ) );
+            rc.add( paramQuery, SP.text, vf.createLiteral( "SELECT ?" + paramKey + " ?label WHERE{ ?" + paramKey + " a <" + paramType + "> ; rdfs:label ?label }" ) );
             rc.add( argumentURI, SP.query, paramQuery );
 
             /*
