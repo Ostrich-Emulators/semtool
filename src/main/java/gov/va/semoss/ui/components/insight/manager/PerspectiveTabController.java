@@ -156,7 +156,11 @@ public class PerspectiveTabController extends InsightManagerController{
 	 * fields.
 	 */
 	private void handleAddPerspective(ActionEvent event){
-		String strTitle = imc.legalizeQuotes(imc.txtPerspectiveTitle.getText().trim());
+		String strTitle = imc.legalizeQuotes(imc.txtPerspectiveTitle.getText().trim());		  
+		//Replace all spaces in "strTitle" with underscores,
+		//to make the Title suitable for a URI:
+		String strUriTitle = strTitle.replaceAll("\\s+", "");
+		
 		String strDescription = imc.legalizeQuotes(imc.txtaPerspectiveDesc.getText().trim());
 		
 		//Define a Task to save the current Perspective:
@@ -164,7 +168,7 @@ public class PerspectiveTabController extends InsightManagerController{
 		   @Override 
 	       protected Boolean call() throws Exception{
 			   boolean boolReturnValue = false;
-			   boolReturnValue = imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().addPerspective(strTitle, strDescription, true);
+			   boolReturnValue = imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().addPerspective(strTitle, strUriTitle, strDescription, true);
                return boolReturnValue;
 		   }
 		};
@@ -187,13 +191,35 @@ public class PerspectiveTabController extends InsightManagerController{
               }
            }
         });
-		if(strTitle.equals("") == false
-		   && imc.cboPerspectiveTitle.getSelectionModel().getSelectedItem().getLabel().trim().equals(strTitle) == false){
+		if(strUriTitle.equals("") == false && isUriTitleUnique(strUriTitle) == true){
 		     //Run the Task on a separate Thread:
 	         new Thread(addPerspective).start();
 		}else{
-			 Utility.showError("Error: You must enter a unique Title, and you should enter a Description.");
+			 Utility.showError("Error: The internal Perspective identifier must be unique and non-empty.\n" +
+		        "It is based upon the Title, and all spaces within the Title are compressed\n" +
+				"to form the identifier.");
 		}
+	}
+	
+	/**   Returns true only if the passed-in URI Title is unique in the "arylPerspectives"
+	 * ObservableList. The URI Title is based upon a user-entered Title for a new Perspective,
+	 * but it is stripped of all internal spaces.
+	 * 
+	 * @param strUriTitle -- (Sting) User-entered Title for a new Perspective, stripped of all
+	 *    internal spaces.
+	 *    
+	 * @return isUriTitleUnique -- (boolean) Described above.
+	 */
+	private boolean isUriTitleUnique(String strUriTitle){
+	   boolean boolReturnValue = true;
+	   
+	   for(Perspective perspective: imc.arylPerspectives){
+		   if(perspective.getLabel().replaceAll("\\s+", "").equals(strUriTitle)){
+			  boolReturnValue = false;
+			  break;
+		   }
+	   }
+	   return boolReturnValue;
 	}
 	
 	/**   Click-handler for the "Delete Perspective" button. Removes the current Perspective

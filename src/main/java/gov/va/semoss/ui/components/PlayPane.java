@@ -53,6 +53,7 @@ import gov.va.semoss.util.CSSApplication;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
+import gov.va.semoss.util.Utility;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -70,8 +71,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
+import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -663,14 +666,16 @@ public class PlayPane extends JFrame {
 		} );
 
 		iManagePanel = new InsightManagerPanel( repoList );
-		rightView.insertTab( "Insight Manager", null, iManagePanel,
-				"Manage perspectives and insights", 2 );
+//		rightView.insertTab( "Insight Manager", null, iManagePanel,
+//				"Manage perspectives and insights", 2 );
+		rightView.addTab( "Insight Manager", null, iManagePanel,
+				"Manage perspectives and insights");
 		JLabel perlbl = new JLabel("Insight Manager");
 		Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
 		perlbl.setIcon(pericon);
 		perlbl.setIconTextGap(5);
 		perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-		rightView.setTabComponentAt(2, perlbl);
+		rightView.setTabComponentAt(rightView.getTabCount() - 1, perlbl);
 		return rightView;
 	}
 
@@ -1567,6 +1572,7 @@ public class PlayPane extends JFrame {
 
 		final JCheckBoxMenuItem iManage = new JCheckBoxMenuItem( "Insight Manager tab",
 				getProp( prefs, IMANAGE ) );
+
 		if (getProp( prefs, IMANAGE ) == true)
 			iManage.setToolTipText( "Disable the Insite Manager Tab" );
 		else
@@ -1582,14 +1588,14 @@ public class PlayPane extends JFrame {
 
 				if ( ischecked ) {
 					iManagePanel.insightManagerPanelWorker();
-					rightTabs.insertTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1"), iManagePanel,
-							"Manage perspectives and insights", 3 );
+					rightTabs.addTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1"), iManagePanel,
+							"Manage perspectives and insights" );
 					JLabel perlbl = new JLabel("Insight Manager");
 					Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
 					perlbl.setIcon(pericon);
 					perlbl.setIconTextGap(5);
 					perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-					rightTabs.setTabComponentAt(3, perlbl);
+					rightTabs.setTabComponentAt(rightTabs.getTabCount() - 1, perlbl);
 					iManage.setToolTipText( "Disable the Insite Manager Tab" );
 				}
 				else {
@@ -1734,6 +1740,7 @@ public class PlayPane extends JFrame {
 		}
 
 		this.setJMenuBar( menu );
+		
 	}
 
 	protected JToolBar buildToolBar( JToolBar playsheeter ) {

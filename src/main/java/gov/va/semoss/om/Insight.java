@@ -1,5 +1,7 @@
 package gov.va.semoss.om;
 
+import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
@@ -7,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 import org.openjena.atlas.logging.Log;
 import org.openrdf.model.URI;
@@ -258,9 +261,9 @@ public class Insight {
 		if ( descriptionValue != null ) {
 			setDescription( descriptionValue.stringValue() );
 		}
-		Value creatorValue = resultSet.getValue( "creator" );
-		if ( creatorValue != null ) {
-			setCreator( creatorValue.stringValue() );
+	    Value creatorValue = resultSet.getValue( "creator" );
+	    if(creatorValue != null){
+		   setCreator( creatorValue.stringValue() );
 		}
 		Value createdValue = resultSet.getValue( "created" );
 		if ( createdValue != null ) {
@@ -306,16 +309,6 @@ public class Insight {
 		}
 	}
 
-//	@Override
-//	public String toString() {
-//		return "Insight [id: " + getId()
-//				+ ", databaseID: " + getDatabaseID()
-//				+ ", entityType: " + getEntityType()
-//				+ ", label: " + getLabel()
-//				+ ", sparql: " + getSparql()
-//				+ ", output: " + getOutput() 
-//				+ " (or renderer class: " + getRendererClass() + ")]";
-//	}
 	
 	@Override
 	public String toString() {
