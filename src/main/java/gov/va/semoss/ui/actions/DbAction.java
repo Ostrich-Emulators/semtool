@@ -20,7 +20,7 @@ import gov.va.semoss.ui.components.ProgressTask;
  */
 public abstract class DbAction extends AbstractAction {
 
-  public static final String MERGE = "DataBase";
+  public static final String MERGE = "Database";
   public static final String PROPS = "About Database";
   public static final String CLONE = "Copy ";
   public static final String CLONECONF = "Clone Setup (no data) ";
@@ -90,6 +90,7 @@ public abstract class DbAction extends AbstractAction {
   }
 
   public static Icon getIcon( String middle ) {
+	  System.out.println( "ICON: " + middle );
     return new ImageIcon( DbAction.class.getResource( "/images/icons16/"
         + middle + "_16.png" ) );
   }
