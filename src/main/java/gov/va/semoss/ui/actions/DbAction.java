@@ -90,7 +90,6 @@ public abstract class DbAction extends AbstractAction {
   }
 
   public static Icon getIcon( String middle ) {
-	  System.out.println( "ICON: " + middle );
     return new ImageIcon( DbAction.class.getResource( "/images/icons16/"
         + middle + "_16.png" ) );
   }
