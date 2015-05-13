@@ -29,7 +29,7 @@ public class VocabularyPanel extends javax.swing.JPanel {
 		for ( Map.Entry<String, Boolean> en : VocabularyRegistry.getVocabularies2().entrySet() ) {
 			JCheckBox jcb = new JCheckBox( en.getKey(), en.getValue() );
 			vocabs.add( jcb );
-			add( jcb );
+			buttonpanel.add( jcb );
 		}
 		revalidate();
 		repaint();
@@ -64,11 +64,34 @@ public class VocabularyPanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), "Add Vocabularies", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
-    setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
+    jLabel1 = new javax.swing.JLabel();
+    buttonpanel = new javax.swing.JPanel();
+
+    jLabel1.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+    jLabel1.setText("Add Vocabularies");
+
+    buttonpanel.setLayout(new javax.swing.BoxLayout(buttonpanel, javax.swing.BoxLayout.PAGE_AXIS));
+
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+    this.setLayout(layout);
+    layout.setHorizontalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+      .addComponent(buttonpanel, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+    );
+    layout.setVerticalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(layout.createSequentialGroup()
+        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addComponent(buttonpanel, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(0, 0, 0))
+    );
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JPanel buttonpanel;
+  private javax.swing.JLabel jLabel1;
   // End of variables declaration//GEN-END:variables
 }
