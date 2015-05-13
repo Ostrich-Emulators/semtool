@@ -750,71 +750,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	/**
-	 * Method addStatement. Processes a given subject, predicate, object triple
-	 * and adds the statement to the SailConnection.
-	 *
-	 * @param subject String - RDF Subject for the triple
-	 * @param predicate String - RDF Predicate for the triple
-	 * @param object Object - RDF Object for the triple
-	 * @param concept boolean - True if the statement is a concept
-	 */
-	@Override
-	public void addStatement( String subject, String predicate, Object object,
-			boolean concept ) {
-		//logger.debug("Updating Triple " + subject + "<>" + predicate + "<>" + object);
-		try {
-			RepositoryConnection rc = getRawConnection();
-
-			URI newSub;
-			URI newPred;
-			String subString;
-			String predString;
-			String sub = subject.trim();
-			String pred = predicate.trim();
-			ValueFactory vf = rc.getValueFactory();
-
-			subString = Utility.getUriCompatibleString( sub, false );
-			newSub = vf.createURI( subString );
-
-			predString = Utility.getUriCompatibleString( pred, false );
-			newPred = vf.createURI( predString );
-
-			if ( !concept ) {
-				if ( object.getClass() == Double.class ) {
-					log.debug( "Found Double " + object );
-					rc.add(
-							new StatementImpl( newSub, newPred, vf.createLiteral(
-											( (Double) object ) ) ) );
-				}
-
-				else if ( object.getClass() == Date.class ) {
-					log.debug( "Found Date " + object );
-					rc.add(
-							new StatementImpl( newSub, newPred, vf.createLiteral( Date.class
-											.cast( object ) ) ) );
-				}
-				else {
-					log.debug( "Found String " + object );
-					String value = object + "";
-					// try to see if it already has properties then add to it
-					String cleanValue
-							= value.replaceAll( "/", "-" ).replaceAll( "\"", "'" );
-					rc.add( new StatementImpl( newSub, newPred, vf.createLiteral(
-							cleanValue ) ) );
-				}
-			}
-			else {
-				rc.add(
-						new StatementImpl( newSub, newPred, vf.createURI( object + "" ) ) );
-			}
-
-		}
-		catch ( RepositoryException e ) {
-			log.error( e );
-		}
-	}
-
-	/**
 	 * Runs the passed string query against the engine and returns graph query
 	 * results. The query passed must be in the structure of a CONSTRUCT SPARQL
 	 * query. The exact format of the results will be dependent on the type of the
@@ -869,10 +804,5 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public ENGINE_TYPE getEngineType() {
 		return ENGINE_TYPE.SESAME;
-	}
-
-	@Override
-	public void removeStatement( String subject, String predicate, Object object, boolean concept ) {
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
 	}
 }

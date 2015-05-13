@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
-import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.algebra.BindingSetAssignment;
 import org.openrdf.query.algebra.Coalesce;
 import org.openrdf.query.algebra.Extension;
@@ -16,11 +15,9 @@ import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.ValueConstant;
 import org.openrdf.query.algebra.Var;
-import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.query.parser.sparql.GraphPattern;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sail.SailRepositoryConnection;
-import org.openrdf.repository.sail.SailTupleQuery;
 import org.openrdf.repository.sparql.query.SPARQLQueryBindingSet;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
