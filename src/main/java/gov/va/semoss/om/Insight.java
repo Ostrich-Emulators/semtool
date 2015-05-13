@@ -1,23 +1,19 @@
 package gov.va.semoss.om;
 
-import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.prefs.Preferences;
 
-import org.openjena.atlas.logging.Log;
+import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 
 public class Insight {
-
+	private static final Logger log = Logger.getLogger( Insight.class );
 	//ID of the question:
 	URI id = null;
 	//Name of the question:
@@ -195,7 +191,7 @@ public class Insight {
 	// this works for the general case and will be suitable for the 2015.01 release:
 	public String getOrderedLabel() {
 		if ( this.order.size() > 1 ) {
-			Log.warn( getClass(), "Insight: " + this.label + " belongs to more than one perspective.  Order returned may be invalid." );
+			log.warn( "Insight: " + this.label + " belongs to more than one perspective. Order returned may be invalid." );
 		}
 		Set<String> keySet = this.order.keySet();
 		String[] perspectives = keySet.toArray( new String[keySet.size()] );
