@@ -81,7 +81,7 @@ public class JenaEngineTest {
 		props.setProperty( JenaEngine.INMEM_PROP, Boolean.toString( false ) );
 
 		JenaEngine instance = new JenaEngine();
-		instance.startLoading( props );
+		instance.openDB( props );
 		instance.closeDB();
 		assertTrue( !instance.getShadowFile().exists() );
 	}
@@ -92,7 +92,7 @@ public class JenaEngineTest {
 		props.setProperty( JenaEngine.FILE_PROP, dbdir.toString() );
 
 		JenaEngine instance = new JenaEngine();
-		instance.startLoading( props );
+		instance.openDB( props );
 
 		instance.execute( new ModificationExecutorAdapter( true ) {
 
@@ -106,7 +106,7 @@ public class JenaEngineTest {
 
 		instance.closeDB();
 
-		instance.startLoading( props );
+		instance.openDB( props );
 
 		OneVarListQueryAdapter<String> lqa
 				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }",

@@ -58,7 +58,7 @@ public class JenaEngine extends AbstractSesameEngine {
 	private boolean needsSave = false;
 
 	@Override
-	public void startLoading( Properties props ) throws RepositoryException {
+	protected void createRc( Properties props ) throws RepositoryException {
 		boolean inmem = Boolean.parseBoolean( props.getProperty( INMEM_PROP,
 				Boolean.toString( true ) ) );
 		needsSave = false;
@@ -68,7 +68,7 @@ public class JenaEngine extends AbstractSesameEngine {
 		}
 		else {
 			try {
-				datadir = File.createTempFile( "jena-temp", ".rdf" );
+				datadir = File.createTempFile( "jena-temp-", ".rdf" );
 				datadir.delete();
 				datadir.mkdirs();
 				datadir.deleteOnExit();
@@ -94,7 +94,6 @@ public class JenaEngine extends AbstractSesameEngine {
 		}
 
 		copyFromTdb( props.getProperty( FILE_PROP ) );
-		super.startLoading( props );
 	}
 
 	private void copyFromTdb( String file ) throws RepositoryException {

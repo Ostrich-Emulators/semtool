@@ -20,6 +20,7 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import info.aduna.iteration.Iterations;
 import java.io.IOException;
 import java.util.Properties;
@@ -130,10 +131,18 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	 */
 	@Override
 	protected void startLoading( Properties props ) throws RepositoryException {
+		createRc( props );
 		super.startLoading( props );
 		owlRc = createOwlRc();
 	}
 
+	/**
+	 * An extension point for subclasses to create their RepositoryConnection
+	 * @param props
+	 * @throws RepositoryException 
+	 */
+	protected abstract void createRc( Properties props ) throws RepositoryException;
+	
 	@Override
 	protected URI setUris( String data, String schema ) {
 		URI baseuri = null;
@@ -439,6 +448,15 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		return model;
 	}
 
+	/**
+	 * Creates a new IEngine instance from the given repository connection.
+	 * @param rc
+	 * @return 
+	 */
+	public static IEngine wrap( RepositoryConnection rc ){
+		return new InMemorySesameEngine( rc );
+	}
+	
 	@Override
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
