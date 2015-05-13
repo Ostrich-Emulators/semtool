@@ -73,7 +73,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 	private InsightManagerImpl insightEngine = null;
 
 	@Override
-	protected void startLoading( Properties props ) throws RepositoryException {
+	protected void createRc( Properties props ) throws RepositoryException {
 		Properties rws = getRWSProperties( props );
 
 		// the journal is the file itself
@@ -106,8 +106,6 @@ public class BigDataEngine extends AbstractSesameEngine {
 		catch ( InterruptedException | ExecutionException e ) {
 			log.fatal( e, e );
 		}
-
-		super.startLoading( props );
 
 		rc = repo.getConnection();
 	}

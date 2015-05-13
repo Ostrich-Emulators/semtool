@@ -187,26 +187,6 @@ public interface IEngine extends IExplorable {
 	public String getEngineName();
 
 	/**
-	 * Creates a statement with the given subject, predicate and object
-	 *
-	 * @param subject - Subject for the triple
-	 * @param predicate - Predicate for the triple
-	 * @param object - Object for the triple
-	 * @param concept - Specifies if it is a concept
-	 */
-	public void addStatement( String subject, String predicate, Object object, boolean concept );
-
-	/**
-	 * Removes a statement with the given subject, predicate and object
-	 *
-	 * @param subject - Subject for the triple
-	 * @param predicate - Predicate for the triple
-	 * @param object - Object for the triple
-	 * @param concept - Specifies if it is a concept
-	 */
-	public void removeStatement( String subject, String predicate, Object object, boolean concept );
-
-	/**
 	 * Commit the database. Commits the active transaction. This operation ends
 	 * the active transaction.
 	 */

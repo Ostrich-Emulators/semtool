@@ -177,16 +177,6 @@ public class InMemoryJenaEngine extends AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public void addStatement( String subject, String predicate, Object object, boolean concept ) {
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
-	public void removeStatement( String subject, String predicate, Object object, boolean concept ) {
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
 	public Map<String, String> getNamespaces() {
 		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
 	}

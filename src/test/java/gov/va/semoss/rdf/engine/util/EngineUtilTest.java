@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
-import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;

@@ -40,6 +40,7 @@ import org.openrdf.sail.memory.MemoryStore;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data
@@ -469,8 +470,7 @@ public class GraphDataModel {
       // TODO Auto-generated catch block
       log.error( e );
     }
-    IEngine sesameEngine = new InMemorySesameEngine();
-    ( (InMemorySesameEngine) sesameEngine ).setRepositoryConnection( lastRC );
+    IEngine sesameEngine = new InMemorySesameEngine( lastRC );
     RDFEngineHelper.removeAllData( sesameEngine, rc );
     //jenaModel.remove(lastModel);
     modelCounter--;
@@ -487,8 +487,7 @@ public class GraphDataModel {
     RepositoryConnection newRC = rcStore.get( modelCounter - 1 );
         //add redo model from repository connection
 
-    IEngine sesameEngine = new InMemorySesameEngine();
-    ( (InMemorySesameEngine) sesameEngine ).setRepositoryConnection( newRC );
+    IEngine sesameEngine = new InMemorySesameEngine( newRC );
     RDFEngineHelper.addAllData( sesameEngine, rc );
     modelCounter++;
 
@@ -595,8 +594,7 @@ public class GraphDataModel {
     catch ( Exception e ) {
 
     }
-    InMemorySesameEngine rcSesameEngine = new InMemorySesameEngine();
-    rcSesameEngine.setRepositoryConnection( rc );
+    InMemorySesameEngine rcSesameEngine = new InMemorySesameEngine( rc );
     SesameJenaUpdateWrapper sjuw = new SesameJenaUpdateWrapper();
     sjuw.setEngine( rcSesameEngine );
     sjuw.setQuery( query );
@@ -605,8 +603,7 @@ public class GraphDataModel {
 
     // run query on curRc
     if ( curRC != null ) {
-      InMemorySesameEngine curRcSesameEngine = new InMemorySesameEngine();
-      curRcSesameEngine.setRepositoryConnection( curRC );
+      InMemorySesameEngine curRcSesameEngine = new InMemorySesameEngine( curRC );
       sjuw.setEngine( curRcSesameEngine );
       sjuw.setQuery( query );
       sjuw.execute();

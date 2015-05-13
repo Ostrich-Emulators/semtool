@@ -232,9 +232,7 @@ public class RDFEngineHelper {
 	}
 	
 	public static SesameJenaSelectWrapper runSesameJenaSelectWrapper(RepositoryConnection rc, String query) {
-		IEngine engine = new InMemorySesameEngine();
-		((InMemorySesameEngine)engine).setRepositoryConnection(rc);
-
+		IEngine engine = new InMemorySesameEngine( rc );
 		return runSesameJenaSelectWrapper(engine, query);
 	}
 	
@@ -255,16 +253,12 @@ public class RDFEngineHelper {
 	}
 	
 	public static SesameJenaConstructWrapper runSesameJenaSelectCheater(RepositoryConnection rc, String query) {
-		IEngine engine = new InMemorySesameEngine();
-		((InMemorySesameEngine)engine).setRepositoryConnection(rc);
-
+		IEngine engine = new InMemorySesameEngine( rc );
 		return runSesameJenaSelectCheater(engine, query);
 	}
 	
 	public static SesameJenaConstructWrapper runSesameJenaConstruct(RepositoryConnection rc, String query) {
-		IEngine engine = new InMemorySesameEngine();
-		((InMemorySesameEngine)engine).setRepositoryConnection(rc);
-
+		IEngine engine = new InMemorySesameEngine( rc );
 		return runSesameJenaConstruct(engine, query);
 	}
 	

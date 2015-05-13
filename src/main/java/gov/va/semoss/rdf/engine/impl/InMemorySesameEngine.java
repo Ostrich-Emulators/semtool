@@ -37,6 +37,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
 /**
@@ -50,7 +51,28 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	private boolean iControlMyRc = false;
 
 	public InMemorySesameEngine() {
-		SailRepository repo = new SailRepository( new MemoryStore() );
+		createRc( new Properties() );
+	}
+
+	public InMemorySesameEngine( RepositoryConnection rc ) {
+		setRepositoryConnection( rc, false );
+	}
+
+	public InMemorySesameEngine( RepositoryConnection rc, boolean takeControl ) {
+		setRepositoryConnection( rc, takeControl );
+	}
+
+	@Override
+	protected final void createRc( Properties p ) {
+		if ( null != rc ) {
+			// we've already have our rc created, so there's nothing to do here
+			return;
+		}
+
+		ForwardChainingRDFSInferencer inferencer
+				= new ForwardChainingRDFSInferencer( new MemoryStore() );
+		Repository repo = new SailRepository( inferencer );
+
 		try {
 			repo.initialize();
 			rc = repo.getConnection();
@@ -64,12 +86,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			}
 		}
 
-		setRepositoryConnection( rc );
-		iControlMyRc = true;
-	}
-
-	public InMemorySesameEngine( RepositoryConnection rc ) {
-		setRepositoryConnection( rc );
+		setRepositoryConnection( rc, true );
 	}
 
 	/**
@@ -78,9 +95,10 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	 * @param rc RepositoryConnection. The repository connection that this is
 	 * being set to.
 	 */
-	public final void setRepositoryConnection( RepositoryConnection rc ) {
+	private void setRepositoryConnection( RepositoryConnection rc,
+			boolean takeControl ) {
 		this.rc = rc;
-		iControlMyRc = false;
+		iControlMyRc = takeControl;
 
 		try {
 			startLoading( new Properties() );
@@ -140,11 +158,6 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		}
 
 		return model;
-	}
-
-	@Override
-	public void openDB( Properties props ) {
-		// no meaning to this now
 	}
 
 	/**

@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
 
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
@@ -18,6 +17,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import java.util.List;
+import java.util.Properties;
 
 public class ClusterEngine extends AbstractSesameEngine {
 
@@ -34,31 +34,30 @@ public class ClusterEngine extends AbstractSesameEngine {
 
 	// keeps an in memory store which would be utilized for traverse freely
 	RepositoryConnection rc = null;
-	RepositoryConnection owlRc = null;
 	private WriteableInsightManager insights;
 
 	// database names
 	Map<String, IEngine> engineHash = new HashMap<>();
 
-	public ClusterEngine() {
+	@Override
+	protected void createRc( Properties props ) {
 		ForwardChainingRDFSInferencer inferencer
 				= new ForwardChainingRDFSInferencer( new MemoryStore() );
-		SailRepository owlRepo = new SailRepository( inferencer );
+		SailRepository repo = new SailRepository( inferencer );
 		try {
-			owlRepo.initialize();
-			owlRc = owlRepo.getConnection();
+			repo.initialize();
+			rc = repo.getConnection();
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
 		}
-
 	}
 
 	@Override
-	protected RepositoryConnection getRawConnection(){
+	protected RepositoryConnection getRawConnection() {
 		return rc;
 	}
-	
+
 	// You register a database with the name server
 	// in this case you register an engine
 	// when registered all the questions are parsed out
@@ -77,12 +76,7 @@ public class ClusterEngine extends AbstractSesameEngine {
 		// get the ontology / base DB for this engine
 		// load it into the in memory
 		Collection<Statement> stmts = engine.getOwlData();
-		try {
-			owlRc.add( stmts );
-		}
-		catch ( RepositoryException ex ) {
-			//ignored
-		}
+		super.addOwlData( stmts );
 
 		// do the same with insights
 		initializeInsightBase();

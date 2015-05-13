@@ -45,8 +45,7 @@ public class GraphOWLHelper {
 	public static void loadConceptHierarchy(RepositoryConnection rc, String subjects, 
 			String objects, GraphPlaySheet ps)
 	{
-		IEngine sesameEngine = new InMemorySesameEngine();
-		((InMemorySesameEngine)sesameEngine).setRepositoryConnection(rc);
+		IEngine sesameEngine = new InMemorySesameEngine( rc );
 		String conceptHierarchyForSubject = "SELECT ?Subject ?Predicate ?Object WHERE " +
 			"{" +
 			"{?Subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?Object}" +
@@ -84,8 +83,7 @@ public class GraphOWLHelper {
 	public static void loadRelationHierarchy(RepositoryConnection rc, String predicates, 
 			GraphPlaySheet ps)
 	{
-		IEngine sesameEngine = new InMemorySesameEngine();
-		((InMemorySesameEngine)sesameEngine).setRepositoryConnection(rc);
+		IEngine sesameEngine = new InMemorySesameEngine( rc );
 		// same concept as the subject, but only for relations
 		String relationHierarchy = "SELECT ?Subject ?Predicate ?Object WHERE " +
 			"{" +
@@ -123,8 +121,7 @@ public class GraphOWLHelper {
 	 */
 	public static void loadPropertyHierarchy(RepositoryConnection rc, 
 			String predicates, String containsRelation, GraphPlaySheet ps) {
-		IEngine sesameEngine = new InMemorySesameEngine();
-		((InMemorySesameEngine)sesameEngine).setRepositoryConnection(rc);
+		IEngine sesameEngine = new InMemorySesameEngine( rc );
 		// same concept as the subject, but only for relations
 		String relationHierarchy = "SELECT ?Subject ?Predicate ?Object WHERE " +
 			"{" +
