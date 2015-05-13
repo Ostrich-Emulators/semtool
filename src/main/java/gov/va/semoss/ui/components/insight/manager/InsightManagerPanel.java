@@ -37,14 +37,29 @@ public class InsightManagerPanel extends JPanel {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+            	FXMLLoader loader;
+            	Parent root;
+            	InsightManagerController imController;
+            	Scene scene;
                 try{
+                   //If an engine is loaded, then show the Insight Manager:
           		   if(DIHelper.getInstance().getRdfEngine() != null){
-                      FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/InsightManagerPanel.fxml"));
-        		      Parent root = loader.load();
-        		      InsightManagerController imController = loader.getController();
-        		      Scene scene = new Scene((Parent) root);
+                      loader = new FXMLLoader(getClass().getResource("/fxml/InsightManagerPanel.fxml"));
+        		      root = loader.load();
+        		      imController = loader.getController();
+        		      scene = new Scene((Parent) root);
                		  jfxPanel.setScene(scene);
         		      imController.setData();
+        			  jfxPanel.setVisible(true);
+        		   //If no engine is loaded, then release all Insight Manager load variables,
+        		   //and show nothing:
+        		   }else{
+        			  jfxPanel.setVisible(false);
+                      loader = null;
+                      root = null;
+                      imController = null;
+                	  jfxPanel.setScene(null);
+                	  jfxPanel.validate();
         		   }
                 }catch(Exception e){
                 	e.printStackTrace();
