@@ -155,12 +155,12 @@ public class CloneDataPanel extends javax.swing.JPanel {
 		Date time = new Date();
 		cdp.dbname.setText( engine.getEngineName()
 				+ new SimpleDateFormat( "_yyyyMMdd_HHmmss" ).format( time ) );
-		cdp.title.setText( "Clone of " + metas.get( RDFS.LABEL )
+		cdp.title.setText( "Copy of " + metas.get( RDFS.LABEL )
 				+ new SimpleDateFormat( " yyyyMMdd_HHmmss" ).format( time ) );
 
-		int ans = JOptionPane.showOptionDialog( frame, cdp, "Clone Database",
+		int ans = JOptionPane.showOptionDialog( frame, cdp, "Copy Database",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				new String[]{ "Clone", "Cancel" }, "Clone" );
+				new String[]{ "Copy", "Cancel" }, "Copy" );
 		if ( 0 == ans ) {
 			return new DbCloneMetadata( cdp.dbdir.getFirstFile(),
 					cdp.dbname.getText(), cdp.title.getText(),

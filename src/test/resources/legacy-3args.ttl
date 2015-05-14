@@ -1,0 +1,326 @@
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix vas: <http://va.gov/ontologies/semoss#> .
+@prefix vac: <http://va.gov/ontologies/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix semoss: <http://semoss.org/ontologies/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix testdata: <http://seman.tc/data/northwind/> .
+@prefix testowl: <http://seman.tc/models/northwind#> .
+
+<http://semoss.va.gov/database/S6fc2303f-ea5a-4ab8-83e5-2de72f5146c3> void:subset <http://junk.com/testfiles> .
+
+<http://junk.com/testfiles> a owl:Ontology , void:Dataset .
+
+<http://seman.tc/data/northwind/Concept/Category/Beverages> testowl:Description "Soft drinks, coffees, teas, beers, and ales" ;
+	a testowl:Category ;
+	rdfs:label "Beverages" .
+
+<http://seman.tc/data/northwind/Concept/Category/Condiments> testowl:Description "Sweet and savory sauces, relishes, spreads, and seasonings" ;
+	a testowl:Category ;
+	rdfs:label "Condiments" .
+
+<http://seman.tc/data/northwind/Concept/Category/Confections> testowl:Description "Desserts, candies, and sweet breads" ;
+	a testowl:Category ;
+	rdfs:label "Confections" .
+
+<http://seman.tc/data/northwind/Concept/Category/Dairy_Products> testowl:Description "Cheeses" ;
+	a testowl:Category ;
+	rdfs:label "Dairy Products" .
+
+<http://seman.tc/data/northwind/Concept/Category/K9a3fe86e20c408956c561beddf8fb956> testowl:Description "a test item" ;
+	a testowl:Category ;
+	rdfs:label "cat:colon" .
+
+<http://seman.tc/data/northwind/Concept/Category/Mc6c1692d90d5908a813621c031a9711a> testowl:Description "Breads, crackers, pasta, and cereal" ;
+	a testowl:Category ;
+	rdfs:label "Grains/Cereals" .
+
+<http://seman.tc/data/northwind/Concept/Category/Produce> testowl:Description "Dried fruit and bean curd" ;
+	a testowl:Category ;
+	rdfs:label "Produce" .
+
+<http://seman.tc/data/northwind/Concept/Category/Seafood> testowl:Description "Seaweed and fish" ;
+	a testowl:Category ;
+	rdfs:label "Seafood" .
+
+<http://seman.tc/data/northwind/Concept/Category/W87ef52d611a9e479ee89efd3c70384c8> testowl:Description "Prepared meats" ;
+	a testowl:Category ;
+	rdfs:label "Meat/Poultry" .
+
+<http://seman.tc/data/northwind/Concept/Product/Alice_Mutton> <http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> <http://seman.tc/data/northwind/Concept/Category/W87ef52d611a9e479ee89efd3c70384c8> ;
+	a testowl:Product ;
+	rdfs:label "Alice Mutton" .
+
+<http://seman.tc/data/northwind/Concept/Product/Carnarvon_Tigers> <http://seman.tc/data/northwind/Relation/Category/Carnarvon_Tigers_x_Seafood> <http://seman.tc/data/northwind/Concept/Category/Seafood> ;
+	a testowl:Product ;
+	rdfs:label "Carnarvon Tigers" .
+
+<http://seman.tc/data/northwind/Concept/Product/Chai> <http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://seman.tc/data/northwind/Concept/Category/Beverages> ;
+	a testowl:Product ;
+	rdfs:label "Chai" .
+
+<http://seman.tc/data/northwind/Concept/Product/Chang> <http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://seman.tc/data/northwind/Concept/Category/Beverages> ;
+	a testowl:Product ;
+	rdfs:label "Chang" .
+
+<http://seman.tc/data/northwind/Concept/Product/Db3ded23ecae42112e1674bd5e682862e> <http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> <http://seman.tc/data/northwind/Concept/Category/Condiments> ;
+	a testowl:Product ;
+	rdfs:label "Chef Anton's Cajun Seasoning" .
+
+<http://seman.tc/data/northwind/Concept/Product/E0d5bad031547be1f7fe7e228ffcd57aa> <http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://seman.tc/data/northwind/Concept/Category/Confections> ;
+	a testowl:Product ;
+	rdfs:label "Sir Rodney's Marmalade" .
+
+<http://seman.tc/data/northwind/Concept/Product/F56baa3c2d8f3e3c32744563747a28d92> <http://seman.tc/data/northwind/Relation/Category/Kb48374119b00d39089d9ff2e59d45e50> <http://seman.tc/data/northwind/Concept/Category/Condiments> ;
+	a testowl:Product ;
+	rdfs:label "Aniseed:Syrup" .
+
+<http://seman.tc/data/northwind/Concept/Product/Gdada55a7e4bebd7cad3e4a3075a0a15f> <http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> <http://seman.tc/data/northwind/Concept/Category/Condiments> ;
+	a testowl:Product ;
+	rdfs:label "Chef Anton's Gumbo Mix" .
+
+<http://seman.tc/data/northwind/Concept/Product/Genen_Shouyu> <http://seman.tc/data/northwind/Relation/Category/Genen_Shouyu_x_Condiments> <http://seman.tc/data/northwind/Concept/Category/Condiments> ;
+	a testowl:Product ;
+	rdfs:label "Genen Shouyu" .
+
+<http://seman.tc/data/northwind/Concept/Product/Guaraná_Fantástica> <http://seman.tc/data/northwind/Relation/Category/Guaraná_Fantástica_x_Beverages> <http://seman.tc/data/northwind/Concept/Category/Beverages> ;
+	a testowl:Product ;
+	rdfs:label "Guaraná Fantástica" .
+
+<http://seman.tc/data/northwind/Concept/Product/Gumbär_Gummibärchen> <http://seman.tc/data/northwind/Relation/Category/Gumbär_Gummibärchen_x_Confections> <http://seman.tc/data/northwind/Concept/Category/Confections> ;
+	a testowl:Product ;
+	rdfs:label "Gumbär Gummibärchen" .
+
+<http://seman.tc/data/northwind/Concept/Product/Ikura> <http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> <http://seman.tc/data/northwind/Concept/Category/Seafood> ;
+	a testowl:Product ;
+	rdfs:label "Ikura" .
+
+<http://seman.tc/data/northwind/Concept/Product/J14d75b0e1f88dd9bd61bae3614ecb053> <http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> <http://seman.tc/data/northwind/Concept/Category/Confections> ;
+	a testowl:Product ;
+	rdfs:label "Sir Rodney's Scones" .
+
+<http://seman.tc/data/northwind/Concept/Product/Konbu> <http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> <http://seman.tc/data/northwind/Concept/Category/Seafood> ;
+	a testowl:Product ;
+	rdfs:label "Konbu" .
+
+<http://seman.tc/data/northwind/Concept/Product/L04c0e1167641c32dea29f87197d5164e> <http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> <http://seman.tc/data/northwind/Concept/Category/Mc6c1692d90d5908a813621c031a9711a> ;
+	a testowl:Product ;
+	rdfs:label "Gustaf's Knäckebröd" .
+
+<http://seman.tc/data/northwind/Concept/Product/Mishi_Kobe_Niku> <http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> <http://seman.tc/data/northwind/Concept/Category/W87ef52d611a9e479ee89efd3c70384c8> ;
+	a testowl:Product ;
+	rdfs:label "Mishi Kobe Niku" .
+
+<http://seman.tc/data/northwind/Concept/Product/Northwoods_Cranberry_Sauce> <http://seman.tc/data/northwind/Relation/Category/Northwoods_Cranberry_Sauce_x_Condiments> <http://seman.tc/data/northwind/Concept/Category/Condiments> ;
+	a testowl:Product ;
+	rdfs:label "Northwoods Cranberry Sauce" .
+
+<http://seman.tc/data/northwind/Concept/Product/NuNuCa_Nuß-Nougat-Creme> <http://seman.tc/data/northwind/Relation/Category/NuNuCa_Nuß-Nougat-Creme_x_Confections> <http://seman.tc/data/northwind/Concept/Category/Confections> ;
+	a testowl:Product ;
+	rdfs:label "NuNuCa Nuß-Nougat-Creme" .
+
+<http://seman.tc/data/northwind/Concept/Product/Pavlova> <http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> <http://seman.tc/data/northwind/Concept/Category/Confections> ;
+	a testowl:Product ;
+	rdfs:label "Pavlova" .
+
+<http://seman.tc/data/northwind/Concept/Product/Queso_Cabrales> <http://seman.tc/data/northwind/Relation/Category/Queso_Cabrales_x_Dairy_Products> <http://seman.tc/data/northwind/Concept/Category/Dairy_Products> ;
+	a testowl:Product ;
+	rdfs:label "Queso Cabrales" .
+
+<http://seman.tc/data/northwind/Concept/Product/Queso_Manchego_La_Pastora> <http://seman.tc/data/northwind/Relation/Category/Queso_Manchego_La_Pastora_x_Dairy_Products> <http://seman.tc/data/northwind/Concept/Category/Dairy_Products> ;
+	a testowl:Product ;
+	rdfs:label "Queso Manchego La Pastora" .
+
+<http://seman.tc/data/northwind/Concept/Product/Rössle_Sauerkraut> <http://seman.tc/data/northwind/Relation/Category/Rössle_Sauerkraut_x_Produce> <http://seman.tc/data/northwind/Concept/Category/Produce> ;
+	a testowl:Product ;
+	rdfs:label "Rössle Sauerkraut" .
+
+<http://seman.tc/data/northwind/Concept/Product/Schoggi_Schokolade> <http://seman.tc/data/northwind/Relation/Category/Schoggi_Schokolade_x_Confections> <http://seman.tc/data/northwind/Concept/Category/Confections> ;
+	a testowl:Product ;
+	rdfs:label "Schoggi Schokolade" .
+
+<http://seman.tc/data/northwind/Concept/Product/T5b711d7a7c857a47516abb2044a55a02> <http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> <http://seman.tc/data/northwind/Concept/Category/Produce> ;
+	a testowl:Product ;
+	rdfs:label "Uncle Bob's Organic Dried Pears" .
+
+<http://seman.tc/data/northwind/Concept/Product/Teatime_Chocolate_Biscuits> <http://seman.tc/data/northwind/Relation/Category/Teatime_Chocolate_Biscuits_x_Confections> <http://seman.tc/data/northwind/Concept/Category/Confections> ;
+	a testowl:Product ;
+	rdfs:label "Teatime Chocolate Biscuits" .
+
+<http://seman.tc/data/northwind/Concept/Product/Tef01006da466edde22c97c4d5f2d31f9> <http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> <http://seman.tc/data/northwind/Concept/Category/Condiments> ;
+	a testowl:Product ;
+	rdfs:label "Grandma's Boysenberry Spread" .
+
+<http://seman.tc/data/northwind/Concept/Product/Thüringer_Rostbratwurst> <http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://seman.tc/data/northwind/Concept/Category/W87ef52d611a9e479ee89efd3c70384c8> ;
+	a testowl:Product ;
+	rdfs:label "Thüringer Rostbratwurst" .
+
+<http://seman.tc/data/northwind/Concept/Product/Tofu> <http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> <http://seman.tc/data/northwind/Concept/Category/Produce> ;
+	a testowl:Product ;
+	rdfs:label "Tofu" .
+
+<http://seman.tc/data/northwind/Concept/Product/Tunnbröd> <http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> <http://seman.tc/data/northwind/Concept/Category/Mc6c1692d90d5908a813621c031a9711a> ;
+	a testowl:Product ;
+	rdfs:label "Tunnbröd" .
+
+<http://seman.tc/data/northwind/Concept/Sugar/Casters> a testowl:Sugar ;
+	rdfs:label "Casters" .
+
+<http://seman.tc/data/northwind/Concept/Sugar/Confections> a testowl:Sugar ;
+	rdfs:label "Confections" .
+
+<http://seman.tc/data/northwind/Concept/Sugar/Raw> a testowl:Sugar ;
+	rdfs:label "Raw" .
+
+<http://seman.tc/data/northwind/Concept/Sugar/Refined> a testowl:Sugar ;
+	rdfs:label "Refined" .
+
+<http://seman.tc/data/northwind/Relation/Category/Carnarvon_Tigers_x_Seafood> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Carnarvon Tigers Category Seafood" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Chai Category Beverages" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> testowl:extraprop "colon:something" ;
+	rdfs:label "Chang Category Beverages" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Gustaf's Knäckebröd Category Grains/Cereals" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Uncle Bob's Organic Dried Pears Category Produce" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Genen_Shouyu_x_Condiments> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Genen Shouyu Category Condiments" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Guaraná_Fantástica_x_Beverages> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Guaraná Fantástica Category Beverages" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Gumbär_Gummibärchen_x_Confections> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Gumbär Gummibärchen Category Confections" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Ikura Category Seafood" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Kb48374119b00d39089d9ff2e59d45e50> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Aniseed:Syrup Category Condiments" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Konbu Category Seafood" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Thüringer Rostbratwurst Category Meat/Poultry" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Northwoods_Cranberry_Sauce_x_Condiments> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Northwoods Cranberry Sauce Category Condiments" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/NuNuCa_Nuß-Nougat-Creme_x_Confections> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "NuNuCa Nuß-Nougat-Creme Category Confections" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Pavlova Category Confections" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Mishi Kobe Niku Category Meat/Poultry" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Queso_Cabrales_x_Dairy_Products> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Queso Cabrales Category Dairy Products" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Queso_Manchego_La_Pastora_x_Dairy_Products> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Queso Manchego La Pastora Category Dairy Products" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Tunnbröd Category Grains/Cereals" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Rössle_Sauerkraut_x_Produce> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Rössle Sauerkraut Category Produce" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Sir Rodney's Scones Category Confections" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Schoggi_Schokolade_x_Confections> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Schoggi Schokolade Category Confections" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Sir Rodney's Marmalade Category Confections" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Teatime_Chocolate_Biscuits_x_Confections> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Teatime Chocolate Biscuits Category Confections" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Tofu Category Produce" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Grandma's Boysenberry Spread Category Condiments" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Alice Mutton Category Meat/Poultry" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> testowl:extraprop "2.0"^^xsd:double ;
+	rdfs:label "Chef Anton's Cajun Seasoning Category Condiments" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+<http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> testowl:extraprop "1.0"^^xsd:double ;
+	rdfs:label "Chef Anton's Gumbo Mix Category Condiments" ;
+	rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Category> .
+
+testowl:Category a owl:Class ;
+	rdfs:label "Category" ;
+	rdfs:subClassOf testowl:Concept .
+
+testowl:Concept a rdfs:Class .
+
+testowl:Description rdfs:label "Description" ;
+	rdfs:subPropertyOf testowl:Relation , <http://seman.tc/models/northwind#Relation/Contains> .
+
+testowl:extraprop rdfs:label "extraprop" ;
+	rdfs:subPropertyOf testowl:Relation , <http://seman.tc/models/northwind#Relation/Contains> .
+
+testowl:Product a owl:Class ;
+	rdfs:label "Product" ;
+	rdfs:subClassOf testowl:Concept .
+
+testowl:Relation a rdf:Property .
+
+<http://seman.tc/models/northwind#Relation/Category> a owl:ObjectProperty ;
+	rdfs:label "Category" ;
+	rdfs:subPropertyOf testowl:Relation .
+
+<http://seman.tc/models/northwind#Relation/Contains> rdfs:subPropertyOf <http://seman.tc/models/northwind#Relation/Contains> .
+
+testowl:Sugar a owl:Class ;
+	rdfs:label "Sugar" ;
+	rdfs:subClassOf testowl:Concept .
+
+<http://semoss.va.gov/database/S6fc2303f-ea5a-4ab8-83e5-2de72f5146c3> owl:imports <http://junk.com/testfiles> .

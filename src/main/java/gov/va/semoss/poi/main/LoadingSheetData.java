@@ -433,6 +433,14 @@ public class LoadingSheetData {
 			return object;
 		}
 
+		public String getSheetName() {
+			return LoadingSheetData.this.getName();
+		}
+
+		public String getRelname() {
+			return LoadingSheetData.this.getRelname();
+		}
+
 		public void setSubject( String s ) {
 			subject = s;
 		}

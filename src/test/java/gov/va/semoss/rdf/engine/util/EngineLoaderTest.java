@@ -66,8 +66,10 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sail.memory.MemoryStore;
 
 /**
@@ -94,6 +96,7 @@ public class EngineLoaderTest {
 
 	private static final File LEGACY = new File( "src/test/resources/legacy.xlsx" );
 	private static final File LEGACY_EXP = new File( "src/test/resources/legacy-mm.nt" );
+	private static final File LEGACY_EXP2 = new File( "src/test/resources/legacy-3args.ttl" );
 	private static final File LEGACY_NOMM_EXP = new File( "src/test/resources/legacy-nomm.nt" );
 
 	private static final File CUSTOM = new File( "src/test/resources/custom.xlsx" );
@@ -115,6 +118,7 @@ public class EngineLoaderTest {
 
 	private static final File TEST10 = new File( "src/test/resources/test10.xlsx" );
 	private static final File TEST10_EXP = new File( "src/test/resources/test10.nt" );
+	private static final File TEST10_EXP2 = new File( "src/test/resources/test10.ttl" );
 
 	private static final File TEST14 = new File( "src/test/resources/test14.xlsx" );
 	private static final File TEST14_EXP = new File( "src/test/resources/test14.nt" );
@@ -607,6 +611,28 @@ public class EngineLoaderTest {
 	}
 
 	@Test
+	public void testSemossEdgeTest10() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		engine.getRawConnection().add( engine.getBaseUri(), VAS.ReificationModel,
+				VAS.VASEMOSS_Reification );
+		engine.getRawConnection().commit();
+
+		POIReader rdr = new POIReader();
+		ImportData id = rdr.readOneFile( TEST10 );
+
+		EngineLoader el = new EngineLoader();
+		el.loadToEngine( id, engine, null );
+
+		engine.getRawConnection().setNamespace( "testdata", id.getMetadata().getDataBuilder().toString() );
+		engine.getRawConnection().setNamespace( "testowl", id.getMetadata().getSchemaBuilder().toString() );
+		trace( TEST10_EXP2 );
+
+		compare( engine, TEST10_EXP2, true );
+	}
+
+	@Test
 	public void testSetDefaultBaseUriOverride() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
@@ -717,10 +743,10 @@ public class EngineLoaderTest {
 				throw e;
 			}
 		}
-		finally{
+		finally {
 			el.release();
 		}
-		
+
 	}
 
 	@Test
@@ -753,8 +779,13 @@ public class EngineLoaderTest {
 		el.loadToEngine( data, engine, null );
 		el.release();
 
-		compareData( engine.getRawConnection(), getExpectedGraph( LEGACY_EXP ),
-				engine.getDataBuilder(), engine.getSchemaBuilder() );
+		engine.getRawConnection().setNamespace( "testdata",
+				data.getMetadata().getDataBuilder().toString() );
+		engine.getRawConnection().setNamespace( "testowl",
+				data.getMetadata().getSchemaBuilder().toString() );
+
+		trace( LEGACY_EXP2 );
+		compare( engine, LEGACY_EXP2, true );
 	}
 
 	@Test
@@ -911,15 +942,19 @@ public class EngineLoaderTest {
 		compareData( engine.getRawConnection(), getExpectedGraph( TEST17_EXP ),
 				engine.getDataBuilder(), engine.getSchemaBuilder() );
 	}
-	
-	private Model getExpectedGraph( File rdf ) {
+
+	private static Model getExpectedGraph( File rdf ) {
+		return getExpectedGraph( rdf, RDFFormat.NTRIPLES );
+	}
+
+	private static Model getExpectedGraph( File rdf, RDFFormat fmt ) {
 		SailRepository repo = new SailRepository( new MemoryStore() );
 		RepositoryConnection expectedrc = null;
 		List<Statement> stmts = new ArrayList<>();
 		try {
 			repo.initialize();
 			expectedrc = repo.getConnection();
-			expectedrc.add( rdf, null, RDFFormat.NTRIPLES );
+			expectedrc.add( rdf, null, fmt );
 			stmts.addAll( Iterations.asList( expectedrc.getStatements( null, null,
 					null, true ) ) );
 		}
@@ -1006,4 +1041,45 @@ public class EngineLoaderTest {
 		assertEquals( label + " subjects mismatch", exp.subjects(), tst.subjects() );
 		assertEquals( label + " subjects mismatch", exp.objects(), tst.objects() );
 	}
+
+	private void trace( File f ) throws Exception {
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			File tracefile = new File( tmpdir, f.getName() );
+			try ( Writer w = new BufferedWriter( new FileWriter( tracefile ) ) ) {
+				engine.getRawConnection().export( new TurtleWriter( w ) );
+			}
+		}
+	}
+
+	private static void compare( InMemorySesameEngine engine, File expected,
+			boolean doCountsOnly ) throws IOException, RepositoryException, RDFHandlerException {
+
+		// get rid of the random database id
+		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.Database );
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					expected.getName() ) ) ) ) {
+				engine.getRawConnection().export( new TurtleWriter( w ) );
+			}
+		}
+
+		Model model = getExpectedGraph( expected, RDFFormat.TURTLE );
+		List<Statement> stmts = Iterations.asList( engine.getRawConnection()
+				.getStatements( null, null, null, false ) );
+
+		assertEquals( model.size(), stmts.size() );
+
+		if ( doCountsOnly ) {
+			// do counts instead of checking exact URIs
+		}
+		else {
+			for ( Statement s : stmts ) {
+				assertTrue( model.contains( s ) );
+			}
+		}
+	}
+
 }

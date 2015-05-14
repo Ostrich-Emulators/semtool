@@ -5,6 +5,8 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+vcamp:Yuri semoss:Purchased vcamp:Pinto .
+
 semoss:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf semoss:Concept .
@@ -47,5 +49,3 @@ vcamp:Yuri_Purchased_Yugo semoss:Price "3000 USD" ;
 
 vcamp:Pinto a semoss:Car ;
 	rdfs:label "Pinto" .
-
-vcamp:Yuri semoss:Purchased vcamp:Pinto .

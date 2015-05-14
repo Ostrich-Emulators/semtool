@@ -53,7 +53,6 @@ import gov.va.semoss.util.CSSApplication;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
-import gov.va.semoss.util.Utility;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -71,10 +70,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
-import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -90,7 +87,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -123,6 +119,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -245,7 +242,7 @@ public class PlayPane extends JFrame {
 			= new ImportInsightsAction( UIPROGRESS, true, this );
 	private final ImportInsightsAction importInsights
 			= new ImportInsightsAction( UIPROGRESS, false, this );
-	
+
 	private final CheckConsistencyAction consistencyCheck
 			= new CheckConsistencyAction( UIPROGRESS, this );
 	protected final JMenu windowSelector = new JMenu( "Window" );
@@ -253,6 +250,8 @@ public class PlayPane extends JFrame {
 	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
 	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As..." );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
+	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging tab" );
+	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager tab" );
 
 	private final JToolBar toolbar;
 	private final JToolBar playsheetToolbar;
@@ -401,7 +400,7 @@ public class PlayPane extends JFrame {
 		setTitle( "SEMOSS - Analytics Environment" );
 		windowSelector.setEnabled( false );
 		windowSelector.setMnemonic( KeyEvent.VK_W );
-		windowSelector.setToolTipText("Manage Opened Windows");
+		windowSelector.setToolTipText( "Manage Opened Windows" );
 
 		final Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		String wloc = prefs.get( "windowLocation", "" );
@@ -561,13 +560,7 @@ public class PlayPane extends JFrame {
 				}
 				if ( null != engine ) {
 					sparqler.setEnabled( engine.isServerSupported() );
-					boolean ispinned = Boolean.parseBoolean( engine.getProperty( Constants.PIN_KEY ));
-				     // if (ispinned) {
-				     // putValue( AbstractAction.SMALL_ICON, ( DbAction.getIcon( "db_copy1") ));
-				     // }
-					
 				}
-				
 			}
 		} );
 	}
@@ -610,13 +603,13 @@ public class PlayPane extends JFrame {
 		JComponent main = makeMainTab();
 		leftView.addTab( "Database Explorer", DbAction.getIcon( "db_explorer1" ), main,
 				"Ask the SEMOSS database a question" );
-		JLabel dislbl = new JLabel("Database Explorer");
+		JLabel dislbl = new JLabel( "Database Explorer" );
 		Icon disicon = DbAction.getIcon( "db_explorer1" );
-		dislbl.setIcon(disicon);
-		dislbl.setIconTextGap(5);
-		dislbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-		leftView.setTabComponentAt(0, dislbl);
-		
+		dislbl.setIcon( disicon );
+		dislbl.setIconTextGap( 5 );
+		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
+		leftView.setTabComponentAt( 0, dislbl );
+
 		owlPanel = makeOwlTab();
 		leftView.addTab( "SUDOWL", null, owlPanel, null );
 
@@ -639,22 +632,21 @@ public class PlayPane extends JFrame {
 		JComponent graphPanel = makeGraphTab();
 		rightView.addTab( "Display Pane", DbAction.getIcon( "display_tab1" ), graphPanel,
 				"Display response to questions (queries)" );
-		JLabel dislbl = new JLabel("Display Pane");
+		JLabel dislbl = new JLabel( "Display Pane" );
 		Icon disicon = DbAction.getIcon( "display_tab1" );
-		dislbl.setIcon(disicon);
-		dislbl.setIconTextGap(5);
-		dislbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-		rightView.setTabComponentAt(0, dislbl);
+		dislbl.setIcon( disicon );
+		dislbl.setIconTextGap( 5 );
+		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
+		rightView.setTabComponentAt( 0, dislbl );
 
 		loggingPanel = new LoggingPanel();
+		CloseableTab ct = new PlayPaneCloseableTab( rightView, loggingItem,
+				DbAction.getIcon( "log_tab1" ) );
+
 		rightView.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 				"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
-		JLabel loglbl = new JLabel("Logging");
-		Icon logicon = DbAction.getIcon( "log_tab1" );
-		loglbl.setIcon(logicon);
-		loglbl.setIconTextGap(5);
-		loglbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-		rightView.setTabComponentAt(1, loglbl);
+		int idx = rightView.indexOfComponent( loggingPanel );
+		rightView.setTabComponentAt( idx, ct );
 		rightView.addChangeListener( new ChangeListener() {
 
 			@Override
@@ -666,16 +658,12 @@ public class PlayPane extends JFrame {
 		} );
 
 		iManagePanel = new InsightManagerPanel( repoList );
-//		rightView.insertTab( "Insight Manager", null, iManagePanel,
-//				"Manage perspectives and insights", 2 );
 		rightView.addTab( "Insight Manager", null, iManagePanel,
-				"Manage perspectives and insights");
-		JLabel perlbl = new JLabel("Insight Manager");
-		Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
-		perlbl.setIcon(pericon);
-		perlbl.setIconTextGap(5);
-		perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-		rightView.setTabComponentAt(rightView.getTabCount() - 1, perlbl);
+				"Manage perspectives and insights" );
+		CloseableTab ct2 = new PlayPaneCloseableTab( rightView, iManageItem,
+				DbAction.getIcon( "insight_manager_tab1" ) );
+		idx = rightView.indexOfComponent( iManagePanel );
+		rightView.setTabComponentAt( idx, ct2 );
 		return rightView;
 	}
 
@@ -934,11 +922,10 @@ public class PlayPane extends JFrame {
 
 			@Override
 			public void internalFrameActivated( InternalFrameEvent e ) {
-			
-			//	fileMenuSave.setEnabled( false );
-			//	fileMenuSaveAs.setEnabled( false );
-			//	fileMenuSaveAll.setEnabled( false );
 
+				//	fileMenuSave.setEnabled( false );
+				//	fileMenuSaveAs.setEnabled( false );
+				//	fileMenuSaveAll.setEnabled( false );
 				JInternalFrame jif = e.getInternalFrame();
 
 				if ( jif instanceof PlaySheetFrame ) {
@@ -1000,7 +987,6 @@ public class PlayPane extends JFrame {
 
 				JMenuItem closeone = new JMenuItem( new AbstractAction( "Close" ) {
 
-					
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
 						JInternalFrame f = desktopPane.getSelectedFrame();
@@ -1030,8 +1016,8 @@ public class PlayPane extends JFrame {
 						customSparqlPanel.enableAppend( false );
 					}
 				} );
-
-				JMenuItem tilev = new JMenuItem( new AbstractAction( "Tile Vertically" ) {
+				
+				JMenuItem tilehor = new JMenuItem( new AbstractAction( "Tile Horizontally" ) {
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -1044,8 +1030,8 @@ public class PlayPane extends JFrame {
 						}
 					}
 				} );
-
-				JMenuItem tileh = new JMenuItem( new AbstractAction( "Tile Horizontally" ) {
+				//tileh to tilever
+				JMenuItem tilever = new JMenuItem( new AbstractAction( "Tile Vertically" ) {
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -1080,31 +1066,33 @@ public class PlayPane extends JFrame {
 
 				if ( windowSelector.isEnabled() ) {
 					windowSelector.add( closeone );
-					closeone.setToolTipText("Close the current Window");
-					closeone.setMnemonic(KeyEvent.VK_C);
+					closeone.setToolTipText( "Close the current Window" );
+					closeone.setMnemonic( KeyEvent.VK_C );
 					windowSelector.add( closeall );
-					closeall.setToolTipText("Close all Windows");
-					closeall.setMnemonic(KeyEvent.VK_A);
+					closeall.setToolTipText( "Close all Windows" );
+					closeall.setMnemonic( KeyEvent.VK_A );
 					windowSelector.addSeparator();
-					windowSelector.add( tileh );
-					tileh.setToolTipText("Arrange Windows in horizontal tiles");
-					tileh.setMnemonic(KeyEvent.VK_H);
-					tileh.setIcon(DbAction.getIcon( "window_tile_horizontal1"));
-					windowSelector.add( tilev );
-					tilev.setToolTipText("Arrange Windows in vertical tiles");
-					tilev.setMnemonic(KeyEvent.VK_V);
-					tilev.setIcon(DbAction.getIcon( "window_tile_vertical1"));
+
+					windowSelector.add( tilehor );
+					tilever.setToolTipText("Arrange Windows in vertical tiles");
+					tilever.setMnemonic(KeyEvent.VK_H);
+					tilever.setIcon(DbAction.getIcon( "window_tile_vertical1"));
+					windowSelector.add( tilever );
+					tilehor.setToolTipText("Arrange Windows in horizontal tiles");
+					tilehor.setMnemonic(KeyEvent.VK_V);
+					tilehor.setIcon(DbAction.getIcon( "window_tile_horizontal1"));
+
 					windowSelector.add( tilec );
-					tilec.setToolTipText("Arrange Windows in cascade");
-					tilec.setMnemonic(KeyEvent.VK_S);
-					tilec.setIcon(DbAction.getIcon( "window_cascade1" ));
+					tilec.setToolTipText( "Arrange Windows in cascade" );
+					tilec.setMnemonic( KeyEvent.VK_S );
+					tilec.setIcon( DbAction.getIcon( "window_cascade1" ) );
 					windowSelector.addSeparator();
 				}
-				
+
 				int numI = 0;
 				for ( final JInternalFrame f : frames ) {
 					numI++;
-					JMenuItem i = new JMenuItem( numI+". "+f.getTitle() );
+					JMenuItem i = new JMenuItem( numI + ". " + f.getTitle() );
 					i.setIcon( f.getFrameIcon() );
 					i.addActionListener( new ActionListener() {
 
@@ -1199,9 +1187,9 @@ public class PlayPane extends JFrame {
 		JMenu exptop = new JMenu( "Export" );
 		exptop.setToolTipText( "Export Database Activities" );
 		exptop.setMnemonic( KeyEvent.VK_E );
-		exptop.add( exportttl );
-		exptop.add( exportnt );
-		exptop.add( exportrdf );
+		//exptop.add( exportttl );
+		//exptop.add( exportnt );
+		//exptop.add( exportrdf );
 		exptop.setIcon( DbAction.getIcon( "exportdb" ) );
 
 		//db.add( cloneconfer );
@@ -1211,22 +1199,34 @@ public class PlayPane extends JFrame {
 		loadingsheets.setToolTipText( "Export the Loading Sheets" );
 		loadingsheets.setMnemonic( KeyEvent.VK_L );
 		loadingsheets.setIcon( DbAction.getIcon( "import_data_review" ) );
-		
+
 		exptop.add( loadingsheets );
+		//Semantic Web
+		JMenu semsheets = new JMenu( "Semantic Web" );
+		semsheets.setToolTipText( "Export the Semantic Web" );
+		semsheets.setMnemonic( KeyEvent.VK_S );
+		semsheets.setIcon( DbAction.getIcon( "semantic_dataset1" ) );
+		exptop.add( semsheets );
+		semsheets.add (exportttl);
+		semsheets.add( exportnt );
+		semsheets.add( exportrdf );
 		//Nodes
 		JMenu nodes = new JMenu( "Nodes" );
 		nodes.setToolTipText( "Export the Nodes" );
 		nodes.setMnemonic( KeyEvent.VK_N );
+		nodes.setToolTipText( "Export the Nodes" );
+		nodes.setIcon( DbAction.getIcon( "protege/individual" ) );
 		loadingsheets.add( nodes );
 		//Nodes SubMenu
 		nodes.add( expnodes );
 		nodes.add( expSpecNodes );
 		//RelationShips
-		JMenu relationS = new JMenu( "RelationShips" );
+		JMenu relationS = new JMenu( "Relationships" );
 		relationS.setToolTipText( "Export the Relations" );
 		relationS.setMnemonic( KeyEvent.VK_R );
+		relationS.setIcon( DbAction.getIcon( "relationship1" ) );
 		loadingsheets.add( relationS );
-		//RelationShips SubMenu
+		//Relationships SubMenu
 		relationS.add( exprels );
 		relationS.add( expSpecRels );
 
@@ -1257,7 +1257,7 @@ public class PlayPane extends JFrame {
 		JMenu insights = new JMenu( "Insights" );
 		insights.setToolTipText( "Import Insight Operations" );
 		insights.setMnemonic( KeyEvent.VK_I );
-		
+
 		//Ticket #792
 		insights.add( importInsights );
 		insights.add( resetInsights );
@@ -1273,14 +1273,14 @@ public class PlayPane extends JFrame {
 		db.addSeparator();
 		db.add( sparqler );
 		sparqler.setEnabled( false );
-	
+
 		db.add( proper );
 		db.setEnabled( false );
 		ListSelectionListener lsl = new ListSelectionListener() {
 
 			@Override
 			public void valueChanged( ListSelectionEvent e ) {
-			//	if ( e.getValueIsAdjusting() ) {
+				//	if ( e.getValueIsAdjusting() ) {
 				//		return;
 				//	}
 
@@ -1366,28 +1366,25 @@ public class PlayPane extends JFrame {
 
 				if ( preflistenermap.containsKey( cmd ) ) {
 					JPanel panel = preflistenermap.get( cmd );
-					
+
 					if ( ischecked ) {
-					// Enable- Disable Logic
-						if (cmd == "graphfilter"){
-							item.setToolTipText("Disable the Graph Filter Tab ");
+						// Enable- Disable Logic
+						if ( GFILTER.equals( cmd ) ) {
+							item.setToolTipText( "Disable the Graph Filter Tab " );
 						}
-						else if (cmd == "loggingpanel") {
-							item.setToolTipText("Disable the Logging Tab");
+						else if ( LOGGING.equals( cmd ) ) {
+							item.setToolTipText( "Disable the Logging Tab" );
 						}
-						else if (cmd == "graphcosmetics") {
-							item.setToolTipText("Disable the Graph Cosmetics Tab");
-
+						else if ( GCOSMETICS.equals( cmd ) ) {
+							item.setToolTipText( "Disable the Graph Cosmetics Tab" );
 						}
-						else if (cmd == "GPS_SUDOWL_DEFAULT") {
-							item.setToolTipText("Disable the SUDOWL Tab");
-
+						else if ( Constants.GPSSudowl.equals( cmd ) ) {
+							item.setToolTipText( "Disable the SUDOWL Tab" );
 						}
 						else {
-							item.setToolTipText("Disable "+cmd);
+							item.setToolTipText( "Disable " + cmd );
 						}
-						
-						
+
 						if ( owlPanel == panel ) {
 							leftTabs.addTab( "SUDOWL", null, owlPanel, null );
 						}
@@ -1400,39 +1397,35 @@ public class PlayPane extends JFrame {
 									"Customize graph display" );
 						}
 						else if ( loggingPanel == panel ) {
-							rightTabs.insertTab( "Logging",  DbAction.getIcon( "log_tab1" ), loggingPanel,
-									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team", 2 );
-							JLabel loglbl = new JLabel("Logging");
-							Icon logicon = DbAction.getIcon( "log_tab1" );
-							loglbl.setIcon(logicon);
-							loglbl.setIconTextGap(5);
-							loglbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-							rightTabs.setTabComponentAt(2, loglbl);
-						} 
+							rightTabs.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
+									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
+							int idx = rightTabs.indexOfComponent( loggingPanel );
+							CloseableTab ct = new PlayPaneCloseableTab( rightTabs, loggingItem,
+									DbAction.getIcon( "log_tab1" ) );
+							rightTabs.setTabComponentAt( idx, ct );
+						}
 					}
 					else {
-						if (cmd == "graphfilter"){
-							item.setToolTipText("Enable the Graph Filter Tab ");
+						if ( GFILTER.equals( cmd ) ) {
+							item.setToolTipText( "Enable the Graph Filter Tab " );
 						}
-						else if (cmd == "loggingpanel") {
-							item.setToolTipText("Enable the Logging Tab");
+						else if ( LOGGING.equals( cmd ) ) {
+							item.setToolTipText( "Enable the Logging Tab" );
+						}
+						else if ( GCOSMETICS.equals( cmd ) ) {
+							item.setToolTipText( "Enable the Graph Cosmetics Tab" );
 
 						}
-						else if (cmd == "graphcosmetics") {
-							item.setToolTipText("Enable the Graph Cosmetics Tab");
-
-						}
-						else if (cmd == "GPS_SUDOWL_DEFAULT") {
-							item.setToolTipText("Enable the SUDOWL Tab");
+						else if ( Constants.GPSSudowl.equals( cmd ) ) {
+							item.setToolTipText( "Enable the SUDOWL Tab" );
 
 						}
 						else {
-							item.setToolTipText("Enable "+cmd);
+							item.setToolTipText( "Enable " + cmd );
 						}
-						
+
 						if ( loggingPanel == panel ) {
 							rightTabs.remove( panel );
-
 						}
 						else {
 							leftTabs.remove( panel );
@@ -1441,35 +1434,41 @@ public class PlayPane extends JFrame {
 				}
 			}
 		};
-		
+
 		//Sudo Tab
 		final JCheckBoxMenuItem sudowl = new JCheckBoxMenuItem( "SUDOWL tab",
 				getProp( prefs, Constants.GPSSudowl ) );
 		sudowl.setActionCommand( Constants.GPSSudowl );
 		sudowl.addActionListener( preflistener );
 		//sudowl.setToolTipText( "Enables/Disables the SUDOWL tab" );
-		if (getProp( prefs, Constants.GPSSudowl )  == true)
+		if ( getProp( prefs, Constants.GPSSudowl ) == true ) {
 			sudowl.setToolTipText( "Disable the Status bar" );
-		else
+		}
+		else {
 			sudowl.setToolTipText( "Enable the Status bar" );
+		}
 
 		//Status Tab
 		final JCheckBoxMenuItem statbar = new JCheckBoxMenuItem( "Status Bar",
 				prefs.getBoolean( "showStatus", true ) );
-		if (prefs.getBoolean( "showStatus", true ) == true)
+		if ( prefs.getBoolean( "showStatus", true ) == true ) {
 			statbar.setToolTipText( "Disable the Status bar" );
-		else
+		}
+		else {
 			statbar.setToolTipText( "Enable the Status bar" );
-		
+		}
+
 		statbar.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				statusbar.setVisible( statbar.isSelected() );
 				prefs.putBoolean( "showStatus", statusbar.isVisible() );
-				if ( statusbar.isVisible() ) 
+				if ( statusbar.isVisible() ) {
 					statbar.setToolTipText( "Disable the Status bar" );
-				else
+				}
+				else {
 					statbar.setToolTipText( "Enable the Status bar" );
+				}
 			}
 		} );
 
@@ -1477,61 +1476,70 @@ public class PlayPane extends JFrame {
 				getProp( prefs, GCOSMETICS ) );
 		gcos.setActionCommand( GCOSMETICS );
 		gcos.addActionListener( preflistener );
-	//	gcos.setToolTipText( "Enables/Disables graph cosmetics tab" );
-		
-		if (getProp( prefs, GCOSMETICS ) == true)
+		//	gcos.setToolTipText( "Enables/Disables graph cosmetics tab" );
+
+		if ( getProp( prefs, GCOSMETICS ) == true ) {
 			gcos.setToolTipText( "Disable the Graph Cosmetics Tab" );
-		else
+		}
+		else {
 			gcos.setToolTipText( "Enable the Graph Cosmetics Tab" );
+		}
 
 		final JCheckBoxMenuItem gfilt = new JCheckBoxMenuItem( "Graph Filter tab",
 				getProp( prefs, GFILTER ) );
 		gfilt.setActionCommand( GFILTER );
 		gfilt.addActionListener( preflistener );
-	//	gfilt.setToolTipText( "Enables/Disables graph filter tab" );
-		
-		if (getProp( prefs, GFILTER ) == true)
+		//	gfilt.setToolTipText( "Enables/Disables graph filter tab" );
+
+		if ( getProp( prefs, GFILTER ) == true ) {
 			gfilt.setToolTipText( "Disable the Graph Filter Tab" );
-		else
+		}
+		else {
 			gfilt.setToolTipText( "Enable the Graph Filter Tab" );
+		}
 
-
-		final JCheckBoxMenuItem logging = new JCheckBoxMenuItem( "Logging tab",
-				getProp( prefs, LOGGING ) );
-		logging.setActionCommand( LOGGING );
-		logging.addActionListener( preflistener );
+		loggingItem.setSelected( getProp( prefs, LOGGING ) );
+		loggingItem.setActionCommand( LOGGING );
+		loggingItem.addActionListener( preflistener );
 		//logging.setToolTipText( "Enables/Disables logging tab" );
-		
-		
-		if (getProp( prefs, LOGGING ) == true)
-			logging.setToolTipText( "Disable the Logging Tab" );
-		else
-			logging.setToolTipText( "Enable the Logging Tab" );
-		
+
+		if ( getProp( prefs, LOGGING ) == true ) {
+			loggingItem.setToolTipText( "Disable the Logging Tab" );
+		}
+		else {
+			loggingItem.setToolTipText( "Enable the Logging Tab" );
+		}
+
 		//Tool Bar
 		final JCheckBoxMenuItem tb = new JCheckBoxMenuItem( "Tool Bar",
 				prefs.getBoolean( "showToolBar", true ) );
 
-		if (prefs.getBoolean( "showToolBar", true ) == true)
+		if ( prefs.getBoolean( "showToolBar", true ) == true ) {
 			tb.setToolTipText( "Disable the Tool Bar" );
-		else
+		}
+		else {
 			tb.setToolTipText( "Enable the Tool Bar" );
-		
+		}
+
 		tb.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				toolbar.setVisible( tb.isSelected() );
 				prefs.putBoolean( "showToolBar", toolbar.isVisible() );
-				if ( toolbar.isVisible() ) 
+				if ( toolbar.isVisible() ) {
 					tb.setToolTipText( "Disable the Tool bar" );
-				else
+				}
+				else {
 					tb.setToolTipText( "Enable the Tool bar" );
+				}
 			}
 		} );
 
-		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Menu", true );
-		splithider.setToolTipText( "Disable the Left menu" );
+
+		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Panel", true );
+		splithider.setToolTipText( "Disable the Left Panel" );
 		
+
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
@@ -1539,9 +1547,11 @@ public class PlayPane extends JFrame {
 				leftTabs.setVisible( !leftTabs.isVisible() );
 				if ( leftTabs.isVisible() ) {
 					mainSplitPane.setDividerLocation( 0.25 );
-					splithider.setToolTipText( "Disable the Left menu" );
+
+					splithider.setToolTipText( "Disable the Left Panel" );
 				}else{
-					splithider.setToolTipText( "Enable the Left menu" );
+					splithider.setToolTipText( "Enable the Left Panel" );
+
 				}
 			}
 		} );
@@ -1549,12 +1559,14 @@ public class PlayPane extends JFrame {
 		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Area",
 				getProp( prefs, QUERYPANEL ) );
 		//hidecsp.setToolTipText( "Shows/Hides query area" );
-		
-		if (getProp( prefs, QUERYPANEL ) == true)
+
+		if ( getProp( prefs, QUERYPANEL ) == true ) {
 			hidecsp.setToolTipText( "Disable the Query Area" );
-		else
+		}
+		else {
 			hidecsp.setToolTipText( "Enable the Query Area" );
-		
+		}
+
 		hidecsp.addActionListener( new ActionListener() {
 
 			@Override
@@ -1564,43 +1576,42 @@ public class PlayPane extends JFrame {
 				if ( customSparqlPanel.isVisible() ) {
 					combinedSplitPane.setDividerLocation( 0.75 );
 					hidecsp.setToolTipText( "Disable the Query Area" );
-				} else {
+				}
+				else {
 					hidecsp.setToolTipText( "Enable the Query Area" );
 				}
 			}
 		} );
 
-		final JCheckBoxMenuItem iManage = new JCheckBoxMenuItem( "Insight Manager tab",
-				getProp( prefs, IMANAGE ) );
+		iManageItem.setSelected( getProp( prefs, IMANAGE ) );
+		if ( getProp( prefs, IMANAGE ) == true ) {
+			iManageItem.setToolTipText( "Disable the Insite Manager Tab" );
+		}
+		else {
+			iManageItem.setToolTipText( "Enable the Insite Manager Tab" );
+		}
 
-		if (getProp( prefs, IMANAGE ) == true)
-			iManage.setToolTipText( "Disable the Insite Manager Tab" );
-		else
-			iManage.setToolTipText( "Enable the Insite Manager Tab" );
-		
-		iManage.addActionListener( new ActionListener() {
+		iManageItem.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				boolean ischecked = iManage.isSelected();
+				boolean ischecked = iManageItem.isSelected();
 				prefs.putBoolean( IMANAGE, ischecked );
 				DIHelper.getInstance().getCoreProp().setProperty( IMANAGE,
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
 					iManagePanel.insightManagerPanelWorker();
-					rightTabs.addTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1"), iManagePanel,
+					rightTabs.addTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1" ), iManagePanel,
 							"Manage perspectives and insights" );
-					JLabel perlbl = new JLabel("Insight Manager");
-					Icon pericon = DbAction.getIcon( "insight_manager_tab1" );
-					perlbl.setIcon(pericon);
-					perlbl.setIconTextGap(5);
-					perlbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-					rightTabs.setTabComponentAt(rightTabs.getTabCount() - 1, perlbl);
-					iManage.setToolTipText( "Disable the Insite Manager Tab" );
+					CloseableTab ct2 = new PlayPaneCloseableTab( rightTabs, iManageItem,
+							DbAction.getIcon( "insight_manager_tab1" ) );
+					int idx = rightTabs.indexOfComponent( iManagePanel );
+					rightTabs.setTabComponentAt( idx, ct2 );
+					iManageItem.setToolTipText( "Disable the Insite Manager Tab" );
 				}
 				else {
 					rightTabs.remove( iManagePanel );
-					iManage.setToolTipText( "Enable the Insite Manager Tab" );
+					iManageItem.setToolTipText( "Enable the Insite Manager Tab" );
 				}
 			}
 		} );
@@ -1608,34 +1619,36 @@ public class PlayPane extends JFrame {
 
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
-		view.setToolTipText("Enable or disable the V-CAMP application tabs");
+		view.setToolTipText( "Enable or disable the V-CAMP application tabs" );
 		view.add( gcos );
-		gcos.setMnemonic(KeyEvent.VK_C);
+		gcos.setMnemonic( KeyEvent.VK_C );
 		view.add( gfilt );
-		gfilt.setMnemonic(KeyEvent.VK_F);
-		view.add( iManage );
-		iManage.setMnemonic(KeyEvent.VK_I);
+		gfilt.setMnemonic( KeyEvent.VK_F );
+		view.add( iManageItem );
+		iManageItem.setMnemonic( KeyEvent.VK_I );
 		view.add( splithider );
-		splithider.setMnemonic(KeyEvent.VK_M);
-		view.add( logging );
+		splithider.setMnemonic( KeyEvent.VK_M );
+		view.add( loggingItem );
 		//Icon for the Menu Item
 		//logging.setIcon( DbAction.getIcon( "log_tab1" ));
-		logging.setMnemonic(KeyEvent.VK_L);
+		loggingItem.setMnemonic( KeyEvent.VK_L );
 		view.add( hidecsp );
-		hidecsp.setMnemonic(KeyEvent.VK_Q);
+		hidecsp.setMnemonic( KeyEvent.VK_Q );
 		view.add( statbar );
-		statbar.setMnemonic(KeyEvent.VK_S);
+		statbar.setMnemonic( KeyEvent.VK_S );
 		view.add( sudowl );
-		sudowl.setMnemonic(KeyEvent.VK_O);
+		sudowl.setMnemonic( KeyEvent.VK_O );
 		view.add( tb );
-		tb.setMnemonic(KeyEvent.VK_T);
-		
+		tb.setMnemonic( KeyEvent.VK_T );
+
 		return view;
 	}
 
 	protected void buildMenuBar() {
 		JMenuBar menu = new JMenuBar();
-
+		//menu.getAccessibleContext().setAccessibleName("TopMenu");
+		//menu.getAccessibleContext().setAccessibleDescription("V-CAMP SEMOSS APPLICATION MENU");
+		
 		JMenuItem exiter = new JMenuItem( new AbstractAction( "Exit" ) {
 			private static final long serialVersionUID = 1L;
 
@@ -1648,11 +1661,13 @@ public class PlayPane extends JFrame {
 		fileMenuSave.setEnabled( false );
 		fileMenuSaveAs.setEnabled( false );
 		fileMenuSaveAll.setEnabled( false );
-
+		
+	//	AccessibleJMenu xx = new javax.swing.JMenu.AccessibleJMenu("test");
+		
 		JMenu newmenu = new JMenu( "New" );
-		newmenu.setToolTipText("Create a new Database or Loading Sheet");
+		newmenu.setToolTipText( "Create a new Database or Loading Sheet" );
 		newmenu.setMnemonic( KeyEvent.VK_N );
-		newmenu.setIcon( DbAction.getIcon( "file-new1"));
+		newmenu.setIcon( DbAction.getIcon( "file-new1" ) );
 		fileMenu.add( newmenu );
 		JMenuItem jmi = newmenu.add( creater );
 		jmi.setText( "Database" );
@@ -1662,29 +1677,40 @@ public class PlayPane extends JFrame {
 		jmi.setMnemonic( KeyEvent.VK_L );
 
 		fileMenu.setMnemonic( KeyEvent.VK_F );
+
+		//Object anchor;
+		//fileMenu.firePropertyChange("text to be spoken", fileMenu.getToolTipText(), anchor);
+		//AccessibleContext ac = getAccessibleContext();
+		
+		//ac.setAccessibleDescription("Accessibility Demo1 description.");
+		//fileMenu.getAccessibleContext().setAccessibleName(fileMenu.getToolTipText() + " disabled");
+		//fileMenu.getAccessibleContext().setAccessibleDescription("Test");
+		
 		fileMenu.setToolTipText("File Operations");
+
+
 		exiter.setMnemonic( KeyEvent.VK_X );
-		exiter.setToolTipText("Exit the V-CAMP SEMOSS Tool");
+		exiter.setToolTipText( "Exit the V-CAMP SEMOSS Tool" );
 
 		jmi = fileMenu.add( importxls );
 		jmi.setText( "Open..." );
-		jmi.setToolTipText("Open Files to Import");
+		jmi.setToolTipText( "Open Files to Import" );
 		jmi.setMnemonic( KeyEvent.VK_O );
 		fileMenu.addSeparator();
 		fileMenu.add( unmounter );
-		unmounter.setEnabled(false);
-		fileMenuSave.setToolTipText("Save changes");
+		unmounter.setEnabled( false );
+		fileMenuSave.setToolTipText( "Save changes" );
 		fileMenuSave.setMnemonic( KeyEvent.VK_S );
-		fileMenuSave.setIcon( DbAction.getIcon( "save_diskette1"));
+		fileMenuSave.setIcon( DbAction.getIcon( "save_diskette1" ) );
 		fileMenu.add( fileMenuSave );
-		fileMenuSaveAs.setToolTipText("Save to a new file name");
-		fileMenuSaveAs.setMnemonic( KeyEvent.VK_A);
-		fileMenuSaveAs.setIcon( DbAction.getIcon( "save_as_diskette1"));
+		fileMenuSaveAs.setToolTipText( "Save to a new file name" );
+		fileMenuSaveAs.setMnemonic( KeyEvent.VK_A );
+		fileMenuSaveAs.setIcon( DbAction.getIcon( "save_as_diskette1" ) );
 		fileMenu.add( fileMenuSaveAs );
-		fileMenuSaveAll.setToolTipText("Save all changes");
+		fileMenuSaveAll.setToolTipText( "Save all changes" );
 		fileMenuSaveAll.setMnemonic( KeyEvent.VK_V );
-		fileMenuSaveAll.setIcon( DbAction.getIcon( "save_alldiskette1"));
-	//	fileMenu.add( fileMenuSaveAll );
+		fileMenuSaveAll.setIcon( DbAction.getIcon( "save_alldiskette1" ) );
+		//	fileMenu.add( fileMenuSaveAll );
 
 //		JMenu exptop2 = new JMenu( "Export" );
 //		exptop2.add( exportttl );
@@ -1711,7 +1737,7 @@ public class PlayPane extends JFrame {
 //		fileMenu.add( exptop2 );
 //		fileMenu.add( importtop2 );
 		fileMenu.addSeparator();
-		exiter.setIcon( DbAction.getIcon( "exit1"));
+		exiter.setIcon( DbAction.getIcon( "exit1" ) );
 		fileMenu.add( exiter );
 
 		menu.add( fileMenu );
@@ -1720,8 +1746,7 @@ public class PlayPane extends JFrame {
 		JMenu help = buildHelpMenu();
 		JMenu view = buildViewMenu();
 		JMenu tools = buildToolMenuBar();
-		
-		
+
 		if ( null != db ) {
 			menu.add( db );
 		}
@@ -1740,7 +1765,7 @@ public class PlayPane extends JFrame {
 		}
 
 		this.setJMenuBar( menu );
-		
+
 	}
 
 	protected JToolBar buildToolBar( JToolBar playsheeter ) {
@@ -1798,6 +1823,23 @@ public class PlayPane extends JFrame {
 				DIHelper.getInstance().getCoreProp()
 						.setProperty( en.getKey(), en.getValue().toString() );
 			}
+		}
+	}
+
+	protected class PlayPaneCloseableTab extends CloseableTab {
+
+		private final JCheckBoxMenuItem item;
+
+		public PlayPaneCloseableTab( JTabbedPane parent, JCheckBoxMenuItem item,
+				Icon icon ) {
+			super( parent );
+			setIcon( icon );
+			this.item = item;
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent ae ) {
+			item.doClick();
 		}
 	}
 }

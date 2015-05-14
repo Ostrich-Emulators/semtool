@@ -37,10 +37,10 @@ import java.awt.Frame;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLDecoder;
@@ -54,7 +54,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -66,8 +65,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
+import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -399,7 +398,7 @@ public class Utility {
 	 *
 	 * @param urilabels a mapping of URIs to their labels. Say, the results of
 	 * null	null	null	null null null null null null	null	null	null	null	null	null
-	 * null	null	null	null	null	 {@link #getInstanceLabels(java.util.Collection, 
+	 * null	null	null	null	null	null	null	null	 {@link #getInstanceLabels(java.util.Collection, 
    * gov.va.semoss.rdf.engine.api.IEngine) }
 	 *
 	 * @return the results
@@ -1008,26 +1007,28 @@ public class Utility {
 			Files.delete( Paths.get( "html.zip" ) );
 			throw ( ioe );
 		}
-
 	}
 
 	public static void unzip( String zipFilePath, String destDir ) throws IOException {
+		try ( ZipInputStream zips
+				= new ZipInputStream( new FileInputStream( new File( zipFilePath ) ) ) ) {
+			unzip( zips, new File( destDir ) );
+		}
+	}
 
-		ZipFile zipFile = new ZipFile( zipFilePath );
-		Enumeration<?> enu = zipFile.entries();
-		while ( enu.hasMoreElements() ) {
-			ZipEntry zipEntry = (ZipEntry) enu.nextElement();
-
+	public static void unzip( ZipInputStream zis, File destDir ) throws IOException {
+		ZipEntry zipEntry;
+		while ( null != ( zipEntry = zis.getNextEntry() ) ) {
 			String name = zipEntry.getName();
 			/* For debugging when needed
-			 * 
+			 *
 			 long size = zipEntry.getSize();
 			 long compressedSize = zipEntry.getCompressedSize();
-			 System.out.printf("name: %-20s | size: %6d | compressed size: %6d\n", 
+			 System.out.printf("name: %-20s | size: %6d | compressed size: %6d\n",
 			 name, size, compressedSize);
 			 */
 
-			File file = new File( destDir + File.separator + name );
+			File file = new File( destDir, name );
 			if ( name.endsWith( "/" ) ) {
 				file.mkdirs();
 				continue;
@@ -1038,17 +1039,15 @@ public class Utility {
 				parent.mkdirs();
 			}
 
-			InputStream is = zipFile.getInputStream( zipEntry );
-			FileOutputStream fos = new FileOutputStream( file );
-			byte[] bytes = new byte[1024];
-			int length;
-			while ( ( length = is.read( bytes ) ) >= 0 ) {
-				fos.write( bytes, 0, length );
+			try ( FileOutputStream fos = new FileOutputStream( file ) ) {
+				byte[] bytes = new byte[1024];
+				int length;
+				while ( ( length = zis.read( bytes ) ) >= 0 ) {
+					fos.write( bytes, 0, length );
+				}
+				zis.closeEntry();
 			}
-			is.close();
-			fos.close();
 		}
-		zipFile.close();
 	}
 
 	public static void addModelToJTable( AbstractTableModel tableModel, String tableKey ) {
@@ -1057,8 +1056,10 @@ public class Utility {
 		tableModel.fireTableDataChanged();
 
 		for ( int i = 0; i < tableModel.getColumnCount(); i++ ) {
-			if ( Boolean.class.equals( tableModel.getColumnClass( i ) ) ) {
+			if ( Boolean.class
+					.equals( tableModel.getColumnClass( i ) ) ) {
 				TableColumnModel columnModel = table.getColumnModel();
+
 				if ( i < columnModel.getColumnCount() ) {
 					columnModel.getColumn( i ).setPreferredWidth( 35 );
 				}

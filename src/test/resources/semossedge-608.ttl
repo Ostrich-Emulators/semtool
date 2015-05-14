@@ -1,0 +1,37 @@
+@prefix vcamp: <http://va.gov/ontologies/> .
+@prefix semoss: <http://semoss.org/ontologies/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+semoss:Person a owl:Class ;
+	rdfs:label "Person" ;
+	rdfs:subClassOf semoss:Concept .
+
+semoss:Apple a owl:Class ;
+	rdfs:label "Apple" ;
+	rdfs:subClassOf semoss:Concept .
+
+semoss:likes rdfs:label "likes" ;
+	a owl:ObjectProperty .
+
+semoss:Orange a owl:Class ;
+	rdfs:label "Orange" ;
+	rdfs:subClassOf semoss:Concept .
+
+semoss:hates rdfs:label "hates" ;
+	a owl:ObjectProperty .
+
+vcamp:John a semoss:Person ;
+	rdfs:label "John" .
+
+vcamp:Golden_Delicious a semoss:Apple ;
+	rdfs:label "Golden Delicious" .
+
+vcamp:John semoss:likes vcamp:Golden_Delicious .
+
+vcamp:B342d0955-9af2-455f-ad15-e3e93e7f1575 a semoss:Orange ;
+	rdfs:label "Golden Delicious" .
+
+vcamp:John semoss:hates vcamp:B342d0955-9af2-455f-ad15-e3e93e7f1575 .

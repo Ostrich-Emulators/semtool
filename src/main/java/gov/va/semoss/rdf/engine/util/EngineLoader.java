@@ -242,7 +242,7 @@ public class EngineLoader {
 		}
 
 		if ( null == im.getDataBuilder() ) {
-			im.setDataBuilder( im.getBase().stringValue() );
+			im.setDataBuilder( engine.getDataBuilder().toString() );
 		}
 
 		// we want to search all namespaces, but use the metadata's first
@@ -285,12 +285,10 @@ public class EngineLoader {
 
 			URI ebase = engine.getBaseUri();
 			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
+			myrc.add( ebase, OWL.IMPORTS, data.getMetadata().getBase() );
+
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
 			myrc.add( data.getMetadata().getBase(), RDF.TYPE, OWL.ONTOLOGY );
-
-			if ( null != data.getMetadata().getSourceOfData() ) {
-				myrc.add( ebase, OWL.IMPORTS, data.getMetadata().getSourceOfData() );
-			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
