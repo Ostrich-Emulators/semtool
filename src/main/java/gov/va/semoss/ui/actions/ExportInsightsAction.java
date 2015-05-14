@@ -59,7 +59,7 @@ public class ExportInsightsAction extends DbAction {
 	private File exportfile;
 
 	public ExportInsightsAction( String optg, Frame frame ) {
-		super( optg, "Insights (.ttl)", "semantic-webdoc" );
+		super( optg, "Insights (.ttl)", "insight" );
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION,
 				"Export the insights as a Turtle file" );
