@@ -29,6 +29,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Callback;
+import gov.va.semoss.om.ValueType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
@@ -89,6 +90,9 @@ public class  InsightManagerController implements Initializable{
 	protected TextField txtLabel_parm;
     @FXML 
     protected TextField txtVariable_parm;
+	@FXML
+	protected ComboBox<ValueType> cboValueType_parm;
+	protected ObservableList<ValueType> arylValueTypes;
     @FXML
     protected TextField txtValueType_parm;
     @FXML
@@ -139,12 +143,13 @@ public class  InsightManagerController implements Initializable{
 	 */
 	public void setData(){		    
 		engine = DIHelper.getInstance().getRdfEngine();
-		
 		//If the engine has been loaded, then populate controls, otherwise skip:
 		if(engine != null){
 		   arylPerspectives = FXCollections.observableArrayList();
 		   arylPlaySheets = FXCollections.observableArrayList();
 		   arylInsightParameters = FXCollections.observableArrayList();
+		   arylValueTypes = FXCollections.observableArrayList();
+		   
 		   //The Insight Perspective list-view must handle multiple selections:
 		   lstvInsightPerspective_Inst.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		   //Instantiate button-handlers for the "Perspective" tab:
@@ -154,7 +159,7 @@ public class  InsightManagerController implements Initializable{
 		   //Instantiate button-handlers for the "Parameter" tab:
 		   prmtc = new ParameterTabController(this);
 		   
-		   loadPlaySheetsAndData();
+		   loadReferencesAndData();
 		   
 		   //If the "Perspective" changes on the "Perspective" tab, then repopulate its text-field, 
 		   //its "Description", and its associated "Insights":
@@ -255,8 +260,19 @@ public class  InsightManagerController implements Initializable{
 	             //---------------------------------------------------------------------------------
 	             populateNameTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);	          				   
 			     populateVariableTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
+			     populateValueTypeComboBox();
 			     populateTypeTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
 			     populateDefaultQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
+
+			     //If the "Value Type" combo-box changes on the "Parameter" tab, fill the 
+			     //"Value Type" text-filed with the selected value:
+			     cboValueType_parm.valueProperty().addListener(new ChangeListener<Object>() {
+				     @Override 
+				     public void changed(ObservableValue<?> ov, Object t, Object t1) {
+				    	String valueClass = ((ValueType) t1).getValueClass();
+				    	txtValueType_parm.setText(valueClass);
+				     }
+			     });
 			  }
 		   });
 		   
@@ -387,11 +403,12 @@ public class  InsightManagerController implements Initializable{
 	}
 	
 	/**   Same as "loadData(...)", but also fetches data for the Insight tab's "Display with"
-	 * combo-box. Designed to be run once when the Insight Manager is loaded initially.
+	 * combo-box and the Parameter tab's "Value Type" combo-box: Designed to be run once when 
+	 * the Insight Manager is loaded initially.
 	 */
-	private void loadPlaySheetsAndData(){		
+	private void loadReferencesAndData(){		
 	    //Convert mouse-pointer to a "wait" cursor:
-		cboDisplayWith_Inst.getScene().setCursor(Cursor.WAIT);
+		tbpTabbedPane.getScene().setCursor(Cursor.WAIT);
 		
 		//Define a Task to fetch an ArrayList of PlaySheets:
 		Task<ObservableList<PlaySheet>> getPlaySheetData = new Task<ObservableList<PlaySheet>>(){
@@ -401,21 +418,47 @@ public class  InsightManagerController implements Initializable{
 		        return arylPlaySheets;
 		    }
 		};
-	    //Define a listener to set the return value when the Task completes:
+		//Define a Task to fetch an ArrayList of Concept Value Types:
+		Task<ObservableList<ValueType>> getValueTypeData = new Task<ObservableList<ValueType>>(){
+		    @Override 
+		    protected ObservableList<ValueType> call() throws Exception {
+		    	arylValueTypes = FXCollections.observableArrayList(engine.getInsightManager().getValueTypes());		    	
+		        return arylValueTypes;
+		    }
+		};
+	    //Define a listener to load Insight Manager data when Task completes,
+		//but only if the Concept Types have been loaded:
 		getPlaySheetData.stateProperty().addListener(new ChangeListener<Worker.State>() {
 	        @Override 
 	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
 	            if(newState == Worker.State.SUCCEEDED){
-	            	//Restore mouse-pointer:
-	            	cboDisplayWith_Inst.getScene().setCursor(Cursor.DEFAULT);
-	            	
-	            	//Load Insight Manager data:
-	            	loadData(null, null, null);
+	            	if(arylValueTypes.size() > 0){
+	            	   //Restore mouse-pointer:
+	            	   tbpTabbedPane.getScene().setCursor(Cursor.DEFAULT);	            	
+	            	   //Load Insight Manager data:
+	            	   loadData(null, null, null);
+	            	}
 	      	    }    	    
 	        }
 	     });
-		 //Run the Task on a separate Thread:
+	    //Define a listener to load Insight Manager data when Task completes,
+		//but only if the PlaySheets have been loaded:
+		getValueTypeData.stateProperty().addListener(new ChangeListener<Worker.State>() {
+	        @Override 
+	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
+	            if(newState == Worker.State.SUCCEEDED){
+	            	if(arylPlaySheets.size() > 0){
+	            	   //Restore mouse-pointer:
+	            	   tbpTabbedPane.getScene().setCursor(Cursor.DEFAULT);	            	
+	            	   //Load Insight Manager data:
+	            	   loadData(null, null, null);
+	            	}
+	      	    }    	    
+	        }
+	     });
+		 //Run the Tasks on a separate Threads:
 		 new Thread(getPlaySheetData).start();
+		 new Thread(getValueTypeData).start();
 	}
 //----------------------------------------------------------------------------------------------------
 //	                            P e r s p e c t i v e   T a b
@@ -760,6 +803,13 @@ public class  InsightManagerController implements Initializable{
         txtVariable_parm.setText(arylParameters.get(parameterIndex).getVariable());
 	}
 	
+	/**   Populates the "Value Types..." dropdown with all Concept Types defined
+	 * in the Main KB. 
+	 */
+	private void populateValueTypeComboBox(){
+	    cboValueType_parm.setItems(arylValueTypes);
+	    cboValueType_parm.setValue(new ValueType("Choose one to override selection", ""));
+	}
 	/**   Populates the "Type" text-field with the "valueType" property from the currently  
 	 * selected Parameter.
 	 * 

@@ -49,13 +49,16 @@ import gov.va.semoss.model.vocabulary.SPIN;
 import gov.va.semoss.model.vocabulary.SPL;
 import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.om.ValueType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.PlaySheet;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
@@ -589,7 +592,7 @@ public class InsightManagerImpl implements InsightManager {
 	            add(playsheet);
 	          }
 	      };
-	      log.debug("Playsheeter... " + query );
+	      log.debug("Playsheet Query... " + query );
 	      colPlaysheet.addAll(AbstractSesameEngine.getSelect(lqa, rc, true));
 	      
 	  }catch(RepositoryException | MalformedQueryException | QueryEvaluationException e){
@@ -597,6 +600,40 @@ public class InsightManagerImpl implements InsightManager {
 	  }
 	  
 	  return colPlaysheet;
+  }
+  /**   Returns a collection of Concept Values from the main KB, for use in the 
+   * "Value Type..." combo-box on the "Parameter" tab of the Insight Manager.
+   * 
+   * @return -- (Collection<Type>) Described above.
+   */
+  @Override
+  public Collection<ValueType> getValueTypes(){
+	  final Collection<ValueType> colValueType = new ArrayList<ValueType>();
+	  IEngine engine = DIHelper.getInstance().getRdfEngine();
+	  SesameJenaSelectWrapper wrapper = new SesameJenaSelectWrapper();
+	  
+	  wrapper.setEngine(engine);
+  
+	  String query = "SELECT DISTINCT ?valueClass ?valueLabel WHERE { " +
+		 "?valueClass rdfs:subClassOf <http://semoss.org/ontologies/Concept> . " +
+		 "?valueClass rdfs:label ?valueLabel " +
+		 "FILTER( ?valueClass != <http://semoss.org/ontologies/Concept> && " +
+		 "?valueClass != <http://www.w3.org/2004/02/skos/core#Concept>) }";
+	  
+	  wrapper.setQuery( query );
+	  wrapper.executeQuery();
+	  engine.commit();
+      String[] vars = wrapper.getVariables();
+	  while(wrapper.hasNext()){
+		  SesameJenaSelectStatement stmt = wrapper.next();
+		  String valueClass = stmt.getRawVar(vars[0]) + "";
+		  String valueLabel = stmt.getRawVar(vars[1]) + "";
+		  ValueType valueType = new ValueType(valueLabel, valueClass);
+		  colValueType.add(valueType);
+	  }	  
+      log.debug("ConceptType Query... " + query );
+	  
+	  return colValueType;
   }
 
   @Override
