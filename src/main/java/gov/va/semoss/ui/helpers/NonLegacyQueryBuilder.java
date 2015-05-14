@@ -108,6 +108,10 @@ public class NonLegacyQueryBuilder {
 	    this.extQuery = query;
 	 }
 	
+	 // This is a temp fix, a ticket will be opened to address system prefixing here.
+	 // The query execution for parameters should be binding all defined prefix mappings.
+	 private static final String PREFIXES = "PREFIX semoss: <http://semoss.org/ontologies/>\nPREFIX vcamp: <http://va.gov/ontologies/vcamp#>\n";
+	 
 	/**   Fetches data for an Insight Parameter combo-box, either from the Insight's BIND
 	 * statement (legacy), from an externally defined Type, or from an externally defined
 	 * Sparql query.
@@ -147,7 +151,7 @@ public class NonLegacyQueryBuilder {
 	
 	          Map<String, String> paramTable = new HashMap<>();
 	          paramTable.put( Constants.ENTITY, type );
-	          sparqlQuery = (extQuery == null ? Utility.fillParam(sparqlQuery, paramTable) : extQuery);
+	          sparqlQuery = PREFIXES + (extQuery == null ? Utility.fillParam(sparqlQuery, paramTable) : extQuery);
 	
 	          //Fetch all of the URIs (and perhaps associated labels) from the query:
 	          TupleQueryResult result = (TupleQueryResult)eng.execSelectQuery(sparqlQuery);
