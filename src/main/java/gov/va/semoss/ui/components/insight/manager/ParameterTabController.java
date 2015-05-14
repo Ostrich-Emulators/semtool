@@ -42,8 +42,11 @@ public class ParameterTabController extends InsightManagerController {
 	private void handleBuildQuery(ActionEvent event){
 		String strVariable = "?" + imc.legalizeQuotes(imc.txtVariable_parm.getText().trim());
 		String strValueType = imc.legalizeQuotes(imc.txtValueType_parm.getText().trim());
+		// TBD: This is insufficient and added to get past the 5/15 demo.  A prefix resolver API
+		//      should be used to map the URI to an appropriate prefixed name.
+		strValueType = strValueType.replace( "http://semoss.org/ontologies/", "semoss:" );
 		String generatedQuery = "SELECT " + strVariable + " ?label " +
-		   "\nWHERE{\n    " + strVariable + " a <" + strValueType + "> . \n    " +
+		   "\nWHERE{\n    " + strVariable + " a " + strValueType + " . \n    " +
 		   strVariable + " rdfs:label ?label . \n}";
 		imc.txtaDefaultQuery_parm.setText(generatedQuery);
 	}
