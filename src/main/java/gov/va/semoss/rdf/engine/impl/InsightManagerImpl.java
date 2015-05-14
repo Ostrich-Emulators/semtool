@@ -627,7 +627,7 @@ public class InsightManagerImpl implements InsightManager {
 	  while(wrapper.hasNext()){
 		  SesameJenaSelectStatement stmt = wrapper.next();
 		  String valueClass = stmt.getRawVar(vars[0]) + "";
-		  String valueLabel = stmt.getRawVar(vars[1]) + "";
+		  String valueLabel = stmt.getVar(vars[1]).toString();
 		  ValueType valueType = new ValueType(valueLabel, valueClass);
 		  colValueType.add(valueType);
 	  }	  
