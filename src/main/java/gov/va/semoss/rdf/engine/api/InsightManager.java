@@ -12,7 +12,7 @@ import org.openrdf.model.URI;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 
-import gov.va.semoss.om.ValueType;
+import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
@@ -60,12 +60,12 @@ import java.util.List;
    */
   public Collection<PlaySheet> getPlaySheets();
   
-  /**   Returns a collection of Concept Values from the main KB, for use in the
-   *  "Value Type..." combo-box on the "Parameter" tab of the Insight Manager.
+  /**   Returns a collection of Parameter Types from the main KB, for use in the
+   *  "Parameter Types" combo-box on the "Parameter" tab of the Insight Manager.
    * 
-   * @return -- (Collection<ValueType>) Described above.
+   * @return -- (Collection<ParameterType>) Described above.
    */
-  public Collection<ValueType> getValueTypes();
+  public Collection<ParameterType> getParameterTypes();
   
   /**
    * Gets the raw statements for the insights

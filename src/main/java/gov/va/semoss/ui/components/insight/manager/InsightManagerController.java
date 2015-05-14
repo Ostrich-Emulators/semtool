@@ -29,7 +29,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Callback;
-import gov.va.semoss.om.ValueType;
+import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
@@ -91,10 +91,8 @@ public class  InsightManagerController implements Initializable{
     @FXML 
     protected TextField txtVariable_parm;
 	@FXML
-	protected ComboBox<ValueType> cboValueType_parm;
-	protected ObservableList<ValueType> arylValueTypes;
-    @FXML
-    protected TextField txtValueType_parm;
+	protected ComboBox<ParameterType> cboParameterType_parm;
+	protected ObservableList<ParameterType> arylParameterTypes;
     @FXML
     protected TextArea txtaDefaultQuery_parm;
 	@FXML
@@ -148,7 +146,7 @@ public class  InsightManagerController implements Initializable{
 		   arylPerspectives = FXCollections.observableArrayList();
 		   arylPlaySheets = FXCollections.observableArrayList();
 		   arylInsightParameters = FXCollections.observableArrayList();
-		   arylValueTypes = FXCollections.observableArrayList();
+		   arylParameterTypes = FXCollections.observableArrayList();
 		   
 		   //The Insight Perspective list-view must handle multiple selections:
 		   lstvInsightPerspective_Inst.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -260,19 +258,8 @@ public class  InsightManagerController implements Initializable{
 	             //---------------------------------------------------------------------------------
 	             populateNameTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);	          				   
 			     populateVariableTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
-			     populateValueTypeComboBox();
-			     populateTypeTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
+			     populateParameterTypeComboBox(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
 			     populateDefaultQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
-
-			     //If the "Value Type" combo-box changes on the "Parameter" tab, fill the 
-			     //"Value Type" text-filed with the selected value:
-			     cboValueType_parm.valueProperty().addListener(new ChangeListener<Object>() {
-				     @Override 
-				     public void changed(ObservableValue<?> ov, Object t, Object t1) {
-				    	String valueClass = ((ValueType) t1).getValueClass();
-				    	txtValueType_parm.setText(valueClass);
-				     }
-			     });
 			  }
 		   });
 		   
@@ -419,20 +406,20 @@ public class  InsightManagerController implements Initializable{
 		    }
 		};
 		//Define a Task to fetch an ArrayList of Concept Value Types:
-		Task<ObservableList<ValueType>> getValueTypeData = new Task<ObservableList<ValueType>>(){
+		Task<ObservableList<ParameterType>> getParameterTypeData = new Task<ObservableList<ParameterType>>(){
 		    @Override 
-		    protected ObservableList<ValueType> call() throws Exception {
-		    	arylValueTypes = FXCollections.observableArrayList(engine.getInsightManager().getValueTypes());		    	
-		        return arylValueTypes;
+		    protected ObservableList<ParameterType> call() throws Exception {
+		    	arylParameterTypes = FXCollections.observableArrayList(engine.getInsightManager().getParameterTypes());		    	
+		        return arylParameterTypes;
 		    }
 		};
 	    //Define a listener to load Insight Manager data when Task completes,
-		//but only if the Concept Types have been loaded:
+		//but only if the Parameter Types have been loaded:
 		getPlaySheetData.stateProperty().addListener(new ChangeListener<Worker.State>() {
 	        @Override 
 	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
 	            if(newState == Worker.State.SUCCEEDED){
-	            	if(arylValueTypes.size() > 0){
+	            	if(arylParameterTypes.size() > 0){
 	            	   //Restore mouse-pointer:
 	            	   tbpTabbedPane.getScene().setCursor(Cursor.DEFAULT);	            	
 	            	   //Load Insight Manager data:
@@ -443,7 +430,7 @@ public class  InsightManagerController implements Initializable{
 	     });
 	    //Define a listener to load Insight Manager data when Task completes,
 		//but only if the PlaySheets have been loaded:
-		getValueTypeData.stateProperty().addListener(new ChangeListener<Worker.State>() {
+		getParameterTypeData.stateProperty().addListener(new ChangeListener<Worker.State>() {
 	        @Override 
 	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
 	            if(newState == Worker.State.SUCCEEDED){
@@ -458,7 +445,7 @@ public class  InsightManagerController implements Initializable{
 	     });
 		 //Run the Tasks on a separate Threads:
 		 new Thread(getPlaySheetData).start();
-		 new Thread(getValueTypeData).start();
+		 new Thread(getParameterTypeData).start();
 	}
 //----------------------------------------------------------------------------------------------------
 //	                            P e r s p e c t i v e   T a b
@@ -803,25 +790,22 @@ public class  InsightManagerController implements Initializable{
         txtVariable_parm.setText(arylParameters.get(parameterIndex).getVariable());
 	}
 	
-	/**   Populates the "Value Types..." dropdown with all Concept Types defined
-	 * in the Main KB. 
+	/**   Populates the "Parameter Type" dropdown with all Concept Types defined
+	 * in the Main KB, and pre-selects the Type associated with the current Parameter.
 	 */
-	private void populateValueTypeComboBox(){
-	    cboValueType_parm.setItems(arylValueTypes);
-	    cboValueType_parm.setValue(new ValueType("Choose one to override selection", ""));
-	}
-	/**   Populates the "Type" text-field with the "valueType" property from the currently  
-	 * selected Parameter.
-	 * 
-	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-	 * @param insightIndex -- (int) Index of currently selected Insight.
-	 * @param parameterIndex -- (int) Index of currently selected Parameter.
-	 */
-	private void populateTypeTextField(int perspectiveIndex, int insightIndex, int parameterIndex){
+	private void populateParameterTypeComboBox(int perspectiveIndex, int insightIndex, int parameterIndex){
  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
         Insight insight = arylInsights.get(insightIndex);
         ArrayList<Parameter> arylParameters = (ArrayList<Parameter>)insight.getInsightParameters();
-        txtValueType_parm.setText(arylParameters.get(parameterIndex).getValueType());
+        Parameter parameter = arylParameters.get(parameterIndex);
+	    cboParameterType_parm.setItems(arylParameterTypes);
+	    
+	    for(ParameterType valueType: cboParameterType_parm.getItems()){
+	    	if(parameter.getParameterType().equals(valueType.getParameterClass())){
+	    		cboParameterType_parm.getSelectionModel().select(valueType);
+	    		break;
+	    	}
+	    }
 	}
 	
 	/**   Populates the "Default Query" text-field with the "defaultQuery" property from  

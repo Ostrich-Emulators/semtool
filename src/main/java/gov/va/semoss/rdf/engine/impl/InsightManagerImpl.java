@@ -49,7 +49,7 @@ import gov.va.semoss.model.vocabulary.SPIN;
 import gov.va.semoss.model.vocabulary.SPL;
 import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.om.ValueType;
+import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.PlaySheet;
@@ -601,24 +601,23 @@ public class InsightManagerImpl implements InsightManager {
 	  
 	  return colPlaysheet;
   }
-  /**   Returns a collection of Concept Values from the main KB, for use in the 
-   * "Value Type..." combo-box on the "Parameter" tab of the Insight Manager.
+  /**   Returns a collection of Parameter Types from the main KB, for use in the
+   *  "Parameter Types" combo-box on the "Parameter" tab of the Insight Manager.
    * 
-   * @return -- (Collection<Type>) Described above.
+   * @return -- (Collection<ParameterType>) Described above.
    */
-  @Override
-  public Collection<ValueType> getValueTypes(){
-	  final Collection<ValueType> colValueType = new ArrayList<ValueType>();
+  public Collection<ParameterType> getParameterTypes(){
+	  final Collection<ParameterType> colParameterType = new ArrayList<ParameterType>();
 	  IEngine engine = DIHelper.getInstance().getRdfEngine();
 	  SesameJenaSelectWrapper wrapper = new SesameJenaSelectWrapper();
 	  
 	  wrapper.setEngine(engine);
   
-	  String query = "SELECT DISTINCT ?valueClass ?valueLabel WHERE { " +
-		 "?valueClass rdfs:subClassOf <http://semoss.org/ontologies/Concept> . " +
-		 "?valueClass rdfs:label ?valueLabel " +
-		 "FILTER( ?valueClass != <http://semoss.org/ontologies/Concept> && " +
-		 "?valueClass != <http://www.w3.org/2004/02/skos/core#Concept>) }";
+	  String query = "SELECT DISTINCT ?parameterClass ?parameterLabel WHERE { " +
+		 "?parameterClass rdfs:subClassOf <http://semoss.org/ontologies/Concept> . " +
+		 "?parameterClass rdfs:label ?parameterLabel " +
+		 "FILTER( ?parameterClass != <http://semoss.org/ontologies/Concept> && " +
+		 "?parameterClass != <http://www.w3.org/2004/02/skos/core#Concept>) }";
 	  
 	  wrapper.setQuery( query );
 	  wrapper.executeQuery();
@@ -626,14 +625,14 @@ public class InsightManagerImpl implements InsightManager {
       String[] vars = wrapper.getVariables();
 	  while(wrapper.hasNext()){
 		  SesameJenaSelectStatement stmt = wrapper.next();
-		  String valueClass = stmt.getRawVar(vars[0]) + "";
-		  String valueLabel = stmt.getVar(vars[1]).toString();
-		  ValueType valueType = new ValueType(valueLabel, valueClass);
-		  colValueType.add(valueType);
+		  String parameterClass = stmt.getRawVar(vars[0]) + "";
+		  String parameterLabel = stmt.getVar(vars[1]).toString();
+		  ParameterType parameterType = new ParameterType(parameterLabel, parameterClass);
+		  colParameterType.add(parameterType);
 	  }	  
-      log.debug("ConceptType Query... " + query );
+      log.debug("ParameterType Query... " + query );
 	  
-	  return colValueType;
+	  return colParameterType;
   }
 
   @Override
