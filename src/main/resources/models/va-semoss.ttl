@@ -110,12 +110,12 @@ vas:W3C-Reification
   vas:icon "questions_dendrogram1_16.png"^^xsd:string ;
   rdfs:label "Dendrogram"^^xsd:string ;
 .
-<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.DualEngineGridPlaySheet>
-  rdf:type vas:DataView ;
-  ui:viewClass "gov.va.semoss.ui.components.playsheets.DualEngineGridPlaySheet"^^xsd:string ;
-  rdfs:comment "Uncertain if this play sheet would ever be user selectable."^^xsd:string ;
-  rdfs:label "Dual Engine Grid"^^xsd:string ;
-.
+# <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.DualEngineGridPlaySheet>
+#   rdf:type vas:DataView ;
+#   ui:viewClass "gov.va.semoss.ui.components.playsheets.DualEngineGridPlaySheet"^^xsd:string ;
+#   rdfs:comment "Uncertain if this play sheet would ever be user selectable."^^xsd:string ;
+#   rdfs:label "Dual Engine Grid"^^xsd:string ;
+# .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GraphPlaySheet>
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.GraphPlaySheet"^^xsd:string ;
@@ -180,8 +180,8 @@ vas:W3C-Reification
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.SankeyPlaySheet>
   rdf:type vas:DataView ;
   ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
-  vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships.  "^^xsd:string ;
-  vas:icon "questions_sankey1_16.png"^^xsd:string ;
+  vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships."^^xsd:string ;
+  vas:icon "questions_sankey2_16.png"^^xsd:string ;
   rdfs:label "Sankey Diagram"^^xsd:string ;
 .
 <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet>
