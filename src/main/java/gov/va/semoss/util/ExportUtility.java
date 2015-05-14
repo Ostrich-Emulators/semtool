@@ -129,9 +129,14 @@ public class ExportUtility {
 
 	private static File getSuggestedFilename(Component component, String suffix) {
 		try {
-			return new File(((IPlaySheet) component).getTitle() + suffix);
+			String title = ((IPlaySheet) component).getTitle();
+			title = title.replaceAll("[^A-Za-z0-9 ()]", "");
+			if (title.length() > 100)
+				title = title.substring(0, 100);
+
+			return new File(title + suffix);
 		} catch (Exception e) {
-			log.debug("Couldn't create a suggested filename from component: " + component);
+			log.debug("Couldn't create a suggested filename from component: " + component + "\n" + e, e);
 			return new File("SemossExport" + suffix);
 		}
 	}
