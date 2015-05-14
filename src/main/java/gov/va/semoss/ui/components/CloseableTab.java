@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicButtonUI;
 
 /**
@@ -36,7 +37,8 @@ public class CloseableTab extends JPanel implements ActionListener {
 		super( new BorderLayout() );
 		tabs = parent;
 
-		mark = new JLabel();
+		mark = new JLabel( " " );
+		mark.setHorizontalTextPosition( SwingConstants.RIGHT );
 		mark.setIconTextGap( 2 );
 
 		JLabel lbl = new JLabel() {
