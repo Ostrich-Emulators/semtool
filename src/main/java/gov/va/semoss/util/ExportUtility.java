@@ -27,6 +27,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.FileBrowsePanel;
+import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
 import java.awt.Component;
@@ -99,9 +100,10 @@ public class ExportUtility {
 			File loc = FileBrowsePanel.getLocationForEmptyPref( prefs, lastDirUsedKey );
 
 			String p = prefs.get( lastDirUsedKey, loc.getAbsolutePath() );
-			
+
 			JFileChooser fileChooser = new JFileChooser( p );
-			fileChooser.setDialogTitle("Specify a " + suffix + "file to save");
+			fileChooser.setDialogTitle("Specify a " + suffix + " file to save");
+			fileChooser.setSelectedFile( getSuggestedFilename(component, suffix) );
 			
 			int userSelection = fileChooser.showSaveDialog( JOptionPane.getFrameForComponent( component ) );
 			if (userSelection != JFileChooser.APPROVE_OPTION) {
@@ -122,6 +124,15 @@ public class ExportUtility {
 			Utility.showError( "Export failed." );
 			log.error( e, e );
 			return null;
+		}
+	}
+
+	private static File getSuggestedFilename(Component component, String suffix) {
+		try {
+			return new File(((IPlaySheet) component).getTitle() + suffix);
+		} catch (Exception e) {
+			log.debug("Couldn't create a suggested filename from component: " + component);
+			return new File("SemossExport" + suffix);
 		}
 	}
 
