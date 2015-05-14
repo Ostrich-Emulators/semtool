@@ -36,6 +36,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +45,6 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
@@ -116,15 +117,26 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 				table.getActionMap().get( "copy" ).actionPerformed( ae );
 			}
 		} );
+
+		model.addPropertyChangeListener( ValueTableModel.NEEDS_SAVE,
+				new PropertyChangeListener() {
+
+					@Override
+					public void propertyChange( PropertyChangeEvent evt ) {
+						boolean show = Boolean.parseBoolean( evt.getNewValue().toString() );
+						GridRAWPlaySheet.this.getPlaySheetFrame().showSaveMnemonic( show );
+					}
+				} );
+
 	}
 
-	protected void setupToolBarButtons( final String tabTitle ){
+	protected void setupToolBarButtons( final String tabTitle ) {
 		save.setDefaultFileName( tabTitle );
 		save.setTable( model );
 		saveas.setDefaultFileName( tabTitle );
-		saveas.setTable( model );		
+		saveas.setTable( model );
 	}
-	
+
 	@Override
 	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
 		setupToolBarButtons( tabTitle );

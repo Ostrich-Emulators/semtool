@@ -63,6 +63,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	public static final String SAVE_AS = "saveas";
 	public static final String SAVE_ALL = "saveall";
 	public static final String EXPORT = "export";
+	private static final String SAVE_MNEMONIC = "* ";
 
 	private static final long serialVersionUID = 7908827976216133994L;
 	private static final Logger log = Logger.getLogger( PlaySheetFrame.class );
@@ -271,6 +272,16 @@ public class PlaySheetFrame extends JInternalFrame {
 
 	public void addProgress( String txt, int val ) {
 		updateProgress( txt, jBar.getValue() + val );
+	}
+
+	public void showSaveMnemonic( boolean show ) {
+		String current = getTitle();
+		if ( show ) {
+			setTitle( SAVE_MNEMONIC + current );
+		}
+		else {
+			setTitle( current.replaceAll( "^\\" + SAVE_MNEMONIC, "" ) );
+		}
 	}
 
 	public ProgressTask getCreateTask( final String query ) {
