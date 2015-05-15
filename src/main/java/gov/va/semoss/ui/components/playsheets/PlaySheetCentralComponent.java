@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components.playsheets;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.DefaultIcons;
@@ -143,20 +144,32 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		overlay( valdata, Arrays.asList( "Subject", "Predicate", "Object" ) );
 	}
 
-	public void populateToolBar( JToolBar tb, final String tabTitle ) {
-		AbstractAction aa = new AbstractAction( "Export Image",
-				DefaultIcons.defaultIcons.get( DefaultIcons.SAVE ) ) {
+	public void populateToolBar( JToolBar toolBar, final String tabTitle ) {
+		AbstractAction savePDFAction = new AbstractAction( "Export PDF", DbAction.getIcon("save_pdf") ) {
 					private static final long serialVersionUID = 3936319423436805397L;
 
 					@Override
 					public void actionPerformed( ActionEvent e ) {
-						ExportUtility.doGraphExportWithDialogue( PlaySheetCentralComponent.this );
+						ExportUtility.doGraphExportPDFWithDialogue( PlaySheetCentralComponent.this );
 					}
 
 				};
 
-		aa.putValue( Action.SHORT_DESCRIPTION, "Export Image" );
-		tb.add( aa );
+		savePDFAction.putValue( Action.SHORT_DESCRIPTION, "Export PDF" );
+		toolBar.add( savePDFAction );
+		
+		AbstractAction savePNGAction = new AbstractAction( "Export PNG", DbAction.getIcon("save_png") ) {
+					private static final long serialVersionUID = 3936319423436805398L;
+
+					@Override
+					public void actionPerformed( ActionEvent e ) {
+						ExportUtility.doGraphExportPNGWithDialogue( PlaySheetCentralComponent.this );
+					}
+
+				};
+
+		savePNGAction.putValue( Action.SHORT_DESCRIPTION, "Export PNG" );
+		toolBar.add( savePNGAction );
 	}
 
 	/**

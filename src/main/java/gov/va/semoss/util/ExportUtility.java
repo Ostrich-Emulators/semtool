@@ -27,6 +27,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.FileBrowsePanel;
+import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
 import java.awt.Component;
@@ -39,10 +40,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
@@ -66,32 +63,84 @@ public class ExportUtility {
 		EPS, PNG, PDF
 	};
 
-	public static void doGraphExportWithDialogue(Component component) {
-		Map<String,Object> returnHash = getExportFileLocationAndExportType(component);
-		if (returnHash == null) {
+	public static void doGraphExportPDFWithDialogue(Component component) {
+		doGraphExportWithDialogue(component, ExportType.PDF, ".pdf");
+	}
+	
+	public static void doGraphExportPNGWithDialogue(Component component) {
+		doGraphExportWithDialogue(component, ExportType.PNG, ".png");
+	}
+	
+	private static void doGraphExportWithDialogue(Component component, ExportType exportType, String suffix) {
+		File file = getExportFileLocation(component, suffix);
+		if (file == null) {
 			return;
 		}
-		
-		ExportType exportType = (ExportType) returnHash.get("exportType");
-		File file = (File) returnHash.get("fileLocation");
-		String fileLocation = file.getAbsolutePath();
-		
-		try {
-			if ( exportType.equals( ExportType.PNG ) ){
-				writePNG(component, fileLocation);
-			} else if ( exportType.equals( ExportType.PDF ) ) {
-				writePDF(component, fileLocation);
-			}
 
+		try {
+			if (exportType == ExportType.PNG)
+				writePNG(component, file.getAbsolutePath());
+			else if (exportType == ExportType.PDF)
+				writePDF(component, file.getAbsolutePath());			
+			
 			Utility.showExportMessage( JOptionPane.getFrameForComponent( component ), 
-					"Export successful: " + fileLocation, "Export Successful", file );
+					"Export successful: " + file.getAbsolutePath(), "Export Successful", file );
 		}
 		catch ( IOException | DocumentException e ) {
-			Utility.showError( "Graph export failed." );
+			Utility.showError( "Graph export to " + suffix + " failed." );
 			log.error( e, e );
 		}
 	}
 	
+	private static File getExportFileLocation(Component component, String suffix) {
+		try {
+			String lastDirUsedKey = "lastgraphexportdir";
+			
+			Preferences prefs = Preferences.userNodeForPackage( ExportUtility.class );
+			File loc = FileBrowsePanel.getLocationForEmptyPref( prefs, lastDirUsedKey );
+
+			String p = prefs.get( lastDirUsedKey, loc.getAbsolutePath() );
+
+			JFileChooser fileChooser = new JFileChooser( p );
+			fileChooser.setDialogTitle("Specify a " + suffix + " file to save");
+			fileChooser.setSelectedFile( getSuggestedFilename(component, suffix) );
+			
+			int userSelection = fileChooser.showSaveDialog( JOptionPane.getFrameForComponent( component ) );
+			if (userSelection != JFileChooser.APPROVE_OPTION) {
+				return null;
+			}
+			
+			File file = fileChooser.getSelectedFile();			
+			prefs.put( lastDirUsedKey, file.getParent() );
+			
+			String fileLocation = file.getAbsolutePath();
+			if ( !fileLocation.toUpperCase().endsWith(suffix.toUpperCase()) ) {
+				file = new File(fileLocation + suffix);
+			}
+			
+			return file;
+		}
+		catch ( Exception e ) {
+			Utility.showError( "Export failed." );
+			log.error( e, e );
+			return null;
+		}
+	}
+
+	private static File getSuggestedFilename(Component component, String suffix) {
+		try {
+			String title = ((IPlaySheet) component).getTitle();
+			title = title.replaceAll("[^A-Za-z0-9 ()]", "");
+			if (title.length() > 100)
+				title = title.substring(0, 100);
+
+			return new File(title + suffix);
+		} catch (Exception e) {
+			log.debug("Couldn't create a suggested filename from component: " + component + "\n" + e, e);
+			return new File("SemossExport" + suffix);
+		}
+	}
+
 	private static void writePNG(Component component, String fileLocation) throws IOException{
 		BufferedImage bufferedImage = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		component.paint(bufferedImage.getGraphics());
@@ -145,68 +194,6 @@ public class ExportUtility {
 		}
 		
 		document.close();
-	}
-
-	private static Map<String,Object> getExportFileLocationAndExportType(Component component) {
-		try {
-			String lastDirUsedKey = "lastgraphexportdir";
-	
-			Preferences prefs = Preferences.userNodeForPackage( ExportUtility.class );
-			File loc = FileBrowsePanel.getLocationForEmptyPref( prefs, lastDirUsedKey );
-	
-			String p = prefs.get( lastDirUsedKey, loc.getAbsolutePath() );
-			JFileChooser chooser = new JFileChooser( p );
-			chooser.setControlButtonsAreShown( false );
-			chooser.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "PNG image", "png" ) );
-			chooser.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "PDF document", "pdf" ) );
-			
-			//Display dialog to choose export quality
-			Object[] options = { "PDF document", "PNG image", "Cancel" };
-			int n = JOptionPane.showOptionDialog( JOptionPane.getFrameForComponent( component ),
-					chooser,
-					"Export", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0] );
-			String suffix = "";
-			
-			ExportType exportType = ExportType.PNG;
-			switch ( n ) {
-				case -1:
-					return null;
-				case 0:
-					exportType = ExportType.PDF;
-					suffix = ".pdf";
-					break;
-				case 1:
-					exportType = ExportType.PNG;
-					suffix = ".png";
-					break;
-				case 2:
-					return null;
-			}
-			
-	
-			File file = chooser.getSelectedFile();
-			if ( null == file ) {
-				file = new File( chooser.getCurrentDirectory(),
-						new SimpleDateFormat( "'Graph_Export_'MMM_dd_yyyy_HHmm" ).format( new Date() ) );
-			}
-	
-			prefs.put( lastDirUsedKey, file.getParent() );
-			String fileLocation = file.getAbsolutePath();
-
-			if ( !( fileLocation.endsWith(".png") || fileLocation.endsWith(".pdf") ) ) {
-				file = new File(fileLocation + suffix);
-			}
-			
-			HashMap<String,Object> returnHash = new HashMap<String,Object>();
-			returnHash.put("exportType", exportType);
-			returnHash.put("fileLocation", file);
-			return returnHash;
-		}
-		catch ( Exception e ) {
-			Utility.showError( "Export failed." );
-			log.error( e, e );
-			return null;
-		}
 	}
 
 	@SuppressWarnings("unused")

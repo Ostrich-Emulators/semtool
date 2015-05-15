@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
  *
  * @author ryan
  */
+
 public interface GraphWriter {
 
 	public static final Pattern NUMERIC = Pattern.compile( "^\\d+.?\\d*$" );

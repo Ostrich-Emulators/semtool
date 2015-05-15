@@ -50,7 +50,7 @@ public class WriteableParameterTabImpl implements WriteableParameterTab {
 		  String parameterUriString = "<" + parameter.getParameterURI().trim() + ">";
 		  String label = parameter.getLabel().trim();
 		  String variable = parameter.getVariable().trim();
-		  String valueType = parameter.getValueType().trim();
+		  String parameterType = parameter.getParameterType().trim();
 		  String defaultQuery = parameter.getDefaultQuery().trim();
 
 		  //Make sure that embedded new-line characters can be persisted:
@@ -88,7 +88,7 @@ public class WriteableParameterTabImpl implements WriteableParameterTab {
 			  + "INSERT{ " + parameterUriString + " rdfs:label \"" + label + "\" . " 
 			  + parameterUriString + " spl:predicate " + predicateUriString + " . "
 			  + predicateUriString + " rdfs:label \"" + variable + "\" . "
-			  + parameterUriString + " spl:valueType <" + valueType + "> . "
+			  + parameterUriString + " spl:valueType <" + parameterType + "> . "
 			  + parameterUriString + " a spl:Argument .} "
 			  + "WHERE { " + insightUriString + " spin:constraint " + parameterUriString + " .}";
           
@@ -103,7 +103,7 @@ public class WriteableParameterTabImpl implements WriteableParameterTab {
 		      rc.begin();
 		      
 	          if(label.equals("") == false && variable.equals("") == false && 
-	        	 valueType.equals("") == false){
+	        	 parameterType.equals("") == false){
 	             Update uq_1 = rc.prepareUpdate(QueryLanguage.SPARQL, query_1);
 	             Update uq_2 = rc.prepareUpdate(QueryLanguage.SPARQL, query_2);
 		         Update uq_3 = rc.prepareUpdate(QueryLanguage.SPARQL, query_3);

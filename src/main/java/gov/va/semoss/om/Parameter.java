@@ -11,17 +11,17 @@ import org.openrdf.query.BindingSet;
 public class Parameter {
     private String strLabel;
     private String strVariable;
-    private String strValueType;
+    private String strParameterType;
     private String strDefaultQuery;
     private String strParameterURI;
     
     public Parameter(){
     }    
-    public Parameter(String strParameterURI, String strLabel, String strVariable, String strValueType, String strDefaultValue, String strDefaultQuery){
+    public Parameter(String strParameterURI, String strLabel, String strVariable, String strParameterType, String strDefaultValue, String strDefaultQuery){
     	this.strParameterURI = strParameterURI;
     	this.strLabel = strLabel;
     	this.strVariable = strVariable;
-    	this.strValueType = strValueType;
+    	this.strParameterType = strParameterType;
     	this.strDefaultQuery = strDefaultQuery;
     }
 
@@ -46,12 +46,12 @@ public class Parameter {
     public void setVariable(String strVariable){
     	this.strVariable = strVariable;
     }
-    //Parameter value type:
-    public String getValueType(){
-    	return this.strValueType;
+    //Parameter type:
+    public String getParameterType(){
+    	return this.strParameterType;
     }
-    public void setValueType(String strValueType){
-    	this.strValueType = strValueType;
+    public void setParameterType(String strParameterType){
+    	this.strParameterType = strParameterType;
     }
     //Parameter default query:
     public String getDefaultQuery(){
@@ -69,7 +69,7 @@ public class Parameter {
     	this.strParameterURI = "";
     	this.strLabel = "";
     	this.strVariable = "";
-    	this.strValueType = "";
+    	this.strParameterType = "";
     	this.strDefaultQuery = "";
     	
 		Value ParameterURI_Value = resultSet.getValue("parameter");
@@ -91,9 +91,9 @@ public class Parameter {
 			   this.strVariable = aryVariable[0];
 			}
 		}
-		Value valueTypeValue = resultSet.getValue("parameterValueType");
-		if(valueTypeValue != null){
-			this.strValueType = valueTypeValue.stringValue();
+		Value parameterTypeValue = resultSet.getValue("parameterValueType");
+		if(parameterTypeValue != null){
+			this.strParameterType = parameterTypeValue.stringValue();
 		}
 		Value defaultQueryValue = resultSet.getValue("parameterQuery");
 		if(defaultQueryValue != null){

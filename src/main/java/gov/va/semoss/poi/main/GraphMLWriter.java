@@ -51,6 +51,7 @@ public class GraphMLWriter implements GraphWriter {
 		}
 	}
 
+	
 	@Override
 	public void write( ImportData data, OutputStream output ) throws IOException {
 		Graph graph = getGraph( data );

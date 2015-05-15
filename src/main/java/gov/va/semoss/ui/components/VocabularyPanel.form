@@ -43,11 +43,10 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="SansSerif" size="12" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Add Vocabularies"/>
+        <Property name="text" type="java.lang.String" value="Reload Vocabularies (After Clear)"/>
       </Properties>
     </Component>
     <Container class="javax.swing.JPanel" name="buttonpanel">
-
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout">
         <Property name="axis" type="int" value="3"/>
       </Layout>
