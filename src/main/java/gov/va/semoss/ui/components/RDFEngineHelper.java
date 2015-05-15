@@ -27,14 +27,16 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaConstructStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaConstructWrapper;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.DIHelper;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -45,6 +47,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
+import org.openrdf.rio.ntriples.NTriplesWriter;
 
 /**
  * This class is responsible for loading many of the hierarchies available in
@@ -159,6 +162,13 @@ public class RDFEngineHelper {
 				+ "  {?Subject   ?Predicate ?Object}"
 				+ "}";
 
+//		try( FileWriter fw = new FileWriter( "/tmp/graph.nt" ) ){
+//			rc.export( new NTriplesWriter( fw ) );
+//		}
+//		catch( Exception e ){
+//			logger.error( e,e);
+//		}
+
 		int numResults = 0;
 		Collection<SesameJenaConstructStatement> sjsc = runSesameJenaConstruct( rc, query );
 		for ( SesameJenaConstructStatement s : sjsc ) {
@@ -191,18 +201,22 @@ public class RDFEngineHelper {
 				+ "  {?outNode  ?edge              ?inNode} "
 				+ "}";
 
-		int numResults = 0;
-		SesameJenaSelectWrapper sjsc = runSesameJenaSelectWrapper( rc, query );
-		while ( sjsc.hasNext() ) {
-			SesameJenaSelectStatement sct = sjsc.next();
-			gdm.addEdgeProperty( "" + sct.getRawVar( "edge" ),
-					sct.getRawVar( "value" ),
-					"" + sct.getRawVar( "prop" ),
-					"" + sct.getRawVar( "outNode" ),
-					"" + sct.getRawVar( "inNode" ) );
-			numResults++;
-		}
-		logger.debug( "genEdgePropertiesLocal added " + numResults + " edge properties." );
+		final int size[] = { 0 };
+		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				gdm.addEdgeProperty( set.getValue( "edge" ).toString(),
+						set.getValue( "value" ).toString(),
+						set.getValue( "prop" ).toString(),
+						set.getValue( "outNode" ).toString(),
+						set.getValue( "inNode" ).toString() );
+				size[0]++;
+			}
+		};
+
+		AbstractSesameEngine.getSelectNoEx( vqa, rc, true );
+		logger.debug( "genEdgePropertiesLocal added " + size[0] + " edge properties." );
 	}
 
 	/**
@@ -346,7 +360,8 @@ public class RDFEngineHelper {
 		return new ArrayList<>();
 	}
 
-	public static Collection<SesameJenaConstructStatement> runSesameJenaConstruct( IEngine engine, String query ) {
+	public static Collection<SesameJenaConstructStatement> 
+		runSesameJenaConstruct( IEngine engine, String query ) {
 		logger.debug( "Running query in runSesameJenaConstruct: " + query );
 
 		List<SesameJenaConstructStatement> list = new ArrayList<>();

@@ -289,7 +289,10 @@ public class GraphDataModel {
     } else  {
       try {
           object = new URIImpl( st.getObject().toString() );
-      } catch (Exception ignored) {}
+      } 
+			catch (Exception e) {
+				log.warn( e,e);
+			}
     }
     
     if (object == null) {
