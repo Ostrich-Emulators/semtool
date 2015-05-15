@@ -980,10 +980,11 @@ public class PlayPane extends JFrame {
 
 			private void refresh() {
 				final JInternalFrame[] frames = desktopPane.getAllFrames();
+				int len = frames.length;
 				windowSelector.removeAll();
 				if ( 0 == frames.length ) {
 					appendChkBox.setSelected( false );
-				}
+				} 
 
 				windowSelector.setEnabled( 0 < frames.length );
 				customSparqlPanel.enableAppend( frames.length > 0 );
@@ -1095,6 +1096,7 @@ public class PlayPane extends JFrame {
 				int numI = 0;
 				for ( final JInternalFrame f : frames ) {
 					numI++;
+					
 					JMenuItem i = new JMenuItem( numI + ". " + f.getTitle() );
 					i.setIcon( f.getFrameIcon() );
 					i.addActionListener( new ActionListener() {
@@ -1567,7 +1569,7 @@ public class PlayPane extends JFrame {
 
 		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Panel",
 				getProp( prefs, QUERYPANEL ) );
-		//hidecsp.setToolTipText( "Shows/Hides query area" );
+
 
 		if ( getProp( prefs, QUERYPANEL ) == true ) {
 			hidecsp.setToolTipText( "Disable the Query Panel" );
@@ -1584,10 +1586,10 @@ public class PlayPane extends JFrame {
 				prefs.putBoolean( QUERYPANEL, customSparqlPanel.isVisible() );
 				if ( customSparqlPanel.isVisible() ) {
 					combinedSplitPane.setDividerLocation( 0.75 );
-					hidecsp.setToolTipText( "Disable the Query Area" );
+					hidecsp.setToolTipText( "Disable the Query Panel" );
 				}
 				else {
-					hidecsp.setToolTipText( "Enable the Query Area" );
+					hidecsp.setToolTipText( "Enable the Query Panel" );
 				}
 			}
 		} );

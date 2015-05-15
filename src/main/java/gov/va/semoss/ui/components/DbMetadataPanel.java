@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.model.vocabulary.VAS;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,7 +14,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.JTextField;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.URI;
@@ -24,6 +27,7 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
@@ -31,16 +35,22 @@ import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
+import gov.va.semoss.ui.components.renderers.DatasetsRenderer;
+import gov.va.semoss.ui.components.renderers.RepositoryRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+
 import java.awt.HeadlessException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.query.BindingSet;
@@ -235,6 +245,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		loadable = ( null != baseuri );
 	}
 
+	
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
@@ -328,6 +339,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
     subsets.setModel(subsetmodel);
     subsets.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    subsets.setCellRenderer( new DatasetsRenderer() );
+ 
     jScrollPane2.setViewportView(subsets);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

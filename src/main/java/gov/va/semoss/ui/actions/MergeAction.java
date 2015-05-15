@@ -71,7 +71,7 @@ public class MergeAction extends DbAction {
 	protected boolean preAction( ActionEvent ae ) {
 		copywhat.setPreferredSize( new Dimension( 250, 80 ) );
 		int retval = JOptionPane.showConfirmDialog( frame, copywhat,
-				"Clear what data from " + getEngineName() + "?",
+				"Copy what data from " + getEngineName() + "?",
 				JOptionPane.OK_CANCEL_OPTION );
 		return ( JOptionPane.OK_OPTION == retval );
 	}
