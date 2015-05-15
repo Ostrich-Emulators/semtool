@@ -17,7 +17,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.ui.components.CheckWhatPanel;
+import gov.va.semoss.ui.components.CheckConsistencyPanel;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -42,7 +42,7 @@ public class CheckConsistencyAction extends DbAction {
 	private static final Logger log = Logger.getLogger( CheckConsistencyAction.class );
 	private static final int WARNING_LIMIT = 1500;
 	private final Frame frame;
-	private final CheckWhatPanel checkwhat = new CheckWhatPanel( true, true );
+	private final CheckConsistencyPanel checkwhat = new CheckConsistencyPanel( true, true );
 
 	public CheckConsistencyAction( String optg, Frame frame ) {
 		super( optg, CONSISTENCYCHECK, "conformance-check" );

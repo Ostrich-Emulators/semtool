@@ -27,16 +27,16 @@ import org.openrdf.model.URI;
  *
  * @author ryan
  */
-public final class CheckWhatPanel extends javax.swing.JPanel {
+public final class CheckConsistencyPanel extends javax.swing.JPanel {
 
-	private static final Logger log = Logger.getLogger( CheckWhatPanel.class );
+	private static final Logger log = Logger.getLogger(CheckConsistencyPanel.class );
 	private final List<URI> conceptmodellist = new ArrayList<>();
 	private final List<URI> relationmodellist = new ArrayList<>();
 	private final LabeledPairRenderer<URI> crenderer = LabeledPairRenderer.getUriPairRenderer();
 	private final LabeledPairRenderer<URI> rrenderer = LabeledPairRenderer.getUriPairRenderer();
 	private final DefaultComboBoxModel<StringDistance> distancemodel = new DefaultComboBoxModel<>();
 
-	public CheckWhatPanel() {
+	public CheckConsistencyPanel() {
 		initComponents();
 		conceptList.setCellRenderer( crenderer );
 		relationList.setCellRenderer( rrenderer );
@@ -55,7 +55,7 @@ public final class CheckWhatPanel extends javax.swing.JPanel {
 		}
 	}
 
-	public CheckWhatPanel( boolean selNodes, boolean selRels ) {
+	public CheckConsistencyPanel( boolean selNodes, boolean selRels ) {
 		this();
 		selectNodes( selNodes );
 		selectRels( selRels );
