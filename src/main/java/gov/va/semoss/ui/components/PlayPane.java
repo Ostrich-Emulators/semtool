@@ -248,7 +248,7 @@ public class PlayPane extends JFrame {
 	protected final JMenu windowSelector = new JMenu( "Window" );
 	protected final JMenu fileMenu = new JMenu( "File" );
 	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
-	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As..." );
+	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
 	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging tab" );
 	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager tab" );
@@ -611,7 +611,7 @@ public class PlayPane extends JFrame {
 		leftView.setTabComponentAt( 0, dislbl );
 
 		owlPanel = makeOwlTab();
-		leftView.addTab( "SUDOWL", null, owlPanel, null );
+		//leftView.addTab( "SUDOWL", null, owlPanel, null );
 
 		JPanel outputPanel = makeOutputPanel();
 		leftView.addTab( "Graph Labels", null, outputPanel,
@@ -1073,6 +1073,7 @@ public class PlayPane extends JFrame {
 					closeall.setMnemonic( KeyEvent.VK_A );
 					windowSelector.addSeparator();
 
+
 					windowSelector.add( tilehor );
 					tilever.setToolTipText("Arrange Windows in vertical tiles");
 					tilever.setMnemonic(KeyEvent.VK_H);
@@ -1081,6 +1082,8 @@ public class PlayPane extends JFrame {
 					tilehor.setToolTipText("Arrange Windows in horizontal tiles");
 					tilehor.setMnemonic(KeyEvent.VK_V);
 					tilehor.setIcon(DbAction.getIcon( "window_tile_horizontal1"));
+
+
 
 					windowSelector.add( tilec );
 					tilec.setToolTipText( "Arrange Windows in cascade" );
@@ -1215,7 +1218,8 @@ public class PlayPane extends JFrame {
 		nodes.setToolTipText( "Export the Nodes" );
 		nodes.setMnemonic( KeyEvent.VK_N );
 		nodes.setToolTipText( "Export the Nodes" );
-		nodes.setIcon( DbAction.getIcon( "protege/individual" ) );
+		nodes.setIcon( DbAction.getIcon( "protege//individual1" ) );
+
 		loadingsheets.add( nodes );
 		//Nodes SubMenu
 		nodes.add( expnodes );
@@ -1536,9 +1540,13 @@ public class PlayPane extends JFrame {
 		} );
 
 
+
+
 		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Panel", true );
 		splithider.setToolTipText( "Disable the Left Panel" );
 		
+
+
 
 		splithider.addActionListener( new ActionListener() {
 
@@ -1548,9 +1556,13 @@ public class PlayPane extends JFrame {
 				if ( leftTabs.isVisible() ) {
 					mainSplitPane.setDividerLocation( 0.25 );
 
+
+
 					splithider.setToolTipText( "Disable the Left Panel" );
 				}else{
 					splithider.setToolTipText( "Enable the Left Panel" );
+
+
 
 				}
 			}
@@ -1636,7 +1648,7 @@ public class PlayPane extends JFrame {
 		hidecsp.setMnemonic( KeyEvent.VK_Q );
 		view.add( statbar );
 		statbar.setMnemonic( KeyEvent.VK_S );
-		view.add( sudowl );
+		//view.add( sudowl );
 		sudowl.setMnemonic( KeyEvent.VK_O );
 		view.add( tb );
 		tb.setMnemonic( KeyEvent.VK_T );
@@ -1678,6 +1690,8 @@ public class PlayPane extends JFrame {
 
 		fileMenu.setMnemonic( KeyEvent.VK_F );
 
+
+
 		//Object anchor;
 		//fileMenu.firePropertyChange("text to be spoken", fileMenu.getToolTipText(), anchor);
 		//AccessibleContext ac = getAccessibleContext();
@@ -1687,6 +1701,8 @@ public class PlayPane extends JFrame {
 		//fileMenu.getAccessibleContext().setAccessibleDescription("Test");
 		
 		fileMenu.setToolTipText("File Operations");
+
+
 
 
 		exiter.setMnemonic( KeyEvent.VK_X );

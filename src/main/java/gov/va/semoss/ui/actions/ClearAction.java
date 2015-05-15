@@ -46,7 +46,7 @@ public class ClearAction extends DbAction {
 
 	@Override
 	public boolean preAction( ActionEvent ae ) {
-		copywhat = new CopyWhatPanel( "Erase What Data?" );
+		copywhat = new CopyWhatPanel( "Clear What Data?" );
 		copywhat.showVocabularies( true );
 		
 		copywhat.getDataBox().addActionListener( new ActionListener(){
