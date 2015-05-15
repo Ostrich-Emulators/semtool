@@ -1218,7 +1218,7 @@ public class PlayPane extends JFrame {
 		nodes.setToolTipText( "Export the Nodes" );
 		nodes.setMnemonic( KeyEvent.VK_N );
 		nodes.setToolTipText( "Export the Nodes" );
-		nodes.setIcon( DbAction.getIcon( "protege//individual1" ) );
+		nodes.setIcon( DbAction.getIcon( "protege/individual" ) );
 
 		loadingsheets.add( nodes );
 		//Nodes SubMenu
