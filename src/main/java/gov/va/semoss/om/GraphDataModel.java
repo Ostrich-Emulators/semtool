@@ -4,7 +4,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.InMemoryJenaEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaConstructStatement;
-import gov.va.semoss.rdf.engine.impl.SesameJenaConstructWrapper;
 import gov.va.semoss.rdf.engine.impl.SesameJenaUpdateWrapper;
 import gov.va.semoss.ui.components.RDFEngineHelper;
 import gov.va.semoss.util.Constants;
@@ -40,7 +39,7 @@ import org.openrdf.sail.memory.MemoryStore;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
+import java.util.Collection;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data
@@ -183,10 +182,9 @@ public class GraphDataModel {
     try {
       rc.begin();
 
-      SesameJenaConstructWrapper sjw = RDFEngineHelper.runSesameConstructOrSelectQuery( engine, query );
-      while ( sjw.hasNext() ) {
-        SesameJenaConstructStatement statement = sjw.next();
-
+      Collection<SesameJenaConstructStatement> sjw 
+					= RDFEngineHelper.runSesameConstructOrSelectQuery( engine, query );
+      for( SesameJenaConstructStatement statement : sjw ){
         String thisSubject = "(<" + statement.getSubject() + ">)";
         String thisPredicate = "(<" + statement.getPredicate() + ">)";
         String thisObject = "(<" + statement.getObject() + ">)";
@@ -448,9 +446,10 @@ public class GraphDataModel {
         + "  {?Subject ?subProp  ?contains}"
         + "}";
 
-    SesameJenaConstructWrapper sjcw = RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
-    if ( sjcw.hasNext() ) {
-      containsRelation = " <" + sjcw.next().getSubject() + "> ";
+    Collection<SesameJenaConstructStatement> sjcw 
+				= RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
+    if ( !sjcw.isEmpty() ) {
+      containsRelation = " <" + sjcw.iterator().next().getSubject() + "> ";
     }
 
     return containsRelation;
@@ -524,9 +523,9 @@ public class GraphDataModel {
 				"}";
 		
 		int numResults = 0;
-		SesameJenaConstructWrapper sjcw = RDFEngineHelper.runSesameJenaSelectCheater(rc, query);
-		while(sjcw.hasNext()) {
-			SesameJenaConstructStatement sct = sjcw.next();
+		Collection<SesameJenaConstructStatement> sjcw 
+				= RDFEngineHelper.runSesameJenaSelectCheater(rc, query);
+		for( SesameJenaConstructStatement sct : sjcw ){
 			if ( baseFilterHash.containsKey( sct.getSubject() )
 					|| baseFilterHash.containsKey( sct.getPredicate() )
 					|| baseFilterHash.containsKey( sct.getObject() + "" ) ) {
@@ -564,9 +563,10 @@ public class GraphDataModel {
         + "}";
 
     int numResults = 0;
-    SesameJenaConstructWrapper sjcw = RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
-    while ( sjcw.hasNext() ) {
-      String subject = sjcw.next().getSubject();
+    Collection<SesameJenaConstructStatement> sjcw 
+				= RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
+		for( SesameJenaConstructStatement s : sjcw ){
+      String subject = s.getSubject();
       if ( !baseFilterHash.containsKey( subject ) && !vertStore.containsKey( subject ) ) {
         SEMOSSVertex vertex = new SEMOSSVertex( subject );
         //setLabel( vertex );
@@ -727,9 +727,9 @@ public class GraphDataModel {
   }
 
   public void removeView( String query, IEngine engine ) {
-    SesameJenaConstructWrapper sjw = RDFEngineHelper.runSesameConstructOrSelectQuery( engine, query );
-    while ( sjw.hasNext() ) {
-      SesameJenaConstructStatement st = sjw.next();
+		Collection<SesameJenaConstructStatement> sjw
+				= RDFEngineHelper.runSesameConstructOrSelectQuery( engine, query );
+		for( SesameJenaConstructStatement st : sjw ){
       org.openrdf.model.Resource subject = new URIImpl( st.getSubject() );
       org.openrdf.model.URI predicate = new URIImpl( st.getPredicate() );
       String delQuery = "DELETE DATA {";
