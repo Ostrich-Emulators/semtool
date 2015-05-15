@@ -212,7 +212,8 @@ public class InMemoryJenaEngine extends AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public org.openrdf.model.Model construct( String query ) throws RepositoryException, MalformedQueryException, QueryEvaluationException {
+	public org.openrdf.model.Model construct( QueryExecutor<org.openrdf.model.Model> query )
+			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
 	}
 

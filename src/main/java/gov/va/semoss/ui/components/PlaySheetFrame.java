@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapterImpl;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
@@ -310,7 +311,7 @@ public class PlaySheetFrame extends JInternalFrame {
 					}
 					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
 						updateProgress( "Preparing Display", 80 );
-						Model model = engine.construct( lqa.getSparql() );
+						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
 						cmp.create( model );
 						dsize = model.size();
 					}
