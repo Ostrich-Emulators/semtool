@@ -28,6 +28,7 @@ import gov.va.semoss.ui.components.renderers.RepositoryRenderer;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultIcons;
 import gov.va.semoss.util.Utility;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -37,6 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
@@ -50,6 +52,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
@@ -97,16 +100,20 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		doconformance = conform;
 		doreplace = replace;
 	//	setTitle( "Import Data Review 4" );
-	//	fileToLoad.getName()
+	//	fileToLoad.
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
 
 		showerrs.setVisible( doconformance );
+		
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
 			boolean meta, boolean conform, boolean replace ) {
 		this( eng, calc, meta, conform, replace );
+		String sName = toload.toString();
+		setTitle( sName.substring(sName.lastIndexOf("\\")+1, sName.lastIndexOf("]")) );
+		setToolTipText("Window of" + sName.substring(sName.lastIndexOf("\\")+1, sName.lastIndexOf("]")));
 		populateForFiles( toload );
 	}
 
