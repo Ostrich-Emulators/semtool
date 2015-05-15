@@ -251,8 +251,10 @@ public class PlayPane extends JFrame {
 	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
 	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
-	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging tab" );
-	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager tab" );
+	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging",
+			DbAction.getIcon( "log_tab1" ) );
+	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager",
+			DbAction.getIcon( "insight_manager_tab1" ) );
 
 	private final JToolBar toolbar;
 	private final JToolBar playsheetToolbar;
@@ -1175,7 +1177,12 @@ public class PlayPane extends JFrame {
 	}
 
 	protected JMenu buildToolMenuBar() {
-		return null;
+		JMenu tools = new JMenu( "Tools" );
+		tools.setMnemonic( KeyEvent.VK_T );
+		tools.setToolTipText( "Additional data tools" );
+		tools.add( loggingItem );
+		tools.add( iManageItem );
+		return tools;
 	}
 
 	protected JMenu buildDatabaseMenu() {
@@ -1664,7 +1671,7 @@ public class PlayPane extends JFrame {
 		fileMenuSaveAs.setEnabled( false );
 		fileMenuSaveAll.setEnabled( false );
 
-	//	AccessibleJMenu xx = new javax.swing.JMenu.AccessibleJMenu("test");
+		//	AccessibleJMenu xx = new javax.swing.JMenu.AccessibleJMenu("test");
 		JMenu newmenu = new JMenu( "New" );
 		newmenu.setToolTipText( "Create a new Database or Loading Sheet" );
 		newmenu.setMnemonic( KeyEvent.VK_N );
