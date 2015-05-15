@@ -68,7 +68,7 @@ public class VocabularyPanel extends javax.swing.JPanel {
     buttonpanel = new javax.swing.JPanel();
 
     jLabel1.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
-    jLabel1.setText("Add Vocabularies");
+    jLabel1.setText("Reload Vocabularies");
 
     buttonpanel.setLayout(new javax.swing.BoxLayout(buttonpanel, javax.swing.BoxLayout.PAGE_AXIS));
 
