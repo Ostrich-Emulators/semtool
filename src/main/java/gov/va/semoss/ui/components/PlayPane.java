@@ -1568,15 +1568,15 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Area",
+		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Panel",
 				getProp( prefs, QUERYPANEL ) );
 		//hidecsp.setToolTipText( "Shows/Hides query area" );
 
 		if ( getProp( prefs, QUERYPANEL ) == true ) {
-			hidecsp.setToolTipText( "Disable the Query Area" );
+			hidecsp.setToolTipText( "Disable the Query Panel" );
 		}
 		else {
-			hidecsp.setToolTipText( "Enable the Query Area" );
+			hidecsp.setToolTipText( "Enable the Query Panel" );
 		}
 
 		hidecsp.addActionListener( new ActionListener() {
