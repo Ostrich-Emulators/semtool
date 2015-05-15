@@ -31,103 +31,62 @@ import java.util.Set;
  */
 public class DefaultPlaySheetIcons {
 
+	private static final Set<Class<?>> knownClasses = new LinkedHashSet<>();
 	public static final Map<String, ImageIcon> defaultIcons = new HashMap<>();
-	public static final Set<Class<?>> knownClasses = new LinkedHashSet<>();
 	public static final Icon blank;
 
+	private DefaultPlaySheetIcons() {
+	}
+
 	static {
-		defaultIcons.put( "(Heat Map)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_heat_map3_16.png" ) ) );
-		defaultIcons.put( HeatMapPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_heat_map3_16.png" ) ) );
-
-		defaultIcons.put( "(Grid)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_grid2_16.png" ) ) );
-		defaultIcons.put( GridPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_grid2_16.png" ) ) );
-
-		defaultIcons.put( "(Raw Grid)",
-				new ImageIcon( Utility.loadImage( "icons16/excel_16.png" ) ) );
-		defaultIcons.put( GridRAWPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/excel_16.png" ) ) );
-
-		defaultIcons.put( "(Grid Scatter)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_grid_scatter1_16.png" ) ) );
-		defaultIcons.put( GridScatterSheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_grid_scatter1_16.png" ) ) );
-
-		defaultIcons.put( "(Graph)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_graph_16.png" ) ) );
-		defaultIcons.put( GraphPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_graph_16.png" ) ) );
-
-		defaultIcons.put( "(Metamodel Graph)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_metamodel1_16.png" ) ) );
-		defaultIcons.put( MetamodelGraphPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_metamodel1_16.png" ) ) );
-
-		defaultIcons.put( "(Pie Chart)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_pie_chart1_16.png" ) ) );
-		defaultIcons.put( PieChartPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_pie_chart1_16.png" ) ) );
-
-		defaultIcons.put( "(Column Chart)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_bar_chart1_16.png" ) ) );
-		defaultIcons.put( ColumnChartPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_bar_chart1_16.png" ) ) );
-
-		defaultIcons.put( "(Bar Chart)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_bar_chart1_16.png" ) ) );
-
-		defaultIcons.put( "(Parallel Coordinates)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_parcoords6_16.png" ) ) );
-		defaultIcons.put( ParallelCoordinatesPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_parcoords6_16.png" ) ) );
-
-		defaultIcons.put( "(Dendrogram)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_dendrogram1_16.png" ) ) );
-		defaultIcons.put( DendrogramPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_dendrogram1_16.png" ) ) );
-
-		defaultIcons.put( "(Sankey Diagram)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_sankey2_16.png" ) ) );
-		defaultIcons.put( SankeyPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_sankey2_16.png" ) ) );
-
-		defaultIcons.put( "(World Heat Map)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_world_heat_map3_16.png" ) ) );
-		defaultIcons.put( WorldHeatMapPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_world_heat_map3_16.png" ) ) );
-
-		defaultIcons.put( "(US Heat Map)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_us_heat_map1_16.png" ) ) );
-		defaultIcons.put( USHeatMapPlaySheet.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/questions_us_heat_map1_16.png" ) ) );
-
-		defaultIcons.put( "(Update Query)",
-				new ImageIcon( Utility.loadImage( "icons16/questions_update2_16.png" ) ) );
-
-		defaultIcons.put( LoadingPlaySheetBase.class.getName(),
-				new ImageIcon( Utility.loadImage( "icons16/import_data_review_16.png" ) ) );
-
-		blank = new ImageIcon( Utility.loadImage( "icons16/blank_16.png" ) );
-
 		// when adding new known classes, you must add the subclass before the 
 		// superclass, as the list is checked in order
-		knownClasses.add( LoadingPlaySheetBase.class );
-		knownClasses.add( HeatMapPlaySheet.class );
-		knownClasses.add( GridPlaySheet.class );
-		knownClasses.add( GridRAWPlaySheet.class );
-		knownClasses.add( GridScatterSheet.class );
-		knownClasses.add( GraphPlaySheet.class );
-		knownClasses.add( MetamodelGraphPlaySheet.class );
-		knownClasses.add( PieChartPlaySheet.class );
-		knownClasses.add( ColumnChartPlaySheet.class );
-		knownClasses.add( ParallelCoordinatesPlaySheet.class );
-		knownClasses.add( DendrogramPlaySheet.class );
-		knownClasses.add( SankeyPlaySheet.class );
-		knownClasses.add( WorldHeatMapPlaySheet.class );
-		knownClasses.add( USHeatMapPlaySheet.class );
+		blank = new ImageIcon( Utility.loadImage( "icons16/blank_16.png" ) );
+
+		setDefaultIcon( LoadingPlaySheetBase.class, "icons16/import_data_review_16.png" );
+
+		setDefaultIcon( "(Heat Map)", "icons16/questions_heat_map3_16.png" );
+		setDefaultIcon( HeatMapPlaySheet.class, "icons16/questions_heat_map3_16.png" );
+
+		setDefaultIcon( "(Grid)", "icons16/questions_grid2_16.png" );
+		setDefaultIcon( GridPlaySheet.class, "icons16/questions_grid2_16.png" );
+
+		setDefaultIcon( "(Raw Grid)", "icons16/questions_raw_grid2_16.png" );
+		setDefaultIcon( GridRAWPlaySheet.class, "icons16/questions_raw_grid2_16.png" );
+
+		setDefaultIcon( "(Grid Scatter)", "icons16/questions_grid_scatter1_16.png" );
+		setDefaultIcon( GridScatterSheet.class, "icons16/questions_grid_scatter1_16.png" );
+
+		setDefaultIcon( "(Graph)", "icons16/questions_graph_16.png" );
+		setDefaultIcon( GraphPlaySheet.class, "icons16/questions_graph_16.png" );
+
+		setDefaultIcon( "(Metamodel Graph)", "icons16/questions_metamodel1_16.png" );
+		setDefaultIcon( MetamodelGraphPlaySheet.class, "icons16/questions_metamodel1_16.png" );
+
+		setDefaultIcon( "(Pie Chart)", "icons16/questions_pie_chart1_16.png" );
+		setDefaultIcon( PieChartPlaySheet.class, "icons16/questions_pie_chart1_16.png" );
+
+		setDefaultIcon( "(Column Chart)", "icons16/questions_bar_chart1_16.png" );
+		setDefaultIcon( ColumnChartPlaySheet.class, "icons16/questions_bar_chart1_16.png" );
+
+		setDefaultIcon( "(Bar Chart)", "icons16/questions_bar_chart1_16.png" );
+
+		setDefaultIcon( "(Parallel Coordinates)", "icons16/questions_parcoords6_16.png" );
+		setDefaultIcon( ParallelCoordinatesPlaySheet.class, "icons16/questions_parcoords6_16.png" );
+
+		setDefaultIcon( "(Dendrogram)", "icons16/questions_dendrogram1_16.png" );
+		setDefaultIcon( DendrogramPlaySheet.class, "icons16/questions_dendrogram1_16.png" );
+
+		setDefaultIcon( "(Sankey Diagram)", "icons16/questions_sankey2_16.png" );
+		setDefaultIcon( SankeyPlaySheet.class, "icons16/questions_sankey2_16.png" );
+
+		setDefaultIcon( "(World Heat Map)", "icons16/questions_world_heat_map3_16.png" );
+		setDefaultIcon( WorldHeatMapPlaySheet.class, "icons16/questions_world_heat_map3_16.png" );
+
+		setDefaultIcon( "(US Heat Map)", "icons16/questions_us_heat_map1_16.png" );
+		setDefaultIcon( USHeatMapPlaySheet.class, "icons16/questions_us_heat_map1_16.png" );
+
+		setDefaultIcon( "(Update Query)", "icons16/questions_update2_16.png" );
 	}
 
 	public static void setDefaultIcon( Class<?> k, String imgloc ) {
@@ -136,7 +95,7 @@ public class DefaultPlaySheetIcons {
 	}
 
 	public static void setDefaultIcon( String key, String imgloc ) {
-		defaultIcons.put( key, new ImageIcon( Utility.loadImage( imgloc ) ) );
+		defaultIcons.put( key, Utility.loadImageIcon( imgloc ) );
 	}
 
 	public static ImageIcon getDefaultIcon( Class<?> klass ) {
@@ -152,5 +111,5 @@ public class DefaultPlaySheetIcons {
 		}
 
 		return null;
-	}
+	}	
 }

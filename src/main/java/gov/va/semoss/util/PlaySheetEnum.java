@@ -19,6 +19,7 @@
 package gov.va.semoss.util;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Enables a variable to be a set of predefined constants.
@@ -64,8 +65,8 @@ public enum PlaySheetEnum {
 		return this.sheetHint;
 	}
 	
-	public static ArrayList<String> getAllSheetNames(){
-		ArrayList<String> list = new ArrayList<String>();
+	public static List<String> getAllSheetNames(){
+		List<String> list = new ArrayList<>();
 		for (PlaySheetEnum e : PlaySheetEnum.values())
 		{
 			list.add(e.getSheetName());
@@ -73,8 +74,8 @@ public enum PlaySheetEnum {
 		return list;
 	}
 	
-	public static ArrayList<String> getAllSheetClasses(){
-		ArrayList<String> list = new ArrayList<String>();
+	public static List<String> getAllSheetClasses(){
+		List<String> list = new ArrayList<>();
 		for (PlaySheetEnum e : PlaySheetEnum.values())
 		{
 			list.add(e.getSheetClass());
