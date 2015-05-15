@@ -33,7 +33,7 @@ import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
-import gov.va.semoss.ui.components.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;

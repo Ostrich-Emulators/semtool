@@ -45,7 +45,7 @@ public class GraphMLWriter implements GraphWriter {
 
 	@Override
 	public void write( ImportData data, File output ) throws IOException {
-		output.mkdirs();
+		output.getParentFile().mkdirs();
 		try ( FileOutputStream fos = new FileOutputStream( output ) ) {
 			write( data, fos );
 		}
