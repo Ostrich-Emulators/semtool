@@ -16,12 +16,13 @@ import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.FileBrowsePanel;
-
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.PlaySheetFrame;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyVetoException;
 
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
@@ -29,9 +30,9 @@ import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,8 +50,8 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
-
 import javax.swing.JOptionPane;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
@@ -323,8 +324,17 @@ public class OpenAction extends DbAction {
 	public static void addGrids( Collection<File> xslxes, IEngine engine,
 			JDesktopPane pane ) {
 		int progressPerFile = 100 / xslxes.size();
-		PlaySheetFrame psf = new PlaySheetFrame( engine, "Import Data" );
+		String sTitle = xslxes.toString();
+		//PlaySheetFrame psf = new PlaySheetFrame( engine, "Import Data" );
+		PlaySheetFrame psf = new PlaySheetFrame( engine, sTitle.substring(sTitle.lastIndexOf("\\")+1, sTitle.lastIndexOf("]")) );
+		try {
+			psf.setIcon(true);
+		} catch (PropertyVetoException e) {
+			// TODO Auto-generated catch block
+			
+		}
 		pane.add( psf );
+		
 
 		POIReader xlsreader = new POIReader();
 		for ( File fileToLoad : xslxes ) {
