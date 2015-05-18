@@ -331,7 +331,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected void addPanel() {
 		try {
 			if ( gdm.enableSearchBar() ) {
-				searchPanel.getSearchController().indexStatements( gdm.getJenaModel() );
+//				JPM 05-19-2015 Commented out, there is an error here that is preventing the visualizations from being seen
+//				searchPanel.getSearchController().indexStatements( gdm.getJenaModel() );
 			}
 
 			GraphZoomScrollPane gzPane = new GraphZoomScrollPane( view );
