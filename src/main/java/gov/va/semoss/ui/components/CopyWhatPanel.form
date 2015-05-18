@@ -16,7 +16,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="label" alignment="0" pref="155" max="32767" attributes="0"/>
+          <Component id="label" alignment="0" max="32767" attributes="0"/>
           <Component id="vocabPanel" alignment="0" max="32767" attributes="0"/>
           <Group type="102" attributes="0">
               <Group type="103" groupAlignment="0" attributes="0">
@@ -35,7 +35,7 @@
               <Component id="data" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="insights" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="vocabPanel" max="32767" attributes="0"/>
           </Group>
       </Group>

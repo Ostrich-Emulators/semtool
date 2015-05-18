@@ -11,7 +11,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 
@@ -23,22 +22,35 @@ public class RepositoryRenderer extends DefaultListCellRenderer {
 
 	private static final Icon pin;
 	private static final Icon nopin;
+	private static final Icon nopinserver;
+	private static final Icon pinserver;
 
 	static {
 		pin = new ImageIcon( Utility.loadImage( "icons16/dbpin_16.png" ) );
 		nopin = new ImageIcon( Utility.loadImage( "icons16/db_16.png" ) );
+		nopinserver = new ImageIcon( Utility.loadImage( "icons16/db_sparql_endpoint1_16.png" ) );
+		pinserver = new ImageIcon( Utility.loadImage( "icons16/dbpin_sparql_endpoint1_16.png" ) );
 	}
 
 	@Override
 	public Component getListCellRendererComponent( JList list, Object val, int idx,
 			boolean sel, boolean hasfocus ) {
 
-		IEngine eng = IEngine.class.cast( val );		
-		String title = eng.getEngineName();//MetadataQuery.getEngineLabel( eng );
+		IEngine eng = IEngine.class.cast( val );
+		String title = eng.getEngineName();
 
-		boolean pinned = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) );
 		super.getListCellRendererComponent( list, title, idx, sel, hasfocus );
-		setIcon( pinned ? pin : nopin );
+
+		Icon icon;
+		boolean pinned = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) );
+		if ( eng.serverIsRunning() ) {
+			icon = ( pinned ? pinserver : nopinserver );
+		}
+		else {
+			icon = ( pinned ? pin : nopin );
+		}
+
+		setIcon( icon );
 
 		return this;
 	}

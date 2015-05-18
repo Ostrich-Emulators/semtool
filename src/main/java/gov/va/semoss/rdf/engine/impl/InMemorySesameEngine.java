@@ -27,8 +27,10 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.util.List;
+import java.util.Map;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -97,10 +99,12 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	 */
 	private void setRepositoryConnection( RepositoryConnection rc,
 			boolean takeControl ) {
+		
 		this.rc = rc;
 		iControlMyRc = takeControl;
 
 		try {
+			
 			startLoading( new Properties() );
 
 			URI baseuri = null;
@@ -116,9 +120,9 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			if ( null == baseuri ) {
 				// no base uri in the DB, so make a new one
 				baseuri = getNewBaseUri();
-				rc.begin();
+				//rc.begin();
 				rc.add( baseuri, RDF.TYPE, VAS.Database );
-				rc.commit();
+				//rc.commit();
 			}
 
 			setBaseUri( baseuri );

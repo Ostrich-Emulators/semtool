@@ -138,11 +138,12 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	/**
 	 * An extension point for subclasses to create their RepositoryConnection
+	 *
 	 * @param props
-	 * @throws RepositoryException 
+	 * @throws RepositoryException
 	 */
 	protected abstract void createRc( Properties props ) throws RepositoryException;
-	
+
 	@Override
 	protected URI setUris( String data, String schema ) {
 		URI baseuri = null;
@@ -434,29 +435,33 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	public static Model getConstruct( String sparqlstr, RepositoryConnection rc )
+	public static Model getConstruct( QueryExecutor<Model> query, RepositoryConnection rc )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 
-		String sparql = processNamespaces( sparqlstr );
+		String sparql = processNamespaces( query.bindAndGetSparql() );
+
 		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql );
-		Model model = new LinkedHashModel();
+		tq.setIncludeInferred( query.usesInferred() );
+
 		GraphQueryResult gqr = tq.evaluate();
 		while ( gqr.hasNext() ) {
-			model.add( gqr.next() );
+			query.getResults().add( gqr.next() );
 		}
 		gqr.close();
-		return model;
+
+		return query.getResults();
 	}
 
 	/**
 	 * Creates a new IEngine instance from the given repository connection.
+	 *
 	 * @param rc
-	 * @return 
+	 * @return
 	 */
-	public static IEngine wrap( RepositoryConnection rc ){
+	public static IEngine wrap( RepositoryConnection rc ) {
 		return new InMemorySesameEngine( rc );
 	}
-	
+
 	@Override
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
@@ -469,11 +474,9 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	@Override
-	public Model construct( String q )
-			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-
-		RepositoryConnection rc = getRawConnection();
-		return getConstruct( q, rc );
+	public Model construct( QueryExecutor<Model> q ) throws RepositoryException,
+			MalformedQueryException, QueryEvaluationException {
+		return getConstruct( q, getRawConnection() );
 	}
 
 	@Override

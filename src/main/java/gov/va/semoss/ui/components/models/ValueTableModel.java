@@ -7,6 +7,9 @@ package gov.va.semoss.ui.components.models;
 
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
 
+import gov.va.semoss.util.MultiMap;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,14 +39,19 @@ import org.openrdf.model.vocabulary.XMLSchema;
  */
 public class ValueTableModel extends AbstractTableModel {
 
+	public static final String ALLOW_INSERT = "allowinsert";
+	public static final String NEEDS_SAVE = "savesetting";
+	public static final String READ_ONLY = "readonly";
+
 	private static final long serialVersionUID = 7491106662313232478L;
+	private static final String EVERYTHING = "everything"; // for prop listeners
+	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
+	private static final Map<Class<?>, URI> DATATYPELOOKUP = new HashMap<>();
+	private static final ValueFactory VF = new ValueFactoryImpl();
 
 	private final List<Object[]> data = new ArrayList<>();
 	private final List<String> headers = new ArrayList<>();
 	private final List<Class<?>> columnClasses = new ArrayList<>();
-	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
-	private static final Map<Class<?>, URI> DATATYPELOOKUP = new HashMap<>();
-	private static final ValueFactory VF = new ValueFactoryImpl();
 
 	static {
 		TYPELOOKUP.put( XMLSchema.INT, Integer.class );
@@ -68,6 +76,7 @@ public class ValueTableModel extends AbstractTableModel {
 	private boolean readonly;
 	private boolean allowInsertsInPlace = false;
 	private boolean saveme = false;
+	private final MultiMap<String, PropertyChangeListener> listeners = new MultiMap<>();
 
 	public ValueTableModel() {
 		this( true );
@@ -87,6 +96,22 @@ public class ValueTableModel extends AbstractTableModel {
 		fireTableRowsDeleted( 0, ds );
 	}
 
+	public void addPropertyChangeListener( PropertyChangeListener pl ) {
+		listeners.add( EVERYTHING, pl );
+	}
+
+	public void addPropertyChangeListener( String prop, PropertyChangeListener pl ) {
+		listeners.add( prop, pl );
+	}
+
+	public void removePropertyChangeListener( PropertyChangeListener pl ) {
+		listeners.getNN( EVERYTHING ).remove( pl );
+	}
+
+	public void removePropertyChangeListener( String prop, PropertyChangeListener pl ) {
+		listeners.getNN( prop ).remove( pl );
+	}
+
 	/**
 	 * Permits this model to allow an empty row at the bottom where the user can
 	 * insert new rows of data, like old MS Access tables
@@ -94,7 +119,19 @@ public class ValueTableModel extends AbstractTableModel {
 	 * @param b allow?
 	 */
 	public void setAllowInsertsInPlace( boolean b ) {
+		PropertyChangeEvent pce
+				= new PropertyChangeEvent( this, ALLOW_INSERT, allowInsertsInPlace, b );
+
 		allowInsertsInPlace = b;
+
+		if ( !pce.getNewValue().equals( pce.getOldValue() ) ) {
+			for ( PropertyChangeListener pcl : listeners.getNN( EVERYTHING ) ) {
+				pcl.propertyChange( pce );
+			}
+			for ( PropertyChangeListener pcl : listeners.getNN( ALLOW_INSERT ) ) {
+				pcl.propertyChange( pce );
+			}
+		}
 	}
 
 	/**
@@ -113,7 +150,19 @@ public class ValueTableModel extends AbstractTableModel {
 	 * @param b
 	 */
 	public void setReadOnly( boolean b ) {
+		PropertyChangeEvent pce
+				= new PropertyChangeEvent( this, READ_ONLY, readonly, b );
+
 		readonly = b;
+
+		if ( !pce.getNewValue().equals( pce.getOldValue() ) ) {
+			for ( PropertyChangeListener pcl : listeners.getNN( EVERYTHING ) ) {
+				pcl.propertyChange( pce );
+			}
+			for ( PropertyChangeListener pcl : listeners.getNN( READ_ONLY ) ) {
+				pcl.propertyChange( pce );
+			}
+		}
 	}
 
 	public boolean isReadOnly() {
@@ -229,7 +278,6 @@ public class ValueTableModel extends AbstractTableModel {
 
 	@Override
 	public void setValueAt( Object aValue, int r, int c ) {
-		saveme = true;
 		Class<?> k = getColumnClass( c );
 
 		boolean isinsert = isInsertRow( r );
@@ -241,6 +289,8 @@ public class ValueTableModel extends AbstractTableModel {
 
 		data.get( r )[c] = k.cast( aValue );
 
+		setNeedsSave( true );
+
 		if ( isinsert ) {
 			fireTableRowsInserted( r, r );
 		}
@@ -250,7 +300,20 @@ public class ValueTableModel extends AbstractTableModel {
 	}
 
 	public void setNeedsSave( boolean b ) {
+		PropertyChangeEvent pce
+				= new PropertyChangeEvent( this, NEEDS_SAVE, saveme, b );
+
 		saveme = b;
+
+		if ( !pce.getNewValue().equals( pce.getOldValue() ) ) {
+			for ( PropertyChangeListener pcl : listeners.getNN( EVERYTHING ) ) {
+				pcl.propertyChange( pce );
+			}
+
+			for ( PropertyChangeListener pcl : listeners.getNN( NEEDS_SAVE ) ) {
+				pcl.propertyChange( pce );
+			}
+		}
 	}
 
 	public boolean needsSave() {

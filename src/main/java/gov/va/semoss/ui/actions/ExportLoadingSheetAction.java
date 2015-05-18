@@ -19,7 +19,7 @@ import javax.swing.JFileChooser;
 
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.ui.components.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;

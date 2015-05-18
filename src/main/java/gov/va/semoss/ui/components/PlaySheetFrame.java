@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapterImpl;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
@@ -63,6 +64,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	public static final String SAVE_AS = "saveas";
 	public static final String SAVE_ALL = "saveall";
 	public static final String EXPORT = "export";
+	private static final String SAVE_MNEMONIC = "* ";
 
 	private static final long serialVersionUID = 7908827976216133994L;
 	private static final Logger log = Logger.getLogger( PlaySheetFrame.class );
@@ -273,6 +275,16 @@ public class PlaySheetFrame extends JInternalFrame {
 		updateProgress( txt, jBar.getValue() + val );
 	}
 
+	public void showSaveMnemonic( boolean show ) {
+		String current = getTitle();
+		if ( show ) {
+			setTitle( SAVE_MNEMONIC + current );
+		}
+		else {
+			setTitle( current.replaceAll( "^\\" + SAVE_MNEMONIC, "" ) );
+		}
+	}
+
 	public ProgressTask getCreateTask( final String query ) {
 		final PlaySheetCentralComponent cmp = getActivePlaySheet();
 		//String q = query.replaceAll( "(?i)^CONSTRUCT[\\s]*\\{([^\\.]+)[\\.][\\s]*\\}", "SELECT $1" );		
@@ -299,7 +311,7 @@ public class PlaySheetFrame extends JInternalFrame {
 					}
 					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
 						updateProgress( "Preparing Display", 80 );
-						Model model = engine.construct( lqa.getSparql() );
+						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
 						cmp.create( model );
 						dsize = model.size();
 					}
