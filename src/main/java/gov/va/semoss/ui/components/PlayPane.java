@@ -620,7 +620,8 @@ public class PlayPane extends JFrame {
 
 		owlPanel = makeOwlTab();
 		//leftView.addTab( "SUDOWL", null, owlPanel, null );
-
+		
+		//Label
 		outputPanel = makeOutputPanel();
 		leftView.addTab( "Graph Labels", null, outputPanel,
 				"Customize the labels associated with the objects displayed on the graph" );
