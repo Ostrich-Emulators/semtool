@@ -88,6 +88,9 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 	 */
 	@Override
 	public void actionPerformed( ActionEvent actionevent ) {
+		//Open the "Display Pane": 
+        PlayPane.rightTabs.setSelectedIndex(0);
+
 		// get all the component
 		// get the current panel showing - need to do the isVisible
 		// currently assumes all queries are SPARQL, needs some filtering if
