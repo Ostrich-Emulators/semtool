@@ -41,6 +41,7 @@ import java.util.List;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
@@ -74,23 +75,22 @@ public class RDFEngineHelper {
 		logger.debug( "loadConceptHierarchy added " + numResults + " results to the sesame rc." );
 	}
 
-	/**
-	 * Loads the relation hierarchy.
-	 *
-	 * @param engine	Engine where data is stored.
-	 * @param predicates Predicate.
-	 * @param gdm Graph playsheet that allows properties to be added to the
-	 * repository connection.
-	 */
 	public static void loadRelationHierarchy( IEngine engine, String predicates, GraphDataModel gdm ) {
 		String query
-				= "CONSTRUCT { ?Subject ?Predicate ?Object} WHERE {"
-				+ "  {?Subject ?Predicate ?Object}"
-				+ "  {?Subject rdfs:subPropertyOf ?Object}"
-				+ "} BINDINGS ?Subject { " + predicates + " } ";
+				= "CONSTRUCT { ?s ?p ?o } WHERE {"
+				+ "  ?s ?p ?o ."
+				+ "  ?s a owl:objectProperty ."
+				+ "} BINDINGS ?s { " + predicates + " } ";
+		int n1 = addResultsToRC( engine, query, gdm );
 
-		int numResults = addResultsToRC( engine, query, gdm );
-		logger.debug( "loadRelationHierarchy added " + numResults + " results to the sesame rc." );
+		query
+				= "CONSTRUCT { ?s ?p ?o } WHERE {"
+				+ "  ?s ?p ?o ."
+				+ "  ?s a <" + engine.getSchemaBuilder().getRelationUri().build() + "> ."
+				+ "} BINDINGS ?s { " + predicates + " } ";
+		int n2 = addResultsToRC( engine, query, gdm );
+
+		logger.debug( "loadRelationHierarchy added " + ( n1 + n2 ) + " results to the sesame rc." );
 	}
 
 	/**
@@ -129,13 +129,8 @@ public class RDFEngineHelper {
 	 */
 	public static void genPropertiesRemote( IEngine engine, String subjects, String objects, String predicates, String containsRelation, GraphDataModel gdm ) {
 		String query
-				= "CONSTRUCT { ?Subject ?Predicate ?Object . ?Predicate ?type ?contains} WHERE {"
-				+ "  BIND(<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> AS ?type)"
-				+ "  BIND(" + containsRelation + " as ?contains)"
-				+ "  {?Predicate a " + containsRelation + ";}"
-				+ "  {?Subject ?Predicate ?Object}"
-				+ "}"
-				+ "BINDINGS ?Subject { " + subjects + " " + predicates + " " + objects + " }";
+				= "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o } "
+				+ "BINDINGS ?s { " + subjects + " " + predicates + " " + objects + " }";
 
 		int numResults = addResultsToRC( engine, query, gdm );
 		logger.debug( "genPropertiesRemote added " + numResults + " results to the sesame rc." );
@@ -153,9 +148,9 @@ public class RDFEngineHelper {
 	public static void genNodePropertiesLocal( RepositoryConnection rc, String containsRelation, GraphDataModel gdm ) {
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object} WHERE {"
-				+ "  {?Predicate a " + containsRelation + ";}"
-				+ "  {?Subject   a <" + DIHelper.getConceptURI().stringValue() + ">;}"
-				+ "  {?Subject   ?Predicate ?Object}"
+				+ "  ?Predicate a <" + DIHelper.getRelationURI().stringValue() + "> ."
+				+ "  ?Subject   a <" + DIHelper.getConceptURI().stringValue() + "> ."
+				+ "  ?Subject   ?Predicate ?Object"
 				+ "}";
 
 		Collection<SesameJenaConstructStatement> sjsc = runSesameJenaConstruct( rc, query );
@@ -179,12 +174,11 @@ public class RDFEngineHelper {
 	public static void genEdgePropertiesLocal( RepositoryConnection rc, String containsRelation, GraphDataModel gdm ) {
 		String query
 				= "SELECT ?edge ?prop ?value ?outNode ?inNode WHERE {"
-				+ "  {?prop     a                  " + containsRelation + ";}"
-				+ "  {?edge     rdfs:subPropertyOf <" + DIHelper.getRelationURI().stringValue() + ">;}"
-				+ "  {?outNode  a                  <" + DIHelper.getConceptURI().stringValue() + ">; }"
-				+ "  {?inNode   a                  <" + DIHelper.getConceptURI().stringValue() + ">; }"
-				+ "  {?edge     ?prop              ?value} "
-				+ "  {?outNode  ?edge              ?inNode} "
+				+ "  ?edge     a     ?reltype ."
+				+ "  ?outNode  a     ?concept ."
+				+ "  ?inNode   a     ?concept ."
+				+ "  ?edge     ?prop ?value . "
+				+ "  ?outNode  ?edge ?inNode . "
 				+ "}";
 
 		final int size[] = { 0 };
@@ -192,14 +186,17 @@ public class RDFEngineHelper {
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				gdm.addEdgeProperty( set.getValue( "edge" ).toString(),
-						set.getValue( "value" ).toString(),
-						set.getValue( "prop" ).toString(),
-						set.getValue( "outNode" ).toString(),
-						set.getValue( "inNode" ).toString() );
+				gdm.addEdgeProperty( set.getValue( "edge" ).stringValue(),
+						set.getValue( "value" ).stringValue(),
+						set.getValue( "prop" ).stringValue(),
+						set.getValue( "outNode" ).stringValue(),
+						set.getValue( "inNode" ).stringValue() );
 				size[0]++;
 			}
 		};
+
+		vqa.bind( "reltype", DIHelper.getRelationURI() );
+		vqa.bind( "concept", DIHelper.getConceptURI() );
 
 		AbstractSesameEngine.getSelectNoEx( vqa, rc, true );
 		logger.debug( "genEdgePropertiesLocal added " + size[0] + " edge properties." );
@@ -217,7 +214,7 @@ public class RDFEngineHelper {
 
 		Collection<SesameJenaConstructStatement> sjsc = runSesameJenaConstruct( engine, query );
 		for ( SesameJenaConstructStatement st : sjsc ) {
-			gdm.addToSesame( st, false );
+			gdm.addToSesame( st );
 			numResults++;
 		}
 
@@ -386,8 +383,8 @@ public class RDFEngineHelper {
 
 	private static SesameJenaConstructStatement toSjcs( Statement s ) {
 		SesameJenaConstructStatement sjcs = new SesameJenaConstructStatement();
-		sjcs.setSubject( s.getSubject().toString() );
-		sjcs.setPredicate( s.getPredicate().toString() );
+		sjcs.setSubject( s.getSubject().stringValue() );
+		sjcs.setPredicate( s.getPredicate().stringValue() );
 		sjcs.setObject( s.getObject() );
 		return sjcs;
 	}

@@ -122,10 +122,11 @@ public class VertexFilterData extends AbstractTableModel {
 		return edgeCount;
 	}
 
-	public Object getEdgeVal(int r, int c) {
-		if (edgeRows == null)
+	public Object getEdgeVal( int r, int c ) {
+		if ( edgeRows == null || 0 == edgeRows.length ) {
 			return null;
-		
+		}
+
 		return edgeRows[r][c];
 	}
 

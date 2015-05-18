@@ -749,7 +749,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			st.setPredicate( predicate );
 			st.setObject( baseObject );
 
-			gdm.addToSesame( st, true );
+			gdm.addToSesame( st );
 			log.debug( " Query....  " + parent + "<>" + child );
 		}
 

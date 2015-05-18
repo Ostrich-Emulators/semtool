@@ -23,7 +23,6 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -43,6 +42,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.turtle.TurtleWriter;
 
 /*
@@ -213,7 +213,7 @@ public class GraphDataModel {
 					objects += thisObject;
 				}
 
-				addToSesame( statement, false );
+				addToSesame( statement );
 
 				if ( search ) {
 					addToJenaModel3( statement );
@@ -290,31 +290,20 @@ public class GraphDataModel {
 				+ " statements to the baseFilterHash." );
 	}
 
-	/**
-	 * Method addToSesame.
-	 *
-	 * @param st SesameJenaConstructStatement
-	 * @param overrideURI boolean
-	 */
-	public void addToSesame( SesameJenaConstructStatement st, boolean overrideURI ) {
+	public void addToSesame( SesameJenaConstructStatement st ) {
 		Resource subject = new URIImpl( st.getSubject() );
 		URI predicate = new URIImpl( st.getPredicate() );
 		Value object = null;
 
-		if ( st.getObject() instanceof Resource && !overrideURI ) {
-			object = (Resource) st.getObject();
+		if ( st.getObject() instanceof Resource ) {
+			object = Resource.class.cast( st.getObject() );
 		}
-		else {
-			try {
-				object = new URIImpl( st.getObject().toString() );
-			}
-			catch ( Exception e ) {
-				log.warn( e, e );
-			}
+		else if ( st.getObject() instanceof Literal ) {
+			object = Literal.class.cast( st.getObject() );
 		}
 
-		if ( object == null ) {
-			object = new LiteralImpl( st.getObject().toString() );
+		if ( null == object ) {
+			object = new ValueFactoryImpl().createLiteral( object.toString() );
 		}
 
 		try {
@@ -538,10 +527,9 @@ public class GraphDataModel {
 	public void generateEdgesFromTriplesInRC() {
 		String query
 				= "SELECT DISTINCT ?Subject ?Predicate ?Object WHERE {"
-				+ "  {?Predicate rdfs:subPropertyOf <" + relationURI.stringValue() + ">;}"
-				+ "  {?Subject " + typeOrSubclass + " <" + conceptURI.stringValue() + ">;}"
-				+ "  {?Subject ?Predicate ?Object}"
-				+ "  FILTER(?Predicate != <" + relationURI.stringValue() + ">)"
+				+ "  ?Predicate a <" + relationURI.stringValue() + "> ."
+				+ "  ?Subject " + typeOrSubclass + " <" + conceptURI.stringValue() + "> ."
+				+ "  ?Subject ?Predicate ?Object"
 				+ "}";
 
 		int numResults = 0;
@@ -550,7 +538,7 @@ public class GraphDataModel {
 		for ( SesameJenaConstructStatement sct : sjcw ) {
 			if ( baseFilterHash.containsKey( sct.getSubject() )
 					|| baseFilterHash.containsKey( sct.getPredicate() )
-					|| baseFilterHash.containsKey( sct.getObject() + "" ) ) {
+					|| baseFilterHash.containsKey( sct.getObject().toString() ) ) {
 				continue;
 			}
 
