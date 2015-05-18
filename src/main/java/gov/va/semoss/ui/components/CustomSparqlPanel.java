@@ -1,6 +1,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.ui.components.renderers.PlaySheetRenderer;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -34,7 +35,6 @@ import javax.swing.event.InternalFrameListener;
 import org.apache.log4j.Logger;
 
 import aurelienribon.ui.css.Style;
-
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.DIHelper;
@@ -43,6 +43,7 @@ import gov.va.semoss.util.Utility;
 import gov.va.semoss.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
 
@@ -392,6 +393,9 @@ public class CustomSparqlPanel extends JPanel {
 
 		@Override
 		public void actionPerformed( ActionEvent e ) {
+			//Open the "Display Pane": 
+	        PlayPane.rightTabs.setSelectedIndex(0);
+	        
 			String playSheetString = playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
 			//Store the currently selected playsheet with the currently
 			//selected query tab:

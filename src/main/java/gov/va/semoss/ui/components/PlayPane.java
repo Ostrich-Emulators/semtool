@@ -204,7 +204,7 @@ public class PlayPane extends JFrame {
 			lblDBImportURL, lblDesignateBaseUri, lblDBImportUsername, lblDBImportPW,
 			lblDBImportDriverType;
 
-	protected final JTabbedPane leftTabs, rightTabs;
+	public static JTabbedPane leftTabs, rightTabs;
 	private final StatusBar statusbar;
 
 	private final DbAction creater = new CreateDbAction( UIPROGRESS, this );

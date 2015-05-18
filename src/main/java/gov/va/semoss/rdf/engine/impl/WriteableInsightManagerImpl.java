@@ -19,6 +19,8 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.UriSanitizer;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -313,6 +316,32 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
   @Override
   public WriteableParameterTab getWriteableParameterTab(){
 	  return wprmt;
+  }
+  
+  /**   Extracts from V-CAMP/SEMOSS preferences the user's name, email, and organization,
+   * and returns a string of user-info for saving with Insights, based upon these. If these 
+   * preferences have not been set, then the passe-in value is returned.
+   * 
+   * @param strOldUserInfo -- (String) User-info that has been displayed from a database fetch.
+   * 
+   * @return userInfoFromToolPreferences -- (String) Described above.
+   */
+  @Override
+  public String userInfoFromToolPreferences(String strOldUserInfo){
+	  String userInfo = strOldUserInfo;
+	  Preferences prefs = Preferences.userNodeForPackage(SemossPreferences.class);		
+	  String userPrefName = prefs.get(Constants.USERPREF_NAME, "").trim();
+	  String userPrefEmail = prefs.get(Constants.USERPREF_EMAIL, "").trim();
+	  userPrefEmail = (userPrefEmail.trim().equals("") == false) ? " <" + userPrefEmail.trim() + ">" : "";
+	  String userPrefOrg = prefs.get(Constants.USERPREF_ORG, "").trim();
+	  if(userPrefName.equals("") == false || userPrefEmail.equals("") == false || userPrefOrg.equals("") == false){
+		 if(userPrefName.equals("") || userPrefOrg.equals("")){
+			 userInfo = userPrefName + userPrefEmail + " " + userPrefOrg;
+		 }else{
+			 userInfo = userPrefName + userPrefEmail + ", " + userPrefOrg;
+		 }
+	  }
+	  return userInfo;
   }
     
 }//End WriteableInsightManager class.

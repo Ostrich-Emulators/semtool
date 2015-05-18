@@ -65,19 +65,8 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
 		  Literal now = insightVF.createLiteral( new Date() );		
-		  
-		  Preferences prefs = Preferences.userNodeForPackage(SemossPreferences.class);		
-		  String userPrefName = prefs.get(Constants.USERPREF_NAME, "");
-		  String userPrefOrg = prefs.get(Constants.USERPREF_ORG, "");
-		  Literal creator = insightVF.createLiteral( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
-		  if(userPrefName.equals("") == false || userPrefOrg.equals("") == false){
-			 if(userPrefName.equals("") || userPrefOrg.equals("")){
-				 creator = insightVF.createLiteral(userPrefName + userPrefOrg);
-			 }else{
-				 creator = insightVF.createLiteral(userPrefName + ", " + userPrefOrg);
-			 }
-		  }
-
+		  String strCreator = wim.userInfoFromToolPreferences("Created By Insight Manager, " + System.getProperty("release.nameVersion", "VA SEMOSS"));
+		  Literal creator = insightVF.createLiteral(strCreator);
 		  String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
@@ -265,23 +254,12 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		  boolean boolReturnValue = false;
 	      ValueFactory insightVF = rc.getValueFactory();
 		  Literal now = insightVF.createLiteral( new Date() );
-
-		  Preferences prefs = Preferences.userNodeForPackage(SemossPreferences.class);		
-		  String userPrefName = prefs.get(Constants.USERPREF_NAME, "");
-		  String userPrefOrg = prefs.get(Constants.USERPREF_ORG, "");
-		  Literal creator = insightVF.createLiteral( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
-		  if(userPrefName.equals("") == false || userPrefOrg.equals("") == false){
-			 if(userPrefName.equals("") || userPrefOrg.equals("")){
-				 creator = insightVF.createLiteral(userPrefName + userPrefOrg);
-			 }else{
-				 creator = insightVF.createLiteral(userPrefName + ", " + userPrefOrg);
-			 }
-		  }
-
-		  Literal title = insightVF.createLiteral(strTitle);
-		  
+		  String strCreator = wim.userInfoFromToolPreferences("Created By Insight Manager, " + System.getProperty("release.nameVersion", "VA SEMOSS"));
+		  Literal creator = insightVF.createLiteral(strCreator);
+		  Literal title = insightVF.createLiteral(strTitle);		  
 		  Literal description = insightVF.createLiteral(strDescription);
-	      String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
+
+		  String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
 
 		  try{
 	          rc.begin();
@@ -433,6 +411,9 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	  @Override
 	  public boolean savePerspective(String uri, String strTitle, String strDescription){
 		  boolean boolReturnValue = false;
+
+		  //Make sure that embedded new-line characters can be persisted:
+		  strDescription = strDescription.replace("\n", "\\n");
 		  
 		  String query = "PREFIX " + DCTERMS.PREFIX  + ": <" + DCTERMS.NAMESPACE + "> "
 		     + "DELETE{ ?uri rdfs:label ?label .  "
