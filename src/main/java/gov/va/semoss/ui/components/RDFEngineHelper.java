@@ -28,15 +28,12 @@ import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
-import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaConstructStatement;
-import gov.va.semoss.rdf.engine.impl.SesameJenaConstructWrapper;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
+import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.DIHelper;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -47,7 +44,6 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
-import org.openrdf.rio.ntriples.NTriplesWriter;
 
 /**
  * This class is responsible for loading many of the hierarchies available in
@@ -162,23 +158,13 @@ public class RDFEngineHelper {
 				+ "  {?Subject   ?Predicate ?Object}"
 				+ "}";
 
-//		try( FileWriter fw = new FileWriter( "/tmp/graph.nt" ) ){
-//			rc.export( new NTriplesWriter( fw ) );
-//		}
-//		catch( Exception e ){
-//			logger.error( e,e);
-//		}
-
-		int numResults = 0;
 		Collection<SesameJenaConstructStatement> sjsc = runSesameJenaConstruct( rc, query );
 		for ( SesameJenaConstructStatement s : sjsc ) {
 			SEMOSSVertex vertex = gdm.createOrRetrieveVertex( s.getSubject() );
 			vertex.setProperty( s.getPredicate(), s.getObject() );
 			gdm.storeVertex( vertex );
-
-			numResults++;
 		}
-		logger.debug( "genNodePropertiesLocal added " + numResults + " node properties." );
+		logger.debug( "genNodePropertiesLocal added " + sjsc.size() + " node properties." );
 	}
 
 	/**
@@ -280,44 +266,39 @@ public class RDFEngineHelper {
 		}
 	}
 
-	public static SesameJenaSelectWrapper runSesameJenaSelectWrapper( RepositoryConnection rc, String query ) {
-		IEngine engine = new InMemorySesameEngine( rc );
-		return runSesameJenaSelectWrapper( engine, query );
+	public static Collection<SesameJenaSelectStatement>
+			runSesameJenaSelectWrapper( RepositoryConnection rc, String query ) {
+		return AbstractSesameEngine.getSelectNoEx( getSjssAdapter( query ), rc, true );
 	}
 
-	public static SesameJenaSelectWrapper runSesameJenaSelectWrapper( IEngine engine, String query ) {
+	public static Collection<SesameJenaSelectStatement>
+			runSesameJenaSelectWrapper( IEngine engine, String query ) {
 		logger.debug( "Running query in runSesameJenaSelectWrapper:" + query );
-		SesameJenaSelectWrapper sjsc = new SesameJenaSelectWrapper();
 
 		try {
-			sjsc.setEngine( engine );
-			sjsc.setQuery( query );
-			sjsc.executeQuery();
-			sjsc.getVariables();
+			return engine.query( getSjssAdapter( query ) );
 		}
-		catch ( Exception ex ) {
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
 			logger.error( ex );
 		}
 
-		return sjsc;
+		return new ArrayList<>();
 	}
 
 	public static Collection<SesameJenaConstructStatement>
 			runSesameJenaSelectCheater( RepositoryConnection rc, String query ) {
-		IEngine engine = new InMemorySesameEngine( rc );
-		Collection<SesameJenaConstructStatement> list
-				= runSesameJenaSelectCheater( engine, query );
-		engine.closeDB();
-		return list;
+		return AbstractSesameEngine.getSelectNoEx( getSjssAdapter_c( query ), rc, true );
 	}
 
 	public static Collection<SesameJenaConstructStatement>
 			runSesameJenaConstruct( RepositoryConnection rc, String query ) {
-		IEngine engine = new InMemorySesameEngine( rc );
-		Collection<SesameJenaConstructStatement> stmt
-				= runSesameJenaConstruct( engine, query );
-		engine.closeDB();
-		return stmt;
+		try {
+			return toList( AbstractSesameEngine.getConstruct( new ModelQueryAdapter( query ), rc ) );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			logger.error( e, e );
+		}
+		return new ArrayList<>();
 	}
 
 	public static Collection<SesameJenaConstructStatement>
@@ -329,29 +310,19 @@ public class RDFEngineHelper {
 		return runSesameJenaSelectCheater( engine, query );
 	}
 
-	public static Collection<SesameJenaConstructStatement> runSesameJenaSelectCheater( IEngine engine, String query ) {
+	/**
+	 * Runs a SELECT query, but returns data as if it were a CONSTRUCT query
+	 *
+	 * @param engine
+	 * @param query
+	 * @return
+	 */
+	public static Collection<SesameJenaConstructStatement>
+			runSesameJenaSelectCheater( IEngine engine, String query ) {
 		logger.debug( "Running query in runSesameJenaSelectCheater: " + query );
 
-		ListQueryAdapter<SesameJenaConstructStatement> lqa
-				= new ListQueryAdapter<SesameJenaConstructStatement>( query ) {
-
-					@Override
-					public void handleTuple( BindingSet set, ValueFactory fac ) {
-						// we're simulating a CONSTRUCT query, so just assume the 
-						// first binding is subject, second is predicate, and third is object
-						SesameJenaConstructStatement stmt = new SesameJenaConstructStatement();
-
-						Iterator<Binding> it = set.iterator();
-
-						stmt.setSubject( it.next().toString() );
-						stmt.setPredicate( it.next().toString() );
-						stmt.setObject( it.next().toString() );
-						add( stmt );
-					}
-				};
-
 		try {
-			return engine.query( lqa );
+			return engine.query( getSjssAdapter_c( query ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			logger.error( e, e );
@@ -360,42 +331,72 @@ public class RDFEngineHelper {
 		return new ArrayList<>();
 	}
 
-	public static Collection<SesameJenaConstructStatement> 
-		runSesameJenaConstruct( IEngine engine, String query ) {
+	public static Collection<SesameJenaConstructStatement>
+			runSesameJenaConstruct( IEngine engine, String query ) {
 		logger.debug( "Running query in runSesameJenaConstruct: " + query );
 
-		List<SesameJenaConstructStatement> list = new ArrayList<>();
 		try {
-			Model model = engine.construct( new ModelQueryAdapter( query ) );
-			for ( Statement s : model ) {
-				SesameJenaConstructStatement sjcs = new SesameJenaConstructStatement();
-				sjcs.setSubject( s.getSubject().toString() );
-				sjcs.setPredicate( s.getPredicate().toString() );
-				sjcs.setObject( s.getObject().toString() );
-				list.add( sjcs );
-			}
+			return toList( engine.construct( new ModelQueryAdapter( query ) ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			logger.error( e, e );
 		}
 
-		return list;
+		return new ArrayList<>();
 	}
 
-	private static SesameJenaConstructWrapper runSesameQuery( SesameJenaConstructWrapper sjsc, IEngine engine, String query ) {
-		try {
-			sjsc.setEngine( engine );
-			sjsc.setQuery( query );
-			sjsc.execute();
+	private static ListQueryAdapter<SesameJenaSelectStatement> getSjssAdapter( String query ) {
+		return new ListQueryAdapter<SesameJenaSelectStatement>( query ) {
 
-			if ( !sjsc.hasNext() ) {
-				logger.debug( "Came into not having ANY data" );
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				SesameJenaSelectStatement stmt = new SesameJenaSelectStatement();
+				for ( Binding b : set ) {
+					stmt.setRawVar( b.getName(), b.getValue() );
+				}
+				add( stmt );
 			}
-		}
-		catch ( Exception ex ) {
-			logger.error( ex, ex );
-		}
+		};
+	}
 
-		return sjsc;
+	private static ListQueryAdapter<SesameJenaConstructStatement> getSjssAdapter_c( String query ) {
+		return new ListQueryAdapter<SesameJenaConstructStatement>( query ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				if ( 3 == set.size() ) {
+					// we're simulating a CONSTRUCT query, so just assume the 
+					// first binding is subject, second is predicate, and third is object
+					SesameJenaConstructStatement stmt = new SesameJenaConstructStatement();
+
+					Iterator<Binding> it = set.iterator();
+
+					stmt.setSubject( it.next().toString() );
+					stmt.setPredicate( it.next().toString() );
+					stmt.setObject( it.next() );
+					add( stmt );
+				}
+				else {
+					logger.error( "Could not simulate a CONSTRUCT statement (vars!=3) from: "
+							+ query );
+				}
+			}
+		};
+	}
+
+	private static SesameJenaConstructStatement toSjcs( Statement s ) {
+		SesameJenaConstructStatement sjcs = new SesameJenaConstructStatement();
+		sjcs.setSubject( s.getSubject().toString() );
+		sjcs.setPredicate( s.getPredicate().toString() );
+		sjcs.setObject( s.getObject() );
+		return sjcs;
+	}
+
+	private static List<SesameJenaConstructStatement> toList( Model m ) {
+		List<SesameJenaConstructStatement> list = new ArrayList<>();
+		for ( Statement s : m ) {
+			list.add( toSjcs( s ) );
+		}
+		return list;
 	}
 }
