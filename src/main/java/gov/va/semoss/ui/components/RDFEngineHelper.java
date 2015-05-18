@@ -68,8 +68,8 @@ public class RDFEngineHelper {
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object } WHERE {"
 				+ "  {?Subject a ?Object}"
-				+ "  {?Subject ?Predicate ?Object}"
-				+ "} BINDINGS ?Subject { " + subjects + objects + " } ";
+				+ "  {?Subject ?Predicate ?Object} FILTER ( isURI( ?Object ) )"
+				+ "} BINDINGS ?Subject { " + subjects + objects + " }";
 
 		int numResults = addResultsToRC( engine, query, gdm );
 		logger.debug( "loadConceptHierarchy added " + numResults + " results to the sesame rc." );

@@ -1,12 +1,8 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.impl.InMemoryJenaEngine;
-import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaConstructStatement;
-import gov.va.semoss.rdf.engine.impl.SesameJenaUpdateWrapper;
 import gov.va.semoss.ui.components.RDFEngineHelper;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 
@@ -18,16 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.Update;
-import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -38,11 +27,26 @@ import org.openrdf.sail.memory.MemoryStore;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import gov.va.semoss.rdf.engine.impl.InMemoryJenaEngine;
+import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
+import gov.va.semoss.rdf.engine.impl.SesameJenaUpdateWrapper;
+import gov.va.semoss.util.Constants;
+import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import org.apache.commons.io.FileUtils;
+import org.openrdf.model.Literal;
+import org.openrdf.model.Namespace;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.Update;
+import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.rio.turtle.TurtleWriter;
 
 /*
@@ -97,6 +101,9 @@ public class GraphDataModel {
 			myRepository.initialize();
 
 			rc = myRepository.getConnection();
+			for ( Map.Entry<String, String> ns : Utility.DEFAULTNAMESPACES.entrySet() ) {
+				rc.setNamespace( ns.getKey(), ns.getValue() );
+			}
 		}
 		catch ( RepositoryException re ) {
 			log.error( re, re );
@@ -226,25 +233,61 @@ public class GraphDataModel {
 
 			if ( subjects.length() > 0 || predicates.length() > 0 || objects.length() > 0 ) {
 				RDFEngineHelper.loadConceptHierarchy( engine, subjects, objects, this );
+				print( "in-add-1" );
 				RDFEngineHelper.loadRelationHierarchy( engine, predicates, this );
+				print( "in-add-2" );
 			}
 
 			if ( prop ) {
 				RDFEngineHelper.loadPropertyHierarchy( engine, predicates, getContainsRelation(), this );
+				print( "in-add-3" );
 				RDFEngineHelper.genPropertiesRemote( engine, subjects, objects, predicates, getContainsRelation(), this );
+				print( "in-add-4" );
 			}
 
 			rc.commit();
-
-			try ( FileWriter fw = new FileWriter( new File( FileUtils.getTempDirectory(),
-					"graph.ttl" ) ) ) {
-				rc.export( new TurtleWriter( fw ) );
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
-
+			print( "graph" );
 			modelCounter++;
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+		}
+	}
+
+	private void print( String fname ) {
+		try ( FileWriter fw = new FileWriter( new File( FileUtils.getTempDirectory(),
+				fname + ".ttl" ) ) ) {
+			TurtleWriter tw = new TurtleWriter( fw );
+			List<Statement> stmts = Iterations.asList( rc.getStatements( null, null, null, true ) );
+			Collections.sort( stmts, new Comparator<Statement>() {
+
+				@Override
+				public int compare( Statement o1, Statement o2 ) {
+					int diff = o1.getSubject().stringValue().compareTo( o2.getSubject().stringValue() );
+					if ( 0 == diff ) {
+						diff = o1.getPredicate().stringValue().compareTo( o2.getPredicate().stringValue() );
+
+						if ( 0 == diff ) {
+							diff = o1.getObject().stringValue().compareTo( o2.getObject().stringValue() );
+						}
+					}
+
+					return diff;
+				}
+			} );
+
+			tw.startRDF();
+			RepositoryResult<Namespace> en = rc.getNamespaces();
+			while ( en.hasNext() ) {
+				Namespace ns = en.next();
+				tw.handleNamespace( ns.getPrefix(), ns.getName() );
+			}
+			en.close();
+
+			for ( Statement s : stmts ) {
+				tw.handleStatement( s );
+			}
+			tw.endRDF();
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
@@ -303,19 +346,17 @@ public class GraphDataModel {
 		}
 
 		if ( null == object ) {
-			object = new ValueFactoryImpl().createLiteral( object.toString() );
+			object = new ValueFactoryImpl().createLiteral( st.getObject().toString() );
 		}
 
 		try {
-			if ( rc.hasStatement( subject, predicate, object, true ) ) {
-				return;
-			}
+			if ( !rc.hasStatement( subject, predicate, object, true ) ) {
+				if ( CREATION_METHOD.OVERLAY == method ) {
+					curRC.add( subject, predicate, object );
+				}
 
-			if ( method == CREATION_METHOD.OVERLAY ) {
-				curRC.add( subject, predicate, object );
+				rc.add( subject, predicate, object );
 			}
-
-			rc.add( subject, predicate, object );
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
@@ -527,7 +568,7 @@ public class GraphDataModel {
 	public void generateEdgesFromTriplesInRC() {
 		String query
 				= "SELECT DISTINCT ?Subject ?Predicate ?Object WHERE {"
-				+ "  ?Predicate a <" + relationURI.stringValue() + "> ."
+				+ "  ?Predicate a owl:ObjectProperty ."
 				+ "  ?Subject " + typeOrSubclass + " <" + conceptURI.stringValue() + "> ."
 				+ "  ?Subject ?Predicate ?Object"
 				+ "}";
@@ -543,7 +584,8 @@ public class GraphDataModel {
 			}
 
 			SEMOSSVertex vertex1 = createOrRetrieveVertex( sct.getSubject() );
-			SEMOSSVertex vertex2 = createOrRetrieveVertex( sct.getObject() + "", sct.getObject() );
+			SEMOSSVertex vertex2 
+					= createOrRetrieveVertex( sct.getObject().toString(), sct.getObject() );
 
 			// check to see if this is another type of edge
 			String edgeString = vertex1.getProperty( Constants.VERTEX_NAME ) + ":" + vertex2.getProperty( Constants.VERTEX_NAME );
