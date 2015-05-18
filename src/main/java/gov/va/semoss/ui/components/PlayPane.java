@@ -148,6 +148,7 @@ public class PlayPane extends JFrame {
 	private final String IMANAGE = "iManagePanel";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
+	private final String GFLABEL = "graphlabel";
 	private final String LOGGING = "loggingpanel";
 	private final String QUERYPANEL = "customSparqlPanel";
 	public static final String UIPROGRESS = "UI";
@@ -174,6 +175,8 @@ public class PlayPane extends JFrame {
 
 	// Left label panel
 	private JPanel filterPanel;
+	//private JPanel filterLabel;
+	private JPanel outputPanel;
 	public JTable labelTable, tooltipTable;
 
 	// SUDOWL Panel Components
@@ -586,6 +589,11 @@ public class PlayPane extends JFrame {
 		if ( !fpref ) {
 			leftTabs.remove( filterPanel );
 		}
+		//Label
+		boolean flabel = prefs.getBoolean( GFLABEL, false );
+		if ( !flabel ) {
+			leftTabs.remove( outputPanel );
+		}
 
 		boolean lpref = prefs.getBoolean( LOGGING, false );
 		if ( !lpref ) {
@@ -613,12 +621,15 @@ public class PlayPane extends JFrame {
 		owlPanel = makeOwlTab();
 		//leftView.addTab( "SUDOWL", null, owlPanel, null );
 
-		JPanel outputPanel = makeOutputPanel();
+		outputPanel = makeOutputPanel();
 		leftView.addTab( "Graph Labels", null, outputPanel,
 				"Customize the labels associated with the objects displayed on the graph" );
 
 		filterPanel = makeFilterPanel();
 		leftView.addTab( "Graph Filter", null, filterPanel, "Customize graph display" );
+		//Label
+		//filterLabel = makeFilterPanel();
+		//leftView.addTab( "Graph Filter", null, filterPanel, "Customize graph display" );
 
 		cosmeticsPanel = makeGraphCosmeticsPanel();
 		leftView.addTab( "Graph Cosmetics", null, cosmeticsPanel,
@@ -1356,6 +1367,7 @@ public class PlayPane extends JFrame {
 		preflistenermap.put( Constants.GPSSudowl, owlPanel );
 		preflistenermap.put( GCOSMETICS, cosmeticsPanel );
 		preflistenermap.put( GFILTER, filterPanel );
+		preflistenermap.put( GFLABEL, outputPanel );
 		preflistenermap.put( LOGGING, loggingPanel );
 
 		ActionListener preflistener = new ActionListener() {
@@ -1377,6 +1389,9 @@ public class PlayPane extends JFrame {
 						// Enable- Disable Logic
 						if ( GFILTER.equals( cmd ) ) {
 							item.setToolTipText( "Disable the Graph Filter Tab " );
+						}
+						else if ( GFLABEL.equals( cmd ) ) {
+							item.setToolTipText( "Disable the Graph Label Tab" );
 						}
 						else if ( LOGGING.equals( cmd ) ) {
 							item.setToolTipText( "Disable the Logging Tab" );
@@ -1401,7 +1416,12 @@ public class PlayPane extends JFrame {
 						else if ( filterPanel == panel ) {
 							leftTabs.addTab( "Graph Filter", null, filterPanel,
 									"Customize graph display" );
-						}
+						} 
+						//Label
+						else if ( outputPanel == panel ) {
+							leftTabs.addTab( "Graph Label", null, outputPanel,
+									"Customize graph Label" );
+						} 
 						else if ( loggingPanel == panel ) {
 							rightTabs.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
@@ -1414,6 +1434,9 @@ public class PlayPane extends JFrame {
 					else {
 						if ( GFILTER.equals( cmd ) ) {
 							item.setToolTipText( "Enable the Graph Filter Tab " );
+						}
+						else if ( GFLABEL.equals( cmd ) ) {
+							item.setToolTipText( "Enable the Graph Label Tab" );
 						}
 						else if ( LOGGING.equals( cmd ) ) {
 							item.setToolTipText( "Enable the Logging Tab" );
@@ -1496,6 +1519,7 @@ public class PlayPane extends JFrame {
 		gfilt.setActionCommand( GFILTER );
 		gfilt.addActionListener( preflistener );
 		//	gfilt.setToolTipText( "Enables/Disables graph filter tab" );
+		
 
 		if ( getProp( prefs, GFILTER ) == true ) {
 			gfilt.setToolTipText( "Disable the Graph Filter Tab" );
@@ -1504,6 +1528,13 @@ public class PlayPane extends JFrame {
 			gfilt.setToolTipText( "Enable the Graph Filter Tab" );
 		}
 
+		//Graph Labels tab
+		final JCheckBoxMenuItem gflab = new JCheckBoxMenuItem( "Graph Label tab",
+				getProp( prefs, GFLABEL ) );
+		gflab.setActionCommand( GFLABEL );
+		gflab.addActionListener( preflistener );
+		
+		
 		loggingItem.setSelected( getProp( prefs, LOGGING ) );
 		loggingItem.setActionCommand( LOGGING );
 		loggingItem.addActionListener( preflistener );
@@ -1638,6 +1669,8 @@ public class PlayPane extends JFrame {
 		gcos.setMnemonic( KeyEvent.VK_C );
 		view.add( gfilt );
 		gfilt.setMnemonic( KeyEvent.VK_F );
+		view.add( gflab );
+		gflab.setMnemonic( KeyEvent.VK_G );
 		view.add( iManageItem );
 		iManageItem.setMnemonic( KeyEvent.VK_I );
 		view.add( splithider );
