@@ -42,6 +42,7 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -70,7 +71,7 @@ public class GraphDataModel {
 	private List<RepositoryConnection> rcStore = new ArrayList<>();
 
 	private final Map<String, String> baseFilterHash = new HashMap<>();
-	protected Map<URI, String> labelcache = new HashMap<>();
+	protected Map<Resource, String> labelcache = new HashMap<>();
 
 	private Model jenaModel, curModel;
 	private List<Model> modelStore = new ArrayList<>();
@@ -167,8 +168,8 @@ public class GraphDataModel {
 			return;
 		}
 
-		RDFEngineHelper.genNodePropertiesLocal( rc, getContainsRelation(), this );
-		RDFEngineHelper.genEdgePropertiesLocal( rc, getContainsRelation(), this );
+		RDFEngineHelper.genNodePropertiesLocal( rc, this );
+		RDFEngineHelper.genEdgePropertiesLocal( rc, this );
 
 		generateVerticesFromConceptsInRC();
 		generateEdgesFromTriplesInRC();
@@ -189,35 +190,39 @@ public class GraphDataModel {
 	 *
 	 */
 	public void processData( String query, IEngine engine ) {
-		Set<URI> urisNeedingLabels = new HashSet<>();
-		String subjects = "";
-		String predicates = "";
-		String objects = "";
+		Set<Resource> urisNeedingLabels = new HashSet<>();
+		Set<URI> subjects = new HashSet<>();
+		Set<URI> predicates = new HashSet<>();
+		Set<Value> objects = new HashSet<>();
+		Set<URI> objuris = new HashSet<>();
 
 		try {
 			rc.begin();
-
+			ValueFactory vf = rc.getValueFactory();
+			
 			Collection<SesameJenaConstructStatement> sjw
 					= RDFEngineHelper.runSesameConstructOrSelectQuery( engine, query );
 			for ( SesameJenaConstructStatement statement : sjw ) {
-				String thisSubject = "(<" + statement.getSubject() + ">)";
-				String thisPredicate = "(<" + statement.getPredicate() + ">)";
-				String thisObject = "(<" + statement.getObject() + ">)";
-
-				urisNeedingLabels.add( new URIImpl( statement.getSubject() ) );
-				urisNeedingLabels.add( new URIImpl( statement.getPredicate() ) );
-				if ( statement.getObject() instanceof URI ) {
-					urisNeedingLabels.add( URI.class.cast( statement.getObject() ) );
+				URI sub = vf.createURI( statement.getSubject() );
+				URI pred = vf.createURI( statement.getPredicate() );
+				Value val = Value.class.cast( statement.getObject() );
+				
+				urisNeedingLabels.add( sub );
+				urisNeedingLabels.add( pred );
+				if ( val instanceof URI ) {
+					URI o = URI.class.cast( val );
+					objuris.add( o );
+					urisNeedingLabels.add( o );
 				}
 
-				if ( !subjects.contains( thisSubject ) ) {
-					subjects += thisSubject;
+				if ( !subjects.contains( sub ) ) {
+					subjects.add( sub );
 				}
-				if ( !predicates.contains( thisPredicate ) ) {
-					predicates += thisPredicate;
+				if ( !predicates.contains( pred ) ) {
+					predicates.add( pred );
 				}
-				if ( !objects.contains( thisObject ) ) {
-					objects += thisObject;
+				if ( !objects.contains( val ) ) {
+					objects.add(  val );
 				}
 
 				addToSesame( statement );
@@ -231,8 +236,8 @@ public class GraphDataModel {
 			loadOwlData( subjects, engine );
 			labelcache.putAll( Utility.getInstanceLabels( urisNeedingLabels, engine ) );
 
-			if ( subjects.length() > 0 || predicates.length() > 0 || objects.length() > 0 ) {
-				RDFEngineHelper.loadConceptHierarchy( engine, subjects, objects, this );
+			if ( !( subjects.isEmpty() && predicates.isEmpty() && objects.isEmpty() ) ){
+				RDFEngineHelper.loadConceptHierarchy( engine, subjects, objuris, this );
 				//print( "in-add-1" );
 				RDFEngineHelper.loadRelationHierarchy( engine, predicates, this );
 				//print( "in-add-2" );
@@ -241,7 +246,7 @@ public class GraphDataModel {
 			if ( prop ) {
 				RDFEngineHelper.loadPropertyHierarchy( engine, predicates, this );
 				print( "in-add-3" );
-				RDFEngineHelper.genPropertiesRemote( engine, subjects, objects, predicates, this );
+				RDFEngineHelper.genPropertiesRemote( engine, subjects, objuris, predicates, this );
 				print( "in-add-4" );
 			}
 
@@ -300,7 +305,7 @@ public class GraphDataModel {
 	 * Adds the base relationships to the metamodel. This links the hierarchy that
 	 * tool needs to the metamodel being queried.
 	 */
-	private void loadOwlData( String subjects, IEngine engine ) throws RepositoryException {
+	private void loadOwlData( Collection<URI> subjects, IEngine engine ) throws RepositoryException {
 		if ( loadedOWLS.contains( engine ) ) {
 			return;
 		}
@@ -308,7 +313,7 @@ public class GraphDataModel {
 		loadedOWLS.add( engine );
 
 		for ( Statement statement : engine.getOwlData() ) {
-			if ( subjects.contains( statement.getSubject().stringValue() ) ) {
+			if ( subjects.contains( URI.class.cast( statement.getSubject() ) ) ){
 				rc.add( statement );
 			}
 		}

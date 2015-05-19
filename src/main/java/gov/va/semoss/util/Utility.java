@@ -80,6 +80,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xerces.util.XMLChar;
+import org.openrdf.model.BNode;
+import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -346,20 +348,20 @@ public class Utility {
 	 *
 	 * @return a map of URI=&gt;label
 	 */
-	public static Map<URI, String> getInstanceLabels( final Collection<URI> uris,
-			IEngine eng ) {
+	public static <X extends Resource> Map<X, String>
+			getInstanceLabels( final Collection<X> uris, IEngine eng ) {
 		if ( uris.isEmpty() ) {
 			return new HashMap<>();
 		}
 
-		final Map<URI, String> retHash = new HashMap<>();
+		final Map<Resource, String> retHash = new HashMap<>();
 
 		StringBuilder sb
 				= new StringBuilder( "SELECT ?s ?label WHERE { ?s rdfs:label ?label }" );
 		sb.append( " VALUES ?s {" );
-		for ( URI uri : uris ) {
+		for ( Resource uri : uris ) {
 			if ( null == uri ) {
-				log.warn( "trying to find the label of a null URI? (probably a bug)" );
+				log.warn( "trying to find the label of a null Resource? (probably a bug)" );
 			}
 			else {
 				sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
@@ -382,13 +384,21 @@ public class Utility {
 		}
 
 		// add any URIs that don't have a label, but were in the argument collection
-		Set<URI> todo = new HashSet<>( uris );
+		Set<Resource> todo = new HashSet<>( uris );
 		todo.removeAll( retHash.keySet() );
-		for ( URI u : todo ) {
-			retHash.put( u, u.getLocalName() );
+		for ( Resource u : todo ) {
+			if ( u instanceof URI ) {
+				retHash.put( u, URI.class.cast( u ).getLocalName() );
+			}
+			else if ( u instanceof BNode ) {
+				retHash.put( u, BNode.class.cast( u ).getID() );
+			}
+			else {
+				retHash.put( u, u.stringValue() );
+			}
 		}
 
-		return retHash;
+		return (Map<X, String>) retHash;
 	}
 
 	/**
@@ -396,27 +406,43 @@ public class Utility {
 	 * gov.va.semoss.rdf.engine.api.IEngine) }, but returns a sorted map with
 	 * consistent iteration pattern
 	 *
-	 * @param urilabels a mapping of URIs to their labels. Say, the results of
-	 * null	null	null	null null null null null null	null	null	null	null	null	null
-	 * null	null	null	null	null	null	null	null	 {@link #getInstanceLabels(java.util.Collection, 
-   * gov.va.semoss.rdf.engine.api.IEngine) }
+	 * @param urilabels a mapping of URIs to their labels. Say, the results of {@link #getInstanceLabels(java.util.Collection,
+	 * gov.va.semoss.rdf.engine.api.IEngine) }
 	 *
 	 * @return the results
 	 */
-	public static Map<URI, String> sortUrisByLabel( Map<URI, String> urilabels ) {
-		List<UriLabelPair> pairs = new ArrayList<>();
+	public static <X extends Resource> Map<X, String> sortUrisByLabel( Map<X, String> urilabels ) {
+		List<ResourceLabelPair> pairs = new ArrayList<>();
 
-		for ( Map.Entry<URI, String> p : urilabels.entrySet() ) {
-			pairs.add( new UriLabelPair( p.getKey(), p.getValue() ) );
+		for ( Map.Entry<X, String> p : urilabels.entrySet() ) {
+			Resource r = p.getKey();
+
+			pairs.add( new ResourceLabelPair( r, p.getValue() ) );
 		}
 		Collections.sort( pairs );
 
-		LinkedHashMap<URI, String> ret = new LinkedHashMap<>();
-		for ( UriLabelPair ulp : pairs ) {
-			ret.put( ulp.getUri(), ulp.getLabel() );
+		LinkedHashMap<Resource, String> ret = new LinkedHashMap<>();
+		for ( ResourceLabelPair ulp : pairs ) {
+			ret.put( ulp.r, ulp.l );
 		}
 
-		return ret;
+		return (Map<X, String>) ret;
+	}
+
+	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
+
+		public final Resource r;
+		public final String l;
+
+		public ResourceLabelPair( Resource r, String l ) {
+			this.r = r;
+			this.l = l;
+		}
+
+		@Override
+		public int compareTo( ResourceLabelPair t ) {
+			return l.compareTo( t.l );
+		}
 	}
 
 	/**
@@ -1070,5 +1096,31 @@ public class Utility {
 	public static void resetJTable( String tableKey ) {
 		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
 		log.debug( "Resetting the " + tableKey + " table model." );
+	}
+
+	/**
+	 * Implodes the given collection, appending <code>start</code> before each
+	 * element, and <code>stop</code> after each one, and <code>sep</code> in
+	 * between
+	 *
+	 * @param collection the elements to implode. {@link Object#toString()} will
+	 * be called on each one
+	 * @param start what to put before each element
+	 * @param stop what to put after each element
+	 * @param sep what to put between elements
+	 * @return a string representation of the given collection. If the collection
+	 * is empty or null, an empty string will be returned.
+	 */
+	public static String implode( Collection<?> collection, String start, String stop,
+			String sep ) {
+		StringBuilder sb = new StringBuilder();
+		for ( Object o : collection ) {
+			if ( 0 != sb.length() ) {
+				sb.append( sep );
+			}
+			sb.append( start ).append( o.toString() ).append( stop );
+		}
+
+		return sb.toString();
 	}
 }
