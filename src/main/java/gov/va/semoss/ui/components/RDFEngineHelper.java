@@ -65,59 +65,46 @@ public class RDFEngineHelper {
 	 * repository connection.
 	 */
 	public static void loadConceptHierarchy( IEngine engine, Collection<URI> subjects,
-			Collection<URI> objects, GraphDataModel gdm ) {
+			GraphDataModel gdm ) {
 
 		String subs = Utility.implode( subjects, "<", ">", " " );
-		String objs = Utility.implode( objects, "<", ">", " " );
 
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object } WHERE {"
 				+ "  {?Subject a ?Object}"
 				+ "  {?Subject ?Predicate ?Object} FILTER ( isURI( ?Object ) )"
-				+ "} VALUES ?Subject { " + subs + objs + " }";
+				+ "} VALUES ?Subject { " + subs + " }";
 
 		int numResults = addResultsToRC( engine, query, gdm );
 		logger.debug( "loadConceptHierarchy added " + numResults + " results to the sesame rc." );
 	}
 
-	public static void loadRelationHierarchy( IEngine engine, Collection<URI> predicates, GraphDataModel gdm ) {
-		String preds = Utility.implode( predicates, "(<", ">)", " " );
-		
+	public static void loadRelationHierarchy( IEngine engine, Collection<URI> predicates,
+			GraphDataModel gdm ) {
+		String preds = Utility.implode( predicates, "<", ">", " " );
+
 		String query
 				= "CONSTRUCT { ?s ?p ?o } WHERE {"
 				+ "  ?s ?p ?o ."
-				+ "  ?s a owl:objectProperty ."
-				+ "} VALUES ?s { " + preds + " } ";
-		int n1 = addResultsToRC( engine, query, gdm );
-
-		query
-				= "CONSTRUCT { ?s ?p ?o } WHERE {"
-				+ "  ?s ?p ?o ."
-				+ "  ?s a <" + engine.getSchemaBuilder().getRelationUri().build() + "> ."
+				+ "  ?s a owl:ObjectProperty ."
 				+ "} VALUES ?s { " + preds + " } ";
 		int n2 = addResultsToRC( engine, query, gdm );
 
-		logger.debug( "loadRelationHierarchy added " + ( n1 + n2 ) + " results to the sesame rc." );
+		logger.debug( "loadRelationHierarchy added " + n2 + " results to the sesame rc." );
 	}
 
-	/**
-	 * Loads the property hierarchy.
-	 *
-	 * @param engine Engine where data is stored.
-	 * @param predicates Predicate.
-	 * @param containsRelation String that shows the relation.
-	 * @param gdm Graph playsheet that allows properties to be added to the
-	 * repository connection.
-	 */
 	public static void loadPropertyHierarchy( IEngine engine, Collection<URI> predicates,
 			GraphDataModel gdm ) {
+
+		// RPB: I don't know what this function is for. It's basically
+		// the same as loadRelationHierarchy(), above
+		
+		String rel = engine.getSchemaBuilder().getRelationUri().toString();
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object} WHERE {"
-				+ "  {?Subject ?Predicate ?Object}"
-				+ "  {?Subject a owl:DatatypeProperty }"
+				+ "  ?Subject ?Predicate ?Object ."
 				+ "} "
-				+ "VALUES ?Subject { "
-				+ Utility.implode( predicates, "(<", ">)", " " ) + " } ";
+				+ "VALUES ?Subject { " + Utility.implode( predicates, "<", ">", " " ) + " } ";
 
 		int numResults = addResultsToRC( engine, query, gdm );
 		logger.debug( "loadPropertyHierarchy added " + numResults + " results to the sesame rc." );
@@ -137,15 +124,11 @@ public class RDFEngineHelper {
 	 * connection.
 	 */
 	public static void genPropertiesRemote( IEngine engine, Collection<URI> subjects,
-			Collection<URI> objects, Collection<URI> predicates, GraphDataModel gdm ) {
-
-		String subs = Utility.implode( subjects, "(<", ">)", " " );
-		String pred = Utility.implode( predicates, "(<", ">)", " " );
-		String objs = Utility.implode( objects, "(<", ">)", " " );
+		GraphDataModel gdm ) {
 
 		String query
-				= "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o } "
-				+ "VALUES ?s { " + subs + pred + objs + " }";
+				= "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o . FILTER ( isLiteral( ?o ) ) } "
+				+ "VALUES ?s { " + Utility.implode( subjects, "<", ">", " " ) + " }";
 
 		int numResults = addResultsToRC( engine, query, gdm );
 		logger.debug( "genPropertiesRemote added " + numResults + " results to the sesame rc." );
@@ -168,6 +151,7 @@ public class RDFEngineHelper {
 				+ "  ?Subject   a <" + DIHelper.getConceptURI().stringValue() + "> ."
 				+ "  ?Subject   ?Predicate ?Object"
 				+ "}";
+		// ModelQueryAdapter mqa = new ModelQueryAdapter( query );
 
 		Collection<SesameJenaConstructStatement> sjsc = runSesameJenaConstruct( rc, query );
 		for ( SesameJenaConstructStatement s : sjsc ) {
@@ -187,7 +171,7 @@ public class RDFEngineHelper {
 	 * query.
 	 * @param gdm Graph playsheet where edge properties are added.
 	 */
-	public static void genEdgePropertiesLocal( RepositoryConnection rc, 
+	public static void genEdgePropertiesLocal( RepositoryConnection rc,
 			GraphDataModel gdm ) {
 		String query
 				= "SELECT ?edge ?prop ?value ?outNode ?inNode WHERE {"
@@ -263,7 +247,7 @@ public class RDFEngineHelper {
 	private static void addOrRemoveAllData( IEngine engine, RepositoryConnection toRC, boolean add ) {
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object} WHERE {"
-				+ "  {?Subject ?Predicate ?Object} "
+				+ "  ?Subject ?Predicate ?Object"
 				+ "}";
 
 		try {

@@ -73,7 +73,7 @@ public class GraphDataModel {
 	private final Set<String> baseFilterSet = new HashSet<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
-	private Model jenaModel, curModel;
+	private Model curModel;
 	private List<Model> modelStore = new ArrayList<>();
 	private int modelCounter = 0;
 
@@ -198,14 +198,14 @@ public class GraphDataModel {
 		try {
 			rc.begin();
 			ValueFactory vf = rc.getValueFactory();
-			
+
 			Collection<SesameJenaConstructStatement> sjw
 					= RDFEngineHelper.runSesameConstructOrSelectQuery( engine, query );
 			for ( SesameJenaConstructStatement statement : sjw ) {
 				URI sub = vf.createURI( statement.getSubject() );
 				URI pred = vf.createURI( statement.getPredicate() );
 				Value val = Value.class.cast( statement.getObject() );
-				
+
 				urisNeedingLabels.add( sub );
 				urisNeedingLabels.add( pred );
 				if ( val instanceof URI ) {
@@ -221,31 +221,33 @@ public class GraphDataModel {
 					predicates.add( pred );
 				}
 				if ( !objects.contains( val ) ) {
-					objects.add(  val );
+					objects.add( val );
 				}
 
 				addToSesame( statement );
-
-				if ( search ) {
-					addToJenaModel3( statement );
-				}
 			}
 			log.debug( "\nSubs >> " + subjects + "\nPrds >> " + predicates + "\nObjs >> " + objects );
 
 			loadOwlData( subjects, engine );
 			labelcache.putAll( Utility.getInstanceLabels( urisNeedingLabels, engine ) );
 
-			if ( !( subjects.isEmpty() && predicates.isEmpty() && objects.isEmpty() ) ){
-				RDFEngineHelper.loadConceptHierarchy( engine, subjects, objuris, this );
-				//print( "in-add-1" );
+			if ( !( subjects.isEmpty() && predicates.isEmpty() && objects.isEmpty() ) ) {
+				print( "in-add-0" );
+				List<URI> concepts = new ArrayList<>( subjects );
+				concepts.addAll( objuris );
+				RDFEngineHelper.loadConceptHierarchy( engine, concepts, this );
+				print( "in-add-1" );
 				RDFEngineHelper.loadRelationHierarchy( engine, predicates, this );
-				//print( "in-add-2" );
+				print( "in-add-2" );
 			}
 
 			if ( prop ) {
 				RDFEngineHelper.loadPropertyHierarchy( engine, predicates, this );
 				print( "in-add-3" );
-				RDFEngineHelper.genPropertiesRemote( engine, subjects, objuris, predicates, this );
+				List<URI> uris = new ArrayList<>( subjects );
+				uris.addAll( objuris );
+				uris.addAll( predicates );
+				RDFEngineHelper.genPropertiesRemote( engine, uris, this );
 				print( "in-add-4" );
 			}
 
@@ -312,7 +314,7 @@ public class GraphDataModel {
 		loadedOWLS.add( engine );
 
 		for ( Statement statement : engine.getOwlData() ) {
-			if ( subjects.contains( URI.class.cast( statement.getSubject() ) ) ){
+			if ( subjects.contains( URI.class.cast( statement.getSubject() ) ) ) {
 				rc.add( statement );
 			}
 		}
@@ -385,30 +387,6 @@ public class GraphDataModel {
 		v.setLabel( v.getLabel() + labelPieceToAppend );
 	}
 
-	/**
-	 * Method addToJenaModel3.
-	 *
-	 * @param st SesameJenaConstructStatement
-	 */
-	public void addToJenaModel3( SesameJenaConstructStatement st ) {
-		if ( jenaModel == null ) {
-			jenaModel = ModelFactory.createDefaultModel();
-		}
-
-		com.hp.hpl.jena.rdf.model.Resource subject = jenaModel.createResource( st.getSubject() );
-		com.hp.hpl.jena.rdf.model.Property props = jenaModel.createProperty( st.getPredicate() );
-		com.hp.hpl.jena.rdf.model.Resource object = jenaModel.createResource( st.getObject() + "" );
-
-		com.hp.hpl.jena.rdf.model.Statement jenaSt = jenaModel.createStatement( subject, props, object );
-		if ( !jenaModel.contains( jenaSt ) ) {
-			jenaModel.add( jenaSt );
-
-			if ( method == CREATION_METHOD.OVERLAY ) {
-				curModel.add( jenaSt );
-			}
-		}
-	}
-
 	public SEMOSSVertex createOrRetrieveVertex( String vertexKey ) {
 		if ( !vertStore.containsKey( vertexKey ) ) {
 			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
@@ -419,11 +397,12 @@ public class GraphDataModel {
 	}
 
 	private SEMOSSVertex createOrRetrieveVertex( String vertexKey, Object object ) {
-		if( !vertStore.containsKey( vertexKey ) ){		
+		if ( !vertStore.containsKey( vertexKey ) ) {
 			// if this is a URI great. Else it's a literal
-			SEMOSSVertex vertex = ( object instanceof URI ? new SEMOSSVertex( vertexKey )
-					:	new SEMOSSVertex( vertexKey, object ) );
-			
+			SEMOSSVertex vertex = ( object instanceof URI
+					? new SEMOSSVertex( vertexKey )
+					: new SEMOSSVertex( vertexKey, object ) );
+
 			// setLabel( vertex );
 			storeVertex( vertex );
 		}
@@ -544,22 +523,6 @@ public class GraphDataModel {
 	}
 
 	/**
-	 * Method removeFromJenaModel.
-	 *
-	 * @param st SesameJenaConstructStatement
-	 */
-	protected void removeFromJenaModel( SesameJenaConstructStatement st ) {
-		com.hp.hpl.jena.rdf.model.Resource subject = jenaModel.createResource( st.getSubject() );
-		com.hp.hpl.jena.rdf.model.Property props = jenaModel.createProperty( st.getPredicate() );
-		com.hp.hpl.jena.rdf.model.Resource object = jenaModel.createResource( st.getObject() + "" );
-		com.hp.hpl.jena.rdf.model.Statement jenaSt;
-
-		log.warn( "Removing Statement " + subject + "<>" + props + "<>" + object );
-		jenaSt = jenaModel.createStatement( subject, props, object );
-		jenaModel.remove( jenaSt );
-	}
-
-	/**
 	 * Method generateEdgesFromTriplesInRC executes the first SPARQL query and
 	 * generates the graphs
 	 */
@@ -582,7 +545,7 @@ public class GraphDataModel {
 			}
 
 			SEMOSSVertex vertex1 = createOrRetrieveVertex( sct.getSubject() );
-			SEMOSSVertex vertex2 
+			SEMOSSVertex vertex2
 					= createOrRetrieveVertex( sct.getObject().toString(), sct.getObject() );
 
 			// check to see if this is another type of edge
@@ -660,14 +623,6 @@ public class GraphDataModel {
 			sjuw.execute();
 			log.info( "Ran update against curRC" );
 		}
-
-		// run query on jenaModel
-		InMemoryJenaEngine modelJenaEngine = new InMemoryJenaEngine();
-		modelJenaEngine.setModel( jenaModel );
-		sjuw.setEngine( modelJenaEngine );
-		sjuw.setQuery( query );
-		sjuw.execute();
-		log.info( "Ran update against jenaModel" );
 
 		// run query on jenaModel
 		if ( curModel != null ) {
@@ -748,33 +703,6 @@ public class GraphDataModel {
 
 	public Map<String, SEMOSSEdge> getIncrementalEdgeStore() {
 		return this.incrementalEdgeStore;
-	}
-
-	public Model getJenaModel() {
-		if ( null == jenaModel ) {
-			jenaModel = ModelFactory.createDefaultModel();
-			try {
-				RepositoryResult<Statement> rr = rc.getStatements( null, null, null, false );
-				while ( rr.hasNext() ) {
-					Statement st = rr.next();
-					com.hp.hpl.jena.rdf.model.Resource subject
-							= jenaModel.createResource( st.getSubject().stringValue() );
-					com.hp.hpl.jena.rdf.model.Property props
-							= jenaModel.createProperty( st.getPredicate().stringValue() );
-					com.hp.hpl.jena.rdf.model.Resource object
-							= jenaModel.createResource( st.getObject().stringValue() );
-
-					com.hp.hpl.jena.rdf.model.Statement jenaSt
-							= jenaModel.createStatement( subject, props, object );
-					jenaModel.add( jenaSt );
-				}
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
-		}
-
-		return jenaModel;
 	}
 
 	public void removeView( String query, IEngine engine ) {
