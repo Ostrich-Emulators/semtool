@@ -196,7 +196,7 @@ public class SearchController implements KeyListener, FocusListener,
 				Map<String, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
 				if ( vertStore.containsKey( uristr ) ) {
 					log.debug( "selecting node: " + uristr + " from search" );
-					tempState.pick( vertStore.get( uristr ), true );
+					gps.getView().getPickedVertexState().pick( vertStore.get( uristr ), true );
 				}
 			}
 		}
@@ -241,7 +241,7 @@ public class SearchController implements KeyListener, FocusListener,
 			}
 		}
 		catch ( InterruptedException e ) {
-			log.error( e );
+			log.error( e, e );
 		}
 	}
 
