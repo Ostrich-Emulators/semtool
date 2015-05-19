@@ -238,12 +238,17 @@ public class GraphDataModel {
 				print( "in-add-2" );
 			}
 
+			/* DM: 2015/5/18
+			 * 
+			 * We no longer create "Contains" relations:
+			 * 
 			if ( prop ) {
 				RDFEngineHelper.loadPropertyHierarchy( engine, predicates, getContainsRelation(), this );
 				print( "in-add-3" );
 				RDFEngineHelper.genPropertiesRemote( engine, subjects, objects, predicates, getContainsRelation(), this );
 				print( "in-add-4" );
 			}
+			*/
 
 			rc.commit();
 			print( "graph" );
