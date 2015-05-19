@@ -102,11 +102,12 @@ public class RDFEngineHelper {
 	 * @param gdm Graph playsheet that allows properties to be added to the
 	 * repository connection.
 	 */
-	public static void loadPropertyHierarchy( IEngine engine, String predicates, String containsRelation, GraphDataModel gdm ) {
+	public static void loadPropertyHierarchy( IEngine engine, String predicates, 
+			GraphDataModel gdm ) {
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object} WHERE {"
 				+ "  {?Subject ?Predicate ?Object}"
-				+ "  {?Subject a " + containsRelation + " }"
+				+ "  {?Subject a owl:DatatypeProperty }"
 				+ "} "
 				+ "BINDINGS ?Subject { " + predicates + " } ";
 
@@ -127,7 +128,8 @@ public class RDFEngineHelper {
 	 * @param gdm Graph playsheet that allows properties to be added to repository
 	 * connection.
 	 */
-	public static void genPropertiesRemote( IEngine engine, String subjects, String objects, String predicates, String containsRelation, GraphDataModel gdm ) {
+	public static void genPropertiesRemote( IEngine engine, String subjects, 
+			String objects, String predicates, GraphDataModel gdm ) {
 		String query
 				= "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o } "
 				+ "BINDINGS ?s { " + subjects + " " + predicates + " " + objects + " }";

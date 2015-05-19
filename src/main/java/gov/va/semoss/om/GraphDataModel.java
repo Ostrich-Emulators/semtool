@@ -233,22 +233,17 @@ public class GraphDataModel {
 
 			if ( subjects.length() > 0 || predicates.length() > 0 || objects.length() > 0 ) {
 				RDFEngineHelper.loadConceptHierarchy( engine, subjects, objects, this );
-				print( "in-add-1" );
+				//print( "in-add-1" );
 				RDFEngineHelper.loadRelationHierarchy( engine, predicates, this );
-				print( "in-add-2" );
+				//print( "in-add-2" );
 			}
 
-			/* DM: 2015/5/18
-			 * 
-			 * We no longer create "Contains" relations:
-			 * 
 			if ( prop ) {
-				RDFEngineHelper.loadPropertyHierarchy( engine, predicates, getContainsRelation(), this );
+				RDFEngineHelper.loadPropertyHierarchy( engine, predicates, this );
 				print( "in-add-3" );
-				RDFEngineHelper.genPropertiesRemote( engine, subjects, objects, predicates, getContainsRelation(), this );
+				RDFEngineHelper.genPropertiesRemote( engine, subjects, objects, predicates, this );
 				print( "in-add-4" );
 			}
-			*/
 
 			rc.commit();
 			print( "graph" );

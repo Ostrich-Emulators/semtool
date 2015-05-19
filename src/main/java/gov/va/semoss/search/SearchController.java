@@ -50,17 +50,15 @@ import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
 import java.io.File;
 import java.io.IOException;
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.MapFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -83,37 +81,37 @@ import org.openrdf.rio.RDFHandlerException;
  */
 public class SearchController implements KeyListener, FocusListener,
 		ActionListener, Runnable {
-	
+
 	private static final Logger log = Logger.getLogger( SearchController.class );
 	private static final String TEXT_FIELD = "alltext";
 	private static final String URI_FIELD = "URI";
 	private JPopupMenu menu = new JPopupMenu();
 	private JTextField searchText;
-	
+
 	private long lastTime = 0;
 	private Thread thread = null;
 	private boolean typed = false;
 	private boolean searchContinue = true;
-	
+
 	private Map<String, String> resHash = new HashMap<>();
 	private Map<String, String> cleanResHash = new HashMap<>();
-	
+
 	private VertexPaintTransformer oldTx = null;
 	private EdgeStrokeTransformer oldeTx = null;
 	private ArrowFillPaintTransformer oldafpTx = null;
 	private VertexLabelFontTransformer oldVLF = null;
-	
+
 	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> target = null;
 	private PickedState<SEMOSSVertex> liveState;
 	private PickedState<SEMOSSVertex> tempState = new MultiPickedState<>();
-	
+
 	private GraphPlaySheet gps;
-	
+
 	private final StandardAnalyzer analyzer = new StandardAnalyzer( Version.LUCENE_36 );
 	private final Directory ramdir = new RAMDirectory();
 	private IndexReader reader;
 	private IndexSearcher searcher;
-	
+
 	public Map<String, String> getCleanResHash() {
 		return cleanResHash;
 	}
@@ -179,33 +177,33 @@ public class SearchController implements KeyListener, FocusListener,
 	 * @param searchString String
 	 */
 	private void searchStatement( String searchString ) {
-		StringBuilder sb = new StringBuilder( searchString );
-		sb.append( " label: " ).append( searchString );
-		sb.append( " description: " ).append( searchString );
-		sb.append( " type: " ).append( searchString );
-		
+		StringBuilder query = new StringBuilder( searchString );
+		query.append( " label: " ).append( searchString );
+		query.append( " description: " ).append( searchString );
+		query.append( " type: " ).append( searchString );
+
 		QueryParser alltextqp
 				= new QueryParser( Version.LUCENE_36, TEXT_FIELD, analyzer );
-		
+
 		try {
-			Query q = alltextqp.parse( searchString );
-			
+			Query q = alltextqp.parse( query.toString() );
+
 			TopDocs hits = searcher.search( q, 500 );
 			for ( ScoreDoc sd : hits.scoreDocs ) {
 				Document doc = searcher.doc( sd.doc );
 				String uristr = doc.get( URI_FIELD );
-				
+
 				Map<String, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
 				if ( vertStore.containsKey( uristr ) ) {
 					log.debug( "selecting node: " + uristr + " from search" );
-					tempState.pick( vertStore.get( uristr ), true );					
+					tempState.pick( vertStore.get( uristr ), true );
 				}
 			}
 		}
 		catch ( ParseException | IOException e ) {
 			log.error( e, e );
 		}
-		
+
 		target.repaint();
 		searchText.requestFocus( true );
 	}
@@ -318,20 +316,20 @@ public class SearchController implements KeyListener, FocusListener,
 					log.warn( e, e );
 				}
 			}
-			
+
 			Map<URI, String> labelcache = new HashMap<>();
 			AbstractSesameEngine.getSelectNoEx( new VoidQueryAdapter( "SELECT DISTINCT ?s ?l { ?s rdfs:label ?l }" ) {
-				
+
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
 					labelcache.put( URI.class.cast( set.getValue( "s" ) ),
 							set.getValue( "l" ).stringValue() );
 				}
-				
+
 			}, rc, true );
-			
+
 			rc.export( new RepositoryIndexer( labelcache ) );
-			
+
 			reader = IndexReader.open( ramdir );
 			searcher = new IndexSearcher( reader );
 		}
@@ -394,14 +392,14 @@ public class SearchController implements KeyListener, FocusListener,
 	@Override
 	public void keyReleased( KeyEvent arg0 ) {
 	}
-	
+
 	private class RepositoryIndexer implements RDFHandler {
-		
+
 		private IndexWriter indexer;
 		private final Map<Resource, Document> doccache = new HashMap<>();
 		private final Map<Resource, StringBuilder> textcache = new HashMap<>();
 		private final Map<URI, String> labels;
-		
+
 		public RepositoryIndexer( Map<URI, String> labels ) {
 			this.labels = labels;
 			IndexWriterConfig config
@@ -413,11 +411,11 @@ public class SearchController implements KeyListener, FocusListener,
 				log.error( "could not create lucene index", e );
 			}
 		}
-		
+
 		@Override
 		public void startRDF() throws RDFHandlerException {
 		}
-		
+
 		@Override
 		public void endRDF() throws RDFHandlerException {
 			try {
@@ -428,20 +426,23 @@ public class SearchController implements KeyListener, FocusListener,
 								Field.Index.ANALYZED ) );
 					}
 				}
-				
+
 				indexer.addDocuments( doccache.values() );
 				indexer.commit();
 				indexer.close();
-				
-				IndexWriterConfig config
-						= new IndexWriterConfig( Version.LUCENE_36, analyzer );
-				IndexWriter iw
-						= new IndexWriter( FSDirectory.open( new File( "/tmp/search.lucene" ) ),
-								config );
-				iw.addDocuments( doccache.values() );
-				iw.commit();
-				iw.close();
-				
+
+				if ( log.isDebugEnabled() ) {
+					File lucenedir
+							= new File( FileUtils.getTempDirectory(), "search.lucene" );
+					IndexWriterConfig config
+							= new IndexWriterConfig( Version.LUCENE_36, analyzer );
+					IndexWriter iw
+							= new IndexWriter( FSDirectory.open( lucenedir ), config );
+					iw.addDocuments( doccache.values() );
+					iw.commit();
+					iw.close();
+				}
+
 				textcache.clear();
 				doccache.clear();
 			}
@@ -449,11 +450,11 @@ public class SearchController implements KeyListener, FocusListener,
 				log.error( "could not add/commit lucene index", e );
 			}
 		}
-		
+
 		@Override
 		public void handleNamespace( String string, String string1 ) throws RDFHandlerException {
 		}
-		
+
 		@Override
 		public void handleStatement( Statement stmt ) throws RDFHandlerException {
 			Resource sub = stmt.getSubject();
@@ -461,20 +462,20 @@ public class SearchController implements KeyListener, FocusListener,
 			if ( val instanceof Resource ) {
 				return;
 			}
-			
+
 			if ( !doccache.containsKey( sub ) ) {
 				Document doc = new Document();
 				doccache.put( sub, doc );
 				doc.add( new Field( "URI", sub.stringValue(), Field.Store.YES,
 						Field.Index.NOT_ANALYZED ) );
-				
+
 				textcache.put( sub, new StringBuilder() );
 			}
-			
+
 			textcache.get( sub ).append( " " ).append( val.stringValue() );
-			
+
 			Document doc = doccache.get( sub );
-			
+
 			URI pred = stmt.getPredicate();
 			String label = ( labels.containsKey( pred )
 					? labels.get( pred ) : pred.getLocalName() );
@@ -489,10 +490,10 @@ public class SearchController implements KeyListener, FocusListener,
 			else if ( "label".equals( label ) ) {
 				f.setBoost( 8.0f );
 			}
-			
+
 			doc.add( f );
 		}
-		
+
 		@Override
 		public void handleComment( String string ) throws RDFHandlerException {
 		}
