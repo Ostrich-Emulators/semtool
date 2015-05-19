@@ -32,9 +32,7 @@ public class UriBuilder {
 	private UriSanitizer sanitizer;
 	private boolean lastIsConcatenator;
 	private static final Pattern CONCAT_PAT = Pattern.compile( "(.*)([/#:])$" );
-	private static final int localPartLength = 36; // TBD: qualify this limit, consider making a semoss property
 	private static final Pattern PUNCTUATION = Pattern.compile( "\\p{Punct}", Pattern.UNICODE_CHARACTER_CLASS );
-
 	/**
 	 * Sets the class to use when a user calls
 	 * {@link #getBuilder(java.lang.String)} or
@@ -131,6 +129,7 @@ public class UriBuilder {
 	public URI build( String extra ){
 		return copy().add( extra ).build();
 	}
+
 
 	public URI uniqueUri() {
 		StringBuilder uristr = new StringBuilder( content );
@@ -341,12 +340,13 @@ public class UriBuilder {
 		return sanitizer;
 	}
 
-	private static String truncateLocalPart( String longString ) {
-		final int lastCharIndex = localPartLength - 1;
-		return longString.substring(0, lastCharIndex );
-	}
 	public static class DefaultSanitizer implements UriSanitizer {
-
+		private final int localPartMaxLength = 54; // TBD: qualify this limit, consider making a semoss property
+		
+		public String getUUIDLocalName() {
+			return  RandomStringUtils.randomAlphabetic( 1 ) + UUID.randomUUID().toString();
+		}
+		
 		@Override
 		public String sanitize( String raw ) {
 			// Check if the string is already valid:
@@ -376,7 +376,12 @@ public class UriBuilder {
 				}
 			}
 
-			return ( sanitized.length() > localPartLength  ) ? truncateLocalPart( sanitized ) : sanitized ;
+			// At issue here was a that truncating the local part at the length limit (as done previously) did not
+			// guarantee uniqueness.  This lead to occasional URI collisions and the overlap of data.  So now when
+			// we hit the max length limit, we graph a UUID since we are otherwise unable to check for uniqueness
+			// at this stage.
+			//
+			return ( sanitized.length() > localPartMaxLength  ) ? getUUIDLocalName() : sanitized ;
 		}
 	}
 }
