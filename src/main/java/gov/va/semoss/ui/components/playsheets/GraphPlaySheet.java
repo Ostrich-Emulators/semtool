@@ -92,6 +92,8 @@ import gov.va.semoss.ui.transformer.VertexTooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import org.openrdf.model.Model;
+import org.openrdf.model.impl.LinkedHashModel;
 
 /**
  */
@@ -331,8 +333,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected void addPanel() {
 		try {
 			if ( gdm.enableSearchBar() ) {
-//				JPM 05-19-2015 Commented out, there is an error here that is preventing the visualizations from being seen
-//				searchPanel.getSearchController().indexStatements( gdm.getJenaModel() );
+				searchPanel.getSearchController().indexRepository( gdm.getRC() );
 			}
 
 			GraphZoomScrollPane gzPane = new GraphZoomScrollPane( view );

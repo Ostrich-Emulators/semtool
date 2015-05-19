@@ -129,7 +129,7 @@ public class ControlPanel extends JPanel {
 		ringsButton.setToolTipText("<html><b>Show Radial Rings</b><br>Only available with Balloon and Radial Tree layouts</html>");
 		ringsButton.addActionListener(ringsListener);
 		
-	    weightButton = new WeightDropDownButton(Utility.loadImageIcon("width.png"));
+    weightButton = new WeightDropDownButton(Utility.loadImageIcon("width.png"));
 		weightButton.setToolTipText("<html><b>Edge Weight</b><br>Convert edge thickness corresponding to properties that exist on the edges</html>");
 		weightButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

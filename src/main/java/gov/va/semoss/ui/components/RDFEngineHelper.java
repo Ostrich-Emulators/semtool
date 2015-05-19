@@ -368,9 +368,9 @@ public class RDFEngineHelper {
 
 					Iterator<Binding> it = set.iterator();
 
-					stmt.setSubject( it.next().toString() );
-					stmt.setPredicate( it.next().toString() );
-					stmt.setObject( it.next() );
+					stmt.setSubject( it.next().getValue().toString() );
+					stmt.setPredicate( it.next().getValue().toString() );
+					stmt.setObject( it.next().getValue() );
 					add( stmt );
 				}
 				else {

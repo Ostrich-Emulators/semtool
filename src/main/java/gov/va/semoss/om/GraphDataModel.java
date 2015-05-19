@@ -406,31 +406,25 @@ public class GraphDataModel {
 	}
 
 	public SEMOSSVertex createOrRetrieveVertex( String vertexKey ) {
-		SEMOSSVertex vertex = vertStore.get( vertexKey );
-		if ( vertex == null ) {
-			vertex = new SEMOSSVertex( vertexKey );
-			setLabel( vertex );
+		if ( !vertStore.containsKey( vertexKey ) ) {
+			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
 			storeVertex( vertex );
 		}
 
-		return vertex;
+		return vertStore.get( vertexKey );
 	}
 
 	private SEMOSSVertex createOrRetrieveVertex( String vertexKey, Object object ) {
-		SEMOSSVertex vertex = vertStore.get( vertexKey );
-		if ( vertex == null ) {
-			if ( object instanceof URI ) {
-				vertex = new SEMOSSVertex( vertexKey );
-			}
-			else // ok this is a literal
-			{
-				vertex = new SEMOSSVertex( vertexKey, object );
-			}
+		if( !vertStore.containsKey( vertexKey ) ){		
+			// if this is a URI great. Else it's a literal
+			SEMOSSVertex vertex = ( object instanceof URI ? new SEMOSSVertex( vertexKey )
+					:	new SEMOSSVertex( vertexKey, object ) );
+			
 			// setLabel( vertex );
 			storeVertex( vertex );
 		}
 
-		return vertex;
+		return vertStore.get( vertexKey );
 	}
 
 	public void storeVertex( SEMOSSVertex vert ) {
