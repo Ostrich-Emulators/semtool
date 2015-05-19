@@ -67,14 +67,14 @@ public class RDFEngineHelper {
 	public static void loadConceptHierarchy( IEngine engine, Collection<URI> subjects,
 			Collection<URI> objects, GraphDataModel gdm ) {
 
-		String subs = Utility.implode( subjects, "(<", ">)", " " );
-		String objs = Utility.implode( objects, "(<", ">)", " " );
+		String subs = Utility.implode( subjects, "<", ">", " " );
+		String objs = Utility.implode( objects, "<", ">", " " );
 
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object } WHERE {"
 				+ "  {?Subject a ?Object}"
 				+ "  {?Subject ?Predicate ?Object} FILTER ( isURI( ?Object ) )"
-				+ "} BINDINGS ?Subject { " + subs + objs + " }";
+				+ "} VALUES ?Subject { " + subs + objs + " }";
 
 		int numResults = addResultsToRC( engine, query, gdm );
 		logger.debug( "loadConceptHierarchy added " + numResults + " results to the sesame rc." );
@@ -87,14 +87,14 @@ public class RDFEngineHelper {
 				= "CONSTRUCT { ?s ?p ?o } WHERE {"
 				+ "  ?s ?p ?o ."
 				+ "  ?s a owl:objectProperty ."
-				+ "} BINDINGS ?s { " + preds + " } ";
+				+ "} VALUES ?s { " + preds + " } ";
 		int n1 = addResultsToRC( engine, query, gdm );
 
 		query
 				= "CONSTRUCT { ?s ?p ?o } WHERE {"
 				+ "  ?s ?p ?o ."
 				+ "  ?s a <" + engine.getSchemaBuilder().getRelationUri().build() + "> ."
-				+ "} BINDINGS ?s { " + preds + " } ";
+				+ "} VALUES ?s { " + preds + " } ";
 		int n2 = addResultsToRC( engine, query, gdm );
 
 		logger.debug( "loadRelationHierarchy added " + ( n1 + n2 ) + " results to the sesame rc." );
@@ -116,7 +116,7 @@ public class RDFEngineHelper {
 				+ "  {?Subject ?Predicate ?Object}"
 				+ "  {?Subject a owl:DatatypeProperty }"
 				+ "} "
-				+ "BINDINGS ?Subject { "
+				+ "VALUES ?Subject { "
 				+ Utility.implode( predicates, "(<", ">)", " " ) + " } ";
 
 		int numResults = addResultsToRC( engine, query, gdm );
@@ -145,7 +145,7 @@ public class RDFEngineHelper {
 
 		String query
 				= "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o } "
-				+ "BINDINGS ?s { " + subs + pred + objs + " }";
+				+ "VALUES ?s { " + subs + pred + objs + " }";
 
 		int numResults = addResultsToRC( engine, query, gdm );
 		logger.debug( "genPropertiesRemote added " + numResults + " results to the sesame rc." );

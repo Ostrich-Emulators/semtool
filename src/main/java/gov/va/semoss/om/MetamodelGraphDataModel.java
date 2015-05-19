@@ -25,8 +25,8 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 		
 		setTypeOrSubclass(" rdfs:subClassOf ");
 		setFilterOutOwlData(false);
-		getBaseFilterHash().put(DIHelper.getConceptURI().stringValue(), "");
-		getBaseFilterHash().put(DIHelper.getConceptURI("ApplicationModule").stringValue(), "");
+		getBaseFilterSet().add(DIHelper.getConceptURI().stringValue() );
+		getBaseFilterSet().add(DIHelper.getConceptURI("ApplicationModule").stringValue() );
 	}
 
 	  /**

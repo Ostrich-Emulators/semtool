@@ -70,7 +70,7 @@ public class GraphDataModel {
 	private RepositoryConnection rc, curRC;
 	private List<RepositoryConnection> rcStore = new ArrayList<>();
 
-	private final Map<String, String> baseFilterHash = new HashMap<>();
+	private final Set<String> baseFilterSet = new HashSet<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
 	private Model jenaModel, curModel;
@@ -88,7 +88,6 @@ public class GraphDataModel {
 
 	private static final URI containsURI = DIHelper.getContainsURI();
 	private static final URI conceptURI = DIHelper.getConceptURI();
-	private static final URI relationURI = DIHelper.getRelationURI();
 
 	//these are used for keeping track of only what was added or subtracted and will only be populated when overlay is true
 	private Map<String, SEMOSSVertex> incrementalVertStore;
@@ -328,9 +327,9 @@ public class GraphDataModel {
 			String p = statement.getPredicate().stringValue();
 			String o = statement.getObject().stringValue();
 
-			baseFilterHash.put( s, s );
-			baseFilterHash.put( p, p );
-			baseFilterHash.put( o, o );
+			baseFilterSet.add( s );
+			baseFilterSet.add( p );
+			baseFilterSet.add( o );
 			numStatementsAdded++;
 		}
 
@@ -576,9 +575,9 @@ public class GraphDataModel {
 		Collection<SesameJenaConstructStatement> sjcw
 				= RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
 		for ( SesameJenaConstructStatement sct : sjcw ) {
-			if ( baseFilterHash.containsKey( sct.getSubject() )
-					|| baseFilterHash.containsKey( sct.getPredicate() )
-					|| baseFilterHash.containsKey( sct.getObject().toString() ) ) {
+			if ( baseFilterSet.contains( sct.getSubject() )
+					|| baseFilterSet.contains( sct.getPredicate() )
+					|| baseFilterSet.contains( sct.getObject().toString() ) ) {
 				continue;
 			}
 
@@ -619,7 +618,7 @@ public class GraphDataModel {
 				= RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
 		for ( SesameJenaConstructStatement s : sjcw ) {
 			String subject = s.getSubject();
-			if ( !baseFilterHash.containsKey( subject ) && !vertStore.containsKey( subject ) ) {
+			if ( !baseFilterSet.contains( subject ) && !vertStore.containsKey( subject ) ) {
 				SEMOSSVertex vertex = new SEMOSSVertex( subject );
 				//setLabel( vertex );
 				storeVertex( vertex );
@@ -845,8 +844,8 @@ public class GraphDataModel {
 		}
 	}
 
-	public Map<String, String> getBaseFilterHash() {
-		return baseFilterHash;
+	public Set<String> getBaseFilterSet() {
+		return baseFilterSet;
 	}
 
 	public void setFilterOutOwlData( boolean _filterOutOwlData ) {
