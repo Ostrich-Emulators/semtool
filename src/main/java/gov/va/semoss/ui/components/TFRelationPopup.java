@@ -39,6 +39,7 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import org.openrdf.model.URI;
 
 /**
  */
@@ -60,7 +61,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 	 * @param pickedVertex DBCMVertex[]
 	 */
 	public TFRelationPopup( SEMOSSVertex vertex, GraphPlaySheet ps, SEMOSSVertex[] pickedVertex ) {
-		super("Traverse Freely: All " + Utility.getClassName( vertex.getURI() ) + "(s) ");
+		super("Traverse Freely: All " + Utility.getClassName( vertex.getURI().stringValue() ) + "(s) ");
 
 		this.ps = ps;
 		this.pickedVertex = pickedVertex;
@@ -99,8 +100,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 		int count = 0;
 		List<String> typeV = new ArrayList<>();
 		for ( SEMOSSVertex thisVert : pickedVertex ) {
-			String uri = thisVert.getURI();
-
+			
 			String query2 = "";
 			if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
 				query2 = DIHelper.getInstance().getProperty( this.mainQueryJENA + prefix );
@@ -108,14 +108,14 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 			else {
 				query2 = DIHelper.getInstance().getProperty( this.mainQuery + prefix );
 			}
-			String typeName = Utility.getConceptType( engine, thisVert.getURI() );
+			String typeName = Utility.getConceptType( engine, thisVert.getURI().stringValue() );
 			if ( typeV.contains( typeName ) ) {
 				continue;
 			}
 			else {
 				typeV.add( typeName );
 			}
-			String type = Utility.getClassName( uri );
+			URI type = thisVert.getType();
 			if ( prefix.equals( "" ) ) {
 				hash.put( "SUBJECT_TYPE", typeName );
 			}

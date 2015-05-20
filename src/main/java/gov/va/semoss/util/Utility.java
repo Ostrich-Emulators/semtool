@@ -1082,8 +1082,7 @@ public class Utility {
 		tableModel.fireTableDataChanged();
 
 		for ( int i = 0; i < tableModel.getColumnCount(); i++ ) {
-			if ( Boolean.class
-					.equals( tableModel.getColumnClass( i ) ) ) {
+			if ( Boolean.class.equals( tableModel.getColumnClass( i ) ) ) {
 				TableColumnModel columnModel = table.getColumnModel();
 
 				if ( i < columnModel.getColumnCount() ) {

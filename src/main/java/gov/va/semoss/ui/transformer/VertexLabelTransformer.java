@@ -27,6 +27,7 @@ import java.util.Collections;
 
 import java.util.List;
 import org.apache.commons.collections15.Transformer;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
 /**
@@ -54,7 +55,7 @@ public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String>
 	 */
 	@Override
 	public String transform( SEMOSSVertex vertex ) {
-		List<String> properties = data.getSelectedProperties( vertex.getType() );
+		List<URI> properties = data.getSelectedProperties( vertex.getType() );
 		if ( properties == null || properties.isEmpty() ) {
 			return "";
 		}
@@ -66,11 +67,11 @@ public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String>
 		//font through font transformer, the label doesn't get really far away from the vertex
 		String html = "<html><!--" + vertex.getURI() + "--><font size='1'>  <br> <br> <br>  </font>";
 		boolean first = true;
-		for ( String property : properties ) {
+		for ( URI property : properties ) {
 			if ( !first ) {
 				html += "<font size='1'><br></font>";
 			}
-			html += vertex.getProperty( new URIImpl( property ) ).toString();
+			html += vertex.getProperty( property ).toString();
 			first = false;
 		}
 		html += "</html>";

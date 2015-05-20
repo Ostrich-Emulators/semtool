@@ -60,7 +60,7 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 	private IEngine engine;
 
 	public TFInstanceRelationPopup( SEMOSSVertex vertex, IEngine e, GraphPlaySheet ps, SEMOSSVertex[] pickedVertex ) {
-		super( "Traverse Freely: " + Utility.getInstanceLabel( new URIImpl( vertex.getURI() ), e ) );
+		super( "Traverse Freely: " + Utility.getInstanceLabel( vertex.getURI(), e ) );
 
 		this.gps = ps;
 		this.engine = e;
@@ -106,7 +106,7 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 			else {
 				query2 = DIHelper.getInstance().getProperty( this.mainQuery + prefix );
 			}
-			String typeName = Utility.getConceptType( engine, thisVert.getURI() );
+			String typeName = Utility.getConceptType( engine, thisVert.getURI().stringValue() );
 			if ( typeV.contains( typeName ) ) {
 				continue;
 			}

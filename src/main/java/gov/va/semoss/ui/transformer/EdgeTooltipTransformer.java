@@ -22,10 +22,11 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.util.Constants;
 
-import java.util.ArrayList;
 
+import java.util.List;
 import org.apache.commons.collections15.Transformer;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
 /**
@@ -55,7 +56,7 @@ public class EdgeTooltipTransformer implements Transformer <SEMOSSEdge, String> 
 	public String transform(SEMOSSEdge edge) {		
 		String propName = "";
 
-		ArrayList<String> props = data.getSelectedPropertiesTT(edge.getEdgeType());
+		List<URI> props = data.getSelectedPropertiesTT(edge.getEdgeType());
 		if(props != null && props.size() > 0)
 		{
 			propName = propName + edge.getProperty(new URIImpl( props.get(0)+"") );
@@ -66,7 +67,7 @@ public class EdgeTooltipTransformer implements Transformer <SEMOSSEdge, String> 
 				//only add the label on the property if it is not one of the main three
 				if(!prop.equals(Constants.VERTEX_NAME)&&!prop.equals(Constants.EDGE_NAME)&&!prop.equals(Constants.VERTEX_TYPE)&&!prop.equals(Constants.EDGE_TYPE)&&!prop.equals(Constants.URI_KEY))
 					propName = propName + prop+": ";
-				propName = propName + edge.getProperty(new URIImpl( props.get(propIndex)) );
+				propName = propName + edge.getProperty( props.get(propIndex));
 			}
 		}
 		

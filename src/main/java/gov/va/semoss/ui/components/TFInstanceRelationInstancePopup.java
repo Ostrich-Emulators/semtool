@@ -94,7 +94,7 @@ public class TFInstanceRelationInstancePopup extends JMenu implements MouseListe
 		String ignoreURI = DIHelper.getInstance().getProperty(Constants.IGNORE_URI);
 		int count = 0;
     for ( SEMOSSVertex thisVert : pickedVertex ) {
-      String uri = thisVert.getURI();
+      String uri = thisVert.getURI().stringValue();
       
       String query2 = DIHelper.getInstance().getProperty(this.mainQuery+ prefix);
       

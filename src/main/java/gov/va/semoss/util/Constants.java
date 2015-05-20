@@ -82,7 +82,7 @@ public class Constants {
 	public static final String LAYOUT = "LAYOUT";
 	public static final URI VERTEX_NAME = RDFS.LABEL;
 	public static final URI VERTEX_TYPE = RDF.TYPE;
-	public static final String VERTEX_COLOR = "VERTEX_COLOR_PROPERTY";
+	public static final URI VERTEX_COLOR = new URIImpl( "semoss://color.vertex" );
 	public static final String GENERIC_IMAGE = "GENERIC";
 	public static final String PERSPECTIVE = "PERSPECTIVE";
 	public static final URI IN_EDGE_CNT = new URIImpl( "semoss://count.edge.in" );

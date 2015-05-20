@@ -22,10 +22,11 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.util.Constants;
 
-import java.util.ArrayList;
 
+import java.util.List;
 import org.apache.commons.collections15.Transformer;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
 /**
@@ -55,9 +56,9 @@ public class VertexTooltipTransformer implements Transformer <SEMOSSVertex, Stri
 	public String transform( SEMOSSVertex vertex ) {
 		String propName = "";
 
-		ArrayList<String> props = data.getSelectedPropertiesTT( vertex.getType() );
+		List<URI> props = data.getSelectedPropertiesTT( vertex.getType() );
 		if ( props != null && props.size() > 0 ) {
-			propName = propName + vertex.getProperty( new URIImpl( props.get( 0 ) ) ).toString();
+			propName = propName + vertex.getProperty( props.get( 0 ) ).toString();
 			for ( int propIndex = 1; propIndex < props.size(); propIndex++ ) {
 				String prop = props.get( propIndex ) + "";
 				propName = propName + "<br>";
@@ -69,7 +70,7 @@ public class VertexTooltipTransformer implements Transformer <SEMOSSVertex, Stri
 						&& !prop.equals( Constants.URI_KEY ) ) {
 					propName = propName + prop + ": ";
 				}
-				propName = propName + vertex.getProperty( new URIImpl( props.get( propIndex ) ) ).toString();
+				propName = propName + vertex.getProperty( props.get( propIndex ) ).toString();
 			}
 		}
 		//logger.debug("Prop Name " + propName);

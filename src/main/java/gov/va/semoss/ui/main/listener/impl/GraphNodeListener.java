@@ -21,7 +21,6 @@ package gov.va.semoss.ui.main.listener.impl;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,51 +42,57 @@ import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import java.util.HashMap;
+import java.util.HashSet;
+import org.openrdf.model.URI;
 
 /**
  * Controls what happens when a user clicks on a node in a graph.
  */
 public class GraphNodeListener extends ModalLensGraphMouse implements
 		IChakraListener {
+
 	private static final Logger logger = Logger
-			.getLogger(GraphNodeListener.class);
+			.getLogger( GraphNodeListener.class );
 	private GraphPlaySheet gps;
 
-	public GraphNodeListener(GraphPlaySheet _gps) {
+	public GraphNodeListener( GraphPlaySheet _gps ) {
 		gps = _gps;
 	}
 
 	/**
 	 * Method mousePressed. Controls what happens when the mouse is pressed.
 	 *
-	 * @param e
-	 *            MouseEvent
+	 * @param e MouseEvent
 	 */
 	@Override
-	public void mousePressed(MouseEvent e) {
-		super.mousePressed(e);
+	public void mousePressed( MouseEvent e ) {
+		super.mousePressed( e );
 
-		if (!(e.getSource() instanceof VisualizationViewer<?, ?>)) {
-			logger.warn("Unknown mouse event type: " + e.getSource());
+		if ( !( e.getSource() instanceof VisualizationViewer<?, ?> ) ) {
+			logger.warn( "Unknown mouse event type: " + e.getSource() );
 			return;
 		}
 
-		@SuppressWarnings("unchecked")
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = 
-				(VisualizationViewer<SEMOSSVertex, SEMOSSEdge>) e.getSource();
+		@SuppressWarnings( "unchecked" )
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer
+				= (VisualizationViewer<SEMOSSVertex, SEMOSSEdge>) e.getSource();
 
-		Map<String, String> vertHash = new Hashtable<String, String>();
-		SEMOSSVertex clickedVertex = checkIfVertexWasClicked(viewer, e.getX(),
-				e.getY());
+		Set<SEMOSSVertex> vertHash = new HashSet<>();
+		SEMOSSVertex clickedVertex = checkIfVertexWasClicked( viewer, e.getX(),
+				e.getY() );
 
-		if (clickedVertex == null)
-			handleEdges(viewer);
+		if ( clickedVertex == null ) {
+			handleEdges( viewer );
+		}
 
-		if (e.getButton() == MouseEvent.BUTTON3)
-			vertHash = handleRightClick(viewer, clickedVertex, e);
+		if ( e.getButton() == MouseEvent.BUTTON3 ) {
+			vertHash = handleRightClick( viewer, clickedVertex, e );
+		}
 
-		if (gps.getSearchPanel().isHighlightButtonSelected())
-			handleHighlightVertexInSkeletonMode(viewer, vertHash);
+		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+			handleHighlightVertexInSkeletonMode( viewer, vertHash );
+		}
 	}
 
 	/*
@@ -98,14 +103,14 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 	 * to use to get the vertex
 	 */
 	private SEMOSSVertex checkIfVertexWasClicked(
-			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer, int x, int y) {
+			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer, int x, int y ) {
 
 		GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport = viewer
 				.getPickSupport();
-		Object clickedObject = pickSupport.getVertex(viewer.getGraphLayout(),
-				x, y);
-		if (clickedObject instanceof SEMOSSVertex) {
-			logger.debug("The user clicked a SEMOSSVertex.");
+		Object clickedObject = pickSupport.getVertex( viewer.getGraphLayout(),
+				x, y );
+		if ( clickedObject instanceof SEMOSSVertex ) {
+			logger.debug( "The user clicked a SEMOSSVertex." );
 			return (SEMOSSVertex) clickedObject;
 		}
 
@@ -120,15 +125,15 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 	 * to use to get the edges
 	 */
 	private void handleEdges(
-			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer) {
+			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
 		JTable table = (JTable) DIHelper.getInstance().getLocalProp(
-				Constants.PROP_TABLE);
+				Constants.PROP_TABLE );
 
 		Set<SEMOSSEdge> pickedEdges = viewer.getPickedEdgeState().getPicked();
-		for (SEMOSSEdge edge : pickedEdges) {
+		for ( SEMOSSEdge edge : pickedEdges ) {
 			EdgePropertyTableModel pm = new EdgePropertyTableModel(
-					gps.getFilterData(), edge);
-			table.setModel(pm);
+					gps.getFilterData(), edge );
+			table.setModel( pm );
 			pm.fireTableDataChanged();
 		}
 	}
@@ -145,21 +150,18 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 	 * @param MouseEvent e - the mouse event which we are handling, used as the
 	 * display container.
 	 */
-	private Map<String, String> handleRightClick(
-			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
-			SEMOSSVertex clickedVertex, MouseEvent e) {
-		logger.debug("The user right clicked.");
+	private Set<SEMOSSVertex> handleRightClick( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
+			SEMOSSVertex clickedVertex, MouseEvent e ) {
+		logger.debug( "The user right clicked." );
 
-		Map<String, String> vertHash = new Hashtable<String, String>();
+		Set<SEMOSSVertex> vertHash = new HashSet<>();
 
-		Set<SEMOSSVertex> pickedVertices = viewer.getPickedVertexState()
-				.getPicked();
-		for (SEMOSSVertex vertex : pickedVertices)
-			vertHash.put(vertex.getURI(), vertex.getURI());
+		Set<SEMOSSVertex> pickedVertices = viewer.getPickedVertexState().getPicked();
+		vertHash.addAll( pickedVertices );
 
 		SEMOSSVertex[] vertices = pickedVertices
-				.toArray(new SEMOSSVertex[pickedVertices.size()]);
-		new GraphNodePopup(gps, clickedVertex, vertices).show(e);
+				.toArray( new SEMOSSVertex[pickedVertices.size()] );
+		new GraphNodePopup( gps, clickedVertex, vertices ).show( e );
 
 		return vertHash;
 	}
@@ -176,38 +178,38 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 	 */
 	private void handleHighlightVertexInSkeletonMode(
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
-			Map<String, String> vertHash) {
+			Set<SEMOSSVertex> verts ) {
 
+		Set<SEMOSSVertex> vertHash = new HashSet<>(verts );
+		
 		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) viewer
 				.getRenderContext().getVertexFontTransformer();
-		vertHash.putAll(vlft.getVertHash());
-		vlft.setVertHash(vertHash);
+		vertHash.addAll( vlft.getVertHash() );
+		vlft.setVertHash( vertHash );
 		VertexPaintTransformer ptx = (VertexPaintTransformer) viewer
 				.getRenderContext().getVertexFillPaintTransformer();
-		ptx.setVertHash(vertHash);
+		ptx.setVertHash( vertHash );
 		viewer.repaint();
 	}
 
 	/**
-	 * Method actionPerformed. Dictates what actions to take when an Action
-	 * Event is performed.
+	 * Method actionPerformed. Dictates what actions to take when an Action Event
+	 * is performed.
 	 *
-	 * @param arg0
-	 *            ActionEvent - The event that triggers the actions in the
-	 *            method.
+	 * @param arg0 ActionEvent - The event that triggers the actions in the
+	 * method.
 	 */
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
+	public void actionPerformed( ActionEvent arg0 ) {
 	}
 
 	/**
 	 * Method setView. Sets a JComponent that the listener will access and/or
 	 * modify when an action event occurs.
 	 *
-	 * @param view
-	 *            the component that the listener will access
+	 * @param view the component that the listener will access
 	 */
 	@Override
-	public void setView(JComponent view) {
+	public void setView( JComponent view ) {
 	}
 }

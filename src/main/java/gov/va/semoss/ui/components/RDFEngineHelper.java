@@ -155,52 +155,11 @@ public class RDFEngineHelper {
 
 		Collection<SesameJenaConstructStatement> sjsc = runSesameJenaConstruct( rc, query );
 		for ( SesameJenaConstructStatement s : sjsc ) {
-			SEMOSSVertex vertex = gdm.createOrRetrieveVertex( s.getSubject() );
+			SEMOSSVertex vertex = gdm.createOrRetrieveVertex( URI.class.cast( s.getSubject() ) );
 			vertex.setProperty( s.getPredicate(), s.getObject() );
 			gdm.storeVertex( vertex );
 		}
 		logger.debug( "genNodePropertiesLocal added " + sjsc.size() + " node properties." );
-	}
-
-	/**
-	 * Gets edge properties from a local repository connection.
-	 *
-	 * @param rc Repository connection: main interface for updating data in and
-	 * performing queries on a Sesame repository.
-	 * @param containsRelation String that shows the relation for the property
-	 * query.
-	 * @param gdm Graph playsheet where edge properties are added.
-	 */
-	public static void genEdgePropertiesLocal( RepositoryConnection rc,
-			GraphDataModel gdm ) {
-		String query
-				= "SELECT ?edge ?prop ?value ?outNode ?inNode WHERE {"
-				+ "  ?edge     a     ?reltype ."
-				+ "  ?outNode  a     ?concept ."
-				+ "  ?inNode   a     ?concept ."
-				+ "  ?edge     ?prop ?value . "
-				+ "  ?outNode  ?edge ?inNode . "
-				+ "}";
-
-		final int size[] = { 0 };
-		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				gdm.addEdgeProperty( set.getValue( "edge" ).stringValue(),
-						set.getValue( "value" ).stringValue(),
-						set.getValue( "prop" ).stringValue(),
-						set.getValue( "outNode" ).stringValue(),
-						set.getValue( "inNode" ).stringValue() );
-				size[0]++;
-			}
-		};
-
-		vqa.bind( "reltype", DIHelper.getRelationURI() );
-		vqa.bind( "concept", DIHelper.getConceptURI() );
-
-		AbstractSesameEngine.getSelectNoEx( vqa, rc, true );
-		logger.debug( "genEdgePropertiesLocal added " + size[0] + " edge properties." );
 	}
 
 	/**

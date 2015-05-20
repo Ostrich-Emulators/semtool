@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.algorithm.impl;
 
@@ -39,6 +39,11 @@ import gov.va.semoss.ui.components.GridFilterData;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.AbstractAction;
 
 /**
@@ -54,8 +59,8 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	String selectedNodes = "";
 	Vector<SEMOSSEdge> masterEdgeVector = new Vector();//keeps track of everything accounted for in the forest
 	Vector<SEMOSSVertex> masterVertexVector = new Vector();
-	Hashtable islandVerts = new Hashtable();
-	Hashtable islandEdges = new Hashtable();
+	Set<SEMOSSVertex> islandVerts = new HashSet<>();
+	Set<SEMOSSEdge> islandEdges = new HashSet<>();
 	String edgeHashKey = "EdgeHashKey";
 
 	public IslandIdentifierProcessor( GraphPlaySheet gps, SEMOSSVertex[] pickedV ) {
@@ -130,12 +135,14 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 			String key = masterHashIt.next();
 			if ( !key.contains( mainlandKey ) ) {
 				if ( key.contains( edgeHashKey ) ) {
-					Hashtable islandEdgeHash = (Hashtable) masterHash.get( key );
-					islandEdges.putAll( islandEdgeHash );
+					Collection<SEMOSSEdge> islandEdgeHash
+							= (Collection<SEMOSSEdge>) masterHash.get( key );
+					islandEdges.addAll( islandEdgeHash );
 				}
 				else {
-					Hashtable islandVertHash = (Hashtable) masterHash.get( key );
-					islandVerts.putAll( islandVertHash );
+					Collection<SEMOSSVertex> islandVertHash
+							= (Collection<SEMOSSVertex>) masterHash.get( key );
+					islandVerts.addAll( islandVertHash );
 				}
 			}
 		}
@@ -145,10 +152,16 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 * Sets the transformers based on valid edges and vertices for the playsheet.
 	 */
 	private void setTransformers() {
+		Map<SEMOSSEdge, Double> edges = new HashMap<>();
+		for( SEMOSSEdge s : islandEdges){
+			edges.put( s, 3d );
+		}
+		
+		
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( islandEdges );
+		tx.setEdges( edges );
 		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) playSheet.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( islandEdges );
+		stx.setEdges( edges );
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
 		atx.setEdges( islandEdges );
 		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
@@ -165,14 +178,10 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 * @param masterEdges Vector<DBCMEdge>
 	 * @param masterVerts Vector<DBCMVertex>
 	 */
-	private void addRemainingToIslandHash( Vector<SEMOSSEdge> masterEdges, Vector<SEMOSSVertex> masterVerts ) {
-		for ( SEMOSSVertex vertex : masterVerts ) {
-			islandVerts.put( (String) vertex.getProperty( Constants.URI_KEY ), vertex );
-		}
-
-		for ( SEMOSSEdge edge : masterEdges ) {
-			islandEdges.put( (String) edge.getProperty( Constants.URI_KEY ), edge );
-		}
+	private void addRemainingToIslandHash( Collection<SEMOSSEdge> masterEdges,
+			Collection<SEMOSSVertex> masterVerts ) {
+		islandVerts.addAll( masterVerts );
+		islandEdges.addAll( masterEdges );
 	}
 
 	/**
@@ -182,15 +191,17 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 * @param vertex DBCMVertex	Passed node.
 	 */
 	public void addNetworkToMasterHash( SEMOSSVertex vertex ) {
-		String vertexName = (String) vertex.getProperty( Constants.VERTEX_NAME );
+		String vertexName = vertex.getLabel();
+
 		//use current nodes as the next set of nodes that I will have to traverse downward from.  Starts with passed node
-		ArrayList<SEMOSSVertex> currentNodes = new ArrayList<SEMOSSVertex>();
+		List<SEMOSSVertex> currentNodes = new ArrayList<>();
 		currentNodes.add( vertex );
-		Hashtable islandHash = new Hashtable();
-		islandHash.put( vertex.getProperty( Constants.URI_KEY ), vertex );
-		Hashtable islandEdgeHash = new Hashtable();
+
+		Set<SEMOSSVertex> islandHash = new HashSet<>();
+		islandHash.add( vertex );
+		Set<SEMOSSEdge> islandEdgeHash = new HashSet<>();
 		//use next nodes as the future set of nodes to traverse down from.
-		ArrayList<SEMOSSVertex> nextNodes = new ArrayList<SEMOSSVertex>();
+		List<SEMOSSVertex> nextNodes = new ArrayList<>();
 
 		int nodeIndex = 0;
 		int levelIndex = 1;
@@ -200,7 +211,8 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 				nodeIndex = 0;
 				SEMOSSVertex vert = currentNodes.remove( nodeIndex );
 
-				ArrayList<SEMOSSVertex> subsetNextNodes = traverseOutward( vert, islandHash, islandEdgeHash, vertexName );
+				Collection<SEMOSSVertex> subsetNextNodes
+						= traverseOutward( vert, islandHash, islandEdgeHash, vertexName );
 
 				nextNodes.addAll( subsetNextNodes );
 
@@ -222,31 +234,35 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 *
 	 * @return ArrayList<DBCMVertex>	List of nodes from traversing.
 	 */
-	public ArrayList<SEMOSSVertex> traverseOutward( SEMOSSVertex vert, Hashtable vertNetworkHash, Hashtable edgeNetworkHash, String vertKey ) {
+	public List<SEMOSSVertex> traverseOutward( SEMOSSVertex vert,
+			Set<SEMOSSVertex> vertNetworkHash, Set<SEMOSSEdge> edgeNetworkHash,
+			String vertKey ) {
 		//get nodes downstream
-		ArrayList<SEMOSSVertex> vertArray = new ArrayList<SEMOSSVertex>();
+		List<SEMOSSVertex> vertArray = new ArrayList<>();
 		Collection<SEMOSSEdge> edgeArray = forest.getOutEdges( vert );
 		//add all edges
-		putEdgesInHash( edgeArray, edgeNetworkHash );
+		edgeNetworkHash.addAll( edgeArray );
+
 		for ( SEMOSSEdge edge : edgeArray ) {
 			SEMOSSVertex inVert = edge.getInVertex();
 			if ( masterVertexVector.contains( inVert ) ) {
 				vertArray.add( inVert );//this is going to be the returned array, so this is all set
 
-				vertNetworkHash.put( inVert.getProperty( Constants.URI_KEY ), inVert );
+				vertNetworkHash.add( inVert );
 				removeAllEdgesAssociatedWithNode( inVert );
 			}
 		}
 		//get nodes upstream
 		Collection<SEMOSSEdge> inEdgeArray = forest.getInEdges( vert );
-		putEdgesInHash( inEdgeArray, edgeNetworkHash );
+		edgeNetworkHash.addAll( inEdgeArray );
+
 		for ( SEMOSSEdge edge : inEdgeArray ) {
 			SEMOSSVertex outVert = edge.getOutVertex();
 			if ( masterVertexVector.contains( outVert ) ) {
 				vertArray.add( outVert );//this is going to be the returned array, so this is all set
 
-				vertNetworkHash.put( outVert.getProperty( Constants.URI_KEY ), outVert );
-				edgeNetworkHash.put( edge.getProperty( Constants.URI_KEY ), edge );
+				vertNetworkHash.add( outVert );
+				edgeNetworkHash.add( edge );
 				removeAllEdgesAssociatedWithNode( outVert );
 			}
 		}
@@ -254,24 +270,6 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 		masterHash.put( vertKey, vertNetworkHash );
 		masterHash.put( vertKey + edgeHashKey, edgeNetworkHash );
 		return vertArray;
-	}
-
-	/**
-	 * Put edges into hashtable. Iterates through collection of edges and puts the
-	 * property of the edges into hashtable.
-	 *
-	 * @param edges Collection<DBCMEdge>	Collection of edges.
-	 * @param hash Hashtable<String,DBCMEdge>	Hashtable of edges.
-	 *
-	 * @return Hashtable<String,DBCMEdge>	Final hashtable of properties and edges.
-	 */
-	private Hashtable<String, SEMOSSEdge> putEdgesInHash( Collection<SEMOSSEdge> edges, Hashtable<String, SEMOSSEdge> hash ) {
-		Iterator edgeIt = edges.iterator();
-		while ( edgeIt.hasNext() ) {
-			SEMOSSEdge edge = (SEMOSSEdge) edgeIt.next();
-			hash.put( (String) edge.getProperty( Constants.URI_KEY ), edge );
-		}
-		return hash;
 	}
 
 	/**
@@ -283,20 +281,12 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	private void removeAllEdgesAssociatedWithNode( SEMOSSVertex vert ) {
 		//remove vertex
 		masterVertexVector.remove( vert );
+
 		//remove downstream edges
-		Collection<SEMOSSEdge> edgeArray = forest.getOutEdges( vert );
-		for ( SEMOSSEdge edge : edgeArray ) {
-			if ( masterEdgeVector.contains( edge ) ) {
-				masterEdgeVector.remove( edge );
-			}
-		}
+		masterEdgeVector.removeAll( forest.getOutEdges( vert ) );
+
 		//remove upstream edges
-		Collection<SEMOSSEdge> inEdgeArray = forest.getInEdges( vert );
-		for ( SEMOSSEdge edge : inEdgeArray ) {
-			if ( masterEdgeVector.contains( edge ) ) {
-				masterEdgeVector.remove( edge );
-			}
-		}
+		masterEdgeVector.removeAll( forest.getInEdges( vert ) );
 	}
 
 	/**
@@ -318,9 +308,7 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 * @param pickedVertices DBCMVertex[]	List of nodes that have been selected.
 	 */
 	public void setSelectedNodes( SEMOSSVertex[] pickedVertices ) {
-		for ( int idx = 0; idx < pickedVertices.length; idx++ ) {
-			selectedVerts.add( pickedVertices[idx] );
-		}
+		selectedVerts.addAll( islandVerts );
 	}
 
 	/**

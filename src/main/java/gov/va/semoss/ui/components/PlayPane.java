@@ -129,6 +129,7 @@ import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 import gov.va.semoss.ui.actions.ExportGraphMLAction;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 
+import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -136,6 +137,7 @@ import java.util.HashMap;
 import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.event.InternalFrameEvent;
+import org.openrdf.model.URI;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -840,8 +842,14 @@ public class PlayPane extends JFrame {
 		JPanel panel = new JPanel( new GridLayout( 2, 1 ) );
 		panel.setBackground( SystemColor.control );
 
+		LabeledPairTableCellRenderer<URI> renderer = LabeledPairTableCellRenderer.getUriPairRenderer();
+		
 		labelTable = initJTableAndAddTo( panel, false );
 		tooltipTable = initJTableAndAddTo( panel, false );
+		
+//		labelTable.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );
+//		tooltipTable.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );		
+		
 
 		return panel;
 	}

@@ -93,6 +93,8 @@ import gov.va.semoss.ui.transformer.VertexTooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import java.util.HashSet;
+import org.openrdf.model.URI;
 
 /**
  */
@@ -335,7 +337,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		try {
 			if ( gdm.enableSearchBar() ) {
 				Graph<SEMOSSVertex, SEMOSSEdge> g = gdm.getGraph();
-				searchPanel.getSearchController().indexRepository( g.getEdges(), 
+				searchPanel.getSearchController().indexRepository( g.getEdges(),
 						g.getVertices(), getEngine() );
 			}
 
@@ -465,57 +467,24 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	protected void createForest() throws Exception {
-		Map<String, String> filteredNodes = filterData.getFilterNodes();
-		log.debug( "Filtered Nodes " + filteredNodes );
+		for( SEMOSSEdge edge : gdm.getGraph().getEdges() ){
+			processControlData( edge );
 
-//		log.debug( "Adding edges from edgeStore to forest" );
-//		for ( String edgeURI : gdm.getEdgeStore().keySet() ) {
-//			SEMOSSEdge edge = gdm.getEdgeStore().get( edgeURI );
-//			SEMOSSVertex outVert = edge.getOutVertex();
-//			SEMOSSVertex inVert = edge.getInVertex();
-//
-//			if ( filteredNodes.containsKey( inVert.getURI() )
-//					|| filteredNodes.containsKey( outVert.getURI() )
-//					|| filterData.getEdgeFilterNodes().containsKey( edge.getURI() ) ) {
-//				continue;
-//			}
-//
-//			//add to forest
-//			getGraph().addEdge( edge, outVert, inVert );
-//			processControlData( edge );
-//
-//			//add to filter data
-//			filterData.addEdge( edge );
-//
-//			//add to pred data
-//			predData.addPredicateAvailable( edge.getURI() );
-//			predData.addConceptAvailable( inVert.getURI() );
-//			predData.addConceptAvailable( outVert.getURI() );
-//
-//			//add to simple graph
-//			graph.addVertex( outVert );
-//			graph.addVertex( inVert );
-//			if ( outVert != inVert ) {// loops not allowed in simple graph
-//				log.debug( "Adding edge to graph <> " + outVert.getURI() + " <> "
-//						+ edge.getURI() + " <> " + inVert.getURI() + " <>" );
-//				graph.addEdge( outVert, inVert, edge );
-//			}
-//		}
+			//add to filter data
+			filterData.addEdge( edge );
+
+			//add to pred data
+			predData.addPredicateAvailable( edge.getURI().stringValue() );
+			predData.addConceptAvailable( edge.getInVertex().getURI().stringValue() );
+			predData.addConceptAvailable( edge.getOutVertex().getURI().stringValue() );
+		}
 
 		log.debug( "Done with edges... checking for isolated nodes" );
 		//now for vertices--process control data and add what is necessary to the graph
 		//use vert store to check for any isolated nodes and add to forest
 		for ( SEMOSSVertex vert : gdm.getVertStore().values() ) {
-			if ( filteredNodes.containsKey( vert.getURI() ) ) {
-				continue;
-			}
-
 			processControlData( vert );
 			filterData.addVertex( vert );
-//			if ( !forest.containsVertex( vert ) ) {
-//				forest.addVertex( vert );
-//				graph.addVertex( vert );
-//			}
 		}
 
 		genAllData();
@@ -693,8 +662,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		if ( searchPanel.isHighlightButtonSelected() ) {
 			VertexPaintTransformer ptx = (VertexPaintTransformer) view.getRenderContext().getVertexFillPaintTransformer();
-			Map<String, String> searchVertices = new HashMap<>();
-			searchVertices.putAll( searchPanel.getSearchController().getCleanResHash() );
+			Set<SEMOSSVertex> searchVertices = new HashSet<>();
+			searchVertices.addAll( searchPanel.getSearchController().getCleanResHash() );
 			ptx.setVertHash( searchVertices );
 			VertexLabelFontTransformer vfl = (VertexLabelFontTransformer) view.getRenderContext().getVertexFontTransformer();
 			vfl.setVertHash( searchVertices );
@@ -790,13 +759,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	private void processControlData( SEMOSSEdge edge ) {
-		for ( String property : edge.getProperties().keySet() ) {
+		for ( URI property : edge.getProperties().keySet() ) {
 			controlData.addEdgeProperty( edge.getEdgeType(), property );
 		}
 	}
 
 	private void processControlData( SEMOSSVertex vertex ) {
-		for ( String property : vertex.getProperties().keySet() ) {
+		for ( URI property : vertex.getProperties().keySet() ) {
 			controlData.addVertexProperty( vertex.getType(), property );
 		}
 	}
@@ -804,7 +773,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public void createData() {
 		gdm.createModel( getQuery(), getEngine() );
-		gdm.fillStoresFromModel();
 	}
 
 	@Override
@@ -918,19 +886,19 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		//otherwise, only perform action on the selected vertices and edges
 		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
 			if ( increaseFont ) {
-				transformerV.increaseFontSize( vertex.getURI() );
+				transformerV.increaseFontSize( vertex );
 			}
 			else {
-				transformerV.decreaseFontSize( vertex.getURI() );
+				transformerV.decreaseFontSize( vertex );
 			}
 		}
 
 		for ( SEMOSSEdge edge : viewer.getPickedEdgeState().getPicked() ) {
 			if ( increaseFont ) {
-				transformerE.increaseFontSize( edge.getURI() );
+				transformerE.increaseFontSize( edge );
 			}
 			else {
-				transformerE.decreaseFontSize( edge.getURI() );
+				transformerE.decreaseFontSize( edge );
 			}
 		}
 

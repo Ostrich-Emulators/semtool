@@ -24,28 +24,24 @@ import java.awt.event.ItemListener;
 import java.util.Iterator;
 
 import javax.swing.JTable;
-import javax.swing.JToggleButton;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.models.VertexPropertyTableModel;
-import gov.va.semoss.ui.components.GraphPlaySheetFrame;
 import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.QuestionPlaySheetStore;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -84,25 +80,20 @@ public class PickedStateListener implements ItemListener {
 		PickedState<SEMOSSVertex> ps = viewer.getPickedVertexState();
 		Iterator<SEMOSSVertex> it = ps.getPicked().iterator();
 
-		SEMOSSVertex[] vertices = new SEMOSSVertex[ps.getPicked().size()];
-
 		//Need vertex to highlight when click in skeleton mode... Here we need to get the already selected vertices
 		//so that we can add to them
-		Map<String, String> vertHash = new HashMap<>();
+		Set<SEMOSSVertex> vertHash = new HashSet<>();
 		VertexLabelFontTransformer vlft = null;
 		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
 			vlft = (VertexLabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-			vertHash = vlft.getVertHash();
+			vertHash.addAll( vlft.getVertHash() );
 		}
+		
+		vertHash.addAll( ps.getPicked() );
 
-		for ( int vertIndex = 0; it.hasNext(); vertIndex++ ) {
-			SEMOSSVertex v = it.next();
-			vertices[vertIndex] = v;
-			//add selected vertices
-			vertHash.put( v.getProperty( RDF.SUBJECT ).toString(), v.getProperty( RDF.SUBJECT ).toString() );
-
+		for ( SEMOSSVertex v : ps.getPicked() ){
 			logger.debug( " Name  >>> " + v.getProperty( RDFS.LABEL ) );
-			vst.setSelected( v.getURI() );
+			vst.setSelected( v );
 			// this needs to invoke the property table model stuff
 
 			VertexPropertyTableModel pm = new VertexPropertyTableModel( gps.getFilterData(), v );

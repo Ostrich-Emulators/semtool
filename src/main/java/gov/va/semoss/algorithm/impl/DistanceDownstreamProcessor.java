@@ -411,7 +411,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		Iterator<SEMOSSEdge> edgeIt = edgePath.iterator();
 		while ( edgeIt.hasNext() ) {
 			SEMOSSEdge edge = edgeIt.next();
-			if ( edge.getUriProperties().containsKey( WEIGHT ) ) {
+			if ( edge.getProperties().containsKey( WEIGHT ) ) {
 				total = total * (Double) edge.getProperty( WEIGHT );
 				count++;
 			}

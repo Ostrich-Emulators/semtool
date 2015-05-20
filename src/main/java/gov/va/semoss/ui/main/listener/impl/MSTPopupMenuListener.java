@@ -20,8 +20,6 @@
 package gov.va.semoss.ui.main.listener.impl;
 
 import java.awt.event.ActionEvent;
-import java.util.Hashtable;
-import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.jgrapht.Graph;
@@ -31,8 +29,9 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
@@ -53,7 +52,7 @@ public class MSTPopupMenuListener extends AbstractAction {
 	 */
 	public MSTPopupMenuListener( GraphPlaySheet ps ) {
 		super( "Highlight Minimum Spanning Tree" );
-		putValue( Action.SHORT_DESCRIPTION, 
+		putValue( Action.SHORT_DESCRIPTION,
 				"Highlight subgraph that contains all the vertices and is a tree" );
 		this.ps = ps;
 	}
@@ -79,12 +78,9 @@ public class MSTPopupMenuListener extends AbstractAction {
 				= new KruskalMinimumSpanningTree<>( graph );
 
 		// get all the edges
-		Iterator<SEMOSSEdge> csIterator = kmst.getEdgeSet().iterator();
-		Hashtable<String, SEMOSSEdge> edgeHash = new Hashtable<>();
-		while ( csIterator.hasNext() ) {
-			SEMOSSEdge edge = csIterator.next();
-			String edgeName = (String) edge.getProperty( Constants.URI_KEY );
-			edgeHash.put( edgeName, edge );
+		Map<SEMOSSEdge, Double> edgeHash = new HashMap<>();
+		for ( SEMOSSEdge ed : kmst.getEdgeSet() ) {
+			edgeHash.put( ed, 3d );
 		}
 
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();

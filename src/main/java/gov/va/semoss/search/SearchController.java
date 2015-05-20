@@ -89,8 +89,8 @@ public class SearchController implements KeyListener, FocusListener,
 	private boolean typed = false;
 	private boolean searchContinue = true;
 
-	private Map<String, String> resHash = new HashMap<>();
-	private Map<String, String> cleanResHash = new HashMap<>();
+	private Set<SEMOSSVertex> resHash = new HashSet<>();
+	private Set<SEMOSSVertex> cleanResHash = new HashSet<>();
 
 	private VertexPaintTransformer oldTx = null;
 	private EdgeStrokeTransformer oldeTx = null;
@@ -108,7 +108,7 @@ public class SearchController implements KeyListener, FocusListener,
 	private IndexReader reader;
 	private IndexSearcher searcher;
 
-	public Map<String, String> getCleanResHash() {
+	public Set<SEMOSSVertex> getCleanResHash() {
 		return cleanResHash;
 	}
 
@@ -140,11 +140,10 @@ public class SearchController implements KeyListener, FocusListener,
 			target.repaint();
 			// if the search vertex state has been cleared, we need to refill it
 			// with what is in the res hash
-			Map<String, SEMOSSVertex> vertStore = gps.getGraphData()
-					.getVertStore();
+			Map<URI, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
 			if ( tempState.getPicked().isEmpty() && !resHash.isEmpty() ) {
-				for ( String resKey : resHash.keySet() ) {
-					liveState.pick( vertStore.get( resKey ), true );
+				for ( SEMOSSVertex resKey : resHash ) {
+					liveState.pick( resKey, true );
 				}
 			}
 			// if there are vertices in the temp state, need to pick them in the
@@ -187,12 +186,12 @@ public class SearchController implements KeyListener, FocusListener,
 			TopDocs hits = searcher.search( q, 500 );
 			for ( ScoreDoc sd : hits.scoreDocs ) {
 				Document doc = searcher.doc( sd.doc );
-				String uristr = doc.get( URI_FIELD );
+				URI uri = new URIImpl( doc.get( URI_FIELD ) );
 
-				Map<String, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
-				if ( vertStore.containsKey( uristr ) ) {
-					log.debug( "selecting node: " + uristr + " from search" );
-					gps.getView().getPickedVertexState().pick( vertStore.get( uristr ), true );
+				Map<URI, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
+				if ( vertStore.containsKey( uri ) ) {
+					log.debug( "selecting node: " + uri + " from search" );
+					gps.getView().getPickedVertexState().pick( vertStore.get( uri ), true );
 				}
 			}
 		}
@@ -315,23 +314,23 @@ public class SearchController implements KeyListener, FocusListener,
 			}
 
 			Set<Resource> needLabels = new HashSet<>();
-			for( SEMOSSEdge e : edges ){
-				needLabels.addAll( e.getUriProperties().keySet() );
+			for ( SEMOSSEdge e : edges ) {
+				needLabels.addAll( e.getProperties().keySet() );
 			}
-			for( SEMOSSVertex e : nodes ){
-				needLabels.addAll( e.getUriProperties().keySet() );
+			for ( SEMOSSVertex e : nodes ) {
+				needLabels.addAll( e.getProperties().keySet() );
 			}
-			
-			Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine);
+
+			Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine );
 			RepositoryIndexer ri = new RepositoryIndexer( labels );
 
-			for( SEMOSSEdge e : edges ){
-				ri.handleProperties( e.getURI(), e.getUriProperties() );
+			for ( SEMOSSEdge e : edges ) {
+				ri.handleProperties( e.getURI(), e.getProperties() );
 			}
-			for( SEMOSSVertex e : nodes ){
-				ri.handleProperties( e.getURI(), e.getUriProperties() );
+			for ( SEMOSSVertex e : nodes ) {
+				ri.handleProperties( e.getURI(), e.getProperties() );
 			}
-			
+
 			ri.finish();
 
 			reader = IndexReader.open( ramdir );
@@ -400,8 +399,8 @@ public class SearchController implements KeyListener, FocusListener,
 	private class RepositoryIndexer {
 
 		private IndexWriter indexer;
-		private final Map<String, Document> doccache = new HashMap<>();
-		private final Map<String, StringBuilder> textcache = new HashMap<>();
+		private final Map<URI, Document> doccache = new HashMap<>();
+		private final Map<URI, StringBuilder> textcache = new HashMap<>();
 		private final Map<Resource, String> labels;
 
 		public RepositoryIndexer( Map<Resource, String> labs ) {
@@ -418,7 +417,7 @@ public class SearchController implements KeyListener, FocusListener,
 
 		public void finish() {
 			try {
-				for ( Map.Entry<String, Document> en : doccache.entrySet() ) {
+				for ( Map.Entry<URI, Document> en : doccache.entrySet() ) {
 					String sb = textcache.get( en.getKey() ).toString().trim();
 					if ( !sb.isEmpty() ) {
 						en.getValue().add( new Field( TEXT_FIELD, sb, Field.Store.YES,
@@ -450,13 +449,13 @@ public class SearchController implements KeyListener, FocusListener,
 			}
 		}
 
-		public void handleProperties( String sub, Map<URI, Object> props ) {
+		public void handleProperties( URI sub, Map<URI, Object> props ) {
 			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
 				URI pred = en.getKey();
 				if ( !doccache.containsKey( sub ) ) {
 					Document doc = new Document();
 					doccache.put( sub, doc );
-					doc.add( new Field( "URI", sub, Field.Store.YES,
+					doc.add( new Field( "URI", sub.stringValue(), Field.Store.YES,
 							Field.Index.NOT_ANALYZED ) );
 
 					textcache.put( sub, new StringBuilder() );

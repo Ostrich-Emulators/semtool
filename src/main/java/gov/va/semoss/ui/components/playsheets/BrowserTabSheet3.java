@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
+import org.openrdf.model.URI;
 
 /**
  * This class is used in chart listeners to create the appropriate browser and
@@ -62,7 +63,7 @@ public class BrowserTabSheet3 extends BrowserPlaySheet2 implements ActionListene
 	}
 
 	public void pullData() {
-		Map<String, List<SEMOSSVertex>> nodeHash = gps.getFilterData().getTypeHash();
+		Map<URI, List<SEMOSSVertex>> nodeHash = gps.getFilterData().getTypeHash();
 		Map<String, Object> newHash = new HashMap<>();
 		newHash.put( "Nodes", nodeHash );
 		addDataHash( newHash );

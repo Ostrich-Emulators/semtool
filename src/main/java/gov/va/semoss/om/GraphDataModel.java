@@ -26,18 +26,16 @@ import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import edu.uci.ics.jung.graph.DelegateForest;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
-import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.InMemoryJenaEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaUpdateWrapper;
-import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.io.FileWriter;
@@ -91,14 +89,12 @@ public class GraphDataModel {
 
 	private boolean search, prop, sudowl;
 
-	protected Map<String, SEMOSSVertex> vertStore = new HashMap<>();
-	protected Map<String, SEMOSSEdge> edgeStore = new HashMap<>();
+	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
+	protected Map<URI, SEMOSSEdge> edgeStore = new HashMap<>();
 
 	private boolean filterOutOwlData = true;
 	private URI typeOrSubclass = RDF.TYPE;
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> forest = new DirectedSparseGraph<>();
-
-	private URI conceptURI;
 
 	//these are used for keeping track of only what was added or subtracted and will only be populated when overlay is true
 	private Map<String, SEMOSSVertex> incrementalVertStore;
@@ -180,14 +176,7 @@ public class GraphDataModel {
 	 * and edges.
 	 */
 	public void fillStoresFromModel() {
-		log.debug( "Creating the base Graph in fillStoresFromModel." );
-		if ( rc == null ) {
-			log.warn( "rc is null, could not create the base graph." );
-			return;
-		}
-
-		generateVerticesFromConceptsInRC();
-		generateEdgesFromTriplesInRC();
+		log.warn( "this function has been refactored away" );
 	}
 
 	/*
@@ -205,7 +194,6 @@ public class GraphDataModel {
 	 *
 	 */
 	public void processData( String query, IEngine engine ) {
-		conceptURI = engine.getSchemaBuilder().getConceptUri().build();
 
 		try {
 			rc.begin();
@@ -224,15 +212,22 @@ public class GraphDataModel {
 					needProps.add( Resource.class.cast( obj ) );
 				}
 
-				SEMOSSVertex vert1 = createOrRetrieveVertex( sub.stringValue() );
-				SEMOSSVertex vert2 = createOrRetrieveVertex( obj.stringValue() );
+				SEMOSSVertex vert1 = createOrRetrieveVertex( URI.class.cast( sub ) );
+				SEMOSSVertex vert2;
+				if ( obj instanceof URI ) {
+					vert2 = createOrRetrieveVertex( URI.class.cast( obj ) );
+				}
+				else {
+					URI uri = UriBuilder.getBuilder( Constants.ANYNODE ).uniqueUri();
+					vert2 = createOrRetrieveVertex( uri );
+					vert2.setLabel( obj.stringValue() );
+				}
 
 				forest.addVertex( vert1 );
 				forest.addVertex( vert2 );
-				
 
-				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred.stringValue() );
-				edge.setEdgeType( pred.stringValue() );
+				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred );
+				edge.setEdgeType( pred );
 				storeEdge( edge );
 
 				try {
@@ -246,7 +241,7 @@ public class GraphDataModel {
 			Map<URI, String> edgelabels
 					= Utility.getInstanceLabels( model.predicates(), engine );
 			for ( URI u : model.predicates() ) {
-				SEMOSSEdge edge = edgeStore.get( u.stringValue() );
+				SEMOSSEdge edge = edgeStore.get( u );
 				edge.setProperty( RDFS.LABEL, edgelabels.get( u ) );
 			}
 
@@ -382,7 +377,7 @@ public class GraphDataModel {
 
 	protected void setLabel( SEMOSSVertex v, String labelPieceToAppend ) {
 		try {
-			URI uri = new URIImpl( v.getURI() );
+			URI uri = v.getURI();
 			if ( labelcache.containsKey( uri ) ) {
 				v.setLabel( labelcache.get( uri ) + labelPieceToAppend );
 				return;
@@ -394,20 +389,9 @@ public class GraphDataModel {
 		v.setLabel( v.getLabel() + labelPieceToAppend );
 	}
 
-	public SEMOSSVertex createOrRetrieveVertex( String vertexKey ) {
+	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey ) {
 		if ( !vertStore.containsKey( vertexKey ) ) {
 			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
-			storeVertex( vertex );
-		}
-
-		return vertStore.get( vertexKey );
-	}
-
-	private SEMOSSVertex createOrRetrieveVertex( String vertexKey, Object object ) {
-		if ( !vertStore.containsKey( vertexKey ) ) {
-			// if this is a URI great. Else it's a literal
-			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
-			// setLabel( vertex );
 			storeVertex( vertex );
 		}
 
@@ -415,47 +399,29 @@ public class GraphDataModel {
 	}
 
 	public void storeVertex( SEMOSSVertex vert ) {
-		String key = vert.getProperty( RDF.SUBJECT ).toString();
+		URI key = vert.getURI();
 		setLabel( vert );
 		vertStore.put( key, vert );
 
 		if ( method == CREATION_METHOD.OVERLAY && incrementalVertStore != null ) {
-			incrementalVertStore.put( key, vert );
+			incrementalVertStore.put( key.stringValue(), vert );
 		}
 
 		else if ( method == CREATION_METHOD.UNDO && incrementalVertStore != null ) {
-			incrementalVertStore.remove( key );
+			incrementalVertStore.remove( key.stringValue() );
 		}
 	}
 
 	public void storeEdge( SEMOSSEdge edge ) {
-		String key = edge.getProperty( Constants.URI_KEY ) + "";
+		URI key = edge.getURI();
 		edgeStore.put( key, edge );
 
 		if ( method == CREATION_METHOD.OVERLAY && incrementalEdgeStore != null ) {
-			incrementalEdgeStore.put( key, edge );
+			incrementalEdgeStore.put( key.stringValue(), edge );
 		}
 
 		if ( method == CREATION_METHOD.UNDO && incrementalEdgeStore != null ) {
-			incrementalEdgeStore.remove( key );
-		}
-	}
-
-	public void addEdgeProperty( String edgeName, Object value, String propName, String outNode, String inNode ) {
-		SEMOSSEdge edge = edgeStore.get( edgeName );
-
-		if ( edge == null ) {
-			SEMOSSVertex vertex1 = createOrRetrieveVertex( outNode );
-			SEMOSSVertex vertex2 = createOrRetrieveVertex( inNode );
-
-			edge = new SEMOSSEdge( vertex1, vertex2, edgeName );
-		}
-
-		//only set property and store edge if the property does not already exist on the edge
-		String propNameInstance = Utility.getInstanceName( propName );
-		if ( edge.getProperty( new URIImpl( propNameInstance ) ) == null ) {
-			edge.setProperty( propNameInstance, value );
-			storeEdge( edge );
+			incrementalEdgeStore.remove( key.stringValue() );
 		}
 	}
 
@@ -479,9 +445,14 @@ public class GraphDataModel {
 		modelCounter--;
 
 		incrementalVertStore.clear();
-		incrementalVertStore.putAll( vertStore );
+		for ( Map.Entry<URI, SEMOSSVertex> en : vertStore.entrySet() ) {
+			incrementalVertStore.put( en.getKey().stringValue(), en.getValue() );
+		}
+
 		incrementalEdgeStore.clear();
-		incrementalEdgeStore.putAll( edgeStore );
+		for ( Map.Entry<URI, SEMOSSEdge> en : edgeStore.entrySet() ) {
+			incrementalEdgeStore.put( en.getKey().stringValue(), en.getValue() );
+		}
 		vertStore.clear();
 		edgeStore.clear();
 	}
@@ -496,93 +467,6 @@ public class GraphDataModel {
 
 		incrementalVertStore.clear();
 		incrementalEdgeStore.clear();
-	}
-
-	/**
-	 * Method generateEdgesFromTriplesInRC executes the first SPARQL query and
-	 * generates the graphs
-	 */
-	public void generateEdgesFromTriplesInRC() {
-		if ( true ) {
-			return;
-		}
-
-		String query
-				= "SELECT DISTINCT ?Subject ?Predicate ?Object WHERE {"
-				+ "  ?Predicate a owl:ObjectProperty ."
-				+ "  ?Subject " + typeOrSubclass + " <" + conceptURI.stringValue() + "> ."
-				+ "  ?Subject ?Predicate ?Object"
-				+ "}";
-
-		int numResults = 0;
-		Collection<SesameJenaConstructStatement> sjcw
-				= RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
-		for ( SesameJenaConstructStatement sct : sjcw ) {
-			if ( baseFilterSet.contains( sct.getSubject() )
-					|| baseFilterSet.contains( sct.getPredicate() )
-					|| baseFilterSet.contains( sct.getObject().toString() ) ) {
-				continue;
-			}
-
-			SEMOSSVertex vertex1 = createOrRetrieveVertex( sct.getSubject() );
-			SEMOSSVertex vertex2
-					= createOrRetrieveVertex( sct.getObject().toString(), sct.getObject() );
-
-			// check to see if this is another type of edge
-			String edgeString = vertex1.getProperty( RDFS.LABEL ) + ":" + vertex2.getProperty( RDFS.LABEL );
-			String predicateName = sct.getPredicate();
-			if ( !predicateName.contains( edgeString ) ) {
-				predicateName += "/" + edgeString;
-			}
-
-			if ( edgeStore.get( sct.getPredicate() ) == null && edgeStore.get( predicateName ) == null ) {
-				storeEdge( new SEMOSSEdge( vertex1, vertex2, predicateName ) );
-				log.debug( sct.getPredicate() + " <<>> " + predicateName );
-				numResults++;
-			}
-		}
-
-		log.debug( "generateEdgesFromTriplesInRC() stored " + numResults + " edges." );
-	}
-
-	/**
-	 * Method generateVerticesFromConceptsInRC - create all the relationships
-	 */
-	public void generateVerticesFromConceptsInRC() {
-		if ( true ) {
-			return;
-		}
-
-		String query = "SELECT DISTINCT ?s ?p ?o ?concept WHERE {"
-				+ " ?s ?type+ ?concept . ?s ?p ?o . FILTER( isLiteral( ?o ) )  }";
-
-		ListQueryAdapter<SEMOSSVertex> vqa = new ListQueryAdapter<SEMOSSVertex>( query ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI sub = URI.class.cast( set.getValue( "s" ) );
-
-				if ( !( baseFilterSet.contains( sub.stringValue() )
-						|| vertStore.containsKey( sub.stringValue() ) ) ) {
-					URI prop = URI.class.cast( set.getValue( "p" ) );
-					Value v = set.getValue( "o" );
-
-					SEMOSSVertex vertex = new SEMOSSVertex( sub.stringValue() );
-					vertex.setProperty( prop.stringValue(), v.stringValue() );
-					add( vertex );
-				}
-			}
-		};
-
-		vqa.useInferred( true );
-		vqa.bind( "concept", conceptURI );
-		vqa.bind( "type", typeOrSubclass );
-		List<SEMOSSVertex> verts = AbstractSesameEngine.getSelectNoEx( vqa, rc, true );
-		for ( SEMOSSVertex v : verts ) {
-			storeVertex( v );
-		}
-
-		log.debug( "genBaseConcepts() loaded " + verts.size() + " vertices." );
 	}
 
 	/**
@@ -682,11 +566,11 @@ public class GraphDataModel {
 		log.debug( "Extend : Total Models added = " + modelStore.size() );
 	}
 
-	public Map<String, SEMOSSVertex> getVertStore() {
+	public Map<URI, SEMOSSVertex> getVertStore() {
 		return this.vertStore;
 	}
 
-	public Map<String, SEMOSSEdge> getEdgeStore() {
+	public Map<URI, SEMOSSEdge> getEdgeStore() {
 		return this.edgeStore;
 	}
 
@@ -817,10 +701,10 @@ public class GraphDataModel {
 
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					String s = set.getValue( "s" ).stringValue();
+					URI s = URI.class.cast( set.getValue( "s" ) );
 					URI prop = URI.class.cast( set.getValue( "p" ) );
 					String val = set.getValue( "o" ).stringValue();
-					String type = set.getValue( "type" ).stringValue();
+					URI type = URI.class.cast( set.getValue( "type" ) );
 
 					SEMOSSVertex v = createOrRetrieveVertex( s );
 					v.setProperty( prop, val );
@@ -836,10 +720,10 @@ public class GraphDataModel {
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
 					// ?s ?rel ?o ?prop ?literal
-					String s = set.getValue( "s" ).stringValue();
-					String rel = set.getValue( "rel" ).stringValue();
+					URI s = URI.class.cast( set.getValue( "s" ) );
+					URI rel = URI.class.cast( set.getValue( "rel" ) );
 					URI prop = URI.class.cast( set.getValue( "prop" ) );
-					String o = set.getValue( "o" ).stringValue();
+					URI o = URI.class.cast( set.getValue( "o" ) );
 					String type = set.getValue( "literal" ).stringValue();
 
 					if ( !edgeStore.containsKey( rel ) ) {

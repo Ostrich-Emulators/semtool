@@ -19,12 +19,13 @@
 package gov.va.semoss.util;
 
 import java.util.Comparator;
+import org.openrdf.model.URI;
 
 
 /**
  * Used to compare two properties.
  */
-public class PropComparator implements Comparator<String>{
+public class PropComparator implements Comparator<URI>{
 
 	/**
 	 * Compares two properties.
@@ -35,7 +36,7 @@ public class PropComparator implements Comparator<String>{
 	
 	 * @return int 				Returns -1, 0, or 1 */
 	@Override
-	public int compare(String str1, String str2) {
+	public int compare(URI str1, URI str2) {
 		if(str1.equals(Constants.VERTEX_NAME)) return -1;
 		else if(str2.equals(Constants.VERTEX_NAME)) return 1;
 		else if(str1.equals(Constants.VERTEX_TYPE)) return -1;
@@ -47,6 +48,6 @@ public class PropComparator implements Comparator<String>{
 		else if(str1.equals(Constants.URI_KEY)) return -1;
 		else if(str2.equals(Constants.URI_KEY)) return 1;
 
-		return str1.compareToIgnoreCase(str2);
+		return str1.stringValue().compareToIgnoreCase(str2.stringValue() );
 	}
 }
