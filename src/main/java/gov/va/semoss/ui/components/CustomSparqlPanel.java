@@ -253,6 +253,9 @@ public class CustomSparqlPanel extends JPanel {
 			public void actionPerformed( ActionEvent e ) {
 				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
 				sparqlArea.setTextOfSelectedTab( selected.getSparql() );
+				//Pre-select the Playsheet of the Insight copied down:
+				String selectedPlaySheet = PlaySheetEnum.getNameFromClass(selected.getOutput());
+				playSheetComboBox.setSelectedItem(selectedPlaySheet);
 			}
 		} );
 
