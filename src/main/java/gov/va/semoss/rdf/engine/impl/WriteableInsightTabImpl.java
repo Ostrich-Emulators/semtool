@@ -301,7 +301,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
              + "?body sp:text \"" + sparql + "\" . "
              + "?insightURI dcterms:description \"" + description + "\" . "
              + "?insightURI dcterms:creator \"" + creator + "\" . "
-             + "?insightURI dcterms:modified \"" + modified + "\" . } "
+             + "?insightURI dcterms:modified \"" + modified + "\"^^xsd:dateTime . } "
              + "WHERE { BIND(" + insightURI_String + " AS ?insightURI) . "
              + "?insightURI rdfs:label ?question . "
              + "?insightURI ui:dataView ?dataViewOutput . "

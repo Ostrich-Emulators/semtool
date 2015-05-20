@@ -37,6 +37,7 @@ import org.apache.log4j.Logger;
 import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.Utility;
@@ -411,7 +412,7 @@ public class CustomSparqlPanel extends JPanel {
 
 			//Setup playsheet, exQueryProcessor will also take care of append or create query: 
 			String query = sparqlArea.getTextOfSelectedTab();
-
+Utility.showMessage(AbstractSesameEngine.processNamespaces(query));
 			IEngine eng = DIHelper.getInstance().getRdfEngine();
 
 			if ( playSheetString.equals( "Update Query" ) ) {
