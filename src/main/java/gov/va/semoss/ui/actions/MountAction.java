@@ -38,7 +38,7 @@ public class MountAction extends DbAction {
 
   public MountAction( String optg, Frame frame ) {
     super( optg, MOUNT, "attachdb" );
-    putValue( AbstractAction.SHORT_DESCRIPTION, "Mount an existing database" );
+    putValue( AbstractAction.SHORT_DESCRIPTION, "Attach an existing database" );
   }
 
   @Override
@@ -72,7 +72,7 @@ public class MountAction extends DbAction {
 
   @Override
   protected ProgressTask getTask( ActionEvent e ) {
-    ProgressTask pt = new ProgressTask( "Mounting " + smssfile,
+    ProgressTask pt = new ProgressTask( "Attaching " + smssfile,
         new Runnable() {
           @Override
           public void run() {
