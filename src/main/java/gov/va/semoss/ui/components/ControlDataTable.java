@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.components;
 
@@ -29,12 +29,10 @@ import org.apache.log4j.Logger;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.PropComparator;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 
@@ -45,24 +43,19 @@ public class ControlDataTable {
 
 	private static Logger logger = Logger.getLogger( ControlDataTable.class );
 
-	private Object[][] rows = new Object[0][5];
-	private Class<?>[] rowClasses = { String.class, URI.class, Boolean.class, Boolean.class, String.class };
-	private int rowCount = 0;
+	private List<ControlDataRow> data = new ArrayList<>();
+	private Class<?>[] rowClasses = { URI.class, URI.class, Boolean.class,
+		Boolean.class, String.class };
 
 	private MultiMap<URI, URI> properties = new MultiMap<>(); // type -> properties
 	private Set<URI> propertyShow;
 	private Set<URI> propertyShowTT;
 	private Set<URI> propertyHide;
 
-	private MultiMap<URI, URI> labelSelectedList = new MultiMap<>(); // type->selected props (labels)
-	private Set<URI> labelUnselectedList = new HashSet<>();
-	private MultiMap<URI, URI> tooltipSelectedList = new MultiMap<>(); // type->selected props (tooltips)
-	private Set<URI> tooltipUnselectedList = new HashSet<>();
-
 	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
 	private ControlDataTableModel tableModel;
 
-	public ControlDataTable( Set<URI> _propertyShow, 
+	public ControlDataTable( Set<URI> _propertyShow,
 			Set<URI> _propertyShowTT, Set<URI> _propertyHide, String[] columnNames ) {
 		propertyShow = _propertyShow;
 		propertyShowTT = _propertyShowTT;
@@ -80,8 +73,7 @@ public class ControlDataTable {
 		List<URI> propertyListByType = properties.getNN( type );
 
 		if ( !propertyListByType.contains( property ) && !propertyHide.contains( property ) ) {
-			propertyListByType.add( property );
-			rowCount++;
+			properties.add( type, property );
 		}
 	}
 
@@ -90,95 +82,33 @@ public class ControlDataTable {
 	 * properties
 	 */
 	public void populateAllRows() {
-		populateFirstRow();
+		data.clear();
 
 		List<URI> types = new ArrayList<>( properties.keySet() );
-		Collections.sort( types, new Comparator<URI>(){
+		Collections.sort( types, new PropComparator() );
 
-			@Override
-			public int compare( URI o1, URI o2 ) {
-				return o1.stringValue().compareTo( o2.stringValue() );
-			}
-		} );
-
-		int rowIndex = 1;
 		for ( URI type : types ) {
+			ControlDataRow header
+					= new ControlDataRow( type, Constants.ANYNODE, true, true );
+			data.add( header );
 
 			List<URI> propertiesForThisType = properties.getNN( type );
 			Collections.sort( propertiesForThisType, new PropComparator() );
 
-			boolean firstRow = true;
 			for ( URI property : propertiesForThisType ) {
 				if ( propertyHide.contains( property ) ) {
 					continue;
 				}
 
-				populateRow( rowIndex, type, property, firstRow );
+				ControlDataRow cdr = new ControlDataRow( type, property,
+						propertyShow.contains( property ),
+						propertyShowTT.contains( property ) );
 
-				logger.debug( "Adding Row-- " + rowIndex + "<>" + type + "<>" + property );
-				firstRow = false;
-				rowIndex++;
+				data.add( cdr );
 			}
 		}
 
 		tableModel.fireTableDataChanged();
-	}
-
-	/**
-	 * Populates the first row. columns are: Type, Property, Boolean
-	 *
-	 * @param rowCount: total number of rows
-	 */
-	public void populateFirstRow() {
-		rows = new Object[rowCount + 1][5];
-		rows[0][0] = "SELECT ALL";
-		rows[0][1] = "";
-		rows[0][2] = new Boolean( true );
-		rows[0][3] = new Boolean( true );
-		rows[0][4] = "SELECT ALL";
-	}
-
-	/**
-	 * Populates one row. columns are: Type, Property, Boolean
-	 *
-	 * @param rowIndex: the row number
-	 * @param type: the type of the row
-	 * @param property: the property to be shown or hidden
-	 * @param firstRow:
-	 */
-	public void populateRow( int rowIndex, URI type, URI property, boolean firstRow ) {
-		rows[rowIndex][0] = "";
-		rows[rowIndex][1] = property;
-		rows[rowIndex][2] = isSelected( labelSelectedList, type, property );
-		rows[rowIndex][3] = isSelected( tooltipSelectedList, type, property );
-		rows[rowIndex][4] = type;
-
-		if ( firstRow ) {
-			rows[rowIndex][0] = type;
-		}
-
-		if ( propertyShow.contains( property ) && !labelUnselectedList.contains( type ) ) {
-			setValue(true, rowIndex, 2 );
-		}
-
-		if ( propertyShowTT.contains( property ) && !tooltipUnselectedList.contains( type ) ) {
-			setValue(true, rowIndex, 3 );
-		}
-	}
-
-	private static Boolean isSelected( MultiMap<URI, URI> selectedList, 
-			URI type, URI property ) {
-		if ( !selectedList.containsKey( type ) ) {
-			return false;
-		}
-
-		for ( URI thisProp : selectedList.get( type ) ) {
-			if ( thisProp != null && thisProp.equals( property ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -189,75 +119,31 @@ public class ControlDataTable {
 	 * @param column Column number.
 	 */
 	public void setValue( Object val, int row, int column ) {
-		rows[row][column] = val;
+		List<ControlDataRow> tochange = new ArrayList<>();
 
-		if ( column == 2 ) {
-			setValue( labelSelectedList, labelUnselectedList, val, row, column );
-		}
-		else if ( column == 3 ) {
-			setValue( tooltipSelectedList, tooltipUnselectedList, val, row, column );
-		}
-	}
-
-	/**
-	 * Sets value at a particular row and column location.
-	 *
-	 * @param val Label value.
-	 * @param row Row number.
-	 * @param column Column number.
-	 */
-	public void setValue( MultiMap<URI, URI> selectedList, 
-			Set<URI> unselectedList, Object valueObject, int row, int column ) {
-		if ( !( valueObject instanceof Boolean ) ) {
-			return;
-		}
-		Boolean valBoolean = (Boolean) valueObject;
-
-		if ( row == 0 ) {
-			// if it is the header row--select all
-			for ( int i = 1; i < rows.length; i++ ) {
-				setValue( selectedList, unselectedList, valBoolean, i, column );
-			}
-		}
-
-		URI type = URI.class.cast( rows[row][4] );
-		URI property = URI.class.cast( rows[row][1] );
-
-		List<URI> typePropList = selectedList.getNN( type );
-		if ( typePropList == null ) {
-			typePropList = new ArrayList<>();
-		}
-
-		if ( valBoolean ) {
-			if ( !typePropList.contains( property ) ) {
-				typePropList.add( property );
-				unselectedList.remove( type );
+		ControlDataRow myrow = data.get( row );
+		if ( Constants.ANYNODE.equals( myrow.prop ) ) {
+			// this is the "SELECT ALL" row, so select all the properties of this type
+			for ( ControlDataRow cc : data ) {
+				if ( cc.type.equals( myrow.type ) ) {
+					tochange.add( cc );
+				}
 			}
 		}
 		else {
-			typePropList.remove( property );
-			unselectedList.add( type );
+			tochange.add( myrow );
 		}
 
-		rows[row][column] = valBoolean;
-		tableModel.fireTableCellUpdated( row, column );
-		selectedList.put( type, typePropList );
-	}
-
-	/**
-	 * Gets label value from a particular row and column location.
-	 *
-	 * @param row Row number.
-	 * @param column Column number.
-	 *
-	 * @return Object Label value.
-	 */
-	public Object getCell( int row, int column ) {
-		if ( row >= rows.length || column >= rows[0].length ) {
-			return null;
+		if ( 2 == column ) {
+			for ( ControlDataRow cdr : tochange ) {
+				cdr.label = Boolean.class.cast( val );
+			}
 		}
-
-		return rows[row][column];
+		else if ( 3 == column ) {
+			for ( ControlDataRow cdr : tochange ) {
+				cdr.tooltip = Boolean.class.cast( val );
+			}
+		}
 	}
 
 	/**
@@ -268,7 +154,14 @@ public class ControlDataTable {
 	 * @return Vector<String> List of properties.
 	 */
 	public List<URI> getSelectedProperties( URI type ) {
-		return labelSelectedList.getNN( type );
+		List<URI> selecteds = new ArrayList<>();
+		for ( ControlDataRow cdr : data ) {
+			if ( cdr.type.equals( type ) && cdr.label ) {
+				selecteds.add( cdr.prop );
+			}
+		}
+
+		return selecteds;
 	}
 
 	/**
@@ -279,7 +172,14 @@ public class ControlDataTable {
 	 * @return Vector<String> List of properties.
 	 */
 	public List<URI> getSelectedPropertiesTT( URI type ) {
-		return tooltipSelectedList.get( type );
+		List<URI> selecteds = new ArrayList<>();
+		for ( ControlDataRow cdr : data ) {
+			if ( cdr.type.equals( type ) && cdr.tooltip ) {
+				selecteds.add( cdr.prop );
+			}
+		}
+
+		return selecteds;
 	}
 
 	public ControlDataTableModel getTableModel() {
@@ -288,6 +188,7 @@ public class ControlDataTable {
 
 	public void setViewer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> _viewer ) {
 		viewer = _viewer;
+
 	}
 
 	public class ControlDataTableModel extends AbstractTableModel {
@@ -328,7 +229,7 @@ public class ControlDataTable {
 		 */
 		@Override
 		public int getRowCount() {
-			return rows.length;
+			return data.size();
 		}
 
 		/**
@@ -341,7 +242,19 @@ public class ControlDataTable {
 		 */
 		@Override
 		public Object getValueAt( int row, int column ) {
-			return getCell( row, column );
+			ControlDataRow cdr = data.get( row );
+			switch ( column ) {
+				case 0:
+					return cdr.type;
+				case 1:
+					return cdr.prop;
+				case 2:
+					return cdr.label;
+				case 3:
+					return cdr.tooltip;
+				default:
+					return null;
+			}
 		}
 
 		/**
@@ -384,6 +297,26 @@ public class ControlDataTable {
 			if ( viewer != null ) {
 				viewer.repaint();
 			}
+		}
+	}
+
+	public class ControlDataRow {
+
+		URI type;
+		URI prop;
+		boolean label;
+		boolean tooltip;
+		String other;
+
+		public ControlDataRow( URI type, URI prop, boolean label, boolean toolt ) {
+			this.type = type;
+			this.prop = prop;
+			this.label = label;
+			this.tooltip = toolt;
+		}
+
+		public ControlDataRow( URI type, URI prop ) {
+			this( type, prop, false, false );
 		}
 	}
 }

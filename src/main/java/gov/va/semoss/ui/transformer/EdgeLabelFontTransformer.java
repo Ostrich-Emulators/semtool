@@ -188,11 +188,13 @@ public class EdgeLabelFontTransformer implements Transformer<SEMOSSEdge, Font> {
 
 		Font font = new Font( "Plain", Font.PLAIN, customSize );
 
-		if ( edgeURI2Show.contains( arg0 ) ) {
-			font = new Font( "Plain", Font.PLAIN, customSize );
-		}
-		else {
-			font = new Font( "Plain", Font.PLAIN, 0 );
+		if ( !edgeURI2Show.isEmpty() ) {
+			if ( edgeURI2Show.contains( arg0 ) ) {
+				font = new Font( "Plain", Font.PLAIN, customSize );
+			}
+			else {
+				font = new Font( "Plain", Font.PLAIN, 0 );
+			}
 		}
 		return font;
 	}

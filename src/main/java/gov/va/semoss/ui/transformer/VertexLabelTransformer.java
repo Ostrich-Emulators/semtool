@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.collections15.Transformer;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
 
 /**
  * Transforms the property label on a node vertex in the graph.

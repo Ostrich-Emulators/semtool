@@ -47,8 +47,11 @@ public class ArrowDrawPaintTransformer implements Transformer<SEMOSSEdge, Paint>
 	 *
 	 * @param edges Hashtable<String,DBCMEdge>
 	 */
-	public void setEdges( Set<SEMOSSEdge> edges ) {
-		this.edges = edges;
+	public void setEdges( Set<SEMOSSEdge> eds ) {
+		edges.clear();
+		if( null != eds ){
+			edges.addAll( eds );
+		}
 	}
 
 	/**

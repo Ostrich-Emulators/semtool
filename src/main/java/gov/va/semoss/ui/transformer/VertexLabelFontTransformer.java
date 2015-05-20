@@ -93,7 +93,9 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 	 */
 	public void setVertHash( Set<SEMOSSVertex> verts ) {
 		this.verticeURI2Show.clear();
-		this.verticeURI2Show.addAll( verts );
+		if ( null != verts ) {
+			this.verticeURI2Show.addAll( verts );
+		}
 	}
 
 	/**
@@ -197,11 +199,13 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 				: currentDefaultSize );
 		Font font = new Font( "Plain", Font.PLAIN, size );
 
-		if ( verticeURI2Show.contains( arg0 ) ) {
-			font = new Font( "Plain", Font.PLAIN, size );
-		}
-		else {
-			font = new Font( "Plain", Font.PLAIN, 0 );
+		if ( !verticeURI2Show.isEmpty() ) {
+			if ( verticeURI2Show.contains( arg0 ) ) {
+				font = new Font( "Plain", Font.PLAIN, size );
+			}
+			else {
+				font = new Font( "Plain", Font.PLAIN, 0 );
+			}
 		}
 		return font;
 	}

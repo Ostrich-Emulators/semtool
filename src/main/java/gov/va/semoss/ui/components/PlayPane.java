@@ -138,6 +138,8 @@ import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.event.InternalFrameEvent;
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -853,14 +855,17 @@ public class PlayPane extends JFrame {
 		JPanel panel = new JPanel( new GridLayout( 2, 1 ) );
 		panel.setBackground( SystemColor.control );
 
-		LabeledPairTableCellRenderer<URI> renderer = LabeledPairTableCellRenderer.getUriPairRenderer();
-		
+		LabeledPairTableCellRenderer<URI> renderer
+				= LabeledPairTableCellRenderer.getUriPairRenderer();
+		renderer.cache( Constants.ANYNODE, "SELECT ALL" );
+		renderer.cache( RDF.SUBJECT, "URI" );
+		renderer.cache( RDFS.LABEL, "Label" );
+
 		labelTable = initJTableAndAddTo( panel, false );
 		tooltipTable = initJTableAndAddTo( panel, false );
-		
-//		labelTable.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );
-//		tooltipTable.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );		
-		
+
+		labelTable.setDefaultRenderer( URI.class, renderer );
+		tooltipTable.setDefaultRenderer( URI.class, renderer );
 
 		return panel;
 	}
@@ -1003,7 +1008,7 @@ public class PlayPane extends JFrame {
 				windowSelector.removeAll();
 				if ( 0 == frames.length ) {
 					appendChkBox.setSelected( false );
-				} 
+				}
 
 				windowSelector.setEnabled( 0 < frames.length );
 				customSparqlPanel.enableAppend( frames.length > 0 );
@@ -1115,7 +1120,7 @@ public class PlayPane extends JFrame {
 				int numI = 0;
 				for ( final JInternalFrame f : frames ) {
 					numI++;
-					
+
 					JMenuItem i = new JMenuItem( numI + ". " + f.getTitle() );
 					i.setIcon( f.getFrameIcon() );
 					i.addActionListener( new ActionListener() {
@@ -1430,12 +1435,12 @@ public class PlayPane extends JFrame {
 						else if ( filterPanel == panel ) {
 							leftTabs.addTab( "Graph Filter", null, filterPanel,
 									"Customize graph display" );
-						} 
+						}
 						//Label
 						else if ( outputPanel == panel ) {
 							leftTabs.addTab( "Graph Label", null, outputPanel,
 									"Customize graph Label" );
-						} 
+						}
 						else if ( loggingPanel == panel ) {
 							rightTabs.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
@@ -1533,7 +1538,6 @@ public class PlayPane extends JFrame {
 		gfilt.setActionCommand( GFILTER );
 		gfilt.addActionListener( preflistener );
 		//	gfilt.setToolTipText( "Enables/Disables graph filter tab" );
-		
 
 		if ( getProp( prefs, GFILTER ) == true ) {
 			gfilt.setToolTipText( "Disable the Graph Filter Tab" );
@@ -1547,8 +1551,7 @@ public class PlayPane extends JFrame {
 				getProp( prefs, GFLABEL ) );
 		gflab.setActionCommand( GFLABEL );
 		gflab.addActionListener( preflistener );
-		
-		
+
 		loggingItem.setSelected( getProp( prefs, LOGGING ) );
 		loggingItem.setActionCommand( LOGGING );
 		loggingItem.addActionListener( preflistener );
@@ -1608,7 +1611,6 @@ public class PlayPane extends JFrame {
 
 		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Panel",
 				getProp( prefs, QUERYPANEL ) );
-
 
 		if ( getProp( prefs, QUERYPANEL ) == true ) {
 			hidecsp.setToolTipText( "Disable the Query Panel" );
