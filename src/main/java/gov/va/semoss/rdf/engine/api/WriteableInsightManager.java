@@ -107,4 +107,14 @@ public interface WriteableInsightManager extends InsightManager {
    */
   public WriteableParameterTab getWriteableParameterTab(); 
   
+  /**   Extracts from V-CAMP/SEMOSS preferences the user's name, email, and organization,
+   * and returns a string of user-info for saving with Insights, based upon these. If these 
+   * preferences have not been set, then the passe-in value is returned.
+   * 
+   * @param strOldUserInfo -- (String) User-info that has been displayed from a database fetch.
+   * 
+   * @return userInfoFromToolPreferences -- (String) Described above.
+   */
+  public String userInfoFromToolPreferences(String strOldUserInfo);
+  
 }//End "WriteableInsightManager" interface.

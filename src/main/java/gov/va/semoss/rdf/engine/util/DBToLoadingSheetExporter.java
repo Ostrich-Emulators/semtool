@@ -1,4 +1,4 @@
-package gov.va.semoss.ui.components;
+package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.LoadingSheetData;
@@ -427,13 +427,13 @@ public class DBToLoadingSheetExporter {
 	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
 			IEngine engine ) {
 		String q
-				= "SELECT DISTINCT ?verb WHERE {"
+				= "SELECT DISTINCT ?relationship WHERE {"
 				+ "?in  a ?stype . "
 				+ "?out a ?otype . "
 				+ "?in ?relationship ?out . "
-				+ "?relationship ?subprop ?verb ."
+				+ "MINUS{ ?relationship rdf:predicate ?p }"
 				+ "}";
-		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q, "verb" );
+		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q, "relationship" );
 		varq.useInferred( false );
 		varq.bind( "stype", subjectNodeType );
 		varq.bind( "subprop", RDFS.SUBPROPERTYOF );
@@ -467,6 +467,7 @@ public class DBToLoadingSheetExporter {
 
 		final Set<URI> needlabels = new HashSet<>();
 
+		// TODO: DM: rewrite this
 		String query
 				= "SELECT ?in ?relationship ?out ?contains ?prop WHERE { "
 				+ "  ?in            a             ?subjType . "

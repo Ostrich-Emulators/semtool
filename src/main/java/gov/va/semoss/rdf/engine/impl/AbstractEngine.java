@@ -426,18 +426,6 @@ public abstract class AbstractEngine implements IEngine {
 		return new ArrayList<>();
 	}
 
-	public static Model getConstruct( String sparql, RepositoryConnection rc )
-			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
-		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql );
-		Model model = new LinkedHashModel();
-		GraphQueryResult gqr = tq.evaluate();
-		while ( gqr.hasNext() ) {
-			model.add( gqr.next() );
-		}
-		gqr.close();
-		return model;
-	}
-
 	@Override
 	public InsightManager getInsightManager() {
 		return insightEngine;

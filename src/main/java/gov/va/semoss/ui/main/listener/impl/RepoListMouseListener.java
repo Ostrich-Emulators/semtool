@@ -29,6 +29,7 @@ import gov.va.semoss.ui.actions.CloneAction;
 import gov.va.semoss.ui.actions.CreateDbAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.EndpointAction;
+import gov.va.semoss.ui.actions.ExportGraphMLAction;
 import gov.va.semoss.ui.actions.ExportInsightsAction;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
 import gov.va.semoss.ui.actions.ExportSpecificNodesToLoadingSheetAction;
@@ -44,6 +45,9 @@ import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.PlayPane;
 import static gov.va.semoss.ui.components.PlayPane.UIPROGRESS;
+import java.awt.event.KeyEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
@@ -68,9 +72,10 @@ public class RepoListMouseListener extends MouseAdapter {
 	private final ExportTtlAction exportnt;
 	private final ExportTtlAction exportrdf;
 	private final ExportInsightsAction exportinsights;
-	private final ExportLoadingSheetAction exporterwhole;
-	private final ExportLoadingSheetAction exporternodes;
-	private final ExportLoadingSheetAction exporterrels;
+	private final ExportLoadingSheetAction expall;
+	private final ExportLoadingSheetAction expnodes;
+	private final ExportLoadingSheetAction exprels;
+	private final DbAction expgraph;
 	private final DbAction expSpecNodes;
 	private final DbAction expSpecRels;
 	private final UnmountAction unmounter;
@@ -96,12 +101,13 @@ public class RepoListMouseListener extends MouseAdapter {
 				ExportTtlAction.Style.RDF, frame );
 		unmounter = new UnmountAction( frame );
 		sparqler = new EndpointAction( PlayPane.UIPROGRESS, frame );
-		exporternodes = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
+		expnodes = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
 				true, false );
-		exporterwhole = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
+		expall = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
 				true, true );
-		exporterrels = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
+		exprels = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
 				false, true );
+		expgraph = new ExportGraphMLAction( PlayPane.UIPROGRESS, frame );
 		expSpecNodes = new ExportSpecificNodesToLoadingSheetAction(
 				PlayPane.UIPROGRESS, frame );
 		expSpecRels = new ExportSpecificRelationshipsToLoadingSheetAction(
@@ -126,7 +132,7 @@ public class RepoListMouseListener extends MouseAdapter {
 			me.consume();
 
 			Point p = me.getPoint();
-			
+
 			// figure out if we pressed the "attach db" or "create db" icon
 			if ( p.y <= repoList.getFontMetrics( repoList.getFont() ).getHeight() ) {
 				mounter.actionPerformed( null );
@@ -150,50 +156,117 @@ public class RepoListMouseListener extends MouseAdapter {
 
 	private JPopupMenu makeMenu( RepositoryList repoList, final IEngine engine ) {
 
-		JPopupMenu popup = new JPopupMenu();
+		JPopupMenu db = new JPopupMenu();
 
 		if ( null != engine ) {
 			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner,
 				clearer, exportttl, exportnt, exportrdf, exportinsights, importls,
-				unmounter, sparqler, mounter, exporternodes, exporterrels, expSpecNodes,
-				expSpecRels, exporterwhole, creater, resetInsights, importInsights,
-				consistencyCheck } ) {
+				unmounter, sparqler, mounter, expnodes, exprels, expSpecNodes,
+				expSpecRels, expall, creater, resetInsights, importInsights,
+				consistencyCheck, expgraph } ) {
 				dba.setEngine( opEngine );
 			}
 
-			popup.add( toggler );
-			popup.add( proper );
-			popup.addSeparator();
-
-			popup.add( cloner );
-			popup.add( clearer );
-			popup.add( consistencyCheck );
-
+			db.add( toggler );
+			db.add( unmounter );
+			//Quality Check
+			db.add( consistencyCheck );
+			db.addSeparator();
+			//Export
 			JMenu exptop = new JMenu( "Export" );
-			exptop.add( exportttl );
-			exptop.add( exportnt );
-			exptop.add( exportrdf );
-			JMenu loadingsheets = new JMenu( "Loading Sheets" );
+			exptop.setToolTipText( "Export Database Activities" );
+			exptop.setMnemonic( KeyEvent.VK_E );
+			//exptop.add( exportttl );
+			//exptop.add( exportnt );
+			//exptop.add( exportrdf );
 			exptop.setIcon( DbAction.getIcon( "exportdb" ) );
+
+			//db.add( cloneconfer );
+			//db.add( clearer );
+			//Loading Sheets
+			JMenu loadingsheets = new JMenu( "Loading Sheets" );
+			loadingsheets.setToolTipText( "Export the Loading Sheets" );
+			loadingsheets.setMnemonic( KeyEvent.VK_L );
+			loadingsheets.setIcon( DbAction.getIcon( "import_data_review" ) );
+
 			exptop.add( loadingsheets );
-			loadingsheets.add( exporternodes );
-			loadingsheets.add( expSpecNodes );
-			loadingsheets.add( exporterrels );
-			loadingsheets.add( expSpecRels );
-			loadingsheets.add( exporterwhole );
+			//Semantic Web
+			JMenu semsheets = new JMenu( "Semantic Web" );
+			semsheets.setToolTipText( "Export the Semantic Web" );
+			semsheets.setMnemonic( KeyEvent.VK_S );
+			semsheets.setIcon( DbAction.getIcon( "semantic_dataset1" ) );
+			exptop.add( semsheets );
+			semsheets.add( exportttl );
+			semsheets.add( exportnt );
+			semsheets.add( exportrdf );
+			//Nodes
+			JMenu nodes = new JMenu( "Nodes" );
+			nodes.setToolTipText( "Export the Nodes" );
+			nodes.setMnemonic( KeyEvent.VK_N );
+			nodes.setToolTipText( "Export the Nodes" );
+			nodes.setIcon( DbAction.getIcon( "protege/individual" ) );
+
+			loadingsheets.add( nodes );
+			//Nodes SubMenu
+			nodes.add( expnodes );
+			nodes.add( expSpecNodes );
+			//RelationShips
+			JMenu relationS = new JMenu( "Relationships" );
+			relationS.setToolTipText( "Export the Relations" );
+			relationS.setMnemonic( KeyEvent.VK_R );
+			relationS.setIcon( DbAction.getIcon( "relationship1" ) );
+			loadingsheets.add( relationS );
+			//Relationships SubMenu
+			relationS.add( exprels );
+			relationS.add( expSpecRels );
+
+			loadingsheets.add( expall );
 			exptop.add( exportinsights );
-			popup.add( exptop );
+			exptop.add( expgraph );
+			db.add( exptop );
 
 			JMenu importtop = new JMenu( "Import" );
-			importtop.setIcon( DbAction.getIcon( "importdb" ) );
-			popup.add( importtop );
-			importtop.add( importls );
-			JMenu insights = new JMenu( "Insights" );
-			insights.add( resetInsights );
-			insights.add( importInsights );
-			importtop.add( insights );
+			importtop.setToolTipText( "Import Database Operations" );
+			importtop.setMnemonic( KeyEvent.VK_I );
 
-			popup.add( mergeroot );
+			importtop.setIcon( DbAction.getIcon( "importdb" ) );
+			importtop.setToolTipText( "Import Database Operations" );
+			importtop.setMnemonic( KeyEvent.VK_I );
+			db.add( importtop );
+			//JMenu iDatabase = new JMenu( "Database" );
+			//iDatabase.setToolTipText("Import Database Operations");
+			//iDatabase.setMnemonic(KeyEvent.VK_D);
+			//importtop.add( iDatabase );
+
+			mergeroot.setToolTipText( "Merge the Data between databases" );
+			mergeroot.setMnemonic( KeyEvent.VK_D );
+			mergeroot.setIcon( DbAction.getIcon( "semossjnl" ) );
+			mergeroot.setEnabled( false );
+			importtop.add( mergeroot );
+			importtop.add( importls );
+
+			JMenu insights = new JMenu( "Insights" );
+			insights.setToolTipText( "Import Insight Operations" );
+			insights.setMnemonic( KeyEvent.VK_I );
+
+			//Ticket #792
+			insights.add( importInsights );
+			insights.add( resetInsights );
+			importtop.add( insights );
+			//Insite Manager Icon
+			insights.setIcon( DbAction.getIcon( "insight_manager_tab1" ) );
+			//importInsights
+			db.setToolTipText( "Database operations" );
+
+			db.add( cloner );
+			db.add( clearer );
+			db.addSeparator();
+			db.add( sparqler );
+			sparqler.setEnabled( false );
+
+			db.add( proper );
+			db.setEnabled( false );
+
 			mergeroot.removeAll();
 			mergeroot.setEnabled( repoList.getRepositoryModel().size() > 1 );
 
@@ -203,19 +276,8 @@ public class RepoListMouseListener extends MouseAdapter {
 							JOptionPane.getFrameForComponent( repoList ) ) );
 				}
 			}
-
-			popup.add( unmounter );
-
-			if ( engine.isServerSupported() ) {
-				popup.add( sparqler );
-			}
-
-			popup.addSeparator();
 		}
 
-		popup.add( mounter );
-		popup.add( creater );
-
-		return popup;
+		return db;
 	}
 }

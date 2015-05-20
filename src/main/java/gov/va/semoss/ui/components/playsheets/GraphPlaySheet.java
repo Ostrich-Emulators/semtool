@@ -462,7 +462,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected void createForest( boolean initForest ) throws Exception {
 
 		if ( initForest ) {
-			forest = new DelegateForest<SEMOSSVertex, SEMOSSEdge>();
+			forest = new DelegateForest<>();
 		}
 
 		Map<String, String> filteredNodes = filterData.getFilterNodes();
@@ -898,8 +898,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		EdgeLabelFontTransformer transformerE = (EdgeLabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
 		
 		//if no vertices or edges are selected, perform action on all vertices and edges
-		if(		viewer.getPickedVertexState().getPicked().size() == 0 && 
-				  viewer.getPickedEdgeState().getPicked().size() == 0 ){
+		if(		viewer.getPickedVertexState().getPicked().isEmpty() && 
+				viewer.getPickedEdgeState().getPicked().isEmpty() ){
 			if(increaseFont){
 				transformerV.increaseFontSize();
 				transformerE.increaseFontSize();

@@ -31,7 +31,6 @@ import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.sail.SailException;
 import gov.va.semoss.util.UriBuilder;
-import java.util.HashMap;
 import java.util.Map;
 import org.openrdf.model.Model;
 
@@ -281,7 +280,7 @@ public interface IEngine extends IExplorable {
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
 
-	public Model construct( String query )
+	public Model construct( QueryExecutor<Model> query )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
 
 	/**

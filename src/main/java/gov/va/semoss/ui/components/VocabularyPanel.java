@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
+import java.awt.Insets;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import javax.swing.JCheckBox;
  * @author ryan
  */
 public class VocabularyPanel extends javax.swing.JPanel {
-
+	
 	private final List<JCheckBox> vocabs = new ArrayList<>();
 
 	/**
@@ -25,16 +26,17 @@ public class VocabularyPanel extends javax.swing.JPanel {
 	 */
 	public VocabularyPanel() {
 		initComponents();
-
+				
 		for ( Map.Entry<String, Boolean> en : VocabularyRegistry.getVocabularies2().entrySet() ) {
 			JCheckBox jcb = new JCheckBox( en.getKey(), en.getValue() );
+			jcb.setMargin( new Insets( 2, 0, 2, 0 ) );
 			vocabs.add( jcb );
 			buttonpanel.add( jcb );
 		}
 		revalidate();
 		repaint();
 	}
-
+	
 	public List<URL> getSelectedVocabularies() {
 		List<URL> urls = new ArrayList<>();
 		for ( JCheckBox jcb : vocabs ) {
@@ -43,18 +45,18 @@ public class VocabularyPanel extends javax.swing.JPanel {
 				urls.add( VocabularyRegistry.getURL( label ) );
 			}
 		}
-
+		
 		return urls;
 	}
-
+	
 	@Override
-	public void setEnabled( boolean b ){
+	public void setEnabled( boolean b ) {
 		super.setEnabled( b );
-		for( JCheckBox jcb : vocabs ){
+		for ( JCheckBox jcb : vocabs ) {
 			jcb.setEnabled( b );
 		}
 	}
-	
+
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
@@ -64,34 +66,45 @@ public class VocabularyPanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    jLabel1 = new javax.swing.JLabel();
+    label = new javax.swing.JLabel();
     buttonpanel = new javax.swing.JPanel();
+    filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 4), new java.awt.Dimension(0, 4), new java.awt.Dimension(32767, 4));
+    filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0));
 
-    jLabel1.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
-    jLabel1.setText("Reload Vocabularies");
+    label.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+    label.setText("Reload Vocabularies (After Clear)");
+    label.setMaximumSize(null);
 
     buttonpanel.setLayout(new javax.swing.BoxLayout(buttonpanel, javax.swing.BoxLayout.PAGE_AXIS));
+    buttonpanel.add(filler2);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+      .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
       .addComponent(buttonpanel, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+      .addGroup(layout.createSequentialGroup()
+        .addGap(69, 69, 69)
+        .addComponent(filler1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addComponent(buttonpanel, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(0, 0, 0))
+        .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(buttonpanel, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(filler1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel buttonpanel;
-  private javax.swing.JLabel jLabel1;
+  private javax.swing.Box.Filler filler1;
+  private javax.swing.Box.Filler filler2;
+  private javax.swing.JLabel label;
   // End of variables declaration//GEN-END:variables
 }

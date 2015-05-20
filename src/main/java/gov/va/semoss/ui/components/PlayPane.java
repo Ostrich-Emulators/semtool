@@ -79,7 +79,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
@@ -92,12 +91,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -120,7 +117,6 @@ import javax.swing.event.InternalFrameListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -130,11 +126,15 @@ import aurelienribon.ui.css.swing.SwingStyle;
 import com.ibm.icu.util.StringTokenizer;
 
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
+import gov.va.semoss.ui.actions.ExportGraphMLAction;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import java.util.HashMap;
+import javax.swing.JDialog;
+import javax.swing.JMenuBar;
 import javax.swing.event.InternalFrameEvent;
 
 /**
@@ -207,7 +207,7 @@ public class PlayPane extends JFrame {
 			lblDBImportURL, lblDesignateBaseUri, lblDBImportUsername, lblDBImportPW,
 			lblDBImportDriverType;
 
-	protected final JTabbedPane leftTabs, rightTabs;
+	public static JTabbedPane leftTabs, rightTabs;
 	private final StatusBar statusbar;
 
 	private final DbAction creater = new CreateDbAction( UIPROGRESS, this );
@@ -224,6 +224,7 @@ public class PlayPane extends JFrame {
 			ExportTtlAction.Style.RDF, this );
 	private final DbAction exportinsights
 			= new ExportInsightsAction( UIPROGRESS, this );
+	private final DbAction expgraph = new ExportGraphMLAction( UIPROGRESS, this );
 	private final DbAction expall = new ExportLoadingSheetAction( UIPROGRESS,
 			this, true, true );
 	private final DbAction exprels = new ExportLoadingSheetAction( UIPROGRESS,
@@ -253,8 +254,10 @@ public class PlayPane extends JFrame {
 	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
 	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
-	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging tab" );
-	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager tab" );
+	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging",
+			DbAction.getIcon( "log_tab1" ) );
+	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager",
+			DbAction.getIcon( "insight_manager_tab1" ) );
 
 	private final JToolBar toolbar;
 	private final JToolBar playsheetToolbar;
@@ -554,7 +557,7 @@ public class PlayPane extends JFrame {
 				IEngine engine = repoList.getSelectedValue();
 
 				DbAction actions[] = {
-					toggler, proper, cloner, clearer, exportttl, exportnt,
+					toggler, proper, cloner, clearer, exportttl, exportnt, expgraph,
 					exportrdf, exportinsights, expall, exprels, expnodes, expSpecNodes,
 					expSpecRels, unmounter, sparqler, importls, consistencyCheck };
 				for ( DbAction dba : actions ) {
@@ -1029,7 +1032,7 @@ public class PlayPane extends JFrame {
 						customSparqlPanel.enableAppend( false );
 					}
 				} );
-				
+
 				JMenuItem tilehor = new JMenuItem( new AbstractAction( "Tile Horizontally" ) {
 
 					@Override
@@ -1086,17 +1089,14 @@ public class PlayPane extends JFrame {
 					closeall.setMnemonic( KeyEvent.VK_A );
 					windowSelector.addSeparator();
 
-
 					windowSelector.add( tilehor );
-					tilever.setToolTipText("Arrange Windows in vertical tiles");
-					tilever.setMnemonic(KeyEvent.VK_H);
-					tilever.setIcon(DbAction.getIcon( "window_tile_vertical1"));
+					tilever.setToolTipText( "Arrange Windows in vertical tiles" );
+					tilever.setMnemonic( KeyEvent.VK_H );
+					tilever.setIcon( DbAction.getIcon( "window_tile_vertical1" ) );
 					windowSelector.add( tilever );
-					tilehor.setToolTipText("Arrange Windows in horizontal tiles");
-					tilehor.setMnemonic(KeyEvent.VK_V);
-					tilehor.setIcon(DbAction.getIcon( "window_tile_horizontal1"));
-
-
+					tilehor.setToolTipText( "Arrange Windows in horizontal tiles" );
+					tilehor.setMnemonic( KeyEvent.VK_V );
+					tilehor.setIcon( DbAction.getIcon( "window_tile_horizontal1" ) );
 
 					windowSelector.add( tilec );
 					tilec.setToolTipText( "Arrange Windows in cascade" );
@@ -1191,7 +1191,12 @@ public class PlayPane extends JFrame {
 	}
 
 	protected JMenu buildToolMenuBar() {
-		return null;
+		JMenu tools = new JMenu( "Tools" );
+		tools.setMnemonic( KeyEvent.VK_T );
+		tools.setToolTipText( "Additional data tools" );
+		tools.add( loggingItem );
+		tools.add( iManageItem );
+		return tools;
 	}
 
 	protected JMenu buildDatabaseMenu() {
@@ -1224,7 +1229,7 @@ public class PlayPane extends JFrame {
 		semsheets.setMnemonic( KeyEvent.VK_S );
 		semsheets.setIcon( DbAction.getIcon( "semantic_dataset1" ) );
 		exptop.add( semsheets );
-		semsheets.add (exportttl);
+		semsheets.add( exportttl );
 		semsheets.add( exportnt );
 		semsheets.add( exportrdf );
 		//Nodes
@@ -1232,7 +1237,7 @@ public class PlayPane extends JFrame {
 		nodes.setToolTipText( "Export the Nodes" );
 		nodes.setMnemonic( KeyEvent.VK_N );
 		nodes.setToolTipText( "Export the Nodes" );
-		nodes.setIcon( DbAction.getIcon( "protege//individual1" ) );
+		nodes.setIcon( DbAction.getIcon( "protege/individual" ) );
 
 		loadingsheets.add( nodes );
 		//Nodes SubMenu
@@ -1250,6 +1255,7 @@ public class PlayPane extends JFrame {
 
 		loadingsheets.add( expall );
 		exptop.add( exportinsights );
+		exptop.add( expgraph );
 		db.add( exptop );
 
 		JMenu importtop = new JMenu( "Import" );
@@ -1573,14 +1579,8 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-
-
-
 		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Panel", true );
 		splithider.setToolTipText( "Disable the Left Panel" );
-		
-
-
 
 		splithider.addActionListener( new ActionListener() {
 
@@ -1590,13 +1590,10 @@ public class PlayPane extends JFrame {
 				if ( leftTabs.isVisible() ) {
 					mainSplitPane.setDividerLocation( 0.25 );
 
-
-
 					splithider.setToolTipText( "Disable the Left Panel" );
-				}else{
+				}
+				else {
 					splithider.setToolTipText( "Enable the Left Panel" );
-
-
 
 				}
 			}
@@ -1696,7 +1693,7 @@ public class PlayPane extends JFrame {
 		JMenuBar menu = new JMenuBar();
 		//menu.getAccessibleContext().setAccessibleName("TopMenu");
 		//menu.getAccessibleContext().setAccessibleDescription("V-CAMP SEMOSS APPLICATION MENU");
-		
+
 		JMenuItem exiter = new JMenuItem( new AbstractAction( "Exit" ) {
 			private static final long serialVersionUID = 1L;
 
@@ -1709,9 +1706,8 @@ public class PlayPane extends JFrame {
 		fileMenuSave.setEnabled( false );
 		fileMenuSaveAs.setEnabled( false );
 		fileMenuSaveAll.setEnabled( false );
-		
-	//	AccessibleJMenu xx = new javax.swing.JMenu.AccessibleJMenu("test");
-		
+
+		//	AccessibleJMenu xx = new javax.swing.JMenu.AccessibleJMenu("test");
 		JMenu newmenu = new JMenu( "New" );
 		newmenu.setToolTipText( "Create a new Database or Loading Sheet" );
 		newmenu.setMnemonic( KeyEvent.VK_N );
@@ -1726,20 +1722,13 @@ public class PlayPane extends JFrame {
 
 		fileMenu.setMnemonic( KeyEvent.VK_F );
 
-
-
 		//Object anchor;
 		//fileMenu.firePropertyChange("text to be spoken", fileMenu.getToolTipText(), anchor);
 		//AccessibleContext ac = getAccessibleContext();
-		
 		//ac.setAccessibleDescription("Accessibility Demo1 description.");
 		//fileMenu.getAccessibleContext().setAccessibleName(fileMenu.getToolTipText() + " disabled");
 		//fileMenu.getAccessibleContext().setAccessibleDescription("Test");
-		
-		fileMenu.setToolTipText("File Operations");
-
-
-
+		fileMenu.setToolTipText( "File Operations" );
 
 		exiter.setMnemonic( KeyEvent.VK_X );
 		exiter.setToolTipText( "Exit the V-CAMP SEMOSS Tool" );

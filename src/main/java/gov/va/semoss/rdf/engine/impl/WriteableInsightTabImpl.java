@@ -269,24 +269,13 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 		  String rendererClass = insight.getRendererClass();
 		  String isLegacy = String.valueOf(insight.getIsLegacy());
 		  String sparql = insight.getSparql();
+		  String description = insight.getDescription();
 
 		  //Make sure that embedded new-line characters can be persisted:
 		  sparql = sparql.replace("\n", "\\n"); 
-          
-		  String description = insight.getDescription();
-
-		  String creator = insight.getCreator();
-		  Preferences prefs = Preferences.userNodeForPackage(SemossPreferences.class);		
-		  String userPrefName = prefs.get(Constants.USERPREF_NAME, "");
-		  String userPrefOrg = prefs.get(Constants.USERPREF_ORG, "");
-		  if(userPrefName.equals("") == false || userPrefOrg.equals("") == false){
-			 if(userPrefName.equals("") || userPrefOrg.equals("")){
-				 creator = userPrefName + userPrefOrg;
-			 }else{
-				 creator = userPrefName + ", " + userPrefOrg;
-			 }
-		  }
-		  
+		  description = description.replace("\n", "\\n");
+				  
+		  String creator = wim.userInfoFromToolPreferences(insight.getCreator());		  
 	      ValueFactory insightVF = rc.getValueFactory();
 	      String modified = insightVF.createLiteral(new Date()).stringValue();
 		  		  
