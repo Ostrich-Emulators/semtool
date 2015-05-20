@@ -54,6 +54,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class is used to create the button that allows the weight to be
@@ -307,7 +308,8 @@ public class WeightDropDownButton extends JButton {
 	 * @param JList<String> list - the list of items which may or may not be selected
 	 * @return  Hashtable<String, Double> of the nodes and weights
 	 */
-	public Hashtable<String, Double> getWeightHash(Collection<?> collection, String selectedValue, double defaultScale) {
+	public Hashtable<String, Double> getWeightHash(Collection<?> collection,
+			String selectedValue, double defaultScale) {
 		double minimumValue = .5, multiplier = 3;
 
 		if(selectedValue == null) {
@@ -321,10 +323,10 @@ public class WeightDropDownButton extends JButton {
 			Object propertyValue = null;
 			String uri = null;
 			if (object instanceof SEMOSSVertex) {
-				propertyValue = ((SEMOSSVertex) object).getProperty(selectedValue);
+				propertyValue = ((SEMOSSVertex) object).getProperty(new URIImpl( selectedValue) );
 				uri = ((SEMOSSVertex) object).getURI();
 			} else if (object instanceof SEMOSSEdge) {
-				propertyValue = ((SEMOSSEdge) object).getProperty(selectedValue);
+				propertyValue = ((SEMOSSEdge) object).getProperty(new URIImpl( selectedValue) );
 				uri = ((SEMOSSEdge) object).getURI();
 			}
 			

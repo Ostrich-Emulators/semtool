@@ -40,11 +40,13 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  * This class is used to create a popup menu for the TF instance relation.
  */
 public class TFInstanceRelationPopup extends JMenu implements MouseListener {
+
 	private static final long serialVersionUID = -3788376340326236013L;
 	private GraphPlaySheet gps;
 	private SEMOSSVertex[] pickedVertex;
@@ -54,11 +56,11 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 	private String mainQuery, mainQueryJENA, neighborQuery, neighborQueryJENA;
 
 	private boolean populated = false;
-	
+
 	private IEngine engine;
 
 	public TFInstanceRelationPopup( SEMOSSVertex vertex, IEngine e, GraphPlaySheet ps, SEMOSSVertex[] pickedVertex ) {
-		super("Traverse Freely: " + Utility.getInstanceLabel( new URIImpl(vertex.getURI()), e));
+		super( "Traverse Freely: " + Utility.getInstanceLabel( new URIImpl( vertex.getURI() ), e ) );
 
 		this.gps = ps;
 		this.engine = e;
@@ -67,7 +69,7 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 		this.mainQueryJENA = Constants.NEIGHBORHOOD_TYPE_QUERY_JENA;
 		this.neighborQuery = Constants.TRAVERSE_FREELY_QUERY;
 		this.neighborQueryJENA = Constants.TRAVERSE_FREELY_QUERY_JENA;
-		
+
 		addMouseListener( this );
 	}
 
@@ -123,14 +125,14 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 			String fileName = "";
 			if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
 				for ( SEMOSSVertex pickedVertex1 : pickedVertex ) {
-					if ( pickedVertex1.getProperty( Constants.VERTEX_TYPE ).equals( thisVert.getProperty( Constants.VERTEX_TYPE ) ) ) {
+					if ( pickedVertex1.getProperty( RDF.TYPE ).equals( thisVert.getProperty( RDF.TYPE ) ) ) {
 						fileName = fileName + "<" + pickedVertex1.getURI() + ">";
 					}
 				}
 			}
 			else {
 				for ( SEMOSSVertex pickedVertex1 : pickedVertex ) {
-					if ( pickedVertex1.getProperty( Constants.VERTEX_TYPE ).equals( thisVert.getProperty( Constants.VERTEX_TYPE ) ) ) {
+					if ( pickedVertex1.getProperty( RDF.TYPE ).equals( thisVert.getProperty( RDF.TYPE ) ) ) {
 						fileName = fileName + "(<" + pickedVertex1.getURI() + ">)";
 					}
 				}

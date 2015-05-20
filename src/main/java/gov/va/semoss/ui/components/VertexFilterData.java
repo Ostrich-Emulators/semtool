@@ -29,6 +29,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
 import javax.swing.table.AbstractTableModel;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class is used to filter vertex data.
@@ -574,7 +575,7 @@ public class VertexFilterData extends AbstractTableModel {
 		String key = propertyRows[row][0];
 		propertyRows[row][column] = val;
 		propHash.put(vert, propertyRows);
-		vert.putProperty(key, val + "");
+		vert.putProperty(new URIImpl( key ), val + "");
 	}
 
 	/**
@@ -652,7 +653,7 @@ public class VertexFilterData extends AbstractTableModel {
 		String key = propertyRows[row][0];
 		propertyRows[row][column] = val;
 		edgeHash.put(edge, propertyRows);
-		edge.putProperty(key, val + "");
+		edge.putProperty(new URIImpl( key ), val + "");
 	}
 
 	/**

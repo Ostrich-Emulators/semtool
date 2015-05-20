@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  * Transforms the font label on a node vertex in the graph.
@@ -194,7 +195,7 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 		Font font = new Font( "Plain", Font.PLAIN, customSize );
 
 		if ( verticeURI2Show != null ) {
-			String URI = (String) arg0.getProperty( Constants.URI_KEY );
+			String URI = (String) arg0.getProperty( RDF.SUBJECT );
 			logger.debug( "URI " + URI );
 			if ( verticeURI2Show.containsKey( URI ) ) {
 				font = new Font( "Plain", Font.PLAIN, customSize );

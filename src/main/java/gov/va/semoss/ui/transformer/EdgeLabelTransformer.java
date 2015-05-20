@@ -27,6 +27,7 @@ import java.util.Collections;
 
 import org.apache.commons.collections15.Transformer;
 import org.apache.log4j.Logger;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * Transforms the property edge label on the graph.
@@ -64,7 +65,7 @@ public class EdgeLabelTransformer implements Transformer <SEMOSSEdge, String> {
 				if(propIndex!=0) propName = propName + "<br>";
 				propName = propName + "<!--"+edge.getURI()+"-->";//Need this stupid comment to keep each html comment different. 
 				//For some reason the transformer cannot handle text size changes if two labels are the same
-				propName = propName + edge.getProperty(props.get(propIndex)+"");
+				propName = propName + edge.getProperty(new URIImpl( props.get(propIndex)+"") );
 			}
 			propName = propName + "</html>";
 		}

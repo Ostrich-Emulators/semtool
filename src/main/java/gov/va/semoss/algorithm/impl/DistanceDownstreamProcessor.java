@@ -39,8 +39,10 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
@@ -49,7 +51,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class DistanceDownstreamProcessor extends AbstractAction implements IAlgorithm {
 	private static final long serialVersionUID = 3191222375480129585L;
-	
+	public static final URI WEIGHT = new URIImpl( "semoss://weight" );
 	private static final Logger log
 			= Logger.getLogger( DistanceDownstreamProcessor.class );
 	protected DelegateForest forest = null;
@@ -409,8 +411,8 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		Iterator<SEMOSSEdge> edgeIt = edgePath.iterator();
 		while ( edgeIt.hasNext() ) {
 			SEMOSSEdge edge = edgeIt.next();
-			if ( edge.getProperties().containsKey( "weight" ) ) {
-				total = total * (Double) edge.getProperty( "weight" );
+			if ( edge.getUriProperties().containsKey( WEIGHT ) ) {
+				total = total * (Double) edge.getProperty( WEIGHT );
 				count++;
 			}
 		}

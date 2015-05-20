@@ -46,6 +46,8 @@ import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.util.HashMap;
 import java.util.Map;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Controls what happens when a picked state occurs.
@@ -97,9 +99,9 @@ public class PickedStateListener implements ItemListener {
 			SEMOSSVertex v = it.next();
 			vertices[vertIndex] = v;
 			//add selected vertices
-			vertHash.put( v.getProperty( Constants.URI_KEY ).toString(), v.getProperty( Constants.URI_KEY ).toString() );
+			vertHash.put( v.getProperty( RDF.SUBJECT ).toString(), v.getProperty( RDF.SUBJECT ).toString() );
 
-			logger.debug( " Name  >>> " + v.getProperty( Constants.VERTEX_NAME ) );
+			logger.debug( " Name  >>> " + v.getProperty( RDFS.LABEL ) );
 			vst.setSelected( v.getURI() );
 			// this needs to invoke the property table model stuff
 

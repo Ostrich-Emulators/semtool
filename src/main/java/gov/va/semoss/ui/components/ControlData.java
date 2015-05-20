@@ -41,14 +41,14 @@ public class ControlData {
 		propertyHide.put(Constants.VERTEX_COLOR, Constants.VERTEX_COLOR);
 		
 		Hashtable<String, String> propertyShow  = new Hashtable<String, String>();
-		propertyShow.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
+		propertyShow.put(Constants.VERTEX_NAME.stringValue(), Constants.VERTEX_NAME.stringValue());
 
 		Hashtable<String, String> propertyShowTT = new Hashtable<String, String>();
-		propertyShowTT.put(Constants.EDGE_NAME, Constants.EDGE_NAME);
-		propertyShowTT.put(Constants.EDGE_TYPE, Constants.EDGE_TYPE);
-		propertyShowTT.put(Constants.URI_KEY, Constants.URI_KEY);
-		propertyShowTT.put(Constants.VERTEX_NAME, Constants.VERTEX_NAME);
-		propertyShowTT.put(Constants.VERTEX_TYPE, Constants.VERTEX_TYPE);
+		propertyShowTT.put(Constants.EDGE_NAME.stringValue(), Constants.EDGE_NAME.stringValue());
+		propertyShowTT.put(Constants.EDGE_TYPE.stringValue(), Constants.EDGE_TYPE.stringValue());
+		propertyShowTT.put(Constants.URI_KEY.stringValue(), Constants.URI_KEY.stringValue());
+		propertyShowTT.put(Constants.VERTEX_NAME.stringValue(), Constants.VERTEX_NAME.stringValue());
+		propertyShowTT.put(Constants.VERTEX_TYPE.stringValue(), Constants.VERTEX_TYPE.stringValue());
 		
 		vertexCDT = new ControlDataTable(propertyShow, propertyShowTT, propertyHide, new String[] {"Vertex Type", "Property", "Label", "Tooltip" });
 		edgeCDT   = new ControlDataTable(propertyShow, propertyShowTT, propertyHide, new String[] {"Edge Type", "Property", "Label", "Tooltip" });
@@ -99,12 +99,12 @@ public class ControlData {
 		ArrayList<String> edgeProperties = edgeCDT.getSelectedProperties(type);
 		
 		if (vertexProperties == null && edgeProperties == null)
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		
-		if (vertexProperties == null || vertexProperties.size() == 0)
+		if (vertexProperties == null || vertexProperties.isEmpty())
 			return edgeProperties;
 		
-		if (edgeProperties == null || edgeProperties.size() == 0)
+		if (edgeProperties == null || edgeProperties.isEmpty())
 			return vertexProperties;
 		
 		vertexProperties.addAll(edgeProperties);

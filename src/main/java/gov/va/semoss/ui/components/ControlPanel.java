@@ -21,7 +21,7 @@ package gov.va.semoss.ui.components;
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
-import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
@@ -220,7 +220,7 @@ public class ControlPanel extends JPanel {
 	 * Sets the graph layout.
 	 * @param lay Layout
 	 */
-	public void setGraphLayout(Layout<?,?> lay, DelegateForest<?, ?> forest){
+	public void setGraphLayout(Layout<?,?> lay, Forest<?, ?> forest){
 		if(lay instanceof BalloonLayout || lay instanceof RadialTreeLayout){
 			ringsListener.setGraph(forest);
 			ringsButton.setEnabled(true);

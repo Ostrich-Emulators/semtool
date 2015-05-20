@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.collections15.Transformer;
 import org.apache.log4j.Logger;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * Transforms what is displayed on the tooltip when an edge is selected on a graph.
@@ -57,7 +58,7 @@ public class EdgeTooltipTransformer implements Transformer <SEMOSSEdge, String> 
 		ArrayList<String> props = data.getSelectedPropertiesTT(edge.getEdgeType());
 		if(props != null && props.size() > 0)
 		{
-			propName = propName + edge.getProperty(props.get(0)+"");
+			propName = propName + edge.getProperty(new URIImpl( props.get(0)+"") );
 			for(int propIndex=1;propIndex < props.size();propIndex++){
 				String prop = props.get(propIndex)+"";
 				propName = propName + "<br>";
@@ -65,7 +66,7 @@ public class EdgeTooltipTransformer implements Transformer <SEMOSSEdge, String> 
 				//only add the label on the property if it is not one of the main three
 				if(!prop.equals(Constants.VERTEX_NAME)&&!prop.equals(Constants.EDGE_NAME)&&!prop.equals(Constants.VERTEX_TYPE)&&!prop.equals(Constants.EDGE_TYPE)&&!prop.equals(Constants.URI_KEY))
 					propName = propName + prop+": ";
-				propName = propName + edge.getProperty(props.get(propIndex));
+				propName = propName + edge.getProperty(new URIImpl( props.get(propIndex)) );
 			}
 		}
 		

@@ -25,11 +25,18 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.EdgeType;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.InMemoryJenaEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaUpdateWrapper;
+import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import info.aduna.iteration.Iterations;
 import java.io.File;
@@ -39,12 +46,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import org.apache.commons.io.FileUtils;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
 import org.openrdf.query.UpdateExecutionException;
@@ -73,8 +85,8 @@ public class GraphDataModel {
 	private final Set<String> baseFilterSet = new HashSet<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
-	private Model curModel;
-	private List<Model> modelStore = new ArrayList<>();
+	private com.hp.hpl.jena.rdf.model.Model curModel;
+	private List<com.hp.hpl.jena.rdf.model.Model> modelStore = new ArrayList<>();
 	private int modelCounter = 0;
 
 	private boolean search, prop, sudowl;
@@ -83,11 +95,10 @@ public class GraphDataModel {
 	protected Map<String, SEMOSSEdge> edgeStore = new HashMap<>();
 
 	private boolean filterOutOwlData = true;
-	private String typeOrSubclass = " a ";
-	private String containsRelation;
+	private URI typeOrSubclass = RDF.TYPE;
+	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> forest = new DirectedSparseGraph<>();
 
-	private static final URI containsURI = DIHelper.getContainsURI();
-	private static final URI conceptURI = DIHelper.getConceptURI();
+	private URI conceptURI;
 
 	//these are used for keeping track of only what was added or subtracted and will only be populated when overlay is true
 	private Map<String, SEMOSSVertex> incrementalVertStore;
@@ -118,6 +129,14 @@ public class GraphDataModel {
 
 	public boolean showSudowl() {
 		return sudowl;
+	}
+
+	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
+		return forest;
+	}
+
+	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
+		forest = f;
 	}
 
 	public void overlayData( String query, IEngine engine ) {
@@ -167,9 +186,6 @@ public class GraphDataModel {
 			return;
 		}
 
-		RDFEngineHelper.genNodePropertiesLocal( rc, this );
-		RDFEngineHelper.genEdgePropertiesLocal( rc, this );
-
 		generateVerticesFromConceptsInRC();
 		generateEdgesFromTriplesInRC();
 	}
@@ -189,74 +205,65 @@ public class GraphDataModel {
 	 *
 	 */
 	public void processData( String query, IEngine engine ) {
-		Set<Resource> urisNeedingLabels = new HashSet<>();
-		Set<URI> subjects = new HashSet<>();
-		Set<URI> predicates = new HashSet<>();
-		Set<Value> objects = new HashSet<>();
-		Set<URI> objuris = new HashSet<>();
+		conceptURI = engine.getSchemaBuilder().getConceptUri().build();
 
 		try {
 			rc.begin();
-			ValueFactory vf = rc.getValueFactory();
 
-			Collection<SesameJenaConstructStatement> sjw
-					= RDFEngineHelper.runSesameConstructOrSelectQuery( engine, query );
-			for ( SesameJenaConstructStatement statement : sjw ) {
-				URI sub = vf.createURI( statement.getSubject() );
-				URI pred = vf.createURI( statement.getPredicate() );
-				Value val = Value.class.cast( statement.getObject() );
+			ModelQueryAdapter mqa = new ModelQueryAdapter( query );
+			mqa.useInferred( false );
+			Model model = engine.construct( mqa );
+			Set<Resource> needProps = new HashSet<>( model.subjects() );
 
-				urisNeedingLabels.add( sub );
-				urisNeedingLabels.add( pred );
-				if ( val instanceof URI ) {
-					URI o = URI.class.cast( val );
-					objuris.add( o );
-					urisNeedingLabels.add( o );
+			for ( Statement s : model ) {
+				Resource sub = s.getSubject();
+				URI pred = s.getPredicate();
+				Value obj = s.getObject();
+
+				if ( obj instanceof Resource ) {
+					needProps.add( Resource.class.cast( obj ) );
 				}
 
-				if ( !subjects.contains( sub ) ) {
-					subjects.add( sub );
-				}
-				if ( !predicates.contains( pred ) ) {
-					predicates.add( pred );
-				}
-				if ( !objects.contains( val ) ) {
-					objects.add( val );
-				}
+				SEMOSSVertex vert1 = createOrRetrieveVertex( sub.stringValue() );
+				SEMOSSVertex vert2 = createOrRetrieveVertex( obj.stringValue() );
 
-				addToSesame( statement );
-			}
-			log.debug( "\nSubs >> " + subjects + "\nPrds >> " + predicates + "\nObjs >> " + objects );
+				forest.addVertex( vert1 );
+				forest.addVertex( vert2 );
+				
 
-			loadOwlData( subjects, engine );
-			labelcache.putAll( Utility.getInstanceLabels( urisNeedingLabels, engine ) );
+				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred.stringValue() );
+				edge.setEdgeType( pred.stringValue() );
+				storeEdge( edge );
 
-			if ( !( subjects.isEmpty() && predicates.isEmpty() && objects.isEmpty() ) ) {
-				print( "in-add-0" );
-				List<URI> concepts = new ArrayList<>( subjects );
-				concepts.addAll( objuris );
-				RDFEngineHelper.loadConceptHierarchy( engine, concepts, this );
-				print( "in-add-1" );
-				RDFEngineHelper.loadRelationHierarchy( engine, predicates, this );
-				print( "in-add-2" );
+				try {
+					forest.addEdge( edge, vert1, vert2, EdgeType.DIRECTED );
+				}
+				catch ( Exception t ) {
+					log.error( t, t );
+				}
 			}
 
-			if ( prop ) {
-				RDFEngineHelper.loadPropertyHierarchy( engine, predicates, this );
-				print( "in-add-3" );
-				List<URI> uris = new ArrayList<>( subjects );
-				uris.addAll( objuris );
-				uris.addAll( predicates );
-				RDFEngineHelper.genPropertiesRemote( engine, uris, this );
-				print( "in-add-4" );
+			Map<URI, String> edgelabels
+					= Utility.getInstanceLabels( model.predicates(), engine );
+			for ( URI u : model.predicates() ) {
+				SEMOSSEdge edge = edgeStore.get( u.stringValue() );
+				edge.setProperty( RDFS.LABEL, edgelabels.get( u ) );
 			}
+
+			fetchProperties( needProps, model.predicates(), engine );
 
 			rc.commit();
 			print( "graph" );
 			modelCounter++;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception ex ) {
+				log.warn( "cannot rollback transaction", ex );
+			}
 		}
 	}
 
@@ -306,7 +313,7 @@ public class GraphDataModel {
 	 * Adds the base relationships to the metamodel. This links the hierarchy that
 	 * tool needs to the metamodel being queried.
 	 */
-	private void loadOwlData( Collection<URI> subjects, IEngine engine ) throws RepositoryException {
+	private void loadOwlData( Collection<Resource> subjects, IEngine engine ) throws RepositoryException {
 		if ( loadedOWLS.contains( engine ) ) {
 			return;
 		}
@@ -314,7 +321,7 @@ public class GraphDataModel {
 		loadedOWLS.add( engine );
 
 		for ( Statement statement : engine.getOwlData() ) {
-			if ( subjects.contains( URI.class.cast( statement.getSubject() ) ) ) {
+			if ( subjects.contains( statement.getSubject() ) ) {
 				rc.add( statement );
 			}
 		}
@@ -399,10 +406,7 @@ public class GraphDataModel {
 	private SEMOSSVertex createOrRetrieveVertex( String vertexKey, Object object ) {
 		if ( !vertStore.containsKey( vertexKey ) ) {
 			// if this is a URI great. Else it's a literal
-			SEMOSSVertex vertex = ( object instanceof URI
-					? new SEMOSSVertex( vertexKey )
-					: new SEMOSSVertex( vertexKey, object ) );
-
+			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
 			// setLabel( vertex );
 			storeVertex( vertex );
 		}
@@ -411,7 +415,7 @@ public class GraphDataModel {
 	}
 
 	public void storeVertex( SEMOSSVertex vert ) {
-		String key = vert.getProperty( Constants.URI_KEY ) + "";
+		String key = vert.getProperty( RDF.SUBJECT ).toString();
 		setLabel( vert );
 		vertStore.put( key, vert );
 
@@ -449,38 +453,10 @@ public class GraphDataModel {
 
 		//only set property and store edge if the property does not already exist on the edge
 		String propNameInstance = Utility.getInstanceName( propName );
-		if ( edge.getProperty( propNameInstance ) == null ) {
+		if ( edge.getProperty( new URIImpl( propNameInstance ) ) == null ) {
 			edge.setProperty( propNameInstance, value );
 			storeEdge( edge );
 		}
-	}
-
-	/**
-	 * Method getContainsRelation
-	 *
-	 * @return String
-	 */
-	protected String getContainsRelation() {
-		if ( containsRelation != null ) {
-			return containsRelation;
-		}
-
-		containsRelation = " <" + containsURI.stringValue() + "> ";
-
-		String query
-				= "SELECT DISTINCT ?Subject ?subProp ?contains WHERE { "
-				+ "  BIND( rdfs:subPropertyOf AS ?subProp )"
-				+ "  BIND( " + containsRelation + " AS ?contains)"
-				+ "  {?Subject ?subProp  ?contains}"
-				+ "}";
-
-		Collection<SesameJenaConstructStatement> sjcw
-				= RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
-		if ( !sjcw.isEmpty() ) {
-			containsRelation = " <" + sjcw.iterator().next().getSubject() + "> ";
-		}
-
-		return containsRelation;
 	}
 
 	public void undoData() {
@@ -527,6 +503,10 @@ public class GraphDataModel {
 	 * generates the graphs
 	 */
 	public void generateEdgesFromTriplesInRC() {
+		if ( true ) {
+			return;
+		}
+
 		String query
 				= "SELECT DISTINCT ?Subject ?Predicate ?Object WHERE {"
 				+ "  ?Predicate a owl:ObjectProperty ."
@@ -549,7 +529,7 @@ public class GraphDataModel {
 					= createOrRetrieveVertex( sct.getObject().toString(), sct.getObject() );
 
 			// check to see if this is another type of edge
-			String edgeString = vertex1.getProperty( Constants.VERTEX_NAME ) + ":" + vertex2.getProperty( Constants.VERTEX_NAME );
+			String edgeString = vertex1.getProperty( RDFS.LABEL ) + ":" + vertex2.getProperty( RDFS.LABEL );
 			String predicateName = sct.getPredicate();
 			if ( !predicateName.contains( edgeString ) ) {
 				predicateName += "/" + edgeString;
@@ -569,27 +549,40 @@ public class GraphDataModel {
 	 * Method generateVerticesFromConceptsInRC - create all the relationships
 	 */
 	public void generateVerticesFromConceptsInRC() {
-		String query
-				= "SELECT DISTINCT ?Subject ?Predicate ?Object WHERE {"
-				+ "  {?Subject " + typeOrSubclass + " <" + conceptURI.stringValue() + ">;}"
-				+ "  BIND(\"\" AS ?Predicate)" // these are only used so that I can use select cheater...
-				+ "  BIND(\"\" AS ?Object)"
-				+ "}";
-
-		int numResults = 0;
-		Collection<SesameJenaConstructStatement> sjcw
-				= RDFEngineHelper.runSesameJenaSelectCheater( rc, query );
-		for ( SesameJenaConstructStatement s : sjcw ) {
-			String subject = s.getSubject();
-			if ( !baseFilterSet.contains( subject ) && !vertStore.containsKey( subject ) ) {
-				SEMOSSVertex vertex = new SEMOSSVertex( subject );
-				//setLabel( vertex );
-				storeVertex( vertex );
-				numResults++;
-			}
+		if ( true ) {
+			return;
 		}
 
-		log.debug( "genBaseConcepts() loaded " + numResults + " vertices." );
+		String query = "SELECT DISTINCT ?s ?p ?o ?concept WHERE {"
+				+ " ?s ?type+ ?concept . ?s ?p ?o . FILTER( isLiteral( ?o ) )  }";
+
+		ListQueryAdapter<SEMOSSVertex> vqa = new ListQueryAdapter<SEMOSSVertex>( query ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				URI sub = URI.class.cast( set.getValue( "s" ) );
+
+				if ( !( baseFilterSet.contains( sub.stringValue() )
+						|| vertStore.containsKey( sub.stringValue() ) ) ) {
+					URI prop = URI.class.cast( set.getValue( "p" ) );
+					Value v = set.getValue( "o" );
+
+					SEMOSSVertex vertex = new SEMOSSVertex( sub.stringValue() );
+					vertex.setProperty( prop.stringValue(), v.stringValue() );
+					add( vertex );
+				}
+			}
+		};
+
+		vqa.useInferred( true );
+		vqa.bind( "concept", conceptURI );
+		vqa.bind( "type", typeOrSubclass );
+		List<SEMOSSVertex> verts = AbstractSesameEngine.getSelectNoEx( vqa, rc, true );
+		for ( SEMOSSVertex v : verts ) {
+			storeVertex( v );
+		}
+
+		log.debug( "genBaseConcepts() loaded " + verts.size() + " vertices." );
 	}
 
 	/**
@@ -780,7 +773,7 @@ public class GraphDataModel {
 		filterOutOwlData = _filterOutOwlData;
 	}
 
-	public void setTypeOrSubclass( String _typeOrSubclass ) {
+	public void setTypeOrSubclass( URI _typeOrSubclass ) {
 		typeOrSubclass = _typeOrSubclass;
 	}
 
@@ -798,5 +791,73 @@ public class GraphDataModel {
 
 	public int getRCStoreSize() {
 		return rcStore.size();
+	}
+
+	private void fetchProperties( Collection<Resource> concepts, Collection<URI> preds,
+			IEngine engine ) throws RepositoryException, QueryEvaluationException {
+
+		String conceptprops
+				= "SELECT ?s ?p ?o ?type WHERE {"
+				+ " ?s ?p ?o . "
+				+ " ?s a ?type ."
+				+ " FILTER ( isLiteral( ?o ) ) }"
+				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
+		String edgeprops
+				= "SELECT ?s ?rel ?o ?prop ?literal"
+				+ "WHERE {"
+				+ "  ?rel ?prop ?literal ."
+				+ "  ?rel a ?semossrel ."
+				+ "  ?rel rdf:predicate ?superrel ."
+				+ "  ?s ?rel ?o ."
+				+ "  FILTER ( isLiteral( ?literal ) )"
+				+ "}"
+				+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
+		try {
+			VoidQueryAdapter cqa = new VoidQueryAdapter( conceptprops ) {
+
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					String s = set.getValue( "s" ).stringValue();
+					URI prop = URI.class.cast( set.getValue( "p" ) );
+					String val = set.getValue( "o" ).stringValue();
+					String type = set.getValue( "type" ).stringValue();
+
+					SEMOSSVertex v = createOrRetrieveVertex( s );
+					v.setProperty( prop, val );
+					v.setProperty( RDF.TYPE, type );
+				}
+			};
+			cqa.useInferred( false );
+			engine.query( cqa );
+
+			// do the same thing, but for edges
+			VoidQueryAdapter eqa = new VoidQueryAdapter( edgeprops ) {
+
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					// ?s ?rel ?o ?prop ?literal
+					String s = set.getValue( "s" ).stringValue();
+					String rel = set.getValue( "rel" ).stringValue();
+					URI prop = URI.class.cast( set.getValue( "prop" ) );
+					String o = set.getValue( "o" ).stringValue();
+					String type = set.getValue( "literal" ).stringValue();
+
+					if ( !edgeStore.containsKey( rel ) ) {
+						SEMOSSVertex v1 = createOrRetrieveVertex( s );
+						SEMOSSVertex v2 = createOrRetrieveVertex( o );
+						SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
+						storeEdge( edge );
+					}
+
+					SEMOSSEdge edge = edgeStore.get( rel );
+					edge.setProperty( prop, type );
+				}
+			};
+			eqa.useInferred( false );
+			engine.query( eqa );
+		}
+		catch ( MalformedQueryException ex ) {
+			log.error( "BUG!", ex );
+		}
 	}
 }

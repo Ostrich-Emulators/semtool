@@ -55,11 +55,11 @@ public class DBCMEdge {
 	public DBCMEdge(DBCMVertex outVertex, DBCMVertex inVertex, String uri)
 	{
 		this.uri = uri;
-		putProperty(Constants.URI_KEY, uri);
+		putProperty(Constants.URI_KEY.stringValue(), uri);
 		String className = Utility.getClassName(uri);
 		String edgeName = Utility.getInstanceName(uri);
-		putProperty(Constants.EDGE_TYPE, className);
-		putProperty(Constants.EDGE_NAME, edgeName);
+		putProperty(Constants.EDGE_TYPE.stringValue(), className);
+		putProperty(Constants.EDGE_NAME.stringValue(), edgeName);
 		this.inVertex = inVertex;
 		this.outVertex = outVertex;
 		inVertex.addInEdge(this);

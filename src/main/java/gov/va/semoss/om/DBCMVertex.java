@@ -52,7 +52,7 @@ public class DBCMVertex{
 	public DBCMVertex(String uri)
 	{
 		this.uri = uri;
-		putProperty(Constants.URI_KEY, uri);
+		putProperty(Constants.URI_KEY.stringValue(), uri);
 		
 		// parse out all the oth er properties
 		logger.debug("URI " + uri);
@@ -67,10 +67,10 @@ public class DBCMVertex{
 		if(className == null)
 			className = instanceName;
 		
-		putProperty(Constants.VERTEX_TYPE, className);
+		putProperty(Constants.VERTEX_TYPE.stringValue(), className);
 		logger.debug("Type is " + className);
 		
-		putProperty(Constants.VERTEX_NAME, instanceName);
+		putProperty(Constants.VERTEX_NAME.stringValue(), instanceName);
 		logger.debug("Name is " + instanceName);
 
 	}
@@ -83,7 +83,7 @@ public class DBCMVertex{
 	public DBCMVertex(String type, Object vert)
 	{
 		this.uri = type + "/" + vert;
-		putProperty(Constants.URI_KEY, this.uri);
+		putProperty(Constants.URI_KEY.stringValue(), this.uri);
 		
 		String value = vert +"";
 		if(vert instanceof Literal)
@@ -103,10 +103,10 @@ public class DBCMVertex{
 		logger.debug("URI " + uri);
 		String className = Utility.getInstanceName(uri);
 				
-		putProperty(Constants.VERTEX_TYPE, className);
+		putProperty(Constants.VERTEX_TYPE.stringValue(), className);
 		logger.debug("Type is " + className);
 		
-		putProperty(Constants.VERTEX_NAME, value);
+		putProperty(Constants.VERTEX_NAME.stringValue(), value);
 		logger.debug("Name is " + value);
 
 	}
@@ -129,10 +129,10 @@ public class DBCMVertex{
 	{
 		inEdge.add(edge);
 		double edgeCount = 0.0;
-		if(propHash.containsKey(Constants.INEDGE_COUNT))
-			edgeCount = (Double)propHash.get(Constants.INEDGE_COUNT);
+		if(propHash.containsKey(Constants.IN_EDGE_CNT.stringValue()))
+			edgeCount = (Double)propHash.get(Constants.IN_EDGE_CNT.stringValue());
 		edgeCount++;
-		propHash.put(Constants.INEDGE_COUNT, edgeCount);
+		propHash.put(Constants.IN_EDGE_CNT.stringValue(), edgeCount);
 		
 		addVertexCounter(edge.inVertex);
 	}
@@ -146,7 +146,7 @@ public class DBCMVertex{
 		// also create specific 
 		// find the type
 		// get the node on other side
-		String vertType = (String)outVert.getProperty(Constants.VERTEX_TYPE);
+		String vertType = (String)outVert.getProperty(Constants.VERTEX_TYPE.stringValue());
 
 		Integer vertTypeCount = new Integer(0);
 		if(propHash.containsKey(vertType))
@@ -164,10 +164,10 @@ public class DBCMVertex{
 	{
 		outEdge.add(edge);
 		double edgeCount = 0.0;
-		if(propHash.containsKey(Constants.OUTEDGE_COUNT))
-			edgeCount = (Double)propHash.get(Constants.OUTEDGE_COUNT);
+		if(propHash.containsKey(Constants.OUT_EDGE_CNT.stringValue()))
+			edgeCount = (Double)propHash.get(Constants.OUT_EDGE_CNT.stringValue());
 		edgeCount++;
-		propHash.put(Constants.OUTEDGE_COUNT, edgeCount);
+		propHash.put(Constants.OUT_EDGE_CNT.stringValue(), edgeCount);
 
 		addVertexCounter(edge.outVertex);
 	}

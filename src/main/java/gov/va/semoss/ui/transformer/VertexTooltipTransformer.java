@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.collections15.Transformer;
 import org.apache.log4j.Logger;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * Transforms what is displayed on the tooltip when a vertex/node is selected on a graph.
@@ -51,20 +52,24 @@ public class VertexTooltipTransformer implements Transformer <SEMOSSVertex, Stri
 	
 	 * @return String - The name of the property. */
 	@Override
-	public String transform(SEMOSSVertex vertex) {	
+	public String transform( SEMOSSVertex vertex ) {
 		String propName = "";
 
-		ArrayList<String> props = data.getSelectedPropertiesTT(vertex.getType());
-		if(props != null && props.size() > 0)
-		{
-			propName = propName + vertex.getProperty(props.get(0)+"");
-			for(int propIndex=1;propIndex < props.size();propIndex++){
-				String prop = props.get(propIndex)+"";
+		ArrayList<String> props = data.getSelectedPropertiesTT( vertex.getType() );
+		if ( props != null && props.size() > 0 ) {
+			propName = propName + vertex.getProperty( new URIImpl( props.get( 0 ) ) ).toString();
+			for ( int propIndex = 1; propIndex < props.size(); propIndex++ ) {
+				String prop = props.get( propIndex ) + "";
 				propName = propName + "<br>";
 				//only add the label on the property if it is not one of the main three
-				if(!prop.equals(Constants.VERTEX_NAME)&&!prop.equals(Constants.EDGE_NAME)&&!prop.equals(Constants.VERTEX_TYPE)&&!prop.equals(Constants.EDGE_TYPE)&&!prop.equals(Constants.URI_KEY))
-					propName = propName + prop+": ";
-				propName = propName + vertex.getProperty(props.get(propIndex)+"");
+				if ( !prop.equals( Constants.VERTEX_NAME )
+						&& !prop.equals( Constants.EDGE_NAME ) 
+						&& !prop.equals( Constants.VERTEX_TYPE )
+						&& !prop.equals( Constants.EDGE_TYPE ) 
+						&& !prop.equals( Constants.URI_KEY ) ) {
+					propName = propName + prop + ": ";
+				}
+				propName = propName + vertex.getProperty( new URIImpl( props.get( propIndex ) ) ).toString();
 			}
 		}
 		//logger.debug("Prop Name " + propName);

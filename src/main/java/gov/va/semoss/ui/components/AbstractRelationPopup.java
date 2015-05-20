@@ -131,7 +131,7 @@ public abstract class AbstractRelationPopup extends JMenu implements MouseListen
 				uri = "\"" + uri + "\"";
 			}
 
-			hash.put( Constants.URI_KEY, uri );
+			hash.put( Constants.URI_KEY.stringValue(), uri );
 			String filledQuery = Utility.fillParam( query2, hash );
 
 			// get the repository and execute the query
@@ -209,7 +209,7 @@ public abstract class AbstractRelationPopup extends JMenu implements MouseListen
 					predClassName = "\"" + predClassName + "\"";
 				}
 
-				hash.put( Constants.URI_KEY, uriName );
+				hash.put( Constants.URI_KEY.stringValue(), uriName );
 				hash.put( Constants.PREDICATE, predClassName );
         //logger.debug("Predicate is " + predName + "<<>> "+ predClassName);
 

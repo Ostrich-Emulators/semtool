@@ -71,8 +71,9 @@ public class RDFEngineHelper {
 
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object } WHERE {"
-				+ "  {?Subject a ?Object}"
-				+ "  {?Subject ?Predicate ?Object} FILTER ( isURI( ?Object ) )"
+				+ "  ?Subject a ?Object ."
+				+ "  ?Subject ?Predicate ?Object ."
+				+ "  FILTER ( isURI( ?Object ) )"
 				+ "} VALUES ?Subject { " + subs + " }";
 
 		int numResults = addResultsToRC( engine, query, gdm );
@@ -98,7 +99,6 @@ public class RDFEngineHelper {
 
 		// RPB: I don't know what this function is for. It's basically
 		// the same as loadRelationHierarchy(), above
-		
 		String rel = engine.getSchemaBuilder().getRelationUri().toString();
 		String query
 				= "CONSTRUCT { ?Subject ?Predicate ?Object} WHERE {"
@@ -124,7 +124,7 @@ public class RDFEngineHelper {
 	 * connection.
 	 */
 	public static void genPropertiesRemote( IEngine engine, Collection<URI> subjects,
-		GraphDataModel gdm ) {
+			GraphDataModel gdm ) {
 
 		String query
 				= "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o . FILTER ( isLiteral( ?o ) ) } "
@@ -251,7 +251,9 @@ public class RDFEngineHelper {
 				+ "}";
 
 		try {
-			Model m = engine.construct( new ModelQueryAdapter( query ) );
+			ModelQueryAdapter mqa = new ModelQueryAdapter( query );
+			mqa.useInferred( false );
+			Model m = engine.construct( mqa );
 			if ( add ) {
 				toRC.add( m );
 			}
@@ -291,7 +293,9 @@ public class RDFEngineHelper {
 	public static Collection<SesameJenaConstructStatement>
 			runSesameJenaConstruct( RepositoryConnection rc, String query ) {
 		try {
-			return toList( AbstractSesameEngine.getConstruct( new ModelQueryAdapter( query ), rc ) );
+			ModelQueryAdapter mqa = new ModelQueryAdapter( query );
+			mqa.useInferred( false );
+			return toList( AbstractSesameEngine.getConstruct( mqa, rc ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			logger.error( e, e );
@@ -334,7 +338,9 @@ public class RDFEngineHelper {
 		logger.debug( "Running query in runSesameJenaConstruct: " + query );
 
 		try {
-			return toList( engine.construct( new ModelQueryAdapter( query ) ) );
+			ModelQueryAdapter mqa = new ModelQueryAdapter( query );
+			mqa.useInferred( false );
+			return toList( engine.construct( mqa ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			logger.error( e, e );
@@ -344,42 +350,49 @@ public class RDFEngineHelper {
 	}
 
 	private static ListQueryAdapter<SesameJenaSelectStatement> getSjssAdapter( String query ) {
-		return new ListQueryAdapter<SesameJenaSelectStatement>( query ) {
+		ListQueryAdapter<SesameJenaSelectStatement> q
+				= new ListQueryAdapter<SesameJenaSelectStatement>( query ) {
 
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				SesameJenaSelectStatement stmt = new SesameJenaSelectStatement();
-				for ( Binding b : set ) {
-					stmt.setRawVar( b.getName(), b.getValue() );
-				}
-				add( stmt );
-			}
-		};
+					@Override
+					public void handleTuple( BindingSet set, ValueFactory fac ) {
+						SesameJenaSelectStatement stmt = new SesameJenaSelectStatement();
+						for ( Binding b : set ) {
+							stmt.setRawVar( b.getName(), b.getValue() );
+						}
+						add( stmt );
+					}
+				};
+		q.useInferred( false );
+		return q;
 	}
 
 	private static ListQueryAdapter<SesameJenaConstructStatement> getSjssAdapter_c( String query ) {
-		return new ListQueryAdapter<SesameJenaConstructStatement>( query ) {
+		ListQueryAdapter<SesameJenaConstructStatement> q
+				= new ListQueryAdapter<SesameJenaConstructStatement>( query ) {
 
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				if ( 3 == set.size() ) {
+					@Override
+					public void handleTuple( BindingSet set, ValueFactory fac ) {
+						if ( 3 == set.size() ) {
 					// we're simulating a CONSTRUCT query, so just assume the 
-					// first binding is subject, second is predicate, and third is object
-					SesameJenaConstructStatement stmt = new SesameJenaConstructStatement();
+							// first binding is subject, second is predicate, and third is object
+							SesameJenaConstructStatement stmt = new SesameJenaConstructStatement();
 
-					Iterator<Binding> it = set.iterator();
+							Iterator<Binding> it = set.iterator();
 
-					stmt.setSubject( it.next().getValue().toString() );
-					stmt.setPredicate( it.next().getValue().toString() );
-					stmt.setObject( it.next().getValue() );
-					add( stmt );
-				}
-				else {
-					logger.error( "Could not simulate a CONSTRUCT statement (vars!=3) from: "
-							+ query );
-				}
-			}
-		};
+							stmt.setSubject( it.next().getValue().toString() );
+							stmt.setPredicate( it.next().getValue().toString() );
+							stmt.setObject( it.next().getValue() );
+							add( stmt );
+						}
+						else {
+							logger.error( "Could not simulate a CONSTRUCT statement (vars!=3) from: "
+									+ query );
+						}
+					}
+				};
+		
+		q.useInferred( false );
+		return q;
 	}
 
 	private static SesameJenaConstructStatement toSjcs( Statement s ) {

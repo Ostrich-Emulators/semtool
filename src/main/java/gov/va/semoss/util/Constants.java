@@ -80,18 +80,20 @@ public class Constants {
 	public static final String DBCM_Prop = "DBCM_Prop";
 	public static final String EMPTY = "@@";
 	public static final String LAYOUT = "LAYOUT";
-	public static final String VERTEX_NAME = "VERTEX_LABEL_PROPERTY";
-	public static final String VERTEX_TYPE = "VERTEX_TYPE_PROPERTY";
+	public static final URI VERTEX_NAME = RDFS.LABEL;
+	public static final URI VERTEX_TYPE = RDF.TYPE;
 	public static final String VERTEX_COLOR = "VERTEX_COLOR_PROPERTY";
 	public static final String GENERIC_IMAGE = "GENERIC";
 	public static final String PERSPECTIVE = "PERSPECTIVE";
-	public static final String INEDGE_COUNT = "Inputs";
-	public static final String OUTEDGE_COUNT = "Outputs";
+	public static final URI IN_EDGE_CNT = new URIImpl( "semoss://count.edge.in" );
+	public static final URI OUT_EDGE_CNT = new URIImpl( "semoss://count.edge.out" );
 	public static final String PROCESS_CURRENT_DATE = "PROCESS_CURRENT_DATE";
 	public static final String PROCESS_CURRENT_USER = "PROCESS_CURRENT_USER";
 	public static final String CURRENT_PLAYSHEET = "layoutValue";
 	public static final String BASE_FOLDER = "BaseFolder";
 
+	
+	
 	//graphplaysheet option constants
 	// layouts
 	public static final String GPSSudowl = "GPS_SUDOWL_DEFAULT";
@@ -213,8 +215,8 @@ public class Constants {
 	public static final String APPEND = "appendChkBox";
 	public static final String PROP_URI = "PROP_URI";
 	public static final String PREDICATE_URI = "PREDICATE_URI";
-	public static final String EDGE_NAME = "EDGE_NAME";
-	public static final String EDGE_TYPE = "EDGE_TYPE";
+	public static final URI EDGE_NAME = RDFS.LABEL;
+	public static final URI EDGE_TYPE = RDF.TYPE;
 	public static final String OPTION = "OPTION"; // used by entity filler
 	public static final String FILTER = "FILTER_NAME";
 	public static final String EDGE_ADJUSTER_TABLE = "edgeAdjusterTable";
@@ -230,7 +232,7 @@ public class Constants {
 	public static final String CALC_COLUMN_LABELS = "_ColLabels";
 	public static final String CALC_ROW_LABELS = "_RowLabels";
 	public static final String CALC_EXAMPLE_EDGE = "_ExEdge";
-	public static final String URI_KEY = "URI";
+	public static final URI URI_KEY = RDF.SUBJECT;
 	public static final String CALC_NAMES_LIST = "_Names";
 	public static final String CALC_NAMES_TECH_STD_LIST = "_Names_Tech_Std";
 	public static final String GRID_VIEW = "gov.va.semoss.ui.components.playsheets.GridPlaySheet";

@@ -12,6 +12,7 @@ import java.util.Map;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import org.openrdf.model.vocabulary.RDFS;
 
 public class MetamodelGraphDataModel extends GraphDataModel {
 	private static final Logger log = Logger.getLogger( MetamodelGraphDataModel.class );
@@ -23,7 +24,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	public MetamodelGraphDataModel() {
 		super();
 		
-		setTypeOrSubclass(" rdfs:subClassOf ");
+		setTypeOrSubclass( RDFS.SUBCLASSOF );
 		setFilterOutOwlData(false);
 		getBaseFilterSet().add(DIHelper.getConceptURI().stringValue() );
 		getBaseFilterSet().add(DIHelper.getConceptURI("ApplicationModule").stringValue() );

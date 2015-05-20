@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class collects the information that is used in
@@ -367,7 +368,8 @@ public class DistanceDownstreamInserter {
 				}
 				else // ok this is a literal
 				{
-					vert2 = new SEMOSSVertex( sct.getPredicate(), sct.getObject() );
+					vert2 = new SEMOSSVertex( sct.getObject().toString(),
+							new URIImpl( sct.getPredicate() ) );
 				}
 				vertStore.put( sct.getObject() + "", vert2 );
 			}

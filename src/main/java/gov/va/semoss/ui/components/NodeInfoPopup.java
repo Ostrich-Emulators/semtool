@@ -44,6 +44,7 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JInternalFrame;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  * This class is used to display information about a node in a popup window.
@@ -97,7 +98,7 @@ public class NodeInfoPopup extends AbstractAction {
 		//first process the data into a hashtable
 		Map<String, Integer> typeCounts = new HashMap<>();
 		for ( SEMOSSVertex v : pickedVertex ) {
-			String vType = v.getProperty( Constants.VERTEX_TYPE ) + "";
+			String vType = v.getProperty( RDF.TYPE ).toString();
 			//if the hashtable already contains the type, add to the count
 			if ( typeCounts.containsKey( vType ) ) {
 				int count = typeCounts.get( vType );

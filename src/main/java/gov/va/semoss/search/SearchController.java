@@ -40,16 +40,19 @@ import edu.uci.ics.jung.visualization.picking.MultiPickedState;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
-import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.Utility;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -67,15 +70,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFHandler;
-import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  */
@@ -298,7 +294,8 @@ public class SearchController implements KeyListener, FocusListener,
 	 *
 	 * @param jenaModel Model
 	 */
-	public void indexRepository( RepositoryConnection rc ) {
+	public void indexRepository( Collection<SEMOSSEdge> edges,
+			Collection<SEMOSSVertex> nodes, IEngine engine ) {
 		try {
 			if ( null != reader ) {
 				try {
@@ -317,23 +314,30 @@ public class SearchController implements KeyListener, FocusListener,
 				}
 			}
 
-			Map<URI, String> labelcache = new HashMap<>();
-			AbstractSesameEngine.getSelectNoEx( new VoidQueryAdapter( "SELECT DISTINCT ?s ?l { ?s rdfs:label ?l }" ) {
+			Set<Resource> needLabels = new HashSet<>();
+			for( SEMOSSEdge e : edges ){
+				needLabels.addAll( e.getUriProperties().keySet() );
+			}
+			for( SEMOSSVertex e : nodes ){
+				needLabels.addAll( e.getUriProperties().keySet() );
+			}
+			
+			Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine);
+			RepositoryIndexer ri = new RepositoryIndexer( labels );
 
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					labelcache.put( URI.class.cast( set.getValue( "s" ) ),
-							set.getValue( "l" ).stringValue() );
-				}
-
-			}, rc, true );
-
-			rc.export( new RepositoryIndexer( labelcache ) );
+			for( SEMOSSEdge e : edges ){
+				ri.handleProperties( e.getURI(), e.getUriProperties() );
+			}
+			for( SEMOSSVertex e : nodes ){
+				ri.handleProperties( e.getURI(), e.getUriProperties() );
+			}
+			
+			ri.finish();
 
 			reader = IndexReader.open( ramdir );
 			searcher = new IndexSearcher( reader );
 		}
-		catch ( RepositoryException | RDFHandlerException | IOException ex ) {
+		catch ( IOException ex ) {
 			log.error( ex, ex );
 		}
 	}
@@ -393,15 +397,15 @@ public class SearchController implements KeyListener, FocusListener,
 	public void keyReleased( KeyEvent arg0 ) {
 	}
 
-	private class RepositoryIndexer implements RDFHandler {
+	private class RepositoryIndexer {
 
 		private IndexWriter indexer;
-		private final Map<Resource, Document> doccache = new HashMap<>();
-		private final Map<Resource, StringBuilder> textcache = new HashMap<>();
-		private final Map<URI, String> labels;
+		private final Map<String, Document> doccache = new HashMap<>();
+		private final Map<String, StringBuilder> textcache = new HashMap<>();
+		private final Map<Resource, String> labels;
 
-		public RepositoryIndexer( Map<URI, String> labels ) {
-			this.labels = labels;
+		public RepositoryIndexer( Map<Resource, String> labs ) {
+			labels = labs;
 			IndexWriterConfig config
 					= new IndexWriterConfig( Version.LUCENE_36, analyzer );
 			try {
@@ -412,14 +416,9 @@ public class SearchController implements KeyListener, FocusListener,
 			}
 		}
 
-		@Override
-		public void startRDF() throws RDFHandlerException {
-		}
-
-		@Override
-		public void endRDF() throws RDFHandlerException {
+		public void finish() {
 			try {
-				for ( Map.Entry<Resource, Document> en : doccache.entrySet() ) {
+				for ( Map.Entry<String, Document> en : doccache.entrySet() ) {
 					String sb = textcache.get( en.getKey() ).toString().trim();
 					if ( !sb.isEmpty() ) {
 						en.getValue().add( new Field( TEXT_FIELD, sb, Field.Store.YES,
@@ -451,51 +450,38 @@ public class SearchController implements KeyListener, FocusListener,
 			}
 		}
 
-		@Override
-		public void handleNamespace( String string, String string1 ) throws RDFHandlerException {
-		}
+		public void handleProperties( String sub, Map<URI, Object> props ) {
+			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
+				URI pred = en.getKey();
+				if ( !doccache.containsKey( sub ) ) {
+					Document doc = new Document();
+					doccache.put( sub, doc );
+					doc.add( new Field( "URI", sub, Field.Store.YES,
+							Field.Index.NOT_ANALYZED ) );
 
-		@Override
-		public void handleStatement( Statement stmt ) throws RDFHandlerException {
-			Resource sub = stmt.getSubject();
-			Value val = stmt.getObject();
-			if ( val instanceof Resource ) {
-				return;
+					textcache.put( sub, new StringBuilder() );
+				}
+
+				textcache.get( sub ).append( " " ).append( en.getValue().toString() );
+
+				Document doc = doccache.get( sub );
+
+				String label = ( labels.containsKey( pred )
+						? labels.get( pred ) : pred.getLocalName() );
+				Field f = new Field( label, en.getValue().toString(), Field.Store.YES,
+						Field.Index.ANALYZED );
+				if ( "Description".equals( label ) ) {
+					f.setBoost( 2.0f );
+				}
+				else if ( "type".equals( label ) ) {
+					f.setBoost( 4.0f );
+				}
+				else if ( "label".equals( label ) ) {
+					f.setBoost( 8.0f );
+				}
+
+				doc.add( f );
 			}
-
-			if ( !doccache.containsKey( sub ) ) {
-				Document doc = new Document();
-				doccache.put( sub, doc );
-				doc.add( new Field( "URI", sub.stringValue(), Field.Store.YES,
-						Field.Index.NOT_ANALYZED ) );
-
-				textcache.put( sub, new StringBuilder() );
-			}
-
-			textcache.get( sub ).append( " " ).append( val.stringValue() );
-
-			Document doc = doccache.get( sub );
-
-			URI pred = stmt.getPredicate();
-			String label = ( labels.containsKey( pred )
-					? labels.get( pred ) : pred.getLocalName() );
-			Field f = new Field( label, val.stringValue(), Field.Store.YES,
-					Field.Index.ANALYZED );
-			if ( "Description".equals( label ) ) {
-				f.setBoost( 2.0f );
-			}
-			else if ( "type".equals( label ) ) {
-				f.setBoost( 4.0f );
-			}
-			else if ( "label".equals( label ) ) {
-				f.setBoost( 8.0f );
-			}
-
-			doc.add( f );
-		}
-
-		@Override
-		public void handleComment( String string ) throws RDFHandlerException {
 		}
 	}
 }
