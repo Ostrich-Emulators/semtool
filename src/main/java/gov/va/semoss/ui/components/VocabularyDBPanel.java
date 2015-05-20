@@ -17,14 +17,14 @@ import javax.swing.JCheckBox;
  *
  * @author ryan
  */
-public class VocabularyPanel extends javax.swing.JPanel {
+public class VocabularyDBPanel extends javax.swing.JPanel {
 	
 	private final List<JCheckBox> vocabs = new ArrayList<>();
 
 	/**
 	 * Creates new form VocabularyPanel
 	 */
-	public VocabularyPanel() {
+	public VocabularyDBPanel() {
 		initComponents();
 				
 		for ( Map.Entry<String, Boolean> en : VocabularyRegistry.getVocabularies2().entrySet() ) {
@@ -72,7 +72,7 @@ public class VocabularyPanel extends javax.swing.JPanel {
     filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0));
 
     label.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
-    label.setText("Reload Vocabularies (After Clear)");
+    label.setText("Import Vocabularies");
     label.setMaximumSize(null);
     buttonpanel.setLayout(new javax.swing.BoxLayout(buttonpanel, javax.swing.BoxLayout.PAGE_AXIS));
     buttonpanel.add(filler2);
@@ -91,11 +91,11 @@ public class VocabularyPanel extends javax.swing.JPanel {
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+     //   .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(buttonpanel, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+    //    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(filler1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addContainerGap()
+  //      .addContainerGap()
         )
     );
   }// </editor-fold>//GEN-END:initComponents

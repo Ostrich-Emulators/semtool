@@ -172,7 +172,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     conformer = new javax.swing.JCheckBox();
     baseuri = new javax.swing.JComboBox<String>();
     edgemodelPanel = new javax.swing.JPanel();
-    vocabPanel = new gov.va.semoss.ui.components.VocabularyPanel();
+    vocabPanel = new gov.va.semoss.ui.components.VocabularyDBPanel();
 
     jLabel2.setLabelFor(file);
     jLabel2.setText("Select File(s) to Import");
@@ -461,7 +461,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private gov.va.semoss.ui.components.FileBrowsePanel questionfile;
   private javax.swing.JLabel questionlbl;
   private javax.swing.JLabel urilbl;
-  private gov.va.semoss.ui.components.VocabularyPanel vocabPanel;
+  private gov.va.semoss.ui.components.VocabularyDBPanel vocabPanel;
   // End of variables declaration//GEN-END:variables
 
 	/**
