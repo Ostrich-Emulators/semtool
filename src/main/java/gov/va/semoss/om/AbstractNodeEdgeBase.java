@@ -24,25 +24,14 @@ public class AbstractNodeEdgeBase {
 	private static final Logger log = Logger.getLogger( AbstractNodeEdgeBase.class );
 
 	private final Map<URI, Object> properties = new HashMap<>();
-	private String id;
+	private URI id;
 
-	public AbstractNodeEdgeBase( String id ) {
-		this( id, null, id );
-	}
-
-	public AbstractNodeEdgeBase( String id, URI type ) {
-		this( id, type, id );
-	}
-
-	public AbstractNodeEdgeBase( String id, URI type, String label ) {
-		this.id = id;
-		properties.put( RDF.SUBJECT, id );
-		properties.put( RDFS.LABEL, label );
-		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
+	public AbstractNodeEdgeBase( URI id ) {
+		this( id, null, id.getLocalName() );
 	}
 
 	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
-		this.id = id.stringValue();
+		this.id = id;
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, label );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
@@ -90,10 +79,10 @@ public class AbstractNodeEdgeBase {
 		return properties.containsKey( prop );
 	}
 
-	public void setURI( URI uri ){
+	public void setURI( URI uri ) {
 		setProperty( RDF.SUBJECT, uri );
 	}
-	
+
 	public URI getURI() {
 		return URI.class.cast( getProperty( RDF.SUBJECT ) );
 	}
@@ -128,4 +117,8 @@ public class AbstractNodeEdgeBase {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return id + "; " + getType().getLocalName() + "; " + getLabel();
+	}
 }

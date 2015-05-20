@@ -26,9 +26,7 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -42,8 +40,7 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 
 	private transient static Logger logger = Logger.getLogger( SEMOSSVertex.class );
 
-	private transient Map<String, String> uriHash = new HashMap<>();
-	private transient Map<String, SEMOSSVertex> edgeHash = new HashMap<>();
+	//private transient Map<String, SEMOSSVertex> edgeHash = new HashMap<>();
 
 	private transient List<SEMOSSEdge> inEdge = new ArrayList<>();
 	private transient List<SEMOSSEdge> outEdge = new ArrayList<>();
@@ -63,6 +60,7 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 		TypeColorShapeTable.getInstance().initializeShape( this );
 	}
 
+	@Override
 	public void setProperty( URI prop, Object val ) {
 		super.setProperty( prop, val );
 		if ( RDF.TYPE.equals( prop ) ) {
@@ -75,39 +73,12 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 	public void addInEdge( SEMOSSEdge edge ) {
 		inEdge.add( edge );
 		setProperty( Constants.IN_EDGE_CNT, inEdge.size() );
-
-		edgeHash.put(
-				edge.getInVertex().getProperty( RDFS.LABEL ).toString(),
-				edge.getInVertex() );
-		addVertexCounter( edge.getOutVertex() );
-	}
-
-	/**
-	 * Method addVertexCounter.
-	 *
-	 * @param outVertex SEMOSSVertex
-	 */
-	private void addVertexCounter( SEMOSSVertex outVertex ) {
-		Integer vertTypeCount = 0;
-		try {
-			if ( hasProperty( outVertex.getType() ) ) {
-				vertTypeCount = (Integer) getProperty( outVertex.getType() );
-			}
-			vertTypeCount++;
-			setProperty( outVertex.getType(), vertTypeCount );
-		}
-		catch ( Exception ignored ) {
-		}
 	}
 
 	// this is the invertex
 	public void addOutEdge( SEMOSSEdge edge ) {
 		outEdge.add( edge );
 		setProperty( Constants.OUT_EDGE_CNT, outEdge.size() );
-
-		edgeHash.put( edge.getOutVertex().getProperty( RDFS.LABEL ).toString(),
-				edge.getOutVertex() );
-		addVertexCounter( edge.getInVertex() );
 	}
 
 	public final void setColor( Color _color ) {

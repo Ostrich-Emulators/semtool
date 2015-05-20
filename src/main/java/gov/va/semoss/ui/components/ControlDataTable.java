@@ -89,7 +89,7 @@ public class ControlDataTable {
 
 		for ( URI type : types ) {
 			ControlDataRow header
-					= new ControlDataRow( type, Constants.ANYNODE, true, true );
+					= new ControlDataRow( type, Constants.ANYNODE, false, false );
 			data.add( header );
 
 			List<URI> propertiesForThisType = properties.getNN( type );

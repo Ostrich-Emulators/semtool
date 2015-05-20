@@ -860,6 +860,8 @@ public class PlayPane extends JFrame {
 		renderer.cache( Constants.ANYNODE, "SELECT ALL" );
 		renderer.cache( RDF.SUBJECT, "URI" );
 		renderer.cache( RDFS.LABEL, "Label" );
+		renderer.cache( Constants.IN_EDGE_CNT, "Inputs" );
+		renderer.cache( Constants.OUT_EDGE_CNT, "Outputs" );
 
 		labelTable = initJTableAndAddTo( panel, false );
 		tooltipTable = initJTableAndAddTo( panel, false );

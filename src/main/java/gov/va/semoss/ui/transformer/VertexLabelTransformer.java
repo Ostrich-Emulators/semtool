@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.transformer;
 
@@ -70,7 +70,10 @@ public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String>
 			if ( !first ) {
 				html += "<font size='1'><br></font>";
 			}
-			html += vertex.getProperty( property ).toString();
+
+			if ( vertex.hasProperty( property ) ) {
+				html += vertex.getProperty( property ).toString();
+			}
 			first = false;
 		}
 		html += "</html>";

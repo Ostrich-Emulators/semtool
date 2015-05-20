@@ -467,7 +467,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	protected void createForest() throws Exception {
-		for( SEMOSSEdge edge : gdm.getGraph().getEdges() ){
+		for ( SEMOSSEdge edge : gdm.getGraph().getEdges() ) {
 			processControlData( edge );
 
 			//add to filter data
@@ -483,6 +483,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		//now for vertices--process control data and add what is necessary to the graph
 		//use vert store to check for any isolated nodes and add to forest
 		for ( SEMOSSVertex vert : gdm.getVertStore().values() ) {
+			log.debug( "before processControlData: " + vert );
+
 			processControlData( vert );
 			filterData.addVertex( vert );
 		}

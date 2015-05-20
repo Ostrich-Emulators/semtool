@@ -94,7 +94,7 @@ public class GraphDataModel {
 
 	private boolean filterOutOwlData = true;
 	private URI typeOrSubclass = RDF.TYPE;
-	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> forest = new DirectedSparseGraph<>();
+	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph = new DirectedSparseGraph<>();
 
 	//these are used for keeping track of only what was added or subtracted and will only be populated when overlay is true
 	private Map<String, SEMOSSVertex> incrementalVertStore;
@@ -128,11 +128,11 @@ public class GraphDataModel {
 	}
 
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
-		return forest;
+		return vizgraph;
 	}
 
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
-		forest = f;
+		vizgraph = f;
 	}
 
 	public void overlayData( String query, IEngine engine ) {
@@ -223,15 +223,15 @@ public class GraphDataModel {
 					vert2.setLabel( obj.stringValue() );
 				}
 
-				forest.addVertex( vert1 );
-				forest.addVertex( vert2 );
+				vizgraph.addVertex( vert1 );
+				vizgraph.addVertex( vert2 );
 
 				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred );
 				edge.setEdgeType( pred );
 				storeEdge( edge );
 
 				try {
-					forest.addEdge( edge, vert1, vert2, EdgeType.DIRECTED );
+					vizgraph.addEdge( edge, vert1, vert2, EdgeType.DIRECTED );
 				}
 				catch ( Exception t ) {
 					log.error( t, t );
@@ -687,7 +687,7 @@ public class GraphDataModel {
 				+ " FILTER ( isLiteral( ?o ) ) }"
 				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
 		String edgeprops
-				= "SELECT ?s ?rel ?o ?prop ?literal"
+				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel"
 				+ "WHERE {"
 				+ "  ?rel ?prop ?literal ."
 				+ "  ?rel a ?semossrel ."
@@ -708,7 +708,7 @@ public class GraphDataModel {
 
 					SEMOSSVertex v = createOrRetrieveVertex( s );
 					v.setProperty( prop, val );
-					v.setProperty( RDF.TYPE, type );
+					v.setType( type );
 				}
 			};
 			cqa.useInferred( false );
@@ -724,7 +724,8 @@ public class GraphDataModel {
 					URI rel = URI.class.cast( set.getValue( "rel" ) );
 					URI prop = URI.class.cast( set.getValue( "prop" ) );
 					URI o = URI.class.cast( set.getValue( "o" ) );
-					String type = set.getValue( "literal" ).stringValue();
+					String propval = set.getValue( "literal" ).stringValue();
+					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
 					if ( !edgeStore.containsKey( rel ) ) {
 						SEMOSSVertex v1 = createOrRetrieveVertex( s );
@@ -734,7 +735,8 @@ public class GraphDataModel {
 					}
 
 					SEMOSSEdge edge = edgeStore.get( rel );
-					edge.setProperty( prop, type );
+					edge.setProperty( prop, propval );
+					edge.setType( superrel );
 				}
 			};
 			eqa.useInferred( false );
