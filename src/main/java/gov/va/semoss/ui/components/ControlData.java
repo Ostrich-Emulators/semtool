@@ -15,19 +15,22 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.components;
 
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 
+import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 
@@ -37,6 +40,8 @@ import org.openrdf.model.URI;
 public class ControlData {
 
 	private ControlDataTable vertexCDT, edgeCDT;
+	private IEngine engine;
+	private final Map<URI, String> labelcache = new HashMap<>();
 
 	/**
 	 * Constructor for ControlData.
@@ -58,6 +63,10 @@ public class ControlData {
 
 		vertexCDT = new ControlDataTable( propertyShow, propertyShowTT, propertyHide, new String[]{ "Vertex Type", "Property", "Label", "Tooltip" } );
 		edgeCDT = new ControlDataTable( propertyShow, propertyShowTT, propertyHide, new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
+	}
+
+	public void setEngine( IEngine e ) {
+		engine = e;
 	}
 
 	/**
@@ -86,6 +95,15 @@ public class ControlData {
 	 */
 	public void addVertexProperty( URI type, URI property ) {
 		vertexCDT.addProperty( type, property );
+	}
+
+	public String getLabel( URI uri ) {
+		if ( !labelcache.containsKey( uri ) ) {
+			String l = ( null == engine ? uri.getLocalName()
+					: Utility.getInstanceLabel( uri, engine ) );
+			labelcache.put( uri, l );
+		}
+		return labelcache.get( uri );
 	}
 
 	/**

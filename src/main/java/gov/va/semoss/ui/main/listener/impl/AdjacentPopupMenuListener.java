@@ -143,7 +143,6 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 			while ( masterIt.hasNext() ) {
 				SEMOSSVertex vert = (SEMOSSVertex) masterIt.next();
 				Hashtable vHash = (Hashtable) masterHash.get( vert );
-				ArrayList<SEMOSSVertex> parentPath = (ArrayList<SEMOSSVertex>) vHash.get( ddp.pathString );
 				ArrayList<SEMOSSEdge> parentEdgePath = (ArrayList<SEMOSSEdge>) vHash.get( ddp.edgePathString );
 				edgeHash = putEdgesInHash( new Vector( parentEdgePath ), edgeHash );
 				for ( SEMOSSEdge edge : parentEdgePath ) {
@@ -184,7 +183,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 	private Map<SEMOSSEdge, Double> putEdgesInHash( Collection<SEMOSSEdge> edges,
 			Map<SEMOSSEdge, Double> hash ) {
 		for ( SEMOSSEdge e : edges ) {
-			hash.put( e, 3d ); // RPB: I'm just making this up.
+			hash.put( e, 1d ); // RPB: I'm just making this up.
 		}
 
 		return hash;

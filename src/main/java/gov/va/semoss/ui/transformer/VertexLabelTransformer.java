@@ -55,7 +55,7 @@ public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String>
 	@Override
 	public String transform( SEMOSSVertex vertex ) {
 		List<URI> properties = data.getSelectedProperties( vertex.getType() );
-		if ( properties == null || properties.isEmpty() ) {
+		if ( properties.isEmpty() ) {
 			return "";
 		}
 
