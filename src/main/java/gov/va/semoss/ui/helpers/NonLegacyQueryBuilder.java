@@ -1,6 +1,7 @@
 package gov.va.semoss.ui.helpers;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.util.Constants;
@@ -107,11 +108,7 @@ public class NonLegacyQueryBuilder {
 	 public void setExternalQuery( String query ) {
 	    this.extQuery = query;
 	 }
-	
-	 // This is a temp fix, a ticket will be opened to address system prefixing here.
-	 // The query execution for parameters should be binding all defined prefix mappings.
-	 private static final String PREFIXES = "PREFIX semoss: <http://semoss.org/ontologies/>\nPREFIX vcamp: <http://va.gov/ontologies/vcamp#>\n";
-	 
+		 
 	/**   Fetches data for an Insight Parameter combo-box, either from the Insight's BIND
 	 * statement (legacy), from an externally defined Type, or from an externally defined
 	 * Sparql query.
@@ -151,7 +148,10 @@ public class NonLegacyQueryBuilder {
 	
 	          Map<String, String> paramTable = new HashMap<>();
 	          paramTable.put( Constants.ENTITY, type );
-	          sparqlQuery = PREFIXES + (extQuery == null ? Utility.fillParam(sparqlQuery, paramTable) : extQuery);
+	          sparqlQuery = extQuery == null ? Utility.fillParam(sparqlQuery, paramTable) : extQuery;
+	          
+	          //Add a line of namespace prefixes to the top of the query for processing:
+	          sparqlQuery = AbstractSesameEngine.processNamespaces(sparqlQuery);
 	
 	          //Fetch all of the URIs (and perhaps associated labels) from the query:
 	          TupleQueryResult result = (TupleQueryResult)eng.execSelectQuery(sparqlQuery);
