@@ -174,7 +174,7 @@ public class RDFEngineHelper {
 
 		Collection<SesameJenaConstructStatement> sjsc = runSesameJenaConstruct( engine, query );
 		for ( SesameJenaConstructStatement st : sjsc ) {
-			gdm.addToSesame( st );
+			//gdm.addToSesame( st );
 			numResults++;
 		}
 

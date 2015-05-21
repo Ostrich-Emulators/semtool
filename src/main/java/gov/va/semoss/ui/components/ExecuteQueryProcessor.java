@@ -29,14 +29,9 @@ import javax.swing.JInternalFrame;
 public class ExecuteQueryProcessor {
 
 	private static final Logger logger = Logger.getLogger( ExecuteQueryProcessor.class );
-	private boolean custom = false;
 	private boolean append = false;
 	private IPlaySheet playSheet = null;
 	private Perspective perspective = null;
-
-	public void setCustomBoolean( boolean custom ) {
-		this.custom = custom;
-	}
 
 	public void setAppendBoolean( boolean append ) {
 		this.append = append;
@@ -80,7 +75,7 @@ public class ExecuteQueryProcessor {
 	 */
 	public IPlaySheet processCustomQuery( String query, String playSheetString,
 			boolean appending ) {
-		if ( playSheetString.equals( "Update Query" ) == false ) {
+		if ( !"Update Query".equalsIgnoreCase( playSheetString ) ) {
 			QuestionPlaySheetStore.getInstance().customIDcount++;
 
 			IEngine engine = DIHelper.getInstance().getRdfEngine();
@@ -142,31 +137,33 @@ public class ExecuteQueryProcessor {
 		QuestionPlaySheetStore.getInstance().idCount++;
 		playSheetTitle.append( " (" ).
 				append( QuestionPlaySheetStore.getInstance().getIDCount() ).append( ")" );
-        //When preparing Sparql to execute, we must remove all new-line characters:
-		String sparql = getSparql( insight, paramHash ).replace('\n', ' ');
+		//When preparing Sparql to execute, we must remove all new-line characters:
+		String sparql = getSparql( insight, paramHash ).replace( '\n', ' ' );
 		return prepareQueryOutputPlaySheet( engine, sparql, insight.getOutput(),
 				playSheetTitle.toString(), insight, appending );
 	}
 
-	/**   Returns the Insight's Sparql with the selected parameters applied to various
-	 * internal variables. If the Insight is legacy, then the ideosyncratic strings 
-	 * (e.g.: "<@...@>") must first be removed.
-	 * 
+	/**
+	 * Returns the Insight's Sparql with the selected parameters applied to
+	 * various internal variables. If the Insight is legacy, then the
+	 * ideosyncratic strings (e.g.: "<@...@>") must first be removed.
+	 *
 	 * @param insight -- (Insight) The current Insight value object.
-	 * 
-	 * @param paramHash -- (Map<String, String>) The selected parameters to build into
-	 *    the Insight query.
-	 *    
+	 *
+	 * @param paramHash -- (Map<String, String>) The selected parameters to build
+	 * into the Insight query.
+	 *
 	 * @return getSparql -- (String) Described above.
 	 */
 	public static String getSparql( Insight insight, Map<String, String> paramHash ) {
 		String sparql = Utility.normalizeParam( insight.getSparql() );
 		logger.debug( "SPARQL " + sparql );
-        if(insight.getIsLegacy() == true){
-            sparql = Utility.fillParam(sparql, paramHash );
-        }else{
-            sparql = NonLegacyQueryBuilder.buildNonLegacyInsightQuery(insight.getSparql(), paramHash);
-        }
+		if ( insight.getIsLegacy() == true ) {
+			sparql = Utility.fillParam( sparql, paramHash );
+		}
+		else {
+			sparql = NonLegacyQueryBuilder.buildNonLegacyInsightQuery( insight.getSparql(), paramHash );
+		}
 		return sparql;
 	}
 
@@ -234,7 +231,7 @@ public class ExecuteQueryProcessor {
 					logger.fatal( "No failsafe playsheet for sparql: " + sparql );
 				}
 			}
-			
+
 			QuestionPlaySheetStore.getInstance().put( insight.getIdStr(), playSheet );
 
 			playSheet.setQuery( sparql );

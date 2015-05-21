@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.transformer;
 
+import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.util.PropComparator;
@@ -32,7 +33,7 @@ import org.openrdf.model.URI;
 /**
  * Transforms the property label on a node vertex in the graph.
  */
-public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String> {
+public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transformer<T, String> {
 
 	private ControlData data;
 
@@ -41,7 +42,7 @@ public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String>
 	 *
 	 * @param data ControlData
 	 */
-	public VertexLabelTransformer( ControlData data ) {
+	public LabelTransformer( ControlData data ) {
 		this.data = data;
 	}
 
@@ -53,7 +54,7 @@ public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String>
 	 * @return String - the property name of the vertex
 	 */
 	@Override
-	public String transform( SEMOSSVertex vertex ) {
+	public String transform( AbstractNodeEdgeBase vertex ) {
 		List<URI> properties = data.getSelectedProperties( vertex.getType() );
 		if ( properties.isEmpty() ) {
 			return "";
@@ -64,20 +65,29 @@ public class VertexLabelTransformer implements Transformer<SEMOSSVertex, String>
 
 		//uri required for uniqueness, need these font tags so that when you increase 
 		//font through font transformer, the label doesn't get really far away from the vertex
-		String html = "<html><!--" + vertex.getURI() + "--><font size='1'>  <br> <br> <br>  </font>";
+		StringBuilder html = new StringBuilder();
+		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
+		html.append( "<font size='1'>" );
+		if ( vertex instanceof SEMOSSVertex ) {
+			html.append( "<br><br><br>" ); // so the text goes under the node icon (?)
+		}
+		html.append( "</font>" );
 		boolean first = true;
 		for ( URI property : properties ) {
 			if ( !first ) {
-				html += "<font size='1'><br></font>";
+				html.append( "<font size='1'><br></font>" );
 			}
 
 			if ( vertex.hasProperty( property ) ) {
-				html += vertex.getProperty( property ).toString();
+				html.append( vertex.getProperty( property ) );
 			}
 			first = false;
 		}
-		html += "</html>";
 
-		return html;
+		html.append( " lev: " ).append( vertex.getLevel() );
+
+		html.append( "</html>" );
+
+		return html.toString();
 	}
 }

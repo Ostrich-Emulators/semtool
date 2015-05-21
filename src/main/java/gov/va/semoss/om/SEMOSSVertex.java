@@ -31,7 +31,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Variables are transient because this tells the json writer to ignore them
@@ -39,7 +38,6 @@ import org.openrdf.model.vocabulary.RDFS;
 public class SEMOSSVertex extends AbstractNodeEdgeBase {
 
 	private transient static Logger logger = Logger.getLogger( SEMOSSVertex.class );
-
 	//private transient Map<String, SEMOSSVertex> edgeHash = new HashMap<>();
 
 	private transient List<SEMOSSEdge> inEdge = new ArrayList<>();

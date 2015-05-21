@@ -20,6 +20,7 @@
 package gov.va.semoss.ui.components;
 
 import edu.uci.ics.jung.visualization.VisualizationViewer;
+import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -50,6 +51,7 @@ public class ControlData {
 		// put what we want to show first in all of these things
 		Set<URI> propertyHide = new HashSet<>();
 		propertyHide.add( Constants.VERTEX_COLOR );
+		propertyHide.add( AbstractNodeEdgeBase.LEVEL );
 
 		Set<URI> propertyShow = new HashSet<>();
 		propertyShow.add( Constants.VERTEX_NAME );

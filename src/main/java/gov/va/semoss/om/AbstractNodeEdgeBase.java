@@ -22,7 +22,7 @@ import org.openrdf.model.vocabulary.RDFS;
 public class AbstractNodeEdgeBase {
 
 	private static final Logger log = Logger.getLogger( AbstractNodeEdgeBase.class );
-
+	public static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
 	private final Map<URI, Object> properties = new HashMap<>();
 	private URI id;
 
@@ -35,6 +35,15 @@ public class AbstractNodeEdgeBase {
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, label );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
+		properties.put( LEVEL, 1 );
+	}
+
+	public void setLevel( int lev ) {
+		setProperty( LEVEL, lev );
+	}
+
+	public int getLevel() {
+		return Integer.class.cast( getProperty( LEVEL ) );
 	}
 
 	/**
@@ -119,6 +128,7 @@ public class AbstractNodeEdgeBase {
 
 	@Override
 	public String toString() {
-		return id + "; " + getType().getLocalName() + "; " + getLabel();
+		return id + "; " + getType().getLocalName() + "; " + getLabel() + "; level "
+				+ getLevel();
 	}
 }

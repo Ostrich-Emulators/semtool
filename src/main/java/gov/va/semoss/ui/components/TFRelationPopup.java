@@ -44,11 +44,12 @@ import org.openrdf.model.URI;
 /**
  */
 public class TFRelationPopup extends JMenu implements MouseListener {
+
 	private static final long serialVersionUID = 4029501595464135469L;
-	
+
 	private GraphPlaySheet ps = null;
 	private SEMOSSVertex[] pickedVertex = null;
-	private Logger logger = Logger.getLogger( getClass() );
+	private static final Logger logger = Logger.getLogger( TFRelationPopup.class );
 
 	private String mainQuery, mainQueryJENA, neighborQuery, neighborQueryJENA;
 	private boolean populated = false;
@@ -61,7 +62,8 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 	 * @param pickedVertex DBCMVertex[]
 	 */
 	public TFRelationPopup( SEMOSSVertex vertex, GraphPlaySheet ps, SEMOSSVertex[] pickedVertex ) {
-		super("Traverse Freely: All " + Utility.getClassName( vertex.getURI().stringValue() ) + "(s) ");
+		super( "Traverse Freely: All "
+				+ Utility.getInstanceLabel( vertex.getType(), ps.getEngine() ) + "(s) " );
 
 		this.ps = ps;
 		this.pickedVertex = pickedVertex;
@@ -69,7 +71,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 		this.mainQueryJENA = Constants.NEIGHBORHOOD_TYPE_QUERY_JENA;
 		this.neighborQuery = Constants.TRAVERSE_FREELY_QUERY;
 		this.neighborQueryJENA = Constants.TRAVERSE_FREELY_QUERY_JENA;
-		
+
 		addMouseListener( this );
 	}
 
@@ -80,7 +82,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 	 */
 	public void addRelations( String prefix ) {
 		// get the selected repository
-		IEngine engine = DIHelper.getInstance().getRdfEngine();
+		IEngine engine = ps.getEngine();
 		// execute the query
 		// add all the relationships
 		// the relationship needs to have the subject - selected vertex
@@ -100,7 +102,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 		int count = 0;
 		List<String> typeV = new ArrayList<>();
 		for ( SEMOSSVertex thisVert : pickedVertex ) {
-			
+
 			String query2 = "";
 			if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
 				query2 = DIHelper.getInstance().getProperty( this.mainQueryJENA + prefix );

@@ -174,7 +174,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void overlay( List<Value[]> data, List<String> newheaders ) {
+	public void overlay( List<Value[]> data, List<String> newheaders, IEngine eng ) {
 		log.debug( "into overlay: " + data.size() + " items" );
 		model.addData( data );
 	}

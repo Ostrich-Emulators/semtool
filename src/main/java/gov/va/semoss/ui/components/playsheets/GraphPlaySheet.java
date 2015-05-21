@@ -38,13 +38,6 @@ import org.apache.log4j.Logger;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.SimpleGraph;
-import org.openrdf.model.Value;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.Update;
-import org.openrdf.query.UpdateExecutionException;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DelegateForest;
@@ -60,7 +53,6 @@ import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.impl.SesameJenaConstructStatement;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.GraphPlaySheetFrame;
@@ -81,19 +73,19 @@ import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
 import gov.va.semoss.ui.transformer.EdgeLabelFontTransformer;
-import gov.va.semoss.ui.transformer.EdgeLabelTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.EdgeTooltipTransformer;
+import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexTooltipTransformer;
+import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import java.util.Arrays;
 import java.util.HashSet;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 
 /**
@@ -145,7 +137,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void setAppend( boolean append ) {
 		log.debug( "Append set to " + append );
 		this.overlay = append;
-		gdm.setOverlay( append );
 	}
 
 	public DelegateForest<SEMOSSVertex, SEMOSSEdge> getForest() {
@@ -193,30 +184,22 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method undoView. Get the latest view and undo it.
 	 */
 	public void undoView() {
-		try {
-			if ( gdm.getModelCounter() > 1 ) {
-				gdm.undoData();
-				filterData = new VertexFilterData();
-				controlData = new ControlData();
-				predData = new PropertySpecData();
-
-				refineView();
-				log.debug( "model size: " + gdm.getRC().size() );
-			}
-
-			genAllData();
-		}
-		catch ( RepositoryException e ) {
-			log.error( e );
+		if ( gdm.getOverlayLevel() > 1 ) {
+			gdm.undoData();
+			filterData = new VertexFilterData();
+			controlData = new ControlData();
+			predData = new PropertySpecData();
+			refineView();
 		}
 
+		genAllData();
 	}
 
 	/**
 	 * Method redoView.
 	 */
 	public void redoView() {
-		if ( gdm.getRCStoreSize() > gdm.getModelCounter() - 1 ) {
+		if ( gdm.hasRedoData() ) {
 			gdm.redoData();
 			refineView();
 		}
@@ -372,12 +355,15 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		view.setGraphMouse( gl );
 
-		VertexLabelTransformer vlt = new VertexLabelTransformer( controlData );
+		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
+		TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
+		
+		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
+		TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
+
 		VertexPaintTransformer vpt = new VertexPaintTransformer();
-		VertexTooltipTransformer vtt = new VertexTooltipTransformer( controlData );
-		EdgeLabelTransformer elt = new EdgeLabelTransformer( controlData );
-		EdgeTooltipTransformer ett = new EdgeTooltipTransformer( controlData );
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
+		
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
 		EdgeArrowStrokeTransformer east = new EdgeArrowStrokeTransformer();
@@ -504,19 +490,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method setUndoRedoBtn.
 	 */
 	private void setUndoRedoBtn() {
-		if ( gdm.getModelCounter() > 1 ) {
-			searchPanel.setUndoButtonEnabled( true );
-		}
-		else {
-			searchPanel.setUndoButtonEnabled( false );
-		}
-
-		if ( gdm.getRCStoreSize() >= gdm.getModelCounter() ) {
-			searchPanel.setRedoButtonEnabled( true );
-		}
-		else {
-			searchPanel.setRedoButtonEnabled( false );
-		}
+		searchPanel.setUndoButtonEnabled( gdm.getOverlayLevel() > 1 );
+		searchPanel.setRedoButtonEnabled( gdm.hasRedoData() );
 	}
 
 	/**
@@ -618,19 +593,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Method setRC.
-	 *
-	 * @param rc RepositoryConnection
-	 */
-	public void setRC( RepositoryConnection rc ) {
-		gdm.setRC( rc );
-	}
-
-	public RepositoryConnection getRC() {
-		return gdm.getRC();
-	}
-
-	/**
 	 * Method getEdgeLabelFontTransformer.
 	 *
 	 * @return EdgeLabelFontTransformer
@@ -679,19 +641,21 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	public void removeExistingConcepts( List<String> subVector ) {
-		for ( String remQuery : subVector ) {
-			try {
-				log.debug( "Removing query " + remQuery );
-				Update update = gdm.getRC().prepareUpdate( QueryLanguage.SPARQL, remQuery );
-				update.execute();
-				log.error( "removing concepts not implemented (being refactored)" );
-				//this.gdm.baseRelEngine.execInsertQuery(remQuery);
+		throw new UnsupportedOperationException( "this function is not operational until refactored" );
 
-			}
-			catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
-				log.error( e, e );
-			}
-		}
+//		for ( String remQuery : subVector ) {
+//			try {
+//				log.debug( "Removing query " + remQuery );
+//				Update update = gdm.getRC().prepareUpdate( QueryLanguage.SPARQL, remQuery );
+//				update.execute();
+//				log.error( "removing concepts not implemented (being refactored)" );
+//				//this.gdm.baseRelEngine.execInsertQuery(remQuery);
+//
+//			}
+//			catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
+//				log.error( e, e );
+//			}
+//		}
 	}
 
 	/**
@@ -703,28 +667,30 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * @return String
 	 */
 	public String addNewConcepts( String subjects, String baseObject, String predicate ) {
-		String listOfChilds = null;
-		for ( String adder : subjects.split( ";" ) ) {
-			String parent = adder.substring( 0, adder.indexOf( "@@" ) );
-			String child = adder.substring( adder.indexOf( "@@" ) + 2 );
+		throw new UnsupportedOperationException( "this function is not operational until refactored" );
 
-			if ( listOfChilds == null ) {
-				listOfChilds = child;
-			}
-			else {
-				listOfChilds = listOfChilds + ";" + child;
-			}
-
-			SesameJenaConstructStatement st = new SesameJenaConstructStatement();
-			st.setSubject( child );
-			st.setPredicate( predicate );
-			st.setObject( baseObject );
-
-			gdm.addToSesame( st );
-			log.debug( " Query....  " + parent + "<>" + child );
-		}
-
-		return listOfChilds;
+//		String listOfChilds = null;
+//		for ( String adder : subjects.split( ";" ) ) {
+//			String parent = adder.substring( 0, adder.indexOf( "@@" ) );
+//			String child = adder.substring( adder.indexOf( "@@" ) + 2 );
+//
+//			if ( listOfChilds == null ) {
+//				listOfChilds = child;
+//			}
+//			else {
+//				listOfChilds = listOfChilds + ";" + child;
+//			}
+//
+//			SesameJenaConstructStatement st = new SesameJenaConstructStatement();
+//			st.setSubject( child );
+//			st.setPredicate( predicate );
+//			st.setObject( baseObject );
+//
+//			gdm.addToSesame( st );
+//			log.debug( " Query....  " + parent + "<>" + child );
+//		}
+//
+//		return listOfChilds;
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -732,8 +698,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public Object getData() {
 		Map<String, Object> returnHash = (Map<String, Object>) super.getData();
 		if ( overlay ) {
-			returnHash.put( "nodes", gdm.getIncrementalVertStore() );
-			returnHash.put( "edges", gdm.getIncrementalEdgeStore().values() );
+			//returnHash.put( "nodes", gdm.getIncrementalVertStore() );
+			//returnHash.put( "edges", gdm.getIncrementalEdgeStore().values() );
 		}
 		else {
 			returnHash.put( "nodes", gdm.getVertStore() );
@@ -754,6 +720,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		colorShapeData.fillRows( filterData.getTypeHash() );
+		setUndoRedoBtn();
 	}
 
 	@Override
@@ -797,23 +764,18 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void overlay( List<Value[]> data, List<String> headers ) {
-		setAppend( true );
-		createData();
-		try {
-			// createForest( false );
-			createForest();
-			createLayout();
-			processView();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
+	public void create( Model m, IEngine engine ) {
+		add( m, engine );
 	}
 
 	@Override
-	public void create( List<Value[]> valdata, List<String> headers, IEngine engine ) {
-		createData();
+	public void overlay( Model m, IEngine engine ) {
+		add( m, engine );
+	}
+
+	public void add( Model m, IEngine engine ) {
+		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
+		gdm.addGraphLevel( m, engine );
 
 		try {
 			// createForest( true );
@@ -831,9 +793,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	public static void initVvRenderer( RenderContext<SEMOSSVertex, SEMOSSEdge> rc, ControlData controlData ) {
-		VertexLabelTransformer vlt = new VertexLabelTransformer( controlData );
+		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
+		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
+
 		VertexPaintTransformer vpt = new VertexPaintTransformer();
-		EdgeLabelTransformer elt = new EdgeLabelTransformer( controlData );
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();

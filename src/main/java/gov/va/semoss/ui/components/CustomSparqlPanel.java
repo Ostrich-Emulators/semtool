@@ -407,7 +407,6 @@ public class CustomSparqlPanel extends JPanel {
 
 			ExecuteQueryProcessor exQueryProcessor = new ExecuteQueryProcessor();
 			exQueryProcessor.setAppendBoolean( appending );
-			exQueryProcessor.setCustomBoolean( false );
 
 			//Setup playsheet, exQueryProcessor will also take care of append or create query: 
 			String query = sparqlArea.getTextOfSelectedTab();
