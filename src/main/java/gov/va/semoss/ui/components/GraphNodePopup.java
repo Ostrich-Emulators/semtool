@@ -40,6 +40,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
+import java.util.Arrays;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -140,7 +141,7 @@ public class GraphNodePopup extends JPopupMenu {
 		menu.setEnabled( true );
 
 		menu.add( new GraphNodeRankListener( gps ) );
-		menu.add( new DistanceDownstreamProcessor( gps, highlightedVertices ) );
+		menu.add( new DistanceDownstreamProcessor( gps, Arrays.asList( highlightedVertices ) ) );
 		menu.add( new LoopIdentifierProcessor( gps, highlightedVertices ) );
 		menu.add( new IslandIdentifierProcessor( gps, highlightedVertices ) );
 		

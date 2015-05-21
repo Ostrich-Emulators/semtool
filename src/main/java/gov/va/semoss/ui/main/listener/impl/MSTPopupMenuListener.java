@@ -73,7 +73,7 @@ public class MSTPopupMenuListener extends AbstractAction {
 		// I cannot add this to the interface because not all of them will be forced to have it
 		// yes, which means the menu cannot be generic too - I understand
 		logger.debug( "Getting the base graph" );
-		Graph graph = ps.getGraph();
+		Graph graph = ps.getSimpleGraph();
 		KruskalMinimumSpanningTree<SEMOSSVertex, SEMOSSEdge> kmst
 				= new KruskalMinimumSpanningTree<>( graph );
 

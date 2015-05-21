@@ -96,7 +96,7 @@ public class DistanceDownstreamInserter {
 			}
 			catch ( Exception e ) {
 				//TODO: Specify exception
-				logger.error( e );
+				logger.error( e,e );
 			}
 
 			DistanceDownstreamProcessor processor = new DistanceDownstreamProcessor( dataForest );
@@ -126,9 +126,9 @@ public class DistanceDownstreamInserter {
 				}
 				else {
 					Hashtable vertHash = (Hashtable) processor.masterHash.get( sysVertex );
-					ArrayList<SEMOSSVertex> path = (ArrayList<SEMOSSVertex>) vertHash.get( processor.pathString );
+					ArrayList<SEMOSSVertex> path = (ArrayList<SEMOSSVertex>) vertHash.get(processor.PATH );
 					//if the path starts with the data object, need to subtract 1 from distance
-					int distance = (Integer) vertHash.get( processor.distanceString );
+					int distance = (Integer) vertHash.get(processor.DISTANCE );
 					if ( ( path.get( 0 ) ).getProperty( Constants.URI_KEY ).equals( dataObjectString ) ) {
 						distance = distance - 1;
 					}
@@ -136,7 +136,7 @@ public class DistanceDownstreamInserter {
 
 					//this will fill networkValueHash and soaValueHash with raw numbers
 					//normalizeNetworkWeights will then update the values in networkValueHash by normalizing it
-					maxCreditValue = calculateWeights( vertHash, system, dataObjectString, distance, processor.pathString, maxCreditValue );
+					maxCreditValue = calculateWeights(vertHash, system, dataObjectString, distance, processor.PATH, maxCreditValue );
 				}
 
 			}

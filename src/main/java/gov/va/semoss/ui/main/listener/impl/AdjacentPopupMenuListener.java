@@ -40,6 +40,7 @@ import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -135,7 +136,8 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 			}
 		}
 		else if ( Type.ALL == type ) {
-			DistanceDownstreamProcessor ddp = new DistanceDownstreamProcessor(ps, vertices );
+			DistanceDownstreamProcessor ddp 
+					= new DistanceDownstreamProcessor(ps, Arrays.asList( vertices ) );
 			ddp.execute();
 			//use the master hash to set the nodes and edges
 			Hashtable masterHash = ddp.masterHash;
@@ -143,7 +145,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 			while ( masterIt.hasNext() ) {
 				SEMOSSVertex vert = (SEMOSSVertex) masterIt.next();
 				Hashtable vHash = (Hashtable) masterHash.get( vert );
-				ArrayList<SEMOSSEdge> parentEdgePath = (ArrayList<SEMOSSEdge>) vHash.get( ddp.edgePathString );
+				List<SEMOSSEdge> parentEdgePath = (ArrayList<SEMOSSEdge>) vHash.get(ddp.EDGEPATH );
 				edgeHash = putEdgesInHash( new Vector( parentEdgePath ), edgeHash );
 				for ( SEMOSSEdge edge : parentEdgePath ) {
 					if ( allEdgesVect.contains( edge ) ) {

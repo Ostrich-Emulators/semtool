@@ -34,6 +34,7 @@ import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,27 +51,28 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * actually perform the distance downstream calculation.
  */
 public class DistanceDownstreamProcessor extends AbstractAction implements IAlgorithm {
+
 	private static final long serialVersionUID = 3191222375480129585L;
 	public static final URI WEIGHT = new URIImpl( "semoss://weight" );
 	private static final Logger log
 			= Logger.getLogger( DistanceDownstreamProcessor.class );
-	protected DelegateForest forest = null;
-	protected ArrayList<SEMOSSVertex> selectedVerts = new ArrayList<>();
+	protected final DelegateForest<SEMOSSVertex, SEMOSSEdge> forest;
+	protected List<SEMOSSVertex> selectedVerts = new ArrayList<>();
 	GridFilterData gfd = new GridFilterData();
 	protected GraphPlaySheet playSheet;
 	public Hashtable masterHash = new Hashtable();
-	public String distanceString = "Distance";
-	public String pathString = "vertexPath";
-	public String edgePathString = "edgePathString";
-	public String leafString = "leafString";
+	public static final String DISTANCE = "Distance";
+	public static final String PATH = "vertexPath";
+	public static final String EDGEPATH = "edgePathString";
+	public static final String LEAF = "leafString";
 	String selectedNodes = "";
-	protected ArrayList<SEMOSSVertex> nextNodes = new ArrayList<>();
+	protected List<SEMOSSVertex> nextNodes = new ArrayList<>();
 
-	public DistanceDownstreamProcessor( GraphPlaySheet gps, SEMOSSVertex[] verts ) {
+	public DistanceDownstreamProcessor( GraphPlaySheet gps, Collection<SEMOSSVertex> verts ) {
 		super( "Distance Downstream" );
 
 		playSheet = gps;
-		forest = gps.getForest();		
+		forest = gps.getForest();
 		setSelectedNodes( verts );
 	}
 
@@ -90,7 +92,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 */
 	@Override
 	public void execute() {
-		ArrayList<SEMOSSVertex> currentNodes = setRoots();
+		List<SEMOSSVertex> currentNodes = setRoots();
 		performDownstreamProcessing( currentNodes );
 	}
 
@@ -100,11 +102,13 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 *
 	 * @return ArrayList<DBCMVertex> List of roots.
 	 */
-	protected ArrayList<SEMOSSVertex> setRoots() {
-		//use current nodes as the next set of nodes that I will have to traverse downward from.  Starts with root nodes
-		ArrayList<SEMOSSVertex> currentNodes = new ArrayList<SEMOSSVertex>();
-		//as we go, put in masterHash with vertHash.  vertHash has distance and path with the key being the actual vertex
-		if ( selectedVerts.size() != 0 ) {
+	protected List<SEMOSSVertex> setRoots() {
+		//use current nodes as the next set of nodes that I will have to 
+		// traverse downward from.  Starts with root nodes
+		List<SEMOSSVertex> currentNodes = new ArrayList<>();
+		//as we go, put in masterHash with vertHash.  vertHash has distance 
+		// and path with the key being the actual vertex
+		if ( !selectedVerts.isEmpty() ) {
 			int count = 0;
 			for ( SEMOSSVertex selectedVert : selectedVerts ) {
 				if ( count > 0 ) {
@@ -123,12 +127,12 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		//start with the root nodes in the masterHash
 		for ( SEMOSSVertex vert : currentNodes ) {
 			Hashtable vertHash = new Hashtable();
-			ArrayList<SEMOSSVertex> path = new ArrayList<SEMOSSVertex>();
-			ArrayList<SEMOSSVertex> edgePath = new ArrayList<SEMOSSVertex>();
+			List<SEMOSSVertex> path = new ArrayList<>();
+			List<SEMOSSVertex> edgePath = new ArrayList<>();
 			path.add( vert );
-			vertHash.put( distanceString, 0 );
-			vertHash.put( pathString, path );
-			vertHash.put( edgePathString, edgePath );
+			vertHash.put( DISTANCE, 0 );
+			vertHash.put( PATH, path );
+			vertHash.put( EDGEPATH, edgePath );
 			masterHash.put( vert, vertHash );
 		}
 		return currentNodes;
@@ -140,7 +144,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 *
 	 * @param currentNodes ArrayList<DBCMVertex>	List of current nodes.
 	 */
-	protected void performDownstreamProcessing( ArrayList<SEMOSSVertex> currentNodes ) {
+	protected void performDownstreamProcessing( List<SEMOSSVertex> currentNodes ) {
 		int nodeIndex = 0;
 		int levelIndex = 1;
 		while ( !nextNodes.isEmpty() || levelIndex == 1 ) {
@@ -151,10 +155,11 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 				SEMOSSVertex vert = currentNodes.remove( nodeIndex );
 
 				Hashtable vertHash = (Hashtable) masterHash.get( vert );
-				ArrayList<SEMOSSVertex> parentPath = (ArrayList<SEMOSSVertex>) vertHash.get( pathString );
-				ArrayList<SEMOSSEdge> parentEdgePath = (ArrayList<SEMOSSEdge>) vertHash.get( edgePathString );
+				List<SEMOSSVertex> parentPath = (List<SEMOSSVertex>) vertHash.get( PATH );
+				List<SEMOSSEdge> parentEdgePath = (List<SEMOSSEdge>) vertHash.get( EDGEPATH );
 
-				ArrayList<SEMOSSVertex> subsetNextNodes = traverseDownward( vert, levelIndex, parentPath, parentEdgePath );
+				List<SEMOSSVertex> subsetNextNodes
+						= traverseDownward( vert, levelIndex, parentPath, parentEdgePath );
 
 				nextNodes.addAll( subsetNextNodes );
 
@@ -177,8 +182,9 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 * @return ArrayList<DBCMVertex> Vert array. Used to calculate network value
 	 * in DistanceDownstreamInserter.
 	 */
-	public ArrayList<SEMOSSVertex> traverseDownward( SEMOSSVertex vert, int levelIndex, ArrayList<SEMOSSVertex> parentPath, ArrayList<SEMOSSEdge> parentEdgePath ) {
-		ArrayList<SEMOSSVertex> vertArray = new ArrayList<>();
+	public List<SEMOSSVertex> traverseDownward( SEMOSSVertex vert, int levelIndex,
+			List<SEMOSSVertex> parentPath, List<SEMOSSEdge> parentEdgePath ) {
+		List<SEMOSSVertex> vertArray = new ArrayList<>();
 		Collection<SEMOSSEdge> edgeArray = forest.getOutEdges( vert );
 		for ( SEMOSSEdge edge : edgeArray ) {
 			SEMOSSVertex inVert = edge.getInVertex();
@@ -187,15 +193,15 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 
 				//now I have to add this new vertex to masterHash.  This requires using the vertHash of the parent child to get path
 				Hashtable vertHash = new Hashtable();
-				ArrayList<SEMOSSVertex> newPath = new ArrayList<>();
-				ArrayList<SEMOSSEdge> newEdgePath = new ArrayList<>();
+				List<SEMOSSVertex> newPath = new ArrayList<>();
+				List<SEMOSSEdge> newEdgePath = new ArrayList<>();
 				newPath.addAll( parentPath );
 				newEdgePath.addAll( parentEdgePath );
 				newPath.add( inVert );
 				newEdgePath.add( edge );
-				vertHash.put( distanceString, levelIndex );
-				vertHash.put( pathString, newPath );
-				vertHash.put( edgePathString, newEdgePath );
+				vertHash.put( DISTANCE, levelIndex );
+				vertHash.put( PATH, newPath );
+				vertHash.put( EDGEPATH, newEdgePath );
 				masterHash.put( inVert, vertHash );
 			}
 		}
@@ -203,19 +209,10 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		//if the vertArray is null, I'm going to add a key saying that it is a leaf of the tree
 		if ( vertArray.isEmpty() ) {
 			Hashtable parentHash = (Hashtable) masterHash.get( vert );
-			parentHash.put( leafString, "Leaf" );
+			parentHash.put( LEAF, "Leaf" );
 		}
 
 		return vertArray;
-	}
-
-	/**
-	 * Sets the forest.
-	 *
-	 * @param f DelegateForest	Forest that is set.
-	 */
-	public void setForest( DelegateForest f ) {
-		forest = f;
 	}
 
 	/**
@@ -223,10 +220,8 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 *
 	 * @param pickedVertices DBCMVertex[]	Array of picked vertices to be set.
 	 */
-	public void setSelectedNodes( SEMOSSVertex[] pickedVertices ) {
-		for ( int idx = 0; idx < pickedVertices.length; idx++ ) {
-			selectedVerts.add( pickedVertices[idx] );
-		}
+	public final void setSelectedNodes( Collection<SEMOSSVertex> pickedVertices ) {
+		selectedVerts.addAll( pickedVertices );
 	}
 
 	/**
@@ -234,11 +229,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 * vertices.
 	 */
 	public void setRootNodesAsSelected() {
-		Collection roots = forest.getRoots();
-		Iterator<SEMOSSVertex> rootsIt = roots.iterator();
-		while ( rootsIt.hasNext() ) {
-			selectedVerts.add( rootsIt.next() );
-		}
+		selectedVerts.addAll( forest.getRoots() );
 	}
 
 	/**
@@ -253,7 +244,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	public boolean addSelectedNode( String pickedVertex, int position ) {
 		Collection<SEMOSSVertex> vertices = forest.getVertices();
 		for ( SEMOSSVertex vert : vertices ) {
-			if ( pickedVertex.equals( vert.getURI() ) ) {
+			if ( pickedVertex.equals( vert ) ) {
 				selectedVerts.add( position, vert );
 				log.debug( "SET VERT..................." + vert.getURI() + " to position "
 						+ position );
@@ -344,11 +335,11 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 			SEMOSSVertex vertex = (SEMOSSVertex) masterIt.next();
 			Hashtable vertHash = (Hashtable) masterHash.get( vertex );
 
-			int dist = (Integer) vertHash.get( distanceString );
-			ArrayList path = (ArrayList) vertHash.get( pathString );
-			String root = (String) ( (SEMOSSVertex) path.get( 0 ) ).getProperty( Constants.VERTEX_NAME );
+			int dist = (Integer) vertHash.get( DISTANCE );
+			List<SEMOSSVertex> path = (List<SEMOSSVertex>) vertHash.get( PATH );
+			String root = path.get( 0 ).getProperty( Constants.VERTEX_NAME ).toString();
 
-			Double multWeight = getMultipliedWeight( (ArrayList<SEMOSSEdge>) vertHash.get( edgePathString ) );
+			Double multWeight = getMultipliedWeight( (List<SEMOSSEdge>) vertHash.get( EDGEPATH ) );
 			Object[] rowArray = { vertex.getLabel(), vertex.getType(), dist, root, multWeight };
 			tableList.add( rowArray );
 			if ( multWeight > 0 ) {
@@ -405,7 +396,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 *
 	 * @return Double Final edge weight.
 	 */
-	private Double getMultipliedWeight( ArrayList<SEMOSSEdge> edgePath ) {
+	private Double getMultipliedWeight( Collection<SEMOSSEdge> edgePath ) {
 		int count = 0;
 		double total = 1.0;
 		Iterator<SEMOSSEdge> edgeIt = edgePath.iterator();
@@ -420,212 +411,6 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 			return total;
 		}
 		return 0.0;
-	}
-
-	/**
-	 * Given a string representing frequency of data sent through systems,
-	 * quantify this value based on frequency.
-	 *
-	 * @param freqString String	String representing how frequently data is
-	 * released.
-	 *
-	 * @return int	Number associated with the frequency string.
-	 */
-	private int translateString( String freqString ) {
-		int freqInt = 0;
-		if ( freqString.equalsIgnoreCase( "Real-time (user-initiated)" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (monthly)" ) ) {
-			freqInt = 720;
-		}
-		if ( freqString.equalsIgnoreCase( "Weekly" ) ) {
-			freqInt = 168;
-		}
-		if ( freqString.equalsIgnoreCase( Constants.TBD ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Monthly" ) ) {
-			freqInt = 720;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (daily)" ) ) {
-			freqInt = 24;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch(Daily)" ) ) {
-			freqInt = 24;
-		}
-		if ( freqString.equalsIgnoreCase( "Real-time" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "n/a" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Transactional" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "On Demand" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Event Driven (seconds-minutes)" ) ) {
-			freqInt = 60;
-		}
-		if ( freqString.equalsIgnoreCase( "TheaterFramework" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Event Driven (Seconds)" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Web services" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "TF" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (12/day)" ) ) {
-			freqInt = 2;
-		}
-		if ( freqString.equalsIgnoreCase( "SFTP" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (twice monthly)" ) ) {
-			freqInt = 360;
-		}
-		if ( freqString.equalsIgnoreCase( "Daily" ) ) {
-			freqInt = 24;
-		}
-		if ( freqString.equalsIgnoreCase( "Hourly" ) ) {
-			freqInt = 1;
-		}
-		if ( freqString.equalsIgnoreCase( "Near Real-time (transaction initiated)" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (three times a week)" ) ) {
-			freqInt = 2;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (weekly)" ) ) {
-			freqInt = 7;
-		}
-		if ( freqString.equalsIgnoreCase( "Near Real-time" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Real Time" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (bi-monthly)" ) ) {
-			freqInt = 1440;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (semiannually)" ) ) {
-			freqInt = 4392;
-		}
-		if ( freqString.equalsIgnoreCase( "Event Driven (Minutes-hours)" ) ) {
-			freqInt = 1;
-		}
-		if ( freqString.equalsIgnoreCase( "Annually" ) ) {
-			freqInt = 8760;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch(Monthly)" ) ) {
-			freqInt = 720;
-		}
-		if ( freqString.equalsIgnoreCase( "Bi-Weekly" ) ) {
-			freqInt = 336;
-		}
-		if ( freqString.equalsIgnoreCase( "Daily at end of day" ) ) {
-			freqInt = 24;
-		}
-		if ( freqString.equalsIgnoreCase( "TCP" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "event-driven (Minutes-hours)" ) ) {
-			freqInt = 1;
-		}
-		if ( freqString.equalsIgnoreCase( "Interactive" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Weekly Quarterly" ) ) {
-			freqInt = 2184;
-		}
-		if ( freqString.equalsIgnoreCase( "Weekly Daily Weekly Weekly Weekly Weekly Daily Daily Daily" ) ) {
-			freqInt = 168;
-		}
-		if ( freqString.equalsIgnoreCase( "Weekly Daily" ) ) {
-			freqInt = 168;
-		}
-		if ( freqString.equalsIgnoreCase( "Periodic" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (4/day)" ) ) {
-			freqInt = 6;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch(Daily/Monthly)" ) ) {
-			freqInt = 720;
-		}
-		if ( freqString.equalsIgnoreCase( "Weekly; Interactive; Interactive" ) ) {
-			freqInt = 168;
-		}
-		if ( freqString.equalsIgnoreCase( "interactive" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (quarterly)" ) ) {
-			freqInt = 2184;
-		}
-		if ( freqString.equalsIgnoreCase( "Every 8 hours (KML)/On demand (HTML)" ) ) {
-			freqInt = 8;
-		}
-		if ( freqString.equalsIgnoreCase( "Monthly at beginning of month, or as user initiated" ) ) {
-			freqInt = 720;
-		}
-		if ( freqString.equalsIgnoreCase( "On demad" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Monthly Bi-Monthly Weekly Weekly" ) ) {
-			freqInt = 720;
-		}
-		if ( freqString.equalsIgnoreCase( "Quarterly" ) ) {
-			freqInt = 2184;
-		}
-		if ( freqString.equalsIgnoreCase( "On-demand" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "user upload" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "1/hour (KML)/On demand (HTML)" ) ) {
-			freqInt = 1;
-		}
-		if ( freqString.equalsIgnoreCase( "DVD" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Real-time " ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Weekly " ) ) {
-			freqInt = 168;
-		}
-		if ( freqString.equalsIgnoreCase( "Annual" ) ) {
-			freqInt = 8760;
-		}
-		if ( freqString.equalsIgnoreCase( "Daily Interactive" ) ) {
-			freqInt = 24;
-		}
-		if ( freqString.equalsIgnoreCase( "NFS, Oracle connection" ) ) {
-			freqInt = 0;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch(Weekly)" ) ) {
-			freqInt = 168;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch(Quarterly)" ) ) {
-			freqInt = 2184;
-		}
-		if ( freqString.equalsIgnoreCase( "Batch (yearly)" ) ) {
-			freqInt = 8760;
-		}
-		if ( freqString.equalsIgnoreCase( "Each user login instance" ) ) {
-			freqInt = 0;
-		}
-		return freqInt;
 	}
 
 	/**

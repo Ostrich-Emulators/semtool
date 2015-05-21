@@ -60,13 +60,9 @@ public class LayoutMenuItem extends AbstractAction {
 	 * Paints the specified layout.
 	 */
 	public void paintLayout() {
-		String oldLayout = ps.getLayoutName();
-		ps.setLayoutName( layout );
-		boolean success = ps.createLayout();
-		if ( success ) {
-			ps.refreshView();
-		}
-		else {
+		String oldLayout = ps.getLayoutName();		
+		boolean success = ps.setLayoutName( layout );
+		if( !success ){
 			if ( layout.equals( Constants.RADIAL_TREE_LAYOUT )
 					|| layout.equals( Constants.BALLOON_LAYOUT )
 					|| layout.equals( Constants.TREE_LAYOUT ) ) {

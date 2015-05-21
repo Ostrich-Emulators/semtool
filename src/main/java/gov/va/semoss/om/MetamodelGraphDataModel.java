@@ -35,10 +35,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	   * full it will use the rc to create edge and node properties and then nodes
 	   * and edges.
 	   */
-	@Override
-	public void fillStoresFromModel() {
-		super.fillStoresFromModel();
-		
+	public void fillStoresFromModel() {	
 		updateLabelsOfEdges();
 		updateLabelsOfVertices();
 	}

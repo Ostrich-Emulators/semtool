@@ -78,15 +78,6 @@ public class GraphDataModel {
 		vizgraph = f;
 	}
 
-	/**
-	 * Method fillStoresFromModel. This function requires the rc to be completely
-	 * full it will use the rc to create edge and node properties and then nodes
-	 * and edges.
-	 */
-	public void fillStoresFromModel() {
-		log.warn( "this function has been refactored away" );
-	}
-
 	/*
 	 * Method processData @param query @param engine
 	 *
@@ -102,6 +93,10 @@ public class GraphDataModel {
 	 *
 	 */
 	public void addGraphLevel( Model model, IEngine engine ) {
+		if( model.isEmpty() ){
+			return;
+		}
+		
 		removeFutureRedoLevels();
 
 		try {

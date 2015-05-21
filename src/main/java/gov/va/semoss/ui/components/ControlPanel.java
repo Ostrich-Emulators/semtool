@@ -15,14 +15,15 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.components;
 
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
-import edu.uci.ics.jung.graph.Forest;
+import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
@@ -226,9 +227,10 @@ public class ControlPanel extends JPanel {
 	 *
 	 * @param lay Layout
 	 */
-	public void setGraphLayout( Layout<?, ?> lay, Forest<?, ?> forest ) {
+	public void setGraphLayout( Layout<SEMOSSVertex, SEMOSSEdge> lay,
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> forest ) {
 		if ( lay instanceof BalloonLayout || lay instanceof RadialTreeLayout ) {
-			ringsListener.setGraph( forest );
+			ringsListener.setGraph( new DelegateForest<>( forest ) );
 			ringsButton.setEnabled( true );
 		}
 		else {

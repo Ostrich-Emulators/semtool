@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.search;
 
+import edu.uci.ics.jung.graph.Graph;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -50,7 +51,6 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
@@ -289,12 +289,11 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	/**
-	 * Method indexRepository.
+	 * Method indexGraph.
 	 *
 	 * @param jenaModel Model
 	 */
-	public void indexRepository( Collection<SEMOSSEdge> edges,
-			Collection<SEMOSSVertex> nodes, IEngine engine ) {
+	public void indexGraph( Graph<SEMOSSVertex, SEMOSSEdge> graph, IEngine engine ) {
 		try {
 			if ( null != reader ) {
 				try {
@@ -314,20 +313,20 @@ public class SearchController implements KeyListener, FocusListener,
 			}
 
 			Set<Resource> needLabels = new HashSet<>();
-			for ( SEMOSSEdge e : edges ) {
+			for ( SEMOSSEdge e : graph.getEdges() ) {
 				needLabels.addAll( e.getProperties().keySet() );
 			}
-			for ( SEMOSSVertex e : nodes ) {
+			for ( SEMOSSVertex e : graph.getVertices() ) {
 				needLabels.addAll( e.getProperties().keySet() );
 			}
 
 			Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine );
 			RepositoryIndexer ri = new RepositoryIndexer( labels );
 
-			for ( SEMOSSEdge e : edges ) {
+			for ( SEMOSSEdge e : graph.getEdges() ) {
 				ri.handleProperties( e.getURI(), e.getProperties() );
 			}
-			for ( SEMOSSVertex e : nodes ) {
+			for ( SEMOSSVertex e : graph.getVertices() ) {
 				ri.handleProperties( e.getURI(), e.getProperties() );
 			}
 
