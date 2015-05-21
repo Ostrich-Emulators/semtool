@@ -79,15 +79,81 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 			}
 
 			if ( vertex.hasProperty( property ) ) {
-				html.append( vertex.getProperty( property ) );
+				String propval = vertex.getProperty( property ).toString();
+				html.append( paragraph( propval, 50 ) );
 			}
 			first = false;
 		}
 
 		// html.append( " lev: " ).append( vertex.getLevel() );
-
 		html.append( "</html>" );
 
 		return html.toString();
+	}
+
+	/**
+	 * Chops a string to a smaller size. We try to break on a word boundary, even
+	 * if that makes us go over <code>maxsize</code>
+	 *
+	 * @param longstring
+	 * @param maxsize
+	 * @return
+	 */
+	public static String chop( String longstring, int maxsize ) {
+		if ( longstring.length() <= maxsize ) {
+			return longstring;
+		}
+
+		StringBuilder newstring = new StringBuilder();
+		for ( String word : longstring.split( "[\\s]+" ) ) {
+			if ( newstring.length() < maxsize ) {
+				if ( 0 != newstring.length() ) {
+					newstring.append( " " );
+				}
+				newstring.append( word );
+			}
+			else {
+				newstring.append( "..." );
+				break;
+			}
+		}
+
+		return newstring.toString();
+	}
+
+	/**
+	 * Converts long text into a block of text about <code>maxsize</code>
+	 * characters wide
+	 *
+	 * @param longstring
+	 * @param maxsize
+	 * @return
+	 */
+	public static String paragraph( String longstring, int maxsize ) {
+		if ( longstring.length() <= maxsize ) {
+			return longstring;
+		}
+
+		StringBuilder newstring = new StringBuilder();
+		StringBuilder line = new StringBuilder();
+		for ( String word : longstring.split( "[\\s]+" ) ) {
+			if ( line.length() > maxsize ) {
+				if ( 0 != newstring.length() ) {
+					newstring.append( "<br>" );
+				}
+
+				newstring.append( line );
+				line = new StringBuilder();
+			}
+
+			if ( 0 != line.length() ) {
+				line.append( " " );
+			}
+
+			line.append( word );
+		}
+		newstring.append( "<br>" ).append( line );
+
+		return newstring.toString();
 	}
 }

@@ -80,6 +80,7 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.HashSet;
 import org.openrdf.model.Model;
@@ -92,7 +93,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	private static final long serialVersionUID = 4699492732234656487L;
 	protected static final Logger log = Logger.getLogger( GraphPlaySheet.class );
 
-	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
+	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
 	private JSplitPane graphSplitPane;
 	private ControlPanel controlPanel;
 	private LegendPanel2 legendPanel;
@@ -119,41 +120,36 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		log.debug( "new Graph PlaySheet" );
 		gdm = model;
 
-		try {
-			controlPanel = new ControlPanel( gdm.enableSearchBar() );
+		controlPanel = new ControlPanel( gdm.enableSearchBar() );
 
-			legendPanel = new LegendPanel2();
+		legendPanel = new LegendPanel2();
 
-			graphSplitPane = new JSplitPane();
-			graphSplitPane.setEnabled( false );
-			graphSplitPane.setOneTouchExpandable( true );
-			graphSplitPane.setOrientation( JSplitPane.VERTICAL_SPLIT );
-			controlPanel.setPlaySheet( this );
+		graphSplitPane = new JSplitPane();
+		graphSplitPane.setEnabled( false );
+		graphSplitPane.setOneTouchExpandable( true );
+		graphSplitPane.setOrientation( JSplitPane.VERTICAL_SPLIT );
 
-			setLayout( new BorderLayout() );
-			add( graphSplitPane, BorderLayout.CENTER );
-			add( legendPanel, BorderLayout.SOUTH );
+		setLayout( new BorderLayout() );
+		add( graphSplitPane, BorderLayout.CENTER );
+		add( legendPanel, BorderLayout.SOUTH );
 
-			Layout<SEMOSSVertex, SEMOSSEdge> layout2Use = new FRLayout( gdm.getGraph() );
-			controlPanel.setGraphLayout( layout2Use, gdm.getGraph() );
-			view = createVisualizer( layout2Use );
+		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout( gdm.getGraph() );
+		view = new VisualizationViewer<>( layout );
+		initVisualizer( view );
 
-			controlData.setViewer( view );
-			controlPanel.setViewer( view );
+		controlData.setViewer( view );
+		controlPanel.setPlaySheet( this );
+		controlPanel.setGraphLayout( layout, gdm.getGraph() );
+		controlPanel.setViewer( view );
 
-			GraphZoomScrollPane gzPane = new GraphZoomScrollPane( view );
-			gzPane.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-			gzPane.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
+		GraphZoomScrollPane gzPane = new GraphZoomScrollPane( view );
+		gzPane.getVerticalScrollBar().setUI( new NewScrollBarUI() );
+		gzPane.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
 
-			graphSplitPane.setTopComponent( controlPanel );
-			graphSplitPane.setBottomComponent( gzPane );
+		graphSplitPane.setTopComponent( controlPanel );
+		graphSplitPane.setBottomComponent( gzPane );
 
-			legendPanel.setFilterData( filterData );
-
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
+		legendPanel.setFilterData( filterData );
 	}
 
 	public DelegateForest<SEMOSSVertex, SEMOSSEdge> getForest() {
@@ -253,15 +249,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Method createVisualizer.
+	 * Method initVisualizer.
 	 */
-	protected VisualizationViewer<SEMOSSVertex, SEMOSSEdge>
-			createVisualizer( Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
-
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer
-				= new VisualizationViewer<>( layout );
-		viewer.setPreferredSize( layout.getSize() );
-		viewer.setBounds( 10000000, 10000000, 10000000, 100000000 );
+	protected void initVisualizer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
+		//viewer.setPreferredSize( layout.getSize() );
+		// viewer.setBounds( 10000000, 10000000, 10000000, 100000000 );
 		viewer.setRenderer( new BasicRenderer<>() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
@@ -317,8 +309,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		PickedStateListener psl = new PickedStateListener( viewer, this );
 		PickedState<SEMOSSVertex> ps = viewer.getPickedVertexState();
 		ps.addItemListener( psl );
-
-		return viewer;
 	}
 
 	public String getLayoutName() {
@@ -404,9 +394,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			layout = new FRLayout( gdm.getGraph() );
 		}
 
+		Dimension d = getSize();
+		d.setSize( d.getWidth() * 0.75, d.getHeight() * 0.75 );
+		layout.setSize( d );
 		controlPanel.setGraphLayout( layout, gdm.getGraph() );
 		view.setGraphLayout( layout );
-		
+
 		return ok;
 	}
 
