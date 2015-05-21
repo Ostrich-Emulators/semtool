@@ -80,7 +80,7 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 
 			if ( vertex.hasProperty( property ) ) {
 				String propval = vertex.getProperty( property ).toString();
-				html.append( paragraph( propval, 50 ) );
+				html.append( chop( propval, 50 ) );
 			}
 			first = false;
 		}
