@@ -100,7 +100,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	private ControlPanel searchPanel;
 	private LegendPanel2 legendPanel;
 	private VertexColorShapeData colorShapeData = new VertexColorShapeData();
-	private String query;
 	private boolean overlay;
 
 	protected GraphDataModel gdm;
@@ -247,8 +246,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public void refineView() {
 		try {
-			gdm.fillStoresFromModel();
-			// createForest( true );
 			createForest();
 			log.debug( "Refining Forest Complete >>>>>" );
 
@@ -693,26 +690,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 //		return listOfChilds;
 	}
 
-	@SuppressWarnings( "unchecked" )
-	@Override
-	public Object getData() {
-		Map<String, Object> returnHash = (Map<String, Object>) super.getData();
-		if ( overlay ) {
-			//returnHash.put( "nodes", gdm.getIncrementalVertStore() );
-			//returnHash.put( "edges", gdm.getIncrementalEdgeStore().values() );
-		}
-		else {
-			returnHash.put( "nodes", gdm.getVertStore() );
-			returnHash.put( "edges", gdm.getEdgeStore().values() );
-		}
-
-		return returnHash;
-	}
-
 	public void genAllData() {
 		filterData.fillRows();
 		filterData.fillEdgeRows();
-
 		controlData.generateAllRows();
 
 		if ( gdm.showSudowl() ) {
@@ -737,21 +717,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		for ( URI property : vertex.getProperties().keySet() ) {
 			controlData.addVertexProperty( vertex.getType(), property );
 		}
-	}
-
-	@Override
-	public void createData() {
-		gdm.createModel( getQuery(), getEngine() );
-	}
-
-	@Override
-	public void setQuery( String q ) {
-		query = q;
-	}
-
-	@Override
-	public String getQuery() {
-		return query;
 	}
 
 	/**

@@ -41,12 +41,6 @@ public class GraphDataModel {
 
 	private static final Logger log = Logger.getLogger( GraphDataModel.class );
 
-	private enum CREATION_METHOD {
-
-		CREATE_NEW, OVERLAY, UNDO
-	};
-	private CREATION_METHOD method;
-
 	private final Set<String> baseFilterSet = new HashSet<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
@@ -82,41 +76,6 @@ public class GraphDataModel {
 
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
 		vizgraph = f;
-	}
-
-	public void overlayData( String query, IEngine engine ) {
-//		log.debug( "Creating the new model" );
-//
-//		curModel = null;
-//		curRC = null;
-//
-//		incrementalVertStore = new HashMap<>();
-//		incrementalEdgeStore = new HashMap<>();
-//
-//		try {
-//			Repository newRepo = new SailRepository(
-//					new ForwardChainingRDFSInferencer( new MemoryStore() )
-//			);
-//			newRepo.initialize();
-//
-//			curRC = newRepo.getConnection();
-//			curModel = ModelFactory.createDefaultModel();
-//		}
-//		catch ( RepositoryException e ) {
-//			log.error( e );
-//		}
-//
-//		processData( query, engine );
-		processTraverseCourse();
-	}
-
-	public void createModel( String query, IEngine engine ) {
-//		if ( method == CREATION_METHOD.OVERLAY ) {
-//			overlayData( query, engine );
-//		}
-//		else {
-//			processData( query, engine );
-//		}
 	}
 
 	/**
@@ -297,16 +256,6 @@ public class GraphDataModel {
     
 		 log.debug( "Initializing boolean properties (prop, sudowl, search) to (" + prop + ", " + sudowl + ", " + search + ")" );
 		 */
-	}
-
-	/**
-	 * Method processTraverseCourse.
-	 */
-	public void processTraverseCourse() {
-		//if you're at a spot where you have forward models, extensions will reset the future, thus we need to remove all future models
-		//modelCounter already added by the time it gets here so you need to -1 to modelCounter
-		throw new UnsupportedOperationException( "Not yet implemented!" );
-
 	}
 
 	public Map<URI, SEMOSSVertex> getVertStore() {

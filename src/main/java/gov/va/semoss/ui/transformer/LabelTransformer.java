@@ -84,7 +84,7 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 			first = false;
 		}
 
-		html.append( " lev: " ).append( vertex.getLevel() );
+		// html.append( " lev: " ).append( vertex.getLevel() );
 
 		html.append( "</html>" );
 
