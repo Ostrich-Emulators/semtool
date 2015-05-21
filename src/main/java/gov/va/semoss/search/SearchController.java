@@ -19,22 +19,7 @@
  */
 package gov.va.semoss.search;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-
-import org.apache.log4j.Logger;
-import org.apache.lucene.store.RAMDirectory;
-
+import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.picking.MultiPickedState;
 import edu.uci.ics.jung.visualization.picking.PickedState;
@@ -48,12 +33,27 @@ import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -68,6 +68,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
@@ -121,49 +122,57 @@ public class SearchController implements KeyListener, FocusListener,
 	 */
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		// see if the key is depressed
-		// if yes swap the transformer
-		if ( ( (JToggleButton) e.getSource() ).isSelected() ) {
-			// set the transformers
-			oldTx = (VertexPaintTransformer) target.getRenderContext()
-					.getVertexFillPaintTransformer();
-			oldTx.setVertHash( resHash );
-			oldeTx = (EdgeStrokeTransformer) target.getRenderContext()
-					.getEdgeStrokeTransformer();
-			oldeTx.setEdges( null );
-			oldafpTx = (ArrowFillPaintTransformer) target.getRenderContext()
-					.getArrowFillPaintTransformer();
-			oldafpTx.setEdges( null );
-			oldVLF = (VertexLabelFontTransformer) target.getRenderContext()
-					.getVertexFontTransformer();
-			oldVLF.setVertHash( resHash );
-			target.repaint();
-			// if the search vertex state has been cleared, we need to refill it
-			// with what is in the res hash
-			Map<URI, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
-			if ( tempState.getPicked().isEmpty() && !resHash.isEmpty() ) {
-				for ( SEMOSSVertex resKey : resHash ) {
-					liveState.pick( resKey, true );
-				}
-			}
-			// if there are vertices in the temp state, need to pick them in the
-			// live state and clear tempState
-			if ( tempState.getPicked().size() > 0 ) {
-				for ( SEMOSSVertex vertex : tempState.getPicked() ) {
-					liveState.pick( vertex, true );
-				}
-				tempState.clear();
-			}
-		}
-		else {
-			liveState.clear();
-			oldTx.setVertHash( null );
-			oldeTx.setEdges( null );
-			oldafpTx.setEdges( null );
-			oldVLF.setVertHash( null );
-			target.repaint();
-		}
+		if ( ( (JToggleButton) e.getSource() ).isSelected() )
+			handleSelectionOfButton();
+		else
+			handleDeselectionOfButton();
+		
 		gps.resetTransformers();
+	}
+	
+	private void handleSelectionOfButton() {
+		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = target.getRenderContext();
+		
+		// set the transformers
+		oldTx = (VertexPaintTransformer) rc.getVertexFillPaintTransformer();
+		oldTx.setVertHash( resHash );
+		
+		oldVLF = (VertexLabelFontTransformer) rc.getVertexFontTransformer();
+		oldVLF.setVertHash( resHash );
+		
+		oldeTx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
+		oldeTx.setEdges( null );
+		
+		oldafpTx = (ArrowFillPaintTransformer) rc.getArrowFillPaintTransformer();
+		oldafpTx.setEdges( null );
+		
+		target.repaint();
+		
+		// if the search vertex state has been cleared, we need to refill it
+		// with what is in the res hash
+		if ( tempState.getPicked().isEmpty() && !resHash.isEmpty() ) {
+			for ( SEMOSSVertex resKey : resHash ) {
+				liveState.pick( resKey, true );
+			}
+		}
+		
+		// if there are vertices in the temp state, need to pick them in the
+		// live state and clear tempState
+		if ( tempState.getPicked().size() > 0 ) {
+			for ( SEMOSSVertex vertex : tempState.getPicked() ) {
+				liveState.pick( vertex, true );
+			}
+			tempState.clear();
+		}
+	}
+
+	private void handleDeselectionOfButton() {
+		liveState.clear();
+		oldTx.setVertHash( null );
+		oldeTx.setEdges( null );
+		oldafpTx.setEdges( null );
+		oldVLF.setVertHash( null );
+		target.repaint();
 	}
 
 	/**
