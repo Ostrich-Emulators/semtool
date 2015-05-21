@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.util.Constants;
 import javax.swing.table.AbstractTableModel;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;

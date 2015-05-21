@@ -294,6 +294,10 @@ public class GraphDataModel {
 		return maxOverlayLevel > overlayLevel;
 	}
 
+	public boolean hasUndoData() {
+		return overlayLevel > 1;
+	}
+
 	private void fetchProperties( Collection<Resource> concepts, Collection<URI> preds,
 			IEngine engine ) throws RepositoryException, QueryEvaluationException {
 
@@ -344,16 +348,18 @@ public class GraphDataModel {
 					String propval = set.getValue( "literal" ).stringValue();
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
-					if ( !edgeStore.containsKey( rel ) ) {
-						SEMOSSVertex v1 = createOrRetrieveVertex( s );
-						SEMOSSVertex v2 = createOrRetrieveVertex( o );
-						SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
-						storeEdge( edge );
-					}
+					if ( concepts.contains( s ) && concepts.contains( o ) ) {
+						if ( !edgeStore.containsKey( rel ) ) {
+							SEMOSSVertex v1 = createOrRetrieveVertex( s );
+							SEMOSSVertex v2 = createOrRetrieveVertex( o );
+							SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
+							storeEdge( edge );
+						}
 
-					SEMOSSEdge edge = edgeStore.get( rel );
-					edge.setProperty( prop, propval );
-					edge.setType( superrel );
+						SEMOSSEdge edge = edgeStore.get( rel );
+						edge.setProperty( prop, propval );
+						edge.setType( superrel );
+					}
 				}
 			};
 			eqa.useInferred( false );

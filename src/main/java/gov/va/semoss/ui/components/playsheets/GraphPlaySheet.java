@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JDesktopPane;
@@ -97,10 +96,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
 	private JSplitPane graphSplitPane;
-	private ControlPanel searchPanel;
+	private ControlPanel controlPanel;
 	private LegendPanel2 legendPanel;
 	private VertexColorShapeData colorShapeData = new VertexColorShapeData();
-	private boolean overlay;
 
 	protected GraphDataModel gdm;
 	protected String layoutName = Constants.FR;
@@ -125,17 +123,29 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public GraphPlaySheet( GraphDataModel model ) {
 		log.debug( "new Graph PlaySheet" );
 		gdm = model;
-		createView();
-	}
 
-	/**
-	 * Method setAppend.
-	 *
-	 * @param append boolean
-	 */
-	public void setAppend( boolean append ) {
-		log.debug( "Append set to " + append );
-		this.overlay = append;
+		try {
+			controlPanel = new ControlPanel( gdm.enableSearchBar() );
+
+			legendPanel = new LegendPanel2();
+
+			graphSplitPane = new JSplitPane();
+			graphSplitPane.setEnabled( false );
+			graphSplitPane.setOneTouchExpandable( true );
+			graphSplitPane.setOrientation( JSplitPane.VERTICAL_SPLIT );
+			controlPanel.setPlaySheet( this );
+
+			graphSplitPane.setTopComponent( controlPanel );
+			graphSplitPane.setBottomComponent( new JLabel() );
+
+			setLayout( new BorderLayout() );
+			add( graphSplitPane, BorderLayout.CENTER );
+			add( legendPanel, BorderLayout.SOUTH );
+			setVisible( true );
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+		}
 	}
 
 	public DelegateForest<SEMOSSVertex, SEMOSSEdge> getForest() {
@@ -150,28 +160,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return gdm;
 	}
 
-	public boolean isAppending() {
-		return overlay;
-	}
-
 	public void setGraphData( GraphDataModel gdm ) {
 		this.gdm = gdm;
-	}
-
-	/**
-	 * Method createView.
-	 */
-	@Override
-	public void createView() {
-		setAppend( false );
-
-		try {
-			searchPanel = new ControlPanel( gdm.enableSearchBar() );
-			addInitialPanel();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
 	}
 
 	public void processView() throws PropertyVetoException {
@@ -183,7 +173,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method undoView. Get the latest view and undo it.
 	 */
 	public void undoView() {
-		if ( gdm.getOverlayLevel() > 1 ) {
+		if ( gdm.hasUndoData() ) {
 			gdm.undoData();
 			filterData = new VertexFilterData();
 			controlData = new ControlData();
@@ -288,36 +278,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Method addInitialPanel
-	 *
-	 * Create the listener and add the frame. If there is a view, remove it.
-	 */
-	public void addInitialPanel() {
-		legendPanel = new LegendPanel2();
-
-		graphSplitPane = new JSplitPane();
-		graphSplitPane.setEnabled( false );
-		graphSplitPane.setOneTouchExpandable( true );
-		graphSplitPane.setOrientation( JSplitPane.VERTICAL_SPLIT );
-		searchPanel.setPlaySheet( this );
-
-		graphSplitPane.setTopComponent( searchPanel );
-		graphSplitPane.setBottomComponent( new JLabel() );
-
-		setLayout( new BorderLayout() );
-		add( graphSplitPane, BorderLayout.CENTER );
-		add( legendPanel, BorderLayout.SOUTH );
-		setVisible( true );
-	}
-
-	/**
 	 * Method addPanel - adds the model to search panel
 	 */
 	protected void addPanel() {
 		try {
 			if ( gdm.enableSearchBar() ) {
 				Graph<SEMOSSVertex, SEMOSSEdge> g = gdm.getGraph();
-				searchPanel.getSearchController().indexRepository( g.getEdges(),
+				controlPanel.getSearchController().indexRepository( g.getEdges(),
 						g.getVertices(), getEngine() );
 			}
 
@@ -325,13 +292,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			gzPane.getVerticalScrollBar().setUI( new NewScrollBarUI() );
 			gzPane.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
 
-			graphSplitPane.setTopComponent( searchPanel );
+			graphSplitPane.setTopComponent( controlPanel );
 			graphSplitPane.setBottomComponent( gzPane );
 
 			legendPanel.setFilterData( filterData );
 
 			log.debug( "Adding graph pane." );
-//			addComponentAsTab( "Graph", graphSplitPane );
 		}
 		catch ( Exception ex ) {
 			log.error( "problem adding panel to play sheet", ex );
@@ -354,13 +320,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
 		TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
-		
+
 		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
 		TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
 
 		VertexPaintTransformer vpt = new VertexPaintTransformer();
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
-		
+
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
 		EdgeArrowStrokeTransformer east = new EdgeArrowStrokeTransformer();
@@ -402,7 +368,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		ps.addItemListener( psl );
 
 		controlData.setViewer( view );
-		searchPanel.setViewer( view );
+		controlPanel.setViewer( view );
 
 		log.debug( "Completed Visualization >>>> " );
 	}
@@ -441,7 +407,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			return false;
 		}
 
-		searchPanel.setGraphLayout( layout2Use, getForest() );
+		controlPanel.setGraphLayout( layout2Use, getForest() );
 		return true;
 	}
 
@@ -487,8 +453,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method setUndoRedoBtn.
 	 */
 	private void setUndoRedoBtn() {
-		searchPanel.setUndoButtonEnabled( gdm.getOverlayLevel() > 1 );
-		searchPanel.setRedoButtonEnabled( gdm.hasRedoData() );
+		controlPanel.setUndoButtonEnabled( gdm.getOverlayLevel() > 1 );
+		controlPanel.setRedoButtonEnabled( gdm.hasRedoData() );
 	}
 
 	/**
@@ -621,10 +587,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		VertexShapeTransformer vst = (VertexShapeTransformer) view.getRenderContext().getVertexShapeTransformer();
 		vst.setVertexSizeHash( new HashMap<>() );
 
-		if ( searchPanel.isHighlightButtonSelected() ) {
+		if ( controlPanel.isHighlightButtonSelected() ) {
 			VertexPaintTransformer ptx = (VertexPaintTransformer) view.getRenderContext().getVertexFillPaintTransformer();
 			Set<SEMOSSVertex> searchVertices = new HashSet<>();
-			searchVertices.addAll( searchPanel.getSearchController().getCleanResHash() );
+			searchVertices.addAll( controlPanel.getSearchController().getCleanResHash() );
 			ptx.setVertHash( searchVertices );
 			VertexLabelFontTransformer vfl = (VertexLabelFontTransformer) view.getRenderContext().getVertexFontTransformer();
 			vfl.setVertHash( searchVertices );
@@ -796,7 +762,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		super.incrementFont( incr );
 		boolean increaseFont = ( incr > 0 ? true : false );
 
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = searchPanel.getSearchController().getTarget();
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = controlPanel.getSearchController().getTarget();
 		VertexLabelFontTransformer transformerV = (VertexLabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
 		EdgeLabelFontTransformer transformerE = (EdgeLabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
 
@@ -844,6 +810,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	public ControlPanel getSearchPanel() {
-		return searchPanel;
+		return controlPanel;
 	}
 }
