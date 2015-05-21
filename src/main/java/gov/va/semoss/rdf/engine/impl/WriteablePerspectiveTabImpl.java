@@ -12,23 +12,16 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
-import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.prefs.Preferences;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
@@ -45,7 +38,6 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	  private WriteableInsightManager wim;
 	  private RepositoryConnection rc;
 	  private static final Logger log = Logger.getLogger(WriteablePerspectiveTab.class);
-	  private final Pattern pattern = Pattern.compile("^(\\w+)(.*)$");
 	  
 	  public WriteablePerspectiveTabImpl(WriteableInsightManagerImpl wim){
 		  this.wim = wim;
@@ -86,12 +78,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	          URI dataViewURI = insightVF.createURI( VAS.NAMESPACE, dataViewName );
 	          rc.add( dataViewURI, RDFS.LABEL, insightVF.createLiteral( dataViewName ) );
 
-	          String type = "";
 	          String sparql = "SELECT * WHERE{?s ?p ?o .}";
-	          Matcher matcher = pattern.matcher( sparql );
-	          if(matcher.find()){
-	             type = matcher.group( 1 );
-	          }
 
               String spinBodyUriName = perspective.getLabel() + "-insight-body-" + strUniqueIdentifier;
               URI spinBody = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName);
@@ -287,12 +274,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		          URI dataViewURI = insightVF.createURI( VAS.NAMESPACE, dataViewName );
 		          rc.add( dataViewURI, RDFS.LABEL, insightVF.createLiteral( dataViewName ) );
 	
-		          String type = null;
 		          String sparql = "";
-		          Matcher matcher = pattern.matcher( sparql );
-		          if ( matcher.find() ) {
-		            type = matcher.group( 1 );
-		          }
 	
                   String spinBodyUriName = strUriTitle + "-insight-body-" + strUniqueIdentifier;
 				  URI spinBody = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName);

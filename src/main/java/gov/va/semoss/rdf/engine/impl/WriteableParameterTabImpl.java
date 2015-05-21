@@ -1,11 +1,7 @@
 package gov.va.semoss.rdf.engine.impl;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.Writer;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
@@ -18,20 +14,15 @@ import gov.va.semoss.model.vocabulary.SPL;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.Utility;
 
 public class WriteableParameterTabImpl implements WriteableParameterTab {
-	  private WriteableInsightManager wim;
 	  private RepositoryConnection rc;
 	  private static final Logger log = Logger.getLogger(WriteablePerspectiveTab.class);
 	  
 	  public WriteableParameterTabImpl(WriteableInsightManagerImpl wim){
-		  this.wim = wim;
 		  this.rc = wim.getRawConnection();
 	  }
 
