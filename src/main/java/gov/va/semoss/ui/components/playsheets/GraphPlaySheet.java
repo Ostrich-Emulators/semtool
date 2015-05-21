@@ -38,16 +38,10 @@ import org.apache.log4j.Logger;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.SimpleGraph;
-import org.openrdf.model.Value;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.Update;
-import org.openrdf.query.UpdateExecutionException;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -59,7 +53,6 @@ import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.impl.SesameJenaConstructStatement;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.GraphPlaySheetFrame;
@@ -80,32 +73,33 @@ import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
 import gov.va.semoss.ui.transformer.EdgeLabelFontTransformer;
-import gov.va.semoss.ui.transformer.EdgeLabelTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.EdgeTooltipTransformer;
+import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexTooltipTransformer;
+import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import java.util.Arrays;
+import java.util.HashSet;
+import org.openrdf.model.Model;
+import org.openrdf.model.URI;
 
 /**
  */
 public class GraphPlaySheet extends PlaySheetCentralComponent {
+
 	private static final long serialVersionUID = 4699492732234656487L;
 	protected static final Logger log = Logger.getLogger( GraphPlaySheet.class );
 
-	private DelegateForest<SEMOSSVertex, SEMOSSEdge> forest;
 	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
 	private JSplitPane graphSplitPane;
 	private ControlPanel searchPanel;
 	private LegendPanel2 legendPanel;
 	private VertexColorShapeData colorShapeData = new VertexColorShapeData();
-	private String query;
 	private boolean overlay;
 
 	protected GraphDataModel gdm;
@@ -120,7 +114,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected EdgeLabelFontTransformer elft;
 	protected VertexShapeTransformer vsht;
 	protected boolean traversable = true, nodesHidable = true;
-	
+
 	/**
 	 * Constructor for GraphPlaySheetFrame.
 	 */
@@ -142,11 +136,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void setAppend( boolean append ) {
 		log.debug( "Append set to " + append );
 		this.overlay = append;
-		gdm.setOverlay( append );
 	}
 
 	public DelegateForest<SEMOSSVertex, SEMOSSEdge> getForest() {
-		return forest;
+		return new DelegateForest<>( gdm.getGraph() );
 	}
 
 	public boolean getSudowl() {
@@ -190,30 +183,22 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method undoView. Get the latest view and undo it.
 	 */
 	public void undoView() {
-		try {
-			if ( gdm.getModelCounter() > 1 ) {
-				gdm.undoData();
-				filterData = new VertexFilterData();
-				controlData = new ControlData();
-				predData = new PropertySpecData();
-
-				refineView();
-				log.debug( "model size: " + gdm.getRC().size() );
-			}
-
-			genAllData();
-		}
-		catch ( RepositoryException e ) {
-			log.error( e );
+		if ( gdm.getOverlayLevel() > 1 ) {
+			gdm.undoData();
+			filterData = new VertexFilterData();
+			controlData = new ControlData();
+			predData = new PropertySpecData();
+			refineView();
 		}
 
+		genAllData();
 	}
 
 	/**
 	 * Method redoView.
 	 */
 	public void redoView() {
-		if ( gdm.getRCStoreSize() > gdm.getModelCounter() - 1 ) {
+		if ( gdm.hasRedoData() ) {
 			gdm.redoData();
 			refineView();
 		}
@@ -222,7 +207,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public void overlayView() {
 		try {
-			createForest( false );
+			// createForest( false );
+			createForest();
 
 			//add to overall modelstore			
 			boolean successfulLayout = createLayout();
@@ -260,8 +246,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public void refineView() {
 		try {
-			gdm.fillStoresFromModel();
-			createForest( true );
+			createForest();
 			log.debug( "Refining Forest Complete >>>>>" );
 
 			createLayout();
@@ -331,7 +316,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected void addPanel() {
 		try {
 			if ( gdm.enableSearchBar() ) {
-				searchPanel.getSearchController().indexStatements( gdm.getJenaModel() );
+				Graph<SEMOSSVertex, SEMOSSEdge> g = gdm.getGraph();
+				searchPanel.getSearchController().indexRepository( g.getEdges(),
+						g.getVertices(), getEngine() );
 			}
 
 			GraphZoomScrollPane gzPane = new GraphZoomScrollPane( view );
@@ -364,13 +351,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		view.setGraphMouse( new GraphNodeListener( this ) );
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		view.setGraphMouse( gl );
+
+		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
+		TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
 		
-		VertexLabelTransformer vlt = new VertexLabelTransformer( controlData );
+		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
+		TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
+
 		VertexPaintTransformer vpt = new VertexPaintTransformer();
-		VertexTooltipTransformer vtt = new VertexTooltipTransformer( controlData );
-		EdgeLabelTransformer elt = new EdgeLabelTransformer( controlData );
-		EdgeTooltipTransformer ett = new EdgeTooltipTransformer( controlData );
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
+		
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
 		EdgeArrowStrokeTransformer east = new EdgeArrowStrokeTransformer();
@@ -411,9 +401,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		PickedState<SEMOSSVertex> ps = view.getPickedVertexState();
 		ps.addItemListener( psl );
 
-		controlData.setViewer( view);
+		controlData.setViewer( view );
 		searchPanel.setViewer( view );
-		
+
 		log.debug( "Completed Visualization >>>> " );
 	}
 
@@ -422,7 +412,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 *
 	 * @return boolean
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	public boolean createLayout() {
 		Class<?> layoutClass = (Class<?>) DIHelper.getInstance().getLocalProp( layoutName );
 		log.debug( "Create layout from layoutName " + layoutName
@@ -432,7 +422,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		layout2Use = null;
 		try {
 			Constructor<?> constructor = layoutClass.getConstructor( edu.uci.ics.jung.graph.Forest.class );
-			layout2Use = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( forest );
+			layout2Use = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( getForest() );
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
 			errorMessage = e.toString();
@@ -440,7 +430,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		try {
 			Constructor<?> constructor = layoutClass.getConstructor( edu.uci.ics.jung.graph.Graph.class );
-			layout2Use = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( forest );
+			layout2Use = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( getForest() );
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
 			errorMessage = e.toString();
@@ -459,63 +449,27 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return layoutName;
 	}
 
-	protected void createForest( boolean initForest ) throws Exception {
-
-		if ( initForest ) {
-			forest = new DelegateForest<>();
-		}
-
-		Map<String, String> filteredNodes = filterData.getFilterNodes();
-		log.debug( "Filtered Nodes " + filteredNodes );
-
-		log.debug( "Adding edges from edgeStore to forest" );
-		for ( String edgeURI : gdm.getEdgeStore().keySet() ) {
-			SEMOSSEdge edge = gdm.getEdgeStore().get( edgeURI );
-			SEMOSSVertex outVert = edge.getOutVertex();
-			SEMOSSVertex inVert = edge.getInVertex();
-
-			if ( filteredNodes.containsKey( inVert.getURI() )
-					|| filteredNodes.containsKey( outVert.getURI() )
-					|| filterData.getEdgeFilterNodes().containsKey( edge.getURI() ) ) {
-				continue;
-			}
-
-			//add to forest
-			forest.addEdge( edge, outVert, inVert );
+	protected void createForest() throws Exception {
+		for ( SEMOSSEdge edge : gdm.getGraph().getEdges() ) {
 			processControlData( edge );
 
 			//add to filter data
 			filterData.addEdge( edge );
 
 			//add to pred data
-			predData.addPredicateAvailable( edge.getURI() );
-			predData.addConceptAvailable( inVert.getURI() );
-			predData.addConceptAvailable( outVert.getURI() );
-
-			//add to simple graph
-			graph.addVertex( outVert );
-			graph.addVertex( inVert );
-			if ( outVert != inVert ) {// loops not allowed in simple graph
-				log.debug( "Adding edge to graph <> " + outVert.getURI() + " <> "
-						+ edge.getURI() + " <> " + inVert.getURI() + " <>" );
-				graph.addEdge( outVert, inVert, edge );
-			}
+			predData.addPredicateAvailable( edge.getURI().stringValue() );
+			predData.addConceptAvailable( edge.getInVertex().getURI().stringValue() );
+			predData.addConceptAvailable( edge.getOutVertex().getURI().stringValue() );
 		}
 
 		log.debug( "Done with edges... checking for isolated nodes" );
 		//now for vertices--process control data and add what is necessary to the graph
 		//use vert store to check for any isolated nodes and add to forest
 		for ( SEMOSSVertex vert : gdm.getVertStore().values() ) {
-			if ( filteredNodes.containsKey( vert.getURI() ) ) {
-				continue;
-			}
+			log.debug( "before processControlData: " + vert );
 
 			processControlData( vert );
 			filterData.addVertex( vert );
-			if ( !forest.containsVertex( vert ) ) {
-				forest.addVertex( vert );
-				graph.addVertex( vert );
-			}
 		}
 
 		genAllData();
@@ -533,19 +487,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method setUndoRedoBtn.
 	 */
 	private void setUndoRedoBtn() {
-		if ( gdm.getModelCounter() > 1 ) {
-			searchPanel.setUndoButtonEnabled( true );
-		}
-		else {
-			searchPanel.setUndoButtonEnabled( false );
-		}
-
-		if ( gdm.getRCStoreSize() >= gdm.getModelCounter() ) {
-			searchPanel.setRedoButtonEnabled( true );
-		}
-		else {
-			searchPanel.setRedoButtonEnabled( false );
-		}
+		searchPanel.setUndoButtonEnabled( gdm.getOverlayLevel() > 1 );
+		searchPanel.setRedoButtonEnabled( gdm.hasRedoData() );
 	}
 
 	/**
@@ -576,12 +519,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Method setForest.
+	 * Method setGraph.
 	 *
 	 * @param forest DelegateForest
 	 */
 	public void setForest( DelegateForest<SEMOSSVertex, SEMOSSEdge> forest ) {
-		this.forest = forest;
+		gdm.setGraph( forest );
 	}
 
 	/**
@@ -609,7 +552,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	/**
 	 * Method printConnectedNodes.
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings( "unused" )
 	private void printConnectedNodes() {
 		log.debug( "In print connected Nodes routine " );
 		ConnectivityInspector<SEMOSSVertex, SEMOSSEdge> ins = new ConnectivityInspector<SEMOSSVertex, SEMOSSEdge>( graph );
@@ -631,7 +574,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	/**
 	 * Method printSpanningTree.
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings( "unused" )
 	private void printSpanningTree() {
 		KruskalMinimumSpanningTree<SEMOSSVertex, SEMOSSEdge> spanningTree
 				= new KruskalMinimumSpanningTree<>( graph );
@@ -644,19 +587,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 				log.debug( "Edge Name: " + edge.getProperty( Constants.EDGE_NAME ) );
 			}
 		}
-	}
-
-	/**
-	 * Method setRC.
-	 *
-	 * @param rc RepositoryConnection
-	 */
-	public void setRC( RepositoryConnection rc ) {
-		gdm.setRC( rc );
-	}
-
-	public RepositoryConnection getRC() {
-		return gdm.getRC();
 	}
 
 	/**
@@ -693,8 +623,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		if ( searchPanel.isHighlightButtonSelected() ) {
 			VertexPaintTransformer ptx = (VertexPaintTransformer) view.getRenderContext().getVertexFillPaintTransformer();
-			Map<String, String> searchVertices = new HashMap<>();
-			searchVertices.putAll( searchPanel.getSearchController().getCleanResHash() );
+			Set<SEMOSSVertex> searchVertices = new HashSet<>();
+			searchVertices.addAll( searchPanel.getSearchController().getCleanResHash() );
 			ptx.setVertHash( searchVertices );
 			VertexLabelFontTransformer vfl = (VertexLabelFontTransformer) view.getRenderContext().getVertexFontTransformer();
 			vfl.setVertHash( searchVertices );
@@ -708,19 +638,21 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	public void removeExistingConcepts( List<String> subVector ) {
-		for ( String remQuery : subVector ) {
-			try {
-				log.debug( "Removing query " + remQuery );
-				Update update = gdm.getRC().prepareUpdate( QueryLanguage.SPARQL, remQuery );
-				update.execute();
-				log.error( "removing concepts not implemented (being refactored)" );
-				//this.gdm.baseRelEngine.execInsertQuery(remQuery);
+		throw new UnsupportedOperationException( "this function is not operational until refactored" );
 
-			}
-			catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
-				log.error( e, e );
-			}
-		}
+//		for ( String remQuery : subVector ) {
+//			try {
+//				log.debug( "Removing query " + remQuery );
+//				Update update = gdm.getRC().prepareUpdate( QueryLanguage.SPARQL, remQuery );
+//				update.execute();
+//				log.error( "removing concepts not implemented (being refactored)" );
+//				//this.gdm.baseRelEngine.execInsertQuery(remQuery);
+//
+//			}
+//			catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
+//				log.error( e, e );
+//			}
+//		}
 	}
 
 	/**
@@ -732,50 +664,35 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * @return String
 	 */
 	public String addNewConcepts( String subjects, String baseObject, String predicate ) {
-		String listOfChilds = null;
-		for ( String adder : subjects.split( ";" ) ) {
-			String parent = adder.substring( 0, adder.indexOf( "@@" ) );
-			String child = adder.substring( adder.indexOf( "@@" ) + 2 );
+		throw new UnsupportedOperationException( "this function is not operational until refactored" );
 
-			if ( listOfChilds == null ) {
-				listOfChilds = child;
-			}
-			else {
-				listOfChilds = listOfChilds + ";" + child;
-			}
-
-			SesameJenaConstructStatement st = new SesameJenaConstructStatement();
-			st.setSubject( child );
-			st.setPredicate( predicate );
-			st.setObject( baseObject );
-
-			gdm.addToSesame( st, true );
-			log.debug( " Query....  " + parent + "<>" + child );
-		}
-
-		return listOfChilds;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Object getData() {
-		Map<String, Object> returnHash = (Map<String, Object>) super.getData();
-		if ( overlay ) {
-			returnHash.put( "nodes", gdm.getIncrementalVertStore() );
-			returnHash.put( "edges", gdm.getIncrementalEdgeStore().values() );
-		}
-		else {
-			returnHash.put( "nodes", gdm.getVertStore() );
-			returnHash.put( "edges", gdm.getEdgeStore().values() );
-		}
-
-		return returnHash;
+//		String listOfChilds = null;
+//		for ( String adder : subjects.split( ";" ) ) {
+//			String parent = adder.substring( 0, adder.indexOf( "@@" ) );
+//			String child = adder.substring( adder.indexOf( "@@" ) + 2 );
+//
+//			if ( listOfChilds == null ) {
+//				listOfChilds = child;
+//			}
+//			else {
+//				listOfChilds = listOfChilds + ";" + child;
+//			}
+//
+//			SesameJenaConstructStatement st = new SesameJenaConstructStatement();
+//			st.setSubject( child );
+//			st.setPredicate( predicate );
+//			st.setObject( baseObject );
+//
+//			gdm.addToSesame( st );
+//			log.debug( " Query....  " + parent + "<>" + child );
+//		}
+//
+//		return listOfChilds;
 	}
 
 	public void genAllData() {
 		filterData.fillRows();
 		filterData.fillEdgeRows();
-
 		controlData.generateAllRows();
 
 		if ( gdm.showSudowl() ) {
@@ -783,35 +700,23 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		colorShapeData.fillRows( filterData.getTypeHash() );
+		setUndoRedoBtn();
 	}
 
 	@Override
-	public void runAnalytics() {}
+	public void runAnalytics() {
+	}
 
 	private void processControlData( SEMOSSEdge edge ) {
-		for ( String property : edge.getProperties().keySet() )
+		for ( URI property : edge.getProperties().keySet() ) {
 			controlData.addEdgeProperty( edge.getEdgeType(), property );
+		}
 	}
 
 	private void processControlData( SEMOSSVertex vertex ) {
-		for ( String property : vertex.getProperties().keySet() )
+		for ( URI property : vertex.getProperties().keySet() ) {
 			controlData.addVertexProperty( vertex.getType(), property );
-	}
-
-	@Override
-	public void createData() {
-		gdm.createModel( getQuery(), getEngine() );
-		gdm.fillStoresFromModel();
-	}
-
-	@Override
-	public void setQuery( String q ) {
-		query = q;
-	}
-
-	@Override
-	public String getQuery() {
-		return query;
+		}
 	}
 
 	/**
@@ -824,25 +729,22 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void overlay( List<Value[]> data, List<String> headers ) {
-		setAppend( true );
-		createData();
-		try {
-			createForest( false );
-			createLayout();
-			processView();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
+	public void create( Model m, IEngine engine ) {
+		add( m, engine );
 	}
 
 	@Override
-	public void create( List<Value[]> valdata, List<String> headers, IEngine engine ) {
-		createData();
+	public void overlay( Model m, IEngine engine ) {
+		add( m, engine );
+	}
+
+	public void add( Model m, IEngine engine ) {
+		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
+		gdm.addGraphLevel( m, engine );
 
 		try {
-			createForest( true );
+			// createForest( true );
+			createForest();
 			createLayout();
 			processView();
 		}
@@ -856,9 +758,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	public static void initVvRenderer( RenderContext<SEMOSSVertex, SEMOSSEdge> rc, ControlData controlData ) {
-		VertexLabelTransformer vlt = new VertexLabelTransformer( controlData );
+		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
+		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
+
 		VertexPaintTransformer vpt = new VertexPaintTransformer();
-		EdgeLabelTransformer elt = new EdgeLabelTransformer( controlData );
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
@@ -887,54 +790,59 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public LegendPanel2 getLegendPanel() {
 		return legendPanel;
 	}
-	
+
 	@Override
 	public void incrementFont( float incr ) {
-		super.incrementFont(incr);
+		super.incrementFont( incr );
 		boolean increaseFont = ( incr > 0 ? true : false );
-		
-		VisualizationViewer<SEMOSSVertex,SEMOSSEdge> viewer = searchPanel.getSearchController().getTarget();
+
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = searchPanel.getSearchController().getTarget();
 		VertexLabelFontTransformer transformerV = (VertexLabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
 		EdgeLabelFontTransformer transformerE = (EdgeLabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
-		
+
 		//if no vertices or edges are selected, perform action on all vertices and edges
-		if(		viewer.getPickedVertexState().getPicked().isEmpty() && 
-				viewer.getPickedEdgeState().getPicked().isEmpty() ){
-			if(increaseFont){
+		if ( viewer.getPickedVertexState().getPicked().isEmpty()
+				&& viewer.getPickedEdgeState().getPicked().isEmpty() ) {
+			if ( increaseFont ) {
 				transformerV.increaseFontSize();
 				transformerE.increaseFontSize();
-			} else {
+			}
+			else {
 				transformerV.decreaseFontSize();
 				transformerE.decreaseFontSize();
 			}
 		}
-		
+
 		//otherwise, only perform action on the selected vertices and edges
-		for (SEMOSSVertex vertex:viewer.getPickedVertexState().getPicked()) {
-			if(increaseFont)
-				transformerV.increaseFontSize(vertex.getURI());
-			else
-				transformerV.decreaseFontSize(vertex.getURI());
+		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
+			if ( increaseFont ) {
+				transformerV.increaseFontSize( vertex );
+			}
+			else {
+				transformerV.decreaseFontSize( vertex );
+			}
 		}
 
-		for (SEMOSSEdge edge:viewer.getPickedEdgeState().getPicked()) {
-			if(increaseFont)
-				transformerE.increaseFontSize(edge.getURI());
-			else
-				transformerE.decreaseFontSize(edge.getURI());
+		for ( SEMOSSEdge edge : viewer.getPickedEdgeState().getPicked() ) {
+			if ( increaseFont ) {
+				transformerE.increaseFontSize( edge );
+			}
+			else {
+				transformerE.decreaseFontSize( edge );
+			}
 		}
-		
+
 		viewer.repaint();
 	}
-	
+
 	public boolean isTraversable() {
 		return traversable;
 	}
-	
+
 	public boolean areNodesHidable() {
 		return nodesHidable;
 	}
-	
+
 	public ControlPanel getSearchPanel() {
 		return searchPanel;
 	}

@@ -49,10 +49,4 @@ public class GraphPlaySheetFrame extends PlaySheetFrame {
 		}
 		super.addTab( title, c );
 	}
-	
-	@Override
-	public ProgressTask getCreateTask( final String query ) {
-		gps.setQuery( query );
-		return super.getCreateTask( query );
-	}
 }

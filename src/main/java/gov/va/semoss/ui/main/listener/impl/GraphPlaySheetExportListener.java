@@ -40,6 +40,7 @@ import javax.swing.Action;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  * Controls the export graph to grid feature.
@@ -77,7 +78,7 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 		List<Value[]> vals = new ArrayList<>();
 		for ( SEMOSSVertex v : verts ) {
 			Value subj = vf.createLiteral( v.getLabel() );
-			Object o = v.getProperty( Constants.VERTEX_TYPE );
+			Object o = v.getProperty( RDF.TYPE );
 			if ( null != o ) {
 				Value pred = vf.createLiteral( "Vertex Type" );
 				Value obj = vf.createLiteral( o.toString() );

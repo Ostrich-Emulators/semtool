@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.algorithm.impl;
 
@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class collects the information that is used in
@@ -58,7 +59,7 @@ public class DistanceDownstreamInserter {
 	double depreciationRate;
 	double appreciationRate;
 	// references to main vertstore
-	Hashtable<String, SEMOSSVertex> vertStore = new Hashtable();
+	Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	// references to the main edgeStore
 	Hashtable<String, SEMOSSEdge> edgeStore = new Hashtable();
 	PropertySpecData predData = new PropertySpecData();
@@ -334,7 +335,7 @@ public class DistanceDownstreamInserter {
 		//this is pretty much directly from GraphPlaySheet CreateForest().  I removed Jena Model and Control Data though
 		logger.info( "Creating Forest >>>>>" );
 
-		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest = new DelegateForest<SEMOSSVertex, SEMOSSEdge>();
+		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest = new DelegateForest<>();
 		Properties rdfMap = DIHelper.getInstance().getRdfMap();
 
 		createBaseURIs();
@@ -350,26 +351,27 @@ public class DistanceDownstreamInserter {
 			SesameJenaConstructStatement sct = sjw.next();
 			String predicateName = sct.getPredicate();
 
-					// get the subject, predicate and object
+			// get the subject, predicate and object
 			// look for the appropriate vertices etc and paint it
 			predData.addConceptAvailable( sct.getSubject() );
 			predData.addConceptAvailable( sct.getObject() + "" );
-			SEMOSSVertex vert1 = vertStore.get( sct.getSubject() + "" );
+			SEMOSSVertex vert1 = vertStore.get( new URIImpl( sct.getSubject() ) );
 			if ( vert1 == null ) {
-				vert1 = new SEMOSSVertex( sct.getSubject() );
-				vertStore.put( sct.getSubject() + "", vert1 );
+				vert1 = new SEMOSSVertex( new URIImpl( sct.getSubject() ) );
+				vertStore.put( vert1.getURI(), vert1 );
 			}
-			SEMOSSVertex vert2 = vertStore.get( sct.getObject() + "" );
+			SEMOSSVertex vert2 = vertStore.get( new URIImpl( sct.getObject().toString() ) );
 			if ( vert2 == null )//|| forest.getInEdges(vert2).size()>=1)
 			{
 				if ( sct.getObject() instanceof URI ) {
-					vert2 = new SEMOSSVertex( sct.getObject() + "" );
+					vert2 = new SEMOSSVertex( new URIImpl( sct.getObject().toString() ) );
 				}
 				else // ok this is a literal
 				{
-					vert2 = new SEMOSSVertex( sct.getPredicate(), sct.getObject() );
+					vert2 = new SEMOSSVertex( new URIImpl( sct.getObject().toString() ),
+							new URIImpl( sct.getPredicate() ), sct.getObject().toString() );
 				}
-				vertStore.put( sct.getObject() + "", vert2 );
+				vertStore.put( vert2.getURI(), vert2 );
 			}
 			// create the edge now
 			SEMOSSEdge edge = edgeStore.get( sct.getPredicate() + "" );
@@ -387,11 +389,11 @@ public class DistanceDownstreamInserter {
 				 edgeStore.put(sct.getPredicate()+"", edge);*/
 
 				// the logic works only when the predicates dont have the vertices on it.. 
-				edge = new SEMOSSEdge( vert1, vert2, predicateName );
+				edge = new SEMOSSEdge( vert1, vert2, new URIImpl( predicateName ) );
 				edgeStore.put( predicateName, edge );
 			}
 
-					// add the edge now if the edge does not exist
+			// add the edge now if the edge does not exist
 			// need to handle the duplicate issue again
 			try {
 				forest.addEdge( edge, vertStore.get( sct.getSubject() + "" ),

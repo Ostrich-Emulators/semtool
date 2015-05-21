@@ -92,9 +92,9 @@ public class RelationPredictPopup extends JMenu implements MouseListener {
 		// there should exactly be 2 vertices
 		// we try to find the predicate based on both subject and object
 		SEMOSSVertex vert1 = pickedVertex[0];
-		String uri = vert1.getURI();
+		String uri = vert1.getURI().stringValue();
 		SEMOSSVertex vert2 = pickedVertex[1];
-		String uri2 = vert2.getURI();
+		String uri2 = vert2.getURI().stringValue();
 
 		Pattern pattern = Pattern.compile( "\\s" );
 		Matcher matcher = pattern.matcher( uri );

@@ -110,7 +110,7 @@ public abstract class AbstractRelationPopup extends JMenu implements MouseListen
 
 		String ignoreURI = DIHelper.getInstance().getProperty( Constants.IGNORE_URI );
 		for ( SEMOSSVertex thisVert : pickedVertex ) {
-			String uri = thisVert.getURI();
+			String uri = thisVert.getURI().stringValue();
 
 			String query2 = DIHelper.getInstance().getProperty( this.mainQuery );
 
@@ -131,7 +131,7 @@ public abstract class AbstractRelationPopup extends JMenu implements MouseListen
 				uri = "\"" + uri + "\"";
 			}
 
-			hash.put( Constants.URI_KEY, uri );
+			hash.put( Constants.URI_KEY.stringValue(), uri );
 			String filledQuery = Utility.fillParam( query2, hash );
 
 			// get the repository and execute the query
@@ -186,7 +186,7 @@ public abstract class AbstractRelationPopup extends JMenu implements MouseListen
 						typeQuery = DIHelper.getInstance().getProperty( this.altQuery );
 
 						// now see if the main one also needs to be switched around
-						String vertURI = thisVert.getURI();
+						String vertURI = thisVert.getURI().stringValue();
 						vertURI = vertURI.trim();
 						matcher = pattern.matcher( vertURI );
 						found = matcher.find();
@@ -209,7 +209,7 @@ public abstract class AbstractRelationPopup extends JMenu implements MouseListen
 					predClassName = "\"" + predClassName + "\"";
 				}
 
-				hash.put( Constants.URI_KEY, uriName );
+				hash.put( Constants.URI_KEY.stringValue(), uriName );
 				hash.put( Constants.PREDICATE, predClassName );
         //logger.debug("Predicate is " + predName + "<<>> "+ predClassName);
 

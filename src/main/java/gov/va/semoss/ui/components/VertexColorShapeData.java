@@ -30,6 +30,7 @@ import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 
 /**
  * This class is used primarily for vertex filtering.
@@ -37,7 +38,7 @@ import org.apache.log4j.Logger;
 public class VertexColorShapeData extends AbstractTableModel {
 
 	private final static Logger logger = Logger.getLogger( VertexColorShapeData.class );
-	private Map<String, List<SEMOSSVertex>> typeHash = new HashMap<>();
+	private Map<URI, List<SEMOSSVertex>> typeHash = new HashMap<>();
 	private static final String[] scColumnNames = { "Node", "Instance", "Shape", "Color" };
 	private String[][] shapeColorRows;
 	private int numRows = 0;
@@ -66,7 +67,7 @@ public class VertexColorShapeData extends AbstractTableModel {
 			return numRows;
 		}
 
-		for ( Map.Entry<String, List<SEMOSSVertex>> entry : typeHash.entrySet() ) {
+		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : typeHash.entrySet() ) {
 			numRows++;
 			numRows += entry.getValue().size();
 		}
@@ -112,16 +113,16 @@ public class VertexColorShapeData extends AbstractTableModel {
 	 *
 	 * @param _typeHash
 	 */
-	public void fillRows( Map<String, List<SEMOSSVertex>> _typeHash ) {
+	public void fillRows( Map<URI, List<SEMOSSVertex>> _typeHash ) {
 		logger.debug( "Populating rows of the table in Graph Cosmetics tab." );
 		typeHash = _typeHash;
 		shapeColorRows = new String[getRowCount()][scColumnNames.length];
 
 		numRows = 0;
-		for ( Map.Entry<String, List<SEMOSSVertex>> entry : typeHash.entrySet() ) {
-			String vertexType = entry.getKey();
+		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : typeHash.entrySet() ) {
+			URI vertexType = entry.getKey();
 
-			shapeColorRows[numRows][0] = vertexType;
+			shapeColorRows[numRows][0] = vertexType.stringValue();
 			shapeColorRows[numRows][1] = "Set for All";
 			shapeColorRows[numRows][2] = "";
 			shapeColorRows[numRows][3] = "";

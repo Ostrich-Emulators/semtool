@@ -26,7 +26,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.JMenuItem;
 
 import org.apache.log4j.Logger;
 
@@ -41,7 +40,10 @@ import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
@@ -92,16 +94,10 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		//Get what edges are already highlighted so that we can just add to it
 		//Get what vertices are already painted so we can just add to it
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
-		Hashtable<String, SEMOSSEdge> edgeHash = tx.getEdges();
-		if ( edgeHash == null ) {
-			edgeHash = new Hashtable<>();
-		}
+		Map<SEMOSSEdge, Double> edgeHash = tx.getEdges();
 
 		VertexPaintTransformer vtx = (VertexPaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
-		Hashtable<String, String> vertHash = vtx.getVertHash();
-		if ( vertHash == null ) {
-			vertHash = new Hashtable<>();
-		}
+		Set<SEMOSSVertex> vertHash = new HashSet<>( vtx.getVertHash() );
 
 		PickedState state = ps.getView().getPickedVertexState();
 		state.clear();
@@ -112,14 +108,14 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 				SEMOSSVertex vert = vertices[vertIndex];
 				logger.debug( "In Edges count is " + vert.getInEdges().size() );
 				logger.debug( "Out Edges count is " + vert.getOutEdges().size() );
-				vertHash.put( vert.getURI(), vert.getURI() );
+				vertHash.add( vert );
 
 				//if the button name contains upstream, get the upstream edges and vertices
 				if ( Type.ADJACENT == type || Type.DOWNSTREAM == type ) {
 					edgeHash = putEdgesInHash( vert.getOutEdges(), edgeHash );
 					for ( SEMOSSEdge edge : vert.getOutEdges() ) {
 						if ( allEdgesVect.contains( edge ) ) {
-							vertHash.put( edge.getInVertex().getURI(), edge.getInVertex().getURI() );
+							vertHash.add( edge.getInVertex() );
 							state.pick( edge.getInVertex(), true );
 						}
 					}
@@ -130,7 +126,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 					edgeHash = putEdgesInHash( vert.getInEdges(), edgeHash );
 					for ( SEMOSSEdge edge : vert.getInEdges() ) {
 						if ( allEdgesVect.contains( edge ) ) {
-							vertHash.put( edge.getOutVertex().getURI(), edge.getOutVertex().getURI() );
+							vertHash.add( edge.getOutVertex() );
 							state.pick( edge.getOutVertex(), true );
 						}
 					}
@@ -147,13 +143,12 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 			while ( masterIt.hasNext() ) {
 				SEMOSSVertex vert = (SEMOSSVertex) masterIt.next();
 				Hashtable vHash = (Hashtable) masterHash.get( vert );
-				ArrayList<SEMOSSVertex> parentPath = (ArrayList<SEMOSSVertex>) vHash.get( ddp.pathString );
 				ArrayList<SEMOSSEdge> parentEdgePath = (ArrayList<SEMOSSEdge>) vHash.get( ddp.edgePathString );
 				edgeHash = putEdgesInHash( new Vector( parentEdgePath ), edgeHash );
 				for ( SEMOSSEdge edge : parentEdgePath ) {
 					if ( allEdgesVect.contains( edge ) ) {
-						vertHash.put( edge.getOutVertex().getURI(), edge.getOutVertex().getURI() );
-						vertHash.put( edge.getInVertex().getURI(), edge.getInVertex().getURI() );
+						vertHash.add( edge.getOutVertex() );
+						vertHash.add( edge.getInVertex() );
 						state.pick( edge.getOutVertex(), true );
 						state.pick( edge.getInVertex(), true );
 					}
@@ -168,7 +163,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
 		vlft.setVertHash( vertHash );
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( edgeHash );
+		atx.setEdges( edgeHash.keySet() );
 		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) ps.getView().getRenderContext().getEdgeArrowStrokeTransformer();
 		stx.setEdges( edgeHash );
 
@@ -185,10 +180,10 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 	 *
 	 * @return Hashtable<String,DBCMEdge> The updated hashtable.
 	 */
-	private Hashtable<String, SEMOSSEdge> putEdgesInHash( Collection<SEMOSSEdge> edges,
-			Hashtable<String, SEMOSSEdge> hash ) {
+	private Map<SEMOSSEdge, Double> putEdgesInHash( Collection<SEMOSSEdge> edges,
+			Map<SEMOSSEdge, Double> hash ) {
 		for ( SEMOSSEdge e : edges ) {
-			hash.put( (String) e.getProperty( Constants.URI_KEY ), e );
+			hash.put( e, 1d ); // RPB: I'm just making this up.
 		}
 
 		return hash;

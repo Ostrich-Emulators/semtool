@@ -13,6 +13,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 
 import gov.va.semoss.ui.components.VertexFilterData;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import org.openrdf.model.URI;
 
 public class CustomNodeCreator {
   private static final Logger log = Logger.getLogger( CustomNodeCreator.class );
@@ -59,10 +60,10 @@ public class CustomNodeCreator {
 					VertexFilterData vfd = ps.getFilterData();
 					System.out.println("Vertex Types Available ");
 					System.out.println("======================= ");
-					Collection<String> keys = vfd.getTypeHash().keySet();
+					Collection<URI> keys = vfd.getTypeHash().keySet();
 					int keyCount = 1;
-          for( String key : keys ){
-						System.out.println(keyCount + " ." + key);
+          for( URI key : keys ){
+						log.debug( keyCount + " ." + key);
 						keyCount++;
 					}
 				}

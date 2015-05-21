@@ -33,6 +33,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -92,8 +93,8 @@ public class GraphNodeRankListener extends AbstractAction {
 		//process through graph and list out all nodes, type, pagerank
 		ValueFactory vf = new ValueFactoryImpl();
 		for ( SEMOSSVertex v : col ) {
-			String url = v.getURI();
-			String[] urlSplit = url.split( "/" );
+			URI url = v.getURI();
+			String[] urlSplit = url.stringValue().split( "/" );
 			double r = ranker.getVertexScore( v );
 
 			Value[] scores = { vf.createLiteral( v.getLabel() ),

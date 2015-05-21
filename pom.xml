@@ -139,11 +139,6 @@
 			<!--<version>0.9.4</version>-->
 		</dependency>
 		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-larq</artifactId>
-			<version>1.0.0-incubating</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>3.9</version>

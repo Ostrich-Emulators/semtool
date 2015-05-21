@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 
 import gov.va.semoss.om.SEMOSSVertex;
+import org.openrdf.model.URI;
 
 /**
  * This class is used to create the legend for visualizations.
@@ -57,8 +58,8 @@ public class LegendPanel2 extends JPanel {
 	public void drawLegend() {
 		removeAll();
 		
-		for ( Map.Entry<String, List<SEMOSSVertex>> entry : data.getTypeHash().entrySet() ) {
-			String nodeType = entry.getKey();
+		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : data.getTypeHash().entrySet() ) {
+			URI nodeType = entry.getKey();
 			List<SEMOSSVertex> vertexList = entry.getValue();
 			SEMOSSVertex vertex = vertexList.get( 0 );
 

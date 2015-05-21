@@ -12,6 +12,7 @@ import java.util.Map;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import org.openrdf.model.vocabulary.RDFS;
 
 public class MetamodelGraphDataModel extends GraphDataModel {
 	private static final Logger log = Logger.getLogger( MetamodelGraphDataModel.class );
@@ -23,10 +24,10 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	public MetamodelGraphDataModel() {
 		super();
 		
-		setTypeOrSubclass(" rdfs:subClassOf ");
+		setTypeOrSubclass( RDFS.SUBCLASSOF );
 		setFilterOutOwlData(false);
-		getBaseFilterHash().put(DIHelper.getConceptURI().stringValue(), "");
-		getBaseFilterHash().put(DIHelper.getConceptURI("ApplicationModule").stringValue(), "");
+		getBaseFilterSet().add(DIHelper.getConceptURI().stringValue() );
+		getBaseFilterSet().add(DIHelper.getConceptURI("ApplicationModule").stringValue() );
 	}
 
 	  /**
@@ -126,7 +127,8 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 		for(SEMOSSEdge edge:edgeStore.values()) {
 			log.debug("populateRelationshipInstanceCount run " + (numQueriesRun++) + " of " + edgeStore.size() + 
 					" for subject " + edge.getOutVertex().getURI() + " and object " + edge.getInVertex().getURI());
-			edgeCounts.put(edge, populateRelationshipInstanceCount(edge.getOutVertex().getURI(), edge.getInVertex().getURI()));
+			edgeCounts.put(edge, populateRelationshipInstanceCount(edge.getOutVertex().getURI().stringValue(),
+					edge.getInVertex().getURI().stringValue()));
 		}
 	}
 	

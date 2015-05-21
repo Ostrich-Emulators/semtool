@@ -11,7 +11,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.util.DefaultIcons;
 import gov.va.semoss.util.ExportUtility;
 import gov.va.semoss.util.Utility;
 
@@ -71,10 +70,10 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return title;
 	}
 
-	public boolean hasChanges(){
+	public boolean hasChanges() {
 		return false;
 	}
-	
+
 	protected void setHeaders( List<String> newheaders ) {
 		headers.clear();
 		headers.addAll( newheaders );
@@ -124,7 +123,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		}
 	}
 
-	public void create( Model m ) {
+	public void create( Model m, IEngine engine ) {
 		List<Value[]> valdata = new ArrayList<>();
 		for ( Statement s : m ) {
 			valdata.add( new Value[]{ s.getSubject(), s.getPredicate(),
@@ -134,39 +133,39 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		create( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), null );
 	}
 
-	public void overlay( Model m ) {
+	public void overlay( Model m, IEngine engine ) {
 		List<Value[]> valdata = new ArrayList<>();
 		for ( Statement s : m ) {
 			valdata.add( new Value[]{ s.getSubject(), s.getPredicate(),
 				s.getObject() } );
 		}
 
-		overlay( valdata, Arrays.asList( "Subject", "Predicate", "Object" ) );
+		overlay( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), null );
 	}
 
 	public void populateToolBar( JToolBar toolBar, final String tabTitle ) {
-		AbstractAction savePDFAction = new AbstractAction( "Export PDF", DbAction.getIcon("save_pdf") ) {
-					private static final long serialVersionUID = 3936319423436805397L;
+		AbstractAction savePDFAction = new AbstractAction( "Export PDF", DbAction.getIcon( "save_pdf" ) ) {
+			private static final long serialVersionUID = 3936319423436805397L;
 
-					@Override
-					public void actionPerformed( ActionEvent e ) {
-						ExportUtility.doGraphExportPDFWithDialogue( PlaySheetCentralComponent.this );
-					}
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				ExportUtility.doGraphExportPDFWithDialogue( PlaySheetCentralComponent.this );
+			}
 
-				};
+		};
 
 		savePDFAction.putValue( Action.SHORT_DESCRIPTION, "Export PDF" );
 		toolBar.add( savePDFAction );
-		
-		AbstractAction savePNGAction = new AbstractAction( "Export PNG", DbAction.getIcon("save_png") ) {
-					private static final long serialVersionUID = 3936319423436805398L;
 
-					@Override
-					public void actionPerformed( ActionEvent e ) {
-						ExportUtility.doGraphExportPNGWithDialogue( PlaySheetCentralComponent.this );
-					}
+		AbstractAction savePNGAction = new AbstractAction( "Export PNG", DbAction.getIcon( "save_png" ) ) {
+			private static final long serialVersionUID = 3936319423436805398L;
 
-				};
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				ExportUtility.doGraphExportPNGWithDialogue( PlaySheetCentralComponent.this );
+			}
+
+		};
 
 		savePNGAction.putValue( Action.SHORT_DESCRIPTION, "Export PNG" );
 		toolBar.add( savePNGAction );
@@ -219,7 +218,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return list;
 	}
 
-	public void overlay( List<Value[]> data, List<String> headers ) {
+	public void overlay( List<Value[]> data, List<String> headers, IEngine eng ) {
 		log.error( "into overlay: " + data.size() + " items" );
 	}
 
@@ -313,6 +312,10 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 	public boolean canAcceptDataWithHeaders( List<String> newheaders ) {
 		return headers.equals( newheaders );
+	}
+
+	public boolean canAcceptModelData() {
+		return canAcceptDataWithHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 	}
 
 	/**

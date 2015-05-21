@@ -312,7 +312,7 @@ public class PlaySheetFrame extends JInternalFrame {
 					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
 						updateProgress( "Preparing Display", 80 );
 						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
-						cmp.create( model );
+						cmp.create( model, engine );
 						dsize = model.size();
 					}
 					else {
@@ -360,22 +360,44 @@ public class PlaySheetFrame extends JInternalFrame {
 				try {
 
 					updateProgress( "Executing Query", 40 );
-					List<Value[]> data = engine.query( lqa );
-					List<String> headers = lqa.getBindingNames();
 
-					updateProgress( "Preparing Display", 80 );
-					if ( overlayee.canAcceptDataWithHeaders( headers ) ) {
-						overlayee.overlay( data, headers );
+					if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
+						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
+						updateProgress( "Preparing Display", 80 );
+
+						if ( overlayee.canAcceptModelData() ) {
+							overlayee.overlay( model, engine );
+						}
+						else {
+							try {
+								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
+								pscc.setTitle( titleIfNeeded );
+								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
+								pscc.create( model, engine );
+							}
+							catch ( InstantiationException | IllegalAccessException e ) {
+								log.error( e, e );
+							}
+						}
 					}
 					else {
-						try {
-							PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
-							pscc.setTitle( titleIfNeeded );
-							PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
-							pscc.create( data, headers, getEngine() );
+						List<Value[]> data = engine.query( lqa );
+						List<String> headers = lqa.getBindingNames();
+
+						updateProgress( "Preparing Display", 80 );
+						if ( overlayee.canAcceptDataWithHeaders( headers ) ) {
+							overlayee.overlay( data, headers, engine );
 						}
-						catch ( InstantiationException | IllegalAccessException e ) {
-							log.error( e, e );
+						else {
+							try {
+								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
+								pscc.setTitle( titleIfNeeded );
+								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
+								pscc.create( data, headers, engine );
+							}
+							catch ( InstantiationException | IllegalAccessException e ) {
+								log.error( e, e );
+							}
 						}
 					}
 					updateProgress( "Execution Complete", 90 );

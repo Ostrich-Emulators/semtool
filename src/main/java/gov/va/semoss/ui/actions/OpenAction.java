@@ -308,7 +308,7 @@ public class OpenAction extends DbAction {
 				loader.loadToEngine( Arrays.asList( f ), eng, false, null );
 				GridRAWPlaySheet grid = new GridRAWPlaySheet();
 				grid.setTitle( f.toString() );
-				grid.create( eng.toModel() );
+				grid.create( eng.toModel(), eng );
 				psf.add( grid );
 			}
 			catch ( RepositoryException | IOException | ImportValidationException e ) {

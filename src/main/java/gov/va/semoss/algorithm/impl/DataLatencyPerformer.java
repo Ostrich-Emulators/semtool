@@ -15,10 +15,11 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.algorithm.impl;
 
+import edu.uci.ics.jung.graph.DelegateForest;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -30,23 +31,29 @@ import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.components.GraphPlaySheetFrame;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
-import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * This class performs the calculations for data latency.
  */
 public class DataLatencyPerformer implements IAlgorithm {
 
+	public static final URI FREQUENCY = new URIImpl( "semoss://freq" );
 	GraphPlaySheet ps = null;
-	DelegateForest forest;
+	DelegateForest<SEMOSSVertex, SEMOSSEdge> forest;
 	public SEMOSSVertex[] pickedVertex = null;
 	Logger logger = Logger.getLogger( getClass() );
 	double value;
@@ -55,8 +62,8 @@ public class DataLatencyPerformer implements IAlgorithm {
 	Vector<SEMOSSVertex> currentPathVerts = new Vector<SEMOSSVertex>();//these are used for depth search first
 	Vector<SEMOSSEdge> currentPathEdges = new Vector<SEMOSSEdge>();
 	double currentPathLate;
-	Hashtable validEdges = new Hashtable();
-	Hashtable<String, String> validVerts = new Hashtable<String, String>();
+	Map<SEMOSSEdge, Double> validEdges = new HashMap<>();
+	Set<SEMOSSVertex> validVerts = new HashSet<>();
 	String selectedNodes = "";
 	double naFrequencyFraction = 0;
 	double notInterfaceFraction = 1;
@@ -145,17 +152,17 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 * @return Vector<DBCMVertex>
 	 */
 	private Vector<SEMOSSVertex> getForestRoots() {
-		Vector<SEMOSSVertex> forestRoots = new Vector<SEMOSSVertex>();
+		Vector<SEMOSSVertex> forestRoots = new Vector<>();
 		if ( pickedVertex.length != 0 ) {
 			int count = 0;
 			for ( SEMOSSVertex selectedVert : pickedVertex ) {
 				forestRoots.add( selectedVert );
-				validVerts.put( (String) selectedVert.getProperty( Constants.URI_KEY ), (String) selectedVert.getProperty( Constants.URI_KEY ) );
+				validVerts.add( selectedVert );
 				finalVertScores.put( selectedVert, 0.0 );
 				if ( count > 0 ) {
 					selectedNodes = selectedNodes + ", ";
 				}
-				selectedNodes = selectedNodes + selectedVert.getProperty( Constants.VERTEX_NAME );
+				selectedNodes = selectedNodes + selectedVert.getProperty( RDFS.LABEL );
 				count++;
 			}
 		}
@@ -164,7 +171,7 @@ public class DataLatencyPerformer implements IAlgorithm {
 			Collection<SEMOSSVertex> forestRootsCollection = forest.getRoots();
 			for ( SEMOSSVertex v : forestRootsCollection ) {
 				forestRoots.add( v );
-				validVerts.put( (String) v.getProperty( Constants.URI_KEY ), (String) v.getProperty( Constants.URI_KEY ) );
+				validVerts.add( v );
 				finalVertScores.put( v, 0.0 );
 			}
 		}
@@ -244,23 +251,24 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 *
 	 * @return DBCMVertex
 	 */
-	private SEMOSSVertex traverseDepthDownward( SEMOSSVertex vert, Hashtable<SEMOSSEdge, Double> usedLeafEdges, SEMOSSVertex rootVert ) {
+	private SEMOSSVertex traverseDepthDownward( SEMOSSVertex vert,
+			Hashtable<SEMOSSEdge, Double> usedLeafEdges, SEMOSSVertex rootVert ) {
 		SEMOSSVertex nextVert = null;
 		Collection<SEMOSSEdge> edgeArray = getValidEdges( forest.getOutEdges( vert ) );
 		for ( SEMOSSEdge edge : edgeArray ) {
 			SEMOSSVertex inVert = edge.getInVertex();
 			String freqString = "";
-			if ( edge.getProperty( "Frequency" ) != null ) {
-				String frequency = edge.getProperty( "Frequency" ) + "";
+			if ( edge.getProperty( FREQUENCY ) != null ) {
+				String frequency = edge.getProperty( FREQUENCY ) + "";
 				freqString = frequency.replaceAll( "\"", "" );
 			}
 			else {
-				validEdges.put( (String) edge.getProperty( Constants.URI_KEY ), notInterfaceFraction );
+				validEdges.put( edge, notInterfaceFraction );
 			}
 			//if the edge is not available or doens't have a frequency, remove from master edges and make red
 			if ( !isAvailable( freqString ) ) {
 				//masterEdgeVector.remove(edge);
-				validEdges.put( (String) edge.getProperty( Constants.URI_KEY ), naFrequencyFraction );
+				validEdges.put( edge, naFrequencyFraction );
 			}
 			double freqDouble = translateString( freqString );
 			double tempPathLate = currentPathLate + freqDouble;
@@ -268,7 +276,8 @@ public class DataLatencyPerformer implements IAlgorithm {
 			if ( usedLeafEdges.containsKey( edge ) ) {
 				leafEdgeScore = usedLeafEdges.get( edge );
 			}
-			if ( tempPathLate <= value && masterVertexVector.contains( inVert ) && ( !usedLeafEdges.containsKey( edge ) || tempPathLate < leafEdgeScore ) && !currentPathEdges.contains( edge ) ) {
+			if ( tempPathLate <= value && masterVertexVector.contains( inVert )
+					&& ( !usedLeafEdges.containsKey( edge ) || tempPathLate < leafEdgeScore ) && !currentPathEdges.contains( edge ) ) {
 				nextVert = inVert;//this is going to be the returned vert, so this is all set
 				if ( currentPathVerts.contains( inVert ) ) {
 					currentPathVerts.add( inVert );
@@ -320,14 +329,11 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 * @param edges Vector<DBCMEdge>
 	 * @param verts Vector<DBCMVertex>
 	 */
-	private void addPathAsValid( Vector<SEMOSSEdge> edges, Vector<SEMOSSVertex> verts ) {
-		for ( SEMOSSVertex vertex : verts ) {
-			validVerts.put( (String) vertex.getProperty( Constants.URI_KEY ), (String) vertex.getProperty( Constants.URI_KEY ) );
-		}
-
-		for ( SEMOSSEdge edge : edges ) {
-			double edgeScore = getEdgeScore( edge );
-			validEdges.put( (String) edge.getProperty( Constants.URI_KEY ), edgeScore );
+	private void addPathAsValid( Collection<SEMOSSEdge> edges, Collection<SEMOSSVertex> verts ) {
+		validVerts.addAll( verts );
+		logger.warn( "this code is probably wrong" );
+		for ( SEMOSSEdge e : edges ) {
+			validEdges.put( e, 5d );
 		}
 	}
 
@@ -341,11 +347,11 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 */
 	private double getEdgeScore( SEMOSSEdge edge ) {
 		double ret = 1.0;
-		if ( edge.getProperty( "Frequency" ) == null ) {
+		if ( edge.getProperty( FREQUENCY ) == null ) {
 			ret = notInterfaceFraction;
 		}
 		else {
-			String frequency = edge.getProperty( "Frequency" ) + "";
+			String frequency = edge.getProperty( FREQUENCY ) + "";
 			String freqString = frequency.replaceAll( "\"", "" );
 			if ( !isAvailable( freqString ) ) {
 				ret = naFrequencyFraction;
@@ -656,7 +662,7 @@ public class DataLatencyPerformer implements IAlgorithm {
 		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) ps.getView().getRenderContext().getEdgeArrowStrokeTransformer();
 		stx.setEdges( validEdges );
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( validEdges );
+		atx.setEdges( validEdges.keySet() );
 		VertexPaintTransformer vtx = (VertexPaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
 		vtx.setVertHash( validVerts );
 		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();

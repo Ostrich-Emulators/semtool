@@ -50,8 +50,7 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 	}
 
 	@Override
-	public void overlay( List<Value[]> data, List<String> newheaders ) {
-		IEngine eng = this.getPlaySheetFrame().getEngine();
-		super.overlay( convertUrisToLabels( data, eng ), newheaders );
+	public void overlay( List<Value[]> data, List<String> newheaders, IEngine eng ) {
+		super.overlay( convertUrisToLabels( data, eng ), newheaders, eng );
 	}
 }

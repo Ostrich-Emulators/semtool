@@ -157,7 +157,7 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	 */
 	private void addEdges( SEMOSSEdge edge, SEMOSSVertex vert, SEMOSSVertex inVert ) {
 		//need to get all vertices that exist with this uri and create edge downward to new instances of this invert
-		String uri = vert.getURI();
+		String uri = vert.getURI().stringValue();
 		ArrayList<SEMOSSVertex> vertArray = uriVertHash.get( uri );
 		if ( vertArray == null ) {
 			SEMOSSEdge newEdge = new SEMOSSEdge( vert, inVert, edge.getURI() );
@@ -183,7 +183,7 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	 * @param vert DBCM vertex.
 	 */
 	private void addToURIVertHash( SEMOSSVertex vert ) {
-		String uri = vert.getURI();
+		String uri = vert.getURI().stringValue();
 		ArrayList<SEMOSSVertex> vertArray = null;
 		if ( uriVertHash.containsKey( uri ) ) {
 			vertArray = uriVertHash.get( uri );

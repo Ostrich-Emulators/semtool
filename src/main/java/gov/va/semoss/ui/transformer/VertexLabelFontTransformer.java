@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.transformer;
 
@@ -28,21 +28,26 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import org.openrdf.model.URI;
 
 /**
  * Transforms the font label on a node vertex in the graph.
  */
 public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Font> {
 
-	Map<String, String> verticeURI2Show = null;
 	private static final Logger logger
 			= Logger.getLogger( VertexLabelFontTransformer.class );
+
+	Set<SEMOSSVertex> verticeURI2Show = new HashSet<>();
 	int initialDefaultSize = Constants.INITIAL_GRAPH_FONT_SIZE;
 	int currentDefaultSize;
 	int maxSize = 55;
 	int minSize = 0;
 	//This stores all font size data about the nodes.  Different than verticeURI2Show because need to remember size information when vertex label is unhidden
-	Map<String, Integer> nodeSizeData;
+	Map<SEMOSSVertex, Integer> nodeSizeData;
 
 	/**
 	 * Constructor for VertexLabelFontTransformer.
@@ -57,7 +62,7 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 	 *
 	 * @return Hashtable<String,Object>
 	 */
-	public Map<String, String> getVertHash() {
+	public Collection<SEMOSSVertex> getVertHash() {
 		return verticeURI2Show;
 	}
 
@@ -66,7 +71,7 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 	 *
 	 * @return Hashtable
 	 */
-	public Map<String, Integer> getFontSizeData() {
+	public Map<SEMOSSVertex, Integer> getFontSizeData() {
 		return nodeSizeData;
 	}
 
@@ -86,8 +91,11 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 	 *
 	 * @param verticeURI2Show Hashtable
 	 */
-	public void setVertHash( Map<String, String> verticeURI2Show ) {
-		this.verticeURI2Show = verticeURI2Show;
+	public void setVertHash( Set<SEMOSSVertex> verts ) {
+		this.verticeURI2Show.clear();
+		if ( null != verts ) {
+			this.verticeURI2Show.addAll( verts );
+		}
 	}
 
 	/**
@@ -107,7 +115,7 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 		if ( currentDefaultSize < maxSize ) {
 			currentDefaultSize++;
 		}
-		for ( Map.Entry<String, Integer> entry : nodeSizeData.entrySet() ) {
+		for ( Map.Entry<SEMOSSVertex, Integer> entry : nodeSizeData.entrySet() ) {
 			int size = entry.getValue();
 			if ( size < maxSize ) {
 				entry.setValue( size + 1 );
@@ -124,7 +132,7 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 			currentDefaultSize--;
 		}
 
-		for ( Map.Entry<String, Integer> entry : nodeSizeData.entrySet() ) {
+		for ( Map.Entry<SEMOSSVertex, Integer> entry : nodeSizeData.entrySet() ) {
 			int size = entry.getValue();
 			if ( size > minSize ) {
 				entry.setValue( size - 1 );
@@ -138,7 +146,7 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 	 *
 	 * @param nodeURI String - the node URI of the selected node.
 	 */
-	public void increaseFontSize( String nodeURI ) {
+	public void increaseFontSize( SEMOSSVertex nodeURI ) {
 		if ( nodeSizeData.containsKey( nodeURI ) ) {
 			int size = nodeSizeData.get( nodeURI );
 			if ( size < maxSize ) {
@@ -161,7 +169,7 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 	 *
 	 * @param nodeURI String - the node URI of the selected node.
 	 */
-	public void decreaseFontSize( String nodeURI ) {
+	public void decreaseFontSize( SEMOSSVertex nodeURI ) {
 		if ( nodeSizeData.containsKey( nodeURI ) ) {
 			int size = nodeSizeData.get( nodeURI );
 			if ( size > minSize ) {
@@ -187,17 +195,13 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 	 */
 	@Override
 	public Font transform( SEMOSSVertex arg0 ) {
-		int customSize = currentDefaultSize;
-		if ( nodeSizeData.containsKey( arg0.getURI() ) ) {
-			customSize = nodeSizeData.get( arg0.getURI() );
-		}
-		Font font = new Font( "Plain", Font.PLAIN, customSize );
+		int size = ( nodeSizeData.containsKey( arg0 ) ? nodeSizeData.get( arg0 )
+				: currentDefaultSize );
+		Font font = new Font( "Plain", Font.PLAIN, size );
 
-		if ( verticeURI2Show != null ) {
-			String URI = (String) arg0.getProperty( Constants.URI_KEY );
-			logger.debug( "URI " + URI );
-			if ( verticeURI2Show.containsKey( URI ) ) {
-				font = new Font( "Plain", Font.PLAIN, customSize );
+		if ( !verticeURI2Show.isEmpty() ) {
+			if ( verticeURI2Show.contains( arg0 ) ) {
+				font = new Font( "Plain", Font.PLAIN, size );
 			}
 			else {
 				font = new Font( "Plain", Font.PLAIN, 0 );
@@ -205,5 +209,4 @@ public class VertexLabelFontTransformer implements Transformer<SEMOSSVertex, Fon
 		}
 		return font;
 	}
-
 }

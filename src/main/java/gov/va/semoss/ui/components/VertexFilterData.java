@@ -29,6 +29,8 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
 import javax.swing.table.AbstractTableModel;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class is used to filter vertex data.
@@ -37,8 +39,8 @@ public class VertexFilterData extends AbstractTableModel {
 	private static final long serialVersionUID = 5877171695108692808L;
 	private static final Logger logger = Logger.getLogger(VertexFilterData.class);
 
-	private final Map<String, List<SEMOSSVertex>> typeHash = new HashMap<>();
-	private final Map<String, List<SEMOSSEdge>> edgeTypeHash = new HashMap<>();
+	private final Map<URI, List<SEMOSSVertex>> typeHash = new HashMap<>();
+	private final Map<URI, List<SEMOSSEdge>> edgeTypeHash = new HashMap<>();
 	private static final String[] columnNames = { "Show", "Node", "Instance" };
 	private static final Class<?>[] classNames = { Boolean.class, Object.class, Object.class };
 
@@ -57,12 +59,12 @@ public class VertexFilterData extends AbstractTableModel {
 	private Class<?>[] propClassNames = { Object.class, Object.class };
 
 	// all the nodes that need to be filtered
-	private final Map<String, String> filterNodes = new HashMap<>();
-	private final Map<String, String> edgeFilterNodes = new HashMap<>();
+	private final Map<URI, String> filterNodes = new HashMap<>();
+	private final Map<URI, String> edgeFilterNodes = new HashMap<>();
 
 	// these ensure you are not adding the same vertex more than once
-	private final Map<String, SEMOSSVertex> checker = new HashMap<>();
-	private final Map<String, SEMOSSEdge> edgeChecker = new HashMap<>();
+	private final Map<URI, SEMOSSVertex> checker = new HashMap<>();
+	private final Map<URI, SEMOSSEdge> edgeChecker = new HashMap<>();
 
 	// Table rows for vertices
 	private String[][] rows = null;
@@ -122,10 +124,11 @@ public class VertexFilterData extends AbstractTableModel {
 		return edgeCount;
 	}
 
-	public Object getEdgeVal(int r, int c) {
-		if (edgeRows == null)
+	public Object getEdgeVal( int r, int c ) {
+		if ( edgeRows == null || 0 == edgeRows.length ) {
 			return null;
-		
+		}
+
 		return edgeRows[r][c];
 	}
 
@@ -146,16 +149,8 @@ public class VertexFilterData extends AbstractTableModel {
 	 *
 	 * @return List of nodes (DBCM vertexes).
 	 */
-	public List<SEMOSSVertex> getNodes(String nodeType) {
+	public List<SEMOSSVertex> getNodes(URI nodeType) {
 		return typeHash.get(nodeType);
-	}
-
-	public Map<String, String> getFilterNodes() {
-		return filterNodes;
-	}
-
-	public Map<String, String> getEdgeFilterNodes() {
-		return edgeFilterNodes;
 	}
 
 	/**
@@ -165,10 +160,10 @@ public class VertexFilterData extends AbstractTableModel {
 	 *            DBCMVertex
 	 */
 	public void addVertex(SEMOSSVertex vert) {
-		if (checker.containsKey(vert.getURI() + ""))
+		if (checker.containsKey(vert.getURI()))
 			return;
 
-		String vertType = vert.getType();
+		URI vertType = vert.getType();
 		List<SEMOSSVertex> typeVector;
 		if (typeHash.containsKey(vertType))
 			typeVector = typeHash.get(vertType);
@@ -193,7 +188,7 @@ public class VertexFilterData extends AbstractTableModel {
 		if (edgeChecker.containsKey(edge.getURI() + "")) 
 			return;
 		
-		String edgeType = (String) edge.getProperty(Constants.EDGE_TYPE);
+		URI edgeType = edge.getType();
 		List<SEMOSSEdge> typeVector;
 		if (edgeTypeHash.containsKey(edgeType))
 			typeVector = edgeTypeHash.get(edgeType);
@@ -254,9 +249,9 @@ public class VertexFilterData extends AbstractTableModel {
 
 		int rowCount = 0;
 		int keyCount = 0;
-		for (Map.Entry<String, List<SEMOSSVertex>> en : typeHash.entrySet()) {
-			String vertType = en.getKey();
-			nodeTypes[keyCount] = vertType;
+		for (Map.Entry<URI, List<SEMOSSVertex>> en : typeHash.entrySet()) {
+			URI vertType = en.getKey();
+			nodeTypes[keyCount] = vertType.stringValue();
 			List<SEMOSSVertex> vertVector = en.getValue();
 
 			boolean firstVertexOfThisType = true;
@@ -267,7 +262,7 @@ public class VertexFilterData extends AbstractTableModel {
 					String key = vertType + "-Select All";
 					rows[rowCount][0] = (oldshowvals.containsKey(key) ? oldshowvals
 							.get(key) : true) + "";
-					rows[rowCount][1] = vertType;
+					rows[rowCount][1] = vertType.stringValue();
 					rows[rowCount][2] = "Select All";
 					rowCount++;
 					firstVertexOfThisType = false;
@@ -276,7 +271,7 @@ public class VertexFilterData extends AbstractTableModel {
 				rows[rowCount][0] = (oldshowvals.containsKey(vertName) ? oldshowvals
 						.get(vertName) : true) + "";
 				rows[rowCount][2] = vertName;
-				rows[rowCount][3] = vert.getURI();
+				rows[rowCount][3] = vert.getURI().stringValue();
 				rowCount++;
 			}
 			keyCount++;
@@ -366,9 +361,9 @@ public class VertexFilterData extends AbstractTableModel {
 
 		int rowCount = 0;
 		int keyCount = 0;
-		for (Map.Entry<String, List<SEMOSSEdge>> en : edgeTypeHash.entrySet()) {
-			String edgeType = en.getKey();
-			edgeTypes[keyCount] = edgeType;
+		for (Map.Entry<URI, List<SEMOSSEdge>> en : edgeTypeHash.entrySet()) {
+			URI edgeType = en.getKey();
+			edgeTypes[keyCount] = edgeType.stringValue();
 			edgeTypeRows[keyCount][0] = edgeType;
 			edgeTypeRows[keyCount][1] = 100d;
 
@@ -516,16 +511,16 @@ public class VertexFilterData extends AbstractTableModel {
 	 *            DBCMVertex
 	 */
 	public void fillPropRows(SEMOSSVertex vert) {
-		Map<String, Object> propH = vert.getProperties();
+		Map<URI, Object> propH = vert.getProperties();
 		String[][] propertyRows = new String[propH.size()][2];
 
 		logger.debug(" Filling Property for vertex " + propH.size());
 		int keyCount = 0;
-		for (Map.Entry<String, Object> en : propH.entrySet()) {
-			String key = en.getKey();
+		for (Map.Entry<URI, Object> en : propH.entrySet()) {
+			URI key = en.getKey();
 			Object value = en.getValue();
 
-			propertyRows[keyCount][0] = key;
+			propertyRows[keyCount][0] = key.stringValue();
 			propertyRows[keyCount][1] = value.toString();
 
 			keyCount++;
@@ -573,7 +568,7 @@ public class VertexFilterData extends AbstractTableModel {
 		String key = propertyRows[row][0];
 		propertyRows[row][column] = val;
 		propHash.put(vert, propertyRows);
-		vert.putProperty(key, val + "");
+		vert.setProperty(new URIImpl( key ), val + "");
 	}
 
 	/**
@@ -598,14 +593,14 @@ public class VertexFilterData extends AbstractTableModel {
 	 *            SEMOSSEdge
 	 */
 	public void fillEdgeRows(SEMOSSEdge edge) {
-		Map<String, Object> propHash = edge.getProperties();
+		Map<URI, Object> propHash = edge.getProperties();
 		logger.debug("fillEdgeRows(edge) Number of Properties: "
 				+ propHash.size());
 
 		int keyCount = 0;
 		String[][] propertyRows = new String[propHash.size()][2];
-		for (Map.Entry<String, Object> entry : propHash.entrySet()) {
-			propertyRows[keyCount][0] = entry.getKey();
+		for (Map.Entry<URI, Object> entry : propHash.entrySet()) {
+			propertyRows[keyCount][0] = entry.getKey().stringValue();
 			propertyRows[keyCount][1] = entry.getValue().toString();
 			keyCount++;
 		}
@@ -651,7 +646,7 @@ public class VertexFilterData extends AbstractTableModel {
 		String key = propertyRows[row][0];
 		propertyRows[row][column] = val;
 		edgeHash.put(edge, propertyRows);
-		edge.putProperty(key, val + "");
+		edge.setProperty(new URIImpl( key ), val + "");
 	}
 
 	/**
@@ -659,7 +654,7 @@ public class VertexFilterData extends AbstractTableModel {
 	 * 
 	 * @return Hashtable of edge types of the form <String, Vector>
 	 */
-	public Map<String, List<SEMOSSEdge>> getEdgeTypeHash() {
+	public Map<URI, List<SEMOSSEdge>> getEdgeTypeHash() {
 		return this.edgeTypeHash;
 	}
 
@@ -668,7 +663,7 @@ public class VertexFilterData extends AbstractTableModel {
 	 * 
 	 * @return Hashtable of the form <String, Vector>
 	 */
-	public Map<String, List<SEMOSSVertex>> getTypeHash() {
+	public Map<URI, List<SEMOSSVertex>> getTypeHash() {
 		return this.typeHash;
 	}
 

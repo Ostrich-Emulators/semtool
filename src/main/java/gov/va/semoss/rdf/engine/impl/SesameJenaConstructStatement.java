@@ -71,4 +71,9 @@ public class SesameJenaConstructStatement {
 	public void setObject(Object object) {
 		this.object = object;
 	}
+
+	@Override
+	public String toString() {
+		return "subject=" + subject + ", predicate=" + predicate + ", object=" + object + '}';
+	}	
 }
