@@ -42,7 +42,7 @@ public abstract class QueryExecutorAdapter<T> implements QueryExecutor<T> {
   private final List<String> bindNames = new ArrayList<>();
   private String sparql;
   protected T result;
-  private boolean infer = true;
+  private boolean infer = false;
 
   public QueryExecutorAdapter() {
   }
