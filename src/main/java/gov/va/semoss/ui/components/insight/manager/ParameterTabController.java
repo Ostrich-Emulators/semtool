@@ -102,8 +102,11 @@ public class ParameterTabController extends InsightManagerController {
               }
            }
         });
-		//Run the Task on a separate Thread:
-		new Thread(saveParameter).start();
+		//Display a query-validation dialog if query is invalid. Save if user presses "Ok":
+		if(imc.queryValidationDialog(parameter.getDefaultQuery()) == true){
+		   //Run the Task on a separate Thread:
+		   new Thread(saveParameter).start();
+		}
 	}
 
 }//End "ParameterTabController" class.
