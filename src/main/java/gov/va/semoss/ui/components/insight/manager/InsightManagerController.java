@@ -1,10 +1,22 @@
 package gov.va.semoss.ui.components.insight.manager;
 
+import static org.junit.Assert.assertEquals;
+
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+
+import org.openrdf.model.ValueFactory;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.GraphQuery;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
@@ -35,6 +47,8 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
+import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.Utility;
@@ -842,6 +856,59 @@ public class  InsightManagerController implements Initializable{
 		strReturnValue = strReturnValue.replaceAll( "\"", "'" );
 
 		return strReturnValue;
+	}
+	
+	/**   If the passed-in query is invalid or cannot be executed, this method
+	 * displays a dialog, indicating the problem, and asks the user if he would
+	 * like to save the query anyway. Returns true if the query is valid and can
+	 * be executed, or if the user clicks "Ok" on the dialog. If the user cancels
+	 * out of the dialog, or closes it, false is returned.
+	 * 
+	 * @param strQuery -- (String) A query to test.
+	 * 
+	 * @return queryValidationDialog -- (boolean) Described above.
+	 */
+	public boolean queryValidationDialog(String strQuery){
+		boolean boolReturnValue = true;
+		String exception = "";
+		
+		QueryExecutorAdapter<String> querySelect = new QueryExecutorAdapter<String>() {
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+               //Nothing is done here.
+			}
+		};		
+		try{
+			if(strQuery.toUpperCase().startsWith("SELECT")){
+			   querySelect.setSparql(strQuery);
+			   engine.query(querySelect);
+			   
+			}else if(strQuery.toUpperCase().startsWith("CONSTRUCT")){
+				Repository repo = engine.getInsightManager().getRepository();
+				RepositoryConnection rc = null;
+			    rc = repo.getConnection();
+                strQuery = AbstractSesameEngine.processNamespaces(strQuery);
+				rc.prepareGraphQuery(QueryLanguage.SPARQL, strQuery);
+			}else{
+				exception += "   The query must begin with SELECT or CONSTRUCT.\n";
+			}
+		}catch(MalformedQueryException e){
+			exception += "   The query is malformed.\n";			
+		} catch (Exception e) {
+			exception += "   The query cannot be evaluated as written.\n";
+		}
+		
+		if(exception.equals("") == false){
+			int msgResponse = Utility.showWarningOkCancel("The following problems exist with your query:\n" +
+		       exception + "Would you still like to save it?");
+
+			if(msgResponse == 0){
+				boolReturnValue = true;
+			}else{
+		        boolReturnValue = false;
+			}
+		}		
+		return boolReturnValue;
 	}
 
 

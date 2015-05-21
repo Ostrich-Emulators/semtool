@@ -303,8 +303,11 @@ public class InsightTabController extends InsightManagerController {
               }
            }
         });
-		//Run the Task on a separate Thread:
-		new Thread(saveInsight).start();
+		//Display a query-validation dialog if query is invalid. Save if user presses "Ok":
+		if(imc.queryValidationDialog(insight.getSparql()) == true){
+		   //Run the Task on a separate Thread:
+		   new Thread(saveInsight).start();
+		}
 	}
 
 }//End "InsightTabController" class.
