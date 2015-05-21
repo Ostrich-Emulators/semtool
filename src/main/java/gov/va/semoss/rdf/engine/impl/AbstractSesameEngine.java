@@ -371,7 +371,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		return ret;
 	}
 
-	private static String processNamespaces( String rawsparql ) {
+	public static String processNamespaces( String rawsparql ) {
 		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
 		namespaces.putAll( Utility.DEFAULTNAMESPACES );
 

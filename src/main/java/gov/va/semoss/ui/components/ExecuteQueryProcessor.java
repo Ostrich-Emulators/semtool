@@ -13,6 +13,7 @@ import org.openrdf.model.impl.URIImpl;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
@@ -110,8 +111,13 @@ public class ExecuteQueryProcessor {
 	private IPlaySheet processUpdateQuery( String query ) {
 		//create UpdateProcessor class.  Set the query.  Let it run.
 		UpdateProcessor processor = new UpdateProcessor();
+        
+        //Add a line of namespace prefixes to the top of the query for processing:
+        query = AbstractSesameEngine.processNamespaces(query);
+
 		processor.setQuery( query );
 		processor.processQuery();
+		
 		return playSheet;
 	}
 

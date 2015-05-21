@@ -3,7 +3,6 @@ package gov.va.semoss.ui.components.insight.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.prefs.Preferences;
 
 import org.openrdf.model.URI;
 
@@ -236,7 +235,6 @@ public class InsightTabController extends InsightManagerController {
 		Collection<Perspective> colPerspectivesToAddInsight = new ArrayList<Perspective>();
 		Collection<Perspective> colPerspectivesToRemoveInsight = new ArrayList<Perspective>();
 		Collection<Perspective> colEndangeredPerspectives = new ArrayList<Perspective>();
-		Preferences prefs = Preferences.userRoot();
 		
 		//Set Insight fields from "Insight" tab in UI:
 		insight.setLabel(imc.legalizeQuotes(imc.txtQuestion_Inst.getText().trim()));
@@ -303,8 +301,11 @@ public class InsightTabController extends InsightManagerController {
               }
            }
         });
-		//Run the Task on a separate Thread:
-		new Thread(saveInsight).start();
+		//Display a query-validation dialog if query is invalid. Save if user presses "Ok":
+		if(imc.queryValidationDialog(insight.getSparql()) == true){
+		   //Run the Task on a separate Thread:
+		   new Thread(saveInsight).start();
+		}
 	}
 
 }//End "InsightTabController" class.

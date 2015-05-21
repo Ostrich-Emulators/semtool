@@ -2,12 +2,9 @@ package gov.va.semoss.rdf.engine.impl;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.prefs.Preferences;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDFS;
@@ -30,9 +27,6 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
 public class WriteableInsightTabImpl implements WriteableInsightTab {
@@ -301,7 +295,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
              + "?body sp:text \"" + sparql + "\" . "
              + "?insightURI dcterms:description \"" + description + "\" . "
              + "?insightURI dcterms:creator \"" + creator + "\" . "
-             + "?insightURI dcterms:modified \"" + modified + "\" . } "
+             + "?insightURI dcterms:modified \"" + modified + "\"^^xsd:dateTime . } "
              + "WHERE { BIND(" + insightURI_String + " AS ?insightURI) . "
              + "?insightURI rdfs:label ?question . "
              + "?insightURI ui:dataView ?dataViewOutput . "

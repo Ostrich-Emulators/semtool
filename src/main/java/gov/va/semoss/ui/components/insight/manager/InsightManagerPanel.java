@@ -2,7 +2,6 @@ package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.ui.components.RepositoryList;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
@@ -10,8 +9,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 import javax.swing.*;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 

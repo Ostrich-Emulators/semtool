@@ -1,7 +1,5 @@
 package gov.va.semoss.ui.components.insight.manager;
 
-import org.openrdf.model.URI;
-
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.util.Utility;

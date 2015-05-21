@@ -5,45 +5,30 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
-import gov.va.semoss.model.vocabulary.OLO;
-import gov.va.semoss.model.vocabulary.SP;
-import gov.va.semoss.model.vocabulary.SPIN;
-import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DeterministicSanitizer;
-import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.UriSanitizer;
-import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.prefs.Preferences;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.Update;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -62,7 +47,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
   private boolean haschanges = false;
   private final UriSanitizer sanitizer = new DeterministicSanitizer();
   private final Collection<Statement> initialStatements = new ArrayList<>();
-  private final Pattern pattern = Pattern.compile( "^(\\w+)(.*)$" );
   
   private WriteablePerspectiveTabImpl wpt;
   private WriteableInsightTabImpl wit;
