@@ -79,6 +79,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import org.apache.commons.collections15.Predicate;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
@@ -270,7 +271,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method initVisualizer.
 	 */
 	protected void initVisualizer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		viewer.setRenderer( new BasicRenderer<>() );
+		viewer.setRenderer( new SemossBasicRenderer() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
 		viewer.setGraphMouse( new GraphNodeListener( this ) );
@@ -719,6 +720,49 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public ControlPanel getSearchPanel() {
 		return controlPanel;
+	}
+	
+	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
+
+		Predicate<SEMOSSEdge> edgehider = new Predicate<SEMOSSEdge>() {
+
+			@Override
+			public boolean evaluate( SEMOSSEdge v ) {
+				return ( v.isVisible() && v.getLevel() <= overlayLevel
+						&& v.getInVertex().isVisible() && v.getOutVertex().isVisible() );
+			}
+		};
+
+		@Override
+		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext,
+				Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
+
+			try {
+
+				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
+					if ( edgehider.evaluate( e ) ) {
+						renderEdge( renderContext, layout, e );
+						renderEdgeLabel( renderContext, layout, e );
+					}
+				}
+			}
+			catch ( ConcurrentModificationException cme ) {
+				renderContext.getScreenDevice().repaint();
+			}
+
+			// paint all the vertices
+			try {
+				for ( SEMOSSVertex v : layout.getGraph().getVertices() ) {
+					if ( predicate.evaluate( v ) ) {
+						renderVertex( renderContext, layout, v );
+						renderVertexLabel( renderContext, layout, v );
+					}
+				}
+			}
+			catch ( ConcurrentModificationException cme ) {
+				renderContext.getScreenDevice().repaint();
+			}
+		}
 	}
 
 	private class HidingPredicate implements Predicate<SEMOSSVertex> {

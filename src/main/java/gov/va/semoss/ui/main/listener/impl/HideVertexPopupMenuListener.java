@@ -53,6 +53,7 @@ public class HideVertexPopupMenuListener extends AbstractAction {
 			gps.getFilterData().addNodeToFilter( vertex );
 			vertex.setVisible( false );
 		}
-		gps.updateLayout();
+
+		gps.getView().repaint();
 	}
 }

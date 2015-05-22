@@ -19,6 +19,9 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.util.EdgeType;
+import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import java.awt.event.ActionEvent;
 
@@ -30,19 +33,34 @@ import javax.swing.AbstractAction;
  */
 public class UnHideVertexPopupMenuListener extends AbstractAction {
 
-	GraphPlaySheet ps;
+	private final GraphPlaySheet gps;
 
 	public UnHideVertexPopupMenuListener( GraphPlaySheet gps ) {
 		super( "Unhide Nodes" );
-		ps = gps;
+		this.gps = gps;
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		for ( SEMOSSVertex v : ps.getGraphData().getGraph().getVertices() ) {
-			v.setVisible( true );
+		
+		Graph<SEMOSSVertex, SEMOSSEdge> realg = gps.getGraphData().getGraph();
+		Graph<SEMOSSVertex, SEMOSSEdge> vizg = gps.getView().getGraphLayout().getGraph();
+
+		for ( SEMOSSVertex v : realg.getVertices() ) {
+			if( !v.isVisible() ){
+				v.setVisible( true );
+				vizg.addVertex( v );
+			}
 		}
-		ps.getFilterData().unfilterAll();
-		ps.updateLayout();
+		
+		for ( SEMOSSEdge v : realg.getEdges() ) {
+			if( !vizg.containsEdge( v ) ){
+				v.setVisible( true );
+				vizg.addEdge( v, realg.getSource( v ), realg.getDest( v ), EdgeType.DIRECTED );
+			}
+		}
+		
+		gps.getFilterData().unfilterAll();
+		gps.getView().repaint();		
 	}
 }
