@@ -45,9 +45,13 @@ public class ParameterTabController extends InsightManagerController {
 		String strVariable = "?" + imc.legalizeQuotes(imc.txtVariable_parm.getText().trim());
         String strParameterType = ((ParameterType) imc.cboParameterType_parm.getValue()).getParameterClass();
         if(strParameterType != null && strParameterType.equals("") == false){
-		   // TBD: This is insufficient and added to get past the 5/15 demo.  A prefix resolver API
-		   //      should be used to map the URI to an appropriate prefixed name.
-		   strParameterType = strParameterType.replace( "http://semoss.org/ontologies/", "semoss:" );
+		   //Note: A generalized prefix resolver API should be used here 
+           //to map the URI to an appropriate prefixed name:
+           if(strParameterType.contains("http://semoss.org/ontologies/") == true){
+		      strParameterType = strParameterType.replace( "http://semoss.org/ontologies/", "semoss:" );
+           }else{
+        	  strParameterType = "<" + strParameterType + ">";
+           }
 		   String generatedQuery = "SELECT " + strVariable + " ?label " +
 		      "\nWHERE{\n    " + strVariable + " a " + strParameterType + " . \n    " +
 		      strVariable + " rdfs:label ?label . \n}";

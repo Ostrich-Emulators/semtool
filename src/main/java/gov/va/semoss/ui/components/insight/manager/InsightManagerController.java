@@ -804,11 +804,17 @@ public class  InsightManagerController implements Initializable{
         Parameter parameter = arylParameters.get(parameterIndex);
 	    cboParameterType_parm.setItems(arylParameterTypes);
 	    
+	    boolean boolSelected = false;
 	    for(ParameterType valueType: cboParameterType_parm.getItems()){
 	    	if(parameter.getParameterType().equals(valueType.getParameterClass())){
 	    		cboParameterType_parm.getSelectionModel().select(valueType);
+	    		boolSelected = true;
 	    		break;
 	    	}
+	    }
+	    //If nothing has been selected, the select the "(Unselected)" item:
+	    if(boolSelected == false){
+    		cboParameterType_parm.getSelectionModel().selectFirst();
 	    }
 	}
 	
