@@ -75,7 +75,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		setSelectedNodes( verts );
 	}
 
-	public DistanceDownstreamProcessor( DelegateForest df ) {
+	public DistanceDownstreamProcessor( DelegateForest<SEMOSSVertex, SEMOSSEdge> df ) {
 		forest = df;
 	}
 

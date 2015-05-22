@@ -19,28 +19,25 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.visualization.RenderContext;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-
 
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.algorithm.impl.DistanceDownstreamProcessor;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.PaintTransformer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
-import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -54,8 +51,8 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 
 		ALL( "Highlight All Downstream", "Highlights all downstream nodes adjacent to the selected node" ),
 		ADJACENT( "Highlight Adjacent", "Highlights nodes adjacent to selected node" ),
-		UPSTREAM( "Highlight Downstream", "Highlights downstream nodes adjacent to selected node" ),
-		DOWNSTREAM( "Highlight Upstream", "Highlights upstream nodes adjacent to selected node" );
+		DOWNSTREAM( "Highlight Downstream", "Highlights downstream nodes adjacent to selected node" ),
+		UPSTREAM( "Highlight Upstream", "Highlights upstream nodes adjacent to selected node" );
 		public final String name;
 		public final String tooltip;
 
@@ -65,125 +62,88 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		}
 	};
 
-	GraphPlaySheet ps = null;
-	SEMOSSVertex[] vertices = null;
+	private final GraphPlaySheet ps;
+	private final List<SEMOSSVertex> vertices;
 	private final Type type;
 
 	private static final Logger logger = Logger.getLogger( AdjacentPopupMenuListener.class );
 
-	public AdjacentPopupMenuListener( Type type, GraphPlaySheet gps, SEMOSSVertex[] verts ) {
+	public AdjacentPopupMenuListener( Type type, GraphPlaySheet gps,
+			Collection<SEMOSSVertex> verts ) {
 		super( type.name );
 		ps = gps;
-		vertices = verts;
+		vertices = new ArrayList<>( verts );
 		this.type = type;
-		setEnabled( vertices.length > 0 );
+		setEnabled( !vertices.isEmpty() );
 		putValue( Action.SHORT_DESCRIPTION, type.tooltip );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		Collection<List<SEMOSSEdge>> allPlaySheetEdges = ps.getFilterData().getEdgeTypeHash().values();
-		List<SEMOSSEdge> allEdgesVect = new ArrayList<>();
-		for ( List<SEMOSSEdge> v : allPlaySheetEdges ) {
-			allEdgesVect.addAll( v );
-		}
-		logger.debug( "Getting the base graph" );
+		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = ps.getView().getRenderContext();
 
-		//Get what edges are already highlighted so that we can just add to it
-		//Get what vertices are already painted so we can just add to it
-		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
-		Set<SEMOSSEdge> edgeHash = tx.getSelectedEdges();
+		EdgeStrokeTransformer etx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
 
-		PaintTransformer vtx = (PaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
 		PickedState state = ps.getView().getPickedVertexState();
-		Set<SEMOSSVertex> vertHash = new HashSet<>( state.getPicked() );
-
+		Set<SEMOSSVertex> selectedVerts = new HashSet<>( state.getPicked() );
+		Set<SEMOSSEdge> selectedEdges = new HashSet<>( etx.getSelectedEdges() );
 		state.clear();
 
 		//if it is All, must use distance downstream processor to get all of the edges
 		if ( Type.ALL != type ) {
-			for ( int vertIndex = 0; vertIndex < vertices.length; vertIndex++ ) {
-				SEMOSSVertex vert = vertices[vertIndex];
-				logger.debug( "In Edges count is " + vert.getInEdges().size() );
-				logger.debug( "Out Edges count is " + vert.getOutEdges().size() );
-				vertHash.add( vert );
+			for ( SEMOSSVertex vert : vertices ) {
+				selectedVerts.add( vert );
 
 				//if the button name contains upstream, get the upstream edges and vertices
-				if ( Type.ADJACENT == type || Type.DOWNSTREAM == type ) {
-					edgeHash.addAll( vert.getOutEdges() );
-					for ( SEMOSSEdge edge : vert.getOutEdges() ) {
-						if ( allEdgesVect.contains( edge ) ) {
-							vertHash.add( edge.getInVertex() );
-							state.pick( edge.getInVertex(), true );
-						}
-					}
+				if ( Type.ADJACENT == type ) {
+					selectedEdges.addAll( vert.getInEdges() );
+					selectedEdges.addAll( vert.getOutEdges() );
 				}
-
-				//if the button name contains downstream, get the downstream edges and vertices
-				if ( Type.ADJACENT == type || Type.UPSTREAM == type ) {
-					edgeHash.addAll(  vert.getInEdges() );
-					for ( SEMOSSEdge edge : vert.getInEdges() ) {
-						if ( allEdgesVect.contains( edge ) ) {
-							vertHash.add( edge.getOutVertex() );
-							state.pick( edge.getOutVertex(), true );
-						}
-					}
+				else if ( Type.DOWNSTREAM == type ) {
+					selectedEdges.addAll( vert.getOutEdges() );
 				}
-
+				else {
+					selectedEdges.addAll( vert.getInEdges() );
+				}
 			}
 		}
 		else if ( Type.ALL == type ) {
-			DistanceDownstreamProcessor ddp 
-					= new DistanceDownstreamProcessor(ps, Arrays.asList( vertices ) );
-			ddp.execute();
-			//use the master hash to set the nodes and edges
-			Hashtable masterHash = ddp.masterHash;
-			Iterator masterIt = masterHash.keySet().iterator();
-			while ( masterIt.hasNext() ) {
-				SEMOSSVertex vert = (SEMOSSVertex) masterIt.next();
-				Hashtable vHash = (Hashtable) masterHash.get( vert );
-				List<SEMOSSEdge> parentEdgePath = (ArrayList<SEMOSSEdge>) vHash.get(ddp.EDGEPATH );
-				edgeHash.addAll( parentEdgePath );
-				for ( SEMOSSEdge edge : parentEdgePath ) {
-					if ( allEdgesVect.contains( edge ) ) {
-						vertHash.add( edge.getOutVertex() );
-						vertHash.add( edge.getInVertex() );
-						state.pick( edge.getOutVertex(), true );
-						state.pick( edge.getInVertex(), true );
+			// get all downstream nodes
+			Set<SEMOSSVertex> seen = new HashSet<>();
+			Deque<SEMOSSVertex> todo = new ArrayDeque<>( vertices );
+			while ( !todo.isEmpty() ) {
+				SEMOSSVertex v = todo.pop();
+				selectedVerts.add( v );
+				seen.add( v );
+
+				for ( SEMOSSEdge ed : v.getOutEdges() ) {
+					selectedEdges.add( ed );
+
+					SEMOSSVertex v2 = ed.getInVertex();
+					if ( !seen.contains( v2 ) ) { // don't add a node we've already seen
+						todo.push( v2 );
 					}
 				}
 			}
-
 		}
-		ps.getView().setPickedVertexState( state );
 
-		tx.setSelectedEdges( edgeHash );
-		vtx.setSelected( vertHash );
-		LabelFontTransformer vlft = (LabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setSelected( vertHash );
+		for ( SEMOSSEdge ed : selectedEdges ) {
+			selectedVerts.add( ed.getInVertex() );
+			selectedVerts.add( ed.getOutVertex() );
+		}
+
+		for ( SEMOSSVertex v : selectedVerts ) {
+			state.pick( v, true );
+		}
+
+		etx.setSelectedEdges( selectedEdges );
+
+		LabelFontTransformer vlft = (LabelFontTransformer) rc.getVertexFontTransformer();
+		vlft.setSelected( selectedVerts );
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( edgeHash );
+		atx.setEdges( selectedEdges );
 
 		// repaint it
 		ps.getView().repaint();
 	}
-
-	/**
-	 * Method putEdgesInHash. Puts the new relationships in the in-memory graph
-	 * hashtable.
-	 *
-	 * @param edges Vector<DBCMEdge> The Vector of new edges.
-	 * @param hash Hashtable<String,DBCMEdge> The hashtable to be updated.
-	 *
-	 * @return Hashtable<String,DBCMEdge> The updated hashtable.
-	 */
-	private Map<SEMOSSEdge, Double> putEdgesInHash( Collection<SEMOSSEdge> edges,
-			Map<SEMOSSEdge, Double> hash ) {
-		for ( SEMOSSEdge e : edges ) {
-			hash.put( e, 1d ); // RPB: I'm just making this up.
-		}
-
-		return hash;
-	}
-
 }

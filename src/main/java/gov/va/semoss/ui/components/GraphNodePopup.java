@@ -189,23 +189,25 @@ public class GraphNodePopup extends JPopupMenu {
 	}
 
 	private void addHighlightingOptions() {
+		List<SEMOSSVertex> verts = Arrays.asList( highlightedVertices );
+
 		AdjacentPopupMenuListener highAdjBoth
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.ADJACENT,
-						gps, highlightedVertices );
+						gps, verts );
 
 		JMenu moreHighlight = new JMenu( "More Highlight Options" );
 
 		AdjacentPopupMenuListener highAdjDown
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.DOWNSTREAM,
-						gps, highlightedVertices );
+						gps, verts );
 
 		AdjacentPopupMenuListener highAdjUp
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.UPSTREAM,
-						gps, highlightedVertices );
+						gps, verts );
 
 		AdjacentPopupMenuListener highAdjAll
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.ALL,
-						gps, highlightedVertices );
+						gps, verts );
 
 		MSTPopupMenuListener MST = new MSTPopupMenuListener( gps );
 
