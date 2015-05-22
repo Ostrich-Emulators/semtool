@@ -29,6 +29,7 @@ public class AbstractNodeEdgeBase {
 	private String colorString;
 	private final Map<URI, Object> properties = new HashMap<>();
 	private URI id;
+	private boolean visible = true;
 
 	public AbstractNodeEdgeBase( URI id ) {
 		this( id, null, id.getLocalName() );
@@ -64,6 +65,14 @@ public class AbstractNodeEdgeBase {
 
 	public String getColorString() {
 		return colorString;
+	}
+
+	public void setVisible( boolean b ) {
+		visible = b;
+	}
+
+	public boolean isVisible() {
+		return visible;
 	}
 
 	/**

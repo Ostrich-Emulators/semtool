@@ -452,10 +452,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) rc.getArrowDrawPaintTransformer();
 		atx.setEdges( null );
 		VertexShapeTransformer vst = (VertexShapeTransformer) rc.getVertexShapeTransformer();
-		vst.setVertexSizeHash( new HashMap<>() );
+		vst.emptySelected();
 
 		Set<SEMOSSVertex> verts = ( controlPanel.isHighlightButtonSelected()
 				? view.getPickedVertexState().getPicked() : null );
+		view.getPickedVertexState().clear();
+
 		PaintTransformer ptx = (PaintTransformer) rc.getVertexFillPaintTransformer();
 		LabelFontTransformer vfl = (LabelFontTransformer) rc.getVertexFontTransformer();
 		ptx.setSelected( verts );
@@ -631,9 +633,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		boolean increaseFont = ( incr > 0 );
 
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = view;
-		LabelFontTransformer<SEMOSSVertex> transformerV 
+		LabelFontTransformer<SEMOSSVertex> transformerV
 				= (LabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-		LabelFontTransformer<SEMOSSEdge> transformerE 
+		LabelFontTransformer<SEMOSSEdge> transformerE
 				= (LabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
 
 		//if no vertices or edges are selected, perform action on all vertices and edges
@@ -686,10 +688,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
 
 		@Override
-		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext, Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
+		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext, 
+				Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
 			try {
 				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
-					if ( e.getLevel() <= overlayLevel ) {
+					if ( e.isVisible() && e.getLevel() <= overlayLevel
+							&& e.getInVertex().isVisible() && e.getOutVertex().isVisible() ) {
+
 						renderEdge(
 								renderContext,
 								layout,
@@ -708,7 +713,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			// paint all the vertices
 			try {
 				for ( SEMOSSVertex v : layout.getGraph().getVertices() ) {
-					if ( v.getLevel() <= overlayLevel ) {
+					if ( v.isVisible() && v.getLevel() <= overlayLevel ) {
 						renderVertex(
 								renderContext,
 								layout,

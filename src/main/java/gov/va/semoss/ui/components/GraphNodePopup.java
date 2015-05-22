@@ -105,7 +105,8 @@ public class GraphNodePopup extends JPopupMenu {
 		addSeparator();
 
 		JMenuItem item = add( "Hide Nodes" );
-		item.addActionListener( new HideVertexPopupMenuListener( gps, highlightedVertices ) );
+		item.addActionListener( new HideVertexPopupMenuListener( gps,
+				Arrays.asList( highlightedVertices ) ) );
 		item.setEnabled( highlightedVertices.length > 0 && gps.areNodesHidable() );
 
 		item = add( "Unhide Nodes" );

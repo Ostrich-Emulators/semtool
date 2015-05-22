@@ -50,6 +50,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
+import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -118,7 +119,7 @@ public class SearchController implements KeyListener, FocusListener,
 			handleDeselectionOfButton();
 		}
 
-		gps.resetTransformers();
+		// gps.resetTransformers();
 	}
 
 	private void handleSelectionOfButton() {
@@ -293,51 +294,60 @@ public class SearchController implements KeyListener, FocusListener,
 	 * @param jenaModel Model
 	 */
 	public void indexGraph( Graph<SEMOSSVertex, SEMOSSEdge> graph, IEngine engine ) {
-		try {
-			if ( null != reader ) {
+		SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
+
+			@Override
+			protected Void doInBackground() throws Exception {
+
+				Set<Resource> needLabels = new HashSet<>();
+				for ( SEMOSSEdge e : graph.getEdges() ) {
+					needLabels.addAll( e.getProperties().keySet() );
+				}
+				for ( SEMOSSVertex e : graph.getVertices() ) {
+					needLabels.addAll( e.getProperties().keySet() );
+				}
+
+				Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine );
+				RepositoryIndexer ri = new RepositoryIndexer( labels );
+
+				for ( SEMOSSEdge e : graph.getEdges() ) {
+					ri.handleProperties( e.getURI(), e.getProperties() );
+				}
+				for ( SEMOSSVertex v : graph.getVertices() ) {
+					vertStore.put( v.getURI(), v );
+					ri.handleProperties( v.getURI(), v.getProperties() );
+				}
+
+				ri.finish();
+				return null;
+			}
+
+			@Override
+			public void done() {
 				try {
-					reader.close();
+					if ( null == reader ) {
+						reader = IndexReader.open( ramdir );
+					}
+					else {
+						IndexReader rdr = IndexReader.openIfChanged( reader );
+						if ( null != rdr ) {
+							reader = rdr;
+						}
+						
+						searcher.close();
+					}
+
+					searcher = new IndexSearcher( reader );
+					searchText.setEnabled( true );
 				}
-				catch ( Exception e ) {
-					log.warn( e, e );
+				catch ( IOException ioe ) {
+					log.warn( "cannot read newly-created search index", ioe );
+					searchText.setEnabled( false );
 				}
 			}
-			if ( null != searcher ) {
-				try {
-					searcher.close();
-				}
-				catch ( Exception e ) {
-					log.warn( e, e );
-				}
-			}
+		};
 
-			Set<Resource> needLabels = new HashSet<>();
-			for ( SEMOSSEdge e : graph.getEdges() ) {
-				needLabels.addAll( e.getProperties().keySet() );
-			}
-			for ( SEMOSSVertex e : graph.getVertices() ) {
-				needLabels.addAll( e.getProperties().keySet() );
-			}
-
-			Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine );
-			RepositoryIndexer ri = new RepositoryIndexer( labels );
-
-			for ( SEMOSSEdge e : graph.getEdges() ) {
-				ri.handleProperties( e.getURI(), e.getProperties() );
-			}
-			for ( SEMOSSVertex v : graph.getVertices() ) {
-				vertStore.put( v.getURI(), v );
-				ri.handleProperties( v.getURI(), v.getProperties() );
-			}
-
-			ri.finish();
-
-			reader = IndexReader.open( ramdir );
-			searcher = new IndexSearcher( reader );
-		}
-		catch ( IOException ex ) {
-			log.error( ex, ex );
-		}
+		sw.execute();
 	}
 
 	/**
@@ -373,7 +383,8 @@ public class SearchController implements KeyListener, FocusListener,
 	 * @param arg0 KeyEvent
 	 */
 	@Override
-	public void keyReleased( KeyEvent arg0 ) {
+	public
+			void keyReleased( KeyEvent arg0 ) {
 	}
 
 	private class RepositoryIndexer {
@@ -387,6 +398,7 @@ public class SearchController implements KeyListener, FocusListener,
 			labels = labs;
 			IndexWriterConfig config
 					= new IndexWriterConfig( Version.LUCENE_36, analyzer );
+			config.setOpenMode( IndexWriterConfig.OpenMode.CREATE );
 			try {
 				indexer = new IndexWriter( ramdir, config );
 			}

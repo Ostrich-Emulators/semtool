@@ -15,13 +15,13 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import gov.va.semoss.om.SEMOSSVertex;
 import java.awt.event.ActionEvent;
 
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import javax.swing.AbstractAction;
 
@@ -39,7 +39,10 @@ public class UnHideVertexPopupMenuListener extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
+		for ( SEMOSSVertex v : ps.getGraph().getVertices() ) {
+			v.setVisible( true );
+		}
 		ps.getFilterData().unfilterAll();
-		ps.refineView();
+		ps.getView().repaint();
 	}
 }
