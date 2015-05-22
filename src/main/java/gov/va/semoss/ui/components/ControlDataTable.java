@@ -19,30 +19,26 @@
  */
 package gov.va.semoss.ui.components;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import javax.swing.table.AbstractTableModel;
-
-import org.apache.log4j.Logger;
-
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.PropComparator;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import javax.swing.table.AbstractTableModel;
+
 import org.openrdf.model.URI;
 
 /**
  * This class is used to keep track of specific properties for a table.
  */
 public class ControlDataTable {
-
-	private static Logger logger = Logger.getLogger( ControlDataTable.class );
-
 	private List<ControlDataRow> data = new ArrayList<>();
 	private Class<?>[] rowClasses = { URI.class, URI.class, Boolean.class,
 		Boolean.class, String.class };
@@ -244,9 +240,11 @@ public class ControlDataTable {
 		public Object getValueAt( int row, int column ) {
 			ControlDataRow cdr = data.get( row );
 			switch ( column ) {
-				case 0:
-					return cdr.type;
-				case 1:
+				case 0: {
+					if ( Constants.ANYNODE.equals( cdr.prop ) )
+						return cdr.type;
+					return "";
+				} case 1:
 					return cdr.prop;
 				case 2:
 					return cdr.label;
@@ -301,7 +299,6 @@ public class ControlDataTable {
 	}
 
 	public class ControlDataRow {
-
 		URI type;
 		URI prop;
 		boolean label;

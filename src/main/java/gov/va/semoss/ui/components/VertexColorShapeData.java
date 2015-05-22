@@ -36,8 +36,9 @@ import org.openrdf.model.URI;
  * This class is used primarily for vertex filtering.
  */
 public class VertexColorShapeData extends AbstractTableModel {
-
+	private static final long serialVersionUID = -8530913683566271008L;
 	private final static Logger logger = Logger.getLogger( VertexColorShapeData.class );
+	
 	private Map<URI, List<SEMOSSVertex>> typeHash = new HashMap<>();
 	private static final String[] scColumnNames = { "Node", "Instance", "Shape", "Color" };
 	private String[][] shapeColorRows;
