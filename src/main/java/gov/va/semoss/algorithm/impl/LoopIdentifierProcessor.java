@@ -46,7 +46,7 @@ import javax.swing.AbstractAction;
 public class LoopIdentifierProcessor extends AbstractAction implements IAlgorithm {
 
 	private final DelegateForest<SEMOSSVertex, SEMOSSEdge> forest;
-	private final List<SEMOSSVertex> selectedVerts = new ArrayList<>();
+	private final List<SEMOSSVertex> selectedVerts;
 	private final GridFilterData gfd = new GridFilterData();
 	private final GraphPlaySheet playSheet;
 	private final Set<SEMOSSEdge> nonLoopEdges = new HashSet<>();
@@ -58,11 +58,11 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	private final  List<SEMOSSVertex> currentPathVerts = new ArrayList<>();//these are used for depth search first
 	private final  List<SEMOSSEdge> currentPathEdges = new ArrayList<>();
 
-	public LoopIdentifierProcessor( GraphPlaySheet gps, SEMOSSVertex[] verts ) {
+	public LoopIdentifierProcessor( GraphPlaySheet gps, Collection<SEMOSSVertex> verts ) {
 		super( "Loop Identifier" );
 		playSheet = gps;
 		forest = playSheet.getForest();
-		setSelectedNodes( verts );
+		selectedVerts = new ArrayList<>( verts );
 	}
 
 	@Override
