@@ -203,14 +203,6 @@ public class GraphDataModel {
 		 */
 	}
 
-	private Map<URI, SEMOSSVertex> getVertStore() {
-		return this.vertStore;
-	}
-
-	private Map<URI, SEMOSSEdge> getEdgeStore() {
-		return this.edgeStore;
-	}
-
 	public Set<String> getBaseFilterSet() {
 		return baseFilterSet;
 	}
