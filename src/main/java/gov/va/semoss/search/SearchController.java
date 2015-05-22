@@ -152,14 +152,7 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	private void handleDeselectionOfButton() {
-		oldTx.setSelected( null );
-		oldeTx.setSelectedEdges( null );
-		gps.getVertexLabelFontTransformer().setSelected( null );
-		gps.getEdgeLabelFontTransformer().setSelected( null );
-		gps.getEdgeLabelFontTransformer().setNormalFontSize( oldfontsize );
-		oldsTx.emptySelected();
-		oldeTx.reset( oldedgesize, -1, -1 );
-		gps.getView().repaint();
+		gps.resetTransformers();
 
 		if ( !searchText.getText().isEmpty() ) {
 			searchStatement( searchText.getText() );

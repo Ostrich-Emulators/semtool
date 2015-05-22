@@ -227,9 +227,9 @@ public class ControlPanel extends JPanel {
 	 * @param lay Layout
 	 */
 	public void setGraphLayout( Layout<SEMOSSVertex, SEMOSSEdge> lay,
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> forest ) {
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
 		if ( lay instanceof BalloonLayout || lay instanceof RadialTreeLayout ) {
-			ringsListener.setGraph( new DelegateForest<>( forest ) );
+			ringsListener.setGraph( new DelegateForest<>( graph ) );
 			ringsButton.setEnabled( true );
 		}
 		else {

@@ -39,10 +39,10 @@ public class UnHideVertexPopupMenuListener extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		for ( SEMOSSVertex v : ps.getGraph().getVertices() ) {
+		for ( SEMOSSVertex v : ps.getGraphData().getGraph().getVertices() ) {
 			v.setVisible( true );
 		}
 		ps.getFilterData().unfilterAll();
-		ps.getView().repaint();
+		ps.updateLayout();
 	}
 }

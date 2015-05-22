@@ -19,12 +19,12 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -79,7 +79,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
+import org.apache.commons.collections15.Predicate;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 
@@ -109,6 +109,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	protected int overlayLevel = 0;
 	protected int maxOverlayLevel = 0;
+	private final HidingPredicate predicate = new HidingPredicate();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -157,12 +158,38 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return new DelegateForest<>( gdm.getGraph() );
 	}
 
+	/**
+	 * Gets the visible graph as a SimpleGraph. This function differs from 
+	 * {@link GraphDataModel#asSimpleGraph() } because only visible nodes are
+	 * included
+	 *
+	 * @return
+	 */
 	public SimpleGraph<SEMOSSVertex, SEMOSSEdge> asSimpleGraph() {
-		return gdm.asSimpleGraph();
+		Graph<SEMOSSVertex, SEMOSSEdge> visible = getVisibleGraph();
+
+		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph
+				= new SimpleGraph<>( SEMOSSEdge.class );
+
+		for ( SEMOSSVertex v : visible.getVertices() ) {
+			graph.addVertex( v );
+		}
+		for ( SEMOSSEdge v : visible.getEdges() ) {
+			graph.addEdge( v.getInVertex(), v.getOutVertex(), v );
+		}
+
+		return graph;
 	}
 
-	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
-		return gdm.getGraph();
+	/**
+	 * This function differs from {@link GraphDataModel#getGraph() } because only
+	 * visible nodes are included
+	 *
+	 * @return
+	 */
+	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getVisibleGraph() {
+		VertexPredicateFilter filter = new VertexPredicateFilter<>( predicate );
+		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) filter.transform( gdm.getGraph() );
 	}
 
 	public boolean getSudowl() {
@@ -183,7 +210,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void undoView() {
 		if ( overlayLevel > 1 ) {
 			overlayLevel--;
-			view.repaint();
+			updateLayout();
 			setUndoRedoBtn();
 		}
 	}
@@ -194,9 +221,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void redoView() {
 		if ( overlayLevel < maxOverlayLevel ) {
 			overlayLevel++;
-			view.repaint();
+			updateLayout();
 			setUndoRedoBtn();
 		}
+	}
+
+	public void updateLayout() {
+		VertexPredicateFilter filter = new VertexPredicateFilter<>( predicate );
+		Layout<SEMOSSVertex, SEMOSSEdge> layout = view.getGraphLayout();
+		layout.setGraph( filter.transform( gdm.getGraph() ) );
+		view.setGraphLayout( layout );
 	}
 
 	@Override
@@ -236,7 +270,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method initVisualizer.
 	 */
 	protected void initVisualizer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		viewer.setRenderer( new SemossBasicRenderer() );
+		viewer.setRenderer( new BasicRenderer<>() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
 		viewer.setGraphMouse( new GraphNodeListener( this ) );
@@ -257,8 +291,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		ArrowFillPaintTransformer aft = new ArrowFillPaintTransformer();
 
 		//keep the stored one if possible
-		vlft = new LabelFontTransformer<SEMOSSVertex>();
-		elft = new LabelFontTransformer<SEMOSSEdge>();
+		vlft = new LabelFontTransformer<>();
+		elft = new LabelFontTransformer<>();
 		vsht = new VertexShapeTransformer();
 
 		viewer.setBackground( Color.WHITE );
@@ -356,9 +390,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		boolean ok = false;
 		Layout<SEMOSSVertex, SEMOSSEdge> layout;
+
+		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter
+				= new VertexPredicateFilter<>( predicate );
+		Graph<SEMOSSVertex, SEMOSSEdge> graph = filter.transform( gdm.getGraph() );
 		try {
 			Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
-			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( gdm.getGraph() );
+			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
 			ok = true;
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
@@ -366,10 +404,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			layout = new FRLayout( gdm.getGraph() );
 		}
 
-		Dimension d = getSize();
-		d.setSize( d.getWidth() * 0.75, d.getHeight() * 0.75 );
-		layout.setSize( d );
-		controlPanel.setGraphLayout( layout, gdm.getGraph() );
+		controlPanel.setGraphLayout( layout,
+				(DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph );
 		view.setGraphLayout( layout );
 
 		return ok;
@@ -685,49 +721,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return controlPanel;
 	}
 
-	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
+	private class HidingPredicate implements Predicate<SEMOSSVertex> {
 
 		@Override
-		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext, 
-				Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
-			try {
-				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
-					if ( e.isVisible() && e.getLevel() <= overlayLevel
-							&& e.getInVertex().isVisible() && e.getOutVertex().isVisible() ) {
-
-						renderEdge(
-								renderContext,
-								layout,
-								e );
-						renderEdgeLabel(
-								renderContext,
-								layout,
-								e );
-					}
-				}
-			}
-			catch ( ConcurrentModificationException cme ) {
-				renderContext.getScreenDevice().repaint();
-			}
-
-			// paint all the vertices
-			try {
-				for ( SEMOSSVertex v : layout.getGraph().getVertices() ) {
-					if ( v.isVisible() && v.getLevel() <= overlayLevel ) {
-						renderVertex(
-								renderContext,
-								layout,
-								v );
-						renderVertexLabel(
-								renderContext,
-								layout,
-								v );
-					}
-				}
-			}
-			catch ( ConcurrentModificationException cme ) {
-				renderContext.getScreenDevice().repaint();
-			}
+		public boolean evaluate( SEMOSSVertex v ) {
+			return ( v.isVisible() && v.getLevel() <= overlayLevel );
 		}
 	}
 }
