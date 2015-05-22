@@ -282,10 +282,10 @@ insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
 
 arg:Concept rdfs:label "Concept" .
 
-insights:GQ1-Concept-Query sp:text "SELECT ?entity WHERE { {?entity rdfs:subClassOf <http://semoss.org/ontologies/Concept> ;} }" ;
+insights:GQ1-Concept-Query sp:text "SELECT ?entity WHERE { ?entity rdfs:subClassOf <http://semoss.org/ontologies/Concept> . }" ;
 	a sp:Select .
 
-insights:GQ1-CONSTRUCT sp:text "CONSTRUCT {?instance ?instance ?instance} WHERE { BIND(<@Concept-http://semoss.org/ontologies/Concept@> AS ?entity) BIND(<@Instance-http://semoss.org/ontologies/Concept/Instance@> AS ?instance) {?instance a ?entity ;} }" ;
+insights:GQ1-CONSTRUCT sp:text "CONSTRUCT {?instance ?instance ?instance} WHERE { BIND(<@Concept-http://semoss.org/ontologies/Concept@> AS ?entity) BIND(<@Instance-http://semoss.org/ontologies/Concept/Instance@> AS ?instance) ?instance a ?entity . }" ;
 	a sp:Construct .
 
 insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
@@ -296,5 +296,5 @@ insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
 
 arg:Instance rdfs:label "Instance" .
 
-insights:GQ1-Instance-Query sp:text "SELECT ?Instance WHERE { {?Instance a <@Concept@> ;} }" ;
+insights:GQ1-Instance-Query sp:text "SELECT ?entity WHERE { ?entity a <@Concept@> . }" ;
 	a sp:Select .
