@@ -143,7 +143,7 @@ public class GraphNodePopup extends JPopupMenu {
 		menu.add( new GraphNodeRankListener( gps ) );
 		menu.add( new DistanceDownstreamProcessor( gps, Arrays.asList( highlightedVertices ) ) );
 		menu.add( new LoopIdentifierProcessor( gps, highlightedVertices ) );
-		menu.add( new IslandIdentifierProcessor( gps, highlightedVertices ) );
+		menu.add( new IslandIdentifierProcessor( gps, Arrays.asList( highlightedVertices ) ) );
 		
 		add( menu );
 	}

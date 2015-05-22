@@ -39,13 +39,16 @@ import org.jgrapht.graph.SimpleGraph;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.picking.PickedState;
+import edu.uci.ics.jung.visualization.renderers.BasicEdgeRenderer;
 import edu.uci.ics.jung.visualization.renderers.BasicRenderer;
+import edu.uci.ics.jung.visualization.renderers.BasicVertexRenderer;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSEdge;
@@ -82,6 +85,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
@@ -107,7 +111,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected VertexLabelFontTransformer vlft;
 	protected EdgeLabelFontTransformer elft;
 	protected VertexShapeTransformer vsht;
-	protected boolean traversable = true, nodesHidable = true;
+	protected boolean traversable = true;
+	protected boolean nodesHidable = true;
+
+	protected int overlayLevel = 0;
+	protected int maxOverlayLevel = 0;
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -156,17 +164,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return new DelegateForest<>( gdm.getGraph() );
 	}
 
-	public SimpleGraph<SEMOSSVertex, SEMOSSEdge> getSimpleGraph() {
-		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph
-				= new SimpleGraph<>( SEMOSSEdge.class );
-		for ( SEMOSSVertex v : gdm.getGraph().getVertices() ) {
-			graph.addVertex( v );
-		}
-		for ( SEMOSSEdge v : gdm.getGraph().getEdges() ) {
-			graph.addEdge( v.getInVertex(), v.getOutVertex(), v );
-		}
+	public SimpleGraph<SEMOSSVertex, SEMOSSEdge> asSimpleGraph() {
+		return gdm.asSimpleGraph();
+	}
 
-		return graph;
+	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
+		return gdm.getGraph();
 	}
 
 	public boolean getSudowl() {
@@ -185,24 +188,21 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method undoView. Get the latest view and undo it.
 	 */
 	public void undoView() {
-		if ( gdm.hasUndoData() ) {
-			gdm.undoData();
-			filterData = new VertexFilterData();
-			controlData = new ControlData();
-			predData = new PropertySpecData();
-			refineView();
+		if ( overlayLevel > 1 ) {
+			overlayLevel--;
+			view.repaint();
+			setUndoRedoBtn();
 		}
-
-		genAllData();
 	}
 
 	/**
 	 * Method redoView.
 	 */
 	public void redoView() {
-		if ( gdm.hasRedoData() ) {
-			gdm.redoData();
-			refineView();
+		if ( overlayLevel < maxOverlayLevel ) {
+			overlayLevel++;
+			view.repaint();
+			setUndoRedoBtn();
 		}
 	}
 
@@ -241,7 +241,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			legendPanel.drawLegend();
 
 			setUndoRedoBtn();
-
 		}
 		catch ( Exception ex ) {
 			log.error( "problem adding panel to play sheet", ex );
@@ -252,9 +251,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method initVisualizer.
 	 */
 	protected void initVisualizer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		//viewer.setPreferredSize( layout.getSize() );
-		// viewer.setBounds( 10000000, 10000000, 10000000, 100000000 );
-		viewer.setRenderer( new BasicRenderer<>() );
+		viewer.setRenderer( new SemossBasicRenderer() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
 		viewer.setGraphMouse( new GraphNodeListener( this ) );
@@ -276,18 +273,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		ArrowFillPaintTransformer aft = new ArrowFillPaintTransformer();
 
 		//keep the stored one if possible
-		if ( vlft == null ) {
-			vlft = new VertexLabelFontTransformer();
-		}
-		if ( elft == null ) {
-			elft = new EdgeLabelFontTransformer();
-		}
-		if ( vsht == null ) {
-			vsht = new VertexShapeTransformer();
-		}
-		else {
-			vsht.emptySelected();
-		}
+		vlft = new VertexLabelFontTransformer();
+		elft = new EdgeLabelFontTransformer();
+		vsht = new VertexShapeTransformer();
 
 		viewer.setBackground( Color.WHITE );
 		viewer.getRenderContext().setVertexLabelTransformer( vlt );
@@ -326,8 +314,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method setUndoRedoBtn.
 	 */
 	private void setUndoRedoBtn() {
-		controlPanel.setUndoButtonEnabled( gdm.getOverlayLevel() > 1 );
-		controlPanel.setRedoButtonEnabled( gdm.hasRedoData() );
+		controlPanel.setUndoButtonEnabled( overlayLevel > 1 );
+		controlPanel.setRedoButtonEnabled( maxOverlayLevel > overlayLevel );
 	}
 
 	/**
@@ -412,7 +400,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 */
 	private void printConnectedNodes() {
 		log.debug( "In print connected Nodes routine " );
-		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph = getSimpleGraph();
+		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph = asSimpleGraph();
 
 		ConnectivityInspector<SEMOSSVertex, SEMOSSEdge> ins
 				= new ConnectivityInspector<>( graph );
@@ -436,7 +424,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 */
 	@SuppressWarnings( "unused" )
 	private void printSpanningTree() {
-		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph = getSimpleGraph();
+		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph = asSimpleGraph();
 
 		KruskalMinimumSpanningTree<SEMOSSVertex, SEMOSSEdge> spanningTree
 				= new KruskalMinimumSpanningTree<>( graph );
@@ -562,11 +550,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		colorShapeData.fillRows( filterData.getTypeHash() );
-		setUndoRedoBtn();
-	}
-
-	@Override
-	public void runAnalytics() {
 	}
 
 	private void processControlData( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
@@ -614,7 +597,19 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public void add( Model m, IEngine engine ) {
 		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
-		gdm.addGraphLevel( m, engine );
+
+		if ( m.isEmpty() ) {
+			return; // nothing to add to the graph
+		}
+
+		if ( overlayLevel < maxOverlayLevel ) {
+			gdm.removeElementsSinceLevel( overlayLevel );
+		}
+
+		gdm.addGraphLevel( m, engine, ++overlayLevel );
+		if ( overlayLevel > maxOverlayLevel ) {
+			maxOverlayLevel = overlayLevel;
+		}
 		updateGraph();
 	}
 
@@ -710,5 +705,48 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public ControlPanel getSearchPanel() {
 		return controlPanel;
+	}
+
+	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
+
+		@Override
+		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext, Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
+			try {
+				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
+					if ( e.getLevel() <= overlayLevel ) {
+						renderEdge(
+								renderContext,
+								layout,
+								e );
+						renderEdgeLabel(
+								renderContext,
+								layout,
+								e );
+					}
+				}
+			}
+			catch ( ConcurrentModificationException cme ) {
+				renderContext.getScreenDevice().repaint();
+			}
+
+			// paint all the vertices
+			try {
+				for ( SEMOSSVertex v : layout.getGraph().getVertices() ) {
+					if ( v.getLevel() <= overlayLevel ) {
+						renderVertex(
+								renderContext,
+								layout,
+								v );
+						renderVertexLabel(
+								renderContext,
+								layout,
+								v );
+					}
+				}
+			}
+			catch ( ConcurrentModificationException cme ) {
+				renderContext.getScreenDevice().repaint();
+			}
+		}
 	}
 }

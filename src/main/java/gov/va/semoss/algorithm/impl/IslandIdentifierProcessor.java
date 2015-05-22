@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Vector;
 
 import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
@@ -51,23 +50,22 @@ import javax.swing.AbstractAction;
  */
 public class IslandIdentifierProcessor extends AbstractAction implements IAlgorithm {
 
-	DelegateForest forest = null;
-	ArrayList<SEMOSSVertex> selectedVerts = new ArrayList<>();
-	GridFilterData gfd = new GridFilterData();
-	GraphPlaySheet playSheet;
+	private final DelegateForest<SEMOSSVertex, SEMOSSEdge> forest;
+	private final List<SEMOSSVertex> selectedVerts = new ArrayList<>();
+	private final GraphPlaySheet playSheet;
 	public Hashtable masterHash = new Hashtable();//this will have key: node, object: hashtable with verts.  Also key: node + edgeHashKey and object: hastable with edges
 	String selectedNodes = "";
-	Vector<SEMOSSEdge> masterEdgeVector = new Vector();//keeps track of everything accounted for in the forest
-	Vector<SEMOSSVertex> masterVertexVector = new Vector();
+	List<SEMOSSEdge> masterEdgeVector = new ArrayList<>();//keeps track of everything accounted for in the forest
+	List<SEMOSSVertex> masterVertexVector = new ArrayList<>();
 	Set<SEMOSSVertex> islandVerts = new HashSet<>();
 	Set<SEMOSSEdge> islandEdges = new HashSet<>();
 	String edgeHashKey = "EdgeHashKey";
 
-	public IslandIdentifierProcessor( GraphPlaySheet gps, SEMOSSVertex[] pickedV ) {
+	public IslandIdentifierProcessor( GraphPlaySheet gps, Collection<SEMOSSVertex> pickedV ) {
 		super( "Island Identifier" );
 		playSheet = gps;
 		forest = playSheet.getForest();
-		setSelectedNodes( pickedV );
+		selectedVerts.addAll( pickedV );
 	}
 
 	@Override
@@ -153,11 +151,10 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 */
 	private void setTransformers() {
 		Map<SEMOSSEdge, Double> edges = new HashMap<>();
-		for( SEMOSSEdge s : islandEdges){
+		for ( SEMOSSEdge s : islandEdges ) {
 			edges.put( s, 3d );
 		}
-		
-		
+
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
 		tx.setEdges( edges );
 		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) playSheet.getView().getRenderContext().getEdgeArrowStrokeTransformer();
@@ -290,28 +287,6 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	}
 
 	/**
-	 * Sets the forest.
-	 *
-	 * @param f DelegateForest	Forest to be set.
-	 */
-	public void setForest( DelegateForest f ) {
-		forest = f;
-		Collection<SEMOSSEdge> edges = f.getEdges();
-		Collection<SEMOSSVertex> v = f.getVertices();
-		masterEdgeVector.addAll( edges );
-		masterVertexVector.addAll( v );
-	}
-
-	/**
-	 * Sets selected nodes.
-	 *
-	 * @param pickedVertices DBCMVertex[]	List of nodes that have been selected.
-	 */
-	public void setSelectedNodes( SEMOSSVertex[] pickedVertices ) {
-		selectedVerts.addAll( islandVerts );
-	}
-
-	/**
 	 * Sets playsheet as a graph play sheet.
 	 *
 	 * @param ps IPlaySheet	Playsheet to be cast.
@@ -331,7 +306,7 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 */
 	@Override
 	public String[] getVariables() {
-		return null;
+		throw new UnsupportedOperationException( "don't know what this is" );
 	}
 
 	/**

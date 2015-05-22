@@ -32,9 +32,8 @@ import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.Constants;
 import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
+import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -285,7 +284,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		// the objects in a row are string, string, int, string, (optional)double
 		Map<Integer, Class<?>> classes = new HashMap<>();
 		classes.put( 0, String.class );
-		classes.put( 1, String.class );
+		classes.put( 1, URI.class );
 		classes.put( 2, Integer.class );
 		classes.put( 3, String.class );
 		classes.put( 4, Double.class );
@@ -295,6 +294,9 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 			Value[] vrow = new Value[cols];
 			for ( int i = 0; i < cols; i++ ) {
 				switch ( i ) {
+					case 1:
+						vrow[i] = URI.class.cast( row[i] );
+						break;
 					case 2:
 						vrow[i] = vf.createLiteral( Integer.class.cast( row[i] ) );
 						break;
@@ -308,7 +310,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 			data.add( vrow );
 		}
 
-		GridRAWPlaySheet grid = new GridRAWPlaySheet();
+		GridPlaySheet grid = new GridPlaySheet();
 		grid.create( data, heads, playSheet.getPlaySheetFrame().getEngine() );
 		playSheet.getPlaySheetFrame().addTab( "Hops Downstream From " + selectedNodes,
 				grid );
@@ -327,7 +329,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		colNames[3] = "Root Node";
 
 		//use masterHash to fill tableList and gfd
-		ArrayList<Object[]> tableList = new ArrayList();
+		List<Object[]> tableList = new ArrayList();
 		Iterator masterIt = masterHash.keySet().iterator();
 
 		boolean weightCheck = false;
@@ -372,10 +374,9 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	 *
 	 * @return ArrayList List with new column names.
 	 */
-	private ArrayList removeColumn( ArrayList tableList, int column ) {
-		ArrayList newTableList = new ArrayList();
-		for ( int i = 0; i < tableList.size(); i++ ) {
-			Object[] row = (Object[]) tableList.get( i );
+	private List<Object[]> removeColumn( Collection<Object[]> tableList, int column ) {
+		List<Object[]> newTableList = new ArrayList();
+		for ( Object[] row : tableList ) {
 			Object[] newRow = new Object[row.length - 1];
 			int count = 0;
 			for ( int j = 0; j < row.length; j++ ) {
