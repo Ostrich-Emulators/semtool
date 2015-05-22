@@ -255,8 +255,8 @@ public class CustomSparqlPanel extends JPanel {
 				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
 				sparqlArea.setTextOfSelectedTab( selected.getSparql() );
 				//Pre-select the Playsheet of the Insight copied down:
-				String selectedPlaySheet = PlaySheetEnum.getNameFromClass(selected.getOutput());
-				playSheetComboBox.setSelectedItem(selectedPlaySheet);
+				String selectedPlaySheet = PlaySheetEnum.getNameFromClass( selected.getOutput() );
+				playSheetComboBox.setSelectedItem( selectedPlaySheet );
 			}
 		} );
 
@@ -398,8 +398,8 @@ public class CustomSparqlPanel extends JPanel {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			//Open the "Display Pane": 
-	        PlayPane.rightTabs.setSelectedIndex(0);
-	        
+			PlayPane.rightTabs.setSelectedIndex( 0 );
+
 			String playSheetString = playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
 			//Store the currently selected playsheet with the currently
 			//selected query tab:
@@ -467,8 +467,7 @@ public class CustomSparqlPanel extends JPanel {
 					throw new IllegalArgumentException( output
 							+ " not yet updated to the new handling", e );
 				}
-				PlaySheetFrame psf = ( GraphPlaySheet.class.isAssignableFrom( pscc.getClass() )
-						? new GraphPlaySheetFrame( eng ) : new PlaySheetFrame( eng ) );
+				PlaySheetFrame psf = new PlaySheetFrame( eng );
 				pscc.setTitle( title );
 				psf.addTab( title, pscc );
 

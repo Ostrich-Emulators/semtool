@@ -219,7 +219,6 @@ public class ControlPanel extends JPanel {
 	public void setViewer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
 		vertSizeListener.setViewer( viewer );
 		ringsListener.setViewer( viewer );
-		searchController.setTarget( viewer );
 	}
 
 	/**

@@ -30,8 +30,6 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.util.Utility;
-import java.util.HashMap;
-import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
@@ -40,8 +38,7 @@ import javax.swing.Action;
  */
 public class MSTPopupMenuListener extends AbstractAction {
 
-	GraphPlaySheet ps = null;
-	SEMOSSVertex[] vertices = null;
+	private final GraphPlaySheet ps;
 
 	private static final Logger logger = Logger.getLogger( MSTPopupMenuListener.class );
 
@@ -77,14 +74,9 @@ public class MSTPopupMenuListener extends AbstractAction {
 		KruskalMinimumSpanningTree<SEMOSSVertex, SEMOSSEdge> kmst
 				= new KruskalMinimumSpanningTree<>( graph );
 
-		// get all the edges
-		Map<SEMOSSEdge, Double> edgeHash = new HashMap<>();
-		for ( SEMOSSEdge ed : kmst.getEdgeSet() ) {
-			edgeHash.put( ed, 3d );
-		}
-
-		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( edgeHash );
+		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext()
+				.getEdgeStrokeTransformer();
+		tx.setSelectedEdges( kmst.getEdgeSet() );
 
 		// repaint it
 		ps.getView().repaint();
@@ -93,5 +85,4 @@ public class MSTPopupMenuListener extends AbstractAction {
 		Utility.showMessage( "Minimum Spanning Tree uses " + shortestPathSize
 				+ " edges out of " + originalSize + " original edges" );
 	}
-
 }

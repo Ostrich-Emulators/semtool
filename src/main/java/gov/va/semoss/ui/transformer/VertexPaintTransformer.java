@@ -20,10 +20,8 @@
 package gov.va.semoss.ui.transformer;
 
 import java.awt.Paint;
-import java.util.Hashtable;
 
 import org.apache.commons.collections15.Transformer;
-import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import java.util.Collection;
@@ -45,22 +43,22 @@ public class VertexPaintTransformer implements Transformer<SEMOSSVertex, Paint> 
 	}
 
 	/**
-	 * Method setVertHash. Sets the Hashtable of vertices.
+	 * Method setSelectedVertices. Sets the Hashtable of vertices.
 	 *
-	 * @param verticeURI2Show Hashtable
+	 * @param verts Hashtable
 	 */
-	public void setVertHash( Collection<SEMOSSVertex> verticeURI2Show ) {
+	public void setSelectedVertices( Collection<SEMOSSVertex> verts ) {
 		this.verticeURI2Show.clear();
-		if ( null != verticeURI2Show ) {
-			this.verticeURI2Show.addAll( verticeURI2Show );
+		if ( null != verts ) {
+			this.verticeURI2Show.addAll( verts );
 		}
 	}
 
 	/**
-	 * Method getVertHash. Retreives the hashtable of vertices 	 *
+	 * Method getSelectedVertices. Retreives the hashtable of vertices 	 *
 	 * @return Hashtable
 	 */
-	public Collection<SEMOSSVertex> getVertHash() {
+	public Collection<SEMOSSVertex> getSelectedVertices() {
 		return verticeURI2Show;
 	}
 

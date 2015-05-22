@@ -28,18 +28,15 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.GridFilterData;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 
@@ -265,22 +262,16 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 * Sets the transformers based on valid edges and vertices for the playsheet.
 	 */
 	private void setTransformers() {
-		// RPB: I don't know what's going on in this function
-		Map<SEMOSSEdge, Double> questionableEdgeMap = new HashMap<>();
-		for ( SEMOSSEdge e : loopEdges ) {
-			questionableEdgeMap.put( e, 1d ); // ??? no idea what this should be
-		}
-
+		
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( questionableEdgeMap );
-		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) playSheet.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( questionableEdgeMap );
+		tx.setSelectedEdges( loopEdges );
+
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
 		atx.setEdges( loopEdges );
 		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setVertHash( loopVerts );
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setVertHash( loopVerts );
+		vtx.setSelectedVertices( loopVerts );
+		LabelFontTransformer vlft = (LabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
+		vlft.setSelected( loopVerts );
 		// repaint it
 		playSheet.getView().repaint();
 	}

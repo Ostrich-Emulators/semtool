@@ -57,7 +57,8 @@ public class GraphNodePopup extends JPopupMenu {
 	private SEMOSSVertex pickedVertex;
 	private final IEngine engine;
 
-	public GraphNodePopup( GraphPlaySheet gps, SEMOSSVertex pickedVertex, SEMOSSVertex[] highlightedVertices ) {
+	public GraphNodePopup( GraphPlaySheet gps, SEMOSSVertex pickedVertex, 
+			SEMOSSVertex[] highlightedVertices ) {
 		super();
 
 		this.gps = gps;
@@ -90,6 +91,7 @@ public class GraphNodePopup extends JPopupMenu {
 		JMenuItem item = add( "Create Custom Chart" );
 		item.setToolTipText( "Invoke a screen to build a custom chart" );
 		item.addActionListener(new ActionListener() {
+				@Override
 		    public void actionPerformed(ActionEvent e) {
 				BrowserTabSheet3 tab
 						= new BrowserTabSheet3( "/html/RDFSemossCharts/app/index.html", gps );
@@ -164,8 +166,9 @@ public class GraphNodePopup extends JPopupMenu {
 
 		item = add( "Show Selected Node Information" );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
+		
 		item.addActionListener( new NodeInfoPopup( gps, highlightedVertices,
-				gps.getDesktopPane() ) );
+				gps.getPlaySheetFrame().getDesktopPane() ) );
 	}
 
 	private void addGraphOptions() {

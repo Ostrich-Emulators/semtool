@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Vector;
 
 
 import org.apache.log4j.Logger;
@@ -33,13 +32,11 @@ import gov.va.semoss.algorithm.impl.DistanceDownstreamProcessor;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
-import gov.va.semoss.util.Constants;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -95,10 +92,10 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		//Get what edges are already highlighted so that we can just add to it
 		//Get what vertices are already painted so we can just add to it
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
-		Map<SEMOSSEdge, Double> edgeHash = tx.getEdges();
+		Set<SEMOSSEdge> edgeHash = tx.getSelectedEdges();
 
 		VertexPaintTransformer vtx = (VertexPaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
-		Set<SEMOSSVertex> vertHash = new HashSet<>( vtx.getVertHash() );
+		Set<SEMOSSVertex> vertHash = new HashSet<>( vtx.getSelectedVertices() );
 
 		PickedState state = ps.getView().getPickedVertexState();
 		state.clear();
@@ -113,7 +110,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 
 				//if the button name contains upstream, get the upstream edges and vertices
 				if ( Type.ADJACENT == type || Type.DOWNSTREAM == type ) {
-					edgeHash = putEdgesInHash( vert.getOutEdges(), edgeHash );
+					edgeHash.addAll( vert.getOutEdges() );
 					for ( SEMOSSEdge edge : vert.getOutEdges() ) {
 						if ( allEdgesVect.contains( edge ) ) {
 							vertHash.add( edge.getInVertex() );
@@ -124,7 +121,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 
 				//if the button name contains downstream, get the downstream edges and vertices
 				if ( Type.ADJACENT == type || Type.UPSTREAM == type ) {
-					edgeHash = putEdgesInHash( vert.getInEdges(), edgeHash );
+					edgeHash.addAll(  vert.getInEdges() );
 					for ( SEMOSSEdge edge : vert.getInEdges() ) {
 						if ( allEdgesVect.contains( edge ) ) {
 							vertHash.add( edge.getOutVertex() );
@@ -146,7 +143,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 				SEMOSSVertex vert = (SEMOSSVertex) masterIt.next();
 				Hashtable vHash = (Hashtable) masterHash.get( vert );
 				List<SEMOSSEdge> parentEdgePath = (ArrayList<SEMOSSEdge>) vHash.get(ddp.EDGEPATH );
-				edgeHash = putEdgesInHash( new Vector( parentEdgePath ), edgeHash );
+				edgeHash.addAll( parentEdgePath );
 				for ( SEMOSSEdge edge : parentEdgePath ) {
 					if ( allEdgesVect.contains( edge ) ) {
 						vertHash.add( edge.getOutVertex() );
@@ -160,14 +157,12 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		}
 		ps.getView().setPickedVertexState( state );
 
-		tx.setEdges( edgeHash );
-		vtx.setVertHash( vertHash );
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setVertHash( vertHash );
+		tx.setSelectedEdges( edgeHash );
+		vtx.setSelectedVertices( vertHash );
+		LabelFontTransformer vlft = (LabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
+		vlft.setSelected( vertHash );
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( edgeHash.keySet() );
-		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) ps.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( edgeHash );
+		atx.setEdges( edgeHash );
 
 		// repaint it
 		ps.getView().repaint();

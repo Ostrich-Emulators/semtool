@@ -88,27 +88,14 @@ public class GraphDataModel {
 		vizgraph = f;
 	}
 
-	/*
-	 * Method processData @param query @param engine
+	/**
+	 * Adds new nodes/edges to the graph at the specified "redo" level.
 	 *
-	 * Need to take the base information from the base query and insert it into
-	 * the jena model this is based on EXTERNAL ontology then take the ontology
-	 * and insert it into the jena model (may be eventually we can run this
-	 * through a reasoner too)
-	 *
-	 * Now insert our base model into the same ontology. Now query the model for
-	 * Relations - Paint the basic graph. Now find a way to get all the predicate
-	 * properties from them. Hopefully the property is done using subproperty of
-	 * predicates - Pick all the predicates but for the properties.
-	 *
+	 * @param model the nodes/edges to add
+	 * @param engine the engine to get other data from
+	 * @param overlayLevel the level of the nodes
 	 */
 	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
-		if ( model.isEmpty() ) {
-			return;
-		}
-
-		removeElementsSinceLevel( overlayLevel );
-
 		try {
 			Set<Resource> needProps = new HashSet<>( model.subjects() );
 
@@ -179,24 +166,6 @@ public class GraphDataModel {
 		// edges are removed automatically...
 	}
 
-	protected void setLabel( SEMOSSVertex v ) {
-		setLabel( v, "" );
-	}
-
-	protected void setLabel( SEMOSSVertex v, String labelPieceToAppend ) {
-		try {
-			URI uri = v.getURI();
-			if ( labelcache.containsKey( uri ) ) {
-				v.setLabel( labelcache.get( uri ) + labelPieceToAppend );
-				return;
-			}
-		}
-		catch ( Exception e ) {
-			// label won't be in the cache; don't worry about it
-		}
-		v.setLabel( v.getLabel() + labelPieceToAppend );
-	}
-
 	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey, int overlayLevel ) {
 		if ( !vertStore.containsKey( vertexKey ) ) {
 			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
@@ -209,7 +178,6 @@ public class GraphDataModel {
 
 	public void storeVertex( SEMOSSVertex vert ) {
 		URI key = vert.getURI();
-		setLabel( vert );
 		vertStore.put( key, vert );
 	}
 
@@ -235,16 +203,12 @@ public class GraphDataModel {
 		 */
 	}
 
-	public Map<URI, SEMOSSVertex> getVertStore() {
+	private Map<URI, SEMOSSVertex> getVertStore() {
 		return this.vertStore;
 	}
 
-	public Map<URI, SEMOSSEdge> getEdgeStore() {
+	private Map<URI, SEMOSSEdge> getEdgeStore() {
 		return this.edgeStore;
-	}
-
-	public void removeView( String query, IEngine engine ) {
-		throw new UnsupportedOperationException( "Not yet implemented!" );
 	}
 
 	public Set<String> getBaseFilterSet() {

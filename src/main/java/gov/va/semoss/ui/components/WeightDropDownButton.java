@@ -305,14 +305,14 @@ public class WeightDropDownButton extends JButton {
 		VertexShapeTransformer vst
 				= (VertexShapeTransformer) playSheet.getView().getRenderContext().getVertexShapeTransformer();
 		vst.setVertexSizeHash( getWeightHash( playSheet.getForest().getVertices(),
-				selectedValue, vst.getDefaultScale(), SEMOSSVertex.class ) );
+				selectedValue, vst.getDefaultScale() ) );
 
 		playSheet.getView().repaint();
 	}
 
 	private void rescaleEdges( URI selectedValue ) {
 		EdgeStrokeTransformer est = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		est.setEdges( getWeightHash( playSheet.getForest().getEdges(), selectedValue, 1.0, SEMOSSEdge.class ) );
+		est.setSelectedSize( 10d );
 
 		playSheet.getView().repaint();
 	}
@@ -325,8 +325,9 @@ public class WeightDropDownButton extends JButton {
 	 * selected
 	 * @return Hashtable<String, Double> of the nodes and weights
 	 */
-	public static <X> Map<X, Double> getWeightHash( Collection<? extends AbstractNodeEdgeBase> collection,
-			URI selectedValue, double defaultScale, Class<X> k ) {
+	public static <X extends AbstractNodeEdgeBase> Map<X, Double>
+			getWeightHash( Collection<X> collection, URI selectedValue,
+					double defaultScale ) {
 
 		double minimumValue = .5, multiplier = 3;
 
@@ -359,8 +360,8 @@ public class WeightDropDownButton extends JButton {
 					lowValue = value;
 				}
 
-				Logger.getLogger( WeightDropDownButton.class ).warn( "this is about to fail");
-				weightHash.put( (X)uri, value );
+				Logger.getLogger( WeightDropDownButton.class ).warn( "this is about to fail" );
+				weightHash.put( (X) uri, value );
 			}
 		}
 

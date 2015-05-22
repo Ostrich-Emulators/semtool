@@ -64,6 +64,6 @@ public class ArrowDrawPaintTransformer implements Transformer<SEMOSSEdge, Paint>
 	 */
 	@Override
 	public Paint transform( SEMOSSEdge edge ) {
-		return ( edges.contains( edge ) ? Color.black : Color.white );
+		return ( edges.contains( edge ) ? Color.gray : Color.white );
 	}
 }

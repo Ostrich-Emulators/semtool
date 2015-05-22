@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.transformer;
 
@@ -27,29 +27,20 @@ import java.util.Map;
 import org.apache.commons.collections15.Transformer;
 
 import gov.va.semoss.om.SEMOSSVertex;
-import org.openrdf.model.URI;
 
 /**
  * Transforms the size and shape of selected nodes.
  */
 public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> {
 
-	private Map<SEMOSSVertex, Double> vertSizeHash;
-	private Map<SEMOSSVertex, Double> vertSelectionHash;
-	private double maxSize = 100.0;
-	private double minSize = 0.0;
-	private double currentDefaultScale;
-	private double initialDefaultScale = 1;
-	private double sizeDelta = .5;
+	private static final double INITIAL_SCALE = 1;
+	private static final double SIZE_DELTA = .5;
+	private static final double maxSize = 100.0;
+	private static final double minSize = 0.0;
 
-	/**
-	 * Constructor for VertexShapeTransformer.
-	 */
-	public VertexShapeTransformer() {
-		vertSizeHash = new HashMap<>();
-		vertSelectionHash = new HashMap<>();
-		currentDefaultScale = initialDefaultScale;
-	}
+	private final Map<SEMOSSVertex, Double> vertSizeHash = new HashMap<>();
+	private final Map<SEMOSSVertex, Double> vertSelectionHash = new HashMap<>();
+	private double currentDefaultScale = INITIAL_SCALE;
 
 	/**
 	 * Gets the default scale
@@ -63,10 +54,13 @@ public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> 
 	/**
 	 * Method setVertexSizeHash. Sets the local vertex size hash
 	 *
-	 * @param vertSizeHash
+	 * @param sizes
 	 */
-	public void setVertexSizeHash( Map<SEMOSSVertex, Double> vertSizeHash ) {
-		this.vertSizeHash = vertSizeHash;
+	public void setVertexSizeHash( Map<SEMOSSVertex, Double> sizes ) {
+		vertSizeHash.clear();
+		if ( null != sizes ) {
+			vertSizeHash.putAll( sizes );
+		}
 	}
 
 	/**
@@ -75,9 +69,9 @@ public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> 
 	 * @param nodeURI String
 	 */
 	public void setSelected( SEMOSSVertex nodeURI ) {
-		double selectedSize = sizeDelta;
+		double selectedSize = SIZE_DELTA;
 		if ( vertSelectionHash.containsKey( nodeURI ) ) {
-			selectedSize = vertSelectionHash.get( nodeURI ) - sizeDelta;
+			selectedSize = vertSelectionHash.get( nodeURI ) - SIZE_DELTA;
 		}
 		vertSelectionHash.put( nodeURI, selectedSize );
 	}
@@ -98,14 +92,14 @@ public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> 
 		if ( vertSizeHash.containsKey( nodeURI ) ) {
 			double size = vertSizeHash.get( nodeURI );
 			if ( size < maxSize ) {
-				size = size + sizeDelta;
+				size = size + SIZE_DELTA;
 			}
 			vertSizeHash.put( nodeURI, size );
 		}
 		else {
 			double size = currentDefaultScale;
 			if ( size < maxSize ) {
-				size = size + sizeDelta;
+				size = size + SIZE_DELTA;
 			}
 			vertSizeHash.put( nodeURI, size );
 		}
@@ -120,14 +114,14 @@ public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> 
 		if ( vertSizeHash.containsKey( nodeURI ) ) {
 			double size = vertSizeHash.get( nodeURI );
 			if ( size > minSize ) {
-				size = size - sizeDelta;
+				size = size - SIZE_DELTA;
 			}
 			vertSizeHash.put( nodeURI, size );
 		}
 		else {
 			double size = currentDefaultScale;
 			if ( size > minSize ) {
-				size = size - sizeDelta;
+				size = size - SIZE_DELTA;
 			}
 			vertSizeHash.put( nodeURI, size );
 		}
@@ -139,14 +133,14 @@ public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> 
 	public void increaseSize() {
 		// Increase everything that does not have a size specified
 		if ( currentDefaultScale < maxSize ) {
-			currentDefaultScale = currentDefaultScale + sizeDelta;
+			currentDefaultScale = currentDefaultScale + SIZE_DELTA;
 		}
 
 		// Increase everything with a size specified
 		for ( Map.Entry<SEMOSSVertex, Double> en : vertSizeHash.entrySet() ) {
 			Double size = en.getValue();
 			if ( size < maxSize ) {
-				en.setValue( size + sizeDelta );
+				en.setValue( size + SIZE_DELTA );
 			}
 		}
 	}
@@ -157,13 +151,13 @@ public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> 
 	public void decreaseSize() {
 		// Decrease everything that does not have a size specified
 		if ( currentDefaultScale > minSize ) {
-			currentDefaultScale = currentDefaultScale - sizeDelta;
+			currentDefaultScale = currentDefaultScale - SIZE_DELTA;
 		}
 
 		for ( Map.Entry<SEMOSSVertex, Double> en : vertSizeHash.entrySet() ) {
 			Double size = en.getValue();
 			if ( size > minSize ) {
-				en.setValue( size - sizeDelta );
+				en.setValue( size - SIZE_DELTA );
 			}
 		}
 	}
@@ -181,7 +175,7 @@ public class VertexShapeTransformer implements Transformer<SEMOSSVertex, Shape> 
 		// only need to tranform if uri is contained in hash or current size
 		// does not equal default size
 		if ( !vertSizeHash.containsKey( vertex )
-				&& currentDefaultScale == initialDefaultScale
+				&& currentDefaultScale == INITIAL_SCALE
 				&& !vertSelectionHash.containsKey( vertex ) ) {
 			return vertex.getShape();
 		}

@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JDesktopPane;
 import javax.swing.JSplitPane;
 
 import org.apache.log4j.Logger;
@@ -46,9 +45,7 @@ import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.picking.PickedState;
-import edu.uci.ics.jung.visualization.renderers.BasicEdgeRenderer;
 import edu.uci.ics.jung.visualization.renderers.BasicRenderer;
-import edu.uci.ics.jung.visualization.renderers.BasicVertexRenderer;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSEdge;
@@ -56,7 +53,6 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
-import gov.va.semoss.ui.components.GraphPlaySheetFrame;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.NewHoriScrollBarUI;
 import gov.va.semoss.ui.components.NewScrollBarUI;
@@ -72,9 +68,9 @@ import gov.va.semoss.ui.main.listener.impl.PlaySheetControlListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetOWLListener;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
 import gov.va.semoss.ui.transformer.EdgeLabelFontTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
@@ -86,7 +82,6 @@ import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
-import java.util.HashSet;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 
@@ -108,8 +103,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected ControlData controlData = new ControlData();
 	protected PropertySpecData predData = new PropertySpecData();
 	protected VertexFilterData filterData = new VertexFilterData();
-	protected VertexLabelFontTransformer vlft;
-	protected EdgeLabelFontTransformer elft;
+	protected LabelFontTransformer<SEMOSSVertex> vlft;
+	protected LabelFontTransformer<SEMOSSEdge> elft;
 	protected VertexShapeTransformer vsht;
 	protected boolean traversable = true;
 	protected boolean nodesHidable = true;
@@ -206,14 +201,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 	}
 
-	public GraphPlaySheetFrame getGraphPlaySheet() {
-		return GraphPlaySheetFrame.class.cast( getPlaySheetFrame() );
-	}
-
-	public JDesktopPane getDesktopPane() {
-		return getPlaySheetFrame().getDesktopPane();
-	}
-
 	@Override
 	public void setFrame( PlaySheetFrame frame ) {
 		super.setFrame( frame );
@@ -269,12 +256,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
-		EdgeArrowStrokeTransformer east = new EdgeArrowStrokeTransformer();
 		ArrowFillPaintTransformer aft = new ArrowFillPaintTransformer();
 
 		//keep the stored one if possible
-		vlft = new VertexLabelFontTransformer();
-		elft = new EdgeLabelFontTransformer();
+		vlft = new LabelFontTransformer<SEMOSSVertex>();
+		elft = new LabelFontTransformer<SEMOSSEdge>();
 		vsht = new VertexShapeTransformer();
 
 		viewer.setBackground( Color.WHITE );
@@ -285,7 +271,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		viewer.getRenderContext().setVertexFillPaintTransformer( vpt );
 		viewer.getRenderContext().setEdgeStrokeTransformer( est );
 		viewer.getRenderContext().setArrowDrawPaintTransformer( adpt );
-		viewer.getRenderContext().setEdgeArrowStrokeTransformer( east );
+		viewer.getRenderContext().setEdgeArrowStrokeTransformer( est );
 		viewer.getRenderContext().setArrowFillPaintTransformer( aft );
 		viewer.getRenderContext().setVertexFontTransformer( vlft );
 		viewer.getRenderContext().setEdgeFontTransformer( elft );
@@ -444,7 +430,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 *
 	 * @return EdgeLabelFontTransformer
 	 */
-	public EdgeLabelFontTransformer getEdgeLabelFontTransformer() {
+	public LabelFontTransformer<SEMOSSEdge> getEdgeLabelFontTransformer() {
 		return elft;
 	}
 
@@ -453,7 +439,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 *
 	 * @return VertexLabelFontTransformer
 	 */
-	public VertexLabelFontTransformer getVertexLabelFontTransformer() {
+	public LabelFontTransformer<SEMOSSVertex> getVertexLabelFontTransformer() {
 		return vlft;
 	}
 
@@ -461,30 +447,21 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Method resetTransformers.
 	 */
 	public void resetTransformers() {
+		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = view.getRenderContext();
 
-		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) view.getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( null );
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) view.getRenderContext().getArrowDrawPaintTransformer();
+		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
+		tx.setSelectedEdges( null );
+		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) rc.getArrowDrawPaintTransformer();
 		atx.setEdges( null );
-		EdgeArrowStrokeTransformer east = (EdgeArrowStrokeTransformer) view.getRenderContext().getEdgeArrowStrokeTransformer();
-		east.setEdges( null );
-		VertexShapeTransformer vst = (VertexShapeTransformer) view.getRenderContext().getVertexShapeTransformer();
+		VertexShapeTransformer vst = (VertexShapeTransformer) rc.getVertexShapeTransformer();
 		vst.setVertexSizeHash( new HashMap<>() );
 
-		if ( controlPanel.isHighlightButtonSelected() ) {
-			VertexPaintTransformer ptx = (VertexPaintTransformer) view.getRenderContext().getVertexFillPaintTransformer();
-			Set<SEMOSSVertex> searchVertices = new HashSet<>();
-			searchVertices.addAll( controlPanel.getSearchController().getCleanResHash() );
-			ptx.setVertHash( searchVertices );
-			VertexLabelFontTransformer vfl = (VertexLabelFontTransformer) view.getRenderContext().getVertexFontTransformer();
-			vfl.setVertHash( searchVertices );
-		}
-		else {
-			VertexPaintTransformer ptx = (VertexPaintTransformer) view.getRenderContext().getVertexFillPaintTransformer();
-			ptx.setVertHash( null );
-			VertexLabelFontTransformer vfl = (VertexLabelFontTransformer) view.getRenderContext().getVertexFontTransformer();
-			vfl.setVertHash( null );
-		}
+		Set<SEMOSSVertex> verts = ( controlPanel.isHighlightButtonSelected()
+				? view.getPickedVertexState().getPicked() : null );
+		VertexPaintTransformer ptx = (VertexPaintTransformer) rc.getVertexFillPaintTransformer();
+		LabelFontTransformer vfl = (LabelFontTransformer) rc.getVertexFontTransformer();
+		ptx.setSelectedVertices( verts );
+		vfl.setSelected( verts );
 	}
 
 	public void removeExistingConcepts( List<String> subVector ) {
@@ -625,7 +602,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
-		EdgeArrowStrokeTransformer east = new EdgeArrowStrokeTransformer();
 		ArrowFillPaintTransformer aft = new ArrowFillPaintTransformer();
 		//keep the stored one if possible
 		VertexLabelFontTransformer vlft = new VertexLabelFontTransformer();
@@ -640,7 +616,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		rc.setVertexFillPaintTransformer( vpt );
 		rc.setEdgeStrokeTransformer( est );
 		rc.setArrowDrawPaintTransformer( adpt );
-		rc.setEdgeArrowStrokeTransformer( east );
+		rc.setEdgeArrowStrokeTransformer( est );
 		rc.setArrowFillPaintTransformer( aft );
 		rc.setVertexFontTransformer( vlft );
 		rc.setEdgeFontTransformer( elft );
@@ -656,7 +632,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		super.incrementFont( incr );
 		boolean increaseFont = ( incr > 0 );
 
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = controlPanel.getSearchController().getTarget();
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = view;
 		VertexLabelFontTransformer transformerV = (VertexLabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
 		EdgeLabelFontTransformer transformerE = (EdgeLabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
 

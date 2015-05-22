@@ -28,20 +28,16 @@ import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
 import edu.uci.ics.jung.graph.DelegateForest;
-import gov.va.semoss.ui.components.GridFilterData;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 
@@ -150,21 +146,15 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 * Sets the transformers based on valid edges and vertices for the playsheet.
 	 */
 	private void setTransformers() {
-		Map<SEMOSSEdge, Double> edges = new HashMap<>();
-		for ( SEMOSSEdge s : islandEdges ) {
-			edges.put( s, 3d );
-		}
-
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( edges );
-		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) playSheet.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( edges );
+		tx.setSelectedEdges( islandEdges );
+		
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
 		atx.setEdges( islandEdges );
 		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setVertHash( islandVerts );
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setVertHash( islandVerts );
+		vtx.setSelectedVertices( islandVerts );
+		LabelFontTransformer vlft = (LabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
+		vlft.setSelected( islandVerts );
 		// repaint it
 		playSheet.getView().repaint();
 	}

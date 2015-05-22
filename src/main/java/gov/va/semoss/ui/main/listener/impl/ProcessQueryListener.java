@@ -31,7 +31,6 @@ import javax.swing.JDesktopPane;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
@@ -40,21 +39,15 @@ import gov.va.semoss.ui.components.ExecuteQueryProcessor;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.ui.helpers.PlaysheetCreateRunner;
 import gov.va.semoss.ui.helpers.PlaysheetOverlayRunner;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.PlaySheetEnum;
-import gov.va.semoss.util.Utility;
 import gov.va.semoss.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.OperationsProgress;
-import gov.va.semoss.ui.components.OperationsProgress.OperationsProgressListener;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
-import gov.va.semoss.ui.components.GraphPlaySheetFrame;
 import gov.va.semoss.ui.components.PlayPane;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 /**
@@ -123,8 +116,7 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 		boolean oldstyle = true;
 		try {
 			Class<?> k = Class.forName( output );
-			oldstyle = !( PlaySheetCentralComponent.class.isAssignableFrom( k )
-					|| GraphPlaySheetFrame.class.equals( k ) );
+			oldstyle = !( PlaySheetCentralComponent.class.isAssignableFrom( k ) );
 		}
 		catch ( ClassNotFoundException e ) {
 			oldstyle = true;
@@ -210,8 +202,7 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 						+ " not yet updated to the new handling", e );
 			}
 
-			PlaySheetFrame psf = ( GraphPlaySheet.class.isAssignableFrom( pscc.getClass() )
-					? new GraphPlaySheetFrame( eng ) : new PlaySheetFrame( eng ) );
+			PlaySheetFrame psf = new PlaySheetFrame( eng );
 			pscc.setTitle( insight.getLabel() );
 			psf.addTab( title, pscc );
 

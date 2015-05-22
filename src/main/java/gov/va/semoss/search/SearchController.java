@@ -22,16 +22,14 @@ package gov.va.semoss.search;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.picking.MultiPickedState;
-import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 
@@ -43,6 +41,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -90,17 +89,10 @@ public class SearchController implements KeyListener, FocusListener,
 	private boolean typed = false;
 	private boolean searchContinue = true;
 
-	private Set<SEMOSSVertex> resHash = new HashSet<>();
-	private Set<SEMOSSVertex> cleanResHash = new HashSet<>();
-
 	private VertexPaintTransformer oldTx = null;
 	private EdgeStrokeTransformer oldeTx = null;
-	private ArrowFillPaintTransformer oldafpTx = null;
-	private VertexLabelFontTransformer oldVLF = null;
-
-	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> target = null;
-	private PickedState<SEMOSSVertex> liveState;
-	private PickedState<SEMOSSVertex> tempState = new MultiPickedState<>();
+	private VertexShapeTransformer oldsTx = null;
+	private double oldedgesize = 0;
 
 	private GraphPlaySheet gps;
 
@@ -108,10 +100,7 @@ public class SearchController implements KeyListener, FocusListener,
 	private final Directory ramdir = new RAMDirectory();
 	private IndexReader reader;
 	private IndexSearcher searcher;
-
-	public Set<SEMOSSVertex> getCleanResHash() {
-		return cleanResHash;
-	}
+	private final Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 
 	// toggle button listener
 	// this will swap the view based on what is being presented
@@ -133,48 +122,42 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	private void handleSelectionOfButton() {
-		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = target.getRenderContext();
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
+		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = view.getRenderContext();
+
+		Collection<SEMOSSVertex> picked = view.getPickedVertexState().getPicked();
 
 		// set the transformers
 		oldTx = (VertexPaintTransformer) rc.getVertexFillPaintTransformer();
-		oldTx.setVertHash( resHash );
+		oldTx.setSelectedVertices( picked );
 
-		oldVLF = (VertexLabelFontTransformer) rc.getVertexFontTransformer();
-		oldVLF.setVertHash( resHash );
+		gps.getVertexLabelFontTransformer().setSelected( picked );
 
 		oldeTx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
-		oldeTx.setEdges( null );
+		oldedgesize = oldeTx.getNormalSize();
+		oldeTx.setNormalSize( 0.1f );
 
-		oldafpTx = (ArrowFillPaintTransformer) rc.getArrowFillPaintTransformer();
-		oldafpTx.setEdges( null );
+		oldsTx = (VertexShapeTransformer) rc.getVertexShapeTransformer();
+//		Set<SEMOSSVertex> unpicked = new HashSet<>( gps.getGraph().getVertices() );
+//		unpicked.removeAll( view.getPickedVertexState().getPicked() );
+//		for ( SEMOSSVertex v : unpicked ) {
+//			oldsTx.decreaseSize( v );
+//		}
 
-		target.repaint();
-
-		// if the search vertex state has been cleared, we need to refill it
-		// with what is in the res hash
-		if ( tempState.getPicked().isEmpty() && !resHash.isEmpty() ) {
-			for ( SEMOSSVertex resKey : resHash ) {
-				liveState.pick( resKey, true );
-			}
-		}
-
-		// if there are vertices in the temp state, need to pick them in the
-		// live state and clear tempState
-		if ( tempState.getPicked().size() > 0 ) {
-			for ( SEMOSSVertex vertex : tempState.getPicked() ) {
-				liveState.pick( vertex, true );
-			}
-			tempState.clear();
-		}
+		view.repaint();
 	}
 
 	private void handleDeselectionOfButton() {
-		liveState.clear();
-		oldTx.setVertHash( null );
-		oldeTx.setEdges( null );
-		oldafpTx.setEdges( null );
-		oldVLF.setVertHash( null );
-		target.repaint();
+		oldTx.setSelectedVertices( null );
+		oldeTx.setSelectedEdges( null );
+		gps.getVertexLabelFontTransformer().setSelected( null );
+		oldsTx.emptySelected();
+		oldeTx.reset( oldedgesize, -1, -1 );
+		gps.getView().repaint();
+
+		if ( !searchText.getText().isEmpty() ) {
+			searchStatement( searchText.getText() );
+		}
 	}
 
 	/**
@@ -195,14 +178,17 @@ public class SearchController implements KeyListener, FocusListener,
 			Query q = alltextqp.parse( query.toString() );
 
 			TopDocs hits = searcher.search( q, 500 );
+
+			gps.getView().getPickedVertexState().clear();
+
 			for ( ScoreDoc sd : hits.scoreDocs ) {
 				Document doc = searcher.doc( sd.doc );
 				URI uri = new URIImpl( doc.get( URI_FIELD ) );
 
-				Map<URI, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
 				if ( vertStore.containsKey( uri ) ) {
+					SEMOSSVertex v = vertStore.get( uri );
 					log.debug( "selecting node: " + uri + " from search" );
-					gps.getView().getPickedVertexState().pick( vertStore.get( uri ), true );
+					gps.getView().getPickedVertexState().pick( v, true );
 				}
 			}
 		}
@@ -210,7 +196,7 @@ public class SearchController implements KeyListener, FocusListener,
 			log.error( e, e );
 		}
 
-		target.repaint();
+		gps.getView().repaint();
 		searchText.requestFocus( true );
 	}
 
@@ -227,14 +213,11 @@ public class SearchController implements KeyListener, FocusListener,
 						menu.setVisible( false );
 						menu.removeAll();
 					}
-					if ( searchText.getText().length() > 0 && lastTime != 0 ) {
+					if ( !( searchText.getText().isEmpty() || 0 == lastTime ) ) {
 						searchStatement( searchText.getText() );
 					}
-					else if ( searchText.getText().length() == 0
-							&& lastTime != 0 ) {
-						resHash.clear();
-						cleanResHash.clear();
-						tempState.clear();
+					else if ( searchText.getText().isEmpty() && lastTime != 0 ) {
+						handleDeselectionOfButton();
 						log.debug( "cleared" );
 					}
 					lastTime = System.currentTimeMillis();
@@ -337,8 +320,9 @@ public class SearchController implements KeyListener, FocusListener,
 			for ( SEMOSSEdge e : graph.getEdges() ) {
 				ri.handleProperties( e.getURI(), e.getProperties() );
 			}
-			for ( SEMOSSVertex e : graph.getVertices() ) {
-				ri.handleProperties( e.getURI(), e.getProperties() );
+			for ( SEMOSSVertex v : graph.getVertices() ) {
+				vertStore.put( v.getURI(), v );
+				ri.handleProperties( v.getURI(), v.getProperties() );
 			}
 
 			ri.finish();
@@ -367,25 +351,6 @@ public class SearchController implements KeyListener, FocusListener,
 	 */
 	public void setGPS( GraphPlaySheet _gps ) {
 		gps = _gps;
-	}
-
-	/**
-	 * Method setTarget.
-	 *
-	 * @param vv VisualizationViewer
-	 */
-	public VisualizationViewer<SEMOSSVertex, SEMOSSEdge> getTarget() {
-		return target;
-	}
-
-	/**
-	 * Method setTarget.
-	 *
-	 * @param vv VisualizationViewer
-	 */
-	public void setTarget( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> _target ) {
-		target = _target;
-		liveState = target.getPickedVertexState();
 	}
 
 	/**
@@ -439,7 +404,7 @@ public class SearchController implements KeyListener, FocusListener,
 				indexer.commit();
 				indexer.close();
 
-				if ( log.isDebugEnabled() ) {
+				if ( log.isTraceEnabled() ) {
 					File lucenedir
 							= new File( FileUtils.getTempDirectory(), "search.lucene" );
 					IndexWriterConfig config

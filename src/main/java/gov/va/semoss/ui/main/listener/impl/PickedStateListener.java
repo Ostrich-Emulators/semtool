@@ -40,9 +40,9 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.util.HashSet;
 import java.util.Set;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
 /**
@@ -83,10 +83,10 @@ public class PickedStateListener implements ItemListener {
 		//Need vertex to highlight when click in skeleton mode... Here we need to get the already selected vertices
 		//so that we can add to them
 		Set<SEMOSSVertex> vertHash = new HashSet<>();
-		VertexLabelFontTransformer vlft = null;
+		LabelFontTransformer vlft = null;
 		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-			vlft = (VertexLabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-			vertHash.addAll( vlft.getVertHash() );
+			vlft = (LabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
+			vertHash.addAll( vlft.getSelectedVertices() );
 		}
 		
 		vertHash.addAll( ps.getPicked() );
@@ -103,9 +103,9 @@ public class PickedStateListener implements ItemListener {
 			logger.debug( "Add this in - Prop Table" );
 		}
 		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-			vlft.setVertHash( vertHash );
+			vlft.setSelected( vertHash );
 			VertexPaintTransformer ptx = (VertexPaintTransformer) viewer.getRenderContext().getVertexFillPaintTransformer();
-			ptx.setVertHash( vertHash );
+			ptx.setSelectedVertices( vertHash );
 		}
 
 	}
