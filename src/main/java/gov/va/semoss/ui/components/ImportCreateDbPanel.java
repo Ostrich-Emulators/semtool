@@ -422,8 +422,11 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 						try {
 							EngineCreateBuilder ecb
 							= new EngineCreateBuilder( dbdir.getFirstFile(), dbname.getText() );
-File fileQuestions = questionfile.getFirstFile();
-fileQuestions = (fileQuestions != null) ? fileQuestions : new File("/models/va-semoss.ttl");
+							
+							//If no question file is entered, then use "va-semoss.ttl":
+                            File fileQuestions = questionfile.getFirstFile();
+                            fileQuestions = (fileQuestions != null) ? fileQuestions : new File("/models/va-semoss.ttl");
+                            
 							ecb.setDefaultBaseUri( defaultBaseUri,
 									defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ) )
 							.setReificationModel( reif )
