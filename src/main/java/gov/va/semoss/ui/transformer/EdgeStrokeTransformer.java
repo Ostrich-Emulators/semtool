@@ -35,7 +35,7 @@ public class EdgeStrokeTransformer implements Transformer<SEMOSSEdge, Stroke> {
 
 	public static final float DEFAULT_SIZE = 0.3f;
 	public static final float UNSELECTED_SIZE = 0.1f;
-	public static final double SELECTED_SIZE = 3f;
+	public static final double SELECTED_SIZE = 2f;
 
 	private final Set<SEMOSSEdge> edges = new HashSet<>();
 	private Stroke normal;

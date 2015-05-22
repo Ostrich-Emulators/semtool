@@ -25,6 +25,7 @@ import java.awt.Paint;
 import org.apache.commons.collections15.Transformer;
 
 import gov.va.semoss.om.SEMOSSEdge;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,7 +48,7 @@ public class ArrowDrawPaintTransformer implements Transformer<SEMOSSEdge, Paint>
 	 *
 	 * @param edges Hashtable<String,DBCMEdge>
 	 */
-	public void setEdges( Set<SEMOSSEdge> eds ) {
+	public void setEdges( Collection<SEMOSSEdge> eds ) {
 		edges.clear();
 		if( null != eds ){
 			edges.addAll( eds );
@@ -64,6 +65,6 @@ public class ArrowDrawPaintTransformer implements Transformer<SEMOSSEdge, Paint>
 	 */
 	@Override
 	public Paint transform( SEMOSSEdge edge ) {
-		return ( edges.contains( edge ) ? Color.gray : Color.white );
+		return ( edges.contains( edge ) ? edge.getColor() : Color.white );
 	}
 }

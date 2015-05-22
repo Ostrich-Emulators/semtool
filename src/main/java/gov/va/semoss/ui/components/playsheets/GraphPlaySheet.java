@@ -302,6 +302,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		viewer.getRenderContext().setVertexStrokeTransformer( vst );
 		viewer.getRenderContext().setVertexShapeTransformer( vsht );
 		viewer.getRenderContext().setVertexFillPaintTransformer( vpt );
+		viewer.getRenderContext().setEdgeDrawPaintTransformer( vpt );
 		viewer.getRenderContext().setEdgeStrokeTransformer( est );
 		viewer.getRenderContext().setArrowDrawPaintTransformer( adpt );
 		viewer.getRenderContext().setEdgeArrowStrokeTransformer( est );
@@ -651,6 +652,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		rc.setVertexStrokeTransformer( vst );
 		rc.setVertexShapeTransformer( vsht );
 		rc.setVertexFillPaintTransformer( vpt );
+		rc.setEdgeDrawPaintTransformer( vpt );
 		rc.setEdgeStrokeTransformer( est );
 		rc.setArrowDrawPaintTransformer( adpt );
 		rc.setEdgeArrowStrokeTransformer( est );
@@ -721,7 +723,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public ControlPanel getSearchPanel() {
 		return controlPanel;
 	}
-	
+
 	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
 
 		Predicate<SEMOSSEdge> edgehider = new Predicate<SEMOSSEdge>() {

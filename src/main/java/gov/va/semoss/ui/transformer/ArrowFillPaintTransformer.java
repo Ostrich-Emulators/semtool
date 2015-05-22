@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import java.awt.Color;
 import java.awt.Paint;
 
 import org.apache.commons.collections15.Transformer;
@@ -33,6 +32,6 @@ public class ArrowFillPaintTransformer implements Transformer<SEMOSSEdge, Paint>
 
 	@Override
 	public Paint transform( SEMOSSEdge edge ) {
-		return Color.gray;
+		return edge.getColor();
 	}
 }

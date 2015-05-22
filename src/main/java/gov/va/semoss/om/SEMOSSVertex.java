@@ -22,7 +22,6 @@ package gov.va.semoss.om;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Constants;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Collection;
