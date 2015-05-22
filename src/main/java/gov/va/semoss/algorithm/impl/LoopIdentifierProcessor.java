@@ -29,7 +29,7 @@ import gov.va.semoss.ui.components.GridFilterData;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -268,8 +268,8 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
 		atx.setEdges( loopEdges );
-		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setSelectedVertices( loopVerts );
+		PaintTransformer vtx = (PaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
+		vtx.setSelected( loopVerts );
 		LabelFontTransformer vlft = (LabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
 		vlft.setSelected( loopVerts );
 		// repaint it

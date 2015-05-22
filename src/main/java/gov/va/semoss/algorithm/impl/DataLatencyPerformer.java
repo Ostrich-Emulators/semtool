@@ -33,7 +33,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -659,8 +659,8 @@ public class DataLatencyPerformer implements IAlgorithm {
 
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
 		atx.setEdges( validEdges );
-		VertexPaintTransformer vtx = (VertexPaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setSelectedVertices( validVerts );
+		PaintTransformer vtx = (PaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
+		vtx.setSelected( validVerts );
 		
 		LabelFontTransformer vlft = (LabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
 		vlft.setSelected( validVerts );

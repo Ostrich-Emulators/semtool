@@ -27,8 +27,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.LabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
@@ -89,10 +88,11 @@ public class SearchController implements KeyListener, FocusListener,
 	private boolean typed = false;
 	private boolean searchContinue = true;
 
-	private VertexPaintTransformer oldTx = null;
+	private PaintTransformer oldTx = null;
 	private EdgeStrokeTransformer oldeTx = null;
 	private VertexShapeTransformer oldsTx = null;
 	private double oldedgesize = 0;
+	private int oldfontsize = 0;
 
 	private GraphPlaySheet gps;
 
@@ -128,10 +128,13 @@ public class SearchController implements KeyListener, FocusListener,
 		Collection<SEMOSSVertex> picked = view.getPickedVertexState().getPicked();
 
 		// set the transformers
-		oldTx = (VertexPaintTransformer) rc.getVertexFillPaintTransformer();
-		oldTx.setSelectedVertices( picked );
+		oldTx = (PaintTransformer) rc.getVertexFillPaintTransformer();
+		oldTx.setSelected( picked );
 
 		gps.getVertexLabelFontTransformer().setSelected( picked );
+		gps.getEdgeLabelFontTransformer().setSelected( view.getPickedEdgeState().getPicked() );
+		oldfontsize = gps.getEdgeLabelFontTransformer().getNormalFontSize();
+		gps.getEdgeLabelFontTransformer().setNormalFontSize( 0 );
 
 		oldeTx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
 		oldedgesize = oldeTx.getNormalSize();
@@ -148,9 +151,11 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	private void handleDeselectionOfButton() {
-		oldTx.setSelectedVertices( null );
+		oldTx.setSelected( null );
 		oldeTx.setSelectedEdges( null );
 		gps.getVertexLabelFontTransformer().setSelected( null );
+		gps.getEdgeLabelFontTransformer().setSelected( null );
+		gps.getEdgeLabelFontTransformer().setNormalFontSize( oldfontsize );
 		oldsTx.emptySelected();
 		oldeTx.reset( oldedgesize, -1, -1 );
 		gps.getView().repaint();

@@ -35,7 +35,7 @@ import org.openrdf.model.URI;
  */
 public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transformer<T, String> {
 
-	private ControlData data;
+	private final ControlData data;
 
 	/**
 	 * Constructor for VertexLabelTransformer.

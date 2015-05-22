@@ -33,7 +33,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -94,10 +94,10 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
 		Set<SEMOSSEdge> edgeHash = tx.getSelectedEdges();
 
-		VertexPaintTransformer vtx = (VertexPaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
-		Set<SEMOSSVertex> vertHash = new HashSet<>( vtx.getSelectedVertices() );
-
+		PaintTransformer vtx = (PaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
 		PickedState state = ps.getView().getPickedVertexState();
+		Set<SEMOSSVertex> vertHash = new HashSet<>( state.getPicked() );
+
 		state.clear();
 
 		//if it is All, must use distance downstream processor to get all of the edges
@@ -158,7 +158,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		ps.getView().setPickedVertexState( state );
 
 		tx.setSelectedEdges( edgeHash );
-		vtx.setSelectedVertices( vertHash );
+		vtx.setSelected( vertHash );
 		LabelFontTransformer vlft = (LabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
 		vlft.setSelected( vertHash );
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();

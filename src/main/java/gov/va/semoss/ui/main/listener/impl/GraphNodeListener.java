@@ -38,7 +38,6 @@ import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.models.EdgePropertyTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.util.HashSet;
@@ -46,11 +45,9 @@ import java.util.HashSet;
 /**
  * Controls what happens when a user clicks on a node in a graph.
  */
-public class GraphNodeListener extends ModalLensGraphMouse implements
-		IChakraListener {
+public class GraphNodeListener extends ModalLensGraphMouse implements IChakraListener {
 
-	private static final Logger logger = Logger
-			.getLogger( GraphNodeListener.class );
+	private static final Logger logger = Logger.getLogger( GraphNodeListener.class );
 	private GraphPlaySheet gps;
 
 	public GraphNodeListener( GraphPlaySheet _gps ) {
@@ -177,15 +174,8 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
 			Set<SEMOSSVertex> verts ) {
 
-		Set<SEMOSSVertex> vertHash = new HashSet<>(verts );
-		
-		LabelFontTransformer vlft 
-				= (LabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-		vertHash.addAll( vlft.getSelectedVertices() );
-		vlft.setSelected( vertHash );
-		VertexPaintTransformer ptx = (VertexPaintTransformer) viewer
-				.getRenderContext().getVertexFillPaintTransformer();
-		ptx.setSelectedVertices( vertHash );
+		LabelFontTransformer<SEMOSSVertex> vlft = gps.getVertexLabelFontTransformer();
+		vlft.select( verts );
 		viewer.repaint();
 	}
 

@@ -31,8 +31,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.models.VertexPropertyTableModel;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -73,7 +72,8 @@ public class PickedStateListener implements ItemListener {
 		table.setModel( tm );
 
 		//need to check if there are any size resets that need to be done
-		VertexShapeTransformer vst = (VertexShapeTransformer) viewer.getRenderContext().getVertexShapeTransformer();
+		VertexShapeTransformer vst 
+				= (VertexShapeTransformer) viewer.getRenderContext().getVertexShapeTransformer();
 		vst.emptySelected();
 
 		// handle the vertices
@@ -86,7 +86,7 @@ public class PickedStateListener implements ItemListener {
 		LabelFontTransformer vlft = null;
 		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
 			vlft = (LabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-			vertHash.addAll( vlft.getSelectedVertices() );
+			vertHash.addAll( vlft.getSelected() );
 		}
 		
 		vertHash.addAll( ps.getPicked() );
@@ -104,8 +104,8 @@ public class PickedStateListener implements ItemListener {
 		}
 		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
 			vlft.setSelected( vertHash );
-			VertexPaintTransformer ptx = (VertexPaintTransformer) viewer.getRenderContext().getVertexFillPaintTransformer();
-			ptx.setSelectedVertices( vertHash );
+			PaintTransformer ptx = (PaintTransformer) viewer.getRenderContext().getVertexFillPaintTransformer();
+			ptx.setSelected( vertHash );
 		}
 
 	}

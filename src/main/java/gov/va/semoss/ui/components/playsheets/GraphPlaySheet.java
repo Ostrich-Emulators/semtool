@@ -68,12 +68,10 @@ import gov.va.semoss.ui.main.listener.impl.PlaySheetControlListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetOWLListener;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeLabelFontTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.LabelTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.ui.transformer.TooltipTransformer;
@@ -251,7 +249,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
 		TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
 
-		VertexPaintTransformer vpt = new VertexPaintTransformer();
+		PaintTransformer vpt = new PaintTransformer();
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
@@ -458,9 +456,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		Set<SEMOSSVertex> verts = ( controlPanel.isHighlightButtonSelected()
 				? view.getPickedVertexState().getPicked() : null );
-		VertexPaintTransformer ptx = (VertexPaintTransformer) rc.getVertexFillPaintTransformer();
+		PaintTransformer ptx = (PaintTransformer) rc.getVertexFillPaintTransformer();
 		LabelFontTransformer vfl = (LabelFontTransformer) rc.getVertexFontTransformer();
-		ptx.setSelectedVertices( verts );
+		ptx.setSelected( verts );
 		vfl.setSelected( verts );
 	}
 
@@ -598,14 +596,14 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
 		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
 
-		VertexPaintTransformer vpt = new VertexPaintTransformer();
+		PaintTransformer vpt = new PaintTransformer();
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
 		ArrowFillPaintTransformer aft = new ArrowFillPaintTransformer();
 		//keep the stored one if possible
-		VertexLabelFontTransformer vlft = new VertexLabelFontTransformer();
-		EdgeLabelFontTransformer elft = new EdgeLabelFontTransformer();
+		LabelFontTransformer<SEMOSSVertex> vlft = new LabelFontTransformer<>();
+		LabelFontTransformer<SEMOSSEdge> elft = new LabelFontTransformer<>();
 		VertexShapeTransformer vsht = new VertexShapeTransformer();
 
 		//view.setGraphMouse(mc);
@@ -633,8 +631,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		boolean increaseFont = ( incr > 0 );
 
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = view;
-		VertexLabelFontTransformer transformerV = (VertexLabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-		EdgeLabelFontTransformer transformerE = (EdgeLabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
+		LabelFontTransformer<SEMOSSVertex> transformerV 
+				= (LabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
+		LabelFontTransformer<SEMOSSEdge> transformerE 
+				= (LabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
 
 		//if no vertices or edges are selected, perform action on all vertices and edges
 		if ( viewer.getPickedVertexState().getPicked().isEmpty()

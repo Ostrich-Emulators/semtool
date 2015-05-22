@@ -44,7 +44,7 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	private static final int MINSIZE = 0;
 
 	private final Set<T> selecteds = new HashSet<>();
-	private int currentDefaultSize = Constants.INITIAL_GRAPH_FONT_SIZE;
+	private int normalSize = Constants.INITIAL_GRAPH_FONT_SIZE;
 	//This stores all font size data about the nodes.  Different than 
 	// verticeURI2Show because need to remember size information when vertex label is unhidden
 	private final Map<T, Integer> nodeSizeData = new HashMap<>();
@@ -66,22 +66,26 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	}
 
 	/**
-	 * Method getSelectedVertices. Gets the hashtable of vertices and URIs.
+	 * Method getSelected. Gets the hashtable of vertices and URIs.
 	 *
 	 * @return Hashtable<String,Object>
 	 */
-	public Collection<T> getSelectedVertices() {
+	public Collection<T> getSelected() {
 		return selecteds;
 	}
 
 	/**
-	 * Method getCurrentFontSize. Retrieves the current default font size for the
+	 * Method getNormalFontSize. Retrieves the current default font size for the
 	 * nodes.
 	 *
 	 * @return int - the current font size.
 	 */
-	public int getCurrentFontSize() {
-		return currentDefaultSize;
+	public int getNormalFontSize() {
+		return normalSize;
+	}
+
+	public void setNormalFontSize( int n ) {
+		normalSize = n;
 	}
 
 	/**
@@ -92,8 +96,16 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	 */
 	public void setSelected( Collection<T> verts ) {
 		this.selecteds.clear();
+		select( verts );
+	}
+
+	public void select( T vert ) {
+		selecteds.add( vert );
+	}
+
+	public void select( Collection<T> verts ) {
 		if ( null != verts ) {
-			this.selecteds.addAll( verts );
+			selecteds.addAll( verts );
 		}
 	}
 
@@ -103,7 +115,7 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	 */
 	public void clearSizeData() {
 		nodeSizeData.clear();
-		currentDefaultSize = DEFAULT_SIZE;
+		normalSize = DEFAULT_SIZE;
 	}
 
 	/**
@@ -111,8 +123,8 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	 * graph.
 	 */
 	public void increaseFontSize() {
-		if ( currentDefaultSize < MAXSIZE ) {
-			currentDefaultSize++;
+		if ( normalSize < MAXSIZE ) {
+			normalSize++;
 		}
 		for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
 			int size = entry.getValue();
@@ -127,8 +139,8 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	 * graph.
 	 */
 	public void decreaseFontSize() {
-		if ( currentDefaultSize > MINSIZE ) {
-			currentDefaultSize--;
+		if ( normalSize > MINSIZE ) {
+			normalSize--;
 		}
 
 		for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
@@ -154,7 +166,7 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 			nodeSizeData.put( nodeURI, size );
 		}
 		else {
-			int size = currentDefaultSize;
+			int size = normalSize;
 			if ( size < MAXSIZE ) {
 				size = size + 1;
 			}
@@ -177,7 +189,7 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 			nodeSizeData.put( nodeURI, size );
 		}
 		else {
-			int size = currentDefaultSize;
+			int size = normalSize;
 			if ( size > MINSIZE ) {
 				size = size - 1;
 			}
@@ -195,13 +207,13 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	@Override
 	public Font transform( T arg0 ) {
 		if ( selecteds.isEmpty() ) {
-			return new Font( "Plain", Font.PLAIN, currentDefaultSize );
+			return new Font( "Plain", Font.PLAIN, normalSize );
 		}
 		else {
 			int size = unselectedSize;
 			if ( selecteds.contains( arg0 ) ) {
 				size = ( nodeSizeData.containsKey( arg0 )
-						? nodeSizeData.get( arg0 ) : currentDefaultSize );
+						? nodeSizeData.get( arg0 ) : normalSize );
 			}
 
 			return new Font( "Plain", Font.PLAIN, size );

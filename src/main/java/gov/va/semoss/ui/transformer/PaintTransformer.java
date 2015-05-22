@@ -15,51 +15,47 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.transformer;
 
+import gov.va.semoss.om.AbstractNodeEdgeBase;
+import java.awt.Color;
 import java.awt.Paint;
 
-import org.apache.commons.collections15.Transformer;
-
-import gov.va.semoss.om.SEMOSSVertex;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.collections15.Transformer;
 
 /**
  * Transforms the color of vertices/nodes on the graph.
  */
-public class VertexPaintTransformer implements Transformer<SEMOSSVertex, Paint> {
+public class PaintTransformer<T extends AbstractNodeEdgeBase> implements Transformer<T, Paint> {
 
-	private Set<SEMOSSVertex> verticeURI2Show = new HashSet<>();
+	private Set<T> selecteds = new HashSet<>();
 
-	/**
-	 * Constructor for VertexPaintTransformer.
-	 */
-	public VertexPaintTransformer() {
-
+	public void reset() {
+		selecteds.clear();
 	}
 
-	/**
-	 * Method setSelectedVertices. Sets the Hashtable of vertices.
-	 *
-	 * @param verts Hashtable
-	 */
-	public void setSelectedVertices( Collection<SEMOSSVertex> verts ) {
-		this.verticeURI2Show.clear();
-		if ( null != verts ) {
-			this.verticeURI2Show.addAll( verts );
+	public void setSelected( Collection<T> s ) {
+		selecteds.clear();
+		select( s );
+	}
+
+	public void select( T s ) {
+		selecteds.add( s );
+	}
+
+	public void select( Collection<T> s ) {
+		if( null != s ){
+			selecteds.addAll( s );
 		}
 	}
 
-	/**
-	 * Method getSelectedVertices. Retreives the hashtable of vertices 	 *
-	 * @return Hashtable
-	 */
-	public Collection<SEMOSSVertex> getSelectedVertices() {
-		return verticeURI2Show;
+	public Set<T> getSelected() {
+		return selecteds;
 	}
 
 	/**
@@ -71,7 +67,11 @@ public class VertexPaintTransformer implements Transformer<SEMOSSVertex, Paint> 
 	 * @return Paint - The type of Paint.
 	 */
 	@Override
-	public Paint transform( SEMOSSVertex vertex ) {
+	public Paint transform( T vertex ) {
+		if ( !( selecteds.isEmpty() || selecteds.contains( vertex ) ) ) {
+			return Color.white;
+		}
+
 		return vertex.getColor();
 	}
 }

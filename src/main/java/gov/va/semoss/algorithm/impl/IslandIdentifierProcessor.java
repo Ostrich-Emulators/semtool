@@ -29,7 +29,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.util.Constants;
 import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.ui.components.api.IPlaySheet;
@@ -151,8 +151,8 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 		
 		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
 		atx.setEdges( islandEdges );
-		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setSelectedVertices( islandVerts );
+		PaintTransformer vtx = (PaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
+		vtx.setSelected( islandVerts );
 		LabelFontTransformer vlft = (LabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
 		vlft.setSelected( islandVerts );
 		// repaint it

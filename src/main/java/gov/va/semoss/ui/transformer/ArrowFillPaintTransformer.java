@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.transformer;
 
@@ -25,42 +25,14 @@ import java.awt.Paint;
 import org.apache.commons.collections15.Transformer;
 
 import gov.va.semoss.om.SEMOSSEdge;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Highlights the edges of a graph so they can be highlighted.
  */
 public class ArrowFillPaintTransformer implements Transformer<SEMOSSEdge, Paint> {
 
-	Map<String, SEMOSSEdge> edges = new HashMap<>();
-
-	/**
-	 * Constructor for ArrowFillPaintTransformer.
-	 */
-	public ArrowFillPaintTransformer() {
-
-	}
-
-	/**
-	 * Method setEdges. Sets the edges of the graph.
-	 *
-	 * @param edges Hashtable<String,DBCMEdge>
-	 */
-	public void setEdges( Map<String, SEMOSSEdge> edges ) {
-		this.edges = edges;
-	}
-
-	/**
-	 * Method transform. Transforms the edge parameter to its original color.
-	 *
-	 * @param edge DBCMEdge
-	 *
-	 * @return Paint
-	 */
 	@Override
 	public Paint transform( SEMOSSEdge edge ) {
-		Paint p = Color.gray;
-		return p;
+		return Color.gray;
 	}
 }
