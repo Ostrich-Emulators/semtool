@@ -20,7 +20,6 @@
 package gov.va.semoss.ui.transformer;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.util.PropComparator;
 
@@ -67,11 +66,6 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 		//font through font transformer, the label doesn't get really far away from the vertex
 		StringBuilder html = new StringBuilder();
 		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
-		html.append( "<font size='1'>" );
-		if ( vertex instanceof SEMOSSVertex ) {
-			html.append( "<br><br><br>" ); // so the text goes under the node icon (?)
-		}
-		html.append( "</font>" );
 		boolean first = true;
 		for ( URI property : properties ) {
 			if ( !first ) {

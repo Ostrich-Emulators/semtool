@@ -119,7 +119,7 @@ public class SearchController implements KeyListener, FocusListener,
 			handleDeselectionOfButton();
 		}
 
-		// gps.resetTransformers();
+		// gps.clearHighlighting();
 	}
 
 	private void handleSelectionOfButton() {
@@ -152,7 +152,7 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	private void handleDeselectionOfButton() {
-		gps.resetTransformers();
+		gps.clearHighlighting();
 
 		if ( !searchText.getText().isEmpty() ) {
 			searchStatement( searchText.getText() );

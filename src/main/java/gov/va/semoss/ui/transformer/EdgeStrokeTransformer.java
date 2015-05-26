@@ -22,22 +22,18 @@ package gov.va.semoss.ui.transformer;
 import java.awt.BasicStroke;
 import java.awt.Stroke;
 
-import org.apache.commons.collections15.Transformer;
-
 import gov.va.semoss.om.SEMOSSEdge;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.awt.Color;
+import java.awt.Paint;
 
 /**
  */
-public class EdgeStrokeTransformer implements Transformer<SEMOSSEdge, Stroke> {
+public class EdgeStrokeTransformer extends SelectingTransformer<SEMOSSEdge, Stroke> {
 
 	public static final float DEFAULT_SIZE = 0.3f;
 	public static final float UNSELECTED_SIZE = 0.1f;
 	public static final double SELECTED_SIZE = 2f;
 
-	private final Set<SEMOSSEdge> edges = new HashSet<>();
 	private Stroke normal;
 	private Stroke selected;
 	private Stroke unselected;
@@ -105,45 +101,21 @@ public class EdgeStrokeTransformer implements Transformer<SEMOSSEdge, Stroke> {
 			setUnselectedSize( unsel );
 		}
 
-		edges.clear();
+		clearSelected();
 	}
 
-	/**
-	 * Method setSelectedEdges.
-	 *
-	 * @param edges Hashtable
-	 */
-	public void setSelectedEdges( Collection<SEMOSSEdge> eds ) {
-		edges.clear();
-		if ( null != eds ) {
-			edges.addAll( eds );
-		}
-	}
-
-	/**
-	 * Method getSelectedEdges.
-	 *
-	 * @return Hashtable
-	 */
-	public Set<SEMOSSEdge> getSelectedEdges() {
-		return edges;
-	}
-
-	/**
-	 * Method transform.
-	 *
-	 * @param edge DBCMEdge
-	 *
-	 * @return Stroke
-	 */
 	@Override
-	public Stroke transform( SEMOSSEdge edge ) {
+	protected Stroke transformNormal( SEMOSSEdge t ) {
+		return normal;
+	}
 
-		if ( edges.isEmpty() ) {
-			return normal;
-		}
-		else {
-			return ( edges.contains( edge ) ? selected : unselected );
-		}
+	@Override
+	protected Stroke transformSelected( SEMOSSEdge t ) {
+		return selected;
+	}
+
+	@Override
+	protected Stroke transformNotSelected( SEMOSSEdge t, boolean skel ) {
+		return ( skel ? unselected : normal );
 	}
 }

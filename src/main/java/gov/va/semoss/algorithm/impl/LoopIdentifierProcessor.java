@@ -27,7 +27,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.GridFilterData;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
+import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
 import edu.uci.ics.jung.graph.DelegateForest;
@@ -264,10 +264,10 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	private void setTransformers() {
 		
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setSelectedEdges( loopEdges );
+		tx.setSelected( loopEdges );
 
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( loopEdges );
+		ArrowPaintTransformer atx = (ArrowPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
+		atx.setSelected( loopEdges );
 		PaintTransformer vtx = (PaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
 		vtx.setSelected( loopVerts );
 		LabelFontTransformer vlft = (LabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();

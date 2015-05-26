@@ -25,15 +25,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JSplitPane;
 
 import org.apache.log4j.Logger;
-import org.jgrapht.alg.ConnectivityInspector;
-import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.SimpleGraph;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -44,7 +40,6 @@ import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
-import edu.uci.ics.jung.visualization.picking.PickedState;
 import edu.uci.ics.jung.visualization.renderers.BasicRenderer;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.om.GraphDataModel;
@@ -66,8 +61,7 @@ import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetColorShapeListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetControlListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetOWLListener;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
+import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.LabelTransformer;
@@ -77,9 +71,10 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import java.awt.Dimension;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import org.apache.commons.collections15.Predicate;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
@@ -102,9 +97,22 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected ControlData controlData = new ControlData();
 	protected PropertySpecData predData = new PropertySpecData();
 	protected VertexFilterData filterData = new VertexFilterData();
-	protected LabelFontTransformer<SEMOSSVertex> vlft;
-	protected LabelFontTransformer<SEMOSSEdge> elft;
-	protected VertexShapeTransformer vsht;
+
+	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
+	protected VertexShapeTransformer vht = new VertexShapeTransformer();
+	protected LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
+	protected TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
+	protected PaintTransformer<SEMOSSVertex> vpt = new PaintTransformer<>();
+	protected VertexStrokeTransformer vst = new VertexStrokeTransformer();
+
+	protected LabelFontTransformer<SEMOSSEdge> eft = new LabelFontTransformer<>();
+	protected LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
+	protected TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
+	protected PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<>();
+	protected EdgeStrokeTransformer est = new EdgeStrokeTransformer();
+	protected ArrowPaintTransformer adpt = new ArrowPaintTransformer();
+	protected ArrowPaintTransformer aft = new ArrowPaintTransformer();
+
 	protected boolean traversable = true;
 	protected boolean nodesHidable = true;
 
@@ -277,46 +285,29 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		viewer.setGraphMouse( new GraphNodeListener( this ) );
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		viewer.setGraphMouse( gl );
-
-		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
-		TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
-
-		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
-		TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
-
-		PaintTransformer vpt = new PaintTransformer();
-		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
-
-		VertexStrokeTransformer vst = new VertexStrokeTransformer();
-		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
-		ArrowFillPaintTransformer aft = new ArrowFillPaintTransformer();
-
-		//keep the stored one if possible
-		vlft = new LabelFontTransformer<>();
-		elft = new LabelFontTransformer<>();
-		vsht = new VertexShapeTransformer();
-
 		viewer.setBackground( Color.WHITE );
-		viewer.getRenderContext().setVertexLabelTransformer( vlt );
-		viewer.getRenderContext().setEdgeLabelTransformer( elt );
-		viewer.getRenderContext().setVertexStrokeTransformer( vst );
-		viewer.getRenderContext().setVertexShapeTransformer( vsht );
-		viewer.getRenderContext().setVertexFillPaintTransformer( vpt );
-		viewer.getRenderContext().setEdgeDrawPaintTransformer( vpt );
-		viewer.getRenderContext().setEdgeStrokeTransformer( est );
-		viewer.getRenderContext().setArrowDrawPaintTransformer( adpt );
-		viewer.getRenderContext().setEdgeArrowStrokeTransformer( est );
-		viewer.getRenderContext().setArrowFillPaintTransformer( aft );
-		viewer.getRenderContext().setVertexFontTransformer( vlft );
-		viewer.getRenderContext().setEdgeFontTransformer( elft );
-		viewer.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.CNTR );
-		viewer.getRenderContext().setLabelOffset( 0 );
+
+		RenderContext rc = viewer.getRenderContext();
+		rc.setVertexLabelTransformer( vlt );
 		viewer.setVertexToolTipTransformer( vtt );
+		rc.setVertexStrokeTransformer( vst );
+		rc.setVertexShapeTransformer( vht );
+		rc.setVertexFillPaintTransformer( vpt );
+		rc.setVertexFontTransformer( vft );
+
+		rc.setEdgeLabelTransformer( elt );
 		viewer.setEdgeToolTipTransformer( ett );
+		rc.setEdgeDrawPaintTransformer( ept );
+		rc.setEdgeStrokeTransformer( est );
+		rc.setEdgeArrowStrokeTransformer( est );
+		rc.setEdgeFontTransformer( eft );
+		rc.setArrowDrawPaintTransformer( adpt );
+		rc.setArrowFillPaintTransformer( aft );
+		viewer.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.S );
+		rc.setLabelOffset( 0 );
 
 		PickedStateListener psl = new PickedStateListener( viewer, this );
-		PickedState<SEMOSSVertex> ps = viewer.getPickedVertexState();
-		ps.addItemListener( psl );
+		viewer.getPickedVertexState().addItemListener( psl );
 	}
 
 	public String getLayoutName() {
@@ -377,8 +368,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	/**
 	 * Sets the layout of the visualization. The name must be a key pointing to a
 	 * a class name in the semoss.properties file. If any error occurs, the layout
-	 * is reset to {@link Constants#FR}. (Not all layouts can support all graph
-	 * topologies)
+	 * is clearSelected to {@link Constants#FR}. (Not all layouts can support all
+	 * graph topologies)
 	 *
 	 * @return true if the desired layout was applied
 	 * @param layout String
@@ -418,56 +409,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Method printConnectedNodes.
-	 */
-	private void printConnectedNodes() {
-		log.debug( "In print connected Nodes routine " );
-		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph = asSimpleGraph();
-
-		ConnectivityInspector<SEMOSSVertex, SEMOSSEdge> ins
-				= new ConnectivityInspector<>( graph );
-		log.debug( "Number of vertices: " + graph.vertexSet().size()
-				+ ", and edges: " + graph.edgeSet().size() );
-		log.debug( "ins.isGraphConnected(): " + ins.isGraphConnected() );
-		log.debug( "Number of connected sets is: " + ins.connectedSets().size() );
-		Iterator<Set<SEMOSSVertex>> csIterator = ins.connectedSets().iterator();
-		while ( csIterator.hasNext() ) {
-			Set<SEMOSSVertex> vertSet = csIterator.next();
-			Iterator<SEMOSSVertex> si = vertSet.iterator();
-			while ( si.hasNext() ) {
-				SEMOSSVertex vert = si.next();
-				//log.info("Set " + count + ">>>> " + vert.getProperty(Constants.VERTEX_NAME));
-			}
-		}
-	}
-
-	/**
-	 * Method printSpanningTree.
-	 */
-	@SuppressWarnings( "unused" )
-	private void printSpanningTree() {
-		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph = asSimpleGraph();
-
-		KruskalMinimumSpanningTree<SEMOSSVertex, SEMOSSEdge> spanningTree
-				= new KruskalMinimumSpanningTree<>( graph );
-
-		log.debug( "Spanning tree, Number of vertices: " + graph.vertexSet().size() );
-		log.debug( "Spanning tree, Number of Edges:    " + spanningTree.getEdgeSet().size() );
-
-		if ( log.isDebugEnabled() ) {
-			for ( SEMOSSEdge edge : spanningTree.getEdgeSet() ) {
-				log.debug( "Edge Name: " + edge.getProperty( Constants.EDGE_NAME ) );
-			}
-		}
-	}
-
-	/**
 	 * Method getEdgeLabelFontTransformer.
 	 *
 	 * @return EdgeLabelFontTransformer
 	 */
 	public LabelFontTransformer<SEMOSSEdge> getEdgeLabelFontTransformer() {
-		return elft;
+		return eft;
 	}
 
 	/**
@@ -476,30 +423,21 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * @return VertexLabelFontTransformer
 	 */
 	public LabelFontTransformer<SEMOSSVertex> getVertexLabelFontTransformer() {
-		return vlft;
+		return vft;
 	}
 
 	/**
-	 * Method resetTransformers.
+	 * Method clearHighlighting.
 	 */
-	public void resetTransformers() {
-		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = view.getRenderContext();
+	public void clearHighlighting() {
+		vft.clearSelected();
+		vpt.clearSelected();
 
-		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
-		tx.setSelectedEdges( null );
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) rc.getArrowDrawPaintTransformer();
-		atx.setEdges( null );
-		VertexShapeTransformer vst = (VertexShapeTransformer) rc.getVertexShapeTransformer();
-		vst.emptySelected();
-
-		Set<SEMOSSVertex> verts = ( controlPanel.isHighlightButtonSelected()
-				? view.getPickedVertexState().getPicked() : null );
-		view.getPickedVertexState().clear();
-
-		PaintTransformer ptx = (PaintTransformer) rc.getVertexFillPaintTransformer();
-		LabelFontTransformer vfl = (LabelFontTransformer) rc.getVertexFontTransformer();
-		ptx.setSelected( verts );
-		vfl.setSelected( verts );
+		est.clearSelected();
+		ept.clearSelected();
+		eft.clearSelected();
+		adpt.clearSelected();
+		aft.clearSelected();
 	}
 
 	public void removeExistingConcepts( List<String> subVector ) {
@@ -639,8 +577,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		PaintTransformer vpt = new PaintTransformer();
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
-		ArrowDrawPaintTransformer adpt = new ArrowDrawPaintTransformer();
-		ArrowFillPaintTransformer aft = new ArrowFillPaintTransformer();
+		ArrowPaintTransformer adpt = new ArrowPaintTransformer(); // color
+		ArrowPaintTransformer aft = new ArrowPaintTransformer(); // fill
 		//keep the stored one if possible
 		LabelFontTransformer<SEMOSSVertex> vlft = new LabelFontTransformer<>();
 		LabelFontTransformer<SEMOSSEdge> elft = new LabelFontTransformer<>();
@@ -722,6 +660,27 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public ControlPanel getSearchPanel() {
 		return controlPanel;
+	}
+
+	public void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
+		vft.select( verts );
+		vpt.select( verts );
+
+		est.select( edges );
+		ept.select( edges );
+		eft.select( edges );
+		adpt.select( edges );
+		aft.select( edges );		
+
+		view.repaint();
+	}
+
+	public Collection<SEMOSSVertex> getHighlightedVertices() {
+		return new HashSet<>( vft.getSelected() );
+	}
+
+	public Collection<SEMOSSEdge> getHighlightedEdges() {
+		return new HashSet<>( est.getSelected() );
 	}
 
 	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {

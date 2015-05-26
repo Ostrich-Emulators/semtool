@@ -24,54 +24,33 @@ import java.awt.Font;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.collections15.Transformer;
-import org.apache.log4j.Logger;
-
 import gov.va.semoss.util.Constants;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Transforms the font label on a node vertex in the graph.
  */
-public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Transformer<T, Font> {
+public class LabelFontTransformer<T extends AbstractNodeEdgeBase> extends SelectingTransformer<T, Font> {
 
-	private static final Logger logger
-			= Logger.getLogger( LabelFontTransformer.class );
 	private static final int DEFAULT_SIZE = Constants.INITIAL_GRAPH_FONT_SIZE;
 	private static final int MAXSIZE = 55;
 	private static final int MINSIZE = 0;
 
-	private final Set<T> selecteds = new HashSet<>();
 	private int normalSize = Constants.INITIAL_GRAPH_FONT_SIZE;
 	//This stores all font size data about the nodes.  Different than 
 	// verticeURI2Show because need to remember size information when vertex label is unhidden
 	private final Map<T, Integer> nodeSizeData = new HashMap<>();
 
 	private int unselectedSize = MINSIZE;
-
-	/**
-	 * Constructor for VertexLabelFontTransformer.
-	 */
-	public LabelFontTransformer() {
-	}
+	private Font normal = new Font( "Plain", Font.PLAIN, DEFAULT_SIZE );
+	private Font unsel = new Font( "Plain", Font.PLAIN, MINSIZE );
 
 	public void setUnselectedSize( int sz ) {
 		unselectedSize = sz;
+		unsel = new Font( "Plain", Font.PLAIN, sz );
 	}
 
 	public int getUnselectedSize() {
 		return unselectedSize;
-	}
-
-	/**
-	 * Method getSelected. Gets the hashtable of vertices and URIs.
-	 *
-	 * @return Hashtable<String,Object>
-	 */
-	public Collection<T> getSelected() {
-		return selecteds;
 	}
 
 	/**
@@ -86,27 +65,7 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 
 	public void setNormalFontSize( int n ) {
 		normalSize = n;
-	}
-
-	/**
-	 * Method setSelected. Sets the hashtable of all the vertices to show on a
-	 * graph.
-	 *
-	 * @param verticeURI2Show Hashtable
-	 */
-	public void setSelected( Collection<T> verts ) {
-		this.selecteds.clear();
-		select( verts );
-	}
-
-	public void select( T vert ) {
-		selecteds.add( vert );
-	}
-
-	public void select( Collection<T> verts ) {
-		if ( null != verts ) {
-			selecteds.addAll( verts );
-		}
+		normal = new Font( "Plain", Font.PLAIN, n );
 	}
 
 	/**
@@ -124,7 +83,7 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	 */
 	public void increaseFontSize() {
 		if ( normalSize < MAXSIZE ) {
-			normalSize++;
+			setNormalFontSize( normalSize + 1 );
 		}
 		for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
 			int size = entry.getValue();
@@ -140,7 +99,7 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 	 */
 	public void decreaseFontSize() {
 		if ( normalSize > MINSIZE ) {
-			normalSize--;
+			setNormalFontSize( normalSize - 1 );
 		}
 
 		for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
@@ -197,26 +156,20 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> implements Tra
 		}
 	}
 
-	/**
-	 * Method transform. Transforms the label on a node vertex in the graph
-	 *
-	 * @param arg0 DBCMVertex - the vertex to be transformed
-	 *
-	 * @return Font - the font of the vertex
-	 */
 	@Override
-	public Font transform( T arg0 ) {
-		if ( selecteds.isEmpty() ) {
-			return new Font( "Plain", Font.PLAIN, normalSize );
-		}
-		else {
-			int size = unselectedSize;
-			if ( selecteds.contains( arg0 ) ) {
-				size = ( nodeSizeData.containsKey( arg0 )
-						? nodeSizeData.get( arg0 ) : normalSize );
-			}
+	protected Font transformNormal( T t ) {
+		return normal;
+	}
 
-			return new Font( "Plain", Font.PLAIN, size );
-		}
+	@Override
+	protected Font transformSelected( T t ) {
+		int size = ( nodeSizeData.containsKey( t )
+				? nodeSizeData.get( t ) : normalSize );
+		return new Font( "Plain", Font.PLAIN, size );
+	}
+
+	@Override
+	protected Font transformNotSelected( T t, boolean skel ) {
+		return unsel;
 	}
 }

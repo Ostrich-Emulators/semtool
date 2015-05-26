@@ -50,8 +50,8 @@ import org.openrdf.model.vocabulary.RDFS;
 public class PickedStateListener implements ItemListener {
 
 	private static final Logger logger = Logger.getLogger( PickedStateListener.class );
-	VisualizationViewer viewer;
-	private GraphPlaySheet gps;
+	private final VisualizationViewer viewer;
+	private final GraphPlaySheet gps;
 
 	public PickedStateListener( VisualizationViewer v, GraphPlaySheet ps ) {
 		viewer = v;
@@ -78,7 +78,6 @@ public class PickedStateListener implements ItemListener {
 
 		// handle the vertices
 		PickedState<SEMOSSVertex> ps = viewer.getPickedVertexState();
-		Iterator<SEMOSSVertex> it = ps.getPicked().iterator();
 
 		//Need vertex to highlight when click in skeleton mode... Here we need to get the already selected vertices
 		//so that we can add to them
@@ -100,14 +99,11 @@ public class PickedStateListener implements ItemListener {
 			table.setModel( pm );
 			//table.repaint();
 			pm.fireTableDataChanged();
-			logger.debug( "Add this in - Prop Table" );
 		}
-		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+		if ( null != vlft ){
 			vlft.setSelected( vertHash );
 			PaintTransformer ptx = (PaintTransformer) viewer.getRenderContext().getVertexFillPaintTransformer();
 			ptx.setSelected( vertHash );
 		}
-
 	}
-
 }

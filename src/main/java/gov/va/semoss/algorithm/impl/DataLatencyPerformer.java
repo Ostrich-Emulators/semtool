@@ -31,7 +31,7 @@ import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
+import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.util.Constants;
@@ -655,10 +655,10 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 */
 	private void setTransformers() {
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setSelectedEdges( validEdges );
+		tx.setSelected( validEdges );
 
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( validEdges );
+		ArrowPaintTransformer atx = (ArrowPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
+		atx.setSelected( validEdges );
 		PaintTransformer vtx = (PaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
 		vtx.setSelected( validVerts );
 		
