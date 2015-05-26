@@ -32,7 +32,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
+import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -62,7 +62,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		}
 	};
 
-	private final GraphPlaySheet ps;
+	private final GraphPlaySheet gps;
 	private final List<SEMOSSVertex> vertices;
 	private final Type type;
 
@@ -71,7 +71,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 	public AdjacentPopupMenuListener( Type type, GraphPlaySheet gps,
 			Collection<SEMOSSVertex> verts ) {
 		super( type.name );
-		ps = gps;
+		this.gps = gps;
 		vertices = new ArrayList<>( verts );
 		this.type = type;
 		setEnabled( !vertices.isEmpty() );
@@ -80,13 +80,9 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = ps.getView().getRenderContext();
-
-		EdgeStrokeTransformer etx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
-
-		PickedState state = ps.getView().getPickedVertexState();
+		PickedState state = gps.getView().getPickedVertexState();
 		Set<SEMOSSVertex> selectedVerts = new HashSet<>( state.getPicked() );
-		Set<SEMOSSEdge> selectedEdges = new HashSet<>( etx.getSelectedEdges() );
+		Set<SEMOSSEdge> selectedEdges = new HashSet<>();
 		state.clear();
 
 		//if it is All, must use distance downstream processor to get all of the edges
@@ -136,14 +132,6 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 			state.pick( v, true );
 		}
 
-		etx.setSelectedEdges( selectedEdges );
-
-		LabelFontTransformer vlft = (LabelFontTransformer) rc.getVertexFontTransformer();
-		vlft.setSelected( selectedVerts );
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( selectedEdges );
-
-		// repaint it
-		ps.getView().repaint();
+		gps.highlight( selectedVerts, selectedEdges );		
 	}
 }

@@ -22,49 +22,26 @@ package gov.va.semoss.ui.transformer;
 import java.awt.Color;
 import java.awt.Paint;
 
-import org.apache.commons.collections15.Transformer;
-
 import gov.va.semoss.om.SEMOSSEdge;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import static gov.va.semoss.ui.transformer.SelectingTransformer.SelectedState.NOT_SELECTED;
 
 /**
  * Transforms the edges of a graph so they can be highlighted.
  */
-public class ArrowDrawPaintTransformer implements Transformer<SEMOSSEdge, Paint> {
+public class ArrowPaintTransformer extends SelectingTransformer<SEMOSSEdge, Paint> {
 
-	Set<SEMOSSEdge> edges = new HashSet<>();
-
-	/**
-	 * Constructor for ArrowDrawPaintTransformer.
-	 */
-	public ArrowDrawPaintTransformer() {
-
-	}
-
-	/**
-	 * Method setEdges. Sets the hashtable of edges.
-	 *
-	 * @param edges Hashtable<String,DBCMEdge>
-	 */
-	public void setEdges( Collection<SEMOSSEdge> eds ) {
-		edges.clear();
-		if( null != eds ){
-			edges.addAll( eds );
-		}
-	}
-
-	/**
-	 * Method transform. If the hashtable of edges contains the edge parameter,
-	 * paint it black.
-	 *
-	 * @param edge DBCMEdge
-	 *
-	 * @return Paint - the color of the paint.
-	 */
 	@Override
-	public Paint transform( SEMOSSEdge edge ) {
-		return ( edges.contains( edge ) ? edge.getColor() : Color.white );
+	protected Paint transformNormal( SEMOSSEdge t ) {
+		return t.getColor();
+	}
+
+	@Override
+	protected Paint transformSelected( SEMOSSEdge t ) {
+		return t.getColor();
+	}
+
+	@Override
+	protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
+		return ( skel ? Color.white : t.getColor() );
 	}
 }

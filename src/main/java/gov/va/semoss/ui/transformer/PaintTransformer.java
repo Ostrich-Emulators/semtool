@@ -23,55 +23,23 @@ import gov.va.semoss.om.AbstractNodeEdgeBase;
 import java.awt.Color;
 import java.awt.Paint;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.commons.collections15.Transformer;
-
 /**
  * Transforms the color of vertices/nodes on the graph.
  */
-public class PaintTransformer<T extends AbstractNodeEdgeBase> implements Transformer<T, Paint> {
+public class PaintTransformer<T extends AbstractNodeEdgeBase> extends SelectingTransformer<T, Paint> {
 
-	private Set<T> selecteds = new HashSet<>();
-
-	public void reset() {
-		selecteds.clear();
-	}
-
-	public void setSelected( Collection<T> s ) {
-		selecteds.clear();
-		select( s );
-	}
-
-	public void select( T s ) {
-		selecteds.add( s );
-	}
-
-	public void select( Collection<T> s ) {
-		if( null != s ){
-			selecteds.addAll( s );
-		}
-	}
-
-	public Set<T> getSelected() {
-		return selecteds;
-	}
-
-	/**
-	 * Method transform. Get the DI Helper to find what is needed to get for
-	 * vertex
-	 *
-	 * @param arg0 DBCMVertex - The edge of which this returns the properties.
-	 *
-	 * @return Paint - The type of Paint.
-	 */
 	@Override
-	public Paint transform( T vertex ) {
-		if ( !( selecteds.isEmpty() || selecteds.contains( vertex ) ) ) {
-			return Color.white;
-		}
+	protected Paint transformNormal( T t ) {
+		return t.getColor();
+	}
 
-		return vertex.getColor();
+	@Override
+	protected Paint transformSelected( T t ) {
+		return t.getColor();
+	}
+
+	@Override
+	protected Paint transformNotSelected( T t, boolean skel ) {
+		return ( skel ? Color.white : t.getColor() );
 	}
 }

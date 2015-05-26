@@ -76,7 +76,7 @@ public class MSTPopupMenuListener extends AbstractAction {
 
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext()
 				.getEdgeStrokeTransformer();
-		tx.setSelectedEdges( kmst.getEdgeSet() );
+		tx.setSelected( kmst.getEdgeSet() );
 
 		// repaint it
 		ps.getView().repaint();
