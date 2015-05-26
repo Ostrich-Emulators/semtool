@@ -31,16 +31,13 @@ import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
+import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import java.util.HashMap;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -62,7 +59,7 @@ public class DataLatencyPerformer implements IAlgorithm {
 	Vector<SEMOSSVertex> currentPathVerts = new Vector<SEMOSSVertex>();//these are used for depth search first
 	Vector<SEMOSSEdge> currentPathEdges = new Vector<SEMOSSEdge>();
 	double currentPathLate;
-	Map<SEMOSSEdge, Double> validEdges = new HashMap<>();
+	Set<SEMOSSEdge> validEdges = new HashSet<>();
 	Set<SEMOSSVertex> validVerts = new HashSet<>();
 	String selectedNodes = "";
 	double naFrequencyFraction = 0;
@@ -263,12 +260,12 @@ public class DataLatencyPerformer implements IAlgorithm {
 				freqString = frequency.replaceAll( "\"", "" );
 			}
 			else {
-				validEdges.put( edge, notInterfaceFraction );
+				validEdges.add( edge );
 			}
 			//if the edge is not available or doens't have a frequency, remove from master edges and make red
 			if ( !isAvailable( freqString ) ) {
 				//masterEdgeVector.remove(edge);
-				validEdges.put( edge, naFrequencyFraction );
+				validEdges.add( edge );
 			}
 			double freqDouble = translateString( freqString );
 			double tempPathLate = currentPathLate + freqDouble;
@@ -333,7 +330,7 @@ public class DataLatencyPerformer implements IAlgorithm {
 		validVerts.addAll( verts );
 		logger.warn( "this code is probably wrong" );
 		for ( SEMOSSEdge e : edges ) {
-			validEdges.put( e, 5d );
+			validEdges.add( e );
 		}
 	}
 
@@ -658,15 +655,15 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 */
 	private void setTransformers() {
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( validEdges );
-		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) ps.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( validEdges );
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( validEdges.keySet() );
-		VertexPaintTransformer vtx = (VertexPaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setVertHash( validVerts );
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setVertHash( validVerts );
+		tx.setSelected( validEdges );
+
+		ArrowPaintTransformer atx = (ArrowPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
+		atx.setSelected( validEdges );
+		PaintTransformer vtx = (PaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
+		vtx.setSelected( validVerts );
+		
+		LabelFontTransformer vlft = (LabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
+		vlft.setSelected( validVerts );
 		// repaint it
 		ps.getView().repaint();
 	}

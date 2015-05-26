@@ -19,9 +19,11 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.UriBuilder;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import org.jgrapht.graph.SimpleGraph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
@@ -52,11 +54,6 @@ public class GraphDataModel {
 	private boolean filterOutOwlData = true;
 	private URI typeOrSubclass = RDF.TYPE;
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph = new DirectedSparseGraph<>();
-	private MultiMap<Integer, SEMOSSVertex> redoVerts = new MultiMap<>();
-	private MultiMap<Integer, SEMOSSEdge> redoEdges = new MultiMap<>();
-
-	private int overlayLevel = 0;
-	private int maxOverlayLevel = 0;
 
 	public GraphDataModel() {
 		initPropSudowlSearch();
@@ -74,42 +71,32 @@ public class GraphDataModel {
 		return vizgraph;
 	}
 
+	public SimpleGraph<SEMOSSVertex, SEMOSSEdge> asSimpleGraph() {
+		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph
+				= new SimpleGraph<>( SEMOSSEdge.class );
+		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
+			graph.addVertex( v );
+		}
+		for ( SEMOSSEdge v : vizgraph.getEdges() ) {
+			graph.addEdge( v.getInVertex(), v.getOutVertex(), v );
+		}
+
+		return graph;
+	}
+
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
 		vizgraph = f;
 	}
 
 	/**
-	 * Method fillStoresFromModel. This function requires the rc to be completely
-	 * full it will use the rc to create edge and node properties and then nodes
-	 * and edges.
+	 * Adds new nodes/edges to the graph at the specified "redo" level.
+	 *
+	 * @param model the nodes/edges to add
+	 * @param engine the engine to get other data from
+	 * @param overlayLevel the level of the nodes
 	 */
-	public void fillStoresFromModel() {
-		log.warn( "this function has been refactored away" );
-	}
-
-	/*
-	 * Method processData @param query @param engine
-	 *
-	 * Need to take the base information from the base query and insert it into
-	 * the jena model this is based on EXTERNAL ontology then take the ontology
-	 * and insert it into the jena model (may be eventually we can run this
-	 * through a reasoner too)
-	 *
-	 * Now insert our base model into the same ontology. Now query the model for
-	 * Relations - Paint the basic graph. Now find a way to get all the predicate
-	 * properties from them. Hopefully the property is done using subproperty of
-	 * predicates - Pick all the predicates but for the properties.
-	 *
-	 */
-	public void addGraphLevel( Model model, IEngine engine ) {
-		removeFutureRedoLevels();
-
+	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
 		try {
-			overlayLevel++;
-			if ( overlayLevel > maxOverlayLevel ) {
-				maxOverlayLevel = overlayLevel;
-			}
-
 			Set<Resource> needProps = new HashSet<>( model.subjects() );
 
 			for ( Statement s : model ) {
@@ -121,14 +108,14 @@ public class GraphDataModel {
 					needProps.add( Resource.class.cast( obj ) );
 				}
 
-				SEMOSSVertex vert1 = createOrRetrieveVertex( URI.class.cast( sub ) );
+				SEMOSSVertex vert1 = createOrRetrieveVertex( URI.class.cast( sub ), overlayLevel );
 				SEMOSSVertex vert2;
 				if ( obj instanceof URI ) {
-					vert2 = createOrRetrieveVertex( URI.class.cast( obj ) );
+					vert2 = createOrRetrieveVertex( URI.class.cast( obj ), overlayLevel );
 				}
 				else {
 					URI uri = UriBuilder.getBuilder( Constants.ANYNODE ).uniqueUri();
-					vert2 = createOrRetrieveVertex( uri );
+					vert2 = createOrRetrieveVertex( uri, overlayLevel );
 					vert2.setLabel( obj.stringValue() );
 				}
 
@@ -137,7 +124,6 @@ public class GraphDataModel {
 
 				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred );
 				edge.setLevel( overlayLevel );
-				redoEdges.add( overlayLevel, edge );
 				edge.setEdgeType( pred );
 				storeEdge( edge );
 
@@ -156,55 +142,35 @@ public class GraphDataModel {
 				edge.setProperty( RDFS.LABEL, edgelabels.get( u ) );
 			}
 
-			fetchProperties( needProps, model.predicates(), engine );
+			fetchProperties( needProps, model.predicates(), engine, overlayLevel );
 		}
 		catch ( RepositoryException | QueryEvaluationException e ) {
 			log.error( e, e );
 		}
 	}
 
-	private void removeFutureRedoLevels() {
+	public void removeElementsSinceLevel( int overlayLevel ) {
 		// if we've undone some data and now want to add 
 		// something else, get rid of the future redo data
-		for ( int level = overlayLevel; level <= maxOverlayLevel; level++ ) {
-			for ( SEMOSSVertex v : redoVerts.getNN( level ) ) {
-				vertStore.remove( v.getURI() );
-			}
-			for ( SEMOSSEdge e : redoEdges.getNN( level ) ) {
-				edgeStore.remove( e.getURI() );
-			}
-
-			redoVerts.remove( level );
-			redoEdges.remove( level );
-		}
-
-		maxOverlayLevel = overlayLevel;
-	}
-
-	protected void setLabel( SEMOSSVertex v ) {
-		setLabel( v, "" );
-	}
-
-	protected void setLabel( SEMOSSVertex v, String labelPieceToAppend ) {
-		try {
-			URI uri = v.getURI();
-			if ( labelcache.containsKey( uri ) ) {
-				v.setLabel( labelcache.get( uri ) + labelPieceToAppend );
-				return;
+		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
+		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
+			if ( v.getLevel() > overlayLevel ) {
+				nodesToRemove.add( vertStore.remove( v.getURI() ) );
 			}
 		}
-		catch ( Exception e ) {
-			// label won't be in the cache; don't worry about it
+
+		for ( SEMOSSVertex v : nodesToRemove ) {
+			vizgraph.removeVertex( v );
 		}
-		v.setLabel( v.getLabel() + labelPieceToAppend );
+
+		// edges are removed automatically...
 	}
 
-	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey ) {
+	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey, int overlayLevel ) {
 		if ( !vertStore.containsKey( vertexKey ) ) {
 			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
 			vertex.setLevel( overlayLevel );
 			storeVertex( vertex );
-			redoVerts.add( overlayLevel, vertex );
 		}
 
 		return vertStore.get( vertexKey );
@@ -212,33 +178,12 @@ public class GraphDataModel {
 
 	public void storeVertex( SEMOSSVertex vert ) {
 		URI key = vert.getURI();
-		setLabel( vert );
 		vertStore.put( key, vert );
 	}
 
 	public void storeEdge( SEMOSSEdge edge ) {
 		URI key = edge.getURI();
 		edgeStore.put( key, edge );
-	}
-
-	public void undoData() {
-		for ( SEMOSSVertex v : redoVerts.get( overlayLevel ) ) {
-			vizgraph.removeVertex( v );
-		}
-		// edges get removed when an endpoint is removed
-
-		overlayLevel--;
-	}
-
-	public void redoData() {
-		overlayLevel++;
-		for ( SEMOSSVertex v : redoVerts.get( overlayLevel ) ) {
-			vizgraph.addVertex( v );
-		}
-
-		for ( SEMOSSEdge e : redoEdges.get( overlayLevel ) ) {
-			vizgraph.addEdge( e, e.getInVertex(), e.getOutVertex() );
-		}
 	}
 
 	public void initPropSudowlSearch() {
@@ -258,18 +203,6 @@ public class GraphDataModel {
 		 */
 	}
 
-	public Map<URI, SEMOSSVertex> getVertStore() {
-		return this.vertStore;
-	}
-
-	public Map<URI, SEMOSSEdge> getEdgeStore() {
-		return this.edgeStore;
-	}
-
-	public void removeView( String query, IEngine engine ) {
-		throw new UnsupportedOperationException( "Not yet implemented!" );
-	}
-
 	public Set<String> getBaseFilterSet() {
 		return baseFilterSet;
 	}
@@ -282,20 +215,8 @@ public class GraphDataModel {
 		typeOrSubclass = _typeOrSubclass;
 	}
 
-	public int getOverlayLevel() {
-		return overlayLevel;
-	}
-
-	public int getMaxOverlayLevel() {
-		return maxOverlayLevel;
-	}
-
-	public boolean hasRedoData() {
-		return maxOverlayLevel > overlayLevel;
-	}
-
 	private void fetchProperties( Collection<Resource> concepts, Collection<URI> preds,
-			IEngine engine ) throws RepositoryException, QueryEvaluationException {
+			IEngine engine, int overlayLevel ) throws RepositoryException, QueryEvaluationException {
 
 		String conceptprops
 				= "SELECT ?s ?p ?o ?type WHERE {"
@@ -323,7 +244,7 @@ public class GraphDataModel {
 					String val = set.getValue( "o" ).stringValue();
 					URI type = URI.class.cast( set.getValue( "type" ) );
 
-					SEMOSSVertex v = createOrRetrieveVertex( s );
+					SEMOSSVertex v = createOrRetrieveVertex( s, overlayLevel );
 					v.setProperty( prop, val );
 					v.setType( type );
 				}
@@ -344,16 +265,18 @@ public class GraphDataModel {
 					String propval = set.getValue( "literal" ).stringValue();
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
-					if ( !edgeStore.containsKey( rel ) ) {
-						SEMOSSVertex v1 = createOrRetrieveVertex( s );
-						SEMOSSVertex v2 = createOrRetrieveVertex( o );
-						SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
-						storeEdge( edge );
-					}
+					if ( concepts.contains( s ) && concepts.contains( o ) ) {
+						if ( !edgeStore.containsKey( rel ) ) {
+							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
+							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
+							SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
+							storeEdge( edge );
+						}
 
-					SEMOSSEdge edge = edgeStore.get( rel );
-					edge.setProperty( prop, propval );
-					edge.setType( superrel );
+						SEMOSSEdge edge = edgeStore.get( rel );
+						edge.setProperty( prop, propval );
+						edge.setType( superrel );
+					}
 				}
 			};
 			eqa.useInferred( false );

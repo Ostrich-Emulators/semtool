@@ -40,6 +40,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -49,6 +51,7 @@ import javax.swing.JPopupMenu;
  * playsheet.
  */
 public class GraphNodePopup extends JPopupMenu {
+
 	private static final long serialVersionUID = 7106248215097748901L;
 
 	private final GraphPlaySheet gps;
@@ -56,7 +59,8 @@ public class GraphNodePopup extends JPopupMenu {
 	private SEMOSSVertex pickedVertex;
 	private final IEngine engine;
 
-	public GraphNodePopup( GraphPlaySheet gps, SEMOSSVertex pickedVertex, SEMOSSVertex[] highlightedVertices ) {
+	public GraphNodePopup( GraphPlaySheet gps, SEMOSSVertex pickedVertex,
+			SEMOSSVertex[] highlightedVertices ) {
 		super();
 
 		this.gps = gps;
@@ -85,24 +89,26 @@ public class GraphNodePopup extends JPopupMenu {
 
 	private void addChartOptions() {
 		addSeparator();
-		
+
 		JMenuItem item = add( "Create Custom Chart" );
 		item.setToolTipText( "Invoke a screen to build a custom chart" );
-		item.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
+		item.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
 				BrowserTabSheet3 tab
 						= new BrowserTabSheet3( "/html/RDFSemossCharts/app/index.html", gps );
 				gps.getPlaySheetFrame().addTab( "Custom Chart", tab );
 				tab.pullData();
-		    }
-		});
+			}
+		} );
 	}
 
 	private void addHidingOptions() {
 		addSeparator();
 
 		JMenuItem item = add( "Hide Nodes" );
-		item.addActionListener( new HideVertexPopupMenuListener( gps, highlightedVertices ) );
+		item.addActionListener( new HideVertexPopupMenuListener( gps,
+				Arrays.asList( highlightedVertices ) ) );
 		item.setEnabled( highlightedVertices.length > 0 && gps.areNodesHidable() );
 
 		item = add( "Unhide Nodes" );
@@ -112,38 +118,41 @@ public class GraphNodePopup extends JPopupMenu {
 
 	private void addCosmeticsOptions() {
 		addSeparator();
+		List<SEMOSSVertex> verts = Arrays.asList( highlightedVertices );
 
-		JMenuItem item = add( new ColorPopup( "Modify Color ", gps, highlightedVertices ) );
+		JMenuItem item = add( new ColorPopup( "Modify Color", gps, verts ) );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
 		item.setEnabled( highlightedVertices.length > 0 );
 
-		item = add( new ShapePopup( "Modify Shape ", gps, highlightedVertices ) );
+		item = add( new ShapePopup( "Modify Shape", gps, verts ) );
 		item.setToolTipText( "Modify overall appearance of the graph" );
 		item.setEnabled( highlightedVertices.length > 0 );
 
-		item = add( new LayoutPopup( "Modify Layout ", gps ) );
+		item = add( new LayoutPopup( "Modify Layout", gps ) );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
 	}
 
 	private void addTraverseAndAlgorithmOptions() {
 		addSeparator();
+		List<SEMOSSVertex> verts = Arrays.asList( highlightedVertices );
 
-		if ( pickedVertex == null || !gps.isTraversable()) {
+		if ( pickedVertex == null || !gps.isTraversable() ) {
 			add( "Traverse Freely" ).setEnabled( false );
-		} else {
-			add( new TFRelationPopup(pickedVertex, gps, highlightedVertices) );
-			add( new TFInstanceRelationPopup(pickedVertex, engine, gps, highlightedVertices) );
 		}
-		
+		else {
+			add( new TFRelationPopup( pickedVertex, gps, highlightedVertices ) );
+			add( new TFInstanceRelationPopup( pickedVertex, engine, gps, highlightedVertices ) );
+		}
+
 		JMenu menu = new JMenu( "Perform Algorithms" );
 		menu.setToolTipText( "To select multiple nodes, hold Shift and left click on nodes." );
 		menu.setEnabled( true );
 
 		menu.add( new GraphNodeRankListener( gps ) );
-		menu.add( new DistanceDownstreamProcessor( gps, highlightedVertices ) );
-		menu.add( new LoopIdentifierProcessor( gps, highlightedVertices ) );
-		menu.add( new IslandIdentifierProcessor( gps, highlightedVertices ) );
-		
+		menu.add( new DistanceDownstreamProcessor( gps, verts ) );
+		menu.add( new LoopIdentifierProcessor( gps, verts ) );
+		menu.add( new IslandIdentifierProcessor( gps, verts ) );
+
 		add( menu );
 	}
 
@@ -163,8 +172,9 @@ public class GraphNodePopup extends JPopupMenu {
 
 		item = add( "Show Selected Node Information" );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
+
 		item.addActionListener( new NodeInfoPopup( gps, highlightedVertices,
-				gps.getDesktopPane() ) );
+				gps.getPlaySheetFrame().getDesktopPane() ) );
 	}
 
 	private void addGraphOptions() {
@@ -179,23 +189,25 @@ public class GraphNodePopup extends JPopupMenu {
 	}
 
 	private void addHighlightingOptions() {
+		List<SEMOSSVertex> verts = Arrays.asList( highlightedVertices );
+
 		AdjacentPopupMenuListener highAdjBoth
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.ADJACENT,
-						gps, highlightedVertices );
+						gps, verts );
 
 		JMenu moreHighlight = new JMenu( "More Highlight Options" );
 
 		AdjacentPopupMenuListener highAdjDown
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.DOWNSTREAM,
-						gps, highlightedVertices );
+						gps, verts );
 
 		AdjacentPopupMenuListener highAdjUp
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.UPSTREAM,
-						gps, highlightedVertices );
+						gps, verts );
 
 		AdjacentPopupMenuListener highAdjAll
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.ALL,
-						gps, highlightedVertices );
+						gps, verts );
 
 		MSTPopupMenuListener MST = new MSTPopupMenuListener( gps );
 

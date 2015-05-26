@@ -29,10 +29,11 @@ import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import edu.uci.ics.jung.graph.DelegateForest;
-import edu.uci.ics.jung.visualization.picking.PickedState;
+import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import javax.swing.AbstractAction;
+import org.apache.log4j.Logger;
 
 /**
  * Controls converting the graph to a tree layout.
@@ -40,7 +41,7 @@ import javax.swing.AbstractAction;
 public class TreeConverterListener extends AbstractAction {
 
 	GraphPlaySheet playSheet;
-	public DelegateForest networkForest;
+	public DelegateForest<SEMOSSVertex, SEMOSSEdge> oldforest;
 
 	/**
 	 * Method setPlaySheet. Sets the play sheet that the listener will access.
@@ -49,7 +50,7 @@ public class TreeConverterListener extends AbstractAction {
 	 */
 	public void setPlaySheet( GraphPlaySheet ps ) {
 		this.playSheet = ps;
-		networkForest = ps.getForest();
+		oldforest = ps.getForest();
 	}
 
 	@Override
@@ -63,18 +64,18 @@ public class TreeConverterListener extends AbstractAction {
 		}
 		//if the button is unselected, revert to old forest
 		else {
-			playSheet.setForest( networkForest );
+			playSheet.setForest( oldforest );
 		}
-		
-		boolean success = playSheet.createLayout();
+
+		Logger.getLogger( getClass() ).warn( "this function probably doesn't work anymore" );
+		boolean success = true; //playSheet.createLayout();
 		if ( !success ) {
 			int response = showOptionPopup();
 			if ( response == 1 ) {
 				playSheet.setLayoutName( Constants.FR );
-				playSheet.createLayout();
 			}
 		}
-		playSheet.refreshView();
+		playSheet.updateGraph(); // totally unnecessary, I think
 
 	}
 

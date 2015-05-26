@@ -20,7 +20,6 @@
 package gov.va.semoss.ui.transformer;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.util.PropComparator;
 
@@ -35,7 +34,7 @@ import org.openrdf.model.URI;
  */
 public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transformer<T, String> {
 
-	private ControlData data;
+	private final ControlData data;
 
 	/**
 	 * Constructor for VertexLabelTransformer.
@@ -67,11 +66,6 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 		//font through font transformer, the label doesn't get really far away from the vertex
 		StringBuilder html = new StringBuilder();
 		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
-		html.append( "<font size='1'>" );
-		if ( vertex instanceof SEMOSSVertex ) {
-			html.append( "<br><br><br>" ); // so the text goes under the node icon (?)
-		}
-		html.append( "</font>" );
 		boolean first = true;
 		for ( URI property : properties ) {
 			if ( !first ) {
@@ -79,15 +73,81 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 			}
 
 			if ( vertex.hasProperty( property ) ) {
-				html.append( vertex.getProperty( property ) );
+				String propval = vertex.getProperty( property ).toString();
+				html.append( chop( propval, 50 ) );
 			}
 			first = false;
 		}
 
 		// html.append( " lev: " ).append( vertex.getLevel() );
-
 		html.append( "</html>" );
 
 		return html.toString();
+	}
+
+	/**
+	 * Chops a string to a smaller size. We try to break on a word boundary, even
+	 * if that makes us go over <code>maxsize</code>
+	 *
+	 * @param longstring
+	 * @param maxsize
+	 * @return
+	 */
+	public static String chop( String longstring, int maxsize ) {
+		if ( longstring.length() <= maxsize ) {
+			return longstring;
+		}
+
+		StringBuilder newstring = new StringBuilder();
+		for ( String word : longstring.split( "[\\s]+" ) ) {
+			if ( newstring.length() < maxsize ) {
+				if ( 0 != newstring.length() ) {
+					newstring.append( " " );
+				}
+				newstring.append( word );
+			}
+			else {
+				newstring.append( "..." );
+				break;
+			}
+		}
+
+		return newstring.toString();
+	}
+
+	/**
+	 * Converts long text into a block of text about <code>maxsize</code>
+	 * characters wide
+	 *
+	 * @param longstring
+	 * @param maxsize
+	 * @return
+	 */
+	public static String paragraph( String longstring, int maxsize ) {
+		if ( longstring.length() <= maxsize ) {
+			return longstring;
+		}
+
+		StringBuilder newstring = new StringBuilder();
+		StringBuilder line = new StringBuilder();
+		for ( String word : longstring.split( "[\\s]+" ) ) {
+			if ( line.length() > maxsize ) {
+				if ( 0 != newstring.length() ) {
+					newstring.append( "<br>" );
+				}
+
+				newstring.append( line );
+				line = new StringBuilder();
+			}
+
+			if ( 0 != line.length() ) {
+				line.append( " " );
+			}
+
+			line.append( word );
+		}
+		newstring.append( "<br>" ).append( line );
+
+		return newstring.toString();
 	}
 }

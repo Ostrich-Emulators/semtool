@@ -21,7 +21,6 @@ package gov.va.semoss.ui.helpers;
 
 
 import gov.va.semoss.ui.components.GridFilterData;
-import gov.va.semoss.ui.components.GraphPlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class PlaysheetRemoveRunner implements Runnable{
 	 */
 	@Override
 	public void run() {
-		playSheet.removeView();
+		playSheet.updateGraph();
 		createRemoveGrid(playSheet);
 	}
 	

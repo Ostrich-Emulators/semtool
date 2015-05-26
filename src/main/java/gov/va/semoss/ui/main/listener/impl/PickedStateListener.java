@@ -31,8 +31,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.models.VertexPropertyTableModel;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -40,9 +39,9 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.util.HashSet;
 import java.util.Set;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
 /**
@@ -51,8 +50,8 @@ import org.openrdf.model.vocabulary.RDFS;
 public class PickedStateListener implements ItemListener {
 
 	private static final Logger logger = Logger.getLogger( PickedStateListener.class );
-	VisualizationViewer viewer;
-	private GraphPlaySheet gps;
+	private final VisualizationViewer viewer;
+	private final GraphPlaySheet gps;
 
 	public PickedStateListener( VisualizationViewer v, GraphPlaySheet ps ) {
 		viewer = v;
@@ -73,20 +72,20 @@ public class PickedStateListener implements ItemListener {
 		table.setModel( tm );
 
 		//need to check if there are any size resets that need to be done
-		VertexShapeTransformer vst = (VertexShapeTransformer) viewer.getRenderContext().getVertexShapeTransformer();
+		VertexShapeTransformer vst 
+				= (VertexShapeTransformer) viewer.getRenderContext().getVertexShapeTransformer();
 		vst.emptySelected();
 
 		// handle the vertices
 		PickedState<SEMOSSVertex> ps = viewer.getPickedVertexState();
-		Iterator<SEMOSSVertex> it = ps.getPicked().iterator();
 
 		//Need vertex to highlight when click in skeleton mode... Here we need to get the already selected vertices
 		//so that we can add to them
 		Set<SEMOSSVertex> vertHash = new HashSet<>();
-		VertexLabelFontTransformer vlft = null;
+		LabelFontTransformer vlft = null;
 		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-			vlft = (VertexLabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-			vertHash.addAll( vlft.getVertHash() );
+			vlft = (LabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
+			vertHash.addAll( vlft.getSelected() );
 		}
 		
 		vertHash.addAll( ps.getPicked() );
@@ -100,14 +99,11 @@ public class PickedStateListener implements ItemListener {
 			table.setModel( pm );
 			//table.repaint();
 			pm.fireTableDataChanged();
-			logger.debug( "Add this in - Prop Table" );
 		}
-		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-			vlft.setVertHash( vertHash );
-			VertexPaintTransformer ptx = (VertexPaintTransformer) viewer.getRenderContext().getVertexFillPaintTransformer();
-			ptx.setVertHash( vertHash );
+		if ( null != vlft ){
+			vlft.setSelected( vertHash );
+			PaintTransformer ptx = (PaintTransformer) viewer.getRenderContext().getVertexFillPaintTransformer();
+			ptx.setSelected( vertHash );
 		}
-
 	}
-
 }

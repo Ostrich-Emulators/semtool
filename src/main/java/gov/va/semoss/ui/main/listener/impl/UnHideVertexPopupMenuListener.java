@@ -15,13 +15,16 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.util.EdgeType;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
 import java.awt.event.ActionEvent;
 
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import javax.swing.AbstractAction;
 
@@ -30,16 +33,34 @@ import javax.swing.AbstractAction;
  */
 public class UnHideVertexPopupMenuListener extends AbstractAction {
 
-	GraphPlaySheet ps;
+	private final GraphPlaySheet gps;
 
 	public UnHideVertexPopupMenuListener( GraphPlaySheet gps ) {
 		super( "Unhide Nodes" );
-		ps = gps;
+		this.gps = gps;
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		ps.getFilterData().unfilterAll();
-		ps.refineView();
+		
+		Graph<SEMOSSVertex, SEMOSSEdge> realg = gps.getGraphData().getGraph();
+		Graph<SEMOSSVertex, SEMOSSEdge> vizg = gps.getView().getGraphLayout().getGraph();
+
+		for ( SEMOSSVertex v : realg.getVertices() ) {
+			if( !v.isVisible() ){
+				v.setVisible( true );
+				vizg.addVertex( v );
+			}
+		}
+		
+		for ( SEMOSSEdge v : realg.getEdges() ) {
+			if( !vizg.containsEdge( v ) ){
+				v.setVisible( true );
+				vizg.addEdge( v, realg.getSource( v ), realg.getDest( v ), EdgeType.DIRECTED );
+			}
+		}
+		
+		gps.getFilterData().unfilterAll();
+		gps.getView().repaint();		
 	}
 }

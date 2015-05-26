@@ -15,34 +15,28 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.algorithm.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
 
 import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.GridFilterData;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
+import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
-import gov.va.semoss.util.Constants;
+import gov.va.semoss.ui.transformer.PaintTransformer;
 import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import javax.swing.AbstractAction;
 
@@ -51,25 +45,24 @@ import javax.swing.AbstractAction;
  */
 public class LoopIdentifierProcessor extends AbstractAction implements IAlgorithm {
 
-	DelegateForest forest = null;
-	ArrayList<SEMOSSVertex> selectedVerts = new ArrayList<>();
-	GridFilterData gfd = new GridFilterData();
-	GraphPlaySheet playSheet;
-	Hashtable<String, SEMOSSEdge> nonLoopEdges = new Hashtable<>();
-	Set<SEMOSSEdge> loopEdges = new HashSet<>();
-	Hashtable<String, SEMOSSVertex> nonLoopVerts = new Hashtable<>();
-	Set<SEMOSSVertex> loopVerts = new HashSet<>();
-	String selectedNodes = "";
-	Vector<SEMOSSEdge> masterEdgeVector = new Vector();//keeps track of everything accounted for in the forest
-	Vector<SEMOSSVertex> masterVertexVector = new Vector();
-	Vector<SEMOSSVertex> currentPathVerts = new Vector<>();//these are used for depth search first
-	Vector<SEMOSSEdge> currentPathEdges = new Vector<>();
+	private final DelegateForest<SEMOSSVertex, SEMOSSEdge> forest;
+	private final List<SEMOSSVertex> selectedVerts;
+	private final GridFilterData gfd = new GridFilterData();
+	private final GraphPlaySheet playSheet;
+	private final Set<SEMOSSEdge> nonLoopEdges = new HashSet<>();
+	private final  Set<SEMOSSEdge> loopEdges = new HashSet<>();
+	private final Set<SEMOSSVertex> nonLoopVerts = new HashSet<>();
+	private final  Set<SEMOSSVertex> loopVerts = new HashSet<>();
+	private final  List<SEMOSSEdge> masterEdgeVector = new ArrayList();//keeps track of everything accounted for in the forest
+	private final  List<SEMOSSVertex> masterVertexVector = new ArrayList();
+	private final  List<SEMOSSVertex> currentPathVerts = new ArrayList<>();//these are used for depth search first
+	private final  List<SEMOSSEdge> currentPathEdges = new ArrayList<>();
 
-	public LoopIdentifierProcessor( GraphPlaySheet gps, SEMOSSVertex[] verts ) {
+	public LoopIdentifierProcessor( GraphPlaySheet gps, Collection<SEMOSSVertex> verts ) {
 		super( "Loop Identifier" );
 		playSheet = gps;
 		forest = playSheet.getForest();
-		setSelectedNodes( verts );
+		selectedVerts = new ArrayList<>( verts );
 	}
 
 	@Override
@@ -90,31 +83,30 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 		//therefore, remove the vertex and all edges associated with it from the forest
 		//once there are no edges getting removed, its time to stop
 		//Then I run depth search first to validate the edges left
-		Collection<SEMOSSVertex> allVerts = forest.getVertices();
-		Vector<SEMOSSVertex> currentVertices = new Vector<>();
-		Vector<SEMOSSVertex> nextVertices = new Vector<>();
-		currentVertices.addAll( allVerts );
-		nextVertices.addAll( currentVertices );
-		Vector<SEMOSSEdge> newlyRemovedEdges = new Vector<>();
+
+		List<SEMOSSVertex> currentVertices = new ArrayList<>( forest.getVertices() );
+		List<SEMOSSVertex> nextVertices = new ArrayList<>( currentVertices );
+		List<SEMOSSEdge> newlyRemovedEdges = new ArrayList<>();
+
 		int count = 0;
 		while ( count == 0 || !newlyRemovedEdges.isEmpty() ) {
 			newlyRemovedEdges.clear();
 			for ( SEMOSSVertex vertex : currentVertices ) {
-				Vector<SEMOSSEdge> inEdges = getValidEdges( vertex.getInEdges() );
-				int inEdgeCount = inEdges.size();
-				Vector<SEMOSSEdge> outEdges = getValidEdges( vertex.getOutEdges() );
-				int outEdgeCount = outEdges.size();
+				Collection<SEMOSSEdge> inEdges = getValidEdges( vertex.getInEdges() );
+				Collection<SEMOSSEdge> outEdges = getValidEdges( vertex.getOutEdges() );
+
 				//if inEdges is 0, put the vert and its edges in hashtables and remove everything associated with it from the forest
-				if ( inEdgeCount == 0 ) {
-					nonLoopVerts.put( (String) vertex.getProperty( Constants.URI_KEY ), vertex );
-					putEdgesInHash( outEdges, nonLoopEdges );
+				if ( inEdges.isEmpty() ) {
+					nonLoopVerts.add( vertex );
+					nonLoopEdges.addAll( outEdges );
 					newlyRemovedEdges.addAll( removeEdgesFromMaster( outEdges ) );
 					nextVertices.remove( vertex );
 					masterVertexVector.remove( vertex );
 				}
-				else if ( outEdgeCount == 0 ) {
-					nonLoopVerts.put( (String) vertex.getProperty( Constants.URI_KEY ), vertex );
-					putEdgesInHash( inEdges, nonLoopEdges );
+				else if ( outEdges.isEmpty() ) {
+					nonLoopVerts.add( vertex );
+					nonLoopEdges.addAll( inEdges );
+
 					newlyRemovedEdges.addAll( removeEdgesFromMaster( inEdges ) );
 					nextVertices.remove( vertex );
 					masterVertexVector.remove( vertex );
@@ -143,12 +135,12 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 		//for every vertex remaining in master vertex vector, I will get all possible full length paths
 		//If a path return back to the starting node, put it in the loop hash
 		for ( SEMOSSVertex vertex : masterVertexVector ) {
-			Vector<SEMOSSVertex> usedLeafVerts = new Vector<SEMOSSVertex>();//keeps track of all bottom nodes previously visited
+			Set<SEMOSSVertex> usedLeafVerts = new HashSet<>();
 			usedLeafVerts.add( vertex );
 
-			Vector<SEMOSSVertex> currentNodes = new Vector<SEMOSSVertex>();
+			List<SEMOSSVertex> currentNodes = new ArrayList<>();
 			//use next nodes as the future set of nodes to traverse down from.
-			Vector<SEMOSSVertex> nextNodes = new Vector<SEMOSSVertex>();
+			List<SEMOSSVertex> nextNodes = new ArrayList<>();
 
 			//check if there is a loop with itself
 			if ( checkIfCompletesLoop( vertex, vertex ) ) {
@@ -179,7 +171,7 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 				}
 				//Now I should have a complete path.  I need to check to see it it can make it back to the root node.
 				//If it can make it back to the root node, it is a loop and should be added to the loop hashtables
-				if ( currentPathVerts.size() > 0 ) {
+				if ( !currentPathVerts.isEmpty() ) {
 					SEMOSSVertex leafVert = currentPathVerts.get( currentPathVerts.size() - 1 );
 					if ( checkIfCompletesLoop( leafVert, vertex ) ) {
 						//add loop to loop hashtables
@@ -228,12 +220,15 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 *
 	 * @return DBCMVertex Next node for processing.
 	 */
-	private SEMOSSVertex traverseDepthDownward( SEMOSSVertex vert, Vector<SEMOSSVertex> usedLeafVerts ) {
+	private SEMOSSVertex traverseDepthDownward( SEMOSSVertex vert,
+			Collection<SEMOSSVertex> usedLeafVerts ) {
 		SEMOSSVertex nextVert = null;
 		Collection<SEMOSSEdge> edgeArray = getValidEdges( forest.getOutEdges( vert ) );
 		for ( SEMOSSEdge edge : edgeArray ) {
 			SEMOSSVertex inVert = edge.getInVertex();
-			if ( masterVertexVector.contains( inVert ) && !usedLeafVerts.contains( inVert ) && !currentPathVerts.contains( inVert ) ) {
+			if ( masterVertexVector.contains( inVert )
+					&& !usedLeafVerts.contains( inVert )
+					&& !currentPathVerts.contains( inVert ) ) {
 				nextVert = inVert;//this is going to be the returned vert, so this is all set
 				currentPathVerts.add( inVert );
 				currentPathEdges.add( edge );
@@ -250,8 +245,8 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 *
 	 * @return Vector<DBCMEdge>	List of valid edges.
 	 */
-	private Vector<SEMOSSEdge> getValidEdges( Collection<SEMOSSEdge> vector ) {
-		Vector<SEMOSSEdge> validEdges = new Vector<>();
+	private Collection<SEMOSSEdge> getValidEdges( Collection<SEMOSSEdge> vector ) {
+		List<SEMOSSEdge> validEdges = new ArrayList<>();
 		if ( vector == null ) {
 			return validEdges;
 		}
@@ -267,22 +262,16 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 * Sets the transformers based on valid edges and vertices for the playsheet.
 	 */
 	private void setTransformers() {
-		// RPB: I don't know what's going on in this function
-		Map<SEMOSSEdge, Double> questionableEdgeMap = new HashMap<>();
-		for( SEMOSSEdge e : loopEdges ){
-			questionableEdgeMap.put( e, 5d ); // ??? no idea what this should be
-		}
 		
 		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( questionableEdgeMap );
-		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) playSheet.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( questionableEdgeMap );
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( loopEdges );
-		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setVertHash( loopVerts );
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setVertHash( loopVerts );
+		tx.setSelected( loopEdges );
+
+		ArrowPaintTransformer atx = (ArrowPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
+		atx.setSelected( loopEdges );
+		PaintTransformer vtx = (PaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
+		vtx.setSelected( loopVerts );
+		LabelFontTransformer vlft = (LabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
+		vlft.setSelected( loopVerts );
 		// repaint it
 		playSheet.getView().repaint();
 	}
@@ -310,10 +299,9 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 *
 	 * @return Vector<DBCMEdge>	Updated list of edges.
 	 */
-	private Vector<SEMOSSEdge> removeEdgesFromMaster( Vector<SEMOSSEdge> edges ) {
-		Vector<SEMOSSEdge> removedEdges = new Vector<SEMOSSEdge>();
-		for ( int edgeIndex = 0; edgeIndex < edges.size(); edgeIndex++ ) {
-			SEMOSSEdge edge = edges.elementAt( edgeIndex );
+	private Collection<SEMOSSEdge> removeEdgesFromMaster( Collection<SEMOSSEdge> edges ) {
+		List<SEMOSSEdge> removedEdges = new ArrayList<>();
+		for ( SEMOSSEdge edge : edges ) {
 			if ( masterEdgeVector.contains( edge ) ) {
 				removedEdges.add( edge );
 				masterEdgeVector.remove( edge );
@@ -321,38 +309,7 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 		}
 		return removedEdges;
 	}
-
-	/**
-	 * Put edges into hashtable. Iterates through collection of edges and puts the
-	 * property of the edges into hashtable.
-	 *
-	 * @param edges Collection<DBCMEdge>	Collection of edges.
-	 * @param hash Hashtable<String,DBCMEdge>	Hashtable of edges.
-	 *
-	 * @return Hashtable<String,DBCMEdge>	Final hashtable of properties and edges.
-	 */
-	private Hashtable<String, SEMOSSEdge> putEdgesInHash( Collection<SEMOSSEdge> edges, Hashtable<String, SEMOSSEdge> hash ) {
-		Iterator edgeIt = edges.iterator();
-		while ( edgeIt.hasNext() ) {
-			SEMOSSEdge edge = (SEMOSSEdge) edgeIt.next();
-			hash.put( (String) edge.getProperty( Constants.URI_KEY ), edge );
-		}
-		return hash;
-	}
-
-	/**
-	 * Sets the forest.
-	 *
-	 * @param f DelegateForest	Forest to be set.
-	 */
-	public void setForest( DelegateForest f ) {
-		forest = f;
-		Collection<SEMOSSEdge> edges = f.getEdges();
-		Collection<SEMOSSVertex> v = f.getVertices();
-		masterEdgeVector.addAll( edges );
-		masterVertexVector.addAll( v );
-	}
-
+	
 	/**
 	 * Sets selected nodes.
 	 *
@@ -370,7 +327,6 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	@Override
 	public void setPlaySheet( IPlaySheet ps ) {
 		throw new UnsupportedOperationException( "set the playsheet in the constructor" );
-		// playSheet = GraphPlaySheetFrame.class.cast(ps ).getGraphComponent();
 	}
 
 	/**
@@ -382,7 +338,7 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 */
 	@Override
 	public String[] getVariables() {
-		return null;
+		throw new UnsupportedOperationException( "this doesn't do anything" );
 	}
 
 	/**
@@ -394,5 +350,4 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	public String getAlgoName() {
 		return "Loop Identifier";
 	}
-
 }

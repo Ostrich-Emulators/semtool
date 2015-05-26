@@ -69,6 +69,7 @@ public class BalloonLayoutRings implements VisualizationServer.Paintable {
 	 * Method paint.  Paints the rings on the graph.
 	 * @param g Graphics - the graphics to be painted.
 	 */
+	@Override
 	public void paint(Graphics g) {
 		g.setColor(Color.gray);
 	

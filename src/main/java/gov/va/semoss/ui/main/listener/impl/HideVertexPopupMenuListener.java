@@ -15,14 +15,16 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.main.listener.impl;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import javax.swing.AbstractAction;
 
 /**
@@ -30,13 +32,14 @@ import javax.swing.AbstractAction;
  */
 public class HideVertexPopupMenuListener extends AbstractAction {
 
-	GraphPlaySheet gps;
-	SEMOSSVertex[] highlightedVertices;
+	private final GraphPlaySheet gps;
+	private final List<SEMOSSVertex> highlightedVertices = new ArrayList<>();
 
-	public HideVertexPopupMenuListener(GraphPlaySheet gps, SEMOSSVertex[] highlightedVertices) {
+	public HideVertexPopupMenuListener( GraphPlaySheet gps,
+			Collection<SEMOSSVertex> highlights ) {
 		super( "Hide Nodes" );
 		this.gps = gps;
-		this.highlightedVertices = highlightedVertices;
+		highlightedVertices.addAll( highlights );
 	}
 
 	@Override
@@ -48,7 +51,9 @@ public class HideVertexPopupMenuListener extends AbstractAction {
 		for ( SEMOSSVertex vertex : highlightedVertices ) {
 			// take the vertex and add it to the sheet
 			gps.getFilterData().addNodeToFilter( vertex );
+			vertex.setVisible( false );
 		}
-		gps.refineView();
+
+		gps.getView().repaint();
 	}
 }
