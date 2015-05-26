@@ -21,14 +21,15 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
-import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
@@ -40,20 +41,27 @@ public class VertexColorShapeData extends AbstractTableModel {
 	private final static Logger logger = Logger.getLogger( VertexColorShapeData.class );
 	
 	private Map<URI, List<SEMOSSVertex>> typeHash = new HashMap<>();
+	private List<ColorShapeRow> data = new ArrayList<ColorShapeRow>();
 	private static final String[] scColumnNames = { "Node", "Instance", "Shape", "Color" };
-	private String[][] shapeColorRows;
 	private int numRows = 0;
 
-	/**
-	 * Gets cell value at a particular row and column index.
-	 *
-	 * @param row Row index.
-	 * @param column Column index.
-	 * @return Object Cell value.
-	 */
 	@Override
 	public Object getValueAt( int row, int column ) {
-		return shapeColorRows[row][column];
+		ColorShapeRow csRow = data.get( row );
+		switch ( column ) {
+			case 0: {
+				if ( csRow.type != null )
+					return csRow.type.getLocalName();
+				return "";
+			} case 1:
+				return csRow.name;
+			case 2:
+				return csRow.shape;
+			case 3:
+				return csRow.color;
+			default:
+				return null;
+		}
 	}
 
 	/**
@@ -117,24 +125,14 @@ public class VertexColorShapeData extends AbstractTableModel {
 	public void fillRows( Map<URI, List<SEMOSSVertex>> _typeHash ) {
 		logger.debug( "Populating rows of the table in Graph Cosmetics tab." );
 		typeHash = _typeHash;
-		shapeColorRows = new String[getRowCount()][scColumnNames.length];
 
 		numRows = 0;
 		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : typeHash.entrySet() ) {
-			URI vertexType = entry.getKey();
-
-			shapeColorRows[numRows][0] = vertexType.stringValue();
-			shapeColorRows[numRows][1] = "Set for All";
-			shapeColorRows[numRows][2] = "";
-			shapeColorRows[numRows][3] = "";
+			data.add( new ColorShapeRow(entry.getKey(), "Set for All", "", "") );
 			numRows++;
 
 			for ( SEMOSSVertex vertex : entry.getValue() ) {
-				String vertexName = vertex.getLabel();
-
-				shapeColorRows[numRows][1] = vertexName;
-				shapeColorRows[numRows][2] = vertex.getShapeString();
-				shapeColorRows[numRows][3] = vertex.getColorString();
+				data.add( new ColorShapeRow(null, vertex.getLabel(), vertex.getShapeString(), vertex.getColorString()) );
 				numRows++;
 			}
 		}
@@ -152,15 +150,17 @@ public class VertexColorShapeData extends AbstractTableModel {
 	@Override
 	public void setValueAt( Object value, int row, int column ) {
 		// the first column will either be empty, or will be the nodeType
-		String nodeType = shapeColorRows[row][0];
+		
+		URI nodeType = data.get(row).type;
+		
 		if ( nodeType == null ) {
 			// find the node type by scanning up the first column
 			int numRowsUp = 0;
 			while ( nodeType == null ) {
 				numRowsUp++;
-				nodeType = shapeColorRows[row - numRowsUp][0];
+				nodeType = data.get(row - numRowsUp).type;
 			}
-
+			
 			List<SEMOSSVertex> vertexList = typeHash.get( nodeType );
 
 			SEMOSSVertex vertex = vertexList.get( numRowsUp - 1 );
@@ -196,10 +196,6 @@ public class VertexColorShapeData extends AbstractTableModel {
 		else if ( column == 3 ) {
 			setColor( vertex, value, row );
 		}
-		else if ( column == 3 ) {
-			vertex.setColor( DIHelper.getColor( value ) );
-			vertex.setColorString( value );
-		}
 	}
 
 	public void setShape( SEMOSSVertex vertex, String shape ) {
@@ -211,7 +207,7 @@ public class VertexColorShapeData extends AbstractTableModel {
 			return;
 		}
 
-		shapeColorRows[row][2] = shape;
+		data.get(row).shape = shape;
 		TypeColorShapeTable.getInstance().setShape( shape, vertex );
 	}
 
@@ -224,23 +220,33 @@ public class VertexColorShapeData extends AbstractTableModel {
 			return;
 		}
 
-		shapeColorRows[row][3] = color;
+		data.get(row).color = color;
 		TypeColorShapeTable.getInstance().setColor( color, vertex );
 	}
-
+	
 	private int getRowForVertex( String vertexName ) {
-		int row = -1;
-		for ( int i = 0; i < shapeColorRows.length; i++ ) {
-			if ( shapeColorRows[i][1].equals( vertexName ) ) {
-				row = i;
-			}
-		}
+		int rowNum = -1;		
+		for ( int i=0; i<data.size(); i++ )
+			if ( data.get(i).name.equals( vertexName ) )
+				rowNum = i;
 
-		return row;
+		return rowNum;
 	}
 
 	@Override
 	public boolean isCellEditable( int rowIndex, int columnIndex ) {
 		return columnIndex > 1;
+	}
+	
+	public class ColorShapeRow {
+		URI type;
+		String name, shape, color;
+
+		public ColorShapeRow( URI type, String name, String shape, String color ) {
+			this.type = type;
+			this.name = name;
+			this.shape = shape;
+			this.color = color;
+		}
 	}
 }
