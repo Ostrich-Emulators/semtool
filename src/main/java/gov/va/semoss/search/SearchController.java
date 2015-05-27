@@ -124,31 +124,8 @@ public class SearchController implements KeyListener, FocusListener,
 
 	private void handleSelectionOfButton() {
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
-		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = view.getRenderContext();
-
-		Collection<SEMOSSVertex> picked = view.getPickedVertexState().getPicked();
-
-		// set the transformers
-		oldTx = (PaintTransformer) rc.getVertexFillPaintTransformer();
-		oldTx.setSelected( picked );
-
-		gps.getVertexLabelFontTransformer().setSelected( picked );
-		gps.getEdgeLabelFontTransformer().setSelected( view.getPickedEdgeState().getPicked() );
-		oldfontsize = gps.getEdgeLabelFontTransformer().getNormalFontSize();
-		gps.getEdgeLabelFontTransformer().setNormalFontSize( 0 );
-
-		oldeTx = (EdgeStrokeTransformer) rc.getEdgeStrokeTransformer();
-		oldedgesize = oldeTx.getNormalSize();
-		oldeTx.setNormalSize( 0.1f );
-
-		oldsTx = (VertexShapeTransformer) rc.getVertexShapeTransformer();
-//		Set<SEMOSSVertex> unpicked = new HashSet<>( gps.getGraph().getVertices() );
-//		unpicked.removeAll( view.getPickedVertexState().getPicked() );
-//		for ( SEMOSSVertex v : unpicked ) {
-//			oldsTx.decreaseSize( v );
-//		}
-
-		view.repaint();
+		gps.clearHighlighting();
+		gps.skeleton( view.getPickedVertexState().getPicked(), null );		
 	}
 
 	private void handleDeselectionOfButton() {

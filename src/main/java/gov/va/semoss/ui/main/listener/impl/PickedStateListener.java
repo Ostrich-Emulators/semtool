@@ -21,7 +21,6 @@ package gov.va.semoss.ui.main.listener.impl;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Iterator;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;

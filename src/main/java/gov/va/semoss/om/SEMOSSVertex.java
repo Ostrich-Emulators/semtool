@@ -37,13 +37,10 @@ import org.openrdf.model.vocabulary.RDF;
 public class SEMOSSVertex extends AbstractNodeEdgeBase {
 
 	private transient static Logger logger = Logger.getLogger( SEMOSSVertex.class );
-	//private transient Map<String, SEMOSSVertex> edgeHash = new HashMap<>();
-
-	private transient List<SEMOSSEdge> inEdge = new ArrayList<>();
-	private transient List<SEMOSSEdge> outEdge = new ArrayList<>();
-
 	private transient Shape shape, shapeLegend;
 	private String shapeString;
+	private int incount = 0;
+	private int outcount = 0;
 
 	public SEMOSSVertex( URI id ) {
 		this( id, null, id.getLocalName() );
@@ -67,14 +64,14 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 
 	// this is the out vertex
 	public void addInEdge( SEMOSSEdge edge ) {
-		inEdge.add( edge );
-		setProperty( Constants.IN_EDGE_CNT, inEdge.size() );
+		incount++;
+		setProperty( Constants.IN_EDGE_CNT, incount );
 	}
 
 	// this is the invertex
 	public void addOutEdge( SEMOSSEdge edge ) {
-		outEdge.add( edge );
-		setProperty( Constants.OUT_EDGE_CNT, outEdge.size() );
+		outcount++;
+		setProperty( Constants.OUT_EDGE_CNT, outcount );
 	}
 
 	public void setShape( Shape _shape ) {
@@ -99,13 +96,5 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 
 	public Shape getShapeLegend() {
 		return shapeLegend;
-	}
-
-	public Collection<SEMOSSEdge> getInEdges() {
-		return inEdge;
-	}
-
-	public Collection<SEMOSSEdge> getOutEdges() {
-		return outEdge;
 	}
 }
