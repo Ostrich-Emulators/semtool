@@ -109,7 +109,7 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 			state.pick( v, true );
 		}
 
-		gps.highlight( islandVerts, islandEdges );
+		gps.skeleton( islandVerts, islandEdges );
  	}
 
 	/**

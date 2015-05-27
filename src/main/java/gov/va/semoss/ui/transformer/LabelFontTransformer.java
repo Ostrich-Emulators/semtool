@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import gov.va.semoss.util.Constants;
+import java.util.Collection;
 
 /**
  * Transforms the font label on a node vertex in the graph.
@@ -110,6 +111,40 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> extends Select
 		}
 	}
 
+	public void changeFontSize( int delta ) {
+		int newnorm = normalSize + delta;
+		if ( newnorm > MINSIZE && newnorm < MAXSIZE ) {
+			setNormalFontSize( newnorm );
+
+			for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
+				int size = entry.getValue() + delta;
+				if ( size > MAXSIZE ) {
+					size = MAXSIZE;
+				}
+				else if ( size < MINSIZE ) {
+					size = MINSIZE;
+				}
+
+				entry.setValue( size );
+			}
+		}
+	}
+
+	public void changeFontSize( int delta, Collection<T> todo ) {
+		for ( T t : todo ) {
+			int newsize = delta + ( nodeSizeData.containsKey( t )
+					? nodeSizeData.get( t ) : normalSize );
+			if ( newsize > MAXSIZE ) {
+				newsize = MAXSIZE;
+			}
+			else if ( newsize < MINSIZE ) {
+				newsize = MINSIZE;
+			}
+
+			nodeSizeData.put( t, newsize );
+		}
+	}
+
 	/**
 	 * Method increaseFontSize. Increases the font size of a selected node on the
 	 * graph.
@@ -158,6 +193,9 @@ public class LabelFontTransformer<T extends AbstractNodeEdgeBase> extends Select
 
 	@Override
 	protected Font transformNormal( T t ) {
+		if ( nodeSizeData.containsKey( t ) ) {
+			return new Font( "Plain", Font.PLAIN, nodeSizeData.get( t ) );
+		}
 		return normal;
 	}
 

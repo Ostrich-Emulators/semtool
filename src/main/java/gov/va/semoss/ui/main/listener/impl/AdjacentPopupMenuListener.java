@@ -19,8 +19,6 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.visualization.RenderContext;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,11 +27,8 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
-import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;

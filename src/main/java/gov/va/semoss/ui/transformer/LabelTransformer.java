@@ -26,13 +26,12 @@ import gov.va.semoss.util.PropComparator;
 import java.util.Collections;
 
 import java.util.List;
-import org.apache.commons.collections15.Transformer;
 import org.openrdf.model.URI;
 
 /**
  * Transforms the property label on a node vertex in the graph.
  */
-public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transformer<T, String> {
+public class LabelTransformer<T extends AbstractNodeEdgeBase> extends SelectingTransformer<T, String> {
 
 	private final ControlData data;
 
@@ -52,8 +51,7 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 	 *
 	 * @return String - the property name of the vertex
 	 */
-	@Override
-	public String transform( AbstractNodeEdgeBase vertex ) {
+	public String getText( AbstractNodeEdgeBase vertex ) {
 		List<URI> properties = data.getSelectedProperties( vertex.getType() );
 		if ( properties.isEmpty() ) {
 			return "";
@@ -149,5 +147,20 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> implements Transfo
 		newstring.append( "<br>" ).append( line );
 
 		return newstring.toString();
+	}
+
+	@Override
+	protected String transformNormal( T t ) {
+		return getText( t );
+	}
+
+	@Override
+	protected String transformSelected( T t ) {
+		return getText( t );
+	}
+
+	@Override
+	protected String transformNotSelected( T t, boolean inSkeletonMode ) {
+		return ( inSkeletonMode ? "" : getText( t ) );
 	}
 }
