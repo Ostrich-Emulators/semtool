@@ -69,7 +69,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		if ( !hasCachedRelation( connectorkey ) ) {
 			URI connector = null;
 			if ( nap.isEmpty() ) {
-				connector = getCachedRelationClass( stype, otype, relname );
+				connector = getCachedRelationClass( relname );
 			}
 			else {
 				// make a new edge so we can add properties
@@ -82,7 +82,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationNode( connector, connectorkey );
 		}
 
-		myrc.add( subject, getCachedRelationClass( stype, otype, relname ), object );
+		myrc.add( subject, getCachedRelationClass( relname ), object );
 
 		URI connector = getCachedRelation( connectorkey );
 		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
@@ -91,7 +91,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			myrc.add( connector, RDF.TYPE, metas.getSchemaBuilder().getRelationUri().build() );
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
 					+ sheet.getRelname() + " " + orawlabel ) );
-			URI pred = getCachedRelationClass( stype, otype, sheet.getRelname() );
+			URI pred = getCachedRelationClass( sheet.getRelname() );
 			myrc.add( connector, RDF.PREDICATE, pred );
 		}
 

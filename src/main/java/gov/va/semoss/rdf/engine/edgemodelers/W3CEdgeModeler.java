@@ -8,7 +8,6 @@ package gov.va.semoss.rdf.engine.edgemodelers;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import java.util.Map;
 import org.apache.log4j.Logger;
@@ -69,7 +68,7 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 		if ( !hasCachedRelation( connectorkey ) ) {
 			URI connector = null;
 			if ( nap.isEmpty() ) {
-				connector = getCachedRelationClass( stype, otype, relname );
+				connector = getCachedRelationClass( relname );
 			}
 			else {
 				// make a new edge so we can add properties
@@ -82,7 +81,7 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationNode( connector, connectorkey );
 		}
 
-		myrc.add( subject, getCachedRelationClass( stype, otype, relname ), object );
+		myrc.add( subject, getCachedRelationClass( relname ), object );
 
 		URI connector = getCachedRelation( connectorkey );
 		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
@@ -91,8 +90,8 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 			myrc.add( connector, RDF.TYPE, RDF.STATEMENT );
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
 					+ sheet.getRelname() + " " + orawlabel ) );
-			
-			URI pred = getCachedRelationClass( stype, otype, sheet.getRelname() );
+
+			URI pred = getCachedRelationClass( sheet.getRelname() );
 
 			myrc.add( connector, RDF.SUBJECT, subject );
 			myrc.add( connector, RDF.PREDICATE, pred );
