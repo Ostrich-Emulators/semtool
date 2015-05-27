@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -79,13 +80,33 @@ public class CloseableTab extends JPanel implements ActionListener {
 			@Override
 			public void mouseEntered( MouseEvent e ) {
 				closer.setBorderPainted( true );
+				closer.setVisible( true );
 			}
 
 			@Override
 			public void mouseExited( MouseEvent e ) {
 				closer.setBorderPainted( false );
+				closer.setVisible( false );
 			}
 		} );
+
+		addMouseListener( new MouseAdapter() {
+
+			@Override
+			public void mouseExited( MouseEvent e ) {
+				super.mouseExited( e );
+				closer.setVisible( false );
+			}
+
+			@Override
+			public void mouseEntered( MouseEvent e ) {
+				super.mouseEntered( e );
+				closer.setVisible( true );
+			}
+
+		} );
+
+		closer.setVisible( false );
 	}
 
 	@Override

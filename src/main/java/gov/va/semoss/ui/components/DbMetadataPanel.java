@@ -208,9 +208,6 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
 			if ( metadata.containsKey( VAS.ReificationModel ) ) {
 				URI reif = URI.class.cast( metadata.get( VAS.ReificationModel ) );
-
-				// when we save this, it bombs because we're saving a string
-				// where a URI is expected
 				metadata.put( VAS.ReificationModel,
 						new LiteralImpl( Utility.getInstanceLabel( reif, eng ) ) );
 			}
@@ -224,7 +221,6 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				}
 			}
 
-			// FIXME: need to use label for reification model
 			subsetmodel.clear();
 			OneVarListQueryAdapter<URI> q
 					= OneVarListQueryAdapter.getUriList( "SELECT ?o { ?base ?subset ?o }",
