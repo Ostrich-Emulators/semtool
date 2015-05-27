@@ -5,22 +5,15 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.LoadingSheetData;
-import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -33,6 +26,9 @@ import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 
@@ -54,41 +50,6 @@ public class QaCheckerTest {
 	}
 
 	private InMemorySesameEngine engine;
-	private File dbfile;
-
-	private IEngine extractKb() {
-		if ( null != dbfile ) {
-			FileUtils.deleteQuietly( dbfile );
-		}
-
-		try {
-			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
-			Files.copy( new File( "src/test/resources/test.jnl" ).toPath(),
-					dbfile.toPath(), StandardCopyOption.REPLACE_EXISTING );
-		}
-		catch ( Exception e ) {
-			Logger.getLogger( getClass() ).error( e, e );
-		}
-
-		UriBuilder schema = UriBuilder.getBuilder( OWLSTART );
-		final UriBuilder data = UriBuilder.getBuilder( BASEURI );
-		data.setSanitizer( new UriBuilder.DefaultSanitizer() );
-		schema.setSanitizer( new UriBuilder.DefaultSanitizer() );
-
-		Properties props = BigDataEngine.generateProperties( dbfile );
-		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
-		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		BigDataEngine eng = new BigDataEngine();
-		eng.setDataBuilder( data );
-		eng.openDB( props );
-		eng.setSchemaBuilder( schema );
-		return eng;
-	}
-
-	private void removeKb( IEngine eng ) {
-		eng.closeDB();
-		FileUtils.deleteQuietly( dbfile );
-	}
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -131,7 +92,7 @@ public class QaCheckerTest {
 	}
 
 	@Test
-	public void testLoadCaches() throws Exception {
+	public void testLoadCachesLegacy() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
 
@@ -142,21 +103,17 @@ public class QaCheckerTest {
 				new URIImpl( "http://owl.junk.com/testfiles/Description" ),
 				new LiteralImpl( "Soft drinks, coffees, teas, beers, and ales" ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
-				new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Category" ) );
+				RDF.TYPE, new URIImpl( "http://owl.junk.com/testfiles/Category" ) );
 
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#label" ),
-				new LiteralImpl( "Beverages" ) );
+				RDFS.LABEL, new LiteralImpl( "Beverages" ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chai" ),
 				new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
 				new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chai" ),
-				new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Product" ) );
+				RDF.TYPE, new URIImpl( "http://owl.junk.com/testfiles/Product" ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chai" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#label" ),
-				new LiteralImpl( "Chai" ) );
+				RDFS.LABEL, new LiteralImpl( "Chai" ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chang" ),
 				new URIImpl( "http://junk.com/testfiles/Relation/Category/Chang_x_Beverages" ),
 				new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ) );
@@ -165,55 +122,40 @@ public class QaCheckerTest {
 				new URIImpl( "http://owl.junk.com/testfiles/extraprop" ),
 				new LiteralImpl( "1.0", new URIImpl( "http://www.w3.org/2001/XMLSchema#double" ) ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#label" ),
-				new LiteralImpl( "Chai Category Beverages" ) );
+				RDFS.LABEL, new LiteralImpl( "Chai Category Beverages" ) );
 		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ) );
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ) );
 
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" ),
-				new URIImpl( "http://www.w3.org/2002/07/owl#ObjectProperty" ) );
+				RDF.TYPE, OWL.OBJECTPROPERTY );
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#label" ),
-				new LiteralImpl( "Category" ) );
+				RDFS.LABEL, new LiteralImpl( "Category" ) );
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
 
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#label" ),
-				new LiteralImpl( "Description" ) );
+				RDFS.LABEL, new LiteralImpl( "Description" ) );
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
-		
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
+
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" ),
-				new URIImpl( "http://www.w3.org/2002/07/owl#ObjectProperty" ) );
+				RDF.TYPE, OWL.OBJECTPROPERTY );
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#label" ),
-				new LiteralImpl( "Category" ) );
+				RDFS.LABEL, new LiteralImpl( "Category" ) );
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
 
 		rc.add( new URIImpl( "http://schema.org/xyz" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#label" ),
-				new LiteralImpl( "508 Compliant?" ) );
+				RDFS.LABEL, new LiteralImpl( "508 Compliant?" ) );
 		rc.add( new URIImpl( "http://schema.org/xyz" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
 		rc.add( new URIImpl( "http://schema.org/xyz" ),
-				new URIImpl( "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
-		
+				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
+
 		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation" ),
-				new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" ),
-				new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" ) );
+				RDF.TYPE, new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" ) );
 
 		rc.commit();
 
@@ -225,7 +167,34 @@ public class QaCheckerTest {
 	}
 
 	@Test
-	public void testCheckModelConformance() throws Exception {
+	public void testLoadCachesModern() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
+				UriBuilder.getBuilder( OWLSTART ) );
+		engine.getRawConnection().add( engine.getBaseUri(), VAS.ReificationModel,
+				VAS.VASEMOSS_Reification );
+
+		RepositoryConnection rc = engine.getRawConnection();
+		rc.begin();
+
+		final URI DESC = new URIImpl( "http://owl.junk.com/testfiles/Description" );
+		rc.add( DESC, RDF.TYPE, OWL.DATATYPEPROPERTY );
+		rc.add( DESC, RDFS.LABEL, new LiteralImpl( "Description" ) );
+
+		rc.add( new URIImpl( "http://schema.org/xyz" ), RDFS.LABEL,
+				new LiteralImpl( "508 Compliant?" ) );
+		rc.add( new URIImpl( "http://schema.org/xyz" ), RDF.TYPE, OWL.DATATYPEPROPERTY );
+
+		rc.commit();
+
+		QaChecker el = new QaChecker();
+		el.loadCaches( engine );
+
+		assertTrue( el.hasCachedPropertyClass( "Description" ) );
+		assertTrue( el.hasCachedPropertyClass( "508 Compliant?" ) );
+	}
+
+	@Test
+	public void testCheckModelConformanceLegacy() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
 
