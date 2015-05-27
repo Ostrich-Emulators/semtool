@@ -113,7 +113,7 @@ public class QaChecker {
 
 		if ( data.isRel() ) {
 			data.setObjectTypeIsError( !instanceClassCache.containsKey( data.getObjectType() ) );
-			data.setRelationIsError( hasCachedRelationClass( data.getRelname() ) );
+			data.setRelationIsError( !hasCachedRelationClass( data.getRelname() ) );
 		}
 
 		for ( Map.Entry<String, URI> en : data.getPropertiesAndDataTypes().entrySet() ) {

@@ -51,6 +51,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -100,21 +102,19 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		dometamodel = meta;
 		doconformance = conform;
 		doreplace = replace;
-	//	setTitle( "Import Data Review 4" );
-	//	fileToLoad.
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
 
 		showerrs.setVisible( doconformance );
-		
+
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
 			boolean meta, boolean conform, boolean replace ) {
 		this( eng, calc, meta, conform, replace );
-		String sName = toload.toString();
-		setTitle( sName.substring(sName.lastIndexOf("\\")+1, sName.lastIndexOf("]")) );
-		setToolTipText("Window of" + sName.substring(sName.lastIndexOf("\\")+1, sName.lastIndexOf("]")));
+		String sName = Utility.implode( toload, "", "", "," );
+		setTitle( sName );
+		setToolTipText( "Window of" + sName );
 		populateForFiles( toload );
 	}
 
@@ -131,7 +131,6 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
 
 		setTitle( "Import Data Review" );
-		
 
 		LoadingPlaySheetBase first = null;
 		for ( LoadingSheetData n : data.getSheets() ) {
@@ -173,6 +172,21 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		QaChecker el = ( timertoggle.isSelected() ? realtimer : null );
 		c.getLoadingModel().setQaChecker( el );
+
+		c.getLoadingModel().addTableModelListener( new TableModelListener() {
+
+			@Override
+			public void tableChanged( TableModelEvent e ) {
+				CloseableTab tab
+						= LoadingPlaySheetFrame.this.getTabComponent( c );
+
+				boolean haserr = ( timertoggle.isSelected()
+						&& ( c.getLoadingModel().hasConformanceErrors()
+						|| c.getLoadingModel().hasModelErrors() ) );
+
+				tab.setMark( haserr ? MarkType.ERROR : MarkType.NONE );
+			}
+		} );
 	}
 
 	@Override
@@ -230,7 +244,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
 				}
 				announceErrors();
-				
+
 			}
 		} ) {
 			@Override
@@ -277,9 +291,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	@Override
-	public void closeTab( PlaySheetCentralComponent c ) {
+	public
+			void closeTab( PlaySheetCentralComponent c ) {
 		if ( c instanceof RelationshipLoadingPlaySheet ) {
-			sheets.remove( RelationshipLoadingPlaySheet.class.cast( c ) );
+			sheets.remove( RelationshipLoadingPlaySheet.class
+					.cast( c ) );
 		}
 		super.closeTab( c );
 	}
@@ -344,6 +360,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			return repos.getSelectedValue();
 		}
 		return null;
+
 	}
 
 	private class LoadingAction extends AbstractAction {
@@ -618,7 +635,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		@Override
 		public void saveTo( File file ) throws IOException {
-			// if we only have sheets with errors, or sheets with no errors, there's
+		// if we only have sheets with errors, or sheets with no errors, there's
 			// no need to ask the user what they want to export. if we have some of
 			// both, we need to ask
 			boolean hasgoods = false;
