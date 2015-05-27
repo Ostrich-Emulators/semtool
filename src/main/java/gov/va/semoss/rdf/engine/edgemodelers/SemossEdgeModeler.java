@@ -8,7 +8,6 @@ package gov.va.semoss.rdf.engine.edgemodelers;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
 import java.util.Map;
@@ -62,8 +61,6 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			addNode( filler, namespaces, lsd, metas, myrc );
 		}
 		URI object = getCachedInstance( otype, orawlabel );
-
-		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
 
 		// ... and get a relationship that ties them together
 		RelationCacheKey connectorkey = new RelationCacheKey( nap.getSubjectType(),

@@ -232,9 +232,9 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	@Override
-	public URI addNode( LoadingSheetData.LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
-			throws RepositoryException {
+	public URI addNode( LoadingSheetData.LoadingNodeAndPropertyValues nap, 
+			Map<String, String> namespaces, LoadingSheetData sheet, ImportMetadata metas,
+			RepositoryConnection myrc ) throws RepositoryException {
 
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
