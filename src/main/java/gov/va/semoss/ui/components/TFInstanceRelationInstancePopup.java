@@ -145,7 +145,7 @@ public class TFInstanceRelationInstancePopup extends JMenu implements MouseListe
           count++;
           
           logger.debug("Adding Relation " + objURI);
-          NeighborMenuItem nItem = new NeighborMenuItem(objURI, ps, nFillQuery, engine);
+          NeighborMenuItem nItem = new NeighborMenuItem(objURI, ps, nFillQuery );
           add(nItem);
         }
         // for each of these relationship add a relationitem

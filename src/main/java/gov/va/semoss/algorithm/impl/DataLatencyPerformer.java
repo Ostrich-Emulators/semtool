@@ -654,17 +654,6 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 * Sets the transformers based on valid edges and vertices for the playsheet.
 	 */
 	private void setTransformers() {
-		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) ps.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setSelected( validEdges );
-
-		ArrowPaintTransformer atx = (ArrowPaintTransformer) ps.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setSelected( validEdges );
-		PaintTransformer vtx = (PaintTransformer) ps.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setSelected( validVerts );
-		
-		LabelFontTransformer vlft = (LabelFontTransformer) ps.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setSelected( validVerts );
-		// repaint it
-		ps.getView().repaint();
+		ps.highlight( validVerts, validEdges );
 	}
 }

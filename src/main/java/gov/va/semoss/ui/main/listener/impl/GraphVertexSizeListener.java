@@ -64,7 +64,7 @@ public class GraphVertexSizeListener extends AbstractAction implements ActionLis
 		}
 
 		//if no vertices are selected, perform action on all vertices
-		if ( viewer.getPickedVertexState().getPicked().size() == 0 ) {
+		if ( viewer.getPickedVertexState().getPicked().isEmpty() ) {
 			if ( increase ) {
 				transformerV.increaseSize();
 			}

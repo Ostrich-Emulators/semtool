@@ -114,9 +114,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		@Override
 		protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
+			// always show the edge
 			return super.transformNotSelected( t, false );
 		}
-
 	};
 	protected EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 	protected ArrowPaintTransformer adpt = new ArrowPaintTransformer();
@@ -435,26 +435,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return vft;
 	}
 
-	/**
-	 * Clears the highlighting and turns off skeleton mode if it's enabled
-	 */
-	public void clearHighlighting() {
-		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, est,
-			ept, eft, elt, adpt, aft } ) {
-			s.setSkeletonMode( false );
-		}
-
-		vft.clearSelected();
-		vpt.clearSelected();
-
-		est.clearSelected();
-		ept.clearSelected();
-		eft.clearSelected();
-		elt.clearSelected();
-		adpt.clearSelected();
-		aft.clearSelected();
-	}
-
 	public void removeExistingConcepts( List<String> subVector ) {
 		throw new UnsupportedOperationException( "this function is not operational until refactored" );
 
@@ -585,36 +565,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void run() {
 	}
 
-	public static void initVvRenderer( RenderContext<SEMOSSVertex, SEMOSSEdge> rc, ControlData controlData ) {
-		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
-		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
-
-		PaintTransformer vpt = new PaintTransformer();
-		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
-		VertexStrokeTransformer vst = new VertexStrokeTransformer();
-		ArrowPaintTransformer adpt = new ArrowPaintTransformer(); // color
-		ArrowPaintTransformer aft = new ArrowPaintTransformer(); // fill
-		//keep the stored one if possible
-		LabelFontTransformer<SEMOSSVertex> vlft = new LabelFontTransformer<>();
-		LabelFontTransformer<SEMOSSEdge> elft = new LabelFontTransformer<>();
-		VertexShapeTransformer vsht = new VertexShapeTransformer();
-
-		//view.setGraphMouse(mc);
-		rc.setVertexLabelTransformer( vlt );
-		rc.setEdgeLabelTransformer( elt );
-		rc.setVertexStrokeTransformer( vst );
-		rc.setVertexShapeTransformer( vsht );
-		rc.setVertexFillPaintTransformer( vpt );
-		rc.setEdgeDrawPaintTransformer( vpt );
-		rc.setEdgeStrokeTransformer( est );
-		rc.setArrowDrawPaintTransformer( adpt );
-		rc.setEdgeArrowStrokeTransformer( est );
-		rc.setArrowFillPaintTransformer( aft );
-		rc.setVertexFontTransformer( vlft );
-		rc.setEdgeFontTransformer( elft );
-		rc.setLabelOffset( 0 );
-	}
-
 	public LegendPanel2 getLegendPanel() {
 		return legendPanel;
 	}
@@ -648,6 +598,17 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public ControlPanel getSearchPanel() {
 		return controlPanel;
+	}
+
+	/**
+	 * Clears the highlighting and turns off skeleton mode if it's enabled
+	 */
+	public void clearHighlighting() {
+		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, est,
+			ept, eft, elt, adpt, aft } ) {
+			s.setSkeletonMode( false );
+			s.clearSelected();
+		}
 	}
 
 	/**
