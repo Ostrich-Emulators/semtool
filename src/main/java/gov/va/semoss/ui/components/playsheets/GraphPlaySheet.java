@@ -192,8 +192,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		for ( SEMOSSVertex v : visible.getVertices() ) {
 			graph.addVertex( v );
 		}
+		
 		for ( SEMOSSEdge v : visible.getEdges() ) {
-			graph.addEdge( v.getInVertex(), v.getOutVertex(), v );
+			graph.addEdge( visible.getSource( v ), visible.getDest( v ) );
 		}
 
 		return graph;

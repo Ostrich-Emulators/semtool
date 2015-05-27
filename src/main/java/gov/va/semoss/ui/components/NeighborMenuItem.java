@@ -43,7 +43,7 @@ public class NeighborMenuItem extends AbstractAction {
 
 	private static final Logger logger = Logger.getLogger( NeighborMenuItem.class );
 
-	private String query;
+	private final String query;
 	private final GraphPlaySheet gps;
 
 	public NeighborMenuItem( String name, GraphPlaySheet ps, String query ) {

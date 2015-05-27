@@ -118,7 +118,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	}
 	
 	private void populateEdgeCounts() {
-		edgeCounts = new HashMap<SEMOSSEdge,HashMap<String, Integer>>();
+		edgeCounts = new HashMap<>();
 		
 		int numQueriesRun = 1;
 		for(SEMOSSEdge edge:edgeStore.values()) {

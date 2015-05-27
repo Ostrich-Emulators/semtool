@@ -74,11 +74,12 @@ public class GraphDataModel {
 	public SimpleGraph<SEMOSSVertex, SEMOSSEdge> asSimpleGraph() {
 		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph
 				= new SimpleGraph<>( SEMOSSEdge.class );
+		
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
 			graph.addVertex( v );
 		}
 		for ( SEMOSSEdge v : vizgraph.getEdges() ) {
-			graph.addEdge( v.getInVertex(), v.getOutVertex(), v );
+			graph.addEdge( vizgraph.getSource( v ), vizgraph.getDest( v ) );
 		}
 
 		return graph;
