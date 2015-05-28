@@ -21,6 +21,7 @@ package gov.va.semoss.ui.components.playsheets;
 
 import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.lang.reflect.Constructor;
@@ -71,10 +72,12 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
+
 import org.apache.commons.collections15.Predicate;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
@@ -96,7 +99,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected String layoutName = Constants.FR;
 	protected ControlData controlData = new ControlData();
 	protected PropertySpecData predData = new PropertySpecData();
-	protected VertexFilterData filterData = new VertexFilterData();
+	protected VertexFilterData filterData;
 
 	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
 	protected VertexShapeTransformer vht = new VertexShapeTransformer();
@@ -160,6 +163,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setTopComponent( controlPanel );
 		graphSplitPane.setBottomComponent( gzPane );
 
+		filterData = new VertexFilterData(gdm.getGraph());
 		legendPanel.setFilterData( filterData );
 	}
 
@@ -274,6 +278,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			log.error( "problem adding panel to play sheet", ex );
 		}
 	}
+	
+	@Override
+	public void refineView() {
+		updateGraph();
+	}
 
 	/**
 	 * Method initVisualizer.
@@ -308,6 +317,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		PickedStateListener psl = new PickedStateListener( viewer, this );
 		viewer.getPickedVertexState().addItemListener( psl );
+		viewer.getPickedEdgeState().addItemListener( psl );
 	}
 
 	public String getLayoutName() {
@@ -494,15 +504,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	private void genAllData() {
-		filterData.fillRows();
-		filterData.fillEdgeRows();
+		filterData.generateAllRows();
 		controlData.generateAllRows();
+		colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
 
-		if ( gdm.showSudowl() ) {
-			predData.genPredList();
-		}
-
-		colorShapeData.fillRows( filterData.getTypeHash() );
+//		if ( gdm.showSudowl() ) {
+//			predData.genPredList();
+//		}
 	}
 
 	private void processControlData( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
@@ -510,17 +518,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			for ( URI property : vertex.getProperties().keySet() ) {
 				controlData.addVertexProperty( vertex.getType(), property );
 			}
-
-			filterData.addVertex( vertex );
 		}
 
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
 			for ( URI property : edge.getProperties().keySet() ) {
 				controlData.addEdgeProperty( edge.getEdgeType(), property );
 			}
-
-			//add to filter data
-			filterData.addEdge( edge );
 
 			//add to pred data
 			predData.addPredicateAvailable( edge.getURI().stringValue() );

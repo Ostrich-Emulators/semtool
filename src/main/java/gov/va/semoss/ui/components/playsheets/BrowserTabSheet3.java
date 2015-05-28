@@ -63,7 +63,7 @@ public class BrowserTabSheet3 extends BrowserPlaySheet2 implements ActionListene
 	}
 
 	public void pullData() {
-		Map<URI, List<SEMOSSVertex>> nodeHash = gps.getFilterData().getTypeHash();
+		Map<URI, List<SEMOSSVertex>> nodeHash = gps.getFilterData().getNodeTypeMap();
 		Map<String, Object> newHash = new HashMap<>();
 		newHash.put( "Nodes", nodeHash );
 		addDataHash( newHash );

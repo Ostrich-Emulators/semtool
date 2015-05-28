@@ -18,20 +18,28 @@
  ******************************************************************************/
 package gov.va.semoss.ui.components.models;
 
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.VertexFilterData;
+import gov.va.semoss.util.DIHelper;
+
+import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
 
-import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 
 /**
  * This class is used to create a table model (listeners) for edge filters.
  */
 public class EdgeFilterTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 53864898863707354L;
-	private static final Logger logger = Logger.getLogger(EdgeFilterTableModel.class);
 	
-	private static final String[] edgeColumnNames = { "Show", "Relation", "Instance" };
-	private VertexFilterData data = null;
+	private static final String[] columnNames = { "Show", "Relation", "Instance" };
+	private static final Class<?>[] classNames = { Boolean.class, Object.class, Object.class };
+
+	private VertexFilterData data;
+	private ControlData controlData;
 
 	/**
 	 * Constructor for EdgeFilterTableModel.
@@ -41,6 +49,10 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	 */
 	public EdgeFilterTableModel(VertexFilterData _data) {
 		data = _data;
+		
+		controlData = new ControlData();
+		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
+		fireTableDataChanged();
 	}
 
 	/**
@@ -50,7 +62,7 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public int getColumnCount() {
-		return edgeColumnNames.length;
+		return columnNames.length;
 	}
 
 	/**
@@ -73,7 +85,7 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public String getColumnName(int index) {
-		return edgeColumnNames[index];
+		return columnNames[index];
 	}
 
 	/**
@@ -83,22 +95,7 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public int getRowCount() {
-		return data.getEdgeCount();
-	}
-
-	/**
-	 * Returns the value for the cell.
-	 * 
-	 * @param arg0
-	 *            Row index.
-	 * @param arg1
-	 *            Column index.
-	 * 
-	 * @return Object Value of the cell.
-	 */
-	@Override
-	public Object getValueAt(int arg0, int arg1) {
-		return data.getEdgeValueAt(arg0, arg1);
+		return data.getEdges().size();
 	}
 
 	/**
@@ -111,10 +108,7 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public Class<?> getColumnClass(int column) {
-		Object edgeVal = data.getEdgeVal(0, column);
-		if (edgeVal == null)
-			edgeVal = "";
-		return edgeVal.getClass();
+		return classNames[column];
 	}
 
 	/**
@@ -129,26 +123,76 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public boolean isCellEditable(int row, int column) {
-		if (column == 0 || column == 3)
-			return true;
-		return false;
+		return (column == 0);
 	}
 
 	/**
-	 * Sets the edge value at a particular row and column.
-	 * 
-	 * @param value
-	 *            Value to assign to cell.
-	 * @param row
-	 *            Row that value is assigned to.
-	 * @param column
-	 *            Column that value is assigned to.
+	 * Gets the edge value at a particular row and column index.
+	 *
+	 * @param row Row index.
+	 * @param column Column index.
+	 *
+	 * @return Object Edge value.
 	 */
 	@Override
-	public void setValueAt(Object value, int row, int column) {
-		logger.debug("Calling the edge filter set value at");
-		data.setEdgeValueAt(value, row, column);
-		fireTableDataChanged();
+	public Object getValueAt( int row, int column ) {
+		FilterRowModel thisRow = data.getEdges().get( row );
+		switch ( column ) {
+			case 0:
+				return thisRow.show();
+			case 1: {
+				if ( thisRow.isHeader() )
+					return controlData.getLabel( thisRow.getType() );
+				return "";
+			} case 2: {
+				if ( thisRow.isHeader() )
+					return "Select All";
+				return controlData.getLabel( thisRow.getInstance() );
+			} default:
+				return null;
+		}
 	}
 
+	/**
+	 * Sets the edge value at a particular row and column index.
+	 *
+	 * @param value Edge value, as an object.
+	 * @param row Row index.
+	 * @param column Column index.
+	 */
+	@Override
+	public void setValueAt( Object value, int row, int column ) {
+		FilterRowModel thisRow = data.getEdges().get( row );
+		switch ( column ) {
+			case 0: {
+				thisRow.setShow((Boolean) value);
+				break;
+			} case 1: { 
+				thisRow.setType((URI) value);
+				break;
+			} case 2: {
+				thisRow.setInstance((URI) value);
+				break;
+			}
+		}
+		
+		if ( thisRow.isHeader() ) {
+			List<SEMOSSEdge> edgeList = data.getEdgeTypeMap().get( thisRow.getType() );
+
+			int latest = row + 1;
+			for ( SEMOSSEdge edge : edgeList ) {
+				FilterRowModel rowOfThisType = data.getEdges().get( latest++ );
+				rowOfThisType.setShow( (Boolean) value);
+				edge.setVisible( rowOfThisType.show() );
+			}
+
+			fireTableRowsUpdated( row, latest );
+			return;
+		}
+
+		// we are only dealing with one edge
+		SEMOSSEdge edge = data.getEdgeMap().get( thisRow.getInstance() );
+		edge.setVisible( (Boolean) value );
+		fireTableCellUpdated( row, row );
+	}
 }
