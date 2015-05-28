@@ -23,7 +23,6 @@ import gov.va.semoss.ui.components.models.EdgeFilterTableModel;
 import gov.va.semoss.ui.components.models.VertexFilterTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 
 import javax.swing.event.InternalFrameEvent;

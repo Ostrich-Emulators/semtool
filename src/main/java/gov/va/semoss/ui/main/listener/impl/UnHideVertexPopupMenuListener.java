@@ -32,7 +32,7 @@ import javax.swing.AbstractAction;
  * Controls the un-hiding of the vertex pop up menu.
  */
 public class UnHideVertexPopupMenuListener extends AbstractAction {
-
+	private static final long serialVersionUID = 2098465418944831050L;	
 	private final GraphPlaySheet gps;
 
 	public UnHideVertexPopupMenuListener( GraphPlaySheet gps ) {
@@ -42,7 +42,6 @@ public class UnHideVertexPopupMenuListener extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		
 		Graph<SEMOSSVertex, SEMOSSEdge> realg = gps.getGraphData().getGraph();
 		Graph<SEMOSSVertex, SEMOSSEdge> vizg = gps.getView().getGraphLayout().getGraph();
 
@@ -60,7 +59,6 @@ public class UnHideVertexPopupMenuListener extends AbstractAction {
 			}
 		}
 		
-		gps.getFilterData().unfilterAll();
 		gps.getView().repaint();		
 	}
 }

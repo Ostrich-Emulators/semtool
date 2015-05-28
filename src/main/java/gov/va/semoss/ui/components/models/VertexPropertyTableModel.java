@@ -18,72 +18,36 @@
  ******************************************************************************/
 package gov.va.semoss.ui.components.models;
 
+import gov.va.semoss.om.SEMOSSVertex;
+
+import java.util.ArrayList;
+import java.util.Map;
+
 import javax.swing.table.AbstractTableModel;
 
-import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.VertexFilterData;
+import org.openrdf.model.URI;
 
 /**
  * This class is used to create a table model for vertex properties.
  */
 public class VertexPropertyTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = -1980815818428292267L;
-	private VertexFilterData data;
-	private SEMOSSVertex vertex;
 
+	private static final String[] columnNames = { "Name ", "Value" };
+	private static final Class<?>[] classNames = { Object.class, Object.class };
+	private ArrayList<PropertyRow> rows = new ArrayList<PropertyRow>();
+	private SEMOSSVertex vertex;
+	
 	/**
 	 * Constructor for VertexPropertyTableModel.
 	 * 
-	 * @param _data
-	 *            VertexFilterData
-	 * @param _vertex
-	 *            DBCMVertex
+	 * @param vertex
+	 *            SEMOSSVertex
 	 */
-	public VertexPropertyTableModel(VertexFilterData _data, SEMOSSVertex _vertex) {
-		data = _data;
-		vertex = _vertex;
-	}
-
-	/**
-	 * Returns the column count.
-	 * 
-	 * @return int Column count.
-	 */
-	@Override
-	public int getColumnCount() {
-		return data.getPropertyNames().length;
-	}
-
-	/**
-	 * Sets the vertex filter data.
-	 * 
-	 * @param data
-	 *            VertexFilterData
-	 */
-	public void setVertexFilterData(VertexFilterData data) {
-		this.data = data;
-	}
-
-	/**
-	 * Gets the column name at a particular index.
-	 * 
-	 * @param index
-	 *            Column index.
-	 * 
-	 * @return String Column name.
-	 */
-	public String getColumnName(int index) {
-		return data.getPropertyNames()[index];
-	}
-
-	/**
-	 * Returns the row count.
-	 * 
-	 * @return int Row count.
-	 */
-	@Override
-	public int getRowCount() {
-		return data.getPropertyNumRows(vertex);
+	public VertexPropertyTableModel(SEMOSSVertex vertex) {
+		this.vertex = vertex;
+		for ( Map.Entry<URI, Object> entry : vertex.getProperties().entrySet() )
+			rows.add( new PropertyRow(entry.getKey(), entry.getValue()));
 	}
 
 	/**
@@ -98,7 +62,15 @@ public class VertexPropertyTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public Object getValueAt(int row, int column) {
-		return data.getPropValueAt(vertex, row, column);
+		PropertyRow pRow = rows.get(row);
+		switch ( column ) {
+			case 0: {
+				return pRow.name.getLocalName();
+			} case 1: { 
+				return pRow.value;
+			} default:
+				return null;
+		}
 	}
 
 	/**
@@ -112,8 +84,52 @@ public class VertexPropertyTableModel extends AbstractTableModel {
 	 *            Column index.
 	 */
 	public void setValueAt(Object val, int row, int column) {
-		data.setPropValueAt(vertex, val + "", row, column);
+		PropertyRow pRow = rows.get(row);
+			switch ( column ) {
+			case 0: {
+				pRow.name = (URI) val;
+				break;
+			} case 1: { 
+				pRow.value = val;
+				break;
+			}
+		}
+		
+		vertex.setProperty(pRow.name, pRow.value);
+		//JPM 2015/05/27 is the intention here to save this back to the db?
 		fireTableDataChanged();
+	}
+
+	/**
+	 * Returns the column count.
+	 * 
+	 * @return int Column count.
+	 */
+	@Override
+	public int getColumnCount() {
+		return columnNames.length;
+	}
+
+	/**
+	 * Gets the column name at a particular index.
+	 * 
+	 * @param index
+	 *            Column index.
+	 * 
+	 * @return String Column name.
+	 */
+	public String getColumnName(int index) {
+		return columnNames[index];
+	}
+
+	/**
+	 * Returns the row count.
+	 * 
+	 * @return int Row count.
+	 */
+	@Override
+	public int getRowCount() {
+		return rows.size();
 	}
 
 	/**
@@ -125,7 +141,7 @@ public class VertexPropertyTableModel extends AbstractTableModel {
 	 * @return Class Column class.
 	 */
 	public Class<?> getColumnClass(int column) {
-		return data.getPropertyClassNames()[column];
+		return classNames[column];
 	}
 
 	/**
@@ -142,5 +158,15 @@ public class VertexPropertyTableModel extends AbstractTableModel {
 		if (column == 1)
 			return true;
 		return false;
+	}
+
+	public class PropertyRow {
+		URI name;
+		Object value;
+
+		public PropertyRow( URI name, Object value ) {
+			this.name = name;
+			this.value = value;
+		}
 	}
 }

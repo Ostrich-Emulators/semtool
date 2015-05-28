@@ -60,7 +60,7 @@ public class CustomNodeCreator {
 					VertexFilterData vfd = ps.getFilterData();
 					System.out.println("Vertex Types Available ");
 					System.out.println("======================= ");
-					Collection<URI> keys = vfd.getTypeHash().keySet();
+					Collection<URI> keys = vfd.getNodeTypeMap().keySet();
 					int keyCount = 1;
           for( URI key : keys ){
 						log.debug( keyCount + " ." + key);
@@ -82,9 +82,9 @@ public class CustomNodeCreator {
 				if(input.equalsIgnoreCase("R"))
 				{
 					// show me the MVEL Magic BOY !!
-					if(selected != null && ps.getFilterData().getTypeHash().containsKey(selected))
+					if(selected != null && ps.getFilterData().getNodeTypeMap().containsKey(selected))
 					{
-						List<SEMOSSVertex> objs = ps.getFilterData().getTypeHash().get(selected);
+						List<SEMOSSVertex> objs = ps.getFilterData().getNodeTypeMap().get(selected);
 						for(int vertIndex = 0;vertIndex <= objs.size();vertIndex++)
 							System.out.println("" + MVEL.eval(expression, objs.get(vertIndex)));
 						

@@ -53,6 +53,7 @@ import gov.va.semoss.util.CSSApplication;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
+import gov.va.semoss.util.QuestionPlaySheetStore;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -128,15 +129,16 @@ import com.ibm.icu.util.StringTokenizer;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 import gov.va.semoss.ui.actions.ExportGraphAction;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
-
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import java.util.HashMap;
+
 import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.event.InternalFrameEvent;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -146,9 +148,9 @@ import org.openrdf.model.vocabulary.RDFS;
  * SEMOSS.
  */
 public class PlayPane extends JFrame {
-
 	private static final long serialVersionUID = -715188668604903980L;
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
+	
 	private final String IMANAGE = "iManagePanel";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
@@ -889,6 +891,12 @@ public class PlayPane extends JFrame {
 		edgeTable = initJTableAndAddTo( panel, true );
 
 		refreshButton = initCustomButton( "Refresh Graph" );
+		refreshButton.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent actionevent ) {
+				QuestionPlaySheetStore.getInstance().getActiveSheet().refineView();
+			}
+		});
 		panel.add( refreshButton, getGBC( GridBagConstraints.NONE ) );
 
 		return panel;

@@ -160,7 +160,7 @@ public class GraphNodePopup extends JPopupMenu {
 		addSeparator();
 
 		JMenuItem item = add( "SOA Transition All" );
-		item.setEnabled( checkICD() );
+		item.setEnabled( containsICDType() );
 	}
 
 	private void addDataOptions() {
@@ -224,21 +224,12 @@ public class GraphNodePopup extends JPopupMenu {
 	 *
 	 * @return boolean True if the type of node represents an ICD.
 	 */
-	public final boolean checkICD() {
-		boolean icdCheck = false;
-		VertexFilterData vfd = gps.getFilterData();
-		String[] nodeTypeArray = vfd.getNodeTypes();
-		if ( nodeTypeArray == null ) {
-			return false;
-		}
-		for ( String nodeTypeArray1 : nodeTypeArray ) {
-			if ( nodeTypeArray1.equals( "InterfaceControlDocument" ) ) {
-				icdCheck = true;
-				return icdCheck;
-			}
-		}
-		return icdCheck;
-
+	public final boolean containsICDType() {
+		for ( SEMOSSVertex vertex : gps.getFilterData().getGraph().getVertices() )
+			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) )
+				return true;
+		
+		return false;
 	}
 
 	public void show( MouseEvent event ) {
