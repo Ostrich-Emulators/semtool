@@ -122,7 +122,7 @@ public class VertexColorShapeData extends AbstractTableModel {
 	 *
 	 * @param _typeHash
 	 */
-	public void fillRows( Map<URI, List<SEMOSSVertex>> _typeHash ) {
+	public void generateAllRows( Map<URI, List<SEMOSSVertex>> _typeHash ) {
 		logger.debug( "Populating rows of the table in Graph Cosmetics tab." );
 		typeHash = _typeHash;
 

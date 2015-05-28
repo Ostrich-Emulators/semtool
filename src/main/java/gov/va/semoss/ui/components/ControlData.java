@@ -63,7 +63,7 @@ public class ControlData {
 		propertyShowTT.add( Constants.VERTEX_NAME );
 		propertyShowTT.add( Constants.VERTEX_TYPE );
 
-		vertexCDT = new ControlDataTable( propertyShow, propertyShowTT, propertyHide, new String[]{ "Vertex Type", "Property", "Label", "Tooltip" } );
+		vertexCDT = new ControlDataTable( propertyShow, propertyShowTT, propertyHide, new String[]{ "Node Type", "Property", "Label", "Tooltip" } );
 		edgeCDT = new ControlDataTable( propertyShow, propertyShowTT, propertyHide, new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
 	}
 
