@@ -199,10 +199,9 @@ public class DBToLoadingSheetExporter {
 	public List<URI> createConceptList() {
 		final List<URI> conceptList = new ArrayList<>();
 		String query = "SELECT ?entity WHERE "
-				+ "{ ?entity ?subclass ?concept . FILTER( ?entity != ?concept ) }";
+				+ "{ ?entity rdfs:subClassOf ?concept . FILTER( ?entity != ?concept ) }";
 		OneVarListQueryAdapter<URI> qe
 				= OneVarListQueryAdapter.getUriList( query, "entity" );
-		qe.bind( "subclass", RDFS.SUBCLASSOF );
 		qe.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 
 		try {
@@ -286,27 +285,6 @@ public class DBToLoadingSheetExporter {
 		}
 	}
 
-	public List<URI> createRelationshipList() {
-		final List<URI> relList = new ArrayList<>();
-		String query = "SELECT DISTINCT ?verb WHERE {"
-				+ "?in ?relationship ?out . "
-				+ "?relationship ?subprop ?verb ."
-				+ "}";
-
-		OneVarListQueryAdapter<URI> qe
-				= OneVarListQueryAdapter.getUriList( query, "verb" );
-		qe.bind( "subprop", RDFS.SUBPROPERTYOF );
-		qe.useInferred( false );
-
-		try {
-			relList.addAll( engine.query( qe ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( e, e );
-		}
-		return relList;
-	}
-
 	public void exportAllRelationships( List<URI> subjectTypes, ImportData data ) {
 		findDupsToFilterOut();
 
@@ -370,9 +348,11 @@ public class DBToLoadingSheetExporter {
 					seen.put( s, new NodeAndPropertyValues( s ) );
 				}
 
-				seen.get( s ).put( p, prop );
-				needlabels.add( p );
-				properties.add( p );
+				if ( !p.equals( RDFS.LABEL ) ) { // don't add extra label column
+					seen.get( s ).put( p, prop );
+					needlabels.add( p );
+					properties.add( p );
+				}
 			}
 		};
 
@@ -399,16 +379,15 @@ public class DBToLoadingSheetExporter {
 		UriBuilder owlb = engine.getSchemaBuilder();
 		String query
 				= "SELECT DISTINCT ?s WHERE { "
-				+ "  {?in  a         ?stype ;} "
-				+ "  {?s   ?subclass ?concept ;} "
-				+ "  {?out a         ?s ;} "
-				+ "  {?in  ?p        ?out ;} "
+				+ "  ?in  a               ?stype . "
+				+ "  ?out a               ?s ."
+				+ "  ?s   rdfs:subClassOf ?concept ."
+				+ "  ?in  ?p              ?out . "
 				+ "} ";
 
 		OneVarListQueryAdapter<URI> q = OneVarListQueryAdapter.getUriList( query, "s" );
 		q.bind( "stype", subjectType );
 		q.bind( "concept", owlb.getConceptUri().build() );
-		q.bind( "subclass", RDFS.SUBCLASSOF );
 		try {
 			results.addAll( getEngine().query( q ) );
 		}
@@ -431,7 +410,6 @@ public class DBToLoadingSheetExporter {
 		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q, "relationship" );
 		varq.useInferred( false );
 		varq.bind( "stype", subjectNodeType );
-		varq.bind( "subprop", RDFS.SUBPROPERTYOF );
 
 		if ( !objectNodeType.equals( Constants.ANYNODE ) ) {
 			varq.bind( "otype", objectNodeType );
@@ -451,15 +429,8 @@ public class DBToLoadingSheetExporter {
 	private Collection<NodeAndPropertyValues> getOneRelationshipsData( URI subjectType,
 			URI predicateType, URI objectType, final Collection<URI> properties,
 			Map<URI, String> labels ) {
-
+		logger.debug( "getOneRelData for " + subjectType + "->" + predicateType + "->" + objectType );
 		final Map<String, NodeAndPropertyValues> seen = new HashMap<>();
-
-		String queryFilterLine = "";
-		URI moreSpecificSubjectType = dupsToFilterOut.get( subjectType );
-		if ( moreSpecificSubjectType != null ) {
-			queryFilterLine = "  FILTER NOT EXISTS { ?in a ?specType } ";
-		}
-
 		final Set<URI> needlabels = new HashSet<>();
 
 		String query = "SELECT * WHERE {"
@@ -480,11 +451,9 @@ public class DBToLoadingSheetExporter {
 				URI in = URI.class.cast( set.getValue( "s" ) );
 				URI rel = URI.class.cast( set.getValue( "relation" ) );
 				URI out = URI.class.cast( set.getValue( "o" ) );
-				URI pred = URI.class.cast( set.getValue( "p" ) );
 				Value prop = set.getValue( "prop" );
 
 				String key = in.toString() + out.toString();
-
 				if ( !seen.containsKey( key ) ) {
 					seen.put( key, new NodeAndPropertyValues( in, out ) );
 				}
@@ -493,7 +462,8 @@ public class DBToLoadingSheetExporter {
 				needlabels.add( rel );
 				needlabels.add( out );
 
-				if ( null != pred ) {
+				if ( null != prop ) {
+					URI pred = URI.class.cast( set.getValue( "p" ) );
 					seen.get( key ).put( pred, prop );
 					properties.add( pred );
 					needlabels.add( pred );
@@ -501,9 +471,6 @@ public class DBToLoadingSheetExporter {
 			}
 		};
 
-		if ( null != moreSpecificSubjectType ) {
-			vqa.bind( "specType", moreSpecificSubjectType );
-		}
 		vqa.bind( "stype", subjectType );
 		vqa.bind( "relation", predicateType );
 		vqa.bind( "otype", objectType );
