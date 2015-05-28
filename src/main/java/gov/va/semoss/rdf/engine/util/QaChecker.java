@@ -194,6 +194,9 @@ public class QaChecker {
 	}
 
 	public void cacheUris( CacheType type, Map<String, URI> newtocache ) {
+		if ( null == type ) {
+			throw new IllegalArgumentException( "cache type cannot be null" );
+		}
 		switch ( type ) {
 			case CONCEPTCLASS:
 				instanceClassCache.putAll( newtocache );
@@ -538,7 +541,7 @@ public class QaChecker {
 			VoidQueryAdapter vqa4 = new VoidQueryAdapter( relq2 ) {
 
 				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {				
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
 					RelationCacheKey rck = new RelationCacheKey(
 							set.getValue( "stypelabel" ).stringValue(),
 							set.getValue( "otypelabel" ).stringValue(),
