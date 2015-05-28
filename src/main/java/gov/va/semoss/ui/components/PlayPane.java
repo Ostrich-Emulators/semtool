@@ -148,9 +148,9 @@ import org.openrdf.model.vocabulary.RDFS;
  * SEMOSS.
  */
 public class PlayPane extends JFrame {
-
 	private static final long serialVersionUID = -715188668604903980L;
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
+	
 	private final String IMANAGE = "iManagePanel";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
