@@ -7,11 +7,12 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.ui.actions.DbAction;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -19,6 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicButtonUI;
 
 /**
@@ -33,6 +36,8 @@ public class CloseableTab extends JPanel implements ActionListener {
 	};
 	private final JTabbedPane tabs;
 	private final JLabel mark;
+	private static final Icon blank = DbAction.getIcon( "blank" );
+	private static final Icon closeit = DbAction.getIcon( "close" );
 
 	public CloseableTab( JTabbedPane parent ) {
 		super( new BorderLayout() );
@@ -53,7 +58,9 @@ public class CloseableTab extends JPanel implements ActionListener {
 			}
 		};
 
-		JButton closer = new JButton( DbAction.getIcon( "close" ) );
+		JButton closer = new JButton( blank );
+		closer.setPreferredSize( new Dimension( 16, 16 ) );
+		closer.setMargin( new Insets( 0, 0, 0, 0 ) );
 		closer.setToolTipText( "Close this tab" );
 		closer.addActionListener( this );
 
@@ -80,37 +87,25 @@ public class CloseableTab extends JPanel implements ActionListener {
 			@Override
 			public void mouseEntered( MouseEvent e ) {
 				closer.setBorderPainted( true );
-				closer.setVisible( true );
+				closer.setIcon( closeit );
 			}
 
 			@Override
 			public void mouseExited( MouseEvent e ) {
 				closer.setBorderPainted( false );
-				closer.setVisible( false );
+				closer.setIcon( parent.getSelectedIndex()
+						== parent.indexOfTabComponent( CloseableTab.this ) ? closeit : blank );
 			}
 		} );
 
-		addMouseListener( new MouseAdapter() {
+		parent.addChangeListener( new ChangeListener() {
 
 			@Override
-			public void mouseExited( MouseEvent e ) {
-				super.mouseExited( e );
-				closer.setVisible( false );
-			}
-
-			@Override
-			public void mouseEntered( MouseEvent e ) {
-				super.mouseEntered( e );
-				closer.setVisible( true );
-			}
-
-			@Override
-			public void mouseClicked( MouseEvent e ) {
-				parent.setSelectedIndex( tabs.indexOfTabComponent( CloseableTab.this ) );
+			public void stateChanged( ChangeEvent e ) {
+				closer.setIcon( parent.getSelectedIndex()
+						== parent.indexOfTabComponent( CloseableTab.this ) ? closeit : blank );
 			}
 		} );
-
-		closer.setVisible( false );
 	}
 
 	@Override
