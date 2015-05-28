@@ -309,7 +309,8 @@ public class PlaySheetFrame extends JInternalFrame {
 						dsize = 0;
 						cmp.create( null, null, getEngine() );
 					}
-					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
+					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
+							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
 						updateProgress( "Preparing Display", 80 );
 						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
 						cmp.create( model, engine );
@@ -361,7 +362,8 @@ public class PlaySheetFrame extends JInternalFrame {
 
 					updateProgress( "Executing Query", 40 );
 
-					if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" ) ) {
+					if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
+							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
 						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
 						updateProgress( "Preparing Display", 80 );
 

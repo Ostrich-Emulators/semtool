@@ -43,31 +43,48 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="tlbl" alignment="1" max="32767" attributes="0"/>
-                      <Component id="slbl" alignment="1" max="32767" attributes="0"/>
-                      <Component id="olbl" alignment="1" max="32767" attributes="0"/>
-                      <Component id="clbl" alignment="1" max="32767" attributes="0"/>
-                      <Component id="llbl" alignment="1" max="32767" attributes="0"/>
-                      <Component id="blbl" alignment="1" max="32767" attributes="0"/>
-                      <Component id="mlbl" alignment="1" max="32767" attributes="0"/>
-                      <Component id="plbl" alignment="1" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="llbl" alignment="1" max="32767" attributes="0"/>
+                              <Component id="blbl" alignment="1" max="32767" attributes="0"/>
+                              <Component id="mlbl" alignment="1" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="clbl" min="-2" pref="141" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="smss" alignment="1" max="32767" attributes="0"/>
+                          <Component id="voiduri" alignment="1" max="32767" attributes="0"/>
+                          <Component id="jScrollPane2" max="32767" attributes="0"/>
+                          <Component id="created" alignment="0" max="32767" attributes="0"/>
+                          <Component id="update" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
-                  <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="summary" alignment="0" pref="296" max="32767" attributes="0"/>
-                  <Component id="organization" alignment="0" max="32767" attributes="0"/>
-                  <Component id="created" alignment="0" max="32767" attributes="0"/>
-                  <Component id="update" alignment="0" max="32767" attributes="0"/>
-                  <Component id="voiduri" alignment="0" max="32767" attributes="0"/>
-                  <Component id="smss" alignment="0" max="32767" attributes="0"/>
-                  <Component id="poc" alignment="0" max="32767" attributes="0"/>
-                  <Component id="title" alignment="0" max="32767" attributes="0"/>
-                  <Component id="edgemodel" alignment="0" max="32767" attributes="0"/>
-                  <Component id="jScrollPane2" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="tlbl" alignment="1" max="32767" attributes="0"/>
+                              <Component id="slbl" alignment="1" max="32767" attributes="0"/>
+                              <Component id="olbl" alignment="1" max="32767" attributes="0"/>
+                              <Component id="plbl" alignment="1" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="summary" alignment="0" pref="287" max="32767" attributes="0"/>
+                          <Component id="organization" alignment="0" max="32767" attributes="0"/>
+                          <Component id="poc" alignment="0" max="32767" attributes="0"/>
+                          <Component id="title" alignment="0" max="32767" attributes="0"/>
+                          <Component id="schemans" alignment="0" max="32767" attributes="0"/>
+                          <Component id="datans" alignment="0" max="32767" attributes="0"/>
+                          <Component id="edgemodel" alignment="0" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
               </Group>
           </Group>
       </Group>
@@ -95,12 +112,22 @@
                   <Component id="plbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="poc" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="schemans" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="datans" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="edgemodel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="clbl" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="created" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -111,9 +138,9 @@
                   <Component id="update" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="blbl" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="voiduri" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="blbl" min="-2" max="-2" attributes="0"/>
+                  <Component id="voiduri" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -297,5 +324,19 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Schema Namespace"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="schemans">
+    </Component>
+    <Component class="javax.swing.JTextField" name="datans">
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Data Namespace"/>
+      </Properties>
+    </Component>
   </SubComponents>
 </Form>

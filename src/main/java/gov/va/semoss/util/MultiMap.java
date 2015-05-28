@@ -48,8 +48,26 @@ public class MultiMap<T, V> extends HashMap<T, List<V>> {
 		for ( Map.Entry<V, T> en : map.entrySet() ) {
 			multi.add( en.getValue(), en.getKey() );
 		}
-		
-		return multi;
 
+		return multi;
+	}
+
+	/**
+	 * Flips the given mapping. This will result in loss of information if the
+	 * original map's values are not unique.
+	 *
+	 * @param <T>
+	 * @param <V>
+	 * @param map
+	 * @return
+	 */
+	public static <T, V> Map<T, V> lossyflip( Map<V, T> map ) {
+		Map<T, V> multi = new HashMap<>();
+
+		for ( Map.Entry<V, T> en : map.entrySet() ) {
+			multi.put( en.getValue(), en.getKey() );
+		}
+
+		return multi;
 	}
 }

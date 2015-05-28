@@ -73,13 +73,17 @@ import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Paint;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import org.apache.commons.collections15.Predicate;
 import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.LinkedHashModel;
 
 /**
  */
@@ -192,7 +196,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		for ( SEMOSSVertex v : visible.getVertices() ) {
 			graph.addVertex( v );
 		}
-		
+
 		for ( SEMOSSEdge v : visible.getEdges() ) {
 			graph.addEdge( visible.getSource( v ), visible.getDest( v ) );
 		}
@@ -536,18 +540,73 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	@Override
 	public void create( Model m, IEngine engine ) {
-		add( m, engine );
+		add( m, null, engine );
+	}
+
+	/**
+	 * Creates graph nodes from the given data. If the {@code Value[]}s have
+	 * length 1, the values are expected to be nodes ({@link Resource}s. If they
+	 * have length 3, then they are repackaged as Statements, and forwarded on to
+	 * {@link #create(org.openrdf.model.Model, gov.va.semoss.rdf.engine.api.IEngine) }.
+	 * Anything else will throw an exception
+	 *
+	 * @param data the data to add are expected to be
+	 * @param headers ignored
+	 * @param engine
+	 * @throws IllegalArgumentException
+	 *
+	 */
+	@Override
+	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
+		List<Resource> nodes = new ArrayList<>();
+		Model model = new LinkedHashModel();
+		for ( Value[] row : data ) {
+			Resource s = Resource.class.cast( row[0] );
+			if ( 1 == row.length ) {
+				nodes.add( s );
+			}
+			else if ( 3 == row.length ) {
+				URI p = URI.class.cast( row[1] );
+				Value o = row[2];
+
+				model.add( s, p, o );
+			}
+			else {
+				throw new IllegalArgumentException( "Values cannot be converted for graph usage" );
+			}
+		}
+
+		add( model, nodes, engine );
 	}
 
 	@Override
 	public void overlay( Model m, IEngine engine ) {
-		add( m, engine );
+		add( m, null, engine );
 	}
 
-	public void add( Model m, IEngine engine ) {
-		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
+	/**
+	 * Redirects to {@link #create(java.util.List, java.util.List,
+	 * gov.va.semoss.rdf.engine.api.IEngine) }
+	 *
+	 * @param data
+	 * @param headers
+	 * @param eng
+	 */
+	@Override
+	public void overlay( List<Value[]> data, List<String> headers, IEngine eng ) {
+		create( data, headers, eng );
+	}
 
-		if ( m.isEmpty() ) {
+	public void add( Model m, List<Resource> nodes, IEngine engine ) {
+		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
+		if ( null == nodes ) {
+			nodes = new ArrayList<>();
+		}
+		if ( null == m ) {
+			m = new LinkedHashModel();
+		}
+
+		if ( m.isEmpty() && nodes.isEmpty() ) {
 			return; // nothing to add to the graph
 		}
 
@@ -555,10 +614,19 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			gdm.removeElementsSinceLevel( overlayLevel );
 		}
 
-		gdm.addGraphLevel( m, engine, ++overlayLevel );
+		overlayLevel++;
+
+		if ( !m.isEmpty() ) {
+			gdm.addGraphLevel( m, engine, overlayLevel );
+		}
+		if ( !nodes.isEmpty() ) {
+			gdm.addGraphLevel( nodes, engine, overlayLevel );
+		}
+
 		if ( overlayLevel > maxOverlayLevel ) {
 			maxOverlayLevel = overlayLevel;
 		}
+
 		updateGraph();
 	}
 

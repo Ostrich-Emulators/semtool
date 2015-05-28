@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.poi.main.GraphMLWriter;
+import gov.va.semoss.poi.main.GsonWriter;
 import gov.va.semoss.poi.main.ImportData;
 
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
@@ -31,33 +32,46 @@ import javax.swing.JOptionPane;
  *
  * @author ryan
  */
-public class ExportGraphMLAction extends DbAction {
+public class ExportGraphAction extends DbAction {
 
 	public static enum Style {
 
-		NT, TTL, RDF
+		GRAPHML, GSON
 	};
 	private static final Logger log
-			= Logger.getLogger( ExportGraphMLAction.class );
+			= Logger.getLogger( ExportGraphAction.class );
 	private final Frame frame;
 	private File exportfile;
+	private final Style style;
 
-	public ExportGraphMLAction( String optg, Frame frame ) {
-		super( optg, "GraphML" );
+	public ExportGraphAction( String optg, Frame frame, Style style ) {
+		super( optg, Style.GRAPHML == style ? "GraphML" : "GSON" );
 		this.frame = frame;
-		putValue( AbstractAction.SHORT_DESCRIPTION,
-				"Export the database as a GraphML file" );
-		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_G );
+		this.style = style;
+
+		putValue( AbstractAction.SHORT_DESCRIPTION, "Export the database as a "
+				+ ( Style.GRAPHML == style ? "GraphML" : "GSON" ) + " file" );
+		if ( Style.GRAPHML == style ) {
+			putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_G );
+		}
+		else {
+			putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_N );
+		}
 	}
 
 	@Override
 	protected boolean preAction( ActionEvent ae ) {
-		Preferences prefs = Preferences.userNodeForPackage( ExportGraphMLAction.class );
+		Preferences prefs = Preferences.userNodeForPackage( ExportGraphAction.class );
 		File emptypref = FileBrowsePanel.getLocationForEmptyPref( prefs,
 				"lastgraphexp" );
 		JFileChooser chsr = new JFileChooser( emptypref );
 		chsr.setFileView( new SemossFileView() );
-		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "GraphML Files", "graphml" ) );
+		if ( Style.GRAPHML == style ) {
+			chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "GraphML Files", "graphml" ) );
+		}
+		else {
+			chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "GSON Files", "gson" ) );
+		}
 		chsr.setDialogTitle( "Select Export Location" );
 		chsr.setApproveButtonText( "Export" );
 		chsr.setSelectedFile( getSuggestedExportFile( chsr.getCurrentDirectory() ) );
@@ -91,7 +105,12 @@ public class ExportGraphMLAction extends DbAction {
 						try {
 							DBToLoadingSheetExporter exp = new DBToLoadingSheetExporter( getEngine() );
 							ImportData data = exp.runExport( true, true );
-							new GraphMLWriter().write( data, exportfile );
+							if ( Style.GRAPHML == style ) {
+								new GraphMLWriter().write( data, exportfile );
+							}
+							else {
+								new GsonWriter().write( data, exportfile );
+							}
 						}
 						catch ( Exception re ) {
 							Utility.showError( re.getLocalizedMessage() );
@@ -111,8 +130,9 @@ public class ExportGraphMLAction extends DbAction {
 	}
 
 	private File getSuggestedExportFile( File dir ) {
-		File file = new File( dir,
-				Utility.getSaveFilename( getEngineName(), ".graphml" ) );
+
+		File file = new File( dir, Utility.getSaveFilename( getEngineName(),
+				( Style.GRAPHML == style ? ".graphml" : ".gson" ) ) );
 		return file;
 	}
 }

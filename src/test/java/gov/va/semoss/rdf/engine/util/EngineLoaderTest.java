@@ -154,12 +154,8 @@ public class EngineLoaderTest {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		BigDataEngine eng = new BigDataEngine() {
-			@Override
-			public UriBuilder getDataBuilder() {
-				return data;
-			}
-		};
+		BigDataEngine eng = new BigDataEngine();
+		eng.setDataBuilder( data );
 
 		eng.openDB( props );
 		eng.setSchemaBuilder( schema );

@@ -74,7 +74,7 @@ public class GraphDataModel {
 	public SimpleGraph<SEMOSSVertex, SEMOSSEdge> asSimpleGraph() {
 		SimpleGraph<SEMOSSVertex, SEMOSSEdge> graph
 				= new SimpleGraph<>( SEMOSSEdge.class );
-		
+
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
 			graph.addVertex( v );
 		}
@@ -144,6 +144,20 @@ public class GraphDataModel {
 			}
 
 			fetchProperties( needProps, model.predicates(), engine, overlayLevel );
+		}
+		catch ( RepositoryException | QueryEvaluationException e ) {
+			log.error( e, e );
+		}
+	}
+
+	public void addGraphLevel( Collection<Resource> nodes, IEngine engine, int overlayLevel ) {
+		try {
+			for ( Resource sub : nodes ) {
+				SEMOSSVertex vert1 = createOrRetrieveVertex( URI.class.cast( sub ), overlayLevel );
+				vizgraph.addVertex( vert1 );
+			}
+
+			fetchProperties( nodes, null, engine, overlayLevel );
 		}
 		catch ( RepositoryException | QueryEvaluationException e ) {
 			log.error( e, e );
@@ -250,8 +264,11 @@ public class GraphDataModel {
 					v.setType( type );
 				}
 			};
-			cqa.useInferred( false );
-			engine.query( cqa );
+
+			if ( null != concepts ) {
+				cqa.useInferred( false );
+				engine.query( cqa );
+			}
 
 			// do the same thing, but for edges
 			VoidQueryAdapter eqa = new VoidQueryAdapter( edgeprops ) {
@@ -280,8 +297,11 @@ public class GraphDataModel {
 					}
 				}
 			};
-			eqa.useInferred( false );
-			engine.query( eqa );
+
+			if ( null != preds ) {
+				eqa.useInferred( false );
+				engine.query( eqa );
+			}
 		}
 		catch ( MalformedQueryException ex ) {
 			log.error( "BUG!", ex );

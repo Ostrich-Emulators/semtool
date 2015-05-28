@@ -212,6 +212,7 @@ public interface IEngine extends IExplorable {
 	 */
 	public void setSchemaBuilder( UriBuilder bldr );
 
+	public void setDataBuilder( UriBuilder bldr );
 	/**
 	 * Gets a URI builder for constructing OWL metamodel URIs
 	 *

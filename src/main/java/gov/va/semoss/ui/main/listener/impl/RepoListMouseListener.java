@@ -29,7 +29,7 @@ import gov.va.semoss.ui.actions.CloneAction;
 import gov.va.semoss.ui.actions.CreateDbAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.EndpointAction;
-import gov.va.semoss.ui.actions.ExportGraphMLAction;
+import gov.va.semoss.ui.actions.ExportGraphAction;
 import gov.va.semoss.ui.actions.ExportInsightsAction;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
 import gov.va.semoss.ui.actions.ExportSpecificNodesToLoadingSheetAction;
@@ -46,8 +46,6 @@ import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.PlayPane;
 import static gov.va.semoss.ui.components.PlayPane.UIPROGRESS;
 import java.awt.event.KeyEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 /**
  *
@@ -75,7 +73,8 @@ public class RepoListMouseListener extends MouseAdapter {
 	private final ExportLoadingSheetAction expall;
 	private final ExportLoadingSheetAction expnodes;
 	private final ExportLoadingSheetAction exprels;
-	private final DbAction expgraph;
+	private final DbAction expgraphml;
+	private final DbAction expgson;
 	private final DbAction expSpecNodes;
 	private final DbAction expSpecRels;
 	private final UnmountAction unmounter;
@@ -107,7 +106,10 @@ public class RepoListMouseListener extends MouseAdapter {
 				true, true );
 		exprels = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
 				false, true );
-		expgraph = new ExportGraphMLAction( PlayPane.UIPROGRESS, frame );
+		expgraphml = new ExportGraphAction( PlayPane.UIPROGRESS, frame, 
+				ExportGraphAction.Style.GRAPHML );
+		expgson = new ExportGraphAction( PlayPane.UIPROGRESS, frame, 
+				ExportGraphAction.Style.GSON );
 		expSpecNodes = new ExportSpecificNodesToLoadingSheetAction(
 				PlayPane.UIPROGRESS, frame );
 		expSpecRels = new ExportSpecificRelationshipsToLoadingSheetAction(
@@ -163,7 +165,7 @@ public class RepoListMouseListener extends MouseAdapter {
 				clearer, exportttl, exportnt, exportrdf, exportinsights, importls,
 				unmounter, sparqler, mounter, expnodes, exprels, expSpecNodes,
 				expSpecRels, expall, creater, resetInsights, importInsights,
-				consistencyCheck, expgraph } ) {
+				consistencyCheck, expgraphml, expgson } ) {
 				dba.setEngine( opEngine );
 			}
 
@@ -222,7 +224,12 @@ public class RepoListMouseListener extends MouseAdapter {
 
 			loadingsheets.add( expall );
 			exptop.add( exportinsights );
-			exptop.add( expgraph );
+			
+			JMenu gexp = new JMenu( "Graph" );
+			gexp.add( expgraphml );
+			gexp.add( expgson );
+			
+			exptop.add( gexp );			
 			db.add( exptop );
 
 			JMenu importtop = new JMenu( "Import" );

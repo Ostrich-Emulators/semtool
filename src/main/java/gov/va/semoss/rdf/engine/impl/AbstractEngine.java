@@ -25,8 +25,6 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -47,12 +45,8 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
-import org.openrdf.model.Model;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
 
 /**
  * An Abstract Engine that sets up the base constructs needed to create an
@@ -288,7 +282,8 @@ public abstract class AbstractEngine implements IEngine {
 		return databuilder;
 	}
 
-	protected void setDataBuilder( UriBuilder b ) {
+	@Override
+	public void setDataBuilder( UriBuilder b ) {
 		databuilder = b;
 	}
 
