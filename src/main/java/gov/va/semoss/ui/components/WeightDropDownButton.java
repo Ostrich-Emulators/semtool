@@ -56,22 +56,21 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import org.apache.log4j.Logger;
+
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class is used to create the button that allows the weight to be
  * adjusted.
  */
 public class WeightDropDownButton extends JButton {
-
 	private static final long serialVersionUID = 2981760820784735327L;
 
 	private JPopupMenu popupMenu;
 	private JTree edgePropTree, nodePropTree;
 	private boolean listsPopulated = false;
 	private GraphPlaySheet playSheet;
+	private static Map<String,URI> localNameToURIHash = new HashMap<String,URI>();
 
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
@@ -101,37 +100,39 @@ public class WeightDropDownButton extends JButton {
 
 		nodePropTree.setModel( new DefaultTreeModel( invisibleNodeRoot ) );
 		edgePropTree.setModel( new DefaultTreeModel( invisibleEdgeRoot ) );
-
+		
 		//Create a dataset of node types and their properties to the JTree
 		//we use this intermediary data structure because it gives us uniqueness and order for the elements
-		Map<URI, Set<URI>> nodePropertiesToAdd = new HashMap<>();
+		Map<String, Set<String>> nodePropertiesToAdd = new HashMap<>();
 		Collection<SEMOSSVertex> nodeCollection = playSheet.getForest().getVertices();
 		for ( SEMOSSVertex node : nodeCollection ) {
-			Set<URI> propertiesForThisNodeType = nodePropertiesToAdd.get( node.getType() );
+			Set<String> propertiesForThisNodeType = nodePropertiesToAdd.get( node.getType().getLocalName() );
 			if ( propertiesForThisNodeType == null ) {
-				propertiesForThisNodeType = new TreeSet<URI>();
-				nodePropertiesToAdd.put( node.getType(), propertiesForThisNodeType );
+				propertiesForThisNodeType = new TreeSet<String>();
+				nodePropertiesToAdd.put( node.getType().getLocalName(), propertiesForThisNodeType );
 			}
 			for ( Map.Entry<URI, Object> entry : node.getProperties().entrySet() ) {
-				if ( entry.getValue() instanceof Number ) {
-					propertiesForThisNodeType.add( entry.getKey() );
+				if ( getDoubleIfPossibleFrom(entry.getValue()) > 0 ) {
+					propertiesForThisNodeType.add( entry.getKey().getLocalName() );
+					localNameToURIHash.put(entry.getKey().getLocalName(), entry.getKey());
 				}
 			}
 		}
 
 		//Create a dataset of edge types and their properties to the JTree
 		//we use this intermediary data structure because it gives us uniqueness and order for the elements
-		Map<URI, Set<URI>> edgePropertiesToAdd = new HashMap<>();
+		Map<String, Set<String>> edgePropertiesToAdd = new HashMap<>();
 		Collection<SEMOSSEdge> edgeCollection = playSheet.getForest().getEdges();
 		for ( SEMOSSEdge edge : edgeCollection ) {
-			Set<URI> propertiesForThisEdgeType = edgePropertiesToAdd.get( edge.getEdgeType() );
+			Set<String> propertiesForThisEdgeType = edgePropertiesToAdd.get( edge.getEdgeType() );
 			if ( propertiesForThisEdgeType == null ) {
-				propertiesForThisEdgeType = new TreeSet<>();
-				edgePropertiesToAdd.put( edge.getEdgeType(), propertiesForThisEdgeType );
+				propertiesForThisEdgeType = new TreeSet<String>();
+				edgePropertiesToAdd.put( edge.getEdgeType().getLocalName(), propertiesForThisEdgeType );
 			}
 			for ( Map.Entry<URI, Object> entry : edge.getProperties().entrySet() ) {
-				if ( entry.getValue() instanceof Number ) {
-					propertiesForThisEdgeType.add( entry.getKey() );
+				if ( getDoubleIfPossibleFrom(entry.getValue()) > 0 ) {
+					propertiesForThisEdgeType.add( entry.getKey().getLocalName() );
+					localNameToURIHash.put(entry.getKey().getLocalName(), entry.getKey());
 				}
 			}
 		}
@@ -150,17 +151,17 @@ public class WeightDropDownButton extends JButton {
 		popupMenu.repaint();
 	}
 
-	private void addPropertiesToTreeNode( Map<URI, Set<URI>> propertiesToAdd,
+	private void addPropertiesToTreeNode( Map<String, Set<String>> propertiesToAdd,
 			DefaultMutableTreeNode invisibleNodeRoot ) {
-		for ( URI key : propertiesToAdd.keySet() ) {
-			Set<URI> propertiesForThisNodeType = propertiesToAdd.get( key );
+		for ( String key : propertiesToAdd.keySet() ) {
+			Set<String> propertiesForThisNodeType = propertiesToAdd.get( key );
 			if ( propertiesForThisNodeType.isEmpty() ) {
 				continue;
 			}
 
 			DefaultMutableTreeNode nodeType = new DefaultMutableTreeNode( key );
 			invisibleNodeRoot.add( nodeType );
-			for ( URI property : propertiesForThisNodeType ) {
+			for ( String property : propertiesForThisNodeType ) {
 				nodeType.add( new DefaultMutableTreeNode( property ) );
 			}
 		}
@@ -287,21 +288,18 @@ public class WeightDropDownButton extends JButton {
 				}
 
 				String tselectedValue = e.getPath().getLastPathComponent().toString();
-				JTree tree = (JTree) e.getSource();
-				URI selectedValue = ( tree.getSelectionCount() == 0
-						? null : new URIImpl( tselectedValue ) );
 
 				if ( thisMode == edgeMode ) {
-					rescaleEdges( selectedValue );
+					rescaleEdges( tselectedValue );
 				}
 				else if ( thisMode == vertMode ) {
-					rescaleVertices( selectedValue );
+					rescaleVertices( tselectedValue );
 				}
 			}
 		};
 	}
 
-	private void rescaleVertices( URI selectedValue ) {
+	private void rescaleVertices( String selectedValue ) {
 		VertexShapeTransformer vst
 				= (VertexShapeTransformer) playSheet.getView().getRenderContext().getVertexShapeTransformer();
 		vst.setVertexSizeHash( getWeightHash( playSheet.getForest().getVertices(),
@@ -310,9 +308,9 @@ public class WeightDropDownButton extends JButton {
 		playSheet.getView().repaint();
 	}
 
-	private void rescaleEdges( URI selectedValue ) {
+	private void rescaleEdges( String selectedValue ) {
 		EdgeStrokeTransformer est = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		est.setSelectedSize( 10d );
+		est.setEdges( getWeightHash(playSheet.getForest().getEdges(), selectedValue, 1.0) );
 
 		playSheet.getView().repaint();
 	}
@@ -326,7 +324,7 @@ public class WeightDropDownButton extends JButton {
 	 * @return Hashtable<String, Double> of the nodes and weights
 	 */
 	public static <X extends AbstractNodeEdgeBase> Map<X, Double>
-			getWeightHash( Collection<X> collection, URI selectedValue,
+			getWeightHash( Collection<X> collection, String selectedValue,
 					double defaultScale ) {
 
 		double minimumValue = .5, multiplier = 3;
@@ -339,13 +337,14 @@ public class WeightDropDownButton extends JButton {
 		Double highValue = null, lowValue = null;
 		Map<X, Double> weightHash = new HashMap<>();
 
-		for ( AbstractNodeEdgeBase object : collection ) {
+		for ( AbstractNodeEdgeBase nodeOrEdge : collection ) {
 			Object propertyValue = null;
 
-			URI uri = object.getURI();
-			propertyValue = object.getProperty( uri );
+			URI selectedURI = localNameToURIHash.get(selectedValue);
+			propertyValue = nodeOrEdge.getProperty( selectedURI );
+			double propertyDouble = getDoubleIfPossibleFrom(propertyValue);
 
-			if ( propertyValue instanceof Number ) {
+			if ( propertyDouble > 0 ) {
 				double value = Double.parseDouble( propertyValue.toString() );
 				if ( highValue == null ) {
 					highValue = value;
@@ -360,8 +359,7 @@ public class WeightDropDownButton extends JButton {
 					lowValue = value;
 				}
 
-				Logger.getLogger( WeightDropDownButton.class ).warn( "this is about to fail" );
-				weightHash.put( (X) uri, value );
+				weightHash.put( (X) nodeOrEdge, value );
 			}
 		}
 
@@ -371,11 +369,32 @@ public class WeightDropDownButton extends JButton {
 		}
 
 		for ( X key : weightHash.keySet() ) {
-			double value = Double.parseDouble( weightHash.get( key ).toString() );
-			value = ( ( value - lowValue ) / ( highValue - lowValue ) ) * multiplier * defaultScale + minimumValue;
+			double value = ( ( weightHash.get(key) - lowValue ) / ( highValue - lowValue ) ) * multiplier * defaultScale + minimumValue;
 			weightHash.put( key, value );
 		}
 
 		return weightHash;
+	}
+
+	private static double getDoubleIfPossibleFrom(Object propertyValue) {
+		if (propertyValue == null)
+			return -1;
+		
+		if (propertyValue instanceof URI) {
+			URI uri = (URI) propertyValue;
+			try {
+				return Double.parseDouble(uri.getLocalName());
+			}
+			catch (NumberFormatException e) {
+				return -1;
+			}
+		}
+		
+		try {
+			return Double.parseDouble(propertyValue.toString());
+		}
+		catch (NumberFormatException e) {
+			return -1;
+		}
 	}
 }

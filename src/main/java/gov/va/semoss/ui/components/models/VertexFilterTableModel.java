@@ -36,7 +36,7 @@ public class VertexFilterTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 6010606033514579342L;
 	private VertexFilterData data;
 
-	private static final String[] columnNames = { "Show", "Node", "Instance" };
+	private static final String[] columnNames = { "Show", "Node Type", "Instance" };
 	private static final Class<?>[] classNames = { Boolean.class, Object.class, Object.class };
 	
 	private ControlData controlData;
