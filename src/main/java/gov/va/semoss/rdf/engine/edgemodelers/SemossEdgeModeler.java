@@ -8,7 +8,6 @@ package gov.va.semoss.rdf.engine.edgemodelers;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
 import java.util.Map;
@@ -63,8 +62,6 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		}
 		URI object = getCachedInstance( otype, orawlabel );
 
-		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
-
 		// ... and get a relationship that ties them together
 		RelationCacheKey connectorkey = new RelationCacheKey( nap.getSubjectType(),
 				nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
@@ -72,7 +69,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		if ( !hasCachedRelation( connectorkey ) ) {
 			URI connector = null;
 			if ( nap.isEmpty() ) {
-				connector = getCachedRelationClass( stype, otype, relname );
+				connector = getCachedRelationClass( relname );
 			}
 			else {
 				// make a new edge so we can add properties
@@ -85,7 +82,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationNode( connector, connectorkey );
 		}
 
-		myrc.add( subject, getCachedRelationClass( stype, otype, relname ), object );
+		myrc.add( subject, getCachedRelationClass( relname ), object );
 
 		URI connector = getCachedRelation( connectorkey );
 		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
@@ -94,7 +91,7 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 			myrc.add( connector, RDF.TYPE, metas.getSchemaBuilder().getRelationUri().build() );
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
 					+ sheet.getRelname() + " " + orawlabel ) );
-			URI pred = getCachedRelationClass( stype, otype, sheet.getRelname() );
+			URI pred = getCachedRelationClass( sheet.getRelname() );
 			myrc.add( connector, RDF.PREDICATE, pred );
 		}
 

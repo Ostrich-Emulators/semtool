@@ -216,10 +216,10 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 
 					String nFillQuery = Utility.fillParam( typeQuery, hash );
 
-					NeighborMenuItem nItem = new NeighborMenuItem( instance, ps, nFillQuery, engine );
+					NeighborMenuItem nItem = new NeighborMenuItem( instance, ps, nFillQuery );
 					if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
 						nItem = new NeighborMenuItem( "->" + Utility.getInstanceName( pred )
-								+ "->" + instance, ps, nFillQuery, engine );
+								+ "->" + instance, ps, nFillQuery );
 					}
 					add( nItem );
 					//hash.put(objClassName, predClassName);

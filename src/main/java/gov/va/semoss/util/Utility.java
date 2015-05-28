@@ -1111,6 +1111,10 @@ public class Utility {
 	 */
 	public static String implode( Collection<?> collection, String start, String stop,
 			String sep ) {
+		if ( null == collection ) {
+			return "";
+		}
+
 		StringBuilder sb = new StringBuilder();
 		for ( Object o : collection ) {
 			if ( 0 != sb.length() ) {

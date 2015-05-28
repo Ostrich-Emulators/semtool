@@ -13,7 +13,6 @@ import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
-import gov.va.semoss.rdf.engine.util.QaChecker.RelationClassCacheKey;
 import gov.va.semoss.util.UriBuilder;
 import java.util.HashSet;
 import java.util.Map;
@@ -232,9 +231,9 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	@Override
-	public URI addNode( LoadingSheetData.LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
-			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
-			throws RepositoryException {
+	public URI addNode( LoadingSheetData.LoadingNodeAndPropertyValues nap,
+			Map<String, String> namespaces, LoadingSheetData sheet, ImportMetadata metas,
+			RepositoryConnection myrc ) throws RepositoryException {
 
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
@@ -280,8 +279,8 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				// our "value" is really the label of another node, so find that node
 				value = addSimpleNode( propname, value.stringValue(), namespaces,
 						metas, myrc, true );
-				predicate = getCachedRelationClass( sheet.getSubjectType(),
-						sheet.getObjectType(), propname );
+				predicate = getCachedRelationClass( sheet.getSubjectType()
+						+ sheet.getObjectType() + propname );
 			}
 
 			myrc.add( subject, predicate, value );
@@ -334,13 +333,13 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 				String rellabel = sheet.getRelname();
 
-				if ( !hasCachedRelationClass( stype, otype, rellabel ) ) {
+				if ( !hasCachedRelationClass( rellabel ) ) {
 					boolean relationAlreadyMade = isUri( rellabel, namespaces );
 
 					URI ret = ( relationAlreadyMade
 							? getUriFromRawString( rellabel, namespaces )
 							: schema.build( rellabel ) );
-					cacheRelationClass( ret, stype, otype, rellabel );
+					cacheRelationClass( ret, rellabel );
 
 					if ( save && !relationAlreadyMade ) {
 						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
@@ -359,8 +358,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 							+ " relationship to " + getCachedInstanceClass( propname ) );
 
 					cacheRelationClass( SEMOSS.has,
-							new QaChecker.RelationClassCacheKey( sheet.getSubjectType(),
-									sheet.getObjectType(), propname ) );
+							sheet.getSubjectType() + sheet.getObjectType() + propname );
 					continue;
 				}
 
@@ -400,8 +398,8 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		return qaer.getCachedInstanceClass( name );
 	}
 
-	public URI getCachedRelationClass( String s, String o, String p ) {
-		return qaer.getCachedRelationClass( s, o, p );
+	public URI getCachedRelationClass( String rel ) {
+		return qaer.getCachedRelationClass( rel );
 	}
 
 	public URI getCachedPropertyClass( String name ) {
@@ -412,8 +410,8 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		return qaer.hasCachedPropertyClass( name );
 	}
 
-	public boolean hasCachedRelationClass( String s, String o, String p ) {
-		return qaer.hasCachedRelationClass( s, o, p );
+	public boolean hasCachedRelationClass( String rel ) {
+		return qaer.hasCachedRelationClass( rel );
 	}
 
 	public boolean hasCachedRelation( String stype, String otype, String relname,
@@ -421,7 +419,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		return qaer.hasCachedRelation( stype, otype, relname, slabel, olabel );
 	}
 
-	public boolean hasCachedRelation( RelationCacheKey key ){
+	public boolean hasCachedRelation( RelationCacheKey key ) {
 		return qaer.hasCachedRelation( key );
 	}
 
@@ -444,13 +442,13 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		duplicates.add( uri );
 	}
 
-	public void cacheRelationNode( URI uri, RelationCacheKey key ){
+	public void cacheRelationNode( URI uri, RelationCacheKey key ) {
 		qaer.cacheRelationNode( uri, key );
 		duplicates.add( uri );
 	}
 
-	public void cacheRelationClass( URI uri, String sub, String obj, String rel ) {
-		qaer.cacheRelationClass( uri, sub, obj, rel );
+	public void cacheRelationClass( URI uri, String rel ) {
+		qaer.cacheRelationClass( uri, rel );
 		duplicates.add( uri );
 	}
 
@@ -461,11 +459,6 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 	public void cachePropertyClass( URI uri, String name ) {
 		qaer.cachePropertyClass( uri, name );
-		duplicates.add( uri );
-	}
-
-	public void cacheRelationClass( URI uri, RelationClassCacheKey key ) {
-		qaer.cacheRelationClass( uri, key );
 		duplicates.add( uri );
 	}
 }

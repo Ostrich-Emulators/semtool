@@ -14,7 +14,6 @@ import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFr
 import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.isUri;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
-import gov.va.semoss.rdf.engine.util.QaChecker.RelationClassCacheKey;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getCal;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
@@ -75,7 +74,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 		// ... and get a relationship that ties them together
 		RelationCacheKey lkey = new RelationCacheKey( nap.getSubjectType(),
-		nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
+				nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
 
 		if ( !hasCachedRelation( lkey ) ) {
 			URI connector;
@@ -95,7 +94,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationNode( connector, lkey );
 		}
 
-		URI relClassBaseURI = getCachedRelationClass( stype, otype, sheet.getRelname() );
+		URI relClassBaseURI = getCachedRelationClass( sheet.getRelname() );
 
 		URI connector = getCachedRelation( lkey );
 		if ( metas.isAutocreateMetamodel() ) {
@@ -159,8 +158,8 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			if ( sheet.isLink( propname ) ) {
 				// our "value" is really the label of another node, so find that node
 				value = addSimpleNode( propname, value.stringValue(), namespaces, metas, myrc );
-				predicate = getCachedRelationClass( sheet.getSubjectType(),
-						sheet.getObjectType(), propname );
+				predicate = getCachedRelationClass( sheet.getSubjectType()
+						+ sheet.getObjectType() + propname );
 			}
 
 			// not sure if we even use these values anymore
@@ -178,7 +177,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			}
 		}
 	}
-	
+
 	protected URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
 			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
 
@@ -214,7 +213,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 	@Override
 	public void createMetamodel( ImportData alldata, Map<String, String> namespaces,
-			RepositoryConnection myrc )	throws RepositoryException {
+			RepositoryConnection myrc ) throws RepositoryException {
 		ImportMetadata metas = alldata.getMetadata();
 		UriBuilder schema = metas.getSchemaBuilder();
 		boolean save = metas.isAutocreateMetamodel();
@@ -258,7 +257,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 				String rellabel = sheet.getRelname();
 
-				if ( !hasCachedRelationClass( stype, otype, rellabel ) ) {
+				if ( !hasCachedRelationClass( rellabel ) ) {
 					boolean relationAlreadyMade = isUri( rellabel, namespaces );
 
 					URI ret = ( relationAlreadyMade
@@ -266,7 +265,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 							: schema.getRelationUri( rellabel ) );
 					URI relation = schema.getRelationUri().build();
 
-					cacheRelationClass( ret, stype, otype, rellabel );
+					cacheRelationClass( ret, rellabel );
 
 					if ( save ) {
 						if ( !relationAlreadyMade ) {
@@ -293,9 +292,8 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 					log.debug( "linking " + propname + " as a " + SEMOSS.has
 							+ " relationship to " + getCachedInstanceClass( propname ) );
 
-					cacheRelationClass( SEMOSS.has,
-							new RelationClassCacheKey( sheet.getSubjectType(),
-									sheet.getObjectType(), propname ) );
+					cacheRelationClass( SEMOSS.has, sheet.getSubjectType()
+							+ sheet.getObjectType() + propname );
 					continue;
 				}
 

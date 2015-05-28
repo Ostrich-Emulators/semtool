@@ -127,7 +127,7 @@ import aurelienribon.ui.css.swing.SwingStyle;
 import com.ibm.icu.util.StringTokenizer;
 
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
-import gov.va.semoss.ui.actions.ExportGraphMLAction;
+import gov.va.semoss.ui.actions.ExportGraphAction;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 
@@ -230,7 +230,10 @@ public class PlayPane extends JFrame {
 			ExportTtlAction.Style.RDF, this );
 	private final DbAction exportinsights
 			= new ExportInsightsAction( UIPROGRESS, this );
-	private final DbAction expgraph = new ExportGraphMLAction( UIPROGRESS, this );
+	private final DbAction expgraphml
+			= new ExportGraphAction( UIPROGRESS, this, ExportGraphAction.Style.GRAPHML );
+	private final DbAction expgson
+			= new ExportGraphAction( UIPROGRESS, this, ExportGraphAction.Style.GSON );
 	private final DbAction expall = new ExportLoadingSheetAction( UIPROGRESS,
 			this, true, true );
 	private final DbAction exprels = new ExportLoadingSheetAction( UIPROGRESS,
@@ -563,9 +566,9 @@ public class PlayPane extends JFrame {
 				IEngine engine = repoList.getSelectedValue();
 
 				DbAction actions[] = {
-					toggler, proper, cloner, clearer, exportttl, exportnt, expgraph,
-					exportrdf, exportinsights, expall, exprels, expnodes, expSpecNodes,
-					expSpecRels, unmounter, sparqler, importls, consistencyCheck };
+					toggler, proper, cloner, clearer, exportttl, exportnt, expgraphml,
+					expgson, exportrdf, exportinsights, expall, exprels, expnodes,
+					expSpecNodes, expSpecRels, unmounter, sparqler, importls, consistencyCheck };
 				for ( DbAction dba : actions ) {
 					dba.setEngine( engine );
 					dba.setEnabled( null != engine );
@@ -629,7 +632,7 @@ public class PlayPane extends JFrame {
 
 		owlPanel = makeOwlTab();
 		//leftView.addTab( "SUDOWL", null, owlPanel, null );
-		
+
 		//Label
 		outputPanel = makeOutputPanel();
 		leftView.addTab( "Graph Labels", null, outputPanel,
@@ -1278,7 +1281,12 @@ public class PlayPane extends JFrame {
 
 		loadingsheets.add( expall );
 		exptop.add( exportinsights );
-		exptop.add( expgraph );
+
+		JMenu gexp = new JMenu( "Graph" );
+		gexp.add(  expgraphml );
+		gexp.add(  expgson );		
+		
+		exptop.add( gexp );
 		db.add( exptop );
 
 		JMenu importtop = new JMenu( "Import" );

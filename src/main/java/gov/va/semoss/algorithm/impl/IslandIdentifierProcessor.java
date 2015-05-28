@@ -85,9 +85,7 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 			for ( SEMOSSEdge ed : graph.getIncidentEdges( v ) ) {
 				islandEdges.add( ed );
 
-				SEMOSSVertex v2 = ( ed.getInVertex().equals( v ) ? ed.getOutVertex()
-						: ed.getInVertex() );
-
+				SEMOSSVertex v2 = graph.getOpposite( v, ed );
 				if ( !seen.contains( v2 ) ) { // don't add a node we've already seen
 					todo.push( v2 );
 				}
@@ -109,7 +107,7 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 			state.pick( v, true );
 		}
 
-		gps.highlight( islandVerts, islandEdges );
+		gps.skeleton( islandVerts, islandEdges );
  	}
 
 	/**

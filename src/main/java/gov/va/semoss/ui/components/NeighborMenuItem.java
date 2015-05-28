@@ -19,51 +19,69 @@
  */
 package gov.va.semoss.ui.components;
 
-import java.util.List;
-
+import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.helpers.PlaysheetOverlayRunner;
-import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.QuestionPlaySheetStore;
+import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
+import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 
 /**
  * This class is used to create a menu item for the neighborhood.
  */
 public class NeighborMenuItem extends AbstractAction {
 
-	String query;
-	IEngine engine = null;
-	String predicateURI = null;
-	String name = null;
-	private final GraphPlaySheet gps;
-
 	private static final Logger logger = Logger.getLogger( NeighborMenuItem.class );
 
-	public NeighborMenuItem( String name, GraphPlaySheet ps, String query, IEngine engine ) {
+	private final String query;
+	private final GraphPlaySheet gps;
+
+	public NeighborMenuItem( String name, GraphPlaySheet ps, String query ) {
 		super( name );
-		this.name = name;
 		this.query = query;
-		this.engine = engine;
 		this.gps = ps;
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
-		logger.warn( "this class must be refactored" );
-		// Here I need to get the active sheet
-		// get everything with respect the selected node type
-		// and then create the filter on top of the query
-		// use the @filter@ to get this done / some of the 			
+		ProgressTask pt = new ProgressTask( "Expanding Graph", new Runnable() {
 
-		// need to create playsheet extend runner
-		Runnable playRunner = new PlaysheetOverlayRunner( gps );
-		gps.setQuery( query );
-		Thread playThread = new Thread( playRunner );
-		playThread.start();
+			@Override
+			public void run() {
+				LinkedHashModel model = new LinkedHashModel();
+				VoidQueryAdapter q = new VoidQueryAdapter( query ) {
+
+					@Override
+					public void handleTuple( BindingSet set, ValueFactory fac ) {
+						Resource s = Resource.class.cast( set.getValue( "subject" ) );
+						URI p = URI.class.cast( set.getValue( "predicate" ) );
+						Value o = set.getValue( "object" );
+						model.add( s, p, o );
+					}
+				};
+
+				try {
+					gps.getEngine().query( q );
+					gps.overlay( model, gps.getEngine() );
+				}
+				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+					logger.error( e, e );
+					Utility.showError( e.getLocalizedMessage() );
+				}
+			}
+		} );
+
+		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
+
 	}
 }

@@ -124,7 +124,7 @@ public class ConsistencyPlaySheet extends GridRAWPlaySheet {
 
 		List<String> headers
 				= Arrays.asList( labels.get( type ), "Match", "Score", "Match Type" );
-		create( data, headers, getEngine() );
+		create( data, headers, engine );
 		setTitle( labels.get( type ) );
 
 		final NumberFormat df = DecimalFormat.getInstance();

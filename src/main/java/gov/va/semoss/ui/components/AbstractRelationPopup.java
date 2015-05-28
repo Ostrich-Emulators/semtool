@@ -224,7 +224,7 @@ public abstract class AbstractRelationPopup extends JMenu implements MouseListen
 						&& !hash.containsKey( predClassName )
 						&& ( !instance && !predClassName.contains( "\"" ) ) || instance ) {
 					logger.info( "Filler Query is  " + nFillQuery );
-					NeighborMenuItem nItem = new NeighborMenuItem( predClassName, ps, nFillQuery, engine );
+					NeighborMenuItem nItem = new NeighborMenuItem( predClassName, ps, nFillQuery );
 					add( nItem );
 					hash.put( predClassName, predClassName );
 				}

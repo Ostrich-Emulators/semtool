@@ -20,7 +20,6 @@
 package gov.va.semoss.ui.main.listener.impl;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.visualization.RenderContext;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,11 +28,8 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
-import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
@@ -80,6 +76,7 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
 		PickedState state = gps.getView().getPickedVertexState();
 		Set<SEMOSSVertex> selectedVerts = new HashSet<>( state.getPicked() );
 		Set<SEMOSSEdge> selectedEdges = new HashSet<>();
@@ -92,14 +89,13 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 
 				//if the button name contains upstream, get the upstream edges and vertices
 				if ( Type.ADJACENT == type ) {
-					selectedEdges.addAll( vert.getInEdges() );
-					selectedEdges.addAll( vert.getOutEdges() );
+					selectedEdges.addAll( graph.getIncidentEdges( vert ) );
 				}
 				else if ( Type.DOWNSTREAM == type ) {
-					selectedEdges.addAll( vert.getOutEdges() );
+					selectedEdges.addAll( graph.getOutEdges( vert ) );
 				}
 				else {
-					selectedEdges.addAll( vert.getInEdges() );
+					selectedEdges.addAll( graph.getInEdges( vert ) );
 				}
 			}
 		}
@@ -112,10 +108,10 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 				selectedVerts.add( v );
 				seen.add( v );
 
-				for ( SEMOSSEdge ed : v.getOutEdges() ) {
+				for ( SEMOSSEdge ed : graph.getOutEdges( v ) ) {
 					selectedEdges.add( ed );
 
-					SEMOSSVertex v2 = ed.getInVertex();
+					SEMOSSVertex v2 = graph.getOpposite( v, ed );
 					if ( !seen.contains( v2 ) ) { // don't add a node we've already seen
 						todo.push( v2 );
 					}
@@ -124,14 +120,13 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		}
 
 		for ( SEMOSSEdge ed : selectedEdges ) {
-			selectedVerts.add( ed.getInVertex() );
-			selectedVerts.add( ed.getOutVertex() );
+			selectedVerts.addAll( graph.getEndpoints( ed ) );
 		}
 
 		for ( SEMOSSVertex v : selectedVerts ) {
 			state.pick( v, true );
 		}
 
-		gps.highlight( selectedVerts, selectedEdges );		
+		gps.highlight( selectedVerts, selectedEdges );
 	}
 }
