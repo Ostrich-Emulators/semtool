@@ -19,12 +19,14 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.util.DIHelper;
+
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
 
-import gov.va.semoss.om.SEMOSSVertex;
 import org.openrdf.model.URI;
 
 /**
@@ -33,6 +35,7 @@ import org.openrdf.model.URI;
 public class LegendPanel2 extends JPanel {
 	private static final long serialVersionUID = -2364666196260002413L;
 	public VertexFilterData data;
+	private ControlData controlData;
 
 	/**
 	 * Create the panel.
@@ -49,6 +52,10 @@ public class LegendPanel2 extends JPanel {
 	 */
 	public void setFilterData( VertexFilterData _data ) {
 		data = _data;
+		
+		controlData = new ControlData();
+		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
+
 		drawLegend();
 	}
 
@@ -58,12 +65,12 @@ public class LegendPanel2 extends JPanel {
 	public void drawLegend() {
 		removeAll();
 		
-		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : data.getTypeHash().entrySet() ) {
-			URI nodeType = entry.getKey();
+		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : data.getNodeTypeMap().entrySet() ) {
+			String label = controlData.getLabel( entry.getKey() );
 			List<SEMOSSVertex> vertexList = entry.getValue();
 			SEMOSSVertex vertex = vertexList.get( 0 );
 
-			String text = nodeType + " (" + vertexList.size() + ")";
+			String text = label + " (" + vertexList.size() + ")";
 			add( new PaintLabel( text, vertex.getShapeLegend(), vertex.getColor() ) );
 		}
 		

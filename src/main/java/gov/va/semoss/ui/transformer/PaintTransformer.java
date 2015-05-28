@@ -17,36 +17,29 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package gov.va.semoss.ui.components;
+package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-
-import org.apache.log4j.Logger;
+import gov.va.semoss.om.AbstractNodeEdgeBase;
+import java.awt.Color;
+import java.awt.Paint;
 
 /**
+ * Transforms the color of vertices/nodes on the graph.
  */
-public class GraphPlaySheetFrame extends PlaySheetFrame {
+public class PaintTransformer<T extends AbstractNodeEdgeBase> extends SelectingTransformer<T, Paint> {
 
-	private static final long serialVersionUID = 4699492732234656487L;
-	protected static final Logger log = Logger.getLogger(GraphPlaySheetFrame.class );
-	private GraphPlaySheet gps;
-
-	public GraphPlaySheetFrame( IEngine eng ) {
-		super( eng );
-	}
-
-	public GraphPlaySheet getGraphComponent(){
-		return gps;
+	@Override
+	protected Paint transformNormal( T t ) {
+		return t.getColor();
 	}
 
 	@Override
-	public void addTab( String title, PlaySheetCentralComponent c ) {
-		if( c instanceof GraphPlaySheet  && getPlaySheets().isEmpty() ){
-			// our first graph becomes our default graph
-			gps = GraphPlaySheet.class.cast( c );
-		}
-		super.addTab( title, c );
+	protected Paint transformSelected( T t ) {
+		return t.getColor();
+	}
+
+	@Override
+	protected Paint transformNotSelected( T t, boolean skel ) {
+		return ( skel ? Color.white : t.getColor() );
 	}
 }

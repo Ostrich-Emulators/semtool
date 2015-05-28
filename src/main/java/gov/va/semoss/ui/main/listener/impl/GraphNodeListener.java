@@ -21,7 +21,6 @@ package gov.va.semoss.ui.main.listener.impl;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JComponent;
@@ -38,22 +37,17 @@ import gov.va.semoss.ui.components.GraphNodePopup;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.models.EdgePropertyTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import java.util.HashMap;
 import java.util.HashSet;
-import org.openrdf.model.URI;
 
 /**
  * Controls what happens when a user clicks on a node in a graph.
  */
-public class GraphNodeListener extends ModalLensGraphMouse implements
-		IChakraListener {
+public class GraphNodeListener extends ModalLensGraphMouse implements IChakraListener {
 
-	private static final Logger logger = Logger
-			.getLogger( GraphNodeListener.class );
+	private static final Logger logger = Logger.getLogger( GraphNodeListener.class );
 	private GraphPlaySheet gps;
 
 	public GraphNodeListener( GraphPlaySheet _gps ) {
@@ -78,7 +72,6 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer
 				= (VisualizationViewer<SEMOSSVertex, SEMOSSEdge>) e.getSource();
 
-		Set<SEMOSSVertex> vertHash = new HashSet<>();
 		SEMOSSVertex clickedVertex = checkIfVertexWasClicked( viewer, e.getX(),
 				e.getY() );
 
@@ -86,6 +79,7 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 			handleEdges( viewer );
 		}
 
+		Set<SEMOSSVertex> vertHash = new HashSet<>();
 		if ( e.getButton() == MouseEvent.BUTTON3 ) {
 			vertHash = handleRightClick( viewer, clickedVertex, e );
 		}
@@ -131,8 +125,7 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 
 		Set<SEMOSSEdge> pickedEdges = viewer.getPickedEdgeState().getPicked();
 		for ( SEMOSSEdge edge : pickedEdges ) {
-			EdgePropertyTableModel pm = new EdgePropertyTableModel(
-					gps.getFilterData(), edge );
+			EdgePropertyTableModel pm = new EdgePropertyTableModel( edge );
 			table.setModel( pm );
 			pm.fireTableDataChanged();
 		}
@@ -180,15 +173,8 @@ public class GraphNodeListener extends ModalLensGraphMouse implements
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
 			Set<SEMOSSVertex> verts ) {
 
-		Set<SEMOSSVertex> vertHash = new HashSet<>(verts );
-		
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) viewer
-				.getRenderContext().getVertexFontTransformer();
-		vertHash.addAll( vlft.getVertHash() );
-		vlft.setVertHash( vertHash );
-		VertexPaintTransformer ptx = (VertexPaintTransformer) viewer
-				.getRenderContext().getVertexFillPaintTransformer();
-		ptx.setVertHash( vertHash );
+		LabelFontTransformer<SEMOSSVertex> vlft = gps.getVertexLabelFontTransformer();
+		vlft.select( verts );
 		viewer.repaint();
 	}
 

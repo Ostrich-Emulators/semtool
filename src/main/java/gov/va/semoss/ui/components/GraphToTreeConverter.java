@@ -15,14 +15,13 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
@@ -30,9 +29,10 @@ import gov.va.semoss.algorithm.impl.DistanceDownstreamProcessor;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import edu.uci.ics.jung.graph.DelegateForest;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class extends downstream processing in order to convert the graph into
@@ -42,12 +42,8 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 
 	private static final Logger logger = Logger.getLogger( GraphToTreeConverter.class );
 
-	Hashtable<String, ArrayList<SEMOSSVertex>> uriVertHash = new Hashtable();
-	DelegateForest newForest;
-
-	public GraphToTreeConverter( DelegateForest df ) {
-		super( df );
-	}
+	Map<String, List<SEMOSSVertex>> uriVertHash = new HashMap<>();
+	DelegateForest<SEMOSSVertex, SEMOSSEdge> newForest;
 
 	/**
 	 * Constructor for GraphToTreeConverter.
@@ -55,19 +51,7 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	 * @param p Graph playsheet to be set.
 	 */
 	public GraphToTreeConverter( GraphPlaySheet p ) {
-		super( p, p.getView().getPickedVertexState().getPicked().toArray( new SEMOSSVertex[0] ) );
-	}
-
-	/**
-	 * Sets selected nodes into the arraylist of DBCM vertices.
-	 */
-	private void setSelectedNodes() {
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = playSheet.getView();
-		PickedState ps = view.getPickedVertexState();
-		Iterator<SEMOSSVertex> it = ps.getPicked().iterator();
-		while ( it.hasNext() ) {
-			this.selectedVerts.add( it.next() );
-		}
+		super( p, p.getView().getPickedVertexState().getPicked() );
 	}
 
 	/**
@@ -75,8 +59,7 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	 * vertices.
 	 */
 	private void resetConverter() {
-
-		newForest = new DelegateForest();
+		newForest = new DelegateForest<>();
 		masterHash.clear();
 		uriVertHash.clear();
 		selectedVerts.clear();
@@ -89,9 +72,7 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	@Override
 	public void execute() {
 		resetConverter();
-		this.forest = playSheet.getForest();
-		setSelectedNodes();
-		ArrayList<SEMOSSVertex> currentNodes = setRoots();
+		List<SEMOSSVertex> currentNodes = setRoots();
 		performDownstreamProcessing( currentNodes );
 		playSheet.setForest( newForest );
 	}
@@ -108,8 +89,9 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	 * @return ArrayList<DBCMVertex> Vert array, used to calculate network value.
 	 */
 	@Override
-	public ArrayList<SEMOSSVertex> traverseDownward( SEMOSSVertex vert, int levelIndex, ArrayList<SEMOSSVertex> parentPath, ArrayList<SEMOSSEdge> parentEdgePath ) {
-		ArrayList<SEMOSSVertex> vertArray = new ArrayList<SEMOSSVertex>();
+	public List<SEMOSSVertex> traverseDownward( SEMOSSVertex vert, int levelIndex,
+			List<SEMOSSVertex> parentPath, List<SEMOSSEdge> parentEdgePath ) {
+		List<SEMOSSVertex> vertArray = new ArrayList<>();
 		Collection<SEMOSSEdge> edgeArray = forest.getOutEdges( vert );
 		for ( SEMOSSEdge edge : edgeArray ) {
 			SEMOSSVertex inVert = edge.getInVertex();
@@ -119,15 +101,15 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 
 				//now I have to add this new vertex to masterHash.  This requires using the vertHash of the parent child to get path
 				Hashtable vertHash = new Hashtable();
-				ArrayList<SEMOSSVertex> newPath = new ArrayList<SEMOSSVertex>();
-				ArrayList<SEMOSSEdge> newEdgePath = new ArrayList<SEMOSSEdge>();
+				List<SEMOSSVertex> newPath = new ArrayList<>();
+				List<SEMOSSEdge> newEdgePath = new ArrayList<>();
 				newPath.addAll( parentPath );
 				newEdgePath.addAll( parentEdgePath );
 				newPath.add( inVert );
 				newEdgePath.add( edge );
-				vertHash.put( distanceString, levelIndex );
-				vertHash.put( pathString, newPath );
-				vertHash.put( edgePathString, newEdgePath );
+				vertHash.put(DISTANCE, levelIndex );
+				vertHash.put(PATH, newPath );
+				vertHash.put(EDGEPATH, newEdgePath );
 				masterHash.put( inVert, vertHash );
 			}
 			//This is the key piece for creating a tree
@@ -140,9 +122,9 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 
 		//if the vertArray is null, I'm going to add a key saying that it is a leaf of the tree
 		//this will be used in giving network value in distancedownstreaminserter
-		if ( vertArray.size() == 0 ) {
+		if ( vertArray.isEmpty() ) {
 			Hashtable parentHash = (Hashtable) masterHash.get( vert );
-			parentHash.put( leafString, "Leaf" );
+			parentHash.put(LEAF, "Leaf" );
 		}
 
 		return vertArray;
@@ -158,7 +140,7 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	private void addEdges( SEMOSSEdge edge, SEMOSSVertex vert, SEMOSSVertex inVert ) {
 		//need to get all vertices that exist with this uri and create edge downward to new instances of this invert
 		String uri = vert.getURI().stringValue();
-		ArrayList<SEMOSSVertex> vertArray = uriVertHash.get( uri );
+		List<SEMOSSVertex> vertArray = uriVertHash.get( uri );
 		if ( vertArray == null ) {
 			SEMOSSEdge newEdge = new SEMOSSEdge( vert, inVert, edge.getURI() );
 			newEdge.getProperties().putAll( edge.getProperties() );
@@ -184,7 +166,7 @@ public class GraphToTreeConverter extends DistanceDownstreamProcessor {
 	 */
 	private void addToURIVertHash( SEMOSSVertex vert ) {
 		String uri = vert.getURI().stringValue();
-		ArrayList<SEMOSSVertex> vertArray = null;
+		List<SEMOSSVertex> vertArray = null;
 		if ( uriVertHash.containsKey( uri ) ) {
 			vertArray = uriVertHash.get( uri );
 			if ( vertArray.contains( vert ) ) {

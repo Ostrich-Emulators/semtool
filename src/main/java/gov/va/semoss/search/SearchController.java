@@ -19,41 +19,40 @@
  */
 package gov.va.semoss.search;
 
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.RenderContext;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
+import gov.va.semoss.ui.transformer.PaintTransformer;
+import gov.va.semoss.ui.transformer.VertexShapeTransformer;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.Utility;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
-import org.apache.log4j.Logger;
-import org.apache.lucene.store.RAMDirectory;
-
-import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.picking.MultiPickedState;
-import edu.uci.ics.jung.visualization.picking.PickedState;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowFillPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -68,6 +67,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
@@ -89,17 +89,11 @@ public class SearchController implements KeyListener, FocusListener,
 	private boolean typed = false;
 	private boolean searchContinue = true;
 
-	private Set<SEMOSSVertex> resHash = new HashSet<>();
-	private Set<SEMOSSVertex> cleanResHash = new HashSet<>();
-
-	private VertexPaintTransformer oldTx = null;
+	private PaintTransformer oldTx = null;
 	private EdgeStrokeTransformer oldeTx = null;
-	private ArrowFillPaintTransformer oldafpTx = null;
-	private VertexLabelFontTransformer oldVLF = null;
-
-	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> target = null;
-	private PickedState<SEMOSSVertex> liveState;
-	private PickedState<SEMOSSVertex> tempState = new MultiPickedState<>();
+	private VertexShapeTransformer oldsTx = null;
+	private double oldedgesize = 0;
+	private int oldfontsize = 0;
 
 	private GraphPlaySheet gps;
 
@@ -107,10 +101,7 @@ public class SearchController implements KeyListener, FocusListener,
 	private final Directory ramdir = new RAMDirectory();
 	private IndexReader reader;
 	private IndexSearcher searcher;
-
-	public Set<SEMOSSVertex> getCleanResHash() {
-		return cleanResHash;
-	}
+	private final Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 
 	// toggle button listener
 	// this will swap the view based on what is being presented
@@ -121,49 +112,28 @@ public class SearchController implements KeyListener, FocusListener,
 	 */
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		// see if the key is depressed
-		// if yes swap the transformer
 		if ( ( (JToggleButton) e.getSource() ).isSelected() ) {
-			// set the transformers
-			oldTx = (VertexPaintTransformer) target.getRenderContext()
-					.getVertexFillPaintTransformer();
-			oldTx.setVertHash( resHash );
-			oldeTx = (EdgeStrokeTransformer) target.getRenderContext()
-					.getEdgeStrokeTransformer();
-			oldeTx.setEdges( null );
-			oldafpTx = (ArrowFillPaintTransformer) target.getRenderContext()
-					.getArrowFillPaintTransformer();
-			oldafpTx.setEdges( null );
-			oldVLF = (VertexLabelFontTransformer) target.getRenderContext()
-					.getVertexFontTransformer();
-			oldVLF.setVertHash( resHash );
-			target.repaint();
-			// if the search vertex state has been cleared, we need to refill it
-			// with what is in the res hash
-			Map<URI, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
-			if ( tempState.getPicked().isEmpty() && !resHash.isEmpty() ) {
-				for ( SEMOSSVertex resKey : resHash ) {
-					liveState.pick( resKey, true );
-				}
-			}
-			// if there are vertices in the temp state, need to pick them in the
-			// live state and clear tempState
-			if ( tempState.getPicked().size() > 0 ) {
-				for ( SEMOSSVertex vertex : tempState.getPicked() ) {
-					liveState.pick( vertex, true );
-				}
-				tempState.clear();
-			}
+			handleSelectionOfButton();
 		}
 		else {
-			liveState.clear();
-			oldTx.setVertHash( null );
-			oldeTx.setEdges( null );
-			oldafpTx.setEdges( null );
-			oldVLF.setVertHash( null );
-			target.repaint();
+			handleDeselectionOfButton();
 		}
-		gps.resetTransformers();
+
+		// gps.clearHighlighting();
+	}
+
+	private void handleSelectionOfButton() {
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
+		gps.clearHighlighting();
+		gps.skeleton( view.getPickedVertexState().getPicked(), null );		
+	}
+
+	private void handleDeselectionOfButton() {
+		gps.clearHighlighting();
+
+		if ( !searchText.getText().isEmpty() ) {
+			searchStatement( searchText.getText() );
+		}
 	}
 
 	/**
@@ -184,14 +154,17 @@ public class SearchController implements KeyListener, FocusListener,
 			Query q = alltextqp.parse( query.toString() );
 
 			TopDocs hits = searcher.search( q, 500 );
+
+			gps.getView().getPickedVertexState().clear();
+
 			for ( ScoreDoc sd : hits.scoreDocs ) {
 				Document doc = searcher.doc( sd.doc );
 				URI uri = new URIImpl( doc.get( URI_FIELD ) );
 
-				Map<URI, SEMOSSVertex> vertStore = gps.getGraphData().getVertStore();
 				if ( vertStore.containsKey( uri ) ) {
+					SEMOSSVertex v = vertStore.get( uri );
 					log.debug( "selecting node: " + uri + " from search" );
-					gps.getView().getPickedVertexState().pick( vertStore.get( uri ), true );
+					gps.getView().getPickedVertexState().pick( v, true );
 				}
 			}
 		}
@@ -199,7 +172,7 @@ public class SearchController implements KeyListener, FocusListener,
 			log.error( e, e );
 		}
 
-		target.repaint();
+		gps.getView().repaint();
 		searchText.requestFocus( true );
 	}
 
@@ -216,14 +189,11 @@ public class SearchController implements KeyListener, FocusListener,
 						menu.setVisible( false );
 						menu.removeAll();
 					}
-					if ( searchText.getText().length() > 0 && lastTime != 0 ) {
+					if ( !( searchText.getText().isEmpty() || 0 == lastTime ) ) {
 						searchStatement( searchText.getText() );
 					}
-					else if ( searchText.getText().length() == 0
-							&& lastTime != 0 ) {
-						resHash.clear();
-						cleanResHash.clear();
-						tempState.clear();
+					else if ( searchText.getText().isEmpty() && lastTime != 0 ) {
+						handleDeselectionOfButton();
 						log.debug( "cleared" );
 					}
 					lastTime = System.currentTimeMillis();
@@ -289,56 +259,65 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	/**
-	 * Method indexRepository.
+	 * Method indexGraph.
 	 *
 	 * @param jenaModel Model
 	 */
-	public void indexRepository( Collection<SEMOSSEdge> edges,
-			Collection<SEMOSSVertex> nodes, IEngine engine ) {
-		try {
-			if ( null != reader ) {
+	public void indexGraph( Graph<SEMOSSVertex, SEMOSSEdge> graph, IEngine engine ) {
+		SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
+
+			@Override
+			protected Void doInBackground() throws Exception {
+
+				Set<Resource> needLabels = new HashSet<>();
+				for ( SEMOSSEdge e : graph.getEdges() ) {
+					needLabels.addAll( e.getProperties().keySet() );
+				}
+				for ( SEMOSSVertex e : graph.getVertices() ) {
+					needLabels.addAll( e.getProperties().keySet() );
+				}
+
+				Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine );
+				RepositoryIndexer ri = new RepositoryIndexer( labels );
+
+				for ( SEMOSSEdge e : graph.getEdges() ) {
+					ri.handleProperties( e.getURI(), e.getProperties() );
+				}
+				for ( SEMOSSVertex v : graph.getVertices() ) {
+					vertStore.put( v.getURI(), v );
+					ri.handleProperties( v.getURI(), v.getProperties() );
+				}
+
+				ri.finish();
+				return null;
+			}
+
+			@Override
+			public void done() {
 				try {
-					reader.close();
+					if ( null == reader ) {
+						reader = IndexReader.open( ramdir );
+					}
+					else {
+						IndexReader rdr = IndexReader.openIfChanged( reader );
+						if ( null != rdr ) {
+							reader = rdr;
+						}
+						
+						searcher.close();
+					}
+
+					searcher = new IndexSearcher( reader );
+					searchText.setEnabled( true );
 				}
-				catch ( Exception e ) {
-					log.warn( e, e );
+				catch ( IOException ioe ) {
+					log.warn( "cannot read newly-created search index", ioe );
+					searchText.setEnabled( false );
 				}
 			}
-			if ( null != searcher ) {
-				try {
-					searcher.close();
-				}
-				catch ( Exception e ) {
-					log.warn( e, e );
-				}
-			}
+		};
 
-			Set<Resource> needLabels = new HashSet<>();
-			for ( SEMOSSEdge e : edges ) {
-				needLabels.addAll( e.getProperties().keySet() );
-			}
-			for ( SEMOSSVertex e : nodes ) {
-				needLabels.addAll( e.getProperties().keySet() );
-			}
-
-			Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine );
-			RepositoryIndexer ri = new RepositoryIndexer( labels );
-
-			for ( SEMOSSEdge e : edges ) {
-				ri.handleProperties( e.getURI(), e.getProperties() );
-			}
-			for ( SEMOSSVertex e : nodes ) {
-				ri.handleProperties( e.getURI(), e.getProperties() );
-			}
-
-			ri.finish();
-
-			reader = IndexReader.open( ramdir );
-			searcher = new IndexSearcher( reader );
-		}
-		catch ( IOException ex ) {
-			log.error( ex, ex );
-		}
+		sw.execute();
 	}
 
 	/**
@@ -360,25 +339,6 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	/**
-	 * Method setTarget.
-	 *
-	 * @param vv VisualizationViewer
-	 */
-	public VisualizationViewer<SEMOSSVertex, SEMOSSEdge> getTarget() {
-		return target;
-	}
-
-	/**
-	 * Method setTarget.
-	 *
-	 * @param vv VisualizationViewer
-	 */
-	public void setTarget( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> _target ) {
-		target = _target;
-		liveState = target.getPickedVertexState();
-	}
-
-	/**
 	 * Method keyPressed.
 	 *
 	 * @param arg0 KeyEvent
@@ -393,7 +353,8 @@ public class SearchController implements KeyListener, FocusListener,
 	 * @param arg0 KeyEvent
 	 */
 	@Override
-	public void keyReleased( KeyEvent arg0 ) {
+	public
+			void keyReleased( KeyEvent arg0 ) {
 	}
 
 	private class RepositoryIndexer {
@@ -407,6 +368,7 @@ public class SearchController implements KeyListener, FocusListener,
 			labels = labs;
 			IndexWriterConfig config
 					= new IndexWriterConfig( Version.LUCENE_36, analyzer );
+			config.setOpenMode( IndexWriterConfig.OpenMode.CREATE );
 			try {
 				indexer = new IndexWriter( ramdir, config );
 			}
@@ -429,7 +391,7 @@ public class SearchController implements KeyListener, FocusListener,
 				indexer.commit();
 				indexer.close();
 
-				if ( log.isDebugEnabled() ) {
+				if ( log.isTraceEnabled() ) {
 					File lucenedir
 							= new File( FileUtils.getTempDirectory(), "search.lucene" );
 					IndexWriterConfig config

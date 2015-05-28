@@ -23,6 +23,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.DIHelper;
 import java.awt.event.ActionEvent;
+import java.util.Collection;
 import javax.swing.AbstractAction;
 
 /**
@@ -32,11 +33,11 @@ import javax.swing.AbstractAction;
 public class ColorMenuItem extends AbstractAction {
 
 	private static final long serialVersionUID = -5260297432865485162L;
-	private SEMOSSVertex[] pickedVertex;
-	private String color;
+	private final Collection<SEMOSSVertex> pickedVertex;
+	private final String color;
 	private final GraphPlaySheet gps;
 
-	public ColorMenuItem( String _color, GraphPlaySheet ps, SEMOSSVertex[] _pickedVertex ) {
+	public ColorMenuItem( String _color, GraphPlaySheet ps, Collection<SEMOSSVertex> _pickedVertex ) {
 		super( _color );
 		color = _color;
 		pickedVertex = _pickedVertex;
@@ -45,9 +46,11 @@ public class ColorMenuItem extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
-		for ( SEMOSSVertex pickedVertex1 : pickedVertex ) {
-			pickedVertex1.setColor( DIHelper.getColor( color ) );
-			pickedVertex1.setColorString( color );
+		for ( SEMOSSVertex vert : pickedVertex ) {
+			vert.setColor( DIHelper.getColor( color ) );
+			vert.setColorString( color );
 		}
+
+		gps.getView().repaint();
 	}
 }

@@ -47,7 +47,6 @@ import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.impl.AbstractEngine;
-import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
@@ -73,6 +72,7 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
+import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
 /**
@@ -887,9 +887,14 @@ public class EngineUtil implements Runnable {
 			RDFFormat fmt ) {
 		List<Statement> stmts = new ArrayList<>();
 
-		InMemorySesameEngine mem = new InMemorySesameEngine();
+		Repository repo = null;
+		RepositoryConnection rc = null;
+
 		try ( InputStream is = resource.openStream() ) {
-			RepositoryConnection rc = mem.getRawConnection();
+			repo = new SailRepository( new MemoryStore() );
+			repo.initialize();
+			rc = repo.getConnection();
+
 			rc.add( is, Constants.DEFAULT_SEMOSS_URI, fmt );
 			rc.commit();
 			stmts.addAll( Iterations.asList( rc.getStatements( null, null, null, false ) ) );
@@ -897,8 +902,24 @@ public class EngineUtil implements Runnable {
 		catch ( Exception e ) {
 			log.warn( "could not open/parse model resource: " + resource, e );
 		}
-
-		mem.closeDB();
+		finally {
+			if ( null != rc ) {
+				try {
+					rc.close();
+				}
+				catch ( Exception e ) {
+					log.warn( "could not remove temp rc" );
+				}
+			}
+			if ( null != repo ) {
+				try {
+					repo.shutDown();
+				}
+				catch ( Exception e ) {
+					log.warn( "could not remove temp rc" );
+				}
+			}
+		}
 
 		return stmts;
 	}

@@ -35,10 +35,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	   * full it will use the rc to create edge and node properties and then nodes
 	   * and edges.
 	   */
-	@Override
-	public void fillStoresFromModel() {
-		super.fillStoresFromModel();
-		
+	public void fillStoresFromModel() {	
 		updateLabelsOfEdges();
 		updateLabelsOfVertices();
 	}
@@ -121,7 +118,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	}
 	
 	private void populateEdgeCounts() {
-		edgeCounts = new HashMap<SEMOSSEdge,HashMap<String, Integer>>();
+		edgeCounts = new HashMap<>();
 		
 		int numQueriesRun = 1;
 		for(SEMOSSEdge edge:edgeStore.values()) {

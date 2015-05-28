@@ -232,69 +232,1211 @@ vas:reification
   rdfs:label "Reification"^^xsd:string ;
   rdfs:range vas:ReificationModel ;
 .
-insights:Generic-Perspective dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
-	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
-	olo:slot insights:Generic-Perspective-slot-1 , insights:Generic-Perspective-slot-2 ;
-	a vas:Perspective ;
-	rdfs:label "Generic-Perspective" ;
-	dcterms:description "System Provided Generic Perspective" ;
-	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
-
-insights:Generic-Perspective-slot-1 olo:index "1"^^xsd:int ;
-	olo:item insights:GQ0 .
-
-insights:Generic-Perspective-slot-2 olo:index "2"^^xsd:int ;
-	olo:item insights:GQ1 .
-
-insights:GQ0 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
-	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
-	vas:isLegacy "true"^^xsd:boolean ;
-	spin:body insights:GQ0-SELECT ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ;
-	a spin:MagicProperty ;
-	rdfs:label "View the Database Metamodel" ;
-	vas:rendererClass "" ;
-	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "System provided model explorer query." ;
-	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
-
-insights:GQ0-SELECT sp:text "SELECT DISTINCT ?source ?relation ?target WHERE { ?relation a owl:ObjectProperty . ?s ?relation ?o . ?s a ?source . ?o a ?target . FILTER( ?source != <http://semoss.org/ontologies/Concept> && ?source != owl:Class && ?source != rdfs:Resource ) FILTER( ?target != <http://semoss.org/ontologies/Concept> && ?target != owl:Class && ?target != rdfs:Resource ) }" ;
-	a sp:Select .
-
-insights:GQ1 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
-	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
-	vas:isLegacy "true"^^xsd:boolean ;
-	spin:body insights:GQ1-CONSTRUCT ;
-	spin:constraint insights:GQ1-Concept , insights:GQ1-Instance ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
-	a spin:MagicProperty ;
-	rdfs:label "Explore an instance of a selected node type" ;
-	vas:rendererClass "" ;
-	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "System provided instance explorer query." ;
-	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
-
-insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
-	spl:predicate arg:Concept ;
-	spl:valueType semoss:Concept ;
-	a spl:Argument ;
-	rdfs:label "Concept" .
-
-arg:Concept rdfs:label "Concept" .
-
-insights:GQ1-Concept-Query sp:text "SELECT ?entity WHERE { ?entity rdfs:subClassOf <http://semoss.org/ontologies/Concept> . }" ;
-	a sp:Select .
-
-insights:GQ1-CONSTRUCT sp:text "CONSTRUCT {?instance ?instance ?instance} WHERE { BIND(<@Concept-http://semoss.org/ontologies/Concept@> AS ?entity) BIND(<@Instance-http://semoss.org/ontologies/Concept/Instance@> AS ?instance) ?instance a ?entity . }" ;
-	a sp:Construct .
-
-insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
-	spl:predicate arg:Instance ;
-	spl:valueType semoss:Concept ;
-	a spl:Argument ;
-	rdfs:label "Instance" .
-
-arg:Instance rdfs:label "Instance" .
-
-insights:GQ1-Instance-Query sp:text "SELECT ?entity WHERE { ?entity a <@Concept@> . }" ;
-	a sp:Select .
+insights:Generic-Perspective dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
+	olo:slot insights:Generic-Perspective-slot-1 , insights:Generic-Perspective-slot-2 , insights:Generic-Perspective-slot-1432758886428 , insights:Generic-Perspective-slot-1432758967316 ;
+	a vas:Perspective ;
+	rdfs:label "Generic-Perspective" ;
+	dcterms:description "System Provided Generic Perspective" ;
+	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
+
+insights:Generic-Perspective-slot-1 olo:index "1"^^xsd:int ;
+	olo:item insights:GQ0 .
+
+insights:Generic-Perspective-slot-2 olo:index "2"^^xsd:int ;
+	olo:item insights:GQ1 .
+
+insights:GQ0 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+	spin:body insights:GQ0-CONSTRUCT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "View the Database Metamodel" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "The need to filter semoss:Relation indicates an error occuring somewhere, possibly in the importer." ;
+	dcterms:modified "2015-05-27T22:02:17.224Z"^^xsd:dateTime .
+
+insights:GQ0-CONSTRUCT sp:text """CONSTRUCT{ ?source ?relation ?target }
+WHERE {
+  ?relation a owl:ObjectProperty .
+  ?s ?relation ?o .
+  ?s a ?source . 
+  ?o a ?target . 
+  FILTER( ?source != semoss:Concept && ?source != owl:Class && ?source != rdfs:Resource  && ?source != semoss:Relation )
+  FILTER( ?target != semoss:Concept && ?target != owl:Class && ?target != rdfs:Resource )
+}""" ;
+	a sp:Construct .
+
+insights:GQ1 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+	spin:body insights:GQ1-CONSTRUCT ;
+	spin:constraint insights:GQ1-Concept , insights:GQ1-Instance ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "Explore an instance of a selected node type" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "The legacy mode requires both ?entity and ?instance to be in the WHERE clause." ;
+	dcterms:modified "2015-05-27T20:25:40.600Z"^^xsd:dateTime .
+
+insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
+	spl:predicate arg:Concept ;
+	spl:valueType semoss:Concept ;
+	a spl:Argument ;
+	rdfs:label "Concept" .
+
+insights:GQ1-Concept-Query sp:text "SELECT ?entity WHERE { {?entity rdfs:subClassOf <http://semoss.org/ontologies/Concept> ;} }" ;
+	a sp:Select .
+
+insights:GQ1-CONSTRUCT sp:text "SELECT ?instance WHERE { BIND(<@Concept-http://semoss.org/ontologies/Concept@> AS ?entity) BIND(<@Instance-http://semoss.org/ontologies/Concept/Instance@> AS ?instance) }" ;
+	a sp:Construct .
+
+insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
+	spl:predicate arg:Instance ;
+	spl:valueType semoss:Concept ;
+	a spl:Argument ;
+	rdfs:label "Instance" .
+
+insights:GQ1-Instance-Query sp:text "SELECT ?Instance WHERE { {?Instance a <@Concept@> ;} }" ;
+	a sp:Select .
+
+insights:IO1 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:IO1-SELECT ;
+	spin:constraint insights:IO1-DataObject ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What Applications Create, Modify or Read this Data?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO1" ;
+	dcterms:modified "2015-05-14T22:32:30.096-04:00" .
+
+insights:IO1-DataObject sp:query insights:query-1431656691929 ;
+	spl:predicate arg:predicate-1431656691929 ;
+	spl:valueType semoss:DataObject ;
+	a spl:Argument ;
+	rdfs:label "Data Object" .
+
+insights:IO1-SELECT sp:text """SELECT DISTINCT ?DataObject ?ApplicationModule ?CMR
+WHERE {
+  ?DataObjectURI rdfs:label ?DataObject .
+  ?ApplicationModule semoss:Provides ?DataObjectURI .
+  ?ApplicationModule a semoss:ApplicationModule .
+  ?ApplicationModule ?Provides ?DataObjectURI .
+  ?Provides semoss:CMR ?CMR .
+}""" ;
+	a sp:Select .
+
+insights:IO2 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:IO2-CONSTRUCT ;
+	spin:constraint insights:IO2-Data ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What Interface Control Documents exchange this Data?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO2" ;
+	dcterms:modified "2015-05-14T22:35:17.052-04:00" .
+
+insights:IO2-CONSTRUCT sp:text """CONSTRUCT { ?InterfaceControlDocument semoss:UsedBy ?DataObjectURI }
+WHERE {
+  ?InterfaceControlDocument semoss:UsedBy ?DataObjectURI .
+  ?InterfaceControlDocument a semoss:InterfaceControlDocument .
+}""" ;
+	a sp:Construct .
+
+insights:IO2-Data sp:query insights:query-1431657340867 ;
+	spl:predicate arg:predicate-1431657340867 ;
+	spl:valueType semoss:DataObject ;
+	a spl:Argument ;
+	rdfs:label "DataObject" .
+
+insights:IO3 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:IO3-SELECT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What number of ICDs carry each DataObject?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO3" ;
+	dcterms:modified "2015-05-14T22:43:39.932-04:00" .
+
+insights:IO3-SELECT sp:text """SELECT ?DataObject (xsd:double(COUNT(?ICD)) AS ?ICDcount)
+WHERE {
+  ?ICD a semoss:InterfaceControlDocument .
+  ?ICD semoss:UsedBy ?DataObjectURI .
+  ?DataObjectURI a semoss:DataObject .
+  ?DataObjectURI rdfs:label ?DataObject .
+} GROUP BY ?DataObject""" ;
+	a sp:Select .
+
+insights:IO4 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:IO4-SELECT ;
+	spin:constraint insights:constraint-1431657788063 , insights:IO4-DataObject ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What data elements do data objects consist of? (Files and Fields included)" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO4" ;
+	dcterms:modified "2015-05-14T22:43:02.766-04:00" .
+
+insights:IO4-DataObject sp:query insights:IO4-DataObject-Query ;
+	spl:predicate arg:DataObject ;
+	spl:valueType semoss:DataObject ;
+	a spl:Argument ;
+	rdfs:label "Data Object" .
+
+insights:IO4-DataObject-Query sp:text "SELECT ?DataObject ?label WHERE{ ?DataObject a semoss:DataObject ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:IO4-SELECT sp:text """SELECT DISTINCT ?DataObject ?DataElement ?File ?FileNumber ?Field ?FieldNumber ?FieldDescription
+WHERE {
+  ?DataObjectURI a semoss:DataObject .
+  ?DataObjectURI semoss:Consists ?DataElementURI .
+  ?DataElementURI a semoss:DataElement .
+  OPTIONAL{
+    ?DataElementURI semoss:File ?File .
+    ?DataElementURI semoss:FileNumber ?FileNumber .
+    ?DataElementURI semoss:Field ?Field .
+    ?DataElementURI semoss:FieldNumber ?FieldNumber .
+    ?DataElementURI semoss:FieldDescription ?FieldDescription .
+  }
+  ?DataObjectURI rdfs:label ?DataObject .
+  ?DataElementURI rdfs:label ?DataElement .
+}""" ;
+	a sp:Select .
+
+insights:IO5 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:IO5-SELECT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "How many Applications are modifying each Data Object?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO5" ;
+	dcterms:modified "2015-05-14T22:53:09.190-04:00" .
+
+insights:IO5-SELECT sp:text """SELECT DISTINCT ?DataObject (xsd:double(COUNT(?ApplicationModule)) AS ?Number_of_Applications_making_modifications)
+WHERE {
+  ?ApplicationModule a semoss:ApplicationModule .
+  ?ApplicationModule semoss:Provides ?DataObjectURI .
+  ?DataObjectURI a semoss:DataObject .
+  ?ApplicationModule ?Provides ?DataObjectURI .
+  ?Provides semoss:CMR 'M' . 
+  ?DataObjectURI rdfs:label ?DataObject .
+}
+GROUP BY ?DataObject
+ORDER BY DESC (?Number_of_Applications_making_modifications)""" ;
+	a sp:Select .
+
+insights:IO6 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Imported By V-CAMP SEMOSS Tool v2015.03" ;
+	spin:body insights:IO6-SELECT ;
+	spin:constraint insights:IO6-DataObject ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What are the Interfaces for this Data Object? " ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO6" ;
+	dcterms:modified "2015-05-13T14:21:33.826Z"^^xsd:dateTime .
+
+insights:IO6-DataObject sp:query insights:IO6-DataObject-Query ;
+	spl:predicate arg:DataObject ;
+	spl:valueType semoss:DataObject ;
+	a spl:Argument ;
+	rdfs:label "Data Object" .
+
+insights:IO6-DataObject-Query sp:text "SELECT ?DataObject ?label WHERE{ ?DataObject a semoss:DataObject ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:IO6-SELECT sp:text "SELECT DISTINCT ?ApplicationUpstream ?ApplicationDownstream ?ICD ?DataObject ?DBIA WHERE { BIND(<@DataObject-http://semoss.org/ontologies/DataObject@> AS ?DataObjectURI) ?ICD_URI semoss:UsedBy ?DataObjectURI . ?ICD_URI a semoss:InterfaceControlDocument . ?ApplicationUpstreamURI semoss:Provides ?ICD_URI . ?ApplicationUpstreamURI a semoss:ApplicationModule . ?ICD_URI semoss:Consumes ?ApplicationDownstreamURI . ?ApplicationDownstreamURI a semoss:ApplicationModule . ?ICD_URI semoss:Consists ?ICDElem . ?ICDElem a semoss:InterfaceElement . OPTIONAL{ ?ICDElem semoss:DBIANumber ?DBIA .} ?DataObjectURI rdfs:label ?DataObject . ?ApplicationUpstreamURI rdfs:label ?ApplicationUpstream . ?ApplicationDownstreamURI rdfs:label ?ApplicationDownstream . ?ICD_URI rdfs:label ?ICD . }" ;
+	a sp:Select .
+
+insights:IO7 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Imported By V-CAMP SEMOSS Tool v2015.03" ;
+	spin:body insights:IO7-SELECT ;
+	spin:constraint insights:IO7-DataObject ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What are the Interface Elements for this Data Object?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO7" ;
+	dcterms:modified "2015-05-13T14:21:33.826Z"^^xsd:dateTime .
+
+insights:IO7-DataObject sp:query insights:IO7-DataObject-Query ;
+	spl:predicate arg:DataObject ;
+	spl:valueType semoss:DataObject ;
+	a spl:Argument ;
+	rdfs:label "Data Object" .
+
+insights:IO7-DataObject-Query sp:text "SELECT ?DataObject ?label WHERE{ ?DataObject a semoss:DataObject ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:IO7-SELECT sp:text "SELECT DISTINCT ?ApplicationUpstream ?ApplicationDownstream ?ICD ?DataObject ?DBIA ?File ?Field WHERE { BIND(<@DataObject-http://semoss.org/ontologies/DataObject@> AS ?DataObject) . ?ApplicationUpstream a semoss:ApplicationModule . ?ApplicationDownstream a semoss:ApplicationModule . ?ICD a semoss:InterfaceControlDocument . ?ICDElem a semoss:InterfaceElement . ?DataElem a semoss:DataElement . ?DataObject a semoss:DataObject . ?Provides rdfs:subPropertyOf semoss:Provides . ?Consumes rdfs:subPropertyOf semoss:Consumes . ?Consists rdfs:subPropertyOf semoss:Consists . ?Contains rdfs:subPropertyOf <http://semoss.org/ontologies> . ?UsedBy rdfs:subPropertyOf semoss:UsedBy . ?ICD ?UsedBy ?DataObject . ?ApplicationUpstream ?Provides ?ICD . ?ICD ?Consumes ?ApplicationDownstream . ?ICD ?Consists ?ICDElem . ?ICDElem ?Contains ?DataElem . OPTIONAL{?ICDElem semoss:DBIANumber ?DBIA . ?DataElem semoss:FileNumber ?FileNumber . ?DataElem semoss:FieldNumber ?FieldNumber . ?DataElem semoss:File ?File . ?DataElem semoss:Field ?Field .}}" ;
+	a sp:Select .
+
+insights:IO8 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+	spin:body insights:IO8-CONSTRUCT ;
+	spin:constraint insights:IO8-DataObject , insights:constraint-1432221341500 ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What is the network of Systems for the selected DataObject" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO8" ;
+	dcterms:modified "2015-05-21T15:18:46.832Z"^^xsd:dateTime .
+
+insights:IO8-CONSTRUCT sp:text """CONSTRUCT {
+  ?ICD semoss:Consumes ?ApplicationModule_1 .
+  ?ApplicationModule_2 semoss:Provides ?ICD .
+}
+WHERE {
+  ?ICD semoss:UsedBy ?DataObject .
+  ?ICD a semoss:InterfaceControlDocument .
+  ?ICD semoss:Consumes ?ApplicationModule_1 .
+  ?ApplicationModule_1 a semoss:ApplicationModule .
+  ?ApplicationModule_2 semoss:Provides ?ICD .
+  ?ApplicationModule_2 a semoss:ApplicationModule .
+}""" ;
+	a sp:Construct .
+
+insights:IO8-DataObject sp:query insights:IO8-DataObject-Query ;
+	spl:predicate arg:DataObject ;
+	spl:valueType semoss:DataObject ;
+	a spl:Argument ;
+	rdfs:label "Data Object" .
+
+insights:IO8-DataObject-Query sp:text "SELECT ?DataObject ?label WHERE{ ?DataObject a semoss:DataObject ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:IO9 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:IO9-SELECT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What are the DataObjects and their Descriptions" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#IO9" ;
+	dcterms:modified "2015-05-14T22:54:50.546-04:00" .
+
+insights:IO9-SELECT sp:text """SELECT DISTINCT ?DataObject ?Description
+WHERE {
+  ?DataObjectURI a semoss:DataObject ; rdfs:label ?DataObject .
+  OPTIONAL { ?DataObjectURI semoss:Description ?Description . }
+}""" ;
+	a sp:Select .
+
+insights:query-1431556396109 sp:text """SELECT ?ApplicationDownstream ?label 
+WHERE {
+  ?ApplicationDownstream a semoss:ApplicationModule ; rdfs:label ?label
+}""" .
+
+insights:query-1431575781452 sp:text """SELECT ?Activity ?label 
+WHERE{
+    ?Activity a semoss:Activity . 
+    ?Activity rdfs:label ?label . 
+}""" .
+
+insights:query-1431575890758 sp:text """SELECT ?BusinessProcess ?label 
+WHERE{
+    ?BusinessProcess a semoss:BusinessProcess . 
+    ?BusinessProcess rdfs:label ?label . 
+}""" .
+
+insights:query-1431576596690 sp:text """SELECT ?BusinessProcess ?label 
+WHERE{
+    ?BusinessProcess a semoss:BusinessProcess . 
+    ?BusinessProcess rdfs:label ?label . 
+}""" .
+
+insights:query-1431576654837 sp:text """SELECT ?BusinessProcess ?label 
+WHERE{
+    ?BusinessProcess a semoss:BusinessProcess . 
+    ?BusinessProcess rdfs:label ?label . 
+}""" .
+
+insights:query-1431576945529 sp:text """SELECT ?BusinessProcess ?label 
+WHERE{
+    ?BusinessProcess a semoss:BusinessProcess . 
+    ?BusinessProcess rdfs:label ?label . 
+}""" .
+
+insights:query-1431577348720 sp:text """SELECT ?ActivityLevel ?label 
+WHERE{
+    ?ActivityLevel a semoss:ActivityLevel . 
+    ?ActivityLevel rdfs:label ?label . 
+}""" .
+
+insights:query-1431577939502 sp:text """SELECT ?BusinessProcess ?label 
+WHERE{
+    ?BusinessProcess a semoss:BusinessProcess . 
+    ?BusinessProcess rdfs:label ?label . 
+}""" .
+
+insights:query-1431578907596 sp:text """SELECT ?BusinessProcessURI ?label 
+WHERE{
+    ?BusinessProcessURI a semoss:BusinessProcess . 
+    ?BusinessProcessURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431578935311 sp:text """SELECT ?BusinessProcessURI ?label 
+WHERE{
+    ?BusinessProcessURI a semoss:BusinessProcess . 
+    ?BusinessProcessURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579022502 sp:text """SELECT ?BusinessProcessURI ?label 
+WHERE{
+    ?BusinessProcessURI a semoss:BusinessProcess . 
+    ?BusinessProcessURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579051875 sp:text """SELECT ?BusinessProcessURI ?label 
+WHERE{
+    ?BusinessProcessURI a semoss:BusinessProcess . 
+    ?BusinessProcessURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579245300 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579348366 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579432595 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579662111 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579767279 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579794700 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431579862417 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431580317627 sp:text """SELECT ?ApplicationDownstreamURI ?label 
+WHERE{
+    ?ApplicationDownstreamURI a semoss:ApplicationModule . 
+    ?ApplicationDownstreamURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431580442965 sp:text """SELECT ?ApplicationDownStreamURI ?label 
+WHERE{
+    ?ApplicationDownStreamURI a semoss:ApplicationModule . 
+    ?ApplicationDownStreamURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431617570813 sp:text """SELECT ?Capability ?label 
+WHERE{
+    ?Capability a semoss:Capability . 
+    ?Capability rdfs:label ?label . 
+}""" .
+
+insights:query-1431618202469 sp:text """SELECT ?CapabilityURI ?label 
+WHERE{
+    ?CapabilityURI a semoss:Capability . 
+    ?CapabilityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431622485111 sp:text """SELECT ?Capability ?label 
+WHERE{
+    ?Capability a semoss:Capability . 
+    ?Capability rdfs:label ?label . 
+}""" .
+
+insights:query-1431636685759 sp:text """SELECT ?ApplicationUpstream ?label 
+WHERE{
+    ?ApplicationUpstream a semoss:ApplicationModule . 
+    ?ApplicationUpstream rdfs:label ?label . 
+}""" .
+
+insights:query-1431654120002 sp:text """SELECT ?RequirementURI ?label 
+WHERE{
+    ?RequirementURI a semoss:Requirement . 
+    ?RequirementURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431654496413 sp:text """SELECT ?RequirementURI ?label 
+WHERE{
+    ?RequirementURI a semoss:Requirement . 
+    ?RequirementURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431654906353 sp:text """SELECT ?BusinessProcessURI ?label 
+WHERE{
+    ?BusinessProcessURI a semoss:BusinessProcess . 
+    ?BusinessProcessURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431655652639 sp:text """SELECT ?CapabilityURI ?label 
+WHERE{
+    ?CapabilityURI a semoss:Capability . 
+    ?CapabilityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431656007074 sp:text """SELECT ?CapabilityURI ?label 
+WHERE{
+    ?CapabilityURI a semoss:Capability . 
+    ?CapabilityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431656327670 sp:text """SELECT ?CapabilityURI ?label 
+WHERE{
+    ?CapabilityURI a semoss:Capability . 
+    ?CapabilityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431656560888 sp:text """SELECT ?CapabilityURI ?label 
+WHERE{
+    ?CapabilityURI a semoss:Capability . 
+    ?CapabilityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431656691929 sp:text """SELECT ?DataObjectURI ?label 
+WHERE{
+    ?DataObjectURI a semoss:DataObject . 
+    ?DataObjectURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431657340867 sp:text """SELECT ?DataObjectURI ?label 
+WHERE{
+    ?DataObjectURI a semoss:DataObject . 
+    ?DataObjectURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431657807258 sp:text """SELECT ?DataObjectURI ?label 
+WHERE{
+    ?DataObjectURI a semoss:DataObject . 
+    ?DataObjectURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431658729893 sp:text """SELECT ?BusinessProcessURI ?label 
+WHERE{
+    ?BusinessProcessURI a semoss:BusinessProcess . 
+    ?BusinessProcessURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431659329250 sp:text """SELECT ?BusinessProcessURI ?label 
+WHERE{
+    ?BusinessProcessURI a semoss:BusinessProcess . 
+    ?BusinessProcessURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431660029003 sp:text """SELECT ?CapabilityURI ?label 
+WHERE{
+    ?CapabilityURI a semoss:Capability . 
+    ?CapabilityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431660321800 sp:text """SELECT ?CapabilityURI ?label 
+WHERE{
+    ?CapabilityURI a semoss:Capability . 
+    ?CapabilityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431660463738 sp:text """SELECT ?Capability ?label 
+WHERE{
+    ?Capability a semoss:Capability . 
+    ?Capability rdfs:label ?label . 
+}""" .
+
+insights:query-1431691790473 sp:text """SELECT ?ActivityURI ?label 
+WHERE{
+    ?ActivityURI a semoss:Activity . 
+    ?ActivityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431714130979 sp:text """SELECT ?RequirementURI ?label 
+WHERE{
+    ?RequirementURI a semoss:Requirement . 
+    ?RequirementURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431714371392 sp:text """SELECT ?RequirementURI ?label 
+WHERE{
+    ?RequirementURI a semoss:Requirement . 
+    ?RequirementURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431718390124 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1431718639162 sp:text """SELECT ?ActivityURI ?label 
+WHERE{
+    ?ActivityURI a semoss:Activity . 
+    ?ActivityURI rdfs:label ?label . 
+}""" .
+
+insights:query-1432123081738 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:query-1432123094665 sp:text """SELECT ?ApplicationModuleURI ?label 
+WHERE{
+     vcamp:VCAMP semoss:Involves ?ApplicationModuleURI .
+    ?ApplicationModuleURI a semoss:ApplicationModule . 
+    ?ApplicationModuleURI rdfs:label ?label . 
+}""" .
+
+insights:Requirement-Perspective dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Imported By V-CAMP SEMOSS Tool v2015.03" ;
+	olo:slot insights:Requirement-Perspective-slot-1 , insights:Requirement-Perspective-slot-12 , insights:Requirement-Perspective-slot-13 , insights:Requirement-Perspective-slot-14 , insights:Requirement-Perspective-slot-15 , insights:Requirement-Perspective-slot-2 , insights:Requirement-Perspective-slot-3 , insights:Requirement-Perspective-slot-4 , insights:Requirement-Perspective-slot-5 , insights:Requirement-Perspective-slot-6 , insights:Requirement-Perspective-slot-7 , insights:Requirement-Perspective-slot-8 ;
+	a vas:Perspective ;
+	rdfs:label "Requirement-Perspective" ;
+	dcterms:description "Test Description: Requirement-Perspective" ;
+	dcterms:modified "2015-05-13T14:21:33.826Z"^^xsd:dateTime .
+
+insights:Requirement-Perspective-slot-1 olo:index "1"^^xsd:int ;
+	olo:item insights:RP1 .
+
+insights:Requirement-Perspective-slot-12 olo:index "9"^^xsd:int ;
+	olo:item insights:RP12 .
+
+insights:Requirement-Perspective-slot-13 olo:index "10"^^xsd:int ;
+	olo:item insights:RP13 .
+
+insights:Requirement-Perspective-slot-14 olo:index "11"^^xsd:int ;
+	olo:item insights:RP14 .
+
+insights:Requirement-Perspective-slot-15 olo:index "12"^^xsd:int ;
+	olo:item insights:RP15 .
+
+insights:Requirement-Perspective-slot-2 olo:index "2"^^xsd:int ;
+	olo:item insights:RP2 .
+
+insights:Requirement-Perspective-slot-3 olo:index "3"^^xsd:int ;
+	olo:item insights:RP3 .
+
+insights:Requirement-Perspective-slot-4 olo:index "4"^^xsd:int ;
+	olo:item insights:RP4 .
+
+insights:Requirement-Perspective-slot-5 olo:index "5"^^xsd:int ;
+	olo:item insights:RP5 .
+
+insights:Requirement-Perspective-slot-6 olo:index "6"^^xsd:int ;
+	olo:item insights:RP6 .
+
+insights:Requirement-Perspective-slot-7 olo:index "7"^^xsd:int ;
+	olo:item insights:RP7 .
+
+insights:Requirement-Perspective-slot-8 olo:index "8"^^xsd:int ;
+	olo:item insights:RP8 .
+
+insights:RP1 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP1-SELECT ;
+	spin:constraint insights:RP1-Requirement ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What Applications are applicable to this Requirement?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP1" ;
+	dcterms:modified "2015-05-14T21:42:52.296-04:00" .
+
+insights:RP1-Requirement sp:query insights:query-1431654120002 ;
+	spl:predicate arg:predicate-1431654120002 ;
+	spl:valueType semoss:Requirement ;
+	a spl:Argument ;
+	rdfs:label "Requirement" .
+
+insights:RP1-SELECT sp:text """SELECT DISTINCT ?Requirement ?ApplicationModule
+WHERE {
+  ?RequirementURI rdfs:label ?Requirement .
+  ?ApplicationModule semoss:Fulfills ?RequirementURI .
+  ?ApplicationModule a semoss:ApplicationModule
+}""" ;
+	a sp:Select .
+
+insights:RP12 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP12-SELECT ;
+	spin:constraint insights:constraint-1431718335952 , insights:RP12-ApplicationModule ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What are the Business Rules for this Application?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP12" ;
+	dcterms:modified "2015-05-15T15:33:30.530-04:00" .
+
+insights:RP12-ApplicationModule sp:query insights:RP12-ApplicationModule-Query ;
+	spl:predicate arg:ApplicationModule ;
+	spl:valueType semoss:ApplicationModule ;
+	a spl:Argument ;
+	rdfs:label "Application Module" .
+
+insights:RP12-ApplicationModule-Query sp:text "SELECT ?ApplicationModule ?label WHERE{ ?ApplicationModule a semoss:ApplicationModule ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:RP12-SELECT sp:text """SELECT DISTINCT ?ApplicationModule ?BusinessRule
+WHERE {
+  ?ApplicationModuleURI semoss:Implements ?BusinessRuleURI ; rdfs:label ?ApplicationModule.
+  ?BusinessRuleURI a semoss:BusinessRule ; rdfs:label ?BusinessRule .
+}""" ;
+	a sp:Select .
+
+insights:RP13 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP13-SELECT ;
+	spin:constraint insights:constraint-1431718620144 , insights:RP13-Activity ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What Requirements are applicable to this Activity?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP13" ;
+	dcterms:modified "2015-05-15T15:38:34.494-04:00" .
+
+insights:RP13-Activity sp:query insights:RP13-Activity-Query ;
+	spl:predicate arg:Activity ;
+	spl:valueType semoss:Activity ;
+	a spl:Argument ;
+	rdfs:label "Activity" .
+
+insights:RP13-Activity-Query sp:text "SELECT ?Activity ?label WHERE{ ?Activity a semoss:Activity ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:RP13-SELECT sp:text """SELECT DISTINCT ?Activity ?Requirement
+WHERE {
+  ?ApplicationModuleURI semoss:Supports ?ActivityURI .
+  ?RequirementURI a semoss:Requirement . 
+  ?ApplicationModuleURI semoss:Fulfills ?RequirementURI . 
+  ?ActivityURI rdfs:label ?Activity .
+  ?RequirementURI rdfs:label ?Requirement .
+}""" ;
+	a sp:Select .
+
+insights:RP14 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Imported By V-CAMP SEMOSS Tool v2015.03" ;
+	spin:body insights:RP14-SELECT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "Which Application best fullfills each Requirement?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP14" ;
+	dcterms:modified "2015-05-13T14:21:33.826Z"^^xsd:dateTime .
+
+insights:RP14-SELECT sp:text "SELECT DISTINCT ?ApplicationModule ?Requirement (COALESCE(((COUNT(DISTINCT(?DataObject))*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) + COUNT(DISTINCT(?BusinessLogicUnit)))/(COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1))))*100,((COUNT(DISTINCT(?BusinessLogicUnit))/((COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1)))))*100)) AS ?Ratio) WHERE { {?Requirement a semoss:Requirement;}{{?DataObject a semoss:DataObject;}{?Fulfills rdfs:subPropertyOf semoss:Fulfills;}{?Requirement ?Fulfills ?DataObject}{?ApplicationModule a semoss:ApplicationModule;}{?Provides rdfs:subPropertyOf semoss:Provides;}{?Provides semoss:CMR ?aCMR;}{?ApplicationModule ?Provides ?DataObject}} UNION{{?BusinessLogicUnit a semoss:BusinessLogicUnit;}{?FulfillsB rdfs:subPropertyOf semoss:Fulfills;}{?Requirement ?FulfillsB ?BusinessLogicUnit}{?ApplicationModule a semoss:ApplicationModule;}{?Provides1 rdfs:subPropertyOf semoss:Provides;}{?ApplicationModule ?Provides1 ?BusinessLogicUnit}}{{?DataObject1 a semoss:DataObject;}{?Fulfills1 rdfs:subPropertyOf semoss:Fulfills;}{?Fulfills1 semoss:CMR ?rCMR;}{?Requirement ?Fulfills1 ?DataObject1} } UNION { {?BusinessLogicUnit1 a semoss:BusinessLogicUnit;}{?Fulfills1B rdfs:subPropertyOf semoss:Fulfills;}{?Requirement ?Fulfills1B ?BusinessLogicUnit1} } } GROUP BY ?ApplicationModule ?Requirement" ;
+	a sp:Select .
+
+insights:RP15 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Imported By V-CAMP SEMOSS Tool v2015.03" ;
+	spin:body insights:RP15-SELECT ;
+	spin:constraint insights:RP15-ApplicationModule ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "Application Requirement-Business Rules Matrix " ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP15" ;
+	dcterms:modified "2015-05-13T14:21:33.826Z"^^xsd:dateTime .
+
+insights:RP15-ApplicationModule sp:query insights:RP15-ApplicationModule-Query ;
+	spl:predicate arg:ApplicationModule ;
+	spl:valueType semoss:ApplicationModule ;
+	a spl:Argument ;
+	rdfs:label "Application Module" .
+
+insights:RP15-ApplicationModule-Query sp:text "SELECT ?ApplicationModule ?label WHERE{ ?ApplicationModule a semoss:ApplicationModule ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:RP15-SELECT sp:text "SELECT DISTINCT ?BusinessRule ?Requirement (1 AS ?Ct) WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) . ?ApplicationModule a semoss:ApplicationModule . ?Fulfills rdfs:subPropertyOf semoss:Fulfills . ?Requirement a semoss:Requirement . ?ApplicationModule ?Fulfills ?Requirement . OPTIONAL {?Implements rdfs:subPropertyOf semoss:Implements . ?BusinessRule a semoss:BusinessRule . ?ApplicationModule ?Implements ?BusinessRule . ?Fulfills1 rdfs:subPropertyOf semoss:Fulfills . ?Requirement ?Fulfills1 ?BusinessRule .} }" ;
+	a sp:Select .
+
+insights:RP2 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP2-SELECT ;
+	spin:constraint insights:constraint-1431654473217 , insights:RP2-Requirement ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What Activities are applicable to this Requirement?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP2" ;
+	dcterms:modified "2015-05-14T21:50:23.454-04:00" .
+
+insights:RP2-Requirement sp:query insights:RP2-Requirement-Query ;
+	spl:predicate arg:Requirement ;
+	spl:valueType semoss:Requirement ;
+	a spl:Argument ;
+	rdfs:label "Requirement" .
+
+insights:RP2-Requirement-Query sp:text "SELECT ?Requirement ?label WHERE{ ?Requirement a semoss:Requirement ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:RP2-SELECT sp:text """SELECT DISTINCT ?Requirement ?Activity
+WHERE{
+  ?Requirement semoss:Fulfills ?DataObject .
+  ?DataObject a semoss:DataObject .
+  ?Activity semoss:Needs ?DataObject .
+  ?Activity a semoss:Activity .
+}""" ;
+	a sp:Select .
+
+insights:RP3 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP3-SELECT ;
+	spin:constraint insights:constraint-1431691752218 , insights:RP3-Activity ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What Requirements are applicable to this Activity?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP3" ;
+	dcterms:modified "2015-05-15T08:17:18.150-04:00" .
+
+insights:RP3-Activity sp:query insights:RP3-Activity-Query ;
+	spl:predicate arg:Activity ;
+	spl:valueType semoss:Activity ;
+	a spl:Argument ;
+	rdfs:label "Activity" .
+
+insights:RP3-Activity-Query sp:text "SELECT ?Activity ?label WHERE{ ?Activity a semoss:Activity ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:RP3-SELECT sp:text """SELECT DISTINCT ?Activity ?Requirement
+WHERE{
+  ?ActivityURI semoss:Needs ?DataObjectURI .
+  ?DataObjectURI a semoss:DataObject .
+  ?RequirementURI semoss:Fulfills ?DataObjectURI . 
+  ?RequirementURI a semoss:Requirement .
+  ?ActivityURI rdfs:label ?Activity .
+  ?RequirementURI rdfs:label ?Requirement .
+}""" ;
+	a sp:Select .
+
+insights:RP4 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP4-SELECT ;
+	spin:constraint insights:constraint-1431714101027 , insights:RP4-Requirement ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What is the relationship between Requirement and Application (Data)?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP4" ;
+	dcterms:modified "2015-05-15T14:24:45.858-04:00" .
+
+insights:RP4-Requirement sp:query insights:RP4-Requirement-Query ;
+	spl:predicate arg:Requirement ;
+	spl:valueType semoss:Requirement ;
+	a spl:Argument ;
+	rdfs:label "Requirement" .
+
+insights:RP4-Requirement-Query sp:text "SELECT ?Requirement ?label WHERE{ ?Requirement a semoss:Requirement ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:RP4-SELECT sp:text """SELECT DISTINCT ?Requirement ?DataObject ?ApplicationModule
+WHERE {
+  ?RequirementURI semoss:Fulfills ?DataObjectURI .
+  ?DataObjectURI a semoss:DataObjectURI .
+  ?ApplicationModuleURI semoss:Provides ?DataObjectURI .
+  ?ApplicationModuleURI a semoss:ApplicationModuleURI .
+  ?RequirementURI rdfs:label ?Requirement .
+  ?DataObjectURI rdfs:label ?DataObject .
+  ?ApplicationModuleURI rdfs:label ?ApplicationModule .
+}""" ;
+	a sp:Select .
+
+insights:RP5 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP5-SELECT ;
+	spin:constraint insights:constraint-1431714350538 , insights:RP5-Requirement ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What is the relationship between Requirement and Application (BLU)?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP5" ;
+	dcterms:modified "2015-05-15T15:04:12.112-04:00" .
+
+insights:RP5-Requirement sp:query insights:RP5-Requirement-Query ;
+	spl:predicate arg:Requirement ;
+	spl:valueType semoss:Requirement ;
+	a spl:Argument ;
+	rdfs:label "Requirement" .
+
+insights:RP5-Requirement-Query sp:text "SELECT ?Requirement ?label WHERE{ ?Requirement a semoss:Requirement ; rdfs:label ?label }" ;
+	a sp:Select .
+
+insights:RP5-SELECT sp:text """SELECT DISTINCT ?Requirement ?BusinessLogicUnit ?ApplicationModule
+WHERE {
+  ?RequirementURI semoss:Fulfills ?BusinessLogicUnitURI .
+  ?BusinessLogicUnitURI a semoss:BusinessLogicUnit .
+  ?ApplicationModuleURI semoss:Provides ?BusinessLogicUnitURI .
+  ?ApplicationModuleURI a semoss:ApplicationModule .
+  ?ApplicationModuleURI rdfs:label ?ApplicationModule .
+  ?BusinessLogicUnitURI rdfs:label ?BusinessLogicUnit .
+  ?RequirementURI rdfs:label ?Requirement .
+}""" ;
+	a sp:Select .
+
+insights:RP6 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Imported By V-CAMP SEMOSS Tool v2015.03" ;
+	spin:body insights:RP6-SELECT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What application should implemement the 50 IOC requirements (Data)?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP6" ;
+	dcterms:modified "2015-05-13T14:21:33.826Z"^^xsd:dateTime .
+
+insights:RP6-SELECT sp:text "SELECT DISTINCT ?ApplicationModule ?Requirement ((COUNT(DISTINCT(?DataObject)) / COUNT(DISTINCT(?DataObject1)))*100*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) AS ?ctd) WHERE {{?Requirement a semoss:Requirement;}{?DataObject a semoss:DataObject;}{?Fulfills rdfs:subPropertyOf semoss:Fulfills;}{?Requirement ?Fulfills ?DataObject} {?ApplicationModule a semoss:ApplicationModule;}{?Provides rdfs:subPropertyOf semoss:Provides;}{?Provides semoss:CMR ?aCMR;}{?ApplicationModule ?Provides ?DataObject}{?DataObject1 a semoss:DataObject;}{?Fulfills1 rdfs:subPropertyOf semoss:Fulfills;}{?Fulfills1 semoss:CMR ?rCMR;}{?Requirement ?Fulfills1 ?DataObject1} } GROUP BY ?ApplicationModule ?Requirement" ;
+	a sp:Select .
+
+insights:RP7 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP7-SELECT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What application should implemement the 50 IOC requirements (BLU)?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "The original form of this query is nonsensical. The simplication here may also not express the initial author's intent.  The old one bound two BusinessLogicUnit variables that were identical (no constraint present to make them different)" ;
+	dcterms:modified "2015-05-15T16:54:22.317-04:00" .
+
+insights:RP7-SELECT sp:text """SELECT DISTINCT ?ApplicationModule ?Requirement ((COUNT(DISTINCT(?BusinessLogicUnit)) / COUNT(DISTINCT(?BusinessLogicUnit)))*100 AS ?ctd)
+WHERE {
+  ?ApplicationModuleURI a semoss:ApplicationModule .
+  ?ApplicationModuleURI semoss:Provides ?BusinessLogicUnit .
+  ?BusinessLogicUnit a semoss:BusinessLogicUnit .
+  ?RequirementURI a semoss:Requirement .
+  ?RequirementURI semoss:Fulfills ?BusinessLogicUnit .
+} GROUP BY ?ApplicationModule ?Requirement""" ;
+	a sp:Select .
+
+insights:RP8 dcterms:created "2015-05-13T14:21:33.826Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen, V-CAMP" ;
+	spin:body insights:RP8-SELECT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "What application should implement the 50 IOC requirements (Data + BLU)?" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "Test Description: http://va.gov/dataset/insights#RP8" ;
+	dcterms:modified "2015-05-15T18:26:26.699-04:00" .
+
+insights:RP8-SELECT sp:text """SELECT DISTINCT ?ApplicationModule ?Requirement (COALESCE(((COUNT(DISTINCT(?DataObject))*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) + COUNT(DISTINCT(?BusinessLogicUnit)))/(COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1))))*100,((COUNT(DISTINCT(?BusinessLogicUnit))/((COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1)))))*100)) AS ?Ratio)
+WHERE {
+  ?RequirementURI a semoss:Requirement ; rdfs:label ?Requirement .
+  {
+    ?RequirementURI semoss:Fulfills ?DataObject .
+    ?DataObject a semoss:DataObject.
+    ?ApplicationModuleURI a semoss:ApplicationModule .
+    ?ApplicationModuleURI semoss:Provides ?DataObject .
+    ?ApplicationModuleURI ?Provides ?DataObject .
+    ?Provides semoss:CMR ?aCMR .
+  }
+  UNION
+  {
+    ?RequirementURI semoss:Fulfills ?BusinessLogicUnit .
+    ?BusinessLogicUnit a semoss:BusinessLogicUnit .
+    ?ApplicationModuleURI semoss:Provides ?BusinessLogicUnit .
+    ?ApplicationModuleURI a semoss:ApplicationModule .
+  }
+  {
+    ?RequirementURI semoss:Fulfills ?DataObject1 .
+    ?DataObject1 a semoss:DataObject .
+    ?RequirementURI ?Fulfills1 ?DataObject1 .
+    ?Fulfills1 semoss:CMR ?rCMR .
+  }
+  UNION
+  { 
+    ?BusinessLogicUnit1 a semoss:BusinessLogicUnit .
+    ?RequirementURI semoss:Fulfills ?BusinessLogicUnit1 .
+  }
+  ?ApplicationModuleURI rdfs:label ?ApplicationModule .
+} GROUP BY ?ApplicationModule ?Requirement""" ;
+	a sp:Select .
+
+<http://va.gov/ontologies/semoss> a owl:Ontology ;
+	owl:imports <http://purl.org/ontology/olo/core#> , <http://rdfs.org/ns/void> , <http://spinrdf.org/spin> , <http://uispin.org/ui> , <http://va.gov/ontologies/core> , <http://purl.org/dc/terms/> ;
+	owl:versionInfo "Created with TopBraid Composer"^^xsd:string .
+
+vas:Database a owl:Class ;
+	rdfs:label "Database"^^xsd:string ;
+	rdfs:subClassOf void:Dataset .
+
+vas:DataView a owl:Class ;
+	rdfs:label "Data View"^^xsd:string ;
+	rdfs:subClassOf ui:DataViews , _:t2274 , _:t2283 , _:t2293 , _:t2301 , _:t2309 , _:t2317 , _:t2325 .
+
+vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet"^^xsd:string ;
+	vas:icon "questions_bar_chart1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Column Chart"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a Dendrogram diagram using names and children.  "^^xsd:string ;
+	vas:icon "questions_dendrogram1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Dendrogram"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GraphPlaySheet"^^xsd:string ;
+	vas:icon "questions_graph_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Graph"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
+	vac:description "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^xsd:string ;
+	vas:icon "questions_grid2_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Grid"^^xsd:string , "gov.va.semoss.ui.components.playsheets.GridPlaySheet" .
+
+vas:gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
+	vac:description "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
+	vas:icon "questions_raw_grid2_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Raw Grid"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.GridScatterSheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
+	vac:description "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^xsd:string ;
+	vas:icon "questions_grid_scatter1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Grid Scatter"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a heat map diagram. "^^xsd:string ;
+	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Heat Map"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
+	vas:icon "questions_metamodel1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Metamodel Graph"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a Parallel Coordinates diagram."^^xsd:string ;
+	vas:icon "questions_parcoords4_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Parallel Coordinates"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.PieChartPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet"^^xsd:string ;
+	vas:icon "questions_pie_chart1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Pie Chart"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.SankeyPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships."^^xsd:string ;
+	vas:icon "questions_sankey2_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Sankey Diagram"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet"^^xsd:string ;
+	vac:description """The Play Sheet for the United States geo-location data heatmap.  
+Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+	vas:icon "questions_us_heat_map1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "US Heat Map"^^xsd:string .
+
+vas:gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet"^^xsd:string ;
+	vac:description """The Play Sheet for the World geo-location data heatmap.  
+Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+	vas:icon "questions_world_heat_map1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "World Heat Map"^^xsd:string .
+
+vas:gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet ui:viewClass "gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
+	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Application Duplication Heat Map"^^xsd:string .
+
+vas:gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet ui:viewClass "gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet"^^xsd:string ;
+	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Dupe Heat Map"^^xsd:string .
+
+vas:icon a owl:DatatypeProperty ;
+	rdfs:domain ui:Element ;
+	rdfs:label "icon"^^xsd:string .
+
+vas:insight a owl:ObjectProperty ;
+	rdfs:label "insight"^^xsd:string ;
+	rdfs:range vas:InsightProperties .
+
+vas:InsightProperties a spin:MagicProperty ;
+	rdfs:label "Insight Properties"^^xsd:string ;
+	rdfs:subClassOf spin:MagicProperties .
+
+vas:isLegacy a owl:DatatypeProperty ;
+	rdfs:label "Is Legacy"^^xsd:string ;
+	rdfs:range xsd:boolean .
+
+vas:Perspective a owl:Class ;
+	rdfs:label "Perspective"^^xsd:string ;
+	rdfs:subClassOf olo:OrderedList , ui:Element , _:t2275 , _:t2284 , _:t2294 , _:t2302 , _:t2310 , _:t2318 , _:t2326 .
+
+vas:RDR-Reification a vas:ReificationModel ;
+	rdfs:label "RDR Reification"^^xsd:string .
+
+vas:reification a rdf:Property ;
+	rdfs:label "Reification"^^xsd:string ;
+	rdfs:range vas:ReificationModel .
+
+vas:ReificationModel a owl:Class ;
+	rdfs:label "Reification Model"^^xsd:string ;
+	rdfs:subClassOf owl:Thing .
+
+vas:VASEMOSS-Reification a vas:ReificationModel ;
+	rdfs:label "VA-SEMOSS Reification"^^xsd:string .
+
+vas:W3C-Reification a vas:ReificationModel ;
+	rdfs:label "W3C Reification"^^xsd:string .
+
+<http://va.gov/ontologies/vcamp> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
+	vac:headURL "$HeadURL: http://104.130.3.174/svn/vcamp/V-CAMP/branches/dev/src/main/resources/models/vcamp.ttl $"^^xsd:string ;
+	vac:namespace "http://semoss.org/ontologies/vcamp#"^^xsd:string ;
+	vac:namespacePrefix "vcamp"^^xsd:string ;
+	vac:revision "$Revision: 2128 $"^^xsd:string ;
+	vac:revisionDate "$Date: 2015-04-05 21:14:03 -0400 (Sun, 05 Apr 2015) $"^^xsd:string ;
+	vac:specificity "1"^^xsd:integer ;
+	vac:version "0.5"^^xsd:string ;
+	owl:versionIRI <http://semoss.org/ontologies/vcamp/v0.5> , <http://semoss.org/ontololgies/vcamp/v0.5> ;
+	a owl:Ontology ;
+	owl:imports <http://semoss.org/ontologies> , <http://va.gov/ontologies/core> ;
+	owl:versionInfo "$Id: vcamp.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^xsd:string .
+
+insights:constraint-1432221341500 sp:query insights:query-1432221378763 ;
+	spl:predicate arg:predicate-1432221378763 ;
+	spl:valueType semoss:DataObject ;
+	a spl:Argument ;
+	rdfs:label "Data Object" .
+
+arg:predicate-1432221378763 rdfs:label "DataObject" .
+
+insights:query-1432221378763 sp:text """SELECT ?DataObject ?label 
+WHERE{
+    ?DataObject a semoss:DataObject . 
+    ?DataObject rdfs:label ?label . 
+}""" .
+
+insights:Generic-Perspective-insight-1432758886428 dcterms:created "2015-05-27T20:34:46.426Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+	spin:constraint insights:GQ1-Concept , insights:GQ1-Instance ;
+	spin:body insights:Generic-Perspective-insight-body-1432758886428 ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:Function ;
+	rdfs:label "Show One Neighbor Away from Selected Node" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "" ;
+	dcterms:modified "2015-05-27T20:35:52.892Z"^^xsd:dateTime .
+
+insights:Generic-Perspective-insight-body-1432758886428 sp:text """CONSTRUCT {
+  ?source ?step1 ?neighbor
+}
+WHERE {
+ ?instance ?step1 ?neighbor1 .
+ ?step1 a ?step1Type .
+ FILTER (?step1Type = owl:ObjectProperty )
+}""" ;
+	a sp:Select .
+
+insights:Generic-Perspective-slot-1432758886428 olo:index "4"^^xsd:int ;
+	olo:item insights:Generic-Perspective-insight-1432758886428 .
+
+insights:Generic-Perspective-insight-1432758967316 dcterms:created "2015-05-27T20:36:07.315Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+	spin:constraint insights:GQ1-Concept , insights:GQ1-Instance ;
+	spin:body insights:Generic-Perspective-insight-body-1432758967316 ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:Function ;
+	rdfs:label "Show Two Neighbors Away from Selected Node" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "" ;
+	dcterms:modified "2015-05-27T20:37:14.126Z"^^xsd:dateTime .
+
+insights:Generic-Perspective-insight-body-1432758967316 sp:text """CONSTRUCT {
+  ?instance ?step1 ?neighbor1 .
+  ?neightbor1 ?step2 ?neighbor2 .
+}
+WHERE {
+ ?instance ?step1 ?neighbor1 .
+ ?step1 a ?step1Type .
+ FILTER (?step1Type = owl:ObjectProperty )
+ ?neightbor1 ?step2 ?neighbor2 .
+  ?step2 a ?step2Type .
+ FILTER (?step2Type = owl:ObjectProperty )
+}""" ;
+	a sp:Select .
+
+insights:Generic-Perspective-slot-1432758967316 olo:index "3"^^xsd:int ;
+	olo:item insights:Generic-Perspective-insight-1432758967316 .

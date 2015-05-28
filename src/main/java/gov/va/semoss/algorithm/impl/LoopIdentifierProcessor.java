@@ -15,61 +15,40 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.algorithm.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
 
 import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.GridFilterData;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
-import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
-import gov.va.semoss.util.Constants;
-import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import javax.swing.AbstractAction;
+import org.apache.log4j.Logger;
 
 /**
  * This class is used to identify loops within a network.
  */
 public class LoopIdentifierProcessor extends AbstractAction implements IAlgorithm {
 
-	DelegateForest forest = null;
-	ArrayList<SEMOSSVertex> selectedVerts = new ArrayList<>();
-	GridFilterData gfd = new GridFilterData();
-	GraphPlaySheet playSheet;
-	Hashtable<String, SEMOSSEdge> nonLoopEdges = new Hashtable<>();
-	Set<SEMOSSEdge> loopEdges = new HashSet<>();
-	Hashtable<String, SEMOSSVertex> nonLoopVerts = new Hashtable<>();
-	Set<SEMOSSVertex> loopVerts = new HashSet<>();
-	String selectedNodes = "";
-	Vector<SEMOSSEdge> masterEdgeVector = new Vector();//keeps track of everything accounted for in the forest
-	Vector<SEMOSSVertex> masterVertexVector = new Vector();
-	Vector<SEMOSSVertex> currentPathVerts = new Vector<>();//these are used for depth search first
-	Vector<SEMOSSEdge> currentPathEdges = new Vector<>();
+	private static final Logger log = Logger.getLogger( LoopIdentifierProcessor.class );
+	private final GraphPlaySheet gps;
+	private final List<SEMOSSVertex> verts;
 
-	public LoopIdentifierProcessor( GraphPlaySheet gps, SEMOSSVertex[] verts ) {
+	public LoopIdentifierProcessor( GraphPlaySheet ps, Collection<SEMOSSVertex> sels ) {
 		super( "Loop Identifier" );
-		playSheet = gps;
-		forest = playSheet.getForest();
-		setSelectedNodes( verts );
+		this.gps = ps;
+		this.verts = new ArrayList<>( sels.isEmpty()
+				? gps.getVisibleGraph().getVertices() : sels );
 	}
 
 	@Override
@@ -90,276 +69,81 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 		//therefore, remove the vertex and all edges associated with it from the forest
 		//once there are no edges getting removed, its time to stop
 		//Then I run depth search first to validate the edges left
-		Collection<SEMOSSVertex> allVerts = forest.getVertices();
-		Vector<SEMOSSVertex> currentVertices = new Vector<>();
-		Vector<SEMOSSVertex> nextVertices = new Vector<>();
-		currentVertices.addAll( allVerts );
-		nextVertices.addAll( currentVertices );
-		Vector<SEMOSSEdge> newlyRemovedEdges = new Vector<>();
-		int count = 0;
-		while ( count == 0 || !newlyRemovedEdges.isEmpty() ) {
-			newlyRemovedEdges.clear();
-			for ( SEMOSSVertex vertex : currentVertices ) {
-				Vector<SEMOSSEdge> inEdges = getValidEdges( vertex.getInEdges() );
-				int inEdgeCount = inEdges.size();
-				Vector<SEMOSSEdge> outEdges = getValidEdges( vertex.getOutEdges() );
-				int outEdgeCount = outEdges.size();
-				//if inEdges is 0, put the vert and its edges in hashtables and remove everything associated with it from the forest
-				if ( inEdgeCount == 0 ) {
-					nonLoopVerts.put( (String) vertex.getProperty( Constants.URI_KEY ), vertex );
-					putEdgesInHash( outEdges, nonLoopEdges );
-					newlyRemovedEdges.addAll( removeEdgesFromMaster( outEdges ) );
-					nextVertices.remove( vertex );
-					masterVertexVector.remove( vertex );
-				}
-				else if ( outEdgeCount == 0 ) {
-					nonLoopVerts.put( (String) vertex.getProperty( Constants.URI_KEY ), vertex );
-					putEdgesInHash( inEdges, nonLoopEdges );
-					newlyRemovedEdges.addAll( removeEdgesFromMaster( inEdges ) );
-					nextVertices.remove( vertex );
-					masterVertexVector.remove( vertex );
-				}
-				count++;
-			}
-			currentVertices.clear();
-			currentVertices.addAll( nextVertices );
-		}
-		//phase 1 is now complete.  The only vertices and edges left must have in and out edges
-		//However, there is still the possiblity of fake edges and nodes that exist only between two loops
-		//Now I will perform depth search first on all remaining nodes to ensure that every edge is a loop
-		runDepthSearchFirst();
-		//Everything that is left in nextVertices and the forest now must be loopers
-		//lets put them in their respective hashtables and set the transformers
-		setTransformers();
 
-	}
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> realg = gps.getVisibleGraph();
+		// now do a DFS for every node. If we ever get back to our "root," we 
+		// have a loop
 
-	/**
-	 * Get all possible full length paths for every vertex in the master vertex
-	 * vector. If a path returns back to the starting node, then put it inside the
-	 * loop hashtable.
-	 */
-	private void runDepthSearchFirst() {
-		//for every vertex remaining in master vertex vector, I will get all possible full length paths
-		//If a path return back to the starting node, put it in the loop hash
-		for ( SEMOSSVertex vertex : masterVertexVector ) {
-			Vector<SEMOSSVertex> usedLeafVerts = new Vector<SEMOSSVertex>();//keeps track of all bottom nodes previously visited
-			usedLeafVerts.add( vertex );
+		for ( SEMOSSVertex root : verts ) {
+			// we're going to do a DFS here, but keep track of what edges we've traversed
+			// along the way so we can highlight the loop
 
-			Vector<SEMOSSVertex> currentNodes = new Vector<SEMOSSVertex>();
-			//use next nodes as the future set of nodes to traverse down from.
-			Vector<SEMOSSVertex> nextNodes = new Vector<SEMOSSVertex>();
+			for ( SEMOSSEdge edge : realg.getOutEdges( root ) ) {
+				Set<SEMOSSVertex> seen = new HashSet<>();
+				List<SEMOSSEdge> steps = new ArrayList<>();
+				steps.add( edge );
 
-			//check if there is a loop with itself
-			if ( checkIfCompletesLoop( vertex, vertex ) ) {
-				addPathAsLoop( currentPathEdges, currentPathVerts );
-			}
+				List<SEMOSSEdge> edges = lookForLoopBackTo( root, realg.getDest( edge ),
+						seen, steps, realg, 0 );
 
-			int levelIndex = 0;
-			while ( !currentPathVerts.isEmpty() || levelIndex == 0 ) {
-				int pathIndex = 0;
-				currentNodes.add( vertex );
-				currentPathVerts.clear();
-				currentPathEdges.clear();
-				while ( !nextNodes.isEmpty() || pathIndex == 0 ) {
-					nextNodes.clear();
-					while ( !currentNodes.isEmpty() ) {
-						SEMOSSVertex vert = currentNodes.remove( 0 );
+				if ( !edges.isEmpty() && realg.getDest( edges.get( edges.size() - 1 ) ).equals( root ) ) {
+					// highlight all the loop edges
 
-						SEMOSSVertex nextNode = traverseDepthDownward( vert, usedLeafVerts );
-						if ( nextNode != null ) {
-							nextNodes.add( nextNode );
-						}
-
-						pathIndex++;
+					Set<SEMOSSVertex> vs = new HashSet<>();
+					for ( SEMOSSEdge e : edges ) {
+						vs.addAll( realg.getEndpoints( e ) );
 					}
-					currentNodes.addAll( nextNodes );
 
-					levelIndex++;
-				}
-				//Now I should have a complete path.  I need to check to see it it can make it back to the root node.
-				//If it can make it back to the root node, it is a loop and should be added to the loop hashtables
-				if ( currentPathVerts.size() > 0 ) {
-					SEMOSSVertex leafVert = currentPathVerts.get( currentPathVerts.size() - 1 );
-					if ( checkIfCompletesLoop( leafVert, vertex ) ) {
-						//add loop to loop hashtables
-						addPathAsLoop( currentPathEdges, currentPathVerts );
-					}
-					usedLeafVerts.add( leafVert );
+					gps.skeleton( vs, edges );
 				}
 			}
-
 		}
 	}
 
 	/**
-	 * Validate whether or not the loop is complete.
+	 * Keep traversing outward until we either reach our goal or exhaust our edges
 	 *
-	 * @param leaf DBCMVertex	Child node.
-	 * @param root DBCMVertex	Parent node.
-	 *
-	 * @return boolean Returns true if the loop is complete.
+	 * @param goal
+	 * @param root
+	 * @param visited
+	 * @param pathSoFar
+	 * @param mygraph
+	 * @return
 	 */
-	private boolean checkIfCompletesLoop( SEMOSSVertex leaf, SEMOSSVertex root ) {
-		boolean retBool = false;
-		if ( leaf == null ) {
-			return false;
+	private List<SEMOSSEdge> lookForLoopBackTo( SEMOSSVertex goal, SEMOSSVertex step,
+			Set<SEMOSSVertex> visited, List<SEMOSSEdge> steps,
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> mygraph, int depth ) {
+
+		if ( step.equals( goal ) ) {
+			//we're on our goal, so we must have looped
+			return steps;
 		}
 
-		Collection<SEMOSSEdge> edgeArray = getValidEdges( forest.getOutEdges( leaf ) );
-		for ( SEMOSSEdge edge : edgeArray ) {
-			SEMOSSVertex inVert = edge.getInVertex();
-			if ( inVert.equals( root ) ) {
-				currentPathEdges.add( edge );
-				currentPathVerts.add( root );
-				return true;
+		if ( visited.contains( step ) ) {
+			return steps;
+		}
+
+		visited.add( step );
+
+		if ( mygraph.getOutEdges( step ).isEmpty() ) {
+			return steps;
+		}
+
+		// we haven't stopped yet, so take another step
+		List<SEMOSSEdge> shortest = null; // we want the shortest loop we can get
+		for ( SEMOSSEdge edge : mygraph.getOutEdges( step ) ) {
+			List<SEMOSSEdge> journey = new ArrayList<>( steps );
+			journey.add( edge );
+
+			List<SEMOSSEdge> path = lookForLoopBackTo( goal, mygraph.getDest( edge ),
+					visited, journey, mygraph, depth + 1 );
+			if ( null == shortest || path.size() < shortest.size() ) {
+				shortest = path;
 			}
 		}
-		return retBool;
-	}
+		steps = shortest;
 
-	/**
-	 * Returns the next node for loop identification to be performed upon. Uses
-	 * the current vertex and keeps track of which edges are valid. Scores
-	 * vertices based on most efficient way to get to that vertex.
-	 *
-	 * @param vert DBCMVertex	Current node.
-	 * @param usedLeafVerts Vector<DBCMVertex>
-	 *
-	 * @return DBCMVertex Next node for processing.
-	 */
-	private SEMOSSVertex traverseDepthDownward( SEMOSSVertex vert, Vector<SEMOSSVertex> usedLeafVerts ) {
-		SEMOSSVertex nextVert = null;
-		Collection<SEMOSSEdge> edgeArray = getValidEdges( forest.getOutEdges( vert ) );
-		for ( SEMOSSEdge edge : edgeArray ) {
-			SEMOSSVertex inVert = edge.getInVertex();
-			if ( masterVertexVector.contains( inVert ) && !usedLeafVerts.contains( inVert ) && !currentPathVerts.contains( inVert ) ) {
-				nextVert = inVert;//this is going to be the returned vert, so this is all set
-				currentPathVerts.add( inVert );
-				currentPathEdges.add( edge );
-				return nextVert;
-			}
-		}
-		return nextVert;
-	}
-
-	/**
-	 * From the collection of DBCM edges, determine which edges are valid.
-	 *
-	 * @param vector Collection<DBCMEdge>	Collection of edges.
-	 *
-	 * @return Vector<DBCMEdge>	List of valid edges.
-	 */
-	private Vector<SEMOSSEdge> getValidEdges( Collection<SEMOSSEdge> vector ) {
-		Vector<SEMOSSEdge> validEdges = new Vector<>();
-		if ( vector == null ) {
-			return validEdges;
-		}
-		for ( SEMOSSEdge edge : vector ) {
-			if ( masterEdgeVector.contains( edge ) ) {
-				validEdges.add( edge );
-			}
-		}
-		return validEdges;
-	}
-
-	/**
-	 * Sets the transformers based on valid edges and vertices for the playsheet.
-	 */
-	private void setTransformers() {
-		// RPB: I don't know what's going on in this function
-		Map<SEMOSSEdge, Double> questionableEdgeMap = new HashMap<>();
-		for( SEMOSSEdge e : loopEdges ){
-			questionableEdgeMap.put( e, 5d ); // ??? no idea what this should be
-		}
-		
-		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( questionableEdgeMap );
-		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) playSheet.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( questionableEdgeMap );
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( loopEdges );
-		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setVertHash( loopVerts );
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setVertHash( loopVerts );
-		// repaint it
-		playSheet.getView().repaint();
-	}
-
-	/**
-	 * Adds a given path as a loop in the network.
-	 *
-	 * @param edges Vector<DBCMEdge>	List of edges.
-	 * @param verts Vector<DBCMVertex>	List of nodes.
-	 */
-	private void addPathAsLoop( Collection<SEMOSSEdge> edges, Collection<SEMOSSVertex> verts ) {
-		for ( SEMOSSVertex vertex : verts ) {
-			loopVerts.add( vertex );
-		}
-
-		for ( SEMOSSEdge edge : edges ) {
-			loopEdges.add( edge );
-		}
-	}
-
-	/**
-	 * Removes edges from the master list of edges.
-	 *
-	 * @param edges Vector<DBCMEdge>	Original list of edges.
-	 *
-	 * @return Vector<DBCMEdge>	Updated list of edges.
-	 */
-	private Vector<SEMOSSEdge> removeEdgesFromMaster( Vector<SEMOSSEdge> edges ) {
-		Vector<SEMOSSEdge> removedEdges = new Vector<SEMOSSEdge>();
-		for ( int edgeIndex = 0; edgeIndex < edges.size(); edgeIndex++ ) {
-			SEMOSSEdge edge = edges.elementAt( edgeIndex );
-			if ( masterEdgeVector.contains( edge ) ) {
-				removedEdges.add( edge );
-				masterEdgeVector.remove( edge );
-			}
-		}
-		return removedEdges;
-	}
-
-	/**
-	 * Put edges into hashtable. Iterates through collection of edges and puts the
-	 * property of the edges into hashtable.
-	 *
-	 * @param edges Collection<DBCMEdge>	Collection of edges.
-	 * @param hash Hashtable<String,DBCMEdge>	Hashtable of edges.
-	 *
-	 * @return Hashtable<String,DBCMEdge>	Final hashtable of properties and edges.
-	 */
-	private Hashtable<String, SEMOSSEdge> putEdgesInHash( Collection<SEMOSSEdge> edges, Hashtable<String, SEMOSSEdge> hash ) {
-		Iterator edgeIt = edges.iterator();
-		while ( edgeIt.hasNext() ) {
-			SEMOSSEdge edge = (SEMOSSEdge) edgeIt.next();
-			hash.put( (String) edge.getProperty( Constants.URI_KEY ), edge );
-		}
-		return hash;
-	}
-
-	/**
-	 * Sets the forest.
-	 *
-	 * @param f DelegateForest	Forest to be set.
-	 */
-	public void setForest( DelegateForest f ) {
-		forest = f;
-		Collection<SEMOSSEdge> edges = f.getEdges();
-		Collection<SEMOSSVertex> v = f.getVertices();
-		masterEdgeVector.addAll( edges );
-		masterVertexVector.addAll( v );
-	}
-
-	/**
-	 * Sets selected nodes.
-	 *
-	 * @param pickedVertices DBCMVertex[]	List of picked vertices to be set.
-	 */
-	public void setSelectedNodes( SEMOSSVertex[] pickedVertices ) {
-		selectedVerts.addAll( Arrays.asList( pickedVertices ) );
+		return steps;
 	}
 
 	/**
@@ -370,7 +154,6 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	@Override
 	public void setPlaySheet( IPlaySheet ps ) {
 		throw new UnsupportedOperationException( "set the playsheet in the constructor" );
-		// playSheet = GraphPlaySheetFrame.class.cast(ps ).getGraphComponent();
 	}
 
 	/**
@@ -382,7 +165,7 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 */
 	@Override
 	public String[] getVariables() {
-		return null;
+		throw new UnsupportedOperationException( "this doesn't do anything" );
 	}
 
 	/**
@@ -394,5 +177,4 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	public String getAlgoName() {
 		return "Loop Identifier";
 	}
-
 }

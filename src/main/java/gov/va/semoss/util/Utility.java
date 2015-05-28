@@ -28,7 +28,6 @@ import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.ui.components.UriComboBox.UriLabelPair;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import info.aduna.io.IOUtil;
 
@@ -65,8 +64,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
-
 import java.util.zip.ZipInputStream;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -1112,6 +1111,10 @@ public class Utility {
 	 */
 	public static String implode( Collection<?> collection, String start, String stop,
 			String sep ) {
+		if ( null == collection ) {
+			return "";
+		}
+
 		StringBuilder sb = new StringBuilder();
 		for ( Object o : collection ) {
 			if ( 0 != sb.length() ) {

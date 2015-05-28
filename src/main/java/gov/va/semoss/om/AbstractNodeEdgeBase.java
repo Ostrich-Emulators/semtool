@@ -6,6 +6,7 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.util.Constants;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,8 +24,12 @@ public class AbstractNodeEdgeBase {
 
 	private static final Logger log = Logger.getLogger( AbstractNodeEdgeBase.class );
 	public static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
+
+	private Color color;
+	private String colorString;
 	private final Map<URI, Object> properties = new HashMap<>();
 	private URI id;
+	private boolean visible = true;
 
 	public AbstractNodeEdgeBase( URI id ) {
 		this( id, null, id.getLocalName() );
@@ -44,6 +49,30 @@ public class AbstractNodeEdgeBase {
 
 	public int getLevel() {
 		return Integer.class.cast( getProperty( LEVEL ) );
+	}
+
+	public final void setColor( Color _color ) {
+		color = _color;
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColorString( String _colorString ) {
+		colorString = _colorString;
+	}
+
+	public String getColorString() {
+		return colorString;
+	}
+
+	public void setVisible( boolean b ) {
+		visible = b;
+	}
+
+	public boolean isVisible() {
+		return visible;
 	}
 
 	/**

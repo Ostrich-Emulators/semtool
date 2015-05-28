@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.om;
 
+import java.awt.Color;
 import java.util.Objects;
 
 import org.apache.log4j.Logger;
@@ -49,8 +50,9 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 
 		inVertex.addInEdge( this );
 		outVertex.addOutEdge( this );
+		setColor( Color.DARK_GRAY );
 	}
-
+	
 	public SEMOSSVertex getInVertex() {
 		return inVertex;
 	}

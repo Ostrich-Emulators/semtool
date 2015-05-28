@@ -54,8 +54,8 @@ public class ColorShapeClearRefreshListener implements IChakraListener {
 		JTable table = (JTable) DIHelper.getInstance().getLocalProp( Constants.COLOR_SHAPE_TABLE );
 		table.repaint();
 
-		playSheet.repaint();
-		playSheet.genAllData();
+		playSheet.updateGraph();
+		// playSheet.repaint();
 		playSheet.setVisible( true );
 	}
 

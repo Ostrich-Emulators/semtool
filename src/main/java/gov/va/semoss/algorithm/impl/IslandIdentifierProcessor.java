@@ -19,30 +19,26 @@
  */
 package gov.va.semoss.algorithm.impl;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.visualization.RenderContext;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
 
 import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.transformer.ArrowDrawPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeArrowStrokeTransformer;
+import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.VertexLabelFontTransformer;
-import gov.va.semoss.ui.transformer.VertexPaintTransformer;
-import gov.va.semoss.util.Constants;
-import edu.uci.ics.jung.graph.DelegateForest;
-import gov.va.semoss.ui.components.GridFilterData;
+import gov.va.semoss.ui.transformer.PaintTransformer;
+import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 
@@ -51,23 +47,16 @@ import javax.swing.AbstractAction;
  */
 public class IslandIdentifierProcessor extends AbstractAction implements IAlgorithm {
 
-	DelegateForest forest = null;
-	ArrayList<SEMOSSVertex> selectedVerts = new ArrayList<>();
-	GridFilterData gfd = new GridFilterData();
-	GraphPlaySheet playSheet;
-	public Hashtable masterHash = new Hashtable();//this will have key: node, object: hashtable with verts.  Also key: node + edgeHashKey and object: hastable with edges
-	String selectedNodes = "";
-	Vector<SEMOSSEdge> masterEdgeVector = new Vector();//keeps track of everything accounted for in the forest
-	Vector<SEMOSSVertex> masterVertexVector = new Vector();
-	Set<SEMOSSVertex> islandVerts = new HashSet<>();
-	Set<SEMOSSEdge> islandEdges = new HashSet<>();
-	String edgeHashKey = "EdgeHashKey";
+	private final List<SEMOSSVertex> selectedVerts = new ArrayList<>();
+	private final GraphPlaySheet gps;
 
-	public IslandIdentifierProcessor( GraphPlaySheet gps, SEMOSSVertex[] pickedV ) {
+	public IslandIdentifierProcessor( GraphPlaySheet gps, Collection<SEMOSSVertex> pickedV ) {
 		super( "Island Identifier" );
-		playSheet = gps;
-		forest = playSheet.getForest();
-		setSelectedNodes( pickedV );
+		this.gps = gps;
+
+		// if no nodes are selected, then all nodes are selected
+		selectedVerts.addAll( pickedV.isEmpty()
+				? gps.getVisibleGraph().getVertices() : pickedV );
 	}
 
 	@Override
@@ -77,239 +66,49 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		Collection<SEMOSSVertex> forestRoots = new ArrayList();
-		if ( !selectedVerts.isEmpty() ) {
-			int count = 0;
-			for ( SEMOSSVertex selectedVert : selectedVerts ) {
-				if ( masterVertexVector.contains( selectedVert ) ) {
-					forestRoots.add( selectedVert );
-					if ( count > 0 ) {
-						selectedNodes = selectedNodes + ", ";
-					}
-					selectedNodes = selectedNodes + selectedVert.getProperty( Constants.VERTEX_NAME );
-					masterVertexVector.remove( selectedVert );
-					addNetworkToMasterHash( selectedVert );
-					count++;
-				}
-			}
-			addRemainingToIslandHash( masterEdgeVector, masterVertexVector );
-		}
-		else {
-			selectedNodes = "All";
-			forestRoots = forest.getRoots();
-			for ( SEMOSSVertex forestVert : forestRoots ) {
-				if ( masterVertexVector.contains( forestVert ) ) {
-					masterVertexVector.remove( forestVert );
-					addNetworkToMasterHash( forestVert );
-				}
-			}
-			differentiateMainlandFromIslands();
-		}
-		setTransformers();
-	}
 
-	/**
-	 * Iterate through the master hash, get values from the keys and put it into
-	 * the vertHash to determine the mainland and islands Set up new hashtables
-	 * for the islands.
-	 */
-	private void differentiateMainlandFromIslands() {
-		Iterator<String> masterHashIt = masterHash.keySet().iterator();
-		String mainlandKey = "";
-		int mainlandSize = 0;
-		while ( masterHashIt.hasNext() ) {
-			String key = masterHashIt.next();
-			if ( !key.contains( edgeHashKey ) ) {
-				Hashtable vertHash = (Hashtable) masterHash.get( key );
-				int vertHashSize = vertHash.size();
-				if ( vertHashSize > mainlandSize ) {
-					mainlandSize = vertHashSize;
-					mainlandKey = key;
-				}
-			}
-		}
-		//now we know the mainland and therefore the islands.  Time to set the island hastables
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
 
-		masterHashIt = masterHash.keySet().iterator();
-		while ( masterHashIt.hasNext() ) {
-			String key = masterHashIt.next();
-			if ( !key.contains( mainlandKey ) ) {
-				if ( key.contains( edgeHashKey ) ) {
-					Collection<SEMOSSEdge> islandEdgeHash
-							= (Collection<SEMOSSEdge>) masterHash.get( key );
-					islandEdges.addAll( islandEdgeHash );
-				}
-				else {
-					Collection<SEMOSSVertex> islandVertHash
-							= (Collection<SEMOSSVertex>) masterHash.get( key );
-					islandVerts.addAll( islandVertHash );
+		// just do a depth-first search of everything this node connects to
+		// and highlight all the edges and nodes of this island		
+		Set<SEMOSSEdge> islandEdges = new HashSet<>();
+		Set<SEMOSSVertex> islandVerts = new HashSet<>( selectedVerts );
+
+		// get all downstream nodes
+		Set<SEMOSSVertex> seen = new HashSet<>();
+		Deque<SEMOSSVertex> todo = new ArrayDeque<>( selectedVerts );
+		while ( !todo.isEmpty() ) {
+			SEMOSSVertex v = todo.pop();
+			islandVerts.add( v );
+			seen.add( v );
+
+			for ( SEMOSSEdge ed : graph.getIncidentEdges( v ) ) {
+				islandEdges.add( ed );
+
+				SEMOSSVertex v2 = graph.getOpposite( v, ed );
+				if ( !seen.contains( v2 ) ) { // don't add a node we've already seen
+					todo.push( v2 );
 				}
 			}
 		}
+
+		highlightIsland( islandVerts, islandEdges );
 	}
 
 	/**
 	 * Sets the transformers based on valid edges and vertices for the playsheet.
 	 */
-	private void setTransformers() {
-		Map<SEMOSSEdge, Double> edges = new HashMap<>();
-		for( SEMOSSEdge s : islandEdges){
-			edges.put( s, 3d );
-		}
-		
-		
-		EdgeStrokeTransformer tx = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		tx.setEdges( edges );
-		EdgeArrowStrokeTransformer stx = (EdgeArrowStrokeTransformer) playSheet.getView().getRenderContext().getEdgeArrowStrokeTransformer();
-		stx.setEdges( edges );
-		ArrowDrawPaintTransformer atx = (ArrowDrawPaintTransformer) playSheet.getView().getRenderContext().getArrowDrawPaintTransformer();
-		atx.setEdges( islandEdges );
-		VertexPaintTransformer vtx = (VertexPaintTransformer) playSheet.getView().getRenderContext().getVertexFillPaintTransformer();
-		vtx.setVertHash( islandVerts );
-		VertexLabelFontTransformer vlft = (VertexLabelFontTransformer) playSheet.getView().getRenderContext().getVertexFontTransformer();
-		vlft.setVertHash( islandVerts );
-		// repaint it
-		playSheet.getView().repaint();
-	}
+	private void highlightIsland( Collection<SEMOSSVertex> islandVerts,
+			Collection<SEMOSSEdge> islandEdges ) {
 
-	/**
-	 * Method addRemainingToIslandHash.
-	 *
-	 * @param masterEdges Vector<DBCMEdge>
-	 * @param masterVerts Vector<DBCMVertex>
-	 */
-	private void addRemainingToIslandHash( Collection<SEMOSSEdge> masterEdges,
-			Collection<SEMOSSVertex> masterVerts ) {
-		islandVerts.addAll( masterVerts );
-		islandEdges.addAll( masterEdges );
-	}
+		PickedState state = gps.getView().getPickedVertexState();
 
-	/**
-	 * Add network to the master hash based on the current nodes and future set of
-	 * nodes to traverse downward from.
-	 *
-	 * @param vertex DBCMVertex	Passed node.
-	 */
-	public void addNetworkToMasterHash( SEMOSSVertex vertex ) {
-		String vertexName = vertex.getLabel();
-
-		//use current nodes as the next set of nodes that I will have to traverse downward from.  Starts with passed node
-		List<SEMOSSVertex> currentNodes = new ArrayList<>();
-		currentNodes.add( vertex );
-
-		Set<SEMOSSVertex> islandHash = new HashSet<>();
-		islandHash.add( vertex );
-		Set<SEMOSSEdge> islandEdgeHash = new HashSet<>();
-		//use next nodes as the future set of nodes to traverse down from.
-		List<SEMOSSVertex> nextNodes = new ArrayList<>();
-
-		int nodeIndex = 0;
-		int levelIndex = 1;
-		while ( !nextNodes.isEmpty() || levelIndex == 1 ) {
-			nextNodes.clear();
-			while ( !currentNodes.isEmpty() ) {
-				nodeIndex = 0;
-				SEMOSSVertex vert = currentNodes.remove( nodeIndex );
-
-				Collection<SEMOSSVertex> subsetNextNodes
-						= traverseOutward( vert, islandHash, islandEdgeHash, vertexName );
-
-				nextNodes.addAll( subsetNextNodes );
-
-				nodeIndex++;
-			}
-			currentNodes.addAll( nextNodes );
-
-			levelIndex++;
-		}
-	}
-
-	/**
-	 * Gets nodes upstream and downstream, adds all edges.
-	 *
-	 * @param vert DBCMVertex	Passed node.
-	 * @param vertNetworkHash Hashtable	Hashtable of the nodes in the network.
-	 * @param edgeNetworkHash Hashtable	Hashtable of the edges in the network.
-	 * @param vertKey String	Key of the vert hashtable.
-	 *
-	 * @return ArrayList<DBCMVertex>	List of nodes from traversing.
-	 */
-	public List<SEMOSSVertex> traverseOutward( SEMOSSVertex vert,
-			Set<SEMOSSVertex> vertNetworkHash, Set<SEMOSSEdge> edgeNetworkHash,
-			String vertKey ) {
-		//get nodes downstream
-		List<SEMOSSVertex> vertArray = new ArrayList<>();
-		Collection<SEMOSSEdge> edgeArray = forest.getOutEdges( vert );
-		//add all edges
-		edgeNetworkHash.addAll( edgeArray );
-
-		for ( SEMOSSEdge edge : edgeArray ) {
-			SEMOSSVertex inVert = edge.getInVertex();
-			if ( masterVertexVector.contains( inVert ) ) {
-				vertArray.add( inVert );//this is going to be the returned array, so this is all set
-
-				vertNetworkHash.add( inVert );
-				removeAllEdgesAssociatedWithNode( inVert );
-			}
-		}
-		//get nodes upstream
-		Collection<SEMOSSEdge> inEdgeArray = forest.getInEdges( vert );
-		edgeNetworkHash.addAll( inEdgeArray );
-
-		for ( SEMOSSEdge edge : inEdgeArray ) {
-			SEMOSSVertex outVert = edge.getOutVertex();
-			if ( masterVertexVector.contains( outVert ) ) {
-				vertArray.add( outVert );//this is going to be the returned array, so this is all set
-
-				vertNetworkHash.add( outVert );
-				edgeNetworkHash.add( edge );
-				removeAllEdgesAssociatedWithNode( outVert );
-			}
+		for ( SEMOSSVertex v : islandVerts ) {
+			state.pick( v, true );
 		}
 
-		masterHash.put( vertKey, vertNetworkHash );
-		masterHash.put( vertKey + edgeHashKey, edgeNetworkHash );
-		return vertArray;
-	}
-
-	/**
-	 * Given a specific node, it removes the vertex itself in addition to the
-	 * upstream/downstream edges.
-	 *
-	 * @param vert DBCMVertex	Passed node.
-	 */
-	private void removeAllEdgesAssociatedWithNode( SEMOSSVertex vert ) {
-		//remove vertex
-		masterVertexVector.remove( vert );
-
-		//remove downstream edges
-		masterEdgeVector.removeAll( forest.getOutEdges( vert ) );
-
-		//remove upstream edges
-		masterEdgeVector.removeAll( forest.getInEdges( vert ) );
-	}
-
-	/**
-	 * Sets the forest.
-	 *
-	 * @param f DelegateForest	Forest to be set.
-	 */
-	public void setForest( DelegateForest f ) {
-		forest = f;
-		Collection<SEMOSSEdge> edges = f.getEdges();
-		Collection<SEMOSSVertex> v = f.getVertices();
-		masterEdgeVector.addAll( edges );
-		masterVertexVector.addAll( v );
-	}
-
-	/**
-	 * Sets selected nodes.
-	 *
-	 * @param pickedVertices DBCMVertex[]	List of nodes that have been selected.
-	 */
-	public void setSelectedNodes( SEMOSSVertex[] pickedVertices ) {
-		selectedVerts.addAll( islandVerts );
-	}
+		gps.skeleton( islandVerts, islandEdges );
+ 	}
 
 	/**
 	 * Sets playsheet as a graph play sheet.
@@ -331,7 +130,7 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 	 */
 	@Override
 	public String[] getVariables() {
-		return null;
+		throw new UnsupportedOperationException( "don't know what this is" );
 	}
 
 	/**

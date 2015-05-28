@@ -18,8 +18,16 @@
  ******************************************************************************/
 package gov.va.semoss.ui.components.models;
 
-import javax.swing.table.AbstractTableModel;
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.VertexFilterData;
+import gov.va.semoss.util.DIHelper;
+
+import java.util.List;
+
+import javax.swing.table.AbstractTableModel;
+
+import org.openrdf.model.URI;
 
 /**
  * This class is used to create a table model for the vertex filter.
@@ -27,6 +35,11 @@ import gov.va.semoss.ui.components.VertexFilterData;
 public class VertexFilterTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 6010606033514579342L;
 	private VertexFilterData data;
+
+	private static final String[] columnNames = { "Show", "Node", "Instance" };
+	private static final Class<?>[] classNames = { Boolean.class, Object.class, Object.class };
+	
+	private ControlData controlData;
 
 	/**
 	 * Constructor for VertexFilterTableModel.
@@ -36,38 +49,80 @@ public class VertexFilterTableModel extends AbstractTableModel {
 	 */
 	public VertexFilterTableModel(VertexFilterData _data) {
 		data = _data;
+		
+		controlData = new ControlData();
+		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
+		fireTableDataChanged();
 	}
 
 	/**
-	 * Returns the column count.
-	 * 
-	 * @return int Column count.
+	 * Gets value at a particular row and column index.
+	 *
+	 * @param row Row index.
+	 * @param column Column index.
+	 *
+	 * @return Object Cell value.
 	 */
 	@Override
-	public int getColumnCount() {
-		return data.getColumnCount();
+	public Object getValueAt( int row, int column ) {
+		FilterRowModel vfRow = data.getNodes().get( row );
+		switch ( column ) {
+			case 0:
+				return vfRow.show();
+			case 1: {
+				if ( vfRow.isHeader() )
+					return vfRow.getType().getLocalName();
+				return "";
+			} case 2: {
+				if ( vfRow.isHeader() )
+					return "Select All";
+				return controlData.getLabel( vfRow.getInstance() );
+			} default:
+				return null;
+		}
 	}
 
 	/**
-	 * Sets the vertex filter data.
-	 * 
-	 * @param data
-	 *            VertexFilterData
-	 */
-	public void setVertexFilterData(VertexFilterData data) {
-		this.data = data;
-	}
-
-	/**
-	 * Gets the column name at a particular index.
-	 * 
-	 * @param index
-	 *            Column index.
-	 * @return String Column name.
+	 * Sets the cell value at a particular row and column index.
+	 *
+	 * @param value Cell value.
+	 * @param row Row index (int).
+	 * @param column Column index (int).
 	 */
 	@Override
-	public String getColumnName(int index) {
-		return data.getColumnName( index );
+	public void setValueAt( Object value, int row, int column ) {
+		FilterRowModel vfRow = data.getNodes().get( row );
+		switch ( column ) {
+			case 0: {
+				vfRow.setShow((Boolean) value);
+				break;
+			} case 1: { 
+				vfRow.setType((URI) value);
+				break;
+			} case 2: {
+				vfRow.setInstance((URI) value);
+				break;
+			}
+		}
+		
+		if ( vfRow.isHeader() ) {
+			List<SEMOSSVertex> vertVector = data.getNodeTypeMap().get( vfRow.getType() );
+
+			int latest = row + 1;
+			for ( SEMOSSVertex vertex : vertVector ) {
+				FilterRowModel thisVfRow = data.getNodes().get( latest++ );
+				thisVfRow.setShow( (Boolean) value);
+				vertex.setVisible( thisVfRow.show() );
+			}
+
+			fireTableRowsUpdated( row, latest );
+			return;
+		}
+
+		// we are only dealing with one vertex
+		SEMOSSVertex vertex = data.getNodeMap().get( vfRow.getInstance() );
+		vertex.setVisible( (Boolean) value );
+		fireTableCellUpdated( row, row );
 	}
 
 	/**
@@ -77,22 +132,17 @@ public class VertexFilterTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public int getRowCount() {
-		return data.getRowCount();
+		return data.getNodes().size();
 	}
 
 	/**
-	 * Gets the cell value at a particular row and column index.
+	 * Returns the column count.
 	 * 
-	 * @param arg0
-	 *            Row index.
-	 * @param arg1
-	 *            Column index.
-	 * 
-	 * @return Object Cell value.
+	 * @return int Column count.
 	 */
 	@Override
-	public Object getValueAt(int arg0, int arg1) {
-		return data.getValueAt(arg0, arg1);
+	public int getColumnCount() {
+		return columnNames.length;
 	}
 
 	/**
@@ -104,8 +154,30 @@ public class VertexFilterTableModel extends AbstractTableModel {
 	 * @return Class Column class.
 	 */
 	@Override
-	public Class<?> getColumnClass(int column) {
-		return data.getColumnClass( column );
+	public Class<?> getColumnClass( int columnIndex ) {
+		return classNames[columnIndex];
+	}
+
+	/**
+	 * Gets the column name at a particular index.
+	 * 
+	 * @param index
+	 *            Column index.
+	 * @return String Column name.
+	 */
+	@Override
+	public String getColumnName( int column ) {
+		return columnNames[column];
+	}
+	
+	/**
+	 * Sets the vertex filter data.
+	 * 
+	 * @param data
+	 *            VertexFilterData
+	 */
+	public void setVertexFilterData(VertexFilterData data) {
+		this.data = data;
 	}
 
 	/**
@@ -121,21 +193,5 @@ public class VertexFilterTableModel extends AbstractTableModel {
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		return (0 == column);
-	}
-
-	/**
-	 * Sets the label value at a particular row and column index.
-	 * 
-	 * @param value
-	 *            Label value.
-	 * @param row
-	 *            Row index.
-	 * @param column
-	 *            Column index.
-	 */
-	@Override
-	public void setValueAt(Object value, int row, int column) {
-		data.setValueAt(value, row, column);
-		data.fireTableCellUpdated( row, column );
 	}
 }
