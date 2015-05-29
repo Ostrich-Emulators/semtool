@@ -86,35 +86,26 @@ public class WeightDropDownButton extends JButton {
 			return;
 		}
 
-		listsPopulated = true;
-		populateLists();
-	}
-
-	private void populateLists() {
-		nodePropTree.addTreeSelectionListener( getTreeSelectionListener( 2 ) );
-		edgePropTree.addTreeSelectionListener( getTreeSelectionListener( 1 ) );
-
-		DefaultMutableTreeNode invisibleNodeRoot = new DefaultMutableTreeNode( "not visible" );
-		DefaultMutableTreeNode invisibleEdgeRoot = new DefaultMutableTreeNode( "not visible" );
-
-		nodePropTree.setModel( new DefaultTreeModel( invisibleNodeRoot ) );
-		edgePropTree.setModel( new DefaultTreeModel( invisibleEdgeRoot ) );
-		
-		Map<String, Set<String>> nodePropertiesToAdd = buildPropertyDataset(playSheet.getFilterData().getNodeTypeMap());
-		Map<String, Set<String>> edgePropertiesToAdd = buildPropertyDataset(playSheet.getFilterData().getEdgeTypeMap());
-
-		addPropertiesToTreeNode( nodePropertiesToAdd, invisibleNodeRoot );
-		addPropertiesToTreeNode( edgePropertiesToAdd, invisibleEdgeRoot );
-
-		nodePropTree.expandRow( 0 );
-		edgePropTree.expandRow( 0 );
-
-		nodePropTree.setRootVisible( false );
-		edgePropTree.setRootVisible( false );
+		initMenus(nodePropTree, 2, playSheet.getFilterData().getNodeTypeMap());
+		initMenus(edgePropTree, 1, playSheet.getFilterData().getEdgeTypeMap());
 
 		popupMenu.pack();
 		popupMenu.revalidate();
 		popupMenu.repaint();
+		
+		listsPopulated = true;
+	}
+
+	private <X extends AbstractNodeEdgeBase> void initMenus(JTree tree, int selectNum, Map<URI, List<X>> nodesOrEdgesMapByType) {
+		tree.addTreeSelectionListener( getTreeSelectionListener( selectNum ) );
+		DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "not visible" );
+		tree.setModel( new DefaultTreeModel( invisibleRoot ) );
+		
+		Map<String, Set<String>> propertiesToAdd = buildPropertyDataset(nodesOrEdgesMapByType);
+		addPropertiesToTreeNode( propertiesToAdd, invisibleRoot );
+		
+		tree.expandRow( 0 );
+		tree.setRootVisible( false );
 	}
 	
 	/**
