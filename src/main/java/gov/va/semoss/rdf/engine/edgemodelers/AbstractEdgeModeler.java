@@ -208,13 +208,19 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
 
-		if ( ( checkCacheFirst && !hasCachedInstance( typename, rawlabel ) )
-				|| !checkCacheFirst ) {
-			URI subject = ( nodeIsAlreadyUri
-					? getUriFromRawString( rawlabel, namespaces )
-					: metas.getDataBuilder().add( rawlabel ).build() );
-			subject = ensureUnique( subject );
+		if ( nodeIsAlreadyUri ) {
+			URI subject = getUriFromRawString( rawlabel, namespaces );
 			cacheInstance( subject, typename, rawlabel );
+		}
+		else {
+			if ( ( checkCacheFirst && !hasCachedInstance( typename, rawlabel ) )
+					|| !checkCacheFirst ) {
+				URI subject = ( nodeIsAlreadyUri
+						? getUriFromRawString( rawlabel, namespaces )
+						: metas.getDataBuilder().add( rawlabel ).build() );
+				subject = ensureUnique( subject );
+				cacheInstance( subject, typename, rawlabel );
+			}
 		}
 
 		URI subject = getCachedInstance( typename, rawlabel );
