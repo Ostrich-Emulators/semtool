@@ -74,10 +74,10 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 				// not sure why we need to reset the renderer so much
 				TableColumnModel tcm = tbl.getColumnModel();
 				tcm.getColumn( 0 ).setCellRenderer( renderer );
-				if( LoadingPlaySheetBase.this.getLoadingModel().isRel() ){
-					tcm.getColumn( 1 ).setCellRenderer( renderer );			
+				if ( LoadingPlaySheetBase.this.getLoadingModel().isRel() ) {
+					tcm.getColumn( 1 ).setCellRenderer( renderer );
 				}
-				
+
 				setErrorLabel();
 			}
 		} );
@@ -228,8 +228,8 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 			LoadingSheetModel lsm = LoadingSheetModel.class.cast( entry.getModel() );
 			LoadingSheetData.LoadingNodeAndPropertyValues nap = lsm.getNap( entry.getIdentifier() );
 			// log.debug( nap );
-			
-			if( filtering ){
+
+			if ( filtering ) {
 				return ( null == nap ? true : nap.hasError() );
 			}
 			return true;
@@ -295,6 +295,7 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 			vtm.setData( vals, Arrays.asList( "Column Name" ) );
 
 			JTable list = new JTable( vtm );
+			list.putClientProperty( "terminateEditOnFocusLost", Boolean.TRUE );
 			panel.add( list, BorderLayout.CENTER );
 
 			String opts[] = { "Save", "Cancel" };
