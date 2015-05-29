@@ -323,14 +323,14 @@ public class WeightDropDownButton extends JButton {
 	 * selected
 	 * @return Hashtable<String, Double> of the nodes and weights
 	 */
+	@SuppressWarnings("unchecked")
 	public static <X extends AbstractNodeEdgeBase> Map<X, Double>
 			getWeightHash( Collection<X> collection, String selectedValue,
 					double defaultScale ) {
 
 		double minimumValue = .5, multiplier = 3;
 
-		if ( selectedValue == null ) {
-			//this event was the element being unselected
+		if ( checkForUnselectionEvent(selectedValue) ) {
 			return new HashMap<>();
 		}
 
@@ -374,6 +374,23 @@ public class WeightDropDownButton extends JButton {
 		}
 
 		return weightHash;
+	}
+
+	private static String lastSelectedValue;
+	private static boolean checkForUnselectionEvent(String selectedValue) {
+		if (selectedValue == null) {
+			//i don't think this should happen, but just in case
+			lastSelectedValue = null;
+			return true;
+		}
+
+		if (selectedValue.equals(lastSelectedValue)) {
+			lastSelectedValue = null;
+			return true;
+		}
+
+		lastSelectedValue = selectedValue;
+		return false;
 	}
 
 	private static double getDoubleIfPossibleFrom(Object propertyValue) {
