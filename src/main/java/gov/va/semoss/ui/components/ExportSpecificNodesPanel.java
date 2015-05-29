@@ -233,6 +233,6 @@ public class ExportSpecificNodesPanel extends JPanel {
 			}
 		};
 
-		OperationsProgress.getInstance( "UI" ).add( progressTask );
+		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( progressTask );
 	}
 }

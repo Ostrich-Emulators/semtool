@@ -43,7 +43,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 			= Pattern.compile( "\"([^\\\\^]+)\"\\^\\^(.*)" );
 	protected static final Pattern URISTARTPATTERN
 			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
-	private final Set<URI> duplicates = new HashSet<>();
+	private final Set<URI> duplicates;
 	private QaChecker qaer;
 
 	public AbstractEdgeModeler() {
@@ -52,6 +52,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 	public AbstractEdgeModeler( QaChecker qa ) {
 		qaer = qa;
+		duplicates = qaer.getKnownUris();
 	}
 
 	public static boolean isUri( String raw, Map<String, String> namespaces ) {
