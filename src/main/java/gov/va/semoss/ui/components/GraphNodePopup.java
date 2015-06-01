@@ -166,15 +166,8 @@ public class GraphNodePopup extends JPopupMenu {
 	private void addDataOptions() {
 		addSeparator();
 
-		JMenuItem item = add( "Convert to Table" );
-		item.setToolTipText( "Convert graph display to a table display" );
-		item.addActionListener( new GraphPlaySheetExportListener( gps ) );
-
-		item = add( "Show Selected Node Information" );
-		item.setToolTipText( "To select nodes press Shift and click on nodes" );
-
-		item.addActionListener( new NodeInfoPopup( gps, highlightedVertices,
-				gps.getPlaySheetFrame().getDesktopPane() ) );
+		add( new GraphPlaySheetExportListener( gps ) );
+		add( new NodeInfoPopup( gps, Arrays.asList( highlightedVertices ) ) );
 	}
 
 	private void addGraphOptions() {
@@ -225,10 +218,12 @@ public class GraphNodePopup extends JPopupMenu {
 	 * @return boolean True if the type of node represents an ICD.
 	 */
 	public final boolean containsICDType() {
-		for ( SEMOSSVertex vertex : gps.getFilterData().getGraph().getVertices() )
-			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) )
+		for ( SEMOSSVertex vertex : gps.getFilterData().getGraph().getVertices() ) {
+			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) ) {
 				return true;
-		
+			}
+		}
+
 		return false;
 	}
 
