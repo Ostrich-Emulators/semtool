@@ -252,6 +252,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
     jSplitPane1.setDividerLocation(125);
     jSplitPane1.setDividerSize(2);
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+    jSplitPane1.setResizeWeight(0.25);
     jSplitPane1.setToolTipText("");
     jSplitPane1.setContinuousLayout(true);
 
@@ -325,7 +326,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
         .addComponent(submitButton)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(appendChkBox)
-        .addGap(0, 54, Short.MAX_VALUE))
+        .addGap(0, 86, Short.MAX_VALUE))
     );
 
     jSplitPane1.setRightComponent(insightsPanel);
