@@ -159,12 +159,14 @@ public class InsightTabController extends InsightManagerController {
 	 */
 	private void handleDeleteInsight(ActionEvent event){
 		Insight insight = imc.arylInsights.get(imc.intCurInsightIndex);
+		Perspective perspective = imc.arylPerspectives.get(imc.intCurPerspectiveIndex);
 		
 		//Define a Task to remove the current Insight:
 		Task<Boolean> deleteInsight = new Task<Boolean>(){
 		   @Override 
 		   protected Boolean call() throws Exception{
-		      return imc.engine.getWriteableInsightManager().getWriteableInsightTab().deleteInsight(insight);
+		      return imc.engine.getWriteableInsightManager().getWriteableInsightTab()
+		    	 .deleteInsight(new ArrayList<Insight>(imc.arylInsights), insight, perspective);
 		   }
 		};
         //Define a listener to update the JavaFX UI when the Task completes:
@@ -278,8 +280,15 @@ public class InsightTabController extends InsightManagerController {
 		Task<Boolean> saveInsight = new Task<Boolean>(){
 		   @Override 
 		   protected Boolean call() throws Exception{
+			  //Create an ArrayList based upon the current ObservableList of Insights.
+			  //If this new ArrayList doesn't contain the current Perspective, then
+			  //make it null:
+			  ArrayList<Insight> arylInsights = new ArrayList<Insight>(imc.arylInsights);
+			  if(colPerspectivesToRemoveInsight.contains(perspective) == false){
+				 arylInsights = null;
+			  }			   
 		      return imc.engine.getWriteableInsightManager().getWriteableInsightTab()
-		    	 .saveInsight(insight, colPerspectivesToAddInsight, colPerspectivesToRemoveInsight);
+		    	 .saveInsight(arylInsights, insight, colPerspectivesToAddInsight, colPerspectivesToRemoveInsight);
 		   }
 		};
         //Define a listener to update the JavaFX UI when the Task completes:
