@@ -65,7 +65,7 @@ public class LegendPanel2 extends JPanel {
 	public void drawLegend() {
 		removeAll();
 		
-		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : data.getTypeHash().entrySet() ) {
+		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : data.getNodeTypeMap().entrySet() ) {
 			String label = controlData.getLabel( entry.getKey() );
 			List<SEMOSSVertex> vertexList = entry.getValue();
 			SEMOSSVertex vertex = vertexList.get( 0 );

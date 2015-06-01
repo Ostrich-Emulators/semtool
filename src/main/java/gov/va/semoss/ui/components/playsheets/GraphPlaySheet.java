@@ -21,6 +21,7 @@ package gov.va.semoss.ui.components.playsheets;
 
 import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.lang.reflect.Constructor;
@@ -66,18 +67,25 @@ import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
+import gov.va.semoss.ui.transformer.SelectingTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import java.awt.Paint;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
+
 import org.apache.commons.collections15.Predicate;
 import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.LinkedHashModel;
 
 /**
  */
@@ -96,7 +104,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected String layoutName = Constants.FR;
 	protected ControlData controlData = new ControlData();
 	protected PropertySpecData predData = new PropertySpecData();
-	protected VertexFilterData filterData = new VertexFilterData();
+	protected VertexFilterData filterData;
 
 	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
 	protected VertexShapeTransformer vht = new VertexShapeTransformer();
@@ -108,7 +116,14 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected LabelFontTransformer<SEMOSSEdge> eft = new LabelFontTransformer<>();
 	protected LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
 	protected TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
-	protected PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<>();
+	protected PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<SEMOSSEdge>() {
+
+		@Override
+		protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
+			// always show the edge
+			return super.transformNotSelected( t, false );
+		}
+	};
 	protected EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 	protected ArrowPaintTransformer adpt = new ArrowPaintTransformer();
 	protected ArrowPaintTransformer aft = new ArrowPaintTransformer();
@@ -160,6 +175,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setTopComponent( controlPanel );
 		graphSplitPane.setBottomComponent( gzPane );
 
+		filterData = new VertexFilterData(gdm.getGraph());
 		legendPanel.setFilterData( filterData );
 	}
 
@@ -183,8 +199,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		for ( SEMOSSVertex v : visible.getVertices() ) {
 			graph.addVertex( v );
 		}
+
 		for ( SEMOSSEdge v : visible.getEdges() ) {
-			graph.addEdge( v.getInVertex(), v.getOutVertex(), v );
+			graph.addEdge( visible.getSource( v ), visible.getDest( v ) );
 		}
 
 		return graph;
@@ -274,6 +291,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			log.error( "problem adding panel to play sheet", ex );
 		}
 	}
+	
+	@Override
+	public void refineView() {
+		updateGraph();
+	}
 
 	/**
 	 * Method initVisualizer.
@@ -308,6 +330,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		PickedStateListener psl = new PickedStateListener( viewer, this );
 		viewer.getPickedVertexState().addItemListener( psl );
+		viewer.getPickedEdgeState().addItemListener( psl );
 	}
 
 	public String getLayoutName() {
@@ -426,20 +449,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return vft;
 	}
 
-	/**
-	 * Method clearHighlighting.
-	 */
-	public void clearHighlighting() {
-		vft.clearSelected();
-		vpt.clearSelected();
-
-		est.clearSelected();
-		ept.clearSelected();
-		eft.clearSelected();
-		adpt.clearSelected();
-		aft.clearSelected();
-	}
-
 	public void removeExistingConcepts( List<String> subVector ) {
 		throw new UnsupportedOperationException( "this function is not operational until refactored" );
 
@@ -494,15 +503,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	private void genAllData() {
-		filterData.fillRows();
-		filterData.fillEdgeRows();
+		filterData.generateAllRows();
 		controlData.generateAllRows();
+		colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
 
-		if ( gdm.showSudowl() ) {
-			predData.genPredList();
-		}
-
-		colorShapeData.fillRows( filterData.getTypeHash() );
+//		if ( gdm.showSudowl() ) {
+//			predData.genPredList();
+//		}
 	}
 
 	private void processControlData( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
@@ -510,17 +517,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			for ( URI property : vertex.getProperties().keySet() ) {
 				controlData.addVertexProperty( vertex.getType(), property );
 			}
-
-			filterData.addVertex( vertex );
 		}
 
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
 			for ( URI property : edge.getProperties().keySet() ) {
 				controlData.addEdgeProperty( edge.getEdgeType(), property );
 			}
-
-			//add to filter data
-			filterData.addEdge( edge );
 
 			//add to pred data
 			predData.addPredicateAvailable( edge.getURI().stringValue() );
@@ -540,18 +542,73 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	@Override
 	public void create( Model m, IEngine engine ) {
-		add( m, engine );
+		add( m, null, engine );
+	}
+
+	/**
+	 * Creates graph nodes from the given data. If the {@code Value[]}s have
+	 * length 1, the values are expected to be nodes ({@link Resource}s. If they
+	 * have length 3, then they are repackaged as Statements, and forwarded on to
+	 * {@link #create(org.openrdf.model.Model, gov.va.semoss.rdf.engine.api.IEngine) }.
+	 * Anything else will throw an exception
+	 *
+	 * @param data the data to add are expected to be
+	 * @param headers ignored
+	 * @param engine
+	 * @throws IllegalArgumentException
+	 *
+	 */
+	@Override
+	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
+		List<Resource> nodes = new ArrayList<>();
+		Model model = new LinkedHashModel();
+		for ( Value[] row : data ) {
+			Resource s = Resource.class.cast( row[0] );
+			if ( 1 == row.length ) {
+				nodes.add( s );
+			}
+			else if ( 3 == row.length ) {
+				URI p = URI.class.cast( row[1] );
+				Value o = row[2];
+
+				model.add( s, p, o );
+			}
+			else {
+				throw new IllegalArgumentException( "Values cannot be converted for graph usage" );
+			}
+		}
+
+		add( model, nodes, engine );
 	}
 
 	@Override
 	public void overlay( Model m, IEngine engine ) {
-		add( m, engine );
+		add( m, null, engine );
 	}
 
-	public void add( Model m, IEngine engine ) {
-		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
+	/**
+	 * Redirects to {@link #create(java.util.List, java.util.List,
+	 * gov.va.semoss.rdf.engine.api.IEngine) }
+	 *
+	 * @param data
+	 * @param headers
+	 * @param eng
+	 */
+	@Override
+	public void overlay( List<Value[]> data, List<String> headers, IEngine eng ) {
+		create( data, headers, eng );
+	}
 
-		if ( m.isEmpty() ) {
+	public void add( Model m, List<Resource> nodes, IEngine engine ) {
+		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
+		if ( null == nodes ) {
+			nodes = new ArrayList<>();
+		}
+		if ( null == m ) {
+			m = new LinkedHashModel();
+		}
+
+		if ( m.isEmpty() && nodes.isEmpty() ) {
 			return; // nothing to add to the graph
 		}
 
@@ -559,45 +616,24 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			gdm.removeElementsSinceLevel( overlayLevel );
 		}
 
-		gdm.addGraphLevel( m, engine, ++overlayLevel );
+		overlayLevel++;
+
+		if ( !m.isEmpty() ) {
+			gdm.addGraphLevel( m, engine, overlayLevel );
+		}
+		if ( !nodes.isEmpty() ) {
+			gdm.addGraphLevel( nodes, engine, overlayLevel );
+		}
+
 		if ( overlayLevel > maxOverlayLevel ) {
 			maxOverlayLevel = overlayLevel;
 		}
+
 		updateGraph();
 	}
 
 	@Override
 	public void run() {
-	}
-
-	public static void initVvRenderer( RenderContext<SEMOSSVertex, SEMOSSEdge> rc, ControlData controlData ) {
-		LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
-		LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
-
-		PaintTransformer vpt = new PaintTransformer();
-		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
-		VertexStrokeTransformer vst = new VertexStrokeTransformer();
-		ArrowPaintTransformer adpt = new ArrowPaintTransformer(); // color
-		ArrowPaintTransformer aft = new ArrowPaintTransformer(); // fill
-		//keep the stored one if possible
-		LabelFontTransformer<SEMOSSVertex> vlft = new LabelFontTransformer<>();
-		LabelFontTransformer<SEMOSSEdge> elft = new LabelFontTransformer<>();
-		VertexShapeTransformer vsht = new VertexShapeTransformer();
-
-		//view.setGraphMouse(mc);
-		rc.setVertexLabelTransformer( vlt );
-		rc.setEdgeLabelTransformer( elt );
-		rc.setVertexStrokeTransformer( vst );
-		rc.setVertexShapeTransformer( vsht );
-		rc.setVertexFillPaintTransformer( vpt );
-		rc.setEdgeDrawPaintTransformer( vpt );
-		rc.setEdgeStrokeTransformer( est );
-		rc.setArrowDrawPaintTransformer( adpt );
-		rc.setEdgeArrowStrokeTransformer( est );
-		rc.setArrowFillPaintTransformer( aft );
-		rc.setVertexFontTransformer( vlft );
-		rc.setEdgeFontTransformer( elft );
-		rc.setLabelOffset( 0 );
 	}
 
 	public LegendPanel2 getLegendPanel() {
@@ -607,47 +643,20 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public void incrementFont( float incr ) {
 		super.incrementFont( incr );
-		boolean increaseFont = ( incr > 0 );
-
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = view;
-		LabelFontTransformer<SEMOSSVertex> transformerV
-				= (LabelFontTransformer) viewer.getRenderContext().getVertexFontTransformer();
-		LabelFontTransformer<SEMOSSEdge> transformerE
-				= (LabelFontTransformer) viewer.getRenderContext().getEdgeFontTransformer();
 
 		//if no vertices or edges are selected, perform action on all vertices and edges
-		if ( viewer.getPickedVertexState().getPicked().isEmpty()
-				&& viewer.getPickedEdgeState().getPicked().isEmpty() ) {
-			if ( increaseFont ) {
-				transformerV.increaseFontSize();
-				transformerE.increaseFontSize();
-			}
-			else {
-				transformerV.decreaseFontSize();
-				transformerE.decreaseFontSize();
-			}
+		if ( view.getPickedVertexState().getPicked().isEmpty()
+				&& view.getPickedEdgeState().getPicked().isEmpty() ) {
+			vft.changeFontSize( (int) incr );
+			eft.changeFontSize( (int) incr );
+		}
+		else {
+			//otherwise, only perform action on the selected vertices and edges
+			vft.changeFontSize( (int) incr, view.getPickedVertexState().getPicked() );
+			eft.changeFontSize( (int) incr, view.getPickedEdgeState().getPicked() );
 		}
 
-		//otherwise, only perform action on the selected vertices and edges
-		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
-			if ( increaseFont ) {
-				transformerV.increaseFontSize( vertex );
-			}
-			else {
-				transformerV.decreaseFontSize( vertex );
-			}
-		}
-
-		for ( SEMOSSEdge edge : viewer.getPickedEdgeState().getPicked() ) {
-			if ( increaseFont ) {
-				transformerE.increaseFontSize( edge );
-			}
-			else {
-				transformerE.decreaseFontSize( edge );
-			}
-		}
-
-		viewer.repaint();
+		view.repaint();
 	}
 
 	public boolean isTraversable() {
@@ -662,17 +671,51 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return controlPanel;
 	}
 
-	public void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
+	/**
+	 * Clears the highlighting and turns off skeleton mode if it's enabled
+	 */
+	public void clearHighlighting() {
+		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, est,
+			ept, eft, elt, adpt, aft } ) {
+			s.setSkeletonMode( false );
+			s.clearSelected();
+		}
+	}
+
+	/**
+	 * Adds the given vertices and edges to the highlighted parts of the graph
+	 *
+	 * @param verts
+	 * @param edges
+	 * @param asSkeleton should the skeleton mode be activated as well?
+	 */
+	protected void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges,
+			boolean asSkeleton ) {
+
+		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, est,
+			ept, eft, elt, adpt, aft } ) {
+			s.setSkeletonMode( asSkeleton );
+		}
+
 		vft.select( verts );
 		vpt.select( verts );
 
 		est.select( edges );
 		ept.select( edges );
 		eft.select( edges );
+		elt.select( edges );
 		adpt.select( edges );
-		aft.select( edges );		
+		aft.select( edges );
 
 		view.repaint();
+	}
+
+	public void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
+		highlight( verts, edges, false );
+	}
+
+	public void skeleton( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
+		highlight( verts, edges, true );
 	}
 
 	public Collection<SEMOSSVertex> getHighlightedVertices() {

@@ -18,19 +18,26 @@
  ******************************************************************************/
 package gov.va.semoss.ui.components.models;
 
+import gov.va.semoss.om.SEMOSSEdge;
+
+import java.util.ArrayList;
+import java.util.Map;
+
 import javax.swing.table.AbstractTableModel;
 
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.ui.components.VertexFilterData;
+import org.openrdf.model.URI;
 
 /**
  * This class is used to create a table model for edge properties.
  */
 public class EdgePropertyTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = -4086813413883136585L;
-	private VertexFilterData data;
-	private SEMOSSEdge edge;
 
+	private static final String[] columnNames = { "Name ", "Value" };
+	private static final Class<?>[] classNames = { Object.class, Object.class };
+	private ArrayList<PropertyRow> rows = new ArrayList<PropertyRow>();
+	private SEMOSSEdge edge;
+	
 	/**
 	 * Constructor for EdgePropertyTableModel.
 	 * 
@@ -39,9 +46,10 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 * @param edge
 	 *            DBCMEdge
 	 */
-	public EdgePropertyTableModel(VertexFilterData _data, SEMOSSEdge _edge) {
-		data = _data;
-		edge = _edge;
+	public EdgePropertyTableModel(SEMOSSEdge edge) {
+		this.edge = edge;
+		for ( Map.Entry<URI, Object> entry : edge.getProperties().entrySet() )
+			rows.add( new PropertyRow(entry.getKey(), entry.getValue()));
 	}
 
 	/**
@@ -51,17 +59,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public int getColumnCount() {
-		return data.getPropertyNames().length;
-	}
-
-	/**
-	 * Sets the vertex filter data.
-	 * 
-	 * @param data
-	 *            VertexFilterData
-	 */
-	public void setVertexFilterData(VertexFilterData data) {
-		this.data = data;
+		return columnNames.length;
 	}
 
 	/**
@@ -73,7 +71,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 * @return String Column name.
 	 */
 	public String getColumnName(int index) {
-		return data.getPropertyNames()[index];
+		return columnNames[index];
 	}
 
 	/**
@@ -83,7 +81,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public int getRowCount() {
-		return data.getEdgeNumRows(edge);
+		return rows.size();
 	}
 
 	/**
@@ -98,9 +96,17 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public Object getValueAt(int row, int column) {
-		// get the value first
-		return data.getPropValueAt(edge, row, column);
+		PropertyRow pRow = rows.get(row);
+		switch ( column ) {
+			case 0: {
+				return pRow.name.getLocalName();
+			} case 1: { 
+				return pRow.value;
+			} default:
+				return null;
+		}
 	}
+
 
 	/**
 	 * Sets the edge property value at a particular row and column.
@@ -113,9 +119,20 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 *            Column that value is assigned to.
 	 */
 	public void setValueAt(Object val, int row, int column) {
-		data.setPropValueAt(edge, val + "", row, column);
+		PropertyRow pRow = rows.get(row);
+			switch ( column ) {
+			case 0: {
+				pRow.name = (URI) val;
+				break;
+			} case 1: { 
+				pRow.value = val;
+				break;
+			}
+		}
+		
+		edge.setProperty(pRow.name, pRow.value);
+		//JPM 2015/05/27 is the intention here to save this back to the db?
 		fireTableDataChanged();
-		// sets the value
 	}
 
 	/**
@@ -127,7 +144,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 * @return Class Column class.
 	 */
 	public Class<?> getColumnClass(int column) {
-		return data.getPropertyClassNames()[column];
+		return classNames[column];
 	}
 
 	/**
@@ -144,5 +161,15 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 		if (column == 1)
 			return true;
 		return false;
+	}
+
+	public class PropertyRow {
+		URI name;
+		Object value;
+
+		public PropertyRow( URI name, Object value ) {
+			this.name = name;
+			this.value = value;
+		}
 	}
 }

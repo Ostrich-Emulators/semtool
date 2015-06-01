@@ -203,10 +203,10 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 
 					String nFillQuery = Utility.fillParam( typeQuery, hash );
 					logger.debug( nFillQuery );
-					NeighborMenuItem nItem = new NeighborMenuItem( inst, gps, nFillQuery, engine );
+					NeighborMenuItem nItem = new NeighborMenuItem( inst, gps, nFillQuery );
 					if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
 						nItem = new NeighborMenuItem( "->" + Utility.getInstanceName( pred )
-								+ "->" + inst, gps, nFillQuery, engine );
+								+ "->" + inst, gps, nFillQuery );
 					}
 					add( nItem );
 					//hash.put(objClassName, predClassName);

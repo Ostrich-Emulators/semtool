@@ -19,24 +19,26 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
-import java.awt.event.ActionEvent;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.swing.AbstractAction;
 
 /**
  * Controls hiding the pop up menu for nodes on the graph play sheet.
  */
 public class HideVertexPopupMenuListener extends AbstractAction {
+	private static final long serialVersionUID = -2864866456286018607L;
 
 	private final GraphPlaySheet gps;
 	private final List<SEMOSSVertex> highlightedVertices = new ArrayList<>();
 
-	public HideVertexPopupMenuListener( GraphPlaySheet gps,
-			Collection<SEMOSSVertex> highlights ) {
+	public HideVertexPopupMenuListener( GraphPlaySheet gps, Collection<SEMOSSVertex> highlights ) {
 		super( "Hide Nodes" );
 		this.gps = gps;
 		highlightedVertices.addAll( highlights );
@@ -44,16 +46,10 @@ public class HideVertexPopupMenuListener extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		// get the engine
-		// execute the neighbor hood 
-		// paint it
-		// get the query from the
 		for ( SEMOSSVertex vertex : highlightedVertices ) {
-			// take the vertex and add it to the sheet
-			gps.getFilterData().addNodeToFilter( vertex );
 			vertex.setVisible( false );
 		}
-
+		
 		gps.getView().repaint();
 	}
 }

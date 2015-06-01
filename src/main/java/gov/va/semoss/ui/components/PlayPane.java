@@ -53,6 +53,7 @@ import gov.va.semoss.util.CSSApplication;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
+import gov.va.semoss.util.QuestionPlaySheetStore;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -126,17 +127,18 @@ import aurelienribon.ui.css.swing.SwingStyle;
 import com.ibm.icu.util.StringTokenizer;
 
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
-import gov.va.semoss.ui.actions.ExportGraphMLAction;
+import gov.va.semoss.ui.actions.ExportGraphAction;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
-
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import java.util.HashMap;
+
 import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.event.InternalFrameEvent;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -146,9 +148,9 @@ import org.openrdf.model.vocabulary.RDFS;
  * SEMOSS.
  */
 public class PlayPane extends JFrame {
-
 	private static final long serialVersionUID = -715188668604903980L;
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
+	
 	private final String IMANAGE = "iManagePanel";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
@@ -228,7 +230,10 @@ public class PlayPane extends JFrame {
 			ExportTtlAction.Style.RDF, this );
 	private final DbAction exportinsights
 			= new ExportInsightsAction( UIPROGRESS, this );
-	private final DbAction expgraph = new ExportGraphMLAction( UIPROGRESS, this );
+	private final DbAction expgraphml
+			= new ExportGraphAction( UIPROGRESS, this, ExportGraphAction.Style.GRAPHML );
+	private final DbAction expgson
+			= new ExportGraphAction( UIPROGRESS, this, ExportGraphAction.Style.GSON );
 	private final DbAction expall = new ExportLoadingSheetAction( UIPROGRESS,
 			this, true, true );
 	private final DbAction exprels = new ExportLoadingSheetAction( UIPROGRESS,
@@ -561,9 +566,9 @@ public class PlayPane extends JFrame {
 				IEngine engine = repoList.getSelectedValue();
 
 				DbAction actions[] = {
-					toggler, proper, cloner, clearer, exportttl, exportnt, expgraph,
-					exportrdf, exportinsights, expall, exprels, expnodes, expSpecNodes,
-					expSpecRels, unmounter, sparqler, importls, consistencyCheck };
+					toggler, proper, cloner, clearer, exportttl, exportnt, expgraphml,
+					expgson, exportrdf, exportinsights, expall, exprels, expnodes,
+					expSpecNodes, expSpecRels, unmounter, sparqler, importls, consistencyCheck };
 				for ( DbAction dba : actions ) {
 					dba.setEngine( engine );
 					dba.setEnabled( null != engine );
@@ -627,7 +632,7 @@ public class PlayPane extends JFrame {
 
 		owlPanel = makeOwlTab();
 		//leftView.addTab( "SUDOWL", null, owlPanel, null );
-		
+
 		//Label
 		outputPanel = makeOutputPanel();
 		leftView.addTab( "Graph Labels", null, outputPanel,
@@ -886,6 +891,12 @@ public class PlayPane extends JFrame {
 		edgeTable = initJTableAndAddTo( panel, true );
 
 		refreshButton = initCustomButton( "Refresh Graph" );
+		refreshButton.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent actionevent ) {
+				QuestionPlaySheetStore.getInstance().getActiveSheet().refineView();
+			}
+		});
 		panel.add( refreshButton, getGBC( GridBagConstraints.NONE ) );
 
 		return panel;
@@ -1270,7 +1281,12 @@ public class PlayPane extends JFrame {
 
 		loadingsheets.add( expall );
 		exptop.add( exportinsights );
-		exptop.add( expgraph );
+
+		JMenu gexp = new JMenu( "Graph" );
+		gexp.add(  expgraphml );
+		gexp.add(  expgson );		
+		
+		exptop.add( gexp );
 		db.add( exptop );
 
 		JMenu importtop = new JMenu( "Import" );

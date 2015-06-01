@@ -51,6 +51,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -100,21 +102,17 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		dometamodel = meta;
 		doconformance = conform;
 		doreplace = replace;
-	//	setTitle( "Import Data Review 4" );
-	//	fileToLoad.
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
-
 		showerrs.setVisible( doconformance );
-		
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
 			boolean meta, boolean conform, boolean replace ) {
 		this( eng, calc, meta, conform, replace );
-		String sName = toload.toString();
-		setTitle( sName.substring(sName.lastIndexOf("\\")+1, sName.lastIndexOf("]")) );
-		setToolTipText("Window of" + sName.substring(sName.lastIndexOf("\\")+1, sName.lastIndexOf("]")));
+		String sName = Utility.implode( toload, "", "", "," );
+		setTitle( sName );
+		setToolTipText( "Window of" + sName );
 		populateForFiles( toload );
 	}
 
@@ -128,10 +126,9 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, ImportData data ) {
-		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
+		this( eng, false, data.getMetadata().isAutocreateMetamodel(), false, false );
 
 		setTitle( "Import Data Review" );
-		
 
 		LoadingPlaySheetBase first = null;
 		for ( LoadingSheetData n : data.getSheets() ) {
@@ -173,6 +170,21 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		QaChecker el = ( timertoggle.isSelected() ? realtimer : null );
 		c.getLoadingModel().setQaChecker( el );
+
+		c.getLoadingModel().addTableModelListener( new TableModelListener() {
+
+			@Override
+			public void tableChanged( TableModelEvent e ) {
+				CloseableTab tab
+						= LoadingPlaySheetFrame.this.getTabComponent( c );
+
+				boolean haserr = ( timertoggle.isSelected()
+						&& ( c.getLoadingModel().hasConformanceErrors()
+						|| c.getLoadingModel().hasModelErrors() ) );
+
+				tab.setMark( haserr ? MarkType.ERROR : MarkType.NONE );
+			}
+		} );
 	}
 
 	@Override
@@ -230,7 +242,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					LoadingPlaySheetFrame.this.saveall.setSaveFile( lastloaded );
 				}
 				announceErrors();
-				
+
 			}
 		} ) {
 			@Override
@@ -277,9 +289,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	@Override
-	public void closeTab( PlaySheetCentralComponent c ) {
+	public
+			void closeTab( PlaySheetCentralComponent c ) {
 		if ( c instanceof RelationshipLoadingPlaySheet ) {
-			sheets.remove( RelationshipLoadingPlaySheet.class.cast( c ) );
+			sheets.remove( RelationshipLoadingPlaySheet.class
+					.cast( c ) );
 		}
 		super.closeTab( c );
 	}
@@ -344,6 +358,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			return repos.getSelectedValue();
 		}
 		return null;
+
 	}
 
 	private class LoadingAction extends AbstractAction {
@@ -379,26 +394,35 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
+			final ImportData importdata = ImportData.forEngine( engine );
+
+			final int progressPerTab = 100 / sheets.size();
+			for ( LoadingPlaySheetBase c : sheets ) {
+				String text = "Preparing tab: " + c.getTitle();
+				addProgress( text, progressPerTab );
+				log.debug( text );
+
+				LoadingSheetData lsd = c.getLoadingModel().toLoadingSheet( c.getTitle() );
+				if ( !lsd.isEmpty() ) {
+					importdata.add( lsd );
+				}
+			}
+
+			if ( importdata.isEmpty() ) {
+				JOptionPane.showMessageDialog( rootPane, "No data to load",
+						"Nothing to Do", JOptionPane.INFORMATION_MESSAGE );
+				return;
+			}
+
 			if ( askForLoad( engine ) ) {
 				final int ok[] = { 0 };
 				String t = "Committing data to " + engine;
-				int progressPerTab = 100 / sheets.size();
 
 				ProgressTask pt = new ProgressTask( t, new Runnable() {
 
 					@Override
 					public void run() {
 						updateProgress( "Preparing data", 0 );
-						ImportData importdata = ImportData.forEngine( engine );
-
-						for ( LoadingPlaySheetBase c : sheets ) {
-							String text = "Preparing tab: " + c.getTitle();
-							addProgress( text, progressPerTab );
-							log.debug( text );
-
-							LoadingSheetData lsd = c.getLoadingModel().toLoadingSheet( c.getTitle() );
-							importdata.add( lsd );
-						}
 
 						try {
 							String ename = MetadataQuery.getEngineLabel( engine );

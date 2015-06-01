@@ -7,9 +7,12 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.util.QaChecker;
+import gov.va.semoss.rdf.engine.util.QaChecker.CacheType;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.DoubleMetaphoneDistance;
 import gov.va.semoss.util.MetaphoneDistance;
+import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.SoundexDistance;
 import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
@@ -65,18 +68,18 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
 	public void setEngine( IEngine eng ) {
 		final DBToLoadingSheetExporter exporter = new DBToLoadingSheetExporter( eng );
 
+		QaChecker checker = new QaChecker( eng );
+		
 		conceptmodellist.clear();
 		relationmodellist.clear();
 
 		crenderer.clearCache();
 		rrenderer.clearCache();
 
-		Map<URI, String> cs
-				= Utility.getInstanceLabels( exporter.createConceptList(), eng );
+		Map<URI, String> cs = MultiMap.lossyflip( checker.getCache( CacheType.CONCEPTCLASS ) );
 		cs = Utility.sortUrisByLabel( cs );
 
-		Map<URI, String> rs
-				= Utility.getInstanceLabels( exporter.createRelationshipList(), eng );
+		Map<URI, String> rs = MultiMap.lossyflip( checker.getCache( CacheType.RELATIONCLASS ) );
 		rs = Utility.sortUrisByLabel( rs );
 
 		conceptmodellist.addAll( cs.keySet() );

@@ -137,11 +137,6 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		this.setSchemaBuilder( schema );
 	}
 
-	@Override
-	public void setDataBuilder( UriBuilder data ) {
-		super.setDataBuilder( data );
-	}
-
 	/**
 	 * Method getRepositoryConnection. Gets the repository connection.
 	 *

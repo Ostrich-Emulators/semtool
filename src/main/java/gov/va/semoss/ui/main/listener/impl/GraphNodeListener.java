@@ -72,7 +72,6 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer
 				= (VisualizationViewer<SEMOSSVertex, SEMOSSEdge>) e.getSource();
 
-		Set<SEMOSSVertex> vertHash = new HashSet<>();
 		SEMOSSVertex clickedVertex = checkIfVertexWasClicked( viewer, e.getX(),
 				e.getY() );
 
@@ -80,6 +79,7 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 			handleEdges( viewer );
 		}
 
+		Set<SEMOSSVertex> vertHash = new HashSet<>();
 		if ( e.getButton() == MouseEvent.BUTTON3 ) {
 			vertHash = handleRightClick( viewer, clickedVertex, e );
 		}
@@ -125,8 +125,7 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 
 		Set<SEMOSSEdge> pickedEdges = viewer.getPickedEdgeState().getPicked();
 		for ( SEMOSSEdge edge : pickedEdges ) {
-			EdgePropertyTableModel pm = new EdgePropertyTableModel(
-					gps.getFilterData(), edge );
+			EdgePropertyTableModel pm = new EdgePropertyTableModel( edge );
 			table.setModel( pm );
 			pm.fireTableDataChanged();
 		}
