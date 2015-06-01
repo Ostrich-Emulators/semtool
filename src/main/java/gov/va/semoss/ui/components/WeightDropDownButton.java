@@ -105,7 +105,7 @@ public class WeightDropDownButton extends JButton {
 		//Create a dataset of node types and their properties to the JTree
 		//we use this intermediary data structure because it gives us uniqueness and order for the elements
 		Map<String, Set<String>> nodePropertiesToAdd = new HashMap<>();
-		Collection<SEMOSSVertex> nodeCollection = playSheet.getForest().getVertices();
+		Collection<SEMOSSVertex> nodeCollection = playSheet.asForest().getVertices();
 		for ( SEMOSSVertex node : nodeCollection ) {
 			Set<String> propertiesForThisNodeType = nodePropertiesToAdd.get( node.getType().getLocalName() );
 			if ( propertiesForThisNodeType == null ) {
@@ -123,12 +123,12 @@ public class WeightDropDownButton extends JButton {
 		//Create a dataset of edge types and their properties to the JTree
 		//we use this intermediary data structure because it gives us uniqueness and order for the elements
 		Map<String, Set<String>> edgePropertiesToAdd = new HashMap<>();
-		Collection<SEMOSSEdge> edgeCollection = playSheet.getForest().getEdges();
+		Collection<SEMOSSEdge> edgeCollection = playSheet.asForest().getEdges();
 		for ( SEMOSSEdge edge : edgeCollection ) {
-			Set<String> propertiesForThisEdgeType = edgePropertiesToAdd.get( edge.getEdgeType() );
+			Set<String> propertiesForThisEdgeType = edgePropertiesToAdd.get( edge.getType().toString() );
 			if ( propertiesForThisEdgeType == null ) {
-				propertiesForThisEdgeType = new TreeSet<String>();
-				edgePropertiesToAdd.put( edge.getEdgeType().getLocalName(), propertiesForThisEdgeType );
+				propertiesForThisEdgeType = new TreeSet<>();
+				edgePropertiesToAdd.put( edge.getType().getLocalName(), propertiesForThisEdgeType );
 			}
 			for ( Map.Entry<URI, Object> entry : edge.getProperties().entrySet() ) {
 				if ( getDoubleIfPossibleFrom( entry.getValue() ) > 0 ) {
@@ -303,7 +303,7 @@ public class WeightDropDownButton extends JButton {
 	private void rescaleVertices( String selectedValue ) {
 		VertexShapeTransformer vst
 				= (VertexShapeTransformer) playSheet.getView().getRenderContext().getVertexShapeTransformer();
-		vst.setSizeMap( getWeightHash( playSheet.getForest().getVertices(),
+		vst.setSizeMap( getWeightHash( playSheet.asForest().getVertices(),
 				selectedValue, vst.getDefaultSize() ) );
 
 		playSheet.getView().repaint();
@@ -311,7 +311,7 @@ public class WeightDropDownButton extends JButton {
 
 	private void rescaleEdges( String selectedValue ) {
 		EdgeStrokeTransformer est = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		est.setEdges( getWeightHash( playSheet.getForest().getEdges(), selectedValue, 1.0 ) );
+		est.setEdges( getWeightHash( playSheet.asForest().getEdges(), selectedValue, 1.0 ) );
 
 		playSheet.getView().repaint();
 	}

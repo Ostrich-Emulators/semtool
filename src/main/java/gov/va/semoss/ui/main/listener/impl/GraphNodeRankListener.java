@@ -64,13 +64,13 @@ public class GraphNodeRankListener extends AbstractAction {
 		double tolerance = 0.001;
 		int maxIterations = 100;
 		final PageRank<SEMOSSVertex, ?> ranker
-				= new PageRank<>( playsheet.getForest(), alpha );
+				= new PageRank<>( playsheet.asForest(), alpha );
 
 		ranker.setTolerance( tolerance );
 		ranker.setMaxIterations( maxIterations );
 		ranker.evaluate();
 
-		List<SEMOSSVertex> col = new ArrayList<>( playsheet.getForest().getVertices() );
+		List<SEMOSSVertex> col = new ArrayList<>( playsheet.asForest().getVertices() );
 		// sort based on ranking score
 		Collections.sort( col, new Comparator<SEMOSSVertex>() {
 

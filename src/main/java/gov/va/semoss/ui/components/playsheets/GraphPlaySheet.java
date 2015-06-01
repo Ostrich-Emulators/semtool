@@ -36,7 +36,9 @@ import org.jgrapht.graph.SimpleGraph;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DelegateForest;
 import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -49,6 +51,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
+import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.NewHoriScrollBarUI;
 import gov.va.semoss.ui.components.NewScrollBarUI;
@@ -175,12 +178,40 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setTopComponent( controlPanel );
 		graphSplitPane.setBottomComponent( gzPane );
 
-		filterData = new VertexFilterData(gdm.getGraph());
+		filterData = new VertexFilterData( gdm.getGraph() );
 		legendPanel.setFilterData( filterData );
 	}
 
-	public DelegateForest<SEMOSSVertex, SEMOSSEdge> getForest() {
-		return new DelegateForest<>( gdm.getGraph() );
+	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
+		Forest<SEMOSSVertex, SEMOSSEdge> forest = GraphToTreeConverter.convert( gdm.getGraph(),
+				view.getPickedVertexState().getPicked() );
+		
+		printForest( forest );
+		return forest;
+	}
+
+	public static void printForest( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {
+		for ( Tree<SEMOSSVertex, SEMOSSEdge> tree : forest.getTrees() ) {
+			printTree( tree );
+		}
+	}
+
+	public static void printTree( Tree<SEMOSSVertex, SEMOSSEdge> tree ) {
+		printTree( tree.getRoot(), tree, 0 );
+	}
+
+	public static void printTree( SEMOSSVertex root,
+			Tree<SEMOSSVertex, SEMOSSEdge> tree, int depth ) {
+		StringBuilder sb = new StringBuilder();
+		for ( int i = 0; i < depth; i++ ) {
+			sb.append( "  " );
+		}
+		sb.append( root );
+		log.debug( sb.toString() );
+
+		for ( SEMOSSVertex child : tree.getChildren( root ) ) {
+			printTree( child, tree, depth + 1 );
+		}
 	}
 
 	/**
@@ -200,8 +231,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			graph.addVertex( v );
 		}
 
-		for ( SEMOSSEdge v : visible.getEdges() ) {
-			graph.addEdge( visible.getSource( v ), visible.getDest( v ) );
+		for ( SEMOSSEdge e : visible.getEdges() ) {
+			SEMOSSVertex s = visible.getSource( e );
+			SEMOSSVertex d = visible.getDest( e );
+			graph.addEdge( s, d, e );
 		}
 
 		return graph;
@@ -291,7 +324,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			log.error( "problem adding panel to play sheet", ex );
 		}
 	}
-	
+
 	@Override
 	public void refineView() {
 		updateGraph();
@@ -384,7 +417,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 *
 	 * @param forest DelegateForest
 	 */
-	public void setForest( DelegateForest<SEMOSSVertex, SEMOSSEdge> forest ) {
+	public void setForest( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {
 		gdm.setGraph( forest );
 	}
 
@@ -405,19 +438,34 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 				+ ", and layoutClass " + layoutClass );
 
 		boolean ok = false;
-		Layout<SEMOSSVertex, SEMOSSEdge> layout;
+		Layout<SEMOSSVertex, SEMOSSEdge> layout = null;
 
 		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter
 				= new VertexPredicateFilter<>( predicate );
 		Graph<SEMOSSVertex, SEMOSSEdge> graph = filter.transform( gdm.getGraph() );
+
 		try {
-			Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
-			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
+			Constructor<?> constructor = layoutClass.getConstructor( Forest.class );
+			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( asForest() );
 			ok = true;
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-			log.error( "could not create layout", e );
-			layout = new FRLayout( gdm.getGraph() );
+			log.warn( "no forest constructor for " + layoutName + " layout" );
+		}
+
+		if ( !ok ) {
+			try {
+				Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
+				layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
+				ok = true;
+			}
+			catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+				log.error( "could not create layout", e );
+			}
+		}
+
+		if ( null == layout ) {
+			layout = new FRLayout( graph );
 		}
 
 		controlPanel.setGraphLayout( layout,
@@ -506,10 +554,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		filterData.generateAllRows();
 		controlData.generateAllRows();
 		colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
-
-//		if ( gdm.showSudowl() ) {
-//			predData.genPredList();
-//		}
 	}
 
 	private void processControlData( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
@@ -521,7 +565,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
 			for ( URI property : edge.getProperties().keySet() ) {
-				controlData.addEdgeProperty( edge.getEdgeType(), property );
+				controlData.addEdgeProperty( edge.getType(), property );
 			}
 
 			//add to pred data
@@ -672,18 +716,18 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Clears the highlighting, turns off skeleton mode if it's enabled, and resizes
-	 * all nodes with a custom size
+	 * Clears the highlighting, turns off skeleton mode if it's enabled, and
+	 * resizes all nodes with a custom size
 	 */
 	public void clearHighlighting() {
-		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst, 
-			vht, est,	ept, eft, elt, adpt, aft } ) {
+		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst,
+			vht, est, ept, eft, elt, adpt, aft } ) {
 			s.setSkeletonMode( false );
 			s.clearSelected();
 		}
-		
+
 		eft.clearSizeData();
-		vft.clearSizeData();	
+		vft.clearSizeData();
 		vht.clearSizeData();
 	}
 
@@ -697,8 +741,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges,
 			boolean asSkeleton ) {
 
-		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst, 
-			vht, est,	ept, eft, elt, adpt, aft } ) {
+		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst,
+			vht, est, ept, eft, elt, adpt, aft } ) {
 			s.setSkeletonMode( asSkeleton );
 		}
 
