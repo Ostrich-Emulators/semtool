@@ -1,5 +1,7 @@
 package gov.va.semoss.ui.components.insight.manager;
 
+import java.util.ArrayList;
+
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.util.Utility;
@@ -114,19 +116,19 @@ public class PerspectiveTabController extends InsightManagerController{
 		Insight insight = imc.arylInsights.get(imc.intCurInsightIndex);
 		
 		//Define a Task to remove the current Insight:
-		Task<Boolean> deleteInsight = new Task<Boolean>(){
+		Task<Boolean> removeInsight = new Task<Boolean>(){
 		   @Override 
-		   protected Boolean call() throws Exception{
-		      return imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().removeInsight(insight, perspective, true);
+		   protected Boolean call() throws Exception{				  			  
+		      return imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().removeInsight(new ArrayList<Insight>(imc.arylInsights), insight, perspective, true);
 		   }
 		};
         //Define a listener to update the JavaFX UI when the Task completes:
-		deleteInsight.stateProperty().addListener(new ChangeListener<Worker.State>(){
+		removeInsight.stateProperty().addListener(new ChangeListener<Worker.State>(){
            @Override 
            public void changed(ObservableValue<? extends Worker.State> observableValue, 
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
-            	 if(deleteInsight.getValue() == true){
+            	 if(removeInsight.getValue() == true){
           		    Utility.showMessage("Insight removed ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), null, null);
@@ -142,7 +144,7 @@ public class PerspectiveTabController extends InsightManagerController{
 		if(Utility.showWarningOkCancel("Are you sure you want to remove this Insight?") == 0){
 		   if(imc.lstvInsights.getItems().size() > 1){
 			  //Run the Task on a separate Thread:
-		      new Thread(deleteInsight).start();
+		      new Thread(removeInsight).start();
 		   }else{
 			  Utility.showError("Error removing Insight. Cannot remove the only Insight under a Perspective."); 
 		   }
@@ -230,7 +232,7 @@ public class PerspectiveTabController extends InsightManagerController{
 		Task<Boolean> deletePerspective = new Task<Boolean>(){
 		   @Override 
 		   protected Boolean call() throws Exception{
-			  boolean boolReturnValue = false;
+			  boolean boolReturnValue = false;			  
 			  boolReturnValue = imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().deletePerspective(perspective);
               return boolReturnValue;
 		   }
@@ -277,7 +279,7 @@ public class PerspectiveTabController extends InsightManagerController{
 		       @Override 
 		       protected Boolean call() throws Exception{
 		    	   return imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab()
-		    		  .savePerspective(perspective.getUri().toString(), strTitle, strDescription);
+		    		  .savePerspective(new ArrayList<Insight>(imc.arylInsights), perspective.getUri().toString(), strTitle, strDescription);
 		       }
 		   };
 	       //Define a listener to update the JavaFX UI when the Task completes:

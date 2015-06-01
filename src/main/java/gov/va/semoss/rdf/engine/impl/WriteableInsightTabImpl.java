@@ -1,5 +1,6 @@
 package gov.va.semoss.rdf.engine.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -157,15 +158,24 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 
 	  /**   Deletes the current Insight from from the database, and removes its
 	   * reference from all Perspectives.
-	   * 
-	   * Note: This method does not reorder Insights per Perspective after the
-	   *       removal.
+       * 
+       * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+       *     Perspective.
 	   * 
 	   * @param insight -- (Insight) Insight to remove from the Perspective.
+	   * 
+	   * @param perspective -- (Perspective) Current Perspective
 	   */
 	  @Override
-	  public boolean deleteInsight(Insight insight){
+	  public boolean deleteInsight(ArrayList<Insight> arylInsights, Insight insight, Perspective perspective){
 		  boolean boolReturnValue = false;
+
+		  //Adjust orders of all Insights under the current Perspective
+	      //as if this Insight has been removed:
+		  arylInsights.remove(insight);
+		  for(int i = 0; i < arylInsights.size(); i++){
+			 arylInsights.get(i).setOrder(perspective.getUri().toString(), i + 1);
+		  }
 		  
 		  String query_1 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
 		      + "DELETE{ ?perspective olo:slot ?slot .} "
@@ -224,8 +234,14 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	         
 	         rc.commit();
 	         
-	         //Import Insights into the repository:
-	         boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	         //Reorder Insights under the current Perspective:
+	         boolReturnValue = wim.getWriteablePerspectiveTab().reorderInsights(perspective.getUri(), arylInsights);
+	         
+	         //Import Insights into the repository if deletion succeeded
+	         //and Insights have been reordered:
+	         if(boolReturnValue == true){
+	            boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	         }
 	         //Give the left-pane drop-downs enough time to refresh from the import:
 		     Thread.sleep(2000);
 	         
@@ -241,6 +257,9 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	  }
 	  
 	  /**   Saves the current Insight to the database.
+       * 
+       * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+       *     Perspective.
 	   * 
 	   * @param insight -- (Insight) Insight to be saved
 	   * 
@@ -253,7 +272,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * @return saveInsight -- (boolean) Whether the Insight was saved ok.
 	   */
 	  @Override
-	  public boolean saveInsight(Insight insight, 
+	  public boolean saveInsight(ArrayList<Insight> arylInsights, Insight insight,
 		Collection<Perspective> colPerspectivesToAddInsight, Collection<Perspective> colPerspectivesToRemoveInsight){
 		  boolean boolTriplesImportedToDb = false;
 		  boolean boolInsightPerspectivesSaved = false;
@@ -306,14 +325,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
              + "OPTIONAL{ ?insightURI dcterms:description ?description } "
              + "OPTIONAL{ ?insightURI dcterms:creator ?creator } "
              + "OPTIONAL{ ?insightURI dcterms:modified ?modified } } ";
-/*
-		  String query = "PREFIX " + UI.PREFIX + ": <" + UI.NAMESPACE + "> "
-		             + "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
-		             + "DELETE{ ?insightURI ui:dataView ?dataViewOutput . } "
-		             + "INSERT{ ?insightURI ui:dataView vas:" + dataViewOutput + " . } "
-		             + "WHERE { BIND(" + insightURI_String + " AS ?insightURI) . "
-		             + "?insightURI ui:dataView ?dataViewOutput . } ";
-*/
+
           try{
 		      rc.begin();
 	          Update uq = rc.prepareUpdate(QueryLanguage.SPARQL, query);
@@ -321,7 +333,8 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	          rc.commit();
 
 			  //Save Perspective selections for this Insight:
-	          boolInsightPerspectivesSaved = saveInsightPerspectives(insight, colPerspectivesToAddInsight, colPerspectivesToRemoveInsight);
+	          boolInsightPerspectivesSaved = saveInsightPerspectives(arylInsights, insight, 
+	        	 colPerspectivesToAddInsight, colPerspectivesToRemoveInsight);
 
 	          //Import Insights into the repository:
 	          boolTriplesImportedToDb = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
@@ -346,6 +359,9 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * 
 	   * Note: This method is intended to be called from "saveInsight(...)", and therefore does not update the 
 	   *       database on disk, leaving that up to the caller.
+       * 
+       * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+       *     Perspective.
 	   * 
 	   * @param insight -- (Insight) The current Insight being veiwed on the "Insight" tab.
 	   * 
@@ -358,12 +374,12 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * @return saveInsightPerspectives -- (boolean) Whether the Insight could be moved between the specified
 	   *    Perspectives.
 	   */
-	  private boolean saveInsightPerspectives(Insight insight, 
+	  private boolean saveInsightPerspectives(ArrayList<Insight> arylInsights, Insight insight, 
 		Collection<Perspective> colPerspectivesToAddInsight, Collection<Perspective> colPerspectivesToRemoveInsight){
 		  boolean boolReturnValue = true;
 		  
 		  for(Perspective perspective: colPerspectivesToRemoveInsight){
-			  if(wim.getWriteablePerspectiveTab().removeInsight(insight, perspective, false) == false){
+			  if(wim.getWriteablePerspectiveTab().removeInsight(arylInsights, insight, perspective, false) == false){
                   Utility.showWarningOkCancel("WARNING: Insight, \""+insight.getLabel()
                 	 +"\",\ncould not be removed from Perspective, \""+perspective.getLabel()+"\"");
                   boolReturnValue = false;
