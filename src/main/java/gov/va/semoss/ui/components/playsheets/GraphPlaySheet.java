@@ -647,13 +647,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		//if no vertices or edges are selected, perform action on all vertices and edges
 		if ( view.getPickedVertexState().getPicked().isEmpty()
 				&& view.getPickedEdgeState().getPicked().isEmpty() ) {
-			vft.changeFontSize( (int) incr );
-			eft.changeFontSize( (int) incr );
+			vft.changeSize( (int) incr );
+			eft.changeSize( (int) incr );
 		}
 		else {
 			//otherwise, only perform action on the selected vertices and edges
-			vft.changeFontSize( (int) incr, view.getPickedVertexState().getPicked() );
-			eft.changeFontSize( (int) incr, view.getPickedEdgeState().getPicked() );
+			vft.changeSize( (int) incr, view.getPickedVertexState().getPicked() );
+			eft.changeSize( (int) incr, view.getPickedEdgeState().getPicked() );
 		}
 
 		view.repaint();
@@ -672,14 +672,19 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Clears the highlighting and turns off skeleton mode if it's enabled
+	 * Clears the highlighting, turns off skeleton mode if it's enabled, and resizes
+	 * all nodes with a custom size
 	 */
 	public void clearHighlighting() {
-		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, est,
-			ept, eft, elt, adpt, aft } ) {
+		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst, 
+			vht, est,	ept, eft, elt, adpt, aft } ) {
 			s.setSkeletonMode( false );
 			s.clearSelected();
 		}
+		
+		eft.clearSizeData();
+		vft.clearSizeData();	
+		vht.clearSizeData();
 	}
 
 	/**
@@ -692,8 +697,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges,
 			boolean asSkeleton ) {
 
-		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, est,
-			ept, eft, elt, adpt, aft } ) {
+		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst, 
+			vht, est,	ept, eft, elt, adpt, aft } ) {
 			s.setSkeletonMode( asSkeleton );
 		}
 

@@ -21,193 +21,54 @@ package gov.va.semoss.ui.transformer;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import java.awt.Font;
-import java.util.HashMap;
-import java.util.Map;
 
 import gov.va.semoss.util.Constants;
-import java.util.Collection;
 
 /**
  * Transforms the font label on a node vertex in the graph.
  */
-public class LabelFontTransformer<T extends AbstractNodeEdgeBase> extends SelectingTransformer<T, Font> {
+public class LabelFontTransformer<T extends AbstractNodeEdgeBase> extends SizedSelectingTransformer<T, Font> {
 
 	private static final int DEFAULT_SIZE = Constants.INITIAL_GRAPH_FONT_SIZE;
 	private static final int MAXSIZE = 55;
 	private static final int MINSIZE = 0;
 
-	private int normalSize = Constants.INITIAL_GRAPH_FONT_SIZE;
-	//This stores all font size data about the nodes.  Different than 
-	// verticeURI2Show because need to remember size information when vertex label is unhidden
-	private final Map<T, Integer> nodeSizeData = new HashMap<>();
-
-	private int unselectedSize = MINSIZE;
 	private Font normal = new Font( "Plain", Font.PLAIN, DEFAULT_SIZE );
 	private Font unsel = new Font( "Plain", Font.PLAIN, MINSIZE );
 
-	public void setUnselectedSize( int sz ) {
-		unselectedSize = sz;
-		unsel = new Font( "Plain", Font.PLAIN, sz );
-	}
-
-	public int getUnselectedSize() {
-		return unselectedSize;
-	}
-
-	/**
-	 * Method getNormalFontSize. Retrieves the current default font size for the
-	 * nodes.
-	 *
-	 * @return int - the current font size.
-	 */
-	public int getNormalFontSize() {
-		return normalSize;
-	}
-
-	public void setNormalFontSize( int n ) {
-		normalSize = n;
-		normal = new Font( "Plain", Font.PLAIN, n );
-	}
-
-	/**
-	 * Method clearSizeData. Clears all the font size data from the size
-	 * hashtable.
-	 */
-	public void clearSizeData() {
-		nodeSizeData.clear();
-		normalSize = DEFAULT_SIZE;
-	}
-
-	/**
-	 * Method increaseFontSize. Increases the font size for all the nodes in the
-	 * graph.
-	 */
-	public void increaseFontSize() {
-		if ( normalSize < MAXSIZE ) {
-			setNormalFontSize( normalSize + 1 );
-		}
-		for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
-			int size = entry.getValue();
-			if ( size < MAXSIZE ) {
-				entry.setValue( size + 1 );
-			}
-		}
-	}
-
-	/**
-	 * Method decreaseFontSize. Decreases the font size for all the nodes in the
-	 * graph.
-	 */
-	public void decreaseFontSize() {
-		if ( normalSize > MINSIZE ) {
-			setNormalFontSize( normalSize - 1 );
-		}
-
-		for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
-			int size = entry.getValue();
-			if ( size > MINSIZE ) {
-				entry.setValue( size - 1 );
-			}
-		}
-	}
-
-	public void changeFontSize( int delta ) {
-		int newnorm = normalSize + delta;
-		if ( newnorm > MINSIZE && newnorm < MAXSIZE ) {
-			setNormalFontSize( newnorm );
-
-			for ( Map.Entry<T, Integer> entry : nodeSizeData.entrySet() ) {
-				int size = entry.getValue() + delta;
-				if ( size > MAXSIZE ) {
-					size = MAXSIZE;
-				}
-				else if ( size < MINSIZE ) {
-					size = MINSIZE;
-				}
-
-				entry.setValue( size );
-			}
-		}
-	}
-
-	public void changeFontSize( int delta, Collection<T> todo ) {
-		for ( T t : todo ) {
-			int newsize = delta + ( nodeSizeData.containsKey( t )
-					? nodeSizeData.get( t ) : normalSize );
-			if ( newsize > MAXSIZE ) {
-				newsize = MAXSIZE;
-			}
-			else if ( newsize < MINSIZE ) {
-				newsize = MINSIZE;
-			}
-
-			nodeSizeData.put( t, newsize );
-		}
-	}
-
-	/**
-	 * Method increaseFontSize. Increases the font size of a selected node on the
-	 * graph.
-	 *
-	 * @param nodeURI String - the node URI of the selected node.
-	 */
-	public void increaseFontSize( T nodeURI ) {
-		if ( nodeSizeData.containsKey( nodeURI ) ) {
-			int size = nodeSizeData.get( nodeURI );
-			if ( size < MAXSIZE ) {
-				size = size + 1;
-			}
-			nodeSizeData.put( nodeURI, size );
-		}
-		else {
-			int size = normalSize;
-			if ( size < MAXSIZE ) {
-				size = size + 1;
-			}
-			nodeSizeData.put( nodeURI, size );
-		}
-	}
-
-	/**
-	 * Method decreaseFontSize. Decreases the font size of a selected node on the
-	 * graph.
-	 *
-	 * @param nodeURI String - the node URI of the selected node.
-	 */
-	public void decreaseFontSize( T nodeURI ) {
-		if ( nodeSizeData.containsKey( nodeURI ) ) {
-			int size = nodeSizeData.get( nodeURI );
-			if ( size > MINSIZE ) {
-				size = size - 1;
-			}
-			nodeSizeData.put( nodeURI, size );
-		}
-		else {
-			int size = normalSize;
-			if ( size > MINSIZE ) {
-				size = size - 1;
-			}
-			nodeSizeData.put( nodeURI, size );
-		}
+	public LabelFontTransformer() {
+		super( DEFAULT_SIZE, MAXSIZE, MINSIZE, 1.0 );
 	}
 
 	@Override
-	protected Font transformNormal( T t ) {
-		if ( nodeSizeData.containsKey( t ) ) {
-			return new Font( "Plain", Font.PLAIN, nodeSizeData.get( t ) );
-		}
-		return normal;
+	public void setUnselectedSize( double sz ) {
+		super.setUnselectedSize( sz );
+		unsel = new Font( "Plain", Font.PLAIN, (int) sz );
 	}
 
 	@Override
-	protected Font transformSelected( T t ) {
-		int size = ( nodeSizeData.containsKey( t )
-				? nodeSizeData.get( t ) : normalSize );
-		return new Font( "Plain", Font.PLAIN, size );
+	public void setDefaultSize( double n ) {
+		super.setDefaultSize( n );
+		normal = new Font( "Plain", Font.PLAIN, (int) n );
 	}
 
 	@Override
 	protected Font transformNotSelected( T t, boolean skel ) {
 		return unsel;
+	}
+
+	@Override
+	protected Font getNormal( T t, Double sz, double defaultSize ) {
+		if ( null == sz ) {
+			sz = defaultSize;
+		}
+
+		return ( sz == DEFAULT_SIZE ? normal
+				: new Font( "Plain", Font.PLAIN, sz.intValue() ) );
+	}
+
+	@Override
+	protected Font getSelected( T t, Double sz, double defaultSize ) {
+		return getNormal( t, sz, defaultSize );
 	}
 }
