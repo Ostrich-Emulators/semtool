@@ -29,7 +29,8 @@ import java.util.Map;
 /**
  */
 public class EdgeStrokeTransformer extends SelectingTransformer<SEMOSSEdge, Stroke> {
-	private Map<SEMOSSEdge, Double> edges = new HashMap<SEMOSSEdge, Double>();
+
+	private Map<SEMOSSEdge, Double> edges = new HashMap<>();
 	public static final float DEFAULT_SIZE = 0.3f;
 	public static final float UNSELECTED_SIZE = 0.1f;
 	public static final double SELECTED_SIZE = 2f;
@@ -121,50 +122,19 @@ public class EdgeStrokeTransformer extends SelectingTransformer<SEMOSSEdge, Stro
 
 	/**
 	 * Method setEdges.
+	 *
 	 * @param edges HashMap
 	 */
-	public void setEdges(Map<SEMOSSEdge, Double> edges)
-	{
+	public void setEdges( Map<SEMOSSEdge, Double> edges ) {
 		this.edges = edges;
 	}
-	
+
 	/**
 	 * Method getEdges.
-	
-	 * @return HashMap */
-	public Map<SEMOSSEdge, Double> getEdges(){
+	 *
+	 * @return HashMap
+	 */
+	public Map<SEMOSSEdge, Double> getEdges() {
 		return edges;
-	}
-	
-
-	/**
-	 * Method transform.
-	 * @param edge SEMOSSEdge
-	
-	 * @return Stroke */
-	@Override
-	public Stroke transform(SEMOSSEdge edge) {
-		try	{	
-			if (edges == null) {
-				float standardFontFloat = 0.3f;
-				return new BasicStroke(standardFontFloat, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_ROUND);
-			}
-
-			if (!edges.containsKey(edge)) { 
-				float unselectedFontFloat = 0.1f;
-				return new BasicStroke(unselectedFontFloat);
-			}
-			
-			float selectedFontFloat = 3.0f;
-			double valDouble = edges.get(edge);
-			float newFontFloat = selectedFontFloat * (float) valDouble;
-			
-			return new BasicStroke(newFontFloat, BasicStroke.CAP_BUTT,
-					BasicStroke.JOIN_MITER, 10.0f);
-			
-		} catch(Exception ex) {
-			return new BasicStroke(1.0f);
-		}
 	}
 }

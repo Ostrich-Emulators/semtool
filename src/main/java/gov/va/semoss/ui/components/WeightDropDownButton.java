@@ -63,13 +63,14 @@ import org.openrdf.model.URI;
  * adjusted.
  */
 public class WeightDropDownButton extends JButton {
+
 	private static final long serialVersionUID = 2981760820784735327L;
 
 	private JPopupMenu popupMenu;
 	private JTree edgePropTree, nodePropTree;
 	private boolean listsPopulated = false;
 	private GraphPlaySheet playSheet;
-	private static Map<String,URI> localNameToURIHash = new HashMap<String,URI>();
+	private static Map<String, URI> localNameToURIHash = new HashMap<String, URI>();
 
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
@@ -86,55 +87,58 @@ public class WeightDropDownButton extends JButton {
 			return;
 		}
 
-		initMenus(nodePropTree, 2, playSheet.getFilterData().getNodeTypeMap());
-		initMenus(edgePropTree, 1, playSheet.getFilterData().getEdgeTypeMap());
+		initMenus( nodePropTree, 2, playSheet.getFilterData().getNodeTypeMap() );
+		initMenus( edgePropTree, 1, playSheet.getFilterData().getEdgeTypeMap() );
 
 		popupMenu.pack();
 		popupMenu.revalidate();
 		popupMenu.repaint();
-		
+
 		listsPopulated = true;
 	}
 
-	private <X extends AbstractNodeEdgeBase> void initMenus(JTree tree, int selectNum, Map<URI, List<X>> nodesOrEdgesMapByType) {
+	private <X extends AbstractNodeEdgeBase> void initMenus( JTree tree, int selectNum, Map<URI, List<X>> nodesOrEdgesMapByType ) {
 		tree.addTreeSelectionListener( getTreeSelectionListener( selectNum ) );
 		DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "not visible" );
 		tree.setModel( new DefaultTreeModel( invisibleRoot ) );
-		
-		Map<String, Set<String>> propertiesToAdd = buildPropertyDataset(nodesOrEdgesMapByType);
+
+		Map<String, Set<String>> propertiesToAdd = buildPropertyDataset( nodesOrEdgesMapByType );
 		addPropertiesToTreeNode( propertiesToAdd, invisibleRoot );
-		
+
 		tree.expandRow( 0 );
 		tree.setRootVisible( false );
 	}
-	
+
 	/**
-	 * Method buildPropertyDataset. Create a dataset of node types and their properties to later add to the JTree.
-	 * We use this intermediary data structure because it gives us uniqueness and order for the elements. 
-	 * 
-	 * @param Map<URI, List<X>> nodesOrEdgesMapByType - the map of nodes or edges keyed by type
-	 * @return Map<String, Set<String>> maps of the types of the nodes or edges to the names of their numerical properties
+	 * Method buildPropertyDataset. Create a dataset of node types and their
+	 * properties to later add to the JTree. We use this intermediary data
+	 * structure because it gives us uniqueness and order for the elements.
+	 *
+	 * @param Map<URI, List<X>> nodesOrEdgesMapByType - the map of nodes or edges
+	 * keyed by type
+	 * @return Map<String, Set<String>> maps of the types of the nodes or edges to
+	 * the names of their numerical properties
 	 */
-	private <X extends AbstractNodeEdgeBase> Map<String, Set<String>> buildPropertyDataset(Map<URI, List<X>> nodesOrEdgesMapByType) {
+	private <X extends AbstractNodeEdgeBase> Map<String, Set<String>> buildPropertyDataset( Map<URI, List<X>> nodesOrEdgesMapByType ) {
 		Map<String, Set<String>> propertiesToAdd = new HashMap<>();
-		for (Map.Entry<URI, List<X>> entry : nodesOrEdgesMapByType.entrySet()) {
-			if (entry.getValue().size() < 2) {
+		for ( Map.Entry<URI, List<X>> entry : nodesOrEdgesMapByType.entrySet() ) {
+			if ( entry.getValue().size() < 2 ) {
 				//we don't want to list items that are the only one of their type
 				continue;
 			}
-			
+
 			Set<String> propertiesForThisType = new TreeSet<String>();
 			propertiesToAdd.put( entry.getKey().getLocalName(), propertiesForThisType );
 			for ( X nodeOrEdge : entry.getValue() ) {
 				for ( Map.Entry<URI, Object> propEntry : nodeOrEdge.getProperties().entrySet() ) {
-					if ( getDoubleIfPossibleFrom(propEntry.getValue()) > 0 ) {
+					if ( getDoubleIfPossibleFrom( propEntry.getValue() ) > 0 ) {
 						propertiesForThisType.add( propEntry.getKey().getLocalName() );
-						localNameToURIHash.put(propEntry.getKey().getLocalName(), propEntry.getKey());
+						localNameToURIHash.put( propEntry.getKey().getLocalName(), propEntry.getKey() );
 					}
 				}
 			}
 		}
-		
+
 		return propertiesToAdd;
 	}
 
@@ -289,15 +293,16 @@ public class WeightDropDownButton extends JButton {
 	private void rescaleVertices( String selectedValue ) {
 		VertexShapeTransformer vst
 				= (VertexShapeTransformer) playSheet.getView().getRenderContext().getVertexShapeTransformer();
-		vst.setVertexSizeHash( getWeightHash( playSheet.getForest().getVertices(),
-				selectedValue, vst.getDefaultScale() ) );
+		vst.setSizeMap( getWeightHash( playSheet.getGraphData().getGraph().getVertices(),
+				selectedValue, vst.getDefaultSize() ) );
 
 		playSheet.getView().repaint();
 	}
 
 	private void rescaleEdges( String selectedValue ) {
 		EdgeStrokeTransformer est = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		est.setEdges( getWeightHash(playSheet.getForest().getEdges(), selectedValue, 1.0) );
+		est.setEdges( getWeightHash( playSheet.getGraphData().getGraph().getEdges(),
+				selectedValue, 1.0 ) );
 
 		playSheet.getView().repaint();
 	}
@@ -310,14 +315,14 @@ public class WeightDropDownButton extends JButton {
 	 * selected
 	 * @return Hashtable<String, Double> of the nodes and weights
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	public static <X extends AbstractNodeEdgeBase> Map<X, Double>
 			getWeightHash( Collection<X> collection, String selectedValue,
 					double defaultScale ) {
 
 		double minimumValue = .5, multiplier = 3;
 
-		if ( checkForUnselectionEvent(selectedValue) ) {
+		if ( checkForUnselectionEvent( selectedValue ) ) {
 			return new HashMap<>();
 		}
 
@@ -327,9 +332,9 @@ public class WeightDropDownButton extends JButton {
 		for ( AbstractNodeEdgeBase nodeOrEdge : collection ) {
 			Object propertyValue = null;
 
-			URI selectedURI = localNameToURIHash.get(selectedValue);
+			URI selectedURI = localNameToURIHash.get( selectedValue );
 			propertyValue = nodeOrEdge.getProperty( selectedURI );
-			double propertyDouble = getDoubleIfPossibleFrom(propertyValue);
+			double propertyDouble = getDoubleIfPossibleFrom( propertyValue );
 
 			if ( propertyDouble > 0 ) {
 				double value = Double.parseDouble( propertyValue.toString() );
@@ -356,7 +361,7 @@ public class WeightDropDownButton extends JButton {
 		}
 
 		for ( X key : weightHash.keySet() ) {
-			double value = ( ( weightHash.get(key) - lowValue ) / ( highValue - lowValue ) ) * multiplier * defaultScale + minimumValue;
+			double value = ( ( weightHash.get( key ) - lowValue ) / ( highValue - lowValue ) ) * multiplier * defaultScale + minimumValue;
 			weightHash.put( key, value );
 		}
 
@@ -364,14 +369,15 @@ public class WeightDropDownButton extends JButton {
 	}
 
 	private static String lastSelectedValue;
-	private static boolean checkForUnselectionEvent(String selectedValue) {
-		if (selectedValue == null) {
+
+	private static boolean checkForUnselectionEvent( String selectedValue ) {
+		if ( selectedValue == null ) {
 			//i don't think this should happen, but just in case
 			lastSelectedValue = null;
 			return true;
 		}
 
-		if (selectedValue.equals(lastSelectedValue)) {
+		if ( selectedValue.equals( lastSelectedValue ) ) {
 			lastSelectedValue = null;
 			return true;
 		}
@@ -380,24 +386,25 @@ public class WeightDropDownButton extends JButton {
 		return false;
 	}
 
-	private static double getDoubleIfPossibleFrom(Object propertyValue) {
-		if (propertyValue == null)
+	private static double getDoubleIfPossibleFrom( Object propertyValue ) {
+		if ( propertyValue == null ) {
 			return -1;
-		
-		if (propertyValue instanceof URI) {
+		}
+
+		if ( propertyValue instanceof URI ) {
 			URI uri = (URI) propertyValue;
 			try {
-				return Double.parseDouble(uri.getLocalName());
+				return Double.parseDouble( uri.getLocalName() );
 			}
-			catch (NumberFormatException e) {
+			catch ( NumberFormatException e ) {
 				return -1;
 			}
 		}
-		
+
 		try {
-			return Double.parseDouble(propertyValue.toString());
+			return Double.parseDouble( propertyValue.toString() );
 		}
-		catch (NumberFormatException e) {
+		catch ( NumberFormatException e ) {
 			return -1;
 		}
 	}

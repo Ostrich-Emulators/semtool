@@ -12,7 +12,6 @@ import java.util.Map;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
-import org.openrdf.model.vocabulary.RDFS;
 
 public class MetamodelGraphDataModel extends GraphDataModel {
 	private static final Logger log = Logger.getLogger( MetamodelGraphDataModel.class );
@@ -24,8 +23,6 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	public MetamodelGraphDataModel() {
 		super();
 		
-		setTypeOrSubclass( RDFS.SUBCLASSOF );
-		setFilterOutOwlData(false);
 		getBaseFilterSet().add(DIHelper.getConceptURI().stringValue() );
 		getBaseFilterSet().add(DIHelper.getConceptURI("ApplicationModule").stringValue() );
 	}
@@ -47,12 +44,13 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	}
 	
 	private void updateLabelsOfEdges() {
-		HashMap<String,String> edgeTypeHash = new HashMap<String,String>();
+		HashMap<String,String> edgeTypeHash = new HashMap<>();
 		for(SEMOSSEdge edge:edgeStore.values()) {
 			if (!edgeTypeHash.containsKey(edge.getName()))
-				edgeTypeHash.put(edge.getName(), edge.getEdgeType() + getCountOfInstancesForEdge(edge));
+				edgeTypeHash.put(edge.getName(), edge.getType() + getCountOfInstancesForEdge(edge));
 			else
-				edgeTypeHash.put(edge.getName(), edgeTypeHash.get(edge.getName()) + ", " + edge.getEdgeType() + getCountOfInstancesForEdge(edge));
+				edgeTypeHash.put(edge.getName(), edgeTypeHash.get(edge.getName()) + ", "
+						+ edge.getType() + getCountOfInstancesForEdge(edge));
 		}
 
 		for(SEMOSSEdge edge:edgeStore.values()) {
@@ -64,7 +62,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 		if (conceptInstanceCounts==null)
 			populateConceptInstanceCounts();
 		
-		Integer count = conceptInstanceCounts.get(vertex.getURI());
+		Integer count = conceptInstanceCounts.get(vertex.getURI().toString());
 		if (count==null)
 			return "";
 		
@@ -77,7 +75,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 		
 		HashMap<String, Integer> hashMap = edgeCounts.get(edge);
 		
-		Integer count = hashMap.get(edge.getEdgeType());
+		Integer count = hashMap.get(edge.getType().toString());
 		if (count==null)
 			return "";
 

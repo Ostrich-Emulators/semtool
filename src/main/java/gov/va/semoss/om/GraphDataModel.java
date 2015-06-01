@@ -1,5 +1,6 @@
 package gov.va.semoss.om;
 
+import edu.uci.ics.jung.graph.DelegateForest;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
@@ -28,7 +29,6 @@ import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
@@ -51,8 +51,6 @@ public class GraphDataModel {
 	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	protected Map<URI, SEMOSSEdge> edgeStore = new HashMap<>();
 
-	private boolean filterOutOwlData = true;
-	private URI typeOrSubclass = RDF.TYPE;
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph = new DirectedSparseGraph<>();
 
 	public GraphDataModel() {
@@ -78,13 +76,19 @@ public class GraphDataModel {
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
 			graph.addVertex( v );
 		}
-		for ( SEMOSSEdge v : vizgraph.getEdges() ) {
-			graph.addEdge( vizgraph.getSource( v ), vizgraph.getDest( v ) );
+		for ( SEMOSSEdge e : vizgraph.getEdges() ) {
+			graph.addEdge( vizgraph.getSource( e ), vizgraph.getDest( e ), e );
 		}
 
 		return graph;
 	}
 
+	public DelegateForest<SEMOSSVertex, SEMOSSEdge> asForest() {
+		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest	= new DelegateForest<>( vizgraph );
+		return forest;
+	}
+
+	
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
 		vizgraph = f;
 	}
@@ -125,7 +129,7 @@ public class GraphDataModel {
 
 				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred );
 				edge.setLevel( overlayLevel );
-				edge.setEdgeType( pred );
+				edge.setType( pred );
 				storeEdge( edge );
 
 				try {
@@ -222,14 +226,6 @@ public class GraphDataModel {
 		return baseFilterSet;
 	}
 
-	public void setFilterOutOwlData( boolean _filterOutOwlData ) {
-		filterOutOwlData = _filterOutOwlData;
-	}
-
-	public void setTypeOrSubclass( URI _typeOrSubclass ) {
-		typeOrSubclass = _typeOrSubclass;
-	}
-
 	private void fetchProperties( Collection<Resource> concepts, Collection<URI> preds,
 			IEngine engine, int overlayLevel ) throws RepositoryException, QueryEvaluationException {
 
@@ -240,8 +236,7 @@ public class GraphDataModel {
 				+ " FILTER ( isLiteral( ?o ) ) }"
 				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
 		String edgeprops
-				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel"
-				+ "WHERE {"
+				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 				+ "  ?rel ?prop ?literal ."
 				+ "  ?rel a ?semossrel ."
 				+ "  ?rel rdf:predicate ?superrel ."

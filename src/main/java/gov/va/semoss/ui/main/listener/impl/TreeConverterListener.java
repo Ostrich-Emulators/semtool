@@ -28,7 +28,7 @@ import javax.swing.JToggleButton;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.Forest;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
 public class TreeConverterListener extends AbstractAction {
 
 	GraphPlaySheet playSheet;
-	public DelegateForest<SEMOSSVertex, SEMOSSEdge> oldforest;
+	public Forest<SEMOSSVertex, SEMOSSEdge> oldforest;
 
 	/**
 	 * Method setPlaySheet. Sets the play sheet that the listener will access.
@@ -50,7 +50,7 @@ public class TreeConverterListener extends AbstractAction {
 	 */
 	public void setPlaySheet( GraphPlaySheet ps ) {
 		this.playSheet = ps;
-		oldforest = ps.getForest();
+		oldforest = ps.asForest();
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class TreeConverterListener extends AbstractAction {
 
 		//if the button is selected run converter
 		if ( button.isSelected() ) {
-			converter.execute();
+			converter.actionPerformed( e );
 		}
 		//if the button is unselected, revert to old forest
 		else {

@@ -52,21 +52,13 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		outVertex.addOutEdge( this );
 		setColor( Color.DARK_GRAY );
 	}
-	
+
 	public SEMOSSVertex getInVertex() {
 		return inVertex;
 	}
 
 	public SEMOSSVertex getOutVertex() {
 		return outVertex;
-	}
-
-	public URI getEdgeType() {
-		return super.getType();
-	}
-
-	public void setEdgeType( URI _edgeType ) {
-		super.setType( _edgeType );
 	}
 
 	public String getName() {

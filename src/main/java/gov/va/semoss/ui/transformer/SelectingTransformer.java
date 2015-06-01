@@ -56,6 +56,16 @@ public abstract class SelectingTransformer<T, V> implements Transformer<T, V> {
 		}
 	}
 
+	public void deselect( T s ) {
+		selecteds.remove( s );
+	}
+
+	public void deselect( Collection<T> s ) {
+		if ( null != s ) {
+			selecteds.removeAll( s );
+		}
+	}
+
 	public Set<T> getSelected() {
 		return selecteds;
 	}

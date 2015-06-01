@@ -62,9 +62,16 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		}
 		URI object = getCachedInstance( otype, orawlabel );
 
+		boolean relIsAlreadyUri = isUri( relname, namespaces );
+
 		// ... and get a relationship that ties them together
 		RelationCacheKey connectorkey = new RelationCacheKey( nap.getSubjectType(),
-				nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
+				nap.getObjectType(), relname, nap.getSubject(), nap.getObject() );
+
+		if ( relIsAlreadyUri ) {
+			URI connector = getUriFromRawString( relname, namespaces );
+			cacheRelationClass( connector, relname );
+		}
 
 		if ( !hasCachedRelation( connectorkey ) ) {
 			URI connector = null;

@@ -71,7 +71,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		super( "Distance Downstream" );
 
 		playSheet = gps;
-		forest = gps.getForest();
+		forest = new DelegateForest<> ( gps.asForest() );
 		setSelectedNodes( verts );
 	}
 
