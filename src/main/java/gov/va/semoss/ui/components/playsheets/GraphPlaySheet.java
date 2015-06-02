@@ -685,7 +685,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public void paintLegendPanel() {
 		legendPanel.drawLegend(filterData);
-		repaint();
 	}
 
 	@Override
@@ -832,11 +831,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public void setColors(Collection<SEMOSSVertex> vertices, String color) {
 		colorShapeData.setColors(vertices, color);
-		getView().repaint();
+		view.repaint();
 	}
 
 	public void setShapes(Collection<SEMOSSVertex> vertices, String shape) {
 		colorShapeData.setShapes(vertices, shape);
-		getView().repaint();
+		view.repaint();
 	}
 }
