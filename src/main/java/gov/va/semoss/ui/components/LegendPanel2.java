@@ -34,7 +34,6 @@ import org.openrdf.model.URI;
  */
 public class LegendPanel2 extends JPanel {
 	private static final long serialVersionUID = -2364666196260002413L;
-	public VertexFilterData data;
 	private ControlData controlData;
 
 	/**
@@ -43,26 +42,15 @@ public class LegendPanel2 extends JPanel {
 	public LegendPanel2() {
 		setLayout( new WrapLayout( WrapLayout.LEFT, 15, 15 ) );
 		setToolTipText( "You can adjust the shape and color by going to the cosmetics tab on the navigation panel" );
-	}
-
-	/**
-	 * Sets the vertex filter data.
-	 *
-	 * @param data VertexFilterData
-	 */
-	public void setFilterData( VertexFilterData _data ) {
-		data = _data;
 		
 		controlData = new ControlData();
 		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
-
-		drawLegend();
 	}
 
 	/**
 	 * This method will draw the legend for visualizations.
 	 */
-	public void drawLegend() {
+	public void drawLegend(VertexFilterData data) {
 		removeAll();
 		
 		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : data.getNodeTypeMap().entrySet() ) {

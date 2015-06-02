@@ -19,28 +19,36 @@
  */
 package gov.va.semoss.ui.components;
 
-
+import javax.swing.AbstractAction;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
+
+import java.awt.event.ActionEvent;
 import java.util.Collection;
 
 /**
  * This class sets the visualization viewer for a popup menu.
  */
 public class ColorPopup extends JMenu {
-
 	private static final long serialVersionUID = -4784260297860900414L;
 
-	public ColorPopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> verts ) {
+	public ColorPopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( _name );
-		String[] colors = TypeColorShapeTable.getAllColors();
 
-		for ( String color : colors ) {
-			ColorMenuItem item = new ColorMenuItem( color, gps, verts );
-			add( item );
+		for ( String color : TypeColorShapeTable.getAllColors() ) {
+			JMenuItem menuItem = new JMenuItem(color);
+			menuItem.addActionListener(new AbstractAction() {
+				private static final long serialVersionUID = -8338447465448152673L;
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					gps.setColors(vertices, color);
+				}
+			});
+			add(menuItem);
 		}
 	}
 }
