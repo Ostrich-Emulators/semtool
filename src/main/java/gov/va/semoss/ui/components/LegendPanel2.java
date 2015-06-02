@@ -63,5 +63,6 @@ public class LegendPanel2 extends JPanel {
 		}
 		
 		updateUI();
+		repaint();
 	}
 }
