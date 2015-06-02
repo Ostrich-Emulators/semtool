@@ -37,14 +37,14 @@ import org.openrdf.model.URI;
  */
 public class VertexFilterData {
 	// Maps to retrieve nodes by type and by URI
-	private final Map<URI, List<SEMOSSVertex>> nodeTypeMap = new HashMap<>();
-	private final Map<URI, SEMOSSVertex> nodeMap = new HashMap<>();
-	private List<FilterRowModel> nodes = new ArrayList<FilterRowModel>();
+	private Map<URI, List<SEMOSSVertex>> nodeTypeMap = new HashMap<URI, List<SEMOSSVertex>>();
+	private Map<URI, SEMOSSVertex> nodeMap = new HashMap<URI, SEMOSSVertex>();
+	private List<FilterRowModel> nodes = new ArrayList<FilterRowModel>();;
 	
 	// Maps to retrieve edges by type and by URI
-	private final Map<URI, List<SEMOSSEdge>> edgeTypeMap = new HashMap<>();
-	private final Map<URI, SEMOSSEdge> edgeMap = new HashMap<>();
-	private List<FilterRowModel> edges = new ArrayList<FilterRowModel>();
+	private Map<URI, List<SEMOSSEdge>> edgeTypeMap = new HashMap<URI, List<SEMOSSEdge>>();
+	private Map<URI, SEMOSSEdge> edgeMap = new HashMap<URI, SEMOSSEdge>();
+	private List<FilterRowModel> edges = new ArrayList<FilterRowModel>();;
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph;
 
@@ -53,9 +53,6 @@ public class VertexFilterData {
 	}
 
 	public void generateAllRows() {
-		if (nodes.size() != 0) 
-			return;
-
 		populateNodeMaps();
 		populateEdgeMaps();
 		fillNodeRows();
@@ -67,6 +64,9 @@ public class VertexFilterData {
 	 * Populates the nodeTypeMap and nodeMap
 	 */
 	private void populateNodeMaps() {
+		nodeTypeMap = new HashMap<URI, List<SEMOSSVertex>>();
+		nodeMap = new HashMap<URI, SEMOSSVertex>();
+
 		for ( SEMOSSVertex vertex : graph.getVertices() ) {
 			nodeMap.put ( vertex.getURI(), vertex );
 			
@@ -82,6 +82,9 @@ public class VertexFilterData {
 	 * Populates the edgeTypeMap and edgeMap
 	 */
 	private void populateEdgeMaps() {
+		edgeTypeMap = new HashMap<URI, List<SEMOSSEdge>>();
+		edgeMap = new HashMap<URI, SEMOSSEdge>();
+
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
 			edgeMap.put ( edge.getURI(), edge );
 			
@@ -97,6 +100,7 @@ public class VertexFilterData {
 	 * Fills the rows based on the node name and type.
 	 */
 	private void fillNodeRows() {
+		nodes = new ArrayList<FilterRowModel>();
 		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : nodeTypeMap.entrySet() ) {
 			nodes.add( new FilterRowModel(true, true, false, entry.getKey(), Constants.ANYNODE) );
 			for ( SEMOSSVertex vertex : entry.getValue() )
@@ -108,6 +112,7 @@ public class VertexFilterData {
 	 * Fills the edge rows based on the edge name and type.
 	 */
 	private void fillEdgeRows() {
+		edges = new ArrayList<FilterRowModel>();
 		for ( Map.Entry<URI, List<SEMOSSEdge>> entry : edgeTypeMap.entrySet() ) {
 			edges.add( new FilterRowModel(true, true, false, entry.getKey(), Constants.ANYNODE) );
 			for ( SEMOSSEdge edge: entry.getValue() )

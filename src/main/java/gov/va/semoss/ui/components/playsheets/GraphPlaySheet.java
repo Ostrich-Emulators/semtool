@@ -19,20 +19,31 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
-import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Paint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.JSplitPane;
 
+import org.apache.commons.collections15.Predicate;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleGraph;
+import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.LinkedHashModel;
 
+import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
@@ -70,24 +81,11 @@ import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.SelectingTransformer;
+import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
-import gov.va.semoss.ui.transformer.TooltipTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import java.awt.Paint;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-
-import org.apache.commons.collections15.Predicate;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.LinkedHashModel;
 
 /**
  */
@@ -99,7 +97,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
 	private JSplitPane graphSplitPane;
 	private ControlPanel controlPanel;
-	private LegendPanel2 legendPanel;
+	private LegendPanel2 legendPanel = new LegendPanel2();
+
 	private VertexColorShapeData colorShapeData = new VertexColorShapeData();
 
 	protected GraphDataModel gdm;
@@ -109,17 +108,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected VertexFilterData filterData;
 
 	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
-	protected VertexShapeTransformer vht = new VertexShapeTransformer();
 	protected LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
 	protected TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
 	protected PaintTransformer<SEMOSSVertex> vpt = new PaintTransformer<>();
+	protected VertexShapeTransformer vht = new VertexShapeTransformer();
 	protected VertexStrokeTransformer vst = new VertexStrokeTransformer();
 
 	protected LabelFontTransformer<SEMOSSEdge> eft = new LabelFontTransformer<>();
 	protected LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
 	protected TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
 	protected PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<SEMOSSEdge>() {
-
 		@Override
 		protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
 			// always show the edge
@@ -150,8 +148,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		controlPanel = new ControlPanel( gdm.enableSearchBar() );
 
-		legendPanel = new LegendPanel2();
-
 		graphSplitPane = new JSplitPane();
 		graphSplitPane.setEnabled( false );
 		graphSplitPane.setOneTouchExpandable( true );
@@ -161,7 +157,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		add( graphSplitPane, BorderLayout.CENTER );
 		add( legendPanel, BorderLayout.SOUTH );
 
-		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout( gdm.getGraph() );
+		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout<SEMOSSVertex, SEMOSSEdge>( gdm.getGraph() );
 		view = new VisualizationViewer<>( layout );
 		initVisualizer( view );
 
@@ -178,7 +174,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setBottomComponent( gzPane );
 
 		filterData = new VertexFilterData( gdm.getGraph() );
-		legendPanel.setFilterData( filterData );
+		paintLegendPanel();
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -246,7 +242,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * @return
 	 */
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getVisibleGraph() {
-		VertexPredicateFilter filter = new VertexPredicateFilter<>( predicate );
+		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter;
+		filter = new VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge>( predicate );
 		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) filter.transform( gdm.getGraph() );
 	}
 
@@ -285,7 +282,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	public void updateLayout() {
-		VertexPredicateFilter filter = new VertexPredicateFilter<>( predicate );
+		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter = new VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge>( predicate );
 		Layout<SEMOSSVertex, SEMOSSEdge> layout = view.getGraphLayout();
 		layout.setGraph( filter.transform( gdm.getGraph() ) );
 		view.setGraphLayout( layout );
@@ -306,16 +303,15 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 */
 	public void updateGraph() {
 		try {
-			Graph<SEMOSSVertex, SEMOSSEdge> g = gdm.getGraph();
 			setLayoutName( layoutName );
 
 			if ( gdm.enableSearchBar() ) {
-				controlPanel.getSearchController().indexGraph( g, getEngine() );
+				controlPanel.getSearchController().indexGraph( gdm.getGraph(), getEngine() );
 			}
 
-			processControlData( g );
+			processControlData( gdm.getGraph() );
 			genAllData();
-			legendPanel.drawLegend();
+			paintLegendPanel();
 
 			setUndoRedoBtn();
 		}
@@ -341,7 +337,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		viewer.setGraphMouse( gl );
 		viewer.setBackground( Color.WHITE );
 
-		RenderContext rc = viewer.getRenderContext();
+		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = viewer.getRenderContext();
 		rc.setVertexLabelTransformer( vlt );
 		viewer.setVertexToolTipTransformer( vtt );
 		rc.setVertexStrokeTransformer( vst );
@@ -429,6 +425,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * @return true if the desired layout was applied
 	 * @param layout String
 	 */
+	@SuppressWarnings("unchecked")
 	public boolean setLayoutName( String newName ) {
 		this.layoutName = newName;
 
@@ -464,7 +461,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		if ( null == layout ) {
-			layout = new FRLayout( graph );
+			layout = new FRLayout<SEMOSSVertex, SEMOSSEdge>( graph );
 		}
 
 		controlPanel.setGraphLayout( layout,
@@ -686,8 +683,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void run() {
 	}
 
-	public LegendPanel2 getLegendPanel() {
-		return legendPanel;
+	public void paintLegendPanel() {
+		legendPanel.drawLegend(filterData);
+		repaint();
 	}
 
 	@Override
@@ -726,7 +724,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * resizes all nodes with a custom size
 	 */
 	public void clearHighlighting() {
-		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst,
+		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
 			vht, est, ept, eft, elt, adpt, aft } ) {
 			s.setSkeletonMode( false );
 			s.clearSelected();
@@ -747,7 +745,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	protected void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges,
 			boolean asSkeleton ) {
 
-		for ( SelectingTransformer s : new SelectingTransformer[]{ vft, vpt, vst,
+		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
 			vht, est, ept, eft, elt, adpt, aft } ) {
 			s.setSkeletonMode( asSkeleton );
 		}
@@ -830,5 +828,15 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		public boolean evaluate( SEMOSSVertex v ) {
 			return ( v.isVisible() && v.getLevel() <= overlayLevel );
 		}
+	}
+
+	public void setColors(Collection<SEMOSSVertex> vertices, String color) {
+		colorShapeData.setColors(vertices, color);
+		getView().repaint();
+	}
+
+	public void setShapes(Collection<SEMOSSVertex> vertices, String shape) {
+		colorShapeData.setShapes(vertices, shape);
+		getView().repaint();
 	}
 }

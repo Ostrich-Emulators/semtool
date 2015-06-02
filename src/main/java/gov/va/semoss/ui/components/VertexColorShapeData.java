@@ -24,13 +24,13 @@ import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
 /**
@@ -38,12 +38,31 @@ import org.openrdf.model.URI;
  */
 public class VertexColorShapeData extends AbstractTableModel {
 	private static final long serialVersionUID = -8530913683566271008L;
-	private final static Logger logger = Logger.getLogger( VertexColorShapeData.class );
 	
-	private Map<URI, List<SEMOSSVertex>> typeHash = new HashMap<>();
+	private static final String[] columnNames = { "Node", "Instance", "Shape", "Color" };
+	private Map<URI, List<SEMOSSVertex>> nodeMap = new HashMap<>();
 	private List<ColorShapeRow> data = new ArrayList<ColorShapeRow>();
-	private static final String[] scColumnNames = { "Node", "Instance", "Shape", "Color" };
-	private int numRows = 0;
+
+	/**
+	 * Fills the rows of vertex colors and shapes based on the vertex name and
+	 * type.
+	 *
+	 * @param _typeHash
+	 */
+	public void generateAllRows( Map<URI, List<SEMOSSVertex>> _nodeMap ) {
+		nodeMap = _nodeMap;
+		
+		data = new ArrayList<ColorShapeRow>();
+		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : nodeMap.entrySet() ) {
+			data.add( new ColorShapeRow(entry.getKey(), "Set for All", "", "") );
+
+			for ( SEMOSSVertex vertex : entry.getValue() ) {
+				data.add( new ColorShapeRow(null, vertex.getLabel(), vertex.getShapeString(), vertex.getColorString()) );
+			}
+		}
+
+		fireTableDataChanged();
+	}
 
 	@Override
 	public Object getValueAt( int row, int column ) {
@@ -62,82 +81,6 @@ public class VertexColorShapeData extends AbstractTableModel {
 			default:
 				return null;
 		}
-	}
-
-	/**
-	 * Gets the number of rows.
-	 *
-	 * @return int Number of rows.
-	 */
-	@Override
-	public int getRowCount() {
-		numRows = 0;
-		if ( typeHash == null ) {
-			return numRows;
-		}
-
-		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : typeHash.entrySet() ) {
-			numRows++;
-			numRows += entry.getValue().size();
-		}
-
-		return numRows;
-	}
-
-	/**
-	 * Gets the number of columns.
-	 *
-	 * @return int Number of columns.
-	 */
-	@Override
-	public int getColumnCount() {
-		return scColumnNames.length;
-	}
-
-	/**
-	 * Gets the column name at a particular index.
-	 *
-	 * @param index Column index.
-	 * @return String Column name.
-	 */
-	@Override
-	public String getColumnName( int index ) {
-		return scColumnNames[index];
-	}
-
-	/**
-	 * Gets the column class at a particular index.
-	 *
-	 * @param column
-	 * @return Class<?> Column class.
-	 */
-	@Override
-	public Class<?> getColumnClass( int column ) {
-		return String.class;
-	}
-
-	/**
-	 * Fills the rows of vertex colors and shapes based on the vertex name and
-	 * type.
-	 *
-	 * @param _typeHash
-	 */
-	public void generateAllRows( Map<URI, List<SEMOSSVertex>> _typeHash ) {
-		logger.debug( "Populating rows of the table in Graph Cosmetics tab." );
-		typeHash = _typeHash;
-
-		numRows = 0;
-		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : typeHash.entrySet() ) {
-			data.add( new ColorShapeRow(entry.getKey(), "Set for All", "", "") );
-			numRows++;
-
-			for ( SEMOSSVertex vertex : entry.getValue() ) {
-				data.add( new ColorShapeRow(null, vertex.getLabel(), vertex.getShapeString(), vertex.getColorString()) );
-				numRows++;
-			}
-		}
-
-		fireTableDataChanged();
 	}
 
 	/**
@@ -161,7 +104,7 @@ public class VertexColorShapeData extends AbstractTableModel {
 				nodeType = data.get(row - numRowsUp).type;
 			}
 			
-			List<SEMOSSVertex> vertexList = typeHash.get( nodeType );
+			List<SEMOSSVertex> vertexList = nodeMap.get( nodeType );
 
 			SEMOSSVertex vertex = vertexList.get( numRowsUp - 1 );
 			setColorOrShape( row, column, vertex, value + "" );
@@ -171,7 +114,7 @@ public class VertexColorShapeData extends AbstractTableModel {
 		}
 
 		//set the color or shape for all vertices of this type
-		List<SEMOSSVertex> vertexList = typeHash.get( nodeType );
+		List<SEMOSSVertex> vertexList = nodeMap.get( nodeType );
 		for ( int vertIndex = 0; vertIndex < vertexList.size(); vertIndex++ ) {
 			SEMOSSVertex vertex = vertexList.get( vertIndex );
 			setColorOrShape( row + vertIndex + 1, column, vertex, value + "" );
@@ -197,9 +140,10 @@ public class VertexColorShapeData extends AbstractTableModel {
 			setColor( vertex, value, row );
 		}
 	}
-
-	public void setShape( SEMOSSVertex vertex, String shape ) {
-		setShape( vertex, shape, getRowForVertex( vertex.getLabel() ) );
+	
+	public void setShapes(Collection<SEMOSSVertex> nodes, String shape) {
+		for( SEMOSSVertex node : nodes )
+			setShape( node, shape, getRowForVertex( node.getLabel() ) );
 	}
 
 	public void setShape( SEMOSSVertex vertex, String shape, int row ) {
@@ -211,10 +155,13 @@ public class VertexColorShapeData extends AbstractTableModel {
 		TypeColorShapeTable.getInstance().setShape( shape, vertex );
 	}
 
-	public void setColor( SEMOSSVertex vertex, String color ) {
-		setColor( vertex, color, getRowForVertex( vertex.getLabel() ) );
-	}
 
+	public void setColors(Collection<SEMOSSVertex> nodes, String color) {
+		for ( SEMOSSVertex node : nodes ) {
+			setColor( node, color, getRowForVertex( node.getLabel() ) );
+		}
+	}
+	
 	public void setColor( SEMOSSVertex vertex, String color, int row ) {
 		if ( row < 0 ) {
 			return;
@@ -238,6 +185,48 @@ public class VertexColorShapeData extends AbstractTableModel {
 		return columnIndex > 1;
 	}
 	
+	/**
+	 * Gets the number of rows.
+	 *
+	 * @return int Number of rows.
+	 */
+	@Override
+	public int getRowCount() {
+		return data.size();
+	}
+
+	/**
+	 * Gets the number of columns.
+	 *
+	 * @return int Number of columns.
+	 */
+	@Override
+	public int getColumnCount() {
+		return columnNames.length;
+	}
+
+	/**
+	 * Gets the column name at a particular index.
+	 *
+	 * @param index Column index.
+	 * @return String Column name.
+	 */
+	@Override
+	public String getColumnName( int index ) {
+		return columnNames[index];
+	}
+
+	/**
+	 * Gets the column class at a particular index.
+	 *
+	 * @param column
+	 * @return Class<?> Column class.
+	 */
+	@Override
+	public Class<?> getColumnClass( int column ) {
+		return String.class;
+	}
+
 	public class ColorShapeRow {
 		URI type;
 		String name, shape, color;
