@@ -34,7 +34,6 @@ import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleGraph;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.graph.DelegateForest;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
@@ -185,7 +184,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
 		Forest<SEMOSSVertex, SEMOSSEdge> forest = GraphToTreeConverter.convert( gdm.getGraph(),
 				view.getPickedVertexState().getPicked() );
-		
+
 		printForest( forest );
 		return forest;
 	}
@@ -674,6 +673,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		updateGraph();
+	}
+
+	@Override
+	public boolean canAcceptDataWithHeaders( List<String> newheaders ) {
+		// we can accept either a model's headers, or a single header 
+		return ( Arrays.asList( "Subject", "Predicate", "Object" ).equals( newheaders )
+				|| ( 1 == newheaders.size() ) );
 	}
 
 	@Override
