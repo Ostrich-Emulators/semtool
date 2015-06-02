@@ -37,7 +37,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="file" max="32767" attributes="0"/>
                           <Component id="dbname" max="32767" attributes="0"/>
-                          <Component id="dbdir" pref="429" max="32767" attributes="0"/>
+                          <Component id="dbdir" max="32767" attributes="0"/>
                           <Component id="questionfile" alignment="0" max="32767" attributes="0"/>
                           <Component id="baseuri" alignment="0" max="32767" attributes="0"/>
                       </Group>
