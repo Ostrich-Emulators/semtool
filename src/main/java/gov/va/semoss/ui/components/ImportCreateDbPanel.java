@@ -66,6 +66,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				edgegroup.add( jrb );
 				edgemodelPanel.add( jrb );
 
+				// for now, we only support SEMOSS reification
+				jrb.setEnabled( ReificationStyle.SEMOSS == rs );
+
 				jrb.setSelected( ReificationStyle.SEMOSS == rs );
 			}
 		}
@@ -385,6 +388,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			}
 			// else {} // every file has a base URI specified
 		}
+		else {
+			defaultBase = new URIImpl( mybase );
+		}
 
 		final URI defaultBaseUri = defaultBase;
 
@@ -422,11 +428,12 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 						try {
 							EngineCreateBuilder ecb
 							= new EngineCreateBuilder( dbdir.getFirstFile(), dbname.getText() );
-							
+
 							//If no question file is entered, then use "va-semoss.ttl":
-                            File fileQuestions = questionfile.getFirstFile();
-                            fileQuestions = (fileQuestions != null) ? fileQuestions : new File("/models/va-semoss.ttl");
-                            
+							File fileQuestions = questionfile.getFirstFile();
+							fileQuestions = ( fileQuestions != null ) ? fileQuestions
+									: new File( "/models/va-semoss.ttl" );
+
 							ecb.setDefaultBaseUri( defaultBaseUri,
 									defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ) )
 							.setReificationModel( reif )

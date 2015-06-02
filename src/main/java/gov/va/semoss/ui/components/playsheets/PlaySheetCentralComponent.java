@@ -130,7 +130,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 				s.getObject() } );
 		}
 
-		create( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), null );
+		create( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), engine );
 	}
 
 	public void overlay( Model m, IEngine engine ) {
@@ -140,7 +140,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 				s.getObject() } );
 		}
 
-		overlay( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), null );
+		overlay( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), engine );
 	}
 
 	public void populateToolBar( JToolBar toolBar, final String tabTitle ) {
