@@ -260,6 +260,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
+	 * Method resetView. Reset to original view.
+	 */
+	public void resetView() {
+		if ( overlayLevel > 1 ) {
+			overlayLevel = 1;
+			updateLayout();
+		}
+	}
+	
+	/**
 	 * Method undoView. Get the latest view and undo it.
 	 */
 	public void undoView() {
