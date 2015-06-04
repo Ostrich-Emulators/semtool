@@ -8,47 +8,45 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.*?>
 
-<Pane styleClass="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.semoss.ui.components.insight.manager.InsightManagerController">
-  <stylesheets>
-    <URL value="@/css/InsightManagerPanel.css" />
-  </stylesheets>
+<Pane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="300.0" minWidth="300.0" styleClass="root" stylesheets="@../css/InsightManagerPanel.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.semoss.ui.components.insight.manager.InsightManagerController">
+
    <children>
-   <TabPane fx:id="tbpTabbedPane" blendMode="RED" layoutX="1.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <TabPane fx:id="tbpTabbedPane" blendMode="RED" layoutX="1.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
      <tabs>
        <Tab text="Perspective">
          <content>
-           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="578.0" prefWidth="959.0">
+           <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
                   <children>
-                     <GridPane layoutX="7.0" layoutY="-1.0" prefHeight="604.0" prefWidth="964.0">
+                     <GridPane layoutX="7.0" layoutY="-1.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                        <columnConstraints>
-                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="298.0" minWidth="10.0" prefWidth="114.0" />
-                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="863.0" minWidth="10.0" prefWidth="850.0" />
+                         <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="109.0" />
+                         <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="899.0" minWidth="10.0" prefWidth="889.0" />
                        </columnConstraints>
                        <rowConstraints>
-                         <RowConstraints maxHeight="86.0" minHeight="9.0" prefHeight="61.0" vgrow="NEVER" />
-                         <RowConstraints maxHeight="293.0" minHeight="8.0" prefHeight="112.0" vgrow="SOMETIMES" />
-                         <RowConstraints maxHeight="497.0" minHeight="10.0" prefHeight="362.0" vgrow="NEVER" />
-                           <RowConstraints maxHeight="203.0" minHeight="1.0" prefHeight="65.0" vgrow="SOMETIMES" />
+                         <RowConstraints maxHeight="86.0" minHeight="35.0" prefHeight="61.0" vgrow="ALWAYS" />
+                         <RowConstraints maxHeight="293.0" minHeight="70.0" prefHeight="112.0" vgrow="ALWAYS" />
+                         <RowConstraints maxHeight="497.0" minHeight="70.0" prefHeight="362.0" vgrow="ALWAYS" />
+                           <RowConstraints maxHeight="203.0" minHeight="35.0" prefHeight="65.0" vgrow="ALWAYS" />
                        </rowConstraints>
                         <children>
-                           <Label prefHeight="33.0" prefWidth="46.0" text="Title:" GridPane.halignment="RIGHT">
+                           <Label minHeight="-Infinity" minWidth="-Infinity" text="Title:" GridPane.halignment="RIGHT">
                                  <GridPane.margin>
                                     <Insets right="10.0" />
                                  </GridPane.margin>
                               </Label>
-                           <Label text="Description:" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                           <Label minHeight="-Infinity" minWidth="-Infinity" text="Description:" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">
                                  <GridPane.margin>
                                     <Insets right="10.0" top="12.0" />
                                  </GridPane.margin>
                               </Label>
-                           <Label text="Insights:" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                           <Label minHeight="-Infinity" minWidth="-Infinity" text="Insights:" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
                                  <GridPane.margin>
                                     <Insets right="10.0" />
                                  </GridPane.margin>
                               </Label>
-                           <HBox alignment="CENTER" prefHeight="60.0" prefWidth="964.0" GridPane.columnSpan="2" GridPane.rowIndex="3" GridPane.valignment="BOTTOM">
+                           <HBox alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="60.0" prefWidth="964.0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="BOTTOM" GridPane.vgrow="NEVER">
                               <children>
-                                 <Button fx:id="btnAddInsight" mnemonicParsing="false" text="Add Insight" textAlignment="CENTER">
+                                 <Button fx:id="btnAddInsight" minHeight="-Infinity" minWidth="60.0" mnemonicParsing="false" text="Add Insight" textAlignment="CENTER">
                                     <HBox.margin>
                                        <Insets right="5.0" />
                                     </HBox.margin>
@@ -56,7 +54,7 @@
                                           <Font name="System Bold" size="16.0" />
                                        </font>
                                  </Button>
-                                    <Button fx:id="btnRemoveInsight" mnemonicParsing="false" text="Remove Insight" textAlignment="CENTER">
+                                    <Button fx:id="btnRemoveInsight" minHeight="-Infinity" minWidth="70.0" mnemonicParsing="false" text="Remove Insight" textAlignment="CENTER">
                                        <HBox.margin>
                                           <Insets right="5.0" />
                                        </HBox.margin>
@@ -64,7 +62,7 @@
                                           <Font name="System Bold" size="16.0" />
                                        </font>
                                     </Button>
-                                 <Button fx:id="btnAddPerspective" mnemonicParsing="false" text="Add Perspective" textAlignment="CENTER">
+                                 <Button fx:id="btnAddPerspective" minHeight="-Infinity" minWidth="70.0" mnemonicParsing="false" text="Add Perspective" textAlignment="CENTER">
                                     <HBox.margin>
                                        <Insets right="5.0" />
                                     </HBox.margin>
@@ -72,7 +70,7 @@
                                           <Font name="System Bold" size="16.0" />
                                        </font>
                                  </Button>
-                                    <Button fx:id="btnDeletePerspective" mnemonicParsing="false" text="Delete Perspective">
+                                    <Button fx:id="btnDeletePerspective" minHeight="-Infinity" minWidth="80.0" mnemonicParsing="false" text="Delete Perspective">
                                        <HBox.margin>
                                           <Insets right="5.0" />
                                        </HBox.margin>
@@ -80,7 +78,7 @@
                                           <Font name="System Bold" size="16.0" />
                                        </font>
                                     </Button>
-                                 <Button fx:id="btnSavePerspective" mnemonicParsing="false" text="Save Perspective" textAlignment="CENTER">
+                                 <Button fx:id="btnSavePerspective" minHeight="-Infinity" minWidth="80.0" mnemonicParsing="false" text="Save Perspective" textAlignment="CENTER">
                                     <HBox.margin>
                                        <Insets right="5.0" />
                                     </HBox.margin>
@@ -88,31 +86,31 @@
                                           <Font name="System Bold" size="16.0" />
                                        </font>
                                  </Button>
-                                 <Button fx:id="btnReloadPerspective" mnemonicParsing="false" text="Reload" textAlignment="CENTER">
+                                 <Button fx:id="btnReloadPerspective" minHeight="-Infinity" minWidth="40.0" mnemonicParsing="false" text="Reload" textAlignment="CENTER">
                                        <font>
                                           <Font name="System Bold" size="16.0" />
                                        </font></Button>
                               </children>
                                  <GridPane.margin>
-                                    <Insets bottom="10.0" />
+                                    <Insets bottom="10.0" right="10.0" />
                                  </GridPane.margin>
                            </HBox>
-                           <TextArea fx:id="txtaPerspectiveDesc" maxHeight="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <TextArea fx:id="txtaPerspectiveDesc" minHeight="40.0" minWidth="0.0" prefHeight="82.0" prefWidth="853.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets bottom="10.0" right="10.0" />
                                  </GridPane.margin>
                               </TextArea>
-                           <ListView fx:id="lstvInsights" prefHeight="320.0" prefWidth="840.0" styleClass="mylistview" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <ListView fx:id="lstvInsights" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" styleClass="mylistview" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets bottom="10.0" right="10.0" />
                                  </GridPane.margin>
                            </ListView>
-                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                              <HBox alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="NEVER">
                                  <children>
-                                    <ComboBox fx:id="cboPerspectiveTitle" prefHeight="25.0" />
-                                    <TextField fx:id="txtPerspectiveTitle" HBox.hgrow="ALWAYS">
+                                    <ComboBox fx:id="cboPerspectiveTitle" minHeight="-Infinity" minWidth="-Infinity" prefHeight="35.0" />
+                                    <TextField fx:id="txtPerspectiveTitle" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="0.0" prefHeight="35.0" prefWidth="600.0">
                                        <HBox.margin>
-                                          <Insets left="10.0" right="10.0" />
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                        </HBox.margin>
                                     </TextField>
                                  </children>
@@ -125,26 +123,26 @@
        </Tab>
        <Tab text="Insight">
          <content>
-           <AnchorPane minHeight="0.0" minWidth="0.0">
+           <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
                      <children>
-                        <GridPane>
+                        <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="503.0" minWidth="10.0" prefWidth="499.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="503.0" minWidth="10.0" prefWidth="499.0" />
+                            <ColumnConstraints hgrow="ALWAYS" maxWidth="503.0" minWidth="10.0" prefWidth="499.0" />
+                              <ColumnConstraints hgrow="ALWAYS" maxWidth="503.0" minWidth="10.0" prefWidth="499.0" />
                           </columnConstraints>
                           <rowConstraints>
-                              <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="55.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="93.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="93.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="255.0" minHeight="0.0" prefHeight="208.0" vgrow="NEVER" />
-                              <RowConstraints maxHeight="255.0" minHeight="10.0" prefHeight="142.0" vgrow="NEVER" />
-                              <RowConstraints maxHeight="224.0" minHeight="10.0" prefHeight="60.0" vgrow="NEVER" />
-                              <RowConstraints maxHeight="172.0" minHeight="0.0" prefHeight="56.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="95.0" minHeight="-Infinity" prefHeight="55.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="93.0" minHeight="-Infinity" prefHeight="37.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="93.0" minHeight="-Infinity" prefHeight="33.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="255.0" minHeight="75.0" prefHeight="208.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="255.0" minHeight="70.0" prefHeight="142.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="224.0" minHeight="-Infinity" prefHeight="70.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="172.0" minHeight="35.0" prefHeight="65.0" vgrow="ALWAYS" />
                           </rowConstraints>
                            <children>
-                              <HBox alignment="CENTER" prefHeight="147.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
+                              <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="147.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" GridPane.vgrow="ALWAYS">
                                  <children>
-                                    <Button fx:id="btnAddParameter_Inst" mnemonicParsing="false" text="Add Parameter" textAlignment="CENTER">
+                                    <Button fx:id="btnAddParameter_Inst" minWidth="70.0" mnemonicParsing="false" text="Add Parameter" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                                        <font>
                                           <Font name="System Bold" size="16.0" />
                                        </font>
@@ -152,7 +150,7 @@
                                           <Insets right="5.0" />
                                        </HBox.margin>
                                     </Button>
-                                    <Button fx:id="btnDeleteParameter_Inst" mnemonicParsing="false" text="Delete Parameter" textAlignment="CENTER">
+                                    <Button fx:id="btnDeleteParameter_Inst" minWidth="80.0" mnemonicParsing="false" text="Delete Parameter" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                                        <font>
                                           <Font name="System Bold" size="16.0" />
                                        </font>
@@ -160,7 +158,7 @@
                                           <Insets right="5.0" />
                                        </HBox.margin>
                                     </Button>
-                                    <Button fx:id="btnDeleteInsight_Inst" mnemonicParsing="false" text="Delete Insight" textAlignment="CENTER">
+                                    <Button fx:id="btnDeleteInsight_Inst" minWidth="70.0" mnemonicParsing="false" text="Delete Insight" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                                        <font>
                                           <Font name="System Bold" size="16.0" />
                                        </font>
@@ -168,7 +166,7 @@
                                           <Insets right="5.0" />
                                        </HBox.margin>
                                     </Button>
-                                    <Button fx:id="btnSaveInsight_Inst" mnemonicParsing="false" text="Save Insight" textAlignment="CENTER">
+                                    <Button fx:id="btnSaveInsight_Inst" minWidth="60.0" mnemonicParsing="false" text="Save Insight" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                                        <font>
                                           <Font name="System Bold" size="16.0" />
                                        </font>
@@ -176,41 +174,41 @@
                                           <Insets right="5.0" />
                                        </HBox.margin>
                                     </Button>
-                                    <Button fx:id="btnReloadInsight_Inst" mnemonicParsing="false" text="Reload" textAlignment="CENTER">
+                                    <Button fx:id="btnReloadInsight_Inst" minWidth="40.0" mnemonicParsing="false" text="Reload" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                                        <font>
                                           <Font name="System Bold" size="16.0" />
                                        </font>
                                     </Button>
                                  </children>
                               </HBox>
-                              <TextArea fx:id="txtaQuery_Inst" prefHeight="101.0" prefWidth="448.0" wrapText="true" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                              <TextArea fx:id="txtaQuery_Inst" minHeight="0.0" minWidth="0.0" wrapText="true" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets bottom="10.0" left="10.0" right="10.0" />
                                  </GridPane.margin>
                               </TextArea>
-                              <HBox prefHeight="80.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.valignment="CENTER">
+                              <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="80.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                                  <children>
-                                    <Label text="Question:">
+                                    <Label minHeight="-Infinity" minWidth="-Infinity" text="Question:">
                                        <HBox.margin>
                                           <Insets bottom="10.0" left="10.0" right="10.0" top="15.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField fx:id="txtQuestion_Inst" prefHeight="35.0" prefWidth="888.0">
+                                    <TextField fx:id="txtQuestion_Inst" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="35.0" prefWidth="917.0">
                                        <HBox.margin>
                                           <Insets bottom="10.0" right="10.0" top="10.0" />
                                        </HBox.margin>
                                     </TextField>
                                  </children>
                               </HBox>
-                              <GridPane prefHeight="85.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+                              <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="85.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" GridPane.vgrow="ALWAYS">
                                 <columnConstraints>
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                 </columnConstraints>
                                 <rowConstraints>
-                                  <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
-                                  <RowConstraints maxHeight="78.0" minHeight="10.0" prefHeight="51.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="50.0" minHeight="-Infinity" prefHeight="20.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="78.0" minHeight="-Infinity" prefHeight="45.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
                                     <Label text="Author:" GridPane.halignment="LEFT">
@@ -218,7 +216,7 @@
                                           <Insets bottom="10.0" left="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="txtCreator_Inst" editable="false" prefHeight="25.0" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                    <TextField fx:id="txtCreator_Inst" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="35.0" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets bottom="10.0" left="10.0" right="10.0" />
                                        </GridPane.margin>
@@ -228,7 +226,7 @@
                                           <Insets bottom="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="txtCreated_Inst" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                    <TextField fx:id="txtCreated_Inst" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="35.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets bottom="10.0" right="10.0" />
                                        </GridPane.margin>
@@ -238,50 +236,50 @@
                                           <Insets bottom="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="txtModified_Inst" editable="false" prefHeight="25.0" prefWidth="448.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                    <TextField fx:id="txtModified_Inst" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="35.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets bottom="10.0" right="10.0" />
                                        </GridPane.margin>
                                     </TextField>
                                  </children>
                               </GridPane>
-                              <GridPane prefHeight="46.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="1">
+                              <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="46.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                 <columnConstraints>
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="290.0" minWidth="10.0" prefWidth="128.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="532.0" minWidth="10.0" prefWidth="345.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="620.0" minWidth="10.0" prefWidth="152.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="539.0" minWidth="10.0" prefWidth="373.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="290.0" minWidth="-Infinity" prefWidth="128.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="532.0" minWidth="50.0" prefWidth="345.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="620.0" minWidth="-Infinity" prefWidth="152.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="539.0" minWidth="50.0" prefWidth="373.0" />
                                 </columnConstraints>
                                 <rowConstraints>
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Label text="Display with:">
+                                    <Label minHeight="-Infinity" minWidth="-Infinity" text="Display with:">
                                        <GridPane.margin>
                                           <Insets left="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <ComboBox fx:id="cboDisplayWith_Inst" prefHeight="25.0" GridPane.columnIndex="1" />
+                                    <ComboBox fx:id="cboDisplayWith_Inst" GridPane.columnIndex="1" />
                                     <Label text="Renderer Class:" GridPane.columnIndex="2">
                                        <GridPane.margin>
                                           <Insets left="10.0" />
                                        </GridPane.margin></Label>
-                                    <TextField fx:id="txtRendererClass_Inst" GridPane.columnIndex="3">
+                                    <TextField fx:id="txtRendererClass_Inst" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="35.0" GridPane.columnIndex="3">
                                        <GridPane.margin>
                                           <Insets right="10.0" />
                                        </GridPane.margin>
                                     </TextField>
                                  </children>
                               </GridPane>
-                              <GridPane prefHeight="90.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                              <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="90.0" prefWidth="971.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.vgrow="ALWAYS">
                                 <columnConstraints>
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="325.0" minWidth="10.0" prefWidth="175.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="495.0" minWidth="10.0" prefWidth="321.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="475.0" minWidth="10.0" prefWidth="475.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="325.0" minWidth="75.0" prefWidth="175.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="495.0" minWidth="75.0" prefWidth="321.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="475.0" minWidth="75.0" prefWidth="475.0" />
                                 </columnConstraints>
                                 <rowConstraints>
-                                  <RowConstraints maxHeight="40.0" minHeight="5.0" prefHeight="22.0" />
-                                    <RowConstraints maxHeight="106.0" minHeight="0.0" prefHeight="106.0" vgrow="ALWAYS" />
+                                  <RowConstraints maxHeight="40.0" minHeight="-Infinity" prefHeight="20.0" />
+                                    <RowConstraints maxHeight="106.0" minHeight="50.0" prefHeight="106.0" vgrow="ALWAYS" />
                                 </rowConstraints>
                                  <children>
                                     <Label text="Parameter:">
@@ -289,19 +287,19 @@
                                           <Insets bottom="10.0" left="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <ListView fx:id="lstvParameter_Inst" prefHeight="85.0" prefWidth="448.0" styleClass="mylistview" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                                    <ListView fx:id="lstvParameter_Inst" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" styleClass="mylistview" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                        <GridPane.margin>
-                                          <Insets left="10.0" right="10.0" />
+                                          <Insets bottom="5.0" left="10.0" right="10.0" />
                                        </GridPane.margin>
                                     </ListView>
-                                    <ListView fx:id="lstvInsightPerspective_Inst" prefHeight="101.0" prefWidth="448.0" styleClass="mylistview" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                                    <ListView fx:id="lstvInsightPerspective_Inst" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" styleClass="mylistview" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                        <GridPane.margin>
-                                          <Insets right="10.0" />
+                                          <Insets bottom="5.0" right="10.0" />
                                        </GridPane.margin>
                                     </ListView>
-                                    <TextArea fx:id="txtaInsightDesc_Inst" prefHeight="52.0" prefWidth="448.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                                    <TextArea fx:id="txtaInsightDesc_Inst" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                        <GridPane.margin>
-                                          <Insets right="10.0" />
+                                          <Insets bottom="5.0" right="10.0" />
                                        </GridPane.margin>
                                     </TextArea>
                                     <Label text="Perspective:" GridPane.columnIndex="1" GridPane.halignment="LEFT">
@@ -333,11 +331,11 @@
        </Tab>
             <Tab fx:id="tabParameter" text="Parameter">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
                      <children>
-                        <GridPane layoutX="15.0" layoutY="2.0" prefHeight="588.0" prefWidth="969.0">
+                        <GridPane layoutX="15.0" layoutY="2.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <HBox alignment="CENTER" prefHeight="86.0" prefWidth="969.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+                              <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="86.0" prefWidth="969.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" GridPane.vgrow="ALWAYS">
                                  <children>
                                     <Button fx:id="btnSaveParameter_Parm" mnemonicParsing="false" text="Save Parameter" textAlignment="CENTER">
                                        <font>
@@ -354,20 +352,20 @@
                                     </Button>
                                  </children>
                               </HBox>
-                              <TextArea id="txtaDefault_Parm" fx:id="txtaDefaultQuery_parm" prefHeight="293.0" prefWidth="860.0" GridPane.columnSpan="2" GridPane.rowIndex="4" GridPane.vgrow="NEVER">
+                              <TextArea id="txtaDefault_Parm" fx:id="txtaDefaultQuery_parm" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefWidth="978.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.vgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets bottom="10.0" left="10.0" right="10.0" />
                                  </GridPane.margin>
                               </TextArea>
-                              <GridPane GridPane.columnSpan="2">
+                              <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                                 <columnConstraints>
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="238.0" minWidth="10.0" prefWidth="110.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="474.0" minWidth="10.0" prefWidth="400.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="0.0" prefWidth="91.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="456.0" minWidth="10.0" prefWidth="400.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="70.0" prefWidth="110.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="50.0" prefWidth="400.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="70.0" prefWidth="91.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="50.0" prefWidth="400.0" />
                                 </columnConstraints>
                                 <rowConstraints>
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="-Infinity" prefHeight="45.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
                                     <Label text="Variable:" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.valignment="TOP">
@@ -375,12 +373,12 @@
                                           <Insets right="10.0" top="15.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField id="txtVariable_Parm" fx:id="txtVariable_parm" prefHeight="0.0" prefWidth="394.0" GridPane.columnIndex="3">
+                                    <TextField id="txtVariable_Parm" fx:id="txtVariable_parm" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="35.0" GridPane.columnIndex="3">
                                        <GridPane.margin>
                                           <Insets bottom="10.0" right="10.0" />
                                        </GridPane.margin>
                                     </TextField>
-                                    <TextField fx:id="txtLabel_parm" prefHeight="15.0" prefWidth="366.0" GridPane.columnIndex="1">
+                                    <TextField fx:id="txtLabel_parm" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="35.0" GridPane.columnIndex="1">
                                        <GridPane.margin>
                                           <Insets bottom="10.0" right="10.0" />
                                        </GridPane.margin>
@@ -397,25 +395,25 @@
                                     <Insets left="10.0" />
                                  </padding>
                               </Label>
-                              <HBox alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="72.0" prefWidth="969.0" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
+                              <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="45.0" prefWidth="969.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="BOTTOM" GridPane.vgrow="ALWAYS">
                                  <children>
                                     <Button fx:id="btnBuildQuery_Parm" alignment="CENTER" mnemonicParsing="false" text="Build Query from Type" textAlignment="CENTER" HBox.hgrow="NEVER">
                                        <font>
                                           <Font name="System Bold" size="16.0" />
                                        </font>
                                        <HBox.margin>
-                                          <Insets top="50.0" />
+                                          <Insets />
                                        </HBox.margin>
                                     </Button>
                                  </children>
                               </HBox>
-                              <GridPane GridPane.columnSpan="2" GridPane.rowIndex="1">
+                              <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                                 <columnConstraints>
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="480.0" minWidth="10.0" prefWidth="172.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="857.0" minWidth="10.0" prefWidth="797.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="172.0" minWidth="100.0" prefWidth="172.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="857.0" minWidth="100.0" prefWidth="797.0" />
                                 </columnConstraints>
                                 <rowConstraints>
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="-Infinity" prefHeight="45.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
                                     <Label prefHeight="21.0" prefWidth="360.0" text="Parameter Types:">
@@ -423,7 +421,7 @@
                                           <Insets bottom="10.0" left="10.0" right="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <ComboBox fx:id="cboParameterType_parm" prefHeight="31.0" prefWidth="347.0" GridPane.columnIndex="1">
+                                    <ComboBox fx:id="cboParameterType_parm" GridPane.columnIndex="1">
                                        <GridPane.margin>
                                           <Insets bottom="10.0" right="10.0" />
                                        </GridPane.margin>
@@ -432,16 +430,16 @@
                               </GridPane>
                            </children>
                            <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="373.0" minWidth="10.0" prefWidth="73.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="893.0" minWidth="10.0" prefWidth="845.0" />
+                              <ColumnConstraints hgrow="ALWAYS" maxWidth="373.0" minWidth="10.0" prefWidth="73.0" />
+                              <ColumnConstraints hgrow="ALWAYS" maxWidth="893.0" minWidth="10.0" prefWidth="845.0" />
                            </columnConstraints>
                            <rowConstraints>
-                              <RowConstraints maxHeight="445.0" minHeight="10.0" prefHeight="61.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="503.0" minHeight="10.0" prefHeight="56.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="614.0" minHeight="10.0" prefHeight="45.0" valignment="BASELINE" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="614.0" minHeight="10.0" prefHeight="48.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="614.0" minHeight="0.0" prefHeight="318.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="285.0" minHeight="0.0" prefHeight="56.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="445.0" minHeight="-Infinity" prefHeight="61.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="503.0" minHeight="-Infinity" prefHeight="56.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="614.0" minHeight="-Infinity" prefHeight="45.0" valignment="BASELINE" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="614.0" minHeight="-Infinity" prefHeight="48.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="614.0" minHeight="75.0" prefHeight="318.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="56.0" vgrow="ALWAYS" />
                            </rowConstraints>
                         </GridPane>
                      </children>
