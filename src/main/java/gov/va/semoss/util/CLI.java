@@ -222,7 +222,7 @@ public class CLI {
 				? cmd.getOptionValue( "baseuri" ) : "http://semoss.test/database" );
 
 		if ( cmd.hasOption( "out" ) ) {
-			File db = new File( cmd.getOptionValue( "out" ) );
+			File db = new File( cmd.getOptionValue( "out" ) ).getAbsoluteFile();
 			File dbdir = db.getParentFile();
 			if ( !dbdir.exists() ) {
 				if ( !dbdir.mkdirs() ) {
