@@ -113,24 +113,6 @@ public class CliTest {
 		mossy.execute();
 	}
 
-	@Test
-	public void testCreateToNonExistentPath() throws Exception {
-		String[] args = makeArgs( commandLines[1] );
-		CLI mossy = new CLI( args );
-
-		String message = null;
-
-		try {
-			mossy.execute();
-		}
-		catch ( Exception ex ) {
-			String[] splitMessage = ex.getMessage().split( ":" );
-			message = splitMessage[0];
-		}
-
-		assertEquals( "Directory does not exist", message );
-	}
-
 	@Test( expected = FileNotFoundException.class )
 	public void testUpdateToNonExistentPath() throws Exception {
 		String[] args = makeArgs( commandLines[2] );
