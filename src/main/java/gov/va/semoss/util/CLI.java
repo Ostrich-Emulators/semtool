@@ -210,7 +210,7 @@ public class CLI {
 
 		// we need parameters for the following:
 		boolean stageInMemory = !cmd.hasOption( "stage-on-disk" );
-		boolean closure = cmd.hasOption( "closure" ); // calculate inferences
+		boolean closure = Boolean.parseBoolean( cmd.getOptionValue( "closure", "true" ) ); // calculate inferences
 		boolean conformance = cmd.hasOption( "conformance" ); // perform conformance tests
 		boolean createMetamodel = !cmd.hasOption( "no-metamodel" ); // create metamodel
 		ImportData errors = ( conformance ? new ImportData() : null );
