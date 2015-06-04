@@ -51,6 +51,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 
@@ -221,29 +222,25 @@ public class CLI {
 				? cmd.getOptionValue( "baseuri" ) : "http://semoss.test/database" );
 
 		if ( cmd.hasOption( "out" ) ) {
-			String databaseFileName = cmd.getOptionValue( "out" ).replaceFirst( ".jnl", "" );
-			String insightFile = null;
-			final String workingDir = System.getProperty( "user.dir" );
-			final File outputFile = new File( databaseFileName );
-
-			// final EngineUtil eutil = EngineUtil.getInstance();
-			File outputFileDir = outputFile.getParentFile();
-			outputFile.delete();
-			if ( null == outputFileDir ) {
-				outputFileDir = new File( workingDir );
-			}
-			if ( !outputFileDir.exists() ) {
-				throw new FileNotFoundException( "Directory does not exist: " 
-						+ outputFileDir.getPath() );
+			File db = new File( cmd.getOptionValue( "out" ) );
+			File dbdir = db.getParentFile();
+			if ( !dbdir.exists() ) {
+				if ( !dbdir.mkdirs() ) {
+					throw new FileNotFoundException( "Could not create output directory/file" );
+				}
 			}
 
-			EngineCreateBuilder ecb = new EngineCreateBuilder( outputFile, databaseFileName )
+			EngineCreateBuilder ecb = new EngineCreateBuilder( dbdir,
+					FilenameUtils.getBaseName( db.getName() ) )
 					.setDefaultBaseUri( new URIImpl( baseURI ), false )
 					.setReificationModel( ReificationStyle.SEMOSS )
-					.setDefaultsFiles( null, null, insightFile )
 					.setFiles( loads )
 					.setVocabularies( vocabs )
 					.setBooleans( stageInMemory, closure, createMetamodel );
+
+			if ( cmd.hasOption( "insights" ) ) {
+				ecb.setDefaultsFiles( null, null, cmd.getOptionValue( "insights" ) );
+			}
 
 			smss = EngineUtil.createNew( ecb, errors );
 		}
