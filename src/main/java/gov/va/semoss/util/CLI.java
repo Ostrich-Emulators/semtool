@@ -31,16 +31,21 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
+import gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler;
 import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
 import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 
+import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
@@ -50,8 +55,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 public class CLI {
@@ -129,6 +141,26 @@ public class CLI {
 		OptionBuilder.withDescription( "Create a new database." );
 		Option create = OptionBuilder.create( "out" );
 
+		OptionBuilder.withArgName( "string" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Add creator metadata to database." );
+		Option creator = OptionBuilder.create( "organization" );
+
+		OptionBuilder.withArgName( "string" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Add description metadata to database." );
+		Option desc = OptionBuilder.create( "summary" );
+
+		OptionBuilder.withArgName( "string" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Add label metadata to database." );
+		Option label = OptionBuilder.create( "title" );
+
+		OptionBuilder.withArgName( "string" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Add POC metadata to database." );
+		Option publisher = OptionBuilder.create( "poc" );
+
 		OptionGroup createOrUpdate = new OptionGroup();
 		createOrUpdate.addOption( create );
 		createOrUpdate.addOption( update );
@@ -140,6 +172,10 @@ public class CLI {
 		options.addOption( sparql );
 		options.addOption( update );
 		options.addOption( baseuri );
+		options.addOption( creator );
+		options.addOption( desc );
+		options.addOption( label );
+		options.addOption( publisher );
 		options.addOption( vocab );
 		options.addOptionGroup( createOrUpdate );
 
@@ -242,6 +278,34 @@ public class CLI {
 			}
 
 			smss = EngineUtil.createNew( ecb, errors );
+
+			// set the metadata on the just-created database
+			final Map<URI, String> metadatas = getMetadata( cmd );
+
+			if ( !metadatas.isEmpty() ) {
+				// set the metadata on the just-created database
+				IEngine engine = Utility.loadEngine( smss );
+				try {
+					engine.execute( new ModificationExecutorAdapter() {
+
+						@Override
+						public void exec( RepositoryConnection conn ) throws RepositoryException {
+							ValueFactory vf = conn.getValueFactory();
+							for ( Map.Entry<URI, String> en : metadatas.entrySet() ) {
+								Value val = AbstractEdgeModeler.getRDFStringValue( en.getValue(),
+										engine.getNamespaces(), vf );
+								conn.add( engine.getBaseUri(), en.getKey(), val );
+							}
+						}
+					} );
+					
+					engine.commit();
+					Utility.closeEngine( engine );
+				}
+				catch ( Exception e ) {
+					logger.error( e, e );
+				}
+			}
 		}
 		else if ( cmd.hasOption( "update" ) ) {
 			String update = cmd.getOptionValue( "update" );
@@ -249,7 +313,7 @@ public class CLI {
 
 			final File updateFile = new File( update );
 			if ( !updateFile.exists() ) {
-				throw new FileNotFoundException( "Cound not find: " + update );
+				throw new FileNotFoundException( "Could not find: " + update );
 			}
 
 			if ( null == smss ) {
@@ -276,6 +340,25 @@ public class CLI {
 			String sparql = cmd.getOptionValue( "sparql" );
 			// run an update , save updated db
 		}
+	}
+
+	private Map<URI, String> getMetadata( CommandLine cmd ) {
+		Map<URI, String> map = new HashMap<>();
+
+		Map<String, URI> mets = new HashMap<>();
+		mets.put( "organization", DCTERMS.CREATOR );
+		mets.put( "poc", DCTERMS.PUBLISHER );
+		mets.put( "summary", DCTERMS.DESCRIPTION );
+		mets.put( "title", RDFS.LABEL );
+
+		for ( Map.Entry<String, URI> en : mets.entrySet() ) {
+			if ( cmd.hasOption( en.getKey() ) ) {
+				String rawval = cmd.getOptionValue( en.getKey() );
+				map.put( en.getValue(), rawval );
+			}
+		}
+
+		return map;
 	}
 
 	/**
