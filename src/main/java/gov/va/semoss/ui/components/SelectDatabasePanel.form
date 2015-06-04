@@ -49,6 +49,7 @@
         <Property name="dividerLocation" type="int" value="125"/>
         <Property name="dividerSize" type="int" value="2"/>
         <Property name="orientation" type="int" value="0"/>
+        <Property name="resizeWeight" type="double" value="0.25"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
         <Property name="continuousLayout" type="boolean" value="true"/>
       </Properties>
@@ -168,7 +169,7 @@
                       <Component id="submitButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="appendChkBox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="54" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="86" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

@@ -180,7 +180,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
 		Forest<SEMOSSVertex, SEMOSSEdge> forest = GraphToTreeConverter.convert( gdm.getGraph(),
 				view.getPickedVertexState().getPicked() );
-		
+
 		printForest( forest );
 		return forest;
 	}
@@ -680,6 +680,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		updateGraph();
+	}
+
+	@Override
+	public boolean canAcceptDataWithHeaders( List<String> newheaders ) {
+		// we can accept either a model's headers, or a single header 
+		return ( Arrays.asList( "Subject", "Predicate", "Object" ).equals( newheaders )
+				|| ( 1 == newheaders.size() ) );
 	}
 
 	@Override

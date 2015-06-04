@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.util;
 
-import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,6 +37,7 @@ import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -85,35 +85,52 @@ public class CLI {
 			}
 			catch ( IOException ioe ) {
 				logger.error( ioe, ioe );
+				System.exit( 1 );
 			}
 		}
 
 		Options options = new Options();
 		Option help = new Option( "help", "Print this message" );
 
-		Option load = OptionBuilder.withArgName( "file.[xlsx|csv|ttl|rdf|rdfs|owl|n3|jnl]+" )
-				.hasArg()
-				.withDescription( "Data to import." )
-				.create( "load" );
-		Option insights = OptionBuilder.withArgName( "insights.txt+" )
-				.hasArg()
-				.withDescription( "Insights to import." )
-				.create( "insights" );
+		OptionBuilder.withArgName( "file.[xlsx|csv|ttl|rdf|rdfs|owl|n3|jnl]+" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Data to import." );
+		Option load = OptionBuilder.create( "load" );
+
+		OptionBuilder.withArgName( "file.[ttl|rdf|rdfs|owl|n3]+" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Vocabularies to import." );
+		Option vocab = OptionBuilder.create( "vocab" );
+
+		OptionBuilder.withArgName( "uri" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Set the Base URI for loads" );
+		Option baseuri = OptionBuilder.create( "baseuri" );
+
+		OptionBuilder.withArgName( "insights.txt+" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Insights to import." );
+		Option insights = OptionBuilder.create( "insights" );
+
 		Option replace = new Option( "replace", "Replace existing data?" );
-		Option sparql = OptionBuilder.withArgName( "file.sparql+" )
-				.hasArg()
-				.withDescription( "A SPARQL update expression(s) to evaluate." )
-				.create( "sparql" );
-		Option update = OptionBuilder.withArgName( "old.jnl" )
-				.hasArg()
-				.withDescription( "Update an existing database." )
-				.create( "update" );
-		Option out = OptionBuilder.withArgName( "new.jnl" )
-				.hasArg()
-				.withDescription( "Create a new database." )
-				.create( "out" );
+
+		OptionBuilder.withArgName( "file.sparql+" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "A SPARQL update expression(s) to evaluate." );
+		Option sparql = OptionBuilder.create( "sparql" );
+
+		OptionBuilder.withArgName( "old.jnl" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Update an existing database." );
+		Option update = OptionBuilder.create( "update" );
+
+		OptionBuilder.withArgName( "new.jnl" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Create a new database." );
+		Option create = OptionBuilder.create( "out" );
+
 		OptionGroup createOrUpdate = new OptionGroup();
-		createOrUpdate.addOption( out );
+		createOrUpdate.addOption( create );
 		createOrUpdate.addOption( update );
 
 		options.addOption( help );
@@ -122,6 +139,8 @@ public class CLI {
 		options.addOption( replace );
 		options.addOption( sparql );
 		options.addOption( update );
+		options.addOption( baseuri );
+		options.addOption( vocab );
 		options.addOptionGroup( createOrUpdate );
 
 		CommandLineParser parser = new BasicParser();
@@ -134,7 +153,7 @@ public class CLI {
 			System.exit( -1 );
 		}
 
-		if ( cmd.hasOption( "help" ) ) {
+		if ( cmd.hasOption( "help" ) || 0 == cmd.getOptions().length ) {
 			// automatically generate the help statement
 			String header = "Do something useful with an input file\n\n";
 			String footer = "\nPlease report issues at http://example.com/issues";
@@ -143,7 +162,6 @@ public class CLI {
 			formatter.printHelp( "mossy", header, options, footer, true );
 			System.exit( 0 );
 		}
-
 	}
 
 	public String getOption( String option ) {
@@ -170,11 +188,24 @@ public class CLI {
 			for ( String load : loadArgs ) {
 				File loadFile = new File( load );
 				if ( !loadFile.exists() ) {
-					throw new FileNotFoundException( "Cound not find: " + load );
+					throw new FileNotFoundException( "Could not find: " + load );
 				}
 				loads.add( loadFile );
 			}
+		}
 
+		Collection<URL> vocabs = new ArrayList<>();
+		if ( cmd.hasOption( "vocab" ) ) {
+			String[] loadArgs = cmd.getOptionValue( "vocab" ).split( "\\s+" );
+			// split load by space
+
+			for ( String load : loadArgs ) {
+				File loadFile = new File( load );
+				if ( !loadFile.exists() ) {
+					throw new FileNotFoundException( "Could not find: " + load );
+				}
+				vocabs.add( loadFile.toURI().toURL() );
+			}
 		}
 
 		// we need parameters for the following:
@@ -186,12 +217,13 @@ public class CLI {
 
 		File smss = null;
 
+		String baseURI = ( cmd.hasOption( "baseuri" )
+				? cmd.getOptionValue( "baseuri" ) : "http://semoss.test/database" );
+
 		if ( cmd.hasOption( "out" ) ) {
 			String databaseFileName = cmd.getOptionValue( "out" ).replaceFirst( ".jnl", "" );
 			String insightFile = null;
-			String baseURI = "http://semoss.test/" + databaseFileName;
 			final String workingDir = System.getProperty( "user.dir" );
-
 			final File outputFile = new File( databaseFileName );
 
 			// final EngineUtil eutil = EngineUtil.getInstance();
@@ -201,18 +233,19 @@ public class CLI {
 				outputFileDir = new File( workingDir );
 			}
 			if ( !outputFileDir.exists() ) {
-				throw new FileNotFoundException( "Directory does not exist: " + outputFileDir.getPath() );
+				throw new FileNotFoundException( "Directory does not exist: " 
+						+ outputFileDir.getPath() );
 			}
-			
-			smss = EngineUtil.createNew(
-					new EngineCreateBuilder( outputFileDir, databaseFileName )
-					.setDefaultBaseUri( new URIImpl( baseURI ), true )
-					.setReificationModel( ReificationStyle.LEGACY )
+
+			EngineCreateBuilder ecb = new EngineCreateBuilder( outputFile, databaseFileName )
+					.setDefaultBaseUri( new URIImpl( baseURI ), false )
+					.setReificationModel( ReificationStyle.SEMOSS )
 					.setDefaultsFiles( null, null, insightFile )
 					.setFiles( loads )
-					.setBooleans( stageInMemory, closure, createMetamodel ),
-					errors
-			);
+					.setVocabularies( vocabs )
+					.setBooleans( stageInMemory, closure, createMetamodel );
+
+			smss = EngineUtil.createNew( ecb, errors );
 		}
 		else if ( cmd.hasOption( "update" ) ) {
 			String update = cmd.getOptionValue( "update" );
