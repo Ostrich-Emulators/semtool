@@ -252,7 +252,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
     jSplitPane1.setDividerLocation(125);
     jSplitPane1.setDividerSize(2);
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-    jSplitPane1.setResizeWeight(0.25);
+    jSplitPane1.setResizeWeight(0.5);
     jSplitPane1.setToolTipText("");
     jSplitPane1.setContinuousLayout(true);
 
