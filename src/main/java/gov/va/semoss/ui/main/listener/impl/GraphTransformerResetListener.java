@@ -29,7 +29,8 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
  * Controls the resetting of the transformers for the graph play sheet.
  */
 public class GraphTransformerResetListener extends AbstractAction implements ActionListener{
-	GraphPlaySheet playSheet;
+	private static final long serialVersionUID = -4496897463297401205L;
+	private GraphPlaySheet playSheet;
 	
 	/**
 	 * Method setPlaySheet.  Sets the play sheet that the listener will access.
@@ -45,9 +46,8 @@ public class GraphTransformerResetListener extends AbstractAction implements Act
 	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		playSheet.clearHighlighting();
-		playSheet.getView().repaint();
+		playSheet.undoView();
+//		playSheet.clearHighlighting();
+//		playSheet.getView().repaint();
 	}
-	
-
 }
