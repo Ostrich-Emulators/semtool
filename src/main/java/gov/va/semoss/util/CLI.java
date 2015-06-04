@@ -42,15 +42,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import java.util.Properties;
-import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -94,12 +93,12 @@ public class CLI {
 		Option help = new Option( "help", "Print this message" );
 
 		OptionBuilder.withArgName( "file.[xlsx|csv|ttl|rdf|rdfs|owl|n3|jnl]+" );
-		OptionBuilder.hasArg();
+		OptionBuilder.hasArgs( 10 );
 		OptionBuilder.withDescription( "Data to import." );
 		Option load = OptionBuilder.create( "load" );
 
 		OptionBuilder.withArgName( "file.[ttl|rdf|rdfs|owl|n3]+" );
-		OptionBuilder.hasArg();
+		OptionBuilder.hasArgs( 10 );
 		OptionBuilder.withDescription( "Vocabularies to import." );
 		Option vocab = OptionBuilder.create( "vocab" );
 
@@ -108,15 +107,15 @@ public class CLI {
 		OptionBuilder.withDescription( "Set the Base URI for loads" );
 		Option baseuri = OptionBuilder.create( "baseuri" );
 
-		OptionBuilder.withArgName( "insights.txt+" );
-		OptionBuilder.hasArg();
+		OptionBuilder.withArgName( "insights.ttl+" );
+		OptionBuilder.hasArgs( 10 );
 		OptionBuilder.withDescription( "Insights to import." );
 		Option insights = OptionBuilder.create( "insights" );
 
 		Option replace = new Option( "replace", "Replace existing data?" );
 
 		OptionBuilder.withArgName( "file.sparql+" );
-		OptionBuilder.hasArg();
+		OptionBuilder.hasArgs( 10 );
 		OptionBuilder.withDescription( "A SPARQL update expression(s) to evaluate." );
 		Option sparql = OptionBuilder.create( "sparql" );
 
@@ -144,7 +143,7 @@ public class CLI {
 		options.addOption( vocab );
 		options.addOptionGroup( createOrUpdate );
 
-		CommandLineParser parser = new BasicParser();
+		PosixParser parser = new PosixParser();
 
 		try {
 			cmd = parser.parse( options, args );
@@ -183,7 +182,7 @@ public class CLI {
 
 		Collection<File> loads = new ArrayList<>();
 		if ( cmd.hasOption( "load" ) ) {
-			String[] loadArgs = cmd.getOptionValue( "load" ).split( "\\s+" );
+			String[] loadArgs = cmd.getOptionValues( "load" );
 			// split load by space
 
 			for ( String load : loadArgs ) {
@@ -197,10 +196,10 @@ public class CLI {
 
 		Collection<URL> vocabs = new ArrayList<>();
 		if ( cmd.hasOption( "vocab" ) ) {
-			String[] loadArgs = cmd.getOptionValue( "vocab" ).split( "\\s+" );
+			String[] vos = cmd.getOptionValues( "vocab" );
 			// split load by space
 
-			for ( String load : loadArgs ) {
+			for ( String load : vos ) {
 				File loadFile = new File( load );
 				if ( !loadFile.exists() ) {
 					throw new FileNotFoundException( "Could not find: " + load );

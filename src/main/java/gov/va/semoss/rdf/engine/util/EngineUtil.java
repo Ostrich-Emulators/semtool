@@ -554,14 +554,6 @@ public class EngineUtil implements Runnable {
 		}
 
 		try {
-			bde.execute( new ModificationExecutorAdapter() {
-
-				@Override
-				public void exec( RepositoryConnection conn ) throws RepositoryException {
-					conn.add( vocabs );
-				}
-			} );
-
 			WriteableInsightManager wim = bde.getWriteableInsightManager();
 
 			if ( null != ecb.getQuestions() ) {
