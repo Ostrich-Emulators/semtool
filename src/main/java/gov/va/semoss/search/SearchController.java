@@ -20,15 +20,11 @@
 package gov.va.semoss.search;
 
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.PaintTransformer;
-import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 
@@ -40,7 +36,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,8 +44,8 @@ import java.util.Set;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-
 import javax.swing.SwingWorker;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -89,12 +84,6 @@ public class SearchController implements KeyListener, FocusListener,
 	private boolean typed = false;
 	private boolean searchContinue = true;
 
-	private PaintTransformer oldTx = null;
-	private EdgeStrokeTransformer oldeTx = null;
-	private VertexShapeTransformer oldsTx = null;
-	private double oldedgesize = 0;
-	private int oldfontsize = 0;
-
 	private GraphPlaySheet gps;
 
 	private final StandardAnalyzer analyzer = new StandardAnalyzer( Version.LUCENE_36 );
@@ -118,8 +107,6 @@ public class SearchController implements KeyListener, FocusListener,
 		else {
 			handleDeselectionOfButton();
 		}
-
-		// gps.clearHighlighting();
 	}
 
 	private void handleSelectionOfButton() {

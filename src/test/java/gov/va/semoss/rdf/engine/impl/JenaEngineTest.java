@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -50,7 +51,7 @@ public class JenaEngineTest {
 
 	@After
 	public void tearDown() {
-		dbdir.delete();
+		FileUtils.deleteQuietly( dbdir );
 	}
 
 	@Test
