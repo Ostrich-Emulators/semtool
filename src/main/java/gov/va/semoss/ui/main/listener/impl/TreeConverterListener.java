@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JFrame;
@@ -32,7 +33,12 @@ import edu.uci.ics.jung.graph.Forest;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.util.Utility;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Collection;
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import org.apache.log4j.Logger;
 
 /**
@@ -40,8 +46,16 @@ import org.apache.log4j.Logger;
  */
 public class TreeConverterListener extends AbstractAction {
 
-	GraphPlaySheet playSheet;
-	public Forest<SEMOSSVertex, SEMOSSEdge> oldforest;
+	private GraphPlaySheet gps;
+	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> oldgraph;
+
+	public TreeConverterListener() {
+		super( "Convert to Tree", Utility.loadImageIcon( "tree.png" ) );
+
+		putValue( Action.SHORT_DESCRIPTION,
+				"<html><b>Convert to Tree</b><br>Convert current graph to tree by"
+				+ " duplicating nodes with multiple in-edges</html>" );
+	}
 
 	/**
 	 * Method setPlaySheet. Sets the play sheet that the listener will access.
@@ -49,22 +63,42 @@ public class TreeConverterListener extends AbstractAction {
 	 * @param ps GraphPlaySheet
 	 */
 	public void setPlaySheet( GraphPlaySheet ps ) {
-		this.playSheet = ps;
-		oldforest = ps.asForest();
+		gps = ps;
+		setEnabled( false );
+
+		gps.getView().getPickedVertexState().addItemListener( new ItemListener() {
+
+			@Override
+			public void itemStateChanged( ItemEvent e ) {
+				Collection<SEMOSSVertex> picks
+						= gps.getView().getPickedVertexState().getPicked();
+
+				setEnabled( !picks.isEmpty() );
+			}
+		} );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		GraphToTreeConverter converter = new GraphToTreeConverter( playSheet );
 		JToggleButton button = (JToggleButton) e.getSource();
 
 		//if the button is selected run converter
 		if ( button.isSelected() ) {
-			converter.actionPerformed( e );
+			oldgraph = gps.getGraphData().getGraph();
+
+			Collection<SEMOSSVertex> nodes
+					= gps.getView().getPickedVertexState().getPicked();
+			if ( nodes.isEmpty() ) {
+				nodes = gps.getVisibleGraph().getVertices();
+			}
+
+			Forest<SEMOSSVertex, SEMOSSEdge> newforest
+					= GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes );
+			gps.setForest( newforest );
 		}
 		//if the button is unselected, revert to old forest
 		else {
-			playSheet.setForest( oldforest );
+			gps.getGraphData().setGraph( oldgraph );
 		}
 
 		Logger.getLogger( getClass() ).warn( "this function probably doesn't work anymore" );
@@ -72,10 +106,11 @@ public class TreeConverterListener extends AbstractAction {
 		if ( !success ) {
 			int response = showOptionPopup();
 			if ( response == 1 ) {
-				playSheet.setLayoutName( Constants.FR );
+				gps.setLayoutName( Constants.FR );
 			}
 		}
-		playSheet.updateGraph(); // totally unnecessary, I think
+
+		gps.updateGraph(); // totally unnecessary, I think
 
 	}
 

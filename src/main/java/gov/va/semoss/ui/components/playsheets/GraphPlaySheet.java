@@ -164,7 +164,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		controlData.setViewer( view );
 		controlPanel.setPlaySheet( this );
 		controlPanel.setGraphLayout( layout, gdm.getGraph() );
-		controlPanel.setViewer( view );
 
 		GraphZoomScrollPane gzPane = new GraphZoomScrollPane( view );
 		gzPane.getVerticalScrollBar().setUI( new NewScrollBarUI() );
@@ -446,7 +445,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		if ( null == layout ) {
-			layout = new FRLayout<SEMOSSVertex, SEMOSSEdge>( graph );
+			layout = new FRLayout<>( graph );
 		}
 
 		controlPanel.setGraphLayout( layout,
