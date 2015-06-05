@@ -19,24 +19,26 @@
  */
 package gov.va.semoss.algorithm.impl;
 
+import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Tree;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -47,17 +49,17 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class DataLatencyPerformer implements IAlgorithm {
 
+	private static final Logger logger = Logger.getLogger( DataLatencyPerformer.class );
 	public static final URI FREQUENCY = new URIImpl( "semoss://freq" );
-	GraphPlaySheet ps = null;
-	Forest<SEMOSSVertex, SEMOSSEdge> forest;
-	public SEMOSSVertex[] pickedVertex = null;
-	Logger logger = Logger.getLogger( getClass() );
-	double value;
-	Vector<SEMOSSEdge> masterEdgeVector = new Vector();//keeps track of everything accounted for in the forest
-	Vector<SEMOSSVertex> masterVertexVector = new Vector();
-	Vector<SEMOSSVertex> currentPathVerts = new Vector<>();//these are used for depth search first
-	Vector<SEMOSSEdge> currentPathEdges = new Vector<>();
-	double currentPathLate;
+	private final GraphPlaySheet ps;
+	private final List<SEMOSSVertex> pickedVertex = new ArrayList<>();
+	private double value;
+	private final Set<SEMOSSEdge> masterEdgeVector = new HashSet<>();//keeps track of everything accounted for in the forest
+	private final Set<SEMOSSVertex> masterVertexVector = new HashSet<>();
+	private final List<SEMOSSVertex> currentPathVerts = new ArrayList<>();//these are used for depth search first
+	private final List<SEMOSSEdge> currentPathEdges = new ArrayList<>();
+	private Forest<SEMOSSVertex, SEMOSSEdge> forest;
+	private double currentPathLate;
 	Set<SEMOSSEdge> validEdges = new HashSet<>();
 	Set<SEMOSSVertex> validVerts = new HashSet<>();
 	String selectedNodes = "";
@@ -74,14 +76,8 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 * @param p GraphPlaySheetFrame
 	 * @param vect DBCMVertex[]
 	 */
-	public DataLatencyPerformer( GraphPlaySheet p, SEMOSSVertex[] vect ) {
+	public DataLatencyPerformer( GraphPlaySheet p ) {
 		ps = p;
-		pickedVertex = vect;
-		forest = ps.asForest();
-		Collection<SEMOSSEdge> edges = forest.getEdges();
-		Collection<SEMOSSVertex> v = forest.getVertices();
-		masterEdgeVector.addAll( edges );
-		masterVertexVector.addAll( v );
 	}
 
 	/**
@@ -94,48 +90,25 @@ public class DataLatencyPerformer implements IAlgorithm {
 	}
 
 	/**
-	 * Given an array of vertices, set the specific vertex for performing
-	 * calculation.
-	 *
-	 * @param v DBCMVertex[]
-	 */
-	public void setPickedVertex( SEMOSSVertex[] v ) {
-		pickedVertex = v;
-	}
-
-	/**
-	 * Sets the playsheet for calculation to be performed upon.
-	 *
-	 * @param graphPlaySheet IPlaySheet
-	 */
-	@Override
-	public void setPlaySheet( IPlaySheet graphPlaySheet ) {
-		throw new UnsupportedOperationException( "set the playsheet in the constructor" );
-		//ps = GraphPlaySheetFrame.class.cast( graphPlaySheet ).getGraphComponent();
-	}
-
-	/**
-	 * Gets variables.
-	 *
-	 * //TODO: Return empty object instead of null
-	 *
-	 * @return String[]
-	 */
-	@Override
-	public String[] getVariables() {
-		return null;
-	}
-
-	/**
 	 * Clears the hashtables containing strings and DBCM vertices. Create a new
 	 * vector of vertices of forest roots and run the depth search to look for
 	 * complete paths / loops.
 	 */
 	@Override
-	public void execute() {
+	public void execute( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			Collection<SEMOSSVertex> nodes ) {
 		validVerts.clear();
 		validEdges.clear();
-		Vector<SEMOSSVertex> forestRoots = getForestRoots();
+
+		pickedVertex.clear();
+		pickedVertex.addAll( nodes );
+		forest = new DelegateForest<SEMOSSVertex, SEMOSSEdge>( graph );
+		Collection<SEMOSSEdge> edges = forest.getEdges();
+		Collection<SEMOSSVertex> v = forest.getVertices();
+		masterEdgeVector.addAll( edges );
+		masterVertexVector.addAll( v );
+
+		Collection<SEMOSSVertex> forestRoots = getForestRoots();
 		runDepthSearchFirst( forestRoots );
 		setTransformers();
 	}
@@ -147,9 +120,21 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 *
 	 * @return Vector<DBCMVertex>
 	 */
-	private Vector<SEMOSSVertex> getForestRoots() {
-		Vector<SEMOSSVertex> forestRoots = new Vector<>();
-		if ( pickedVertex.length != 0 ) {
+	private Collection<SEMOSSVertex> getForestRoots() {
+		List<SEMOSSVertex> forestRoots = new ArrayList<>();
+		if ( pickedVertex.isEmpty() ) {
+			selectedNodes = "All";
+			List<SEMOSSVertex> forestRootsCollection = new ArrayList<>();
+			for ( Tree<SEMOSSVertex, SEMOSSEdge> t : forest.getTrees() ) {
+				forestRootsCollection.add( t.getRoot() );
+			}
+			for ( SEMOSSVertex v : forestRootsCollection ) {
+				forestRoots.add( v );
+				validVerts.add( v );
+				finalVertScores.put( v, 0.0 );
+			}
+		}
+		else {
 			int count = 0;
 			for ( SEMOSSVertex selectedVert : pickedVertex ) {
 				forestRoots.add( selectedVert );
@@ -162,18 +147,6 @@ public class DataLatencyPerformer implements IAlgorithm {
 				count++;
 			}
 		}
-		else {
-			selectedNodes = "All";
-			List<SEMOSSVertex> forestRootsCollection = new ArrayList<>();
-			for ( Tree<SEMOSSVertex, SEMOSSEdge> t : forest.getTrees() ) {
-				forestRootsCollection.add( t.getRoot() );
-			}
-			for ( SEMOSSVertex v : forestRootsCollection ) {
-				forestRoots.add( v );
-				validVerts.add( v );
-				finalVertScores.put( v, 0.0 );
-			}
-		}
 		return forestRoots;
 	}
 
@@ -184,15 +157,14 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 *
 	 * @param roots Vector<DBCMVertex>	List of roots.
 	 */
-	private void runDepthSearchFirst( Vector<SEMOSSVertex> roots ) {
+	private void runDepthSearchFirst( Collection<SEMOSSVertex> roots ) {
 
 		for ( SEMOSSVertex vertex : roots ) {
+			Map<SEMOSSEdge, Double> usedLeafEdges = new HashMap<>();//keeps track of all bottom edges previously visited and their score
 
-			Hashtable<SEMOSSEdge, Double> usedLeafEdges = new Hashtable<SEMOSSEdge, Double>();//keeps track of all bottom edges previously visited and their score
-
-			Vector<SEMOSSVertex> currentNodes = new Vector<SEMOSSVertex>();
+			List<SEMOSSVertex> currentNodes = new ArrayList<>();
 			//use next nodes as the future set of nodes to traverse down from.
-			Vector<SEMOSSVertex> nextNodes = new Vector<SEMOSSVertex>();
+			List<SEMOSSVertex> nextNodes = new ArrayList<>();
 
 			int levelIndex = 0;
 			while ( !currentPathVerts.isEmpty() || levelIndex == 0 ) {
@@ -251,7 +223,7 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 * @return DBCMVertex
 	 */
 	private SEMOSSVertex traverseDepthDownward( SEMOSSVertex vert,
-			Hashtable<SEMOSSEdge, Double> usedLeafEdges, SEMOSSVertex rootVert ) {
+			Map<SEMOSSEdge, Double> usedLeafEdges, SEMOSSVertex rootVert ) {
 		SEMOSSVertex nextVert = null;
 		Collection<SEMOSSEdge> edgeArray = getValidEdges( forest.getOutEdges( vert ) );
 		for ( SEMOSSEdge edge : edgeArray ) {
@@ -307,8 +279,8 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 *
 	 * @return Vector<DBCMEdge>
 	 */
-	private Vector<SEMOSSEdge> getValidEdges( Collection<SEMOSSEdge> vector ) {
-		Vector<SEMOSSEdge> validEdges = new Vector<SEMOSSEdge>();
+	private List<SEMOSSEdge> getValidEdges( Collection<SEMOSSEdge> vector ) {
+		List<SEMOSSEdge> validEdges = new ArrayList<>();
 		if ( vector == null ) {
 			return validEdges;
 		}
@@ -361,16 +333,6 @@ public class DataLatencyPerformer implements IAlgorithm {
 	}
 
 	/**
-	 * Get the name of the algorithm - in this case, Data Latency Performer.
-	 *
-	 * @return String
-	 */
-	@Override
-	public String getAlgoName() {
-		return "Data Latency Performer";
-	}
-
-	/**
 	 * If the string representing the frequency of data is anything other than TBD
 	 * or N/A, then the calculation can be performed.
 	 *
@@ -381,7 +343,8 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 * is added
 	 */
 	private boolean isAvailable( String freqString ) {
-		if ( ( freqString.equalsIgnoreCase( Constants.TBD ) ) || ( freqString.equalsIgnoreCase( Constants.NA ) ) ) {
+		if ( ( freqString.equalsIgnoreCase( Constants.TBD ) )
+				|| ( freqString.equalsIgnoreCase( Constants.NA ) ) ) {
 			return false;
 		}
 		return true;
@@ -397,7 +360,7 @@ public class DataLatencyPerformer implements IAlgorithm {
 	public void fillHashesWithValuesUpTo( Double inputValue ) {
 		value = inputValue;
 
-		Vector<SEMOSSVertex> forestRoots = getForestRoots();
+		Collection<SEMOSSVertex> forestRoots = getForestRoots();
 		runDepthSearchFirst( forestRoots );
 
 		finalScoresFilled = true;
@@ -421,8 +384,8 @@ public class DataLatencyPerformer implements IAlgorithm {
 	 * valid edges and vertices, we can add the path as valid.
 	 */
 	public void fillValidComponentHashes() {
-		Vector<SEMOSSEdge> validEdges = new Vector();
-		Vector<SEMOSSVertex> validVerts = new Vector();
+		List<SEMOSSEdge> validEdges = new ArrayList<>();
+		List<SEMOSSVertex> validVerts = new ArrayList<>();
 		Iterator vertIt = finalVertScores.keySet().iterator();
 		while ( vertIt.hasNext() ) {
 			SEMOSSVertex vert = (SEMOSSVertex) vertIt.next();

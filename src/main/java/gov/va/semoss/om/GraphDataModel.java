@@ -17,8 +17,10 @@ import org.openrdf.repository.RepositoryException;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import java.util.ArrayList;
@@ -84,11 +86,10 @@ public class GraphDataModel {
 	}
 
 	public DelegateForest<SEMOSSVertex, SEMOSSEdge> asForest() {
-		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest	= new DelegateForest<>( vizgraph );
+		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest = new DelegateForest<>( vizgraph );
 		return forest;
 	}
 
-	
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
 		vizgraph = f;
 	}
@@ -235,7 +236,7 @@ public class GraphDataModel {
 				+ " ?s a ?type ."
 				+ " FILTER ( isLiteral( ?o ) ) }"
 				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
-		
+
 		// we can't be sure if our predicates are the base relation or the 
 		// specific relation, so query for both just in case
 		String edgeprops1

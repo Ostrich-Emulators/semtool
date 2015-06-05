@@ -97,7 +97,7 @@ public class GraphNodePopup extends JPopupMenu {
 			public void actionPerformed( ActionEvent e ) {
 				BrowserTabSheet3 tab
 						= new BrowserTabSheet3( "/html/RDFSemossCharts/app/index.html", gps );
-				gps.getPlaySheetFrame().addTab( "Custom Chart", tab );
+				gps.addSibling( "Custom Chart", tab );
 				tab.pullData();
 			}
 		} );

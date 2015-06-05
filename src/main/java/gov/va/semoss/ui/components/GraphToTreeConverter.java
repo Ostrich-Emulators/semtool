@@ -32,8 +32,10 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.awt.event.ActionEvent;
 import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 import javax.swing.AbstractAction;
 
@@ -43,10 +45,14 @@ import javax.swing.AbstractAction;
  */
 public class GraphToTreeConverter extends AbstractAction {
 
-	private static final Logger logger = Logger.getLogger( GraphToTreeConverter.class );
+	public static enum Search {
+
+		DFS, BFS
+	};
+
+	private static final Logger log = Logger.getLogger( GraphToTreeConverter.class );
 	private final GraphPlaySheet gps;
 	private final Set<SEMOSSVertex> roots = new HashSet<>();
-	private DelegateForest<SEMOSSVertex, SEMOSSEdge> newForest;
 
 	/**
 	 * Constructor for GraphToTreeConverter.
@@ -58,23 +64,55 @@ public class GraphToTreeConverter extends AbstractAction {
 		roots.addAll( p.getView().getPickedVertexState().getPicked() );
 	}
 
-	public static <V, E> Forest<V, E> convert( DirectedGraph<V, E> graph, Set<V> roots ) {
+	/**
+	 * Converts the given graph to a tree using a DFS
+	 *
+	 * @param <V>
+	 * @param <E>
+	 * @param graph
+	 * @param roots
+	 * @return
+	 */
+	public static <V, E> Forest<V, E> convert( DirectedGraph<V, E> graph,
+			Collection<V> roots, Search s ) {
 		DelegateForest<V, E> newforest = new DelegateForest<>();
 		for ( V v : roots ) {
-			newforest.addTree( makeTree( v, graph ) );
+			if ( Search.DFS == s ) {
+				newforest.addTree( dfs( v, graph ) );
+			}
+			else {
+				newforest.addTree( bfs( v, graph ) );
+			}
 		}
 
 		return newforest;
 	}
 
-	private static <V, E> Tree<V, E> makeTree( V root, DirectedGraph<V, E> graph ) {
+	/**
+	 * A convenience function to {@link
+	 * #convert(edu.uci.ics.jung.graph.DirectedGraph, java.util.Collection,
+	 * gov.va.semoss.ui.components.GraphToTreeConverter.Search) } using
+	 * {@link Search#BFS}
+	 *
+	 * @param <V>
+	 * @param <E>
+	 * @param graph
+	 * @param roots
+	 * @return
+	 */
+	public static <V, E> Forest<V, E> convert( DirectedGraph<V, E> graph,
+			Collection<V> roots ) {
+		return convert( graph, roots, Search.BFS );
+	}
+
+	private static <V, E> Tree<V, E> dfs( V root, DirectedGraph<V, E> graph ) {
 		DelegateTree<V, E> tree = new DelegateTree<>();
 		tree.setRoot( root );
-		Deque<V> todo = new ArrayDeque<>();
+		Queue<V> todo = Collections.asLifoQueue( new ArrayDeque<>() );
 		todo.add( root );
-		
+
 		while ( !todo.isEmpty() ) {
-			V v = todo.pop();
+			V v = todo.poll();
 
 			for ( E e : graph.getOutEdges( v ) ) {
 				V child = graph.getOpposite( v, e );
@@ -88,48 +126,18 @@ public class GraphToTreeConverter extends AbstractAction {
 		return tree;
 	}
 
-	/**
-	 * Resets the hashtables containing URIs of the vertices and selected
-	 * vertices.
-	 */
-	private void resetConverter() {
-		newForest = new DelegateForest<>();
-	}
-
-	/**
-	 * Resets the converters, sets the forest and selected nodes, performs
-	 * downstream processing on the current nodes, and sets the forest.
-	 */
-	@Override
-	public void actionPerformed( ActionEvent ae ) {
-		resetConverter();
-		Forest<SEMOSSVertex, SEMOSSEdge> forest = gps.getGraphData().asForest();
-		DelegateForest<SEMOSSVertex, SEMOSSEdge> newforest = new DelegateForest<>();
-
-		for ( SEMOSSVertex v : roots ) {
-			newforest.addTree( makeTree( v, forest, new HashSet<>() ) );
-		}
-
-		GraphPlaySheet.printForest( newforest );
-
-		gps.setForest( forest );
-	}
-
-	public Tree<SEMOSSVertex, SEMOSSEdge> makeTree( SEMOSSVertex root,
-			Forest<SEMOSSVertex, SEMOSSEdge> forest, Set<SEMOSSVertex> seen ) {
-
-		DelegateTree<SEMOSSVertex, SEMOSSEdge> tree = new DelegateTree<>();
+	private static <V, E> Tree<V, E> bfs( V root, DirectedGraph<V, E> graph ) {
+		DelegateTree<V, E> tree = new DelegateTree<>();
 		tree.setRoot( root );
-
-		Deque<SEMOSSVertex> todo = new ArrayDeque<>();
+		Deque<V> todo = new ArrayDeque<>();
 		todo.add( root );
 
 		while ( !todo.isEmpty() ) {
-			SEMOSSVertex v = todo.pop();
+			V v = todo.poll();
 
-			for ( SEMOSSEdge e : forest.getOutEdges( v ) ) {
-				SEMOSSVertex child = forest.getOpposite( v, e );
-				if ( !seen.contains( child ) ) {
+			for ( E e : graph.getOutEdges( v ) ) {
+				V child = graph.getOpposite( v, e );
+				if ( !tree.containsVertex( child ) ) {
 					tree.addChild( e, v, child );
 					todo.add( child );
 				}
@@ -137,5 +145,42 @@ public class GraphToTreeConverter extends AbstractAction {
 		}
 
 		return tree;
+	}
+
+	public static void printForest( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {
+		for ( Tree<SEMOSSVertex, SEMOSSEdge> tree : forest.getTrees() ) {
+			printTree( tree );
+		}
+	}
+
+	public static void printTree( Tree<SEMOSSVertex, SEMOSSEdge> tree ) {
+		printTree( tree.getRoot(), tree, 0 );
+	}
+
+	public static void printTree( SEMOSSVertex root,
+			Tree<SEMOSSVertex, SEMOSSEdge> tree, int depth ) {
+		StringBuilder sb = new StringBuilder();
+		for ( int i = 0; i < depth; i++ ) {
+			sb.append( "  " );
+		}
+		sb.append( root );
+		log.debug( sb.toString() );
+
+		for ( SEMOSSVertex child : tree.getChildren( root ) ) {
+			printTree( child, tree, depth + 1 );
+		}
+	}
+
+	/**
+	 * Sets the forest from the visisble graph and selected nodes, performs the
+	 * tree conversion (using {@link Search#BFS} on the selected nodes, and sets
+	 * the forest on the playsheet
+	 */
+	@Override
+	public void actionPerformed( ActionEvent ae ) {
+		Forest<SEMOSSVertex, SEMOSSEdge> newforest
+				= convert( gps.getGraphData().getGraph(), roots, Search.BFS );
+		printForest( newforest );
+		gps.setForest( newforest );
 	}
 }

@@ -63,7 +63,7 @@ public class PlaysheetRemoveRunner implements Runnable{
 		
 		GridRAWPlaySheet grid = new GridRAWPlaySheet();
 		grid.create( new ArrayList<>(), Arrays.asList( columnName ), gPlaySheet.getEngine() );		
-		gPlaySheet.getPlaySheetFrame().addTab( grid );
+		gPlaySheet.addSibling( grid );
 	}
 	
 	/**

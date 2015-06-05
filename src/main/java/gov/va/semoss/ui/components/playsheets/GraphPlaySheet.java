@@ -48,7 +48,6 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -62,6 +61,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
+import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.NewHoriScrollBarUI;
 import gov.va.semoss.ui.components.NewScrollBarUI;
@@ -157,7 +157,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		add( graphSplitPane, BorderLayout.CENTER );
 		add( legendPanel, BorderLayout.SOUTH );
 
-		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout<SEMOSSVertex, SEMOSSEdge>( gdm.getGraph() );
+		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout<>( gdm.getGraph() );
 		view = new VisualizationViewer<>( layout );
 		initVisualizer( view );
 
@@ -179,34 +179,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
 		Forest<SEMOSSVertex, SEMOSSEdge> forest = GraphToTreeConverter.convert( gdm.getGraph(),
-				view.getPickedVertexState().getPicked() );
-
-		printForest( forest );
+				view.getPickedVertexState().getPicked(), Search.BFS );
+		GraphToTreeConverter.printForest( forest );
 		return forest;
-	}
-
-	public static void printForest( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {
-		for ( Tree<SEMOSSVertex, SEMOSSEdge> tree : forest.getTrees() ) {
-			printTree( tree );
-		}
-	}
-
-	public static void printTree( Tree<SEMOSSVertex, SEMOSSEdge> tree ) {
-		printTree( tree.getRoot(), tree, 0 );
-	}
-
-	public static void printTree( SEMOSSVertex root,
-			Tree<SEMOSSVertex, SEMOSSEdge> tree, int depth ) {
-		StringBuilder sb = new StringBuilder();
-		for ( int i = 0; i < depth; i++ ) {
-			sb.append( "  " );
-		}
-		sb.append( root );
-		log.debug( sb.toString() );
-
-		for ( SEMOSSVertex child : tree.getChildren( root ) ) {
-			printTree( child, tree, depth + 1 );
-		}
 	}
 
 	/**
@@ -268,7 +243,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			updateLayout();
 		}
 	}
-	
+
 	/**
 	 * Method undoView. Get the latest view and undo it.
 	 */
@@ -435,7 +410,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * @return true if the desired layout was applied
 	 * @param layout String
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	public boolean setLayoutName( String newName ) {
 		this.layoutName = newName;
 
@@ -694,7 +669,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	public void paintLegendPanel() {
-		legendPanel.drawLegend(filterData);
+		legendPanel.drawLegend( filterData );
 	}
 
 	@Override
@@ -839,13 +814,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 	}
 
-	public void setColors(Collection<SEMOSSVertex> vertices, String color) {
-		colorShapeData.setColors(vertices, color);
+	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
+		colorShapeData.setColors( vertices, color );
 		view.repaint();
 	}
 
-	public void setShapes(Collection<SEMOSSVertex> vertices, String shape) {
-		colorShapeData.setShapes(vertices, shape);
+	public void setShapes( Collection<SEMOSSVertex> vertices, String shape ) {
+		colorShapeData.setShapes( vertices, shape );
 		view.repaint();
 	}
 }
