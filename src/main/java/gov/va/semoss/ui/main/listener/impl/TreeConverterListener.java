@@ -73,7 +73,9 @@ public class TreeConverterListener extends AbstractAction {
 				Collection<SEMOSSVertex> picks
 						= gps.getView().getPickedVertexState().getPicked();
 
-				setEnabled( !picks.isEmpty() );
+				if( !isEnabled() ){
+					setEnabled( !picks.isEmpty() );
+				}				
 			}
 		} );
 	}
@@ -82,6 +84,8 @@ public class TreeConverterListener extends AbstractAction {
 	public void actionPerformed( ActionEvent e ) {
 		JToggleButton button = (JToggleButton) e.getSource();
 
+		String layoutname;
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> newgraph;
 		//if the button is selected run converter
 		if ( button.isSelected() ) {
 			oldgraph = gps.getGraphData().getGraph();
@@ -92,38 +96,16 @@ public class TreeConverterListener extends AbstractAction {
 				nodes = gps.getVisibleGraph().getVertices();
 			}
 
-			Forest<SEMOSSVertex, SEMOSSEdge> newforest
-					= GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes );
-			gps.setForest( newforest );
+			newgraph = GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes );
+			layoutname = Constants.TREE_LAYOUT;
 		}
 		//if the button is unselected, revert to old forest
 		else {
-			gps.getGraphData().setGraph( oldgraph );
+			newgraph = oldgraph;
+			layoutname = Constants.FR;
 		}
 
-		Logger.getLogger( getClass() ).warn( "this function probably doesn't work anymore" );
-		boolean success = true; //playSheet.createLayout();
-		if ( !success ) {
-			int response = showOptionPopup();
-			if ( response == 1 ) {
-				gps.setLayoutName( Constants.FR );
-			}
-		}
-
-		gps.updateGraph(); // totally unnecessary, I think
-
-	}
-
-	/**
-	 * Method showOptionPopup.
-	 *
-	 * @return int
-	 */
-	private int showOptionPopup() {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp( Constants.MAIN_FRAME );
-		Object[] buttons = { "Cancel Graph Modification", "Continue With " + Constants.FR };
-		int response = JOptionPane.showOptionDialog( playPane, "This layout requires the graph to be in the format of a tree.\nWould you like to revert the layout to " + Constants.FR + "?",
-				"Convert to Tree", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[1] );
-		return response;
+		gps.getGraphData().setGraph( newgraph );
+		gps.setLayoutName( layoutname );
 	}
 }

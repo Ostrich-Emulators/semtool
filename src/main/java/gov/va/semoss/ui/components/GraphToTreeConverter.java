@@ -43,7 +43,7 @@ import javax.swing.AbstractAction;
  * This class extends downstream processing in order to convert the graph into
  * the tree format.
  */
-public class GraphToTreeConverter extends AbstractAction {
+public class GraphToTreeConverter {
 
 	public static enum Search {
 
@@ -51,18 +51,6 @@ public class GraphToTreeConverter extends AbstractAction {
 	};
 
 	private static final Logger log = Logger.getLogger( GraphToTreeConverter.class );
-	private final GraphPlaySheet gps;
-	private final Set<SEMOSSVertex> roots = new HashSet<>();
-
-	/**
-	 * Constructor for GraphToTreeConverter.
-	 *
-	 * @param p Graph playsheet to be set.
-	 */
-	public GraphToTreeConverter( GraphPlaySheet p ) {
-		gps = p;
-		roots.addAll( p.getView().getPickedVertexState().getPicked() );
-	}
 
 	/**
 	 * Converts the given graph to a tree using a DFS
@@ -169,18 +157,5 @@ public class GraphToTreeConverter extends AbstractAction {
 		for ( SEMOSSVertex child : tree.getChildren( root ) ) {
 			printTree( child, tree, depth + 1 );
 		}
-	}
-
-	/**
-	 * Sets the forest from the visisble graph and selected nodes, performs the
-	 * tree conversion (using {@link Search#BFS} on the selected nodes, and sets
-	 * the forest on the playsheet
-	 */
-	@Override
-	public void actionPerformed( ActionEvent ae ) {
-		Forest<SEMOSSVertex, SEMOSSEdge> newforest
-				= convert( gps.getGraphData().getGraph(), roots, Search.BFS );
-		printForest( newforest );
-		gps.setForest( newforest );
 	}
 }

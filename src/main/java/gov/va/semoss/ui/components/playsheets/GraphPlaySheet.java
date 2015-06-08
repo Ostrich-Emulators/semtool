@@ -392,15 +392,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Method setGraph.
-	 *
-	 * @param forest DelegateForest
-	 */
-	public void setForest( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {
-		gdm.setGraph( forest );
-	}
-
-	/**
 	 * Sets the layout of the visualization. The name must be a key pointing to a
 	 * a class name in the semoss.properties file. If any error occurs, the layout
 	 * is clearSelected to {@link Constants#FR}. (Not all layouts can support all
