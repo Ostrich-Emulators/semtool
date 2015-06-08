@@ -22,10 +22,8 @@ package gov.va.semoss.algorithm.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.api.IPlaySheet;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.awt.event.ActionEvent;
@@ -38,7 +36,7 @@ import org.apache.log4j.Logger;
 /**
  * This class is used to identify loops within a network.
  */
-public class LoopIdentifierProcessor extends AbstractAction implements IAlgorithm {
+public class LoopIdentifierProcessor extends AbstractAction {
 
 	private static final Logger log = Logger.getLogger( LoopIdentifierProcessor.class );
 	private final GraphPlaySheet gps;
@@ -61,7 +59,6 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 	 * part of a loop, remove it from the forest. Run depth search in order to
 	 * validate the remaining edges in the forest.
 	 */
-	@Override
 	public void execute() {
 		//All I have to do is go through every node in the forest
 		//if the node has in and out, it could be part of a loop
@@ -144,37 +141,5 @@ public class LoopIdentifierProcessor extends AbstractAction implements IAlgorith
 		steps = shortest;
 
 		return steps;
-	}
-
-	/**
-	 * Sets playsheet as a graph playsheet.
-	 *
-	 * @param ps IPlaySheet	Playsheet to be cast.
-	 */
-	@Override
-	public void setPlaySheet( IPlaySheet ps ) {
-		throw new UnsupportedOperationException( "set the playsheet in the constructor" );
-	}
-
-	/**
-	 * Gets variable names.
-	 *
-	 * //TODO: Return empty object instead of null
-	 *
-	 * @return String[] List of variable names in a string array.
-	 */
-	@Override
-	public String[] getVariables() {
-		throw new UnsupportedOperationException( "this doesn't do anything" );
-	}
-
-	/**
-	 * Gets algorithm name - in this case, "Loop Identifier."
-	 *
-	 * @return String	Name of algorithm.
-	 */
-	@Override
-	public String getAlgoName() {
-		return "Loop Identifier";
 	}
 }

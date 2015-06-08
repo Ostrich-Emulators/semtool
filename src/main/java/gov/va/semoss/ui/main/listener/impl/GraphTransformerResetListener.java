@@ -46,8 +46,7 @@ public class GraphTransformerResetListener extends AbstractAction implements Act
 	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		playSheet.undoView();
-//		playSheet.clearHighlighting();
-//		playSheet.getView().repaint();
+		playSheet.clearHighlighting();
+		playSheet.getView().repaint();
 	}
 }

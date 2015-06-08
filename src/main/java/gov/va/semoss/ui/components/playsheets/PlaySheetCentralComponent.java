@@ -70,6 +70,14 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return title;
 	}
 
+	public void addSibling( PlaySheetCentralComponent pscc ){
+		getPlaySheetFrame().addTab( pscc );
+	}
+	
+	public void addSibling( String title, PlaySheetCentralComponent pscc ){
+		getPlaySheetFrame().addTab( title, pscc );
+	}
+
 	public boolean hasChanges() {
 		return false;
 	}

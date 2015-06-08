@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JFrame;
@@ -32,7 +33,12 @@ import edu.uci.ics.jung.graph.Forest;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.util.Utility;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Collection;
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import org.apache.log4j.Logger;
 
 /**
@@ -40,8 +46,16 @@ import org.apache.log4j.Logger;
  */
 public class TreeConverterListener extends AbstractAction {
 
-	GraphPlaySheet playSheet;
-	public Forest<SEMOSSVertex, SEMOSSEdge> oldforest;
+	private GraphPlaySheet gps;
+	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> oldgraph;
+
+	public TreeConverterListener() {
+		super( "Convert to Tree", Utility.loadImageIcon( "tree.png" ) );
+
+		putValue( Action.SHORT_DESCRIPTION,
+				"<html><b>Convert to Tree</b><br>Convert current graph to tree by"
+				+ " duplicating nodes with multiple in-edges</html>" );
+	}
 
 	/**
 	 * Method setPlaySheet. Sets the play sheet that the listener will access.
@@ -49,46 +63,49 @@ public class TreeConverterListener extends AbstractAction {
 	 * @param ps GraphPlaySheet
 	 */
 	public void setPlaySheet( GraphPlaySheet ps ) {
-		this.playSheet = ps;
-		oldforest = ps.asForest();
+		gps = ps;
+		setEnabled( false );
+
+		gps.getView().getPickedVertexState().addItemListener( new ItemListener() {
+
+			@Override
+			public void itemStateChanged( ItemEvent e ) {
+				Collection<SEMOSSVertex> picks
+						= gps.getView().getPickedVertexState().getPicked();
+
+				if( !isEnabled() ){
+					setEnabled( !picks.isEmpty() );
+				}				
+			}
+		} );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		GraphToTreeConverter converter = new GraphToTreeConverter( playSheet );
 		JToggleButton button = (JToggleButton) e.getSource();
 
+		String layoutname;
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> newgraph;
 		//if the button is selected run converter
 		if ( button.isSelected() ) {
-			converter.actionPerformed( e );
+			oldgraph = gps.getGraphData().getGraph();
+
+			Collection<SEMOSSVertex> nodes
+					= gps.getView().getPickedVertexState().getPicked();
+			if ( nodes.isEmpty() ) {
+				nodes = gps.getVisibleGraph().getVertices();
+			}
+
+			newgraph = GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes );
+			layoutname = Constants.TREE_LAYOUT;
 		}
 		//if the button is unselected, revert to old forest
 		else {
-			playSheet.setForest( oldforest );
+			newgraph = oldgraph;
+			layoutname = Constants.FR;
 		}
 
-		Logger.getLogger( getClass() ).warn( "this function probably doesn't work anymore" );
-		boolean success = true; //playSheet.createLayout();
-		if ( !success ) {
-			int response = showOptionPopup();
-			if ( response == 1 ) {
-				playSheet.setLayoutName( Constants.FR );
-			}
-		}
-		playSheet.updateGraph(); // totally unnecessary, I think
-
-	}
-
-	/**
-	 * Method showOptionPopup.
-	 *
-	 * @return int
-	 */
-	private int showOptionPopup() {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp( Constants.MAIN_FRAME );
-		Object[] buttons = { "Cancel Graph Modification", "Continue With " + Constants.FR };
-		int response = JOptionPane.showOptionDialog( playPane, "This layout requires the graph to be in the format of a tree.\nWould you like to revert the layout to " + Constants.FR + "?",
-				"Convert to Tree", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[1] );
-		return response;
+		gps.getGraphData().setGraph( newgraph );
+		gps.setLayoutName( layoutname );
 	}
 }

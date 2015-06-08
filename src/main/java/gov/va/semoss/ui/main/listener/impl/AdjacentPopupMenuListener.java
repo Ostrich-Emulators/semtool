@@ -82,7 +82,6 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 		Set<SEMOSSEdge> selectedEdges = new HashSet<>();
 		state.clear();
 
-		//if it is All, must use distance downstream processor to get all of the edges
 		if ( Type.ALL != type ) {
 			for ( SEMOSSVertex vert : vertices ) {
 				selectedVerts.add( vert );
