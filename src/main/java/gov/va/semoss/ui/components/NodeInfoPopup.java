@@ -84,6 +84,6 @@ public class NodeInfoPopup extends AbstractAction {
 		grid.create( data, Arrays.asList( "Property Name", "Value" ), gps.getEngine() );
 		//PlaySheetFrame psf = new PlaySheetFrame( gps.getEngine() );
 		//psf.setTitle( "Selected Node Information" );
-		gps.getPlaySheetFrame().addTab( grid );
+		gps.addSibling( grid );
 	}
 }

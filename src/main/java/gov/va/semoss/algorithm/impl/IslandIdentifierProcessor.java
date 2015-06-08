@@ -20,20 +20,13 @@
 package gov.va.semoss.algorithm.impl;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.visualization.RenderContext;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
-import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.ui.transformer.PaintTransformer;
 import edu.uci.ics.jung.visualization.picking.PickedState;
-import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import java.awt.event.ActionEvent;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -45,7 +38,7 @@ import javax.swing.AbstractAction;
 /**
  * This class is used to identify islands in the network.
  */
-public class IslandIdentifierProcessor extends AbstractAction implements IAlgorithm {
+public class IslandIdentifierProcessor extends AbstractAction {
 
 	private final List<SEMOSSVertex> selectedVerts = new ArrayList<>();
 	private final GraphPlaySheet gps;
@@ -57,11 +50,6 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 		// if no nodes are selected, then all nodes are selected
 		selectedVerts.addAll( pickedV.isEmpty()
 				? gps.getVisibleGraph().getVertices() : pickedV );
-	}
-
-	@Override
-	public void execute() {
-		actionPerformed( null );
 	}
 
 	@Override
@@ -108,39 +96,5 @@ public class IslandIdentifierProcessor extends AbstractAction implements IAlgori
 		}
 
 		gps.skeleton( islandVerts, islandEdges );
- 	}
-
-	/**
-	 * Sets playsheet as a graph play sheet.
-	 *
-	 * @param ps IPlaySheet	Playsheet to be cast.
-	 */
-	@Override
-	public void setPlaySheet( IPlaySheet ps ) {
-		throw new UnsupportedOperationException( "set the playsheet in the constructor" );
-		// playSheet = ( (GraphPlaySheet) ps ).getGraphComponent();
 	}
-
-	/**
-	 * Gets variables.
-	 *
-	 * //TODO: Return empty object instead of null
-	 *
-	 * @return String[]	List of variable names as strings.
-	 */
-	@Override
-	public String[] getVariables() {
-		throw new UnsupportedOperationException( "don't know what this is" );
-	}
-
-	/**
-	 * Get algorithm name - in this case, "Island Identifier."
-	 *
-	 * @return String	Name of algorithm.
-	 */
-	@Override
-	public String getAlgoName() {
-		return "Island Identifier";
-	}
-
 }

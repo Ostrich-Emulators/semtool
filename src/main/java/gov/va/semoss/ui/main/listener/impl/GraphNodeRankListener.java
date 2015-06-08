@@ -106,6 +106,6 @@ public class GraphNodeRankListener extends AbstractAction {
 		}
 
 		grid.create( list, colNames, playsheet.getEngine() );
-		playsheet.getPlaySheetFrame().addTab( "NodeRank Scores", grid );
+		playsheet.addSibling( "NodeRank Scores", grid );
 	}
 }

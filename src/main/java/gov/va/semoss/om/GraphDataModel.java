@@ -17,8 +17,10 @@ import org.openrdf.repository.RepositoryException;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import java.util.ArrayList;
@@ -84,11 +86,10 @@ public class GraphDataModel {
 	}
 
 	public DelegateForest<SEMOSSVertex, SEMOSSEdge> asForest() {
-		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest	= new DelegateForest<>( vizgraph );
+		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest = new DelegateForest<>( vizgraph );
 		return forest;
 	}
 
-	
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
 		vizgraph = f;
 	}
@@ -235,7 +236,10 @@ public class GraphDataModel {
 				+ " ?s a ?type ."
 				+ " FILTER ( isLiteral( ?o ) ) }"
 				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
-		String edgeprops
+
+		// we can't be sure if our predicates are the base relation or the 
+		// specific relation, so query for both just in case
+		String edgeprops1
 				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 				+ "  ?rel ?prop ?literal ."
 				+ "  ?rel a ?semossrel ."
@@ -244,6 +248,15 @@ public class GraphDataModel {
 				+ "  FILTER ( isLiteral( ?literal ) )"
 				+ "}"
 				+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
+		String edgeprops2
+				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
+				+ "  ?rel ?prop ?literal ."
+				+ "  ?rel a ?semossrel ."
+				+ "  ?rel rdf:predicate ?superrel ."
+				+ "  ?s ?rel ?o ."
+				+ "  FILTER ( isLiteral( ?literal ) )"
+				+ "}"
+				+ "VALUES ?rel { " + Utility.implode( preds, "<", ">", " " ) + " }";
 		try {
 			VoidQueryAdapter cqa = new VoidQueryAdapter( conceptprops ) {
 
@@ -266,7 +279,7 @@ public class GraphDataModel {
 			}
 
 			// do the same thing, but for edges
-			VoidQueryAdapter eqa = new VoidQueryAdapter( edgeprops ) {
+			VoidQueryAdapter eqa1 = new VoidQueryAdapter( edgeprops1 ) {
 
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
@@ -293,9 +306,38 @@ public class GraphDataModel {
 				}
 			};
 
+			VoidQueryAdapter eqa2 = new VoidQueryAdapter( edgeprops2 ) {
+
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					// ?s ?rel ?o ?prop ?literal
+					URI s = URI.class.cast( set.getValue( "s" ) );
+					URI rel = URI.class.cast( set.getValue( "rel" ) );
+					URI prop = URI.class.cast( set.getValue( "prop" ) );
+					URI o = URI.class.cast( set.getValue( "o" ) );
+					String propval = set.getValue( "literal" ).stringValue();
+					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
+
+					if ( concepts.contains( s ) && concepts.contains( o ) ) {
+						if ( !edgeStore.containsKey( rel ) ) {
+							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
+							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
+							SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
+							storeEdge( edge );
+						}
+
+						SEMOSSEdge edge = edgeStore.get( rel );
+						edge.setProperty( prop, propval );
+						edge.setType( superrel );
+					}
+				}
+			};
 			if ( null != preds ) {
-				eqa.useInferred( false );
-				engine.query( eqa );
+				eqa1.useInferred( false );
+				engine.query( eqa1 );
+
+				eqa2.useInferred( false );
+				engine.query( eqa2 );
 			}
 		}
 		catch ( MalformedQueryException ex ) {

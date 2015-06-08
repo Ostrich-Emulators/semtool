@@ -128,7 +128,7 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 		newGps.setTitle( "EXPORT: " + gps.getTitle() );
 		newGps.create( vals, Arrays.asList( "Vertex or Edge Label", "Property", "Value" ),
 				gps.getEngine() );
-		gps.getPlaySheetFrame().addTab( "Graph as Table", newGps );
+		gps.addSibling( "Graph as Table", newGps );
 	}
 
 	/**
