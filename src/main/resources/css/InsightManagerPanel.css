@@ -1,22 +1,16 @@
 .root{
-    -fx-font-size: 14pt;
+    -fx-font-size: 13pt;
     -fx-font-family: "Tahoma";
-    -fx-background-image: url("../images/insightManagerBackground2.jpg");
-    -fx-background-position: left top;
-    -fx-background-repeat: no-repeat;
-    -fx-background-size: cover;
+    -fx-background-color: lightgray;
 }
 .tab-pane > .tab-header-area > .tab-header-background{
-    -fx-background-image: url("../images/insightManagerBackground.jpg");
-    -fx-background-size: cover;
+    -fx-background-color: lightgray;
 }
 .tab-pane > .tab-header-area > .headers-region > .tab:selected {
     -fx-background-color: yellow;
 }
 .tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
-/*    -fx-border-style: none;*/
     -fx-border-width: 0;
-/*    -fx-border-color: none;*/
 }
 .tab-pane > .tab-content-area {
   -fx-border-color: #000000;
@@ -32,6 +26,7 @@
 
 .list-view{
     -fx-font-size: 0.9em;
+    -fx-border-color: #000000;
 }
 
 .mylistview .list-cell:filled:selected:focused, .mylistview .list-cell:filled:selected {

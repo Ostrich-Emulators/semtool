@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -32,35 +33,38 @@ import org.openrdf.repository.RepositoryException;
  * @author ryan
  */
 public class JenaEngineTest {
-
+	
 	private static final Logger log = Logger.getLogger( JenaEngineTest.class );
 	private static final File TDB = new File( "src/test/resources/database.tdb.zip" );
 	private File dbdir;
-
+	private File randomdbdir;
+	
 	public JenaEngineTest() {
 	}
-
+	
 	@Before
 	public void setUp() throws IOException {
-		dbdir = File.createTempFile( "semoss-test-tdb-", "" );
-		dbdir.delete();
-		Utility.unzip( new ZipInputStream( new FileInputStream( TDB ) ), dbdir );
-		dbdir = new File( dbdir, "database.tdb" );
+		randomdbdir = File.createTempFile( "semoss-test-tdb-", "" );
+		randomdbdir.delete();
+		Utility.unzip( new ZipInputStream( new FileInputStream( TDB ) ), randomdbdir );
+		dbdir = new File( randomdbdir, "database.tdb" );
 	}
-
+	
 	@After
 	public void tearDown() {
-		dbdir.delete();
+		if ( !FileUtils.deleteQuietly( randomdbdir ) ) {
+			log.error( "could not delete test directory: " + randomdbdir );
+		}
 	}
-
+	
 	@Test
 	public void testStartLoading() throws Exception {
 		Properties props = new Properties();
 		props.setProperty( JenaEngine.FILE_PROP, dbdir.toString() );
-
+		
 		JenaEngine instance = new JenaEngine();
 		instance.startLoading( props );
-
+		
 		OneVarListQueryAdapter<String> lqa
 				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }",
 						"label" );
@@ -68,46 +72,46 @@ public class JenaEngineTest {
 		Set<String> expected = new HashSet<>( Arrays.asList( "Yuri", "Yugo", "Pinto",
 				"Yuri Purchased Yugo", "Human Being", "Car", "Price", "Date", "First Name",
 				"Last Name", "Purchased" ) );
-
+		
 		assertEquals( expected, names );
-
+		
 		instance.closeDB();
 	}
-
+	
 	@Test
 	public void testCloseDB() throws RepositoryException {
 		Properties props = new Properties();
 		props.setProperty( JenaEngine.FILE_PROP, dbdir.toString() );
 		props.setProperty( JenaEngine.INMEM_PROP, Boolean.toString( false ) );
-
+		
 		JenaEngine instance = new JenaEngine();
 		instance.openDB( props );
 		instance.closeDB();
 		assertTrue( !instance.getShadowFile().exists() );
 	}
-
+	
 	@Test
 	public void testModifyData() throws Exception {
 		Properties props = new Properties();
 		props.setProperty( JenaEngine.FILE_PROP, dbdir.toString() );
-
+		
 		JenaEngine instance = new JenaEngine();
 		instance.openDB( props );
-
+		
 		instance.execute( new ModificationExecutorAdapter( true ) {
-
+			
 			@Override
 			public void exec( RepositoryConnection conn ) throws RepositoryException {
 				conn.add( new URIImpl( "http://foo.bar/testuri" ), RDFS.LABEL,
 						new LiteralImpl( "extra" ) );
 			}
-
+			
 		} );
-
+		
 		instance.closeDB();
-
+		
 		instance.openDB( props );
-
+		
 		OneVarListQueryAdapter<String> lqa
 				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }",
 						"label" );
@@ -115,10 +119,10 @@ public class JenaEngineTest {
 		Set<String> expected = new HashSet<>( Arrays.asList( "Yuri", "Yugo", "Pinto",
 				"Yuri Purchased Yugo", "Human Being", "Car", "Price", "Date", "First Name",
 				"Last Name", "Purchased", "extra" ) );
-
+		
 		assertEquals( expected, names );
 	}
-
+	
 	@Test
 	public void testGenerateProperties() {
 		Properties props = JenaEngine.generateProperties( dbdir );
