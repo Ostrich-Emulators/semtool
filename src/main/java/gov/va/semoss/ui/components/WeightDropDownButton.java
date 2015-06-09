@@ -161,10 +161,10 @@ public class WeightDropDownButton extends JButton {
 	private <X extends AbstractNodeEdgeBase> Map<String, Set<String>> buildPropertyDataset( Map<URI, List<X>> nodesOrEdgesMapByType ) {
 		Map<String, Set<String>> propertiesToAdd = new HashMap<>();
 		for ( Map.Entry<URI, List<X>> entry : nodesOrEdgesMapByType.entrySet() ) {
-//			if ( entry.getValue().size() < 2 ) {
+			if ( entry.getValue().size() < 2 ) {
 				//we don't want to list items that are the only one of their type
-//				continue;
-//			}
+				continue;
+			}
 
 			Set<String> propertiesForThisType = new TreeSet<String>();
 			propertiesToAdd.put( entry.getKey().getLocalName(), propertiesForThisType );

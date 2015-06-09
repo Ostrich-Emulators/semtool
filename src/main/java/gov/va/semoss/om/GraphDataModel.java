@@ -1,40 +1,37 @@
 package gov.va.semoss.om;
 
-import edu.uci.ics.jung.graph.DelegateForest;
-import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
-
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.repository.RepositoryException;
-
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.Forest;
-import edu.uci.ics.jung.graph.util.EdgeType;
-import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.ui.components.GraphToTreeConverter;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.UriBuilder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import org.jgrapht.graph.SimpleGraph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
+
+import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.EdgeType;
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.Utility;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data

@@ -22,15 +22,17 @@ import org.openrdf.model.vocabulary.RDFS;
  * @author ryan
  */
 public class AbstractNodeEdgeBase {
-	public static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
-
-	private Color color;
-	private String colorString;
+	//the transient keyword keeps this from being sent to the js
+	public transient static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
+	
 	private final transient Map<URI, Object> properties = new HashMap<>();
-	private final Map<String, Object> propHash = new HashMap<>(); //a duplicate copy for the js to access
-	private URI id;
-	private boolean visible = true;
+	private transient boolean visible = true;
+	private transient URI id;
+	private transient Color color;
+	private transient String colorString;
 
+	private final Map<String, Object> propHash = new HashMap<>(); //a duplicate copy for the js to access
+	
 	public AbstractNodeEdgeBase( URI id ) {
 		this( id, null, id.getLocalName() );
 	}
@@ -105,7 +107,10 @@ public class AbstractNodeEdgeBase {
 	public void setProperty( URI prop, Object propValue ) {
 		properties.put( prop, propValue );
 		if (prop != null) {
-			propHash.put( prop.getLocalName(), propValue );
+			if (propValue instanceof URI)
+				propHash.put( prop.getLocalName(), ((URI)propValue).getLocalName() );
+			else 
+				propHash.put( prop.getLocalName(), propValue );
 		}
 	}
 

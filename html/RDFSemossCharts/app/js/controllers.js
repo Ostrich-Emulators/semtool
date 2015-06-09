@@ -25,7 +25,7 @@ function indexCtrl($scope, $http) {
             
             var key;
             for (key in $scope.data.Nodes) {
-                $scope.types[0].push({'name': $scope.data.Nodes[key][0].propHash.VERTEX_TYPE_PROPERTY, 'selected': false});
+                $scope.types[0].push({'name': $scope.data.Nodes[key][0].propHash.type, 'selected': false});
             }
             
         });
@@ -37,7 +37,7 @@ function indexCtrl($scope, $http) {
     
         var key;
         for (key in $scope.data.Nodes) {
-            $scope.types[0].push({'name': $scope.data.Nodes[key][0].propHash.VERTEX_TYPE_PROPERTY, 'selected': false});
+            $scope.types[0].push({'name': $scope.data.Nodes[key][0].propHash.type, 'selected': false});
         }
     });*/
 
@@ -288,7 +288,7 @@ function indexCtrl($scope, $http) {
             //Params pushed in order of dimensions added
             //Params applied in order of [x axis, y axis, 3rd dimension, ... ]
             for(var i=0; i<reducedInstances.length; i++){
-            	axisParams.push(reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY);
+            	axisParams.push(reducedInstances[i].propHash.label);
             }
             //set cols variable
             var cols = axisParams.length;
@@ -303,7 +303,7 @@ function indexCtrl($scope, $http) {
                         for(var i=0; i<$scope.dimensions.length; i++){
                             if($scope.propertiesSelected[i]){
                                 if(reducedInstances[j].propHash[$scope.propertiesSelected[i][0]]){
-                                    instanceParams.push([reducedInstances[j].propHash.VERTEX_LABEL_PROPERTY + '-' + $scope.propertiesSelected[i][0], reducedInstances[j].propHash[$scope.propertiesSelected[i][0]]]);
+                                    instanceParams.push([reducedInstances[j].propHash.label + '-' + $scope.propertiesSelected[i][0], reducedInstances[j].propHash[$scope.propertiesSelected[i][0]]]);
                                 }else{
                                     instanceParams.push('', 0);
                                 }
@@ -335,9 +335,9 @@ function indexCtrl($scope, $http) {
                             for(var i=0; i<reducedInstances.length; i++){
                                 if(reducedInstances[i].propHash[$scope.propertiesSelected[j][0]]){
                                     var brightness = 0.2 - (i / reducedInstances.length) /5;
-                                    series2Val.push({'name': reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY, 'y': reducedInstances[i].propHash[$scope.propertiesSelected[j][0]], 'color': Highcharts.Color(series1Val[j].color).brighten(brightness).get()});
+                                    series2Val.push({'name': reducedInstances[i].propHash.label, 'y': reducedInstances[i].propHash[$scope.propertiesSelected[j][0]], 'color': Highcharts.Color(series1Val[j].color).brighten(brightness).get()});
                                 }else{
-                                    series2Val.push({'name': reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY, 'y': 0});
+                                    series2Val.push({'name': reducedInstances[i].propHash.label, 'y': 0});
                                 }
                             }
                         }
@@ -417,7 +417,7 @@ function indexCtrl($scope, $http) {
                             var propParams = [];
                             for(var j=0; j<reducedInstances.length; j++){
                                 if(reducedInstances[j].propHash[$scope.propertiesSelected[i][0]]){
-                                    propParams.push([reducedInstances[j].propHash.VERTEX_LABEL_PROPERTY, reducedInstances[j].propHash[$scope.propertiesSelected[i][0]]]);
+                                    propParams.push([reducedInstances[j].propHash.label, reducedInstances[j].propHash[$scope.propertiesSelected[i][0]]]);
                                 }else{
                                     propParams.push(0);
                                 }
@@ -439,7 +439,7 @@ function indexCtrl($scope, $http) {
                                 }
                             }
                         }
-                        series1Val.push({'name': reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY, 'y': totalInstanceVal, 'color': colors[i]});
+                        series1Val.push({'name': reducedInstances[i].propHash.label, 'y': totalInstanceVal, 'color': colors[i]});
                     }
                     
                     //loop to set series2Val with outer circle values
@@ -501,7 +501,7 @@ function indexCtrl($scope, $http) {
                 }
                 var data = [];
                 for(var i=0; i<reducedInstances.length; i++){
-                     data.push({name: reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY, x: propertyVals[0][i], y: propertyVals[1][i]});
+                     data.push({name: reducedInstances[i].propHash.label, x: propertyVals[0][i], y: propertyVals[1][i]});
                 }
                 seriesVal.push({'name': 'Instances', 'data': data});
             //sets the data for bubble charts with 3 dimensions
@@ -521,8 +521,8 @@ function indexCtrl($scope, $http) {
                 }
                 var data = [];
                 for(var i=0; i<reducedInstances.length; i++){
-                     //data.push({name: reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY, x: propertyVals[0][i], y: propertyVals[1][i], marker: { radius: propertyVals[2][i]}});
-                    data.push({name: reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY, data: [[propertyVals[0][i], propertyVals[1][i],propertyVals[2][i]]]});
+                     //data.push({name: reducedInstances[i].propHash.label, x: propertyVals[0][i], y: propertyVals[1][i], marker: { radius: propertyVals[2][i]}});
+                    data.push({name: reducedInstances[i].propHash.label, data: [[propertyVals[0][i], propertyVals[1][i],propertyVals[2][i]]]});
                 }
                 //seriesVal.push({'name': 'Instances', 'data': data});
                 seriesVal = data;
@@ -540,7 +540,7 @@ function indexCtrl($scope, $http) {
                             }
                         }
                     }
-                    seriesVal.push({'name': reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY, 'data': propParams});
+                    seriesVal.push({'name': reducedInstances[i].propHash.label, 'data': propParams});
                 }
             }
         //end of the '$scope.groupby' else
@@ -829,7 +829,7 @@ function indexCtrl($scope, $http) {
                     }
                     //returns all unique instances to reducedInstances
                     reducedInstances = _.uniq(reducedInstances);
-                    reducedInstances = _.filter(reducedInstances, function(inst){return inst ? inst.propHash.VERTEX_LABEL_PROPERTY == that.name : null});
+                    reducedInstances = _.filter(reducedInstances, function(inst){return inst ? inst.propHash.label == that.name : null});
                     
                     //checks to see if reducedInstances is empty and will stop the function if so
                     if(reducedInstances.length == 0){
@@ -838,7 +838,7 @@ function indexCtrl($scope, $http) {
                     
                     //adds all the selected unique instances to the columns
                     for(var i=0; i<reducedInstances.length; i++){
-                        axisParams.push(reducedInstances[i].propHash.VERTEX_LABEL_PROPERTY);
+                        axisParams.push(reducedInstances[i].propHash.label);
                     }
                     
                     for(var j=0; j<reducedInstances.length; j++){
@@ -851,7 +851,7 @@ function indexCtrl($scope, $http) {
                                     propParams.push(0);
                                 }
                             }
-                            seriesVal.push({'name': reducedInstances[j].propHash.VERTEX_LABEL_PROPERTY, 'data': propParams});
+                            seriesVal.push({'name': reducedInstances[j].propHash.label, 'data': propParams});
                         }
                     }
                     createChart(chartType, axisParams, seriesVal);
@@ -874,7 +874,7 @@ function indexCtrl($scope, $http) {
                     var propParams = [];
                     for(var j=0; j<reducedInstances.length; j++){
                         if(reducedInstances[j].propHash[that.name]){
-                            propParams.push([reducedInstances[j].propHash.VERTEX_LABEL_PROPERTY, reducedInstances[j].propHash[that.name]]);
+                            propParams.push([reducedInstances[j].propHash.label, reducedInstances[j].propHash[that.name]]);
                         }else{
                             return;
                         }
@@ -944,7 +944,7 @@ function indexCtrl($scope, $http) {
         var key;
         $scope.types[$scope.dimensions.length -1] = [];
         for (key in $scope.data.Nodes) {
-            $scope.types[$scope.dimensions.length -1].push({'name': $scope.data.Nodes[key][0].propHash.VERTEX_TYPE_PROPERTY, 'selected': false});
+            $scope.types[$scope.dimensions.length -1].push({'name': $scope.data.Nodes[key][0].propHash.type, 'selected': false});
         }
         
     };
@@ -1527,7 +1527,7 @@ function gridCtrl($scope, $http) {
                     for(var j=0; j<$scope.data.Nodes.LifeCycle[i].outEdge.length; j++){
                         
                         var myRe = new RegExp("([^/]*)$");
-                        var sysLifeCycStr = myRe.exec($scope.data.Nodes.LifeCycle[i].outEdge[j].propHash.EDGE_NAME);
+                        var sysLifeCycStr = myRe.exec($scope.data.Nodes.LifeCycle[i].outEdge[j].propHash.label);
                         
                         var sysLifeCycArray = sysLifeCycStr[0].split(":");
                         lifeCycle.push({system: sysLifeCycArray[0], lifecycle: sysLifeCycArray[1]});
@@ -1558,7 +1558,7 @@ function gridCtrl($scope, $http) {
                     sortedSystems[i].propHash['SustainmentBudget'] = 0;
                 }
                 for(var j=0; j<lifeCycle.length; j++){
-                    if(lifeCycle[j].system == sortedSystems[i].propHash.VERTEX_LABEL_PROPERTY){
+                    if(lifeCycle[j].system == sortedSystems[i].propHash.label){
                         if(lifeCycle[j].lifecycle == 'Supported'){
                             pointColor = Highcharts.getOptions().colors[2];
                         }
@@ -1576,7 +1576,7 @@ function gridCtrl($scope, $http) {
                 
                 //check chart type to determine data model
                 if(chartType == 'bubble'){
-                    var seriesData = {name: sortedSystems[i].propHash.VERTEX_LABEL_PROPERTY, x: sortedSystems[i].propHash['BusinessValue'], y: sortedSystems[i].propHash['TechnicalMaturity'],  z: sortedSystems[i].propHash['SustainmentBudget']};
+                    var seriesData = {name: sortedSystems[i].propHash.label, x: sortedSystems[i].propHash['BusinessValue'], y: sortedSystems[i].propHash['TechnicalMaturity'],  z: sortedSystems[i].propHash['SustainmentBudget']};
                     
                     if(pointColor == Highcharts.getOptions().colors[2]){
                         supportedData.push(seriesData);
@@ -1588,7 +1588,7 @@ function gridCtrl($scope, $http) {
                         otherData.push(seriesData);
                     }
                 }else if(chartType == 'scatter'){
-                    var seriesData = {name: sortedSystems[i].propHash.VERTEX_LABEL_PROPERTY, x: sortedSystems[i].propHash['BusinessValue'], y: sortedSystems[i].propHash['TechnicalMaturity']}
+                    var seriesData = {name: sortedSystems[i].propHash.label, x: sortedSystems[i].propHash['BusinessValue'], y: sortedSystems[i].propHash['TechnicalMaturity']}
                     //if scatter plot, set the data to different arrays based on color (which is based on life cycle)
                     if(pointColor == Highcharts.getOptions().colors[2]){
                         supportedData.push(seriesData);
@@ -1723,7 +1723,7 @@ function gridCtrl($scope, $http) {
         
         //get all the systems and their respective Technical Maturity
         for(var i=0; i<$scope.data.Nodes.System.length; i++){
-            systems.push({name: $scope.data.Nodes.System[i].propHash.VERTEX_LABEL_PROPERTY, TechMat: $scope.data.Nodes.System[i].propHash.TechnicalMaturity});
+            systems.push({name: $scope.data.Nodes.System[i].propHash.label, TechMat: $scope.data.Nodes.System[i].propHash.TechnicalMaturity});
         }
         
         //var uniqEdges = _.uniq($scope.data.Nodes.Service[i].outEdge);
@@ -1731,8 +1731,8 @@ function gridCtrl($scope, $http) {
         //get all the services and their respective business value
         for(var i=0; i<$scope.data.Nodes.Service.length; i++){
             for(var j=0; j<systems.length; j++){
-                var edgeName = systems[j].name + '-' + $scope.data.Nodes.Service[i].propHash.VERTEX_LABEL_PROPERTY;
-                var uniqEdges = _.uniq($scope.data.Nodes.Service[i].outEdge, function(edge){ return edge.propHash.EDGE_NAME; });
+                var edgeName = systems[j].name + '-' + $scope.data.Nodes.Service[i].propHash.label;
+                var uniqEdges = _.uniq($scope.data.Nodes.Service[i].outEdge, function(edge){ return edge.propHash.label; });
                 for(var k=0; k<uniqEdges.length; k++){
                     //check to make sure all keys have values
                     if(!$scope.data.Nodes.Service[i].propHash.BusinessValue){
@@ -1747,22 +1747,22 @@ function gridCtrl($scope, $http) {
                     if(chartType =='bubble'){
                         //setting the data to be added to the specific array
                         var seriesData = {name: edgeName, x: $scope.data.Nodes.Service[i].propHash.BusinessValue, y: systems[j].TechMat, z: $scope.data.Nodes.Service[i].propHash.ICDCount}
-                        if(uniqEdges[k].propHash.EDGE_TYPE == "BLUProvider" && uniqEdges[k].propHash.EDGE_NAME == edgeName){
+                        if(uniqEdges[k].propHash.type == "BLUProvider" && uniqEdges[k].propHash.label == edgeName){
                             //pointColor = Highcharts.getOptions().colors[1];
                             bluProv.push(seriesData);
                         }
-                        if(uniqEdges[k].propHash.EDGE_TYPE == "DataProvider" && uniqEdges[k].propHash.EDGE_NAME == edgeName){
+                        if(uniqEdges[k].propHash.type == "DataProvider" && uniqEdges[k].propHash.label == edgeName){
                             //pointColor = Highcharts.getOptions().colors[2];
                             dataProv.push(seriesData);
                         }
                     }else if(chartType == 'scatter'){
                         //setting the data to be added to the specific array
                         var seriesData = {name: edgeName, x: $scope.data.Nodes.Service[i].propHash.BusinessValue, y: systems[j].TechMat}
-                        if(uniqEdges[k].propHash.EDGE_TYPE == "BLUProvider" && uniqEdges[k].propHash.EDGE_NAME == edgeName){
+                        if(uniqEdges[k].propHash.type == "BLUProvider" && uniqEdges[k].propHash.label == edgeName){
                             //pointColor = Highcharts.getOptions().colors[1];
                             bluProv.push(seriesData);
                         }
-                        if(uniqEdges[k].propHash.EDGE_TYPE == "DataProvider" && uniqEdges[k].propHash.EDGE_NAME == edgeName){
+                        if(uniqEdges[k].propHash.type == "DataProvider" && uniqEdges[k].propHash.label == edgeName){
                             //pointColor = Highcharts.getOptions().colors[2];
                             dataProv.push(seriesData);
                         }
@@ -1774,7 +1774,7 @@ function gridCtrl($scope, $http) {
         //make array of all the edge names
         var allServiceNames = [];
         for(var i=0; i<$scope.data.Nodes.Service.length; i++){
-            allServiceNames.push($scope.data.Nodes.Service[i].propHash.VERTEX_LABEL_PROPERTY);
+            allServiceNames.push($scope.data.Nodes.Service[i].propHash.label);
         }
         //returns only unique edge names
         allServiceNames = _.uniq(allServiceNames);
