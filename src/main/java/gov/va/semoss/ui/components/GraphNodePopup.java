@@ -24,7 +24,7 @@ import gov.va.semoss.algorithm.impl.IslandIdentifierProcessor;
 import gov.va.semoss.algorithm.impl.LoopIdentifierProcessor;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.playsheets.BrowserTabSheet3;
+import gov.va.semoss.ui.components.playsheets.ChartItPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.main.listener.impl.AdjacentPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeRankListener;
@@ -95,10 +95,8 @@ public class GraphNodePopup extends JPopupMenu {
 		item.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				BrowserTabSheet3 tab
-						= new BrowserTabSheet3( "/html/RDFSemossCharts/app/index.html", gps );
+				ChartItPlaySheet tab = new ChartItPlaySheet( gps );
 				gps.addSibling( "Custom Chart", tab );
-				tab.pullData();
 			}
 		} );
 	}

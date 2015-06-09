@@ -21,23 +21,19 @@ package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.om.SEMOSSVertex;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JButton;
 import org.openrdf.model.URI;
 
 /**
  * This class is used in chart listeners to create the appropriate browser and
  * pull the appropriate data for a playsheet.
  */
-public class BrowserTabSheet3 extends BrowserPlaySheet2 implements ActionListener {
+public class ChartItPlaySheet extends BrowserPlaySheet2 {
 	private static final long serialVersionUID = 5944414296343639772L;
-	private GraphPlaySheet gps;
+	private static final String filename = "/html/RDFSemossCharts/app/index.html";
 
 	/**
 	 * Constructor for BrowserTabSheet3.
@@ -45,24 +41,12 @@ public class BrowserTabSheet3 extends BrowserPlaySheet2 implements ActionListene
 	 * @param fileName File name to be navigated to in the browser.
 	 * @param ps	Playsheet being called.
 	 */
-	public BrowserTabSheet3( String fileName, GraphPlaySheet ps ) {
-		super( fileName );
-		this.gps = ps;
-
-		setLayout( new BorderLayout() );
-		JButton pullDataButton = new JButton( "Pull New Data" );
-		pullDataButton.addActionListener( this );
-
-		add( pullDataButton, BorderLayout.NORTH );
-		add( jfxPanel, BorderLayout.CENTER );
+	public ChartItPlaySheet( GraphPlaySheet gps ) {
+		super( filename );		
+		pullData(gps);
 	}
 	
-	@Override
-	public void actionPerformed( ActionEvent ae ) {
-		pullData();
-	}
-
-	public void pullData() {
+	public void pullData(GraphPlaySheet gps) {
 		Map<URI, List<SEMOSSVertex>> nodeHash = gps.getFilterData().getNodeTypeMap();
 		Map<String, List<SEMOSSVertex>> nodeHashAsLocalNames = new HashMap<String, List<SEMOSSVertex>>();
 		
