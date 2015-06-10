@@ -6,11 +6,12 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.util.Constants;
+
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.log4j.Logger;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
@@ -21,26 +22,28 @@ import org.openrdf.model.vocabulary.RDFS;
  * @author ryan
  */
 public class AbstractNodeEdgeBase {
+	//the transient keyword keeps this from being sent to the js
+	public transient static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
+	
+	private final transient Map<URI, Object> properties = new HashMap<>();
+	private transient boolean visible = true;
+	private transient URI id;
+	private transient Color color;
+	private transient String colorString;
 
-	private static final Logger log = Logger.getLogger( AbstractNodeEdgeBase.class );
-	public static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
-
-	private Color color;
-	private String colorString;
-	private final Map<URI, Object> properties = new HashMap<>();
-	private URI id;
-	private boolean visible = true;
-
+	private final Map<String, Object> propHash = new HashMap<>(); //a duplicate copy for the js to access
+	
 	public AbstractNodeEdgeBase( URI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
 	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
 		this.id = id;
-		properties.put( RDF.SUBJECT, id );
-		properties.put( RDFS.LABEL, label );
-		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
-		properties.put( LEVEL, 1 );
+		
+		setProperty( RDF.SUBJECT, id );
+		setProperty( RDFS.LABEL, label );
+		setProperty( RDF.TYPE, null == type ? Constants.ANYNODE : type );
+		setProperty( LEVEL, 1 );
 	}
 
 	public void setLevel( int lev ) {
@@ -94,7 +97,7 @@ public class AbstractNodeEdgeBase {
 	 * @param label the new label to set
 	 */
 	public void setLabel( String label ) {
-		properties.put( RDFS.LABEL, label );
+		setProperty( RDFS.LABEL, label );
 	}
 
 	public String getLabel() {
@@ -103,6 +106,12 @@ public class AbstractNodeEdgeBase {
 
 	public void setProperty( URI prop, Object propValue ) {
 		properties.put( prop, propValue );
+		if (prop != null) {
+			if (propValue instanceof URI)
+				propHash.put( prop.getLocalName(), ((URI)propValue).getLocalName() );
+			else 
+				propHash.put( prop.getLocalName(), propValue );
+		}
 	}
 
 	public Object getProperty( URI arg0 ) {

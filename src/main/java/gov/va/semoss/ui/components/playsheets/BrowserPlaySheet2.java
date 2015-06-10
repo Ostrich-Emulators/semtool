@@ -193,6 +193,7 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 		dataHash.putAll( newdata );
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object getData() {
 		Map<String, Object> returnHash = (Map<String, Object>) super.getData();
