@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
 /**
@@ -33,13 +34,13 @@ import org.openrdf.model.URI;
  */
 public class ChartItPlaySheet extends BrowserPlaySheet2 {
 	private static final long serialVersionUID = 5944414296343639772L;
+	private static final Logger log = Logger.getLogger( ChartItPlaySheet.class );
 	private static final String filename = "/html/RDFSemossCharts/app/index.html";
 
 	/**
-	 * Constructor for BrowserTabSheet3.
+	 * Constructor for ChartItPlaySheet.
 	 *
-	 * @param fileName File name to be navigated to in the browser.
-	 * @param ps	Playsheet being called.
+	 * @param gps	Playsheet whose nodes we are charting.
 	 */
 	public ChartItPlaySheet( GraphPlaySheet gps ) {
 		super( filename );		
@@ -51,6 +52,18 @@ public class ChartItPlaySheet extends BrowserPlaySheet2 {
 		Map<String, List<SEMOSSVertex>> nodeHashAsLocalNames = new HashMap<String, List<SEMOSSVertex>>();
 		
 		for(URI nodeType:nodeHash.keySet()) {
+			for (SEMOSSVertex node:nodeHash.get(nodeType)) {
+				Map<URI, Object> properties = node.getProperties();
+				for (URI propertyKey: properties.keySet()) {
+					Object propertyValue = properties.get(propertyKey);
+					if (propertyValue instanceof Number) {
+						log.debug("Property " + propertyKey + " is of type Number with value: " + propertyValue);
+					} else {
+						log.debug("Property " + propertyKey + " is not of type Number with value: " + propertyValue);
+					}
+				}
+			}
+			
 			nodeHashAsLocalNames.put(nodeType.getLocalName(), nodeHash.get(nodeType));
 		}
 		
