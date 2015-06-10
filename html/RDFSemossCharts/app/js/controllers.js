@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-function indexCtrl($scope, $http) {
+function chartitCtrl($scope, $http) {
     $scope.types = {};
     $scope.types[0] = [];
     $scope.instances = {};

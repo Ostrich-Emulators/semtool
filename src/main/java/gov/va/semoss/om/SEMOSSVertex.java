@@ -32,9 +32,9 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class SEMOSSVertex extends AbstractNodeEdgeBase {
 	private transient Shape shape, shapeLegend;
-	private String shapeString;
-	private int incount = 0;
-	private int outcount = 0;
+	private transient String shapeString;
+	private transient int incount = 0;
+	private transient int outcount = 0;
 
 	public SEMOSSVertex( URI id ) {
 		this( id, null, id.getLocalName() );
