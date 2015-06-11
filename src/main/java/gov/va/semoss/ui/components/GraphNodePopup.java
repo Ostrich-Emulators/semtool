@@ -95,10 +95,9 @@ public class GraphNodePopup extends JPopupMenu {
 		item.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				ChartItPlaySheet tab = new ChartItPlaySheet( gps );
-				gps.addSibling( "Custom Chart", tab );
+				gps.addSibling( "Custom Chart", new ChartItPlaySheet( gps ) );
 			}
-		} );
+		});
 	}
 
 	private void addHidingOptions() {

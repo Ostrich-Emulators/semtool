@@ -21,9 +21,9 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.helpers.NodeEdgeNumberedPropertyUtility;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
-import gov.va.semoss.util.DIHelper;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -31,7 +31,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -74,24 +73,24 @@ public class WeightDropDownButton extends JButton {
 	private JTree edgePropTree, nodePropTree;
 	private JScrollPane nodeScrollPane, edgeScrollPane;
 	private boolean listsPopulated = false;
-	private ControlData controlData;
+//	private ControlData controlData;
 	private GraphPlaySheet playSheet;
 	
-	private static Map<String, URI> localNameToURIHash = new HashMap<String, URI>();
-	private static Map<String, String> displayNameMap = new HashMap<String, String>();
-	private static Set<String> hidePropertySet = new HashSet<String>();
+//	private static Map<String, URI> localNameToURIHash = new HashMap<String, URI>();
+//	private static Map<String, String> displayNameMap = new HashMap<String, String>();
+//	private static Set<String> hidePropertySet = new HashSet<String>();
 
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
 		initializeButton();
 		
-		controlData = new ControlData();
-		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
+//		controlData = new ControlData();
+//		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
 
-		displayNameMap.put("count.edge.in",  "In-Degree");
-		displayNameMap.put("count.edge.out", "Out-Degree");
+//		displayNameMap.put("count.edge.in",  "In-Degree");
+//		displayNameMap.put("count.edge.out", "Out-Degree");
 		
-		hidePropertySet.add("graphing.level");
+//		hidePropertySet.add("graphing.level");
 	}
 
 	public void setPlaySheet( GraphPlaySheet gps ) {
@@ -169,25 +168,8 @@ public class WeightDropDownButton extends JButton {
 			Set<String> propertiesForThisType = new TreeSet<String>();
 			propertiesToAdd.put( entry.getKey().getLocalName(), propertiesForThisType );
 			for ( X nodeOrEdge : entry.getValue() ) {
-				
-				propertiesLoop: for( Map.Entry<URI, Object> propEntry : nodeOrEdge.getProperties().entrySet() ) {
-					String propertyName = propEntry.getKey().getLocalName();
-//					String propertyName = controlData.getLabel( propEntry.getKey() );
-					
-					if (getDoubleIfPossibleFrom( propEntry.getValue() ) <= 0) 
-						continue propertiesLoop;
-					
-					if (hidePropertySet.contains(propertyName)) 
-						continue propertiesLoop;
-					
-					if (displayNameMap.keySet().contains(propertyName)) {
-						propertyName = displayNameMap.get(propertyName);
-					}
-
-					propertiesForThisType.add( propertyName );
-					localNameToURIHash.put( propertyName, propEntry.getKey() );
-				}
-			
+				Map<String, Object> props = NodeEdgeNumberedPropertyUtility.transformProperties(nodeOrEdge.getProperties(), false);
+				propertiesForThisType.addAll(props.keySet());
 			}
 		}
 
@@ -371,9 +353,9 @@ public class WeightDropDownButton extends JButton {
 		for ( AbstractNodeEdgeBase nodeOrEdge : collection ) {
 			Object propertyValue = null;
 
-			URI selectedURI = localNameToURIHash.get( selectedValue );
+			URI selectedURI = NodeEdgeNumberedPropertyUtility.getURI( selectedValue );
 			propertyValue = nodeOrEdge.getProperty( selectedURI );
-			double propertyDouble = getDoubleIfPossibleFrom( propertyValue );
+			double propertyDouble = NodeEdgeNumberedPropertyUtility.getDoubleIfPossibleFrom( propertyValue );
 
 			if ( propertyDouble > 0 ) {
 				double value = Double.parseDouble( propertyValue.toString() );
@@ -423,28 +405,5 @@ public class WeightDropDownButton extends JButton {
 
 		lastSelectedValue = selectedValue;
 		return false;
-	}
-
-	private static double getDoubleIfPossibleFrom( Object propertyValue ) {
-		if ( propertyValue == null ) {
-			return -1;
-		}
-
-		if ( propertyValue instanceof URI ) {
-			URI uri = (URI) propertyValue;
-			try {
-				return Double.parseDouble( uri.getLocalName() );
-			}
-			catch ( NumberFormatException e ) {
-				return -1;
-			}
-		}
-
-		try {
-			return Double.parseDouble( propertyValue.toString() );
-		}
-		catch ( NumberFormatException e ) {
-			return -1;
-		}
 	}
 }

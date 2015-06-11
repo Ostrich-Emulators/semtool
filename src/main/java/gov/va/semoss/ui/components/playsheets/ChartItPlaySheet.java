@@ -20,6 +20,7 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.om.SEMOSSVertex;
+import static gov.va.semoss.ui.helpers.NodeEdgeNumberedPropertyUtility.transformProperties;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,16 +34,14 @@ import org.openrdf.model.URI;
  */
 public class ChartItPlaySheet extends BrowserPlaySheet2 {
 	private static final long serialVersionUID = 5944414296343639772L;
-	private static final String filename = "/html/RDFSemossCharts/app/index.html";
-
+	
 	/**
-	 * Constructor for BrowserTabSheet3.
+	 * Constructor for ChartItPlaySheet.
 	 *
-	 * @param fileName File name to be navigated to in the browser.
-	 * @param ps	Playsheet being called.
+	 * @param gps	Playsheet whose nodes we are charting.
 	 */
 	public ChartItPlaySheet( GraphPlaySheet gps ) {
-		super( filename );		
+		super( "/html/RDFSemossCharts/app/chartit.html" );		
 		pullData(gps);
 	}
 	
@@ -51,6 +50,11 @@ public class ChartItPlaySheet extends BrowserPlaySheet2 {
 		Map<String, List<SEMOSSVertex>> nodeHashAsLocalNames = new HashMap<String, List<SEMOSSVertex>>();
 		
 		for(URI nodeType:nodeHash.keySet()) {
+			for (SEMOSSVertex node:nodeHash.get(nodeType)) {
+				Map<String, Object> props = transformProperties(node.getProperties(), true);
+				node.setPropHash(props);
+			}
+			
 			nodeHashAsLocalNames.put(nodeType.getLocalName(), nodeHash.get(nodeType));
 		}
 		

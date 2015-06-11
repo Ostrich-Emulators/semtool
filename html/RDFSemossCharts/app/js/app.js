@@ -4,8 +4,8 @@ angular.module('rdfgraph', ['ui', 'ui.bootstrap', 'rdfGraphFilters', 'rdfGraphSe
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.
 		when('/', {
-			controller: indexCtrl,
-			templateUrl: 'index.html'
+			controller: chartitCtrl,
+			templateUrl: 'chartit.html'
 		}).
         when('/grid', {
 			controller: gridCtrl,
@@ -27,6 +27,6 @@ angular.module('rdfgraph', ['ui', 'ui.bootstrap', 'rdfGraphFilters', 'rdfGraphSe
 			templateUrl: 'singlechartgrid.html'
 		}).
 		otherwise({
-			redirectTo: '/index.html'
+			redirectTo: '/chartit.html'
 		});
   }]);
