@@ -27,10 +27,10 @@ import java.util.Set;
 import org.openrdf.model.URI;
 
 public class NodeEdgeNumberedPropertyUtility {
-	private static Map<String, URI> localNameToURIHash = new HashMap<String, URI>();
-	private static Map<String, String> displayNameMap = new HashMap<String, String>();
-	private static Set<String> hidePropertySet = new HashSet<String>();
-	private static Set<String> keepPropertySet = new HashSet<String>();
+	private static final Map<String, URI> localNameToURIHash = new HashMap<>();
+	private static final Map<String, String> displayNameMap = new HashMap<>();
+	private static final Set<String> hidePropertySet = new HashSet<>();
+	private static final Set<String> keepPropertySet = new HashSet<>();
 
 	static {
 		displayNameMap.put("count.edge.in",  "In-Degree");
@@ -47,7 +47,7 @@ public class NodeEdgeNumberedPropertyUtility {
 	}
 	
 	public static Map<String, Object> transformProperties(Map<URI, Object> oldProperties, boolean useKeepProperties) {
-		HashMap<String, Object> newProperties = new HashMap<String, Object>();
+		HashMap<String, Object> newProperties = new HashMap<>();
 		
 		for( Map.Entry<URI, Object> propEntry : oldProperties.entrySet() ) {
 			String propertyName = propEntry.getKey().getLocalName();

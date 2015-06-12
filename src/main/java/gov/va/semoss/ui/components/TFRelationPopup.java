@@ -39,6 +39,7 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import java.util.Collection;
 import org.openrdf.model.URI;
 
 /**
@@ -48,7 +49,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 	private static final long serialVersionUID = 4029501595464135469L;
 
 	private GraphPlaySheet ps = null;
-	private SEMOSSVertex[] pickedVertex = null;
+	private final Collection<SEMOSSVertex> pickedVertex;
 	private static final Logger logger = Logger.getLogger( TFRelationPopup.class );
 
 	private String mainQuery, mainQueryJENA, neighborQuery, neighborQueryJENA;
@@ -61,7 +62,8 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 	 * @param ps IPlaySheet
 	 * @param pickedVertex DBCMVertex[]
 	 */
-	public TFRelationPopup( SEMOSSVertex vertex, GraphPlaySheet ps, SEMOSSVertex[] pickedVertex ) {
+	public TFRelationPopup( SEMOSSVertex vertex, GraphPlaySheet ps,
+			Collection<SEMOSSVertex> pickedVertex ) {
 		super( "Traverse Freely: All "
 				+ Utility.getInstanceLabel( vertex.getType(), ps.getEngine() ) + "(s) " );
 
