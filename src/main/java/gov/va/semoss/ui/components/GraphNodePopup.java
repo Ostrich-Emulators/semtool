@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import gov.va.semoss.algorithm.impl.DistanceDownstreamProcessor;
 import gov.va.semoss.algorithm.impl.IslandIdentifierProcessor;
 import gov.va.semoss.algorithm.impl.LoopIdentifierProcessor;
@@ -27,12 +28,12 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.ChartItPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.main.listener.impl.AdjacentPopupMenuListener;
+import gov.va.semoss.ui.main.listener.impl.CondenseGraph;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeRankListener;
 import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetExportListener;
 import gov.va.semoss.ui.main.listener.impl.HideVertexPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.MSTPopupMenuListener;
-import gov.va.semoss.ui.main.listener.impl.MousePickingPopupMenuListener;
-import gov.va.semoss.ui.main.listener.impl.MouseTransformPopupMenuListener;
+import gov.va.semoss.ui.main.listener.impl.MouseTransformPickPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.UnHideVertexPopupMenuListener;
 
 import java.awt.event.ActionEvent;
@@ -41,7 +42,6 @@ import java.awt.event.MouseEvent;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -56,7 +56,7 @@ public class GraphNodePopup extends JPopupMenu {
 	private static final long serialVersionUID = 7106248215097748901L;
 
 	private final GraphPlaySheet gps;
-	private Set<SEMOSSVertex> highlightedVertices;
+	private final Set<SEMOSSVertex> highlightedVertices;
 	private SEMOSSVertex pickedVertex;
 	private final IEngine engine;
 
@@ -163,12 +163,15 @@ public class GraphNodePopup extends JPopupMenu {
 
 		add( new GraphPlaySheetExportListener( gps ) );
 		add( new NodeInfoPopup( gps, highlightedVertices ) );
+		add( new CondenseGraph( gps ) );
 	}
 
 	private void addGraphOptions() {
 		addSeparator();
-		add( new MouseTransformPopupMenuListener( gps.getView() ) );
-		add( new MousePickingPopupMenuListener( gps.getView() ) );
+		add( new MouseTransformPickPopupMenuListener( gps.getView(),
+				ModalGraphMouse.Mode.TRANSFORMING ) );
+		add( new MouseTransformPickPopupMenuListener( gps.getView(),
+				ModalGraphMouse.Mode.PICKING ) );
 	}
 
 	private void addHighlightingOptions() {
