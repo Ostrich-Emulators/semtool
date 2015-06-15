@@ -19,29 +19,36 @@
  */
 package gov.va.semoss.ui.components;
 
-
-import javax.swing.JMenu;
-
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
+
+import java.awt.event.ActionEvent;
 import java.util.Collection;
+
+import javax.swing.AbstractAction;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 /**
  * This class is used to display information about shapes in a popup menu.
  */
 public class ShapePopup extends JMenu {
-
 	private static final long serialVersionUID = 3874311709020126729L;
 	
-	public ShapePopup( String _name, GraphPlaySheet gps, 
-			Collection<SEMOSSVertex> verts ) {
+	public ShapePopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( _name );
 
-		String[] shapes = TypeColorShapeTable.getAllShapes();
-		for ( String shape : shapes ) {
-			ShapeMenuItem item = new ShapeMenuItem( shape, gps, verts );
-			add( item );
+		for ( String shape : TypeColorShapeTable.getAllShapes() ) {
+			JMenuItem menuItem = new JMenuItem(shape);
+			menuItem.addActionListener(new AbstractAction() {
+				private static final long serialVersionUID = -8338448713648152673L;
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					gps.setShapes(vertices, shape);
+				}
+			});
+			add(menuItem);
 		}
 	}
 }

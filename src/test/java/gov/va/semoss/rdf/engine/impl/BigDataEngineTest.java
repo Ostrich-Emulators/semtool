@@ -96,11 +96,12 @@ public class BigDataEngineTest {
 
 		wim.commit();
 
-		assertEquals( "perspective not added", oldps.size() + 1,
-				im.getPerspectives().size() );
-
-		assertEquals( "commit failed", im.getPerspectives().size(),
-				wim.getPerspectives().size() );
+		Collection<Perspective> imps = im.getPerspectives();
+		Collection<Perspective> wimps = wim.getPerspectives();
+		im.release();
 		wim.release();
+
+		assertEquals( "perspective not added", oldps.size() + 1, imps.size() );
+		assertEquals( "commit failed", imps.size(), wimps.size() );
 	}
 }

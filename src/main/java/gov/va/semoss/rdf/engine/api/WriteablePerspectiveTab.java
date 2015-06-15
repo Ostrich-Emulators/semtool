@@ -1,5 +1,7 @@
 package gov.va.semoss.rdf.engine.api;
 
+import java.util.ArrayList;
+
 import org.openrdf.model.URI;
 
 import gov.va.semoss.om.Insight;
@@ -16,7 +18,23 @@ public interface WriteablePerspectiveTab {
    */
 	public boolean addInsight(int newOrder, Perspective perspective);
 	
-  /**   Removes an Insight from a Perspective in the triple-store on disk.
+  /**   Reorders Insights under the passed-in Perspective, using the new orders within
+    * the passed-in Insight array-list.
+   *
+   * @param perspectiveURI -- (URI) The URI of the Perspective containing the passed-in
+   *    Insights.
+   *
+   * @param arylInsights -- (ArrayList<Insight>) An array list of Insights that needs
+   *    all Insight Orders persisted
+   * 
+   * @return setInsightOrders -- (boolean) Whether the Insight reordering succeeded.
+   */
+    public boolean reorderInsights(URI perspectiveURI, ArrayList<Insight> arylInsights);
+  
+ /**   Removes an Insight from a Perspective in the triple-store on disk.
+   * 
+   * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+   *     Perspective.
    * 
    * @param insight -- (Insight) Insight to remove from the Perspective.
    * 
@@ -24,7 +42,8 @@ public interface WriteablePerspectiveTab {
    * 
    * @param doImport -- (boolean) Whether to import memory database to disk.
    */
-	public boolean removeInsight(Insight insight, Perspective perspective, boolean doImport);
+	public boolean removeInsight(ArrayList<Insight> arylInsights, Insight insight,
+       Perspective perspective, boolean doImport);
   
   /**   Adds a new Perspective to the triple-store on disk.
    * 
@@ -49,6 +68,9 @@ public interface WriteablePerspectiveTab {
   /**   Saves a Perspective's Title and Description into the triple-store on disk,
    * where the passed-in URI is the subject.
    * 
+   * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+   *     Perspective.
+   * 
    * @param uri -- (String) URI of Perspective.
    * 
    * @param strTitle -- (String) Title of Perspective (rdfs:label).
@@ -57,7 +79,8 @@ public interface WriteablePerspectiveTab {
    * 
    * @return savePerspective -- (boolean) Whether the save to disk succeeded.
    */
-	public boolean savePerspective(String uri, String strTitle, String strDescription);
+	public boolean savePerspective(ArrayList<Insight> arylInsights, String uri, 
+	   String strTitle, String strDescription);
 	
 	/**   Searches the database for Insights that are not associated with any Perspective,
 	 * and places them under the "Detached-Insight-Perspective". If no "Detached-Insight-Perspective"

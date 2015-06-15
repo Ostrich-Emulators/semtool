@@ -26,11 +26,11 @@ import gov.va.semoss.poi.main.XlsWriter.NodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
+import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.Arrays;
 import java.util.Collection;
@@ -78,6 +78,9 @@ public class DBToLoadingSheetExporter {
 	private static LoadingSheetData convertToNodes( URI subjectType,
 			Collection<NodeAndPropertyValues> data, Set<URI> properties,
 			Map<URI, String> labels ) {
+
+		properties.remove( RDFS.LABEL ); // don't add an extra label column
+
 		String sheetname = labels.get( subjectType );
 		LoadingSheetData ret = LoadingSheetData.nodesheet( sheetname );
 		for ( URI prop : properties ) {
@@ -99,6 +102,9 @@ public class DBToLoadingSheetExporter {
 	private static LoadingSheetData convertToRelationshipLoadingSheetData( URI subjectType,
 			URI predType, URI objectType, Collection<NodeAndPropertyValues> data, Set<URI> properties,
 			Map<URI, String> labels ) {
+
+		properties.remove( RDFS.LABEL ); // don't add an extra label column
+
 		String stname = labels.get( subjectType );
 		String otname = labels.get( objectType );
 		String relname = labels.get( predType );
@@ -199,10 +205,9 @@ public class DBToLoadingSheetExporter {
 	public List<URI> createConceptList() {
 		final List<URI> conceptList = new ArrayList<>();
 		String query = "SELECT ?entity WHERE "
-				+ "{ ?entity ?subclass ?concept . FILTER( ?entity != ?concept ) }";
+				+ "{ ?entity rdfs:subClassOf+ ?concept . FILTER( ?entity != ?concept ) }";
 		OneVarListQueryAdapter<URI> qe
 				= OneVarListQueryAdapter.getUriList( query, "entity" );
-		qe.bind( "subclass", RDFS.SUBCLASSOF );
 		qe.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 
 		try {
@@ -286,46 +291,40 @@ public class DBToLoadingSheetExporter {
 		}
 	}
 
-	public List<URI> createRelationshipList() {
-		final List<URI> relList = new ArrayList<>();
-		String query = "SELECT DISTINCT ?verb WHERE {"
-				+ "?in ?relationship ?out . "
-				+ "?relationship ?subprop ?verb ."
-				+ "}";
-
-		OneVarListQueryAdapter<URI> qe
-				= OneVarListQueryAdapter.getUriList( query, "verb" );
-		qe.bind( "subprop", RDFS.SUBPROPERTYOF );
-		qe.useInferred( false );
-
-		try {
-			relList.addAll( engine.query( qe ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( e, e );
-		}
-		return relList;
-	}
-
 	public void exportAllRelationships( List<URI> subjectTypes, ImportData data ) {
 		findDupsToFilterOut();
 
-		List<URI[]> relsToExport = new ArrayList<>();
+		String q = "SELECT DISTINCT ?subtype ?rel ?objtype WHERE {"
+				+ "  ?sub a ?subtype ."
+				+ "  ?sub ?rel ?obj ."
+				+ "  ?objtype rdfs:subClassOf ?concept ."
+				+ "  ?obj a ?objtype ."
+				+ "  ?rel a owl:ObjectProperty ."
+				+ "}";
+		ListQueryAdapter<URI[]> triples = new ListQueryAdapter<URI[]>( q ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				URI triple[] = {
+					URI.class.cast( set.getValue( "subtype" ) ),
+					URI.class.cast( set.getValue( "rel" ) ),
+					URI.class.cast( set.getValue( "objtype" ) ) };
+				add( triple );
+			}
+		};
+		triples.bind( "concept", getEngine().getSchemaBuilder().getConceptUri().build() );
 
 		for ( URI subjectType : subjectTypes ) {
-			List<URI> objectTypes
-					= getAllSubclassesOfConceptThatAreObjectsInATripleWithSubjectOfType( subjectType );
-			for ( URI objectType : objectTypes ) {
+			triples.bind( "subtype", subjectType );
 
-				List<URI> predicateTypes = getPredicatesBetween( subjectType, objectType,
-						getEngine() );
-				for ( URI predicateType : predicateTypes ) {
-					relsToExport.add( new URI[]{ subjectType, predicateType, objectType } );
-				}
+			try {
+				List<URI[]> relsToExport = getEngine().query( triples );
+				exportTheseRelationships( relsToExport, data );
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+				logger.error( e, e );
 			}
 		}
-
-		exportTheseRelationships( relsToExport, data );
 	}
 
 	/**
@@ -350,12 +349,10 @@ public class DBToLoadingSheetExporter {
 
 		String query
 				= "SELECT ?s ?p ?prop WHERE { "
-				+ "{?s    a ?subjType ;} "
+				+ " ?s ?p ?prop . "
+				+ " ?s a  ?subjType . "
 				+ queryFilterLine
-				+ "OPTIONAL { "
-				+ "  ?p   a      ?contains . "
-				+ "  ?s   ?p     ?prop . "
-				+ "  } "
+				+ " FILTER ( isLiteral( ?prop ) ) "
 				+ "} ";
 
 		final List<URI> needlabels = new ArrayList<>();
@@ -372,11 +369,9 @@ public class DBToLoadingSheetExporter {
 					seen.put( s, new NodeAndPropertyValues( s ) );
 				}
 
-				if ( !( null == p || null == prop ) ) {
-					seen.get( s ).put( p, prop );
-					needlabels.add( p );
-					properties.add( p );
-				}
+				seen.get( s ).put( p, prop );
+				needlabels.add( p );
+				properties.add( p );
 			}
 		};
 
@@ -384,7 +379,6 @@ public class DBToLoadingSheetExporter {
 			vqa.bind( "specType", moreSpecificSubjectType );
 		}
 		vqa.bind( "subjType", subjectType );
-		vqa.bind( "contains", getEngine().getSchemaBuilder().getContainsUri() );
 
 		try {
 			getEngine().query( vqa );
@@ -399,31 +393,6 @@ public class DBToLoadingSheetExporter {
 		return seen.values();
 	}
 
-	private List<URI> getAllSubclassesOfConceptThatAreObjectsInATripleWithSubjectOfType( URI subjectType ) {
-		List<URI> results = new ArrayList<>();
-		UriBuilder owlb = engine.getSchemaBuilder();
-		String query
-				= "SELECT DISTINCT ?s WHERE { "
-				+ "  {?in  a         ?stype ;} "
-				+ "  {?s   ?subclass ?concept ;} "
-				+ "  {?out a         ?s ;} "
-				+ "  {?in  ?p        ?out ;} "
-				+ "} ";
-
-		OneVarListQueryAdapter<URI> q = OneVarListQueryAdapter.getUriList( query, "s" );
-		q.bind( "stype", subjectType );
-		q.bind( "concept", owlb.getConceptUri().build() );
-		q.bind( "subclass", RDFS.SUBCLASSOF );
-		try {
-			results.addAll( getEngine().query( q ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( e, e );
-		}
-
-		return results;
-	}
-
 	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
 			IEngine engine ) {
 		String q
@@ -436,7 +405,6 @@ public class DBToLoadingSheetExporter {
 		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q, "relationship" );
 		varq.useInferred( false );
 		varq.bind( "stype", subjectNodeType );
-		varq.bind( "subprop", RDFS.SUBPROPERTYOF );
 
 		if ( !objectNodeType.equals( Constants.ANYNODE ) ) {
 			varq.bind( "otype", objectNodeType );
@@ -457,63 +425,40 @@ public class DBToLoadingSheetExporter {
 			URI predicateType, URI objectType, final Collection<URI> properties,
 			Map<URI, String> labels ) {
 
-		final Map<URI, NodeAndPropertyValues> seen = new HashMap<>();
-
-		String queryFilterLine = "";
-		URI moreSpecificSubjectType = dupsToFilterOut.get( subjectType );
-		if ( moreSpecificSubjectType != null ) {
-			queryFilterLine = "  FILTER NOT EXISTS { ?in a ?specType } ";
-		}
-
+		// break this into two pieces...the first query gets the subjects and objects,
+		// and the second query gets properties for edges (if they exist)
+		logger.debug( "getOneRelData for " + subjectType.getLocalName() + "->"
+				+ predicateType.getLocalName() + "->" + objectType.getLocalName() );
+		final Map<String, NodeAndPropertyValues> seen = new HashMap<>();
 		final Set<URI> needlabels = new HashSet<>();
 
-		// TODO: DM: rewrite this
-		String query
-				= "SELECT ?in ?relationship ?out ?contains ?prop WHERE { "
-				+ "  ?in            a             ?subjType . "
-				+ queryFilterLine
-				+ "  ?out           a             ?objType . "
-				+ "  ?relationship  ?subprop      ?predType . "
-				+ "  ?in            ?relationship ?out . "
-				+ "  OPTIONAL { "
-				+ "    ?contains      a           ?containsType . "
-				+ "    ?relationship  ?contains   ?prop . "
-				+ "  } "
-				+ "} ";
+		String query = "SELECT DISTINCT ?sub ?obj WHERE {"
+				+ "  ?sub a ?subtype ."
+				+ "  ?sub ?rel ?obj ."
+				+ "  ?obj a ?objtype ."
+				+ "  ?rel a owl:ObjectProperty ."
+				+ "}";
 
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI in = URI.class.cast( set.getValue( "in" ) );
-				URI rel = URI.class.cast( set.getValue( "relationship" ) );
-				URI out = URI.class.cast( set.getValue( "out" ) );
-				URI contains = URI.class.cast( set.getValue( "contains" ) );
-				Value prop = set.getValue( "prop" );
+				URI in = URI.class.cast( set.getValue( "sub" ) );
+				URI out = URI.class.cast( set.getValue( "obj" ) );
 
-				if ( !seen.containsKey( rel ) ) {
-					seen.put( rel, new NodeAndPropertyValues( in, out ) );
+				String key = in.toString() + out.toString();
+				if ( !seen.containsKey( key ) ) {
+					seen.put( key, new NodeAndPropertyValues( in, out ) );
 				}
 
 				needlabels.add( in );
-				needlabels.add( rel );
 				needlabels.add( out );
-				if ( !( null == contains || null == prop ) ) {
-					seen.get( rel ).put( contains, prop );
-					properties.add( contains );
-					needlabels.add( contains );
-				}
 			}
 		};
 
-		if ( null != moreSpecificSubjectType ) {
-			vqa.bind( "specType", moreSpecificSubjectType );
-		}
-		vqa.bind( "subjType", subjectType );
-		vqa.bind( "predType", predicateType );
-		vqa.bind( "objType", objectType );
-		vqa.bind( "subprop", RDFS.SUBPROPERTYOF );
-		vqa.bind( "containsType", getEngine().getSchemaBuilder().getContainsUri() );
+		vqa.bind( "subtype", subjectType );
+		vqa.bind( "rel", predicateType );
+		vqa.bind( "objtype", objectType );
 		vqa.useInferred( false );
 
 		try {
@@ -521,6 +466,50 @@ public class DBToLoadingSheetExporter {
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			logger.error( query, e );
+		}
+
+		String edgequery = "SELECT DISTINCT ?sub ?obj ?prop ?propval WHERE {"
+				+ "  ?sub a ?subtype ."
+				+ "  ?sub ?specificrel ?obj ."
+				+ "  ?obj a ?objtype ."
+				+ "  ?specificrel a ?semossrel ."
+				+ "  ?specificrel rdf:predicate ?rel ."
+				+ "  ?specificrel ?prop ?propval ."
+				+ "  FILTER( isLiteral( ?propval ) ) ."
+				+ "}";
+		VoidQueryAdapter edges = new VoidQueryAdapter( edgequery ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				URI in = URI.class.cast( set.getValue( "sub" ) );
+				URI out = URI.class.cast( set.getValue( "obj" ) );
+				URI prop = URI.class.cast( set.getValue( "prop" ) );
+				Value val = set.getValue( "propval" );
+
+				String key = in.toString() + out.toString();
+				if ( !seen.containsKey( key ) ) {
+					seen.put( key, new NodeAndPropertyValues( in, out ) );
+				}
+
+				needlabels.add( prop );
+				properties.add( prop );
+
+				NodeAndPropertyValues nap = seen.get( key );
+				nap.put( prop, val );
+			}
+		};
+
+		edges.bind( "subtype", subjectType );
+		edges.bind( "rel", predicateType );
+		edges.bind( "semossrel", getEngine().getSchemaBuilder().getRelationUri().build() );
+		edges.bind( "objtype", objectType );
+		edges.useInferred( false );
+
+		try {
+			getEngine().query( edges );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			logger.error( "could not retrieve edge properties", e );
 		}
 
 		// don't refetch stuff already in the labels cache

@@ -252,11 +252,14 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
     jSplitPane1.setDividerLocation(125);
     jSplitPane1.setDividerSize(2);
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+    jSplitPane1.setResizeWeight(0.5);
     jSplitPane1.setToolTipText("");
     jSplitPane1.setContinuousLayout(true);
 
     repoPanel.setBackground(java.awt.Color.white);
     repoPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 10, 10));
+    repoPanel.setMinimumSize(new java.awt.Dimension(100, 100));
+    repoPanel.setPreferredSize(new java.awt.Dimension(275, 150));
     repoPanel.setLayout(new java.awt.BorderLayout());
 
     oneLabel.setText("1. Select a database to explore:");
@@ -325,7 +328,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
         .addComponent(submitButton)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(appendChkBox)
-        .addGap(0, 54, Short.MAX_VALUE))
+        .addGap(0, 0, Short.MAX_VALUE))
     );
 
     jSplitPane1.setRightComponent(insightsPanel);
@@ -350,7 +353,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
         .addContainerGap()
         .addComponent(jLabel1)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE))
+        .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 401, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 

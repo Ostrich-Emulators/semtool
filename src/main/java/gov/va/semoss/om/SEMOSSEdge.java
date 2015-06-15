@@ -22,7 +22,6 @@ package gov.va.semoss.om;
 import java.awt.Color;
 import java.util.Objects;
 
-import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
 /**
@@ -31,9 +30,6 @@ import org.openrdf.model.URI;
  * @version $Revision: 1.0 $
  */
 public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOSSEdge> {
-
-	private static final Logger logger = Logger.getLogger( SEMOSSEdge.class );
-
 	private final SEMOSSVertex inVertex;
 	private final SEMOSSVertex outVertex;
 
@@ -52,21 +48,13 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		outVertex.addOutEdge( this );
 		setColor( Color.DARK_GRAY );
 	}
-	
+
 	public SEMOSSVertex getInVertex() {
 		return inVertex;
 	}
 
 	public SEMOSSVertex getOutVertex() {
 		return outVertex;
-	}
-
-	public URI getEdgeType() {
-		return super.getType();
-	}
-
-	public void setEdgeType( URI _edgeType ) {
-		super.setType( _edgeType );
 	}
 
 	public String getName() {

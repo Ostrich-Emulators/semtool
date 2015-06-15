@@ -1,38 +1,37 @@
 package gov.va.semoss.om;
 
-import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
-
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.repository.RepositoryException;
-
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.util.EdgeType;
-import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.UriBuilder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import org.jgrapht.graph.SimpleGraph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
+
+import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.EdgeType;
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.Utility;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data
@@ -51,8 +50,6 @@ public class GraphDataModel {
 	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	protected Map<URI, SEMOSSEdge> edgeStore = new HashMap<>();
 
-	private boolean filterOutOwlData = true;
-	private URI typeOrSubclass = RDF.TYPE;
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph = new DirectedSparseGraph<>();
 
 	public GraphDataModel() {
@@ -78,11 +75,16 @@ public class GraphDataModel {
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
 			graph.addVertex( v );
 		}
-		for ( SEMOSSEdge v : vizgraph.getEdges() ) {
-			graph.addEdge( vizgraph.getSource( v ), vizgraph.getDest( v ) );
+		for ( SEMOSSEdge e : vizgraph.getEdges() ) {
+			graph.addEdge( vizgraph.getSource( e ), vizgraph.getDest( e ), e );
 		}
 
 		return graph;
+	}
+
+	public DelegateForest<SEMOSSVertex, SEMOSSEdge> asForest() {
+		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest = new DelegateForest<>( vizgraph );
+		return forest;
 	}
 
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
@@ -125,7 +127,7 @@ public class GraphDataModel {
 
 				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred );
 				edge.setLevel( overlayLevel );
-				edge.setEdgeType( pred );
+				edge.setType( pred );
 				storeEdge( edge );
 
 				try {
@@ -222,14 +224,6 @@ public class GraphDataModel {
 		return baseFilterSet;
 	}
 
-	public void setFilterOutOwlData( boolean _filterOutOwlData ) {
-		filterOutOwlData = _filterOutOwlData;
-	}
-
-	public void setTypeOrSubclass( URI _typeOrSubclass ) {
-		typeOrSubclass = _typeOrSubclass;
-	}
-
 	private void fetchProperties( Collection<Resource> concepts, Collection<URI> preds,
 			IEngine engine, int overlayLevel ) throws RepositoryException, QueryEvaluationException {
 
@@ -239,9 +233,11 @@ public class GraphDataModel {
 				+ " ?s a ?type ."
 				+ " FILTER ( isLiteral( ?o ) ) }"
 				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
-		String edgeprops
-				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel"
-				+ "WHERE {"
+
+		// we can't be sure if our predicates are the base relation or the 
+		// specific relation, so query for both just in case
+		String edgeprops1
+				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 				+ "  ?rel ?prop ?literal ."
 				+ "  ?rel a ?semossrel ."
 				+ "  ?rel rdf:predicate ?superrel ."
@@ -249,6 +245,15 @@ public class GraphDataModel {
 				+ "  FILTER ( isLiteral( ?literal ) )"
 				+ "}"
 				+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
+		String edgeprops2
+				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
+				+ "  ?rel ?prop ?literal ."
+				+ "  ?rel a ?semossrel ."
+				+ "  ?rel rdf:predicate ?superrel ."
+				+ "  ?s ?rel ?o ."
+				+ "  FILTER ( isLiteral( ?literal ) )"
+				+ "}"
+				+ "VALUES ?rel { " + Utility.implode( preds, "<", ">", " " ) + " }";
 		try {
 			VoidQueryAdapter cqa = new VoidQueryAdapter( conceptprops ) {
 
@@ -271,7 +276,7 @@ public class GraphDataModel {
 			}
 
 			// do the same thing, but for edges
-			VoidQueryAdapter eqa = new VoidQueryAdapter( edgeprops ) {
+			VoidQueryAdapter eqa1 = new VoidQueryAdapter( edgeprops1 ) {
 
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
@@ -298,9 +303,38 @@ public class GraphDataModel {
 				}
 			};
 
+			VoidQueryAdapter eqa2 = new VoidQueryAdapter( edgeprops2 ) {
+
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					// ?s ?rel ?o ?prop ?literal
+					URI s = URI.class.cast( set.getValue( "s" ) );
+					URI rel = URI.class.cast( set.getValue( "rel" ) );
+					URI prop = URI.class.cast( set.getValue( "prop" ) );
+					URI o = URI.class.cast( set.getValue( "o" ) );
+					String propval = set.getValue( "literal" ).stringValue();
+					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
+
+					if ( concepts.contains( s ) && concepts.contains( o ) ) {
+						if ( !edgeStore.containsKey( rel ) ) {
+							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
+							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
+							SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
+							storeEdge( edge );
+						}
+
+						SEMOSSEdge edge = edgeStore.get( rel );
+						edge.setProperty( prop, propval );
+						edge.setType( superrel );
+					}
+				}
+			};
 			if ( null != preds ) {
-				eqa.useInferred( false );
-				engine.query( eqa );
+				eqa1.useInferred( false );
+				engine.query( eqa1 );
+
+				eqa2.useInferred( false );
+				engine.query( eqa2 );
 			}
 		}
 		catch ( MalformedQueryException ex ) {

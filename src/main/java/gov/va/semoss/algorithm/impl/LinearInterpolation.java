@@ -18,8 +18,12 @@
  ******************************************************************************/
 package gov.va.semoss.algorithm.impl;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.algorithm.api.IAlgorithm;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.IPlaySheet;
+import java.util.Collection;
 
 
 /**
@@ -44,7 +48,9 @@ public class LinearInterpolation implements IAlgorithm{
 	 * a and b are the time values
 	 * y_a and y_b are the years
 	 */
-	public void execute(){
+	@Override
+	public void execute( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			Collection<SEMOSSVertex> verts ){
 
 		retVal = -1.0E30;
 	   	a = min;
@@ -98,33 +104,4 @@ public class LinearInterpolation implements IAlgorithm{
 		yVal -= dataExposeCost / B;
 		return yVal;
 	}
-
-
-	/**
-	 * Sets playsheet as a graph playsheet.
-	 * @param ps IPlaySheet		Playsheet to be cast.
-	 */
-	public void setPlaySheet(IPlaySheet ps){
-		playSheet = ps;
-	}
-
-	/**
-	 * Gets variable names.
-	
-	 * //TODO: Return empty object instead of null
-	 * @return String[] 	List of variable names in a string array. */
-	@Override
-	public String[] getVariables() {
-		return null;
-	}
-
-	/**
-	 * Gets algorithm name - in this case, "Loop Identifier."
-	
-	 * @return String		Name of algorithm. */
-	@Override
-	public String getAlgoName() {
-		return "Linear Interpolation";
-	}
-
 }

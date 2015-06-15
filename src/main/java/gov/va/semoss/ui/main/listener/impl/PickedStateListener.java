@@ -15,10 +15,11 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import edu.uci.ics.jung.visualization.RenderContext;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashSet;
@@ -38,11 +39,13 @@ import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import java.util.Arrays;
 
 /**
  * Controls what happens when a picked state occurs.
  */
 public class PickedStateListener implements ItemListener {
+
 	private static final Logger logger = Logger.getLogger( PickedStateListener.class );
 	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
 	private final GraphPlaySheet gps;
@@ -59,40 +62,51 @@ public class PickedStateListener implements ItemListener {
 	 */
 	@Override
 	public void itemStateChanged( ItemEvent e ) {
-		logger.debug( "PickedStateListener.itemStateChanged(e) called for click event: " + e.getSource() );
-
 		JTable table = (JTable) DIHelper.getInstance().getLocalProp( Constants.PROP_TABLE );
 		table.setModel( new DefaultTableModel() );
 
+		RenderContext rc = viewer.getRenderContext();
+
 		//need to check if there are any size resets that need to be done
-		VertexShapeTransformer vst 
-				= (VertexShapeTransformer) viewer.getRenderContext().getVertexShapeTransformer();
-		vst.emptySelected();
+		VertexShapeTransformer vst = (VertexShapeTransformer) rc.getVertexShapeTransformer();
+					
+		// increase/decrease the size of nodes as they get selected/unselected
+		if ( e.getItem() instanceof SEMOSSVertex ) {
+			SEMOSSVertex v = SEMOSSVertex.class.cast( e.getItem() );
 
-		//Need vertex to highlight when click in skeleton mode... Here we need to get the already selected vertices
-		//so that we can add to them
-		Set<SEMOSSVertex> vertHash = new HashSet<>();
-		LabelFontTransformer<SEMOSSVertex> vlft = null;
-		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-			vlft = (LabelFontTransformer<SEMOSSVertex>) viewer.getRenderContext().getVertexFontTransformer();
-			vertHash.addAll( vlft.getSelected() );
+			logger.debug( ( ItemEvent.DESELECTED == e.getStateChange() ? "Deselecting"
+					: "Selecting" ) + " node: " + v );
+
+			double delta = ( ItemEvent.DESELECTED == e.getStateChange()
+					? -VertexShapeTransformer.STEPSIZE : VertexShapeTransformer.STEPSIZE );
+			vst.changeSize( delta, Arrays.asList( v ) );
 		}
-		
-		vertHash.addAll( viewer.getPickedVertexState().getPicked() );
 
-		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ){
-			logger.debug( "Selecting vertex with label >>> " + vertex.getLabel() );
-			vst.setSelected( vertex );
+		//Need vertex to highlight when click in skeleton mode... Here we need to 
+		// get the already selected vertices so that we can add to them
+		Set<SEMOSSVertex> selectedVertices = new HashSet<>();
+		LabelFontTransformer<SEMOSSVertex> vlft = null;
 
+		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+			vlft = (LabelFontTransformer<SEMOSSVertex>) rc.getVertexFontTransformer();
+			selectedVertices.addAll( vlft.getSelected() );
+		}
+
+		selectedVertices.addAll( viewer.getPickedVertexState().getPicked() );
+
+		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
 			VertexPropertyTableModel pm = new VertexPropertyTableModel( vertex );
 			table.setModel( pm );
 			pm.fireTableDataChanged();
 		}
-		
-		if ( null != vlft ){
-			vlft.setSelected( vertHash );
-			PaintTransformer<SEMOSSVertex> ptx = (PaintTransformer<SEMOSSVertex>) viewer.getRenderContext().getVertexFillPaintTransformer();
-			ptx.setSelected( vertHash );
+
+		if ( null != vlft ) {
+			vlft.setSelected( selectedVertices );
+			PaintTransformer<SEMOSSVertex> ptx
+					= (PaintTransformer<SEMOSSVertex>) viewer.getRenderContext().getVertexFillPaintTransformer();
+			ptx.setSelected( selectedVertices );
 		}
+
+		//viewer.repaint();
 	}
 }

@@ -104,9 +104,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		doreplace = replace;
 		timertoggle.setText( null );
 		timertoggle.setSelected( doconformance );
-
 		showerrs.setVisible( doconformance );
-
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, Collection<File> toload, boolean calc,
@@ -128,7 +126,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	public LoadingPlaySheetFrame( IEngine eng, ImportData data ) {
-		this( eng, false, data.getMetadata().isAutocreateMetamodel(), true, false );
+		this( eng, false, data.getMetadata().isAutocreateMetamodel(), false, false );
 
 		setTitle( "Import Data Review" );
 
@@ -396,26 +394,35 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
+			final ImportData importdata = ImportData.forEngine( engine );
+
+			final int progressPerTab = 100 / sheets.size();
+			for ( LoadingPlaySheetBase c : sheets ) {
+				String text = "Preparing tab: " + c.getTitle();
+				addProgress( text, progressPerTab );
+				log.debug( text );
+
+				LoadingSheetData lsd = c.getLoadingModel().toLoadingSheet( c.getTitle() );
+				if ( !lsd.isEmpty() ) {
+					importdata.add( lsd );
+				}
+			}
+
+			if ( importdata.isEmpty() ) {
+				JOptionPane.showMessageDialog( rootPane, "No data to load",
+						"Nothing to Do", JOptionPane.INFORMATION_MESSAGE );
+				return;
+			}
+
 			if ( askForLoad( engine ) ) {
 				final int ok[] = { 0 };
 				String t = "Committing data to " + engine;
-				int progressPerTab = 100 / sheets.size();
 
 				ProgressTask pt = new ProgressTask( t, new Runnable() {
 
 					@Override
 					public void run() {
 						updateProgress( "Preparing data", 0 );
-						ImportData importdata = ImportData.forEngine( engine );
-
-						for ( LoadingPlaySheetBase c : sheets ) {
-							String text = "Preparing tab: " + c.getTitle();
-							addProgress( text, progressPerTab );
-							log.debug( text );
-
-							LoadingSheetData lsd = c.getLoadingModel().toLoadingSheet( c.getTitle() );
-							importdata.add( lsd );
-						}
 
 						try {
 							String ename = MetadataQuery.getEngineLabel( engine );
@@ -635,7 +642,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 		@Override
 		public void saveTo( File file ) throws IOException {
-		// if we only have sheets with errors, or sheets with no errors, there's
+			// if we only have sheets with errors, or sheets with no errors, there's
 			// no need to ask the user what they want to export. if we have some of
 			// both, we need to ask
 			boolean hasgoods = false;

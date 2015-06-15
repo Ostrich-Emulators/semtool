@@ -1,5 +1,6 @@
 package gov.va.semoss.rdf.engine.api;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import gov.va.semoss.om.Insight;
@@ -23,15 +24,20 @@ public interface WriteableInsightTab {
 	  
 	  /**   Deletes the current Insight from from the database, and removes its
 	   * reference from all Perspectives.
-	   * 
-	   * Note: This method does not reorder Insights per Perspective after the
-	   *       removal.
+       * 
+       * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+       *     Perspective.
 	   * 
 	   * @param insight -- (Insight) Insight to remove from the Perspective.
+	   * 
+	   * @param perspective -- (Perspective) Current Perspective
 	   */
-	  public boolean deleteInsight(Insight insight);
+	  public boolean deleteInsight(ArrayList<Insight> arylInsights, Insight insight, Perspective perspective);
 	  
 	  /**   Saves the current Insight to the database.
+       * 
+       * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+       *     Perspective.
 	   * 
 	   * @param insight -- (Insight) Insight to be saved
 	   * 
@@ -43,7 +49,7 @@ public interface WriteableInsightTab {
 	   * 
 	   * @return saveInsight -- (boolean) Whether the Insight was saved ok.
 	   */
-	  public boolean saveInsight(Insight insight, 
+	  public boolean saveInsight(ArrayList<Insight> arylInsights, Insight insight,
 		  Collection<Perspective> colPerspectivesToAddInsight, Collection<Perspective> colPerspectivesToRemoveInsight);
 
 	  /**   Adds an existing Insight to the passed-in Perspective and to the triple-store on disk.

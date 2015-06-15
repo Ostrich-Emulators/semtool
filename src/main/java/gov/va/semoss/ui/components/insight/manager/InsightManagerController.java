@@ -32,6 +32,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
@@ -499,6 +503,7 @@ public class  InsightManagerController implements Initializable{
 	    //to the left of Insight labels:
 	    lstvInsights.setCellFactory(listView -> new ListCell<Insight>() {
 	        private ImageView imageView = new ImageView();
+	        
 	        @Override
 	        public void updateItem(Insight item, boolean empty) {
 	            super.updateItem(item, empty);
@@ -516,7 +521,111 @@ public class  InsightManagerController implements Initializable{
 	            	}
 	            }
 	        }
-	    });	     
+	        
+	        /**   Class-initializer to define drag-and-drop operations.
+	         */
+	        {
+	            ListCell thisCell = this;
+
+	            setOnDragDetected(event ->{
+	                if(getItem() == null){
+	                    return;
+	                }
+	                Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+	                ClipboardContent content = new ClipboardContent();
+	                content.putString(getText());
+	                dragboard.setDragView(
+	                	new Image(getInsightIcon(getItem().getOrderedLabel(perspective.getUri())))
+	                );
+	                dragboard.setContent(content);
+	                event.consume();
+	            });
+
+	            setOnDragOver(event -> {
+	                if(event.getGestureSource() != thisCell && event.getDragboard().hasString()){
+	                    event.acceptTransferModes(TransferMode.MOVE);
+	                }
+	                event.consume();
+	            });
+
+	            setOnDragEntered(event -> {
+	                if(event.getGestureSource() != thisCell && event.getDragboard().hasString()){
+	                    setOpacity(0.3);
+	                }
+	            });
+
+	            setOnDragExited(event -> {
+	                if(event.getGestureSource() != thisCell && event.getDragboard().hasString()){
+	                    setOpacity(1);
+	                }
+	            });
+
+	            setOnDragDropped(event -> {
+	                if(getItem() == null){
+	                    return;
+	                }
+	                Dragboard dragboard = event.getDragboard();
+	                boolean success = false;
+
+	                if (dragboard.hasString()) {
+	                    int thisIdx = arylInsights.indexOf(getItem());
+	                    int draggedIdx = 0;
+	                    for(Insight item: arylInsights){
+	                    	if(item.getOrderedLabel(perspective.getUri()).equals(dragboard.getString())){
+	                    		break;
+	                    	}
+	                    	draggedIdx++;
+	                    }
+                        moveInsight(draggedIdx, thisIdx, perspective.getUri().toString(), 
+                           arylInsights.get(draggedIdx));
+
+	                    success = true;
+	                }
+	                event.setDropCompleted(success);
+	                event.consume();
+	            });
+
+	            setOnDragDone(DragEvent::consume);
+
+	        }//End Class-initializer.
+
+	        /**   Moves a dragged Insight to a new position in the list-view, and either pushes 
+	         * other Insights back or forward, depending upon the drag direction
+	         * 
+	         * @param startIdx -- (int) Origin index of dragged Insight in the list-view's
+	         *     ObservableList.
+	         *     
+	         * @param endIdx -- (int) Destination index of dragged Insight in the list-view's
+	         *     ObservableList.
+	         *     
+	         * @param strPerspectiveUri -- (String) URI string of the Perspective that contains
+	         *     the visible Insights.
+	         *     
+	         * @param insight -- (Insight) The Insight to be moved.
+	         */
+	        private void moveInsight(int startIdx, int endIdx, String strPerspectiveUri, Insight insight){
+	        	if(startIdx < endIdx){
+	        	   for(int i = startIdx; i < endIdx; i++){
+	        		   arylInsights.set(i, arylInsights.get(i + 1));
+	        	   }
+	        	   arylInsights.set(endIdx, insight);
+	        	}
+	        	if(startIdx > endIdx){
+	        	   for(int i = startIdx; i > endIdx; i--){
+	        		   arylInsights.set(i, arylInsights.get(i - 1));
+	        	   }
+		           arylInsights.set(endIdx, insight);
+	        	}
+	        	//Reorder Insights and redisplay:
+	        	for(int i = 0; i < arylInsights.size(); i++){
+	        		arylInsights.get(i).setOrder(strPerspectiveUri, i + 1);
+	        	}
+	        	lstvInsights.setItems(null);
+	        	lstvInsights.setItems(arylInsights);
+	        }
+	        
+	    });//End setCellFactory.
+	    
 	    //Navigate to the previously selected Insight (or the first Insight under
 	    //the Perspective, if the previously selected Insight has been moved):
     	lstvInsights.getSelectionModel().selectFirst();

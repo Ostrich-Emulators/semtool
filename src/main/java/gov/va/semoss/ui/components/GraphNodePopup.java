@@ -24,7 +24,7 @@ import gov.va.semoss.algorithm.impl.IslandIdentifierProcessor;
 import gov.va.semoss.algorithm.impl.LoopIdentifierProcessor;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.playsheets.BrowserTabSheet3;
+import gov.va.semoss.ui.components.playsheets.ChartItPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.main.listener.impl.AdjacentPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeRankListener;
@@ -95,12 +95,9 @@ public class GraphNodePopup extends JPopupMenu {
 		item.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				BrowserTabSheet3 tab
-						= new BrowserTabSheet3( "/html/RDFSemossCharts/app/index.html", gps );
-				gps.getPlaySheetFrame().addTab( "Custom Chart", tab );
-				tab.pullData();
+				gps.addSibling( "Custom Chart", new ChartItPlaySheet( gps ) );
 			}
-		} );
+		});
 	}
 
 	private void addHidingOptions() {
@@ -166,15 +163,8 @@ public class GraphNodePopup extends JPopupMenu {
 	private void addDataOptions() {
 		addSeparator();
 
-		JMenuItem item = add( "Convert to Table" );
-		item.setToolTipText( "Convert graph display to a table display" );
-		item.addActionListener( new GraphPlaySheetExportListener( gps ) );
-
-		item = add( "Show Selected Node Information" );
-		item.setToolTipText( "To select nodes press Shift and click on nodes" );
-
-		item.addActionListener( new NodeInfoPopup( gps, highlightedVertices,
-				gps.getPlaySheetFrame().getDesktopPane() ) );
+		add( new GraphPlaySheetExportListener( gps ) );
+		add( new NodeInfoPopup( gps, Arrays.asList( highlightedVertices ) ) );
 	}
 
 	private void addGraphOptions() {
@@ -225,10 +215,12 @@ public class GraphNodePopup extends JPopupMenu {
 	 * @return boolean True if the type of node represents an ICD.
 	 */
 	public final boolean containsICDType() {
-		for ( SEMOSSVertex vertex : gps.getFilterData().getGraph().getVertices() )
-			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) )
+		for ( SEMOSSVertex vertex : gps.getFilterData().getGraph().getVertices() ) {
+			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) ) {
 				return true;
-		
+			}
+		}
+
 		return false;
 	}
 

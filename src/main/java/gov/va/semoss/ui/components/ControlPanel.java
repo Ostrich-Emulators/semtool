@@ -45,6 +45,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
@@ -125,10 +127,9 @@ public class ControlPanel extends JPanel {
 				"control Y", KeyStroke.getKeyStroke( KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK ) );
 		redoButton.setEnabled( false );
 
-		treeButton = new JToggleButton( Utility.loadImageIcon( "tree.png" ) );
-		treeButton.setToolTipText( "<html><b>Convert to Tree</b><br>Convert current graph to tree by duplicating nodes with multiple in-edges</html>" );
-		treeButton.addActionListener( treeListener );
-
+		treeButton = new JToggleButton( treeListener );
+		treeButton.setText( "" );
+		
 		ringsButton = new JToggleButton( Utility.loadImageIcon( "ring.png" ) );
 		ringsButton.setToolTipText( "<html><b>Show Radial Rings</b><br>Only available with Balloon and Radial Tree layouts</html>" );
 		ringsButton.addActionListener( ringsListener );
@@ -136,6 +137,7 @@ public class ControlPanel extends JPanel {
 		weightButton = new WeightDropDownButton( Utility.loadImageIcon( "width.png" ) );
 		weightButton.setToolTipText( "<html><b>Edge Weight</b><br>Convert edge thickness corresponding to properties that exist on the edges</html>" );
 		weightButton.addActionListener( new ActionListener() {
+			@Override
 			public void actionPerformed( ActionEvent e ) {
 				( (WeightDropDownButton) e.getSource() ).showPopup();
 			}
@@ -212,16 +214,6 @@ public class ControlPanel extends JPanel {
 	}
 
 	/**
-	 * Sets the viewer.
-	 *
-	 * @param view VisualizationViewer
-	 */
-	public void setViewer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		vertSizeListener.setViewer( viewer );
-		ringsListener.setViewer( viewer );
-	}
-
-	/**
 	 * Sets the graph layout.
 	 *
 	 * @param lay Layout
@@ -252,6 +244,10 @@ public class ControlPanel extends JPanel {
 		undoListener.setPlaySheet( gps );
 		searchController.setGPS( gps );
 		weightButton.setPlaySheet( gps );
+
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
+		vertSizeListener.setViewer( viewer );
+		ringsListener.setViewer( viewer );		
 	}
 
 	public void setUndoButtonEnabled( boolean enabled ) {

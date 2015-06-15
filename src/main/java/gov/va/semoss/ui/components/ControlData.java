@@ -53,8 +53,10 @@ public class ControlData {
 		propertyHide.add( Constants.VERTEX_COLOR );
 		propertyHide.add( AbstractNodeEdgeBase.LEVEL );
 
-		Set<URI> propertyShow = new HashSet<>();
-		propertyShow.add( Constants.VERTEX_NAME );
+		Set<URI> vertexPropertyShow = new HashSet<>();
+		vertexPropertyShow.add( Constants.VERTEX_NAME );
+
+		Set<URI> edgePropertyShow = new HashSet<>();
 
 		Set<URI> propertyShowTT = new HashSet<>();
 		propertyShowTT.add( Constants.EDGE_NAME );
@@ -63,8 +65,8 @@ public class ControlData {
 		propertyShowTT.add( Constants.VERTEX_NAME );
 		propertyShowTT.add( Constants.VERTEX_TYPE );
 
-		vertexCDT = new ControlDataTable( propertyShow, propertyShowTT, propertyHide, new String[]{ "Node Type", "Property", "Label", "Tooltip" } );
-		edgeCDT = new ControlDataTable( propertyShow, propertyShowTT, propertyHide, new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
+		vertexCDT = new ControlDataTable( vertexPropertyShow, propertyShowTT, propertyHide, new String[]{ "Node Type", "Property", "Label", "Tooltip" } );
+		edgeCDT = new ControlDataTable( edgePropertyShow, propertyShowTT, propertyHide, new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
 	}
 
 	public void setEngine( IEngine e ) {

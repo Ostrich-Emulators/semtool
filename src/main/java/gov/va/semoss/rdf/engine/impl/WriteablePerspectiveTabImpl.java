@@ -177,7 +177,58 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 		  return boolReturnValue;
 	  }
 	  
+	  /**   Reorders Insights under the passed-in Perspective, using the new orders within
+	   * the passed-in Insight array-list.
+       *
+       * @param perspectiveURI -- (URI) The URI of the Perspective containing the passed-in
+       *    Insights.
+       *
+       * @param arylInsights -- (ArrayList<Insight>) An array list of Insights that needs
+       *    all Insight Orders persisted
+	   * 
+	   * @return setInsightOrders -- (boolean) Whether the Insight reordering succeeded.
+	   */
+	  public boolean reorderInsights(URI perspectiveURI, ArrayList<Insight> arylInsights){
+		  boolean boolReturnValue = false;
+	      ValueFactory insightVF = rc.getValueFactory();
+
+	      //If no Insights have been passed in, return true:
+	      if(arylInsights == null){
+	    	 return true;
+	      }
+	      
+		  try{
+	          rc.begin();          
+	    	  for(Insight insight: arylInsights){
+	    		  Literal order = insightVF.createLiteral(insight.getOrder(perspectiveURI));
+	    		  String query = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
+	    			  + "DELETE{ ?slot olo:index ?o .} "
+	    		      + "INSERT{ ?slot olo:index " + order + " .} "
+	    			  + "WHERE{ <" + perspectiveURI + "> olo:slot ?slot . "
+	    			  + "?slot olo:index ?o . "
+	    			  + "?slot olo:item <" + insight.getId() + "> . } ";
+	    	      Update uq = rc.prepareUpdate(QueryLanguage.SPARQL, query);
+	              uq.execute();
+	    	  }
+	    	  rc.commit();
+	          boolReturnValue = true;
+	          
+		  }catch(Exception e){
+			  e.printStackTrace();
+		      try{
+		          rc.rollback();
+		      }catch ( Exception ee ) {
+		          log.warn( ee, ee );
+		      }
+		  }	  
+		  return boolReturnValue;
+	  }
+	  
+	  
 	  /**   Removes an Insight from a Perspective in the triple-store on disk.
+       * 
+       * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+       *     Perspective.
 	   * 
        * @param insight -- (Insight) Insight to remove from the Perspective.
        * 
@@ -186,8 +237,16 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
        * @param doImport -- (boolean) Whether to import memory database to disk.
        */
 	  @Override
-	  public boolean removeInsight(Insight insight, Perspective perspective, boolean doImport){
+	  public boolean removeInsight(ArrayList<Insight> arylInsights, Insight insight, 
+		 Perspective perspective, boolean doImport){
 		  boolean boolReturnValue = false;
+
+		  //Adjust orders of all Insights under the current Perspective
+	      //as if this Insight has been removed:
+		  arylInsights.remove(insight);
+		  for(int i = 0; i < arylInsights.size(); i++){
+			 arylInsights.get(i).setOrder(perspective.getUri().toString(), i + 1);
+		  }
 		  
 		  String query_1 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
 		      + "DELETE{ ?perspective olo:slot ?slot . "
@@ -204,14 +263,18 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	         uq_1.execute();
 	         
 	         rc.commit();
-	                  
+	         
+	         //Reorder Insights under the current Perspective:
+	         boolReturnValue = reorderInsights(perspective.getUri(), arylInsights);
+
 	         if(doImport == true){
-	            //Import Insights into the repository:
-	            boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	            //Import Insights into the repository if deletion succeeded
+	        	//and Insights have been reordered:
+	        	if(boolReturnValue == true){
+	               boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	        	}
 	            //Give the left-pane drop-downs enough time to refresh from the import:
 		        Thread.sleep(2000);
-	         }else{
-	        	boolReturnValue = true;
 	         }
 		  }catch(Exception e){
 		     log.error( e, e );
@@ -381,6 +444,9 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	  
 	  /**   Saves a Perspective's Title and Description into the triple-store on disk,
 	   * where the passed-in URI is the subject.
+       * 
+       * @param arylInsights - (ArrayList<Insight>) All Insights under the current
+       *     Perspective.
 	   * 
 	   * @param uri -- (String) URI of Perspective.
 	   * 
@@ -391,8 +457,10 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	   * @return savePerspective -- (boolean) Whether the save to disk succeeded.
 	   */
 	  @Override
-	  public boolean savePerspective(String uri, String strTitle, String strDescription){
+	  public boolean savePerspective(ArrayList<Insight> arylInsights, String uri, 
+		 String strTitle, String strDescription){
 		  boolean boolReturnValue = false;
+	      ValueFactory insightVF = rc.getValueFactory();
 
 		  //Make sure that embedded new-line characters can be persisted:
 		  strDescription = strDescription.replace("\n", "\\n");
@@ -410,9 +478,16 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab{
 	         Update uq = rc.prepareUpdate(QueryLanguage.SPARQL, query);
 	         uq.execute();
 	         rc.commit();
-	         //Import Insights into the repository:
-	         boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
-             //Give the left-pane drop-downs enough time to refresh from the import:
+	         
+	         //Reorder Insights under the current Perspective:
+	         boolReturnValue = reorderInsights(insightVF.createURI(uri), arylInsights);
+	         
+	         //Import Insights into the repository if save succeeded
+	         //and Insights have been reordered:
+	         if(boolReturnValue == true){
+	            boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	         }
+	         //Give the left-pane drop-downs enough time to refresh from the import:
 	         Thread.sleep(2000);
 		        
 		  }catch(Exception e){

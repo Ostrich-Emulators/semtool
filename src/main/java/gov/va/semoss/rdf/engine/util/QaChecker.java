@@ -65,6 +65,18 @@ public class QaChecker {
 		loadCaches( eng );
 	}
 
+	public Set<URI> getKnownUris() {
+		Set<URI> set = new HashSet<>( instanceClassCache.size()
+				+ relationBaseClassCache.size() + relationCache.size()
+				+ propertyClassCache.size() + dataNodes.size() );
+		for ( Map<?, URI> map : Arrays.asList( instanceClassCache, relationBaseClassCache,
+				relationCache, propertyClassCache, dataNodes ) ) {
+			set.addAll( map.values() );
+		}
+
+		return set;
+	}
+
 	/**
 	 * Separates any non-conforming data from the loading data. This removes the
 	 * offending data from <code>data</code> and puts them in <code>errors</code>

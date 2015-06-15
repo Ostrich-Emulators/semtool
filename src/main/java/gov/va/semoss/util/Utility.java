@@ -1005,9 +1005,7 @@ public class Utility {
 	}
 
 	public static void repaintActiveGraphPlaysheet() {
-		GraphPlaySheet playSheet = getActiveGraphPlaysheet();
-		playSheet.getLegendPanel().drawLegend();
-		playSheet.repaint();
+		getActiveGraphPlaysheet().paintLegendPanel();
 	}
 
 	public static void extractHTML() throws IOException {

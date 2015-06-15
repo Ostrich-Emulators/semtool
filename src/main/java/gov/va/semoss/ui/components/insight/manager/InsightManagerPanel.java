@@ -1,8 +1,14 @@
 package gov.va.semoss.ui.components.insight.manager;
 
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
 import gov.va.semoss.ui.components.RepositoryList;
 import gov.va.semoss.util.DIHelper;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,7 +18,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class InsightManagerPanel extends JPanel {
+public class InsightManagerPanel extends JPanel{
 	private static final long serialVersionUID = 6184892035434769170L; 
     private final JFXPanel jfxPanel = new JFXPanel();
  
@@ -23,6 +29,16 @@ public class InsightManagerPanel extends JPanel {
     protected void initComponents() {
         createScene();
         add(jfxPanel);
+        //When this component is manually resized, set the PreferredSize
+        //of the "jfxPanel" accordingly:
+		addComponentListener(new ComponentAdapter() {
+	        public void componentResized(ComponentEvent e) {
+	        	//Handles resizes by Maximize or Restore:
+				revalidate();
+				
+	        	jfxPanel.setPreferredSize(new Dimension(getWidth(), getHeight()));
+	        }
+	    });
     }
  
     /**   Creates the Scene-graph on the JavaFX thread.
@@ -48,7 +64,21 @@ public class InsightManagerPanel extends JPanel {
                		  jfxPanel.setScene(scene);
         		      imController.setData();
         			  jfxPanel.setVisible(true);
-        		   //If no engine is loaded, then release all Insight Manager load variables,
+ 
+        			  //When the width or height of the scene has changed, access the TabbedPane
+        			  //via the Controller, and set its width or height accordingly:
+        			  scene.widthProperty().addListener(new ChangeListener<Number>() {
+    				     @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+     				        imController.tbpTabbedPane.setPrefWidth((double) newSceneWidth);
+    				     }
+        			  });
+        			  scene.heightProperty().addListener(new ChangeListener<Number>() {
+    				     @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+     				        imController.tbpTabbedPane.setPrefHeight((double) newSceneHeight);
+    				     }
+        			  });
+ 
+       		       //If no engine is loaded, then release all Insight Manager load variables,
         		   //and show nothing:
         		   }else{
         			  jfxPanel.setVisible(false);
