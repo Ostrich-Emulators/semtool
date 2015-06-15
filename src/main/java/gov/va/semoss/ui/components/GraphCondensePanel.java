@@ -12,6 +12,7 @@ import gov.va.semoss.util.Utility;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
 import org.openrdf.model.URI;
 
@@ -23,9 +24,11 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 
 	public static enum RemovalStrategy {
 
-		KEEP, IGNORE
+		KEEP, IGNORE, FROM, TO
 	};
-	private final DefaultComboBoxModel<URI> nodetypemodel
+	private final DefaultComboBoxModel<URI> removermodel
+			= new DefaultComboBoxModel<>();
+	private final DefaultComboBoxModel<URI> endpointmodel
 			= new DefaultComboBoxModel<>();
 
 	/**
@@ -46,20 +49,37 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 		labels = Utility.sortUrisByLabel( labels );
 
 		for ( URI t : labels.keySet() ) {
-			nodetypemodel.addElement( t );
+			removermodel.addElement( t );
+			endpointmodel.addElement( t );
 		}
 
 		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
 		renderer.cache( labels );
-		nodetype.setRenderer( renderer );
+		intermediateType.setRenderer( renderer );
+		endpointType.setRenderer( renderer );
+
+		keeper.setActionCommand( RemovalStrategy.KEEP.toString() );
+		inprop.setActionCommand( RemovalStrategy.FROM.toString() );
+		outprop.setActionCommand( RemovalStrategy.TO.toString() );
+		ignoreprop.setActionCommand( RemovalStrategy.IGNORE.toString() );
 	}
 
 	public URI getEdgeTypeToRemove() {
-		return nodetype.getItemAt( nodetype.getSelectedIndex() );
+		return intermediateType.getItemAt( intermediateType.getSelectedIndex() );
+	}
+
+	public URI getEdgeEndpointType() {
+		return endpointType.getItemAt( endpointType.getSelectedIndex() );
 	}
 
 	public RemovalStrategy getRemovalStrategy() {
-		return ( keeper.isSelected() ? RemovalStrategy.KEEP : RemovalStrategy.IGNORE );
+		ButtonModel bm = buttonGroup1.getSelection();
+		String action = bm.getActionCommand();
+		return RemovalStrategy.valueOf( action );
+	}
+
+	public boolean getGenProps() {
+		return genprops.isSelected();
 	}
 
 	/**
@@ -73,14 +93,20 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 
     buttonGroup1 = new javax.swing.ButtonGroup();
     jLabel1 = new javax.swing.JLabel();
-    nodetype = new javax.swing.JComboBox<URI>();
+    intermediateType = new javax.swing.JComboBox<URI>();
     jPanel1 = new javax.swing.JPanel();
     keeper = new javax.swing.JRadioButton();
     ignoreprop = new javax.swing.JRadioButton();
+    inprop = new javax.swing.JRadioButton();
+    outprop = new javax.swing.JRadioButton();
+    jLabel2 = new javax.swing.JLabel();
+    endpointType = new javax.swing.JComboBox<URI>();
+    genprops = new javax.swing.JCheckBox();
 
-    jLabel1.setText("Remove Node Type");
+    jLabel1.setText("Condense Nodes of Type");
+    jLabel1.setToolTipText("Intermediate nodes of this type will be removed");
 
-    nodetype.setModel(nodetypemodel);
+    intermediateType.setModel(removermodel);
 
     jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "On Edge Property Clash"));
 
@@ -91,50 +117,94 @@ public class GraphCondensePanel extends javax.swing.JPanel {
     buttonGroup1.add(ignoreprop);
     ignoreprop.setText("Ignore the Property");
 
+    buttonGroup1.add(inprop);
+    inprop.setText("Use In-Edge Value");
+
+    buttonGroup1.add(outprop);
+    outprop.setText("Use Out-Edge Value");
+
     javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
     jPanel1.setLayout(jPanel1Layout);
     jPanel1Layout.setHorizontalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(ignoreprop)
-      .addComponent(keeper)
+      .addGroup(jPanel1Layout.createSequentialGroup()
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(outprop)
+          .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(ignoreprop, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(inprop))
+          .addComponent(keeper))
+        .addGap(103, 103, 103))
     );
     jPanel1Layout.setVerticalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel1Layout.createSequentialGroup()
-        .addComponent(keeper)
+        .addComponent(ignoreprop)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(ignoreprop))
+        .addComponent(inprop)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(outprop)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(keeper)
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
+
+    jLabel2.setText("...That are Between Nodes of Type");
+
+    endpointType.setModel(endpointmodel);
+
+    genprops.setSelected(true);
+    genprops.setText("Generated edge should include intermediate node's properties");
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addComponent(jLabel1)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-        .addComponent(nodetype, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))
-      .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addComponent(genprops)
+        .addContainerGap(24, Short.MAX_VALUE))
+      .addGroup(layout.createSequentialGroup()
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel2)
+          .addComponent(jLabel1))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(intermediateType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(endpointType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+      .addGroup(layout.createSequentialGroup()
+        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(0, 0, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(jLabel1)
-          .addComponent(nodetype, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+          .addComponent(intermediateType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel2)
+          .addComponent(endpointType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(0, 127, Short.MAX_VALUE))
+        .addGap(18, 18, 18)
+        .addComponent(genprops)
+        .addGap(55, 55, 55))
     );
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroup1;
+  private javax.swing.JComboBox<URI> endpointType;
+  private javax.swing.JCheckBox genprops;
   private javax.swing.JRadioButton ignoreprop;
+  private javax.swing.JRadioButton inprop;
+  private javax.swing.JComboBox<URI> intermediateType;
   private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JRadioButton keeper;
-  private javax.swing.JComboBox<URI> nodetype;
+  private javax.swing.JRadioButton outprop;
   // End of variables declaration//GEN-END:variables
 }

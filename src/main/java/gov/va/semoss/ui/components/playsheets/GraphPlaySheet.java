@@ -172,7 +172,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setTopComponent( controlPanel );
 		graphSplitPane.setBottomComponent( gzPane );
 
-		filterData = new VertexFilterData( gdm.getGraph() );
+		filterData = new VertexFilterData();
 		paintLegendPanel();
 	}
 
@@ -217,7 +217,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 */
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getVisibleGraph() {
 		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter;
-		filter = new VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge>( predicate );
+		filter = new VertexPredicateFilter<>( predicate );
 		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) filter.transform( gdm.getGraph() );
 	}
 
@@ -294,7 +294,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			}
 
 			processControlData( gdm.getGraph() );
-			genAllData();
+			filterData.generateAllRows( gdm.getGraph() );
+			colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
 			paintLegendPanel();
 
 			setUndoRedoBtn();
@@ -521,13 +522,10 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 //		return listOfChilds;
 	}
 
-	private void genAllData() {
-		filterData.generateAllRows();
-		controlData.generateAllRows();
-		colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
-	}
-
 	private void processControlData( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		controlData.clear();
+		filterData.generateAllRows( graph );
+		
 		for ( SEMOSSVertex vertex : graph.getVertices() ) {
 			for ( URI property : vertex.getProperties().keySet() ) {
 				controlData.addVertexProperty( vertex.getType(), property );

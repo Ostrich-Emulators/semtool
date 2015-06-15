@@ -210,7 +210,7 @@ public class GraphNodePopup extends JPopupMenu {
 	 * @return boolean True if the type of node represents an ICD.
 	 */
 	public final boolean containsICDType() {
-		for ( SEMOSSVertex vertex : gps.getFilterData().getGraph().getVertices() ) {
+		for ( SEMOSSVertex vertex : gps.getGraphData().getGraph().getVertices() ) {
 			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) ) {
 				return true;
 			}
