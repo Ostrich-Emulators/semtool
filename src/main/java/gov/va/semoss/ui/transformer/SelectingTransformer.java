@@ -41,6 +41,10 @@ public abstract class SelectingTransformer<T, V> implements Transformer<T, V> {
 		skeleton = b;
 	}
 
+	public boolean isSkeletonMode() {
+		return skeleton;
+	}
+
 	public void setSelected( Collection<T> s ) {
 		clearSelected();
 		select( s );
