@@ -39,7 +39,7 @@ public class EdgeFilterTableModel extends AbstractTableModel {
 	private static final Class<?>[] classNames = { Boolean.class, Object.class, Object.class };
 
 	private VertexFilterData data;
-	private ControlData controlData;
+	private final ControlData controlData;
 
 	/**
 	 * Constructor for EdgeFilterTableModel.
