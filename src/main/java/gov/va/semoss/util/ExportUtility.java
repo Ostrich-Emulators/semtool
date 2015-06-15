@@ -19,27 +19,14 @@
  */
 package gov.va.semoss.util;
 
-import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.visualization.VisualizationImageServer;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.renderers.Renderer;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
@@ -47,7 +34,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.sourceforge.jlibeps.epsgraphics.EpsGraphics2D;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -60,18 +46,22 @@ import com.itextpdf.text.pdf.PdfWriter;
 public class ExportUtility {
 	private static final Logger log = Logger.getLogger( ExportUtility.class );
 	public static enum ExportType {
-		EPS, PNG, PDF
+		PNG, PDF, CSV
 	};
 
 	public static void doGraphExportPDFWithDialogue(Component component) {
-		doGraphExportWithDialogue(component, ExportType.PDF, ".pdf");
+		doGraphExportWithDialogue(component, ExportType.PDF, ".pdf", null);
 	}
 	
 	public static void doGraphExportPNGWithDialogue(Component component) {
-		doGraphExportWithDialogue(component, ExportType.PNG, ".png");
+		doGraphExportWithDialogue(component, ExportType.PNG, ".png", null);
 	}
 	
-	private static void doGraphExportWithDialogue(Component component, ExportType exportType, String suffix) {
+	public static void doExportCSVWithDialogue(Component component, String data) {
+		doGraphExportWithDialogue(component, ExportType.CSV, ".csv", data);
+	}
+	
+	private static void doGraphExportWithDialogue(Component component, ExportType exportType, String suffix, String data) {
 		File file = getExportFileLocation(component, suffix);
 		if (file == null) {
 			return;
@@ -79,9 +69,11 @@ public class ExportUtility {
 
 		try {
 			if (exportType == ExportType.PNG)
-				writePNG(component, file.getAbsolutePath());
+				writePNG(component, file);
 			else if (exportType == ExportType.PDF)
 				writePDF(component, file.getAbsolutePath());			
+			else if (exportType == ExportType.CSV)
+				writeCSV(component, file, data);			
 			
 			Utility.showExportMessage( JOptionPane.getFrameForComponent( component ), 
 					"Export successful: " + file.getAbsolutePath(), "Export Successful", file );
@@ -141,10 +133,20 @@ public class ExportUtility {
 		}
 	}
 
-	private static void writePNG(Component component, String fileLocation) throws IOException{
+	private static void writeCSV(Component component, File file, String data) throws IOException{
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(file);
+            os.write(data.getBytes());
+        } finally {
+            try { if (os != null) os.close(); } catch (IOException e) {}
+        }
+	}
+	
+	private static void writePNG(Component component, File file) throws IOException{
 		BufferedImage bufferedImage = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		component.paint(bufferedImage.getGraphics());
-		ImageIO.write(bufferedImage, Constants.PNG, new File(fileLocation));
+		ImageIO.write(bufferedImage, Constants.PNG, file);
 	}
 
 	private static void writePDF(Component component, String fileLocation) throws IOException, DocumentException {

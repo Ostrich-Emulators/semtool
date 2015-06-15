@@ -249,9 +249,12 @@ $(document).ready(function(){
   });
   
   $('#exportBtn').click(function() {
+    alert("export button is clicked.");
+    
     var keys = _.keys(currentData[0]);
     var csv = _(keys).map(function(d) { return '"' + addslashes(d) + '"'; }).join(",");
     
+    alert("created some variables.");
     _(currentData).each(function(row) {
       csv += "\n";
       csv += _(keys).map(function(k) {
@@ -267,10 +270,15 @@ $(document).ready(function(){
         }
       }).join(",");
     });
+
+//this works in most web browsers but isn't supported in javaFX
+//    var uriContent = "data:application/octet-stream," + encodeURIComponent(csv);
+//    var myWindow = window.open(uriContent, "Parallel Coordinates");
+//    myWindow.focus();
+
+// I've set up a handler in BrowserPlaySheet2 to listen for this event and start the download
+    alert("download:csv" + csv);
     
-    var uriContent = "data:application/octet-stream," + encodeURIComponent(csv);
-    var myWindow = window.open(uriContent, "Parallel Coordinates");
-    myWindow.focus();
     return false;
   });
 
