@@ -22,6 +22,7 @@ package gov.va.semoss.ui.components.playsheets;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.ExportUtility;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 	
 	protected final JFXPanel jfxPanel = new JFXPanel();
 	protected WebEngine engine;
+	protected Scene scene;
 
 	public BrowserPlaySheet2( String htmlPath ) {
 		setLayout( new BorderLayout() );
@@ -73,7 +75,8 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 			@Override
 			public void run() {
 				WebView view = new WebView();
-				jfxPanel.setScene(new Scene(view));
+				scene = new Scene(view);
+				jfxPanel.setScene(scene);
 				
 				engine = view.getEngine();
 				engine.setOnAlert(
@@ -83,8 +86,12 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 							if ("document:loaded".equals(event.getData())) {
 								log.debug("Document is loaded.");
 				                callIt();
+							} else if (event.getData().startsWith("download:csv")){
+								log.debug("Downloading CSV file from browser.");
+								downloadCSV(event.getData().substring(12));
 							}
 						}
+
 					}
 				);
 			}
@@ -169,6 +176,10 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 		});
 	}
 	
+    public void log(String text) {
+        log.debug(text);
+	}
+
 	/**
 	 * Method createCustomView.
 	 *
@@ -203,4 +214,8 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 
 	@Override
 	public void run() {}
+	
+	private void downloadCSV(String data) {
+		ExportUtility.doExportCSVWithDialogue(this, data);
+	}
 }
