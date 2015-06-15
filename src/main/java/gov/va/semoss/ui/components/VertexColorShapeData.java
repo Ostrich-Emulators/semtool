@@ -37,11 +37,12 @@ import org.openrdf.model.URI;
  * This class is used primarily for vertex filtering.
  */
 public class VertexColorShapeData extends AbstractTableModel {
+
 	private static final long serialVersionUID = -8530913683566271008L;
-	
+
 	private static final String[] columnNames = { "Node", "Instance", "Shape", "Color" };
 	private Map<URI, List<SEMOSSVertex>> nodeMap = new HashMap<>();
-	private List<ColorShapeRow> data = new ArrayList<ColorShapeRow>();
+	private List<ColorShapeRow> data = new ArrayList<>();
 
 	/**
 	 * Fills the rows of vertex colors and shapes based on the vertex name and
@@ -51,13 +52,14 @@ public class VertexColorShapeData extends AbstractTableModel {
 	 */
 	public void generateAllRows( Map<URI, List<SEMOSSVertex>> _nodeMap ) {
 		nodeMap = _nodeMap;
-		
-		data = new ArrayList<ColorShapeRow>();
+
+		data = new ArrayList<>();
 		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : nodeMap.entrySet() ) {
-			data.add( new ColorShapeRow(entry.getKey(), "Set for All", "", "") );
+			data.add( new ColorShapeRow( entry.getKey(), "Set for All", "", "" ) );
 
 			for ( SEMOSSVertex vertex : entry.getValue() ) {
-				data.add( new ColorShapeRow(null, vertex.getLabel(), vertex.getShapeString(), vertex.getColorString()) );
+				data.add( new ColorShapeRow( null, vertex.getLabel(),
+						vertex.getShapeString(), vertex.getColorString() ) );
 			}
 		}
 
@@ -69,10 +71,12 @@ public class VertexColorShapeData extends AbstractTableModel {
 		ColorShapeRow csRow = data.get( row );
 		switch ( column ) {
 			case 0: {
-				if ( csRow.type != null )
+				if ( csRow.type != null ) {
 					return csRow.type.getLocalName();
+				}
 				return "";
-			} case 1:
+			}
+			case 1:
 				return csRow.name;
 			case 2:
 				return csRow.shape;
@@ -93,17 +97,17 @@ public class VertexColorShapeData extends AbstractTableModel {
 	@Override
 	public void setValueAt( Object value, int row, int column ) {
 		// the first column will either be empty, or will be the nodeType
-		
-		URI nodeType = data.get(row).type;
-		
+
+		URI nodeType = data.get( row ).type;
+
 		if ( nodeType == null ) {
 			// find the node type by scanning up the first column
 			int numRowsUp = 0;
 			while ( nodeType == null ) {
 				numRowsUp++;
-				nodeType = data.get(row - numRowsUp).type;
+				nodeType = data.get( row - numRowsUp ).type;
 			}
-			
+
 			List<SEMOSSVertex> vertexList = nodeMap.get( nodeType );
 
 			SEMOSSVertex vertex = vertexList.get( numRowsUp - 1 );
@@ -140,10 +144,11 @@ public class VertexColorShapeData extends AbstractTableModel {
 			setColor( vertex, value, row );
 		}
 	}
-	
-	public void setShapes(Collection<SEMOSSVertex> nodes, String shape) {
-		for( SEMOSSVertex node : nodes )
+
+	public void setShapes( Collection<SEMOSSVertex> nodes, String shape ) {
+		for ( SEMOSSVertex node : nodes ) {
 			setShape( node, shape, getRowForVertex( node.getLabel() ) );
+		}
 	}
 
 	public void setShape( SEMOSSVertex vertex, String shape, int row ) {
@@ -151,31 +156,32 @@ public class VertexColorShapeData extends AbstractTableModel {
 			return;
 		}
 
-		data.get(row).shape = shape;
+		data.get( row ).shape = shape;
 		TypeColorShapeTable.getInstance().setShape( shape, vertex );
 	}
 
-
-	public void setColors(Collection<SEMOSSVertex> nodes, String color) {
+	public void setColors( Collection<SEMOSSVertex> nodes, String color ) {
 		for ( SEMOSSVertex node : nodes ) {
 			setColor( node, color, getRowForVertex( node.getLabel() ) );
 		}
 	}
-	
+
 	public void setColor( SEMOSSVertex vertex, String color, int row ) {
 		if ( row < 0 ) {
 			return;
 		}
 
-		data.get(row).color = color;
+		data.get( row ).color = color;
 		TypeColorShapeTable.getInstance().setColor( color, vertex );
 	}
-	
+
 	private int getRowForVertex( String vertexName ) {
-		int rowNum = -1;		
-		for ( int i=0; i<data.size(); i++ )
-			if ( data.get(i).name.equals( vertexName ) )
+		int rowNum = -1;
+		for ( int i = 0; i < data.size(); i++ ) {
+			if ( data.get( i ).name.equals( vertexName ) ) {
 				rowNum = i;
+			}
+		}
 
 		return rowNum;
 	}
@@ -184,7 +190,7 @@ public class VertexColorShapeData extends AbstractTableModel {
 	public boolean isCellEditable( int rowIndex, int columnIndex ) {
 		return columnIndex > 1;
 	}
-	
+
 	/**
 	 * Gets the number of rows.
 	 *
@@ -228,6 +234,7 @@ public class VertexColorShapeData extends AbstractTableModel {
 	}
 
 	public class ColorShapeRow {
+
 		URI type;
 		String name, shape, color;
 
