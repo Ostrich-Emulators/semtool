@@ -22,9 +22,9 @@ import org.openrdf.model.URI;
  */
 public class GraphCondensePanel extends javax.swing.JPanel {
 
-	public static enum RemovalStrategy {
+	public static enum EdgePropertySource {
 
-		KEEP, IGNORE, FROM, TO
+		NODE, INEDGE, OUTEDGE
 	};
 	private final DefaultComboBoxModel<URI> removermodel
 			= new DefaultComboBoxModel<>();
@@ -58,10 +58,9 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 		intermediateType.setRenderer( renderer );
 		endpointType.setRenderer( renderer );
 
-		keeper.setActionCommand( RemovalStrategy.KEEP.toString() );
-		inprop.setActionCommand( RemovalStrategy.FROM.toString() );
-		outprop.setActionCommand( RemovalStrategy.TO.toString() );
-		ignoreprop.setActionCommand( RemovalStrategy.IGNORE.toString() );
+		inprop.setActionCommand(EdgePropertySource.INEDGE.toString() );
+		outprop.setActionCommand(EdgePropertySource.OUTEDGE.toString() );
+		nodeprop.setActionCommand(EdgePropertySource.NODE.toString() );
 	}
 
 	public URI getEdgeTypeToRemove() {
@@ -72,14 +71,10 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 		return endpointType.getItemAt( endpointType.getSelectedIndex() );
 	}
 
-	public RemovalStrategy getRemovalStrategy() {
-		ButtonModel bm = buttonGroup1.getSelection();
+	public EdgePropertySource getPropertySource() {
+		ButtonModel bm = edgegroup.getSelection();
 		String action = bm.getActionCommand();
-		return RemovalStrategy.valueOf( action );
-	}
-
-	public boolean getGenProps() {
-		return genprops.isSelected();
+		return EdgePropertySource.valueOf( action );
 	}
 
 	/**
@@ -91,37 +86,32 @@ public class GraphCondensePanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    buttonGroup1 = new javax.swing.ButtonGroup();
+    edgegroup = new javax.swing.ButtonGroup();
     jLabel1 = new javax.swing.JLabel();
     intermediateType = new javax.swing.JComboBox<URI>();
     jPanel1 = new javax.swing.JPanel();
-    keeper = new javax.swing.JRadioButton();
-    ignoreprop = new javax.swing.JRadioButton();
+    nodeprop = new javax.swing.JRadioButton();
     inprop = new javax.swing.JRadioButton();
     outprop = new javax.swing.JRadioButton();
     jLabel2 = new javax.swing.JLabel();
     endpointType = new javax.swing.JComboBox<URI>();
-    genprops = new javax.swing.JCheckBox();
 
     jLabel1.setText("Condense Nodes of Type");
     jLabel1.setToolTipText("Intermediate nodes of this type will be removed");
 
     intermediateType.setModel(removermodel);
 
-    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "On Edge Property Clash"));
+    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "Generated Edge Properties Source"));
 
-    buttonGroup1.add(keeper);
-    keeper.setSelected(true);
-    keeper.setText("Keep All Values");
+    edgegroup.add(nodeprop);
+    nodeprop.setSelected(true);
+    nodeprop.setText("Condensed Node");
 
-    buttonGroup1.add(ignoreprop);
-    ignoreprop.setText("Ignore the Property");
+    edgegroup.add(inprop);
+    inprop.setText("In-Edge");
 
-    buttonGroup1.add(inprop);
-    inprop.setText("Use In-Edge Value");
-
-    buttonGroup1.add(outprop);
-    outprop.setText("Use Out-Edge Value");
+    edgegroup.add(outprop);
+    outprop.setText("Out-Edge");
 
     javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
     jPanel1.setLayout(jPanel1Layout);
@@ -130,39 +120,28 @@ public class GraphCondensePanel extends javax.swing.JPanel {
       .addGroup(jPanel1Layout.createSequentialGroup()
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(outprop)
-          .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(ignoreprop, javax.swing.GroupLayout.Alignment.TRAILING)
-            .addComponent(inprop))
-          .addComponent(keeper))
+          .addComponent(inprop)
+          .addComponent(nodeprop))
         .addGap(103, 103, 103))
     );
     jPanel1Layout.setVerticalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel1Layout.createSequentialGroup()
-        .addComponent(ignoreprop)
+        .addComponent(nodeprop)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(inprop)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(outprop)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(keeper)
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addComponent(outprop))
     );
 
     jLabel2.setText("...That are Between Nodes of Type");
 
     endpointType.setModel(endpointmodel);
 
-    genprops.setSelected(true);
-    genprops.setText("Generated edge should include intermediate node's properties");
-
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addComponent(genprops)
-        .addContainerGap(24, Short.MAX_VALUE))
       .addGroup(layout.createSequentialGroup()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(jLabel2)
@@ -173,7 +152,7 @@ public class GraphCondensePanel extends javax.swing.JPanel {
           .addComponent(endpointType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
       .addGroup(layout.createSequentialGroup()
         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(0, 0, Short.MAX_VALUE))
+        .addGap(0, 127, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -185,26 +164,22 @@ public class GraphCondensePanel extends javax.swing.JPanel {
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(jLabel2)
           .addComponent(endpointType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(18, 18, 18)
-        .addComponent(genprops)
-        .addGap(55, 55, 55))
+        .addGap(75, 75, 75))
     );
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroup1;
+  private javax.swing.ButtonGroup edgegroup;
   private javax.swing.JComboBox<URI> endpointType;
-  private javax.swing.JCheckBox genprops;
-  private javax.swing.JRadioButton ignoreprop;
   private javax.swing.JRadioButton inprop;
   private javax.swing.JComboBox<URI> intermediateType;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;
-  private javax.swing.JRadioButton keeper;
+  private javax.swing.JRadioButton nodeprop;
   private javax.swing.JRadioButton outprop;
   // End of variables declaration//GEN-END:variables
 }

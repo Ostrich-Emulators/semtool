@@ -12,7 +12,7 @@ import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.GraphCondensePanel;
-import gov.va.semoss.ui.components.GraphCondensePanel.RemovalStrategy;
+import gov.va.semoss.ui.components.GraphCondensePanel.EdgePropertySource;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -63,7 +63,7 @@ public class CondenseGraph extends AbstractAction {
 				public void run() {
 					DirectedGraph<SEMOSSVertex, SEMOSSEdge> newg
 							= condense( gps.getVisibleGraph(), gcp.getEdgeTypeToRemove(),
-									gcp.getEdgeEndpointType(), gcp.getRemovalStrategy() );
+									gcp.getEdgeEndpointType(), gcp.getPropertySource() );
 					gps.getGraphData().setGraph( newg );
 					gps.updateGraph();
 				}
@@ -75,7 +75,7 @@ public class CondenseGraph extends AbstractAction {
 
 	public static DirectedGraph<SEMOSSVertex, SEMOSSEdge>
 			condense( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-					URI toremove, URI endpoint, RemovalStrategy strat ) {
+					URI toremove, URI endpoint, EdgePropertySource strat ) {
 
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> newgraph = new DirectedSparseGraph<>();
 
@@ -125,11 +125,27 @@ public class CondenseGraph extends AbstractAction {
 				SEMOSSVertex to = tup.out.getInVertex();
 
 				SEMOSSEdge edge = new SEMOSSEdge( from, to, middle.getURI() );
-				edge.setType( middle.getType() );
-				for( Map.Entry<URI, Object> prop : middle.getProperties().entrySet() ){
+
+				Map<URI, Object> props;
+				switch ( strat ) {
+					case NODE:
+						props = middle.getProperties();
+						break;
+					case INEDGE:
+						props = tup.in.getProperties();
+						break;
+					case OUTEDGE:
+						props = tup.out.getProperties();
+						break;
+					default:
+						throw new IllegalArgumentException( "no edge property source provided!" );
+				}
+
+				for ( Map.Entry<URI, Object> prop : props.entrySet() ) {
 					edge.setProperty( prop.getKey(), prop.getValue() );
 				}
-				
+				edge.setType( middle.getType() );
+
 				newgraph.addEdge( edge, from, to, EdgeType.DIRECTED );
 			}
 		}

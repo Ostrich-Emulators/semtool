@@ -294,6 +294,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			}
 
 			processControlData( gdm.getGraph() );
+			controlData.generateAllRows();
 			filterData.generateAllRows( gdm.getGraph() );
 			colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
 			paintLegendPanel();
@@ -524,7 +525,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	private void processControlData( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
 		controlData.clear();
-		filterData.generateAllRows( graph );
 		
 		for ( SEMOSSVertex vertex : graph.getVertices() ) {
 			for ( URI property : vertex.getProperties().keySet() ) {
