@@ -72,6 +72,11 @@ public class ControlDataTable {
 			properties.add( type, property );
 		}
 	}
+	
+	public void clear(){
+		properties.clear();
+	}
+	
 
 	/**
 	 * Generates all the rows in the control panel for the specified table and

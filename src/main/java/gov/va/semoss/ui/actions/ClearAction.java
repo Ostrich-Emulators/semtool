@@ -57,7 +57,7 @@ public class ClearAction extends DbAction {
 		} );
 
 		int retval = JOptionPane.showConfirmDialog( frame, copywhat,
-				"Clear what data from data from " + getEngineName() + "?",
+				"Clear what data from " + getEngineName() + "?",
 				JOptionPane.OK_CANCEL_OPTION );
 		return ( JOptionPane.OK_OPTION == retval );
 	}

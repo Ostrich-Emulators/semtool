@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import gov.va.semoss.algorithm.impl.DistanceDownstreamProcessor;
 import gov.va.semoss.algorithm.impl.IslandIdentifierProcessor;
 import gov.va.semoss.algorithm.impl.LoopIdentifierProcessor;
@@ -27,21 +28,21 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.ChartItPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.main.listener.impl.AdjacentPopupMenuListener;
+import gov.va.semoss.ui.main.listener.impl.CondenseGraph;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeRankListener;
 import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetExportListener;
 import gov.va.semoss.ui.main.listener.impl.HideVertexPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.MSTPopupMenuListener;
-import gov.va.semoss.ui.main.listener.impl.MousePickingPopupMenuListener;
-import gov.va.semoss.ui.main.listener.impl.MouseTransformPopupMenuListener;
+import gov.va.semoss.ui.main.listener.impl.MouseTransformPickPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.UnHideVertexPopupMenuListener;
-import gov.va.semoss.util.DIHelper;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -55,7 +56,7 @@ public class GraphNodePopup extends JPopupMenu {
 	private static final long serialVersionUID = 7106248215097748901L;
 
 	private final GraphPlaySheet gps;
-	private SEMOSSVertex[] highlightedVertices;
+	private final Set<SEMOSSVertex> highlightedVertices;
 	private SEMOSSVertex pickedVertex;
 	private final IEngine engine;
 
@@ -64,18 +65,18 @@ public class GraphNodePopup extends JPopupMenu {
 		super();
 
 		this.gps = gps;
-		this.highlightedVertices = highlightedVertices;
+		this.highlightedVertices = new HashSet<>( Arrays.asList( highlightedVertices ) );
 		this.pickedVertex = pickedVertex;
 
-		if ( this.highlightedVertices.length == 1 ) {
-			this.pickedVertex = this.highlightedVertices[0];
+		if ( 1 == this.highlightedVertices.size() ) {
+			this.pickedVertex = highlightedVertices[0];
 		}
 
-		if ( this.pickedVertex != null && this.highlightedVertices.length == 0 ) {
-			this.highlightedVertices = new SEMOSSVertex[]{ this.pickedVertex };
+		if ( this.pickedVertex != null && this.highlightedVertices.isEmpty() ) {
+			this.highlightedVertices.add( this.pickedVertex );
 		}
 
-		engine = DIHelper.getInstance().getRdfEngine();
+		engine = gps.getEngine();
 
 		addHighlightingOptions();
 		addGraphOptions();
@@ -97,16 +98,15 @@ public class GraphNodePopup extends JPopupMenu {
 			public void actionPerformed( ActionEvent e ) {
 				gps.addSibling( "Custom Chart", new ChartItPlaySheet( gps ) );
 			}
-		});
+		} );
 	}
 
 	private void addHidingOptions() {
 		addSeparator();
 
 		JMenuItem item = add( "Hide Nodes" );
-		item.addActionListener( new HideVertexPopupMenuListener( gps,
-				Arrays.asList( highlightedVertices ) ) );
-		item.setEnabled( highlightedVertices.length > 0 && gps.areNodesHidable() );
+		item.addActionListener( new HideVertexPopupMenuListener( gps, highlightedVertices ) );
+		item.setEnabled( !highlightedVertices.isEmpty() && gps.areNodesHidable() );
 
 		item = add( "Unhide Nodes" );
 		item.addActionListener( new UnHideVertexPopupMenuListener( gps ) );
@@ -115,15 +115,14 @@ public class GraphNodePopup extends JPopupMenu {
 
 	private void addCosmeticsOptions() {
 		addSeparator();
-		List<SEMOSSVertex> verts = Arrays.asList( highlightedVertices );
 
-		JMenuItem item = add( new ColorPopup( "Modify Color", gps, verts ) );
+		JMenuItem item = add( new ColorPopup( "Modify Color", gps, highlightedVertices ) );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
-		item.setEnabled( highlightedVertices.length > 0 );
+		item.setEnabled( !highlightedVertices.isEmpty() );
 
-		item = add( new ShapePopup( "Modify Shape", gps, verts ) );
+		item = add( new ShapePopup( "Modify Shape", gps, highlightedVertices ) );
 		item.setToolTipText( "Modify overall appearance of the graph" );
-		item.setEnabled( highlightedVertices.length > 0 );
+		item.setEnabled( highlightedVertices.isEmpty() );
 
 		item = add( new LayoutPopup( "Modify Layout", gps ) );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
@@ -131,7 +130,6 @@ public class GraphNodePopup extends JPopupMenu {
 
 	private void addTraverseAndAlgorithmOptions() {
 		addSeparator();
-		List<SEMOSSVertex> verts = Arrays.asList( highlightedVertices );
 
 		if ( pickedVertex == null || !gps.isTraversable() ) {
 			add( "Traverse Freely" ).setEnabled( false );
@@ -146,9 +144,9 @@ public class GraphNodePopup extends JPopupMenu {
 		menu.setEnabled( true );
 
 		menu.add( new GraphNodeRankListener( gps ) );
-		menu.add( new DistanceDownstreamProcessor( gps, verts ) );
-		menu.add( new LoopIdentifierProcessor( gps, verts ) );
-		menu.add( new IslandIdentifierProcessor( gps, verts ) );
+		menu.add( new DistanceDownstreamProcessor( gps, highlightedVertices ) );
+		menu.add( new LoopIdentifierProcessor( gps, highlightedVertices ) );
+		menu.add( new IslandIdentifierProcessor( gps, highlightedVertices ) );
 
 		add( menu );
 	}
@@ -164,40 +162,37 @@ public class GraphNodePopup extends JPopupMenu {
 		addSeparator();
 
 		add( new GraphPlaySheetExportListener( gps ) );
-		add( new NodeInfoPopup( gps, Arrays.asList( highlightedVertices ) ) );
+		add( new NodeInfoPopup( gps, highlightedVertices ) );
+		add( new CondenseGraph( gps ) );
 	}
 
 	private void addGraphOptions() {
 		addSeparator();
-
-		JMenuItem item = add( "Move Graph" );
-		item.setToolTipText( "Move entire graph as a single unit" );
-		item.addActionListener( new MouseTransformPopupMenuListener( gps.getView() ) );
-
-		item = add( "Pick Graph" );
-		item.addActionListener( new MousePickingPopupMenuListener( gps.getView() ) );
+		add( new MouseTransformPickPopupMenuListener( gps.getView(),
+				ModalGraphMouse.Mode.TRANSFORMING ) );
+		add( new MouseTransformPickPopupMenuListener( gps.getView(),
+				ModalGraphMouse.Mode.PICKING ) );
 	}
 
 	private void addHighlightingOptions() {
-		List<SEMOSSVertex> verts = Arrays.asList( highlightedVertices );
 
 		AdjacentPopupMenuListener highAdjBoth
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.ADJACENT,
-						gps, verts );
+						gps, highlightedVertices );
 
 		JMenu moreHighlight = new JMenu( "More Highlight Options" );
 
 		AdjacentPopupMenuListener highAdjDown
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.DOWNSTREAM,
-						gps, verts );
+						gps, highlightedVertices );
 
 		AdjacentPopupMenuListener highAdjUp
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.UPSTREAM,
-						gps, verts );
+						gps, highlightedVertices );
 
 		AdjacentPopupMenuListener highAdjAll
 				= new AdjacentPopupMenuListener( AdjacentPopupMenuListener.Type.ALL,
-						gps, verts );
+						gps, highlightedVertices );
 
 		MSTPopupMenuListener MST = new MSTPopupMenuListener( gps );
 
@@ -215,7 +210,7 @@ public class GraphNodePopup extends JPopupMenu {
 	 * @return boolean True if the type of node represents an ICD.
 	 */
 	public final boolean containsICDType() {
-		for ( SEMOSSVertex vertex : gps.getFilterData().getGraph().getVertices() ) {
+		for ( SEMOSSVertex vertex : gps.getGraphData().getGraph().getVertices() ) {
 			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) ) {
 				return true;
 			}

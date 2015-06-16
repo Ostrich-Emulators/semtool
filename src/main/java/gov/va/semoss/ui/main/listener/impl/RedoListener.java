@@ -24,14 +24,13 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.helpers.PlaysheetRedoRunner;
 
 /**
  * Controls running of the redo button for a play sheet.
  */
 public class RedoListener extends AbstractAction implements ActionListener {
 		
-	GraphPlaySheet gps = null;
+	private GraphPlaySheet gps = null;
 	
 	/**
 	 * Method actionPerformed.  Dictates what actions to take when an Action Event is performed.
@@ -39,11 +38,7 @@ public class RedoListener extends AbstractAction implements ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent actionevent) {
-		
-		// thread
-		PlaysheetRedoRunner playRunner = new PlaysheetRedoRunner(gps);
-		Thread playThread = new Thread(playRunner);
-		playThread.start();
+		gps.redoView();
 	}
 
 	/**
