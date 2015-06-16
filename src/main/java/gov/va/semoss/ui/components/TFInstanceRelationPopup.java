@@ -30,7 +30,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.impl.URIImpl;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -40,6 +39,7 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import java.util.Collection;
 import org.openrdf.model.vocabulary.RDF;
 
 /**
@@ -47,19 +47,20 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 
-	private static final long serialVersionUID = -3788376340326236013L;
-	private GraphPlaySheet gps;
-	private SEMOSSVertex[] pickedVertex;
 	private static final Logger logger
 			= Logger.getLogger( TFInstanceRelationPopup.class );
+	private static final long serialVersionUID = -3788376340326236013L;
+	private final GraphPlaySheet gps;
+	private final Collection<SEMOSSVertex> pickedVertex;
 
 	private String mainQuery, mainQueryJENA, neighborQuery, neighborQueryJENA;
 
 	private boolean populated = false;
 
-	private IEngine engine;
+	private final IEngine engine;
 
-	public TFInstanceRelationPopup( SEMOSSVertex vertex, IEngine e, GraphPlaySheet ps, SEMOSSVertex[] pickedVertex ) {
+	public TFInstanceRelationPopup( SEMOSSVertex vertex, IEngine e, 
+			GraphPlaySheet ps, Collection<SEMOSSVertex> pickedVertex ) {
 		super( "Traverse Freely: " + Utility.getInstanceLabel( vertex.getURI(), e ) );
 
 		this.gps = ps;

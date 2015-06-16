@@ -1,21 +1,22 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2013 SEMOSS.ORG
- * 
+ *
  * This file is part of SEMOSS.
- * 
- * SEMOSS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * SEMOSS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with SEMOSS.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
+ *
+ * SEMOSS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * SEMOSS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
+ * ****************************************************************************
+ */
 package gov.va.semoss.ui.main.listener.impl;
 
 import java.awt.Component;
@@ -39,8 +40,6 @@ import gov.va.semoss.ui.components.ExecuteQueryProcessor;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.helpers.PlaysheetCreateRunner;
-import gov.va.semoss.ui.helpers.PlaysheetOverlayRunner;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.tabbedqueries.TabbedQueries;
@@ -56,22 +55,20 @@ import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
  * information 4. Set all the controls reference within the PlaySheet
  */
 public class ProcessQueryListener extends AbstractAction implements IChakraListener {
-
-	/**
-	 *
-	 */
+	private static final Logger logger = Logger.getLogger( ProcessQueryListener.class );
 	private static final long serialVersionUID = 5236863287462387L;
+	
 	// where all the parameters are set
 	// this will implement a cardlayout and then on top of that the param panel
 	JPanel paramPanel = null;
 	// right hand side panel
 	JComponent rightPanel = null;
-	private static final Logger logger = Logger.getLogger( ProcessQueryListener.class );
 	TabbedQueries sparql = null;
 	boolean custom = false;
 	boolean append = false;
 	JCheckBox appendChkBox;
-	JComboBox<Insight> cboInsights;	
+	JComboBox<Insight> cboInsights;
+
 	/**
 	 * Method actionPerformed. Dictates what actions to take when an Action Event
 	 * is performed.
@@ -82,7 +79,7 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 	@Override
 	public void actionPerformed( ActionEvent actionevent ) {
 		//Open the "Display Pane": 
-        PlayPane.rightTabs.setSelectedIndex(0);
+		PlayPane.rightTabs.setSelectedIndex( 0 );
 
 		// get all the component
 		// get the current panel showing - need to do the isVisible
@@ -90,7 +87,6 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 		// there are other types of queries
 		// especially the ones that would use JGraph
 		// get the query
-
 		//initiate executeQueryProcessor
 		appendChkBox = (JCheckBox) DIHelper.getInstance().getLocalProp( Constants.APPEND );
 		boolean appending = appendChkBox.isSelected();
@@ -109,17 +105,19 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 		IEngine eng = DIHelper.getInstance().getRdfEngine();
 
 		//Setup playsheet: 
-		cboInsights	= (JComboBox) DIHelper.getInstance().getLocalProp( Constants.QUESTION_LIST_FIELD );
+		cboInsights = (JComboBox) DIHelper.getInstance().getLocalProp( Constants.QUESTION_LIST_FIELD );
 		Insight insight = cboInsights.getItemAt( cboInsights.getSelectedIndex() );
 		String output = insight.getOutput();
 
-		boolean oldstyle = true;
 		try {
 			Class<?> k = Class.forName( output );
-			oldstyle = !( PlaySheetCentralComponent.class.isAssignableFrom( k ) );
+			if( !( PlaySheetCentralComponent.class.isAssignableFrom( k ) ) ){
+				throw new IllegalArgumentException( "Defunct playsheet class: " + output );
+			}
 		}
 		catch ( ClassNotFoundException e ) {
-			oldstyle = true;
+			throw new IllegalArgumentException( "Unhandled playsheet class: " + output,
+					e );
 		}
 		//get Swing UI and set ParamHash";
 		JPanel panel = (JPanel) DIHelper.getInstance().getLocalProp( Constants.PARAM_PANEL_FIELD );
@@ -135,7 +133,6 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 			}
 		}
 
-		IPlaySheet oldplaysheet = null;
 		Map<String, String> paramHash = new HashMap<>();;
 		if ( null != curPanel ) {
 			// get all the param field
@@ -143,37 +140,19 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 
 			for ( Component field : fields ) {
 				if ( field instanceof ParamComboBox ) {
-	                String fieldName = ( (ParamComboBox) field ).getParamName();
-	                String fieldValue = ( (ParamComboBox) field ).getSelectedItem() + "";
-	                String uriFill = ( (ParamComboBox) field ).getURI( fieldValue );
-	                if ( uriFill == null ) {
-	                   uriFill = fieldValue;
-	                }
-	                paramHash.put( fieldName, uriFill );
+					String fieldName = ( (ParamComboBox) field ).getParamName();
+					String fieldValue = ( (ParamComboBox) field ).getSelectedItem() + "";
+					String uriFill = ( (ParamComboBox) field ).getURI( fieldValue );
+					if ( uriFill == null ) {
+						uriFill = fieldValue;
+					}
+					paramHash.put( fieldName, uriFill );
 				}
 			}
 		}
 
 		JDesktopPane pane = DIHelper.getInstance().getDesktop();
-		if ( oldstyle ) {
-			doitOldSkool( oldplaysheet, appending, pane, output );
-		}
-		else {
-			doitNewSkool( perspective, insight, paramHash, appending, pane );
-		}
-	}
-
-	private void doitOldSkool( IPlaySheet play, boolean appending, JDesktopPane pane, String output) {
-		Runnable playRunner;
-		if ( appending ) {
-			logger.debug( "Appending " );
-			playRunner = new PlaysheetOverlayRunner( play );
-		}
-		else {
-			play.setJDesktopPane( pane );
-			playRunner = new PlaysheetCreateRunner( play );
-		}		
-		playRunner.run();
+		doitNewSkool( perspective, insight, paramHash, appending, pane );
 	}
 
 	private void doitNewSkool( Perspective persp, Insight insight,
@@ -185,7 +164,7 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 		ProgressTask pt = null;
 		if ( appending ) {
 			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
-			String title = persp.getLabel() + "-Insight-" + insight.getOrder( persp.getUri() );			
+			String title = persp.getLabel() + "-Insight-" + insight.getOrder( persp.getUri() );
 
 			pt = psf.getOverlayTask( query, insight.getLabel(), title );
 		}
@@ -207,7 +186,7 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 			psf.addTab( title, pscc );
 
 			psf.setTitle( insight.getLabel() );
-			DIHelper.getInstance().getDesktop().add( psf );			
+			DIHelper.getInstance().getDesktop().add( psf );
 
 			pt = psf.getCreateTask( query );
 		}

@@ -40,9 +40,10 @@ import org.openrdf.model.URI;
  */
 public class ControlData {
 
-	private ControlDataTable vertexCDT, edgeCDT;
-	private IEngine engine;
+	private final ControlDataTable vertexCDT;
+	private final ControlDataTable edgeCDT;
 	private final Map<URI, String> labelcache = new HashMap<>();
+	private IEngine engine;
 
 	/**
 	 * Constructor for ControlData.
@@ -110,6 +111,11 @@ public class ControlData {
 		return labelcache.get( uri );
 	}
 
+	public void clear(){
+		vertexCDT.clear();
+		edgeCDT.clear();
+	}
+	
 	/**
 	 * Gets properties of a specific type.
 	 *

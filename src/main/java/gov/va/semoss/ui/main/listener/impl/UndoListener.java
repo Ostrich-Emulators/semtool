@@ -24,7 +24,6 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.helpers.PlaysheetUndoRunner;
 
 /**
  * Controls running of the undo button for a play sheet.
@@ -40,9 +39,7 @@ public class UndoListener extends AbstractAction implements ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent actionevent) {
-		PlaysheetUndoRunner playRunner = new PlaysheetUndoRunner(gps);
-		Thread playThread = new Thread(playRunner);
-		playThread.start();
+		gps.undoView();
 	}
 
 

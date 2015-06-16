@@ -35,8 +35,8 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 
 	private static final String[] columnNames = { "Name ", "Value" };
 	private static final Class<?>[] classNames = { Object.class, Object.class };
-	private ArrayList<PropertyRow> rows = new ArrayList<PropertyRow>();
-	private SEMOSSEdge edge;
+	private final ArrayList<PropertyRow> rows = new ArrayList<>();
+	private final SEMOSSEdge edge;
 	
 	/**
 	 * Constructor for EdgePropertyTableModel.
@@ -70,6 +70,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 * 
 	 * @return String Column name.
 	 */
+	@Override
 	public String getColumnName(int index) {
 		return columnNames[index];
 	}
@@ -118,6 +119,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 * @param column
 	 *            Column that value is assigned to.
 	 */
+	@Override
 	public void setValueAt(Object val, int row, int column) {
 		PropertyRow pRow = rows.get(row);
 			switch ( column ) {
@@ -143,6 +145,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 * 
 	 * @return Class Column class.
 	 */
+	@Override
 	public Class<?> getColumnClass(int column) {
 		return classNames[column];
 	}
@@ -157,6 +160,7 @@ public class EdgePropertyTableModel extends AbstractTableModel {
 	 * 
 	 * @return boolean True if the cell is editable.
 	 */
+	@Override
 	public boolean isCellEditable(int row, int column) {
 		if (column == 1)
 			return true;

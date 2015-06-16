@@ -36,8 +36,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -129,8 +131,8 @@ public class SearchController implements KeyListener, FocusListener,
 	 * @param searchString String
 	 */
 	private void searchStatement( String searchString ) {
-		StringBuilder query = new StringBuilder( searchString );
-		query.append( " label: " ).append( searchString );
+		StringBuilder query = new StringBuilder();
+		query.append( " label: " ).append( searchString ).append( "*" );
 		query.append( " description: " ).append( searchString );
 		query.append( " type: " ).append( searchString );
 
@@ -142,24 +144,34 @@ public class SearchController implements KeyListener, FocusListener,
 
 			TopDocs hits = searcher.search( q, 500 );
 
+			List<SEMOSSVertex> verts = new ArrayList<>();
+			
 			gps.getView().getPickedVertexState().clear();
-
 			for ( ScoreDoc sd : hits.scoreDocs ) {
 				Document doc = searcher.doc( sd.doc );
 				URI uri = new URIImpl( doc.get( URI_FIELD ) );
 
 				if ( vertStore.containsKey( uri ) ) {
 					SEMOSSVertex v = vertStore.get( uri );
+					verts.add( v );
 					log.debug( "selecting node: " + uri + " from search" );
 					gps.getView().getPickedVertexState().pick( v, true );
 				}
+			}
+
+			boolean skel = gps.getVertexLabelFontTransformer().isSkeletonMode();
+			gps.clearHighlighting();
+			if( skel ){
+				gps.skeleton( verts, null );				
+			}
+			else{
+				gps.highlight( verts, null );
 			}
 		}
 		catch ( ParseException | IOException e ) {
 			log.error( e, e );
 		}
 
-		gps.getView().repaint();
 		searchText.requestFocus( true );
 	}
 
