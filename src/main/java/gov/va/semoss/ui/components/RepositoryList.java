@@ -65,6 +65,7 @@ public class RepositoryList extends JList<IEngine> {
 	private static final Logger log = Logger.getLogger( RepositoryList.class );
 	private final RepositoryListModel model;
 	private String copiedsmss;
+	private JLabel add1;
 
 	public RepositoryList() {
 		super( new RepositoryListModel() );
@@ -276,11 +277,10 @@ public class RepositoryList extends JList<IEngine> {
 	}
 
 	private class RepositoryListLayerUI extends LayerUI<RepositoryList> {
-
-		private final JLabel add = new JLabel( "Attach DB", DbAction.getIcon( "attachdb" ),
-				SwingConstants.LEADING );
-		private final JLabel create = new JLabel( "Create DB", DbAction.getIcon( "adddb" ),
-				SwingConstants.LEADING );
+	
+		
+		private final JLabel add = new JLabel( "Attach DB", DbAction.getIcon( "attachdb" ), SwingConstants.LEADING);
+		private final JLabel create = new JLabel( "Create DB", DbAction.getIcon( "adddb" ), SwingConstants.LEADING );
 
 		@Override
 		public void paint( Graphics g, JComponent c ) {
@@ -294,9 +294,14 @@ public class RepositoryList extends JList<IEngine> {
 				RepositoryList list = RepositoryList.this;
 
 				Font f = list.getFont();
+				add.setToolTipText("Attach a New Database");
 				add.setFont( new Font( f.getName(), Font.ITALIC, f.getSize() ) );
+				add.repaint();
+				
+				
+				
 				create.setFont( new Font( f.getName(), Font.ITALIC, f.getSize() ) );
-
+				create.setToolTipText("Create a New Database");
 				add.setSize( c.getWidth(), h );
 				add.paint( g2 );
 
