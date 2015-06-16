@@ -1608,9 +1608,11 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Panel", true );
+		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem("Left Panel", true);
+		splithider.setMnemonic(KeyEvent.VK_L);
 		splithider.setToolTipText( "Disable the Left Panel" );
-
+		
+		
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
@@ -1620,9 +1622,11 @@ public class PlayPane extends JFrame {
 					mainSplitPane.setDividerLocation( 0.25 );
 
 					splithider.setToolTipText( "Disable the Left Panel" );
+					splithider.setMnemonic(KeyEvent.VK_L);
 				}
 				else {
 					splithider.setToolTipText( "Enable the Left Panel" );
+					splithider.setMnemonic(KeyEvent.VK_L);
 
 				}
 			}
@@ -1719,8 +1723,8 @@ public class PlayPane extends JFrame {
 
 	protected void buildMenuBar() {
 		JMenuBar menu = new JMenuBar();
-		//menu.getAccessibleContext().setAccessibleName("TopMenu");
-		//menu.getAccessibleContext().setAccessibleDescription("V-CAMP SEMOSS APPLICATION MENU");
+		menu.getAccessibleContext().setAccessibleName("TopMenu");
+		menu.getAccessibleContext().setAccessibleDescription("V-CAMP SEMOSS APPLICATION MENU");
 
 		JMenuItem exiter = new JMenuItem( new AbstractAction( "Exit" ) {
 			private static final long serialVersionUID = 1L;
@@ -1741,10 +1745,15 @@ public class PlayPane extends JFrame {
 		newmenu.setMnemonic( KeyEvent.VK_N );
 		newmenu.setIcon( DbAction.getIcon( "file-new1" ) );
 		fileMenu.add( newmenu );
+		newmenu.getAccessibleContext().setAccessibleName("New");
+		newmenu.getAccessibleContext().setAccessibleDescription("Create a new Database or Loading Sheet");
+		
 		JMenuItem jmi = newmenu.add( creater );
 		jmi.setText( "Database" );
 		jmi.setMnemonic( KeyEvent.VK_D );
 		jmi = newmenu.add( newls );
+		jmi.getAccessibleContext().setAccessibleName("Database");
+		jmi.getAccessibleContext().setAccessibleDescription("Database");
 		jmi.setText( "Loading Sheet" );
 		jmi.setMnemonic( KeyEvent.VK_L );
 
@@ -1771,43 +1780,28 @@ public class PlayPane extends JFrame {
 		fileMenuSave.setToolTipText( "Save changes" );
 		fileMenuSave.setMnemonic( KeyEvent.VK_S );
 		fileMenuSave.setIcon( DbAction.getIcon( "save_diskette1" ) );
+		fileMenuSaveAs.getAccessibleContext().setAccessibleName("Save");
+		fileMenuSaveAs.getAccessibleContext().setAccessibleDescription("Save changes");
 		fileMenu.add( fileMenuSave );
 		fileMenuSaveAs.setToolTipText( "Save to a new file name" );
 		fileMenuSaveAs.setMnemonic( KeyEvent.VK_A );
 		fileMenuSaveAs.setIcon( DbAction.getIcon( "save_as_diskette1" ) );
 		fileMenu.add( fileMenuSaveAs );
+		fileMenuSaveAs.getAccessibleContext().setAccessibleName("SaveAs");
+		fileMenuSaveAs.getAccessibleContext().setAccessibleDescription("Save to a new file name");
 		fileMenuSaveAll.setToolTipText( "Save all changes" );
 		fileMenuSaveAll.setMnemonic( KeyEvent.VK_V );
 		fileMenuSaveAll.setIcon( DbAction.getIcon( "save_alldiskette1" ) );
+		fileMenuSaveAll.getAccessibleContext().setAccessibleName("SaveAll");
+		fileMenuSaveAll.getAccessibleContext().setAccessibleDescription("Save All Tabs");
 		//	fileMenu.add( fileMenuSaveAll );
 
-//		JMenu exptop2 = new JMenu( "Export" );
-//		exptop2.add( exportttl );
-//		exptop2.add( exportnt );
-//		exptop2.add( exportrdf );
-//		exptop2.setIcon( DbAction.getIcon( "exportdb" ) );
-//		JMenu loadingsheets2 = new JMenu( "Loading Sheets" );
-//		exptop2.add( loadingsheets2 );
-//		loadingsheets2.add( expnodes );
-//		loadingsheets2.add( expSpecNodes );
-//		loadingsheets2.add( exprels );
-//		loadingsheets2.add( expSpecRels );
-//		loadingsheets2.add( expall );
-//		exptop2.add( exportinsights );
-//
-//		JMenu importtop2 = new JMenu( "Import" );
-//		importtop2.setIcon( DbAction.getIcon( "importdb" ) );
-//		importtop2.add( importls );
-//		JMenu insights2 = new JMenu( "Insights" );
-//		insights2.add( resetInsights );
-//		insights2.add( importInsights );
-//		importtop2.add( insights2 );
-//
-//		fileMenu.add( exptop2 );
-//		fileMenu.add( importtop2 );
+
 		fileMenu.addSeparator();
 		exiter.setIcon( DbAction.getIcon( "exit1" ) );
 		fileMenu.add( exiter );
+		exiter.getAccessibleContext().setAccessibleName("Exit");
+		exiter.getAccessibleContext().setAccessibleDescription("Exit V-CAMP Application");
 
 		menu.add( fileMenu );
 
