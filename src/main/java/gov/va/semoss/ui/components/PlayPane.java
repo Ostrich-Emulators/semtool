@@ -1608,9 +1608,11 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Panel", true );
+		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem("Left Panel", true);
+		splithider.setMnemonic(KeyEvent.VK_L);
 		splithider.setToolTipText( "Disable the Left Panel" );
-
+		
+		
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
@@ -1620,9 +1622,11 @@ public class PlayPane extends JFrame {
 					mainSplitPane.setDividerLocation( 0.25 );
 
 					splithider.setToolTipText( "Disable the Left Panel" );
+					splithider.setMnemonic(KeyEvent.VK_L);
 				}
 				else {
 					splithider.setToolTipText( "Enable the Left Panel" );
+					splithider.setMnemonic(KeyEvent.VK_L);
 
 				}
 			}
