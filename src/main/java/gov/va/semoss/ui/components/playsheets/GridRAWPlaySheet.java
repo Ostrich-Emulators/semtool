@@ -30,8 +30,13 @@ import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.URIEditor;
 
+import gov.va.semoss.util.MultiMap;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -43,15 +48,20 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
+import javax.swing.table.TableColumnModel;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -67,6 +77,9 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	private final SaveGridAction save = new SaveGridAction( false );
 	private final SaveAsGridAction saveas = new SaveAsGridAction( true );
 	private final SaveAllGridAction saveall = new SaveAllGridAction();
+	private final JLabel searchlabel = new JLabel( "Search" );
+	private final JTextField searchfield = new JTextField();
+	private final HighlightingRenderer renderer = new HighlightingRenderer();
 
 	public GridRAWPlaySheet() {
 		this( new ValueTableModel() );
@@ -128,6 +141,18 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 					}
 				} );
 
+		searchfield.setPreferredSize( new Dimension( 50, 20 ) );
+		Border b1 = BorderFactory.createLineBorder( Color.DARK_GRAY, 1 );
+		Border b2 = BorderFactory.createEmptyBorder( 0, 3, 0, 3 );
+		searchfield.setBorder( BorderFactory.createCompoundBorder( b1, b2 ) );
+
+		searchfield.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				search( searchfield.getText() );
+			}
+		} );
 	}
 
 	protected void setupToolBarButtons( final String tabTitle ) {
@@ -137,6 +162,25 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		saveas.setTable( model );
 	}
 
+	private void search( String ltxt ) {
+		log.debug( "searching for: " + ltxt );
+		String txt = ltxt.toUpperCase();
+		renderer.clear();
+
+		for ( int r = 0; r < table.getRowCount(); r++ ) {
+			for ( int c = 0; c < table.getColumnCount(); c++ ) {
+				Object val = table.getValueAt( r, c );
+				if ( null != val ) {
+					if ( val.toString().toUpperCase().contains( txt ) ) {
+						log.debug( "found " + txt + " at (" + r + "," + c + ") {" + val + "}" );
+						renderer.highlight( r, c );
+						model.fireTableCellUpdated( r, c );
+					}
+				}
+			}
+		}
+	}
+
 	@Override
 	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
 		setupToolBarButtons( tabTitle );
@@ -144,6 +188,9 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 
 		saveall.setPlaySheetFrame( getPlaySheetFrame() );
 		jtb.add( saveall );
+
+		jtb.add( searchlabel );
+		jtb.add( searchfield );
 	}
 
 	@Override
@@ -171,6 +218,11 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		setHeaders( newheaders );
 		log.debug( "into create: " + data.size() + " items" );
 		model.setData( data, newheaders );
+
+		TableColumnModel tm = table.getColumnModel();
+		for ( int c = 0; c < tm.getColumnCount(); c++ ) {
+			tm.getColumn( c ).setCellRenderer( renderer );
+		}
 	}
 
 	@Override
@@ -214,5 +266,37 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	@Override
 	public boolean prefersTabs() {
 		return true;
+	}
+
+	private class HighlightingRenderer extends DefaultTableCellRenderer {
+
+		private final MultiMap<Integer, Integer> highlights = new MultiMap<>();
+
+		@Override
+		public Component getTableCellRendererComponent( JTable table, Object value,
+				boolean isSelected, boolean hasFocus, int row, int column ) {
+			super.getTableCellRendererComponent( table, value, isSelected,
+					hasFocus, row, column );
+			setOpaque( true );
+
+			setBackground( table.getBackground() );
+			setForeground( table.getForeground() );
+			if ( highlights.containsKey( row ) ) {
+				if ( highlights.get( row ).contains( column ) ) {
+					setBackground( table.getSelectionBackground() );
+					setForeground( table.getSelectionForeground() );
+				}
+			}
+
+			return this;
+		}
+
+		public void clear() {
+			highlights.clear();
+		}
+
+		public void highlight( int row, int col ) {
+			highlights.add( row, col );
+		}
 	}
 }
