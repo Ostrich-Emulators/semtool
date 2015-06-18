@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Objects;
 import javax.swing.JPanel;
 
 import org.openrdf.model.URI;
@@ -73,9 +74,15 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		for ( Map.Entry<URI, List<SEMOSSVertex>> en : types.entrySet() ) {
 			String label = labels.get( en.getKey() );
 
-			String text = label + " (" + en.getValue().size() + ")";
-			add( new PaintLabel( text, shapes.get( en.getKey() ),
-					colors.get( en.getKey() ) ) );
+			MultiMap<ShapeColorHelper, SEMOSSVertex> mm = new MultiMap<>();
+			for ( SEMOSSVertex v : en.getValue() ) {
+				mm.add( new ShapeColorHelper( v.getShapeLegend(), v.getColor() ), v );
+			}
+
+			for ( Map.Entry<ShapeColorHelper, List<SEMOSSVertex>> sch : mm.entrySet() ) {
+				String text = label + " (" + sch.getValue().size() + ")";
+				add( new PaintLabel( text, sch.getKey().shape, sch.getKey().color ) );
+			}
 		}
 
 		updateUI();
@@ -86,5 +93,43 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			String oldlayout, String newlayout ) {
 		// nothing to update in this case
+	}
+
+	private class ShapeColorHelper {
+
+		public final Shape shape;
+		public final Color color;
+
+		public ShapeColorHelper( Shape s, Color c ) {
+			shape = s;
+			color = c;
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 5;
+			hash = 13 * hash + Objects.hashCode( this.shape );
+			hash = 13 * hash + Objects.hashCode( this.color );
+			return hash;
+		}
+
+		@Override
+		public boolean equals( Object obj ) {
+			if ( obj == null ) {
+				return false;
+			}
+			if ( getClass() != obj.getClass() ) {
+				return false;
+			}
+			final ShapeColorHelper other = (ShapeColorHelper) obj;
+			if ( !Objects.equals( this.shape, other.shape ) ) {
+				return false;
+			}
+			if ( !Objects.equals( this.color, other.color ) ) {
+				return false;
+			}
+			return true;
+		}
+
 	}
 }
