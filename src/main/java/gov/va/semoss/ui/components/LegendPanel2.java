@@ -19,9 +19,19 @@
  */
 package gov.va.semoss.ui.components;
 
+import static com.hp.hpl.jena.sparql.vocabulary.TestManifestUpdate_11.data;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.util.DIHelper;
 
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.Utility;
+import java.awt.Color;
+import java.awt.Shape;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +42,9 @@ import org.openrdf.model.URI;
 /**
  * This class is used to create the legend for visualizations.
  */
-public class LegendPanel2 extends JPanel {
+public class LegendPanel2 extends JPanel implements GraphListener {
+
 	private static final long serialVersionUID = -2364666196260002413L;
-	private ControlData controlData;
 
 	/**
 	 * Create the panel.
@@ -42,27 +52,39 @@ public class LegendPanel2 extends JPanel {
 	public LegendPanel2() {
 		setLayout( new WrapLayout( WrapLayout.LEFT, 15, 15 ) );
 		setToolTipText( "You can adjust the shape and color by going to the cosmetics tab on the navigation panel" );
-		
-		controlData = new ControlData();
-		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
 	}
 
-	/**
-	 * This method will draw the legend for visualizations.
-	 */
-	public void drawLegend(VertexFilterData data) {
-		removeAll();
-		
-		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : data.getNodeTypeMap().entrySet() ) {
-			String label = controlData.getLabel( entry.getKey() );
-			List<SEMOSSVertex> vertexList = entry.getValue();
-			SEMOSSVertex vertex = vertexList.get( 0 );
-
-			String text = label + " (" + vertexList.size() + ")";
-			add( new PaintLabel( text, vertex.getShapeLegend(), vertex.getColor() ) );
+	@Override
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		MultiMap<URI, SEMOSSVertex> types = new MultiMap<>();
+		Map<URI, Shape> shapes = new HashMap<>();
+		Map<URI, Color> colors = new HashMap<>();
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			types.add( v.getType(), v );
+			shapes.put( v.getType(), v.getShapeLegend() );
+			colors.put( v.getType(), v.getColor() );
 		}
-		
+
+		IEngine eng = DIHelper.getInstance().getRdfEngine();
+		Map<URI, String> labels = Utility.getInstanceLabels( shapes.keySet(), eng );
+
+		removeAll();
+
+		for ( Map.Entry<URI, List<SEMOSSVertex>> en : types.entrySet() ) {
+			String label = labels.get( en.getKey() );
+
+			String text = label + " (" + en.getValue().size() + ")";
+			add( new PaintLabel( text, shapes.get( en.getKey() ),
+					colors.get( en.getKey() ) ) );
+		}
+
 		updateUI();
 		repaint();
+	}
+
+	@Override
+	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			String oldlayout, String newlayout ) {
+		// nothing to update in this case
 	}
 }
