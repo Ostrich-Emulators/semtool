@@ -66,7 +66,7 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 	 *
 	 * @param _typeHash
 	 */
-	public void generateAllRows( Map<URI, List<SEMOSSVertex>> _nodeMap ) {
+	private void generateAllRows( Map<URI, List<SEMOSSVertex>> _nodeMap ) {
 		nodeMap = _nodeMap;
 
 		data = new ArrayList<>();

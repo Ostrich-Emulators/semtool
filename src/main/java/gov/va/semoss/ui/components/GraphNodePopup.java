@@ -122,7 +122,7 @@ public class GraphNodePopup extends JPopupMenu {
 
 		item = add( new ShapePopup( "Modify Shape", gps, highlightedVertices ) );
 		item.setToolTipText( "Modify overall appearance of the graph" );
-		item.setEnabled( highlightedVertices.isEmpty() );
+		item.setEnabled( !highlightedVertices.isEmpty() );
 
 		item = add( new LayoutPopup( "Modify Layout", gps ) );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
