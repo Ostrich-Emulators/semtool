@@ -67,7 +67,7 @@ public class OpenURLAction extends DbAction {
 
 	public static OpenURLAction getLatestReleaseAction() {
 		return new OpenURLAction( "Get the Latest Release",
-				"Opens a Browser to the latest VCAMP Stable application",
+				"Opens a Browser to the latest V-CAMP Stable application",
 				DIHelper.getInstance().getProperty( Constants.LATESTRELEASE_KEY ),
 				"VCAMP-Tool", KeyEvent.VK_S );
 	}
