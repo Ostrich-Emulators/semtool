@@ -19,7 +19,12 @@
  */
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Utility;
 
@@ -36,13 +41,24 @@ import org.openrdf.model.URI;
 /**
  * This class is used primarily for vertex filtering.
  */
-public class VertexColorShapeData extends AbstractTableModel {
+public class VertexColorShapeData extends AbstractTableModel implements GraphListener {
 
 	private static final long serialVersionUID = -8530913683566271008L;
 
 	private static final String[] columnNames = { "Node", "Instance", "Shape", "Color" };
 	private Map<URI, List<SEMOSSVertex>> nodeMap = new HashMap<>();
 	private List<ColorShapeRow> data = new ArrayList<>();
+
+	@Override
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+		generateAllRows( gps.getFilterData().getNodeTypeMap() );
+	}
+	
+	@Override
+	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+		// nothing to update in this case
+	}
 
 	/**
 	 * Fills the rows of vertex colors and shapes based on the vertex name and

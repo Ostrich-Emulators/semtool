@@ -19,26 +19,31 @@
  */
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
-
 import gov.va.semoss.util.Utility;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.openrdf.model.URI;
 
 /**
  * This class is used to keep track of all the properties within the tool.
  */
-public class ControlData {
+public class ControlData implements GraphListener {
 
 	private final ControlDataTable vertexCDT;
 	private final ControlDataTable edgeCDT;
@@ -69,6 +74,33 @@ public class ControlData {
 		vertexCDT = new ControlDataTable( vertexPropertyShow, propertyShowTT, propertyHide, new String[]{ "Node Type", "Property", "Label", "Tooltip" } );
 		edgeCDT = new ControlDataTable( edgePropertyShow, propertyShowTT, propertyHide, new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
 	}
+	
+	@Override
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+		clear();
+
+		for ( SEMOSSVertex vertex : graph.getVertices() ) {
+			for ( URI property : vertex.getProperties().keySet() ) {
+				addVertexProperty( vertex.getType(), property );
+			}
+		}
+
+		for ( SEMOSSEdge edge : graph.getEdges() ) {
+			for ( URI property : edge.getProperties().keySet() ) {
+				addEdgeProperty( edge.getType(), property );
+			}
+		}
+		
+		generateAllRows();
+	}
+	
+	@Override
+	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+		// nothing to update in this case
+	}
+
+
 
 	public void setEngine( IEngine e ) {
 		engine = e;

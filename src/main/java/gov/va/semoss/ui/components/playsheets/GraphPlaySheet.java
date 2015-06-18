@@ -161,15 +161,15 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		add( graphSplitPane, BorderLayout.CENTER );
 		LegendPanel2 legendPanel = new LegendPanel2();
 		add( legendPanel, BorderLayout.SOUTH );
-		addGraphListener( legendPanel );
 
 		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout<>( gdm.getGraph() );
 		view = new VisualizationViewer<>( layout );
 		initVisualizer( view );
 
 		controlData.setViewer( view );
+
 		controlPanel.setPlaySheet( this );
-		controlPanel.setGraphLayout( layout, gdm.getGraph() );
+		controlPanel.layoutChanged( gdm.getGraph(), null, layout );
 
 		GraphZoomScrollPane zoomer = new GraphZoomScrollPane( view );
 		zoomer.getVerticalScrollBar().setUI( new NewScrollBarUI() );
@@ -179,6 +179,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setBottomComponent( zoomer );
 
 		filterData = new VertexFilterData();
+		
+		addGraphListener( legendPanel );
+		addGraphListener( controlData );
+		addGraphListener( filterData );
+		addGraphListener( predData );
+		addGraphListener( colorShapeData );
+		addGraphListener( controlPanel );
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -291,25 +298,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
-		try {
-			setLayoutName( layoutName );
-
-			if ( gdm.enableSearchBar() ) {
-				controlPanel.getSearchController().indexGraph( gdm.getGraph(), getEngine() );
-			}
-
-			processControlData( gdm.getGraph() );
-			controlData.generateAllRows();
-			filterData.generateAllRows( gdm.getGraph() );
-			colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
-
-			setUndoRedoBtn();
-		}
-		catch ( Exception ex ) {
-			log.error( "problem adding panel to play sheet", ex );
-		}
-
+		setLayoutName( layoutName );
+		setUndoRedoBtn();
 		fireGraphUpdated();
+	}
+	
+	public boolean enableSearchBar() {
+		return gdm.enableSearchBar();
 	}
 
 	@Override
@@ -417,13 +412,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		log.debug( "Create layout from layoutName " + layoutName
 				+ ", and layoutClass " + layoutClass );
 
-		boolean ok = false;
-		Layout<SEMOSSVertex, SEMOSSEdge> layout = null;
-
 		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter
 				= new VertexPredicateFilter<>( predicate );
 		Graph<SEMOSSVertex, SEMOSSEdge> graph = filter.transform( gdm.getGraph() );
 
+		boolean ok = false;
+		Layout<SEMOSSVertex, SEMOSSEdge> layout = null;
 		try {
 			Constructor<?> constructor = layoutClass.getConstructor( Forest.class );
 			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( asForest() );
@@ -433,7 +427,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			log.warn( "no forest constructor for " + layoutName + " layout" );
 		}
 
-		if ( !ok ) {
+		if ( null == layout ) {
 			try {
 				Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
 				layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
@@ -447,9 +441,22 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		if ( null == layout ) {
 			layout = new FRLayout<>( graph );
 		}
+		
+		fitGraphinWindow();
+		view.setGraphLayout( layout );
 
-		// the following code tries to fit the graph to the available space
-		// it could work better
+		for ( GraphListener gl : listenees ) {
+			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName, layout );
+		}
+
+		return ok;
+	}
+	
+	/*
+	 * This method tries to fit the graph to the available space.
+	 * It could work better.
+	 */
+	private void fitGraphinWindow() {
 		MultiLayerTransformer mlt = view.getRenderContext().getMultiLayerTransformer();
 		double vscalex = mlt.getTransformer( Layer.VIEW ).getScaleX() * 1.1;
 		double vscaley = mlt.getTransformer( Layer.VIEW ).getScaleY() * 1.1;
@@ -460,23 +467,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		double scaley = 1 / vscalex;
 
 		mlt.getTransformer( Layer.LAYOUT ).setScale( scalex, scaley, view.getCenter() );
-		// end of space-allocation code
-
-		controlPanel.setGraphLayout( layout,
-				(DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph );
-		view.setGraphLayout( layout );
-
-		for ( GraphListener gl : listenees ) {
-			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName,
-					this.layoutName );
-		}
-
-		return ok;
 	}
 
 	public void fireGraphUpdated() {
 		for ( GraphListener gl : listenees ) {
-			gl.graphUpdated( gdm.getGraph() );
+			try {
+				gl.graphUpdated( gdm.getGraph(), this );
+			}
+			catch ( Exception ex ) {
+				log.error( "Error updating graph for GraphListener " + gl + ": " + ex, ex );
+			}
 		}
 	}
 
@@ -561,27 +561,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 //		}
 //
 //		return listOfChilds;
-	}
-
-	private void processControlData( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		controlData.clear();
-
-		for ( SEMOSSVertex vertex : graph.getVertices() ) {
-			for ( URI property : vertex.getProperties().keySet() ) {
-				controlData.addVertexProperty( vertex.getType(), property );
-			}
-		}
-
-		for ( SEMOSSEdge edge : graph.getEdges() ) {
-			for ( URI property : edge.getProperties().keySet() ) {
-				controlData.addEdgeProperty( edge.getType(), property );
-			}
-
-			//add to pred data
-			predData.addPredicateAvailable( edge.getURI().stringValue() );
-			predData.addConceptAvailable( edge.getInVertex().getURI().stringValue() );
-			predData.addConceptAvailable( edge.getOutVertex().getURI().stringValue() );
-		}
 	}
 
 	/**

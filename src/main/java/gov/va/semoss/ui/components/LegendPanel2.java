@@ -19,23 +19,24 @@
  */
 package gov.va.semoss.ui.components;
 
-import static com.hp.hpl.jena.sparql.vocabulary.TestManifestUpdate_11.data;
+import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
+
 import java.awt.Color;
 import java.awt.Shape;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import java.util.Objects;
+
 import javax.swing.JPanel;
 
 import org.openrdf.model.URI;
@@ -56,7 +57,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 	}
 
 	@Override
-	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
 		MultiMap<URI, SEMOSSVertex> types = new MultiMap<>();
 		Map<URI, Shape> shapes = new HashMap<>();
 		Map<URI, Color> colors = new HashMap<>();
@@ -91,7 +92,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldlayout, String newlayout ) {
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
 		// nothing to update in this case
 	}
 

@@ -19,6 +19,13 @@
  */
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -29,7 +36,7 @@ import org.apache.log4j.Logger;
  * This is the core class used to show which classes are data properties as
  * opposed to object properties.
  */
-public class PropertySpecData {
+public class PropertySpecData implements GraphListener{
 
 	// for every predicate
 	// get the predicate class name upto the URI
@@ -68,6 +75,22 @@ public class PropertySpecData {
 	Hashtable<String, String> propertyHash = new Hashtable<String, String>();
 
 	Logger logger = Logger.getLogger( getClass() );
+
+	@Override
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+		for ( SEMOSSEdge edge : graph.getEdges() ) {
+			//add to pred data
+			addPredicateAvailable( edge.getURI().stringValue() );
+			addConceptAvailable( edge.getInVertex().getURI().stringValue() );
+			addConceptAvailable( edge.getOutVertex().getURI().stringValue() );
+		}
+	}
+	
+	@Override
+	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+		// nothing to update in this case
+	}
 
 	/**
 	 * Adds predicates to the hashtable.
