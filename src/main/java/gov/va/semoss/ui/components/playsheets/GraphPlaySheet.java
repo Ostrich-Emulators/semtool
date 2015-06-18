@@ -49,6 +49,8 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.Layer;
+import edu.uci.ics.jung.visualization.MultiLayerTransformer;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -169,12 +171,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		controlPanel.setPlaySheet( this );
 		controlPanel.setGraphLayout( layout, gdm.getGraph() );
 
-		GraphZoomScrollPane gzPane = new GraphZoomScrollPane( view );
-		gzPane.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		gzPane.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
+		GraphZoomScrollPane zoomer = new GraphZoomScrollPane( view );
+		zoomer.getVerticalScrollBar().setUI( new NewScrollBarUI() );
+		zoomer.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
 
 		graphSplitPane.setTopComponent( controlPanel );
-		graphSplitPane.setBottomComponent( gzPane );
+		graphSplitPane.setBottomComponent( zoomer );
 
 		filterData = new VertexFilterData();
 	}
@@ -448,6 +450,20 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			layout = new FRLayout<>( graph );
 		}
 
+		// the following code tries to fit the graph to the available space
+		// it could work better
+		MultiLayerTransformer mlt = view.getRenderContext().getMultiLayerTransformer();
+		double vscalex = mlt.getTransformer( Layer.VIEW ).getScaleX() * 1.1;
+		double vscaley = mlt.getTransformer( Layer.VIEW ).getScaleY() * 1.1;
+
+		// Dimension d = view.getSize();
+		// d.setSize( d.getWidth() / vscalex, d.getHeight() / vscaley );
+		double scalex = 1 / vscaley;
+		double scaley = 1 / vscalex;
+
+		mlt.getTransformer( Layer.LAYOUT ).setScale( scalex, scaley, view.getCenter() );
+		// end of space-allocation code
+
 		controlPanel.setGraphLayout( layout,
 				(DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph );
 		view.setGraphLayout( layout );
@@ -460,12 +476,12 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return ok;
 	}
 
-	public void fireGraphUpdated(){
-		for( GraphListener gl : listenees ){
+	public void fireGraphUpdated() {
+		for ( GraphListener gl : listenees ) {
 			gl.graphUpdated( gdm.getGraph() );
 		}
 	}
-	
+
 	public void addGraphListener( GraphListener gl ) {
 		listenees.add( gl );
 	}
@@ -773,6 +789,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return new HashSet<>( est.getSelected() );
 	}
 
+	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
+		colorShapeData.setColors( vertices, color );
+		view.repaint();
+	}
+
+	public void setShapes( Collection<SEMOSSVertex> vertices, String shape ) {
+		colorShapeData.setShapes( vertices, shape );
+		view.repaint();
+	}
+
 	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
 
 		Predicate<SEMOSSEdge> edgehider = new Predicate<SEMOSSEdge>() {
@@ -822,16 +848,5 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		public boolean evaluate( SEMOSSVertex v ) {
 			return ( v.isVisible() && v.getLevel() <= overlayLevel );
 		}
-	}
-
-	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
-		colorShapeData.setColors( vertices, color );
-		this.fireGraphUpdated();
-		view.repaint();
-	}
-
-	public void setShapes( Collection<SEMOSSVertex> vertices, String shape ) {
-		colorShapeData.setShapes( vertices, shape );
-		view.repaint();
 	}
 }
