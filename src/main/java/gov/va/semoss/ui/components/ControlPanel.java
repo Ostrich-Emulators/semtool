@@ -28,6 +28,7 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.search.SearchController;
+import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.main.listener.impl.GraphTransformerResetListener;
 import gov.va.semoss.ui.main.listener.impl.GraphVertexSizeListener;
@@ -45,8 +46,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
@@ -66,7 +65,7 @@ import javax.swing.border.BevelBorder;
  * @author karverma
  * @version $Revision: 1.0 $
  */
-public class ControlPanel extends JPanel {
+public class ControlPanel extends JPanel implements GraphListener{
 
 	private static final long serialVersionUID = 3128479498547975776L;
 
@@ -160,6 +159,28 @@ public class ControlPanel extends JPanel {
 		buildLayout();
 	}
 
+	@Override
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+		if ( gps.enableSearchBar() ) {
+			searchController.indexGraph( graph, gps.getEngine() );
+		}
+	}
+	
+	@Override
+	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+		if ( newlayout instanceof BalloonLayout || newlayout instanceof RadialTreeLayout ) {
+			ringsListener.setGraph( new DelegateForest<>( graph ) );
+			ringsButton.setEnabled( true );
+		}
+		else {
+			ringsButton.setEnabled( false );
+			ringsButton.setSelected( false );
+		}
+
+		ringsListener.setLayout( newlayout );
+	}
+
 	private void buildLayout() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{ 0, 0 };
@@ -214,25 +235,6 @@ public class ControlPanel extends JPanel {
 	}
 
 	/**
-	 * Sets the graph layout.
-	 *
-	 * @param lay Layout
-	 */
-	public void setGraphLayout( Layout<SEMOSSVertex, SEMOSSEdge> lay,
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		if ( lay instanceof BalloonLayout || lay instanceof RadialTreeLayout ) {
-			ringsListener.setGraph( new DelegateForest<>( graph ) );
-			ringsButton.setEnabled( true );
-		}
-		else {
-			ringsButton.setEnabled( false );
-			ringsButton.setSelected( false );
-		}
-
-		ringsListener.setLayout( lay );
-	}
-
-	/**
 	 * Sets the playsheet for all necessary listeners.
 	 *
 	 * @param _gps GraphPlaySheet
@@ -264,9 +266,5 @@ public class ControlPanel extends JPanel {
 
 	public void clickTreeButton() {
 		treeButton.doClick();
-	}
-
-	public SearchController getSearchController() {
-		return searchController;
 	}
 }

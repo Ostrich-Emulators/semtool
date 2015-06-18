@@ -19,13 +19,16 @@
  */
 package gov.va.semoss.ui.components;
 
-import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.models.FilterRowModel;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
-
 import gov.va.semoss.util.MultiMap;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,7 +40,7 @@ import org.openrdf.model.URI;
 /**
  * This class is used to filter vertex data.
  */
-public class VertexFilterData {
+public class VertexFilterData implements GraphListener {
 
 	// Maps to retrieve nodes by type and by URI
 
@@ -50,11 +53,18 @@ public class VertexFilterData {
 	private final Map<URI, SEMOSSEdge> edgeMap = new HashMap<>();
 	private List<FilterRowModel> edges = new ArrayList<>();
 
-	public void generateAllRows( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
+	@Override
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
 		populateNodeMaps( graph.getVertices() );
 		populateEdgeMaps( graph.getEdges() );
 		fillNodeRows();
 		fillEdgeRows();
+	}
+	
+	@Override
+	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+		// nothing to update in this case
 	}
 
 	/**
