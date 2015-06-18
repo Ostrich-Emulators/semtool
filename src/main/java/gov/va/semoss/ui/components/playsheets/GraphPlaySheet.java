@@ -792,11 +792,13 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
 		colorShapeData.setColors( vertices, color );
 		view.repaint();
+		fireGraphUpdated();
 	}
 
 	public void setShapes( Collection<SEMOSSVertex> vertices, String shape ) {
 		colorShapeData.setShapes( vertices, shape );
 		view.repaint();
+		fireGraphUpdated();
 	}
 
 	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
