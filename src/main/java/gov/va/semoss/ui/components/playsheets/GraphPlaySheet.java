@@ -309,9 +309,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			log.error( "problem adding panel to play sheet", ex );
 		}
 
-		for ( GraphListener gl : listenees ) {
-			gl.graphUpdated( gdm.getGraph() );
-		}
+		fireGraphUpdated();
 	}
 
 	@Override
