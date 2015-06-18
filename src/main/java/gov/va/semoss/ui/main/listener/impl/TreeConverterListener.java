@@ -22,14 +22,10 @@ package gov.va.semoss.ui.main.listener.impl;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 
 import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
-import edu.uci.ics.jung.graph.Forest;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
@@ -39,7 +35,6 @@ import java.awt.event.ItemListener;
 import java.util.Collection;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.apache.log4j.Logger;
 
 /**
  * Controls converting the graph to a tree layout.

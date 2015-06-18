@@ -98,7 +98,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
 	private JSplitPane graphSplitPane;
 	private ControlPanel controlPanel;
-	private LegendPanel2 legendPanel = new LegendPanel2();
 
 	private VertexColorShapeData colorShapeData = new VertexColorShapeData();
 
@@ -158,7 +157,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		setLayout( new BorderLayout() );
 		add( graphSplitPane, BorderLayout.CENTER );
+		LegendPanel2 legendPanel = new LegendPanel2();
 		add( legendPanel, BorderLayout.SOUTH );
+		addGraphListener( legendPanel );
 
 		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout<>( gdm.getGraph() );
 		view = new VisualizationViewer<>( layout );
@@ -176,7 +177,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setBottomComponent( gzPane );
 
 		filterData = new VertexFilterData();
-		paintLegendPanel();
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -300,7 +300,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			controlData.generateAllRows();
 			filterData.generateAllRows( gdm.getGraph() );
 			colorShapeData.generateAllRows( filterData.getNodeTypeMap() );
-			paintLegendPanel();
 
 			setUndoRedoBtn();
 		}
@@ -459,6 +458,20 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		return ok;
+	}
+
+	public void fireGraphUpdated(){
+		for( GraphListener gl : listenees ){
+			gl.graphUpdated( gdm.getGraph() );
+		}
+	}
+	
+	public void addGraphListener( GraphListener gl ) {
+		listenees.add( gl );
+	}
+
+	public void removeGraphListener( GraphListener gl ) {
+		listenees.remove( gl );
 	}
 
 	public VisualizationViewer<SEMOSSVertex, SEMOSSEdge> getView() {
@@ -669,10 +682,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	public void run() {
 	}
 
-	public void paintLegendPanel() {
-		legendPanel.drawLegend( filterData );
-	}
-
 	@Override
 	public void incrementFont( float incr ) {
 		super.incrementFont( incr );
@@ -817,6 +826,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
 		colorShapeData.setColors( vertices, color );
+		this.fireGraphUpdated();
 		view.repaint();
 	}
 
