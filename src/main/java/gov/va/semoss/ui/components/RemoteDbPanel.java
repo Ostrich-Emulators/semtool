@@ -7,7 +7,6 @@ package gov.va.semoss.ui.components;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.prefs.Preferences;
 
 /**
  *
@@ -36,14 +35,8 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 
 		remoteurl.setText( ext );
 
-		if ( inter.equals( INTERNAL.toExternalForm() ) ) {
-			internal.setSelected( true );
-		}
-		else {
-			external.setSelected( true );
-			insightsurl.setEnabled( true );
-			insightsurl.setText( inter );
-		}
+		insightsurl.setEnabled( true );
+		insightsurl.setText( inter );
 	}
 
 	public URL getUrl() throws MalformedURLException {
@@ -51,10 +44,6 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 	}
 
 	public URL getInsights() throws MalformedURLException {
-		if ( internal.isSelected() ) {
-			return INTERNAL;
-		}
-
 		return new URL( insightsurl.getText() );
 	}
 
@@ -70,68 +59,30 @@ public class RemoteDbPanel extends javax.swing.JPanel {
     buttonGroup1 = new javax.swing.ButtonGroup();
     jLabel1 = new javax.swing.JLabel();
     remoteurl = new javax.swing.JTextField();
-    jPanel1 = new javax.swing.JPanel();
-    internal = new javax.swing.JRadioButton();
-    external = new javax.swing.JRadioButton();
     insightsurl = new javax.swing.JTextField();
+    jLabel2 = new javax.swing.JLabel();
 
     jLabel1.setText("Remote URL");
 
-    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "Insights Database"));
-
-    buttonGroup1.add(internal);
-    internal.setSelected(true);
-    internal.setText("Internal");
-    internal.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        internalActionPerformed(evt);
-      }
-    });
-
-    buttonGroup1.add(external);
-    external.setText("External");
-    external.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        externalActionPerformed(evt);
-      }
-    });
-
     insightsurl.setEnabled(false);
 
-    javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-    jPanel1.setLayout(jPanel1Layout);
-    jPanel1Layout.setHorizontalGroup(
-      jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(jPanel1Layout.createSequentialGroup()
-        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(external)
-          .addComponent(internal))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(insightsurl))
-    );
-    jPanel1Layout.setVerticalGroup(
-      jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(jPanel1Layout.createSequentialGroup()
-        .addComponent(internal)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(external)
-          .addComponent(insightsurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addGap(0, 1, Short.MAX_VALUE))
-    );
+    jLabel2.setText("Insights URL");
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+      .addGroup(layout.createSequentialGroup()
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(layout.createSequentialGroup()
-            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(remoteurl, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE)))
-        .addGap(0, 0, 0))
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+            .addGap(0, 0, 0))
+          .addGroup(layout.createSequentialGroup()
+            .addComponent(jLabel2)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+          .addComponent(insightsurl, javax.swing.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
+          .addComponent(remoteurl)))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -140,27 +91,18 @@ public class RemoteDbPanel extends javax.swing.JPanel {
           .addComponent(jLabel1)
           .addComponent(remoteurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(0, 0, Short.MAX_VALUE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(insightsurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(jLabel2)))
     );
   }// </editor-fold>//GEN-END:initComponents
-
-  private void externalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_externalActionPerformed
-		insightsurl.setEnabled( external.isSelected() );
-  }//GEN-LAST:event_externalActionPerformed
-
-  private void internalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_internalActionPerformed
-		insightsurl.setEnabled( external.isSelected() );
-  }//GEN-LAST:event_internalActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroup1;
-  private javax.swing.JRadioButton external;
   private javax.swing.JTextField insightsurl;
-  private javax.swing.JRadioButton internal;
   private javax.swing.JLabel jLabel1;
-  private javax.swing.JPanel jPanel1;
+  private javax.swing.JLabel jLabel2;
   private javax.swing.JTextField remoteurl;
   // End of variables declaration//GEN-END:variables
 }

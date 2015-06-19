@@ -51,7 +51,7 @@ public class RemoteDbAction extends DbAction {
 		RemoteDbPanel panel = new RemoteDbPanel( prefs.get( "lastexturl", "http://" ),
 				prefs.get( "lastinsighturl", "http://" ) );
 
-		String options[] = { "Open", "Cancel" };
+		String options[] = { "Connect", "Cancel" };
 		int opt = JOptionPane.showOptionDialog( frame, panel, "Open Remote DB",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
 				options[0] );
