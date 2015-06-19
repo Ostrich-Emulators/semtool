@@ -18,7 +18,6 @@
  ******************************************************************************/
 package gov.va.semoss.ui.main.listener.impl;
 
-import java.awt.event.ActionEvent;
 
 import javax.swing.JComponent;
 
@@ -30,21 +29,6 @@ import gov.va.semoss.ui.components.api.IChakraListener;
 public abstract class AbstractListener implements IChakraListener {
 	
 	JComponent parentView = null;
-	JComponent rightView = null;	
-
-	/**
-	 * Method actionPerformed.  Dictates what actions to take when an Action Event is performed.
-	 * @param arg0 ActionEvent - The event that triggers the actions in the method.
-	 */
-	@Override
-	public abstract void actionPerformed(ActionEvent arg0); 
-	
-	/**
-	 * Method setView. Sets a JComponent that the listener will access and/or modify when an action event occurs.  
-	 * @param view the component that the listener will access
-	 */
-	@Override
-	public abstract void setView(JComponent view);
-	
+	JComponent rightView = null;
 
 }

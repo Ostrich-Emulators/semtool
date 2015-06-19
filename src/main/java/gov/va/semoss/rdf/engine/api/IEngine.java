@@ -44,7 +44,7 @@ import org.openrdf.model.Model;
  * @author karverma
  * @version $Revision: 1.0 $
  */
-public interface IEngine extends IExplorable {
+public interface IEngine {
 
 	/**
 	 * This specifies the type of the engine and determines what API should be
@@ -213,6 +213,7 @@ public interface IEngine extends IExplorable {
 	public void setSchemaBuilder( UriBuilder bldr );
 
 	public void setDataBuilder( UriBuilder bldr );
+
 	/**
 	 * Gets a URI builder for constructing OWL metamodel URIs
 	 *
@@ -328,4 +329,9 @@ public interface IEngine extends IExplorable {
 	public org.openrdf.model.URI getBaseUri();
 
 	public WriteableInsightManager getWriteableInsightManager();
+
+	// gets the insight database
+	public InsightManager getInsightManager();
+
+	public void setInsightManager( InsightManager eng );
 }

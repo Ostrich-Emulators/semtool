@@ -32,8 +32,6 @@ import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 import com.bigdata.rdf.sail.CreateKBTask;
-import com.bigdata.rdf.sail.remote.BigdataSailRemoteRepository;
-import com.bigdata.rdf.sail.remote.BigdataSailRemoteRepositoryConnection;
 import com.bigdata.rdf.sail.webapp.NanoSparqlServer;
 import com.bigdata.rdf.store.AbstractTripleStore;
 import com.bigdata.rdf.task.AbstractApiTask;

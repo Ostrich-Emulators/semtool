@@ -42,5 +42,5 @@ public class SesameEngine extends AbstractSesameEngine {
 	protected InsightManager createInsightManager() {
 		InsightManagerImpl imi = new InsightManagerImpl( insights );
 		return imi;
-	}
+	}	
 }

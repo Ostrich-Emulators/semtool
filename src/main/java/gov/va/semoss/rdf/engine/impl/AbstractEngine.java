@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -36,14 +34,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -62,38 +58,6 @@ public abstract class AbstractEngine implements IEngine {
 	private UriBuilder schemabuilder;
 	private UriBuilder databuilder;
 	private URI baseuri;
-
-	public static final String fromSparql = "SELECT DISTINCT ?entity WHERE { "
-			+ "{?rel <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://semoss.org/ontologies/Relation>} "
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://semoss.org/ontologies/Concept>} "
-			+ "{?x ?rel  ?y} "
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?x}"
-			+ "{?nodeType <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?y}"
-			+ "}";
-
-	public static final String toSparql = "SELECT DISTINCT ?entity WHERE { "
-			+ "{?rel <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://semoss.org/ontologies/Relation>} "
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://semoss.org/ontologies/Concept>} "
-			+ "{?x ?rel ?y} "
-			+ "{?nodeType <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?x}"
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?y}"
-			+ "}";
-
-	public static final String fromSparqlWithVerbs = "SELECT DISTINCT ?rel ?entity WHERE { "
-			+ "{?rel <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://semoss.org/ontologies/Relation>} "
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://semoss.org/ontologies/Concept>} "
-			+ "{?x ?rel  ?y} "
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?x}"
-			+ "{?nodeType <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?y}"
-			+ "}";
-
-	public static final String toSparqlWithVerbs = "SELECT DISTINCT ?rel ?entity WHERE { "
-			+ "{?rel <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://semoss.org/ontologies/Relation>} "
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://semoss.org/ontologies/Concept>} "
-			+ "{?x ?rel ?y} "
-			+ "{?nodeType <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?x}"
-			+ "{?entity <http://www.w3.org/2000/01/rdf-schema#subClassOf>* ?y}"
-			+ "}";
 
 	/**
 	 * Opens the database. This function calls (in this order) {@link #loadAllProperties(java.util.Properties,
@@ -146,7 +110,7 @@ public abstract class AbstractEngine implements IEngine {
 	 * @throws org.openrdf.repository.RepositoryException
 	 */
 	protected void loadLegacyInsights( Properties props ) throws RepositoryException {
-		log.warn( "" );
+		log.warn( "this engine type does load legacy insights" );
 	}
 
 	/**
@@ -378,49 +342,6 @@ public abstract class AbstractEngine implements IEngine {
 		}
 	}
 
-	// gets the from and to nodes
-	@Override
-	public Collection<String> getNeighbors( String nodeType, int neighborHood ) {
-		Collection<String> from = getFromNeighbors( nodeType, 0 );
-		Collection<String> to = getToNeighbors( nodeType, 0 );
-		from.addAll( to );
-		return from;
-	}
-
-	// gets the from neighborhood for a given node
-	@Override
-	public Collection<String> getFromNeighbors( String nodeType, int neighborHood ) {
-		// this is where this node is the from node
-		OneVarListQueryAdapter<String> qea
-				= OneVarListQueryAdapter.getStringList( fromSparql, "entity" );
-		qea.bindURI( "nodeType", nodeType );
-
-		try {
-			return query( qea );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-		}
-		return new ArrayList<>();
-	}
-
-	// gets the to nodes
-	@Override
-	public Collection<String> getToNeighbors( String nodeType, int neighborHood ) {
-		// this is where this node is the to node
-		OneVarListQueryAdapter<String> qea
-				= OneVarListQueryAdapter.getStringList( toSparql, "entity" );
-		qea.bindURI( "nodeType", nodeType );
-
-		try {
-			return query( qea );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-		}
-		return new ArrayList<>();
-	}
-
 	@Override
 	public InsightManager getInsightManager() {
 		return insightEngine;
@@ -565,8 +486,8 @@ public abstract class AbstractEngine implements IEngine {
 
 	@Override
 	public void startServer( int port ) {
-		log.error(
-				"Server mode is not supported. Please check isServerSupported() before calling startServer(int)" );
+		log.error(	"Server mode is not supported. Please check isServerSupported() "
+				+ "before calling startServer(int)" );
 	}
 
 	@Override

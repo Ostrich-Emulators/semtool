@@ -49,25 +49,17 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	private static final Logger log = Logger.getLogger( InMemorySesameEngine.class );
 	private RepositoryConnection rc = null;
 	private boolean iControlMyRc = false;
-	private RepositoryConnection insights = null;
-	private boolean iControlMyInsights = false;
 
 	public InMemorySesameEngine() {
 		createRc( new Properties() );
 	}
-	
+
 	public InMemorySesameEngine( RepositoryConnection rc ) {
 		setRepositoryConnection( rc, false );
 	}
 
 	public InMemorySesameEngine( RepositoryConnection rc, boolean takeControl ) {
 		setRepositoryConnection( rc, takeControl );
-	}
-
-	public InMemorySesameEngine( RepositoryConnection data, RepositoryConnection insights,
-			boolean datacontrol, boolean insightscontrol ) {
-		setRepositoryConnection( rc, datacontrol );
-		setInsightsConnection( insights, insightscontrol );
 	}
 
 	@Override
@@ -138,13 +130,6 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		}
 	}
 
-	private void setInsightsConnection( RepositoryConnection rc,
-			boolean takeControl ) {
-
-		this.insights = rc;
-		iControlMyInsights = takeControl;
-	}
-
 	public void setBuilders( UriBuilder data, UriBuilder schema ) {
 		this.setDataBuilder( data );
 		this.setSchemaBuilder( schema );
@@ -194,23 +179,9 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			catch ( Exception e ) {
 				log.error( e, e );
 			}
-		}
 
-		if ( iControlMyInsights ) {
-			try {
-				insights.close();
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
-
-			Repository repo = insights.getRepository();
-			try {
-				repo.shutDown();
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
+			rc = null;
 		}
+		super.closeDB();
 	}
 }
