@@ -289,8 +289,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	@Override
-	public
-			void closeTab( PlaySheetCentralComponent c ) {
+	public void closeTab( PlaySheetCentralComponent c ) {
 		if ( c instanceof RelationshipLoadingPlaySheet ) {
 			sheets.remove( RelationshipLoadingPlaySheet.class
 					.cast( c ) );
@@ -675,6 +674,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			ImportData data = ImportData.forEngine( getEngine() );
 			fillImportData( data, dogoods, dobads );
 
+			for ( LoadingSheetData lsd : data.getSheets() ) {
+				if ( lsd.getName().isEmpty() ) {
+
+				}
+			}
+
 			XlsWriter writer = new XlsWriter();
 			writer.write( data, file );
 		}
@@ -699,12 +704,17 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						}
 					}
 
-					tofill.add( newrels );
+					if ( !( newrels.isEmpty() || newrels.getName().isEmpty() ) ) {
+						tofill.add( newrels );
+					}
 				}
 				else {
 					newlsd = lsd.getLoadingModel().toLoadingSheet( tabname );
 					if ( dogoods ) {
-						tofill.add( newlsd );
+
+						if ( !( newlsd.isEmpty() || newlsd.getName().isEmpty() ) ) {
+							tofill.add( newlsd );
+						}
 					}
 				}
 			}
