@@ -128,6 +128,7 @@ import com.ibm.icu.util.StringTokenizer;
 
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 import gov.va.semoss.ui.actions.ExportGraphAction;
+import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 
@@ -249,6 +250,7 @@ public class PlayPane extends JFrame {
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
 	private final OpenAction importxls = new OpenAction( UIPROGRESS, this );
+	private final RemoteDbAction remoteDb = new RemoteDbAction( UIPROGRESS, this );
 	private final NewLoadingSheetAction newls
 			= new NewLoadingSheetAction( UIPROGRESS, this );
 	private final ImportInsightsAction resetInsights
@@ -1774,6 +1776,9 @@ public class PlayPane extends JFrame {
 		jmi.setText( "Open..." );
 		jmi.setToolTipText( "Open Files to Import" );
 		jmi.setMnemonic( KeyEvent.VK_O );
+		
+		fileMenu.add( remoteDb );
+		
 		fileMenu.addSeparator();
 		fileMenu.add( unmounter );
 		unmounter.setEnabled( false );

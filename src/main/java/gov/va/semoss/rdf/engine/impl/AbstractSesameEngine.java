@@ -76,7 +76,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
-import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
@@ -215,7 +214,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		try {
 			query( q );
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
 		}
 		return baseuri;
@@ -292,6 +291,25 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			}
 		}
 
+		if ( null != getRawConnection() ) {
+			RepositoryConnection rc = getRawConnection();
+			if ( null != rc ) {
+				try {
+					rc.close();
+				}
+				catch ( Exception e ) {
+					log.warn( "could not close repo connection", e );
+				}
+
+				try {
+					rc.getRepository().shutDown();
+				}
+				catch ( Exception e ) {
+					log.warn( "could not close repo", e );
+				}
+			}
+		}
+
 		super.closeDB();
 	}
 
@@ -326,49 +344,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		catch ( IOException e ) {
 			log.debug( e );
 		}
-	}
-
-	// gets the from neighborhood for a given node
-	public Map<String, List<String>> getFromNeighborsWithVerbs( String nodeType,
-			int neighborHood ) {
-		// this is where this node is the from node
-		final Map<String, List<String>> ret = new HashMap<>();
-		QueryExecutor<Void> vqa = new QueryExecutorAdapter<Void>(
-				fromSparqlWithVerbs ) {
-					@Override
-					public void handleTuple( BindingSet set, ValueFactory fac ) {
-						String verb = set.getValue( "ret" ).stringValue();
-						String node = set.getValue( "entity" ).stringValue();
-						if ( !ret.containsKey( verb ) ) {
-							ret.put( verb, new ArrayList<>() );
-						}
-						ret.get( verb ).add( node );
-					}
-				};
-		vqa.bindURI( "noteType", nodeType );
-		getSelectNoEx( vqa, owlRc, true );
-		return ret;
-	}
-
-	// gets the to nodes
-	public Map<String, List<String>> getToNeighborsWithVerbs( String nodeType,
-			int neighborHood ) {
-		// this is where this node is the to node
-		final Map<String, List<String>> ret = new HashMap<>();
-		QueryExecutor<Void> vqa = new QueryExecutorAdapter<Void>( toSparqlWithVerbs ) {
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				String verb = set.getValue( "ret" ).stringValue();
-				String node = set.getValue( "entity" ).stringValue();
-				if ( !ret.containsKey( verb ) ) {
-					ret.put( verb, new ArrayList<>() );
-				}
-				ret.get( verb ).add( node );
-			}
-		};
-		vqa.bindURI( "noteType", nodeType );
-		getSelectNoEx( vqa, owlRc, true );
-		return ret;
 	}
 
 	public static String processNamespaces( String rawsparql ) {
@@ -528,31 +503,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	@Override
-	public boolean serverIsRunning() {
-		return false;
-	}
-
-	@Override
-	public boolean isServerSupported() {
-		return false;
-	}
-
-	@Override
-	public void startServer( int port ) {
-		log.error(
-				"Server mode is not supported. Please check isServerSupported() before calling startServer(int)" );
-	}
-
-	@Override
-	public void stopServer() {
-	}
-
-	@Override
-	public java.net.URI getServerUri() {
-		return null;
-	}
-
 	/**
 	 * Does this engine support binding variables within the Sparql execution?
 	 *
@@ -594,11 +544,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		catch ( RepositoryException e ) {
 			log.warn( "could not update last modified date", e );
 		}
-	}
-
-	@Override
-	public void calculateInferences() throws RepositoryException {
-		// nothing to do
 	}
 
 	@Override

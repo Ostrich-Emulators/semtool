@@ -157,13 +157,6 @@ public class BigDataEngine extends AbstractSesameEngine {
 		//src.close();
 		insightrc.close();
 
-//    log.debug( "insight statements: " + stmts.size() );
-//    try ( Writer w = new BufferedWriter( new FileWriter( new File( "/tmp/ikb-" + getEngineName() + ".nt" ) ) ) ) {
-//      src.export( new NTriplesWriter( w ) );
-//    }
-//    catch ( Exception e ) {
-//      log.error( e, e );
-//    }
 		return insightEngine;
 	}
 
