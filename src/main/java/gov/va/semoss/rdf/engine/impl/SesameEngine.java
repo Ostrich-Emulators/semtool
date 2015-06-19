@@ -18,9 +18,6 @@ import org.openrdf.repository.http.HTTPRepository;
  */
 public class SesameEngine extends AbstractSesameEngine {
 
-	public static final String REPOSITORY_KEY = "repository";
-	public static final String INSIGHTS_KEY = "insights";
-
 	private Repository insights;
 	private RepositoryConnection data;
 
@@ -31,7 +28,7 @@ public class SesameEngine extends AbstractSesameEngine {
 
 		Repository repo = new HTTPRepository( url );
 		repo.initialize();
-		
+
 		data = repo.getConnection();
 		insights = new HTTPRepository( ins );
 	}
@@ -45,5 +42,5 @@ public class SesameEngine extends AbstractSesameEngine {
 	protected InsightManager createInsightManager() {
 		InsightManagerImpl imi = new InsightManagerImpl( insights );
 		return imi;
-	}	
+	}
 }

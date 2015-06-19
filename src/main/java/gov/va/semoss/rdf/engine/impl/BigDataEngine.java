@@ -32,6 +32,8 @@ import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 import com.bigdata.rdf.sail.CreateKBTask;
+import com.bigdata.rdf.sail.remote.BigdataSailRemoteRepository;
+import com.bigdata.rdf.sail.remote.BigdataSailRemoteRepositoryConnection;
 import com.bigdata.rdf.sail.webapp.NanoSparqlServer;
 import com.bigdata.rdf.store.AbstractTripleStore;
 import com.bigdata.rdf.task.AbstractApiTask;
@@ -75,39 +77,47 @@ public class BigDataEngine extends AbstractSesameEngine {
 	@Override
 	protected void createRc( Properties props ) throws RepositoryException {
 		Properties rws = getRWSProperties( props );
+		boolean isremote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY, "false" ) );
 
-		// the journal is the file itself
-		journal = new Journal( rws );
-
-		// the main KB
-		rws.setProperty( BigdataSail.Options.NAMESPACE, "kb" );
-		CreateKBTask ctor = new CreateKBTask( "kb", rws );
-		try {
-			AbstractApiTask.submitApiTask( journal, ctor ).get();
-			AbstractTripleStore triples
-					= AbstractTripleStore.class.cast( journal.getResourceLocator().
-							locate( "kb", ITx.UNISOLATED ) );
-
-			sail = new BigdataSail( triples );
-			repo = new BigdataSailRepository( sail );
-			repo.initialize();
-
-			// the insights KB
-			rws.setProperty( BigdataSail.Options.NAMESPACE, Constants.INSIGHTKB );
-			CreateKBTask ctor2 = new CreateKBTask( Constants.INSIGHTKB, rws );
-			AbstractApiTask.submitApiTask( journal, ctor2 ).get();
-			AbstractTripleStore insights
-					= AbstractTripleStore.class.cast( journal.getResourceLocator().
-							locate( Constants.INSIGHTKB, ITx.UNISOLATED ) );
-			BigdataSail insightSail = new BigdataSail( insights );
-			insightrepo = new BigdataSailRepository( insightSail );
-			insightrepo.initialize();
+		if ( isremote ) {
+			String url = props.getProperty( REPOSITORY_KEY );
+			String ins = props.getProperty( INSIGHTS_KEY );
+			log.debug( "big data remote! " + url + " ... " + ins );
+			throw new UnsupportedOperationException( "Remote Bigdata repositories are not yet supported" );
 		}
-		catch ( InterruptedException | ExecutionException e ) {
-			log.fatal( e, e );
-		}
+		else {
+			// the journal is the file itself
+			journal = new Journal( rws );
 
-		rc = repo.getConnection();
+			// the main KB
+			rws.setProperty( BigdataSail.Options.NAMESPACE, "kb" );
+			CreateKBTask ctor = new CreateKBTask( "kb", rws );
+			try {
+				AbstractApiTask.submitApiTask( journal, ctor ).get();
+				AbstractTripleStore triples
+						= AbstractTripleStore.class.cast( journal.getResourceLocator().
+								locate( "kb", ITx.UNISOLATED ) );
+
+				sail = new BigdataSail( triples );
+				repo = new BigdataSailRepository( sail );
+				repo.initialize();
+
+				// the insights KB
+				rws.setProperty( BigdataSail.Options.NAMESPACE, Constants.INSIGHTKB );
+				CreateKBTask ctor2 = new CreateKBTask( Constants.INSIGHTKB, rws );
+				AbstractApiTask.submitApiTask( journal, ctor2 ).get();
+				AbstractTripleStore insights
+						= AbstractTripleStore.class.cast( journal.getResourceLocator().
+								locate( Constants.INSIGHTKB, ITx.UNISOLATED ) );
+				BigdataSail insightSail = new BigdataSail( insights );
+				insightrepo = new BigdataSailRepository( insightSail );
+				insightrepo.initialize();
+			}
+			catch ( InterruptedException | ExecutionException e ) {
+				log.fatal( e, e );
+			}
+			rc = repo.getConnection();
+		}
 	}
 
 	@Override
@@ -124,9 +134,11 @@ public class BigDataEngine extends AbstractSesameEngine {
 		String jnlName
 				= rws.getProperty( BigdataSail.Options.FILE, getEngineName() + ".jnl" );
 		// fix the path for the jnl file
-		File jnl = searchFor( jnlName, searchpath );
-
-		ret.put( BigdataSail.Options.FILE, jnl.toString() );
+		boolean isremote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY, "false" ) );
+		if ( !isremote ) {
+			File jnl = searchFor( jnlName, searchpath );
+			ret.put( BigdataSail.Options.FILE, jnl.toString() );
+		}
 		return ret;
 	}
 

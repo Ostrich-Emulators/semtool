@@ -10,7 +10,6 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.RemoteDbPanel;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -18,7 +17,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 import static javax.swing.Action.SHORT_DESCRIPTION;
@@ -33,8 +31,7 @@ public class RemoteDbAction extends DbAction {
 
 	private static final Logger log = Logger.getLogger( RemoteDbAction.class );
 	private final Frame frame;
-	private URL url;
-	private URL insights;
+	private Properties props = null;
 
 	public RemoteDbAction( String optg, Frame frame ) {
 		super( optg, "Open Remote DB", "open-file3" );
@@ -57,10 +54,9 @@ public class RemoteDbAction extends DbAction {
 				options[0] );
 		if ( 0 == opt ) {
 			try {
-				url = panel.getUrl();
-				prefs.put( "lastexturl", url.toExternalForm() );
-				insights = panel.getInsights();
-				prefs.put( "lastinsighturl", insights.toExternalForm() );
+				props = panel.getConnectionProperties();
+				prefs.put( "lastexturl", props.getProperty( SesameEngine.REPOSITORY_KEY ) );
+				prefs.put( "lastinsighturl", props.getProperty( SesameEngine.INSIGHTS_KEY ) );
 				return true;
 			}
 			catch ( MalformedURLException mue ) {
@@ -78,11 +74,6 @@ public class RemoteDbAction extends DbAction {
 
 			@Override
 			public void run() {
-				Properties props = new Properties();
-				props.setProperty( SesameEngine.REPOSITORY_KEY, url.toExternalForm() );
-				props.setProperty( SesameEngine.INSIGHTS_KEY, insights.toExternalForm() );
-				props.setProperty( Constants.ENGINE_IMPL, SesameEngine.class.getCanonicalName() );
-
 				try {
 					File propfile = File.createTempFile( "remote-db-", ".properties" );
 					propfile.deleteOnExit();
