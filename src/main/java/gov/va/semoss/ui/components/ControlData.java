@@ -74,7 +74,7 @@ public class ControlData implements GraphListener {
 		vertexCDT = new ControlDataTable( vertexPropertyShow, propertyShowTT, propertyHide, new String[]{ "Node Type", "Property", "Label", "Tooltip" } );
 		edgeCDT = new ControlDataTable( edgePropertyShow, propertyShowTT, propertyHide, new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
 	}
-	
+
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
 		clear();
@@ -90,17 +90,15 @@ public class ControlData implements GraphListener {
 				addEdgeProperty( edge.getType(), property );
 			}
 		}
-		
+
 		generateAllRows();
 	}
-	
+
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
 		// nothing to update in this case
 	}
-
-
 
 	public void setEngine( IEngine e ) {
 		engine = e;
@@ -143,11 +141,11 @@ public class ControlData implements GraphListener {
 		return labelcache.get( uri );
 	}
 
-	public void clear(){
+	public void clear() {
 		vertexCDT.clear();
 		edgeCDT.clear();
 	}
-	
+
 	/**
 	 * Gets properties of a specific type.
 	 *
@@ -155,25 +153,10 @@ public class ControlData implements GraphListener {
 	 *
 	 * @return Vector<String> List of properties.
 	 */
-	public List<URI> getSelectedProperties( URI type ) {
-		List<URI> vertexProperties = vertexCDT.getSelectedProperties( type );
-		List<URI> edgeProperties = edgeCDT.getSelectedProperties( type );
-
-		if ( vertexProperties == null && edgeProperties == null ) {
-			return new ArrayList<>();
-		}
-
-		if ( vertexProperties == null || vertexProperties.isEmpty() ) {
-			return edgeProperties;
-		}
-
-		if ( edgeProperties == null || edgeProperties.isEmpty() ) {
-			return vertexProperties;
-		}
-
-		vertexProperties.addAll( edgeProperties );
-
-		return vertexProperties;
+	public List<URI> getSelectedProperties( AbstractNodeEdgeBase v ) {
+		return ( v instanceof SEMOSSVertex
+				? vertexCDT.getSelectedProperties( v.getType() )
+				: edgeCDT.getSelectedProperties( v.getType() ) );
 	}
 
 	/**

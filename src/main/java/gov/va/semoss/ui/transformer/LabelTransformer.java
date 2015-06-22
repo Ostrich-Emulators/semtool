@@ -51,8 +51,9 @@ public class LabelTransformer<T extends AbstractNodeEdgeBase> extends SelectingT
 	 *
 	 * @return String - the property name of the vertex
 	 */
-	public String getText( AbstractNodeEdgeBase vertex ) {
-		List<URI> properties = data.getSelectedProperties( vertex.getType() );
+	public String getText( T vertex ) {
+		List<URI> properties = data.getSelectedProperties( vertex );
+		
 		if ( properties.isEmpty() ) {
 			return "";
 		}
