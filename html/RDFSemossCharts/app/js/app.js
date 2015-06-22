@@ -1,32 +1,14 @@
 'use strict';
 
-angular.module('rdfgraph', ['ui', 'ui.bootstrap', 'rdfGraphFilters', 'rdfGraphServices', 'rdfGraphDirectives']).
+angular.module('rdfgraph', ['ui', 'ui.bootstrap']).
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.
-		when('/', {
+		when('/chartit', {
 			controller: chartitCtrl,
 			templateUrl: 'chartit.html'
-		}).
-        when('/grid', {
-			controller: gridCtrl,
-			templateUrl: 'grid.html'
-		}).
-        when('/singlechart', {
-			controller: SingleChartCtrl,
-			templateUrl: 'singlechart.html'
-		}).
-		when('/timeline', {
-			controller: TimelineCtrl,
-			templateUrl: 'timeline.html'
-		}).
-		when('/lifecycle', {
-			templateUrl: 'lifecycle.html'
 		}).
 		when('/singlechartgrid', {
 			controller: SingleChartCtrl,
 			templateUrl: 'singlechartgrid.html'
-		}).
-		otherwise({
-			redirectTo: '/chartit.html'
 		});
   }]);
