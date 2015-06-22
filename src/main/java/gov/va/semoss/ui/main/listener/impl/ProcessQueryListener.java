@@ -42,7 +42,7 @@ import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.tabbedqueries.TabbedQueries;
+import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;

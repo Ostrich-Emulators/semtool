@@ -29,7 +29,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 
-import gov.va.semoss.tabbedqueries.TabbedQueries;
+import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 
 /**
  * Controls the customize SPARQL query button.

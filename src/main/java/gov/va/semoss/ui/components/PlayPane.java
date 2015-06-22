@@ -1464,7 +1464,8 @@ public class PlayPane extends JFrame {
 						}
 						else if ( loggingPanel == panel ) {
 							rightTabs.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
-									"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
+									"This tab keeps a log of SEMOSS warnings and error messges for "
+											+ "use by the SEMOSS development team" );
 							int idx = rightTabs.indexOfComponent( loggingPanel );
 							CloseableTab ct = new PlayPaneCloseableTab( rightTabs, loggingItem,
 									DbAction.getIcon( "log_tab1" ) );
