@@ -2,13 +2,38 @@
 
 <html class="no-js" ng-app="rdfgraph">
 <head>
-    <title>Single Chart Grid</title>    
+    <title>Single Chart Grid</title>
+    
     <!-- CSS -->
     <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
     <link rel="stylesheet" href="css/bootstrap.css"/> 
     <link rel="stylesheet" href="css/jquery-ui-1.8.23.custom.css"/>
     <link rel="stylesheet" href="css/style.css"/>
     <link rel="stylesheet" href="css/bootstrap-editable.css"/>
+    
+    <!-- jQuery and Bootstrap Libraries -->
+    <script src="lib/jquery/jquery-1.8.3.min.js"></script>
+    <script src="lib/jquery/jquery-ui-1.8.23.custom.min.js"></script>
+    <script src="lib/bootstrap/bootstrap.js"></script>
+    <script src="lib/underscore/underscore.js"></script>
+
+	<!-- AngularJS -->
+	<script src="lib/angular/angular.js"></script>
+	<script src="lib/angular/angular-ui.js"></script>
+	<script src="lib/angular/angular-ui-bootstrap.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/controllers.js"></script>
+	
+	<!-- Make Dem Charts -->
+    <script src="lib/highcharts/highcharts.js"></script>
+    <script src="lib/highcharts/highcharts-more.js"></script>
+    <script>
+        function start(data) {
+            var ctrlScope = angular.element(jQuery('#thecontroller')).scope();
+            ctrlScope.setJSONData(data);
+        };
+    </script>
+    
 </head>
 
 <body ng-cloak class="ng-cloak">
@@ -43,37 +68,5 @@
                 <div id='visualization' style="width:600px;height:523px;"></div>
             </div>   
     </div>
-    
-    <!-- jQuery and Bootstrap Libraries -->
-    <script src="lib/jquery/jquery-1.8.3.min.js"></script>
-    <script src="lib/jquery/jquery-ui-1.8.23.custom.min.js"></script>
-    <script src="lib/bootstrap.js"></script>
-    <script src="lib/underscore.js"></script>
-
-	
-	<!-- AngularJS -->
-	<script src="lib/angular/angular.js"></script>
-	<script src="lib/angular/angular-ui.js"></script>
-	<script src="lib/angular/angular-ui-bootstrap.js"></script>
-		
-	<!-- Angular Module -->
-	<script src="js/app.js"></script>
-	
-	<!-- Angular Controllers -->
-	<script src="js/controllers.js"></script>
-	<script src="js/directives.js"></script>
-	<script src="js/filters.js"></script>	
-	<script src="js/services.js"></script>
-	
-	<!-- Make Dem Charts -->
-    <script src="lib/highcharts.js"></script>
-    <script src="lib/highcharts-more.js"></script>
-    <script>
-        function start(data) {
-            var ctrlScope = angular.element(jQuery('#thecontroller')).scope();
-            ctrlScope.setJSONData(data);
-        };
-    </script>
-	
 </body>
 </html>
