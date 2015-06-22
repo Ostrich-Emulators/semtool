@@ -22,11 +22,16 @@
 	</scm>
     
 	<dependencies>
-		<dependency>
-			<groupId>gov.va.semoss</groupId>
-			<artifactId>tabbedqueries</artifactId>
-			<version>1.4.3</version>
-		</dependency>
+    <dependency>
+      <groupId>com.fifesoft</groupId>
+      <artifactId>rsyntaxtextarea</artifactId>
+      <version>2.5.6</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fifesoft</groupId>
+      <artifactId>autocomplete</artifactId>
+      <version>2.5.4</version>
+    </dependency>
 		<dependency>
 			<groupId>vcamp.cssengine</groupId>
 			<artifactId>aurelienribon</artifactId>
