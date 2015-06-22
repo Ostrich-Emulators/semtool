@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -32,10 +31,6 @@ public class TabbedQueries extends JTabbedPane {
 
 	private final TabRenameAction renamer = new TabRenameAction();
 
-	/**
-	 * CONSTRUCTOR
-	 *
-	 */
 	public TabbedQueries() {
 		/**
 		 * Listener for the TabbedPane's change event. Selects the clicked tab. If
@@ -60,9 +55,8 @@ public class TabbedQueries extends JTabbedPane {
 					addNewTab();
 				}
 			}
-		};//End "changeListener" variable creation.
+		};
 
-		//Add change listener to the TabbedPane:
 		addChangeListener( changer );
 
 		// NOTE: this will add a "*" tab, but the change listener we just
@@ -75,7 +69,7 @@ public class TabbedQueries extends JTabbedPane {
 	 * property. The "Custom Sparql Query" window will use this property to
 	 * preselect the playsheet dropdown
 	 *
-	 * @return getTagOfSelectedTab -- (String) The tag of the currently displayed
+	 * @return getTagOfSelectedTab The tag of the currently displayed
 	 * SyntaxTextEditor.
 	 */
 	public String getTagOfSelectedTab() {
@@ -87,7 +81,7 @@ public class TabbedQueries extends JTabbedPane {
 	 * Sparql Query" window will use this property to preselect the playsheet
 	 * dropdown.
 	 *
-	 * @param strTag -- (String) Described above.
+	 * @param strTag Described above.
 	 */
 	public void setTagOfSelectedTab( String strTag ) {
 		getEditorOfSelectedTab().setTag( strTag );
@@ -98,8 +92,8 @@ public class TabbedQueries extends JTabbedPane {
 	 * "Custom Sparql Query" window will use this property to extract, run, and
 	 * display queries.
 	 *
-	 * @return getTextOfSelectedTab -- (String) The contents of the currently
-	 * displayed SyntaxTextEditor.
+	 * @return getTextOfSelectedTab The contents of the currently displayed
+	 * SyntaxTextEditor.
 	 */
 	public String getTextOfSelectedTab() {
 		return getEditorOfSelectedTab().getText();
@@ -110,8 +104,8 @@ public class TabbedQueries extends JTabbedPane {
 	 * "Custom Sparql Query" window will use this property to extract, run, and
 	 * display queries.
 	 *
-	 * @param strText -- (String) A string of text to display in the currently
-	 * selected SyntaxTextEditor.
+	 * @param strText A string of text to display in the currently selected
+	 * SyntaxTextEditor.
 	 */
 	public void setTextOfSelectedTab( String strText ) {
 		getEditorOfSelectedTab().setText( strText );
@@ -121,8 +115,7 @@ public class TabbedQueries extends JTabbedPane {
 	 * Exposes the SyntaxTextEditor of the selected tab as a public property, to
 	 * be used for keyboard and mouse-click handlers:
 	 *
-	 * @return getEditorOfSelectedTab -- (SyntaxTextEditor) The currently
-	 * displayed SyntaxTextEditor.
+	 * @return getEditorOfSelectedTab The currently displayed SyntaxTextEditor.
 	 */
 	public SyntaxTextEditor getEditorOfSelectedTab() {
 		RTextScrollPane sp = RTextScrollPane.class.cast( getSelectedComponent() );
@@ -165,35 +158,6 @@ public class TabbedQueries extends JTabbedPane {
 				( (SyntaxTextEditor) e.getSource() ).setCaretPosition( caratPosistion );
 			}
 		} );
-	}
-
-	/**
-	 * Specifies a "Rename Tab" option on the SyntaxTextEditor's context menu, and
-	 * provides a listener for that option's selection.
-	 */
-	private class TabRenameAction extends AbstractAction {
-
-		private static final long serialVersionUID = -3273106660731070101L;
-
-		public TabRenameAction() {
-			super( "Rename Tab" );
-		}
-
-		/**
-		 * Adds a new title to the currently selected tab. The user enters the
-		 * title, which cannot be empty or the "*" character.
-		 */
-		@Override
-		public void actionPerformed( ActionEvent e ) {
-			int index = getSelectedIndex();
-			String strOldTitle = getTitleAt( index );
-			String strNewTitle = ( JOptionPane.showInputDialog( TabbedQueries.this,
-					"Enter a Query Tab Title:", strOldTitle ) + "" ).trim();
-			if ( !( "null".equals( strNewTitle ) || strNewTitle.isEmpty()
-					|| "*".equals( strNewTitle ) ) ) {
-				setTitleAt( index, strNewTitle );
-			}
-		}
 	}
 
 	/**
@@ -280,6 +244,35 @@ public class TabbedQueries extends JTabbedPane {
 				}
 
 				TabbedQueries.this.remove( tabpos );
+			}
+		}
+	}
+
+	/**
+	 * Specifies a "Rename Tab" option on the SyntaxTextEditor's context menu, and
+	 * provides a listener for that option's selection.
+	 */
+	private class TabRenameAction extends AbstractAction {
+
+		private static final long serialVersionUID = -3273106660731070101L;
+
+		public TabRenameAction() {
+			super( "Rename Tab" );
+		}
+
+		/**
+		 * Adds a new title to the currently selected tab. The user enters the
+		 * title, which cannot be empty or the "*" character.
+		 */
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			int index = getSelectedIndex();
+			String strOldTitle = getTitleAt( index );
+			String strNewTitle = ( JOptionPane.showInputDialog( TabbedQueries.this,
+					"Enter a Query Tab Title:", strOldTitle ) + "" ).trim();
+			if ( !( "null".equals( strNewTitle ) || strNewTitle.isEmpty()
+					|| "*".equals( strNewTitle ) ) ) {
+				setTitleAt( index, strNewTitle );
 			}
 		}
 	}
