@@ -47,7 +47,7 @@ public class NewLoadingSheetAction extends DbAction {
 			LoadingPlaySheetBase base = ( lsd.isRel()
 					? new RelationshipLoadingPlaySheet( lsd, true )
 					: new NodeLoadingPlaySheet( lsd, true ) );
-
+			
 			LoadingPlaySheetFrame psf = new LoadingPlaySheetFrame();
 			psf.addTab( base );
 			psf.setTitle( "Loading Sheet Data" );

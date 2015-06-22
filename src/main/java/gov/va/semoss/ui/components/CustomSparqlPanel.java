@@ -37,12 +37,10 @@ import org.apache.log4j.Logger;
 import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.tabbedqueries.TabbedQueries;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import javax.swing.JDesktopPane;

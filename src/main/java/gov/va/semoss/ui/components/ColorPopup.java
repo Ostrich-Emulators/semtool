@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.components;
 
@@ -34,21 +34,23 @@ import java.util.Collection;
  * This class sets the visualization viewer for a popup menu.
  */
 public class ColorPopup extends JMenu {
+
 	private static final long serialVersionUID = -4784260297860900414L;
 
 	public ColorPopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( _name );
 
 		for ( String color : TypeColorShapeTable.getAllColors() ) {
-			JMenuItem menuItem = new JMenuItem(color);
-			menuItem.addActionListener(new AbstractAction() {
+			JMenuItem menuItem = new JMenuItem( color );
+			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338447465448152673L;
+
 				@Override
-				public void actionPerformed(ActionEvent e) {
-					gps.setColors(vertices, color);
+				public void actionPerformed( ActionEvent e ) {
+					gps.setColors( vertices, color );
 				}
-			});
-			add(menuItem);
+			} );
+			add( menuItem );
 		}
 	}
 }

@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.components;
 
@@ -34,21 +34,23 @@ import javax.swing.JMenuItem;
  * This class is used to display information about shapes in a popup menu.
  */
 public class ShapePopup extends JMenu {
+
 	private static final long serialVersionUID = 3874311709020126729L;
-	
+
 	public ShapePopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( _name );
 
 		for ( String shape : TypeColorShapeTable.getAllShapes() ) {
-			JMenuItem menuItem = new JMenuItem(shape);
-			menuItem.addActionListener(new AbstractAction() {
+			JMenuItem menuItem = new JMenuItem( shape );
+			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338448713648152673L;
+
 				@Override
-				public void actionPerformed(ActionEvent e) {
-					gps.setShapes(vertices, shape);
+				public void actionPerformed( ActionEvent e ) {
+					gps.setShapes( vertices, shape );
 				}
-			});
-			add(menuItem);
+			} );
+			add( menuItem );
 		}
 	}
 }
