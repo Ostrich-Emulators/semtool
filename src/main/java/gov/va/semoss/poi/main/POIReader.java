@@ -39,12 +39,14 @@ import org.openrdf.model.ValueFactory;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.xml.sax.SAXException;
 
 /**
  * Loading data into SEMOSS using Microsoft Excel Loading Sheet files
@@ -149,6 +151,14 @@ public class POIReader implements ImportFileReader {
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
+		LowMemXlsReader rdr = new LowMemXlsReader();
+		try {
+			rdr.processOneSheet( file );
+		}
+		catch ( IOException | OpenXML4JException | SAXException e ) {
+			throw new IOException( "problem reading file" + file, e );
+		}
+
 		ImportData d = read( new XSSFWorkbook( new FileInputStream( file ) ) );
 		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
 		return d;
