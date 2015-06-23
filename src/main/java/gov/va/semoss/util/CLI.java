@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.cli.HelpFormatter;
@@ -55,7 +54,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -311,8 +309,8 @@ public class CLI {
 			String update = cmd.getOptionValue( "update" );
 			boolean replace = cmd.hasOption( "replace" );
 
-			final File updateFile = new File( update );
-			if ( !updateFile.exists() ) {
+			smss = new File( update );
+			if ( !smss.exists() ) {
 				throw new FileNotFoundException( "Could not find: " + update );
 			}
 
