@@ -310,12 +310,8 @@ public class CLI {
 			boolean replace = cmd.hasOption( "replace" );
 
 			smss = new File( update );
-			if ( !smss.exists() ) {
-				throw new FileNotFoundException( "Could not find: " + update );
-			}
-
-			if ( null == smss ) {
-				throw new FileNotFoundException( "No journal found" );
+			if ( null == update || !smss.exists() ) {
+				throw new FileNotFoundException( "Journal not found:  " + update );
 			}
 
 			IEngine engine = Utility.loadEngine( smss );
