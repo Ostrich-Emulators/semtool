@@ -151,9 +151,11 @@ public class POIReader implements ImportFileReader {
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
-		LowMemXlsReader rdr = new LowMemXlsReader();
 		try {
-			rdr.processOneSheet( file );
+			LowMemXlsReader rdr = new LowMemXlsReader( file );
+			for( String sheetname : rdr.getSheetNames() ){
+				rdr.read( sheetname );
+			}
 		}
 		catch ( IOException | OpenXML4JException | SAXException e ) {
 			throw new IOException( "problem reading file" + file, e );
