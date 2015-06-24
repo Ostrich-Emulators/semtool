@@ -1,45 +1,38 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<title>SANKEY Experiment</title>
-<style>
- 
-.node rect {
-  cursor: move;
-  fill-opacity: .9;
-  shape-rendering: crispEdges;
-}
- 
-.node text {
-  font-size: 9px;
-  font-family: sans-serif;
-  pointer-events: none;
-  text-shadow: 0 1px 0 #fff;
-}
- 
-.link {
-  fill: none;
-  stroke: #000;
-  stroke-opacity: .2;
-}
- 
-.link:hover {
-  stroke-opacity: .5;
-}
- 
-</style>
-<body>
- 
-<p id="chart">
- 
+<head>
+	<meta charset="utf-8">
+	<title>SANKEY Visualization</title>
+	
+	<style>
+		.node rect {
+		  cursor: move;
+		  fill-opacity: .9;
+		  shape-rendering: crispEdges;
+		}
+		.node text {
+		  font-size: 9px;
+		  font-family: sans-serif;
+		  pointer-events: none;
+		  text-shadow: 0 1px 0 #fff;
+		}
+		.link {
+		  fill: none;
+		  stroke: #000;
+		  stroke-opacity: .2;
+		}
+		.link:hover {
+		  stroke-opacity: .5;
+		} 
+	</style>
+	
 <script src="lib/jquery/jquery-1.8.3.min.js"></script> 
 <script src="lib/d3/d3.v3.js"></script>
 <script src="lib/d3/d3.tip.js"></script>
 <script src="lib/d3/d3.sankey.js"></script>
 <script src="lib/underscore/underscore.js"></script>
+<script src="js/semoss.js"></script>
+
 <script>
-
-
-  
 var units = "Widgets";
  
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
@@ -220,10 +213,10 @@ var path = sankey.link();
 		d3.select("#"+id).style("stroke-opacity", opacity);
 	}
 }
-
-
- 
 </script>
- 
+</head>
+
+<body>
+	<p id="chart">
 </body>
 </html>

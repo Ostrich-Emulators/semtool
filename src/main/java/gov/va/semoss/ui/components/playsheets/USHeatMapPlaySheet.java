@@ -20,13 +20,14 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
@@ -35,6 +36,7 @@ import org.openrdf.model.Value;
  * world heat map that can show any numeric property on a node.
  */
 public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
+	private static final long serialVersionUID = 150592881428916712L;
 
 	/**
 	 * Constructor for USHeatMapPlaySheet.
@@ -52,7 +54,7 @@ public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 
 		//Possibly filter out all US Facilities from the query?
 		for ( Value[] listElement : newdata ) {
-			LinkedHashMap elementHash = new LinkedHashMap();
+			LinkedHashMap<String,Object> elementHash = new LinkedHashMap<String,Object>();
 			for ( int j = 0; j < var.length; j++ ) {
 				String colName = var[j];
 				Literal l = Literal.class.cast( listElement[j] );

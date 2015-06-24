@@ -33,12 +33,13 @@ import org.openrdf.model.Value;
  * view of data from a SPARQL query.
  */
 public class GridScatterSheet extends BrowserPlaySheet2 {
+	private static final long serialVersionUID = -895084553665944922L;
 
 	/**
 	 * Constructor for GridScatterSheet.
 	 */
 	public GridScatterSheet() {
-		super( "/html/RDFSemossCharts/app/singlechartgrid.html" );
+		super( "/html/RDFSemossCharts/app/gridscatterchart.html" );
 	}
 
 	@Override
