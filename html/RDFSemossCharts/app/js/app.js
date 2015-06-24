@@ -7,8 +7,8 @@ angular.module('rdfgraph', ['ui', 'ui.bootstrap']).
 			controller: chartitCtrl,
 			templateUrl: 'chartit.html'
 		}).
-		when('/singlechartgrid', {
+		when('/gridscatterchart', {
 			controller: SingleChartCtrl,
-			templateUrl: 'singlechartgrid.html'
+			templateUrl: 'gridscatterchart.html'
 		});
   }]);
