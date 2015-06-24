@@ -39,14 +39,12 @@ import org.openrdf.model.ValueFactory;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.xml.sax.SAXException;
 
 /**
  * Loading data into SEMOSS using Microsoft Excel Loading Sheet files
@@ -135,7 +133,10 @@ public class POIReader implements ImportFileReader {
 	@Override
 	public ImportMetadata getMetadata( File file ) throws IOException, ImportValidationException {
 		logger.debug( "getting metadata from file: " + file );
-		final Workbook workbook = new XSSFWorkbook( new FileInputStream( file ) );
+		final LowMemXlsWorkbook workbook
+				= new LowMemXlsWorkbook( new FileInputStream( file ) );
+
+//		final Workbook workbook = new XSSFWorkbook( new FileInputStream( file ) );
 		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
 
 		ImportData data = new ImportData();
@@ -146,23 +147,17 @@ public class POIReader implements ImportFileReader {
 		}
 
 		data.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		workbook.release();
 		return data.getMetadata();
 	}
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
-		try {
-			LowMemXlsReader rdr = new LowMemXlsReader( file );
-			for( String sheetname : rdr.getSheetNames() ){
-				rdr.read( sheetname );
-			}
-		}
-		catch ( IOException | OpenXML4JException | SAXException e ) {
-			throw new IOException( "problem reading file" + file, e );
-		}
-
-		ImportData d = read( new XSSFWorkbook( new FileInputStream( file ) ) );
+		LowMemXlsWorkbook rdr = new LowMemXlsWorkbook( file );
+//		Workbook rdr = new XSSFWorkbook( new FileInputStream( file ) );
+		ImportData d = read( rdr );
 		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		rdr.release();
 		return d;
 	}
 
@@ -563,7 +558,10 @@ public class POIReader implements ImportFileReader {
 	}
 
 	private static boolean isEmpty( Cell cell ) {
-		return ( null == cell );
+		return ( null == cell
+				|| Cell.CELL_TYPE_BLANK == cell.getCellType()
+				|| null == cell.getStringCellValue()
+				|| cell.getStringCellValue().isEmpty() );
 	}
 
 	/**
