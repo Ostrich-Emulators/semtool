@@ -35,6 +35,7 @@ import org.openrdf.model.Value;
  * heat map that can show any numeric property on a node.
  */
 public class WorldHeatMapPlaySheet extends BrowserPlaySheet2 {
+	private static final long serialVersionUID = 5117841017866221965L;
 
 	/**
 	 * Constructor for WorldHeatMapPlaySheet.
@@ -50,7 +51,7 @@ public class WorldHeatMapPlaySheet extends BrowserPlaySheet2 {
 		String[] var = headers.toArray( new String[0] );
 
 		for ( Value[] listElement : newdata ) {
-			LinkedHashMap elementHash = new LinkedHashMap();
+			LinkedHashMap<String,Object> elementHash = new LinkedHashMap<String,Object>();
 			for ( int j = 0; j < var.length; j++ ) {
 				String colName = var[j];
 				Literal l = Literal.class.cast( listElement[j] );
