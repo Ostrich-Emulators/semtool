@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.PictureData;
@@ -33,6 +35,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
@@ -61,6 +65,7 @@ public class LowMemXlsWorkbook implements Workbook {
 	private final ArrayList<String> sharedStrings;
 	private final XSSFReader reader;
 	private final OPCPackage pkg;
+	private final StylesTable styles;
 
 	public LowMemXlsWorkbook( File filename ) throws IOException {
 		this( new BufferedInputStream( new FileInputStream( filename ) ) );
@@ -74,6 +79,8 @@ public class LowMemXlsWorkbook implements Workbook {
 		try {
 			pkg = OPCPackage.open( stream );
 			reader = new XSSFReader( pkg );
+
+			styles = reader.getStylesTable();
 
 			sheetNameIdLkp = readSheetInfo( reader );
 			sharedStrings = readSharedStrings( reader );
@@ -103,7 +110,7 @@ public class LowMemXlsWorkbook implements Workbook {
 			try ( InputStream sheet2 = reader.getSheet( sheetNameIdLkp.get( sheetname ) ) ) {
 				XMLReader parser = XMLReaderFactory.createXMLReader();
 
-				SheetHandler handler = new SheetHandler( sharedStrings, sheetname );
+				SheetHandler handler = new SheetHandler( sharedStrings, styles, sheetname );
 				parser.setContentHandler( handler );
 
 				InputSource sheetSource = new InputSource( sheet2 );
@@ -157,7 +164,7 @@ public class LowMemXlsWorkbook implements Workbook {
 		ArrayList<String> map = new ArrayList<>();
 
 		try ( InputStream is = r.getSharedStringsData() ) {
-			XMLReader parser = XMLReaderFactory.createXMLReader();// "org.apache.xerces.parsers.SAXParser" );
+			XMLReader parser = XMLReaderFactory.createXMLReader();
 			ContentHandler handler = new DefaultHandler() {
 				String content;
 				boolean reading = false;
@@ -460,6 +467,7 @@ public class LowMemXlsWorkbook implements Workbook {
 		private final MultiMap<Integer, Cell> data = new MultiMap<>();
 		private final LowMemXlsSheet sheet;
 		private final Map<Integer, Cell> currentrowdata = new LinkedHashMap<>();
+		private final StylesTable styles;
 		private String lastContents;
 		private boolean reading = false;
 		private LowMemXlsRow currentrow;
@@ -472,8 +480,10 @@ public class LowMemXlsWorkbook implements Workbook {
 			formats.put( "b", Cell.CELL_TYPE_BOOLEAN );
 		}
 
-		private SheetHandler( ArrayList<String> sst, String sheetname ) {
+		private SheetHandler( ArrayList<String> sst, StylesTable styles,
+				String sheetname ) {
 			this.sst = sst;
+			this.styles = styles;
 			sheet = new LowMemXlsSheet( sheetname );
 		}
 
@@ -500,15 +510,29 @@ public class LowMemXlsWorkbook implements Workbook {
 				String celltypestr = attributes.getValue( "t" );
 				int celltype = ( formats.containsKey( celltypestr )
 						? formats.get( celltypestr ) : Cell.CELL_TYPE_BLANK );
-				if ( Cell.CELL_TYPE_NUMERIC == celltype ) {
+
+				// dates don't always have a type attribute
+				if ( Cell.CELL_TYPE_NUMERIC == celltype || null == celltypestr ) {
 					// check if it's a date
-					isdate = ( "1".equals( attributes.getValue( "s" ) ) );
+					String styleidstr = attributes.getValue( "s" );
+					int styleid = ( null == styleidstr ? 0
+							: Integer.parseInt( styleidstr ) );
+
+					XSSFCellStyle style = styles.getStyleAt( styleid );
+					int formatIndex = style.getDataFormat();
+					String formatString = style.getDataFormatString();
+					isdate = DateUtil.isADateFormat( formatIndex, formatString );
+
+					if ( isdate ) {
+						celltype = Cell.CELL_TYPE_NUMERIC;
+						currentcell.setCellStyle( style );
+					}
 				}
 
 				String colname = attributes.getValue( "r" );
 				int currentcol = getColNum( colname.substring( 0,
 						colname.lastIndexOf( Integer.toString( currentrow.getRowNum() + 1 ) ) ) );
-				
+
 				currentcell = currentrow.createCell( currentcol, celltype );
 			}
 			else if ( "row".equals( name ) ) {
@@ -542,11 +566,13 @@ public class LowMemXlsWorkbook implements Workbook {
 						break;
 					case Cell.CELL_TYPE_NUMERIC:
 						if ( isdate ) {
-							// do something here
+							Date date = DateUtil.getJavaDate( Double.parseDouble( lastContents ) );
+							currentcell.setCellValue( date );
 						}
 						else {
 							currentcell.setCellValue( Double.parseDouble( lastContents ) );
 						}
+						break;
 					case Cell.CELL_TYPE_ERROR:
 						log.warn( "unhandled cell type: CELL_TYPE_ERROR" );
 						break;

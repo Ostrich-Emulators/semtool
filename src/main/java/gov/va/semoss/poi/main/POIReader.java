@@ -559,7 +559,6 @@ public class POIReader implements ImportFileReader {
 
 	private static boolean isEmpty( Cell cell ) {
 		return ( null == cell
-				|| Cell.CELL_TYPE_BLANK == cell.getCellType()
 				|| null == cell.getStringCellValue()
 				|| cell.getStringCellValue().isEmpty() );
 	}
@@ -653,14 +652,17 @@ public class POIReader implements ImportFileReader {
 		int rowIndex = nextRow( lSheet, 0 );
 		while ( -1 != rowIndex ) {
 			Row thisRow = lSheet.getRow( rowIndex );
+
 			if ( null == thisRow ) {
 				logger.warn( "skipping row " + rowIndex + " (doesn't exist?)" );
+				rowIndex = nextRow( lSheet, rowIndex );
 				continue;
 			}
 
 			Cell instanceSubjectNodeCell = thisRow.getCell( 1 );
 			if ( isEmpty( instanceSubjectNodeCell ) ) {
 				logger.warn( "skipping row " + rowIndex + " (no instance name)" );
+				rowIndex = nextRow( lSheet, rowIndex );
 				continue;
 			}
 

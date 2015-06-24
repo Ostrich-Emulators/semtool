@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.poi.main;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -12,6 +13,7 @@ import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
@@ -26,14 +28,14 @@ import org.apache.poi.ss.util.CellRangeAddress;
  */
 public class LowMemXlsCell implements Cell {
 
+	private static final SimpleDateFormat SDF
+			= new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" );
 	private final int col;
 	private final Row row;
 	private int celltype;
-	private double dval;
-	private Date dateval;
-	private String stringval;
-	private boolean bval;
+	private String val;
 	private Comment comment;
+	private CellStyle style;
 
 	public LowMemXlsCell( int col, Row row ) {
 		this.col = col;
@@ -77,62 +79,62 @@ public class LowMemXlsCell implements Cell {
 
 	@Override
 	public void setCellValue( double value ) {
-		dval = value;
+		val = Double.toString( value );
 	}
 
 	@Override
 	public void setCellValue( Date value ) {
-		dateval = value;
+		setCellValue( DateUtil.getExcelDate( value ) );
 	}
 
 	@Override
 	public void setCellValue( Calendar value ) {
-		dateval = value.getTime();
+		setCellValue( value.getTime() );
 	}
 
 	@Override
 	public void setCellValue( RichTextString value ) {
-		stringval = value.getString();
+		val = value.getString();
 	}
 
 	@Override
 	public void setCellValue( String value ) {
-		stringval = value;
+		val = value;
 	}
 
 	@Override
 	public void setCellFormula( String formula ) throws FormulaParseException {
-		stringval = formula;
+		val = formula;
 	}
 
 	@Override
 	public String getCellFormula() {
-		return stringval;
+		return val;
 	}
 
 	@Override
 	public double getNumericCellValue() {
-		return dval;
+		return Double.parseDouble( val );
 	}
 
 	@Override
 	public Date getDateCellValue() {
-		return dateval;
+		return DateUtil.getJavaDate( getNumericCellValue() );
 	}
 
 	@Override
 	public RichTextString getRichStringCellValue() {
-		return new HSSFRichTextString( stringval );
+		return new HSSFRichTextString( val );
 	}
 
 	@Override
 	public String getStringCellValue() {
-		return stringval;
+		return val;
 	}
 
 	@Override
 	public void setCellValue( boolean value ) {
-		bval = value;
+		val = Boolean.toString( value );
 	}
 
 	@Override
@@ -142,7 +144,7 @@ public class LowMemXlsCell implements Cell {
 
 	@Override
 	public boolean getBooleanCellValue() {
-		return bval;
+		return Boolean.parseBoolean( val );
 	}
 
 	@Override
@@ -152,12 +154,12 @@ public class LowMemXlsCell implements Cell {
 
 	@Override
 	public void setCellStyle( CellStyle style ) {
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		this.style = style;
 	}
 
 	@Override
 	public CellStyle getCellStyle() {
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		return style;
 	}
 
 	@Override
