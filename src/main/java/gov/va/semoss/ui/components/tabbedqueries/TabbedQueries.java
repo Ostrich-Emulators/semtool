@@ -213,11 +213,15 @@ public class TabbedQueries extends JTabbedPane {
 
 				@Override
 				public void mousePressed( MouseEvent e ) {
+					e.consume();
 					if ( SwingUtilities.isRightMouseButton( e ) ) {
 						JPopupMenu popup = new JPopupMenu();
 						popup.add( renamer );
-
 						popup.show( e.getComponent(), e.getX(), e.getY() );
+					}
+					else {
+						TabbedQueries.this.setSelectedIndex(
+								TabbedQueries.this.indexOfTabComponent( QueryCloseableTab.this ) );
 					}
 				}
 			} );
