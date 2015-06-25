@@ -66,6 +66,7 @@ public class LowMemXlsWorkbook implements Workbook {
 	private final XSSFReader reader;
 	private final OPCPackage pkg;
 	private final StylesTable styles;
+	private Row.MissingCellPolicy policy;
 
 	public LowMemXlsWorkbook( File filename ) throws IOException {
 		this( new BufferedInputStream( new FileInputStream( filename ) ) );
@@ -110,7 +111,8 @@ public class LowMemXlsWorkbook implements Workbook {
 			try ( InputStream sheet2 = reader.getSheet( sheetNameIdLkp.get( sheetname ) ) ) {
 				XMLReader parser = XMLReaderFactory.createXMLReader();
 
-				SheetHandler handler = new SheetHandler( sharedStrings, styles, sheetname );
+				SheetHandler handler
+						= new SheetHandler( sharedStrings, styles, sheetname, this );
 				parser.setContentHandler( handler );
 
 				InputSource sheetSource = new InputSource( sheet2 );
@@ -388,11 +390,12 @@ public class LowMemXlsWorkbook implements Workbook {
 
 	@Override
 	public Row.MissingCellPolicy getMissingCellPolicy() {
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		return policy;
 	}
 
 	@Override
 	public void setMissingCellPolicy( Row.MissingCellPolicy missingCellPolicy ) {
+		policy = missingCellPolicy;
 	}
 
 	@Override
@@ -481,10 +484,10 @@ public class LowMemXlsWorkbook implements Workbook {
 		}
 
 		private SheetHandler( ArrayList<String> sst, StylesTable styles,
-				String sheetname ) {
+				String sheetname, LowMemXlsWorkbook wb ) {
 			this.sst = sst;
 			this.styles = styles;
-			sheet = new LowMemXlsSheet( sheetname );
+			sheet = new LowMemXlsSheet( sheetname, wb );
 		}
 
 		public Sheet getSheet() {
@@ -505,44 +508,44 @@ public class LowMemXlsWorkbook implements Workbook {
 		@Override
 		public void startElement( String uri, String localName, String name,
 				Attributes attributes ) throws SAXException {
-			// c => cell
-			if ( "c".equals( name ) ) {
-				String celltypestr = attributes.getValue( "t" );
-				int celltype = ( formats.containsKey( celltypestr )
-						? formats.get( celltypestr ) : Cell.CELL_TYPE_BLANK );
+			if ( null != name ) {
+				switch ( name ) {
+					case "c": // c is a new cell
+						String celltypestr = attributes.getValue( "t" );
+						int celltype = ( formats.containsKey( celltypestr )
+								? formats.get( celltypestr ) : Cell.CELL_TYPE_BLANK );
+						// dates don't always have a type attribute
+						if ( Cell.CELL_TYPE_NUMERIC == celltype || null == celltypestr ) {
+							// check if it's a date
+							String styleidstr = attributes.getValue( "s" );
+							int styleid = ( null == styleidstr ? 0
+									: Integer.parseInt( styleidstr ) );
 
-				// dates don't always have a type attribute
-				if ( Cell.CELL_TYPE_NUMERIC == celltype || null == celltypestr ) {
-					// check if it's a date
-					String styleidstr = attributes.getValue( "s" );
-					int styleid = ( null == styleidstr ? 0
-							: Integer.parseInt( styleidstr ) );
+							XSSFCellStyle style = styles.getStyleAt( styleid );
+							int formatIndex = style.getDataFormat();
+							String formatString = style.getDataFormatString();
+							isdate = DateUtil.isADateFormat( formatIndex, formatString );
 
-					XSSFCellStyle style = styles.getStyleAt( styleid );
-					int formatIndex = style.getDataFormat();
-					String formatString = style.getDataFormatString();
-					isdate = DateUtil.isADateFormat( formatIndex, formatString );
-
-					if ( isdate ) {
-						celltype = Cell.CELL_TYPE_NUMERIC;
-						currentcell.setCellStyle( style );
-					}
+							if ( isdate ) {
+								celltype = Cell.CELL_TYPE_NUMERIC;
+								currentcell.setCellStyle( style );
+							}
+						}
+						String colname = attributes.getValue( "r" );
+						int currentcol = getColNum( colname.substring( 0,
+								colname.lastIndexOf( Integer.toString( currentrow.getRowNum() + 1 ) ) ) );
+						currentcell = currentrow.createCell( currentcol, celltype );
+						break;
+					case "row":
+						int rownum = Integer.parseInt( attributes.getValue( "r" ) );
+						currentrow = sheet.createRow( rownum - 1 );
+						currentrowdata.clear();
+						break;
+					case "v": // new value for a cell
+						reading = true;
+						lastContents = "";
+						break;
 				}
-
-				String colname = attributes.getValue( "r" );
-				int currentcol = getColNum( colname.substring( 0,
-						colname.lastIndexOf( Integer.toString( currentrow.getRowNum() + 1 ) ) ) );
-
-				currentcell = currentrow.createCell( currentcol, celltype );
-			}
-			else if ( "row".equals( name ) ) {
-				int rownum = Integer.parseInt( attributes.getValue( "r" ) );
-				currentrow = sheet.createRow( rownum - 1 );
-				currentrowdata.clear();
-			}
-			else if ( "v".equals( name ) ) {
-				reading = true;
-				lastContents = "";
 			}
 		}
 
@@ -557,9 +560,14 @@ public class LowMemXlsWorkbook implements Workbook {
 				switch ( currentcell.getCellType() ) {
 					case Cell.CELL_TYPE_STRING:
 						currentcell.setCellValue( sst.get( Integer.parseInt( lastContents ) ) );
+						if ( currentcell.getStringCellValue().isEmpty() ) {
+							currentrow.removeCell( currentcell );
+							currentcell = null;
+						}
 						break;
 					case Cell.CELL_TYPE_BLANK:
-						currentcell.setCellValue( "" );
+						currentrow.removeCell( currentcell );
+						currentcell = null;
 						break;
 					case Cell.CELL_TYPE_BOOLEAN:
 						currentcell.setCellValue( "1".equals( lastContents ) );
@@ -583,6 +591,10 @@ public class LowMemXlsWorkbook implements Workbook {
 						log.warn( "unhandled cell type: " + currentcell.getCellType() );
 				}
 
+				if ( null != currentcell ) {
+					log.debug( sheet.getSheetName() + "(" + currentrow.getRowNum() + ","
+							+ currentcell.getColumnIndex() + ") " + currentcell.getStringCellValue() );
+				}
 				reading = false;
 			}
 		}

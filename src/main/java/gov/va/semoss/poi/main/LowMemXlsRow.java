@@ -91,7 +91,14 @@ public class LowMemXlsRow implements Row {
 
 	@Override
 	public short getLastCellNum() {
-		return (short) cells.size();
+		int maxkey = Integer.MIN_VALUE;
+		for( Integer key : cells.keySet() ){
+			if( key > maxkey ){
+				maxkey = key;
+			}
+		}
+		
+		return (short) maxkey;
 	}
 
 	@Override

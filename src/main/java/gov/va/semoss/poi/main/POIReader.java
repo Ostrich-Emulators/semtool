@@ -715,6 +715,13 @@ public class POIReader implements ImportFileReader {
 		public SheetConfig( Sheet wk ) {
 			Row firstRow = wk.getRow( 0 );
 
+			StringBuilder sb = new StringBuilder( "first row values for " )
+					.append( wk.getSheetName() ).append( ":" );
+			for ( int i = 0; i <= firstRow.getLastCellNum(); i++ ) {
+				sb.append( " {" ).append( firstRow.getCell( i ).getStringCellValue() ).append( "}" );
+			}
+			logger.debug( sb );
+
 			// determine if relationship or property sheet
 			String sheetType = firstRow.getCell( 0 ).getStringCellValue();
 			subjectType = firstRow.getCell( 1 ).getStringCellValue();

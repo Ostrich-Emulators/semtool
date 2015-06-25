@@ -23,7 +23,6 @@ import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 /**
@@ -37,9 +36,11 @@ public class LowMemXlsSheet implements Sheet {
 
 	private final Map<Integer, Row> rows = new HashMap<>();
 	private final String name;
+	private final LowMemXlsWorkbook workbook;
 
-	public LowMemXlsSheet( String n ) {
+	public LowMemXlsSheet( String n, LowMemXlsWorkbook wb ) {
 		name = n;
+		workbook = wb;
 	}
 
 	@Override
@@ -486,8 +487,8 @@ public class LowMemXlsSheet implements Sheet {
 	}
 
 	@Override
-	public Workbook getWorkbook() {
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	public LowMemXlsWorkbook getWorkbook() {
+		return workbook;
 	}
 
 	@Override

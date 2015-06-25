@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.poi.main;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -28,8 +27,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
  */
 public class LowMemXlsCell implements Cell {
 
-	private static final SimpleDateFormat SDF
-			= new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" );
 	private final int col;
 	private final Row row;
 	private int celltype;
