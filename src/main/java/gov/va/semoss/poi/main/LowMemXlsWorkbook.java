@@ -7,6 +7,7 @@ package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
+import gov.va.semoss.util.MultiMap;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -211,25 +212,36 @@ public class LowMemXlsWorkbook implements Workbook {
 
 		try {
 			XMLReader parser = XMLReaderFactory.createXMLReader();
-			for ( Map.Entry<String, SheetType> typeen : getSheetTypes().entrySet() ) {
+
+			Map<String, SheetType> types = getSheetTypes();
+			MultiMap<SheetType, String> mm = MultiMap.flip( types );
+
+			// load the metadata sheet first, if we have one
+			for ( String metasheet : mm.getNN( SheetType.METADATA ) ) {
+				try ( InputStream is = reader.getSheet( sheetNameIdLkp.get( metasheet ) ) ) {
+					MetadataTabXmlHandler handler
+							= new MetadataTabXmlHandler( sharedStrings, id.getMetadata() );
+					parser.setContentHandler( handler );
+
+					InputSource sheetSource = new InputSource( is );
+					parser.parse( sheetSource );
+
+					id.setMetadata( handler.getMetadata() );
+				}
+
+				types.remove( metasheet ); // don't reprocess in the next loop								
+			}
+
+			for ( Map.Entry<String, SheetType> typeen : types.entrySet() ) {
 				String sheetname = typeen.getKey();
 				String sheetid = sheetNameIdLkp.get( sheetname );
 				SheetType sheettype = typeen.getValue();
 
 				try ( InputStream is = reader.getSheet( sheetid ) ) {
-					if ( SheetType.METADATA == sheettype ) {
-						MetadataTabXmlHandler handler
-								= new MetadataTabXmlHandler( sharedStrings, id.getMetadata() );
-						parser.setContentHandler( handler );
-
-						InputSource sheetSource = new InputSource( is );
-						parser.parse( sheetSource );
-
-						id.setMetadata( handler.getMetadata() );
-					}
-					else if ( SheetType.NODE == sheettype || SheetType.RELATION == sheettype ) {
+					if ( SheetType.NODE == sheettype || SheetType.RELATION == sheettype ) {
 						LoadingSheetXmlHandler handler
-								= new LoadingSheetXmlHandler( sharedStrings, styles, sheetname );
+								= new LoadingSheetXmlHandler( sharedStrings, styles, sheetname,
+										id.getMetadata().getNamespaces() );
 						parser.setContentHandler( handler );
 
 						InputSource sheetSource = new InputSource( is );

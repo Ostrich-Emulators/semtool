@@ -6,7 +6,9 @@
 package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +37,7 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 
 	private final Map<Integer, Value> currentrowdata = new LinkedHashMap<>();
 	private final Map<Integer, String> proplkp = new HashMap<>();
+	private final Map<String, String> namespaces;
 	private final LoadingSheetData loadingsheet;
 	private final ArrayList<String> sst;
 	private final StylesTable styles;
@@ -64,9 +67,10 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 	}
 
 	public LoadingSheetXmlHandler( ArrayList<String> sst, StylesTable styles,
-			String sheetname ) {
+			String sheetname, Map<String, String> ns ) {
 		this.sst = sst;
 		this.styles = styles;
+		namespaces = ns;
 
 		// we'll reset this to relationship if needed
 		loadingsheet = LoadingSheetData.nodesheet( sheetname, "" );
@@ -91,6 +95,8 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 							? formats.get( celltypestr ) : Cell.CELL_TYPE_BLANK );
 					// dates don't always have a type attribute
 					if ( Cell.CELL_TYPE_NUMERIC == celltype || null == celltypestr ) {
+						celltype = Cell.CELL_TYPE_NUMERIC;
+						
 						// check if it's a date
 						String styleidstr = attributes.getValue( "s" );
 						int styleid = ( null == styleidstr ? 0
@@ -100,12 +106,8 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 						int formatIndex = style.getDataFormat();
 						String formatString = style.getDataFormatString();
 						isdate = DateUtil.isADateFormat( formatIndex, formatString );
-
-						if ( isdate ) {
-							celltype = Cell.CELL_TYPE_NUMERIC;
-						}
 					}
-
+					
 					String colname = attributes.getValue( "r" );
 					colnum = getColNum( colname.substring( 0,
 							colname.lastIndexOf( Integer.toString( rownum + 1 ) ) ) );
@@ -158,7 +160,7 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 				case Cell.CELL_TYPE_STRING:
 					String strval = sst.get( Integer.parseInt( lastContents ) );
 					if ( !strval.isEmpty() ) {
-						currentrowdata.put( colnum, vf.createLiteral( strval ) );
+						currentrowdata.put( colnum, getRDFStringValue( strval, namespaces, vf ) );
 					}
 					break;
 				case Cell.CELL_TYPE_BLANK:
@@ -234,6 +236,11 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 			int col = en.getKey();
 			String val = en.getValue().stringValue();
 
+			if ( val.startsWith( "<" ) && val.endsWith( ">" ) ) {
+				// this is a URI, and doesn't have a comment, even if it contains a #
+				continue;
+			}
+
 			if ( col > commentcol ) {
 				removers.add( col );
 			}
@@ -252,6 +259,19 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 
 		for ( int col : removers ) {
 			rowdata.remove( col );
+		}
+	}
+
+	@Override
+	public void endDocument() throws SAXException {
+		super.endDocument();
+
+		if ( log.isDebugEnabled() ) {
+			log.debug( "Loading sheet " + loadingsheet.getName()
+					+ " processed. properties: "
+					+ Arrays.toString( loadingsheet.getProperties().toArray() ) );
+			log.debug( "Created " + loadingsheet.getData().size()
+					+ ( loadingsheet.isRel() ? " relationships" : " entities" ) );
 		}
 	}
 }

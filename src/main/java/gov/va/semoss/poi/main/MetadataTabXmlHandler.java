@@ -120,7 +120,6 @@ public class MetadataTabXmlHandler extends DefaultHandler {
 	public void startDocument() throws SAXException {
 		super.startDocument();
 		triples.clear();
-		namespaces.clear();
 		metas.clear();
 		datanamespace = null;
 		schemanamespace = null;
@@ -162,6 +161,8 @@ public class MetadataTabXmlHandler extends DefaultHandler {
 				throw new ImportValidationException( ImportValidationException.ErrorType.INVALID_DATA, e );
 			}
 		}
+
+		namespaces.clear();
 	}
 
 	/**
