@@ -96,7 +96,7 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 					// dates don't always have a type attribute
 					if ( Cell.CELL_TYPE_NUMERIC == celltype || null == celltypestr ) {
 						celltype = Cell.CELL_TYPE_NUMERIC;
-						
+
 						// check if it's a date
 						String styleidstr = attributes.getValue( "s" );
 						int styleid = ( null == styleidstr ? 0
@@ -107,7 +107,7 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 						String formatString = style.getDataFormatString();
 						isdate = DateUtil.isADateFormat( formatIndex, formatString );
 					}
-					
+
 					String colname = attributes.getValue( "r" );
 					colnum = getColNum( colname.substring( 0,
 							colname.lastIndexOf( Integer.toString( rownum + 1 ) ) ) );
@@ -215,7 +215,8 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 		LoadingNodeAndPropertyValues nap = sheet.add( rowdata.remove( 1 ).stringValue() );
 
 		if ( sheet.isRel() && rowdata.containsKey( 2 ) ) {
-			nap.setObject( rowdata.remove( 2 ).stringValue() );
+			String obj = rowdata.remove( 2 ).stringValue();
+			nap.setObject( obj );
 		}
 
 		for ( Map.Entry<Integer, Value> en : rowdata.entrySet() ) {
@@ -236,24 +237,14 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 			int col = en.getKey();
 			String val = en.getValue().stringValue();
 
-			if ( val.startsWith( "<" ) && val.endsWith( ">" ) ) {
-				// this is a URI, and doesn't have a comment, even if it contains a #
-				continue;
-			}
-
+			// already seen a comment cell
 			if ( col > commentcol ) {
 				removers.add( col );
 			}
-
-			// if we start with a comment, we need to remove the whole value
-			// but if we have a comment inside our text, only remove the commented part
+			
 			if ( val.startsWith( "#" ) ) {
-				removers.add( col );
-			}
-			else if ( val.contains( "#" ) ) {
 				commentcol = col;
-				val = val.substring( 0, val.indexOf( "#" ) );
-				en.setValue( vf.createLiteral( val ) );
+				removers.add( col );
 			}
 		}
 
