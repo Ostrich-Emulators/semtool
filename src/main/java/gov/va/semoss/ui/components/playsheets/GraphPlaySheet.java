@@ -252,6 +252,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		if ( overlayLevel > 1 ) {
 			overlayLevel = 1;
 			updateLayout();
+			fireGraphUpdated();
 		}
 	}
 
@@ -263,6 +264,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			overlayLevel--;
 			updateLayout();
 			setUndoRedoBtn();
+			fireGraphUpdated();
 		}
 	}
 
@@ -274,6 +276,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			overlayLevel++;
 			updateLayout();
 			setUndoRedoBtn();
+			fireGraphUpdated();
 		}
 	}
 
