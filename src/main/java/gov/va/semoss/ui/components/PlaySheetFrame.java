@@ -309,6 +309,9 @@ public class PlaySheetFrame extends JInternalFrame {
 						// assume the pscc knows what to do with empty data
 						dsize = 0;
 						cmp.create( null, null, getEngine() );
+						// we have no way of determining what data got produced,
+						// so assume something good happened
+						dsize = 1;
 					}
 					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
 							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
