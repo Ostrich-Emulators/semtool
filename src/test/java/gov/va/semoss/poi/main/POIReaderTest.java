@@ -91,7 +91,7 @@ public class POIReaderTest {
 			rdr.readOneFile( FAIL2 );
 		}
 		catch ( ImportValidationException e ) {
-			if ( ErrorType.MISSING_DATA == e.error ) {
+			if ( ErrorType.TOO_MUCH_DATA == e.error ) {
 				throw e;
 			}
 		}

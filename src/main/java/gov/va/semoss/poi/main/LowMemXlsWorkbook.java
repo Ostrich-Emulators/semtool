@@ -5,7 +5,8 @@
  */
 package gov.va.semoss.poi.main;
 
-import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
+import gov.va.semoss.rdf.engine.util.EngineLoader;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,10 +17,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.formula.udf.UDFFinder;
@@ -42,6 +46,8 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 import org.dom4j.io.SAXReader;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -107,24 +113,148 @@ public class LowMemXlsWorkbook implements Workbook {
 
 	@Override
 	public Sheet getSheet( String sheetname ) {
-		if ( sheetNameIdLkp.containsKey( sheetname ) ) {
-			try ( InputStream sheet2 = reader.getSheet( sheetNameIdLkp.get( sheetname ) ) ) {
-				XMLReader parser = XMLReaderFactory.createXMLReader();
+		return null;
+	}
 
-				SheetHandler handler
-						= new SheetHandler( sharedStrings, styles, sheetname, this );
-				parser.setContentHandler( handler );
+	/**
+	 * Gets the sheet types. If a loader tab exists, only those tabs will be
+	 * checked (and the metadata tab will be verified against what the loader tab
+	 * says).
+	 *
+	 *
+	 * @return
+	 * @throws ImportValidationException
+	 */
+	public Map<String, SheetType> getSheetTypes() throws ImportValidationException {
+		Map<String, SheetType> types = new HashMap<>();
+		Set<String> tabsToCheck = new HashSet<>();
+		boolean checktypes = false;
 
-				InputSource sheetSource = new InputSource( sheet2 );
-				parser.parse( sheetSource );
-				return handler.getSheet();
+		try {
+			XMLReader parser = XMLReaderFactory.createXMLReader();
+
+			if ( sheetNameIdLkp.containsKey( "Loader" ) ) {
+				checktypes = true;
+				try ( InputStream is = reader.getSheet( sheetNameIdLkp.get( "Loader" ) ) ) {
+
+					LoaderTabXmlHandler handler = new LoaderTabXmlHandler( sharedStrings );
+					parser.setContentHandler( handler );
+
+					InputSource sheetSource = new InputSource( is );
+					parser.parse( sheetSource );
+
+					types.putAll( handler.getSheetTypes() );
+					tabsToCheck.addAll( types.keySet() );
+
+					if ( tabsToCheck.isEmpty() ) {
+						throw new ImportValidationException( ErrorType.MISSING_DATA,
+								"No data to process" );
+					}
+				}
 			}
-			catch ( Exception ife ) {
-				log.error( ife, ife );
+			else {
+				tabsToCheck.addAll( sheetNameIdLkp.keySet() );
+			}
+
+			// now check the actual sheets
+			SheetTypeXmlHandler handler = new SheetTypeXmlHandler( sharedStrings );
+			parser.setContentHandler( handler );
+
+			boolean seenMetadata = false; // we can only have 1 metadata tab
+			for ( String sheetname : tabsToCheck ) {
+				if ( !sheetNameIdLkp.containsKey( sheetname ) ) {
+					throw new ImportValidationException( ErrorType.MISSING_DATA,
+							"Missing sheet: " + sheetname );
+				}
+
+				try ( InputStream is = reader.getSheet( sheetNameIdLkp.get( sheetname ) ) ) {
+					InputSource sheetSource = new InputSource( is );
+					parser.parse( sheetSource );
+
+					SheetType sheettype = handler.getSheetType();
+					boolean sheetsaysM = ( SheetType.METADATA == sheettype );
+
+					if ( sheetsaysM ) {
+						if ( seenMetadata ) {
+							throw new ImportValidationException( ErrorType.TOO_MUCH_DATA,
+									"Too many metadata tabs in loading file" );
+						}
+						seenMetadata = true;
+					}
+
+					SheetType loadertype = types.get( sheetname );
+					if ( checktypes ) {
+						if ( ( SheetType.USUAL == loadertype && sheetsaysM )
+								|| SheetType.METADATA == loadertype && !sheetsaysM ) {
+							// if the loader or the sheet itself says its a metadata sheet,
+							// then both types must agree
+							throw new ImportValidationException( ErrorType.WRONG_TABTYPE,
+									"Loader Sheet data type for " + sheetname
+									+ " conflicts with sheet type" );
+						}
+					}
+
+					types.put( sheetname, sheettype );
+				}
 			}
 		}
+		catch ( SAXException | IOException | InvalidFormatException e ) {
+			log.error( e, e );
+		}
 
-		return null; // oh boy!
+		return types;
+	}
+
+	public ImportData getData() throws ImportValidationException {
+		ImportData id = new ImportData();
+		EngineLoader.initNamespaces( id );
+
+		try {
+			XMLReader parser = XMLReaderFactory.createXMLReader();
+			for ( Map.Entry<String, SheetType> typeen : getSheetTypes().entrySet() ) {
+				String sheetname = typeen.getKey();
+				String sheetid = sheetNameIdLkp.get( sheetname );
+				SheetType sheettype = typeen.getValue();
+
+				try ( InputStream is = reader.getSheet( sheetid ) ) {
+					if ( SheetType.METADATA == sheettype ) {
+						MetadataTabXmlHandler handler
+								= new MetadataTabXmlHandler( sharedStrings, id.getMetadata() );
+						parser.setContentHandler( handler );
+
+						InputSource sheetSource = new InputSource( is );
+						parser.parse( sheetSource );
+
+						id.setMetadata( handler.getMetadata() );
+					}
+					else if ( SheetType.NODE == sheettype || SheetType.RELATION == sheettype ) {
+						LoadingSheetXmlHandler handler
+								= new LoadingSheetXmlHandler( sharedStrings, styles, sheetname );
+						parser.setContentHandler( handler );
+
+						InputSource sheetSource = new InputSource( is );
+						parser.parse( sheetSource );
+
+						LoadingSheetData lsd = handler.getSheet();
+						if ( lsd.isEmpty() ) {
+							throw new ImportValidationException( ErrorType.NOT_A_LOADING_SHEET,
+									"Sheet " + sheetname + " contains no loadable data" );
+						}
+						id.add( lsd );
+					}
+				}
+			}
+		}
+		catch ( SAXException | InvalidFormatException | IOException ife ) {
+			log.error( ife, ife );
+		}
+
+		if ( id.isEmpty() ) {
+			throw new ImportValidationException( ErrorType.MISSING_DATA,
+					"No data to process" );
+		}
+
+		return id;
 	}
 
 	public Collection<String> getSheetNames() {
@@ -466,10 +596,11 @@ public class LowMemXlsWorkbook implements Workbook {
 	private static class SheetHandler extends DefaultHandler {
 
 		private static final Map<String, Integer> formats = new HashMap<>();
+		//private final Map<Integer, Value> currentrowdata = new HashMap<>();
+		private final ValueFactory vf = new ValueFactoryImpl();
 		private final ArrayList<String> sst;
-		private final MultiMap<Integer, Cell> data = new MultiMap<>();
 		private final LowMemXlsSheet sheet;
-		private final Map<Integer, Cell> currentrowdata = new LinkedHashMap<>();
+		//private final Map<Integer, Cell> currentrowdata = new LinkedHashMap<>();
 		private final StylesTable styles;
 		private String lastContents;
 		private boolean reading = false;
@@ -539,7 +670,6 @@ public class LowMemXlsWorkbook implements Workbook {
 					case "row":
 						int rownum = Integer.parseInt( attributes.getValue( "r" ) );
 						currentrow = sheet.createRow( rownum - 1 );
-						currentrowdata.clear();
 						break;
 					case "v": // new value for a cell
 						reading = true;

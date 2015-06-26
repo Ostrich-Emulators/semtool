@@ -60,11 +60,6 @@ public class POIReader implements ImportFileReader {
 	private static final String NODE = "Node";
 	private static final String COMMENTSTART = "#";
 
-	private static enum SheetType {
-
-		METADATA, NODE, RELATION, LOADER, UNKNOWN, UNSPECIFIED, EMPTY
-	};
-
 	public ImportData readNonloadingSheet( File file ) throws IOException {
 		ImportData d
 				= readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
@@ -135,6 +130,8 @@ public class POIReader implements ImportFileReader {
 		logger.debug( "getting metadata from file: " + file );
 		final LowMemXlsWorkbook workbook
 				= new LowMemXlsWorkbook( new FileInputStream( file ) );
+		ImportData id = workbook.getData();
+		logger.debug( id );
 
 //		final Workbook workbook = new XSSFWorkbook( new FileInputStream( file ) );
 		workbook.setMissingCellPolicy( Row.RETURN_BLANK_AS_NULL );
@@ -154,8 +151,10 @@ public class POIReader implements ImportFileReader {
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
 		LowMemXlsWorkbook rdr = new LowMemXlsWorkbook( file );
-//		Workbook rdr = new XSSFWorkbook( new FileInputStream( file ) );
-		ImportData d = read( rdr );
+		ImportData d = rdr.getData();
+
+		//Workbook rdr = new XSSFWorkbook( new FileInputStream( file ) );
+		//ImportData d = read( rdr );
 		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
 		rdr.release();
 		return d;
