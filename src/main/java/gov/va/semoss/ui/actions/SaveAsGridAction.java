@@ -102,18 +102,17 @@ public class SaveAsGridAction extends AbstractSavingAction {
 		Builder prefb = new CsvPreference.Builder( (char) CsvPreference.STANDARD_PREFERENCE.getQuoteChar(),
 				(int) delimiter, CsvPreference.STANDARD_PREFERENCE.getEndOfLineSymbols() );
 
-		CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() );
-		writer.writeHeader( heads );
-
-		for ( int r = 0; r < table.getRowCount(); r++ ) {
-			Map<String, Object> map = new HashMap<>();
-			for ( int c = 0; c < heads.length; c++ ) {
-				map.put( heads[c], table.getValueAt( r, c ).toString() );
+		try (CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() )) {
+			writer.writeHeader( heads );
+			
+			for ( int r = 0; r < table.getRowCount(); r++ ) {
+				Map<String, Object> map = new HashMap<>();
+				for ( int c = 0; c < heads.length; c++ ) {
+					map.put( heads[c], table.getValueAt( r, c ).toString() );
+				}
+				writer.write( map, heads );
 			}
-			writer.write( map, heads );
 		}
-		
-		writer.close();
 		table.setNeedsSave( false );
 	}
 
