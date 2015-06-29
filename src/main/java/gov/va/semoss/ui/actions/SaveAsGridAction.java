@@ -12,7 +12,6 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
-import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
