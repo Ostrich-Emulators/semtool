@@ -19,17 +19,24 @@
  */
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.Forest;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
 import javax.swing.JMenu;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class is used to create a popup that allows the user to pick the layout.
  */
 public class LayoutPopup extends JMenu {
-	private static final String[] layoutNames = { Constants.FR, Constants.KK, 
-		Constants.SPRING, Constants.ISO, Constants.CIRCLE_LAYOUT, 
+
+	private static final String[] layoutNames = { Constants.FR, Constants.KK,
+		Constants.SPRING, Constants.ISO, Constants.CIRCLE_LAYOUT,
 		Constants.TREE_LAYOUT, Constants.RADIAL_TREE_LAYOUT, Constants.BALLOON_LAYOUT };
 
 	/**
@@ -40,8 +47,21 @@ public class LayoutPopup extends JMenu {
 	 */
 	public LayoutPopup( String name, GraphPlaySheet ps ) {
 		super( name );
+
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> viz = ps.getVisibleGraph();
+		boolean isforest = ( viz instanceof Forest );
+		Set<String> treelayouts = new HashSet<>();
+		treelayouts.add( Constants.TREE_LAYOUT );
+		treelayouts.add( Constants.RADIAL_TREE_LAYOUT );
+		treelayouts.add( Constants.BALLOON_LAYOUT );
+
 		for ( String layoutName : layoutNames ) {
-			add( new LayoutMenuItem( layoutName, ps ) );
+			LayoutMenuItem mi = new LayoutMenuItem( layoutName, ps );
+			add( mi );
+
+			if ( treelayouts.contains( layoutName ) ) {
+				mi.setEnabled( isforest );
+			}
 		}
 	}
 }

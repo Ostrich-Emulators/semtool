@@ -133,7 +133,10 @@ public class SaveGridAction extends AbstractSavingAction {
 		for ( int r = 0; r < table.getRealRowCount(); r++ ) {
 			String[] row = new String[heads.length];
 			for ( int c = 0; c < heads.length; c++ ) {
-				row[c] = table.getValueAt( r, c ).toString();
+				Object val = table.getValueAt( r, c );
+				if( null != val ){
+					row[c] = val.toString();
+				}
 			}
 			writer.addRow( row );
 		}

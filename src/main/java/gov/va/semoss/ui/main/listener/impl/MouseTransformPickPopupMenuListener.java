@@ -22,7 +22,6 @@ package gov.va.semoss.ui.main.listener.impl;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import java.awt.event.ActionEvent;
 
-
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import javax.swing.AbstractAction;
@@ -35,18 +34,22 @@ public class MouseTransformPickPopupMenuListener extends AbstractAction {
 
 	private final VisualizationViewer ps;
 	private final Mode mode;
+
 	/**
 	 * Method setPlaysheet. Sets the playsheet that the listener will access.
 	 *
 	 * @param ps IPlaySheet
 	 */
 	public MouseTransformPickPopupMenuListener( VisualizationViewer ps, Mode m ) {
-		super( "Move Graph" );
-		putValue( Action.SHORT_DESCRIPTION, "Move entire graph as a single unit" );
+		super( ( Mode.TRANSFORMING == m ? "Move" : "Pick" ) + " Graph" );
+
+		String desc = ( Mode.TRANSFORMING == m
+				? "Move entire graph as a single unit" : "Pick specific nodes" );
+		putValue( Action.SHORT_DESCRIPTION, desc );
 		this.ps = ps;
 		mode = m;
 	}
-	
+
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		( (ModalGraphMouse) ps.getGraphMouse() ).setMode( mode );
