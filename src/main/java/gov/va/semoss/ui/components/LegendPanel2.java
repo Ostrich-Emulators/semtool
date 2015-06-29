@@ -61,7 +61,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		MultiMap<URI, SEMOSSVertex> types = new MultiMap<>();
 		Map<URI, Shape> shapes = new HashMap<>();
 		Map<URI, Color> colors = new HashMap<>();
-		for ( SEMOSSVertex v : graph.getVertices() ) {
+		for ( SEMOSSVertex v : gps.getVisibleGraph().getVertices() ) {
 			types.add( v.getType(), v );
 			shapes.put( v.getType(), v.getShapeLegend() );
 			colors.put( v.getType(), v.getColor() );

@@ -53,49 +53,52 @@ import com.google.gson.Gson;
  * Javascript library to create visualizations.
  */
 public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
+
 	private static final long serialVersionUID = 1142415334918968440L;
 	private static final Logger log = Logger.getLogger( BrowserPlaySheet2.class );
-	
+
 	private final Map<String, Object> dataHash = new HashMap<>();
 	private final String fileName;
-	
+
 	protected final JFXPanel jfxPanel = new JFXPanel();
 	protected WebEngine engine;
 	protected Scene scene;
 
 	public BrowserPlaySheet2( String htmlPath ) {
 		setLayout( new BorderLayout() );
-		add(jfxPanel);
+		add( jfxPanel );
 
-		fileName = "file:///" +
-				DIHelper.getInstance().getProperty( Constants.BASE_FOLDER ) + htmlPath;
-		
-		Platform.setImplicitExit(false);
-		Platform.runLater(new Runnable() {
+		fileName = "file:///"
+				+ DIHelper.getInstance().getProperty( Constants.BASE_FOLDER ) + htmlPath;
+
+		Platform.setImplicitExit( false );
+		Platform.runLater( new Runnable() {
 			@Override
 			public void run() {
 				WebView view = new WebView();
-				scene = new Scene(view);
-				jfxPanel.setScene(scene);
-				
+				scene = new Scene( view );
+				jfxPanel.setScene( scene );
+
 				engine = view.getEngine();
 				engine.setOnAlert(
-					new EventHandler<WebEvent<String>>() {
-						public void handle(WebEvent<String> event) {
-							log.debug("handling event: " + event);
-							if ("document:loaded".equals(event.getData())) {
-								log.debug("Document is loaded.");
-				                callIt();
-							} else if (event.getData().startsWith("download:csv")){
-								log.debug("Downloading CSV file from browser.");
-								downloadCSV(event.getData().substring(12));
+						new EventHandler<WebEvent<String>>() {
+							@Override
+							public void handle( WebEvent<String> event ) {
+								log.debug( "handling event: " + event );
+								if ( "document:loaded".equals( event.getData() ) ) {
+									log.debug( "Document is loaded." );
+									callIt();
+								}
+								else if ( event.getData().startsWith( "download:csv" ) ) {
+									log.debug( "Downloading CSV file from browser." );
+									downloadCSV( event.getData().substring( 12 ) );
+								}
 							}
-						}
 
-					}
+						}
 				);
 			}
-		});
+		} );
 	}
 
 	/**
@@ -114,15 +117,14 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 	 */
 	@Override
 	public void createView() {
-		Platform.runLater(new Runnable() {
+		Platform.runLater( new Runnable() {
 			@Override
 			public void run() {
-				engine.load(fileName);
+				engine.load( fileName );
 			}
-		});
+		} );
 	}
-			
-	
+
 	/**
 	 * Method callIt. Converts a given Hashtable to a Json and passes it to the
 	 * browser.
@@ -132,52 +134,55 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 	 */
 	public void callIt() {
 		String json = new Gson().toJson( dataHash );
-		if (null != json && !"".equals(json) && !"{}".equals(json)) {
-			json = json.replace("\\n", " ");
+		if ( null != json && !"".equals( json ) && !"{}".equals( json ) ) {
+			json = json.replace( "\\n", " " );
 			json = "'" + json + "'";
 		}
-		
-		executeJavaScript("start(" + json + ");");
+
+		executeJavaScript( "start(" + json + ");" );
 	}
-	
+
 	@Override
 	public void incrementFont( float incr ) {
-		executeJavaScript("resizeFont(" + incr + ");");
+		executeJavaScript( "resizeFont(" + incr + ");" );
 	}
-	
-	public void executeJavaScript(String functionNameAndArgs) {
+
+	public void executeJavaScript( String functionNameAndArgs ) {
 		log.debug( "Calling javascript method: " + functionNameAndArgs );
-		
-		Platform.runLater(new Runnable() {
+
+		Platform.runLater( new Runnable() {
 			@Override
 			public void run() {
 				engine.executeScript( functionNameAndArgs );
 			}
-		});
+		} );
 	}
-	
-	public void registerFunction(String namespace, Object theClass) {
-		log.debug( "Registering Java class whose methods can be called from javascript. Namespace: " + namespace + ", Java class: " + theClass );
-		
-		Platform.runLater(new Runnable() {
+
+	public void registerFunction( String namespace, Object theClass ) {
+		log.debug( "Registering Java class whose methods can be called from javascript. Namespace: "
+				+ namespace + ", Java class: " + theClass );
+
+		Platform.runLater( new Runnable() {
 			@Override
 			public void run() {
 				engine.getLoadWorker().stateProperty().addListener(
-				    new ChangeListener<State>() {
-				        public void changed(ObservableValue<? extends Worker.State> ov, State oldState, State newState) {
-				            if (newState == Worker.State.SUCCEEDED) {
-								JSObject jsobj = (JSObject) engine.executeScript("window");
-								jsobj.setMember(namespace, theClass);
-				            }
-				        }
-				    }
-			    );
+						new ChangeListener<State>() {
+							@Override
+							public void changed( ObservableValue<? extends Worker.State> ov,
+									State oldState, State newState ) {
+								if ( newState == Worker.State.SUCCEEDED ) {
+									JSObject jsobj = (JSObject) engine.executeScript( "window" );
+									jsobj.setMember( namespace, theClass );
+								}
+							}
+						}
+				);
 			}
-		});
+		} );
 	}
-	
-    public void log(String text) {
-        log.debug(text);
+
+	public void log( String text ) {
+		log.debug( text );
 	}
 
 	/**
@@ -204,7 +209,7 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 		dataHash.putAll( newdata );
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	@Override
 	public Object getData() {
 		Map<String, Object> returnHash = (Map<String, Object>) super.getData();
@@ -213,9 +218,10 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void run() {}
-	
-	private void downloadCSV(String data) {
-		ExportUtility.doExportCSVWithDialogue(this, data);
+	public void run() {
+	}
+
+	private void downloadCSV( String data ) {
+		ExportUtility.doExportCSVWithDialogue( this, data );
 	}
 }

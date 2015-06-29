@@ -294,6 +294,7 @@ public class PlaySheetFrame extends JInternalFrame {
 		final ListQueryAdapter<Value[]> lqa
 				= new ListOfValueArraysQueryAdapterImpl( q );
 		final StringBuilder builder = new StringBuilder();
+		final int rows[] = { 0 };
 
 		ProgressTask pt = new DisappearingProgressBarTask( cmp, new Runnable() {
 
@@ -308,6 +309,9 @@ public class PlaySheetFrame extends JInternalFrame {
 						// assume the pscc knows what to do with empty data
 						dsize = 0;
 						cmp.create( null, null, getEngine() );
+						// we have no way of determining what data got produced,
+						// so assume something good happened
+						dsize = 1;
 					}
 					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
 							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
@@ -328,6 +332,8 @@ public class PlaySheetFrame extends JInternalFrame {
 					builder.append( cmp.getTitle() ).append( " " ).
 							append( dsize ).append( " Data Row" ).
 							append( 1 == dsize ? "" : "s" ).append( " Fetched" );
+					rows[0] = dsize;
+
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 					log.error( e, e );
@@ -339,6 +345,13 @@ public class PlaySheetFrame extends JInternalFrame {
 			public void done() {
 				setLabel( builder.toString() );
 				setFinishLabel( getLabel() );
+
+				if ( 0 == rows[0] ) {
+					// let the user know we're done, but no data was returned
+					JOptionPane.showMessageDialog( rootPane, "No data returned", "No Data",
+							JOptionPane.INFORMATION_MESSAGE );
+				}
+
 				super.done();
 			}
 		};
