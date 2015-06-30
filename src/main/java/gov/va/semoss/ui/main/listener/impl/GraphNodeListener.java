@@ -48,7 +48,7 @@ import java.util.HashSet;
 public class GraphNodeListener extends ModalLensGraphMouse implements IChakraListener {
 
 	private static final Logger logger = Logger.getLogger( GraphNodeListener.class );
-	private GraphPlaySheet gps;
+	private final GraphPlaySheet gps;
 
 	public GraphNodeListener( GraphPlaySheet _gps ) {
 		gps = _gps;
@@ -84,8 +84,10 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 			vertHash = handleRightClick( viewer, clickedVertex, e );
 		}
 
-		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-			handleHighlightVertexInSkeletonMode( viewer, vertHash );
+		if ( null != gps ) {
+			if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+				handleHighlightVertexInSkeletonMode( viewer, vertHash );
+			}
 		}
 	}
 
@@ -118,7 +120,7 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
 	 * to use to get the edges
 	 */
-	private void handleEdges(
+	protected void handleEdges(
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
 		JTable table = (JTable) DIHelper.getInstance().getLocalProp(
 				Constants.PROP_TABLE );
@@ -134,16 +136,12 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 	/*
 	 * Method handleRightClick Gather highlights vertices and clicked vertex and
 	 * send to right click menu
-	 * 
-	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
-	 * to use to get the edges
-	 * 
-	 * @param SEMOSSVertex clickedVertex - The vertex which was clicked
-	 * 
-	 * @param MouseEvent e - the mouse event which we are handling, used as the
-	 * display container.
+	 * @param viewer The viewer to use to get the edges
+	 * @param clickedVertex The vertex which was clicked
+	 * @param e
+	 * @return all the currently selected nodes
 	 */
-	private Set<SEMOSSVertex> handleRightClick( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
+	protected Set<SEMOSSVertex> handleRightClick( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
 			SEMOSSVertex clickedVertex, MouseEvent e ) {
 		logger.debug( "The user right clicked." );
 
@@ -152,8 +150,8 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 		Set<SEMOSSVertex> pickedVertices = viewer.getPickedVertexState().getPicked();
 		vertHash.addAll( pickedVertices );
 
-		SEMOSSVertex[] vertices = pickedVertices
-				.toArray( new SEMOSSVertex[pickedVertices.size()] );
+		SEMOSSVertex[] vertices
+				= pickedVertices.toArray( new SEMOSSVertex[pickedVertices.size()] );
 		new GraphNodePopup( gps, clickedVertex, vertices ).show( e );
 
 		return vertHash;
