@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.util.MultiMap;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -63,19 +64,30 @@ public class OneVariableDialogItem extends AbstractAction {
 	public void actionPerformed( ActionEvent e ) {
 		Object newval = null;
 		boolean ok = false;
+		OneVariablePanel ovp;
+
 		if ( null == labels ) {
-			newval = JOptionPane.showInputDialog( null, dlgtext, currval );
-			ok = ( null != newval );
+			ovp = new OneVariablePanel( dlgtext, currval.toString(), node.isMarked( property ) );
+			int ans = JOptionPane.showConfirmDialog( null, ovp, dlgtext,
+					JOptionPane.YES_OPTION );
+			if ( JOptionPane.YES_OPTION == ans ) {
+				ok = true;
+				newval = ovp.getInput();
+			}
 		}
 		else {
 			Map<String, ?> lossy = MultiMap.lossyflip( labels );
 			currval = labels.get( currval );
 
-			newval = JOptionPane.showInputDialog( null, dlgtext, dlgtext,
-					JOptionPane.PLAIN_MESSAGE, null, lossy.keySet().toArray(), currval );
-			if ( null != newval ) {
-				newval = lossy.get( newval.toString() );
+			ovp = new OneVariablePanel( dlgtext, new ArrayList<>( lossy.keySet() ),
+					currval, node.isMarked( property ) );
+
+			int ans = JOptionPane.showConfirmDialog( null, ovp, dlgtext,
+					JOptionPane.YES_OPTION );
+
+			if ( JOptionPane.YES_OPTION == ans ) {
 				ok = true;
+				newval = lossy.get( ovp.getInput() );
 			}
 		}
 
