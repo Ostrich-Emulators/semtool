@@ -144,6 +144,10 @@ public class AbstractNodeEdgeBase {
 	public URI getType() {
 		return URI.class.cast( getProperty( RDF.TYPE ) );
 	}
+        
+        public void removeProperty( URI prop ){
+            properties.remove( prop );
+        }
 
 	public void setType( URI type ) {
 		setProperty( RDF.TYPE, type );

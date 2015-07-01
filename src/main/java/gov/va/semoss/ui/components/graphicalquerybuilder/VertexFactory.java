@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
@@ -25,6 +26,7 @@ public class VertexFactory implements Factory<SEMOSSVertex> {
 	public SEMOSSVertex create() {
 		SEMOSSVertex v = new SEMOSSVertex( uribuilder.uniqueUri(), verttype, "" );
 		v.mark( RDFS.LABEL, true );
+                v.removeProperty(AbstractNodeEdgeBase.LEVEL );
 		return v;
 	}
 

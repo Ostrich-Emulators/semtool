@@ -44,6 +44,7 @@ public class OneVariablePanel extends javax.swing.JPanel {
 		card.show( inputarea, "string" );
 		type = STRING;
 		inputlist.setVisibleRowCount( 1 );
+                inputstring.requestFocus();
 	}
 
 	public OneVariablePanel( String ll, List<String> choices, Object choice,

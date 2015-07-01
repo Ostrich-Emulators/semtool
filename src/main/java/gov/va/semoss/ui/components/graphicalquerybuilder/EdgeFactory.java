@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
@@ -24,6 +25,8 @@ public class EdgeFactory implements Factory<SEMOSSEdge> {
 	public SEMOSSEdge create() {
 		SEMOSSEdge edge = new SEMOSSEdge( uribuilder.uniqueUri() );
 		edge.setName( "" );
+                edge.removeProperty(AbstractNodeEdgeBase.LEVEL );
+
 		return edge;
 	}
 
