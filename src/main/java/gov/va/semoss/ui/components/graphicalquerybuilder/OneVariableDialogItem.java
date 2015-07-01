@@ -82,7 +82,7 @@ public class OneVariableDialogItem extends AbstractAction {
 		if ( ok ) {
 			node.setProperty( property, newval );
 			currval = newval;
-			panel.updateViewer();
+			panel.update();
 		}
 	}
 }

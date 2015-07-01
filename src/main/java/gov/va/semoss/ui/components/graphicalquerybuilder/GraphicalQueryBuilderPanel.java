@@ -5,14 +5,17 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.ObservableGraph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.AbstractPopupGraphMousePlugin;
+import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
@@ -23,7 +26,6 @@ import gov.va.semoss.ui.components.NewScrollBarUI;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
-import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -37,13 +39,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -54,18 +59,22 @@ import org.openrdf.model.impl.URIImpl;
  * @author ryan
  */
 public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
-
+	
 	private static final Logger log = Logger.getLogger( GraphicalQueryBuilderPanel.class );
 	private IEngine engine;
 	private final String progress;
 	private final Action addConceptNodeAction;
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE );
 	private final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
-	private final Layout<SEMOSSVertex, SEMOSSEdge> vizlayout = new FRLayout<>( graph );
+	//private final ObservableGraph<SEMOSSVertex, SEMOSSEdge> observer =
+	//		new ObservableGraph<>( graph );
+	private final Layout<SEMOSSVertex, SEMOSSEdge> vizlayout = new StaticLayout<>( graph );
 	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view
 			= new VisualizationViewer<>( vizlayout );
-	GqbLabelTransformer<SEMOSSVertex> vlt;
-	GqbLabelTransformer<SEMOSSEdge> elt;
+	private final VertexFactory vfac = new VertexFactory();
+	private final EdgeFactory efac = new EdgeFactory();
+	private GqbLabelTransformer<SEMOSSVertex> vlt;
+	private GqbLabelTransformer<SEMOSSEdge> elt;
 
 	/**
 	 * Creates new form GraphicalQueryBuilderPanel
@@ -74,47 +83,36 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 		progress = progressname;
 		initComponents();
 		initVizualizer();
-
+		
 		GraphZoomScrollPane zoomer = new GraphZoomScrollPane( view );
 		zoomer.getVerticalScrollBar().setUI( new NewScrollBarUI() );
 		zoomer.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
 		visarea.add( zoomer );
-
+		
 		addConceptNodeAction = new AbstractAction() {
-
+			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				JButton src = JButton.class.cast( e.getSource() );
 				URI concept = new URIImpl( e.getActionCommand() );
 				log.debug( "clicked on " + concept );
-
-				SEMOSSVertex vert = new SEMOSSVertex( uribuilder.uniqueUri(), concept, "" );
-
-				graph.addVertex( vert );
-
-				vizlayout.setGraph( graph );
-				vizlayout.setSize( visarea.getSize() );
-				// vizlayout.setSize( new Dimension( 600, 600 ) );
-
-				updateViewer();
+				vfac.setType( concept );
 			}
 		};
-
 	}
-
+	
 	public void setEngine( IEngine eng ) {
 		engine = eng;
-
+		
 		ProgressTask pt = new ProgressTask( "Initializing Graphical Query Builder",
 				new Runnable() {
-
+					
 					@Override
 					public void run() {
 						buildTypeSelector();
 					}
 				}
 		);
-
+		
 		OperationsProgress.getInstance( progress ).add( pt );
 	}
 
@@ -132,7 +130,8 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
     visarea = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
     typearea = new javax.swing.JPanel();
-    sparqlarea = new javax.swing.JPanel();
+    jScrollPane2 = new javax.swing.JScrollPane();
+    syntaxTextEditor1 = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
 
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
     jSplitPane1.setResizeWeight(0.75);
@@ -152,18 +151,11 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 
     jSplitPane1.setTopComponent(topsplit);
 
-    javax.swing.GroupLayout sparqlareaLayout = new javax.swing.GroupLayout(sparqlarea);
-    sparqlarea.setLayout(sparqlareaLayout);
-    sparqlareaLayout.setHorizontalGroup(
-      sparqlareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 549, Short.MAX_VALUE)
-    );
-    sparqlareaLayout.setVerticalGroup(
-      sparqlareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 104, Short.MAX_VALUE)
-    );
+    syntaxTextEditor1.setColumns(20);
+    syntaxTextEditor1.setRows(5);
+    jScrollPane2.setViewportView(syntaxTextEditor1);
 
-    jSplitPane1.setRightComponent(sparqlarea);
+    jSplitPane1.setRightComponent(jScrollPane2);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -180,34 +172,36 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JSplitPane jSplitPane1;
-  private javax.swing.JPanel sparqlarea;
+  private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor syntaxTextEditor1;
   private javax.swing.JSplitPane topsplit;
   private javax.swing.JPanel typearea;
   private javax.swing.JPanel visarea;
   // End of variables declaration//GEN-END:variables
 
 	private void buildTypeSelector() {
-
+		
 		try {
 			SwingUtilities.invokeAndWait( new Runnable() {
-
+				
 				@Override
 				public void run() {
 					vlt.setEngine( engine );
 					elt.setEngine( engine );
 					if ( null != engine ) {
-
+						
 						typearea.removeAll();
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
-
+						
 						List<URI> concepts = DBToLoadingSheetExporter.createConceptList( engine );
 						gl.setRows( concepts.size() );
-
+						
 						Map<URI, String> conceptlabels = Utility.getInstanceLabels( concepts, engine );
-
+						ButtonGroup group = new ButtonGroup();
+						
 						for ( Map.Entry<URI, String> en : Utility.sortUrisByLabel( conceptlabels ).entrySet() ) {
-							JButton button = new JButton( addConceptNodeAction );
+							JToggleButton button = new JToggleButton( addConceptNodeAction );
 							button.setText( en.getValue() );
 							button.setActionCommand( en.getKey().stringValue() );
 							SEMOSSVertex v = new SEMOSSVertex( uribuilder.uniqueUri(),
@@ -215,9 +209,10 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
 									new Dimension( 15, 15 ) ) );
 							typearea.add( button );
+							group.add( button );
 						}
 					}
-
+					
 					typearea.revalidate();
 					typearea.repaint();
 				}
@@ -227,14 +222,14 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 			log.error( e, e );
 		}
 	}
-
+	
 	private void initVizualizer() {
 		LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
 		vlt = new GqbLabelTransformer<>( getEngine() );
 		PaintTransformer<SEMOSSVertex> vpt = new PaintTransformer<>();
 		VertexShapeTransformer vht = new VertexShapeTransformer();
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
-
+		
 		LabelFontTransformer<SEMOSSEdge> eft = new LabelFontTransformer<>();
 		elt = new GqbLabelTransformer<>( getEngine() );
 		PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<SEMOSSEdge>() {
@@ -247,19 +242,17 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 		ArrowPaintTransformer adpt = new ArrowPaintTransformer();
 		ArrowPaintTransformer aft = new ArrowPaintTransformer();
-
-		GraphNodeListener gl = new GraphMouseAdapter( this );
-		gl.setMode( ModalGraphMouse.Mode.PICKING );
-		view.setGraphMouse( gl );
+		
+		addMouse();
 		view.setBackground( Color.WHITE );
-
+		
 		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = view.getRenderContext();
 		rc.setVertexLabelTransformer( vlt );
 		rc.setVertexStrokeTransformer( vst );
 		rc.setVertexShapeTransformer( vht );
 		rc.setVertexFillPaintTransformer( vpt );
 		rc.setVertexFontTransformer( vft );
-
+		
 		rc.setEdgeLabelTransformer( elt );
 		rc.setEdgeDrawPaintTransformer( ept );
 		rc.setEdgeStrokeTransformer( est );
@@ -274,16 +267,67 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 		//view.getPickedVertexState().addItemListener( psl );
 		//view.getPickedEdgeState().addItemListener( psl );
 	}
-
+	
 	public VisualizationViewer<SEMOSSVertex, SEMOSSEdge> getViewer() {
 		return view;
 	}
-
-	public void updateViewer() {
+	
+	public void update() {
 		view.repaint();
+		updateSparql();
 	}
-
+	
 	public IEngine getEngine() {
 		return engine;
+	}
+	
+	private void addMouse() {
+		EditingModalGraphMouse gm
+				= new EditingModalGraphMouse( view.getRenderContext(), vfac, efac );
+		gm.remove( gm.getPopupEditingPlugin() );
+		gm.add( new MousePopuper() );
+		view.setGraphMouse( gm );
+	}
+	
+	private void updateSparql() {
+		log.debug( graph.getVertexCount() + " vertices, " + graph.getEdgeCount() + " edges" );
+	}
+	
+	private class MousePopuper extends AbstractPopupGraphMousePlugin {
+		
+		public MousePopuper() {
+		}
+		
+		public MousePopuper( int modifiers ) {
+			super( modifiers );
+		}
+		
+		@Override
+		protected void handlePopup( MouseEvent e ) {
+			Point p = e.getPoint();
+			
+			GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport = view.getPickSupport();
+			if ( null != pickSupport ) {
+				final SEMOSSVertex vertex
+						= pickSupport.getVertex( view.getGraphLayout(), p.getX(), p.getY() );
+				if ( null == vertex ) {
+					final SEMOSSEdge edge
+							= pickSupport.getEdge( view.getGraphLayout(), p.getX(), p.getY() );
+					if ( null == edge ) {
+						log.debug( "picked in space" );
+					}
+					else {
+						NodeEdgeBasePopup edgepop
+								= NodeEdgeBasePopup.forEdge( edge, GraphicalQueryBuilderPanel.this );
+						edgepop.show( view, p.x, p.y );
+					}
+				}
+				else {
+					NodeEdgeBasePopup vertpop
+							= NodeEdgeBasePopup.forVertex( vertex, GraphicalQueryBuilderPanel.this );
+					vertpop.show( view, p.x, p.y );
+				}
+			}
+		}
 	}
 }
