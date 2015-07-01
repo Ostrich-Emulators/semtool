@@ -11,9 +11,13 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.util.Utility;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPopupMenu;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -32,6 +36,11 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 		add( new OneVariableDialogItem( v, pnl, RDFS.LABEL, "Set Instance Label",
 				"Set the label of this node", "Instance Label" ) );
 		add( makeTypeItem( v, pnl ) );
+
+		finishMenu();
+	}
+
+	protected void finishMenu() {
 	}
 
 	protected abstract Action makeTypeItem( T v, GraphicalQueryBuilderPanel pnl );
@@ -48,6 +57,24 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Vertex", "New Type", Utility.sortUrisByLabel( labels ) );
 
+			}
+
+			@Override
+			protected void finishMenu() {
+				addSeparator();
+
+				JCheckBoxMenuItem selectMe = new JCheckBoxMenuItem( "Return this Entity",
+						v.isMarked( RDF.SUBJECT ) );
+				add( selectMe );
+
+				selectMe.addItemListener( new ItemListener() {
+
+					@Override
+					public void itemStateChanged( ItemEvent e ) {
+						v.mark( RDF.SUBJECT, selectMe.isSelected() );
+						pnl.update();
+					}
+				} );
 			}
 		};
 	}

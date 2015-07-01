@@ -269,6 +269,7 @@ public class PlayPane extends JFrame {
 	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
 	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
+	private JCheckBoxMenuItem hidecsp;
 	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging",
 			DbAction.getIcon( "log_tab1" ) );
 	private final JCheckBoxMenuItem gQueryBuilderItem
@@ -679,6 +680,7 @@ public class PlayPane extends JFrame {
 		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
 		rightView.setTabComponentAt( 0, dislbl );
 		gQueryBuilderPanel = new GraphicalQueryBuilderPanel( UIPROGRESS );
+		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
 
 		loggingPanel = new LoggingPanel();
 		CloseableTab ct = new PlayPaneCloseableTab( rightView, loggingItem,
@@ -695,9 +697,11 @@ public class PlayPane extends JFrame {
 				if ( rightView.getSelectedComponent().equals( loggingPanel ) ) {
 					loggingPanel.refresh();
 				}
-//				else if( rightView.getSelectedComponent().equals( gQueryBuilderPanel ) ) {
-//					gQueryBuilderPanel.setEngine( repoList.getSelectedValue() );
-//				}
+				else if( rightView.getSelectedComponent().equals( gQueryBuilderPanel ) ) {
+					if( !hidecsp.isSelected() ){
+						hidecsp.doClick();
+					}
+				}
 			}
 		} );
 
@@ -1660,8 +1664,7 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Panel",
-				getProp( prefs, QUERYPANEL ) );
+		hidecsp = new JCheckBoxMenuItem( "Query Panel",	getProp( prefs, QUERYPANEL ) );
 
 		if ( getProp( prefs, QUERYPANEL ) == true ) {
 			hidecsp.setToolTipText( "Disable the Query Panel" );
@@ -1696,13 +1699,13 @@ public class PlayPane extends JFrame {
 
 		gQueryBuilderItem.addActionListener( new ActionListener() {
 			@Override
-			public void actionPerformed( ActionEvent e ) {
+			public void actionPerformed( ActionEvent e ) {				
 				boolean ischecked = gQueryBuilderItem.isSelected();
 				prefs.putBoolean( GQUERYBUILDER, ischecked );
 				DIHelper.getInstance().getCoreProp().setProperty( GQUERYBUILDER,
 						Boolean.toString( ischecked ) );
 
-				if ( ischecked ) {
+				if ( ischecked ) {					
 					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "insight_manager_tab1" ),
 							gQueryBuilderPanel, "Build queries graphically and generate Sparql" );
 					CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, gQueryBuilderItem,

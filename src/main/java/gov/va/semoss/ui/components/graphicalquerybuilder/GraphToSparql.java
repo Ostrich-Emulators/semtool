@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -27,138 +26,177 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class GraphToSparql {
 
-    private final Map<URI, Integer> ids = new HashMap<>();
-    private final Map<NodeType, Integer> valIds = new HashMap<>();
+	private final Map<AbstractNodeEdgeBase, Integer> ids = new HashMap<>();
+	private final Map<NodeType, Integer> valIds = new HashMap<>();
+	private final static Map<URI, String> shortcuts = new HashMap<>();
 
-    public GraphToSparql() {
-    }
+	static {
+		shortcuts.put( RDF.TYPE, "a" );
+		shortcuts.put( RDFS.LABEL, "rdfs:label" );
+	}
 
-    public String construct(DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph) {
-        assignIds(graph);
-        // return convert( graph, false );
-        throw new UnsupportedOperationException("not yet implemented");
-    }
+	public GraphToSparql() {
+	}
 
-    public String select(DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph) {
-        assignIds(graph);
-        return buildSelect(graph) + buildWhere(graph);
-    }
+	public String construct( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		assignIds( graph );
+		// return convert( graph, false );
+		throw new UnsupportedOperationException( "not yet implemented" );
+	}
 
-    private String buildSelect(DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph) {
-        StringBuilder select = new StringBuilder("SELECT");
-        List<AbstractNodeEdgeBase> todo = new ArrayList<>();
-        todo.addAll(graph.getVertices());
-        todo.addAll(graph.getEdges());
+	public String select( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		assignIds( graph );
+		return buildSelect( graph ) + buildWhere( graph );
+	}
 
-        for (AbstractNodeEdgeBase v : todo) {
-            for (Map.Entry<URI, Object> en : v.getProperties().entrySet()) {
-                int objid = valIds.get(new NodeType(v));
-                String objvar = "obj" + objid;
+	private String buildSelect( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		StringBuilder select = new StringBuilder( "SELECT" );
+		List<AbstractNodeEdgeBase> todo = new ArrayList<>();
+		todo.addAll( graph.getVertices() );
+		todo.addAll( graph.getEdges() );
 
-                if (v.isMarked(en.getKey())) {
-                    select.append(" ?").append(objvar);
-                }
-            }
-        }
+		for ( AbstractNodeEdgeBase v : todo ) {
+			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
+				int objid = valIds.get( new NodeType( v ) );
+				String objvar = "obj" + objid;
 
-        return select.toString();
-    }
+				if ( v.isMarked( en.getKey() ) ) {
+					// special handling when the user wants a URI back
+					select.append( " ?" ).append( en.getKey().equals( RDF.SUBJECT )
+							? "node" + ids.get( v ) : objvar );
+				}
+			}
+		}
 
-    private String buildWhere(DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph) {
-        StringBuilder sb = new StringBuilder(" WHERE  {");
-        for (AbstractNodeEdgeBase v : graph.getVertices()) {
-            Map<URI, Object> props = new HashMap<>(v.getProperties());
-            props.remove(RDF.SUBJECT);
-            props.remove(Constants.IN_EDGE_CNT);
-            props.remove(Constants.OUT_EDGE_CNT);
-            props.remove(AbstractNodeEdgeBase.LEVEL);
+		return select.toString();
+	}
 
-            String nodevar = "?node" + ids.get(v.getURI());
-            for (Map.Entry<URI, Object> en : props.entrySet()) {
-                URI type = en.getKey();
-                Object val = en.getValue();
+	private Map<URI, Object> getWhereProps( AbstractNodeEdgeBase v ) {
+		Map<URI, Object> props = new HashMap<>( v.getProperties() );
+		props.remove( RDF.SUBJECT );
+		props.remove( Constants.IN_EDGE_CNT );
+		props.remove( Constants.OUT_EDGE_CNT );
+		props.remove( AbstractNodeEdgeBase.LEVEL );
+		return props;
+	}
 
-                sb.append(nodevar);
-                sb.append(" <").append(type).append("> ");
+	private String buildWhere( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
+		for ( AbstractNodeEdgeBase v : graph.getVertices() ) {
+			Map<URI, Object> props = getWhereProps( v );
 
-                if (v.isMarked(type)) {
-                    int objid = valIds.get(new NodeType(v));
-                    String objvar = "?obj" + objid;
-                    sb.append(objvar);
-                    if (!val.toString().isEmpty()) {
-                        sb.append(". FILTER( ").append(objvar).append(" = ");
-                    }
-                }
+			String nodevar = "?node" + ids.get( v );
+			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
+				URI type = en.getKey();
+				Object val = en.getValue();
 
-                if (val instanceof URI) {
-                    sb.append(" <").append(val).append(">");
-                } else if (val instanceof String && !val.toString().isEmpty()) {
-                    sb.append("\"").append(val).append("\"");
-                }
-                if (v.isMarked(type) && !val.toString().isEmpty()) {
-                    sb.append(")");
-                }
+				sb.append( "  " ).append( nodevar ).append( " " );
+				if ( shortcuts.containsKey( type ) ) {
+					sb.append( shortcuts.get( type ) );
+				}
+				else {
+					sb.append( "<" ).append( type ).append( ">" );
+				}
+				sb.append( " " );
 
-                sb.append(".\n");
-            }
-        }
+				if ( v.isMarked( type ) ) {
+					int objid = valIds.get( new NodeType( v ) );
+					String objvar = "?obj" + objid;
+					sb.append( objvar );
+					if ( !val.toString().isEmpty() ) {
+						sb.append( ". FILTER( " ).append( objvar ).append( " = " );
+					}
+				}
 
-        return sb.append("}").toString();
-    }
+				if ( val instanceof URI ) {
+					sb.append( " <" ).append( val ).append( ">" );
+				}
+				else if ( val instanceof String && !val.toString().isEmpty() ) {
+					sb.append( "\"" ).append( val ).append( "\"" );
+				}
 
-    private void assignIds(DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph) {
-        int nodecount = 0;
-        int propcount = 0;
-        for (SEMOSSVertex v : graph.getVertices()) {
-            ids.put(v.getURI(), nodecount++);
-            valIds.put(new NodeType(v.getURI(), v.getType()), propcount++);
-        }
+				if ( v.isMarked( type ) && !val.toString().isEmpty() ) {
+					sb.append( ")" );
+				}
 
-        for (SEMOSSEdge v : graph.getEdges()) {
-            ids.put(v.getURI(), nodecount++);
-            valIds.put(new NodeType(v.getURI(), v.getType()), propcount++);
-        }
-    }
+				sb.append( ".\n" );
+			}
+		}
 
-    private class NodeType {
+		for ( SEMOSSEdge edge : graph.getEdges() ) {
+			SEMOSSVertex src = graph.getSource( edge );
+			SEMOSSVertex dst = graph.getDest( edge );
 
-        public final URI node;
-        public final URI type;
+			String fromvar = "?node" + ids.get( src );
+			String linkvar = "?link" + ids.get( edge );
+			String tovar = "?node" + ids.get( dst );
 
-        public NodeType(URI node, URI type) {
-            this.node = node;
-            this.type = type;
-        }
+			sb.append( fromvar ).append( " " );
+			if ( Constants.ANYNODE.equals( edge.getType() ) ) {
+				sb.append( linkvar ).append( " " );
+			}
+			else {
+				sb.append( "<" ).append( edge.getType() ).append( "> " );
+			}
+			sb.append( tovar ).append( " .\n" );
+		}
 
-        public NodeType(AbstractNodeEdgeBase b) {
-            this(b.getURI(), b.getType());
-        }
+		return sb.append( "}" ).toString();
+	}
 
-        @Override
-        public int hashCode() {
-            int hash = 3;
-            hash = 19 * hash + Objects.hashCode(this.node);
-            hash = 19 * hash + Objects.hashCode(this.type);
-            return hash;
-        }
+	private void assignIds( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		int nodecount = 0;
+		int propcount = 0;
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			ids.put( v, nodecount++ );
+			valIds.put( new NodeType( v.getURI(), v.getType() ), propcount++ );
+		}
 
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final NodeType other = (NodeType) obj;
-            if (!Objects.equals(this.node, other.node)) {
-                return false;
-            }
-            if (!Objects.equals(this.type, other.type)) {
-                return false;
-            }
-            return true;
-        }
+		for ( SEMOSSEdge v : graph.getEdges() ) {
+			ids.put( v, nodecount++ );
+			valIds.put( new NodeType( v.getURI(), v.getType() ), propcount++ );
+		}
+	}
 
-    }
+	private class NodeType {
+
+		public final URI node;
+		public final URI type;
+
+		public NodeType( URI node, URI type ) {
+			this.node = node;
+			this.type = type;
+		}
+
+		public NodeType( AbstractNodeEdgeBase b ) {
+			this( b.getURI(), b.getType() );
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 3;
+			hash = 19 * hash + Objects.hashCode( this.node );
+			hash = 19 * hash + Objects.hashCode( this.type );
+			return hash;
+		}
+
+		@Override
+		public boolean equals( Object obj ) {
+			if ( obj == null ) {
+				return false;
+			}
+			if ( getClass() != obj.getClass() ) {
+				return false;
+			}
+			final NodeType other = (NodeType) obj;
+			if ( !Objects.equals( this.node, other.node ) ) {
+				return false;
+			}
+			if ( !Objects.equals( this.type, other.type ) ) {
+				return false;
+			}
+			return true;
+		}
+
+	}
 }
