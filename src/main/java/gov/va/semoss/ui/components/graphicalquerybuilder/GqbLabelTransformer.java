@@ -81,13 +81,13 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 		for ( Map.Entry<URI, Object> en : properties.entrySet() ) {
 			URI property = en.getKey();
 			Object val = en.getValue();
-			
+
 			if ( RDF.SUBJECT.equals( property )
 					|| AbstractNodeEdgeBase.LEVEL.equals( property ) ) {
 				continue;
 			}
 
-			if( RDFS.LABEL.equals( property ) && val.toString().isEmpty() ){
+			if ( RDFS.LABEL.equals( property ) && val.toString().isEmpty() ) {
 				val = "&lt;Any&gt;";
 			}
 			if ( val instanceof URI ) {
@@ -100,8 +100,14 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 
 			if ( vertex.hasProperty( property ) ) {
 				String propval = val.toString();
+				if ( vertex.isMarked( property ) ) {
+					html.append( "<b>" );
+				}
 				html.append( labels.get( property ) ).append( ": " ).
 						append( chop( propval, 50 ) );
+				if ( vertex.isMarked( property ) ) {
+					html.append( "</b>" );
+				}
 			}
 			first = false;
 		}

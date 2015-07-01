@@ -10,6 +10,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import org.apache.commons.collections15.Factory;
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  *
@@ -22,7 +23,9 @@ public class VertexFactory implements Factory<SEMOSSVertex> {
 
 	@Override
 	public SEMOSSVertex create() {
-		return new SEMOSSVertex( uribuilder.uniqueUri(), verttype, "" );
+		SEMOSSVertex v = new SEMOSSVertex( uribuilder.uniqueUri(), verttype, "" );
+		v.mark( RDFS.LABEL, true );
+		return v;
 	}
 
 	public void setType( URI type ) {

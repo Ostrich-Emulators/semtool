@@ -32,12 +32,14 @@ public class OneVariablePanel extends javax.swing.JPanel {
 		this( "New Value", "", true );
 	}
 
-	public OneVariablePanel( String ll, String value, boolean checked ) {
+	public OneVariablePanel( String ll, Object value, boolean checked ) {
 		initComponents();
 		label.setText( ll );
 		include.setSelected( checked );
 
-		inputstring.setText( value );
+		if ( null != value ) {
+			inputstring.setText( value.toString() );
+		}
 		CardLayout card = CardLayout.class.cast( inputarea.getLayout() );
 		card.show( inputarea, "string" );
 		type = STRING;
@@ -50,8 +52,8 @@ public class OneVariablePanel extends javax.swing.JPanel {
 		label.setText( ll );
 		include.setSelected( checked );
 
-		Collections.sort(  choices );
-		
+		Collections.sort( choices );
+
 		CardLayout card = CardLayout.class.cast( inputarea.getLayout() );
 		if ( choices.size() > 5 ) {
 			DefaultListModel<String> model = new DefaultListModel<>();
@@ -60,8 +62,8 @@ public class OneVariablePanel extends javax.swing.JPanel {
 			}
 
 			inputlist.setModel( model );
-			
-			if( null != choice ){
+
+			if ( null != choice ) {
 				inputlist.setSelectedValue( choice, true );
 			}
 			card.show( inputarea, "list" );
@@ -69,7 +71,7 @@ public class OneVariablePanel extends javax.swing.JPanel {
 		}
 		else {
 			inputcombo.setModel( new DefaultComboBoxModel<>( choices.toArray( new String[0] ) ) );
-			if( null != choice ){
+			if ( null != choice ) {
 				inputcombo.setSelectedItem( choice );
 			}
 			card.show( inputarea, "combo" );
@@ -143,6 +145,7 @@ public class OneVariablePanel extends javax.swing.JPanel {
     inputarea.add(inputcombo, "combo");
 
     inputlist.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    inputlist.setVisibleRowCount(1);
     jScrollPane2.setViewportView(inputlist);
 
     inputarea.add(jScrollPane2, "list");
@@ -152,21 +155,20 @@ public class OneVariablePanel extends javax.swing.JPanel {
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addGap(87, 87, 87)
-        .addComponent(include)
-        .addGap(0, 0, Short.MAX_VALUE))
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addComponent(label)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(inputarea, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addComponent(label)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(inputarea, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+          .addComponent(include, javax.swing.GroupLayout.Alignment.TRAILING)))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(label)
-          .addComponent(inputarea, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+          .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(inputarea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addComponent(include))
     );

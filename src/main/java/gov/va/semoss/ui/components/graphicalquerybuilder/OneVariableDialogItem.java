@@ -66,10 +66,12 @@ public class OneVariableDialogItem extends AbstractAction {
 		boolean ok = false;
 		OneVariablePanel ovp;
 
+		String[] choices = { "Save", "Cancel" };
+
 		if ( null == labels ) {
-			ovp = new OneVariablePanel( dlgtext, currval.toString(), node.isMarked( property ) );
-			int ans = JOptionPane.showConfirmDialog( null, ovp, dlgtext,
-					JOptionPane.YES_OPTION );
+			ovp = new OneVariablePanel( dlgtext, currval, node.isMarked( property ) );
+			int ans = JOptionPane.showOptionDialog( null, ovp, dlgtext, JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE, null, choices, choices[0] );
 			if ( JOptionPane.YES_OPTION == ans ) {
 				ok = true;
 				newval = ovp.getInput();
@@ -82,8 +84,8 @@ public class OneVariableDialogItem extends AbstractAction {
 			ovp = new OneVariablePanel( dlgtext, new ArrayList<>( lossy.keySet() ),
 					currval, node.isMarked( property ) );
 
-			int ans = JOptionPane.showConfirmDialog( null, ovp, dlgtext,
-					JOptionPane.YES_OPTION );
+			int ans = JOptionPane.showOptionDialog( null, ovp, dlgtext, JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE, null, choices, choices[0] );
 
 			if ( JOptionPane.YES_OPTION == ans ) {
 				ok = true;
@@ -93,6 +95,7 @@ public class OneVariableDialogItem extends AbstractAction {
 
 		if ( ok ) {
 			node.setProperty( property, newval );
+			node.mark( property, ovp.isIncluded() );
 			currval = newval;
 			panel.update();
 		}
