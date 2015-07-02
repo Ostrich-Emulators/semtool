@@ -89,7 +89,7 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 				continue;
 			}
 
-			if ( RDFS.LABEL.equals( property ) && val.toString().isEmpty() ) {
+			if ( null == val || val.toString().isEmpty() ) {
 				val = "&lt;Any&gt;";
 			}
 			if ( val instanceof URI ) {

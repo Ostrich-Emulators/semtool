@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import static cern.clhep.Units.s;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -133,7 +135,7 @@ public class GraphToSparql {
 						sb.append( new LiteralImpl( val.toString(), XMLSchema.BOOLEAN ) );
 					}
 					else if ( val instanceof Date ) {
-						throw new IllegalArgumentException( "date not yet implemented" );
+						sb.append( new ValueFactoryImpl().createLiteral( Date.class.cast( val ) ) );
 					}
 				}
 
