@@ -145,10 +145,10 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
 
 		property.setModel( model );
-		property.setEditable( null != proptype );
+		property.setEditable( false );
 		property.setRenderer( renderer );
 		property.setSelectedItem( null == proptype ? Constants.ANYNODE : valForType );
-
+		
 		setType( valForType );
 	}
 
