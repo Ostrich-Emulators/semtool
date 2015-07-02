@@ -9,7 +9,7 @@ package gov.va.semoss.poi.main;
  *
  * @author ryan
  */
-public class ImportValidationException extends Exception {
+public class ImportValidationException extends RuntimeException {
 
 	public static enum ErrorType {
 
