@@ -37,6 +37,8 @@ import org.openrdf.model.Value;
  */
 public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 	private static final long serialVersionUID = 150592881428916712L;
+	private final static String LOCATION_ID = "locationId";
+	private final static String HEAT_VALUE  = "heatValue";
 
 	/**
 	 * Constructor for USHeatMapPlaySheet.
@@ -49,33 +51,52 @@ public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
 		convertUrisToLabels( newdata, getPlaySheetFrame().getEngine() );
-		Set<Map<String, Object>> data = new HashSet<>();
-		String[] var = headers.toArray( new String[0] );
-
-		//Possibly filter out all US Facilities from the query?
-		for ( Value[] listElement : newdata ) {
+		
+		Set<Map<String, Object>> data = new HashSet<Map<String, Object>>();
+		outsideLoop: for ( Value[] listElement : newdata ) {
 			LinkedHashMap<String,Object> elementHash = new LinkedHashMap<String,Object>();
-			for ( int j = 0; j < var.length; j++ ) {
-				String colName = var[j];
-				Literal l = Literal.class.cast( listElement[j] );
-
-				try {
-					elementHash.put( colName, l.doubleValue() );
-				}
-				catch ( Exception ex ) {
-					elementHash.put( colName, l.stringValue() );
+						
+			for ( int i = 0; i < headers.size(); i++ ) {
+				Literal literal = Literal.class.cast( listElement[i] );
+				if (literal==null)
+					continue outsideLoop;
+				
+				if (LOCATION_ID.equals(headers.get(i))) {
+					elementHash.put( LOCATION_ID, literal.stringValue() );
+				} else if (HEAT_VALUE.equals(headers.get(i))) {
+					try {
+						elementHash.put( HEAT_VALUE, literal.doubleValue() );
+					} catch (Exception e) {
+						continue outsideLoop;
+					}
 				}
 			}
+			
 			data.add( elementHash );
 		}
+		
+		Set<Map<String, Object>> convertedData = convertDataValuesToPercentages(data);
 
 		Map<String, Object> allHash = new HashMap<>();
-		allHash.put( "dataSeries", data );
-
-		allHash.put( "value", var[1] );
-		allHash.put( "locationName", var[0] );
-
+		allHash.put( "dataSeries", convertedData );
 		addDataHash( allHash );
+		
 		createView();
+	}
+
+	private Set<Map<String, Object>> convertDataValuesToPercentages(Set<Map<String, Object>> data) {
+		double maxValue = 0d;
+		for (Map<String, Object> thisMap:data) {
+			double thisValue = Double.parseDouble(""+thisMap.get(HEAT_VALUE));
+			if (thisValue > maxValue)
+				maxValue = thisValue;
+		}
+		
+		for (Map<String, Object> thisMap:data) {
+			double thisValue = Double.parseDouble(""+thisMap.get(HEAT_VALUE));
+			thisMap.put(HEAT_VALUE, new Double(thisValue/maxValue));
+		}
+
+		return data;
 	}
 }

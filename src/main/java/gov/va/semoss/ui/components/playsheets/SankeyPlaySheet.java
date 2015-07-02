@@ -34,7 +34,7 @@ import org.openrdf.model.Value;
  * The Play Sheet for creating a Sankey diagram using nodes and relationships.
  */
 public class SankeyPlaySheet extends BrowserPlaySheet2 {
-
+	private static final long serialVersionUID = -3695621419834031435L;
 	private static final Logger log = Logger.getLogger( SankeyPlaySheet.class );
 
 	/**
@@ -42,6 +42,7 @@ public class SankeyPlaySheet extends BrowserPlaySheet2 {
 	 */
 	public SankeyPlaySheet() {
 		super( "/html/RDFSemossCharts/app/sankey.html" );
+		log.debug("Initializing SankeyPlaysheet");
 	}
 
 	@Override
