@@ -130,6 +130,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			this.property.setModel( model );
 			this.property.setEditable( false );
 			this.property.setRenderer( renderer );
+			this.property.setSelectedItem( valForType );
 		}
 
 		setType( valForType );

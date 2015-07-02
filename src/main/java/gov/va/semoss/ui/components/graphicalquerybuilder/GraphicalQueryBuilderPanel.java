@@ -43,6 +43,7 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
@@ -176,8 +177,8 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 						List<URI> concepts = DBToLoadingSheetExporter.createConceptList( engine );
 						Map<URI, String> conceptlabels = Utility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
-						gl.setRows( conceptlabels.size() );				
-						
+						gl.setRows( conceptlabels.size() );
+
 						ButtonGroup group = new ButtonGroup();
 
 						for ( Map.Entry<URI, String> en : Utility.sortUrisByLabel( conceptlabels ).entrySet() ) {
@@ -255,6 +256,15 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 	public void update() {
 		view.repaint();
 		updateSparql();
+	}
+
+	public void clear() {
+		List<SEMOSSVertex> verts = new ArrayList<>( graph.getVertices() );
+		for ( SEMOSSVertex v : verts ) {
+			graph.removeVertex( v );
+		}
+		vizlayout.reset();
+		update();
 	}
 
 	public IEngine getEngine() {

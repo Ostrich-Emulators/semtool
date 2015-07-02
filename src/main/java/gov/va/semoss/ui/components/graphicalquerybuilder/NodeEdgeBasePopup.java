@@ -40,6 +40,16 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 		add( makeTypeItem( v, pnl ) );
 
 		finishMenu();
+
+		addSeparator();
+		add( new AbstractAction( "Clear Graph" ) {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				pnl.clear();
+			}
+		} );
+
 	}
 
 	protected void finishMenu() {
