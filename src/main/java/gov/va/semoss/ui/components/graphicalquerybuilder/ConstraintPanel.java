@@ -5,6 +5,9 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.util.Date;
 import java.util.Enumeration;
@@ -49,47 +52,58 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return ( JOptionPane.YES_OPTION == ans );
 	}
 
-	public static Value getValue( URI property, String label, Object value,
-			boolean checked, boolean[] included ) {
+	public static ConstraintValue getValue( URI property, String label, Object value,
+			boolean checked ) {
 		JTextField input = new JTextField();
 		input.setText( value.toString() );
 
-		ConstraintPanel cp = new ConstraintPanel( property, label, input, checked, value );
-		if ( showDialog( label, cp ) ) {
-			included[0] = cp.isIncluded();
+		Map<URI, String> propmap = new HashMap<>();
+		propmap.put( property, Utility.getInstanceLabel( property,
+				DIHelper.getInstance().getRdfEngine() ) );
 
+		ConstraintPanel cp = new ConstraintPanel( property, label, input, checked,
+				value, propmap );
+		if ( showDialog( label, cp ) ) {
 			String val = input.getText();
 			URI type = cp.getType();
-			return ( null == type ? new URIImpl( val ) : new LiteralImpl( val, type ) );
+			return new ConstraintValue( ( null == type ? new URIImpl( val )
+					: new LiteralImpl( val, type ) ), cp.isIncluded(), property );
 		}
 		return null;
 	}
 
-	public static Value getValue( URI property, String label, URI value,
-			Map<URI, String> choices, boolean checked, boolean[] included ) {
-
+	public static ConstraintValue getValue( URI property, String label, URI value,
+			Map<URI, String> choices, boolean checked ) {
+		choices = Utility.sortUrisByLabel( choices );
 		URI[] uris = choices.keySet().toArray( new URI[0] );
+		LabeledPairRenderer<URI> renderer
+				= LabeledPairRenderer.getUriPairRenderer().cache( choices );
+
+		Map<URI, String> propmap = new HashMap<>();
+		propmap.put( property, Utility.getInstanceLabel( property,
+				DIHelper.getInstance().getRdfEngine() ) );
 
 		if ( choices.size() > 5 ) {
 			JList<URI> list = new JList<>( uris );
+			list.setCellRenderer( renderer );
 			list.setSelectedValue( value, true );
-			ConstraintPanel cp
-					= new ConstraintPanel( property, label, new JScrollPane( list ),
-							checked, value );
+			ConstraintPanel cp = new ConstraintPanel( property, label,
+					new JScrollPane( list ), checked, value, propmap );
 			if ( showDialog( label, cp ) ) {
-				included[0] = cp.isIncluded();
-
+				return new ConstraintValue( list.getSelectedValue(), cp.isIncluded(),
+						property );
 			}
 		}
 		else {
 			DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
 			JComboBox<URI> box = new JComboBox<>( model );
+			box.setRenderer( renderer );
 			box.setSelectedItem( value );
-			ConstraintPanel cp
-					= new ConstraintPanel( property, label, box, checked, value );
+			ConstraintPanel cp = new ConstraintPanel( property, label, box, checked,
+					value, propmap );
 			if ( showDialog( label, cp ) ) {
-				included[0] = cp.isIncluded();
-
+				return new ConstraintValue( box.getItemAt( box.getSelectedIndex() ),
+						cp.isIncluded(), property );
 			}
 		}
 
@@ -97,7 +111,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	}
 
 	protected ConstraintPanel( URI property, String label, JComponent input,
-			boolean checked, Object valForType ) {
+			boolean checked, Object valForType, Map<URI, String> propmap ) {
 		initComponents();
 
 		inputarea.setLayout( new BorderLayout() );
@@ -107,8 +121,15 @@ public class ConstraintPanel extends javax.swing.JPanel {
 
 		}
 		else {
-			this.property.setText( property.stringValue() );
+			LabeledPairRenderer<URI> renderer
+					= LabeledPairRenderer.getUriPairRenderer().cache( propmap );
+			propmap = Utility.sortUrisByLabel( propmap );
+			URI[] uris = propmap.keySet().toArray( new URI[0] );
+			DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
+			
+			this.property.setModel( model );
 			this.property.setEditable( false );
+			this.property.setRenderer( renderer );
 		}
 
 		setType( valForType );
@@ -177,8 +198,8 @@ public class ConstraintPanel extends javax.swing.JPanel {
     booleantype = new javax.swing.JRadioButton();
     datetype = new javax.swing.JRadioButton();
     jLabel2 = new javax.swing.JLabel();
-    property = new javax.swing.JTextField();
     inputarea = new javax.swing.JPanel();
+    property = new javax.swing.JComboBox<URI>();
 
     label.setText("New Value");
 
@@ -220,20 +241,21 @@ public class ConstraintPanel extends javax.swing.JPanel {
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addComponent(include)
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-      .addGroup(layout.createSequentialGroup()
-        .addComponent(label)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(inputarea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-      .addGroup(layout.createSequentialGroup()
+        .addGap(0, 0, 0)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jLabel2)
-          .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(property, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)))
+          .addComponent(include)
+          .addGroup(layout.createSequentialGroup()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(label, javax.swing.GroupLayout.Alignment.LEADING))
+              .addComponent(jLabel2))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+              .addComponent(property, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+              .addComponent(inputarea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+              .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 273, Short.MAX_VALUE))))
+        .addGap(0, 0, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -241,15 +263,15 @@ public class ConstraintPanel extends javax.swing.JPanel {
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(jLabel2)
           .addComponent(property, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGap(2, 2, 2)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
           .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
           .addComponent(inputarea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addGap(0, 0, 0)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
           .addComponent(jLabel1))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addComponent(include))
     );
   }// </editor-fold>//GEN-END:initComponents
@@ -266,9 +288,22 @@ public class ConstraintPanel extends javax.swing.JPanel {
   private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JLabel label;
-  private javax.swing.JTextField property;
+  private javax.swing.JComboBox<URI> property;
   private javax.swing.JRadioButton stringtype;
   private javax.swing.ButtonGroup typegroup;
   private javax.swing.JRadioButton uritype;
   // End of variables declaration//GEN-END:variables
+
+	public static class ConstraintValue {
+
+		public final Value val;
+		public final boolean included;
+		public final URI property;
+
+		public ConstraintValue( Value val, boolean included, URI property ) {
+			this.val = val;
+			this.included = included;
+			this.property = property;
+		}
+	}
 }

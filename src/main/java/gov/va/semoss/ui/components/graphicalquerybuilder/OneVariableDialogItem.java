@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValue;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import java.awt.event.ActionEvent;
 import java.util.Map;
@@ -13,7 +14,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 
 /**
  *
@@ -61,23 +61,22 @@ public class OneVariableDialogItem extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		Value newval = null;
-		boolean included[] = { false };
+		ConstraintValue newval = null;
 
 		if ( null == labels ) {
 			newval = ConstraintPanel.getValue( property, dlgtext, currval,
-					node.isMarked( property ), included );
+					node.isMarked( property ) );
 		}
 		else {
 			newval = ConstraintPanel.getValue( property, dlgtext, URI.class.cast( currval ),
-					labels, node.isMarked( property ), included );
+					labels, node.isMarked( property ) );
 		}
 
 		if ( null != newval ) {
-			Object value = ( newval instanceof URI ? newval
-					: ValueTableModel.getValueFromLiteral( Literal.class.cast( newval ) ) );
+			Object value = ( newval.val instanceof URI ? newval.val
+					: ValueTableModel.getValueFromLiteral( Literal.class.cast( newval.val ) ) );
 			node.setProperty( property, value );
-			node.mark( property, included[0] );
+			node.mark( property, newval.included );
 			currval = newval;
 			panel.update();
 		}
