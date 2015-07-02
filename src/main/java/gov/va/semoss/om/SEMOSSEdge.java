@@ -74,32 +74,6 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 	}
 
 	@Override
-	public int hashCode() {
-		int hash = 5;
-		hash = 97 * hash + Objects.hashCode( this.inVertex );
-		hash = 97 * hash + Objects.hashCode( this.outVertex );
-		return hash;
-	}
-
-	@Override
-	public boolean equals( Object obj ) {
-		if ( obj == null ) {
-			return false;
-		}
-		if ( getClass() != obj.getClass() ) {
-			return false;
-		}
-		final SEMOSSEdge other = (SEMOSSEdge) obj;
-		if ( !Objects.equals( this.inVertex, other.inVertex ) ) {
-			return false;
-		}
-		if ( !Objects.equals( this.outVertex, other.outVertex ) ) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
 	public int compareTo( SEMOSSEdge t ) {
 		return toString().compareTo( t.toString() );
 	}
@@ -107,7 +81,8 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if ( null != outVertex.getURI() ) {
+
+		if ( !( null == outVertex || null == outVertex.getURI() ) ) {
 			sb.append( outVertex.getURI() );
 		}
 
@@ -115,7 +90,7 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 			sb.append( "->" ).append( getURI() );
 		}
 
-		if ( null != inVertex.getURI() ) {
+		if ( !( null == inVertex || null == inVertex.getURI() ) ) {
 			sb.append( "->" ).append( inVertex.getURI() );
 		}
 

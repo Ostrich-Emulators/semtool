@@ -10,6 +10,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import org.apache.commons.collections15.Factory;
+import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
 /**
@@ -25,7 +26,7 @@ public class EdgeFactory implements Factory<SEMOSSEdge> {
 	public SEMOSSEdge create() {
 		SEMOSSEdge edge = new SEMOSSEdge( uribuilder.uniqueUri() );
 		edge.setName( "" );
-                edge.removeProperty(AbstractNodeEdgeBase.LEVEL );
+		edge.removeProperty( AbstractNodeEdgeBase.LEVEL );
 
 		return edge;
 	}

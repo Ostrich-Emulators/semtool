@@ -56,7 +56,8 @@ public class AbstractNodeEdgeBase {
 	}
 
 	public int getLevel() {
-		return Integer.class.cast( getProperty( LEVEL ) );
+		Object prop = getProperty( LEVEL );
+		return ( null == prop ? 0 : Integer.class.cast( prop ) );
 	}
 
 	public final void setColor( Color _color ) {
@@ -144,10 +145,10 @@ public class AbstractNodeEdgeBase {
 	public URI getType() {
 		return URI.class.cast( getProperty( RDF.TYPE ) );
 	}
-        
-        public void removeProperty( URI prop ){
-            properties.remove( prop );
-        }
+
+	public void removeProperty( URI prop ) {
+		properties.remove( prop );
+	}
 
 	public void setType( URI type ) {
 		setProperty( RDF.TYPE, type );
