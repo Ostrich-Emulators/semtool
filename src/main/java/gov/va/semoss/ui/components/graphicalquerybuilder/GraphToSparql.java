@@ -11,13 +11,16 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  * A class to convert a directed graph from the GQB to valid Sparql
@@ -119,6 +122,18 @@ public class GraphToSparql {
 					}
 					else if ( val instanceof String && !val.toString().isEmpty() ) {
 						sb.append( "\"" ).append( val ).append( "\"" );
+					}
+					else if ( val instanceof Double ) {
+						sb.append( new LiteralImpl( val.toString(), XMLSchema.DOUBLE ) );
+					}
+					else if ( val instanceof Integer ) {
+						sb.append( new LiteralImpl( val.toString(), XMLSchema.INTEGER ) );
+					}
+					else if ( val instanceof Boolean ) {
+						sb.append( new LiteralImpl( val.toString(), XMLSchema.BOOLEAN ) );
+					}
+					else if ( val instanceof Date ) {
+						throw new IllegalArgumentException( "date not yet implemented" );
 					}
 				}
 

@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
@@ -72,6 +73,24 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return null;
 	}
 
+	public static ConstraintValue getValue( String label, Object value,
+			Map<URI, String> propmap ) {
+		JTextField input = new JTextField();
+		if ( null != value ) {
+			input.setText( value.toString() );
+		}
+
+		ConstraintPanel cp = new ConstraintPanel( null, label, input, true,
+				value, propmap );
+		if ( showDialog( label, cp ) ) {
+			String val = input.getText();
+			URI type = cp.getType();
+			return new ConstraintValue( ( null == type ? new URIImpl( val )
+					: new LiteralImpl( val, type ) ), cp.isIncluded(), cp.getPropertyType() );
+		}
+		return null;
+	}
+
 	public static ConstraintValue getValue( URI property, String label, URI value,
 			Map<URI, String> choices, boolean checked ) {
 		choices = Utility.sortUrisByLabel( choices );
@@ -110,34 +129,38 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return null;
 	}
 
-	protected ConstraintPanel( URI property, String label, JComponent input,
+	protected ConstraintPanel( URI proptype, String label, JComponent input,
 			boolean checked, Object valForType, Map<URI, String> propmap ) {
 		initComponents();
 
 		inputarea.setLayout( new BorderLayout() );
 		inputarea.add( input );
 		this.label.setText( label );
-		if ( null == property ) {
+		include.setSelected( checked );
 
-		}
-		else {
-			LabeledPairRenderer<URI> renderer
-					= LabeledPairRenderer.getUriPairRenderer().cache( propmap );
-			propmap = Utility.sortUrisByLabel( propmap );
-			URI[] uris = propmap.keySet().toArray( new URI[0] );
-			DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
-			
-			this.property.setModel( model );
-			this.property.setEditable( false );
-			this.property.setRenderer( renderer );
-			this.property.setSelectedItem( valForType );
-		}
+		LabeledPairRenderer<URI> renderer
+				= LabeledPairRenderer.getUriPairRenderer().cache( propmap );
+		propmap = Utility.sortUrisByLabel( propmap );
+		URI[] uris = propmap.keySet().toArray( new URI[0] );
+		DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
+
+		property.setModel( model );
+		property.setEditable( null != proptype );
+		property.setRenderer( renderer );
+		property.setSelectedItem( null == proptype ? Constants.ANYNODE : valForType );
 
 		setType( valForType );
 	}
 
+	protected URI getPropertyType() {
+		return property.getItemAt( property.getSelectedIndex() );
+	}
+
 	private void setType( Object o ) {
-		if ( o instanceof URI ) {
+		if ( null == o ) {
+			stringtype.setSelected( true );
+		}
+		else if ( o instanceof URI ) {
 			uritype.setSelected( true );
 		}
 		else {

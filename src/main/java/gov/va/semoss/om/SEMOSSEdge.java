@@ -20,7 +20,6 @@
 package gov.va.semoss.om;
 
 import java.awt.Color;
-import java.util.Objects;
 
 import org.openrdf.model.URI;
 

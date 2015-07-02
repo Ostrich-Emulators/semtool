@@ -10,7 +10,6 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import org.apache.commons.collections15.Factory;
-import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
 /**

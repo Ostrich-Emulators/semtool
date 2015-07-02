@@ -59,9 +59,9 @@ import org.openrdf.model.impl.URIImpl;
  *
  * @author ryan
  */
-public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
+public class GraphicalQueryPanel extends javax.swing.JPanel {
 
-	private static final Logger log = Logger.getLogger( GraphicalQueryBuilderPanel.class );
+	private static final Logger log = Logger.getLogger( GraphicalQueryPanel.class );
 	private IEngine engine;
 	private final String progress;
 	private final Action addConceptNodeAction;
@@ -81,7 +81,7 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 	/**
 	 * Creates new form GraphicalQueryBuilderPanel
 	 */
-	public GraphicalQueryBuilderPanel( String progressname ) {
+	public GraphicalQueryPanel( String progressname ) {
 		progress = progressname;
 		initComponents();
 		initVizualizer();
@@ -280,9 +280,9 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 	}
 
 	private void updateSparql() {
-		log.debug( graph.getVertexCount() + " vertices, " + graph.getEdgeCount() + " edges" );
-		String sparql = new GraphToSparql().select( graph );
 		if ( null != sparqlarea ) {
+			String sparql = ( 0 == graph.getVertexCount()
+					? "" : new GraphToSparql().select( graph ) );
 			sparqlarea.setText( sparql );
 		}
 	}
@@ -308,17 +308,17 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 					final SEMOSSEdge edge
 							= pickSupport.getEdge( view.getGraphLayout(), p.getX(), p.getY() );
 					if ( null == edge ) {
-						log.debug( "picked in space" );
+						new EmptySpacePopup( GraphicalQueryPanel.this ).show( view, p.x, p.y );
 					}
 					else {
 						NodeEdgeBasePopup edgepop
-								= NodeEdgeBasePopup.forEdge( edge, GraphicalQueryBuilderPanel.this );
+								= NodeEdgeBasePopup.forEdge( edge, GraphicalQueryPanel.this );
 						edgepop.show( view, p.x, p.y );
 					}
 				}
 				else {
 					NodeEdgeBasePopup vertpop
-							= NodeEdgeBasePopup.forVertex( vertex, GraphicalQueryBuilderPanel.this );
+							= NodeEdgeBasePopup.forVertex( vertex, GraphicalQueryPanel.this );
 					vertpop.show( view, p.x, p.y );
 				}
 			}

@@ -43,7 +43,7 @@ import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.api.IChakraListener;
-import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryBuilderPanel;
+import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
@@ -172,7 +172,7 @@ public class PlayPane extends JFrame {
 	public JCheckBox appendChkBox;
 	public RepositoryList repoList = new RepositoryList();
 
-	private GraphicalQueryBuilderPanel gQueryBuilderPanel;
+	private GraphicalQueryPanel gQueryBuilderPanel;
 	private InsightManagerPanel iManagePanel;
 
 	// Right graphPanel desktopPane
@@ -679,7 +679,7 @@ public class PlayPane extends JFrame {
 		dislbl.setIconTextGap( 5 );
 		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
 		rightView.setTabComponentAt( 0, dislbl );
-		gQueryBuilderPanel = new GraphicalQueryBuilderPanel( UIPROGRESS );
+		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS );
 		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
 
 		loggingPanel = new LoggingPanel();

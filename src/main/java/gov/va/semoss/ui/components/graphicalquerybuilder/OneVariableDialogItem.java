@@ -24,12 +24,12 @@ public class OneVariableDialogItem extends AbstractAction {
 	private final URI property;
 	private final AbstractNodeEdgeBase node;
 	private final String dlgtext;
-	private final GraphicalQueryBuilderPanel panel;
+	private final GraphicalQueryPanel panel;
 	private final Map<URI, String> labels;
 	private Object currval;
 
 	public OneVariableDialogItem( AbstractNodeEdgeBase node,
-			GraphicalQueryBuilderPanel panel, URI prop,
+			GraphicalQueryPanel panel, URI prop,
 			String label, String tooltip, String dlgtext ) {
 
 		super( label );
@@ -45,7 +45,7 @@ public class OneVariableDialogItem extends AbstractAction {
 	}
 
 	public OneVariableDialogItem( AbstractNodeEdgeBase node,
-			GraphicalQueryBuilderPanel panel, URI prop,
+			GraphicalQueryPanel panel, URI prop,
 			String label, String tooltip, String dlgtext, Map<URI, String> labels ) {
 
 		super( label );
@@ -68,15 +68,20 @@ public class OneVariableDialogItem extends AbstractAction {
 					node.isMarked( property ) );
 		}
 		else {
-			newval = ConstraintPanel.getValue( property, dlgtext, URI.class.cast( currval ),
-					labels, node.isMarked( property ) );
+			if ( null == property ) {
+				newval = ConstraintPanel.getValue( dlgtext, null, 	labels );
+			}
+			else {
+				newval = ConstraintPanel.getValue( property, dlgtext, URI.class.cast( currval ),
+						labels, node.isMarked( property ) );
+			}
 		}
 
 		if ( null != newval ) {
 			Object value = ( newval.val instanceof URI ? newval.val
 					: ValueTableModel.getValueFromLiteral( Literal.class.cast( newval.val ) ) );
-			node.setProperty( property, value );
-			node.mark( property, newval.included );
+			node.setProperty( newval.property, value );
+			node.mark( newval.property, newval.included );
 			currval = newval;
 			panel.update();
 		}

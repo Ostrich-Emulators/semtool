@@ -9,12 +9,17 @@ import edu.uci.ics.jung.graph.Graph;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
@@ -25,6 +30,9 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 
 /**
  *
@@ -34,12 +42,12 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 
 	private static final Logger log = Logger.getLogger( NodeEdgeBasePopup.class );
 
-	public NodeEdgeBasePopup( T v, GraphicalQueryBuilderPanel pnl ) {
+	public NodeEdgeBasePopup( T v, GraphicalQueryPanel pnl ) {
 		add( new OneVariableDialogItem( v, pnl, RDFS.LABEL, "Set Instance Label",
 				"Set the label of this node", "Instance Label" ) );
 		add( makeTypeItem( v, pnl ) );
 
-		finishMenu();
+		finishMenu( v, pnl );
 
 		addSeparator();
 		add( new AbstractAction( "Clear Graph" ) {
@@ -52,17 +60,34 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 
 	}
 
-	protected void finishMenu() {
+	protected void finishMenu( T v, GraphicalQueryPanel pnl ) {
 	}
 
-	protected abstract Action makeTypeItem( T v, GraphicalQueryBuilderPanel pnl );
+	protected Collection<URI> getAllPossibleProperties( URI type, IEngine engine ) {
+		String query = "SELECT ?pred WHERE { ?s ?pred ?o . ?s a ?type . FILTER ( isLiteral( ?o ) ) }";
+		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query, "pred" );
+		qa.bind( "type", type );
+
+		List<URI> props = new ArrayList<>();
+		props.add( Constants.ANYNODE );
+		try {
+			props.addAll( engine.query( qa ) );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			log.error( e, e );
+		}
+
+		return props;
+	}
+
+	protected abstract Action makeTypeItem( T v, GraphicalQueryPanel pnl );
 
 	public static NodeEdgeBasePopup<SEMOSSVertex> forVertex( SEMOSSVertex v,
-			GraphicalQueryBuilderPanel pnl ) {
+			GraphicalQueryPanel pnl ) {
 		return new NodeEdgeBasePopup<SEMOSSVertex>( v, pnl ) {
 
 			@Override
-			protected Action makeTypeItem( SEMOSSVertex v, GraphicalQueryBuilderPanel pnl ) {
+			protected Action makeTypeItem( SEMOSSVertex v, GraphicalQueryPanel pnl ) {
 				Map<URI, String> labels = Utility.getInstanceLabels(
 						DBToLoadingSheetExporter.createConceptList( pnl.getEngine() ), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
@@ -72,14 +97,14 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 			}
 
 			@Override
-			protected void finishMenu() {
-				add( new AbstractAction( "Add Constraint" ) {
+			protected void finishMenu( SEMOSSVertex v, GraphicalQueryPanel pnl ) {
+				Collection<URI> props
+						= getAllPossibleProperties( v.getType(), pnl.getEngine() );
 
-					@Override
-					public void actionPerformed( ActionEvent e ) {
-						log.error( "Not supported yet." );
-					}
-				} );
+				Map<URI, String> propmap = Utility.getInstanceLabels( props, pnl.getEngine() );
+				propmap.put( Constants.ANYNODE, "<Any>" );
+				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
+						"Add a constraint to this Vertex", "New Value", propmap ) );
 
 				addSeparator();
 
@@ -100,11 +125,11 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 	}
 
 	public static NodeEdgeBasePopup<SEMOSSEdge> forEdge( SEMOSSEdge v,
-			GraphicalQueryBuilderPanel pnl ) {
+			GraphicalQueryPanel pnl ) {
 		return new NodeEdgeBasePopup<SEMOSSEdge>( v, pnl ) {
 
 			@Override
-			protected Action makeTypeItem( SEMOSSEdge v, GraphicalQueryBuilderPanel pnl ) {
+			protected Action makeTypeItem( SEMOSSEdge v, GraphicalQueryPanel pnl ) {
 				Graph<SEMOSSVertex, SEMOSSEdge> graph
 						= pnl.getViewer().getGraphLayout().getGraph();
 
