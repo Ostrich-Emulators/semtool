@@ -57,7 +57,7 @@ public class GraphToSparql {
 
 		for ( AbstractNodeEdgeBase v : todo ) {
 			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
-				int objid = valIds.get( new NodeType( v ) );
+				int objid = valIds.get( new NodeType( v.getURI(), en.getKey() ) );
 				String objvar = "obj" + objid;
 
 				if ( v.isMarked( en.getKey() ) ) {
@@ -77,6 +77,11 @@ public class GraphToSparql {
 		props.remove( Constants.IN_EDGE_CNT );
 		props.remove( Constants.OUT_EDGE_CNT );
 		props.remove( AbstractNodeEdgeBase.LEVEL );
+
+		if ( Constants.ANYNODE.equals( v.getType() ) && !v.isMarked( RDF.TYPE ) ) {
+			props.remove( RDF.TYPE );
+		}
+
 		return props;
 	}
 
@@ -100,22 +105,25 @@ public class GraphToSparql {
 				sb.append( " " );
 
 				if ( v.isMarked( type ) ) {
-					int objid = valIds.get( new NodeType( v ) );
+					int objid = valIds.get( new NodeType( v.getURI(), type ) );
 					String objvar = "?obj" + objid;
 					sb.append( objvar );
-					if ( !val.toString().isEmpty() ) {
+					if ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
 						sb.append( ". FILTER( " ).append( objvar ).append( " = " );
 					}
 				}
 
-				if ( val instanceof URI ) {
-					sb.append( " <" ).append( val ).append( ">" );
-				}
-				else if ( val instanceof String && !val.toString().isEmpty() ) {
-					sb.append( "\"" ).append( val ).append( "\"" );
+				if ( !Constants.ANYNODE.equals( val ) ) {
+					if ( val instanceof URI ) {
+						sb.append( " <" ).append( val ).append( ">" );
+					}
+					else if ( val instanceof String && !val.toString().isEmpty() ) {
+						sb.append( "\"" ).append( val ).append( "\"" );
+					}
 				}
 
-				if ( v.isMarked( type ) && !val.toString().isEmpty() ) {
+				if ( v.isMarked( type )
+						&& ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
 					sb.append( ")" );
 				}
 
@@ -131,7 +139,7 @@ public class GraphToSparql {
 			String linkvar = "?link" + ids.get( edge );
 			String tovar = "?node" + ids.get( dst );
 
-			sb.append( fromvar ).append( " " );
+			sb.append( "  " ).append( fromvar ).append( " " );
 			if ( Constants.ANYNODE.equals( edge.getType() ) ) {
 				sb.append( linkvar ).append( " " );
 			}
@@ -147,14 +155,17 @@ public class GraphToSparql {
 	private void assignIds( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
 		int nodecount = 0;
 		int propcount = 0;
-		for ( SEMOSSVertex v : graph.getVertices() ) {
-			ids.put( v, nodecount++ );
-			valIds.put( new NodeType( v.getURI(), v.getType() ), propcount++ );
-		}
 
-		for ( SEMOSSEdge v : graph.getEdges() ) {
+		List<AbstractNodeEdgeBase> todo = new ArrayList<>();
+		todo.addAll( graph.getVertices() );
+		todo.addAll( graph.getEdges() );
+
+		for ( AbstractNodeEdgeBase v : todo ) {
 			ids.put( v, nodecount++ );
-			valIds.put( new NodeType( v.getURI(), v.getType() ), propcount++ );
+
+			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
+				valIds.put( new NodeType( v.getURI(), en.getKey() ), propcount++ );
+			}
 		}
 	}
 
@@ -166,10 +177,6 @@ public class GraphToSparql {
 		public NodeType( URI node, URI type ) {
 			this.node = node;
 			this.type = type;
-		}
-
-		public NodeType( AbstractNodeEdgeBase b ) {
-			this( b.getURI(), b.getType() );
 		}
 
 		@Override

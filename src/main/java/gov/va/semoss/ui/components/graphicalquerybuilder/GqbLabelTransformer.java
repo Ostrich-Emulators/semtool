@@ -23,6 +23,7 @@ import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.rdf.engine.api.IEngine;
 
 import gov.va.semoss.ui.transformer.LabelTransformer;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 
 import java.util.HashMap;
@@ -53,6 +54,7 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 
 	public void setEngine( IEngine eng ) {
 		labels.clear();
+		labels.put( Constants.ANYNODE, "&lt;Any&gt;" );
 		this.engine = eng;
 	}
 

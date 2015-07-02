@@ -26,7 +26,7 @@ public class VertexFactory implements Factory<SEMOSSVertex> {
 	public SEMOSSVertex create() {
 		SEMOSSVertex v = new SEMOSSVertex( uribuilder.uniqueUri(), verttype, "" );
 		v.mark( RDFS.LABEL, true );
-                v.removeProperty(AbstractNodeEdgeBase.LEVEL );
+		v.removeProperty( AbstractNodeEdgeBase.LEVEL );
 		return v;
 	}
 

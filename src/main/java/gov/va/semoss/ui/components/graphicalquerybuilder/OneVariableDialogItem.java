@@ -6,14 +6,14 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.ui.components.models.ValueTableModel;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JOptionPane;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  *
@@ -25,7 +25,7 @@ public class OneVariableDialogItem extends AbstractAction {
 	private final AbstractNodeEdgeBase node;
 	private final String dlgtext;
 	private final GraphicalQueryBuilderPanel panel;
-	private final Map<?, String> labels;
+	private final Map<URI, String> labels;
 	private Object currval;
 
 	public OneVariableDialogItem( AbstractNodeEdgeBase node,
@@ -46,7 +46,7 @@ public class OneVariableDialogItem extends AbstractAction {
 
 	public OneVariableDialogItem( AbstractNodeEdgeBase node,
 			GraphicalQueryBuilderPanel panel, URI prop,
-			String label, String tooltip, String dlgtext, Map<?, String> labels ) {
+			String label, String tooltip, String dlgtext, Map<URI, String> labels ) {
 
 		super( label );
 		putValue( Action.SHORT_DESCRIPTION, tooltip );
@@ -56,46 +56,28 @@ public class OneVariableDialogItem extends AbstractAction {
 		this.panel = panel;
 		this.labels = labels;
 		property = prop;
-
 		currval = this.node.getProperty( property );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		Object newval = null;
-		boolean ok = false;
-		OneVariablePanel ovp;
-
-		String[] choices = { "Save", "Cancel" };
+		Value newval = null;
+		boolean included[] = { false };
 
 		if ( null == labels ) {
-			ovp = new OneVariablePanel( dlgtext, currval, node.isMarked( property ) );
-			int ans = JOptionPane.showOptionDialog( null, ovp, dlgtext, JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE, null, choices, choices[0] );
-			if ( JOptionPane.YES_OPTION == ans ) {
-				ok = true;
-				newval = ovp.getInput();
-			}
+			newval = ConstraintPanel.getValue( property, dlgtext, currval,
+					node.isMarked( property ), included );
 		}
 		else {
-			Map<String, ?> lossy = MultiMap.lossyflip( labels );
-			currval = labels.get( currval );
-
-			ovp = new OneVariablePanel( dlgtext, new ArrayList<>( lossy.keySet() ),
-					currval, node.isMarked( property ) );
-
-			int ans = JOptionPane.showOptionDialog( null, ovp, dlgtext, JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE, null, choices, choices[0] );
-
-			if ( JOptionPane.YES_OPTION == ans ) {
-				ok = true;
-				newval = lossy.get( ovp.getInput() );
-			}
+			newval = ConstraintPanel.getValue( property, dlgtext, URI.class.cast( currval ),
+					labels, node.isMarked( property ), included );
 		}
 
-		if ( ok ) {
-			node.setProperty( property, newval );
-			node.mark( property, ovp.isIncluded() );
+		if ( null != newval ) {
+			Object value = ( newval instanceof URI ? newval
+					: ValueTableModel.getValueFromLiteral( Literal.class.cast( newval ) ) );
+			node.setProperty( property, value );
+			node.mark( property, included[0] );
 			currval = newval;
 			panel.update();
 		}

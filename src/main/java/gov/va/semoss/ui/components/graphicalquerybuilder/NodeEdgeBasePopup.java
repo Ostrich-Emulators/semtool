@@ -10,12 +10,14 @@ import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Map;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPopupMenu;
@@ -53,7 +55,7 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 			protected Action makeTypeItem( SEMOSSVertex v, GraphicalQueryBuilderPanel pnl ) {
 				Map<URI, String> labels = Utility.getInstanceLabels(
 						DBToLoadingSheetExporter.createConceptList( pnl.getEngine() ), pnl.getEngine() );
-
+				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Vertex", "New Type", Utility.sortUrisByLabel( labels ) );
 
@@ -61,6 +63,14 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 
 			@Override
 			protected void finishMenu() {
+				add( new AbstractAction( "Add Constraint" ) {
+
+					@Override
+					public void actionPerformed( ActionEvent e ) {
+						log.error( "Not supported yet." );
+					}
+				} );
+
 				addSeparator();
 
 				JCheckBoxMenuItem selectMe = new JCheckBoxMenuItem( "Return this Entity",
@@ -95,6 +105,7 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 						endtype, pnl.getEngine() );
 
 				Map<URI, String> labels = Utility.getInstanceLabels( links, pnl.getEngine() );
+				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Edge", "New Type", Utility.sortUrisByLabel( labels ) );
 			}

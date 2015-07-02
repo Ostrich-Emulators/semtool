@@ -143,7 +143,7 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
     visarea.setLayout(new java.awt.BorderLayout());
     topsplit.setRightComponent(visarea);
 
-    typearea.setLayout(new java.awt.GridLayout(1, 2));
+    typearea.setLayout(new java.awt.GridLayout(1, 1));
     jScrollPane1.setViewportView(typearea);
 
     topsplit.setLeftComponent(jScrollPane1);
@@ -174,9 +174,10 @@ public class GraphicalQueryBuilderPanel extends javax.swing.JPanel {
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
 
 						List<URI> concepts = DBToLoadingSheetExporter.createConceptList( engine );
-						gl.setRows( concepts.size() );
-
 						Map<URI, String> conceptlabels = Utility.getInstanceLabels( concepts, engine );
+						conceptlabels.put( Constants.ANYNODE, "<Any>" );
+						gl.setRows( conceptlabels.size() );				
+						
 						ButtonGroup group = new ButtonGroup();
 
 						for ( Map.Entry<URI, String> en : Utility.sortUrisByLabel( conceptlabels ).entrySet() ) {
