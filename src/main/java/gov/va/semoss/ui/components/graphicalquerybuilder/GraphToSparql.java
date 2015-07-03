@@ -100,6 +100,13 @@ public class GraphToSparql {
 				URI type = en.getKey();
 				Object val = en.getValue();
 
+				// ignore empty variables (mostly, this is just for not returning a
+				// label, but it's generally good not to add unmarked predicates to a 
+				// query)
+				if ( "".equals( v.getProperty( type ).toString() ) && !v.isMarked( type ) ) {
+					continue;
+				}
+
 				sb.append( "  " ).append( nodevar ).append( " " );
 				if ( shortcuts.containsKey( type ) ) {
 					sb.append( shortcuts.get( type ) );

@@ -24,15 +24,18 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 
 import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.PropComparator;
 import gov.va.semoss.util.Utility;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Transforms the property label on a node vertex in the graph.
@@ -75,14 +78,14 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 
 		updateLabels( properties );
 
-		//uri required for uniqueness, need these font tags so that when you increase 
-		//font through font transformer, the label doesn't get really far away from the vertex
 		StringBuilder html = new StringBuilder();
 		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
 		boolean first = true;
-		for ( Map.Entry<URI, Object> en : properties.entrySet() ) {
-			URI property = en.getKey();
-			Object val = en.getValue();
+		List<URI> orderedProps = new ArrayList<>( properties.keySet() );
+		Collections.sort( orderedProps, new PropComparator() );		
+
+		for ( URI property : orderedProps ) {
+			Object val = properties.get( property );
 
 			if ( RDF.SUBJECT.equals( property )
 					|| AbstractNodeEdgeBase.LEVEL.equals( property ) ) {
@@ -131,7 +134,6 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 		props.removeAll( labels.keySet() );
 		if ( !( props.isEmpty() || null == engine ) ) {
 			labels.putAll( Utility.getInstanceLabels( props, engine ) );
-			labels = Utility.sortUrisByLabel( labels );
 		}
 	}
 }

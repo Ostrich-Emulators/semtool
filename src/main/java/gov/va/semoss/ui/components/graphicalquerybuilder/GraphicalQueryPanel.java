@@ -16,6 +16,7 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.AbstractPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
+import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -262,6 +263,17 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		List<SEMOSSVertex> verts = new ArrayList<>( graph.getVertices() );
 		for ( SEMOSSVertex v : verts ) {
 			graph.removeVertex( v );
+		}
+		vizlayout.reset();
+		update();
+	}
+
+	public void remove( AbstractNodeEdgeBase v ) {
+		if ( v instanceof SEMOSSVertex ) {
+			graph.removeVertex( SEMOSSVertex.class.cast( v ) );
+		}
+		else {
+			graph.removeEdge( SEMOSSEdge.class.cast( v ) );
 		}
 		vizlayout.reset();
 		update();

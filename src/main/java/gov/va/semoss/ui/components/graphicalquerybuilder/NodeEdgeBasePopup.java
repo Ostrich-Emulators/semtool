@@ -47,6 +47,15 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 				"Set the label of this node", "Instance Label" ) );
 		add( makeTypeItem( v, pnl ) );
 
+		add( new AbstractAction( "Remove this Element" ) {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				pnl.remove( v );
+			}
+
+		} );
+
 		finishMenu( v, pnl );
 
 		addSeparator();
@@ -64,7 +73,7 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 	}
 
 	protected Collection<URI> getAllPossibleProperties( URI type, IEngine engine ) {
-		String query = "SELECT ?pred WHERE { ?s ?pred ?o . ?s a ?type . FILTER ( isLiteral( ?o ) ) }";
+		String query = "SELECT DISTINCT ?pred WHERE { ?s ?pred ?o . ?s a ?type . FILTER ( isLiteral( ?o ) ) }";
 		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query, "pred" );
 		qa.bind( "type", type );
 
