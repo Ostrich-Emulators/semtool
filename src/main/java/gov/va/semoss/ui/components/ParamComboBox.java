@@ -19,9 +19,12 @@
  */
 package gov.va.semoss.ui.components;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -53,7 +56,7 @@ public class ParamComboBox extends UriComboBox {
 
   public ParamComboBox() {
   }
-
+  
   public void setType( String typ ) {
     type = new URIImpl( typ );
   }
@@ -117,4 +120,5 @@ public class ParamComboBox extends UriComboBox {
   public void setQuery( String query ) {
     this.query = query;
   }
+  
 }

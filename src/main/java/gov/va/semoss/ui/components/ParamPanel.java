@@ -60,6 +60,9 @@ public class ParamPanel extends JPanel implements ActionListener {
 
   Map<String, String> knownValues = new HashMap<>();
   List<ParamComboBox> dependentBoxes = new ArrayList<>();
+  
+List<ParamComboBox> allParamBoxes = new ArrayList<>();
+
   Insight insight = null;
   Map<String, Map<String, String>> parameterMasterHash = null;
   /**
@@ -144,6 +147,8 @@ public class ParamPanel extends JPanel implements ActionListener {
 		String strLabel = e.getValue().get("label");
 		String strType = e.getValue().get("type");
 		String strQuery = e.getValue().get("query");
+NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
+strQuery = filler.fillExternalQuery(strQuery, knownValues);
         JLabel label = new JLabel(strLabel);
         label.setFont( new Font( "Tahoma", Font.PLAIN, 12 ) );
         label.setForeground( Color.DARK_GRAY );
@@ -161,8 +166,8 @@ public class ParamPanel extends JPanel implements ActionListener {
 	      //if it does, set it as a dependent box
 	      if(checkIfFullQuery(strQuery)){
 	          IEngine engine = DIHelper.getInstance().getRdfEngine();
+//	          NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
 	    	  
-	          NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
 	          if (strQuery != null && !strQuery.isEmpty()) {
 	            filler.setExternalQuery(strQuery);
 	          }
@@ -188,6 +193,10 @@ public class ParamPanel extends JPanel implements ActionListener {
 	        field.setType(strType);
 	      }
 
+
+field.setQuery(strQuery);
+field.setType(strType);
+allParamBoxes.add(field);
       gbc_element = new GridBagConstraints();
       gbc_element.anchor = GridBagConstraints.WEST;
       gbc_element.insets = new Insets( 0, 5, 5, 5 );
@@ -236,6 +245,131 @@ public class ParamPanel extends JPanel implements ActionListener {
     fillParams( setParams );
   }
 
+  private boolean repaintParamsRunning;
+  public void repaintParams(ParamComboBox cboParam) {
+	    repaintParamsRunning = true;
+	    //Remove all components (combo boxes) before repainting
+	    this.removeAll();
+	    
+	    //Set up layout values for panel
+	    GridBagLayout gridBagLayout = new GridBagLayout();
+	    gridBagLayout.columnWidths = new int[]{ 0, 0 };
+	    gridBagLayout.rowHeights = new int[]{ 0, 0, 0 };
+	    gridBagLayout.columnWeights = new double[]{ 0.0, 1.0 };
+	    gridBagLayout.rowWeights = new double[]{ 0.0, 0.0 };
+	    this.setLayout( gridBagLayout );
+
+	    List<ParamComboBox> fields = new ArrayList<>();
+	    List<GridBagConstraints> gbcs1 = new ArrayList<>();
+	    List<GridBagConstraints> gbcs2 = new ArrayList<>();
+	    List<JLabel> labels = new ArrayList<>();
+	    GridBagConstraints gbc_element;
+
+	    allParamBoxes = new ArrayList();
+	    knownValues = new HashMap<>();
+	    
+	    //Iterate over parameters in Master Hash:
+	    //---------------------------------------
+	    int elementInt = 0;
+	    List<String> setParams = new ArrayList<>();
+	    
+	    for(Map.Entry<String, Map<String, String>> e: parameterMasterHash.entrySet()){
+			String strVariable = e.getKey();
+			String strLabel = e.getValue().get("label");
+			String strType = e.getValue().get("type");
+			String strQuery = e.getValue().get("query");
+	        NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
+	        strQuery = filler.fillExternalQuery(strQuery, knownValues);
+	        JLabel label = new JLabel(strLabel);
+	        label.setFont( new Font( "Tahoma", Font.PLAIN, 12 ) );
+	        label.setForeground( Color.DARK_GRAY );
+
+	        //Execute the logic for filling the information here
+	        final ParamComboBox field = new ParamComboBox( Arrays.asList( ParamComboBox.FETCHING ) );
+	        field.setFont( new Font( "Tahoma", Font.PLAIN, 11 ) );
+	        field.setParamName(strVariable);
+	        field.setEditable( false );
+	        field.setPreferredSize( new Dimension( 100, 25 ) );
+	        field.setMinimumSize( new Dimension( 100, 25 ) );
+	        field.setBackground( new Color( 119, 136, 153 ) ); //Dropdown background color
+
+          IEngine engine = DIHelper.getInstance().getRdfEngine();
+	  
+          if(strQuery != null && !strQuery.isEmpty()){
+            filler.setExternalQuery(strQuery);
+          }
+          filler.fill(field, engine, strType);
+
+          final Preferences prefs = Preferences.userNodeForPackage( getClass() );
+          if(cboParam.getParamName().equals(field.getParamName())){
+    	  	  field.setSelectedItem(cboParam.getSelectedItem());
+          }else{
+             String lastoption = prefs.get(strType, "" );
+             field.setSelectedItem( lastoption );
+          }
+          field.addActionListener( new ActionListener() {
+             @Override
+             public void actionPerformed( ActionEvent e ) {
+               prefs.put(strType, field.getSelectedItem().toString() );
+             }
+          });
+          
+          setSelected( field );
+        
+          setParams.add( field.getParamName() );
+          field.addActionListener( this );
+
+
+		  field.setQuery(strQuery);
+		  field.setType(strType);
+		  allParamBoxes.add(field);
+	      gbc_element = new GridBagConstraints();
+	      gbc_element.anchor = GridBagConstraints.WEST;
+	      gbc_element.insets = new Insets( 0, 5, 5, 5 );
+	      gbc_element.gridx = 0;
+	      gbc_element.gridy = elementInt;
+	      labels.add( label );
+	      gbcs1.add( gbc_element );
+
+	      gbc_element = new GridBagConstraints();
+	      gbc_element.anchor = GridBagConstraints.NORTH;
+	      gbc_element.fill = GridBagConstraints.HORIZONTAL;
+	      gbc_element.insets = new Insets( 0, 5, 5, 5 );
+	      gbc_element.gridx = 1;
+	      gbc_element.gridy = elementInt;
+
+	      fields.add( field );
+	      gbcs2.add( gbc_element );
+	      elementInt++;
+	    }
+
+	    int index = 0;
+	    int begAlph;
+	    while ( fields.size() > 1 ) {
+	      begAlph = 0;
+	      for ( int i = 1; i < fields.size(); i++ ) {
+	        if ( fields.get( begAlph ).getParamName().compareTo( fields.get( i ).getParamName() ) > 0 ) {
+	          begAlph = i;
+	        }
+	      }
+	      gbcs1.get( begAlph ).gridy = index;
+	      gbcs2.get( begAlph ).gridy = index;
+	      index++;
+	      this.add( labels.get( begAlph ), gbcs1.get( begAlph ) );
+	      this.add( fields.get( begAlph ), gbcs2.get( begAlph ) );
+	      fields.remove( begAlph );
+	      gbcs1.remove( begAlph );
+	      labels.remove( begAlph );
+	      gbcs2.remove( begAlph );
+	    }
+	    if ( !gbcs1.isEmpty() ) {
+	      gbcs1.get( 0 ).gridy = index;
+	      gbcs2.get( 0 ).gridy = index;
+	      this.add( labels.get( 0 ), gbcs1.get( 0 ) );
+	      this.add( fields.get( 0 ), gbcs2.get( 0 ) );
+	    }
+	    repaintParamsRunning = false;
+	  }
 
   /**
    * Fills the list of parameters with newly changed parameters based on whether
@@ -271,7 +405,7 @@ public class ParamPanel extends JPanel implements ActionListener {
       fillParams( newChangedParams );
     }
   }
-
+  
   /**
    * Invoked when an action occurs.
    *
@@ -279,12 +413,42 @@ public class ParamPanel extends JPanel implements ActionListener {
    */
   @Override
   public void actionPerformed( ActionEvent arg0 ) {
-    ParamComboBox source = (ParamComboBox) arg0.getSource();
-    setSelected( source );
-    
-    ArrayList<String> list = new ArrayList<String>();
-    list.add( source.getParamName() );
-    fillParams( list );
+	ParamComboBox source = (ParamComboBox) arg0.getSource();
+	
+	//If Insight is non-legacy:
+	if(insight.getIsLegacy() == false){
+		knownValues.put(source.getParamName(), source.getSelectedUri().toString());
+		
+		//If the new parameter selection will result in queries filled by new URI's,
+		//then repaint the Parameter panel with new drop-downs:
+		boolean boolQueriesFilled = false;
+		for(Map.Entry<String, Map<String, String>> e: parameterMasterHash.entrySet()){
+			String strQuery = e.getValue().get("query");
+	        NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
+	        strQuery = filler.fillExternalQuery(strQuery, knownValues);
+	
+	        boolean queryExists = false;
+	        for(ParamComboBox cboParam : allParamBoxes){
+	        	if(cboParam.getQuery().equals(strQuery)){
+	        		queryExists = true;
+	        		break;
+	        	}
+	        }
+			if(queryExists == false){
+				boolQueriesFilled = true;
+				break;
+			}
+		}		  
+		if(boolQueriesFilled == true && repaintParamsRunning == false){
+	       repaintParams(source);
+		}
+	//If Insight is legacy:
+	}else{
+	    setSelected( source );
+	    ArrayList<String> list = new ArrayList<String>();
+	    list.add( source.getParamName() );
+	    fillParams( list );
+	}
   }
 
   /**

@@ -108,7 +108,34 @@ public class NonLegacyQueryBuilder {
 	 public void setExternalQuery( String query ) {
 	    this.extQuery = query;
 	 }
-		 
+	
+	 /**   Fills non-legacy parameter queries with URI's that depend upon selections made
+	  * from other parameter queries. 
+	  * 
+	  * NOTE: String substitution is performed on variable names, so the variables replaced
+	  *       must not appear in the SELECT clause.
+	  * 
+	  * @param strQuery -- (String) A non-legacy parameter query, containing a variable in 
+	  *    the WHERE clause that must be replaced by a URI, consistent with a selection from
+	  *    another parameter drop-down.
+	  *    
+	  * @param mapParameterSelections -- (Map<String, String>) A collection of parameter name
+	  *    and URI pairs, corresponding to the current parameter drop-down selections.
+	  *    
+	  * @return fillExternalQuery -- (String) The URI substitution described above.
+	  */
+	 public String fillExternalQuery(String strQuery, Map<String, String> mapParameterSelections){
+		 String strReturnValue = strQuery;
+
+		 for(Map.Entry<String, String> entry : mapParameterSelections.entrySet()){ 
+			 String strTarget = "?"+entry.getKey();
+			 if(strReturnValue.contains(strTarget) == true){
+				 strReturnValue = strReturnValue.replace(strTarget, "<" + entry.getValue() + ">");
+			 }
+		 }	
+		 return strReturnValue;
+	 }
+	 
 	/**   Fetches data for an Insight Parameter combo-box, either from the Insight's BIND
 	 * statement (legacy), from an externally defined Type, or from an externally defined
 	 * Sparql query.
@@ -149,7 +176,7 @@ public class NonLegacyQueryBuilder {
 	          Map<String, String> paramTable = new HashMap<>();
 	          paramTable.put( Constants.ENTITY, type );
 	          sparqlQuery = extQuery == null ? Utility.fillParam(sparqlQuery, paramTable) : extQuery;
-	          
+
 	          //Add a line of namespace prefixes to the top of the query for processing:
 	          sparqlQuery = AbstractSesameEngine.processNamespaces(sparqlQuery);
 	
