@@ -102,7 +102,7 @@ public class GraphToSparql {
 
 				// ignore empty variables (mostly, this is just for not returning a
 				// label, but it's generally good not to add unmarked predicates to a 
-				// query)
+				// query). If the predicate is marked, we must include it no matter what
 				if ( "".equals( v.getProperty( type ).toString() ) && !v.isMarked( type ) ) {
 					continue;
 				}
