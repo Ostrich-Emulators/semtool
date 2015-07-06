@@ -294,7 +294,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private void updateSparql() {
 		if ( null != sparqlarea ) {
 			String sparql = ( 0 == graph.getVertexCount()
-					? "" : new GraphToSparql().select( graph ) );
+					? "" : new GraphToSparql( getEngine().getNamespaces() ).select( graph ) );
 			sparqlarea.setText( sparql );
 		}
 	}

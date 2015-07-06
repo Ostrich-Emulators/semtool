@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import static cern.clhep.Units.s;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
@@ -21,7 +20,6 @@ import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
@@ -33,14 +31,19 @@ public class GraphToSparql {
 
 	private final Map<AbstractNodeEdgeBase, Integer> ids = new HashMap<>();
 	private final Map<NodeType, Integer> valIds = new HashMap<>();
-	private final static Map<URI, String> shortcuts = new HashMap<>();
-
-	static {
-		shortcuts.put( RDF.TYPE, "a" );
-		shortcuts.put( RDFS.LABEL, "rdfs:label" );
-	}
+	private final Map<String, String> namespaces;
 
 	public GraphToSparql() {
+		this( new HashMap<>() );
+	}
+
+	public GraphToSparql( Map<String, String> ns ) {
+		namespaces = new HashMap<>( ns );
+	}
+
+	public void setNamespaces( Map<String, String> ns ) {
+		namespaces.clear();
+		namespaces.putAll( ns );
 	}
 
 	public String construct( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
@@ -108,12 +111,7 @@ public class GraphToSparql {
 				}
 
 				sb.append( "  " ).append( nodevar ).append( " " );
-				if ( shortcuts.containsKey( type ) ) {
-					sb.append( shortcuts.get( type ) );
-				}
-				else {
-					sb.append( "<" ).append( type ).append( ">" );
-				}
+				sb.append( shortcut( type ) );
 				sb.append( " " );
 
 				if ( v.isMarked( type ) ) {
@@ -121,13 +119,13 @@ public class GraphToSparql {
 					String objvar = "?obj" + objid;
 					sb.append( objvar );
 					if ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
-						sb.append( ". FILTER( " ).append( objvar ).append( " = " );
+						sb.append( " VALUES " ).append( objvar ).append( " { " );
 					}
 				}
 
 				if ( !Constants.ANYNODE.equals( val ) ) {
 					if ( val instanceof URI ) {
-						sb.append( " <" ).append( val ).append( ">" );
+						sb.append( shortcut( URI.class.cast( val ) ) );
 					}
 					else if ( val instanceof String && !val.toString().isEmpty() ) {
 						sb.append( "\"" ).append( val ).append( "\"" );
@@ -148,10 +146,10 @@ public class GraphToSparql {
 
 				if ( v.isMarked( type )
 						&& ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
-					sb.append( ")" );
+					sb.append( "}" );
 				}
 
-				sb.append( ".\n" );
+				sb.append( " .\n" );
 			}
 		}
 
@@ -191,6 +189,16 @@ public class GraphToSparql {
 				valIds.put( new NodeType( v.getURI(), en.getKey() ), propcount++ );
 			}
 		}
+	}
+
+	private String shortcut( URI type ) {
+		for ( Map.Entry<String, String> ns : namespaces.entrySet() ) {
+			if ( type.getNamespace().equals( ns.getValue() ) ) {
+				return ns.getKey() + ":" + type.getLocalName();
+			}
+		}
+
+		return "<" + type + ">";
 	}
 
 	private class NodeType {
