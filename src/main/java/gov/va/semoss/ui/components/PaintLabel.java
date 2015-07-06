@@ -103,7 +103,7 @@ public class PaintLabel extends JPanel {
 		makeShapeIcon();
 	}
 
-	private void makeShapeIcon() {
+	public static ImageIcon makeShapeIcon( Color color, Shape shape, Dimension dim ) {
 		BufferedImage bi
 				= new BufferedImage( dim.width, dim.height, BufferedImage.TYPE_INT_ARGB );
 		Graphics2D g = bi.createGraphics();
@@ -120,6 +120,11 @@ public class PaintLabel extends JPanel {
 		}
 		g.dispose();
 
-		image.setIcon( new ImageIcon( bi ) );
+		return new ImageIcon( bi );
+	}
+
+	private void makeShapeIcon() {
+		ImageIcon ii = makeShapeIcon( color, shape, dim );
+		image.setIcon( ii );
 	}
 }

@@ -39,6 +39,7 @@ import org.openrdf.model.URI;
  * This class is used to keep track of specific properties for a table.
  */
 public class ControlDataTable {
+
 	private List<ControlDataRow> data = new ArrayList<>();
 	private Class<?>[] rowClasses = { URI.class, URI.class, Boolean.class,
 		Boolean.class, String.class };
@@ -72,11 +73,10 @@ public class ControlDataTable {
 			properties.add( type, property );
 		}
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		properties.clear();
 	}
-	
 
 	/**
 	 * Generates all the rows in the control panel for the specified table and
@@ -246,10 +246,12 @@ public class ControlDataTable {
 			ControlDataRow cdr = data.get( row );
 			switch ( column ) {
 				case 0: {
-					if ( Constants.ANYNODE.equals( cdr.prop ) )
+					if ( Constants.ANYNODE.equals( cdr.prop ) ) {
 						return cdr.type;
+					}
 					return "";
-				} case 1:
+				}
+				case 1:
 					return cdr.prop;
 				case 2:
 					return cdr.label;
@@ -304,6 +306,7 @@ public class ControlDataTable {
 	}
 
 	public class ControlDataRow {
+
 		URI type;
 		URI prop;
 		boolean label;

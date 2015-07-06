@@ -60,7 +60,7 @@ public class DBToLoadingSheetExporter {
 	}
 
 	public ImportData runExport( boolean runNodeExport, boolean runRelationshipExport ) {
-		List<URI> nodes = createConceptList();
+		List<URI> nodes = createConceptList( getEngine() );
 
 		ImportData data = ImportData.forEngine( engine );
 
@@ -202,7 +202,7 @@ public class DBToLoadingSheetExporter {
 		return new File( fileloc.toString() );
 	}
 
-	public List<URI> createConceptList() {
+	public static List<URI> createConceptList( IEngine engine ) {
 		final List<URI> conceptList = new ArrayList<>();
 		String query = "SELECT ?entity WHERE "
 				+ "{ ?entity rdfs:subClassOf+ ?concept . FILTER( ?entity != ?concept ) }";

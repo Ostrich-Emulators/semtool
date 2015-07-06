@@ -322,7 +322,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		viewer.setRenderer( new SemossBasicRenderer() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
-		viewer.setGraphMouse( new GraphNodeListener( this ) );
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		viewer.setGraphMouse( gl );
 		viewer.setBackground( Color.WHITE );

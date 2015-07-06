@@ -110,8 +110,7 @@ public class DBToLoadingSheetExporterTest {
 			}
 		} );
 
-		DBToLoadingSheetExporter dbtlse = new DBToLoadingSheetExporter( eng );
-		List<URI> concepts = dbtlse.createConceptList();
+		List<URI> concepts = DBToLoadingSheetExporter.createConceptList( eng );
 		Collections.sort( concepts, new Comparator<URI>() {
 
 			@Override
