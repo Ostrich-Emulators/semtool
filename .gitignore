@@ -1,0 +1,5 @@
+bin/
+target/
+stashed/
+pom.xml
+src/main/resources/html.zip
