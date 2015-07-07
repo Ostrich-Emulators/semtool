@@ -8,14 +8,16 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.ui.components.renderers.PerspectiveRenderer;
+import java.awt.Component;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 
@@ -35,14 +37,15 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 
 		insightname.setText( "Insight-" + ( new Date().getTime() ) );
 
-		Collection<Perspective> perps = engine.getInsightManager().getPerspectives();
-		DefaultComboBoxModel<Perspective> model = new DefaultComboBoxModel<>(
-				perps.toArray( new Perspective[0] ) );
+		InsightManager im = engine.getInsightManager();
+		Collection<Perspective> perps = im.getPerspectives();
+		DefaultComboBoxModel<Perspective> model
+				= new DefaultComboBoxModel<>( perps.toArray( new Perspective[0] ) );
 		perspectives.setModel( model );
-		perspectives.setRenderer( new PerspectiveRenderer() );
+		perspectives.setRenderer( new PerspectiveRenderer( engine ) );
 	}
 
-	public static void showDialog( JFrame frame, IEngine engine, String sparql ) {
+	public static void showDialog( Component frame, IEngine engine, String sparql ) {
 		SaveAsInsightPanel p = new SaveAsInsightPanel( engine );
 		String[] choices = { "Save", "Cancel" };
 
@@ -55,10 +58,10 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 			if ( 0 == ans ) {
 				Perspective persp
 						= p.perspectives.getItemAt( p.perspectives.getSelectedIndex() );
-				List<Insight> insights = engine.getInsightManager().getInsights( persp );
+				List<Insight> insightlist = engine.getInsightManager().getInsights( persp );
 
 				boolean seenit = false;
-				for ( Insight i : insights ) {
+				for ( Insight i : insightlist ) {
 					if ( i.getLabel().equals( p.insightname.getText() ) ) {
 						seenit = true;
 					}
@@ -67,16 +70,16 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 				tryagain = seenit;
 
 				if ( !seenit ) {
-					Insight insight = new Insight();
-					insight.setSparql( sparql );
-					insight.setLabel( p.insightname.getText() );
-					insights.add( insight );
+					Insight insight = new Insight( p.insightname.getText(), sparql,
+							GridRAWPlaySheet.class );
 
 					WriteableInsightManager wim = engine.getWriteableInsightManager();
-					wim.setInsights( persp, insights );
-					wim.commit();
+					wim.add( insight );
+
+					insightlist.add( insight );
+					wim.setInsights( persp, insightlist );
 					try {
-						EngineUtil.getInstance().importInsightsFromList( wim.getRepository().getConnection().getStatements( null, null, null, false ) );
+						EngineUtil.getInstance().importInsights( wim );
 					}
 					catch ( Exception e ) {
 						Logger.getLogger( SaveAsInsightPanel.class ).error( e, e );

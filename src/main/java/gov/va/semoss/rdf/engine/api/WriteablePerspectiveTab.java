@@ -1,11 +1,11 @@
 package gov.va.semoss.rdf.engine.api;
 
-import java.util.ArrayList;
 
 import org.openrdf.model.URI;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
+import java.util.List;
 
 public interface WriteablePerspectiveTab {
   /**   Adds a new Insight to the current Perspective and to the triple-store on disk.
@@ -29,7 +29,7 @@ public interface WriteablePerspectiveTab {
    * 
    * @return setInsightOrders -- (boolean) Whether the Insight reordering succeeded.
    */
-    public boolean reorderInsights(URI perspectiveURI, ArrayList<Insight> arylInsights);
+    public boolean reorderInsights(URI perspectiveURI, List<Insight> arylInsights);
   
  /**   Removes an Insight from a Perspective in the triple-store on disk.
    * 
@@ -42,7 +42,7 @@ public interface WriteablePerspectiveTab {
    * 
    * @param doImport -- (boolean) Whether to import memory database to disk.
    */
-	public boolean removeInsight(ArrayList<Insight> arylInsights, Insight insight,
+	public boolean removeInsight(List<Insight> arylInsights, Insight insight,
        Perspective perspective, boolean doImport);
   
   /**   Adds a new Perspective to the triple-store on disk.
@@ -79,7 +79,7 @@ public interface WriteablePerspectiveTab {
    * 
    * @return savePerspective -- (boolean) Whether the save to disk succeeded.
    */
-	public boolean savePerspective(ArrayList<Insight> arylInsights, String uri, 
+	public boolean savePerspective(List<Insight> arylInsights, String uri, 
 	   String strTitle, String strDescription);
 	
 	/**   Searches the database for Insights that are not associated with any Perspective,

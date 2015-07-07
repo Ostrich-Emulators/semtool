@@ -626,12 +626,10 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @return -- (boolean) Whether the import succeeded.
 	 */
-	public synchronized boolean importInsightsFromList( RepositoryResult<Statement> statements ) {
+	public synchronized boolean importInsights( WriteableInsightManager wim ){
 		try {
 			IEngine engine = DIHelper.getInstance().getRdfEngine();
-			List<Statement> stmts = new ArrayList<>();
-			stmts.addAll( Iterations.asList( statements ) );
-			insightqueue.put( engine, new InsightsImportConfig( stmts, true ) );
+			insightqueue.put( engine, new InsightsImportConfig( wim.getStatements(), true ) );
 			notify();
 			return true;
 		}
