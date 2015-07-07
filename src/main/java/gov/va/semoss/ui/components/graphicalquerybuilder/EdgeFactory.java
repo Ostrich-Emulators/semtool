@@ -24,7 +24,7 @@ public class EdgeFactory implements Factory<SEMOSSEdge> {
 	@Override
 	public SEMOSSEdge create() {
 		SEMOSSEdge edge = new SEMOSSEdge( uribuilder.uniqueUri() );
-		edge.setName( "" );
+		edge.setLabel( "" );
 		edge.removeProperty( AbstractNodeEdgeBase.LEVEL );
 
 		return edge;
