@@ -32,7 +32,9 @@ public class UriBuilder {
 	private UriSanitizer sanitizer;
 	private boolean lastIsConcatenator;
 	private static final Pattern CONCAT_PAT = Pattern.compile( "(.*)([/#:])$" );
-	private static final Pattern PUNCTUATION = Pattern.compile( "\\p{Punct}", Pattern.UNICODE_CHARACTER_CLASS );
+	private static final Pattern PUNCTUATION = Pattern.compile( "\\p{Punct}",
+			Pattern.UNICODE_CHARACTER_CLASS );
+
 	/**
 	 * Sets the class to use when a user calls
 	 * {@link #getBuilder(java.lang.String)} or
@@ -125,11 +127,10 @@ public class UriBuilder {
 	public URI build() {
 		return toUri();
 	}
-	
-	public URI build( String extra ){
+
+	public URI build( String extra ) {
 		return copy().add( extra ).build();
 	}
-
 
 	public URI uniqueUri() {
 		StringBuilder uristr = new StringBuilder( content );
@@ -247,12 +248,32 @@ public class UriBuilder {
 		return this;
 	}
 
+	/**
+	 * Does the given string start with our current content?
+	 *
+	 * @param uri the uri to check
+	 * @return true, if <code>uri.startsWith( content.toString() )</code>
+	 */
 	public boolean contains( String uri ) {
 		return uri.startsWith( content.toString() );
 	}
 
 	public boolean contains( Resource uri ) {
 		return contains( uri.stringValue() );
+	}
+
+	/**
+	 * Checks if the given URI's namespace is the same as our current content.
+	 * This is a stricter check than {@link #contains(org.openrdf.model.Resource)}
+	 * because the namespace must match the this builder's content exactly, and
+	 * not just start the same way
+	 *
+	 * @param uri the uri to check
+	 * @return true, if
+	 * <code>uri.getNamespace().equals( content.toString() )</code>
+	 */
+	public boolean namespaceOf( URI uri ) {
+		return uri.getNamespace().equals( content.toString() );
 	}
 
 	/**
@@ -341,34 +362,35 @@ public class UriBuilder {
 	}
 
 	public static class DefaultSanitizer implements UriSanitizer {
+
 		private final int localPartMaxLength = 54; // TBD: qualify this limit, consider making a semoss property
-		
+
 		public String getUUIDLocalName() {
-			return  RandomStringUtils.randomAlphabetic( 1 ) + UUID.randomUUID().toString();
+			return RandomStringUtils.randomAlphabetic( 1 ) + UUID.randomUUID().toString();
 		}
-		
+
 		@Override
 		public String sanitize( String raw ) {
 			// Check if the string is already valid:
 			String sanitized = raw;
-			if (! isValidUriChars( raw ) ) {
+			if ( !isValidUriChars( raw ) ) {
 				// Attempt a simple sanitizing:
 				String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
 
-				if( isValidUriChars( rawWithUnderscores) ) {
+				if ( isValidUriChars( rawWithUnderscores ) ) {
 					sanitized = rawWithUnderscores;
 				}
 				else {
 					// Still not clean enough, sanitize as per full-blown XML rules:
-					StringBuilder sb = new StringBuilder(); 
-					for(int i = 0; i < rawWithUnderscores.length(); i++) {
-						char c = rawWithUnderscores.charAt(i);
+					StringBuilder sb = new StringBuilder();
+					for ( int i = 0; i < rawWithUnderscores.length(); i++ ) {
+						char c = rawWithUnderscores.charAt( i );
 						// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
 						// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
-						if( XMLChar.isNCName( c ) ) {
+						if ( XMLChar.isNCName( c ) ) {
 							sb.append( c );
 						}
-						else if ( PUNCTUATION.matcher( Character.toString(c) ).matches() ) {
+						else if ( PUNCTUATION.matcher( Character.toString( c ) ).matches() ) {
 							sb.append( '-' );
 						}
 						sanitized = sb.toString();
@@ -381,7 +403,8 @@ public class UriBuilder {
 			// we hit the max length limit, we graph a UUID since we are otherwise unable to check for uniqueness
 			// at this stage.
 			//
-			return ( sanitized.length() > localPartMaxLength  ) ? getUUIDLocalName() : sanitized ;
+			return ( sanitized.length() > localPartMaxLength ) ? getUUIDLocalName()
+					: sanitized;
 		}
 	}
 }

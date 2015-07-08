@@ -301,9 +301,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
+		fireGraphUpdated();
 		setLayoutName( layoutName );
 		setUndoRedoBtn();
-		fireGraphUpdated();
 	}
 	
 	public boolean enableSearchBar() {
