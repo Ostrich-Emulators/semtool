@@ -110,7 +110,7 @@ public class PaintLabel extends JPanel {
 	 * @param color The color of the fill of the Shape Icon
 	 * @param shape The awt.Shape that the fill color is to occupy
 	 * @param dim The desired dimensions of the icon
-	 * @return an appropriate ImageIcon with the desired dimensions, plus a padding area of 2 px, all around
+	 * @return
 	 */
 	public static ImageIcon makeShapeIcon( Color color, Shape shape, Dimension dim ) {
 		// Set some padding around the ImageIcon, for better display
