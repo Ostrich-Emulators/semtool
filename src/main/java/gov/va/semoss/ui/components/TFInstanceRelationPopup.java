@@ -36,6 +36,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
@@ -59,9 +60,10 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 
 	private final IEngine engine;
 
-	public TFInstanceRelationPopup( SEMOSSVertex vertex, IEngine e, 
+	public TFInstanceRelationPopup( SEMOSSVertex vertex, IEngine e,
 			GraphPlaySheet ps, Collection<SEMOSSVertex> pickedVertex ) {
-		super( "Traverse Freely: " + Utility.getInstanceLabel( vertex.getURI(), e ) );
+		super( "Traverse Freely: " + LabelTransformer.chop(
+				Utility.getInstanceLabel( vertex.getURI(), e ), 30 ) );
 
 		this.gps = ps;
 		this.engine = e;
