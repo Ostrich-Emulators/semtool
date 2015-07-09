@@ -48,6 +48,9 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 				LabeledPairTableCellRenderer trenderer
 						= LabeledPairTableCellRenderer.getValuePairRenderer( pnl.getEngine() );
 				trenderer.cache( Constants.ANYNODE, "<Any>" );
+				
+				tbl.setAutoCreateRowSorter( true );
+				tbl.setFillsViewportHeight( true );
 
 				tbl.setDefaultRenderer( URI.class, renderer );
 				tbl.setDefaultRenderer( Value.class, trenderer );
