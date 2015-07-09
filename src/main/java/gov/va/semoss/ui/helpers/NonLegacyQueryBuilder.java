@@ -153,7 +153,7 @@ public class NonLegacyQueryBuilder {
 	          sparqlQuery = extQuery == null ? Utility.fillParam(sparqlQuery, paramTable) : extQuery;
 
 	          //Add a line of namespace prefixes to the top of the query for processing:
-	          sparqlQuery = AbstractSesameEngine.processNamespaces(sparqlQuery);
+	          sparqlQuery = AbstractSesameEngine.processNamespaces(sparqlQuery, new HashMap<>() );
 	
 	          //Fetch all of the URIs (and perhaps associated labels) from the query:
 	          TupleQueryResult result = (TupleQueryResult)eng.execSelectQuery(sparqlQuery);

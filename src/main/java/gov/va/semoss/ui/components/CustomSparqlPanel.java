@@ -43,6 +43,7 @@ import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
+import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
 
@@ -313,6 +314,10 @@ public class CustomSparqlPanel extends JPanel {
 
 	public void enableAppend( boolean bb ) {
 		appendSparqlQueryChkBox.setEnabled( bb );
+	}
+
+	public SyntaxTextEditor getOpenEditor() {
+		return sparqlArea.getEditorOfSelectedTab();
 	}
 
 	public InternalFrameListener makeDesktopListener() {

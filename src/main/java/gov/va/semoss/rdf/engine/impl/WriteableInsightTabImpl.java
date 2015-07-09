@@ -29,6 +29,7 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.util.Utility;
+import java.util.List;
 
 public class WriteableInsightTabImpl implements WriteableInsightTab {
 	  private WriteableInsightManager wim;
@@ -74,7 +75,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	          rc.commit();
 	          
 	          //Import Insights into the repository:
-	          boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          boolReturnValue = EngineUtil.getInstance().importInsights( wim );
 	          //Give the left-pane drop-downs enough time to refresh from the import:
 		      Thread.sleep(2000);
 		         
@@ -141,7 +142,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	         rc.commit();
 	                  
              //Import Insights into the repository:
-             boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          boolReturnValue = EngineUtil.getInstance().importInsights( wim );
 	         //Give the left-pane drop-downs enough time to refresh from the import:
 		     Thread.sleep(2000);
 
@@ -167,7 +168,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * @param perspective -- (Perspective) Current Perspective
 	   */
 	  @Override
-	  public boolean deleteInsight(ArrayList<Insight> arylInsights, Insight insight, Perspective perspective){
+	  public boolean deleteInsight(List<Insight> arylInsights, Insight insight, Perspective perspective){
 		  boolean boolReturnValue = false;
 
 		  //Adjust orders of all Insights under the current Perspective
@@ -239,8 +240,8 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	         
 	         //Import Insights into the repository if deletion succeeded
 	         //and Insights have been reordered:
-	         if(boolReturnValue == true){
-	            boolReturnValue = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	         if(boolReturnValue){
+	          boolReturnValue = EngineUtil.getInstance().importInsights( wim );
 	         }
 	         //Give the left-pane drop-downs enough time to refresh from the import:
 		     Thread.sleep(2000);
@@ -272,7 +273,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * @return saveInsight -- (boolean) Whether the Insight was saved ok.
 	   */
 	  @Override
-	  public boolean saveInsight(ArrayList<Insight> arylInsights, Insight insight,
+	  public boolean saveInsight(List<Insight> arylInsights, Insight insight,
 		Collection<Perspective> colPerspectivesToAddInsight, Collection<Perspective> colPerspectivesToRemoveInsight){
 		  boolean boolTriplesImportedToDb = false;
 		  boolean boolInsightPerspectivesSaved = false;
@@ -337,7 +338,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	        	 colPerspectivesToAddInsight, colPerspectivesToRemoveInsight);
 
 	          //Import Insights into the repository:
-	          boolTriplesImportedToDb = EngineUtil.getInstance().importInsightsFromList(rc.getStatements(null, null, null, false));
+	          boolTriplesImportedToDb = EngineUtil.getInstance().importInsights( wim );
 	          //Give the left-pane drop-downs enough time to refresh from the import:
 		      Thread.sleep(2000);
 			        
@@ -374,7 +375,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	   * @return saveInsightPerspectives -- (boolean) Whether the Insight could be moved between the specified
 	   *    Perspectives.
 	   */
-	  private boolean saveInsightPerspectives(ArrayList<Insight> arylInsights, Insight insight, 
+	  private boolean saveInsightPerspectives(List<Insight> arylInsights, Insight insight, 
 		Collection<Perspective> colPerspectivesToAddInsight, Collection<Perspective> colPerspectivesToRemoveInsight){
 		  boolean boolReturnValue = true;
 		  

@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.helpers;
 
@@ -186,8 +186,10 @@ public class TypeColorShapeTable {
 		}
 
 		// next check if it is specified in the properties file
-		String shapeStringSetInRDF_MapPropFile = DIHelper.getInstance().getProperty( vertex.getType() + "_SHAPE" );
-		if ( shapeStringSetInRDF_MapPropFile != null && DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
+		String shapeStringSetInRDF_MapPropFile
+				= DIHelper.getInstance().getProperty( vertex.getType() + "_SHAPE" );
+		if ( shapeStringSetInRDF_MapPropFile != null
+				&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
 			return setShape( shapeStringSetInRDF_MapPropFile, vertex );
 		}
 
@@ -219,7 +221,8 @@ public class TypeColorShapeTable {
 		}
 
 		// try to search the properties file for the first time
-		String colorStringSetInRDF_MapPropFile = DIHelper.getInstance().getProperty( vertex.getType() + "_COLOR" );
+		String colorStringSetInRDF_MapPropFile
+				= DIHelper.getInstance().getProperty( vertex.getType() + "_COLOR" );
 		if ( colorStringSetInRDF_MapPropFile != null ) {
 			return setColor( colorStringSetInRDF_MapPropFile, vertex );
 		}

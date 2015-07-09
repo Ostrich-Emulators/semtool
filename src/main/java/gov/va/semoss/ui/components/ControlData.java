@@ -71,8 +71,10 @@ public class ControlData implements GraphListener {
 		propertyShowTT.add( Constants.VERTEX_NAME );
 		propertyShowTT.add( Constants.VERTEX_TYPE );
 
-		vertexCDT = new ControlDataTable( vertexPropertyShow, propertyShowTT, propertyHide, new String[]{ "Node Type", "Property", "Label", "Tooltip" } );
-		edgeCDT = new ControlDataTable( edgePropertyShow, propertyShowTT, propertyHide, new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
+		vertexCDT = new ControlDataTable( vertexPropertyShow, propertyShowTT,
+				propertyHide, new String[]{ "Node Type", "Property", "Label", "Tooltip" } );
+		edgeCDT = new ControlDataTable( edgePropertyShow, propertyShowTT, propertyHide,
+				new String[]{ "Edge Type", "Property", "Label", "Tooltip" } );
 	}
 
 	@Override
