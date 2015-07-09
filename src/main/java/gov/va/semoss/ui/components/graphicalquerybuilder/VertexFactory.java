@@ -45,4 +45,8 @@ public class VertexFactory implements Factory<SEMOSSVertex> {
 	public void setType( URI type ) {
 		verttype = type;
 	}
+
+	public void resetCounter() {
+		count = 0;
+	}
 }

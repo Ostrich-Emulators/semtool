@@ -49,6 +49,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 
 				JOptionPane.showConfirmDialog( JOptionPane.getFrameForComponent( pnl ),
 						jpnl, "Query Results Config", JOptionPane.PLAIN_MESSAGE );
+				pnl.update();
 			}
 		} );
 

@@ -11,7 +11,6 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.UriBuilder;
 import org.apache.commons.collections15.Factory;
-import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 
 /**
@@ -22,7 +21,6 @@ public class EdgeFactory implements Factory<SEMOSSEdge> {
 
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
 	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> map;
-	private URI edgetype;
 	private int count = 0;
 
 	public EdgeFactory( MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> map ) {
@@ -41,8 +39,8 @@ public class EdgeFactory implements Factory<SEMOSSEdge> {
 
 		return edge;
 	}
-
-	public void setType( URI type ) {
-		edgetype = type;
+	
+	public void resetCounter(){
+		count = 0;
 	}
 }

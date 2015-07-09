@@ -277,6 +277,9 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		for ( SEMOSSVertex v : verts ) {
 			graph.removeVertex( v );
 		}
+		vfac.resetCounter();
+		efac.resetCounter();
+		
 		vizlayout.reset();
 		update();
 	}

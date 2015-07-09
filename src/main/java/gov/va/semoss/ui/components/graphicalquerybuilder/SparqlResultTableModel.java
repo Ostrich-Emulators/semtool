@@ -5,14 +5,18 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import static cern.clhep.Units.s;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  *
@@ -23,16 +27,23 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	private static final String[] COLS
 			= { "Node", "Property", "Label", "Returned?" };
 	private static final Class<?>[] COLCLASSES
-			= { AbstractNodeEdgeBase.class, URI.class, String.class, Boolean.class };
+			= { String.class, URI.class, String.class, Boolean.class };
 
-	private final MultiMap<? extends AbstractNodeEdgeBase, SparqlResultConfig> data;
+	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data;
 	private final List<SparqlResultConfig> list = new ArrayList<>();
+	private final Map<AbstractNodeEdgeBase, String> subjects = new HashMap<>();
 
-	public SparqlResultTableModel( MultiMap<? extends AbstractNodeEdgeBase, SparqlResultConfig> data ) {
+	public SparqlResultTableModel( MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data ) {
 		this.data = data;
+
 		for ( Map.Entry<? extends AbstractNodeEdgeBase, List<SparqlResultConfig>> en : data.entrySet() ) {
 			for ( SparqlResultConfig src : en.getValue() ) {
-				list.add( src );
+				if ( src.getProperty().equals( RDF.SUBJECT ) ) {
+					subjects.put( src.getId(), src.getLabel() );
+				}
+				else {
+					list.add( src );
+				}
 			}
 		}
 
@@ -41,7 +52,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	@Override
 	public int getRowCount() {
-		return data.size();
+		return list.size();
 	}
 
 	@Override
@@ -51,7 +62,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable( int row, int col ) {
-		return ( col > 1 );
+		return ( 0 == col || 2 == col );
 	}
 
 	@Override
@@ -69,7 +80,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 		SparqlResultConfig src = list.get( row );
 		switch ( col ) {
 			case 0:
-				return src.getId();
+				return subjects.get( src.getId() );
 			case 1:
 				return src.getProperty();
 			case 2:
@@ -84,12 +95,16 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	@Override
 	public void setValueAt( Object aValue, int row, int col ) {
 		SparqlResultConfig src = list.get( row );
-		switch ( col ) {
-			case 2:
-				src.setLabel( aValue.toString() );
-				break;
-			default:
-				throw new IllegalArgumentException( "unknown column: " + col );
+		if ( 0 == col ) {
+			subjects.put( src.getId(), aValue.toString() );
+			for ( SparqlResultConfig ss : data.getNN( src.getId() ) ) {
+				if ( ss.getProperty().equals( RDF.SUBJECT ) ) {
+					ss.setLabel( aValue.toString() );
+				}
+			}
+		}
+		else if ( 2 == col ) {
+			src.setLabel( aValue.toString() );
 		}
 
 		fireTableCellUpdated( row, col );
