@@ -340,13 +340,14 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 		for ( Map.Entry<AbstractNodeEdgeBase, List<SparqlResultConfig>> en : config.entrySet() ) {
 			for ( SparqlResultConfig src : en.getValue() ) {
-				Matcher m = pat.matcher( src.getLabel() );
+				String lbl = src.getLabel();
+				Matcher m = pat.matcher( lbl );
 				if ( m.matches() ) {
 					String val = m.group( 1 );
 					int id = Integer.parseInt( val );
 
 					if ( id > maxid ) {
-						id = maxid;
+						maxid = id;
 					}
 				}
 			}
@@ -355,7 +356,26 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		return maxid + 1;
 	}
 
+	private void removeOldConfigs() {
+		Set<AbstractNodeEdgeBase> keepers = new HashSet<>();
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			keepers.add( v );
+		}
+		for ( SEMOSSEdge v : graph.getEdges() ) {
+			keepers.add( v );
+		}
+
+		Set<AbstractNodeEdgeBase> toremove = new HashSet<>( config.keySet() );
+		toremove.removeAll( keepers );
+		for ( AbstractNodeEdgeBase b : toremove ) {
+			config.remove( b );
+		}
+
+	}
+
 	private void updateSparqlConfigs() {
+		removeOldConfigs();
+		
 		int nextnodeid = findNextId( "node" );
 		int nextlinkid = findNextId( "link" );
 		int nextobjid = findNextId( "obj" );

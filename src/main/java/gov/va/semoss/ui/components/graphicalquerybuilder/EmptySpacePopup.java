@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.ui.components.SaveAsInsightPanel;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
@@ -44,9 +45,12 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 				Set<URI> labels = SparqlResultConfig.getProperties( map );
 				renderer.cache( Utility.getInstanceLabels( labels, pnl.getEngine() ) );
 
+				LabeledPairTableCellRenderer trenderer
+						= LabeledPairTableCellRenderer.getValuePairRenderer( pnl.getEngine() );
+				trenderer.cache( Constants.ANYNODE, "<Any>" );
+
 				tbl.setDefaultRenderer( URI.class, renderer );
-				tbl.setDefaultRenderer( Value.class,
-						LabeledPairTableCellRenderer.getValuePairRenderer( pnl.getEngine() ) );
+				tbl.setDefaultRenderer( Value.class, trenderer );
 
 				jpnl.add( new JScrollPane( tbl ) );
 

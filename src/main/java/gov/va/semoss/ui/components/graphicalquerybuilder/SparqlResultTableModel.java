@@ -9,12 +9,15 @@ import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 
 /**
@@ -31,6 +34,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data;
 	private final List<SparqlResultConfig> list = new ArrayList<>();
 	private final Map<AbstractNodeEdgeBase, String> subjects = new HashMap<>();
+	private final ValueFactory vf = new ValueFactoryImpl();
 
 	public SparqlResultTableModel( MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data ) {
 		this.data = data;
@@ -84,14 +88,30 @@ public class SparqlResultTableModel extends AbstractTableModel {
 				return subjects.get( src.getId() );
 			case 1:
 				return property;
-			case 2:
-				return src.getId().getProperty( property );
-			case 3:
-			{
-				if( src.getId().isMarked( property ) ){
-					return src.getLabel();					
+			case 2: {
+				Object prop = src.getId().getProperty( property );
+				if ( prop instanceof Double ) {
+					return vf.createLiteral( Double.class.cast( prop ) );
 				}
-				else{
+				else if ( prop instanceof Boolean ) {
+					return vf.createLiteral( Boolean.class.cast( prop ) );
+				}
+				else if ( prop instanceof Date ) {
+					return vf.createLiteral( Date.class.cast( prop ) );
+				}
+				else if ( prop instanceof Integer ) {
+					return vf.createLiteral( Integer.class.cast( prop ) );
+				}
+				else if( prop instanceof URI ){
+					return URI.class.cast( prop );
+				}
+				return vf.createLiteral( prop.toString() );
+			}
+			case 3: {
+				if ( src.getId().isMarked( property ) ) {
+					return src.getLabel();
+				}
+				else {
 					return "";
 				}
 			}
@@ -122,6 +142,6 @@ public class SparqlResultTableModel extends AbstractTableModel {
 		else if ( 4 == col ) {
 			src.getId().mark( src.getProperty(), Boolean.class.cast( aValue ) );
 			fireTableDataChanged();
-		}		
+		}
 	}
 }

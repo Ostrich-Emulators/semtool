@@ -163,7 +163,8 @@ public class GraphToSparql {
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
 			Map<URI, Object> props = getWhereProps( edge );
 			props.remove( RDF.TYPE );
-			boolean useLinkVar = ( edge.isMarked( RDF.TYPE ) || !props.isEmpty() );
+			boolean useLinkVar = ( edge.isMarked( RDF.TYPE ) || !props.isEmpty()
+					|| edge.getType().equals( Constants.ANYNODE ) );
 
 			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
 				sb.append( buildOneConstraint( edge, en.getKey(), en.getValue(), config ) );
@@ -197,8 +198,14 @@ public class GraphToSparql {
 				}
 
 				if ( edge.isMarked( RDF.TYPE ) ) {
-					sb.append( "\n  BIND ( <" ).append( edge.getType() ).append( "> AS ?" ).
-							append( edgemap.get( RDF.TYPE ) ).append( ") " );
+					sb.append( "\n  BIND ( " );
+					if ( Constants.ANYNODE.equals( edge.getType() ) ) {
+						sb.append( linkvar );
+					}
+					else {
+						sb.append( "<" ).append( edge.getType() ).append( ">" );
+					}
+					sb.append( " AS ?" ).append( edgemap.get( RDF.TYPE ) ).append( ") " );
 				}
 
 			}
