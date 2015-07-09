@@ -147,8 +147,8 @@ List<ParamComboBox> allParamBoxes = new ArrayList<>();
 		String strLabel = e.getValue().get("label");
 		String strType = e.getValue().get("type");
 		String strQuery = e.getValue().get("query");
-NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
-strQuery = filler.fillExternalQuery(strQuery, knownValues);
+        NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
+        strQuery = NonLegacyQueryBuilder.buildNonLegacyQuery(strQuery, knownValues);
         JLabel label = new JLabel(strLabel);
         label.setFont( new Font( "Tahoma", Font.PLAIN, 12 ) );
         label.setForeground( Color.DARK_GRAY );
@@ -166,7 +166,6 @@ strQuery = filler.fillExternalQuery(strQuery, knownValues);
 	      //if it does, set it as a dependent box
 	      if(checkIfFullQuery(strQuery)){
 	          IEngine engine = DIHelper.getInstance().getRdfEngine();
-//	          NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
 	    	  
 	          if (strQuery != null && !strQuery.isEmpty()) {
 	            filler.setExternalQuery(strQuery);
@@ -265,7 +264,7 @@ allParamBoxes.add(field);
 	    List<JLabel> labels = new ArrayList<>();
 	    GridBagConstraints gbc_element;
 
-	    allParamBoxes = new ArrayList();
+	    allParamBoxes = new ArrayList<>();
 	    knownValues = new HashMap<>();
 	    
 	    //Iterate over parameters in Master Hash:
@@ -279,7 +278,7 @@ allParamBoxes.add(field);
 			String strType = e.getValue().get("type");
 			String strQuery = e.getValue().get("query");
 	        NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
-	        strQuery = filler.fillExternalQuery(strQuery, knownValues);
+	        strQuery = NonLegacyQueryBuilder.buildNonLegacyQuery(strQuery, knownValues);
 	        JLabel label = new JLabel(strLabel);
 	        label.setFont( new Font( "Tahoma", Font.PLAIN, 12 ) );
 	        label.setForeground( Color.DARK_GRAY );
@@ -424,8 +423,7 @@ allParamBoxes.add(field);
 		boolean boolQueriesFilled = false;
 		for(Map.Entry<String, Map<String, String>> e: parameterMasterHash.entrySet()){
 			String strQuery = e.getValue().get("query");
-	        NonLegacyQueryBuilder filler = new NonLegacyQueryBuilder();
-	        strQuery = filler.fillExternalQuery(strQuery, knownValues);
+	        strQuery = NonLegacyQueryBuilder.buildNonLegacyQuery(strQuery, knownValues);
 	
 	        boolean queryExists = false;
 	        for(ParamComboBox cboParam : allParamBoxes){

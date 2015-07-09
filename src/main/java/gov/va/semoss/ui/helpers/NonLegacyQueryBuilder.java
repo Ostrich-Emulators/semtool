@@ -34,8 +34,8 @@ public class NonLegacyQueryBuilder {
 	//External Parameter Query:
 	private String extQuery;
 	
-    /**   Builds selected parameter values into a non-legacy Insight query, 
-     * and returns the filled query. If the "paramHash" is empty, then the
+    /**   Builds user-selected parameter values into a non-legacy query, and 
+     * returns the filled query. If the "paramHash" is empty, then the
      * passed-in query will be returned unaltered.
      * 
      * @param query -- (String) Sparql query in the non-legacy format, where 
@@ -46,25 +46,26 @@ public class NonLegacyQueryBuilder {
      *    is a variable name occurring in "query", and the value is a String
      *    URI.
      *    
-     * @return buildNonLegacyInsightQuery -- (String) The "query" with certain
+     * @return buildNonLegacyQuery -- (String) The "query" with certain
      *    variables replaced by URI's from "paramHash". 
      *    
-     *    WARNING: A run-time exception will occur if a key from "paramHash"
-     *             occurs in the SELECT or CONSTRUCT clause.
+     *    WARNING: A run-time exception may occur if a key from "paramHash"
+     *             occurs in the SELECT clause. Wherever that key occurs,
+     *             it will be replaced by a URI.
      */
-	public static String buildNonLegacyInsightQuery(String query, Map<String, String> paramHash){
+	public static String buildNonLegacyQuery(String query, Map<String, String> paramHash){
         QueryExecutorAdapter<String> queryExer = new QueryExecutorAdapter<String>(){
- 	      @Override
- 	      public void handleTuple(BindingSet set, ValueFactory fac){}
- 	   };
+ 	        @Override
+ 	        public void handleTuple(BindingSet set, ValueFactory fac){}
+ 	    };
         queryExer.setSparql(query);
- 	   Map<String, String> map = new HashMap<>( paramHash );
- 	   for ( Map.Entry<String, String> e : map.entrySet() ) {
- 		  String key = e.getKey();
- 		  String value = e.getValue();
- 	      queryExer.bindURI(key, value);
- 	   }
- 	   return queryExer.bindAndGetSparql();
+ 	    Map<String, String> map = new HashMap<>( paramHash );
+ 	    for ( Map.Entry<String, String> e : map.entrySet() ) {
+ 		   String key = e.getKey();
+ 		   String value = e.getValue();
+ 	       queryExer.bindURI(key, value);
+ 	    }
+ 	    return queryExer.bindAndGetSparql();
  	}
 	
 	/**   Fills a Parameter combo-box with labels (for display) and associated URIs.
@@ -109,32 +110,6 @@ public class NonLegacyQueryBuilder {
 	    this.extQuery = query;
 	 }
 	
-	 /**   Fills non-legacy parameter queries with URI's that depend upon selections made
-	  * from other parameter queries. 
-	  * 
-	  * NOTE: String substitution is performed on variable names, so the variables replaced
-	  *       must not appear in the SELECT clause.
-	  * 
-	  * @param strQuery -- (String) A non-legacy parameter query, containing a variable in 
-	  *    the WHERE clause that must be replaced by a URI, consistent with a selection from
-	  *    another parameter drop-down.
-	  *    
-	  * @param mapParameterSelections -- (Map<String, String>) A collection of parameter name
-	  *    and URI pairs, corresponding to the current parameter drop-down selections.
-	  *    
-	  * @return fillExternalQuery -- (String) The URI substitution described above.
-	  */
-	 public String fillExternalQuery(String strQuery, Map<String, String> mapParameterSelections){
-		 String strReturnValue = strQuery;
-
-		 for(Map.Entry<String, String> entry : mapParameterSelections.entrySet()){ 
-			 String strTarget = "?"+entry.getKey();
-			 if(strReturnValue.contains(strTarget) == true){
-				 strReturnValue = strReturnValue.replace(strTarget, "<" + entry.getValue() + ">");
-			 }
-		 }	
-		 return strReturnValue;
-	 }
 	 
 	/**   Fetches data for an Insight Parameter combo-box, either from the Insight's BIND
 	 * statement (legacy), from an externally defined Type, or from an externally defined
