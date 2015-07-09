@@ -5,6 +5,9 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
+import gov.va.semoss.model.vocabulary.SP;
+import gov.va.semoss.model.vocabulary.SPIN;
+import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
@@ -19,7 +22,9 @@ import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -27,6 +32,7 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
@@ -40,292 +46,321 @@ import org.openrdf.sail.memory.MemoryStore;
  * @author ryan
  */
 public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
-    implements WriteableInsightManager {
+		implements WriteableInsightManager {
 
-  private static final Logger log
-      = Logger.getLogger( WriteableInsightManagerImpl.class );
-  private boolean haschanges = false;
-  private final UriSanitizer sanitizer = new DeterministicSanitizer();
-  private final Collection<Statement> initialStatements = new ArrayList<>();
-  
-  private WriteablePerspectiveTabImpl wpt;
-  private WriteableInsightTabImpl wit;
-  private WriteableParameterTabImpl wprmt;
-  
-  public WriteableInsightManagerImpl( InsightManager im ) {
-    super( new SailRepository( new ForwardChainingRDFSInferencer( new MemoryStore() ) ) );
+	private static final Logger log
+			= Logger.getLogger( WriteableInsightManagerImpl.class );
+	private boolean haschanges = false;
+	private final UriSanitizer sanitizer = new DeterministicSanitizer();
+	private final Collection<Statement> initialStatements = new ArrayList<>();
 
-    try {
-      initialStatements.addAll( im.getStatements() );
-      getRawConnection().add( initialStatements );
-    }
-    catch ( Exception re ) {
-      log.error( re, re );
-    }
-    
-    wpt = new WriteablePerspectiveTabImpl(this);
-    wit = new WriteableInsightTabImpl(this);
-    wprmt = new WriteableParameterTabImpl(this);
-    //Get current repository from the "InsightManagerImpl":
-    //repo = im.getRepository();    
-  }
+	private final WriteablePerspectiveTabImpl wpt;
+	private final WriteableInsightTabImpl wit;
+	private final WriteableParameterTabImpl wprmt;
 
-  @Override
-  public boolean hasCommittableChanges() {
-    return haschanges;
-  }
+	public WriteableInsightManagerImpl( InsightManager im ) {
+		super( new SailRepository( new ForwardChainingRDFSInferencer( new MemoryStore() ) ) );
 
-  @Override
-  public void dispose() {
-    RepositoryConnection rc = getRawConnection();
-    try {
-      rc.begin();
-      rc.clear();
-      rc.add( initialStatements );
-      rc.commit();
-    }
-    catch ( RepositoryException re ) {
-      log.error( re, re );
-      try {
-        rc.rollback();
-      }
-      catch ( Exception e ) {
-        log.warn( e, e );
-      }
-    }
-  }
+		try {
+			initialStatements.addAll( im.getStatements() );
+			getRawConnection().add( initialStatements );
+		}
+		catch ( Exception re ) {
+			log.error( re, re );
+		}
 
-  @Override
-  public URI add( Insight ins ) {
-    haschanges = true;
-    throw new UnsupportedOperationException( "Not supported yet." );
-  }
+		wpt = new WriteablePerspectiveTabImpl( this );
+		wit = new WriteableInsightTabImpl( this );
+		wprmt = new WriteableParameterTabImpl( this );
+		//Get current repository from the "InsightManagerImpl":
+		//repo = im.getRepository();    
+	}
 
-  @Override
-  public void remove( Insight ins ) {
-    haschanges = true;
-    RepositoryConnection rc = getRawConnection();
-    try {
-      rc.begin();
-      rc.clear( ins.getId(), null, null );
-      rc.commit();
-    }
-    catch ( RepositoryException re ) {
-      log.error( re, re );
-      try {
-        rc.rollback();
-      }
-      catch ( Exception e ) {
-        log.warn( e, e );
-      }
-    }
-  }
+	@Override
+	public boolean hasCommittableChanges() {
+		return haschanges;
+	}
 
-  @Override
-  public void update( Insight ins ) {
-    haschanges = true;
-    throw new UnsupportedOperationException( "Not supported yet." );
-  }
+	@Override
+	public void dispose() {
+		RepositoryConnection rc = getRawConnection();
+		try {
+			rc.begin();
+			rc.clear();
+			rc.add( initialStatements );
+			rc.commit();
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception e ) {
+				log.warn( e, e );
+			}
+		}
+	}
 
-  @Override
-  public URI add( Perspective p ) {
-    haschanges = true;
-    String clean = sanitizer.sanitize( p.getLabel() );
-    RepositoryConnection rc = getRawConnection();
+	@Override
+	public URI add( Insight ins ) {
+		haschanges = true;
+		String clean = sanitizer.sanitize( ins.getLabel() );
+		RepositoryConnection rc = getRawConnection();
 
-    ValueFactory vf = rc.getValueFactory();
-    URI perspectiveURI = vf.createURI( VAS.NAMESPACE, clean );
-    p.setUri( perspectiveURI );
-    try {
-      rc.begin();
-      rc.add( perspectiveURI, RDF.TYPE, VAS.Perspective );
-      rc.add( perspectiveURI, RDFS.LABEL, vf.createLiteral( p.getLabel() ) );
-      rc.commit();
-    }
-    catch ( Exception e ) {
-      log.error( e, e );
-      try {
-        rc.rollback();
-      }
-      catch ( Exception ee ) {
-        log.warn( ee, ee );
-      }
-    }
-    return perspectiveURI;
-  }
+		ValueFactory vf = rc.getValueFactory();
+		URI newId = vf.createURI( VAS.NAMESPACE, clean );
+		URI bodyId = vf.createURI( VAS.NAMESPACE, clean + "-" + ( new Date().getTime() ) );
+		ins.setId( newId );
+		try {
+			rc.begin();
+			rc.add( newId, RDF.TYPE, VAS.insight );
+			rc.add( newId, RDFS.LABEL, vf.createLiteral( ins.getLabel() ) );
+			rc.add( newId, UI.dataView, vf.createURI( "vas:", ins.getOutput() ) );
 
-  @Override
-  public void remove( Perspective p ) {
-    haschanges = true;
-    RepositoryConnection rc = getRawConnection();
-    try {
-      rc.begin();
-      rc.remove( p.getUri(), null, null );
-      rc.commit();
-    }
-    catch ( Exception e ) {
-      log.error( e, e );
-      try {
-        rc.rollback();
-      }
-      catch ( Exception ee ) {
-        log.warn( ee, ee );
-      }
-    }
-  }
+			rc.add( newId, DCTERMS.CREATED, vf.createLiteral( new Date() ) );
+			rc.add( newId, DCTERMS.MODIFIED, vf.createLiteral( new Date() ) );
+			rc.add( newId, DCTERMS.CREATOR,
+					vf.createLiteral( userInfoFromToolPreferences( "" ) ) );
+			rc.add( newId, SPIN.body, bodyId );
 
-  @Override
-  public void update( Perspective p ) {
-    haschanges = true;
-    RepositoryConnection rc = getRawConnection();
+			String sparql = ins.getSparql();
+			rc.add( bodyId, SP.text, vf.createLiteral( sparql ) );
+			rc.add( bodyId, RDF.TYPE, SP.Select );
 
-    ValueFactory vf = rc.getValueFactory();
-    try {
-      rc.begin();
-      rc.remove( p.getUri(), RDFS.LABEL, null );
-      rc.add( p.getUri(), RDFS.LABEL, vf.createLiteral( p.getLabel() ) );
-      rc.commit();
-    }
-    catch ( Exception e ) {
-      log.error( e, e );
-      try {
-        rc.rollback();
-      }
-      catch ( Exception ee ) {
-        log.warn( ee, ee );
-      }
-    }
-  }
+			rc.commit();
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception ee ) {
+				log.warn( ee, ee );
+			}
+		}
+		return newId;
+	}
 
-  @Override
-  public void setInsights( Perspective p, List<Insight> insights ) {
-    haschanges = true;
-    RepositoryConnection rc = getRawConnection();
+	@Override
+	public void remove( Insight ins ) {
+		haschanges = true;
+		RepositoryConnection rc = getRawConnection();
+		try {
+			rc.begin();
+			rc.clear( ins.getId(), null, null );
+			rc.commit();
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception e ) {
+				log.warn( e, e );
+			}
+		}
+	}
 
-    try {
-      rc.begin();
-      rc.remove(p.getUri(), VAS.insight, null );
-      for ( Insight i : insights ) {
-        rc.add(p.getUri(), VAS.insight, i.getId() );
-      }
-      rc.commit();
-    }
-    catch ( Exception e ) {
-      log.error( e, e );
+	@Override
+	public void update( Insight ins ) {
+		haschanges = true;
+		throw new UnsupportedOperationException( "Not supported yet." );
+	}
 
-      try {
-        rc.rollback();
-      }
-      catch ( Exception ee ) {
-        log.warn( ee, ee );
-      }
-    }
-  }
-  
+	@Override
+	public URI add( Perspective p ) {
+		haschanges = true;
+		String clean = sanitizer.sanitize( p.getLabel() );
+		RepositoryConnection rc = getRawConnection();
 
-  //We do not want to release the this object, because the connection will
-  //be closed to the main database.--TKC, 16 Mar 2015.
-  @Override
-  public void release() {
+		ValueFactory vf = rc.getValueFactory();
+		URI perspectiveURI = vf.createURI( VAS.NAMESPACE, clean );
+		p.setUri( perspectiveURI );
+		try {
+			rc.begin();
+			rc.add( perspectiveURI, RDF.TYPE, VAS.Perspective );
+			rc.add( perspectiveURI, RDFS.LABEL, vf.createLiteral( p.getLabel() ) );
+			rc.commit();
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception ee ) {
+				log.warn( ee, ee );
+			}
+		}
+		return perspectiveURI;
+	}
+
+	@Override
+	public void remove( Perspective p ) {
+		haschanges = true;
+		RepositoryConnection rc = getRawConnection();
+		try {
+			rc.begin();
+			rc.remove( p.getUri(), null, null );
+			rc.commit();
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception ee ) {
+				log.warn( ee, ee );
+			}
+		}
+	}
+
+	@Override
+	public void update( Perspective p ) {
+		haschanges = true;
+		RepositoryConnection rc = getRawConnection();
+
+		ValueFactory vf = rc.getValueFactory();
+		try {
+			rc.begin();
+			rc.remove( p.getUri(), RDFS.LABEL, null );
+			rc.add( p.getUri(), RDFS.LABEL, vf.createLiteral( p.getLabel() ) );
+			rc.commit();
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception ee ) {
+				log.warn( ee, ee );
+			}
+		}
+	}
+
+	@Override
+	public void setInsights( Perspective p, List<Insight> insights ) {
+		haschanges = true;
+
+		List<Insight> current = getInsights( p );
+		insights.removeAll( current );
+		if( insights.isEmpty() ){
+			return;
+		}
+		
+		wit.saveInsight( current, insights.get( 0 ), Arrays.asList( p ), new ArrayList<>() );
+	}
+
+	//We do not want to release the this object, because the connection will
+	//be closed to the main database.--TKC, 16 Mar 2015.
+	@Override
+	public void release() {
 //    dispose();
 //    super.release();
-  }
+	}
 
-  @Override
-  public void addRawStatements( Collection<Statement> stmts ) throws RepositoryException {
-    haschanges = true;
-    RepositoryConnection rc = getRawConnection();
+	@Override
+	public void addRawStatements( Collection<Statement> stmts ) throws RepositoryException {
+		haschanges = true;
+		RepositoryConnection rc = getRawConnection();
 
-    try {
-      rc.begin();
-      rc.add( stmts );
-      rc.commit();
-    }
-    catch ( RepositoryException re ) {
-      try {
-        rc.rollback();
-      }
-      catch ( Exception e ) {
-        log.warn( e, e );
-      }
-      throw re;
-    }
-  }
+		try {
+			rc.begin();
+			rc.add( stmts );
+			rc.commit();
+		}
+		catch ( RepositoryException re ) {
+			try {
+				rc.rollback();
+			}
+			catch ( Exception e ) {
+				log.warn( e, e );
+			}
+			throw re;
+		}
+	}
 
-  @Override
-  public void clear() {
-    RepositoryConnection rc = getRawConnection();
+	@Override
+	public void clear() {
+		RepositoryConnection rc = getRawConnection();
 
-    try {
-      rc.begin();
-      rc.clear();
-      rc.commit();
-    }
-    catch ( RepositoryException re ) {
-      log.error( re, re );
-      try {
-        rc.rollback();
-      }
-      catch ( Exception e ) {
-        log.warn( e, e );
-      }
-    }
-  }
-  
-  /**   Provides access to methods that persist changes to "Perspective" tab data.
-   * 
-   * @return getWriteablePerspectiveTab -- (WriteablePerspectiveTab)
-   *    Methods described above.
-   */
-  @Override
-  public WriteablePerspectiveTab getWriteablePerspectiveTab(){
-	  return wpt;
-  }
-  
-  /**   Provides access to methods that persist changes to "Insight" tab data.
-   * 
-   * @return getWriteableInsightTab -- (WriteableInsightTab)
-   *    Methods described above.
-   */
-  @Override
-  public WriteableInsightTab getWriteableInsightTab(){
-	  return wit;
-  }
- 
-  /**   Provides access to methods that persist changes to "Parameter" tab data.
-   * 
-   * @return getWriteableParameterTab -- (WriteableParameterTab)
-   *    Methods described above.
-   */
-  @Override
-  public WriteableParameterTab getWriteableParameterTab(){
-	  return wprmt;
-  }
-  
-  /**   Extracts from V-CAMP/SEMOSS preferences the user's name, email, and organization,
-   * and returns a string of user-info for saving with Insights, based upon these. If these 
-   * preferences have not been set, then the passe-in value is returned.
-   * 
-   * @param strOldUserInfo -- (String) User-info that has been displayed from a database fetch.
-   * 
-   * @return userInfoFromToolPreferences -- (String) Described above.
-   */
-  @Override
-  public String userInfoFromToolPreferences(String strOldUserInfo){
-	  String userInfo = strOldUserInfo;
-	  Preferences prefs = Preferences.userNodeForPackage(SemossPreferences.class);		
-	  String userPrefName = prefs.get(Constants.USERPREF_NAME, "").trim();
-	  String userPrefEmail = prefs.get(Constants.USERPREF_EMAIL, "").trim();
-	  userPrefEmail = (userPrefEmail.trim().equals("") == false) ? " <" + userPrefEmail.trim() + ">" : "";
-	  String userPrefOrg = prefs.get(Constants.USERPREF_ORG, "").trim();
-	  if(userPrefName.equals("") == false || userPrefEmail.equals("") == false || userPrefOrg.equals("") == false){
-		 if(userPrefName.equals("") || userPrefOrg.equals("")){
-			 userInfo = userPrefName + userPrefEmail + " " + userPrefOrg;
-		 }else{
-			 userInfo = userPrefName + userPrefEmail + ", " + userPrefOrg;
-		 }
-	  }
-	  return userInfo;
-  }
-    
+		try {
+			rc.begin();
+			rc.clear();
+			rc.commit();
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception e ) {
+				log.warn( e, e );
+			}
+		}
+	}
+
+	/**
+	 * Provides access to methods that persist changes to "Perspective" tab data.
+	 *
+	 * @return getWriteablePerspectiveTab -- (WriteablePerspectiveTab) Methods
+	 * described above.
+	 */
+	@Override
+	public WriteablePerspectiveTab getWriteablePerspectiveTab() {
+		return wpt;
+	}
+
+	/**
+	 * Provides access to methods that persist changes to "Insight" tab data.
+	 *
+	 * @return getWriteableInsightTab -- (WriteableInsightTab) Methods described
+	 * above.
+	 */
+	@Override
+	public WriteableInsightTab getWriteableInsightTab() {
+		return wit;
+	}
+
+	/**
+	 * Provides access to methods that persist changes to "Parameter" tab data.
+	 *
+	 * @return getWriteableParameterTab -- (WriteableParameterTab) Methods
+	 * described above.
+	 */
+	@Override
+	public WriteableParameterTab getWriteableParameterTab() {
+		return wprmt;
+	}
+
+	/**
+	 * Extracts from V-CAMP/SEMOSS preferences the user's name, email, and
+	 * organization, and returns a string of user-info for saving with Insights,
+	 * based upon these. If these preferences have not been set, then the passe-in
+	 * value is returned.
+	 *
+	 * @param strOldUserInfo -- (String) User-info that has been displayed from a
+	 * database fetch.
+	 *
+	 * @return userInfoFromToolPreferences -- (String) Described above.
+	 */
+	@Override
+	public String userInfoFromToolPreferences( String strOldUserInfo ) {
+		String userInfo = strOldUserInfo;
+		Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
+		String userPrefName = prefs.get( Constants.USERPREF_NAME, "" ).trim();
+		String userPrefEmail = prefs.get( Constants.USERPREF_EMAIL, "" ).trim();
+		userPrefEmail = ( userPrefEmail.trim().equals( "" ) == false )
+				? " <" + userPrefEmail.trim() + ">" : "";
+		String userPrefOrg = prefs.get( Constants.USERPREF_ORG, "" ).trim();
+		if ( userPrefName.equals( "" ) == false || userPrefEmail.equals( "" ) == false || userPrefOrg.equals( "" ) == false ) {
+			if ( userPrefName.equals( "" ) || userPrefOrg.equals( "" ) ) {
+				userInfo = userPrefName + userPrefEmail + " " + userPrefOrg;
+			}
+			else {
+				userInfo = userPrefName + userPrefEmail + ", " + userPrefOrg;
+			}
+		}
+		return userInfo;
+	}
+
 }//End WriteableInsightManager class.

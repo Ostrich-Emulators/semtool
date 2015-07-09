@@ -350,9 +350,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	public static String processNamespaces( String rawsparql ) {
+	public static String processNamespaces( String rawsparql,
+			Map<String, String> customNamespaces ) {
 		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
 		namespaces.putAll( Utility.DEFAULTNAMESPACES );
+		namespaces.putAll( customNamespaces );
 
 		Set<String> existingNamespaces = new HashSet<>();
 		if ( rawsparql.toUpperCase().contains( "PREFIX" ) ) {
@@ -381,7 +383,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			MalformedQueryException, QueryEvaluationException {
 
 		String sparql = processNamespaces( dobindings ? query.getSparql()
-				: query.bindAndGetSparql() );
+				: query.bindAndGetSparql(), query.getNamespaces() );
 
 		ValueFactory vfac = new ValueFactoryImpl();
 		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql );
@@ -417,7 +419,8 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	public static Model getConstruct( QueryExecutor<Model> query, RepositoryConnection rc )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 
-		String sparql = processNamespaces( query.bindAndGetSparql() );
+		String sparql
+				= processNamespaces( query.bindAndGetSparql(), query.getNamespaces() );
 
 		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql );
 		tq.setIncludeInferred( query.usesInferred() );

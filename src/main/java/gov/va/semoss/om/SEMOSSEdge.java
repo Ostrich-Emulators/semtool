@@ -19,8 +19,10 @@
  */
 package gov.va.semoss.om;
 
+import gov.va.semoss.util.UriBuilder;
 import java.awt.Color;
 
+import java.util.Objects;
 import org.openrdf.model.URI;
 
 /**
@@ -44,8 +46,12 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		inVertex = _inVertex;
 		outVertex = _outVertex;
 
-		inVertex.addInEdge( this );
-		outVertex.addOutEdge( this );
+		if ( null != inVertex ) {
+			inVertex.addInEdge( this );
+		}
+		if ( null != outVertex ) {
+			outVertex.addOutEdge( this );
+		}
 		setColor( Color.DARK_GRAY );
 	}
 
@@ -64,12 +70,38 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		return outVertex;
 	}
 
-	public String getName() {
-		return getLabel();
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 97 * hash + Objects.hashCode( this.inVertex );
+		hash = 97 * hash + Objects.hashCode( this.outVertex );
+		hash = 97 * hash + super.hashCode();
+		return hash;
 	}
 
-	public void setName( String _name ) {
-		setLabel( _name );
+	@Override
+	public boolean equals( Object obj ) {
+		if ( obj == null ) {
+			return false;
+		}
+		if ( getClass() != obj.getClass() ) {
+			return false;
+		}
+		final SEMOSSEdge other = (SEMOSSEdge) obj;
+		if ( !Objects.equals( this.getURI(), other.getURI() ) ) {
+			return false;
+		}
+		if ( !Objects.equals( this.inVertex, other.inVertex ) ) {
+			return false;
+		}
+		if ( !Objects.equals( this.outVertex, other.outVertex ) ) {
+			return false;
+		}
+		if ( !Objects.equals( this.outVertex, other.outVertex ) ) {
+			return false;
+		}
+		
+		return true;
 	}
 
 	@Override

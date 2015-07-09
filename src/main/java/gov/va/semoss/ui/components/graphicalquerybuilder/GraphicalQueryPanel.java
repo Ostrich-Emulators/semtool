@@ -107,6 +107,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		sparqlarea = ste;
 	}
 
+	public String getQuery() {
+		return ( null == sparqlarea ? "" : sparqlarea.getText() );
+	}
+
 	public void setEngine( IEngine eng ) {
 		engine = eng;
 
@@ -294,7 +298,8 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private void updateSparql() {
 		if ( null != sparqlarea ) {
 			String sparql = ( 0 == graph.getVertexCount()
-					? "" : new GraphToSparql( getEngine().getNamespaces() ).select( graph ) );
+					? ""
+					: new GraphToSparql( getEngine().getNamespaces() ).select( graph ) );
 			sparqlarea.setText( sparql );
 		}
 	}

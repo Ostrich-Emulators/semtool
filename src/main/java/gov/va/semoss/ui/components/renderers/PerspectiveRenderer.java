@@ -29,7 +29,11 @@ public class PerspectiveRenderer extends DefaultListCellRenderer {
   public PerspectiveRenderer() {
   }
 
-  public void setEngine( IEngine eng ) {
+  public PerspectiveRenderer( IEngine eng ) {
+		setEngine( eng );
+  }
+
+	public void setEngine( IEngine eng ) {
     engine = ( null == eng ? null : eng.getInsightManager() );
     nameCache.clear();
   }

@@ -46,6 +46,7 @@ import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+import java.util.HashMap;
 
 
 public class  InsightManagerController implements Initializable{
@@ -992,7 +993,7 @@ public class  InsightManagerController implements Initializable{
 				Repository repo = engine.getInsightManager().getRepository();
 				RepositoryConnection rc = null;
 			    rc = repo.getConnection();
-                strQuery = AbstractSesameEngine.processNamespaces(strQuery);
+                strQuery = AbstractSesameEngine.processNamespaces(strQuery, new HashMap<>());
 				rc.prepareGraphQuery(QueryLanguage.SPARQL, strQuery);
 			}else{
 				exception += "   The query must begin with SELECT or CONSTRUCT.\n";

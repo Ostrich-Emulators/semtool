@@ -96,7 +96,7 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 		}
 
 		for ( SEMOSSEdge v : edges ) {
-			Value subj = vf.createLiteral( v.getName() );
+			Value subj = vf.createLiteral( v.getLabel() );
 			Object o = v.getProperty( Constants.EDGE_NAME );
 			if ( null != o ) {
 				Value pred = vf.createLiteral( "Name" );

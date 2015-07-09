@@ -40,6 +40,7 @@ public abstract class QueryExecutorAdapter<T> implements QueryExecutor<T> {
 	private final Map<String, URI> umap = new HashMap<>();
 	private final Map<String, Resource> rmap = new HashMap<>();
 	private final List<String> bindNames = new ArrayList<>();
+	private final Map<String, String> namespaces = new HashMap<>();
 	private String sparql;
 	protected T result;
 	private boolean infer = false;
@@ -54,6 +55,44 @@ public abstract class QueryExecutorAdapter<T> implements QueryExecutor<T> {
 	@Override
 	public void setSparql( String sparq ) {
 		sparql = sparq;
+	}
+
+	/**
+	 * Gets a reference to this Executor's namespace map.
+	 *
+	 * @return The reference (not a copy) to the namespace map
+	 */
+	@Override
+	public Map<String, String> getNamespaces() {
+		return namespaces;
+	}
+
+	/**
+	 * Sets custom namespaces for use with the query. These namespaces take
+	 * precedence over system- and user- defined namespaces, but not over
+	 * namespaces explicitly set in the query itself.
+	 *
+	 * @param ns
+	 */
+	@Override
+	public void setNamespaces( Map<String, String> ns ) {
+		namespaces.clear();
+		addNamespaces( ns );
+	}
+
+	@Override
+	public void addNamespaces( Map<String, String> ns ) {
+		namespaces.putAll( ns );
+	}
+
+	@Override
+	public void addNamespace( String prefix, String namespace ) {
+		namespaces.put( prefix, namespace );
+	}
+
+	@Override
+	public void removeNamespace( String prefix ) {
+		namespaces.remove( prefix );
 	}
 
 	@Override

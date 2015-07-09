@@ -49,9 +49,17 @@ import org.eclipse.jetty.server.Server;
 import org.openrdf.model.Statement;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
+import gov.va.semoss.rdf.engine.util.StatementSorter;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
+import org.apache.commons.io.FileUtils;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -192,6 +200,8 @@ public class BigDataEngine extends AbstractSesameEngine {
 			BigdataSailRepositoryConnection repoc = insightrepo.getConnection();
 			// 3
 			log.debug( "writing " + newstmts.size() + " statements to on-disk insight kb" );
+			// sort the statements so a later export looks nice (totally unnecessary,
+			// but troubleshooting is easier)
 			repoc.begin();
 			repoc.clear();
 			repoc.add( newstmts );
@@ -227,8 +237,10 @@ public class BigDataEngine extends AbstractSesameEngine {
 			public void commit() {
 				if ( hasCommittableChanges() ) {
 					try {
-						Collection<Statement> stmts = getStatements();
-						copyInsightsToDisk( getStatements() ); // from the WriteableInsightManager
+						List<Statement> stmts = new ArrayList<>( getStatements() );
+						Collections.sort( stmts, new StatementSorter() );
+
+						copyInsightsToDisk( stmts ); // from the WriteableInsightManager
 
 						// refresh the insight engine's KB
 						RepositoryConnection src = insightEngine.getRawConnection();
@@ -242,6 +254,16 @@ public class BigDataEngine extends AbstractSesameEngine {
 					}
 				}
 
+				if ( log.isTraceEnabled() ) {
+					File dumpfile
+							= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
+					try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
+						insightEngine.getRawConnection().export( new TurtleWriter( w ) );
+					}
+					catch ( Exception ioe ) {
+						log.warn( ioe, ioe );
+					}
+				}
 			}
 		};
 	}
