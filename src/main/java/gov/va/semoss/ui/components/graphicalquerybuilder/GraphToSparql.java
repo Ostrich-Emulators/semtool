@@ -162,8 +162,8 @@ public class GraphToSparql {
 
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
 			Map<URI, Object> props = getWhereProps( edge );
-			boolean dotype = props.containsKey( RDF.TYPE );
 			props.remove( RDF.TYPE );
+			boolean useLinkVar = ( edge.isMarked( RDF.TYPE ) || !props.isEmpty() );
 
 			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
 				sb.append( buildOneConstraint( edge, en.getKey(), en.getValue(), config ) );
@@ -181,19 +181,20 @@ public class GraphToSparql {
 			String tovar = "?" + dstmap.get( RDF.SUBJECT );
 
 			sb.append( "  " ).append( fromvar ).append( " " );
-			if ( Constants.ANYNODE.equals( edge.getType() ) || !props.isEmpty() ) {
+			if ( useLinkVar ) {
 				sb.append( linkvar ).append( " " );
 			}
 			else {
 				sb.append( "<" ).append( edge.getType() ).append( "> " );
-				dotype = false;
 			}
 
 			sb.append( tovar ).append( " " );
 
-			if ( dotype ) {
-				sb.append( "BIND ( <" ).append( edge.getType() ).append( "> AS " ).
-						append( linkvar ).append( " ) " );
+			if ( useLinkVar ) {
+				if ( !edge.getType().equals( Constants.ANYNODE ) ) {
+					sb.append( "BIND ( <" ).append( edge.getType() ).append( "> AS " ).
+							append( linkvar ).append( " ) " );
+				}
 
 				if ( edge.isMarked( RDF.TYPE ) ) {
 					sb.append( "\n  BIND ( <" ).append( edge.getType() ).append( "> AS ?" ).
