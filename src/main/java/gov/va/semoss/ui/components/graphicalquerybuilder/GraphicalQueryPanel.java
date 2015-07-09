@@ -34,6 +34,7 @@ import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.awt.Color;
@@ -45,8 +46,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -55,6 +60,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  *
@@ -73,8 +79,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private final Layout<SEMOSSVertex, SEMOSSEdge> vizlayout = new StaticLayout<>( graph );
 	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view
 			= new VisualizationViewer<>( vizlayout );
-	private final VertexFactory vfac = new VertexFactory();
-	private final EdgeFactory efac = new EdgeFactory();
+	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config
+			= new MultiMap<>();
+	private final VertexFactory vfac = new VertexFactory( config );
+	private final EdgeFactory efac = new EdgeFactory( config );
 	private GqbLabelTransformer<SEMOSSVertex> vlt;
 	private GqbLabelTransformer<SEMOSSEdge> elt;
 	private SyntaxTextEditor sparqlarea;
@@ -264,6 +272,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	}
 
 	public void clear() {
+		config.clear();
 		List<SEMOSSVertex> verts = new ArrayList<>( graph.getVertices() );
 		for ( SEMOSSVertex v : verts ) {
 			graph.removeVertex( v );
@@ -287,6 +296,24 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		return engine;
 	}
 
+	/**
+	 * Gets a reference to this query's graph
+	 *
+	 * @return
+	 */
+	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
+		return graph;
+	}
+
+	/**
+	 * Gets a reference to the sparql configs for this query
+	 *
+	 * @return
+	 */
+	public MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> getSparqlConfigs() {
+		return config;
+	}
+
 	private void addMouse() {
 		EditingModalGraphMouse gm
 				= new EditingModalGraphMouse( view.getRenderContext(), vfac, efac );
@@ -297,10 +324,86 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 	private void updateSparql() {
 		if ( null != sparqlarea ) {
+			updateSparqlConfigs();
 			String sparql = ( 0 == graph.getVertexCount()
 					? ""
-					: new GraphToSparql( getEngine().getNamespaces() ).select( graph ) );
+					: new GraphToSparql( getEngine().getNamespaces() ).select( graph, config ) );
 			sparqlarea.setText( sparql );
+		}
+	}
+
+	private int findNextId( String nodeOrLink ) {
+		int maxid = -1;
+		Pattern pat = Pattern.compile( nodeOrLink + "([0-9]+)$" );
+
+		for ( Map.Entry<AbstractNodeEdgeBase, List<SparqlResultConfig>> en : config.entrySet() ) {
+			for ( SparqlResultConfig src : en.getValue() ) {
+				Matcher m = pat.matcher( src.getLabel() );
+				if ( m.matches() ) {
+					String val = m.group( 1 );
+					int id = Integer.parseInt( val );
+
+					if ( id > maxid ) {
+						id = maxid;
+					}
+				}
+			}
+		}
+
+		return maxid + 1;
+	}
+
+	private void updateSparqlConfigs() {
+		int nextnodeid = findNextId( "node" );
+		int nextlinkid = findNextId( "link" );
+		int nextobjid = findNextId( "obj" );
+
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			if ( !config.containsKey( v ) ) {
+				config.add( v, new SparqlResultConfig( v, RDF.SUBJECT,
+						"node" + ( nextnodeid++ ) ) );
+			}
+		}
+
+		for ( SEMOSSEdge v : graph.getEdges() ) {
+			if ( !config.containsKey( v ) ) {
+				config.add( v, new SparqlResultConfig( v, RDF.SUBJECT,
+						"link" + ( nextlinkid++ ) ) );
+			}
+		}
+
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			List<SparqlResultConfig> vals = config.getNN( v );
+
+			Set<URI> seen = new HashSet<>();
+			for ( SparqlResultConfig src : vals ) {
+				seen.add( src.getProperty() );
+			}
+
+			// skip properties if we already have a property label for it
+			Set<URI> todo = new HashSet<>( v.getProperties().keySet() );
+			todo.removeAll( seen );
+
+			for ( URI prop : todo ) {
+				vals.add( new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) ) );
+			}
+		}
+
+		for ( SEMOSSEdge v : graph.getEdges() ) {
+			List<SparqlResultConfig> vals = config.getNN( v );
+
+			Set<URI> seen = new HashSet<>();
+			for ( SparqlResultConfig src : vals ) {
+				seen.add( src.getProperty() );
+			}
+
+			// skip properties if we already have a property label for it
+			Set<URI> todo = new HashSet<>( v.getProperties().keySet() );
+			todo.removeAll( seen );
+
+			for ( URI prop : todo ) {
+				vals.add( new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) ) );
+			}
 		}
 	}
 

@@ -20,7 +20,6 @@ import org.openrdf.model.URI;
  * @author ryan
  */
 public class OneVariableDialogItem extends AbstractAction {
-
 	private final URI property;
 	private final AbstractNodeEdgeBase node;
 	private final String dlgtext;
@@ -69,7 +68,7 @@ public class OneVariableDialogItem extends AbstractAction {
 		}
 		else {
 			if ( null == property ) {
-				newval = ConstraintPanel.getValue( dlgtext, null, 	labels );
+				newval = ConstraintPanel.getValue( dlgtext, null, labels );
 			}
 			else {
 				newval = ConstraintPanel.getValue( property, dlgtext, URI.class.cast( currval ),

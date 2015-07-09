@@ -10,6 +10,7 @@ import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,8 +30,6 @@ import org.openrdf.model.vocabulary.XMLSchema;
  */
 public class GraphToSparql {
 
-	private final Map<AbstractNodeEdgeBase, Integer> ids = new HashMap<>();
-	private final Map<NodeType, Integer> valIds = new HashMap<>();
 	private final Map<String, String> namespaces;
 
 	public GraphToSparql() {
@@ -47,31 +46,27 @@ public class GraphToSparql {
 	}
 
 	public String construct( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		assignIds( graph );
-		// return convert( graph, false );
 		throw new UnsupportedOperationException( "not yet implemented" );
 	}
 
-	public String select( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		assignIds( graph );
-		return buildSelect( graph ) + buildWhere( graph );
+	public String select( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
+		return buildSelect( graph, config ) + buildWhere( graph, config );
 	}
 
-	private String buildSelect( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+	private String buildSelect( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
 		StringBuilder select = new StringBuilder( "SELECT" );
 		List<AbstractNodeEdgeBase> todo = new ArrayList<>();
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
 		for ( AbstractNodeEdgeBase v : todo ) {
+			Map<URI, String> valIds = SparqlResultConfig.asMap( config.getNN( v ) );
 			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
-				int objid = valIds.get( new NodeType( v.getURI(), en.getKey() ) );
-				String objvar = "obj" + objid;
-
 				if ( v.isMarked( en.getKey() ) ) {
 					// special handling when the user wants a URI back
-					select.append( " ?" ).append( en.getKey().equals( RDF.SUBJECT )
-							? "node" + ids.get( v ) : objvar );
+					select.append( " ?" ).append( valIds.get( en.getKey() ) );
 				}
 			}
 		}
@@ -93,12 +88,14 @@ public class GraphToSparql {
 		return props;
 	}
 
-	private String buildWhere( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+	private String buildWhere( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
 		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
 		for ( AbstractNodeEdgeBase v : graph.getVertices() ) {
+			Map<URI, String> labelmap = SparqlResultConfig.asMap( config.getNN( v ) );
 			Map<URI, Object> props = getWhereProps( v );
 
-			String nodevar = "?node" + ids.get( v );
+			String nodevar = "?" + labelmap.get( RDF.SUBJECT );
 			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
 				URI type = en.getKey();
 				Object val = en.getValue();
@@ -115,8 +112,7 @@ public class GraphToSparql {
 				sb.append( " " );
 
 				if ( v.isMarked( type ) ) {
-					int objid = valIds.get( new NodeType( v.getURI(), type ) );
-					String objvar = "?obj" + objid;
+					String objvar = "?" + labelmap.get( type );
 					sb.append( objvar );
 					if ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
 						sb.append( " VALUES " ).append( objvar ).append( " { " );
@@ -157,9 +153,13 @@ public class GraphToSparql {
 			SEMOSSVertex src = graph.getSource( edge );
 			SEMOSSVertex dst = graph.getDest( edge );
 
-			String fromvar = "?node" + ids.get( src );
-			String linkvar = "?link" + ids.get( edge );
-			String tovar = "?node" + ids.get( dst );
+			Map<URI, String> edgemap = SparqlResultConfig.asMap( config.getNN( edge ) );
+			Map<URI, String> srcmap = SparqlResultConfig.asMap( config.getNN( src ) );
+			Map<URI, String> dstmap = SparqlResultConfig.asMap( config.getNN( dst ) );
+
+			String fromvar = "?" + srcmap.get( RDF.SUBJECT );
+			String linkvar = "?" + edgemap.get( RDF.SUBJECT );
+			String tovar = "?" + dstmap.get( RDF.SUBJECT );
 
 			sb.append( "  " ).append( fromvar ).append( " " );
 			if ( Constants.ANYNODE.equals( edge.getType() ) ) {
@@ -172,23 +172,6 @@ public class GraphToSparql {
 		}
 
 		return sb.append( "}" ).toString();
-	}
-
-	private void assignIds( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		int nodecount = 0;
-		int propcount = 0;
-
-		List<AbstractNodeEdgeBase> todo = new ArrayList<>();
-		todo.addAll( graph.getVertices() );
-		todo.addAll( graph.getEdges() );
-
-		for ( AbstractNodeEdgeBase v : todo ) {
-			ids.put( v, nodecount++ );
-
-			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
-				valIds.put( new NodeType( v.getURI(), en.getKey() ), propcount++ );
-			}
-		}
 	}
 
 	private String shortcut( URI type ) {

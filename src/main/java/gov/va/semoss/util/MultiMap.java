@@ -33,7 +33,10 @@ public class MultiMap<T, V> extends HashMap<T, List<V>> {
 	/**
 	 * Gets a guaranteed not-null list of Vs. This is different from 
 	 * {@link #get(java.lang.Object) } in that it will never return
-	 * <code>null</code>
+	 * <code>null</code>. If the key *is* present, the list is a reference to the
+	 * list of values, so changes to it will be reflected in this map. If the key
+	 * is *not* present, the changes to the returned list will not be reflected in
+	 * the map.
 	 *
 	 * @param key the key to get
 	 * @return a list
