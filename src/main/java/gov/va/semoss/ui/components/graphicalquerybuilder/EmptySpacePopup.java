@@ -21,6 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  *
@@ -44,6 +45,8 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 				renderer.cache( Utility.getInstanceLabels( labels, pnl.getEngine() ) );
 
 				tbl.setDefaultRenderer( URI.class, renderer );
+				tbl.setDefaultRenderer( Value.class,
+						LabeledPairTableCellRenderer.getValuePairRenderer( pnl.getEngine() ) );
 
 				jpnl.add( new JScrollPane( tbl ) );
 

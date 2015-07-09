@@ -5,17 +5,16 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import static cern.clhep.Units.s;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
 
 /**
@@ -25,9 +24,9 @@ import org.openrdf.model.vocabulary.RDF;
 public class SparqlResultTableModel extends AbstractTableModel {
 
 	private static final String[] COLS
-			= { "Node", "Property", "Label", "Returned?" };
+			= { "Node", "Property", "Value", "Label", "Returned?" };
 	private static final Class<?>[] COLCLASSES
-			= { String.class, URI.class, String.class, Boolean.class };
+			= { String.class, URI.class, Value.class, String.class, Boolean.class };
 
 	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data;
 	private final List<SparqlResultConfig> list = new ArrayList<>();
@@ -62,7 +61,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable( int row, int col ) {
-		return ( 0 == col || 2 == col );
+		return ( 0 == col || 3 == col || 4 == col );
 	}
 
 	@Override
@@ -78,15 +77,26 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	@Override
 	public Object getValueAt( int row, int col ) {
 		SparqlResultConfig src = list.get( row );
+		URI property = src.getProperty();
+
 		switch ( col ) {
 			case 0:
 				return subjects.get( src.getId() );
 			case 1:
-				return src.getProperty();
+				return property;
 			case 2:
-				return src.getLabel();
+				return src.getId().getProperty( property );
 			case 3:
-				return ( !( null == src.getLabel() || src.getLabel().isEmpty() ) );
+			{
+				if( src.getId().isMarked( property ) ){
+					return src.getLabel();					
+				}
+				else{
+					return "";
+				}
+			}
+			case 4:
+				return src.getId().isMarked( property );
 			default:
 				throw new IllegalArgumentException( "unknown column: " + col );
 		}
@@ -102,11 +112,16 @@ public class SparqlResultTableModel extends AbstractTableModel {
 					ss.setLabel( aValue.toString() );
 				}
 			}
-		}
-		else if ( 2 == col ) {
-			src.setLabel( aValue.toString() );
-		}
 
-		fireTableCellUpdated( row, col );
+			fireTableDataChanged();
+		}
+		else if ( 3 == col ) {
+			src.setLabel( aValue.toString() );
+			fireTableCellUpdated( row, col );
+		}
+		else if ( 4 == col ) {
+			src.getId().mark( src.getProperty(), Boolean.class.cast( aValue ) );
+			fireTableDataChanged();
+		}		
 	}
 }

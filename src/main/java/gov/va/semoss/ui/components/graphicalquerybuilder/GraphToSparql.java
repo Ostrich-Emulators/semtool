@@ -21,6 +21,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
@@ -65,7 +66,6 @@ public class GraphToSparql {
 			Map<URI, String> valIds = SparqlResultConfig.asMap( config.getNN( v ) );
 			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
 				if ( v.isMarked( en.getKey() ) ) {
-					// special handling when the user wants a URI back
 					select.append( " ?" ).append( valIds.get( en.getKey() ) );
 				}
 			}
@@ -85,71 +85,90 @@ public class GraphToSparql {
 			props.remove( RDF.TYPE );
 		}
 
+		if ( v.getLabel().isEmpty() && !v.isMarked( RDFS.LABEL ) ) {
+			props.remove( RDFS.LABEL );
+		}
+
 		return props;
+	}
+
+	private String buildOneConstraint( AbstractNodeEdgeBase v, URI type, Object val,
+			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
+		StringBuilder sb = new StringBuilder();
+
+		// ignore empty variables (mostly, this is just for not returning a
+		// label, but it's generally good not to add unmarked predicates to a 
+		// query). If the predicate is marked, we must include it no matter what
+		if ( "".equals( v.getProperty( type ).toString() ) && !v.isMarked( type ) ) {
+			return "";
+		}
+
+		Map<URI, String> labelmap = SparqlResultConfig.asMap( config.getNN( v ) );
+		String nodevar = "?" + labelmap.get( RDF.SUBJECT );
+
+		sb.append( "  " ).append( nodevar ).append( " " );
+		sb.append( shortcut( type ) );
+		sb.append( " " );
+
+		if ( v.isMarked( type ) ) {
+			String objvar = "?" + labelmap.get( type );
+			sb.append( objvar );
+			if ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
+				sb.append( " VALUES " ).append( objvar ).append( " { " );
+			}
+		}
+
+		if ( !Constants.ANYNODE.equals( val ) ) {
+			if ( val instanceof URI ) {
+				sb.append( shortcut( URI.class.cast( val ) ) );
+			}
+			else if ( val instanceof String && !val.toString().isEmpty() ) {
+				sb.append( "\"" ).append( val ).append( "\"" );
+			}
+			else if ( val instanceof Double ) {
+				sb.append( new LiteralImpl( val.toString(), XMLSchema.DOUBLE ) );
+			}
+			else if ( val instanceof Integer ) {
+				sb.append( new LiteralImpl( val.toString(), XMLSchema.INTEGER ) );
+			}
+			else if ( val instanceof Boolean ) {
+				sb.append( new LiteralImpl( val.toString(), XMLSchema.BOOLEAN ) );
+			}
+			else if ( val instanceof Date ) {
+				sb.append( new ValueFactoryImpl().createLiteral( Date.class.cast( val ) ) );
+			}
+		}
+
+		if ( v.isMarked( type )
+				&& ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
+			sb.append( "}" );
+		}
+
+		sb.append( " .\n" );
+
+		return sb.toString();
 	}
 
 	private String buildWhere( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
 		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
 		for ( AbstractNodeEdgeBase v : graph.getVertices() ) {
-			Map<URI, String> labelmap = SparqlResultConfig.asMap( config.getNN( v ) );
 			Map<URI, Object> props = getWhereProps( v );
 
-			String nodevar = "?" + labelmap.get( RDF.SUBJECT );
 			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
-				URI type = en.getKey();
-				Object val = en.getValue();
-
-				// ignore empty variables (mostly, this is just for not returning a
-				// label, but it's generally good not to add unmarked predicates to a 
-				// query). If the predicate is marked, we must include it no matter what
-				if ( "".equals( v.getProperty( type ).toString() ) && !v.isMarked( type ) ) {
-					continue;
-				}
-
-				sb.append( "  " ).append( nodevar ).append( " " );
-				sb.append( shortcut( type ) );
-				sb.append( " " );
-
-				if ( v.isMarked( type ) ) {
-					String objvar = "?" + labelmap.get( type );
-					sb.append( objvar );
-					if ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
-						sb.append( " VALUES " ).append( objvar ).append( " { " );
-					}
-				}
-
-				if ( !Constants.ANYNODE.equals( val ) ) {
-					if ( val instanceof URI ) {
-						sb.append( shortcut( URI.class.cast( val ) ) );
-					}
-					else if ( val instanceof String && !val.toString().isEmpty() ) {
-						sb.append( "\"" ).append( val ).append( "\"" );
-					}
-					else if ( val instanceof Double ) {
-						sb.append( new LiteralImpl( val.toString(), XMLSchema.DOUBLE ) );
-					}
-					else if ( val instanceof Integer ) {
-						sb.append( new LiteralImpl( val.toString(), XMLSchema.INTEGER ) );
-					}
-					else if ( val instanceof Boolean ) {
-						sb.append( new LiteralImpl( val.toString(), XMLSchema.BOOLEAN ) );
-					}
-					else if ( val instanceof Date ) {
-						sb.append( new ValueFactoryImpl().createLiteral( Date.class.cast( val ) ) );
-					}
-				}
-
-				if ( v.isMarked( type )
-						&& ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
-					sb.append( "}" );
-				}
-
-				sb.append( " .\n" );
+				sb.append( buildOneConstraint( v, en.getKey(), en.getValue(), config ) );
 			}
 		}
 
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
+			Map<URI, Object> props = getWhereProps( edge );
+			boolean dotype = props.containsKey( RDF.TYPE );
+			props.remove( RDF.TYPE );
+
+			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
+				sb.append( buildOneConstraint( edge, en.getKey(), en.getValue(), config ) );
+			}
+
 			SEMOSSVertex src = graph.getSource( edge );
 			SEMOSSVertex dst = graph.getDest( edge );
 
@@ -162,13 +181,27 @@ public class GraphToSparql {
 			String tovar = "?" + dstmap.get( RDF.SUBJECT );
 
 			sb.append( "  " ).append( fromvar ).append( " " );
-			if ( Constants.ANYNODE.equals( edge.getType() ) ) {
+			if ( Constants.ANYNODE.equals( edge.getType() ) || !props.isEmpty() ) {
 				sb.append( linkvar ).append( " " );
 			}
 			else {
 				sb.append( "<" ).append( edge.getType() ).append( "> " );
+				dotype = false;
 			}
-			sb.append( tovar ).append( " .\n" );
+
+			sb.append( tovar ).append( " " );
+
+			if ( dotype ) {
+				sb.append( "BIND ( <" ).append( edge.getType() ).append( "> AS " ).
+						append( linkvar ).append( " ) " );
+
+				if ( edge.isMarked( RDF.TYPE ) ) {
+					sb.append( "\n  BIND ( <" ).append( edge.getType() ).append( "> AS ?" ).
+							append( edgemap.get( RDF.TYPE ) ).append( ") " );
+				}
+
+			}
+			sb.append( ".\n" );
 		}
 
 		return sb.append( "}" ).toString();

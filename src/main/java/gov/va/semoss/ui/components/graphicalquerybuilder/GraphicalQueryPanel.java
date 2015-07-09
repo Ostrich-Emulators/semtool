@@ -81,8 +81,8 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			= new VisualizationViewer<>( vizlayout );
 	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config
 			= new MultiMap<>();
-	private final VertexFactory vfac = new VertexFactory( config );
-	private final EdgeFactory efac = new EdgeFactory( config );
+	private final VertexFactory vfac = new VertexFactory();
+	private final EdgeFactory efac = new EdgeFactory();
 	private GqbLabelTransformer<SEMOSSVertex> vlt;
 	private GqbLabelTransformer<SEMOSSEdge> elt;
 	private SyntaxTextEditor sparqlarea;
@@ -277,9 +277,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		for ( SEMOSSVertex v : verts ) {
 			graph.removeVertex( v );
 		}
-		vfac.resetCounter();
-		efac.resetCounter();
-		
+
 		vizlayout.reset();
 		update();
 	}
@@ -326,8 +324,9 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	}
 
 	private void updateSparql() {
+		updateSparqlConfigs();
+
 		if ( null != sparqlarea ) {
-			updateSparqlConfigs();
 			String sparql = ( 0 == graph.getVertexCount()
 					? ""
 					: new GraphToSparql( getEngine().getNamespaces() ).select( graph, config ) );
