@@ -787,8 +787,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 			@Override
 			public boolean evaluate( SEMOSSEdge v ) {
-				return ( v.isVisible() && v.getLevel() <= overlayLevel
-						&& v.getInVertex().isVisible() && v.getOutVertex().isVisible() );
+				return ( v.isVisible() && v.getLevel() <= overlayLevel );
 			}
 		};
 
