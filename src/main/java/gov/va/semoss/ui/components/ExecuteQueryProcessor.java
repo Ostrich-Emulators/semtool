@@ -168,7 +168,7 @@ public class ExecuteQueryProcessor {
 			sparql = Utility.fillParam( sparql, paramHash );
 		}
 		else {
-			sparql = NonLegacyQueryBuilder.buildNonLegacyInsightQuery( insight.getSparql(), paramHash );
+			sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( insight.getSparql(), paramHash );
 		}
 		return sparql;
 	}
