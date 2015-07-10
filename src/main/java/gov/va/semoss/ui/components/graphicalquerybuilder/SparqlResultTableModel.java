@@ -27,9 +27,10 @@ import org.openrdf.model.vocabulary.RDF;
 public class SparqlResultTableModel extends AbstractTableModel {
 
 	private static final String[] COLS
-			= { "Node", "Property", "Value", "Label", "Returned?" };
+			= { "Node", "Property", "Value", "Label", "Returned?", "Optional?" };
 	private static final Class<?>[] COLCLASSES
-			= { String.class, URI.class, Value.class, String.class, Boolean.class };
+			= { String.class, URI.class, Value.class, String.class, Boolean.class,
+				Boolean.class };
 
 	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data;
 	private final List<SparqlResultConfig> list = new ArrayList<>();
@@ -65,7 +66,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable( int row, int col ) {
-		return ( 0 == col || 3 == col || 4 == col );
+		return ( 0 == col || 3 == col || 4 == col || 5 == col );
 	}
 
 	@Override
@@ -102,7 +103,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 				else if ( prop instanceof Integer ) {
 					return vf.createLiteral( Integer.class.cast( prop ) );
 				}
-				else if( prop instanceof URI ){
+				else if ( prop instanceof URI ) {
 					return URI.class.cast( prop );
 				}
 				return vf.createLiteral( prop.toString() );
@@ -117,6 +118,8 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			}
 			case 4:
 				return src.getId().isMarked( property );
+			case 5:
+				return src.isOptional();
 			default:
 				throw new IllegalArgumentException( "unknown column: " + col );
 		}
@@ -141,6 +144,10 @@ public class SparqlResultTableModel extends AbstractTableModel {
 		}
 		else if ( 4 == col ) {
 			src.getId().mark( src.getProperty(), Boolean.class.cast( aValue ) );
+			fireTableDataChanged();
+		}
+		else if ( 5 == col ) {
+			src.setOptional( Boolean.class.cast( aValue ) );
 			fireTableDataChanged();
 		}
 	}

@@ -106,7 +106,13 @@ public class GraphToSparql {
 		Map<URI, String> labelmap = SparqlResultConfig.asMap( config.getNN( v ) );
 		String nodevar = "?" + labelmap.get( RDF.SUBJECT );
 
-		sb.append( "  " ).append( nodevar ).append( " " );
+		SparqlResultConfig cfg = SparqlResultConfig.getOne( config.getNN( v ), type );
+
+		sb.append( "  " );
+		if ( cfg.isOptional() ) {
+			sb.append( "OPTIONAL { " );
+		}
+		sb.append( nodevar ).append( " " );
 		sb.append( shortcut( type ) );
 		sb.append( " " );
 
@@ -144,6 +150,10 @@ public class GraphToSparql {
 			sb.append( "}" );
 		}
 
+		if( cfg.isOptional() ){
+			sb.append( " }" );
+		}
+		
 		sb.append( " .\n" );
 
 		return sb.toString();

@@ -25,6 +25,7 @@ public class SparqlResultConfig implements Comparable<SparqlResultConfig> {
 	private final AbstractNodeEdgeBase id;
 	private URI property;
 	private String label;
+	private boolean optional = false;
 
 	public SparqlResultConfig( AbstractNodeEdgeBase id ) {
 		this.id = id;
@@ -34,6 +35,14 @@ public class SparqlResultConfig implements Comparable<SparqlResultConfig> {
 		this.id = id;
 		this.property = property;
 		label = name;
+	}
+
+	public boolean isOptional() {
+		return optional;
+	}
+
+	public void setOptional( boolean b ) {
+		optional = b;
 	}
 
 	public URI getProperty() {
@@ -108,6 +117,16 @@ public class SparqlResultConfig implements Comparable<SparqlResultConfig> {
 			labels.put( src.getProperty(), src.getLabel() );
 		}
 		return labels;
+	}
+
+	public static SparqlResultConfig getOne( List<SparqlResultConfig> list, URI type ) {
+		for( SparqlResultConfig src : list ){
+			if( src.getProperty().equals(  type ) ){
+				return src;
+			}
+		}
+		
+		return null;
 	}
 
 	public static Set<URI> getProperties( Map<AbstractNodeEdgeBase, List<SparqlResultConfig>> map ) {
