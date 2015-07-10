@@ -63,7 +63,11 @@ public class NonLegacyQueryBuilder {
  	    for ( Map.Entry<String, String> e : map.entrySet() ) {
  		   String key = e.getKey();
  		   String value = e.getValue();
- 	       queryExer.bindURI(key, value);
+ 		   //We must prevent the creation of "VALUES" clauses 
+ 		   //when none of the variables are used by the query:
+ 		   if(query.contains("?"+key)){
+ 	          queryExer.bindURI(key, value);
+ 		   }
  	    }
  	    return queryExer.bindAndGetSparql();
  	}
