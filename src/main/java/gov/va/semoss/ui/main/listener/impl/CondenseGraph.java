@@ -50,7 +50,7 @@ public class CondenseGraph extends AbstractAction {
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		GraphCondensePanel gcp = new GraphCondensePanel( gps );
-		String options[] = { "Okay", "Cancel" };
+		String options[] = { "OK", "Cancel" };
 
 		int opt = JOptionPane.showOptionDialog( null, gcp, "Condense Graph",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
