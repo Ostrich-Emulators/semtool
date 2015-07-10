@@ -107,7 +107,8 @@ public class AbstractNodeEdgeBase {
 	}
 
 	public String getLabel() {
-		return properties.get( RDFS.LABEL ).toString();
+		return ( properties.containsKey( RDFS.LABEL )
+				? properties.get( RDFS.LABEL ).toString() : "" );
 	}
 
 	public void setProperty( URI prop, Object propValue ) {

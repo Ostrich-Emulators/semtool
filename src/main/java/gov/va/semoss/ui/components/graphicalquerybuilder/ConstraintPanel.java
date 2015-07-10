@@ -56,7 +56,9 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	public static ConstraintValue getValue( URI property, String label, Object value,
 			boolean checked ) {
 		JTextField input = new JTextField();
-		input.setText( value.toString() );
+		if ( null != value ) {
+			input.setText( value.toString() );
+		}
 
 		Map<URI, String> propmap = new HashMap<>();
 		propmap.put( property, Utility.getInstanceLabel( property,
@@ -146,9 +148,9 @@ public class ConstraintPanel extends javax.swing.JPanel {
 
 		property.setModel( model );
 		property.setEditable( false );
-		property.setRenderer( renderer );
-		property.setSelectedItem( null == proptype ? Constants.ANYNODE : valForType );
-		
+		property.setRenderer( renderer );		
+		property.setSelectedItem( null == proptype ? Constants.ANYNODE : proptype );
+
 		setType( valForType );
 	}
 
