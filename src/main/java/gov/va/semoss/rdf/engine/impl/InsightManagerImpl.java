@@ -630,7 +630,9 @@ public class InsightManagerImpl implements InsightManager {
 				+ "FILTER( ?parameterClass != <http://semoss.org/ontologies/Concept> && "
 				+ "?parameterClass != <http://www.w3.org/2004/02/skos/core#Concept>) } "
 				+ "UNION { BIND(owl:Nothing AS ?parameterClass) . "
-				+ "BIND(\"(Unselected)\" AS ?parameterLabel) } } ORDER BY ?parameterLabel";
+				+ "BIND(\"(Unselected)\" AS ?parameterLabel) } "
+				+ "UNION{ BIND(<http://semoss.org/ontologies/Concept> AS ?parameterClass) . "
+				+ "BIND(\"*Concept\" AS ?parameterLabel) } } ORDER BY ?parameterLabel";
 
 		wrapper.setQuery( query );
 		wrapper.executeQuery();
