@@ -564,25 +564,27 @@ public class ValueTableModel extends AbstractTableModel {
 		}
 
 		Class<?> theClass = getClassForValue( input );
+		String val = input.getLabel();
+		boolean isempty = val.isEmpty();
 
 		if ( theClass == Double.class ) {
-			return input.doubleValue();
+			return ( isempty ? null : input.doubleValue() );
 		}
 
 		if ( theClass == Integer.class ) {
-			return input.intValue();
+			return ( isempty ? null : input.intValue() );
 		}
 
 		if ( theClass == Boolean.class ) {
-			return input.booleanValue();
+			return ( isempty ? null : input.booleanValue() );
 		}
 
 		if ( theClass == Float.class ) {
-			return input.floatValue();
+			return ( isempty ? null : input.floatValue() );
 		}
 
 		if ( theClass == Date.class ) {
-			return input.calendarValue();
+			return ( isempty ? null : input.calendarValue() );
 		}
 
 		return removeExtraneousDoubleQuotes( input.stringValue() );

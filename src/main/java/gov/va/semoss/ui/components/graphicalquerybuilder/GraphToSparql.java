@@ -99,7 +99,10 @@ public class GraphToSparql {
 		// ignore empty variables (mostly, this is just for not returning a
 		// label, but it's generally good not to add unmarked predicates to a 
 		// query). If the predicate is marked, we must include it no matter what
-		if ( "".equals( v.getProperty( type ).toString() ) && !v.isMarked( type ) ) {
+		Object o = v.getProperty( type );
+		String valstr = ( null == o ? "" : o.toString() );
+		
+		if ( valstr.isEmpty() && !v.isMarked( type ) ) {
 			return "";
 		}
 
@@ -119,7 +122,7 @@ public class GraphToSparql {
 		if ( v.isMarked( type ) ) {
 			String objvar = "?" + labelmap.get( type );
 			sb.append( objvar );
-			if ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
+			if ( !( valstr.isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
 				sb.append( " VALUES " ).append( objvar ).append( " { " );
 			}
 		}
@@ -128,17 +131,17 @@ public class GraphToSparql {
 			if ( val instanceof URI ) {
 				sb.append( shortcut( URI.class.cast( val ) ) );
 			}
-			else if ( val instanceof String && !val.toString().isEmpty() ) {
+			else if ( val instanceof String && !valstr.isEmpty() ) {
 				sb.append( "\"" ).append( val ).append( "\"" );
 			}
 			else if ( val instanceof Double ) {
-				sb.append( new LiteralImpl( val.toString(), XMLSchema.DOUBLE ) );
+				sb.append( new LiteralImpl( valstr, XMLSchema.DOUBLE ) );
 			}
 			else if ( val instanceof Integer ) {
-				sb.append( new LiteralImpl( val.toString(), XMLSchema.INTEGER ) );
+				sb.append( new LiteralImpl( valstr, XMLSchema.INTEGER ) );
 			}
 			else if ( val instanceof Boolean ) {
-				sb.append( new LiteralImpl( val.toString(), XMLSchema.BOOLEAN ) );
+				sb.append( new LiteralImpl( valstr, XMLSchema.BOOLEAN ) );
 			}
 			else if ( val instanceof Date ) {
 				sb.append( new ValueFactoryImpl().createLiteral( Date.class.cast( val ) ) );
@@ -146,7 +149,7 @@ public class GraphToSparql {
 		}
 
 		if ( v.isMarked( type )
-				&& ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
+				&& ( !( valstr.isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
 			sb.append( "}" );
 		}
 
