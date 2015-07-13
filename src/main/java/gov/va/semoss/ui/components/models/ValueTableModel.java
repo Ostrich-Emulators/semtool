@@ -602,7 +602,7 @@ public class ValueTableModel extends AbstractTableModel {
 		
 		ValueFactory vf = new ValueFactoryImpl();
 		if ( o instanceof String ) {
-			return vf.createLiteral( o.toString() );
+			return vf.createLiteral( String.class.cast( o ) );
 		}
 		else if ( o instanceof Double ) {
 			return vf.createLiteral( Double.class.cast( o ) );

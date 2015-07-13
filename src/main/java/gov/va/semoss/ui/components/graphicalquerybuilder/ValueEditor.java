@@ -54,24 +54,26 @@ public class ValueEditor extends AbstractCellEditor
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		if ( EDIT.equals( e.getActionCommand() ) ) {
-			ConstraintValue cv = null;
-			if ( null == concepts ) {
-				cv = ConstraintPanel.getValue( type, EDIT, value, checked );
-			}
-			else {
-				// editing a type
-				cv = ConstraintPanel.getValue( type, "Type", URI.class.cast( value ),
-						Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, engine ) ),
-						checked );
-			}
+			try {
+				ConstraintValue cv = null;
+				if ( null == concepts ) {
+					cv = ConstraintPanel.getValue( type, EDIT, value, checked );
+				}
+				else {
+					// editing a type
+					cv = ConstraintPanel.getValue( type, "Type", URI.class.cast( value ),
+							Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, engine ) ),
+							checked );
+				}
 
-			if( null != cv ){
-				value = cv.val;
+				if ( null != cv ) {
+					value = cv.val;
+				}
 			}
-
-			//Make the renderer reappear.
-			fireEditingStopped();
-
+			finally {
+				//Make the renderer reappear.
+				fireEditingStopped();
+			}
 		}
 		else { //User pressed dialog's "OK" button.
 			Logger.getLogger( getClass() ).debug( "here I am?" );

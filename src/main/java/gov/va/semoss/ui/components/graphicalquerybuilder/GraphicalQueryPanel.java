@@ -72,6 +72,7 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class GraphicalQueryPanel extends javax.swing.JPanel {
 
+	public static final URI SPARQLNAME = new URIImpl( "semoss://name.sparql" );
 	private static final Logger log = Logger.getLogger( GraphicalQueryPanel.class );
 	private IEngine engine;
 	private final String progress;
@@ -400,15 +401,19 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 		for ( SEMOSSVertex v : graph.getVertices() ) {
 			if ( !config.containsKey( v ) ) {
-				config.add( v, new SparqlResultConfig( v, RDF.SUBJECT,
-						"node" + ( nextnodeid++ ) ) );
+				SparqlResultConfig src = new SparqlResultConfig( v, SPARQLNAME,
+						"node" + ( nextnodeid++ ) );
+				config.add( v, src );
+				v.setProperty( SPARQLNAME, src.getLabel() );
 			}
 		}
 
 		for ( SEMOSSEdge v : graph.getEdges() ) {
 			if ( !config.containsKey( v ) ) {
-				config.add( v, new SparqlResultConfig( v, RDF.SUBJECT,
-						"link" + ( nextlinkid++ ) ) );
+				SparqlResultConfig src = new SparqlResultConfig( v, SPARQLNAME,
+						"link" + ( nextlinkid++ ) );
+				config.add( v, src );
+				v.setProperty( SPARQLNAME, src.getLabel() );
 			}
 		}
 
@@ -416,6 +421,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			List<SparqlResultConfig> vals = config.getNN( v );
 
 			Set<URI> seen = new HashSet<>();
+			seen.add( RDF.SUBJECT );
 			for ( SparqlResultConfig src : vals ) {
 				seen.add( src.getProperty() );
 			}
@@ -433,6 +439,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			List<SparqlResultConfig> vals = config.getNN( v );
 
 			Set<URI> seen = new HashSet<>();
+			seen.add( RDF.SUBJECT );
 			for ( SparqlResultConfig src : vals ) {
 				seen.add( src.getProperty() );
 			}
@@ -454,9 +461,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			public void handleGraphEvent( GraphEvent evt ) {
 				updateSparql();
 
-//				if ( Type.VERTEX_ADDED == evt.getType() ) {
-//					buttongroup.clearSelection();
-//				}
+				if ( Type.VERTEX_ADDED == evt.getType()
+						|| Type.VERTEX_ADDED == evt.getType() ) {
+
+				}
 			}
 		} );
 	}

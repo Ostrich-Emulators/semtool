@@ -10,7 +10,6 @@ import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,6 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
 
 /**
  *
@@ -38,16 +34,15 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data;
 	private final List<SparqlResultConfig> list = new ArrayList<>();
-	private final Map<AbstractNodeEdgeBase, String> subjects = new HashMap<>();
-	private final ValueFactory vf = new ValueFactoryImpl();
+	private final Map<AbstractNodeEdgeBase, SparqlResultConfig> subjects = new HashMap<>();
 
 	public SparqlResultTableModel( MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data ) {
 		this.data = data;
 
 		for ( Map.Entry<? extends AbstractNodeEdgeBase, List<SparqlResultConfig>> en : data.entrySet() ) {
 			for ( SparqlResultConfig src : en.getValue() ) {
-				if ( src.getProperty().equals( RDF.SUBJECT ) ) {
-					subjects.put( src.getId(), src.getLabel() );
+				if ( src.getProperty().equals( GraphicalQueryPanel.SPARQLNAME ) ) {
+					subjects.put( src.getId(), src );
 				}
 				else {
 					list.add( src );
@@ -87,10 +82,11 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	public Object getValueAt( int row, int col ) {
 		SparqlResultConfig src = list.get( row );
 		URI property = src.getProperty();
+		AbstractNodeEdgeBase base = src.getId();
 
 		switch ( col ) {
 			case 0:
-				return subjects.get( src.getId() );
+				return subjects.get( src.getId() ).getLabel();
 			case 1:
 				return property;
 			case 2:
@@ -115,23 +111,21 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	@Override
 	public void setValueAt( Object aValue, int row, int col ) {
 		SparqlResultConfig src = list.get( row );
-		if ( 0 == col ) {
-			subjects.put( src.getId(), aValue.toString() );
-			for ( SparqlResultConfig ss : data.getNN( src.getId() ) ) {
-				if ( ss.getProperty().equals( RDF.SUBJECT ) ) {
-					ss.setLabel( aValue.toString() );
-				}
-			}
+		AbstractNodeEdgeBase base = src.getId();
 
+		if ( 0 == col ) {
+			SparqlResultConfig ss = subjects.get( base );
+			ss.setLabel( aValue.toString() );
+			base.setProperty( GraphicalQueryPanel.SPARQLNAME, aValue.toString() );
 			fireTableDataChanged();
 		}
 		else if ( 2 == col ) {
 			log.debug( aValue );
 			if ( aValue instanceof URI ) {
-				src.getId().setProperty( src.getProperty(), URI.class.cast( aValue ) );
+				base.setProperty( src.getProperty(), URI.class.cast( aValue ) );
 			}
 			else {
-				src.getId().setProperty( src.getProperty(),
+				base.setProperty( src.getProperty(),
 						ValueTableModel.getValueFromLiteral( Literal.class.cast( aValue ) ) );
 			}
 
@@ -142,7 +136,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			fireTableCellUpdated( row, col );
 		}
 		else if ( 4 == col ) {
-			src.getId().mark( src.getProperty(), Boolean.class.cast( aValue ) );
+			base.mark( src.getProperty(), Boolean.class.cast( aValue ) );
 			fireTableDataChanged();
 		}
 		else if ( 5 == col ) {

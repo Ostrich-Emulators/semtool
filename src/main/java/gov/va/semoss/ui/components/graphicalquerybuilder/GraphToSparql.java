@@ -65,7 +65,7 @@ public class GraphToSparql {
 		for ( AbstractNodeEdgeBase v : todo ) {
 			Map<URI, String> valIds = SparqlResultConfig.asMap( config.getNN( v ) );
 			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
-				if ( v.isMarked( en.getKey() ) ) {
+				if ( !RDF.SUBJECT.equals( en.getKey() ) && v.isMarked( en.getKey() ) ) {
 					select.append( " ?" ).append( valIds.get( en.getKey() ) );
 				}
 			}
@@ -80,6 +80,7 @@ public class GraphToSparql {
 		props.remove( Constants.IN_EDGE_CNT );
 		props.remove( Constants.OUT_EDGE_CNT );
 		props.remove( AbstractNodeEdgeBase.LEVEL );
+		props.remove( GraphicalQueryPanel.SPARQLNAME );
 
 		if ( Constants.ANYNODE.equals( v.getType() ) && !v.isMarked( RDF.TYPE ) ) {
 			props.remove( RDF.TYPE );
@@ -101,13 +102,13 @@ public class GraphToSparql {
 		// query). If the predicate is marked, we must include it no matter what
 		Object o = v.getProperty( type );
 		String valstr = ( null == o ? "" : o.toString() );
-		
+
 		if ( valstr.isEmpty() && !v.isMarked( type ) ) {
 			return "";
 		}
 
 		Map<URI, String> labelmap = SparqlResultConfig.asMap( config.getNN( v ) );
-		String nodevar = "?" + labelmap.get( RDF.SUBJECT );
+		String nodevar = "?" + labelmap.get( GraphicalQueryPanel.SPARQLNAME );
 
 		SparqlResultConfig cfg = SparqlResultConfig.getOne( config.getNN( v ), type );
 
@@ -153,10 +154,10 @@ public class GraphToSparql {
 			sb.append( "}" );
 		}
 
-		if( cfg.isOptional() ){
+		if ( cfg.isOptional() ) {
 			sb.append( " }" );
 		}
-		
+
 		sb.append( " .\n" );
 
 		return sb.toString();
@@ -190,9 +191,9 @@ public class GraphToSparql {
 			Map<URI, String> srcmap = SparqlResultConfig.asMap( config.getNN( src ) );
 			Map<URI, String> dstmap = SparqlResultConfig.asMap( config.getNN( dst ) );
 
-			String fromvar = "?" + srcmap.get( RDF.SUBJECT );
-			String linkvar = "?" + edgemap.get( RDF.SUBJECT );
-			String tovar = "?" + dstmap.get( RDF.SUBJECT );
+			String fromvar = "?" + srcmap.get( GraphicalQueryPanel.SPARQLNAME );
+			String linkvar = "?" + edgemap.get( GraphicalQueryPanel.SPARQLNAME );
+			String tovar = "?" + dstmap.get( GraphicalQueryPanel.SPARQLNAME );
 
 			sb.append( "  " ).append( fromvar ).append( " " );
 			if ( useLinkVar ) {
@@ -236,43 +237,5 @@ public class GraphToSparql {
 		}
 
 		return "<" + type + ">";
-	}
-
-	private class NodeType {
-
-		public final URI node;
-		public final URI type;
-
-		public NodeType( URI node, URI type ) {
-			this.node = node;
-			this.type = type;
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 3;
-			hash = 19 * hash + Objects.hashCode( this.node );
-			hash = 19 * hash + Objects.hashCode( this.type );
-			return hash;
-		}
-
-		@Override
-		public boolean equals( Object obj ) {
-			if ( obj == null ) {
-				return false;
-			}
-			if ( getClass() != obj.getClass() ) {
-				return false;
-			}
-			final NodeType other = (NodeType) obj;
-			if ( !Objects.equals( this.node, other.node ) ) {
-				return false;
-			}
-			if ( !Objects.equals( this.type, other.type ) ) {
-				return false;
-			}
-			return true;
-		}
-
 	}
 }
