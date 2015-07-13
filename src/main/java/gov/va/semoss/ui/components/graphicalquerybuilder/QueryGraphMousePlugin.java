@@ -32,6 +32,5 @@ public class QueryGraphMousePlugin<V, E> extends EditingGraphMousePlugin<V, E> {
 	public void mousePressed( MouseEvent e ) {
 		super.mousePressed( e );
 		edgeIsDirected = EdgeType.DIRECTED;
-		e.consume();
 	}
 }

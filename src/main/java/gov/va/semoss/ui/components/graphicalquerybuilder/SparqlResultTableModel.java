@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
+import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -26,6 +29,7 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class SparqlResultTableModel extends AbstractTableModel {
 
+	private static final Logger log = Logger.getLogger( SparqlResultTableModel.class );
 	private static final String[] COLS
 			= { "Node", "Property", "Value", "Label", "Returned?", "Optional?" };
 	private static final Class<?>[] COLCLASSES
@@ -66,7 +70,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable( int row, int col ) {
-		return ( 0 == col || 3 == col || 4 == col || 5 == col );
+		return ( 1 != col );
 	}
 
 	@Override
@@ -89,25 +93,8 @@ public class SparqlResultTableModel extends AbstractTableModel {
 				return subjects.get( src.getId() );
 			case 1:
 				return property;
-			case 2: {
-				Object prop = src.getId().getProperty( property );
-				if ( prop instanceof Double ) {
-					return vf.createLiteral( Double.class.cast( prop ) );
-				}
-				else if ( prop instanceof Boolean ) {
-					return vf.createLiteral( Boolean.class.cast( prop ) );
-				}
-				else if ( prop instanceof Date ) {
-					return vf.createLiteral( Date.class.cast( prop ) );
-				}
-				else if ( prop instanceof Integer ) {
-					return vf.createLiteral( Integer.class.cast( prop ) );
-				}
-				else if ( prop instanceof URI ) {
-					return URI.class.cast( prop );
-				}
-				return vf.createLiteral( prop.toString() );
-			}
+			case 2:
+				return ValueTableModel.getValueFromObject( src.getId().getProperty( property ) );
 			case 3: {
 				if ( src.getId().isMarked( property ) ) {
 					return src.getLabel();
@@ -137,6 +124,18 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			}
 
 			fireTableDataChanged();
+		}
+		else if ( 2 == col ) {
+			log.debug( aValue );
+			if ( aValue instanceof URI ) {
+				src.getId().setProperty( src.getProperty(), URI.class.cast( aValue ) );
+			}
+			else {
+				src.getId().setProperty( src.getProperty(),
+						ValueTableModel.getValueFromLiteral( Literal.class.cast( aValue ) ) );
+			}
+
+			fireTableCellUpdated( row, col );
 		}
 		else if ( 3 == col ) {
 			src.setLabel( aValue.toString() );

@@ -55,6 +55,8 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 				tbl.setDefaultRenderer( URI.class, renderer );
 				tbl.setDefaultRenderer( Value.class, trenderer );
 
+				tbl.setDefaultEditor( Value.class, new ValueEditor( pnl.getEngine() ) );
+				
 				jpnl.add( new JScrollPane( tbl ) );
 
 				JOptionPane.showConfirmDialog( JOptionPane.getFrameForComponent( pnl ),
