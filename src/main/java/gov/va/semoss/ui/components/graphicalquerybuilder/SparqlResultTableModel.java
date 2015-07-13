@@ -32,13 +32,10 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			= { String.class, URI.class, Value.class, String.class, Boolean.class,
 				Boolean.class };
 
-	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data;
 	private final List<SparqlResultConfig> list = new ArrayList<>();
 	private final Map<AbstractNodeEdgeBase, SparqlResultConfig> subjects = new HashMap<>();
 
 	public SparqlResultTableModel( MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data ) {
-		this.data = data;
-
 		for ( Map.Entry<? extends AbstractNodeEdgeBase, List<SparqlResultConfig>> en : data.entrySet() ) {
 			for ( SparqlResultConfig src : en.getValue() ) {
 				if ( src.getProperty().equals( GraphicalQueryPanel.SPARQLNAME ) ) {
@@ -143,5 +140,9 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			src.setOptional( Boolean.class.cast( aValue ) );
 			fireTableDataChanged();
 		}
+	}
+
+	public SparqlResultConfig getRawRow( int row ){
+		return list.get( row );
 	}
 }

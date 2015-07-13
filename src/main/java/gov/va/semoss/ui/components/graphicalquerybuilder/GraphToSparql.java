@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -44,10 +43,6 @@ public class GraphToSparql {
 	public void setNamespaces( Map<String, String> ns ) {
 		namespaces.clear();
 		namespaces.putAll( ns );
-	}
-
-	public String construct( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		throw new UnsupportedOperationException( "not yet implemented" );
 	}
 
 	public String select( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
