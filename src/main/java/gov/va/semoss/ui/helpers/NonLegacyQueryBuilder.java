@@ -14,6 +14,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -63,7 +65,13 @@ public class NonLegacyQueryBuilder {
  	    for ( Map.Entry<String, String> e : map.entrySet() ) {
  		   String key = e.getKey();
  		   String value = e.getValue();
- 	       queryExer.bindURI(key, value);
+ 		   //We must prevent the creation of "VALUES" clauses 
+ 		   //when none of the variables are used by the query:
+ 		   Pattern pattern = Pattern.compile("\\?"+key+"\\b"); 
+ 		   Matcher matcher = pattern.matcher(query);
+ 		   if(matcher.find() == true){
+ 	          queryExer.bindURI(key, value);
+ 		   }
  	    }
  	    return queryExer.bindAndGetSparql();
  	}
