@@ -34,6 +34,8 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 	private final URI originVertexURI;
 	/** The destination resource (Vertex) URI for this edge/relation */
 	private final URI destinationVertexURI;
+	/** Flag which signifies whether the vertices of this edge are ALL visible - for rendering purposes */
+	private boolean verticesVisible;
 
 	/**
 	 * @param _outVertex
@@ -124,5 +126,21 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		}
 
 		return sb.toString();
+	}
+
+	/**
+	 * Set whether all of the vertices for this edge are visible
+	 * @param visible the visibility of this edge's vertices
+	 */
+	public void setVerticesVisible(boolean visible) {
+		this.verticesVisible = visible;
+	}
+	
+	/**
+	 * Get whether all of the vertices for this edge are visible
+	 * @return True if all vertices are visible, false otherwise
+	 */
+	public boolean getVerticesVisible(){
+		return this.verticesVisible;
 	}
 }

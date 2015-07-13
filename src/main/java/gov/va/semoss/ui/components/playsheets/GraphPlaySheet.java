@@ -42,6 +42,8 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 
+import com.ibm.icu.util.BytesTrie.Iterator;
+
 import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -787,16 +789,15 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 			@Override
 			public boolean evaluate( SEMOSSEdge v ) {
-				return ( v.isVisible() && v.getLevel() <= overlayLevel );
+				return ( v.isVisible() && v.getVerticesVisible() && v.getLevel() <= overlayLevel );
 			}
 		};
 
 		@Override
 		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext,
 				Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
-
+			setEdgeVisibilities();
 			try {
-
 				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
 					if ( edgehider.evaluate( e ) ) {
 						renderEdge( renderContext, layout, e );
@@ -819,6 +820,53 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 			}
 			catch ( ConcurrentModificationException cme ) {
 				renderContext.getScreenDevice().repaint();
+			}
+		}
+		
+		/**
+		 * Convenience method which sets t the visibility of edges in the current graph
+		 * based on the visibility flag within the edge, but ALSO on whether the
+		 * vertices which the edge connects are visible
+		 */
+		private void setEdgeVisibilities() {
+			// Get the current visible DAG
+			Graph<SEMOSSVertex, SEMOSSEdge> currentVisibleGraph = getVisibleGraph();
+			Collection<SEMOSSEdge> allEdges = currentVisibleGraph.getEdges();
+			java.util.Iterator<SEMOSSEdge> edgeIterator = allEdges.iterator();
+			// Iterate over all edges in the graph
+			while (edgeIterator.hasNext()) {
+				SEMOSSEdge edge = edgeIterator.next();
+				SEMOSSVertex destination = currentVisibleGraph.getDest(edge);
+				SEMOSSVertex source = currentVisibleGraph.getSource(edge);
+				boolean destVisible = true;
+				boolean sourceVisible = true;
+				// If the destination vertex/node is not visible, neither should the edge 
+				// be visible
+				// The edge may not have a destination vertex/node, so prepare for that
+				if (destination != null) {
+					if (!destination.isVisible()){
+						destVisible = false;
+					}
+				} else {
+					destVisible = false;
+				}
+				// If the destination vertex/node is not visible, neither should the edge 
+				// be visible
+				// The edge may not have a source vertex/node, so prepare for that
+				if (source != null) {
+					if (!source.isVisible()){
+						sourceVisible = false;
+					}
+				} else {
+					sourceVisible = false;
+				}
+				// If both of the edges are visible, set the edgesVisible flag in the Edge object
+				if (destVisible && sourceVisible){
+					edge.setVerticesVisible(true);
+				}
+				else {
+					edge.setVerticesVisible(false);
+				}
 			}
 		}
 	}
