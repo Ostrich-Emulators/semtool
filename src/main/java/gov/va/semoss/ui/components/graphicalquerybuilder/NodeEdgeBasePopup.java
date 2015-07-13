@@ -41,12 +41,16 @@ import org.openrdf.repository.RepositoryException;
  * @author ryan
  */
 public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu {
-	
+
 	private static final Logger log = Logger.getLogger( NodeEdgeBasePopup.class );
-	
+
 	public NodeEdgeBasePopup( T v, GraphicalQueryPanel pnl ) {
+		add( new OneVariableDialogItem( v, pnl, RDFS.LABEL, "Set Instance Label",
+				"Set the label of this node", "Instance Label" ) );
+		add( makeTypeItem( v, pnl ) );
+
 		add( new AbstractAction( "Change Query ID" ) {
-			
+
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				SparqlResultConfig src = SparqlResultConfig.getOne( pnl.getSparqlConfigs().get( v ),
@@ -60,41 +64,37 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 				}
 			}
 		} );
-		
-		add( new OneVariableDialogItem( v, pnl, RDFS.LABEL, "Set Instance Label",
-				"Set the label of this node", "Instance Label" ) );
-		add( makeTypeItem( v, pnl ) );
-		
+
 		add( new AbstractAction( "Remove this Element" ) {
-			
+
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				pnl.remove( v );
 			}
-			
+
 		} );
-		
+
 		finishMenu( v, pnl );
-		
+
 		addSeparator();
 		add( new AbstractAction( "Clear Graph" ) {
-			
+
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				pnl.clear();
 			}
 		} );
-		
+
 	}
-	
+
 	protected void finishMenu( T v, GraphicalQueryPanel pnl ) {
 	}
-	
+
 	protected Collection<URI> getAllPossibleProperties( URI type, IEngine engine ) {
 		String query = "SELECT DISTINCT ?pred WHERE { ?s ?pred ?o . ?s a ?type . FILTER ( isLiteral( ?o ) ) }";
 		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query, "pred" );
 		qa.bind( "type", type );
-		
+
 		List<URI> props = new ArrayList<>();
 		props.add( Constants.ANYNODE );
 		try {
@@ -103,16 +103,16 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
 		}
-		
+
 		return props;
 	}
-	
+
 	protected abstract Action makeTypeItem( T v, GraphicalQueryPanel pnl );
-	
+
 	public static NodeEdgeBasePopup<SEMOSSVertex> forVertex( SEMOSSVertex v,
 			GraphicalQueryPanel pnl ) {
 		return new NodeEdgeBasePopup<SEMOSSVertex>( v, pnl ) {
-			
+
 			@Override
 			protected Action makeTypeItem( SEMOSSVertex v, GraphicalQueryPanel pnl ) {
 				Map<URI, String> labels = Utility.getInstanceLabels(
@@ -120,27 +120,27 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Vertex", "New Type", Utility.sortUrisByLabel( labels ) );
-				
+
 			}
-			
+
 			@Override
 			protected void finishMenu( SEMOSSVertex v, GraphicalQueryPanel pnl ) {
 				Collection<URI> props
 						= getAllPossibleProperties( v.getType(), pnl.getEngine() );
-				
+
 				Map<URI, String> propmap = Utility.getInstanceLabels( props, pnl.getEngine() );
 				propmap.put( Constants.ANYNODE, "<Any>" );
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
 						"Add a constraint to this Vertex", "New Value", propmap ) );
-				
+
 				addSeparator();
-				
+
 				JCheckBoxMenuItem selectMe = new JCheckBoxMenuItem( "Return this Entity",
 						v.isMarked( RDF.SUBJECT ) );
 				add( selectMe );
-				
+
 				selectMe.addItemListener( new ItemListener() {
-					
+
 					@Override
 					public void itemStateChanged( ItemEvent e ) {
 						v.mark( RDF.SUBJECT, selectMe.isSelected() );
@@ -151,22 +151,22 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 			}
 		};
 	}
-	
+
 	public static NodeEdgeBasePopup<SEMOSSEdge> forEdge( SEMOSSEdge v,
 			GraphicalQueryPanel pnl ) {
 		return new NodeEdgeBasePopup<SEMOSSEdge>( v, pnl ) {
-			
+
 			@Override
 			protected Action makeTypeItem( SEMOSSEdge v, GraphicalQueryPanel pnl ) {
 				Graph<SEMOSSVertex, SEMOSSEdge> graph
 						= pnl.getViewer().getGraphLayout().getGraph();
-				
+
 				URI starttype = graph.getSource( v ).getType();
 				URI endtype = graph.getDest( v ).getType();
-				
+
 				List<URI> links = DBToLoadingSheetExporter.getPredicatesBetween( starttype,
 						endtype, pnl.getEngine() );
-				
+
 				Map<URI, String> labels = Utility.getInstanceLabels( links, pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
