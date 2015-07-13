@@ -424,7 +424,6 @@ allParamBoxes.add(field);
 		for(Map.Entry<String, Map<String, String>> e: parameterMasterHash.entrySet()){
 			String strQuery = e.getValue().get("query");
 	        strQuery = NonLegacyQueryBuilder.buildNonLegacyQuery(strQuery, knownValues);
-	
 	        boolean queryExists = false;
 	        for(ParamComboBox cboParam : allParamBoxes){
 	        	if(cboParam.getQuery().equals(strQuery)){
