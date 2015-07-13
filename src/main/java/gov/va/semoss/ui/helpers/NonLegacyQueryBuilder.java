@@ -67,7 +67,7 @@ public class NonLegacyQueryBuilder {
  		   String value = e.getValue();
  		   //We must prevent the creation of "VALUES" clauses 
  		   //when none of the variables are used by the query:
- 		   Pattern pattern = Pattern.compile("\\?"+key+"\\s"); 
+ 		   Pattern pattern = Pattern.compile("\\?"+key+"\\b"); 
  		   Matcher matcher = pattern.matcher(query);
  		   if(matcher.find() == true){
  	          queryExer.bindURI(key, value);
