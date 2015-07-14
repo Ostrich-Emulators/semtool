@@ -47,7 +47,7 @@ public class SesameJenaImposter extends ListQueryAdapter<Object[]> {
 
 		if ( v instanceof Literal ) {
 			Literal l = Literal.class.cast( v );
-			return ValueTableModel.getValueFromLiteral( l );
+			return ValueTableModel.getObjectFromValue( l );
 		}
 		return v;
 	}

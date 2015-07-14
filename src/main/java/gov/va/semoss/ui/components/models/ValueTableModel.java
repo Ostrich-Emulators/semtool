@@ -38,22 +38,22 @@ import org.openrdf.model.vocabulary.XMLSchema;
  * @author ryan
  */
 public class ValueTableModel extends AbstractTableModel {
-	
+
 	public static final String ALLOW_INSERT = "allowinsert";
 	public static final String NEEDS_SAVE = "savesetting";
 	public static final String READ_ONLY = "readonly";
-	
+
 	private static final Logger log = Logger.getLogger( ValueTableModel.class );
 	private static final long serialVersionUID = 7491106662313232478L;
 	private static final String EVERYTHING = "everything"; // for prop listeners
 	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
 	private static final Map<Class<?>, URI> DATATYPELOOKUP = new HashMap<>();
 	private static final ValueFactory VF = new ValueFactoryImpl();
-	
+
 	private final List<Object[]> data = new ArrayList<>();
 	private final List<String> headers = new ArrayList<>();
 	private final List<Class<?>> columnClasses = new ArrayList<>();
-	
+
 	static {
 		TYPELOOKUP.put( XMLSchema.INT, Integer.class );
 		TYPELOOKUP.put( XMLSchema.INTEGER, Integer.class );
@@ -64,7 +64,7 @@ public class ValueTableModel extends AbstractTableModel {
 		TYPELOOKUP.put( XMLSchema.DATE, Date.class );
 		TYPELOOKUP.put( XMLSchema.DATETIME, Date.class );
 		TYPELOOKUP.put( XMLSchema.BOOLEAN, Boolean.class );
-		
+
 		DATATYPELOOKUP.put( Integer.class, XMLSchema.INT );
 		DATATYPELOOKUP.put( Double.class, XMLSchema.DOUBLE );
 		DATATYPELOOKUP.put( Float.class, XMLSchema.FLOAT );
@@ -72,43 +72,43 @@ public class ValueTableModel extends AbstractTableModel {
 		DATATYPELOOKUP.put( Date.class, XMLSchema.DATETIME );
 		DATATYPELOOKUP.put( Boolean.class, XMLSchema.BOOLEAN );
 	}
-	
+
 	private boolean useraw;
 	private boolean readonly;
 	private boolean allowInsertsInPlace = false;
 	private boolean saveme = false;
 	private final MultiMap<String, PropertyChangeListener> listeners = new MultiMap<>();
-	
+
 	public ValueTableModel() {
 		this( true );
 	}
-	
+
 	public ValueTableModel( boolean raw ) {
 		useraw = raw;
 	}
-	
+
 	public ValueTableModel( List<Value[]> newdata, List<String> heads ) {
 		setData( newdata, heads );
 	}
-	
+
 	protected void clear() {
 		int ds = data.size();
 		data.clear();
 		fireTableRowsDeleted( 0, ds );
 	}
-	
+
 	public void addPropertyChangeListener( PropertyChangeListener pl ) {
 		listeners.add( EVERYTHING, pl );
 	}
-	
+
 	public void addPropertyChangeListener( String prop, PropertyChangeListener pl ) {
 		listeners.add( prop, pl );
 	}
-	
+
 	public void removePropertyChangeListener( PropertyChangeListener pl ) {
 		listeners.getNN( EVERYTHING ).remove( pl );
 	}
-	
+
 	public void removePropertyChangeListener( String prop, PropertyChangeListener pl ) {
 		listeners.getNN( prop ).remove( pl );
 	}
@@ -122,9 +122,9 @@ public class ValueTableModel extends AbstractTableModel {
 	public void setAllowInsertsInPlace( boolean b ) {
 		PropertyChangeEvent pce
 				= new PropertyChangeEvent( this, ALLOW_INSERT, allowInsertsInPlace, b );
-		
+
 		allowInsertsInPlace = b;
-		
+
 		if ( !pce.getNewValue().equals( pce.getOldValue() ) ) {
 			for ( PropertyChangeListener pcl : listeners.getNN( EVERYTHING ) ) {
 				pcl.propertyChange( pce );
@@ -153,9 +153,9 @@ public class ValueTableModel extends AbstractTableModel {
 	public void setReadOnly( boolean b ) {
 		PropertyChangeEvent pce
 				= new PropertyChangeEvent( this, READ_ONLY, readonly, b );
-		
+
 		readonly = b;
-		
+
 		if ( !pce.getNewValue().equals( pce.getOldValue() ) ) {
 			for ( PropertyChangeListener pcl : listeners.getNN( EVERYTHING ) ) {
 				pcl.propertyChange( pce );
@@ -165,56 +165,56 @@ public class ValueTableModel extends AbstractTableModel {
 			}
 		}
 	}
-	
+
 	public boolean isReadOnly() {
 		return readonly;
 	}
-	
+
 	public final void addData( List<Value[]> newdata ) {
 		int sz = data.size();
-		
+
 		if ( !newdata.isEmpty() ) {
 			data.addAll( convertValuesToClassedData( newdata, columnClasses, useraw ) );
 			int newsz = data.size();
 			fireTableRowsInserted( sz - 1, newsz - 1 );
 		}
 	}
-	
+
 	public void setData( List<Value[]> newdata, List<String> heads ) {
 		headers.clear();
 		headers.addAll( heads );
 		columnClasses.clear();
 		columnClasses.addAll( figureColumnClassesFromData( newdata, headers.size() ) );
-		
+
 		data.clear();
 		data.addAll( convertValuesToClassedData( newdata, columnClasses, useraw ) );
 		fireTableStructureChanged();
 	}
-	
+
 	public void setHeaders( Map<String, URI> heads ) {
 		headers.clear();
 		columnClasses.clear();
-		
+
 		for ( Map.Entry<String, URI> en : heads.entrySet() ) {
 			headers.add( en.getKey() );
 			columnClasses.add( TYPELOOKUP.get( en.getValue() ) );
 		}
 		fireTableStructureChanged();
 	}
-	
+
 	public void setHeaders( List<String> heads ) {
 		headers.clear();
 		headers.addAll( heads );
 		fireTableStructureChanged();
 	}
-	
+
 	public void setHeaders( Object[] heads ) {
 		headers.clear();
 		for ( Object o : heads ) {
 			headers.add( o.toString() );
 		}
 	}
-	
+
 	@Override
 	public int getRowCount() {
 		int sz = data.size();
@@ -230,40 +230,40 @@ public class ValueTableModel extends AbstractTableModel {
 	public int getRealRowCount() {
 		return data.size();
 	}
-	
+
 	@Override
 	public int getColumnCount() {
 		return headers.size();
 	}
-	
+
 	@Override
 	public Object getValueAt( int r, int c ) {
 		if ( isInsertRow( r ) ) {
 			return ( 0 == c ? "*" : null );
 		}
-		
+
 		return data.get( r )[c];
 	}
-	
+
 	public Value getRdfValueAt( int r, int c ) {
 		Object val = getValueAt( r, c );
 		if ( null == val ) {
 			return null;
 		}
-		
+
 		String valstr = val.toString();
 		Class<?> klass = getColumnClass( c );
 		URI datatype = DATATYPELOOKUP.get( klass );
 		return ( null == datatype ? VF.createLiteral( valstr )
 				: VF.createLiteral( valstr, datatype ) );
 	}
-	
+
 	@Override
 	public boolean isCellEditable( int row, int col ) {
 		if ( isInsertRow( row ) ) {
 			return ( 0 == col );
 		}
-		
+
 		return !readonly;
 	}
 
@@ -276,22 +276,22 @@ public class ValueTableModel extends AbstractTableModel {
 	protected final boolean isInsertRow( int row ) {
 		return ( allowsInsertsInPlace() && getRowCount() - 1 == row );
 	}
-	
+
 	@Override
 	public void setValueAt( Object aValue, int r, int c ) {
 		Class<?> k = getColumnClass( c );
-		
+
 		boolean isinsert = isInsertRow( r );
-		
+
 		if ( isinsert ) {
 			Object objs[] = new Object[getColumnCount()];
 			data.add( objs );
 		}
-		
+
 		data.get( r )[c] = k.cast( aValue );
-		
+
 		setNeedsSave( true );
-		
+
 		if ( isinsert ) {
 			fireTableRowsInserted( r, r );
 		}
@@ -299,38 +299,38 @@ public class ValueTableModel extends AbstractTableModel {
 			fireTableCellUpdated( r, c );
 		}
 	}
-	
+
 	public void setNeedsSave( boolean b ) {
 		PropertyChangeEvent pce
 				= new PropertyChangeEvent( this, NEEDS_SAVE, saveme, b );
-		
+
 		saveme = b;
-		
+
 		if ( !pce.getNewValue().equals( pce.getOldValue() ) ) {
 			for ( PropertyChangeListener pcl : listeners.getNN( EVERYTHING ) ) {
 				pcl.propertyChange( pce );
 			}
-			
+
 			for ( PropertyChangeListener pcl : listeners.getNN( NEEDS_SAVE ) ) {
 				pcl.propertyChange( pce );
 			}
 		}
 	}
-	
+
 	public boolean needsSave() {
 		return saveme;
 	}
-	
+
 	@Override
 	public Class<?> getColumnClass( int c ) {
 		return ( c < columnClasses.size() ? columnClasses.get( c ) : Object.class );
 	}
-	
+
 	@Override
 	public String getColumnName( int column ) {
 		return headers.get( column );
 	}
-	
+
 	public static List<Class<?>> figureColumnClassesFromData( List<Value[]> newdata,
 			int columns ) {
 		List<Class<?>> columnClasses = new ArrayList<>();
@@ -356,7 +356,7 @@ public class ValueTableModel extends AbstractTableModel {
 			Iterator<Value[]> it = newdata.iterator();
 			Set<Class<?>> finalClasses
 					= new HashSet<>( Arrays.asList( String.class, Object.class ) );
-			
+
 			while ( !colsToFigure.isEmpty() && it.hasNext() ) {
 				Value[] first = it.next();
 
@@ -371,7 +371,7 @@ public class ValueTableModel extends AbstractTableModel {
 					// getClassForValue returns Object when the classtype can't be determined
 					if ( !Object.class.equals( k ) ) {
 						Class<?> previousK = arr[col];
-						
+
 						if ( null == previousK ) {
 							// first time we've set a value for this column
 							arr[col] = k;
@@ -392,7 +392,7 @@ public class ValueTableModel extends AbstractTableModel {
 							}
 							// else we're "final," so don't change
 						}
-						
+
 						if ( finalClasses.contains( arr[col] ) ) {
 							colit.remove();
 						}
@@ -413,16 +413,16 @@ public class ValueTableModel extends AbstractTableModel {
 			for ( int col : colsToFigure ) {
 				arr[col] = Object.class;
 			}
-			
+
 			columnClasses.addAll( Arrays.asList( arr ) );
 		}
-		
+
 		return columnClasses;
 	}
-	
+
 	private static List<Object[]> convertValuesToClassedData( Collection<Value[]> newdata,
 			List<Class<?>> columnClasses, boolean userawstrings ) {
-		
+
 		List<Object[]> data = new ArrayList<>();
 		for ( Value[] varr : newdata ) {
 			try {
@@ -467,7 +467,7 @@ public class ValueTableModel extends AbstractTableModel {
 
 							if ( val instanceof Literal ) {
 								Literal l = Literal.class.cast( val );
-								
+
 								if ( userawstrings ) {
 									if ( null != l.getLanguage() ) {
 										arr[i] = "\"" + l.stringValue() + "\"@" + l.getLanguage();
@@ -495,111 +495,117 @@ public class ValueTableModel extends AbstractTableModel {
 				Logger.getLogger( ValueTableModel.class ).error( e, e );
 			}
 		}
-		
+
 		return data;
 	}
-	
+
 	public static Class<?> getClassForValue( Value v ) {
-		
+
 		if ( v instanceof URI ) {
 			return URI.class;
 		}
-		
+
 		if ( v instanceof Literal ) {
 			Literal l = Literal.class.cast( v );
 			URI dt = l.getDatatype();
 			return ( TYPELOOKUP.containsKey( dt )
 					? TYPELOOKUP.get( dt ) : String.class );
 		}
-		
+
 		return Object.class;
 	}
-	
+
 	public static Object parseXMLDatatype( String input ) {
 		if ( input == null ) {
 			return null;
 		}
-		
+
 		input = input.trim();
-		
+
 		String[] pieces = input.split( "\"" );
 		if ( pieces.length != 3 ) {
 			return removeExtraneousDoubleQuotes( input );
 		}
-		
+
 		Class<?> theClass = null;
 		for ( URI datatypeUri : TYPELOOKUP.keySet() ) {
 			if ( pieces[2].contains( datatypeUri.stringValue() ) ) {
 				theClass = TYPELOOKUP.get( datatypeUri );
 			}
 		}
-		
+
 		String dataPiece = pieces[1];
-		
+
 		if ( theClass == Double.class && XMLDatatypeUtil.isValidDouble( dataPiece ) ) {
 			return XMLDatatypeUtil.parseDouble( dataPiece );
 		}
-		
+
 		if ( theClass == Float.class && XMLDatatypeUtil.isValidFloat( dataPiece ) ) {
 			return XMLDatatypeUtil.parseFloat( dataPiece );
 		}
-		
+
 		if ( theClass == Integer.class && XMLDatatypeUtil.isValidInteger( dataPiece ) ) {
 			return XMLDatatypeUtil.parseInteger( dataPiece );
 		}
-		
+
 		if ( theClass == Boolean.class && XMLDatatypeUtil.isValidBoolean( dataPiece ) ) {
 			return XMLDatatypeUtil.parseBoolean( dataPiece );
 		}
-		
+
 		if ( theClass == Date.class && XMLDatatypeUtil.isValidDate( dataPiece ) ) {
 			return XMLDatatypeUtil.parseCalendar( dataPiece );
 		}
-		
+
 		return removeExtraneousDoubleQuotes( input );
 	}
-	
-	public static Object getValueFromLiteral( Literal input ) {
-		if ( input == null ) {
+
+	public static Object getObjectFromValue( Value value ) {
+		if ( value == null ) {
 			return null;
 		}
-		
-		Class<?> theClass = getClassForValue( input );
+
+		Class<?> theClass = getClassForValue( value );
+
+		if ( URI.class == theClass ) {
+			return value;
+		}
+
+		Literal input = Literal.class.cast( value );
 		String val = input.getLabel();
 		boolean isempty = val.isEmpty();
-		
+
 		if ( theClass == Double.class ) {
 			return ( isempty ? null : input.doubleValue() );
 		}
-		
+
 		if ( theClass == Integer.class ) {
 			return ( isempty ? null : input.intValue() );
 		}
-		
+
 		if ( theClass == Boolean.class ) {
 			return ( isempty ? null : input.booleanValue() );
 		}
-		
+
 		if ( theClass == Float.class ) {
 			return ( isempty ? null : input.floatValue() );
 		}
-		
+
 		if ( theClass == Date.class ) {
 			return ( isempty ? null : input.calendarValue() );
 		}
-		
+
 		return removeExtraneousDoubleQuotes( input.stringValue() );
 	}
-	
+
 	public static Value getValueFromObject( Object o ) {
 		if ( null == o ) {
 			return null;
 		}
-		
+
 		if ( o instanceof Value ) {
 			return Value.class.cast( o );
 		}
-		
+
 		ValueFactory vf = new ValueFactoryImpl();
 		if ( o instanceof String ) {
 			return vf.createLiteral( String.class.cast( o ) );
@@ -619,18 +625,18 @@ public class ValueTableModel extends AbstractTableModel {
 		else if ( o instanceof Float ) {
 			return vf.createLiteral( Float.class.cast( o ) );
 		}
-		
+
 		log.warn( "unhandled data type for object: " + o );
 		return null;
 	}
-	
+
 	public static String removeExtraneousDoubleQuotes( String input ) {
 		while ( input != null && input.length() > 2
 				&& input.charAt( 0 ) == '\"'
 				&& input.charAt( input.length() - 1 ) == '\"' ) {
 			input = input.substring( 1, input.length() - 1 );
 		}
-		
+
 		return input;
 	}
 }

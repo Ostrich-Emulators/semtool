@@ -78,7 +78,7 @@ public class OneVariableDialogItem extends AbstractAction {
 
 		if ( null != newval ) {
 			Object value = ( newval.val instanceof URI ? newval.val
-					: ValueTableModel.getValueFromLiteral( Literal.class.cast( newval.val ) ) );
+					: ValueTableModel.getObjectFromValue( Literal.class.cast( newval.val ) ) );
 			node.setProperty( newval.property, value );
 			node.mark( newval.property, newval.included );
 			currval = newval;

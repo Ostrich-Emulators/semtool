@@ -123,7 +123,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			}
 			else {
 				base.setProperty( src.getProperty(),
-						ValueTableModel.getValueFromLiteral( Literal.class.cast( aValue ) ) );
+						ValueTableModel.getObjectFromValue( Literal.class.cast( aValue ) ) );
 			}
 
 			fireTableCellUpdated( row, col );

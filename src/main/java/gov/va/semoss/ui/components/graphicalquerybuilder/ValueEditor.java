@@ -5,11 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import com.hp.hpl.jena.sparql.function.library.leviathan.e;
-import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValue;
-import gov.va.semoss.util.Utility;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,7 +16,6 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDF;
 
 /**
  *

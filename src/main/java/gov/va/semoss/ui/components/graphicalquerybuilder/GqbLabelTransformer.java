@@ -28,7 +28,6 @@ import gov.va.semoss.util.PropComparator;
 import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -76,7 +76,7 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 	 */
 	@Override
 	public String getText( T vertex ) {
-		Map<URI, Object> properties = vertex.getProperties();
+		Map<URI, Value> properties = vertex.getValues();
 
 		if ( properties.isEmpty() ) {
 			return "";
@@ -92,7 +92,7 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 		Collections.sort( orderedProps, comparator );
 
 		for ( URI property : orderedProps ) {
-			Object val = properties.get( property );
+			Value value = properties.get( property );
 
 			// we never want to display the node URI or it's level			
 			if ( RDF.SUBJECT.equals( property )
@@ -100,11 +100,12 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 				continue;
 			}
 
-			if ( null == val || val.toString().isEmpty() ) {
-				val = "&lt;Any&gt;";
+			String propval = ( null == value ? "" : value.stringValue() );
+			if ( null == propval || propval.isEmpty() ) {
+				propval = "&lt;Any&gt;";
 			}
-			if ( val instanceof URI ) {
-				val = labels.get( URI.class.cast( val ) );
+			if ( value instanceof URI ) {
+				propval = labels.get( URI.class.cast( value ) );
 			}
 
 			if ( !first ) {
@@ -112,7 +113,6 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 			}
 
 			if ( vertex.hasProperty( property ) ) {
-				String propval = val.toString();
 				if ( vertex.isMarked( property ) ) {
 					html.append( "<b>" );
 				}
@@ -139,7 +139,7 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 		return html.toString();
 	}
 
-	private void updateLabels( Map<URI, Object> properties ) {
+	private void updateLabels( Map<URI, Value> properties ) {
 		Set<URI> props = new HashSet<>( properties.keySet() );
 		for ( Object o : properties.values() ) {
 			if ( o instanceof URI ) {
