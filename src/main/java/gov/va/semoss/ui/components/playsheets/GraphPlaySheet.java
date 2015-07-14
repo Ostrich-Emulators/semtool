@@ -796,7 +796,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		@Override
 		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext,
 				Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
-			setEdgeVisibilities();
+			setEdgeVisibilities(layout.getGraph());
 			try {
 				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
 					if ( edgehider.evaluate( e ) ) {
@@ -828,16 +828,16 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		 * based on the visibility flag within the edge, but ALSO on whether the
 		 * vertices which the edge connects are visible
 		 */
-		private void setEdgeVisibilities() {
-			// Get the current visible DAG
-			Graph<SEMOSSVertex, SEMOSSEdge> currentVisibleGraph = getVisibleGraph();
-			Collection<SEMOSSEdge> allEdges = currentVisibleGraph.getEdges();
-			java.util.Iterator<SEMOSSEdge> edgeIterator = allEdges.iterator();
+		private void setEdgeVisibilities(Graph<SEMOSSVertex, SEMOSSEdge> graph) {
+			Collection<SEMOSSEdge> allEdges = graph.getEdges();
+			int edgeTotal = allEdges.size();
+			SEMOSSEdge[] edgeArray = new SEMOSSEdge[edgeTotal];
+			allEdges.toArray(edgeArray);
 			// Iterate over all edges in the graph
-			while (edgeIterator.hasNext()) {
-				SEMOSSEdge edge = edgeIterator.next();
-				SEMOSSVertex destination = currentVisibleGraph.getDest(edge);
-				SEMOSSVertex source = currentVisibleGraph.getSource(edge);
+			for (int i=0; i<edgeTotal; i++) {
+				SEMOSSEdge edge = edgeArray[i];
+				SEMOSSVertex destination = graph.getDest(edge);
+				SEMOSSVertex source = graph.getSource(edge);
 				boolean destVisible = true;
 				boolean sourceVisible = true;
 				// If the destination vertex/node is not visible, neither should the edge 

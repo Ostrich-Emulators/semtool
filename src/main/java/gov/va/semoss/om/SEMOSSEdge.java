@@ -45,8 +45,8 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 	 */
 	public SEMOSSEdge( SEMOSSVertex _outVertex, SEMOSSVertex _inVertex, URI _uri ) {
 		super( _uri, null, _uri.getLocalName() );
-		originVertexURI = _inVertex.getURI();
-		destinationVertexURI = _outVertex.getURI();
+		destinationVertexURI = _inVertex.getURI();
+		originVertexURI = _outVertex.getURI();
 
 		_inVertex.addInEdge( this );
 		_outVertex.addOutEdge( this );
