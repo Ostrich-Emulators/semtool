@@ -9,7 +9,7 @@ import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.ObservableGraph;
 import edu.uci.ics.jung.graph.event.GraphEvent;
 import edu.uci.ics.jung.graph.event.GraphEvent.Type;
@@ -78,7 +78,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private final String progress;
 	private final Action addConceptNodeAction;
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE );
-	private final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
+	private final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseMultigraph<>();
 	private final ObservableGraph<SEMOSSVertex, SEMOSSEdge> observer
 			= new ObservableGraph<>( graph );
 	private final Layout<SEMOSSVertex, SEMOSSEdge> vizlayout = new StaticLayout<>( observer );
@@ -431,7 +431,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			todo.removeAll( seen );
 
 			for ( URI prop : todo ) {
-				vals.add( new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) ) );
+				SparqlResultConfig src
+						= new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) );
+				src.setIncluded( v.isMarked( prop ) );
+				vals.add( src );
 			}
 		}
 
@@ -449,7 +452,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			todo.removeAll( seen );
 
 			for ( URI prop : todo ) {
-				vals.add( new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) ) );
+				SparqlResultConfig src
+						= new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) );
+				src.setIncluded( v.isMarked( prop ) );
+				vals.add( src );
 			}
 		}
 	}

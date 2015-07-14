@@ -25,9 +25,11 @@ import gov.va.semoss.util.DIHelper;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import org.openrdf.model.URI;
 
 /**
@@ -36,41 +38,40 @@ import org.openrdf.model.URI;
  */
 public class TypeColorShapeTable {
 
-	private static TypeColorShapeTable instance = new TypeColorShapeTable();
+	private static final TypeColorShapeTable instance = new TypeColorShapeTable();
 
-	private Map<URI, Shape> shapeHash = new HashMap<>();
-	private Map<URI, Shape> shapeHashL = new HashMap<>();
-	private Map<URI, String> shapeStringHash = new HashMap<>();
+	private final Map<URI, Shape> shapeHash = new HashMap<>();
+	private final Map<URI, Shape> shapeHashL = new HashMap<>();
+	private final Map<URI, String> shapeStringHash = new HashMap<>();
 
-	private Map<URI, Color> colorHash = new HashMap<>();
-	private Map<URI, String> colorStringHash = new HashMap<>();
+	private final Map<URI, Color> colorHash = new HashMap<>();
+	private final Map<URI, String> colorStringHash = new HashMap<>();
 
-	private static String[] shapes, colors;
+	private static final String[] shapes = {
+		Constants.TRIANGLE,
+		Constants.CIRCLE,
+		Constants.SQUARE,
+		Constants.DIAMOND,
+		Constants.STAR,
+		Constants.PENTAGON,
+		Constants.HEXAGON };
+	private static final String[] colors = {
+		Constants.BLUE,
+		Constants.GREEN,
+		Constants.RED,
+		Constants.BROWN,
+		Constants.MAGENTA,
+		Constants.ORANGE,
+		Constants.YELLOW,
+		Constants.AQUA,
+		Constants.PURPLE
+	};
 
 	/**
 	 * Constructor for TypeColorShapeTable, only called internally.
 	 */
-	protected TypeColorShapeTable() {
-		shapes = new String[7];
-		shapes[0] = Constants.TRIANGLE;
-		shapes[1] = Constants.CIRCLE;
-		shapes[2] = Constants.SQUARE;
-		shapes[3] = Constants.DIAMOND;
-		shapes[4] = Constants.STAR;
-		shapes[5] = Constants.PENTAGON;
-		shapes[6] = Constants.HEXAGON;
+	private TypeColorShapeTable() {
 
-		colors = new String[10];
-		colors[0] = Constants.BLUE;
-		colors[1] = Constants.GREEN;
-		colors[2] = Constants.RED;
-		colors[3] = Constants.BROWN;
-		colors[4] = Constants.MAGENTA;
-		colors[5] = Constants.ORANGE;
-		colors[6] = Constants.YELLOW;
-		colors[7] = Constants.AQUA;
-		colors[8] = Constants.PURPLE;
-		colors[9] = Constants.TRANSPARENT;
 	}
 
 	/**
@@ -201,11 +202,9 @@ public class TypeColorShapeTable {
 		}
 
 		//if all of the shapes have already been used, just grab a random shape
-		Object[] keys = shapeHash.keySet().toArray();
-		Object key = keys[new Random().nextInt( keys.length )];
-		String shapeString = shapeStringHash.get( key );
-
-		return setShape( shapeString, vertex );
+		List<String> strings = new ArrayList<>( shapeStringHash.values() );
+		Collections.shuffle( strings );
+		return setShape( strings.get( 0 ), vertex );
 	}
 
 	/**
@@ -235,9 +234,8 @@ public class TypeColorShapeTable {
 		}
 
 		//if all of the colors have already been used, just grab a random color
-		Object[] keys = colorHash.keySet().toArray();
-		Object key = keys[new Random().nextInt( keys.length )];
-
-		return setColor( colorStringHash.get( key ), vertex );
+		List<String> cols = new ArrayList<>( colorStringHash.values() );
+		Collections.shuffle( cols );
+		return setColor( cols.get( 0 ), vertex );
 	}
 }

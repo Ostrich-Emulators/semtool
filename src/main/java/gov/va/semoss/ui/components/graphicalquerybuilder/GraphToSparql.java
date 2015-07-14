@@ -59,7 +59,7 @@ public class GraphToSparql {
 
 		for ( AbstractNodeEdgeBase v : todo ) {
 			Map<URI, String> valIds = SparqlResultConfig.asMap( config.getNN( v ) );
-			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
+			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {			
 				if ( !RDF.SUBJECT.equals( en.getKey() ) && v.isMarked( en.getKey() ) ) {
 					select.append( " ?" ).append( valIds.get( en.getKey() ) );
 				}

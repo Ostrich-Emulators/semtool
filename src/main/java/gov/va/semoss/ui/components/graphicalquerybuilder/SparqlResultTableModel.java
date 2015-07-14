@@ -97,7 +97,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 				}
 			}
 			case 4:
-				return src.getId().isMarked( property );
+				return src.isIncluded();
 			case 5:
 				return src.isOptional();
 			default:
@@ -133,7 +133,8 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			fireTableCellUpdated( row, col );
 		}
 		else if ( 4 == col ) {
-			base.mark( src.getProperty(), Boolean.class.cast( aValue ) );
+			src.setIncluded( Boolean.class.cast( aValue ) );
+			base.mark( src.getProperty(), src.isIncluded() );
 			fireTableDataChanged();
 		}
 		else if ( 5 == col ) {
