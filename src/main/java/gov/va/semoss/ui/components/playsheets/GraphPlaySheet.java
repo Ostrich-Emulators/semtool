@@ -830,12 +830,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		 */
 		private void setEdgeVisibilities(Graph<SEMOSSVertex, SEMOSSEdge> graph) {
 			Collection<SEMOSSEdge> allEdges = graph.getEdges();
-			int edgeTotal = allEdges.size();
-			SEMOSSEdge[] edgeArray = new SEMOSSEdge[edgeTotal];
-			allEdges.toArray(edgeArray);
-			// Iterate over all edges in the graph
-			for (int i=0; i<edgeTotal; i++) {
-				SEMOSSEdge edge = edgeArray[i];
+			for (SEMOSSEdge edge : allEdges) {
 				SEMOSSVertex destination = graph.getDest(edge);
 				SEMOSSVertex source = graph.getSource(edge);
 				boolean destVisible = true;
