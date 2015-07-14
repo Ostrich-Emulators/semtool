@@ -21,13 +21,13 @@ import org.openrdf.model.URI;
  */
 public class OneVariableDialogItem extends AbstractAction {
 	private final URI property;
-	private final AbstractNodeEdgeBase node;
+	private final QueryNodeEdgeBase node;
 	private final String dlgtext;
 	private final GraphicalQueryPanel panel;
 	private final Map<URI, String> labels;
 	private Object currval;
 
-	public OneVariableDialogItem( AbstractNodeEdgeBase node,
+	public OneVariableDialogItem( QueryNodeEdgeBase node,
 			GraphicalQueryPanel panel, URI prop,
 			String label, String tooltip, String dlgtext ) {
 
@@ -43,7 +43,7 @@ public class OneVariableDialogItem extends AbstractAction {
 		labels = null;
 	}
 
-	public OneVariableDialogItem( AbstractNodeEdgeBase node,
+	public OneVariableDialogItem( QueryNodeEdgeBase node,
 			GraphicalQueryPanel panel, URI prop,
 			String label, String tooltip, String dlgtext, Map<URI, String> labels ) {
 
@@ -64,7 +64,7 @@ public class OneVariableDialogItem extends AbstractAction {
 
 		if ( null == labels ) {
 			newval = ConstraintPanel.getValue( property, dlgtext, currval,
-					node.isMarked( property ) );
+					node.isSelected( property ) );
 		}
 		else {
 			if ( null == property ) {
@@ -72,7 +72,7 @@ public class OneVariableDialogItem extends AbstractAction {
 			}
 			else {
 				newval = ConstraintPanel.getValue( property, dlgtext, URI.class.cast( currval ),
-						labels, node.isMarked( property ) );
+						labels, node.isSelected( property ) );
 			}
 		}
 
@@ -80,7 +80,7 @@ public class OneVariableDialogItem extends AbstractAction {
 			Object value = ( newval.val instanceof URI ? newval.val
 					: ValueTableModel.getObjectFromValue( Literal.class.cast( newval.val ) ) );
 			node.setProperty( newval.property, value );
-			node.mark( newval.property, newval.included );
+			node.setSelected( newval.property, newval.included );
 			currval = newval;
 			panel.update();
 		}

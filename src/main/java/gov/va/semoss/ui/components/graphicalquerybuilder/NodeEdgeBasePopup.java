@@ -6,9 +6,6 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.Graph;
-import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
@@ -39,7 +36,7 @@ import org.openrdf.repository.RepositoryException;
  *
  * @author ryan
  */
-public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu {
+public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPopupMenu {
 
 	private static final Logger log = Logger.getLogger( NodeEdgeBasePopup.class );
 
@@ -52,15 +49,10 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				SparqlResultConfig src = SparqlResultConfig.getOne( pnl.getSparqlConfigs().get( v ),
-						GraphicalQueryPanel.SPARQLNAME );
-				if ( null != src ) {
-					String oldid = src.getLabel();
-					String newval = JOptionPane.showInputDialog( pnl, "New Query ID", oldid );
-					src.setLabel( newval );
-					v.setProperty( GraphicalQueryPanel.SPARQLNAME, newval );
-					pnl.update();
-				}
+				String oldid = v.getQueryId();
+				String newval = JOptionPane.showInputDialog( pnl, "New Query ID", oldid );
+				v.setQueryId( newval );
+				pnl.update();
 			}
 		} );
 
@@ -108,12 +100,12 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 
 	protected abstract Action makeTypeItem( T v, GraphicalQueryPanel pnl );
 
-	public static NodeEdgeBasePopup<SEMOSSVertex> forVertex( SEMOSSVertex v,
+	public static NodeEdgeBasePopup<QueryNode> forVertex( QueryNode v,
 			GraphicalQueryPanel pnl ) {
-		return new NodeEdgeBasePopup<SEMOSSVertex>( v, pnl ) {
+		return new NodeEdgeBasePopup<QueryNode>( v, pnl ) {
 
 			@Override
-			protected Action makeTypeItem( SEMOSSVertex v, GraphicalQueryPanel pnl ) {
+			protected Action makeTypeItem( QueryNode v, GraphicalQueryPanel pnl ) {
 				Map<URI, String> labels = Utility.getInstanceLabels(
 						DBToLoadingSheetExporter.createConceptList( pnl.getEngine() ), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
@@ -123,7 +115,7 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 			}
 
 			@Override
-			protected void finishMenu( SEMOSSVertex v, GraphicalQueryPanel pnl ) {
+			protected void finishMenu( QueryNode v, GraphicalQueryPanel pnl ) {
 				Collection<URI> props
 						= getAllPossibleProperties( v.getType(), pnl.getEngine() );
 
@@ -135,15 +127,14 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 				addSeparator();
 
 				JCheckBoxMenuItem selectMe = new JCheckBoxMenuItem( "Return this Entity",
-						v.isMarked( RDF.SUBJECT ) );
+						v.isSelected( RDF.SUBJECT ) );
 				add( selectMe );
 
 				selectMe.addItemListener( new ItemListener() {
 
 					@Override
 					public void itemStateChanged( ItemEvent e ) {
-						v.mark( RDF.SUBJECT, selectMe.isSelected() );
-						v.mark( GraphicalQueryPanel.SPARQLNAME, selectMe.isSelected() );
+						v.setSelected( RDF.SUBJECT, selectMe.isSelected() );
 						pnl.update();
 					}
 				} );
@@ -151,13 +142,13 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 		};
 	}
 
-	public static NodeEdgeBasePopup<SEMOSSEdge> forEdge( SEMOSSEdge v,
+	public static NodeEdgeBasePopup<QueryEdge> forEdge( QueryEdge v,
 			GraphicalQueryPanel pnl ) {
-		return new NodeEdgeBasePopup<SEMOSSEdge>( v, pnl ) {
+		return new NodeEdgeBasePopup<QueryEdge>( v, pnl ) {
 
 			@Override
-			protected Action makeTypeItem( SEMOSSEdge v, GraphicalQueryPanel pnl ) {
-				Graph<SEMOSSVertex, SEMOSSEdge> graph
+			protected Action makeTypeItem( QueryEdge v, GraphicalQueryPanel pnl ) {
+				Graph<QueryNode, QueryEdge> graph
 						= pnl.getViewer().getGraphLayout().getGraph();
 
 				URI starttype = graph.getSource( v ).getType();

@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.rdf.engine.api.IEngine;
 
 import gov.va.semoss.ui.transformer.LabelTransformer;
@@ -28,6 +27,7 @@ import gov.va.semoss.util.PropComparator;
 import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,17 +37,18 @@ import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Transforms the property label on a node vertex in the graph.
  */
-public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTransformer<T> {
+public class GqbLabelTransformer<T extends QueryNodeEdgeBase> extends LabelTransformer<T> {
 
 	private final Map<URI, String> labels = new HashMap<>();
-	private final Comparator<URI> comparator = new PropComparator(
-			GraphicalQueryPanel.SPARQLNAME, RDFS.LABEL, RDF.TYPE, RDF.SUBJECT );
+	private final Comparator<URI> comparator
+			= new PropComparator( RDF.SUBJECT, RDFS.LABEL, RDF.TYPE );
 	private IEngine engine;
 
 	/**
@@ -63,7 +64,7 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 	public void setEngine( IEngine eng ) {
 		labels.clear();
 		labels.put( Constants.ANYNODE, "&lt;Any&gt;" );
-		labels.put( GraphicalQueryPanel.SPARQLNAME, "Query ID" );
+		labels.put( RDF.SUBJECT, "Query ID" );
 		this.engine = eng;
 	}
 
@@ -75,12 +76,18 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 	 * @return String - the property name of the vertex
 	 */
 	@Override
-	public String getText( T vertex ) {
-		Map<URI, Value> properties = vertex.getValues();
+	public String getText( QueryNodeEdgeBase vertex ) {
+		Map<URI, Set<Value>> properties = new HashMap<>( vertex.getAllValues() );
+		properties.remove( RDF.SUBJECT );
+		properties.remove( QueryNode.LEVEL );
 
 		if ( properties.isEmpty() ) {
 			return "";
 		}
+
+		// make sure we display the sparql id
+		properties.put( RDF.SUBJECT,
+				new HashSet<>( Arrays.asList( new LiteralImpl( vertex.getQueryId() ) ) ) );
 
 		updateLabels( properties );
 
@@ -92,42 +99,38 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 		Collections.sort( orderedProps, comparator );
 
 		for ( URI property : orderedProps ) {
-			Value value = properties.get( property );
+			Set<Value> values = properties.get( property );
 
-			// we never want to display the node URI or it's level			
-			if ( RDF.SUBJECT.equals( property )
-					|| AbstractNodeEdgeBase.LEVEL.equals( property ) ) {
-				continue;
-			}
-
-			String propval = ( null == value ? "" : value.stringValue() );
-			if ( null == propval || propval.isEmpty() ) {
-				propval = "&lt;Any&gt;";
-			}
-			if ( value instanceof URI ) {
-				propval = labels.get( URI.class.cast( value ) );
-			}
-
-			if ( !first ) {
-				html.append( "<font size='1'><br></font>" );
-			}
-
-			if ( vertex.hasProperty( property ) ) {
-				if ( vertex.isMarked( property ) ) {
-					html.append( "<b>" );
+			for ( Value value : values ) {
+				String propval = ( null == value ? "" : value.stringValue() );
+				if ( null == propval || propval.isEmpty() ) {
+					propval = "&lt;Any&gt;";
+				}
+				if ( value instanceof URI ) {
+					propval = labels.get( URI.class.cast( value ) );
 				}
 
-				if ( property.equals( GraphicalQueryPanel.SPARQLNAME ) ) {
-					// special handling for the query name...italics and no label part
-					html.append( "<i>" ).append( chop( propval, 50 ) ).append( "</i>" );
-				}
-				else {
-					html.append( labels.get( property ) ).append( ": " ).
-							append( chop( propval, 50 ) );
+				if ( !first ) {
+					html.append( "<font size='1'><br></font>" );
 				}
 
-				if ( vertex.isMarked( property ) ) {
-					html.append( "</b>" );
+				if ( vertex.hasProperty( property ) || RDF.SUBJECT.equals( property ) ) {
+					if ( vertex.isSelected( property ) ) {
+						html.append( "<b>" );
+					}
+
+					if ( property.equals( RDF.SUBJECT ) ) {
+						// special handling for the query name...italics and no label part
+						html.append( "<i>" ).append( chop( propval, 50 ) ).append( "</i>" );
+					}
+					else {
+						html.append( labels.get( property ) ).append( ": " ).
+								append( chop( propval, 50 ) );
+					}
+
+					if ( vertex.isSelected( property ) ) {
+						html.append( "</b>" );
+					}
 				}
 			}
 			first = false;
@@ -139,11 +142,13 @@ public class GqbLabelTransformer<T extends AbstractNodeEdgeBase> extends LabelTr
 		return html.toString();
 	}
 
-	private void updateLabels( Map<URI, Value> properties ) {
+	private void updateLabels( Map<URI, Set<Value>> properties ) {
 		Set<URI> props = new HashSet<>( properties.keySet() );
-		for ( Object o : properties.values() ) {
-			if ( o instanceof URI ) {
-				props.add( URI.class.cast( o ) );
+		for ( Set<Value> os : properties.values() ) {
+			for ( Value o : os ) {
+				if ( o instanceof URI ) {
+					props.add( URI.class.cast( o ) );
+				}
 			}
 		}
 

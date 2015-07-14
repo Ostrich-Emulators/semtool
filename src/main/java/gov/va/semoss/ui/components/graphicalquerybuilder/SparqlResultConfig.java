@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,17 +21,17 @@ import org.openrdf.model.URI;
  */
 public class SparqlResultConfig implements Comparable<SparqlResultConfig> {
 
-	private final AbstractNodeEdgeBase id;
+	private final QueryNodeEdgeBase id;
 	private URI property;
 	private String label;
 	private boolean optional = false;
 	private boolean include = false;
 
-	public SparqlResultConfig( AbstractNodeEdgeBase id ) {
+	public SparqlResultConfig( QueryNodeEdgeBase id ) {
 		this.id = id;
 	}
 
-	public SparqlResultConfig( AbstractNodeEdgeBase id, URI property, String name ) {
+	public SparqlResultConfig( QueryNodeEdgeBase id, URI property, String name ) {
 		this.id = id;
 		this.property = property;
 		label = name;
@@ -71,7 +70,7 @@ public class SparqlResultConfig implements Comparable<SparqlResultConfig> {
 		label = s;
 	}
 
-	public AbstractNodeEdgeBase getId() {
+	public QueryNodeEdgeBase getId() {
 		return id;
 	}
 
@@ -138,9 +137,9 @@ public class SparqlResultConfig implements Comparable<SparqlResultConfig> {
 		return null;
 	}
 
-	public static Set<URI> getProperties( Map<AbstractNodeEdgeBase, List<SparqlResultConfig>> map ) {
+	public static Set<URI> getProperties( Map<QueryNodeEdgeBase, List<SparqlResultConfig>> map ) {
 		Set<URI> props = new HashSet<>();
-		for ( Map.Entry<AbstractNodeEdgeBase, List<SparqlResultConfig>> en : map.entrySet() ) {
+		for ( Map.Entry<QueryNodeEdgeBase, List<SparqlResultConfig>> en : map.entrySet() ) {
 			for ( SparqlResultConfig src : en.getValue() ) {
 				props.add( src.getProperty() );
 			}

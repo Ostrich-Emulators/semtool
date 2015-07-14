@@ -23,12 +23,11 @@ import java.awt.Color;
 import java.awt.Paint;
 
 import gov.va.semoss.om.SEMOSSEdge;
-import static gov.va.semoss.ui.transformer.SelectingTransformer.SelectedState.NOT_SELECTED;
 
 /**
  * Transforms the edges of a graph so they can be highlighted.
  */
-public class ArrowPaintTransformer extends SelectingTransformer<SEMOSSEdge, Paint> {
+public class ArrowPaintTransformer<T extends SEMOSSEdge> extends SelectingTransformer<T, Paint> {
 
 	@Override
 	protected Paint transformNormal( SEMOSSEdge t ) {

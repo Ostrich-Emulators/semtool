@@ -28,7 +28,7 @@ import java.util.Map;
 
 /**
  */
-public class EdgeStrokeTransformer extends SelectingTransformer<SEMOSSEdge, Stroke> {
+public class EdgeStrokeTransformer<T extends SEMOSSEdge> extends SelectingTransformer<T, Stroke> {
 
 	private Map<SEMOSSEdge, Double> edges = new HashMap<>();
 	public static final float DEFAULT_SIZE = 0.3f;

@@ -7,8 +7,6 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.ui.components.SaveAsInsightPanel;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
@@ -45,7 +43,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				JPanel jpnl = new JPanel( new BorderLayout() );
-				MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> map
+				MultiMap<QueryNodeEdgeBase, SparqlResultConfig> map
 						= pnl.getSparqlConfigs();
 
 				List<URI> concepts = DBToLoadingSheetExporter.createConceptList( pnl.getEngine() );
@@ -67,7 +65,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 
 								// FIXME: need to figure out if we're a concept or an edge
 								boolean isconcept = false;
-								for ( SEMOSSVertex v : pnl.getGraph().getVertices() ) {
+								for ( QueryNode v : pnl.getGraph().getVertices() ) {
 									if ( src.getId().equals( v ) ) {
 										isconcept = true;
 									}
@@ -78,8 +76,8 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 								}
 								else {
 									// we have an edge, so figure out the endpoints
-									Pair<SEMOSSVertex> verts
-											= pnl.getGraph().getEndpoints( SEMOSSEdge.class.cast( src.getId() ) );
+									Pair<QueryNode> verts
+											= pnl.getGraph().getEndpoints( QueryEdge.class.cast( src.getId() ) );
 									URI starttype = verts.getFirst().getType();
 									URI endtype = verts.getSecond().getType();
 
@@ -97,7 +95,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 							}
 
 							editor.setType( src.getProperty() );
-							editor.setChecked( src.getId().isMarked( src.getProperty() ) );
+							editor.setChecked( src.getId().isSelected( src.getProperty() ) );
 							return editor;
 						}
 						else {

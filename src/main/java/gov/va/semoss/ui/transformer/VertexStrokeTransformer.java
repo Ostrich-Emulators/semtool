@@ -26,7 +26,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 
 /**
  */
-public class VertexStrokeTransformer extends SelectingTransformer<SEMOSSVertex, Stroke> {
+public class VertexStrokeTransformer<T extends SEMOSSVertex> extends SelectingTransformer<T, Stroke> {
 
 	private final Stroke selected = new BasicStroke( 1f );
 	private final Stroke normal = new BasicStroke( 0f );

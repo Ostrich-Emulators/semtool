@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
@@ -33,17 +32,17 @@ public class SparqlResultTableModel extends AbstractTableModel {
 				Boolean.class };
 
 	private final List<SparqlResultConfig> list = new ArrayList<>();
-	private final Map<AbstractNodeEdgeBase, SparqlResultConfig> subjects = new HashMap<>();
+	private final Map<QueryNodeEdgeBase, SparqlResultConfig> subjects = new HashMap<>();
 
-	public SparqlResultTableModel( MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> data ) {
-		for ( Map.Entry<? extends AbstractNodeEdgeBase, List<SparqlResultConfig>> en : data.entrySet() ) {
+	public SparqlResultTableModel( MultiMap<QueryNodeEdgeBase, SparqlResultConfig> data ) {
+		for ( Map.Entry<QueryNodeEdgeBase, List<SparqlResultConfig>> en : data.entrySet() ) {
 			for ( SparqlResultConfig src : en.getValue() ) {
-				if ( src.getProperty().equals( GraphicalQueryPanel.SPARQLNAME ) ) {
-					subjects.put( src.getId(), src );
-				}
-				else {
+				//if ( src.getProperty().equals( GraphicalQueryPanel.SPARQLNAME ) ) {
+					//subjects.put( src.getId(), src );
+				//}
+				//else {
 					list.add( src );
-				}
+				//}
 			}
 		}
 
@@ -79,7 +78,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	public Object getValueAt( int row, int col ) {
 		SparqlResultConfig src = list.get( row );
 		URI property = src.getProperty();
-		AbstractNodeEdgeBase base = src.getId();
+		QueryNodeEdgeBase base = src.getId();
 
 		switch ( col ) {
 			case 0:
@@ -89,8 +88,8 @@ public class SparqlResultTableModel extends AbstractTableModel {
 			case 2:
 				return ValueTableModel.getValueFromObject( src.getId().getProperty( property ) );
 			case 3: {
-				if ( src.getId().isMarked( property ) ) {
-					return src.getLabel();
+				if ( base.isSelected( property ) ) {
+					return base.getLabel( property );
 				}
 				else {
 					return "";
@@ -108,12 +107,12 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	@Override
 	public void setValueAt( Object aValue, int row, int col ) {
 		SparqlResultConfig src = list.get( row );
-		AbstractNodeEdgeBase base = src.getId();
+		QueryNodeEdgeBase base = src.getId();
 
 		if ( 0 == col ) {
 			SparqlResultConfig ss = subjects.get( base );
 			ss.setLabel( aValue.toString() );
-			base.setProperty( GraphicalQueryPanel.SPARQLNAME, aValue.toString() );
+			base.setLabel( src.getProperty(), aValue.toString() );
 			fireTableDataChanged();
 		}
 		else if ( 2 == col ) {
@@ -134,16 +133,17 @@ public class SparqlResultTableModel extends AbstractTableModel {
 		}
 		else if ( 4 == col ) {
 			src.setIncluded( Boolean.class.cast( aValue ) );
-			base.mark( src.getProperty(), src.isIncluded() );
+			base.setSelected( src.getProperty(), src.isIncluded() );
 			fireTableDataChanged();
 		}
 		else if ( 5 == col ) {
 			src.setOptional( Boolean.class.cast( aValue ) );
+			base.setOptional( src.getProperty(), src.isOptional() );
 			fireTableDataChanged();
 		}
 	}
 
-	public SparqlResultConfig getRawRow( int row ){
+	public SparqlResultConfig getRawRow( int row ) {
 		return list.get( row );
 	}
 }

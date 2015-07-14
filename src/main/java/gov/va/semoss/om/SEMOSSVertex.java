@@ -55,8 +55,7 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 			TypeColorShapeTable.getInstance().initializeColor( this );
 			TypeColorShapeTable.getInstance().initializeShape( this );			
 		}
-	}
-	
+	}	
 
 	// this is the out vertex
 	public void addInEdge( SEMOSSEdge edge ) {
