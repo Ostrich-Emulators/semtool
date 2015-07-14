@@ -43,6 +43,7 @@ public class ValueTableModel extends AbstractTableModel {
 	public static final String NEEDS_SAVE = "savesetting";
 	public static final String READ_ONLY = "readonly";
 
+	private static final Logger log = Logger.getLogger( ValueTableModel.class );
 	private static final long serialVersionUID = 7491106662313232478L;
 	private static final String EVERYTHING = "everything"; // for prop listeners
 	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
@@ -558,34 +559,75 @@ public class ValueTableModel extends AbstractTableModel {
 		return removeExtraneousDoubleQuotes( input );
 	}
 
-	public static Object getValueFromLiteral( Literal input ) {
-		if ( input == null ) {
+	public static Object getObjectFromValue( Value value ) {
+		if ( value == null ) {
 			return null;
 		}
 
-		Class<?> theClass = getClassForValue( input );
+		Class<?> theClass = getClassForValue( value );
+
+		if ( URI.class == theClass ) {
+			return value;
+		}
+
+		Literal input = Literal.class.cast( value );
+		String val = input.getLabel();
+		boolean isempty = val.isEmpty();
 
 		if ( theClass == Double.class ) {
-			return input.doubleValue();
+			return ( isempty ? null : input.doubleValue() );
 		}
 
 		if ( theClass == Integer.class ) {
-			return input.intValue();
+			return ( isempty ? null : input.intValue() );
 		}
 
 		if ( theClass == Boolean.class ) {
-			return input.booleanValue();
+			return ( isempty ? null : input.booleanValue() );
 		}
 
 		if ( theClass == Float.class ) {
-			return input.floatValue();
+			return ( isempty ? null : input.floatValue() );
 		}
 
 		if ( theClass == Date.class ) {
-			return input.calendarValue();
+			return ( isempty ? null : input.calendarValue() );
 		}
 
 		return removeExtraneousDoubleQuotes( input.stringValue() );
+	}
+
+	public static Value getValueFromObject( Object o ) {
+		if ( null == o ) {
+			return null;
+		}
+
+		if ( o instanceof Value ) {
+			return Value.class.cast( o );
+		}
+
+		ValueFactory vf = new ValueFactoryImpl();
+		if ( o instanceof String ) {
+			return vf.createLiteral( String.class.cast( o ) );
+		}
+		else if ( o instanceof Double ) {
+			return vf.createLiteral( Double.class.cast( o ) );
+		}
+		else if ( o instanceof Integer ) {
+			return vf.createLiteral( Integer.class.cast( o ) );
+		}
+		else if ( o instanceof Boolean ) {
+			return vf.createLiteral( Boolean.class.cast( o ) );
+		}
+		else if ( o instanceof Date ) {
+			return vf.createLiteral( Date.class.cast( o ) );
+		}
+		else if ( o instanceof Float ) {
+			return vf.createLiteral( Float.class.cast( o ) );
+		}
+
+		log.warn( "unhandled data type for object: " + o );
+		return null;
 	}
 
 	public static String removeExtraneousDoubleQuotes( String input ) {

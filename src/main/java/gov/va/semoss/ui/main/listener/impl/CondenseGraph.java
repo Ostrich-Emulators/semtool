@@ -50,24 +50,39 @@ public class CondenseGraph extends AbstractAction {
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		GraphCondensePanel gcp = new GraphCondensePanel( gps );
-		String options[] = { "Okay", "Cancel" };
+		String options[] = { "OK", "Cancel" };
 
 		int opt = JOptionPane.showOptionDialog( null, gcp, "Condense Graph",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
 				options[0] );
 		if ( 0 == opt ) {
 
+			int[] nodecount = new int[1];
 			ProgressTask pt = new ProgressTask( "Condensing Graph", new Runnable() {
 
 				@Override
 				public void run() {
+					DirectedGraph<SEMOSSVertex, SEMOSSEdge> oldg = gps.getVisibleGraph();
+					nodecount[0] = oldg.getVertexCount();
+
 					DirectedGraph<SEMOSSVertex, SEMOSSEdge> newg
-							= condense( gps.getVisibleGraph(), gcp.getEdgeTypeToRemove(),
+							= condense( oldg, gcp.getEdgeTypeToRemove(),
 									gcp.getEdgeEndpointType(), gcp.getPropertySource() );
 					gps.getGraphData().setGraph( newg );
 					gps.updateGraph();
 				}
-			} );
+			} ) {
+
+				@Override
+				public void done() {
+					super.done();
+					int count = nodecount[0] - gps.getVisibleGraph().getVertexCount();
+					String msg = "Graph condensed: " + count + " Nodes removed";
+					this.setLabel( msg );
+					JOptionPane.showMessageDialog( gps, msg, "Condenser Results",
+							JOptionPane.INFORMATION_MESSAGE );
+				}
+			};
 
 			OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 		}

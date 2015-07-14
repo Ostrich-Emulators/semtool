@@ -332,7 +332,7 @@ public class Utility {
 	 *
 	 * @return the label, or the localname if no label is in the engine
 	 */
-	public static String getInstanceLabel( URI uri, IEngine eng ) {
+	public static <X extends Resource> String getInstanceLabel( X uri, IEngine eng ) {
 		return getInstanceLabels( Arrays.asList( uri ), eng ).get( uri );
 	}
 

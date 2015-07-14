@@ -5,13 +5,32 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.ui.components.SaveAsInsightPanel;
+import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.Utility;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  *
@@ -22,6 +41,104 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 	private static final Logger log = Logger.getLogger( EmptySpacePopup.class );
 
 	public EmptySpacePopup( GraphicalQueryPanel pnl ) {
+		add( new AbstractAction( "Manage Constraints" ) {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				JPanel jpnl = new JPanel( new BorderLayout() );
+				MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> map
+						= pnl.getSparqlConfigs();
+
+				List<URI> concepts = DBToLoadingSheetExporter.createConceptList( pnl.getEngine() );
+				Map<URI, String> conceptmap
+						= Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, pnl.getEngine() ) );
+				final ValueEditor types = new ValueEditor();
+				final ValueEditor normal = new ValueEditor();
+
+				SparqlResultTableModel model = new SparqlResultTableModel( map );
+
+				final JTable tbl = new JTable( model ) {
+
+					@Override
+					public TableCellEditor getCellEditor( int row, int column ) {
+						if ( 2 == column ) {
+							ValueEditor editor;
+							SparqlResultConfig src = model.getRawRow( row );
+							if ( RDF.TYPE.equals( src.getProperty() ) ) {
+
+								// FIXME: need to figure out if we're a concept or an edge
+								boolean isconcept = false;
+								for ( SEMOSSVertex v : pnl.getGraph().getVertices() ) {
+									if ( src.getId().equals( v ) ) {
+										isconcept = true;
+									}
+								}
+
+								if ( isconcept ) {
+									types.setChoices( conceptmap );
+								}
+								else {
+									// we have an edge, so figure out the endpoints
+									Pair<SEMOSSVertex> verts
+											= pnl.getGraph().getEndpoints( SEMOSSEdge.class.cast( src.getId() ) );
+									URI starttype = verts.getFirst().getType();
+									URI endtype = verts.getSecond().getType();
+
+									List<URI> links = DBToLoadingSheetExporter.getPredicatesBetween( starttype,
+											endtype, pnl.getEngine() );
+									Map<URI, String> labels = Utility.getInstanceLabels( links, pnl.getEngine() );
+									labels.put( Constants.ANYNODE, "<Any>" );
+									types.setChoices( Utility.sortUrisByLabel( labels ) );
+								}
+
+								editor = types;
+							}
+							else {
+								editor = normal;
+							}
+
+							editor.setType( src.getProperty() );
+							editor.setChecked( src.getId().isMarked( src.getProperty() ) );
+							return editor;
+						}
+						else {
+							return super.getCellEditor( row, column );
+						}
+					}
+				};
+
+				LabeledPairTableCellRenderer renderer
+						= LabeledPairTableCellRenderer.getUriPairRenderer();
+				Set<URI> labels = SparqlResultConfig.getProperties( map );
+				renderer.cache( Utility.getInstanceLabels( labels, pnl.getEngine() ) );
+
+				LabeledPairTableCellRenderer trenderer
+						= LabeledPairTableCellRenderer.getValuePairRenderer( pnl.getEngine() );
+				trenderer.cache( Constants.ANYNODE, "<Any>" );
+
+				tbl.setAutoCreateRowSorter( true );
+				tbl.setFillsViewportHeight( true );
+
+				tbl.setDefaultRenderer( URI.class, renderer );
+				tbl.setDefaultRenderer( Value.class, trenderer );
+
+				jpnl.add( new JScrollPane( tbl ) );
+
+				JOptionPane.showConfirmDialog( JOptionPane.getFrameForComponent( pnl ),
+						jpnl, "Query Results Config", JOptionPane.PLAIN_MESSAGE );
+				pnl.update();
+			}
+		} );
+
+		add( new AbstractAction( "Save as Insight" ) {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				SaveAsInsightPanel.showDialog( JOptionPane.getFrameForComponent( pnl ),
+						pnl.getEngine(), pnl.getQuery() );
+
+			}
+		} );
+
+		addSeparator();
 		add( new AbstractAction( "Clear Query" ) {
 
 			@Override
@@ -31,15 +148,6 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 						"Clear the Graph", JOptionPane.YES_NO_OPTION ) ) {
 					pnl.clear();
 				}
-			}
-		} );
-
-		add( new AbstractAction( "Save as Insight" ) {
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				SaveAsInsightPanel.showDialog( JOptionPane.getFrameForComponent( pnl ), 
-						pnl.getEngine(), pnl.getQuery() );
-				
 			}
 		} );
 	}

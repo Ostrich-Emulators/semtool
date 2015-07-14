@@ -58,9 +58,9 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 		intermediateType.setRenderer( renderer );
 		endpointType.setRenderer( renderer );
 
-		inprop.setActionCommand(EdgePropertySource.INEDGE.toString() );
-		outprop.setActionCommand(EdgePropertySource.OUTEDGE.toString() );
-		nodeprop.setActionCommand(EdgePropertySource.NODE.toString() );
+		inprop.setActionCommand( EdgePropertySource.INEDGE.toString() );
+		outprop.setActionCommand( EdgePropertySource.OUTEDGE.toString() );
+		nodeprop.setActionCommand( EdgePropertySource.NODE.toString() );
 	}
 
 	public URI getEdgeTypeToRemove() {

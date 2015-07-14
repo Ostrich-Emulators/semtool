@@ -10,7 +10,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import org.apache.commons.collections15.Factory;
-import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  *
@@ -19,18 +19,13 @@ import org.openrdf.model.URI;
 public class EdgeFactory implements Factory<SEMOSSEdge> {
 
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
-	private URI edgetype;
 
 	@Override
 	public SEMOSSEdge create() {
 		SEMOSSEdge edge = new SEMOSSEdge( uribuilder.uniqueUri() );
-		edge.setLabel( "" );
+		edge.removeProperty( RDFS.LABEL );
 		edge.removeProperty( AbstractNodeEdgeBase.LEVEL );
 
 		return edge;
-	}
-
-	public void setType( URI type ) {
-		edgetype = type;
 	}
 }
