@@ -9,12 +9,16 @@ import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.ObservableGraph;
+import edu.uci.ics.jung.graph.event.GraphEvent;
+import edu.uci.ics.jung.graph.event.GraphEvent.Type;
+import edu.uci.ics.jung.graph.event.GraphEventListener;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.control.AbstractPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.EditingPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
@@ -34,6 +38,7 @@ import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.awt.Color;
@@ -45,8 +50,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -55,6 +64,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.RDF;
 
 /**
  *
@@ -62,22 +72,27 @@ import org.openrdf.model.impl.URIImpl;
  */
 public class GraphicalQueryPanel extends javax.swing.JPanel {
 
+	public static final URI SPARQLNAME = new URIImpl( "semoss://name.sparql" );
 	private static final Logger log = Logger.getLogger( GraphicalQueryPanel.class );
 	private IEngine engine;
 	private final String progress;
 	private final Action addConceptNodeAction;
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE );
-	private final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
-	//private final ObservableGraph<SEMOSSVertex, SEMOSSEdge> observer =
-	//		new ObservableGraph<>( graph );
-	private final Layout<SEMOSSVertex, SEMOSSEdge> vizlayout = new StaticLayout<>( graph );
+	private final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseMultigraph<>();
+	private final ObservableGraph<SEMOSSVertex, SEMOSSEdge> observer
+			= new ObservableGraph<>( graph );
+	private final Layout<SEMOSSVertex, SEMOSSEdge> vizlayout = new StaticLayout<>( observer );
 	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view
 			= new VisualizationViewer<>( vizlayout );
+	private final MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config
+			= new MultiMap<>();
 	private final VertexFactory vfac = new VertexFactory();
 	private final EdgeFactory efac = new EdgeFactory();
 	private GqbLabelTransformer<SEMOSSVertex> vlt;
 	private GqbLabelTransformer<SEMOSSEdge> elt;
 	private SyntaxTextEditor sparqlarea;
+	private EditingModalGraphMouse mouse;
+	private ButtonGroup buttongroup;
 
 	/**
 	 * Creates new form GraphicalQueryBuilderPanel
@@ -97,10 +112,11 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				URI concept = new URIImpl( e.getActionCommand() );
-				log.debug( "clicked on " + concept );
 				vfac.setType( concept );
 			}
 		};
+
+		addGraphListener();
 	}
 
 	public void setSparqlArea( SyntaxTextEditor ste ) {
@@ -184,18 +200,19 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );
 
-						ButtonGroup group = new ButtonGroup();
+						buttongroup = new ButtonGroup();
 
-						for ( Map.Entry<URI, String> en : Utility.sortUrisByLabel( conceptlabels ).entrySet() ) {
+						Map<URI, String> sorted = Utility.sortUrisByLabel( conceptlabels );
+						for ( Map.Entry<URI, String> en : sorted.entrySet() ) {
 							JToggleButton button = new JToggleButton( addConceptNodeAction );
 							button.setText( en.getValue() );
 							button.setActionCommand( en.getKey().stringValue() );
 							SEMOSSVertex v = new SEMOSSVertex( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
-									new Dimension( 15, 15 ) ) );
+									new Dimension( 12, 12 ) ) );
 							typearea.add( button );
-							group.add( button );
+							buttongroup.add( button );
 						}
 					}
 
@@ -225,7 +242,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 				return super.transformNotSelected( t, false );
 			}
 		};
-		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
+		EdgeStrokeTransformer est = new EdgeStrokeTransformer( 1.5, 1.5, 1.5 );
 		ArrowPaintTransformer adpt = new ArrowPaintTransformer();
 		ArrowPaintTransformer aft = new ArrowPaintTransformer();
 
@@ -264,10 +281,12 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	}
 
 	public void clear() {
+		config.clear();
 		List<SEMOSSVertex> verts = new ArrayList<>( graph.getVertices() );
 		for ( SEMOSSVertex v : verts ) {
 			graph.removeVertex( v );
 		}
+
 		vizlayout.reset();
 		update();
 	}
@@ -287,30 +306,179 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		return engine;
 	}
 
+	/**
+	 * Gets a reference to this query's graph
+	 *
+	 * @return
+	 */
+	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
+		return graph;
+	}
+
+	/**
+	 * Gets a reference to the sparql configs for this query
+	 *
+	 * @return
+	 */
+	public MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> getSparqlConfigs() {
+		return config;
+	}
+
 	private void addMouse() {
-		EditingModalGraphMouse gm
-				= new EditingModalGraphMouse( view.getRenderContext(), vfac, efac );
-		gm.remove( gm.getPopupEditingPlugin() );
-		gm.add( new MousePopuper() );
-		view.setGraphMouse( gm );
+		mouse = new EditingModalGraphMouse( view.getRenderContext(), vfac, efac );
+
+		mouse.remove( mouse.getPopupEditingPlugin() );
+		mouse.add( new MousePopuper() );
+
+		mouse.remove( mouse.getEditingPlugin() );
+		mouse.add( new QueryGraphMousePlugin<>( vfac, efac ) );
+
+		view.setGraphMouse( mouse );
 	}
 
 	private void updateSparql() {
+		updateSparqlConfigs();
+
 		if ( null != sparqlarea ) {
 			String sparql = ( 0 == graph.getVertexCount()
 					? ""
-					: new GraphToSparql( getEngine().getNamespaces() ).select( graph ) );
+					: new GraphToSparql( getEngine().getNamespaces() ).select( graph, config ) );
 			sparqlarea.setText( sparql );
 		}
 	}
 
-	private class MousePopuper extends AbstractPopupGraphMousePlugin {
+	private int findNextId( String nodeOrLink ) {
+		int maxid = -1;
+		Pattern pat = Pattern.compile( nodeOrLink + "([0-9]+)$" );
 
-		public MousePopuper() {
+		for ( Map.Entry<AbstractNodeEdgeBase, List<SparqlResultConfig>> en : config.entrySet() ) {
+			for ( SparqlResultConfig src : en.getValue() ) {
+				String lbl = src.getLabel();
+				Matcher m = pat.matcher( lbl );
+				if ( m.matches() ) {
+					String val = m.group( 1 );
+					int id = Integer.parseInt( val );
+
+					if ( id > maxid ) {
+						maxid = id;
+					}
+				}
+			}
 		}
 
-		public MousePopuper( int modifiers ) {
-			super( modifiers );
+		return maxid + 1;
+	}
+
+	/**
+	 * Removes configs that refer to nodes that aren't in the graph anymore
+	 */
+	private void removeOldConfigs() {
+		Set<AbstractNodeEdgeBase> keepers = new HashSet<>();
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			keepers.add( v );
+		}
+		for ( SEMOSSEdge v : graph.getEdges() ) {
+			keepers.add( v );
+		}
+
+		Set<AbstractNodeEdgeBase> toremove = new HashSet<>( config.keySet() );
+		toremove.removeAll( keepers );
+		for ( AbstractNodeEdgeBase b : toremove ) {
+			config.remove( b );
+		}
+
+	}
+
+	/**
+	 * Assigns new configs to nodes in the graph after first removing old configs.
+	 */
+	private void updateSparqlConfigs() {
+		removeOldConfigs();
+
+		int nextnodeid = findNextId( "node" );
+		int nextlinkid = findNextId( "link" );
+		int nextobjid = findNextId( "obj" );
+
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			if ( !config.containsKey( v ) ) {
+				SparqlResultConfig src = new SparqlResultConfig( v, SPARQLNAME,
+						"node" + ( nextnodeid++ ) );
+				config.add( v, src );
+				v.setProperty( SPARQLNAME, src.getLabel() );
+			}
+		}
+
+		for ( SEMOSSEdge v : graph.getEdges() ) {
+			if ( !config.containsKey( v ) ) {
+				SparqlResultConfig src = new SparqlResultConfig( v, SPARQLNAME,
+						"link" + ( nextlinkid++ ) );
+				config.add( v, src );
+				v.setProperty( SPARQLNAME, src.getLabel() );
+			}
+		}
+
+		for ( SEMOSSVertex v : graph.getVertices() ) {
+			List<SparqlResultConfig> vals = config.getNN( v );
+
+			Set<URI> seen = new HashSet<>();
+			seen.add( RDF.SUBJECT );
+			for ( SparqlResultConfig src : vals ) {
+				seen.add( src.getProperty() );
+			}
+
+			// skip properties if we already have a property label for it
+			Set<URI> todo = new HashSet<>( v.getProperties().keySet() );
+			todo.removeAll( seen );
+
+			for ( URI prop : todo ) {
+				SparqlResultConfig src
+						= new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) );
+				src.setIncluded( v.isMarked( prop ) );
+				vals.add( src );
+			}
+		}
+
+		for ( SEMOSSEdge v : graph.getEdges() ) {
+			List<SparqlResultConfig> vals = config.getNN( v );
+
+			Set<URI> seen = new HashSet<>();
+			seen.add( RDF.SUBJECT );
+			for ( SparqlResultConfig src : vals ) {
+				seen.add( src.getProperty() );
+			}
+
+			// skip properties if we already have a property label for it
+			Set<URI> todo = new HashSet<>( v.getProperties().keySet() );
+			todo.removeAll( seen );
+
+			for ( URI prop : todo ) {
+				SparqlResultConfig src
+						= new SparqlResultConfig( v, prop, "obj" + ( nextobjid++ ) );
+				src.setIncluded( v.isMarked( prop ) );
+				vals.add( src );
+			}
+		}
+	}
+
+	private void addGraphListener() {
+		observer.addGraphEventListener( new GraphEventListener() {
+
+			@Override
+			public void handleGraphEvent( GraphEvent evt ) {
+				updateSparql();
+
+				if ( Type.VERTEX_ADDED == evt.getType()
+						|| Type.VERTEX_ADDED == evt.getType() ) {
+
+				}
+			}
+		} );
+	}
+
+	private class MousePopuper extends EditingPopupGraphMousePlugin {
+
+		public MousePopuper() {
+			super( vfac, efac );
 		}
 
 		@Override

@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.om;
 
+import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Color;
@@ -14,10 +15,14 @@ import java.util.Map;
 import java.util.Objects;
 
 import java.util.Set;
+import org.openrdf.model.BNode;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  *
@@ -28,7 +33,7 @@ public class AbstractNodeEdgeBase {
 	//the transient keyword keeps this from being sent to the js (ChartIt)
 	public transient static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
 
-	private final transient Map<URI, Object> properties = new HashMap<>();
+	private final transient Map<URI, Value> properties = new HashMap<>();
 	private transient boolean visible = true;
 	private transient URI id;
 	private transient Color color;
@@ -107,11 +112,16 @@ public class AbstractNodeEdgeBase {
 	}
 
 	public String getLabel() {
-		return properties.get( RDFS.LABEL ).toString();
+		return ( properties.containsKey( RDFS.LABEL )
+				? properties.get( RDFS.LABEL ).toString() : "" );
 	}
 
 	public void setProperty( URI prop, Object propValue ) {
-		properties.put( prop, propValue );
+		setValue( prop, ValueTableModel.getValueFromObject( propValue ) );
+	}
+
+	public void setValue( URI prop, Value val ) {
+		properties.put( prop, val );
 	}
 
 	public void setPropHash( Map<String, Object> _propHash ) {
@@ -122,11 +132,23 @@ public class AbstractNodeEdgeBase {
 		return propHash;
 	}
 
-	public Object getProperty( URI arg0 ) {
-		return properties.get( arg0 );
+	public Object getProperty( URI prop ) {
+		return ValueTableModel.getObjectFromValue( getValue( prop ) );
+	}
+
+	public Value getValue( URI prop ) {
+		return properties.get( prop );
 	}
 
 	public Map<URI, Object> getProperties() {
+		Map<URI, Object> map = new HashMap<>();
+		for ( Map.Entry<URI, Value> en : properties.entrySet() ) {
+			map.put( en.getKey(), ValueTableModel.getObjectFromValue( en.getValue() ) );
+		}
+		return map;
+	}
+
+	public Map<URI, Value> getValues() {
 		return properties;
 	}
 
@@ -135,11 +157,11 @@ public class AbstractNodeEdgeBase {
 	}
 
 	public void setURI( URI uri ) {
-		setProperty( RDF.SUBJECT, uri );
+		setValue( RDF.SUBJECT, uri );
 	}
 
 	public URI getURI() {
-		return URI.class.cast( getProperty( RDF.SUBJECT ) );
+		return URI.class.cast( getValue( RDF.SUBJECT ) );
 	}
 
 	public URI getType() {
@@ -151,7 +173,29 @@ public class AbstractNodeEdgeBase {
 	}
 
 	public void setType( URI type ) {
-		setProperty( RDF.TYPE, type );
+		setValue( RDF.TYPE, type );
+	}
+
+	/**
+	 * Gets the datatype for the value that would be returned for the given
+	 * property from a call to {@link #getProperty(org.openrdf.model.URI) }
+	 *
+	 * @param prop the property to find
+	 * @return the datatype, or {@link XMLSchema#ANYURI} if the value is a URI, or
+	 * {@link XMLSChema#ENTITY} for a BNode.
+	 */
+	public URI getDataType( URI prop ) {
+		if ( properties.containsKey( prop ) ) {
+			Value data = properties.get( prop );
+			if ( data instanceof URI ) {
+				return XMLSchema.ANYURI;
+			}
+			else if ( data instanceof BNode ) {
+				return XMLSchema.ENTITY;
+			}
+			return Literal.class.cast( data ).getDatatype();
+		}
+		return null;
 	}
 
 	public void mark( URI prop, boolean makeMark ) {

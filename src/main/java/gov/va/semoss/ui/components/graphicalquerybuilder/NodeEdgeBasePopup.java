@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -46,6 +47,22 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 		add( new OneVariableDialogItem( v, pnl, RDFS.LABEL, "Set Instance Label",
 				"Set the label of this node", "Instance Label" ) );
 		add( makeTypeItem( v, pnl ) );
+
+		add( new AbstractAction( "Change Query ID" ) {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				SparqlResultConfig src = SparqlResultConfig.getOne( pnl.getSparqlConfigs().get( v ),
+						GraphicalQueryPanel.SPARQLNAME );
+				if ( null != src ) {
+					String oldid = src.getLabel();
+					String newval = JOptionPane.showInputDialog( pnl, "New Query ID", oldid );
+					src.setLabel( newval );
+					v.setProperty( GraphicalQueryPanel.SPARQLNAME, newval );
+					pnl.update();
+				}
+			}
+		} );
 
 		add( new AbstractAction( "Remove this Element" ) {
 
@@ -126,6 +143,7 @@ public abstract class NodeEdgeBasePopup<T extends AbstractNodeEdgeBase> extends 
 					@Override
 					public void itemStateChanged( ItemEvent e ) {
 						v.mark( RDF.SUBJECT, selectMe.isSelected() );
+						v.mark( GraphicalQueryPanel.SPARQLNAME, selectMe.isSelected() );
 						pnl.update();
 					}
 				} );

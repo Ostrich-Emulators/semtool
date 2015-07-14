@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -56,7 +57,14 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	public static ConstraintValue getValue( URI property, String label, Object value,
 			boolean checked ) {
 		JTextField input = new JTextField();
-		input.setText( value.toString() );
+		if ( null != value ) {
+			if ( value instanceof Value ) {
+				input.setText( Value.class.cast( value ).stringValue() );
+			}
+			else {
+				input.setText( value.toString() );
+			}
+		}
 
 		Map<URI, String> propmap = new HashMap<>();
 		propmap.put( property, Utility.getInstanceLabel( property,
@@ -147,8 +155,8 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		property.setModel( model );
 		property.setEditable( false );
 		property.setRenderer( renderer );
-		property.setSelectedItem( null == proptype ? Constants.ANYNODE : valForType );
-		
+		property.setSelectedItem( null == proptype ? Constants.ANYNODE : proptype );
+
 		setType( valForType );
 	}
 
@@ -165,9 +173,13 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 		else {
 			Enumeration<AbstractButton> radios = typegroup.getElements();
+			Class<?> typeclass = ( o instanceof Value
+					? ValueTableModel.getClassForValue( Value.class.cast( o ) )
+					: o.getClass() );
+
 			while ( radios.hasMoreElements() ) {
 				AbstractButton radio = radios.nextElement();
-				if ( radio.getActionCommand().equalsIgnoreCase( o.getClass().getSimpleName() ) ) {
+				if ( radio.getActionCommand().equalsIgnoreCase( typeclass.getSimpleName() ) ) {
 					radio.setSelected( true );
 				}
 			}

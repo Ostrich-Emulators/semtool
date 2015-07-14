@@ -14,6 +14,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -34,8 +36,8 @@ public class NonLegacyQueryBuilder {
 	//External Parameter Query:
 	private String extQuery;
 	
-    /**   Builds selected parameter values into a non-legacy Insight query, 
-     * and returns the filled query. If the "paramHash" is empty, then the
+    /**   Builds user-selected parameter values into a non-legacy query, and 
+     * returns the filled query. If the "paramHash" is empty, then the
      * passed-in query will be returned unaltered.
      * 
      * @param query -- (String) Sparql query in the non-legacy format, where 
@@ -46,25 +48,32 @@ public class NonLegacyQueryBuilder {
      *    is a variable name occurring in "query", and the value is a String
      *    URI.
      *    
-     * @return buildNonLegacyInsightQuery -- (String) The "query" with certain
+     * @return buildNonLegacyQuery -- (String) The "query" with certain
      *    variables replaced by URI's from "paramHash". 
      *    
-     *    WARNING: A run-time exception will occur if a key from "paramHash"
-     *             occurs in the SELECT or CONSTRUCT clause.
+     *    WARNING: A run-time exception may occur if a key from "paramHash"
+     *             occurs in the SELECT clause. Wherever that key occurs,
+     *             it will be replaced by a URI.
      */
-	public static String buildNonLegacyInsightQuery(String query, Map<String, String> paramHash){
+	public static String buildNonLegacyQuery(String query, Map<String, String> paramHash){
         QueryExecutorAdapter<String> queryExer = new QueryExecutorAdapter<String>(){
- 	      @Override
- 	      public void handleTuple(BindingSet set, ValueFactory fac){}
- 	   };
+ 	        @Override
+ 	        public void handleTuple(BindingSet set, ValueFactory fac){}
+ 	    };
         queryExer.setSparql(query);
- 	   Map<String, String> map = new HashMap<>( paramHash );
- 	   for ( Map.Entry<String, String> e : map.entrySet() ) {
- 		  String key = e.getKey();
- 		  String value = e.getValue();
- 	      queryExer.bindURI(key, value);
- 	   }
- 	   return queryExer.bindAndGetSparql();
+ 	    Map<String, String> map = new HashMap<>( paramHash );
+ 	    for ( Map.Entry<String, String> e : map.entrySet() ) {
+ 		   String key = e.getKey();
+ 		   String value = e.getValue();
+ 		   //We must prevent the creation of "VALUES" clauses 
+ 		   //when none of the variables are used by the query:
+ 		   Pattern pattern = Pattern.compile("\\?"+key+"\\b"); 
+ 		   Matcher matcher = pattern.matcher(query);
+ 		   if(matcher.find() == true){
+ 	          queryExer.bindURI(key, value);
+ 		   }
+ 	    }
+ 	    return queryExer.bindAndGetSparql();
  	}
 	
 	/**   Fills a Parameter combo-box with labels (for display) and associated URIs.
@@ -108,7 +117,8 @@ public class NonLegacyQueryBuilder {
 	 public void setExternalQuery( String query ) {
 	    this.extQuery = query;
 	 }
-		 
+	
+	 
 	/**   Fetches data for an Insight Parameter combo-box, either from the Insight's BIND
 	 * statement (legacy), from an externally defined Type, or from an externally defined
 	 * Sparql query.
@@ -149,7 +159,7 @@ public class NonLegacyQueryBuilder {
 	          Map<String, String> paramTable = new HashMap<>();
 	          paramTable.put( Constants.ENTITY, type );
 	          sparqlQuery = extQuery == null ? Utility.fillParam(sparqlQuery, paramTable) : extQuery;
-	          
+
 	          //Add a line of namespace prefixes to the top of the query for processing:
 	          sparqlQuery = AbstractSesameEngine.processNamespaces(sparqlQuery, new HashMap<>() );
 	

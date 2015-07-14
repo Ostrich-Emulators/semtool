@@ -25,6 +25,7 @@ import gov.va.semoss.util.Constants;
 import java.awt.Shape;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
 
 /**
@@ -48,13 +49,14 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 	}
 
 	@Override
-	public void setProperty( URI prop, Object val ) {
-		super.setProperty( prop, val );
-		if ( RDF.TYPE.equals( prop ) ) {
+	public void setValue( URI prop, Value val ){
+		super.setValue( prop, val );
+		if( RDF.TYPE.equals(  prop ) ){
 			TypeColorShapeTable.getInstance().initializeColor( this );
-			TypeColorShapeTable.getInstance().initializeShape( this );
+			TypeColorShapeTable.getInstance().initializeShape( this );			
 		}
 	}
+	
 
 	// this is the out vertex
 	public void addInEdge( SEMOSSEdge edge ) {
