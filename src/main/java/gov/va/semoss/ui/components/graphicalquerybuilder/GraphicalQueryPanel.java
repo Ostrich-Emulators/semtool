@@ -307,17 +307,6 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		return graph;
 	}
 
-	/**
-	 * Gets a reference to the sparql configs for this query
-	 *
-	 * @return
-	 */
-	public MultiMap<QueryNodeEdgeBase, SparqlResultConfig> getSparqlConfigs() {
-		MultiMap<QueryNodeEdgeBase, SparqlResultConfig> config = new MultiMap<>();
-
-		return config;
-	}
-
 	private void addMouse() {
 		mouse = new EditingModalGraphMouse( view.getRenderContext(), vfac, efac );
 
