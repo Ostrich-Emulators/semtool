@@ -46,15 +46,15 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 	private void updateLabelsOfEdges() {
 		HashMap<String,String> edgeTypeHash = new HashMap<>();
 		for(SEMOSSEdge edge:edgeStore.values()) {
-			if (!edgeTypeHash.containsKey(edge.getName()))
-				edgeTypeHash.put(edge.getName(), edge.getType() + getCountOfInstancesForEdge(edge));
+			if (!edgeTypeHash.containsKey(edge.getLabel()))
+				edgeTypeHash.put(edge.getLabel(), edge.getType() + getCountOfInstancesForEdge(edge));
 			else
-				edgeTypeHash.put(edge.getName(), edgeTypeHash.get(edge.getName()) + ", "
+				edgeTypeHash.put(edge.getLabel(), edgeTypeHash.get(edge.getLabel()) + ", "
 						+ edge.getType() + getCountOfInstancesForEdge(edge));
 		}
 
 		for(SEMOSSEdge edge:edgeStore.values()) {
-			edge.setName(edgeTypeHash.get(edge.getName()));
+			edge.setLabel(edgeTypeHash.get(edge.getLabel()));
 		}
 	}
 

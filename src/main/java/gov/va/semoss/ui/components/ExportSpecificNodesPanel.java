@@ -48,8 +48,8 @@ public class ExportSpecificNodesPanel extends JPanel {
 	private JScrollPane nodesScrollPane;
 	private JList<URI> nodesJList;
 	private final LabeledPairRenderer<URI> renderer = new LabeledPairRenderer<>();
-	private JCheckBox togrid = new JCheckBox( "Export to Grid" );
-	private JCheckBox dorels = new JCheckBox( "Include Relationships" );
+	private final JCheckBox togrid = new JCheckBox( "Export to Grid" );
+	private final JCheckBox dorels = new JCheckBox( "Include Relationships" );
 
 	private File exportFile;
 	private List<URI> selectedNodes;
@@ -112,7 +112,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 	}
 
 	private URI[] getAllNodes() {
-		List<URI> uriconcepts = new DBToLoadingSheetExporter( engine ).createConceptList();
+		List<URI> uriconcepts = DBToLoadingSheetExporter.createConceptList( engine );
 		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 

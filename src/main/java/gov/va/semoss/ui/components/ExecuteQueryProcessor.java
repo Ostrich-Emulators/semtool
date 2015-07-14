@@ -4,7 +4,6 @@ import gov.va.semoss.model.vocabulary.VAS;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import java.util.prefs.Preferences;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -24,6 +23,7 @@ import gov.va.semoss.util.QuestionPlaySheetStore;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
+import java.util.HashMap;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 
@@ -113,7 +113,7 @@ public class ExecuteQueryProcessor {
 		UpdateProcessor processor = new UpdateProcessor();
         
         //Add a line of namespace prefixes to the top of the query for processing:
-        query = AbstractSesameEngine.processNamespaces(query);
+        query = AbstractSesameEngine.processNamespaces(query, new HashMap<>() );
 
 		processor.setQuery( query );
 		processor.processQuery();

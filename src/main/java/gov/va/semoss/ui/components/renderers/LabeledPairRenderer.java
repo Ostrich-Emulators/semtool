@@ -36,12 +36,14 @@ public class LabeledPairRenderer<T> extends DefaultListCellRenderer {
     return new HashMap<>( labelCache );
   }
 
-  public void cache( Map<T, String> map ) {
+  public LabeledPairRenderer<T> cache( Map<T, String> map ) {
     labelCache.putAll( map );
+		return this;
   }
 
-  public void cache( T u, String label ) {
+  public LabeledPairRenderer<T> cache( T u, String label ) {
     labelCache.put( u, label );
+		return this;
   }
 
   @Override

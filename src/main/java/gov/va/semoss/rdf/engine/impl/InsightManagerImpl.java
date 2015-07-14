@@ -35,8 +35,6 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.Update;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
@@ -62,14 +60,13 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.openrdf.query.UpdateExecutionException;
+import java.util.HashMap;
 import org.openrdf.repository.Repository;
 
 /**
@@ -142,7 +139,7 @@ public class InsightManagerImpl implements InsightManager {
 
 	public final void loadAllPerspectives( Properties dreamerProp ) {
 		try {
-      // this should load the properties from the specified as opposed to
+			// this should load the properties from the specified as opposed to
 			// loading from core prop
 			// lastly the localprop needs to set up so that it can be swapped
 			String persps = dreamerProp.getProperty( Constants.PERSPECTIVE, "" );
@@ -157,11 +154,12 @@ public class InsightManagerImpl implements InsightManager {
 				ValueFactory insightVF = rc.getValueFactory();
 
 				Literal now = insightVF.createLiteral( new Date() );
-				Literal creator = insightVF.createLiteral( "Imported By " 
+				Literal creator = insightVF.createLiteral( "Imported By "
 						+ System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 
 				for ( String perspective : persps.split( ";" ) ) {
-					URI perspectiveURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, perspective );
+					URI perspectiveURI
+							= insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, perspective );
 					// rc.add( engine, UI.element, perspectiveURI );
 					rc.add( perspectiveURI, RDF.TYPE, VAS.Perspective );
 					rc.add( perspectiveURI, RDFS.LABEL, insightVF.createLiteral( perspective ) );
@@ -171,7 +169,7 @@ public class InsightManagerImpl implements InsightManager {
 					rc.add( perspectiveURI, DCTERMS.CREATOR, creator );
 
 					//REMOVE THIS Line for Production:
-					rc.add( perspectiveURI, DCTERMS.DESCRIPTION, 
+					rc.add( perspectiveURI, DCTERMS.DESCRIPTION,
 							insightVF.createLiteral( "Test Description: " + perspective ) );
 
 					loadQuestions( perspective, perspectiveURI, dreamerProp, now, creator );
@@ -221,13 +219,14 @@ public class InsightManagerImpl implements InsightManager {
 				log.error( ee, ee );
 			}
 		}
-    //This is a private utility method of this class, that is only being run
+		//This is a private utility method of this class, that is only being run
 		//to remove old PlaySheet triples, left over before changes to the Insight
 		//KB were made on 4 April 2015. This call may be removed in the future:
 //    Utility.showMessage(String.valueOf(deleteInsightData()));    
 	}
 
-	private void loadQuestions( String perspectiveKey, URI perspectiveURI, Properties dreamerProp, Literal now, Literal creator ) {
+	private void loadQuestions( String perspectiveKey, URI perspectiveURI,
+			Properties dreamerProp, Literal now, Literal creator ) {
 		try {
 			String insightList = dreamerProp.getProperty( perspectiveKey ); // get the ; delimited
 
@@ -254,7 +253,8 @@ public class InsightManagerImpl implements InsightManager {
 					UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
 					URI insightURI = urib.add( insightKey ).build();
 
-					URI slot = vf.createURI( MetadataConstants.VA_INSIGHTS_NS, perspectiveKey + "-slot-" + order );
+					URI slot = vf.createURI( MetadataConstants.VA_INSIGHTS_NS,
+							perspectiveKey + "-slot-" + order );
 					rc.add( perspectiveURI, OLO.slot, slot );
 					rc.add( slot, OLO.item, insightURI );
 					rc.add( slot, OLO.index, vf.createLiteral( order ) );
@@ -278,7 +278,7 @@ public class InsightManagerImpl implements InsightManager {
 					else {
 						rc.add( spinBody, RDF.TYPE, SP.Construct );
 					}
-          // TODO: The following works fine and the query text is correct in RDF (verified via Insights export)
+					// TODO: The following works fine and the query text is correct in RDF (verified via Insights export)
 					// However, following retrieval from the insights-kb, the quotation marks are being stripped away
 					// which then makes the query text invalid.  Trace this down and address.  IO5 is a good example to
 					// work with, change 'M' to "M" for testing.
@@ -512,35 +512,31 @@ public class InsightManagerImpl implements InsightManager {
 
 	@Override
 	public Insight getInsight( URI perspectiveURI, URI insightURI ) {
-		// replace this with the query
-
 		final Insight insight = new Insight();
 		try {
-			String perspectiveUriString = "<" + perspectiveURI.toString() + ">";
-			String insightUriString = "<" + insightURI.toString() + ">";
-
 			insight.setId( insightURI );
 
-			String isp = "PREFIX " + UI.PREFIX + ": <" + UI.NAMESPACE + "> "
-					+ "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
-					+ "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
-					+ "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
-					+ "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
-					+ "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-					+ "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
-					+ "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?perspective ?description ?creator ?created ?modified ?order WHERE { "
-					+ insightUriString + " rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
-					+ "BIND(" + perspectiveUriString + "AS ?perspective) . "
-					+ "OPTIONAL{ " + insightUriString + " spin:body [ sp:text ?sparql ] } "
-					+ "OPTIONAL{ " + insightUriString + " spin:constraint ?parameter . "
+			Map<String, String> namespaces = new HashMap<>();
+			namespaces.put( UI.PREFIX, UI.NAMESPACE );
+			namespaces.put( SPIN.PREFIX, SPIN.NAMESPACE );
+			namespaces.put( SP.PREFIX, SP.NAMESPACE );
+			namespaces.put( SPL.PREFIX, SPL.NAMESPACE );
+			namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+			namespaces.put( OLO.PREFIX, OLO.NAMESPACE );
+			namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
+			
+			String isp = "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?perspective ?description ?creator ?created ?modified ?order WHERE { "
+					+ "?insightUriString rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
+					+ "OPTIONAL{ ?insightUriString spin:body [ sp:text ?sparql ] } "
+					+ "OPTIONAL{ ?insightUriString spin:constraint ?parameter . "
 					+ "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] }} "
-					+ "OPTIONAL{ " + insightUriString + " vas:rendererClass ?rendererClass } "
-					+ "OPTIONAL{ " + insightUriString + " vas:isLegacy ?isLegacy } "
-					+ "OPTIONAL{ " + insightUriString + " dcterms:description ?description } "
-					+ "OPTIONAL{ " + insightUriString + " dcterms:creator ?creator } "
-					+ "OPTIONAL{ " + insightUriString + " dcterms:created ?created } "
-					+ "OPTIONAL{ " + insightUriString + " dcterms:modified ?modified } "
-					+ "OPTIONAL{ ?perspective olo:slot [ olo:item " + insightUriString + "; olo:index ?order ] } "
+					+ "OPTIONAL{ ?insightUriString vas:rendererClass ?rendererClass } "
+					+ "OPTIONAL{ ?insightUriString vas:isLegacy ?isLegacy } "
+					+ "OPTIONAL{ ?insightUriString dcterms:description ?description } "
+					+ "OPTIONAL{ ?insightUriString dcterms:creator ?creator } "
+					+ "OPTIONAL{ ?insightUriString dcterms:created ?created } "
+					+ "OPTIONAL{ ?insightUriString dcterms:modified ?modified } "
+					+ "OPTIONAL{ ?perspective olo:slot [ olo:item ?insightUriString; olo:index ?order ] } "
 					+ "}";
 			QueryExecutor<Void> qea = new QueryExecutorAdapter<Void>( isp ) {
 
@@ -552,6 +548,12 @@ public class InsightManagerImpl implements InsightManager {
 			};
 
 			log.debug( "Insighter... " + isp + " / " + insightURI );
+			qea.bind( "insightUriString", insightURI );
+			qea.bind( "perspective", perspectiveURI );
+			qea.setNamespaces( namespaces );
+
+			log.debug( AbstractSesameEngine.processNamespaces( qea.bindAndGetSparql(), namespaces) );
+			
 			AbstractSesameEngine.getSelect( qea, rc, false );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
@@ -614,8 +616,9 @@ public class InsightManagerImpl implements InsightManager {
 	 *
 	 * @return -- (Collection<ParameterType>) Described above.
 	 */
+	@Override
 	public Collection<ParameterType> getParameterTypes() {
-		final Collection<ParameterType> colParameterType = new ArrayList<ParameterType>();
+		final Collection<ParameterType> colParameterType = new ArrayList<>();
 		IEngine engine = DIHelper.getInstance().getRdfEngine();
 		SesameJenaSelectWrapper wrapper = new SesameJenaSelectWrapper();
 
@@ -668,43 +671,4 @@ public class InsightManagerImpl implements InsightManager {
 			}
 		}
 	}
-
-	/**
-	 * Utility to remove all triples in the Insight KB. This may be necessary,
-	 * because the import-and-replace utility only replaces like triples.
-	 *
-	 * @return deletePlaySheetData -- (boolean) Whether the removal succeeded.
-	 */
-	private boolean deleteInsightData() {
-		boolean boolReturnValue = false;
-
-		String query = "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
-				+ "DELETE{ ?s ?p ?o .} "
-				+ "WHERE{ ?s ?p ?o .}";
-
-		try {
-			rc.begin();
-			Update uq = rc.prepareUpdate( QueryLanguage.SPARQL, query );
-			uq.execute();
-
-			rc.commit();
-
-			//Import Insights into the repository:
-			boolReturnValue = EngineUtil.getInstance().importInsightsFromList( rc.getStatements( null, null, null, false ) );
-			//Give the left-pane drop-downs enough time to refresh from the import:
-			Thread.sleep( 2000 );
-
-		}
-		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException | InterruptedException e ) {
-			log.error( e, e );
-			try {
-				rc.rollback();
-			}
-			catch ( Exception ee ) {
-				log.warn( ee, ee );
-			}
-		}
-		return boolReturnValue;
-	}
-
 }

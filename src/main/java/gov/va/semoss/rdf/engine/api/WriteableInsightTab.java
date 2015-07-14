@@ -1,11 +1,11 @@
 package gov.va.semoss.rdf.engine.api;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
+import java.util.List;
 
 public interface WriteableInsightTab {
 	  /**   Adds a dummy Parameter to the current Insight in the database.
@@ -32,7 +32,7 @@ public interface WriteableInsightTab {
 	   * 
 	   * @param perspective -- (Perspective) Current Perspective
 	   */
-	  public boolean deleteInsight(ArrayList<Insight> arylInsights, Insight insight, Perspective perspective);
+	  public boolean deleteInsight(List<Insight> arylInsights, Insight insight, Perspective perspective);
 	  
 	  /**   Saves the current Insight to the database.
        * 
@@ -49,7 +49,7 @@ public interface WriteableInsightTab {
 	   * 
 	   * @return saveInsight -- (boolean) Whether the Insight was saved ok.
 	   */
-	  public boolean saveInsight(ArrayList<Insight> arylInsights, Insight insight,
+	  public boolean saveInsight(List<Insight> arylInsights, Insight insight,
 		  Collection<Perspective> colPerspectivesToAddInsight, Collection<Perspective> colPerspectivesToRemoveInsight);
 
 	  /**   Adds an existing Insight to the passed-in Perspective and to the triple-store on disk.

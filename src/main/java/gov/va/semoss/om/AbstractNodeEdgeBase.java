@@ -9,9 +9,11 @@ import gov.va.semoss.util.Constants;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 
+import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
@@ -22,24 +24,27 @@ import org.openrdf.model.vocabulary.RDFS;
  * @author ryan
  */
 public class AbstractNodeEdgeBase {
+
 	//the transient keyword keeps this from being sent to the js (ChartIt)
 	public transient static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
-	
+
 	private final transient Map<URI, Object> properties = new HashMap<>();
 	private transient boolean visible = true;
 	private transient URI id;
 	private transient Color color;
 	private transient String colorString;
+	// callers can "mark" properties for their own use
+	private final Set<URI> markedProperties = new HashSet<>();
 
 	private Map<String, Object> propHash = new HashMap<>(); //this is sent to the js (ChartIt)
-	
+
 	public AbstractNodeEdgeBase( URI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
 	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
 		this.id = id;
-		
+
 		setProperty( RDF.SUBJECT, id );
 		setProperty( RDFS.LABEL, label );
 		setProperty( RDF.TYPE, null == type ? Constants.ANYNODE : type );
@@ -51,7 +56,8 @@ public class AbstractNodeEdgeBase {
 	}
 
 	public int getLevel() {
-		return Integer.class.cast( getProperty( LEVEL ) );
+		Object prop = getProperty( LEVEL );
+		return ( null == prop ? 0 : Integer.class.cast( prop ) );
 	}
 
 	public final void setColor( Color _color ) {
@@ -107,8 +113,8 @@ public class AbstractNodeEdgeBase {
 	public void setProperty( URI prop, Object propValue ) {
 		properties.put( prop, propValue );
 	}
-	
-	public void setPropHash(Map<String, Object> _propHash) {
+
+	public void setPropHash( Map<String, Object> _propHash ) {
 		propHash = _propHash;
 	}
 
@@ -140,8 +146,29 @@ public class AbstractNodeEdgeBase {
 		return URI.class.cast( getProperty( RDF.TYPE ) );
 	}
 
+	public void removeProperty( URI prop ) {
+		properties.remove( prop );
+	}
+
 	public void setType( URI type ) {
 		setProperty( RDF.TYPE, type );
+	}
+
+	public void mark( URI prop, boolean makeMark ) {
+		if ( makeMark && hasProperty( prop ) ) {
+			markedProperties.add( prop );
+		}
+		else {
+			markedProperties.remove( prop );
+		}
+	}
+
+	public Set<URI> getMarkedProperties() {
+		return new HashSet<>( markedProperties );
+	}
+
+	public boolean isMarked( URI prop ) {
+		return markedProperties.contains( prop );
 	}
 
 	@Override

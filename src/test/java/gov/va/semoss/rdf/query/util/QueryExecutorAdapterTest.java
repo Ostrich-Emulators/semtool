@@ -210,16 +210,24 @@ public class QueryExecutorAdapterTest {
 	public void testBindAndGetSparql() throws Exception {
 		// NOTE: this SparQL is a bit non-sensical, but we're just checking the
 		// string replacement logic
-		String expected = "SELECT ?id WHERE {"
-				+ " ?id <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://www.7delta.com/types#one>  ."
-				+ " ?id <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  \"some text\"@en ."
-				+ " ?id <http://www.7delta.com/stringtype>  \"6\"^^<http://www.w3.org/2001/XMLSchema#int> ."
-				+ " ?id <http://www.7delta.com/stringtype>  \"5.2\"^^<http://www.w3.org/2001/XMLSchema#double> ."
-				+ " ?id <http://www.7delta.com/stringtype>  \"2014-10-08T15:10:56.361-04:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> ."
-				+ " ?id ?pred22 \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>"
-				+ " }";
-		queryer.setSparql( "SELECT ?id WHERE { ?id ?pred ?type . ?id ?pred ?text . "
-				+ "?id ?pred2 ?int . ?id ?pred2 ?dbl . ?id ?pred2 ?date . ?id ?pred22 ?bool }" );
+		String expected = "SELECT ?id ?pred WHERE {"
+				+ " ?id ?pred ?type ."
+				+ " ?id ?pred ?text ."
+				+ " ?id ?pred2 ?int ."
+				+ " ?id ?pred2 ?dbl ."
+				+ " ?id ?pred2 ?date ."
+				+ " ?id ?pred22 ?bool "
+				+ " VALUES ?int {\"6\"^^<http://www.w3.org/2001/XMLSchema#int>}"
+				+ " VALUES ?dbl {\"5.2\"^^<http://www.w3.org/2001/XMLSchema#double>}"
+				+ " VALUES ?bool {\"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>}"
+				+ " VALUES ?date {\"2014-10-08T15:10:56.361-04:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>}"
+				+ " VALUES ?text {\"some text\"@en}"
+				+ " VALUES ?pred {<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>}"
+				+ " VALUES ?type {<http://www.7delta.com/types#one>}"
+				+ " VALUES ?pred2 {<http://www.7delta.com/stringtype>}"
+				+ "} ORDER BY ?id";
+		queryer.setSparql( "SELECT ?id ?pred WHERE { ?id ?pred ?type . ?id ?pred ?text . "
+				+ "?id ?pred2 ?int . ?id ?pred2 ?dbl . ?id ?pred2 ?date . ?id ?pred22 ?bool } ORDER BY ?id" );
 		queryer.bind( "pred", RDF.TYPE );
 		queryer.bind( "pred2", TYPES );
 		queryer.bindURI( "type", TYPEONE.stringValue() );
@@ -229,8 +237,7 @@ public class QueryExecutorAdapterTest {
 		queryer.bind( "date", date );
 		queryer.bind( "bool", true );
 
-		String result = queryer.bindAndGetSparql();
-
+		String result = queryer.bindAndGetSparql();		
 		assertEquals( expected, result );
 	}
 }

@@ -20,8 +20,8 @@
 package gov.va.semoss.om;
 
 import java.awt.Color;
-import java.util.Objects;
 
+import java.util.Objects;
 import org.openrdf.model.URI;
 
 /**
@@ -30,12 +30,14 @@ import org.openrdf.model.URI;
  * @version $Revision: 1.0 $
  */
 public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOSSEdge> {
+
 	/** The origin resource (Vertex) URI for this edge/relation */
-	private final URI originVertexURI;
+	private URI originVertexURI;
 	/** The destination resource (Vertex) URI for this edge/relation */
-	private final URI destinationVertexURI;
+	private URI destinationVertexURI;
 	/** Flag which signifies whether the vertices of this edge are ALL visible - for rendering purposes */
 	private boolean verticesVisible;
+
 
 	/**
 	 * @param _outVertex
@@ -47,9 +49,11 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		super( _uri, null, _uri.getLocalName() );
 		destinationVertexURI = _outVertex.getURI();
 		originVertexURI = _inVertex.getURI();
+		setColor( Color.DARK_GRAY );
+	}
 
-		_inVertex.addInEdge( this );
-		_outVertex.addOutEdge( this );
+	public SEMOSSEdge( URI _uri ) {
+		super( _uri, null, _uri.getLocalName() );
 		setColor( Color.DARK_GRAY );
 	}
 
@@ -71,19 +75,12 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		return destinationVertexURI;
 	}
 
-	public String getName() {
-		return getLabel();
-	}
-
-	public void setName( String _name ) {
-		setLabel( _name );
-	}
-
 	@Override
 	public int hashCode() {
 		int hash = 5;
-		hash = 97 * hash + Objects.hashCode( this.originVertexURI );
-		hash = 97 * hash + Objects.hashCode( this.destinationVertexURI );
+		hash = 97 * hash + Objects.hashCode( destinationVertexURI);
+		hash = 97 * hash + Objects.hashCode( originVertexURI);
+		hash = 97 * hash + super.hashCode();
 		return hash;
 	}
 
@@ -96,12 +93,15 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 			return false;
 		}
 		final SEMOSSEdge other = (SEMOSSEdge) obj;
-		if ( !Objects.equals( this.originVertexURI, other.originVertexURI ) ) {
+		if ( !Objects.equals( this.getURI(), other.getURI() ) ) {
 			return false;
 		}
 		if ( !Objects.equals( this.destinationVertexURI, other.destinationVertexURI ) ) {
 			return false;
 		}
+		if ( !Objects.equals( this.originVertexURI, other.originVertexURI ) ) {
+			return false;
+		}	
 		return true;
 	}
 
@@ -116,15 +116,12 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		if ( null != destinationVertexURI ) {
 			sb.append( destinationVertexURI );
 		}
-
 		if ( null != getURI() ) {
 			sb.append( "->" ).append( getURI() );
 		}
-
 		if ( null != originVertexURI ) {
 			sb.append( "->" ).append( originVertexURI );
 		}
-
 		return sb.toString();
 	}
 

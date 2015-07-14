@@ -303,9 +303,9 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
+		fireGraphUpdated();
 		setLayoutName( layoutName );
 		setUndoRedoBtn();
-		fireGraphUpdated();
 	}
 	
 	public boolean enableSearchBar() {
@@ -324,7 +324,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		viewer.setRenderer( new SemossBasicRenderer() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
-		viewer.setGraphMouse( new GraphNodeListener( this ) );
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		viewer.setGraphMouse( gl );
 		viewer.setBackground( Color.WHITE );

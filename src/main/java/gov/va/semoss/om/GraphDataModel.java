@@ -102,6 +102,8 @@ public class GraphDataModel {
 		try {
 			Set<Resource> needProps = new HashSet<>( model.subjects() );
 
+			UriBuilder owlb = engine.getSchemaBuilder();
+
 			for ( Statement s : model ) {
 				Resource sub = s.getSubject();
 				URI pred = s.getPredicate();
@@ -236,7 +238,7 @@ public class GraphDataModel {
 
 		// we can't be sure if our predicates are the base relation or the 
 		// specific relation, so query for both just in case
-		String edgeprops1
+		String specificEdgeProps
 				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 				+ "  ?rel ?prop ?literal ."
 				+ "  ?rel a ?semossrel ."
@@ -245,7 +247,7 @@ public class GraphDataModel {
 				+ "  FILTER ( isLiteral( ?literal ) )"
 				+ "}"
 				+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
-		String edgeprops2
+		String baseEdgeProps
 				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 				+ "  ?rel ?prop ?literal ."
 				+ "  ?rel a ?semossrel ."
@@ -276,7 +278,7 @@ public class GraphDataModel {
 			}
 
 			// do the same thing, but for edges
-			VoidQueryAdapter eqa1 = new VoidQueryAdapter( edgeprops1 ) {
+			VoidQueryAdapter specifics = new VoidQueryAdapter( specificEdgeProps ) {
 
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
@@ -303,7 +305,7 @@ public class GraphDataModel {
 				}
 			};
 
-			VoidQueryAdapter eqa2 = new VoidQueryAdapter( edgeprops2 ) {
+			VoidQueryAdapter baseedge = new VoidQueryAdapter( baseEdgeProps ) {
 
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
@@ -330,11 +332,11 @@ public class GraphDataModel {
 				}
 			};
 			if ( null != preds ) {
-				eqa1.useInferred( false );
-				engine.query( eqa1 );
+				specifics.useInferred( false );
+				engine.query( specifics );
 
-				eqa2.useInferred( false );
-				engine.query( eqa2 );
+				baseedge.useInferred( false );
+				engine.query( baseedge );
 			}
 		}
 		catch ( MalformedQueryException ex ) {

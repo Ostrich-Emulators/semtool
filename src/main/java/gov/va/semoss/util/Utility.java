@@ -973,27 +973,6 @@ public class Utility {
 		return String.format( "%02dm, %02d.%02ds", mins, secs, msecs / 10 );
 	}
 
-	private static int sintRowCount = 0;
-
-	/**
-	 * Convenience method to set a Grid's row count into a static variable of this
-	 * class.
-	 *
-	 * @param intRowCount -- (int) Current Grid's row count.
-	 */
-	public static void setRowCount( int intRowCount ) {
-		sintRowCount = intRowCount;
-	}
-
-	/**
-	 * Convenience method to get the current Grid's row count.
-	 *
-	 * @return getRowCount -- (int) Described above.
-	 */
-	public static int getRowCount() {
-		return sintRowCount;
-	}
-
 	public static String getSaveFilename( String base, String extension ) {
 		SimpleDateFormat sdf = new SimpleDateFormat( "_MMM dd, yyyy HHmm." );
 		return base + sdf.format( new Date() )
