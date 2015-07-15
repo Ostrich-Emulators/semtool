@@ -48,8 +48,7 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 	public PropertyEditorPlaySheet(AbstractNodeEdgeBase _nodeOrEdge) {
 		setLayout( new BorderLayout() );
 		
-		model = new PropertyEditorTableModel(_nodeOrEdge, null);
-//		model = new PropertyEditorTableModel(_nodeOrEdge, getEngine()); //JPM fix - get a copy of current engine
+		model = new PropertyEditorTableModel(_nodeOrEdge, this);
 		table = new JTable( model );
 		
 		table.setAutoCreateRowSorter( true );
