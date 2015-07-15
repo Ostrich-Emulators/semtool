@@ -6,22 +6,17 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  * A class to convert a directed graph from the GQB to valid Sparql
@@ -45,23 +40,24 @@ public class GraphToSparql {
 		namespaces.putAll( ns );
 	}
 
-	public String select( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
-		return buildSelect( graph, config ) + buildWhere( graph, config );
+	public String select( DirectedGraph<QueryNode, QueryEdge> graph ) {
+		return buildSelect( graph ) + buildWhere( graph );
 	}
 
-	private String buildSelect( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
+	private String buildSelect( DirectedGraph<QueryNode, QueryEdge> graph ) {
 		StringBuilder select = new StringBuilder( "SELECT" );
-		List<AbstractNodeEdgeBase> todo = new ArrayList<>();
+		List<QueryNodeEdgeBase> todo = new ArrayList<>();
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
-		for ( AbstractNodeEdgeBase v : todo ) {
-			Map<URI, String> valIds = SparqlResultConfig.asMap( config.getNN( v ) );
-			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {			
-				if ( !RDF.SUBJECT.equals( en.getKey() ) && v.isMarked( en.getKey() ) ) {
-					select.append( " ?" ).append( valIds.get( en.getKey() ) );
+		for ( QueryNodeEdgeBase v : todo ) {
+			for ( Map.Entry<URI, Set<Value>> en : v.getAllValues().entrySet() ) {
+				URI prop = en.getKey();
+				boolean issubj = RDF.SUBJECT.equals( prop );
+
+				if ( v.isSelected( prop ) ) {
+					select.append( " ?" ).
+							append( issubj ? v.getQueryId() : v.getLabel( prop ) );
 				}
 			}
 		}
@@ -69,126 +65,130 @@ public class GraphToSparql {
 		return select.toString();
 	}
 
-	private Map<URI, Object> getWhereProps( AbstractNodeEdgeBase v ) {
-		Map<URI, Object> props = new HashMap<>( v.getProperties() );
+	private Set<URI> getWhereProps( QueryNodeEdgeBase v ) {
+		Set<URI> props = new HashSet<>( v.getProperties().keySet() );
 		props.remove( RDF.SUBJECT );
-		props.remove( Constants.IN_EDGE_CNT );
-		props.remove( Constants.OUT_EDGE_CNT );
-		props.remove( AbstractNodeEdgeBase.LEVEL );
-		props.remove( GraphicalQueryPanel.SPARQLNAME );
 
-		if ( Constants.ANYNODE.equals( v.getType() ) && !v.isMarked( RDF.TYPE ) ) {
+		if ( Constants.ANYNODE.equals( v.getValue( RDF.TYPE ) )
+				&& !v.isSelected( RDF.TYPE ) ) {
 			props.remove( RDF.TYPE );
 		}
 
-		if ( v.getLabel().isEmpty() && !v.isMarked( RDFS.LABEL ) ) {
+		if ( v.getLabel().isEmpty() && !v.isSelected( RDFS.LABEL ) ) {
 			props.remove( RDFS.LABEL );
 		}
 
 		return props;
 	}
 
-	private String buildOneConstraint( AbstractNodeEdgeBase v, URI type, Object val,
-			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
+	private String makeOneValue( Value v ) {
+		if ( v instanceof URI ) {
+			return shortcut( URI.class.cast( v ) );
+		}
+
+		return v.toString();
+	}
+
+	private String buildOneConstraint( QueryNodeEdgeBase v, URI type ) {
 		StringBuilder sb = new StringBuilder();
 
 		// ignore empty variables (mostly, this is just for not returning a
 		// label, but it's generally good not to add unmarked predicates to a 
 		// query). If the predicate is marked, we must include it no matter what
-		Object o = v.getProperty( type );
-		String valstr = ( null == o ? "" : o.toString() );
-
-		if ( valstr.isEmpty() && !v.isMarked( type ) ) {
+		Set<Value> realones = v.getValues( type );
+		if ( ( null == realones || realones.isEmpty() ) && !v.isSelected( type ) ) {
 			return "";
 		}
 
-		Map<URI, String> labelmap = SparqlResultConfig.asMap( config.getNN( v ) );
-		String nodevar = "?" + labelmap.get( GraphicalQueryPanel.SPARQLNAME );
+		// ANYNODE and the empty string are just placeholder, 
+		// but we don't need them anymore
+		Set<Value> vals = new HashSet<>();
+		if ( null != realones ) {
+			vals.addAll( realones );
+		}
 
-		SparqlResultConfig cfg = SparqlResultConfig.getOne( config.getNN( v ), type );
+		List<Value> toremove = new ArrayList<>();
+		toremove.add( Constants.ANYNODE );
+		for ( Value val : vals ) {
+			if ( val.stringValue().isEmpty() ) {
+				toremove.add( val );
+			}
+		}
+		vals.removeAll( toremove );
+
+		String nodevar = "?" + v.getQueryId();
 
 		sb.append( "  " );
-		if ( cfg.isOptional() ) {
+		if ( v.isOptional( type ) ) {
 			sb.append( "OPTIONAL { " );
 		}
 		sb.append( nodevar ).append( " " );
 		sb.append( shortcut( type ) );
 		sb.append( " " );
 
-		if ( v.isMarked( type ) ) {
-			String objvar = "?" + labelmap.get( type );
+		if ( v.isSelected( type ) ) {
+			String objvar = "?" + v.getLabel( type );
 			sb.append( objvar );
-			if ( !( valstr.isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
+
+			if ( !vals.isEmpty() ) {
+				sb.append( " VALUES " ).append( objvar ).append( " { " );
+				for ( Value val : vals ) {
+					sb.append( makeOneValue( val ) ).append( " " );
+				}
+				sb.append( "}" );
+			}
+		}
+		else if ( !vals.isEmpty() ) {
+			if ( vals.size() > 1 ) {
+				String objvar = "?" + v.getLabel( type );
+				sb.append( objvar );
 				sb.append( " VALUES " ).append( objvar ).append( " { " );
 			}
-		}
-
-		if ( !Constants.ANYNODE.equals( val ) ) {
-			if ( val instanceof URI ) {
-				sb.append( shortcut( URI.class.cast( val ) ) );
+			for ( Value val : vals ) {
+				sb.append( makeOneValue( val ) ).append( " " );
 			}
-			else if ( val instanceof String && !valstr.isEmpty() ) {
-				sb.append( "\"" ).append( val ).append( "\"" );
-			}
-			else if ( val instanceof Double ) {
-				sb.append( new LiteralImpl( valstr, XMLSchema.DOUBLE ) );
-			}
-			else if ( val instanceof Integer ) {
-				sb.append( new LiteralImpl( valstr, XMLSchema.INTEGER ) );
-			}
-			else if ( val instanceof Boolean ) {
-				sb.append( new LiteralImpl( valstr, XMLSchema.BOOLEAN ) );
-			}
-			else if ( val instanceof Date ) {
-				sb.append( new ValueFactoryImpl().createLiteral( Date.class.cast( val ) ) );
+			if ( vals.size() > 1 ) {
+				sb.append( "}" );
 			}
 		}
 
-		if ( v.isMarked( type )
-				&& ( !( valstr.isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
-			sb.append( "}" );
-		}
-
-		if ( cfg.isOptional() ) {
+		if ( v.isOptional( type ) ) {
 			sb.append( " }" );
 		}
 
-		sb.append( " .\n" );
+		sb.append(
+				" .\n" );
 
 		return sb.toString();
 	}
 
-	private String buildWhere( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> config ) {
+	private String buildWhere( DirectedGraph<QueryNode, QueryEdge> graph ) {
 		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
-		for ( AbstractNodeEdgeBase v : graph.getVertices() ) {
-			Map<URI, Object> props = getWhereProps( v );
+		for ( QueryNodeEdgeBase v : graph.getVertices() ) {
+			Set<URI> props = getWhereProps( v );
 
-			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
-				sb.append( buildOneConstraint( v, en.getKey(), en.getValue(), config ) );
+			for ( URI prop : props ) {
+				sb.append( buildOneConstraint( v, prop ) );
 			}
 		}
 
-		for ( SEMOSSEdge edge : graph.getEdges() ) {
-			Map<URI, Object> props = getWhereProps( edge );
+		for ( QueryEdge edge : graph.getEdges() ) {
+			Set<URI> props = getWhereProps( edge );
+
 			props.remove( RDF.TYPE );
-			boolean useLinkVar = ( edge.isMarked( RDF.TYPE ) || !props.isEmpty()
+			boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || !props.isEmpty()
 					|| edge.getType().equals( Constants.ANYNODE ) );
 
-			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
-				sb.append( buildOneConstraint( edge, en.getKey(), en.getValue(), config ) );
+			for ( URI prop : props ) {
+				sb.append( buildOneConstraint( edge, prop ) );
 			}
 
-			SEMOSSVertex src = graph.getSource( edge );
-			SEMOSSVertex dst = graph.getDest( edge );
+			QueryNode src = graph.getSource( edge );
+			QueryNode dst = graph.getDest( edge );
 
-			Map<URI, String> edgemap = SparqlResultConfig.asMap( config.getNN( edge ) );
-			Map<URI, String> srcmap = SparqlResultConfig.asMap( config.getNN( src ) );
-			Map<URI, String> dstmap = SparqlResultConfig.asMap( config.getNN( dst ) );
-
-			String fromvar = "?" + srcmap.get( GraphicalQueryPanel.SPARQLNAME );
-			String linkvar = "?" + edgemap.get( GraphicalQueryPanel.SPARQLNAME );
-			String tovar = "?" + dstmap.get( GraphicalQueryPanel.SPARQLNAME );
+			String fromvar = "?" + src.getQueryId();
+			String linkvar = "?" + edge.getQueryId();
+			String tovar = "?" + dst.getQueryId();
 
 			sb.append( "  " ).append( fromvar ).append( " " );
 			if ( useLinkVar ) {
@@ -206,7 +206,7 @@ public class GraphToSparql {
 							append( linkvar ).append( " ) " );
 				}
 
-				if ( edge.isMarked( RDF.TYPE ) ) {
+				if ( edge.isSelected( RDF.TYPE ) ) {
 					sb.append( "\n  BIND ( " );
 					if ( Constants.ANYNODE.equals( edge.getType() ) ) {
 						sb.append( linkvar );
@@ -214,7 +214,7 @@ public class GraphToSparql {
 					else {
 						sb.append( "<" ).append( edge.getType() ).append( ">" );
 					}
-					sb.append( " AS ?" ).append( edgemap.get( RDF.TYPE ) ).append( ") " );
+					sb.append( " AS ?" ).append( edge.getLabel( RDF.TYPE ) ).append( ") " );
 				}
 
 			}

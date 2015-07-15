@@ -19,6 +19,7 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -28,10 +29,7 @@ import org.openrdf.model.vocabulary.XMLSchema;
  *
  * @author ryan
  */
-public class AbstractNodeEdgeBase {
-
-	//the transient keyword keeps this from being sent to the js (ChartIt)
-	public transient static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
+public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	private final transient Map<URI, Value> properties = new HashMap<>();
 	private transient boolean visible = true;
@@ -50,25 +48,17 @@ public class AbstractNodeEdgeBase {
 	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
 		this.id = id;
 
-		setProperty( RDF.SUBJECT, id );
-		setProperty( RDFS.LABEL, label );
-		setProperty( RDF.TYPE, null == type ? Constants.ANYNODE : type );
-		setProperty( LEVEL, 1 );
+		properties.put( RDF.SUBJECT, id );
+		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
+		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
 	}
 
-	public void setLevel( int lev ) {
-		setProperty( LEVEL, lev );
-	}
-
-	public int getLevel() {
-		Object prop = getProperty( LEVEL );
-		return ( null == prop ? 0 : Integer.class.cast( prop ) );
-	}
-
+	@Override
 	public final void setColor( Color _color ) {
 		color = _color;
 	}
 
+	@Override
 	public Color getColor() {
 		return color;
 	}
@@ -81,10 +71,12 @@ public class AbstractNodeEdgeBase {
 		return colorString;
 	}
 
+	@Override
 	public void setVisible( boolean b ) {
 		visible = b;
 	}
 
+	@Override
 	public boolean isVisible() {
 		return visible;
 	}
@@ -107,10 +99,12 @@ public class AbstractNodeEdgeBase {
 	 *
 	 * @param label the new label to set
 	 */
+	@Override
 	public void setLabel( String label ) {
 		setProperty( RDFS.LABEL, label );
 	}
 
+	@Override
 	public String getLabel() {
 		return ( properties.containsKey( RDFS.LABEL )
 				? properties.get( RDFS.LABEL ).toString() : "" );
@@ -120,6 +114,7 @@ public class AbstractNodeEdgeBase {
 		setValue( prop, ValueTableModel.getValueFromObject( propValue ) );
 	}
 
+	@Override
 	public void setValue( URI prop, Value val ) {
 		properties.put( prop, val );
 	}
@@ -132,14 +127,17 @@ public class AbstractNodeEdgeBase {
 		return propHash;
 	}
 
+	@Override
 	public Object getProperty( URI prop ) {
 		return ValueTableModel.getObjectFromValue( getValue( prop ) );
 	}
 
+	@Override
 	public Value getValue( URI prop ) {
 		return properties.get( prop );
 	}
 
+	@Override
 	public Map<URI, Object> getProperties() {
 		Map<URI, Object> map = new HashMap<>();
 		for ( Map.Entry<URI, Value> en : properties.entrySet() ) {
@@ -148,32 +146,39 @@ public class AbstractNodeEdgeBase {
 		return map;
 	}
 
+	@Override
 	public Map<URI, Value> getValues() {
 		return properties;
 	}
 
+	@Override
 	public boolean hasProperty( URI prop ) {
 		return properties.containsKey( prop );
 	}
 
+	@Override
 	public void setURI( URI uri ) {
 		setValue( RDF.SUBJECT, uri );
 	}
 
+	@Override
 	public URI getURI() {
-		return URI.class.cast( getValue( RDF.SUBJECT ) );
+		return URI.class.cast( properties.get( RDF.SUBJECT ) );
 	}
 
+	@Override
 	public URI getType() {
-		return URI.class.cast( getProperty( RDF.TYPE ) );
+		return URI.class.cast( properties.get( RDF.TYPE ) );
 	}
 
-	public void removeProperty( URI prop ) {
-		properties.remove( prop );
-	}
-
+	@Override
 	public void setType( URI type ) {
 		setValue( RDF.TYPE, type );
+	}
+
+	@Override
+	public void removeProperty( URI prop ) {
+		properties.remove( prop );
 	}
 
 	/**
@@ -198,6 +203,7 @@ public class AbstractNodeEdgeBase {
 		return null;
 	}
 
+	@Override
 	public void mark( URI prop, boolean makeMark ) {
 		if ( makeMark && hasProperty( prop ) ) {
 			markedProperties.add( prop );
@@ -211,6 +217,7 @@ public class AbstractNodeEdgeBase {
 		return new HashSet<>( markedProperties );
 	}
 
+	@Override
 	public boolean isMarked( URI prop ) {
 		return markedProperties.contains( prop );
 	}
@@ -239,7 +246,6 @@ public class AbstractNodeEdgeBase {
 
 	@Override
 	public String toString() {
-		return id + "; " + getType().getLocalName() + "; " + getLabel() + "; level "
-				+ getLevel();
+		return id + "; " + getType().getLocalName() + "; " + getLabel();
 	}
 }

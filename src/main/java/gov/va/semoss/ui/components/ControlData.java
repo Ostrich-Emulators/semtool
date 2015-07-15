@@ -22,7 +22,7 @@ package gov.va.semoss.ui.components;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.NodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -57,7 +57,6 @@ public class ControlData implements GraphListener {
 		// put what we want to show first in all of these things
 		Set<URI> propertyHide = new HashSet<>();
 		propertyHide.add( Constants.VERTEX_COLOR );
-		propertyHide.add( AbstractNodeEdgeBase.LEVEL );
 
 		Set<URI> vertexPropertyShow = new HashSet<>();
 		vertexPropertyShow.add( Constants.VERTEX_NAME );
@@ -155,7 +154,7 @@ public class ControlData implements GraphListener {
 	 *
 	 * @return Vector<String> List of properties.
 	 */
-	public List<URI> getSelectedProperties( AbstractNodeEdgeBase v ) {
+	public List<URI> getSelectedProperties( NodeEdgeBase v ) {
 		return ( v instanceof SEMOSSVertex
 				? vertexCDT.getSelectedProperties( v.getType() )
 				: edgeCDT.getSelectedProperties( v.getType() ) );

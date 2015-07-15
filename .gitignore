@@ -1,5 +1,9 @@
-bin/
-target/
-stashed/
-pom.xml
-src/main/resources/html.zip
+/nb-configuration.xml
+/nbactions*
+/*.log
+/*.log.*
+target
+.classpath
+.project
+.settings
+.settings/*
