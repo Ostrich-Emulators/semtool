@@ -68,8 +68,6 @@ public class GraphToSparql {
 	private Set<URI> getWhereProps( QueryNodeEdgeBase v ) {
 		Set<URI> props = new HashSet<>( v.getProperties().keySet() );
 		props.remove( RDF.SUBJECT );
-		props.remove( Constants.IN_EDGE_CNT );
-		props.remove( Constants.OUT_EDGE_CNT );
 
 		if ( Constants.ANYNODE.equals( v.getValue( RDF.TYPE ) )
 				&& !v.isSelected( RDF.TYPE ) ) {

@@ -76,15 +76,11 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return null;
 	}
 
-	public static ConstraintValue getValue( String label, Value value,
-			Map<URI, String> propmap ) {
+	public static ConstraintValue getValue( String label, Map<URI, String> propmap ) {
 		JTextField input = new JTextField();
-		if ( null != value ) {
-			input.setText( value.toString() );
-		}
 
 		ConstraintPanel cp = new ConstraintPanel( null, label, input, true,
-				value, propmap );
+				null, propmap );
 		if ( showDialog( label, cp ) ) {
 			String val = input.getText();
 			URI type = cp.getType();
