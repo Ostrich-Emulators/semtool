@@ -182,6 +182,7 @@ public class GraphDataModel {
 			Collection<SEMOSSEdge> edges = vizgraph.getIncidentEdges( v );
 			for ( SEMOSSEdge e : edges ) {
 				level.remove( e );
+				edgeStore.remove( e.getURI() );
 			}
 
 			vizgraph.removeVertex( v );
@@ -226,7 +227,7 @@ public class GraphDataModel {
 		edgeStore.put( key, edge );
 	}
 
-	public void initPropSudowlSearch() {
+	public final void initPropSudowlSearch() {
 		prop = Boolean.parseBoolean( DIHelper.getInstance().getProperty( Constants.GPSProp ) );
 		sudowl = Boolean.parseBoolean( DIHelper.getInstance().getProperty( Constants.GPSSudowl ) );
 		search = Boolean.parseBoolean( DIHelper.getInstance().getProperty( Constants.GPSSearch ) );
@@ -317,6 +318,7 @@ public class GraphDataModel {
 							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
 							SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
 							storeEdge( edge );
+							level.put( edge, overlayLevel );
 						}
 
 						SEMOSSEdge edge = edgeStore.get( rel );
