@@ -7,16 +7,17 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.ui.components.SaveAsInsightPanel;
+import gov.va.semoss.ui.components.graphicalquerybuilder.SparqlResultTableModel.RowLocator;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,8 +46,6 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				JPanel jpnl = new JPanel( new BorderLayout() );
-				MultiMap<AbstractNodeEdgeBase, SparqlResultConfig> map
-						= pnl.getSparqlConfigs();
 
 				List<URI> concepts = DBToLoadingSheetExporter.createConceptList( pnl.getEngine() );
 				Map<URI, String> conceptmap
@@ -54,7 +53,10 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 				final ValueEditor types = new ValueEditor();
 				final ValueEditor normal = new ValueEditor();
 
-				SparqlResultTableModel model = new SparqlResultTableModel( map );
+				List<QueryNodeEdgeBase> elements = new ArrayList<>( pnl.getGraph().getVertices() );
+				elements.addAll( pnl.getGraph().getEdges() );
+
+				SparqlResultTableModel model = new SparqlResultTableModel( elements );
 
 				final JTable tbl = new JTable( model ) {
 
@@ -62,13 +64,13 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 					public TableCellEditor getCellEditor( int row, int column ) {
 						if ( 2 == column ) {
 							ValueEditor editor;
-							SparqlResultConfig src = model.getRawRow( row );
-							if ( RDF.TYPE.equals( src.getProperty() ) ) {
+							RowLocator src = model.getRawRow( row );
+							if ( RDF.TYPE.equals( src.property ) ) {
 
 								// FIXME: need to figure out if we're a concept or an edge
 								boolean isconcept = false;
-								for ( SEMOSSVertex v : pnl.getGraph().getVertices() ) {
-									if ( src.getId().equals( v ) ) {
+								for ( QueryNode v : pnl.getGraph().getVertices() ) {
+									if ( src.base.equals( v ) ) {
 										isconcept = true;
 									}
 								}
@@ -78,8 +80,8 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 								}
 								else {
 									// we have an edge, so figure out the endpoints
-									Pair<SEMOSSVertex> verts
-											= pnl.getGraph().getEndpoints( SEMOSSEdge.class.cast( src.getId() ) );
+									Pair<QueryNode> verts
+											= pnl.getGraph().getEndpoints( QueryEdge.class.cast( src.base ) );
 									URI starttype = verts.getFirst().getType();
 									URI endtype = verts.getSecond().getType();
 
@@ -96,8 +98,8 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 								editor = normal;
 							}
 
-							editor.setType( src.getProperty() );
-							editor.setChecked( src.getId().isMarked( src.getProperty() ) );
+							editor.setType( src.property );
+							editor.setChecked( src.base.isSelected( src.property ) );
 							return editor;
 						}
 						else {
@@ -108,7 +110,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 
 				LabeledPairTableCellRenderer renderer
 						= LabeledPairTableCellRenderer.getUriPairRenderer();
-				Set<URI> labels = SparqlResultConfig.getProperties( map );
+				Set<URI> labels = getAllProperties( elements );
 				renderer.cache( Utility.getInstanceLabels( labels, pnl.getEngine() ) );
 
 				LabeledPairTableCellRenderer trenderer
@@ -150,5 +152,13 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 				}
 			}
 		} );
+	}
+
+	private static Set<URI> getAllProperties( Collection<QueryNodeEdgeBase> data ) {
+		Set<URI> props = new HashSet<>();
+		for ( QueryNodeEdgeBase b : data ) {
+			props.addAll( b.getAllValues().keySet() );
+		}
+		return props;
 	}
 }

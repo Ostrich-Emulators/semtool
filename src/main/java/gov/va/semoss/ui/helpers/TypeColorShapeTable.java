@@ -174,68 +174,58 @@ public class TypeColorShapeTable {
 		return true;
 	}
 
-	/**
-	 * Method initializeShape. Setting the initial shape of a node based on the
-	 * shape type
-	 *
-	 * @param vertex - the vertex for whom we are setting the shape
-	 */
-	public boolean initializeShape( SEMOSSVertex vertex ) {
+	public Shape getShape( URI type ) {
 		//first check to see if we've seen this type before
-		if ( shapeHash.containsKey( vertex.getType() ) ) {
-			return setShape( null, vertex );
+		if ( shapeHash.containsKey( type ) ) {
+			return shapeHash.get( type );
 		}
 
 		// next check if it is specified in the properties file
 		String shapeStringSetInRDF_MapPropFile
-				= DIHelper.getInstance().getProperty( vertex.getType().getLocalName() + "_SHAPE" );
+				= DIHelper.getInstance().getProperty( type.getLocalName() + "_SHAPE" );
 		if ( shapeStringSetInRDF_MapPropFile != null
 				&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
-			return setShape( shapeStringSetInRDF_MapPropFile, vertex );
+			return DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
 		}
 
 		// if the shape hasn't been set yet, use the first shape not yet in use
 		for ( String shapeString : shapes ) {
 			if ( !shapeStringHash.containsValue( shapeString ) ) {
-				return setShape( shapeString, vertex );
+				return DIHelper.getShape( shapeString );
 			}
 		}
 
 		//if all of the shapes have already been used, just grab a random shape
 		List<String> strings = new ArrayList<>( shapeStringHash.values() );
 		Collections.shuffle( strings );
-		return setShape( strings.get( 0 ), vertex );
+		return DIHelper.getShape( strings.get( 0 ) );
 	}
 
-	/**
-	 * Method initializeColor. Gets the color based on the parameters.
-	 *
-	 * @param vertex
-	 * @return Color - the color based on the type and vertex name
-	 */
-	public boolean initializeColor( SEMOSSVertex vertex ) {
+	public Color getColor( URI type ) {
 		// first check if we've seen the type before
-		if ( colorHash.containsKey( vertex.getType() ) ) {
-			return setColor( null, vertex );
+		if ( colorHash.containsKey( type ) ) {
+			return colorHash.get( type );
 		}
 
 		// try to search the properties file for the first time
 		String colorStringSetInRDF_MapPropFile
-				= DIHelper.getInstance().getProperty( vertex.getType().getLocalName() + "_COLOR" );
+				= DIHelper.getInstance().getProperty( type.getLocalName() + "_COLOR" );
 		if ( colorStringSetInRDF_MapPropFile != null ) {
-			return setColor( colorStringSetInRDF_MapPropFile, vertex );
+			Color col = DIHelper.getColor( colorStringSetInRDF_MapPropFile );
+			colorHash.put( type, col );
+			return col;
 		}
 
 		//find the first color that hasn't been used yet
 		for ( String colorString : colors ) {
 			if ( !colorStringHash.containsValue( colorString ) ) {
-				return setColor( colorString, vertex );
+				return DIHelper.getColor( colorString );
 			}
 		}
 
 		//if all of the colors have already been used, just grab a random color
 		List<String> cols = new ArrayList<>( colorStringHash.values() );
 		Collections.shuffle( cols );
-		return setColor( cols.get( 0 ), vertex );
+		return DIHelper.getColor( cols.get( 0 ) );
 	}
 }

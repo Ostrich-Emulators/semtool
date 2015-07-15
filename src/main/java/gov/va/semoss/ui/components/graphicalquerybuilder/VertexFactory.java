@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import org.apache.commons.collections15.Factory;
@@ -17,16 +15,15 @@ import org.openrdf.model.vocabulary.RDFS;
  *
  * @author ryan
  */
-public class VertexFactory implements Factory<SEMOSSVertex> {
+public class VertexFactory implements Factory<QueryNode> {
 
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
 	private URI verttype;
 
 	@Override
-	public SEMOSSVertex create() {
-		SEMOSSVertex v = new SEMOSSVertex( uribuilder.uniqueUri(), verttype, "" );
-		v.mark( RDFS.LABEL, true );
-		v.removeProperty( AbstractNodeEdgeBase.LEVEL );
+	public QueryNode create() {
+		QueryNode v = new QueryNode( uribuilder.uniqueUri(), verttype, "" );
+		v.setSelected( RDFS.LABEL, true );
 		return v;
 	}
 

@@ -19,14 +19,14 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.NodeEdgeBase;
 import java.awt.Color;
 import java.awt.Paint;
 
 /**
  * Transforms the color of vertices/nodes on the graph.
  */
-public class PaintTransformer<T extends AbstractNodeEdgeBase> extends SelectingTransformer<T, Paint> {
+public class PaintTransformer<T extends NodeEdgeBase> extends SelectingTransformer<T, Paint> {
 
 	@Override
 	protected Paint transformNormal( T t ) {

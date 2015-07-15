@@ -77,7 +77,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 
 			MultiMap<ShapeColorHelper, SEMOSSVertex> mm = new MultiMap<>();
 			for ( SEMOSSVertex v : en.getValue() ) {
-				mm.add( new ShapeColorHelper( v.getShapeLegend(), v.getColor() ), v );
+				mm.add( new ShapeColorHelper( v.getShape(), v.getColor() ), v );
 			}
 
 			for ( Map.Entry<ShapeColorHelper, List<SEMOSSVertex>> sch : mm.entrySet() ) {

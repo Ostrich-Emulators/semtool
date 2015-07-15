@@ -42,8 +42,6 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 
-import com.ibm.icu.util.BytesTrie.Iterator;
-
 import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -484,11 +482,11 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 	}
 
-	public void addGraphListener( GraphListener gl ) {
+	public final void addGraphListener( GraphListener gl ) {
 		listenees.add( gl );
 	}
 
-	public void removeGraphListener( GraphListener gl ) {
+	public final void removeGraphListener( GraphListener gl ) {
 		listenees.remove( gl );
 	}
 
@@ -788,7 +786,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 			@Override
 			public boolean evaluate( SEMOSSEdge v ) {
-				return ( v.isVisible() && v.getVerticesVisible() && v.getLevel() <= overlayLevel );
+				return ( v.isVisible() && v.getVerticesVisible() 
+						&& getGraphData().presentAtLevel( v, overlayLevel ) );
 			}
 		};
 
@@ -869,7 +868,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		@Override
 		public boolean evaluate( SEMOSSVertex v ) {
-			return ( v.isVisible() && v.getLevel() <= overlayLevel );
+			return ( v.isVisible() &&	getGraphData().presentAtLevel( v, overlayLevel ) );
 		}
 	}
 }
