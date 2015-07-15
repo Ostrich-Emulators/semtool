@@ -21,11 +21,14 @@ package gov.va.semoss.ui.components.models;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.NodeOrEdgePropertyPersistenceUtility;
+import gov.va.semoss.util.StatementPersistenceUtility;
+import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -33,8 +36,6 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class is used to create a table model for vertex properties.
@@ -44,10 +45,11 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = -1980815818428292267L;
 
 	private static final String[] columnNames = { "Property Name", "XML Datatype", "Value" };
-	private static final Class<?>[] classNames = { String.class, String.class, Object.class };
+	private static final Class<?>[] classNames = { String.class, String.class, String.class };
 	private ArrayList<PropertyEditorRow> rows = new ArrayList<PropertyEditorRow>();
 	private AbstractNodeEdgeBase nodeOrEdge;
 	private IPlaySheet playsheet;
+	private Set<String> uneditableProperties = new HashSet<String>();
 	
 	/**
 	 * Constructor for VertexPropertyTableModel.
@@ -59,6 +61,9 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 			IPlaySheet _playsheet) { 
 		nodeOrEdge = _nodeOrEdge;
 		playsheet = _playsheet;
+		
+		uneditableProperties.add(Constants.URI_KEY.stringValue());
+		uneditableProperties.add(Constants.VERTEX_TYPE.stringValue());
 	}
 
 
@@ -120,14 +125,26 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		if (column != 2)
 			return;
 		
+		for (String name:uneditableProperties) {
+			if (name.equals(pRow.getName().stringValue())) {
+				Utility.showError("You cannot edit a property with this name from this screen.");
+				return;
+			}
+		}
+		
 		Value oldValue = pRow.getValue();
-		if ( !pRow.setValue(val) )
+		if ( !pRow.setValue(val) ) {
+			Utility.showError("This value is invalid for this datatype, or this datatype is not yet supported.");
 			return;
+		}
 		
 		nodeOrEdge.setValue(pRow.getName(), pRow.getValue());
-		
-		NodeOrEdgePropertyPersistenceUtility saver = new NodeOrEdgePropertyPersistenceUtility(playsheet.getEngine());
-		saver.updatePropertyValue(nodeOrEdge, pRow.getName(), oldValue, pRow.getValue());
+		StatementPersistenceUtility.updateNodeOrEdgePropertyValue(
+				playsheet.getEngine(), 
+				nodeOrEdge, 
+				pRow.getName(), 
+				oldValue, 
+				pRow.getValue());
 		
 		fireTableDataChanged();
 	}
@@ -204,42 +221,13 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		}
 		
 		public boolean setValue(Object val) {
-			if ( Constants.INT_URI.equals(datatype) || Constants.INTEGER_URI.equals(datatype)) {
-				try {
-					value = new LiteralImpl(Integer.parseInt(val+"") + "");
-				} catch (NumberFormatException e) {
-					return false;
-				}
-			} else if ( Constants.DOUBLE_URI.equals(datatype) ) {
-				try {
-					value = new LiteralImpl(Double.parseDouble(val+"") + "");
-				} catch (NumberFormatException e) {
-					return false;
-				}
-			} else if ( Constants.FLOAT_URI.equals(datatype) ) {
-				try {
-					value = new LiteralImpl(Float.parseFloat(val+"") + "");
-				} catch (NumberFormatException e) {
-					return false;
-				}
-			} else if ( Constants.BOOLEAN_URI.equals(datatype) ) {
-				value = new LiteralImpl(Boolean.parseBoolean(val+"") + "");
-			} else if ( Constants.DATE_URI.equals(datatype) ) {
-				log.warn("Trying to set a value for XML Date datatype, which is not yet supported");
-				return false;
-			} else if ( Constants.ANYURI_URI.equals(datatype) ) {
-				try {
-					value = new URIImpl(val + "");
-				} catch (Exception e) {
-					return false;
-				}
-			} else if ( Constants.STRING_URI.equals(datatype) ) {
-				value = new LiteralImpl(val + "");
-			} else {
-				log.warn("Trying to set a value for a datatype not yet supported: " + datatype);
+			Value tempValue = ValueTableModel.getValueFromDatatypeAndString(datatype, val+"");
+			if (tempValue==null) {
+				log.warn("Could not set Value " + val + " for datatype " + datatype);
 				return false;
 			}
 			
+			value = tempValue;
 			return true;
 		}
 
@@ -249,10 +237,6 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 
 		public void setDatatype(String datatype) {
 			this.datatype = datatype;
-		}
-
-		public void setValue(Value value) {
-			this.value = value;
 		}
 
 		public URI getName() {
