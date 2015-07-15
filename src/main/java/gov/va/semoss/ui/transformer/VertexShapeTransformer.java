@@ -19,15 +19,15 @@
  */
 package gov.va.semoss.ui.transformer;
 
+import gov.va.semoss.om.NodeBase;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 
-import gov.va.semoss.om.SEMOSSVertex;
 
 /**
  * Transforms the size and shape of selected nodes.
  */
-public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelectingTransformer<T, Shape> {
+public class VertexShapeTransformer<T extends NodeBase> extends SizedSelectingTransformer<T, Shape> {
 
 	private static final double INITIAL_SCALE = 1.0;
 	private static final double MAXSIZE = 100.0;
@@ -39,12 +39,12 @@ public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelecti
 	}
 
 	@Override
-	protected Shape transformNotSelected( SEMOSSVertex t, boolean inSkeletonMode ) {
+	protected Shape transformNotSelected( NodeBase t, boolean inSkeletonMode ) {
 		return t.getShape();
 	}
 
 	@Override
-	protected Shape getNormal( SEMOSSVertex t, Double sz, double defaultSize ) {
+	protected Shape getNormal( NodeBase t, Double sz, double defaultSize ) {
 		Shape s = t.getShape();
 		if ( null == sz ) {
 			sz = defaultSize;
@@ -59,7 +59,7 @@ public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelecti
 	}
 
 	@Override
-	protected Shape getSelected( SEMOSSVertex t, Double sz, double defaultSize ) {
+	protected Shape getSelected( NodeBase t, Double sz, double defaultSize ) {
 		return getNormal( t, sz, defaultSize );
 	}
 }

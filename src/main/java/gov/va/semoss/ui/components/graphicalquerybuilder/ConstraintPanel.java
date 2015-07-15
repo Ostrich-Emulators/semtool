@@ -54,16 +54,11 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return ( JOptionPane.YES_OPTION == ans );
 	}
 
-	public static ConstraintValue getValue( URI property, String label, Object value,
+	public static ConstraintValue getValue( URI property, String label, Value value,
 			boolean checked ) {
 		JTextField input = new JTextField();
 		if ( null != value ) {
-			if ( value instanceof Value ) {
-				input.setText( Value.class.cast( value ).stringValue() );
-			}
-			else {
-				input.setText( value.toString() );
-			}
+			input.setText( Value.class.cast( value ).stringValue() );
 		}
 
 		Map<URI, String> propmap = new HashMap<>();
@@ -81,7 +76,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return null;
 	}
 
-	public static ConstraintValue getValue( String label, Object value,
+	public static ConstraintValue getValue( String label, Value value,
 			Map<URI, String> propmap ) {
 		JTextField input = new JTextField();
 		if ( null != value ) {
@@ -138,7 +133,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	}
 
 	protected ConstraintPanel( URI proptype, String label, JComponent input,
-			boolean checked, Object valForType, Map<URI, String> propmap ) {
+			boolean checked, Value valForType, Map<URI, String> propmap ) {
 		initComponents();
 
 		inputarea.setLayout( new BorderLayout() );
@@ -164,7 +159,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return property.getItemAt( property.getSelectedIndex() );
 	}
 
-	private void setType( Object o ) {
+	private void setType( Value o ) {
 		if ( null == o ) {
 			stringtype.setSelected( true );
 		}
@@ -173,9 +168,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 		else {
 			Enumeration<AbstractButton> radios = typegroup.getElements();
-			Class<?> typeclass = ( o instanceof Value
-					? ValueTableModel.getClassForValue( Value.class.cast( o ) )
-					: o.getClass() );
+			Class<?> typeclass = ValueTableModel.getClassForValue( o );
 
 			while ( radios.hasMoreElements() ) {
 				AbstractButton radio = radios.nextElement();

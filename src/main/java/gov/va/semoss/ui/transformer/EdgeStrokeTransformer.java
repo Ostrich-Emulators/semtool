@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.transformer;
 
+import gov.va.semoss.om.NodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 
 import java.awt.BasicStroke;
@@ -28,7 +29,7 @@ import java.util.Map;
 
 /**
  */
-public class EdgeStrokeTransformer<T extends SEMOSSEdge> extends SelectingTransformer<T, Stroke> {
+public class EdgeStrokeTransformer<T extends NodeEdgeBase> extends SelectingTransformer<T, Stroke> {
 
 	private Map<SEMOSSEdge, Double> edges = new HashMap<>();
 	public static final float DEFAULT_SIZE = 0.3f;
@@ -106,17 +107,17 @@ public class EdgeStrokeTransformer<T extends SEMOSSEdge> extends SelectingTransf
 	}
 
 	@Override
-	protected Stroke transformNormal( SEMOSSEdge t ) {
+	protected Stroke transformNormal( NodeEdgeBase t ) {
 		return normal;
 	}
 
 	@Override
-	protected Stroke transformSelected( SEMOSSEdge t ) {
+	protected Stroke transformSelected( NodeEdgeBase t ) {
 		return selected;
 	}
 
 	@Override
-	protected Stroke transformNotSelected( SEMOSSEdge t, boolean skel ) {
+	protected Stroke transformNotSelected( NodeEdgeBase t, boolean skel ) {
 		return ( skel ? unselected : normal );
 	}
 
