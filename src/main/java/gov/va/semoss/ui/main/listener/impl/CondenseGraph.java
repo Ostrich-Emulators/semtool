@@ -136,8 +136,8 @@ public class CondenseGraph extends AbstractAction {
 			SEMOSSVertex middle = en.getKey();
 
 			for ( CondenserTuple tup : en.getValue() ) {
-				SEMOSSVertex from = tup.in.getOutVertex();
-				SEMOSSVertex to = tup.out.getInVertex();
+				SEMOSSVertex from = new SEMOSSVertex(tup.in.getDestinationVertexURI());
+				SEMOSSVertex to =  new SEMOSSVertex(tup.out.getOriginVertexURI());
 
 				SEMOSSEdge edge = new SEMOSSEdge( from, to, middle.getURI() );
 
