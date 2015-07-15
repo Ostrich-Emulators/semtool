@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.om;
 
-import gov.va.semoss.util.UriBuilder;
 import java.awt.Color;
 
 import java.util.Objects;
