@@ -197,7 +197,7 @@ public class GraphToSparql {
 		// 2) we have other properties to hang on this edge
 		// Note: if 1 & 2 aren't true, we can handle multiple values without a variable
 		boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || edgeHasMoreProps 
-				|| vals.isEmpty() );
+				|| vals.isEmpty() || edge.isSelected( RDF.SUBJECT ) );
 		if ( useLinkVar ) {
 			sb.append( linkvar ).append( " " );
 		}
