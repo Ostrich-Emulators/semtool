@@ -142,6 +142,14 @@ public class Constants {
 	public static final String CLASS_URI = RDFS.CLASS.toString();
 	public static final String DEFAULT_PROPERTY_URI = RDF.PROPERTY.toString();
 	public static final String RDFTYPE_URI = RDF.TYPE.toString();
+	
+	public static final String STRING_URI = XMLSchema.STRING.toString();
+	public static final String ANYURI_URI = XMLSchema.ANYURI.toString();
+	public static final String INT_URI = XMLSchema.INT.toString();
+	public static final String INTEGER_URI = XMLSchema.INTEGER.toString();
+	public static final String DOUBLE_URI = XMLSchema.DOUBLE.toString();
+	public static final String FLOAT_URI = XMLSchema.FLOAT.toString();
+	public static final String BOOLEAN_URI = XMLSchema.BOOLEAN.toString();
 	public static final String DATE_URI = XMLSchema.DATETIME.toString();
 
 	// layouts
