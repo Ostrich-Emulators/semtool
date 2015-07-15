@@ -65,7 +65,7 @@ public class PickedStateListener implements ItemListener {
 		JTable table = (JTable) DIHelper.getInstance().getLocalProp( Constants.PROP_TABLE );
 		table.setModel( new DefaultTableModel() );
 
-		RenderContext rc = viewer.getRenderContext();
+		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = viewer.getRenderContext();
 
 		//need to check if there are any size resets that need to be done
 		VertexShapeTransformer vst = (VertexShapeTransformer) rc.getVertexShapeTransformer();

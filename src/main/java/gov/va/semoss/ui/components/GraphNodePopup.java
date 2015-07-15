@@ -52,7 +52,6 @@ import javax.swing.JPopupMenu;
  * playsheet.
  */
 public class GraphNodePopup extends JPopupMenu {
-
 	private static final long serialVersionUID = 7106248215097748901L;
 
 	private final GraphPlaySheet gps;
@@ -163,6 +162,10 @@ public class GraphNodePopup extends JPopupMenu {
 
 		add( new GraphPlaySheetExportListener( gps ) );
 		add( new NodeInfoPopup( gps, highlightedVertices ) );
+
+		JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
+		item.setEnabled( highlightedVertices.size() == 1 );
+		
 		add( new CondenseGraph( gps ) );
 	}
 
