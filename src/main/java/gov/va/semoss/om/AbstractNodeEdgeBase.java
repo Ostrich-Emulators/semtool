@@ -31,9 +31,6 @@ import org.openrdf.model.vocabulary.XMLSchema;
  */
 public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
-	//the transient keyword keeps this from being sent to the js (ChartIt)
-	public transient static final URI LEVEL = new URIImpl( "semoss://graphing.level" );
-
 	private final transient Map<URI, Value> properties = new HashMap<>();
 	private transient boolean visible = true;
 	private transient URI id;
@@ -54,16 +51,6 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
-		properties.put( LEVEL, new LiteralImpl( "1", XMLSchema.INTEGER ) );
-	}
-
-	public void setLevel( int lev ) {
-		setProperty( LEVEL, lev );
-	}
-
-	public int getLevel() {
-		Object prop = getProperty( LEVEL );
-		return ( null == prop ? 0 : Integer.class.cast( prop ) );
 	}
 
 	@Override
@@ -112,6 +99,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	 *
 	 * @param label the new label to set
 	 */
+	@Override
 	public void setLabel( String label ) {
 		setProperty( RDFS.LABEL, label );
 	}
@@ -258,7 +246,6 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	@Override
 	public String toString() {
-		return id + "; " + getType().getLocalName() + "; " + getLabel() + "; level "
-				+ getLevel();
+		return id + "; " + getType().getLocalName() + "; " + getLabel();
 	}
 }

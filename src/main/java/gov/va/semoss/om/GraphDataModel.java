@@ -43,6 +43,7 @@ public class GraphDataModel {
 	private static final Logger log = Logger.getLogger( GraphDataModel.class );
 
 	private final Set<String> baseFilterSet = new HashSet<>();
+	private final Map<NodeEdgeBase, Integer> level = new HashMap<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
 	private boolean search, prop, sudowl;
@@ -102,8 +103,6 @@ public class GraphDataModel {
 		try {
 			Set<Resource> needProps = new HashSet<>( model.subjects() );
 
-			UriBuilder owlb = engine.getSchemaBuilder();
-
 			for ( Statement s : model ) {
 				Resource sub = s.getSubject();
 				URI pred = s.getPredicate();
@@ -128,7 +127,7 @@ public class GraphDataModel {
 				vizgraph.addVertex( vert2 );
 
 				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred );
-				edge.setLevel( overlayLevel );
+				level.put( edge, overlayLevel );
 				edge.setType( pred );
 				storeEdge( edge );
 
@@ -173,22 +172,44 @@ public class GraphDataModel {
 		// something else, get rid of the future redo data
 		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
-			if ( v.getLevel() > overlayLevel ) {
+			if ( getLevel( v ) > overlayLevel ) {
 				nodesToRemove.add( vertStore.remove( v.getURI() ) );
 			}
 		}
 
 		for ( SEMOSSVertex v : nodesToRemove ) {
-			vizgraph.removeVertex( v );
-		}
+			// edges will be removed automatically...but sync our level mapping
+			Collection<SEMOSSEdge> edges = vizgraph.getIncidentEdges( v );
+			for ( SEMOSSEdge e : edges ) {
+				level.remove( e );
+			}
 
-		// edges are removed automatically...
+			vizgraph.removeVertex( v );
+			level.remove( v );
+		}
+	}
+
+	public int getLevel( NodeEdgeBase check ) {
+		if ( level.containsKey( check ) ) {
+			return level.get( check );
+		}
+		return 0;
+	}
+
+	/**
+	 * Is this node present at the given level (is it's level <= the given level?)
+	 * @param check
+	 * @param level
+	 * @return 
+	 */
+	public boolean presentAtLevel( NodeEdgeBase check, int level ) {
+		return getLevel( check ) <= level;
 	}
 
 	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey, int overlayLevel ) {
 		if ( !vertStore.containsKey( vertexKey ) ) {
 			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
-			vertex.setLevel( overlayLevel );
+			level.put( vertex, overlayLevel );
 			storeVertex( vertex );
 		}
 

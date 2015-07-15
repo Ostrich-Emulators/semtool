@@ -79,7 +79,6 @@ public class GqbLabelTransformer<T extends QueryNodeEdgeBase> extends LabelTrans
 	public String getText( QueryNodeEdgeBase vertex ) {
 		Map<URI, Set<Value>> properties = new HashMap<>( vertex.getAllValues() );
 		properties.remove( RDF.SUBJECT );
-		properties.remove( QueryNode.LEVEL );
 
 		if ( properties.isEmpty() ) {
 			return "";

@@ -22,7 +22,6 @@ public class EdgeFactory implements Factory<QueryEdge> {
 	public QueryEdge create() {
 		QueryEdge edge = new QueryEdge( uribuilder.uniqueUri() );
 		edge.removeProperty( RDFS.LABEL );
-		edge.removeProperty( QueryEdge.LEVEL );
 
 		return edge;
 	}

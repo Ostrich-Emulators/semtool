@@ -6,10 +6,8 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.util.Constants;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -73,7 +70,6 @@ public class GraphToSparql {
 		props.remove( RDF.SUBJECT );
 		props.remove( Constants.IN_EDGE_CNT );
 		props.remove( Constants.OUT_EDGE_CNT );
-		props.remove( AbstractNodeEdgeBase.LEVEL );
 
 		if ( Constants.ANYNODE.equals( v.getValue( RDF.TYPE ) )
 				&& !v.isSelected( RDF.TYPE ) ) {

@@ -24,7 +24,6 @@ public class VertexFactory implements Factory<QueryNode> {
 	public QueryNode create() {
 		QueryNode v = new QueryNode( uribuilder.uniqueUri(), verttype, "" );
 		v.setSelected( RDFS.LABEL, true );
-		v.removeProperty( QueryNode.LEVEL );
 		return v;
 	}
 
