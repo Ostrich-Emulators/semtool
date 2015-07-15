@@ -19,6 +19,7 @@
 package gov.va.semoss.ui.components.models;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.NodeOrEdgePropertyPersistenceUtility;
 
@@ -46,15 +47,18 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	private static final Class<?>[] classNames = { String.class, String.class, Object.class };
 	private ArrayList<PropertyEditorRow> rows = new ArrayList<PropertyEditorRow>();
 	private AbstractNodeEdgeBase nodeOrEdge;
+	private IEngine engine;
 	
 	/**
 	 * Constructor for VertexPropertyTableModel.
 	 * 
-	 * @param nodeOrEdge
-	 *            AbstractNodeEdgeBase
+	 * @param nodeOrEdge AbstractNodeEdgeBase
+	 * @param IEngine engine
 	 */
-	public PropertyEditorTableModel(AbstractNodeEdgeBase _nodeOrEdge) {
+	public PropertyEditorTableModel(AbstractNodeEdgeBase _nodeOrEdge,
+			IEngine _engine) {
 		nodeOrEdge = _nodeOrEdge;
+		engine = _engine;
 	}
 
 
@@ -90,7 +94,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		PropertyEditorRow pRow = rows.get(row);
 		switch ( column ) {
 			case 0: {
-				return pRow.getName().getLocalName();
+				return pRow.getName().stringValue();
 			} case 1: { 
 				return pRow.getDatatype();
 			} case 2: { 
@@ -121,8 +125,8 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		
 		nodeOrEdge.setValue(pRow.getName(), pRow.getValue());
 		
-		NodeOrEdgePropertyPersistenceUtility saver = new NodeOrEdgePropertyPersistenceUtility();
-		saver.updatePropertyValue(nodeOrEdge, pRow.getName(), pRow.getDatatype(), pRow.getValue());
+		NodeOrEdgePropertyPersistenceUtility saver = new NodeOrEdgePropertyPersistenceUtility(engine);
+		saver.updatePropertyValue(nodeOrEdge, pRow.getName(), pRow.getValue());
 		
 		fireTableDataChanged();
 	}

@@ -3,38 +3,76 @@ package gov.va.semoss.util;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.OperationsProgress;
+import gov.va.semoss.ui.components.PlayPane;
+import gov.va.semoss.ui.components.ProgressTask;
+
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.StatementImpl;
 
 public class NodeOrEdgePropertyPersistenceUtility {
 	private static final Logger log = Logger.getLogger( NodeOrEdgePropertyPersistenceUtility.class );
+	private IEngine engine;
 	
-	public NodeOrEdgePropertyPersistenceUtility() {
-		
+	public NodeOrEdgePropertyPersistenceUtility(IEngine engine) {
+		this.engine = engine;
+		//open the database connection
 	}
 
+	public void closeConnection() {
+		//close the database connection
+	}
+	
 	public void deleteNodeProperty(SEMOSSVertex node, URI name) {
-
+		ProgressTask pt = new ProgressTask( "Deleting Property from the Knowledge Base", new Runnable() {
+			@Override
+			public void run() {
+				//delete the property
+			}
+		} );
+		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 	}
 
-	public void saveNodePropertyValue(SEMOSSVertex node, URI name, String datatype, Value value) {
-
+	public void saveNodePropertyValue(SEMOSSVertex node, URI name, Value value) {
+		ProgressTask pt = new ProgressTask( "Saving Property to the Knowledge Base", new Runnable() {
+			@Override
+			public void run() {
+				Value subject = node.getValue(Constants.URI_KEY);
+				if (subject instanceof Resource) {
+					Statement statement = new StatementImpl((Resource)subject, name, value);
+					
+					ArrayList<Statement> statements = new ArrayList<Statement>();
+					statements.add(statement);
+					
+					engine.addOwlData(statements);
+					engine.commit();
+				} else {
+					log.warn("Trying to save node property with name: " + name + " and value: " + value + ", but subject: " + subject + " is not an instanceof Resource.");
+				}
+			}
+		} );
+		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 	}
 
 	public void updatePropertyValue(AbstractNodeEdgeBase nodeOrEdge,
-			URI name, String datatype, Value value) {
+			URI name, Value value) {
 		deletePropertyValue(nodeOrEdge, name);
-		savePropertyValue(nodeOrEdge, name, datatype, value);
+		savePropertyValue(nodeOrEdge, name, value);
 	}
 
 	public void savePropertyValue(AbstractNodeEdgeBase nodeOrEdge,
-			URI name, String datatype, Value value) {
+			URI name, Value value) {
 		if (nodeOrEdge instanceof SEMOSSVertex) {
-			saveNodePropertyValue((SEMOSSVertex)nodeOrEdge, name, datatype, value);
+			saveNodePropertyValue((SEMOSSVertex)nodeOrEdge, name, value);
 		} else {
-			saveEdgePropertyValue((SEMOSSEdge)nodeOrEdge, name, datatype, value);
+			saveEdgePropertyValue((SEMOSSEdge)nodeOrEdge, name, value);
 		}
 	}
 
@@ -47,8 +85,7 @@ public class NodeOrEdgePropertyPersistenceUtility {
 		}
 	}
 
-	public void saveEdgePropertyValue(SEMOSSEdge edge, URI name,
-			String datatype, Value value) {
+	public void saveEdgePropertyValue(SEMOSSEdge edge, URI name, Value value) {
 		log.warn("This method not yet implemented.");
 		throw new UnsupportedOperationException();
 	}
