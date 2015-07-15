@@ -22,8 +22,11 @@ package gov.va.semoss.ui.components.playsheets;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+
 import java.util.List;
+
 import javax.swing.JTable;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -33,7 +36,9 @@ import org.openrdf.model.Value;
  * from a SPARQL query.
  */
 public class GridPlaySheet extends GridRAWPlaySheet {
+	private static final long serialVersionUID = 983237700844677993L;
 
+	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(GridPlaySheet.class );
 
 	LabeledPairTableCellRenderer<URI> renderer = new LabeledPairTableCellRenderer<>();

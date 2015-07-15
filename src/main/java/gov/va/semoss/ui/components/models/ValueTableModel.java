@@ -6,8 +6,9 @@
 package gov.va.semoss.ui.components.models;
 
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
-
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -20,8 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-
 import java.util.Set;
+
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
@@ -30,6 +31,8 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
 
@@ -628,6 +631,44 @@ public class ValueTableModel extends AbstractTableModel {
 
 		log.warn( "unhandled data type for object: " + o );
 		return null;
+	}
+	
+	public static Value getValueFromDatatypeAndString(String datatype, String content) {
+		if ( Constants.INT_URI.equals(datatype) || Constants.INTEGER_URI.equals(datatype)) {
+			try {
+				return new LiteralImpl(Integer.parseInt(content) + "");
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else if ( Constants.DOUBLE_URI.equals(datatype) ) {
+			try {
+				return new LiteralImpl(Double.parseDouble(content) + "");
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else if ( Constants.FLOAT_URI.equals(datatype) ) {
+			try {
+				return new LiteralImpl(Float.parseFloat(content) + "");
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else if ( Constants.BOOLEAN_URI.equals(datatype) ) {
+			return new LiteralImpl(Boolean.parseBoolean(content) + "");
+		} else if ( Constants.DATE_URI.equals(datatype) ) {
+			log.warn("Parsing RDF datatype Date not yet supported.");
+			return null;
+		} else if ( Constants.ANYURI_URI.equals(datatype) ) {
+			try {
+				return new URIImpl(content);
+			} catch (Exception e) {
+				return null;
+			}
+		} else if ( Constants.STRING_URI.equals(datatype) ) {
+			return new LiteralImpl(content);
+		} else {
+			log.warn("Trying to parse a value for a datatype not yet supported: " + datatype);
+			return null;
+		}
 	}
 
 	public static String removeExtraneousDoubleQuotes( String input ) {
