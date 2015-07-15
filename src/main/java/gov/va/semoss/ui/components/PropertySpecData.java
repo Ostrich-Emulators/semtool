@@ -81,8 +81,8 @@ public class PropertySpecData implements GraphListener{
 		for ( SEMOSSEdge edge : graph.getEdges() ) {
 			//add to pred data
 			addPredicateAvailable( edge.getURI().stringValue() );
-			addConceptAvailable( edge.getInVertex().getURI().stringValue() );
-			addConceptAvailable( edge.getOutVertex().getURI().stringValue() );
+			addConceptAvailable( edge.getOriginVertexURI().stringValue() );
+			addConceptAvailable( edge.getDestinationVertexURI().stringValue() );
 		}
 	}
 	
