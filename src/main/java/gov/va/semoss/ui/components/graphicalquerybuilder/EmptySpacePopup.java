@@ -98,6 +98,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 								editor = normal;
 							}
 
+							editor.setNode( src.base );
 							editor.setType( src.property );
 							editor.setChecked( src.base.isSelected( src.property ) );
 							return editor;

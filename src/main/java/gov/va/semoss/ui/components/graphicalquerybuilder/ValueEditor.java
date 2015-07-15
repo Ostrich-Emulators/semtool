@@ -30,6 +30,7 @@ public class ValueEditor extends AbstractCellEditor
 	private Map<URI, String> types;
 	private URI type;
 	private boolean checked;
+	private QueryNodeEdgeBase nodeedge;
 
 	public ValueEditor() {
 		//Set up the editor (from the table's point of view),
@@ -51,6 +52,10 @@ public class ValueEditor extends AbstractCellEditor
 
 	public void setChoices( Map<URI, String> tt ) {
 		types = tt;
+	}
+
+	public void setNode( QueryNodeEdgeBase b ) {
+		nodeedge = b;
 	}
 
 	/**

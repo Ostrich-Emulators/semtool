@@ -65,6 +65,19 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 
 		} );
 
+		JCheckBoxMenuItem selectMe = new JCheckBoxMenuItem( "Return this Entity",
+				v.isSelected( RDF.SUBJECT ) );
+		add( selectMe );
+
+		selectMe.addItemListener( new ItemListener() {
+
+			@Override
+			public void itemStateChanged( ItemEvent e ) {
+				v.setSelected( RDF.SUBJECT, selectMe.isSelected() );
+				pnl.update();
+			}
+		} );
+
 		finishMenu( v, pnl );
 
 		addSeparator();
@@ -123,21 +136,6 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 				propmap.put( Constants.ANYNODE, "<Any>" );
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
 						"Add a constraint to this Vertex", "New Value", propmap ) );
-
-				addSeparator();
-
-				JCheckBoxMenuItem selectMe = new JCheckBoxMenuItem( "Return this Entity",
-						v.isSelected( RDF.SUBJECT ) );
-				add( selectMe );
-
-				selectMe.addItemListener( new ItemListener() {
-
-					@Override
-					public void itemStateChanged( ItemEvent e ) {
-						v.setSelected( RDF.SUBJECT, selectMe.isSelected() );
-						pnl.update();
-					}
-				} );
 			}
 		};
 	}

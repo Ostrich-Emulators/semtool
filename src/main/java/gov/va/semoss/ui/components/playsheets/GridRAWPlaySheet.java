@@ -277,7 +277,9 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 				boolean isSelected, boolean hasFocus, int row, int column ) {
 			JComponent comp = (JComponent)super.getTableCellRendererComponent( table, value, isSelected,
 					hasFocus, row, column );
-			comp.setToolTipText(packageValueInHTML(value.toString()));
+			if( null != value ){
+				comp.setToolTipText( packageValueInHTML( value.toString() ) );
+			}
 			setOpaque( true );
 
 			setBackground( table.getBackground() );

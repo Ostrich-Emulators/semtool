@@ -6,8 +6,10 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValue;
+import gov.va.semoss.util.MultiMap;
 import java.awt.event.ActionEvent;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openrdf.model.URI;
@@ -25,6 +27,7 @@ public class OneVariableDialogItem extends AbstractAction {
 	private final GraphicalQueryPanel panel;
 	private final Map<URI, String> propTypeChoices;
 	private Value currval;
+	private Set<Value> currvals;
 
 	public OneVariableDialogItem( QueryNodeEdgeBase node, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext ) {
@@ -41,22 +44,24 @@ public class OneVariableDialogItem extends AbstractAction {
 		propTypeChoices = null;
 	}
 
-	public OneVariableDialogItem( QueryNodeEdgeBase node, GraphicalQueryPanel panel,
+	public OneVariableDialogItem( QueryNodeEdgeBase nod, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext, Map<URI, String> labels ) {
 
 		super( label );
 		putValue( Action.SHORT_DESCRIPTION, tooltip );
 
-		this.node = node;
+		this.node = nod;
 		this.dlgtext = dlgtext;
 		this.panel = panel;
 		this.propTypeChoices = labels;
 		property = prop;
-		currval = this.node.getValue( property );
+		currval = node.getValue( property );
+		currvals = node.getValues( property );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
+		MultiMap<ConstraintValue, Value> valmap = null;
 		ConstraintValue newval = null;
 
 		if ( null == propTypeChoices ) {
@@ -71,7 +76,7 @@ public class OneVariableDialogItem extends AbstractAction {
 			}
 			else {
 				// "type" constraint
-				newval = ConstraintPanel.getValue( property, dlgtext, URI.class.cast( currval ),
+				valmap = ConstraintPanel.getValues( property, dlgtext, currvals,
 						propTypeChoices, node.isSelected( property ) );
 			}
 		}
@@ -79,6 +84,14 @@ public class OneVariableDialogItem extends AbstractAction {
 		if ( null != newval ) {
 			currval = newval.val;
 			node.setValue( newval.property, currval );
+			node.setSelected( newval.property, newval.included );
+			panel.update();
+		}
+		else if ( !( null == valmap || valmap.isEmpty() ) ) {
+			newval = valmap.keySet().iterator().next();
+			currvals.clear();
+			currvals.addAll( valmap.getNN( newval ) );
+			node.setProperties( newval.property, currvals );
 			node.setSelected( newval.property, newval.included );
 			panel.update();
 		}

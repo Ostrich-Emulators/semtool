@@ -9,11 +9,15 @@ import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
@@ -23,6 +27,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -80,7 +85,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		JTextField input = new JTextField();
 
 		ConstraintPanel cp = new ConstraintPanel( null, label, input, true,
-				null, propmap );
+				( Value )null, propmap );
 		if ( showDialog( label, cp ) ) {
 			String val = input.getText();
 			URI type = cp.getType();
@@ -105,6 +110,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			JList<URI> list = new JList<>( uris );
 			list.setCellRenderer( renderer );
 			list.setSelectedValue( value, true );
+			list.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
 			ConstraintPanel cp = new ConstraintPanel( property, label,
 					new JScrollPane( list ), checked, value, propmap );
 			if ( showDialog( label, cp ) ) {
@@ -123,6 +129,59 @@ public class ConstraintPanel extends javax.swing.JPanel {
 				return new ConstraintValue( box.getItemAt( box.getSelectedIndex() ),
 						cp.isIncluded(), property );
 			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets a one-key map of values
+	 *
+	 * @param property
+	 * @param label
+	 * @param values
+	 * @param choices
+	 * @param checked
+	 * @return
+	 */
+	public static MultiMap<ConstraintValue, Value> getValues( URI property, String label,
+			Collection<Value> values, Map<URI, String> choices, boolean checked ) {
+		choices = Utility.sortUrisByLabel( choices );
+
+		URI[] uris = choices.keySet().toArray( new URI[0] );
+		Map<URI, Integer> choicepos = new HashMap<>();
+		List<Integer> selections = new ArrayList<>();
+		for ( int i = 0; i < uris.length; i++ ) {
+			choicepos.put( uris[i], i );
+			if ( values.contains( uris[i] ) ) {
+				selections.add( i );
+			}
+		}
+
+		LabeledPairRenderer<URI> renderer
+				= LabeledPairRenderer.getUriPairRenderer().cache( choices );
+
+		Map<URI, String> propmap = new HashMap<>();
+		propmap.put( property, Utility.getInstanceLabel( property,
+				DIHelper.getInstance().getRdfEngine() ) );
+
+		JList<URI> list = new JList<>( uris );
+		list.setCellRenderer( renderer );
+		for ( int idx : selections ) {
+			list.addSelectionInterval( idx, idx );
+		}
+
+		ConstraintPanel cp = new ConstraintPanel( property, label,
+				new JScrollPane( list ), checked, values, propmap );
+		if ( showDialog( label, cp ) ) {
+			
+			ConstraintValue val = new ConstraintValue( null, cp.isIncluded(), property );
+			MultiMap<ConstraintValue, Value> map = new MultiMap<>();
+			for( URI u : list.getSelectedValuesList() ){
+				map.add( val, u );
+			}
+			
+			return map;
 		}
 
 		return null;
@@ -149,6 +208,34 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		property.setSelectedItem( null == proptype ? Constants.ANYNODE : proptype );
 
 		setType( valForType );
+	}
+
+	protected ConstraintPanel( URI proptype, String lbl, JComponent input,
+			boolean checked, Collection<Value> values, Map<URI, String> propmap ) {
+		initComponents();
+
+		inputarea.setLayout( new BorderLayout() );
+		inputarea.add( input );
+		label.setText( lbl );
+		include.setSelected( checked );
+
+		LabeledPairRenderer<URI> renderer
+				= LabeledPairRenderer.getUriPairRenderer().cache( propmap );
+		propmap = Utility.sortUrisByLabel( propmap );
+		URI[] uris = propmap.keySet().toArray( new URI[0] );
+		DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
+
+		property.setModel( model );
+		property.setEditable( false );
+		property.setRenderer( renderer );
+		property.setSelectedItem( null == proptype ? Constants.ANYNODE : proptype );
+
+		if ( !( null == values || values.isEmpty() ) ) {
+			setType( values.iterator().next() );
+		}
+		else {
+			setType( null );
+		}
 	}
 
 	protected URI getPropertyType() {
