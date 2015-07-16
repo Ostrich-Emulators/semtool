@@ -16,6 +16,7 @@ import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
@@ -24,6 +25,7 @@ import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
 import java.util.HashMap;
+
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 
@@ -143,8 +145,10 @@ public class ExecuteQueryProcessor {
 		QuestionPlaySheetStore.getInstance().idCount++;
 		playSheetTitle.append( " (" ).
 				append( QuestionPlaySheetStore.getInstance().getIDCount() ).append( ")" );
+
 		//When preparing Sparql to execute, we must remove all new-line characters:
 		String sparql = getSparql( insight, paramHash ).replace( '\n', ' ' );
+
 		return prepareQueryOutputPlaySheet( engine, sparql, insight.getOutput(),
 				playSheetTitle.toString(), insight, appending );
 	}
@@ -166,9 +170,11 @@ public class ExecuteQueryProcessor {
 		logger.debug( "SPARQL " + sparql );
 		if ( insight.getIsLegacy() == true ) {
 			sparql = Utility.fillParam( sparql, paramHash );
+System.out.println(">>>>>Legacy: "+sparql);
 		}
 		else {
 			sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( insight.getSparql(), paramHash );
+System.out.println(">>>>>Non-Legacy: "+sparql);
 		}
 		return sparql;
 	}
