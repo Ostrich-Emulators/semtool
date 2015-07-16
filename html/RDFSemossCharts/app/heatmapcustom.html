@@ -267,8 +267,7 @@
 			})
 			.on('mouseover', tip.show)
 			.on('mouseout', tip.hide)
-			.on("click", $("<div>We're HERE!</div>").dialog());
-			//.on('click', function(d){popover(d)});
+			.on('click', function(d){popover(d)});
 
 			//passes data into popover. param is the label, which is the system-sys pair.
 

@@ -170,11 +170,9 @@ public class ExecuteQueryProcessor {
 		logger.debug( "SPARQL " + sparql );
 		if ( insight.getIsLegacy() == true ) {
 			sparql = Utility.fillParam( sparql, paramHash );
-System.out.println(">>>>>Legacy: "+sparql);
 		}
 		else {
 			sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( insight.getSparql(), paramHash );
-System.out.println(">>>>>Non-Legacy: "+sparql);
 		}
 		return sparql;
 	}
