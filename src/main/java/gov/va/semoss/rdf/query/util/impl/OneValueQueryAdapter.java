@@ -81,7 +81,7 @@ public abstract class OneValueQueryAdapter<T> extends QueryExecutorAdapter<T> {
 		};
 	}
 
-	public static OneValueQueryAdapter<String> getStringList( String sparql ) {
+	public static OneValueQueryAdapter<String> getString( String sparql ) {
 		return getString( sparql, null );
 	}
 
