@@ -156,17 +156,18 @@ public abstract class QueryExecutorAdapter<T> implements QueryExecutor<T> {
 	}
 
 	@Override
-	public void bindURI( String var, String uri ) {
+	public QueryExecutorAdapter<T> bindURI( String var, String uri ) {
 		try {
 			umap.put( var, new URIImpl( uri ) );
 		}
 		catch ( Exception e ) {
 			log.error( "Could not parse uri: " + uri, e );
 		}
+		return this;
 	}
 
 	@Override
-	public void bindURI( String var, String basename, String localname ) {
+	public QueryExecutorAdapter<T> bindURI( String var, String basename, String localname ) {
 		try {
 			ValueFactory vfac = new ValueFactoryImpl();
 			umap.put( var, vfac.createURI( basename, localname ) );
@@ -174,6 +175,7 @@ public abstract class QueryExecutorAdapter<T> implements QueryExecutor<T> {
 		catch ( Exception e ) {
 			log.error( "Could not parse uri: " + basename + localname, e );
 		}
+		return this;
 	}
 
 	@Override
@@ -219,43 +221,51 @@ public abstract class QueryExecutorAdapter<T> implements QueryExecutor<T> {
 	}
 
 	@Override
-	public void bind( String var, String s ) {
+	public QueryExecutorAdapter<T> bind( String var, String s ) {
 		smap.put( var, new StringPair( s ) );
+		return this;
 	}
 
 	@Override
-	public void bind( String var, Resource r ) {
+	public QueryExecutorAdapter<T> bind( String var, Resource r ) {
 		rmap.put( var, r );
+		return this;
 	}
 
 	@Override
-	public void bind( String var, String s, String lang ) {
+	public QueryExecutorAdapter<T> bind( String var, String s, String lang ) {
 		smap.put( var, new StringPair( s, lang ) );
+		return this;
 	}
 
 	@Override
-	public void bind( String var, double d ) {
+	public QueryExecutorAdapter<T> bind( String var, double d ) {
 		dmap.put( var, d );
+		return this;
 	}
 
 	@Override
-	public void bind( String var, int d ) {
+	public QueryExecutorAdapter<T> bind( String var, int d ) {
 		imap.put( var, d );
+		return this;
 	}
 
 	@Override
-	public void bind( String var, Date d ) {
+	public QueryExecutorAdapter<T> bind( String var, Date d ) {
 		amap.put( var, d );
+		return this;
 	}
 
 	@Override
-	public void bind( String var, boolean d ) {
+	public QueryExecutorAdapter<T> bind( String var, boolean d ) {
 		bmap.put( var, d );
+		return this;
 	}
 
 	@Override
-	public void bind( String var, URI uri ) {
+	public QueryExecutorAdapter<T> bind( String var, URI uri ) {
 		umap.put( var, uri );
+		return this;
 	}
 
 	@Override
