@@ -9,13 +9,16 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiSetMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * A class to convert a directed graph from the GQB to valid Sparql
@@ -178,26 +181,31 @@ public class GraphToSparql {
 			QueryNode src = graph.getSource( edge );
 			QueryNode dst = graph.getDest( edge );
 			sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
-					src, dst, props.size() > 1 ) );
+					src, dst, props.keySet() ) );
 		}
 
 		return sb.append( "}" ).toString();
 	}
 
 	private String buildEdgeTypeAndEndpoints( QueryNodeEdgeBase edge,
-			Set<Value> vals, QueryNode src, QueryNode dst, boolean edgeHasMoreProps ) {
+			Set<Value> vals, QueryNode src, QueryNode dst, Set<URI> otherprops ) {
 		String fromvar = "?" + src.getQueryId();
 		String linkvar = "?" + edge.getQueryId();
 		String tovar = "?" + dst.getQueryId();
 
 		StringBuilder sb = new StringBuilder( "  " ).append( fromvar ).append( " " );
 
+		// if we have a non-generic edge between these two nodes, the sparql changes
+		Set<URI> specialprops = new HashSet<>( otherprops );
+		specialprops.removeAll( Arrays.asList( RDF.TYPE, RDFS.LABEL ) );
+		boolean useCustomEdge = !specialprops.isEmpty();
+
 		// we need to use a variable if:
 		// 1) our edge is selected to be returned in the SELECT part
 		// 2) we have other properties to hang on this edge
 		// Note: if 1 & 2 aren't true, we can handle multiple values without a variable
-		boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || edgeHasMoreProps 
-				|| vals.isEmpty() || edge.isSelected( RDF.SUBJECT ) );
+		boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || otherprops.size() > 1
+				|| vals.isEmpty() || edge.isSelected( RDF.SUBJECT ) || useCustomEdge );
 		if ( useLinkVar ) {
 			sb.append( linkvar ).append( " " );
 		}
@@ -218,6 +226,16 @@ public class GraphToSparql {
 		sb.append( tovar );
 
 		if ( useLinkVar && !vals.isEmpty() ) {
+			if ( useCustomEdge ) {
+				sb.append( " .\n  " ).append( linkvar ).append( " " );
+				sb.append( shortcut( RDF.PREDICATE ) ).append( " ?" );
+				sb.append( edge.getLabel( RDF.TYPE ) );
+
+				// our VALUES clause (below) needs to work on our base edge type,
+				// not the custom one
+				linkvar = "?"+edge.getLabel( RDF.TYPE );
+			}
+
 			sb.append( " VALUES " ).append( linkvar ).append( " { " );
 			for ( Value v : vals ) {
 				sb.append( shortcut( URI.class.cast( v ) ) ).append( " " );
@@ -227,7 +245,7 @@ public class GraphToSparql {
 
 		sb.append( " .\n" );
 
-		if ( edge.isSelected( RDF.TYPE ) ) {
+		if ( edge.isSelected( RDF.TYPE ) && !useCustomEdge ) {
 			sb.append( "  " ).append( linkvar ).append( " " ).
 					append( shortcut( RDF.TYPE ) ).append( "+ ?" ).
 					append( edge.getLabel( RDF.TYPE ) ).append( " .\n" );

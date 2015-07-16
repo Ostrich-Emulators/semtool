@@ -94,7 +94,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 	protected void finishMenu( T v, GraphicalQueryPanel pnl ) {
 	}
 
-	protected Collection<URI> getAllPossibleProperties( URI type, IEngine engine ) {
+	protected static Collection<URI> getAllPossibleProperties( URI type, IEngine engine ) {
 		String query = "SELECT DISTINCT ?pred WHERE { ?s ?pred ?o . ?s a ?type . FILTER ( isLiteral( ?o ) ) }";
 		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query, "pred" );
 		qa.bind( "type", type );
@@ -152,14 +152,24 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 				URI starttype = graph.getSource( v ).getType();
 				URI endtype = graph.getDest( v ).getType();
 
-				List<URI> links = DBToLoadingSheetExporter.getPredicatesBetween( starttype,
-						endtype, pnl.getEngine() );
+				ListQueryAdapter<URI> links
+						= DBToLoadingSheetExporter.getPredicatesBetween( starttype, endtype );
 
-				Map<URI, String> labels = Utility.getInstanceLabels( links, pnl.getEngine() );
-				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
-						"Change the type of this Edge", "New Type", Utility.sortUrisByLabel( labels ) );
+						"Change the type of this Edge", "New Type", links );
 			}
+
+			@Override
+			protected void finishMenu( QueryEdge v, GraphicalQueryPanel pnl ) {
+				String query = "SELECT DISTINCT ?pred WHERE { ?s ?pred ?o . ?s rdf:predicate ?type . FILTER ( isLiteral( ?o ) ) }";
+				ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query, "pred" );
+				URI type = v.getType();
+				qa.bind( "type", type );
+
+				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
+						"Add a constraint to this Vertex", "New Value", qa ) );
+			}
+
 		};
 	}
 }

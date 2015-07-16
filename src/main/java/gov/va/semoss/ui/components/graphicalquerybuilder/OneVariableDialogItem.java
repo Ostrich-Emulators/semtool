@@ -5,7 +5,10 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValue;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,8 +18,12 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 
 /**
  *
@@ -28,9 +35,9 @@ public class OneVariableDialogItem extends AbstractAction {
 	private final QueryNodeEdgeBase node;
 	private final String dlgtext;
 	private final GraphicalQueryPanel panel;
-	private final Map<URI, String> propTypeChoices;
-	private final Value currval;
-	private Set<Value> currvals;
+	private final Set<Value> currvals;
+	private Map<URI, String> propTypeChoices;
+	private ListQueryAdapter<URI> choicesQuery;
 
 	public OneVariableDialogItem( QueryNodeEdgeBase node, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext ) {
@@ -43,8 +50,8 @@ public class OneVariableDialogItem extends AbstractAction {
 		this.panel = panel;
 		property = prop;
 
-		currval = this.node.getValue( property );
-		currvals = this.node.getValues( property );
+		currvals = ( null == node.getValues( property )
+				? new HashSet<>() : node.getValues( property ) );
 		propTypeChoices = null;
 	}
 
@@ -59,14 +66,41 @@ public class OneVariableDialogItem extends AbstractAction {
 		this.panel = panel;
 		this.propTypeChoices = labels;
 		property = prop;
-		currval = node.getValue( property );
 		currvals = ( null == node.getValues( property )
 				? new HashSet<>() : node.getValues( property ) );
+	}
+
+	public OneVariableDialogItem( QueryNodeEdgeBase nod, GraphicalQueryPanel panel,
+			URI prop, String label, String tooltip, String dlgtext,
+			ListQueryAdapter<URI> choicesQ ) {
+
+		super( label );
+		putValue( Action.SHORT_DESCRIPTION, tooltip );
+
+		this.node = nod;
+		this.dlgtext = dlgtext;
+		this.panel = panel;
+		property = prop;
+		currvals = ( null == node.getValues( property )
+				? new HashSet<>() : node.getValues( property ) );
+		choicesQuery = choicesQ;
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		Collection<ConstraintValue> values = null;
+
+		if ( null != choicesQuery ) {
+			try {
+				List<URI> uris = panel.getEngine().query( choicesQuery );
+				propTypeChoices = Utility.getInstanceLabels( uris, panel.getEngine() );
+				propTypeChoices.put( Constants.ANYNODE, "<Any>" );
+				propTypeChoices = Utility.sortUrisByLabel( propTypeChoices );
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
+				Logger.getLogger( getClass() ).error( ex, ex );
+			}
+		}
 
 		if ( null == propTypeChoices ) {
 			// set a specific property
