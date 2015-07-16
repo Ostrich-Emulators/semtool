@@ -56,6 +56,9 @@ public class NonLegacyQueryBuilder {
      *             it will be replaced by a URI.
      */
 	public static String buildNonLegacyQuery(String query, Map<String, String> paramHash){
+		if(query.trim().toLowerCase().equals("null") || query.trim().equals("")){
+			return "null";
+		}		
         QueryExecutorAdapter<String> queryExer = new QueryExecutorAdapter<String>(){
  	        @Override
  	        public void handleTuple(BindingSet set, ValueFactory fac){}

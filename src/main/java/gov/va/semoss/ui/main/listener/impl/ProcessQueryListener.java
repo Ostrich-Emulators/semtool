@@ -48,6 +48,7 @@ import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+import gov.va.semoss.ui.components.playsheets.rendererclasses.AppDupeHeatMapSheet;
 
 /**
  * 1. Get information from the Question for the query 2. Process the query to
@@ -108,7 +109,6 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 		cboInsights = (JComboBox) DIHelper.getInstance().getLocalProp( Constants.QUESTION_LIST_FIELD );
 		Insight insight = cboInsights.getItemAt( cboInsights.getSelectedIndex() );
 		String output = insight.getOutput();
-
 		try {
 			Class<?> k = Class.forName( output );
 			if( !( PlaySheetCentralComponent.class.isAssignableFrom( k ) ) ){
@@ -158,14 +158,22 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 	private void doitNewSkool( Perspective persp, Insight insight,
 			Map<String, String> paramHash, boolean appending, JDesktopPane pane ) {
 		String output = insight.getOutput();
-
 		IEngine eng = DIHelper.getInstance().getRdfEngine();
-		String query = ExecuteQueryProcessor.getSparql( insight, paramHash );
+		
+		//If a "Renderer Class" has been entered into the InsightManager,
+		//then the playsheet dropdown selection and query must not be used.
+		//Instead, use the "Renderer Class":
+		String rendererClass = (insight.getRendererClass() + "").trim();
+		if(rendererClass.equals("") == false){
+			output = "gov.va.semoss.ui.components.playsheets.rendererclasses."+rendererClass;
+		}
+		
+        String query = query = ExecuteQueryProcessor.getSparql( insight, paramHash );
+
 		ProgressTask pt = null;
 		if ( appending ) {
 			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
 			String title = persp.getLabel() + "-Insight-" + insight.getOrder( persp.getUri() );
-
 			pt = psf.getOverlayTask( query, insight.getLabel(), title );
 		}
 		else {
