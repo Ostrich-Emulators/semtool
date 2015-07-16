@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -94,6 +95,15 @@ public class OneVariableDialogItem extends AbstractAction {
 			try {
 				List<URI> uris = panel.getEngine().query( choicesQuery );
 				propTypeChoices = Utility.getInstanceLabels( uris, panel.getEngine() );
+
+				// if there are no property choices, don't show the dialog
+				if ( propTypeChoices.isEmpty() ) {
+					JOptionPane.showMessageDialog( panel,
+							"There are no properties for this entity type", "No Properties",
+							JOptionPane.INFORMATION_MESSAGE );
+					return;
+				}
+
 				propTypeChoices.put( Constants.ANYNODE, "<Any>" );
 				propTypeChoices = Utility.sortUrisByLabel( propTypeChoices );
 			}
