@@ -164,7 +164,7 @@ public class GraphNodePopup extends JPopupMenu {
 		add( new NodeInfoPopup( gps, highlightedVertices ) );
 
 		JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
-		item.setEnabled( highlightedVertices.size() == 1 );
+		item.setEnabled( highlightedVertices.size() >= 1 );
 		
 		add( new CondenseGraph( gps ) );
 	}
