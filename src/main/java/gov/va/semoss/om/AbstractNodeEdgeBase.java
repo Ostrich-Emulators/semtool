@@ -163,12 +163,12 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	@Override
 	public URI getURI() {
-		return URI.class.cast( properties.get( RDF.SUBJECT ) );
+		return URI.class.cast( getValue( RDF.SUBJECT ) );
 	}
 
 	@Override
 	public URI getType() {
-		return URI.class.cast( properties.get( RDF.TYPE ) );
+		return URI.class.cast( getValue( RDF.TYPE ) );
 	}
 
 	@Override
