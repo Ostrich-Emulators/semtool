@@ -6,7 +6,6 @@
 package gov.va.semoss.ui.components.models;
 
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
 
 import java.beans.PropertyChangeEvent;
@@ -633,44 +632,6 @@ public class ValueTableModel extends AbstractTableModel {
 		return null;
 	}
 	
-	public static Value getValueFromDatatypeAndString(String datatype, String content) {
-		if ( Constants.INT_URI.equals(datatype) || Constants.INTEGER_URI.equals(datatype)) {
-			try {
-				return new LiteralImpl(Integer.parseInt(content) + "");
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		} else if ( Constants.DOUBLE_URI.equals(datatype) ) {
-			try {
-				return new LiteralImpl(Double.parseDouble(content) + "");
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		} else if ( Constants.FLOAT_URI.equals(datatype) ) {
-			try {
-				return new LiteralImpl(Float.parseFloat(content) + "");
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		} else if ( Constants.BOOLEAN_URI.equals(datatype) ) {
-			return new LiteralImpl(Boolean.parseBoolean(content) + "");
-		} else if ( Constants.DATE_URI.equals(datatype) ) {
-			log.warn("Parsing RDF datatype Date not yet supported.");
-			return null;
-		} else if ( Constants.ANYURI_URI.equals(datatype) ) {
-			try {
-				return new URIImpl(content);
-			} catch (Exception e) {
-				return null;
-			}
-		} else if ( Constants.STRING_URI.equals(datatype) ) {
-			return new LiteralImpl(content);
-		} else {
-			log.warn("Trying to parse a value for a datatype not yet supported: " + datatype);
-			return null;
-		}
-	}
-
 	public static String removeExtraneousDoubleQuotes( String input ) {
 		while ( input != null && input.length() > 2
 				&& input.charAt( 0 ) == '\"'
@@ -679,5 +640,43 @@ public class ValueTableModel extends AbstractTableModel {
 		}
 
 		return input;
+	}
+
+	public static Value getValueFromDatatypeAndString(URI datatype, String content) {
+		if ( XMLSchema.INTEGER == datatype || XMLSchema.INT == datatype) {
+			try {
+				return new LiteralImpl(Integer.parseInt(content) + "");
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else if ( XMLSchema.DOUBLE == datatype ) {
+			try {
+				return new LiteralImpl(Double.parseDouble(content) + "");
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else if ( XMLSchema.FLOAT == datatype ) {
+			try {
+				return new LiteralImpl(Float.parseFloat(content) + "");
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else if ( XMLSchema.BOOLEAN == datatype ) {
+			return new LiteralImpl(Boolean.parseBoolean(content) + "");
+		} else if ( XMLSchema.DATE == datatype ) {
+			log.warn("Parsing RDF datatype Date not yet supported.");
+			return null;
+		} else if ( XMLSchema.ANYURI == datatype ) {
+			try {
+				return new URIImpl(content);
+			} catch (Exception e) {
+				return null;
+			}
+		} else if ( XMLSchema.STRING == datatype ) {
+			return new LiteralImpl(content);
+		} else {
+			log.warn("Trying to parse a value for a datatype not yet supported: " + datatype);
+			return null;
+		}
 	}
 }
