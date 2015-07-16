@@ -5,15 +5,21 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -22,7 +28,9 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LiteralImpl;
@@ -53,10 +61,12 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return ( JOptionPane.YES_OPTION == ans );
 	}
 
-	public static ConstraintValue getValue( URI property, String label, Object value,
-			boolean checked ) {
+	public static Collection<ConstraintValue> getValues( URI property, String label,
+			Collection<Value> value, boolean checked ) {
 		JTextField input = new JTextField();
-		input.setText( value.toString() );
+		if ( null != value ) {
+			input.setText( implode( value ) );
+		}
 
 		Map<URI, String> propmap = new HashMap<>();
 		propmap.put( property, Utility.getInstanceLabel( property,
@@ -67,26 +77,52 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		if ( showDialog( label, cp ) ) {
 			String val = input.getText();
 			URI type = cp.getType();
-			return new ConstraintValue( ( null == type ? new URIImpl( val )
-					: new LiteralImpl( val, type ) ), cp.isIncluded(), property );
+
+			List<ConstraintValue> values = new ArrayList<>();
+
+			if ( val.contains( "|" ) ) {
+				List<String> newvals = explode( val );
+				for ( String v : newvals ) {
+					values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
+							? new URIImpl( v )
+							: new LiteralImpl( v, type ) ), cp.isIncluded(), property ) );
+				}
+			}
+			else {
+				values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
+						? new URIImpl( val )
+						: new LiteralImpl( val, type ) ), cp.isIncluded(), property ) );
+			}
+			return values;
 		}
 		return null;
 	}
 
-	public static ConstraintValue getValue( String label, Object value,
-			Map<URI, String> propmap ) {
+	public static List<ConstraintValue> getValues( String label, Map<URI, String> propmap ) {
 		JTextField input = new JTextField();
-		if ( null != value ) {
-			input.setText( value.toString() );
-		}
 
 		ConstraintPanel cp = new ConstraintPanel( null, label, input, true,
-				value, propmap );
+				(Value) null, propmap );
 		if ( showDialog( label, cp ) ) {
 			String val = input.getText();
 			URI type = cp.getType();
-			return new ConstraintValue( ( null == type ? new URIImpl( val )
-					: new LiteralImpl( val, type ) ), cp.isIncluded(), cp.getPropertyType() );
+
+			List<ConstraintValue> values = new ArrayList<>();
+						if ( val.contains( "|" ) ) {
+				List<String> newvals = explode( val );
+				for ( String v : newvals ) {
+					values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
+							? new URIImpl( v )
+							: new LiteralImpl( v, type ) ), cp.isIncluded(), cp.getPropertyType() ) );
+				}
+			}
+			else {
+				values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
+						? new URIImpl( val )
+						: new LiteralImpl( val, type ) ), cp.isIncluded(), cp.getPropertyType() ) );
+			}
+
+			return values;
 		}
 		return null;
 	}
@@ -106,6 +142,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			JList<URI> list = new JList<>( uris );
 			list.setCellRenderer( renderer );
 			list.setSelectedValue( value, true );
+			list.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
 			ConstraintPanel cp = new ConstraintPanel( property, label,
 					new JScrollPane( list ), checked, value, propmap );
 			if ( showDialog( label, cp ) ) {
@@ -129,8 +166,60 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return null;
 	}
 
+	/**
+	 * Gets a one-key map of values
+	 *
+	 * @param property
+	 * @param label
+	 * @param values
+	 * @param choices
+	 * @param checked
+	 * @return
+	 */
+	public static Collection<ConstraintValue> getValues( URI property, String label,
+			Collection<Value> values, Map<URI, String> choices, boolean checked ) {
+		choices = Utility.sortUrisByLabel( choices );
+
+		URI[] uris = choices.keySet().toArray( new URI[0] );
+		Map<URI, Integer> choicepos = new HashMap<>();
+		List<Integer> selections = new ArrayList<>();
+		for ( int i = 0; i < uris.length; i++ ) {
+			choicepos.put( uris[i], i );
+			if ( values.contains( uris[i] ) ) {
+				selections.add( i );
+			}
+		}
+
+		LabeledPairRenderer<URI> renderer
+				= LabeledPairRenderer.getUriPairRenderer().cache( choices );
+
+		Map<URI, String> propmap = new HashMap<>();
+		propmap.put( property, Utility.getInstanceLabel( property,
+				DIHelper.getInstance().getRdfEngine() ) );
+
+		JList<URI> list = new JList<>( uris );
+		list.setCellRenderer( renderer );
+		for ( int idx : selections ) {
+			list.addSelectionInterval( idx, idx );
+		}
+
+		ConstraintPanel cp = new ConstraintPanel( property, label,
+				new JScrollPane( list ), checked, values, propmap );
+		if ( showDialog( label, cp ) ) {
+
+			List<ConstraintValue> returns = new ArrayList<>();
+			for ( URI u : list.getSelectedValuesList() ) {
+				returns.add( new ConstraintValue( u, cp.isIncluded(), property ) );
+			}
+
+			return returns;
+		}
+
+		return null;
+	}
+
 	protected ConstraintPanel( URI proptype, String label, JComponent input,
-			boolean checked, Object valForType, Map<URI, String> propmap ) {
+			boolean checked, Value valForType, Map<URI, String> propmap ) {
 		initComponents();
 
 		inputarea.setLayout( new BorderLayout() );
@@ -147,16 +236,44 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		property.setModel( model );
 		property.setEditable( false );
 		property.setRenderer( renderer );
-		property.setSelectedItem( null == proptype ? Constants.ANYNODE : valForType );
-		
+		property.setSelectedItem( null == proptype ? Constants.ANYNODE : proptype );
+
 		setType( valForType );
+	}
+
+	protected ConstraintPanel( URI proptype, String lbl, JComponent input,
+			boolean checked, Collection<Value> values, Map<URI, String> propmap ) {
+		initComponents();
+
+		inputarea.setLayout( new BorderLayout() );
+		inputarea.add( input );
+		label.setText( lbl );
+		include.setSelected( checked );
+
+		LabeledPairRenderer<URI> renderer
+				= LabeledPairRenderer.getUriPairRenderer().cache( propmap );
+		propmap = Utility.sortUrisByLabel( propmap );
+		URI[] uris = propmap.keySet().toArray( new URI[0] );
+		DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
+
+		property.setModel( model );
+		property.setEditable( false );
+		property.setRenderer( renderer );
+		property.setSelectedItem( null == proptype ? Constants.ANYNODE : proptype );
+
+		if ( !( null == values || values.isEmpty() ) ) {
+			setType( values.iterator().next() );
+		}
+		else {
+			setType( null );
+		}
 	}
 
 	protected URI getPropertyType() {
 		return property.getItemAt( property.getSelectedIndex() );
 	}
 
-	private void setType( Object o ) {
+	private void setType( Value o ) {
 		if ( null == o ) {
 			stringtype.setSelected( true );
 		}
@@ -165,17 +282,24 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 		else {
 			Enumeration<AbstractButton> radios = typegroup.getElements();
+			Class<?> typeclass = ValueTableModel.getClassForValue( o );
+
 			while ( radios.hasMoreElements() ) {
 				AbstractButton radio = radios.nextElement();
-				if ( radio.getActionCommand().equalsIgnoreCase( o.getClass().getSimpleName() ) ) {
+				if ( radio.getActionCommand().equalsIgnoreCase( typeclass.getSimpleName() ) ) {
 					radio.setSelected( true );
 				}
 			}
 		}
 	}
 
+	/**
+	 * Gets the currently-selected data type.
+	 *
+	 * @return The datatype, or null if the datatype is {@link XMLSchema#STRING},
+	 * or {@link XMLSchema#ANYURI} if "URI" was selected.
+	 */
 	public URI getType() {
-
 		Enumeration<AbstractButton> radios = typegroup.getElements();
 		while ( radios.hasMoreElements() ) {
 			AbstractButton radio = radios.nextElement();
@@ -184,13 +308,16 @@ public class ConstraintPanel extends javax.swing.JPanel {
 
 				for ( Map.Entry<Class<?>, URI> types : typelookup.entrySet() ) {
 					if ( types.getKey().getSimpleName().equalsIgnoreCase( command ) ) {
+						if ( XMLSchema.STRING.equals( types.getValue() ) ) {
+							return null;
+						}
 						return types.getValue();
 					}
 				}
 			}
 		}
 
-		return null;
+		return XMLSchema.ANYURI;
 	}
 
 	public boolean isIncluded() {
@@ -329,5 +456,55 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			this.included = included;
 			this.property = property;
 		}
+	}
+
+	private static List<String> explode( String val ) {
+		List<String> vals = new ArrayList<>();
+		StringBuffer processed = new StringBuffer();
+		// first, remove any quoted section
+		Pattern quotepattern = Pattern.compile( "\"([^\"]+)\"" );
+		Matcher quoter = quotepattern.matcher( val );
+		while ( quoter.find() ) {
+			vals.add( quoter.group( 1 ) );
+			quoter.appendReplacement( processed, "|" );
+		}
+		if ( processed.length() > 0 ) {
+			quoter.appendTail( processed );
+		}
+		else {
+			processed.append( val );
+		}
+
+		for ( String s : processed.toString().split( "\\s*\\|\\s*" ) ) {
+			if( !s.trim().isEmpty() ){
+				vals.add( s.trim() );
+			}
+		}
+		return vals;
+	}
+
+	private static String implode( Collection<Value> vals ) {
+		StringBuilder sb = new StringBuilder();
+		for ( Value v : vals ) {
+			if ( sb.length() > 0 ) {
+				sb.append( " | " );
+			}
+
+			if ( v instanceof Literal ) {
+				Literal l = Literal.class.cast( v );
+				String str = l.getLabel();
+				if ( str.contains( "|" ) ) {
+					sb.append( "\"" ).append( str ).append( "\"" );
+				}
+				else {
+					sb.append( str );
+				}
+			}
+			else {
+				sb.append( v.stringValue() );
+			}
+		}
+
+		return sb.toString();
 	}
 }

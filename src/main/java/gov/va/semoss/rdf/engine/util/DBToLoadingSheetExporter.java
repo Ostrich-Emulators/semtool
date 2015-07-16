@@ -393,8 +393,8 @@ public class DBToLoadingSheetExporter {
 		return seen.values();
 	}
 
-	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
-			IEngine engine ) {
+	public static ListQueryAdapter<URI> getPredicatesBetween( URI subjectNodeType,
+			URI objectNodeType ) {
 		String q
 				= "SELECT DISTINCT ?relationship WHERE {"
 				+ "?in  a ?stype . "
@@ -409,10 +409,15 @@ public class DBToLoadingSheetExporter {
 		if ( !objectNodeType.equals( Constants.ANYNODE ) ) {
 			varq.bind( "otype", objectNodeType );
 		}
+		return varq;
+	}
+
+	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
+			IEngine engine ) {
 
 		List<URI> values;
 		try {
-			values = engine.query( varq );
+			values = engine.query( getPredicatesBetween( subjectNodeType, objectNodeType ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			values = new ArrayList<>();

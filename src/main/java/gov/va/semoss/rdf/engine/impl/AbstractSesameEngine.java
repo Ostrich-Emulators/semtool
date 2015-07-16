@@ -456,6 +456,16 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	@Override
+	public <T> T queryNoEx( QueryExecutor<T> exe ) {
+		if ( isConnected() ) {
+			RepositoryConnection rc = getRawConnection();
+			return getSelectNoEx( exe, rc, supportsSparqlBindings() );
+		}
+
+		return null;
+	}
+
+	@Override
 	public Model construct( QueryExecutor<Model> q ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
 		return getConstruct( q, getRawConnection() );

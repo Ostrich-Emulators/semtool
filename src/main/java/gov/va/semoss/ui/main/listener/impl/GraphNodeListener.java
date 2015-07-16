@@ -34,12 +34,14 @@ import edu.uci.ics.jung.visualization.control.ModalLensGraphMouse;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.GraphNodePopup;
+import gov.va.semoss.ui.components.NodePropertiesPopup;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.models.EdgePropertyTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+
 import java.util.HashSet;
 
 /**
@@ -74,6 +76,10 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 
 		SEMOSSVertex clickedVertex = checkIfVertexWasClicked( viewer, e.getX(),
 				e.getY() );
+		
+		if (clickedVertex != null) {
+			checkForDoubleClick( viewer, clickedVertex, e );
+		}
 
 		if ( clickedVertex == null ) {
 			handleEdges( viewer );
@@ -89,6 +95,18 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 				handleHighlightVertexInSkeletonMode( viewer, vertHash );
 			}
 		}
+	}
+
+	long lastTimeClicked = 0;
+	private void checkForDoubleClick( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
+			SEMOSSVertex clickedVertex, MouseEvent e ) {
+		
+		long thisTimeClicked = System.currentTimeMillis();
+		if ( (thisTimeClicked - lastTimeClicked) < 250 ) {
+			new NodePropertiesPopup( gps, viewer.getPickedVertexState().getPicked() ).showPropertiesView();
+		}
+		
+		lastTimeClicked = thisTimeClicked;
 	}
 
 	/*

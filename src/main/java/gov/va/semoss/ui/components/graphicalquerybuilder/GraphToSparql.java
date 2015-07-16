@@ -6,21 +6,19 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiSetMap;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.XMLSchema;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * A class to convert a directed graph from the GQB to valid Sparql
@@ -29,8 +27,6 @@ import org.openrdf.model.vocabulary.XMLSchema;
  */
 public class GraphToSparql {
 
-	private final Map<AbstractNodeEdgeBase, Integer> ids = new HashMap<>();
-	private final Map<NodeType, Integer> valIds = new HashMap<>();
 	private final Map<String, String> namespaces;
 
 	public GraphToSparql() {
@@ -46,32 +42,24 @@ public class GraphToSparql {
 		namespaces.putAll( ns );
 	}
 
-	public String construct( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		assignIds( graph );
-		// return convert( graph, false );
-		throw new UnsupportedOperationException( "not yet implemented" );
-	}
-
-	public String select( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		assignIds( graph );
+	public String select( DirectedGraph<QueryNode, QueryEdge> graph ) {
 		return buildSelect( graph ) + buildWhere( graph );
 	}
 
-	private String buildSelect( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
+	private String buildSelect( DirectedGraph<QueryNode, QueryEdge> graph ) {
 		StringBuilder select = new StringBuilder( "SELECT" );
-		List<AbstractNodeEdgeBase> todo = new ArrayList<>();
+		List<QueryNodeEdgeBase> todo = new ArrayList<>();
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
-		for ( AbstractNodeEdgeBase v : todo ) {
-			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
-				int objid = valIds.get( new NodeType( v.getURI(), en.getKey() ) );
-				String objvar = "obj" + objid;
+		for ( QueryNodeEdgeBase v : todo ) {
+			for ( Map.Entry<URI, Set<Value>> en : v.getAllValues().entrySet() ) {
+				URI prop = en.getKey();
+				boolean issubj = RDF.SUBJECT.equals( prop );
 
-				if ( v.isMarked( en.getKey() ) ) {
-					// special handling when the user wants a URI back
-					select.append( " ?" ).append( en.getKey().equals( RDF.SUBJECT )
-							? "node" + ids.get( v ) : objvar );
+				if ( v.isSelected( prop ) ) {
+					select.append( " ?" ).
+							append( issubj ? v.getQueryId() : v.getLabel( prop ) );
 				}
 			}
 		}
@@ -79,116 +67,191 @@ public class GraphToSparql {
 		return select.toString();
 	}
 
-	private Map<URI, Object> getWhereProps( AbstractNodeEdgeBase v ) {
-		Map<URI, Object> props = new HashMap<>( v.getProperties() );
-		props.remove( RDF.SUBJECT );
-		props.remove( Constants.IN_EDGE_CNT );
-		props.remove( Constants.OUT_EDGE_CNT );
-		props.remove( AbstractNodeEdgeBase.LEVEL );
+	private MultiSetMap<URI, Value> getWhereProps( QueryNodeEdgeBase v ) {
+		MultiSetMap<URI, Value> nodeEdgeVals = MultiSetMap.deepCopy( v.getAllValues() );
+		nodeEdgeVals.remove( RDF.SUBJECT );
 
-		if ( Constants.ANYNODE.equals( v.getType() ) && !v.isMarked( RDF.TYPE ) ) {
-			props.remove( RDF.TYPE );
+		// ANYNODE and "" are placeholders, and we don't need to hold their places
+		// anymore at this point, so remove them
+		List<URI> toremove = new ArrayList<>();
+		for ( Map.Entry<URI, Set<Value>> en : nodeEdgeVals.entrySet() ) {
+			URI prop = en.getKey();
+			Set<Value> values = en.getValue();
+
+			values.remove( Constants.ANYNODE );
+
+			for ( Value val : new ArrayList<>( values ) ) {
+				if ( val.stringValue().isEmpty() ) {
+					values.remove( val );
+				}
+			}
+
+			if ( values.isEmpty() && !v.isSelected( prop ) ) {
+				toremove.add( prop );
+			}
 		}
 
-		return props;
+		for ( URI remover : toremove ) {
+			nodeEdgeVals.remove( remover );
+		}
+
+		return nodeEdgeVals;
 	}
 
-	private String buildWhere( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
-		for ( AbstractNodeEdgeBase v : graph.getVertices() ) {
-			Map<URI, Object> props = getWhereProps( v );
+	private String makeOneValue( Value v ) {
+		if ( v instanceof URI ) {
+			return shortcut( URI.class.cast( v ) );
+		}
 
-			String nodevar = "?node" + ids.get( v );
-			for ( Map.Entry<URI, Object> en : props.entrySet() ) {
-				URI type = en.getKey();
-				Object val = en.getValue();
+		return v.toString();
+	}
 
-				// ignore empty variables (mostly, this is just for not returning a
-				// label, but it's generally good not to add unmarked predicates to a 
-				// query). If the predicate is marked, we must include it no matter what
-				if ( "".equals( v.getProperty( type ).toString() ) && !v.isMarked( type ) ) {
-					continue;
+	private String buildOneConstraint( QueryNodeEdgeBase v, URI type,
+			Set<Value> vals ) {
+		StringBuilder sb = new StringBuilder();
+
+		String nodevar = "?" + v.getQueryId();
+
+		sb.append( "  " );
+		if ( v.isOptional( type ) ) {
+			sb.append( "OPTIONAL { " );
+		}
+		sb.append( nodevar ).append( " " );
+		sb.append( shortcut( type ) );
+		sb.append( " " );
+
+		if ( v.isSelected( type ) ) {
+			String objvar = "?" + v.getLabel( type );
+			sb.append( objvar );
+
+			if ( !vals.isEmpty() ) {
+				sb.append( " VALUES " ).append( objvar ).append( " { " );
+				for ( Value val : vals ) {
+					sb.append( makeOneValue( val ) ).append( " " );
 				}
-
-				sb.append( "  " ).append( nodevar ).append( " " );
-				sb.append( shortcut( type ) );
-				sb.append( " " );
-
-				if ( v.isMarked( type ) ) {
-					int objid = valIds.get( new NodeType( v.getURI(), type ) );
-					String objvar = "?obj" + objid;
-					sb.append( objvar );
-					if ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) {
-						sb.append( " VALUES " ).append( objvar ).append( " { " );
-					}
-				}
-
-				if ( !Constants.ANYNODE.equals( val ) ) {
-					if ( val instanceof URI ) {
-						sb.append( shortcut( URI.class.cast( val ) ) );
-					}
-					else if ( val instanceof String && !val.toString().isEmpty() ) {
-						sb.append( "\"" ).append( val ).append( "\"" );
-					}
-					else if ( val instanceof Double ) {
-						sb.append( new LiteralImpl( val.toString(), XMLSchema.DOUBLE ) );
-					}
-					else if ( val instanceof Integer ) {
-						sb.append( new LiteralImpl( val.toString(), XMLSchema.INTEGER ) );
-					}
-					else if ( val instanceof Boolean ) {
-						sb.append( new LiteralImpl( val.toString(), XMLSchema.BOOLEAN ) );
-					}
-					else if ( val instanceof Date ) {
-						sb.append( new ValueFactoryImpl().createLiteral( Date.class.cast( val ) ) );
-					}
-				}
-
-				if ( v.isMarked( type )
-						&& ( !( val.toString().isEmpty() || Constants.ANYNODE.equals( val ) ) ) ) {
-					sb.append( "}" );
-				}
-
-				sb.append( " .\n" );
+				sb.append( "}" );
+			}
+		}
+		else if ( !vals.isEmpty() ) {
+			if ( vals.size() > 1 ) {
+				String objvar = "?" + v.getLabel( type );
+				sb.append( objvar );
+				sb.append( " VALUES " ).append( objvar ).append( " { " );
+			}
+			for ( Value val : vals ) {
+				sb.append( makeOneValue( val ) ).append( " " );
+			}
+			if ( vals.size() > 1 ) {
+				sb.append( "}" );
 			}
 		}
 
-		for ( SEMOSSEdge edge : graph.getEdges() ) {
-			SEMOSSVertex src = graph.getSource( edge );
-			SEMOSSVertex dst = graph.getDest( edge );
+		if ( v.isOptional( type ) ) {
+			sb.append( " }" );
+		}
 
-			String fromvar = "?node" + ids.get( src );
-			String linkvar = "?link" + ids.get( edge );
-			String tovar = "?node" + ids.get( dst );
+		sb.append(
+				" .\n" );
 
-			sb.append( "  " ).append( fromvar ).append( " " );
-			if ( Constants.ANYNODE.equals( edge.getType() ) ) {
-				sb.append( linkvar ).append( " " );
+		return sb.toString();
+	}
+
+	private String buildWhere( DirectedGraph<QueryNode, QueryEdge> graph ) {
+		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
+		for ( QueryNodeEdgeBase v : graph.getVertices() ) {
+			MultiSetMap<URI, Value> props = getWhereProps( v );
+
+			for ( Map.Entry<URI, Set<Value>> en : props.entrySet() ) {
+				sb.append( buildOneConstraint( v, en.getKey(), en.getValue() ) );
 			}
-			else {
-				sb.append( "<" ).append( edge.getType() ).append( "> " );
+		}
+
+		for ( QueryEdge edge : graph.getEdges() ) {
+			MultiSetMap<URI, Value> props = getWhereProps( edge );
+
+			for ( Map.Entry<URI, Set<Value>> en : props.entrySet() ) {
+				URI prop = en.getKey();
+				Set<Value> edgevals = en.getValue();
+				if ( !RDF.TYPE.equals( prop ) ) {
+					sb.append( buildOneConstraint( edge, prop, edgevals ) );
+				}
 			}
-			sb.append( tovar ).append( " .\n" );
+
+			// handle endpoints and types a little differently
+			QueryNode src = graph.getSource( edge );
+			QueryNode dst = graph.getDest( edge );
+			sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
+					src, dst, props.keySet() ) );
 		}
 
 		return sb.append( "}" ).toString();
 	}
 
-	private void assignIds( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		int nodecount = 0;
-		int propcount = 0;
+	private String buildEdgeTypeAndEndpoints( QueryNodeEdgeBase edge,
+			Set<Value> vals, QueryNode src, QueryNode dst, Set<URI> otherprops ) {
+		String fromvar = "?" + src.getQueryId();
+		String linkvar = "?" + edge.getQueryId();
+		String tovar = "?" + dst.getQueryId();
 
-		List<AbstractNodeEdgeBase> todo = new ArrayList<>();
-		todo.addAll( graph.getVertices() );
-		todo.addAll( graph.getEdges() );
+		StringBuilder sb = new StringBuilder( "  " ).append( fromvar ).append( " " );
 
-		for ( AbstractNodeEdgeBase v : todo ) {
-			ids.put( v, nodecount++ );
+		// if we have a non-generic edge between these two nodes, the sparql changes
+		Set<URI> specialprops = new HashSet<>( otherprops );
+		specialprops.removeAll( Arrays.asList( RDF.TYPE, RDFS.LABEL ) );
+		boolean useCustomEdge = !specialprops.isEmpty();
 
-			for ( Map.Entry<URI, Object> en : v.getProperties().entrySet() ) {
-				valIds.put( new NodeType( v.getURI(), en.getKey() ), propcount++ );
+		// we need to use a variable if:
+		// 1) our edge is selected to be returned in the SELECT part
+		// 2) we have other properties to hang on this edge
+		// Note: if 1 & 2 aren't true, we can handle multiple values without a variable
+		boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || otherprops.size() > 1
+				|| vals.isEmpty() || edge.isSelected( RDF.SUBJECT ) || useCustomEdge );
+		if ( useLinkVar ) {
+			sb.append( linkvar ).append( " " );
+		}
+		else {
+			// our edge isn't selected, and we don't have to use a variable
+			boolean first = true;
+			for ( Value v : vals ) {
+				if ( first ) {
+					first = false;
+				}
+				else {
+					sb.append( "| " );
+				}
+
+				sb.append( shortcut( URI.class.cast( v ) ) ).append( " " );
 			}
 		}
+		sb.append( tovar );
+
+		if ( useLinkVar && !vals.isEmpty() ) {
+			if ( useCustomEdge ) {
+				sb.append( " .\n  " ).append( linkvar ).append( " " );
+				sb.append( shortcut( RDF.PREDICATE ) ).append( " ?" );
+				sb.append( edge.getLabel( RDF.TYPE ) );
+
+				// our VALUES clause (below) needs to work on our base edge type,
+				// not the custom one
+				linkvar = "?"+edge.getLabel( RDF.TYPE );
+			}
+
+			sb.append( " VALUES " ).append( linkvar ).append( " { " );
+			for ( Value v : vals ) {
+				sb.append( shortcut( URI.class.cast( v ) ) ).append( " " );
+			}
+			sb.append( "}" );
+		}
+
+		sb.append( " .\n" );
+
+		if ( edge.isSelected( RDF.TYPE ) && !useCustomEdge ) {
+			sb.append( "  " ).append( linkvar ).append( " " ).
+					append( shortcut( RDF.TYPE ) ).append( "+ ?" ).
+					append( edge.getLabel( RDF.TYPE ) ).append( " .\n" );
+		}
+
+		return sb.toString();
 	}
 
 	private String shortcut( URI type ) {
@@ -199,43 +262,5 @@ public class GraphToSparql {
 		}
 
 		return "<" + type + ">";
-	}
-
-	private class NodeType {
-
-		public final URI node;
-		public final URI type;
-
-		public NodeType( URI node, URI type ) {
-			this.node = node;
-			this.type = type;
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 3;
-			hash = 19 * hash + Objects.hashCode( this.node );
-			hash = 19 * hash + Objects.hashCode( this.type );
-			return hash;
-		}
-
-		@Override
-		public boolean equals( Object obj ) {
-			if ( obj == null ) {
-				return false;
-			}
-			if ( getClass() != obj.getClass() ) {
-				return false;
-			}
-			final NodeType other = (NodeType) obj;
-			if ( !Objects.equals( this.node, other.node ) ) {
-				return false;
-			}
-			if ( !Objects.equals( this.type, other.type ) ) {
-				return false;
-			}
-			return true;
-		}
-
 	}
 }

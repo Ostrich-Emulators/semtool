@@ -26,7 +26,7 @@ public interface QueryExecutor<T> {
 	 * @param var the binding to set
 	 * @param uri a string representation of the URI to set
 	 */
-	public void bindURI( String var, String uri );
+	public QueryExecutor<T> bindURI( String var, String uri );
 
 	/**
 	 * Binds a URI represented by this string to a variable
@@ -35,9 +35,9 @@ public interface QueryExecutor<T> {
 	 * @param basename a string representation of the URI basename
 	 * @param localname a string representation of the URI localname
 	 */
-	public void bindURI( String var, String basename, String localname );
+	public QueryExecutor<T> bindURI( String var, String basename, String localname );
 
-	public void bind( String var, URI uri );
+	public QueryExecutor<T> bind( String var, URI uri );
 
 	/**
 	 * Binds a string literal to a variable, without a language tag
@@ -45,19 +45,19 @@ public interface QueryExecutor<T> {
 	 * @param var
 	 * @param s
 	 */
-	public void bind( String var, String s );
+	public QueryExecutor<T> bind( String var, String s );
 
-	public void bind( String var, Resource rsr );
+	public QueryExecutor<T> bind( String var, Resource rsr );
 
-	public void bind( String var, String s, String lang );
+	public QueryExecutor<T> bind( String var, String s, String lang );
 
-	public void bind( String var, double d );
+	public QueryExecutor<T> bind( String var, double d );
 
-	public void bind( String var, int d );
+	public QueryExecutor<T> bind( String var, int d );
 
-	public void bind( String var, Date d );
+	public QueryExecutor<T> bind( String var, Date d );
 
-	public void bind( String var, boolean d );
+	public QueryExecutor<T> bind( String var, boolean d );
 
 	public void useInferred( boolean b );
 

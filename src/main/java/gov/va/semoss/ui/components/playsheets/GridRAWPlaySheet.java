@@ -101,7 +101,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 				put( KeyStroke.getKeyStroke( KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK ),
 						"saveGridAction" );
 		table.getActionMap().put( "saveGridAction", save );
-
+		
 		table.setCellSelectionEnabled( true );
 
 		jsp.getVerticalScrollBar().setUI( new NewScrollBarUI() );
@@ -275,8 +275,11 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		@Override
 		public Component getTableCellRendererComponent( JTable table, Object value,
 				boolean isSelected, boolean hasFocus, int row, int column ) {
-			super.getTableCellRendererComponent( table, value, isSelected,
+			JComponent comp = (JComponent)super.getTableCellRendererComponent( table, value, isSelected,
 					hasFocus, row, column );
+			if( null != value ){
+				comp.setToolTipText( packageValueInHTML( value.toString() ) );
+			}
 			setOpaque( true );
 
 			setBackground( table.getBackground() );
@@ -287,8 +290,29 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 					setForeground( table.getSelectionForeground() );
 				}
 			}
-
-			return this;
+			return comp;
+		}
+		
+		private String packageValueInHTML(String val){
+			StringBuilder content = new StringBuilder();
+			content.append("<html>");
+			String[] words = val.split(" ");
+			int lineLength = 0;
+			int maxLineLength = 80;
+			StringBuilder line = new StringBuilder();
+			for (String word : words){
+				line.append(word + " ");
+				lineLength += word.length();
+				if (lineLength > maxLineLength){
+					content.append(line.toString());
+					content.append("<br>");
+					lineLength = 0;
+					line = new StringBuilder();
+				}
+			}
+			content.append(line.toString());
+			content.append("</html>");
+			return content.toString();
 		}
 
 		public void clear() {
@@ -299,4 +323,5 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 			highlights.add( row, col );
 		}
 	}
+
 }

@@ -19,29 +19,28 @@
  */
 package gov.va.semoss.ui.transformer;
 
+import gov.va.semoss.om.NodeEdgeBase;
 import java.awt.Color;
 import java.awt.Paint;
 
-import gov.va.semoss.om.SEMOSSEdge;
-import static gov.va.semoss.ui.transformer.SelectingTransformer.SelectedState.NOT_SELECTED;
 
 /**
  * Transforms the edges of a graph so they can be highlighted.
  */
-public class ArrowPaintTransformer extends SelectingTransformer<SEMOSSEdge, Paint> {
+public class ArrowPaintTransformer<T extends NodeEdgeBase> extends SelectingTransformer<T, Paint> {
 
 	@Override
-	protected Paint transformNormal( SEMOSSEdge t ) {
+	protected Paint transformNormal( NodeEdgeBase t ) {
 		return t.getColor();
 	}
 
 	@Override
-	protected Paint transformSelected( SEMOSSEdge t ) {
+	protected Paint transformSelected( NodeEdgeBase t ) {
 		return t.getColor();
 	}
 
 	@Override
-	protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
+	protected Paint transformNotSelected( NodeEdgeBase t, boolean skel ) {
 		return ( skel ? Color.white : t.getColor() );
 	}
 }

@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.om;
 
-import gov.va.semoss.util.UriBuilder;
 import java.awt.Color;
 
 import java.util.Objects;
@@ -32,8 +31,13 @@ import org.openrdf.model.URI;
  */
 public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOSSEdge> {
 
-	private SEMOSSVertex inVertex;
-	private SEMOSSVertex outVertex;
+	/** The origin resource (Vertex) URI for this edge/relation */
+	private URI originVertexURI;
+	/** The destination resource (Vertex) URI for this edge/relation */
+	private URI destinationVertexURI;
+	/** Flag which signifies whether the vertices of this edge are ALL visible - for rendering purposes */
+	private boolean verticesVisible;
+
 
 	/**
 	 * @param _outVertex
@@ -43,38 +47,39 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 	 */
 	public SEMOSSEdge( SEMOSSVertex _outVertex, SEMOSSVertex _inVertex, URI _uri ) {
 		super( _uri, null, _uri.getLocalName() );
-		inVertex = _inVertex;
-		outVertex = _outVertex;
-
-		if ( null != inVertex ) {
-			inVertex.addInEdge( this );
-		}
-		if ( null != outVertex ) {
-			outVertex.addOutEdge( this );
-		}
+		destinationVertexURI = _outVertex.getURI();
+		originVertexURI = _inVertex.getURI();
 		setColor( Color.DARK_GRAY );
 	}
 
 	public SEMOSSEdge( URI _uri ) {
 		super( _uri, null, _uri.getLocalName() );
 		setColor( Color.DARK_GRAY );
-		inVertex = null;
-		outVertex = null;
 	}
 
-	public SEMOSSVertex getInVertex() {
-		return inVertex;
+	/**
+	 * Get the resource/node, identified by its unique URI, 
+	 * from which this relation/edge emanates 
+	 * @return The unique URI of the origin resource/vertex
+	 */
+	public URI getOriginVertexURI() {
+		return originVertexURI;
 	}
 
-	public SEMOSSVertex getOutVertex() {
-		return outVertex;
+	/**
+	 * Get the resource/node identified by its unique URI,
+	 * to which this relation/edge leads
+	 * @return The unique URI of the destination resource/vertex
+	 */
+	public URI getDestinationVertexURI() {
+		return destinationVertexURI;
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = 5;
-		hash = 97 * hash + Objects.hashCode( this.inVertex );
-		hash = 97 * hash + Objects.hashCode( this.outVertex );
+		hash = 97 * hash + Objects.hashCode( destinationVertexURI);
+		hash = 97 * hash + Objects.hashCode( originVertexURI);
 		hash = 97 * hash + super.hashCode();
 		return hash;
 	}
@@ -91,16 +96,12 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 		if ( !Objects.equals( this.getURI(), other.getURI() ) ) {
 			return false;
 		}
-		if ( !Objects.equals( this.inVertex, other.inVertex ) ) {
+		if ( !Objects.equals( this.destinationVertexURI, other.destinationVertexURI ) ) {
 			return false;
 		}
-		if ( !Objects.equals( this.outVertex, other.outVertex ) ) {
+		if ( !Objects.equals( this.originVertexURI, other.originVertexURI ) ) {
 			return false;
-		}
-		if ( !Objects.equals( this.outVertex, other.outVertex ) ) {
-			return false;
-		}
-		
+		}	
 		return true;
 	}
 
@@ -112,19 +113,31 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-
-		if ( !( null == outVertex || null == outVertex.getURI() ) ) {
-			sb.append( outVertex.getURI() );
+		if ( null != destinationVertexURI ) {
+			sb.append( destinationVertexURI );
 		}
-
 		if ( null != getURI() ) {
 			sb.append( "->" ).append( getURI() );
 		}
-
-		if ( !( null == inVertex || null == inVertex.getURI() ) ) {
-			sb.append( "->" ).append( inVertex.getURI() );
+		if ( null != originVertexURI ) {
+			sb.append( "->" ).append( originVertexURI );
 		}
-
 		return sb.toString();
+	}
+
+	/**
+	 * Set whether all of the vertices for this edge are visible
+	 * @param visible the visibility of this edge's vertices
+	 */
+	public void setVerticesVisible(boolean visible) {
+		this.verticesVisible = visible;
+	}
+	
+	/**
+	 * Get whether all of the vertices for this edge are visible
+	 * @return True if all vertices are visible, false otherwise
+	 */
+	public boolean getVerticesVisible(){
+		return this.verticesVisible;
 	}
 }

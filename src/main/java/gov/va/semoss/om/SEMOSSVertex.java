@@ -25,12 +25,14 @@ import gov.va.semoss.util.Constants;
 import java.awt.Shape;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
 
 /**
  * Variables are transient because this tells the json writer to ignore them
  */
-public class SEMOSSVertex extends AbstractNodeEdgeBase {
+public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
+
 	private transient Shape shape, shapeLegend;
 	private transient String shapeString;
 	private transient int incount = 0;
@@ -43,16 +45,18 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 	public SEMOSSVertex( URI id, URI type, String label ) {
 		super( id, type, label );
 
-		TypeColorShapeTable.getInstance().initializeColor( this );
-		TypeColorShapeTable.getInstance().initializeShape( this );
+		if ( null != type ) {
+			setColor( TypeColorShapeTable.getInstance().getColor( type ) );
+			setShape( TypeColorShapeTable.getInstance().getShape( type ) );
+		}
 	}
 
 	@Override
-	public void setProperty( URI prop, Object val ) {
-		super.setProperty( prop, val );
+	public void setValue( URI prop, Value val ) {
+		super.setValue( prop, val );
 		if ( RDF.TYPE.equals( prop ) ) {
-			TypeColorShapeTable.getInstance().initializeColor( this );
-			TypeColorShapeTable.getInstance().initializeShape( this );
+			setColor( TypeColorShapeTable.getInstance().getColor( getType() ) );
+			setShape( TypeColorShapeTable.getInstance().getShape( getType() ) );
 		}
 	}
 
@@ -68,10 +72,12 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase {
 		setProperty( Constants.OUT_EDGE_CNT, outcount );
 	}
 
+	@Override
 	public void setShape( Shape _shape ) {
 		shape = _shape;
 	}
 
+	@Override
 	public Shape getShape() {
 		return shape;
 	}

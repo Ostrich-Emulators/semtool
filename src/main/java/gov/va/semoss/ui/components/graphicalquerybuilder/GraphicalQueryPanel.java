@@ -9,16 +9,17 @@ import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.ObservableGraph;
+import edu.uci.ics.jung.graph.event.GraphEvent;
+import edu.uci.ics.jung.graph.event.GraphEvent.Type;
+import edu.uci.ics.jung.graph.event.GraphEventListener;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.control.AbstractPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.EditingPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
-import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.ui.components.NewHoriScrollBarUI;
@@ -27,6 +28,7 @@ import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
+import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -34,6 +36,7 @@ import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.awt.Color;
@@ -45,8 +48,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -67,17 +74,19 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private final String progress;
 	private final Action addConceptNodeAction;
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE );
-	private final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
-	//private final ObservableGraph<SEMOSSVertex, SEMOSSEdge> observer =
-	//		new ObservableGraph<>( graph );
-	private final Layout<SEMOSSVertex, SEMOSSEdge> vizlayout = new StaticLayout<>( graph );
-	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view
+	private final DirectedGraph<QueryNode, QueryEdge> graph = new DirectedSparseMultigraph<>();
+	private final ObservableGraph<QueryNode, QueryEdge> observer
+			= new ObservableGraph<>( graph );
+	private final Layout<QueryNode, QueryEdge> vizlayout = new StaticLayout<>( observer );
+	private final VisualizationViewer<QueryNode, QueryEdge> view
 			= new VisualizationViewer<>( vizlayout );
 	private final VertexFactory vfac = new VertexFactory();
 	private final EdgeFactory efac = new EdgeFactory();
-	private GqbLabelTransformer<SEMOSSVertex> vlt;
-	private GqbLabelTransformer<SEMOSSEdge> elt;
+	private GqbLabelTransformer<QueryNode> vlt;
+	private GqbLabelTransformer<QueryEdge> elt;
 	private SyntaxTextEditor sparqlarea;
+	private EditingModalGraphMouse mouse;
+	private ButtonGroup buttongroup;
 
 	/**
 	 * Creates new form GraphicalQueryBuilderPanel
@@ -97,10 +106,11 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				URI concept = new URIImpl( e.getActionCommand() );
-				log.debug( "clicked on " + concept );
 				vfac.setType( concept );
 			}
 		};
+
+		addGraphListener();
 	}
 
 	public void setSparqlArea( SyntaxTextEditor ste ) {
@@ -184,18 +194,22 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );
 
-						ButtonGroup group = new ButtonGroup();
+						buttongroup = new ButtonGroup();
 
-						for ( Map.Entry<URI, String> en : Utility.sortUrisByLabel( conceptlabels ).entrySet() ) {
+						Map<URI, String> sorted = Utility.sortUrisByLabel( conceptlabels );
+						for ( Map.Entry<URI, String> en : sorted.entrySet() ) {
 							JToggleButton button = new JToggleButton( addConceptNodeAction );
 							button.setText( en.getValue() );
 							button.setActionCommand( en.getKey().stringValue() );
-							SEMOSSVertex v = new SEMOSSVertex( uribuilder.uniqueUri(),
+							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
+							v.setColor( TypeColorShapeTable.getInstance().getColor( en.getKey() ) );
+							v.setShape( TypeColorShapeTable.getInstance().getShape( en.getKey() ) );
+							
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
-									new Dimension( 15, 15 ) ) );
+									new Dimension( 12, 12 ) ) );
 							typearea.add( button );
-							group.add( button );
+							buttongroup.add( button );
 						}
 					}
 
@@ -210,29 +224,29 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	}
 
 	private void initVizualizer() {
-		LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
-		vlt = new GqbLabelTransformer<>( getEngine() );
-		PaintTransformer<SEMOSSVertex> vpt = new PaintTransformer<>();
+		LabelFontTransformer<QueryNode> vft = new LabelFontTransformer<>();
+		vlt = new GqbLabelTransformer( getEngine() );
+		PaintTransformer<QueryNode> vpt = new PaintTransformer<>();
 		VertexShapeTransformer vht = new VertexShapeTransformer();
 		VertexStrokeTransformer vst = new VertexStrokeTransformer();
 
-		LabelFontTransformer<SEMOSSEdge> eft = new LabelFontTransformer<>();
-		elt = new GqbLabelTransformer<>( getEngine() );
-		PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<SEMOSSEdge>() {
+		LabelFontTransformer<QueryEdge> eft = new LabelFontTransformer<>();
+		elt = new GqbLabelTransformer( getEngine() );
+		PaintTransformer<QueryEdge> ept = new PaintTransformer<QueryEdge>() {
 			@Override
-			protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
+			protected Paint transformNotSelected( QueryEdge t, boolean skel ) {
 				// always show the edge
 				return super.transformNotSelected( t, false );
 			}
 		};
-		EdgeStrokeTransformer est = new EdgeStrokeTransformer();
+		EdgeStrokeTransformer est = new EdgeStrokeTransformer( 1.5, 1.5, 1.5 );
 		ArrowPaintTransformer adpt = new ArrowPaintTransformer();
 		ArrowPaintTransformer aft = new ArrowPaintTransformer();
 
 		addMouse();
 		view.setBackground( Color.WHITE );
 
-		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = view.getRenderContext();
+		RenderContext<QueryNode, QueryEdge> rc = view.getRenderContext();
 		rc.setVertexLabelTransformer( vlt );
 		rc.setVertexStrokeTransformer( vst );
 		rc.setVertexShapeTransformer( vht );
@@ -254,30 +268,31 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		//view.getPickedEdgeState().addItemListener( psl );
 	}
 
-	public VisualizationViewer<SEMOSSVertex, SEMOSSEdge> getViewer() {
+	public VisualizationViewer<QueryNode, QueryEdge> getViewer() {
 		return view;
 	}
 
 	public void update() {
-		view.repaint();
 		updateSparql();
+		view.repaint();
 	}
 
 	public void clear() {
-		List<SEMOSSVertex> verts = new ArrayList<>( graph.getVertices() );
-		for ( SEMOSSVertex v : verts ) {
+		List<QueryNode> verts = new ArrayList<>( graph.getVertices() );
+		for ( QueryNode v : verts ) {
 			graph.removeVertex( v );
 		}
+
 		vizlayout.reset();
 		update();
 	}
 
-	public void remove( AbstractNodeEdgeBase v ) {
-		if ( v instanceof SEMOSSVertex ) {
-			graph.removeVertex( SEMOSSVertex.class.cast( v ) );
+	public void remove( QueryNodeEdgeBase v ) {
+		if ( v instanceof QueryNode ) {
+			graph.removeVertex( QueryNode.class.cast( v ) );
 		}
 		else {
-			graph.removeEdge( SEMOSSEdge.class.cast( v ) );
+			graph.removeEdge( QueryEdge.class.cast( v ) );
 		}
 		vizlayout.reset();
 		update();
@@ -287,15 +302,30 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		return engine;
 	}
 
+	/**
+	 * Gets a reference to this query's graph
+	 *
+	 * @return
+	 */
+	public DirectedGraph<QueryNode, QueryEdge> getGraph() {
+		return graph;
+	}
+
 	private void addMouse() {
-		EditingModalGraphMouse gm
-				= new EditingModalGraphMouse( view.getRenderContext(), vfac, efac );
-		gm.remove( gm.getPopupEditingPlugin() );
-		gm.add( new MousePopuper() );
-		view.setGraphMouse( gm );
+		mouse = new EditingModalGraphMouse( view.getRenderContext(), vfac, efac );
+
+		mouse.remove( mouse.getPopupEditingPlugin() );
+		mouse.add( new MousePopuper() );
+
+		mouse.remove( mouse.getEditingPlugin() );
+		mouse.add( new QueryGraphMousePlugin<>( vfac, efac ) );
+
+		view.setGraphMouse( mouse );
 	}
 
 	private void updateSparql() {
+		updateSparqlConfigs();
+
 		if ( null != sparqlarea ) {
 			String sparql = ( 0 == graph.getVertexCount()
 					? ""
@@ -304,25 +334,137 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		}
 	}
 
-	private class MousePopuper extends AbstractPopupGraphMousePlugin {
+	private String createQueryId( QueryNodeEdgeBase v,
+			List<QueryNodeEdgeBase> nodesAndEdges ) {
+		// this is a two-step process
+		// 1) figure out what names have been used
+		// 2) come up with a name based on my first type
+		// 2a) if that name has already been used, come up with another one
+		// new names will be typelabel plus an integer
+		Set<String> used = new HashSet<>();
+		int maxid = -1;
+		String base = ( Constants.ANYNODE.equals( v.getType() )
+				? ( v instanceof QueryNode ? "node" : "link" )
+				: v.getType().getLocalName() );
 
-		public MousePopuper() {
+		Pattern pat = Pattern.compile( base + "([0-9]+)$" );
+
+		for ( QueryNodeEdgeBase qn : nodesAndEdges ) {
+			String usedlabel = qn.getQueryId();
+
+			if ( null != usedlabel ) {
+				used.add( usedlabel );
+
+				Matcher m = pat.matcher( usedlabel );
+				if ( m.matches() ) {
+					String val = m.group( 1 );
+					int id = Integer.parseInt( val );
+
+					if ( id > maxid ) {
+						maxid = id;
+					}
+				}
+			}
 		}
 
-		public MousePopuper( int modifiers ) {
-			super( modifiers );
+		++maxid;
+		String val = base + ( 0 == maxid ? "" : maxid );
+		while ( used.contains( val ) ) {
+			val = base + ( ++maxid );
+		}
+		return val;
+
+	}
+
+	private String createVariableId( QueryNodeEdgeBase v, URI type,
+			List<QueryNodeEdgeBase> nodesAndEdges ) {
+		// just like createQueryId, but for objects
+		Set<String> used = new HashSet<>();
+		int maxid = -1;
+		String base = v.getQueryId() + "_" + type.getLocalName();
+		Pattern pat = Pattern.compile( base + "([0-9]+)$" );
+
+		for ( QueryNodeEdgeBase qn : nodesAndEdges ) {
+			for ( URI prop : qn.getAllValues().keySet() ) {
+				String usedlabel = qn.getLabel( prop );
+
+				if ( null != usedlabel ) {
+					used.add( usedlabel );
+
+					Matcher m = pat.matcher( usedlabel );
+					if ( m.matches() ) {
+						String val = m.group( 1 );
+						int id = Integer.parseInt( val );
+
+						if ( id > maxid ) {
+							maxid = id;
+						}
+					}
+				}
+			}
+		}
+
+		++maxid;
+		String val = base + ( 0 == maxid ? "" : maxid );
+		while ( used.contains( val ) ) {
+			val = base + ( ++maxid );
+		}
+		return val;
+	}
+
+	/**
+	 * Assigns new configs to nodes in the graph after first removing old configs.
+	 */
+	private void updateSparqlConfigs() {
+		List<QueryNodeEdgeBase> todo = new ArrayList<>();
+		todo.addAll( graph.getVertices() );
+		todo.addAll( graph.getEdges() );
+
+		for ( QueryNodeEdgeBase v : todo ) {
+			if ( null == v.getQueryId() ) {
+				v.setQueryId( createQueryId( v, todo ) );
+			}
+
+			for ( URI uri : v.getAllValues().keySet() ) {
+				if ( null == v.getLabel( uri ) ) {
+					// come up with a variable name
+					v.setLabel( uri, createVariableId( v, uri, todo ) );
+				}
+			}
+		}
+	}
+
+	private void addGraphListener() {
+		observer.addGraphEventListener( new GraphEventListener() {
+
+			@Override
+			public void handleGraphEvent( GraphEvent evt ) {
+				updateSparql();
+
+				if ( Type.VERTEX_ADDED == evt.getType()
+						|| Type.VERTEX_ADDED == evt.getType() ) {
+
+				}
+			}
+		} );
+	}
+
+	private class MousePopuper extends EditingPopupGraphMousePlugin {
+
+		public MousePopuper() {
+			super( vfac, efac );
 		}
 
 		@Override
 		protected void handlePopup( MouseEvent e ) {
 			Point p = e.getPoint();
 
-			GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport = view.getPickSupport();
+			GraphElementAccessor<QueryNode, QueryEdge> pickSupport = view.getPickSupport();
 			if ( null != pickSupport ) {
-				final SEMOSSVertex vertex
+				final QueryNode vertex
 						= pickSupport.getVertex( view.getGraphLayout(), p.getX(), p.getY() );
 				if ( null == vertex ) {
-					final SEMOSSEdge edge
+					final QueryEdge edge
 							= pickSupport.getEdge( view.getGraphLayout(), p.getX(), p.getY() );
 					if ( null == edge ) {
 						new EmptySpacePopup( GraphicalQueryPanel.this ).show( view, p.x, p.y );

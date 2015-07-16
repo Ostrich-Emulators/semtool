@@ -19,22 +19,22 @@
  */
 package gov.va.semoss.ui.components;
 
-import javax.swing.JTable;
-
-import org.apache.log4j.Logger;
-
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import gov.va.semoss.util.MultiMap;
+
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JTable;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -44,18 +44,18 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * This class is used to display information about a node in a popup window.
  */
 public class NodeInfoPopup extends AbstractAction {
-
+	private static final long serialVersionUID = -1859278887122010885L;
+	
 	private final GraphPlaySheet gps;
 	private final Collection<SEMOSSVertex> pickedVertex;
-	private static final Logger logger = Logger.getLogger( NodeInfoPopup.class );
 	GridFilterData gfd = new GridFilterData();
 	JTable table = null;
 
-	public NodeInfoPopup( GraphPlaySheet p, Collection<SEMOSSVertex> picked ) {
-		super( "Show Selected Node Information" );
+	public NodeInfoPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> picked ) {
+		super( "Show Information about Selected Node(s)" );
 		this.putValue( Action.SHORT_DESCRIPTION,
-				"To select nodes press Shift and click on nodes" );
-		gps = p;
+				"Draw a box to select nodes, or hold Shift and click on nodes" );
+		this.gps = gps;
 		pickedVertex = picked;
 	}
 
