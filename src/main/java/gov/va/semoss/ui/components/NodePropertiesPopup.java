@@ -24,45 +24,25 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PropertyEditorPlaySheet;
 
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
  * This class is used to display information about a node in a popup window.
  */
 public class NodePropertiesPopup extends AbstractAction {
 	private static final long serialVersionUID = -1859278887122010885L;
-	
 	private GraphPlaySheet gps;
-	private SEMOSSVertex pickedVertex;
+	private Collection<SEMOSSVertex> pickedVertexList;
 
-	public NodePropertiesPopup( GraphPlaySheet gps, SEMOSSVertex pickedVertex ) {
-		super( "Edit Node Properties" );
-		this.putValue( Action.SHORT_DESCRIPTION,
-				"Edit the properties of this node" );
-		this.gps = gps;
+	public NodePropertiesPopup( GraphPlaySheet _gps, Collection<SEMOSSVertex> _pickedVertexList ) {
+		super( "Edit Properties for Node(s)" );
+		putValue( Action.SHORT_DESCRIPTION, "Edit the properties of this node" );
+		gps = _gps;
 		
-		this.pickedVertex = pickedVertex;
-	}
-
-	public NodePropertiesPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> pickedVertexList ) {
-		super( "Edit Node Properties" );
-		this.putValue( Action.SHORT_DESCRIPTION,
-				"Edit the properties of this node" );
-		this.gps = gps;
-		
-		for (SEMOSSVertex v:pickedVertexList)
-			pickedVertex = v;
+		pickedVertexList = _pickedVertexList;
 	}
 
 	@Override
@@ -71,16 +51,6 @@ public class NodePropertiesPopup extends AbstractAction {
 	}
 	
 	public void showPropertiesView() {
-		ValueFactory vf = new ValueFactoryImpl();
-		List<Value[]> data = new ArrayList<>();
-		for ( Map.Entry<URI, Object> entry : pickedVertex.getProperties().entrySet() ) {
-			Value[] row = { entry.getKey(), vf.createLiteral( entry.getValue()+"" ), vf.createLiteral( entry.getValue().getClass().getCanonicalName()) };
-			data.add( row );
-		}
-
-		PropertyEditorPlaySheet grid = new PropertyEditorPlaySheet(pickedVertex);
-		grid.setTitle( "Selected Node Properties" );
-		grid.create( data, null, gps.getEngine() );
-		gps.addSibling( grid );
+		gps.addSibling( new PropertyEditorPlaySheet(pickedVertexList, "Selected Node Properties", gps.getEngine()) );
 	}
 }

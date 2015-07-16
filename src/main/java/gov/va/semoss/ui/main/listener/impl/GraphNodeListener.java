@@ -103,7 +103,7 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 		
 		long thisTimeClicked = System.currentTimeMillis();
 		if ( (thisTimeClicked - lastTimeClicked) < 250 ) {
-			new NodePropertiesPopup( gps, clickedVertex ).showPropertiesView();
+			new NodePropertiesPopup( gps, viewer.getPickedVertexState().getPicked() ).showPropertiesView();
 		}
 		
 		lastTimeClicked = thisTimeClicked;
