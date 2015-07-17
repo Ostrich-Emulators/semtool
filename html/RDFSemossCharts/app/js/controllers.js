@@ -962,6 +962,7 @@ function chartitCtrl($scope, $http) {
 
 
 function SingleChartCtrl($scope, $http) {
+	alert("in SingleChartCtrl");
     
     //creates object that holds all graph option values
     var graphOptions = {
@@ -1173,12 +1174,20 @@ function SingleChartCtrl($scope, $http) {
 
     //creates alliance health grid chart
     $scope.createChart = function (newType) {
-    		
         if(newType){
             graphOptions.chartType = newType
         }
+    	
         if(newType === 'bubble' && graphOptions.series[0].data[0].length < 3) {
             graphOptions.chartType = 'scatter';
+        }
+        
+        function getRotationExceptionForBarchart() {
+            if(graphOptions.chartType == 'column'){
+                return false;
+            }else{
+                return -45;
+            }
         }
 
         //creating the chart
@@ -1208,7 +1217,7 @@ function SingleChartCtrl($scope, $http) {
                 min: graphOptions.xMin,
                 tickInterval: graphOptions.xInterval,
                 labels: {
-                    rotation: -45,
+                    rotation: getRotationExceptionForBarchart(),
                     align: 'right',
                     formatter: function(){
                         return this.value;       
