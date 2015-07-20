@@ -39,7 +39,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ExecuteQueryProcessor;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.ui.components.api.IChakraListener;
-import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
@@ -48,7 +47,6 @@ import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-import gov.va.semoss.ui.components.playsheets.rendererclasses.AppDupeHeatMapSheet;
 
 /**
  * 1. Get information from the Question for the query 2. Process the query to
@@ -56,9 +54,10 @@ import gov.va.semoss.ui.components.playsheets.rendererclasses.AppDupeHeatMapShee
  * information 4. Set all the controls reference within the PlaySheet
  */
 public class ProcessQueryListener extends AbstractAction implements IChakraListener {
+
 	private static final Logger logger = Logger.getLogger( ProcessQueryListener.class );
 	private static final long serialVersionUID = 5236863287462387L;
-	
+
 	// where all the parameters are set
 	// this will implement a cardlayout and then on top of that the param panel
 	JPanel paramPanel = null;
@@ -97,21 +96,13 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 				= (JComboBox<Perspective>) DIHelper.getInstance().getLocalProp( Constants.PERSPECTIVE_SELECTOR );
 		Perspective perspective = cboPerspectives.getItemAt( cboPerspectives.getSelectedIndex() );
 
-		//set custom and append variables to processor
-		ExecuteQueryProcessor exQueryProcessor = new ExecuteQueryProcessor();
-		exQueryProcessor.setAppendBoolean( appending );
-		exQueryProcessor.setPerspective( perspective );
-
-		// get the selected repository, in case someone selects multiple, it'll always use first one
-		IEngine eng = DIHelper.getInstance().getRdfEngine();
-
 		//Setup playsheet: 
 		cboInsights = (JComboBox) DIHelper.getInstance().getLocalProp( Constants.QUESTION_LIST_FIELD );
 		Insight insight = cboInsights.getItemAt( cboInsights.getSelectedIndex() );
 		String output = insight.getOutput();
 		try {
 			Class<?> k = Class.forName( output );
-			if( !( PlaySheetCentralComponent.class.isAssignableFrom( k ) ) ){
+			if ( !( PlaySheetCentralComponent.class.isAssignableFrom( k ) ) ) {
 				throw new IllegalArgumentException( "Defunct playsheet class: " + output );
 			}
 		}
@@ -159,16 +150,16 @@ public class ProcessQueryListener extends AbstractAction implements IChakraListe
 			Map<String, String> paramHash, boolean appending, JDesktopPane pane ) {
 		String output = insight.getOutput();
 		IEngine eng = DIHelper.getInstance().getRdfEngine();
-		
+
 		//If a "Renderer Class" has been entered into the InsightManager,
 		//then the playsheet dropdown selection and query must not be used.
 		//Instead, use the "Renderer Class":
-		String rendererClass = (insight.getRendererClass() + "").trim();
-		if(rendererClass.equals("") == false){
-			output = "gov.va.semoss.ui.components.playsheets.rendererclasses."+rendererClass;
+		String rendererClass = ( insight.getRendererClass() + "" ).trim();
+		if ( rendererClass.equals( "" ) == false ) {
+			output = "gov.va.semoss.ui.components.playsheets.rendererclasses." + rendererClass;
 		}
-		
-        String query = query = ExecuteQueryProcessor.getSparql( insight, paramHash );
+
+		String query = query = ExecuteQueryProcessor.getSparql( insight, paramHash );
 
 		ProgressTask pt = null;
 		if ( appending ) {
