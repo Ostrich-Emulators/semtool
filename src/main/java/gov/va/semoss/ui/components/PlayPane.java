@@ -44,6 +44,7 @@ import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
+import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel_2;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
 import gov.va.semoss.ui.swing.custom.CustomAruiStyle;
@@ -153,6 +154,7 @@ public class PlayPane extends JFrame {
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
 	
 	private final String IMANAGE = "iManagePanel";
+	private final String IMANAGE_2 = "iManagePanel_2";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
 	private final String GFLABEL = "graphlabel";
@@ -170,6 +172,7 @@ public class PlayPane extends JFrame {
 	public RepositoryList repoList = new RepositoryList();
 
 	private InsightManagerPanel iManagePanel;
+	private InsightManagerPanel_2 iManagePanel_2;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -268,6 +271,8 @@ public class PlayPane extends JFrame {
 	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging",
 			DbAction.getIcon( "log_tab1" ) );
 	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager",
+			DbAction.getIcon( "insight_manager_tab1" ) );
+	private final JCheckBoxMenuItem iManageItem_2 = new JCheckBoxMenuItem( "Insight Manager 2",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 
 	private final JToolBar toolbar;
@@ -618,6 +623,10 @@ public class PlayPane extends JFrame {
 		if ( !ipref ) {
 			rightTabs.remove( iManagePanel );
 		}
+		boolean ipref_2 = prefs.getBoolean( IMANAGE_2, false );
+		if ( !ipref_2 ) {
+			rightTabs.remove( iManagePanel_2 );
+		}
 	}
 
 	protected JTabbedPane makeLeftPane() {
@@ -690,6 +699,15 @@ public class PlayPane extends JFrame {
 				DbAction.getIcon( "insight_manager_tab1" ) );
 		idx = rightView.indexOfComponent( iManagePanel );
 		rightView.setTabComponentAt( idx, ct2 );
+		
+		iManagePanel_2 = new InsightManagerPanel_2( repoList );
+		rightView.addTab( "Insight Manager 2", null, iManagePanel_2,
+				"Manage perspectives and insights" );
+		CloseableTab ct2_2 = new PlayPaneCloseableTab( rightView, iManageItem_2,
+				DbAction.getIcon( "insight_manager_tab1" ) );
+		idx = rightView.indexOfComponent( iManagePanel_2 );
+		rightView.setTabComponentAt( idx, ct2_2 );
+		
 		return rightView;
 	}
 
@@ -1224,6 +1242,7 @@ public class PlayPane extends JFrame {
 		tools.setToolTipText( "Additional data tools" );
 		tools.add( loggingItem );
 		tools.add( iManageItem );
+		tools.add( iManageItem_2 );
 		return tools;
 	}
 
@@ -1698,6 +1717,39 @@ public class PlayPane extends JFrame {
 		} );
 		//iManage.setToolTipText( "Enables/Disables insight manager tab" );
 
+		iManageItem_2.setSelected( getProp( prefs, IMANAGE_2 ) );
+		if ( getProp( prefs, IMANAGE_2 ) == true ) {
+			iManageItem_2.setToolTipText( "Disable the Insite Manager Tab" );
+		}
+		else {
+			iManageItem_2.setToolTipText( "Enable the Insite Manager Tab" );
+		}
+
+		iManageItem_2.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				boolean ischecked = iManageItem_2.isSelected();
+				prefs.putBoolean( IMANAGE_2, ischecked );
+				DIHelper.getInstance().getCoreProp().setProperty( IMANAGE_2,
+						Boolean.toString( ischecked ) );
+
+				if ( ischecked ) {
+					iManagePanel_2.insightManagerPanelWorker();
+					rightTabs.addTab( "Insight Manager 2", DbAction.getIcon( "insight_manager_tab1" ), iManagePanel_2,
+							"Manage perspectives and insights" );
+					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, iManageItem_2,
+							DbAction.getIcon( "insight_manager_tab1" ) );
+					int idx = rightTabs.indexOfComponent( iManagePanel_2 );
+					rightTabs.setTabComponentAt( idx, ct2_2 );
+					iManageItem_2.setToolTipText( "Disable the Insite Manager Tab" );
+				}
+				else {
+					rightTabs.remove( iManagePanel_2 );
+					iManageItem_2.setToolTipText( "Enable the Insite Manager Tab" );
+				}
+			}
+		} );
+
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
 		view.setToolTipText( "Enable or disable the V-CAMP application tabs" );
@@ -1709,6 +1761,8 @@ public class PlayPane extends JFrame {
 		gflab.setMnemonic( KeyEvent.VK_G );
 		view.add( iManageItem );
 		iManageItem.setMnemonic( KeyEvent.VK_I );
+		view.add( iManageItem_2 );
+		iManageItem_2.setMnemonic( KeyEvent.VK_U );
 		view.add( splithider );
 		splithider.setMnemonic( KeyEvent.VK_M );
 		view.add( loggingItem );
