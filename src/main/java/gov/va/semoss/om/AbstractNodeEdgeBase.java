@@ -107,7 +107,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	@Override
 	public String getLabel() {
 		return ( properties.containsKey( RDFS.LABEL )
-				? properties.get( RDFS.LABEL ).toString() : "" );
+				? properties.get( RDFS.LABEL ).stringValue() : "" );
 	}
 
 	public void setProperty( URI prop, Object propValue ) {
