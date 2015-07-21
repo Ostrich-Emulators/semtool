@@ -292,6 +292,14 @@ public interface IEngine {
 	 */
 	public <T> T queryNoEx( QueryExecutor<T> exe );
 
+	/**
+	 * Runs an update on the engine
+	 *
+	 * @param ue
+	 */
+	public void update( UpdateExecutor ue ) throws RepositoryException,
+			MalformedQueryException, UpdateExecutionException;
+
 	public Model construct( QueryExecutor<Model> query )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
 

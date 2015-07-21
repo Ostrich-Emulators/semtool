@@ -63,6 +63,7 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
+import gov.va.semoss.rdf.engine.api.UpdateExecutor;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -378,6 +379,25 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		return sparql.toString();
 	}
 
+	public static final void doUpdate( UpdateExecutor query,
+			RepositoryConnection rc, boolean dobindings ) throws RepositoryException,
+			MalformedQueryException, UpdateExecutionException {
+
+		String sparql = processNamespaces( dobindings ? query.getSparql()
+				: query.bindAndGetSparql(), query.getNamespaces() );
+
+		ValueFactory vfac = new ValueFactoryImpl();
+		Update upd = rc.prepareUpdate( QueryLanguage.SPARQL, sparql );
+
+		if ( dobindings ) {
+			upd.setIncludeInferred( query.usesInferred() );
+			query.setBindings( upd, vfac );
+		}
+
+		upd.execute();
+		query.done();
+	}
+
 	public static final <T> T getSelect( QueryExecutor<T> query,
 			RepositoryConnection rc, boolean dobindings ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
@@ -463,6 +483,15 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 
 		return null;
+	}
+
+	@Override
+	public void update( UpdateExecutor ue ) throws RepositoryException,
+			MalformedQueryException, UpdateExecutionException {
+		if ( isConnected() ) {
+			RepositoryConnection rc = getRawConnection();
+			doUpdate( ue, rc, supportsSparqlBindings() );
+		}
 	}
 
 	@Override

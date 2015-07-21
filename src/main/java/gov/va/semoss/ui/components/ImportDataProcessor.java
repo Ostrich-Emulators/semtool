@@ -11,6 +11,11 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
+import java.io.IOException;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.RepositoryException;
 
 public class ImportDataProcessor {
 
@@ -58,8 +63,6 @@ public class ImportDataProcessor {
 					}
 				}
 				String deleteQuery;
-				UpdateProcessor proc = new UpdateProcessor();
-				proc.setEngine( engine );
 
 				int numberNodes = nodes.size();
 				if ( numberNodes > 0 ) {
@@ -71,9 +74,8 @@ public class ImportDataProcessor {
 						deleteQuery += "OPTIONAL{ {?p a <http://semoss.org/ontologies/Relation/Contains> ;} {?s ?p ?prop ;} } } } ";
 						deleteQuery += "}";
 
-						proc.setQuery( deleteQuery );
+						engine.update( new UpdateExecutorAdapter( deleteQuery ) );						
 						logger.debug( deleteQuery );
-						proc.processQuery();
 					}
 				}
 
@@ -96,13 +98,13 @@ public class ImportDataProcessor {
 						deleteQuery += "OPTIONAL { {?relationship ?contains ?prop ;} } } } ";
 						deleteQuery += "}";
 
-						proc.setQuery( deleteQuery );
+						
+						engine.update( new UpdateExecutorAdapter( deleteQuery ) );						
 						logger.debug( deleteQuery );
-						proc.processQuery();
 					}
 				}
 			}
-			catch ( Exception ex ) {
+			catch ( IOException | RepositoryException | MalformedQueryException | UpdateExecutionException ex ) {
 				logger.error( ex, ex );
 			}
 		}

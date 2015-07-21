@@ -46,7 +46,6 @@ import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
 import gov.va.semoss.ui.swing.custom.CustomAruiStyle;
 import gov.va.semoss.ui.swing.custom.CustomButton;
 import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
@@ -166,7 +165,6 @@ public class PlayPane extends JFrame {
 	public JComboBox<Perspective> perspectiveSelector;
 	public JComboBox<Insight> questionSelector;
 	public JPanel paramPanel;
-	public JButton submitButton;
 
 	public JCheckBox appendChkBox;
 	public RepositoryList repoList = new RepositoryList();
@@ -217,7 +215,8 @@ public class PlayPane extends JFrame {
 			lblDBImportURL, lblDesignateBaseUri, lblDBImportUsername, lblDBImportPW,
 			lblDBImportDriverType;
 
-	public static JTabbedPane leftTabs, rightTabs;
+	private final JTabbedPane leftTabs;
+	private final JTabbedPane rightTabs;
 	private final StatusBar statusbar;
 
 	private final DbAction creater = new CreateDbAction( UIPROGRESS, this );
@@ -282,7 +281,7 @@ public class PlayPane extends JFrame {
 	private final JSplitPane mainSplitPane;
 	private final JSplitPane combinedSplitPane;
 	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
-
+	
 	/**
 	 * Launch the application.
 	 *
@@ -293,7 +292,7 @@ public class PlayPane extends JFrame {
 		//exist in a separate class, load all of their listeners first:
 		// customSparqlPanel.loadCustomSparqlPanelListeners();
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
-
+		DIHelper.getInstance().setPlayPane( this );
 		// load all the listeners
 		// cast it to IChakraListener
 		// for each listener specify what is the view field - Listener_VIEW
@@ -520,7 +519,7 @@ public class PlayPane extends JFrame {
 		CustomAruiStyle.init(); // for custom components rules and functions
 
 		// Components to style
-		Style.registerTargetClassName( submitButton, ".createBtn" );
+		//Style.registerTargetClassName( submitButton, ".createBtn" );
 		Style.registerTargetClassName( btnRepaintGraph, ".standardButton" );
 		Style.registerTargetClassName( refreshButton, ".standardButton" );
 		Style.registerTargetClassName( saveSudowl, ".standardButton" );
@@ -741,28 +740,10 @@ public class PlayPane extends JFrame {
 		questionSelector.setFont( selectorFont );
 		repoList.setFont( selectorFont );
 		appendChkBox = pnl.getOverlay();
-		submitButton = pnl.getSubmitButton();
+		JButton submitButton = pnl.getSubmitButton();
 		paramPanel = pnl.getParamPanel();
 
-		Action handleQuestionKeys = new AbstractAction() {
-			private static final long serialVersionUID = -4945632514443349830L;
-
-			@Override
-			public void actionPerformed( final ActionEvent e ) {
-				Runnable runner = new Runnable() {
-					ProcessQueryListener processQueryListener = new ProcessQueryListener();
-
-					@Override
-					public void run() {
-						processQueryListener.actionPerformed( e );
-					}
-				};
-
-				ProgressTask pt = new ProgressTask( "Executing Query", runner );
-				OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
-			}
-		};
-
+		Action handleQuestionKeys = pnl.getInsightAction();
 		submitButton.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getInputMap( JComponent.WHEN_FOCUSED ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getActionMap().put( "handleQuestionKeys", handleQuestionKeys );
@@ -994,9 +975,6 @@ public class PlayPane extends JFrame {
 			@Override
 			public void internalFrameActivated( InternalFrameEvent e ) {
 
-				//	fileMenuSave.setEnabled( false );
-				//	fileMenuSaveAs.setEnabled( false );
-				//	fileMenuSaveAll.setEnabled( false );
 				JInternalFrame jif = e.getInternalFrame();
 
 				if ( jif instanceof PlaySheetFrame ) {
@@ -1048,7 +1026,6 @@ public class PlayPane extends JFrame {
 
 			private void refresh() {
 				final JInternalFrame[] frames = desktopPane.getAllFrames();
-				int len = frames.length;
 				windowSelector.removeAll();
 				if ( 0 == frames.length ) {
 					appendChkBox.setSelected( false );
@@ -1752,10 +1729,9 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Panel",
-				getProp( prefs, QUERYPANEL ) );
+		hidecsp = new JCheckBoxMenuItem( "Query Panel", getProp( prefs, QUERYPANEL ) );
 
-		if ( getProp( prefs, QUERYPANEL ) == true ) {
+		if ( getProp( prefs, QUERYPANEL ) ) {
 			hidecsp.setToolTipText( "Disable the Query Panel" );
 			hidecsp.getAccessibleContext().setAccessibleName("Disable the Query Panel");
 			hidecsp.getAccessibleContext().setAccessibleDescription("Disable the Query Panel");
@@ -2037,6 +2013,10 @@ public class PlayPane extends JFrame {
 		tools.add( playsheeter );
 
 		return tools;
+	}
+	
+	public void showDesktop(){
+		rightTabs.setSelectedIndex( 0 );
 	}
 
 	public static boolean getProp( Preferences prefs, String propstr ) {
