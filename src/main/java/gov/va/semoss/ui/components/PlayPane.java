@@ -128,6 +128,7 @@ import com.ibm.icu.util.StringTokenizer;
 
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 import gov.va.semoss.ui.actions.ExportGraphAction;
+import gov.va.semoss.ui.actions.OpenSparqlAction;
 import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
@@ -149,6 +150,7 @@ import org.openrdf.model.vocabulary.RDFS;
  * SEMOSS.
  */
 public class PlayPane extends JFrame {
+
 	private static final long serialVersionUID = -715188668604903980L;
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
 
@@ -281,7 +283,7 @@ public class PlayPane extends JFrame {
 	private final JSplitPane mainSplitPane;
 	private final JSplitPane combinedSplitPane;
 	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
-	
+
 	/**
 	 * Launch the application.
 	 *
@@ -695,8 +697,8 @@ public class PlayPane extends JFrame {
 				if ( rightView.getSelectedComponent().equals( loggingPanel ) ) {
 					loggingPanel.refresh();
 				}
-				else if( rightView.getSelectedComponent().equals( gQueryBuilderPanel ) ) {
-					if( !hidecsp.isSelected() ){
+				else if ( rightView.getSelectedComponent().equals( gQueryBuilderPanel ) ) {
+					if ( !hidecsp.isSelected() ) {
 						hidecsp.doClick();
 					}
 				}
@@ -907,7 +909,7 @@ public class PlayPane extends JFrame {
 			public void actionPerformed( ActionEvent actionevent ) {
 				QuestionPlaySheetStore.getInstance().getActiveSheet().refineView();
 			}
-		});
+		} );
 		panel.add( refreshButton, getGBC( GridBagConstraints.NONE ) );
 
 		return panel;
@@ -1227,8 +1229,8 @@ public class PlayPane extends JFrame {
 		JMenu tools = new JMenu( "Tools" );
 		tools.setMnemonic( KeyEvent.VK_T );
 		tools.setToolTipText( "Additional data tools" );
-		tools.getAccessibleContext().setAccessibleName("Additional data tools");
-		tools.getAccessibleContext().setAccessibleDescription("Additional data tools");
+		tools.getAccessibleContext().setAccessibleName( "Additional data tools" );
+		tools.getAccessibleContext().setAccessibleDescription( "Additional data tools" );
 		tools.add( loggingItem );
 		tools.add( gQueryBuilderItem );
 		tools.add( iManageItem );
@@ -1245,16 +1247,16 @@ public class PlayPane extends JFrame {
 		//Export
 		JMenu exptop = new JMenu( "Export" );
 		exptop.setToolTipText( "Export Database Activities" );
-		exptop.getAccessibleContext().setAccessibleName("Export Database Activities");
-		exptop.getAccessibleContext().setAccessibleDescription("Export Database Activities");
+		exptop.getAccessibleContext().setAccessibleName( "Export Database Activities" );
+		exptop.getAccessibleContext().setAccessibleDescription( "Export Database Activities" );
 		exptop.setMnemonic( KeyEvent.VK_E );
 		exptop.setIcon( DbAction.getIcon( "exportdb" ) );
 
 		//Loading Sheets
 		JMenu loadingsheets = new JMenu( "Loading Sheets" );
 		loadingsheets.setToolTipText( "Export the Loading Sheets" );
-		loadingsheets.getAccessibleContext().setAccessibleName("Export the Loading Sheets");
-		loadingsheets.getAccessibleContext().setAccessibleDescription("Export the Loading Sheets");
+		loadingsheets.getAccessibleContext().setAccessibleName( "Export the Loading Sheets" );
+		loadingsheets.getAccessibleContext().setAccessibleDescription( "Export the Loading Sheets" );
 		loadingsheets.setMnemonic( KeyEvent.VK_L );
 		loadingsheets.setIcon( DbAction.getIcon( "import_data_review" ) );
 
@@ -1262,8 +1264,8 @@ public class PlayPane extends JFrame {
 		//Semantic Web
 		JMenu semsheets = new JMenu( "Semantic Web" );
 		semsheets.setToolTipText( "Export the Semantic Web" );
-		semsheets.getAccessibleContext().setAccessibleName("Export the Semantic Web");
-		semsheets.getAccessibleContext().setAccessibleDescription("Export the Semantic Web");
+		semsheets.getAccessibleContext().setAccessibleName( "Export the Semantic Web" );
+		semsheets.getAccessibleContext().setAccessibleDescription( "Export the Semantic Web" );
 		semsheets.setMnemonic( KeyEvent.VK_S );
 		semsheets.setIcon( DbAction.getIcon( "semantic_dataset1" ) );
 		exptop.add( semsheets );
@@ -1273,8 +1275,8 @@ public class PlayPane extends JFrame {
 		//Nodes
 		JMenu nodes = new JMenu( "Nodes" );
 		nodes.setToolTipText( "Export the Nodes" );
-		nodes.getAccessibleContext().setAccessibleName("Export the Nodes");
-		nodes.getAccessibleContext().setAccessibleDescription("Export the Nodes");
+		nodes.getAccessibleContext().setAccessibleName( "Export the Nodes" );
+		nodes.getAccessibleContext().setAccessibleDescription( "Export the Nodes" );
 		nodes.setMnemonic( KeyEvent.VK_N );
 		nodes.setIcon( DbAction.getIcon( "protege/individual" ) );
 
@@ -1285,8 +1287,8 @@ public class PlayPane extends JFrame {
 		//RelationShips
 		JMenu relationS = new JMenu( "Relationships" );
 		relationS.setToolTipText( "Export the Relations" );
-		relationS.getAccessibleContext().setAccessibleName("Export the Relations");
-		relationS.getAccessibleContext().setAccessibleDescription("Export the Relations");
+		relationS.getAccessibleContext().setAccessibleName( "Export the Relations" );
+		relationS.getAccessibleContext().setAccessibleDescription( "Export the Relations" );
 		relationS.setMnemonic( KeyEvent.VK_R );
 		relationS.setIcon( DbAction.getIcon( "relationship1" ) );
 		loadingsheets.add( relationS );
@@ -1299,20 +1301,20 @@ public class PlayPane extends JFrame {
 
 		JMenu gexp = new JMenu( "Graph" );
 		gexp.setToolTipText( "Database Graphs" );
-		gexp.getAccessibleContext().setAccessibleName("Database Graphs");
-		gexp.getAccessibleContext().setAccessibleDescription("Database Graphs");
+		gexp.getAccessibleContext().setAccessibleName( "Database Graphs" );
+		gexp.getAccessibleContext().setAccessibleDescription( "Database Graphs" );
 		gexp.setMnemonic( KeyEvent.VK_G );
-		
-		gexp.add(  expgraphml );
-		gexp.add(  expgson );		
-		
+
+		gexp.add( expgraphml );
+		gexp.add( expgson );
+
 		exptop.add( gexp );
 		db.add( exptop );
 
 		JMenu importtop = new JMenu( "Import" );
 		importtop.setToolTipText( "Import Database Operations" );
-		importtop.getAccessibleContext().setAccessibleName("Import Database Operations");
-		importtop.getAccessibleContext().setAccessibleDescription("Import Database Operations");
+		importtop.getAccessibleContext().setAccessibleName( "Import Database Operations" );
+		importtop.getAccessibleContext().setAccessibleDescription( "Import Database Operations" );
 		importtop.setMnemonic( KeyEvent.VK_I );
 		importtop.setIcon( DbAction.getIcon( "importdb" ) );
 		importtop.setMnemonic( KeyEvent.VK_I );
@@ -1323,8 +1325,8 @@ public class PlayPane extends JFrame {
 		//importtop.add( iDatabase );
 		final JMenu mergeroot = new JMenu( DbAction.MERGE );
 		mergeroot.setToolTipText( "Merge the Data between databases" );
-		mergeroot.getAccessibleContext().setAccessibleName("Merge the Data between databases");
-		mergeroot.getAccessibleContext().setAccessibleDescription("Merge the Data between databases");
+		mergeroot.getAccessibleContext().setAccessibleName( "Merge the Data between databases" );
+		mergeroot.getAccessibleContext().setAccessibleDescription( "Merge the Data between databases" );
 		mergeroot.setMnemonic( KeyEvent.VK_D );
 		mergeroot.setIcon( DbAction.getIcon( "semossjnl" ) );
 		mergeroot.setEnabled( false );
@@ -1333,8 +1335,8 @@ public class PlayPane extends JFrame {
 
 		JMenu insights = new JMenu( "Insights" );
 		insights.setToolTipText( "Import Insight Operations" );
-		insights.getAccessibleContext().setAccessibleName("Import Insight Operations");
-		insights.getAccessibleContext().setAccessibleDescription("Import Insight Operations");
+		insights.getAccessibleContext().setAccessibleName( "Import Insight Operations" );
+		insights.getAccessibleContext().setAccessibleDescription( "Import Insight Operations" );
 
 		insights.setMnemonic( KeyEvent.VK_I );
 
@@ -1347,8 +1349,8 @@ public class PlayPane extends JFrame {
 		//importInsights
 		db.setMnemonic( KeyEvent.VK_D );
 		db.setToolTipText( "Database operations" );
-		db.getAccessibleContext().setAccessibleName("Database operations");
-		db.getAccessibleContext().setAccessibleDescription("Database operations");
+		db.getAccessibleContext().setAccessibleName( "Database operations" );
+		db.getAccessibleContext().setAccessibleDescription( "Database operations" );
 
 		db.add( cloner );
 		db.add( clearer );
@@ -1455,37 +1457,37 @@ public class PlayPane extends JFrame {
 						// Enable- Disable Logic
 						if ( GFILTER.equals( cmd ) ) {
 							item.setToolTipText( "Disable the Graph Filter Tab " );
-							item.getAccessibleContext().setAccessibleName("Disable the Graph Filter Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Disable the Graph Filter Tab ");
+							item.getAccessibleContext().setAccessibleName( "Disable the Graph Filter Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Filter Tab " );
 						}
 						else if ( GFLABEL.equals( cmd ) ) {
 							item.setToolTipText( "Disable the Graph Label Tab" );
-							item.getAccessibleContext().setAccessibleName("Disable the Graph Label Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Disable the Graph Label Tab ");
+							item.getAccessibleContext().setAccessibleName( "Disable the Graph Label Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Label Tab " );
 
 						}
 						else if ( LOGGING.equals( cmd ) ) {
 							item.setToolTipText( "Disable the Logging Tab" );
-							item.getAccessibleContext().setAccessibleName("Disable the Logging Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Disable the Logging Tab ");
+							item.getAccessibleContext().setAccessibleName( "Disable the Logging Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab " );
 
 						}
 						else if ( GCOSMETICS.equals( cmd ) ) {
 							item.setToolTipText( "Disable the Graph Cosmetics Tab" );
-							item.getAccessibleContext().setAccessibleName("Disable the Graph Cosmetics Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Disable the Graph Cosmetics Tab ");
+							item.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab " );
 
 						}
 						else if ( Constants.GPSSudowl.equals( cmd ) ) {
 							item.setToolTipText( "Disable the SUDOWL Tab" );
-							item.getAccessibleContext().setAccessibleName("Disable the SUDOWL Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Disable the SUDOWL Tab ");
+							item.getAccessibleContext().setAccessibleName( "Disable the SUDOWL Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Disable the SUDOWL Tab " );
 
 						}
 						else {
 							item.setToolTipText( "Disable " + cmd );
-							item.getAccessibleContext().setAccessibleName("Disable " + cmd);
-							item.getAccessibleContext().setAccessibleDescription("Disable " + cmd);
+							item.getAccessibleContext().setAccessibleName( "Disable " + cmd );
+							item.getAccessibleContext().setAccessibleDescription( "Disable " + cmd );
 
 						}
 
@@ -1508,7 +1510,7 @@ public class PlayPane extends JFrame {
 						else if ( loggingPanel == panel ) {
 							rightTabs.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 									"This tab keeps a log of SEMOSS warnings and error messges for "
-											+ "use by the SEMOSS development team" );
+									+ "use by the SEMOSS development team" );
 							int idx = rightTabs.indexOfComponent( loggingPanel );
 							CloseableTab ct = new PlayPaneCloseableTab( rightTabs, loggingItem,
 									DbAction.getIcon( "log_tab1" ) );
@@ -1518,35 +1520,35 @@ public class PlayPane extends JFrame {
 					else {
 						if ( GFILTER.equals( cmd ) ) {
 							item.setToolTipText( "Enable the Graph Filter Tab " );
-							item.getAccessibleContext().setAccessibleName("Enable the Graph Filter Tab");
-							item.getAccessibleContext().setAccessibleDescription("Enable the Graph Filter Tab ");
+							item.getAccessibleContext().setAccessibleName( "Enable the Graph Filter Tab" );
+							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Filter Tab " );
 						}
 						else if ( GFLABEL.equals( cmd ) ) {
 							item.setToolTipText( "Enable the Graph Label Tab" );
-							item.getAccessibleContext().setAccessibleName("Enable the Graph Label Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Enable the Graph Label Tab ");
+							item.getAccessibleContext().setAccessibleName( "Enable the Graph Label Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Label Tab " );
 						}
 						else if ( LOGGING.equals( cmd ) ) {
 							item.setToolTipText( "Enable the Logging Tab" );
-							item.getAccessibleContext().setAccessibleName("Enable the Logging Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Enable the Logging Tab ");
+							item.getAccessibleContext().setAccessibleName( "Enable the Logging Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Enable the Logging Tab " );
 						}
 						else if ( GCOSMETICS.equals( cmd ) ) {
 							item.setToolTipText( "Enable the Graph Cosmetics Tab" );
-							item.getAccessibleContext().setAccessibleName("Enable the Graph Cosmetics Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Enable the Graph Cosmetics Tab ");
+							item.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
 
 						}
 						else if ( Constants.GPSSudowl.equals( cmd ) ) {
 							item.setToolTipText( "Enable the SUDOWL Tab" );
-							item.getAccessibleContext().setAccessibleName("Enable the SUDOWL Tab ");
-							item.getAccessibleContext().setAccessibleDescription("Enable the SUDOWL Tab ");
+							item.getAccessibleContext().setAccessibleName( "Enable the SUDOWL Tab " );
+							item.getAccessibleContext().setAccessibleDescription( "Enable the SUDOWL Tab " );
 
 						}
 						else {
 							item.setToolTipText( "Enable " + cmd );
-							item.getAccessibleContext().setAccessibleName("Enable " + cmd);
-							item.getAccessibleContext().setAccessibleDescription("Enable " + cmd);
+							item.getAccessibleContext().setAccessibleName( "Enable " + cmd );
+							item.getAccessibleContext().setAccessibleDescription( "Enable " + cmd );
 						}
 
 						if ( loggingPanel == panel ) {
@@ -1568,13 +1570,13 @@ public class PlayPane extends JFrame {
 		//sudowl.setToolTipText( "Enables/Disables the SUDOWL tab" );
 		if ( getProp( prefs, Constants.GPSSudowl ) == true ) {
 			sudowl.setToolTipText( "Disable the Status bar" );
-			sudowl.getAccessibleContext().setAccessibleName("Disable the Status bar");
-			sudowl.getAccessibleContext().setAccessibleDescription("Disable the Status bar");
+			sudowl.getAccessibleContext().setAccessibleName( "Disable the Status bar" );
+			sudowl.getAccessibleContext().setAccessibleDescription( "Disable the Status bar" );
 		}
 		else {
 			sudowl.setToolTipText( "Enable the Status bar" );
-			sudowl.getAccessibleContext().setAccessibleName("Enable the Status bar");
-			sudowl.getAccessibleContext().setAccessibleDescription("Enable the Status bar");
+			sudowl.getAccessibleContext().setAccessibleName( "Enable the Status bar" );
+			sudowl.getAccessibleContext().setAccessibleDescription( "Enable the Status bar" );
 		}
 
 		//Status Tab
@@ -1582,13 +1584,13 @@ public class PlayPane extends JFrame {
 				prefs.getBoolean( "showStatus", true ) );
 		if ( prefs.getBoolean( "showStatus", true ) == true ) {
 			statbar.setToolTipText( "Disable the Status bar" );
-			statbar.getAccessibleContext().setAccessibleName("Disable the Status bar");
-			statbar.getAccessibleContext().setAccessibleDescription("Disable the Status bar");
+			statbar.getAccessibleContext().setAccessibleName( "Disable the Status bar" );
+			statbar.getAccessibleContext().setAccessibleDescription( "Disable the Status bar" );
 		}
 		else {
 			statbar.setToolTipText( "Enable the Status bar" );
-			statbar.getAccessibleContext().setAccessibleName("Enable the Status bar");
-			statbar.getAccessibleContext().setAccessibleDescription("Enable the Status bar");
+			statbar.getAccessibleContext().setAccessibleName( "Enable the Status bar" );
+			statbar.getAccessibleContext().setAccessibleDescription( "Enable the Status bar" );
 		}
 
 		statbar.addActionListener( new ActionListener() {
@@ -1598,13 +1600,13 @@ public class PlayPane extends JFrame {
 				prefs.putBoolean( "showStatus", statusbar.isVisible() );
 				if ( statusbar.isVisible() ) {
 					statbar.setToolTipText( "Disable the Status bar" );
-					statbar.getAccessibleContext().setAccessibleName("Disable the Status bar");
-					statbar.getAccessibleContext().setAccessibleDescription("Disable the Status bar");
+					statbar.getAccessibleContext().setAccessibleName( "Disable the Status bar" );
+					statbar.getAccessibleContext().setAccessibleDescription( "Disable the Status bar" );
 				}
 				else {
 					statbar.setToolTipText( "Enable the Status bar" );
-					statbar.getAccessibleContext().setAccessibleName("Enable the Status bar");
-					statbar.getAccessibleContext().setAccessibleDescription("Enable the Status bar");
+					statbar.getAccessibleContext().setAccessibleName( "Enable the Status bar" );
+					statbar.getAccessibleContext().setAccessibleDescription( "Enable the Status bar" );
 
 				}
 			}
@@ -1618,13 +1620,13 @@ public class PlayPane extends JFrame {
 
 		if ( getProp( prefs, GCOSMETICS ) == true ) {
 			gcos.setToolTipText( "Disable the Graph Cosmetics Tab" );
-			gcos.getAccessibleContext().setAccessibleName("Disable the Graph Cosmetics Tab");
-			gcos.getAccessibleContext().setAccessibleDescription("Disable the Graph Cosmetics Tab");
+			gcos.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab" );
+			gcos.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab" );
 		}
 		else {
 			gcos.setToolTipText( "Enable the Graph Cosmetics Tab" );
-			gcos.getAccessibleContext().setAccessibleName("Enable the Graph Cosmetics Tab");
-			gcos.getAccessibleContext().setAccessibleDescription("Enable the Graph Cosmetics Tab");
+			gcos.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab" );
+			gcos.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab" );
 		}
 
 		final JCheckBoxMenuItem gfilt = new JCheckBoxMenuItem( "Graph Filter tab",
@@ -1635,13 +1637,13 @@ public class PlayPane extends JFrame {
 
 		if ( getProp( prefs, GFILTER ) == true ) {
 			gfilt.setToolTipText( "Disable the Graph Filter Tab" );
-			gfilt.getAccessibleContext().setAccessibleName("Disable the Graph Filter Tab");
-			gfilt.getAccessibleContext().setAccessibleDescription("Disable the Graph Filter Tab");
+			gfilt.getAccessibleContext().setAccessibleName( "Disable the Graph Filter Tab" );
+			gfilt.getAccessibleContext().setAccessibleDescription( "Disable the Graph Filter Tab" );
 		}
 		else {
 			gfilt.setToolTipText( "Enable the Graph Filter Tab" );
-			gfilt.getAccessibleContext().setAccessibleName("Enable the Graph Filter Tab");
-			gfilt.getAccessibleContext().setAccessibleDescription("Enable the Graph Filter Tab");
+			gfilt.getAccessibleContext().setAccessibleName( "Enable the Graph Filter Tab" );
+			gfilt.getAccessibleContext().setAccessibleDescription( "Enable the Graph Filter Tab" );
 		}
 
 		//Graph Labels tab
@@ -1657,13 +1659,13 @@ public class PlayPane extends JFrame {
 
 		if ( getProp( prefs, LOGGING ) == true ) {
 			loggingItem.setToolTipText( "Disable the Logging Tab" );
-			loggingItem.getAccessibleContext().setAccessibleName("Disable the Logging Tab");
-			loggingItem.getAccessibleContext().setAccessibleDescription("Disable the Logging Tab");
+			loggingItem.getAccessibleContext().setAccessibleName( "Disable the Logging Tab" );
+			loggingItem.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab" );
 		}
 		else {
 			loggingItem.setToolTipText( "Enable the Logging Tab" );
-			loggingItem.getAccessibleContext().setAccessibleName("Enable the Logging Tab");
-			loggingItem.getAccessibleContext().setAccessibleDescription("Enable the Logging Tab");
+			loggingItem.getAccessibleContext().setAccessibleName( "Enable the Logging Tab" );
+			loggingItem.getAccessibleContext().setAccessibleDescription( "Enable the Logging Tab" );
 		}
 
 		//Tool Bar
@@ -1672,13 +1674,13 @@ public class PlayPane extends JFrame {
 
 		if ( prefs.getBoolean( "showToolBar", true ) == true ) {
 			tb.setToolTipText( "Disable the Tool Bar" );
-			tb.getAccessibleContext().setAccessibleName("Disable the Tool Bar");
-			tb.getAccessibleContext().setAccessibleDescription("Disable the Tool Bar");
+			tb.getAccessibleContext().setAccessibleName( "Disable the Tool Bar" );
+			tb.getAccessibleContext().setAccessibleDescription( "Disable the Tool Bar" );
 		}
 		else {
 			tb.setToolTipText( "Enable the Tool Bar" );
-			tb.getAccessibleContext().setAccessibleName("Enable the Tool Bar");
-			tb.getAccessibleContext().setAccessibleDescription("Enable the Tool Bar");
+			tb.getAccessibleContext().setAccessibleName( "Enable the Tool Bar" );
+			tb.getAccessibleContext().setAccessibleDescription( "Enable the Tool Bar" );
 		}
 
 		tb.addActionListener( new ActionListener() {
@@ -1688,24 +1690,23 @@ public class PlayPane extends JFrame {
 				prefs.putBoolean( "showToolBar", toolbar.isVisible() );
 				if ( toolbar.isVisible() ) {
 					tb.setToolTipText( "Disable the Tool bar" );
-					tb.getAccessibleContext().setAccessibleName("Disable the Tool Bar");
-					tb.getAccessibleContext().setAccessibleDescription("Disable the Tool Bar");
+					tb.getAccessibleContext().setAccessibleName( "Disable the Tool Bar" );
+					tb.getAccessibleContext().setAccessibleDescription( "Disable the Tool Bar" );
 				}
 				else {
 					tb.setToolTipText( "Enable the Tool bar" );
-					tb.getAccessibleContext().setAccessibleName("Enable the Tool Bar");
-					tb.getAccessibleContext().setAccessibleDescription("Enable the Tool Bar");
+					tb.getAccessibleContext().setAccessibleName( "Enable the Tool Bar" );
+					tb.getAccessibleContext().setAccessibleDescription( "Enable the Tool Bar" );
 				}
 			}
 		} );
 
-		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem("Left Panel", true);
-		splithider.setMnemonic(KeyEvent.VK_L);
+		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Panel", true );
+		splithider.setMnemonic( KeyEvent.VK_L );
 		splithider.setToolTipText( "Disable the Left Panel" );
-		splithider.getAccessibleContext().setAccessibleName("Disable the Left Panel");
-		splithider.getAccessibleContext().setAccessibleDescription("Disable the Left Panel");
-		
-		
+		splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
+		splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
+
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
@@ -1715,15 +1716,15 @@ public class PlayPane extends JFrame {
 					mainSplitPane.setDividerLocation( 0.25 );
 
 					splithider.setToolTipText( "Disable the Left Panel" );
-					splithider.getAccessibleContext().setAccessibleName("Disable the Left Panel");
-					splithider.getAccessibleContext().setAccessibleDescription("Disable the Left Panel");
-					splithider.setMnemonic(KeyEvent.VK_L);
+					splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
+					splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
+					splithider.setMnemonic( KeyEvent.VK_L );
 				}
 				else {
 					splithider.setToolTipText( "Enable the Left Panel" );
-					splithider.getAccessibleContext().setAccessibleName("Enable the Left Panel");
-					splithider.getAccessibleContext().setAccessibleDescription("Enable the Left Panel");
-					splithider.setMnemonic(KeyEvent.VK_L);
+					splithider.getAccessibleContext().setAccessibleName( "Enable the Left Panel" );
+					splithider.getAccessibleContext().setAccessibleDescription( "Enable the Left Panel" );
+					splithider.setMnemonic( KeyEvent.VK_L );
 
 				}
 			}
@@ -1733,13 +1734,13 @@ public class PlayPane extends JFrame {
 
 		if ( getProp( prefs, QUERYPANEL ) ) {
 			hidecsp.setToolTipText( "Disable the Query Panel" );
-			hidecsp.getAccessibleContext().setAccessibleName("Disable the Query Panel");
-			hidecsp.getAccessibleContext().setAccessibleDescription("Disable the Query Panel");
+			hidecsp.getAccessibleContext().setAccessibleName( "Disable the Query Panel" );
+			hidecsp.getAccessibleContext().setAccessibleDescription( "Disable the Query Panel" );
 		}
 		else {
 			hidecsp.setToolTipText( "Enable the Query Panel" );
-			hidecsp.getAccessibleContext().setAccessibleName("Enable the Query Panel");
-			hidecsp.getAccessibleContext().setAccessibleDescription("Enable the Query Panel");
+			hidecsp.getAccessibleContext().setAccessibleName( "Enable the Query Panel" );
+			hidecsp.getAccessibleContext().setAccessibleDescription( "Enable the Query Panel" );
 		}
 
 		hidecsp.addActionListener( new ActionListener() {
@@ -1751,8 +1752,8 @@ public class PlayPane extends JFrame {
 				if ( customSparqlPanel.isVisible() ) {
 					combinedSplitPane.setDividerLocation( 0.75 );
 					hidecsp.setToolTipText( "Disable the Query Panel" );
-					hidecsp.getAccessibleContext().setAccessibleName("Disable the Query Panel");
-					hidecsp.getAccessibleContext().setAccessibleDescription("Disable the Query Panel");
+					hidecsp.getAccessibleContext().setAccessibleName( "Disable the Query Panel" );
+					hidecsp.getAccessibleContext().setAccessibleDescription( "Disable the Query Panel" );
 				}
 				else {
 					hidecsp.setToolTipText( "Enable the Query Panel" );
@@ -1770,13 +1771,13 @@ public class PlayPane extends JFrame {
 
 		gQueryBuilderItem.addActionListener( new ActionListener() {
 			@Override
-			public void actionPerformed( ActionEvent e ) {				
+			public void actionPerformed( ActionEvent e ) {
 				boolean ischecked = gQueryBuilderItem.isSelected();
 				prefs.putBoolean( GQUERYBUILDER, ischecked );
 				DIHelper.getInstance().getCoreProp().setProperty( GQUERYBUILDER,
 						Boolean.toString( ischecked ) );
 
-				if ( ischecked ) {					
+				if ( ischecked ) {
 					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "insight_manager_tab1" ),
 							gQueryBuilderPanel, "Build queries graphically and generate Sparql" );
 					CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, gQueryBuilderItem,
@@ -1795,13 +1796,13 @@ public class PlayPane extends JFrame {
 		iManageItem.setSelected( getProp( prefs, IMANAGE ) );
 		if ( getProp( prefs, IMANAGE ) == true ) {
 			iManageItem.setToolTipText( "Disable the Insite Manager Tab" );
-			iManageItem.getAccessibleContext().setAccessibleName("Disable the Insite Manager Tab");
-			iManageItem.getAccessibleContext().setAccessibleDescription("Disable the Insite Manager Tab");
+			iManageItem.getAccessibleContext().setAccessibleName( "Disable the Insite Manager Tab" );
+			iManageItem.getAccessibleContext().setAccessibleDescription( "Disable the Insite Manager Tab" );
 		}
 		else {
 			iManageItem.setToolTipText( "Enable the Insite Manager Tab" );
-			iManageItem.getAccessibleContext().setAccessibleName("Enable the Insite Manager Tab");
-			iManageItem.getAccessibleContext().setAccessibleDescription("Enable the Insite Manager Tab");
+			iManageItem.getAccessibleContext().setAccessibleName( "Enable the Insite Manager Tab" );
+			iManageItem.getAccessibleContext().setAccessibleDescription( "Enable the Insite Manager Tab" );
 		}
 
 		iManageItem.addActionListener( new ActionListener() {
@@ -1821,14 +1822,14 @@ public class PlayPane extends JFrame {
 					int idx = rightTabs.indexOfComponent( iManagePanel );
 					rightTabs.setTabComponentAt( idx, ct2 );
 					iManageItem.setToolTipText( "Disable the Insite Manager Tab" );
-					iManageItem.getAccessibleContext().setAccessibleName("Disable the Insite Manager Tab");
-					iManageItem.getAccessibleContext().setAccessibleDescription("Disable the Insite Manager Tab");
+					iManageItem.getAccessibleContext().setAccessibleName( "Disable the Insite Manager Tab" );
+					iManageItem.getAccessibleContext().setAccessibleDescription( "Disable the Insite Manager Tab" );
 				}
 				else {
 					rightTabs.remove( iManagePanel );
 					iManageItem.setToolTipText( "Enable the Insite Manager Tab" );
-					iManageItem.getAccessibleContext().setAccessibleName("Enable the Insite Manager Tab");
-					iManageItem.getAccessibleContext().setAccessibleDescription("Enable the Insite Manager Tab");
+					iManageItem.getAccessibleContext().setAccessibleName( "Enable the Insite Manager Tab" );
+					iManageItem.getAccessibleContext().setAccessibleDescription( "Enable the Insite Manager Tab" );
 				}
 			}
 		} );
@@ -1837,8 +1838,8 @@ public class PlayPane extends JFrame {
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
 		view.setToolTipText( "Enable or disable the V-CAMP application tabs" );
-		view.getAccessibleContext().setAccessibleName("Enable the Insite Manager Tab");
-		view.getAccessibleContext().setAccessibleDescription("Enable the Insite Manager Tab");
+		view.getAccessibleContext().setAccessibleName( "Enable the Insite Manager Tab" );
+		view.getAccessibleContext().setAccessibleDescription( "Enable the Insite Manager Tab" );
 		view.add( gcos );
 		gcos.setMnemonic( KeyEvent.VK_C );
 		view.add( gfilt );
@@ -1869,8 +1870,8 @@ public class PlayPane extends JFrame {
 
 	protected void buildMenuBar() {
 		JMenuBar menu = new JMenuBar();
-		menu.getAccessibleContext().setAccessibleName("TopMenu");
-		menu.getAccessibleContext().setAccessibleDescription("V-CAMP SEMOSS APPLICATION MENU");
+		menu.getAccessibleContext().setAccessibleName( "TopMenu" );
+		menu.getAccessibleContext().setAccessibleDescription( "V-CAMP SEMOSS APPLICATION MENU" );
 
 		JMenuItem exiter = new JMenuItem( new AbstractAction( "Exit" ) {
 			private static final long serialVersionUID = 1L;
@@ -1885,91 +1886,105 @@ public class PlayPane extends JFrame {
 		fileMenuSaveAs.setEnabled( false );
 		fileMenuSaveAll.setEnabled( false );
 
-		//	AccessibleJMenu xx = new javax.swing.JMenu.AccessibleJMenu("test");
 		JMenu newmenu = new JMenu( "New" );
 		newmenu.setToolTipText( "Create a new Database or Loading Sheet" );
-		newmenu.getAccessibleContext().setAccessibleName("Create a new Database or Loading Sheet");
-		newmenu.getAccessibleContext().setAccessibleDescription("Create a new Database or Loading Sheet");
+		newmenu.getAccessibleContext().setAccessibleName( "Create a new Database or Loading Sheet" );
+		newmenu.getAccessibleContext().setAccessibleDescription( "Create a new Database or Loading Sheet" );
 		newmenu.setMnemonic( KeyEvent.VK_N );
 		newmenu.setIcon( DbAction.getIcon( "file-new1" ) );
 		fileMenu.add( newmenu );
-		
-		
+
 		// Database
 		JMenuItem jmi = newmenu.add( creater );
 		jmi.setText( "Database" );
-		jmi.getAccessibleContext().setAccessibleName("Create a new Database ");
-		jmi.getAccessibleContext().setAccessibleDescription("Create a new Database ");
+		jmi.getAccessibleContext().setAccessibleName( "Create a new Database " );
+		jmi.getAccessibleContext().setAccessibleDescription( "Create a new Database " );
 		jmi.setMnemonic( KeyEvent.VK_D );
 		jmi = newmenu.add( newls );
-		
+
 		//Loading Sheet
 		jmi.setText( "Loading Sheet" );
-		jmi.getAccessibleContext().setAccessibleName("Create a new Loading Sheet ");
-		jmi.getAccessibleContext().setAccessibleDescription("Create a new Loading Sheet");
+		jmi.getAccessibleContext().setAccessibleName( "Create a new Loading Sheet " );
+		jmi.getAccessibleContext().setAccessibleDescription( "Create a new Loading Sheet" );
 		jmi.setMnemonic( KeyEvent.VK_L );
 
 		fileMenu.setMnemonic( KeyEvent.VK_F );
 		fileMenu.setToolTipText( "File Operations" );
-		fileMenu.getAccessibleContext().setAccessibleName("File Operations");
-		fileMenu.getAccessibleContext().setAccessibleDescription("File Operations");
-		
+		fileMenu.getAccessibleContext().setAccessibleName( "File Operations" );
+		fileMenu.getAccessibleContext().setAccessibleDescription( "File Operations" );
+
 		//Open Menu
 		JMenu openmenu = new JMenu( "Open" );
 		openmenu.setToolTipText( "Open Local or Remote database" );
-		openmenu.getAccessibleContext().setAccessibleName("Open Local or Remote database");
-		openmenu.getAccessibleContext().setAccessibleDescription("Open Local or Remote database");
+		openmenu.getAccessibleContext().setAccessibleName( "Open Local or Remote database" );
+		openmenu.getAccessibleContext().setAccessibleDescription( "Open Local or Remote database" );
 		openmenu.setMnemonic( KeyEvent.VK_O );
 		openmenu.setIcon( DbAction.getIcon( "open-file3" ) );
 		fileMenu.add( openmenu );
-		
+
 		jmi = openmenu.add( importxls );
 		jmi.setText( "Local DB" );
 		jmi.setToolTipText( "Open Local Files to Import" );
-		jmi.getAccessibleContext().setAccessibleName("Open Local Files to Import");
-		jmi.getAccessibleContext().setAccessibleDescription("Open Local Files to Import");
+		jmi.getAccessibleContext().setAccessibleName( "Open Local Files to Import" );
+		jmi.getAccessibleContext().setAccessibleDescription( "Open Local Files to Import" );
 		jmi.setMnemonic( KeyEvent.VK_L );
-		
+
 		jmi = openmenu.add( remoteDb );
 		jmi.setText( "Remote DB" );
 		jmi.setToolTipText( "Open Remote Files to Import" );
-		jmi.getAccessibleContext().setAccessibleName("Open Remote Files to Import");
-		jmi.getAccessibleContext().setAccessibleDescription("Open Remote Files to Import");
+		jmi.getAccessibleContext().setAccessibleName( "Open Remote Files to Import" );
+		jmi.getAccessibleContext().setAccessibleDescription( "Open Remote Files to Import" );
 		jmi.setMnemonic( KeyEvent.VK_R );
-		
+
+		jmi = openmenu.add( new OpenSparqlAction( UIPROGRESS, this, customSparqlPanel ) );
+		jmi.setText( "SPARQL File" );
+		jmi.setToolTipText( "Open SPARQL File in Query Panel" );
+		jmi.getAccessibleContext().setAccessibleName( jmi.getToolTipText() );
+		jmi.getAccessibleContext().setAccessibleDescription( jmi.getToolTipText() );
+		jmi.setMnemonic( KeyEvent.VK_S );
+		jmi.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				// make sure the query panel is visible if we load a sparql file
+				if ( !hidecsp.isSelected() ) {
+					hidecsp.doClick();
+				}
+			}
+		} );
+
 		fileMenu.addSeparator();
 		fileMenu.add( unmounter );
 		unmounter.setEnabled( false );
 		fileMenuSave.setToolTipText( "Save changes" );
-		fileMenuSave.getAccessibleContext().setAccessibleName("Locally Save changes");
-		fileMenuSave.getAccessibleContext().setAccessibleDescription("Locally Save changes");
-		
+		fileMenuSave.getAccessibleContext().setAccessibleName( "Locally Save changes" );
+		fileMenuSave.getAccessibleContext().setAccessibleDescription( "Locally Save changes" );
+
 		fileMenuSave.setMnemonic( KeyEvent.VK_S );
 		fileMenuSave.setIcon( DbAction.getIcon( "save_diskette1" ) );
-		fileMenuSaveAs.getAccessibleContext().setAccessibleName("Save to a new file name");
-		fileMenuSaveAs.getAccessibleContext().setAccessibleDescription("Save to a new file name");
+		fileMenuSaveAs.getAccessibleContext().setAccessibleName( "Save to a new file name" );
+		fileMenuSaveAs.getAccessibleContext().setAccessibleDescription( "Save to a new file name" );
 		fileMenu.add( fileMenuSave );
 		fileMenuSaveAs.setToolTipText( "Save to a new file name" );
 		fileMenuSaveAs.setMnemonic( KeyEvent.VK_A );
 		fileMenuSaveAs.setIcon( DbAction.getIcon( "save_as_diskette1" ) );
 		fileMenu.add( fileMenuSaveAs );
-		fileMenuSaveAs.getAccessibleContext().setAccessibleName("SaveAs");
-		fileMenuSaveAs.getAccessibleContext().setAccessibleDescription("Save to a new file name");
+		fileMenuSaveAs.getAccessibleContext().setAccessibleName( "SaveAs" );
+		fileMenuSaveAs.getAccessibleContext().setAccessibleDescription( "Save to a new file name" );
 		fileMenuSaveAll.setToolTipText( "Save all changes" );
 		fileMenuSaveAll.setMnemonic( KeyEvent.VK_V );
 		fileMenuSaveAll.setIcon( DbAction.getIcon( "save_alldiskette1" ) );
-		fileMenuSaveAll.getAccessibleContext().setAccessibleName("SaveAll");
-		fileMenuSaveAll.getAccessibleContext().setAccessibleDescription("Save All changes");
+		fileMenuSaveAll.getAccessibleContext().setAccessibleName( "SaveAll" );
+		fileMenuSaveAll.getAccessibleContext().setAccessibleDescription( "Save All changes" );
 		//	fileMenu.add( fileMenuSaveAll );
-
 
 		fileMenu.addSeparator();
 		exiter.setIcon( DbAction.getIcon( "exit1" ) );
 		exiter.setMnemonic( KeyEvent.VK_X );
 		exiter.setToolTipText( "Exit the V-CAMP SEMOSS Tool" );
-		exiter.getAccessibleContext().setAccessibleName("Exit the V-CAMP SEMOSS Tool");
-		exiter.getAccessibleContext().setAccessibleDescription("Exit the V-CAMP SEMOSS Tool");
-				
+		exiter.getAccessibleContext().setAccessibleName( "Exit the V-CAMP SEMOSS Tool" );
+		exiter.getAccessibleContext().setAccessibleDescription( "Exit the V-CAMP SEMOSS Tool" );
+
 		fileMenu.add( exiter );
 		menu.add( fileMenu );
 
@@ -2014,8 +2029,8 @@ public class PlayPane extends JFrame {
 
 		return tools;
 	}
-	
-	public void showDesktop(){
+
+	public void showDesktop() {
 		rightTabs.setSelectedIndex( 0 );
 	}
 
