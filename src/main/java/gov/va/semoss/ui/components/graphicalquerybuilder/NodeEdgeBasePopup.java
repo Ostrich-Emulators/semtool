@@ -56,15 +56,6 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 			}
 		} );
 
-		add( new AbstractAction( "Remove this Element" ) {
-
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				pnl.remove( v );
-			}
-
-		} );
-
 		JCheckBoxMenuItem selectMe = new JCheckBoxMenuItem( "Return this Entity",
 				v.isSelected( RDF.SUBJECT ) );
 		add( selectMe );
@@ -81,6 +72,15 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 		finishMenu( v, pnl );
 
 		addSeparator();
+		add( new AbstractAction( "Remove this Element" ) {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				pnl.remove( v );
+			}
+
+		} );
+
 		add( new AbstractAction( "Clear Graph" ) {
 
 			@Override

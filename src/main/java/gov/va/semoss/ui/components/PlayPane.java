@@ -1729,10 +1729,9 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JCheckBoxMenuItem hidecsp = new JCheckBoxMenuItem( "Query Panel",
-				getProp( prefs, QUERYPANEL ) );
+		hidecsp = new JCheckBoxMenuItem( "Query Panel", getProp( prefs, QUERYPANEL ) );
 
-		if ( getProp( prefs, QUERYPANEL ) == true ) {
+		if ( getProp( prefs, QUERYPANEL ) ) {
 			hidecsp.setToolTipText( "Disable the Query Panel" );
 			hidecsp.getAccessibleContext().setAccessibleName("Disable the Query Panel");
 			hidecsp.getAccessibleContext().setAccessibleDescription("Disable the Query Panel");
