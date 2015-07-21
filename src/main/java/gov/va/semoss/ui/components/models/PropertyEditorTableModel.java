@@ -46,11 +46,11 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = -1980815818428292267L;
 
 	private static final String[] columnNames = { "Node Label", "Property Name", "XML Datatype", "Value" };
-	private static final Class<?>[] classNames = { String.class, String.class, String.class, String.class };
+	private static final Class<?>[] classNames = { String.class, URI.class, URI.class, Value.class };
 	private ArrayList<PropertyEditorRow> rows;
-	private Collection<SEMOSSVertex> pickedVertices;
-	private IEngine engine;
-	private Set<URI> uneditableProps = new HashSet<URI>();
+	private final Collection<SEMOSSVertex> pickedVertices;
+	private final IEngine engine;
+	private final Set<URI> uneditableProps = new HashSet<>();
 	
 	/**
 	 * Constructor for VertexPropertyTableModel.
@@ -70,7 +70,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	}
 
 	public void populateRows() {
-		rows = new ArrayList<PropertyEditorRow>();
+		rows = new ArrayList<>();
 		URI datatypeURI;
 		for ( SEMOSSVertex vertex : pickedVertices ) {
 			for ( Map.Entry<URI, Value> entry : vertex.getValues().entrySet() ) {
@@ -106,11 +106,11 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 			case 0: {
 				return pRow.getVertex().getLabel();
 			} case 1: { 
-				return pRow.getName().getLocalName();
+				return pRow.getName();
 			} case 2: { 
-				return pRow.getDatatype().getLocalName();
+				return pRow.getDatatype();
 			} case 3: { 
-				return pRow.getValue().stringValue();
+				return pRow.getValue();
 			} default:
 				return null;
 		}
@@ -126,6 +126,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	 * @param column
 	 *            Column index.
 	 */
+	@Override
 	public void setValueAt(Object val, int row, int column) {
 		if (column != 3)
 			return;
@@ -168,6 +169,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	 * 
 	 * @return String Column name.
 	 */
+	@Override
 	public String getColumnName(int index) {
 		return columnNames[index];
 	}
@@ -190,6 +192,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	 * 
 	 * @return Class Column class.
 	 */
+	@Override
 	public Class<?> getColumnClass(int column) {
 		return classNames[column];
 	}
@@ -204,18 +207,19 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	 * 
 	 * @return boolean True if cell is editable.
 	 */
+	@Override
 	public boolean isCellEditable(int row, int column) {
 		for (URI name:uneditableProps)
 			if (name == rows.get(row).getName())
 				return false;
 
-		return column == 3;
+		return column == 3 && ! XMLSchema.ANYURI.equals( rows.get(row).getDatatype() );
 	}
 
 	public class PropertyEditorRow {
-		private SEMOSSVertex vertex;
-		private URI name;
-		private URI datatype;
+		private final SEMOSSVertex vertex;
+		private final URI name;
+		private final URI datatype;
 		private Value value;
 
 		public PropertyEditorRow( SEMOSSVertex vertex, URI name, URI datatype, Value value ) {
@@ -226,13 +230,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		}
 
 		public boolean setValue(Object val) {
-			Value tempValue = ValueTableModel.getValueFromDatatypeAndString(datatype, val+"");
-			if (tempValue==null) {
-				log.warn("Could not set Value " + val + " for datatype " + datatype);
-				return false;
-			}
-			
-			value = tempValue;
+			value = Value.class.cast( val );
 			return true;
 		}
 

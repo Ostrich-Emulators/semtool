@@ -19,7 +19,9 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.SaveAllGridAction;
 import gov.va.semoss.ui.actions.SaveAsGridAction;
@@ -67,9 +69,14 @@ import javax.swing.table.JTableHeader;
 
 import javax.swing.table.TableColumnModel;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 
 /**
  */
@@ -275,8 +282,8 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	/**
-	 * Retrieves a Resource if the data from {@link JTable#getValueAt(int, int) } can
-	 * be treated as Resource, or null.
+	 * Retrieves a Resource if the data from {@link JTable#getValueAt(int, int) }
+	 * can be treated as Resource, or null.
 	 *
 	 * @param row
 	 * @param col
@@ -290,7 +297,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	private void addMouseListener() {
-		table.addMouseListener(new MouseAdapter() {
+		table.addMouseListener( new MouseAdapter() {
 			@Override
 			public void mouseReleased( MouseEvent e ) {
 				int r = table.rowAtPoint( e.getPoint() );
@@ -311,6 +318,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 					if ( null != rsr ) {
 						JPopupMenu popup = new JPopupMenu();
 						popup.add( new ShowInGraphAction( rsr ) );
+						popup.add( new EditPropertiesAction( rsr ) );
 						popup.show( e.getComponent(), e.getX(), e.getY() );
 					}
 				}
@@ -335,6 +343,32 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 			vals.add( new Value[]{ uri } );
 			gps.create( vals, Arrays.asList( "Subject" ), getEngine() );
 			addSibling( gps );
+		}
+	}
+
+	private class EditPropertiesAction extends AbstractAction {
+
+		public final Resource uri;
+
+		public EditPropertiesAction( Resource myuri ) {
+			super( "View All Properties" );
+			uri = myuri;
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			SEMOSSVertex vertex = new SEMOSSVertex( URI.class.cast( uri ) );
+			try {
+				Model model = getEngine().construct( ModelQueryAdapter.describe( uri ) );
+				for ( Statement s : model ) {
+					vertex.setValue( s.getPredicate(), s.getObject() );
+				}
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
+				log.error( ex, ex );
+			}
+			addSibling( new PropertyEditorPlaySheet( Arrays.asList( vertex ),
+					"Selected Node Properties", getEngine() ) );
 		}
 	}
 
