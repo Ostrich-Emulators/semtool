@@ -124,7 +124,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 		else {
 			// run a regular query
 			JDesktopPane pane = DIHelper.getInstance().getDesktop();
-			PlayPane.rightTabs.setSelectedIndex( 0 );
+			DIHelper.getInstance().getPlayPane().showDesktop();
 			String title = getTitle();
 			boolean appending = isAppending();
 

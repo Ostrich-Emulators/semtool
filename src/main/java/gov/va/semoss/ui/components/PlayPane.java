@@ -212,7 +212,8 @@ public class PlayPane extends JFrame {
 			lblDBImportURL, lblDesignateBaseUri, lblDBImportUsername, lblDBImportPW,
 			lblDBImportDriverType;
 
-	public static JTabbedPane leftTabs, rightTabs;
+	private final JTabbedPane leftTabs;
+	private final JTabbedPane rightTabs;
 	private final StatusBar statusbar;
 
 	private final DbAction creater = new CreateDbAction( UIPROGRESS, this );
@@ -284,7 +285,7 @@ public class PlayPane extends JFrame {
 		//exist in a separate class, load all of their listeners first:
 		// customSparqlPanel.loadCustomSparqlPanelListeners();
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
-
+		DIHelper.getInstance().setPlayPane( this );
 		// load all the listeners
 		// cast it to IChakraListener
 		// for each listener specify what is the view field - Listener_VIEW
@@ -1839,6 +1840,10 @@ public class PlayPane extends JFrame {
 		tools.add( playsheeter );
 
 		return tools;
+	}
+	
+	public void showDesktop(){
+		rightTabs.setSelectedIndex( 0 );
 	}
 
 	public static boolean getProp( Preferences prefs, String propstr ) {
