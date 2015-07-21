@@ -74,16 +74,23 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		URI datatypeURI;
 		for ( SEMOSSVertex vertex : pickedVertices ) {
 			for ( Map.Entry<URI, Value> entry : vertex.getValues().entrySet() ) {
-				if (entry.getValue() instanceof Literal) {
-					Literal literal = (Literal) entry.getValue();
-					if (literal.getDatatype()==null) {
-						datatypeURI = XMLSchema.STRING;
-					} else { 
-						datatypeURI = literal.getDatatype();
+				// don't edit the SUBJECT field (it's just an ID for the vertex)
+				if( !RDF.SUBJECT.equals( entry.getKey()) ){
+					if ( entry.getValue() instanceof Literal ) {
+						Literal literal = (Literal) entry.getValue();
+						if ( literal.getDatatype() == null ) {
+							datatypeURI = XMLSchema.STRING;
+						}
+						else {
+							datatypeURI = literal.getDatatype();
+						}
+						rows.add( new PropertyEditorRow( vertex, entry.getKey(), datatypeURI,
+								entry.getValue() ) );
 					}
-					rows.add( new PropertyEditorRow(vertex, entry.getKey(), datatypeURI, entry.getValue()));
-				} else if (entry.getValue() instanceof URI) {
-					rows.add( new PropertyEditorRow(vertex, entry.getKey(), XMLSchema.ANYURI, entry.getValue()));
+					else if ( entry.getValue() instanceof URI ) {
+						rows.add( new PropertyEditorRow( vertex, entry.getKey(), XMLSchema.ANYURI,
+								entry.getValue() ) );
+					}
 				}
 			}
 		}
