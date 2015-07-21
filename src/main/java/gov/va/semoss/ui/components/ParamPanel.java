@@ -102,7 +102,7 @@ List<ParamComboBox> allParamBoxes = new ArrayList<>();
     //-------------------------------------------------------------------------------------
     parameterMasterHash = new HashMap<>();
     //Legacy Insight:
-    if(insight.getIsLegacy() == true){
+    if(insight.isLegacy() == true){
     	Map<String, Map<String, String>> paramTypeQueryHashFromSparql = Utility.getParamTypeQueryHash(insight.getSparql());
     	for(Map.Entry<String, Map<String, String>> e: paramTypeQueryHashFromSparql.entrySet()){
 		   String variable = e.getKey();
@@ -415,7 +415,7 @@ allParamBoxes.add(field);
 	ParamComboBox source = (ParamComboBox) arg0.getSource();
 	
 	//If Insight is non-legacy:
-	if(insight.getIsLegacy() == false){
+	if(insight.isLegacy() == false){
 		knownValues.put(source.getParamName(), source.getSelectedUri().toString());
 		
 		//If the new parameter selection will result in queries filled by new URI's,

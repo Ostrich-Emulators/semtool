@@ -281,7 +281,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 		  String question = insight.getLabel();
 		  String dataViewOutput = insight.getOutput();
 		  String rendererClass = insight.getRendererClass();
-		  String isLegacy = String.valueOf(insight.getIsLegacy());
+		  String isLegacy = String.valueOf(insight.isLegacy());
 		  String sparql = insight.getSparql();
 		  String description = insight.getDescription();
 

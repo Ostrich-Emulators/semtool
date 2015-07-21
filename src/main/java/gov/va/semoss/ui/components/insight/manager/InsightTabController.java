@@ -251,7 +251,7 @@ public class InsightTabController extends InsightManagerController {
 		}else{
 		  insight.setRendererClass("");
 		}
-		insight.setIsLegacy(imc.chkLegacyQuery_Inst.isSelected());
+		insight.setLegacy(imc.chkLegacyQuery_Inst.isSelected());
 		insight.setSparql(imc.legalizeQuotes(imc.txtaQuery_Inst.getText().trim()));
 		insight.setDescription(imc.legalizeQuotes(imc.txtaInsightDesc_Inst.getText().trim()));
 		insight.setCreator(imc.legalizeQuotes(imc.txtCreator_Inst.getText().trim()));

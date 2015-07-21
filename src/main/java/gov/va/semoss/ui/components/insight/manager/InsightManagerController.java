@@ -763,7 +763,7 @@ public class  InsightManagerController implements Initializable{
 	 */
 	private void populateLegacyQueryCheckBox(int perspectiveIndex, int insightIndex){
   	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-	    chkLegacyQuery_Inst.setSelected(((Insight) arylInsights.get(insightIndex)).getIsLegacy());		   
+	    chkLegacyQuery_Inst.setSelected(((Insight) arylInsights.get(insightIndex)).isLegacy());		   
 	}
 	
 	/**   Populates the query text-area with Sparql from the currently 
