@@ -282,6 +282,16 @@ public interface IEngine {
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
 
+	/**
+	 * Runs a query but does not throw exceptions. If anything exceptional
+	 * happens, this function return null
+	 *
+	 * @param <T> the type of result
+	 * @param exe the query executor to run
+	 * @return the results, or null if something bad happened
+	 */
+	public <T> T queryNoEx( QueryExecutor<T> exe );
+
 	public Model construct( QueryExecutor<Model> query )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
 

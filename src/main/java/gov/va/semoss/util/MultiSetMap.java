@@ -19,6 +19,19 @@ import java.util.Set;
  */
 public class MultiSetMap<T, V> extends HashMap<T, Set<V>> {
 
+	public static <K, X> MultiSetMap<K, X> deepCopy( Map<K, Set<X>> model ) {
+		MultiSetMap<K, X> newmap = new MultiSetMap<>();
+		for ( Map.Entry<K, Set<X>> en : model.entrySet() ) {
+			Set<X> newv = new LinkedHashSet<>();
+			for ( X v : en.getValue() ) {
+				newv.add( v );
+			}
+
+			newmap.put( en.getKey(), newv );
+		}
+		return newmap;
+	}
+
 	@Override
 	public Set<V> put( T key, Set<V> value ) {
 		return super.put( key, value );

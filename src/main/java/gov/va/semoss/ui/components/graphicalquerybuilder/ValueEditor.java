@@ -9,6 +9,8 @@ import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.Constra
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
@@ -30,6 +32,7 @@ public class ValueEditor extends AbstractCellEditor
 	private Map<URI, String> types;
 	private URI type;
 	private boolean checked;
+	private QueryNodeEdgeBase nodeedge;
 
 	public ValueEditor() {
 		//Set up the editor (from the table's point of view),
@@ -53,6 +56,10 @@ public class ValueEditor extends AbstractCellEditor
 		types = tt;
 	}
 
+	public void setNode( QueryNodeEdgeBase b ) {
+		nodeedge = b;
+	}
+
 	/**
 	 * Handles events from the editor button and from the dialog's OK button.
 	 */
@@ -62,7 +69,14 @@ public class ValueEditor extends AbstractCellEditor
 			try {
 				ConstraintValue cv = null;
 				if ( null == types ) {
-					cv = ConstraintPanel.getValue( type, EDIT, value, checked );
+					Collection<ConstraintValue> cvs
+							= ConstraintPanel.getValues( type, EDIT, Arrays.asList( value ), checked );
+					if ( null == cvs || cvs.isEmpty() ) {
+						cv = null;
+					}
+					else {
+						cv = cvs.iterator().next();
+					}
 				}
 				else {
 					// editing a type

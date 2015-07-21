@@ -19,12 +19,13 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.models.PropertyEditorTableModel;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -45,10 +46,11 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 	private final PropertyEditorTableModel model;
 	private final JTable table;
 
-	public PropertyEditorPlaySheet(AbstractNodeEdgeBase _nodeOrEdge) {
+	public PropertyEditorPlaySheet(Collection<SEMOSSVertex> pickedVertices, String title, IEngine engine) {
 		setLayout( new BorderLayout() );
+		setTitle(title);
 		
-		model = new PropertyEditorTableModel(_nodeOrEdge, this);
+		model = new PropertyEditorTableModel(pickedVertices, engine);
 		table = new JTable( model );
 		
 		table.setAutoCreateRowSorter( true );
@@ -81,7 +83,7 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 
 	@Override
 	public void create( List<Value[]> data, List<String> newheaders, IEngine engine ) {
-		model.setData( data, null );
+		model.populateRows();
 	}
 
 	@Override

@@ -7,7 +7,9 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiSetMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,20 +67,35 @@ public class GraphToSparql {
 		return select.toString();
 	}
 
-	private Set<URI> getWhereProps( QueryNodeEdgeBase v ) {
-		Set<URI> props = new HashSet<>( v.getProperties().keySet() );
-		props.remove( RDF.SUBJECT );
+	private MultiSetMap<URI, Value> getWhereProps( QueryNodeEdgeBase v ) {
+		MultiSetMap<URI, Value> nodeEdgeVals = MultiSetMap.deepCopy( v.getAllValues() );
+		nodeEdgeVals.remove( RDF.SUBJECT );
 
-		if ( Constants.ANYNODE.equals( v.getValue( RDF.TYPE ) )
-				&& !v.isSelected( RDF.TYPE ) ) {
-			props.remove( RDF.TYPE );
+		// ANYNODE and "" are placeholders, and we don't need to hold their places
+		// anymore at this point, so remove them
+		List<URI> toremove = new ArrayList<>();
+		for ( Map.Entry<URI, Set<Value>> en : nodeEdgeVals.entrySet() ) {
+			URI prop = en.getKey();
+			Set<Value> values = en.getValue();
+
+			values.remove( Constants.ANYNODE );
+
+			for ( Value val : new ArrayList<>( values ) ) {
+				if ( val.stringValue().isEmpty() ) {
+					values.remove( val );
+				}
+			}
+
+			if ( values.isEmpty() && !v.isSelected( prop ) ) {
+				toremove.add( prop );
+			}
 		}
 
-		if ( v.getLabel().isEmpty() && !v.isSelected( RDFS.LABEL ) ) {
-			props.remove( RDFS.LABEL );
+		for ( URI remover : toremove ) {
+			nodeEdgeVals.remove( remover );
 		}
 
-		return props;
+		return nodeEdgeVals;
 	}
 
 	private String makeOneValue( Value v ) {
@@ -89,32 +106,9 @@ public class GraphToSparql {
 		return v.toString();
 	}
 
-	private String buildOneConstraint( QueryNodeEdgeBase v, URI type ) {
+	private String buildOneConstraint( QueryNodeEdgeBase v, URI type,
+			Set<Value> vals ) {
 		StringBuilder sb = new StringBuilder();
-
-		// ignore empty variables (mostly, this is just for not returning a
-		// label, but it's generally good not to add unmarked predicates to a 
-		// query). If the predicate is marked, we must include it no matter what
-		Set<Value> realones = v.getValues( type );
-		if ( ( null == realones || realones.isEmpty() ) && !v.isSelected( type ) ) {
-			return "";
-		}
-
-		// ANYNODE and the empty string are just placeholder, 
-		// but we don't need them anymore
-		Set<Value> vals = new HashSet<>();
-		if ( null != realones ) {
-			vals.addAll( realones );
-		}
-
-		List<Value> toremove = new ArrayList<>();
-		toremove.add( Constants.ANYNODE );
-		for ( Value val : vals ) {
-			if ( val.stringValue().isEmpty() ) {
-				toremove.add( val );
-			}
-		}
-		vals.removeAll( toremove );
 
 		String nodevar = "?" + v.getQueryId();
 
@@ -165,63 +159,99 @@ public class GraphToSparql {
 	private String buildWhere( DirectedGraph<QueryNode, QueryEdge> graph ) {
 		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
 		for ( QueryNodeEdgeBase v : graph.getVertices() ) {
-			Set<URI> props = getWhereProps( v );
+			MultiSetMap<URI, Value> props = getWhereProps( v );
 
-			for ( URI prop : props ) {
-				sb.append( buildOneConstraint( v, prop ) );
+			for ( Map.Entry<URI, Set<Value>> en : props.entrySet() ) {
+				sb.append( buildOneConstraint( v, en.getKey(), en.getValue() ) );
 			}
 		}
 
 		for ( QueryEdge edge : graph.getEdges() ) {
-			Set<URI> props = getWhereProps( edge );
+			MultiSetMap<URI, Value> props = getWhereProps( edge );
 
-			props.remove( RDF.TYPE );
-			boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || !props.isEmpty()
-					|| edge.getType().equals( Constants.ANYNODE ) );
-
-			for ( URI prop : props ) {
-				sb.append( buildOneConstraint( edge, prop ) );
+			for ( Map.Entry<URI, Set<Value>> en : props.entrySet() ) {
+				URI prop = en.getKey();
+				Set<Value> edgevals = en.getValue();
+				if ( !RDF.TYPE.equals( prop ) ) {
+					sb.append( buildOneConstraint( edge, prop, edgevals ) );
+				}
 			}
 
+			// handle endpoints and types a little differently
 			QueryNode src = graph.getSource( edge );
 			QueryNode dst = graph.getDest( edge );
-
-			String fromvar = "?" + src.getQueryId();
-			String linkvar = "?" + edge.getQueryId();
-			String tovar = "?" + dst.getQueryId();
-
-			sb.append( "  " ).append( fromvar ).append( " " );
-			if ( useLinkVar ) {
-				sb.append( linkvar ).append( " " );
-			}
-			else {
-				sb.append( "<" ).append( edge.getType() ).append( "> " );
-			}
-
-			sb.append( tovar ).append( " " );
-
-			if ( useLinkVar ) {
-				if ( !edge.getType().equals( Constants.ANYNODE ) ) {
-					sb.append( "BIND ( <" ).append( edge.getType() ).append( "> AS " ).
-							append( linkvar ).append( " ) " );
-				}
-
-				if ( edge.isSelected( RDF.TYPE ) ) {
-					sb.append( "\n  BIND ( " );
-					if ( Constants.ANYNODE.equals( edge.getType() ) ) {
-						sb.append( linkvar );
-					}
-					else {
-						sb.append( "<" ).append( edge.getType() ).append( ">" );
-					}
-					sb.append( " AS ?" ).append( edge.getLabel( RDF.TYPE ) ).append( ") " );
-				}
-
-			}
-			sb.append( ".\n" );
+			sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
+					src, dst, props.keySet() ) );
 		}
 
 		return sb.append( "}" ).toString();
+	}
+
+	private String buildEdgeTypeAndEndpoints( QueryNodeEdgeBase edge,
+			Set<Value> vals, QueryNode src, QueryNode dst, Set<URI> otherprops ) {
+		String fromvar = "?" + src.getQueryId();
+		String linkvar = "?" + edge.getQueryId();
+		String tovar = "?" + dst.getQueryId();
+
+		StringBuilder sb = new StringBuilder( "  " ).append( fromvar ).append( " " );
+
+		// if we have a non-generic edge between these two nodes, the sparql changes
+		Set<URI> specialprops = new HashSet<>( otherprops );
+		specialprops.removeAll( Arrays.asList( RDF.TYPE, RDFS.LABEL ) );
+		boolean useCustomEdge = !specialprops.isEmpty();
+
+		// we need to use a variable if:
+		// 1) our edge is selected to be returned in the SELECT part
+		// 2) we have other properties to hang on this edge
+		// Note: if 1 & 2 aren't true, we can handle multiple values without a variable
+		boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || otherprops.size() > 1
+				|| vals.isEmpty() || edge.isSelected( RDF.SUBJECT ) || useCustomEdge );
+		if ( useLinkVar ) {
+			sb.append( linkvar ).append( " " );
+		}
+		else {
+			// our edge isn't selected, and we don't have to use a variable
+			boolean first = true;
+			for ( Value v : vals ) {
+				if ( first ) {
+					first = false;
+				}
+				else {
+					sb.append( "| " );
+				}
+
+				sb.append( shortcut( URI.class.cast( v ) ) ).append( " " );
+			}
+		}
+		sb.append( tovar );
+
+		if ( useLinkVar && !vals.isEmpty() ) {
+			if ( useCustomEdge ) {
+				sb.append( " .\n  " ).append( linkvar ).append( " " );
+				sb.append( shortcut( RDF.PREDICATE ) ).append( " ?" );
+				sb.append( edge.getLabel( RDF.TYPE ) );
+
+				// our VALUES clause (below) needs to work on our base edge type,
+				// not the custom one
+				linkvar = "?"+edge.getLabel( RDF.TYPE );
+			}
+
+			sb.append( " VALUES " ).append( linkvar ).append( " { " );
+			for ( Value v : vals ) {
+				sb.append( shortcut( URI.class.cast( v ) ) ).append( " " );
+			}
+			sb.append( "}" );
+		}
+
+		sb.append( " .\n" );
+
+		if ( edge.isSelected( RDF.TYPE ) && !useCustomEdge ) {
+			sb.append( "  " ).append( linkvar ).append( " " ).
+					append( shortcut( RDF.TYPE ) ).append( "+ ?" ).
+					append( edge.getLabel( RDF.TYPE ) ).append( " .\n" );
+		}
+
+		return sb.toString();
 	}
 
 	private String shortcut( URI type ) {
