@@ -16,7 +16,7 @@ import org.openrdf.query.Operation;
  *
  * @author ryan
  */
-public interface Bindable<T> {
+public interface Bindable {
 	public void setSparql( String sparql );
 
 	/**
@@ -25,7 +25,7 @@ public interface Bindable<T> {
 	 * @param var the binding to set
 	 * @param uri a string representation of the URI to set
 	 */
-	public Bindable<T> bindURI( String var, String uri );
+	public Bindable bindURI( String var, String uri );
 
 	/**
 	 * Binds a URI represented by this string to a variable
@@ -34,9 +34,9 @@ public interface Bindable<T> {
 	 * @param basename a string representation of the URI basename
 	 * @param localname a string representation of the URI localname
 	 */
-	public Bindable<T> bindURI( String var, String basename, String localname );
+	public Bindable bindURI( String var, String basename, String localname );
 
-	public Bindable<T> bind( String var, URI uri );
+	public Bindable bind( String var, URI uri );
 
 	/**
 	 * Binds a string literal to a variable, without a language tag
@@ -44,19 +44,19 @@ public interface Bindable<T> {
 	 * @param var
 	 * @param s
 	 */
-	public Bindable<T> bind( String var, String s );
+	public Bindable bind( String var, String s );
 
-	public Bindable<T> bind( String var, Resource rsr );
+	public Bindable bind( String var, Resource rsr );
 
-	public Bindable<T> bind( String var, String s, String lang );
+	public Bindable bind( String var, String s, String lang );
 
-	public Bindable<T> bind( String var, double d );
+	public Bindable bind( String var, double d );
 
-	public Bindable<T> bind( String var, int d );
+	public Bindable bind( String var, int d );
 
-	public Bindable<T> bind( String var, Date d );
+	public Bindable bind( String var, Date d );
 
-	public Bindable<T> bind( String var, boolean d );
+	public Bindable bind( String var, boolean d );
 
 	public void useInferred( boolean b );
 

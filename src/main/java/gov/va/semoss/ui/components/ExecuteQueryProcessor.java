@@ -52,7 +52,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	public static String getSparql( Insight insight, Map<String, String> paramHash ) {
 		String sparql = Utility.normalizeParam( insight.getSparql() );
 		logger.debug( "SPARQL " + sparql );
-		if ( insight.getIsLegacy() == true ) {
+		if ( insight.isLegacy() == true ) {
 			sparql = Utility.fillParam( sparql, paramHash );
 		}
 		else {
@@ -78,6 +78,10 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	}
 
 	protected abstract String getTitle();
+
+	protected String getFrameTitle() {
+		return getTitle();
+	}
 
 	protected abstract String getQuery();
 
@@ -126,7 +130,9 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 
 			try {
 				PlaySheetCentralComponent pscc = klass.newInstance();
-				pt = doitNewSkool( pscc, query, engine, pane, title, appending );
+				pscc.setTitle( title );
+				pt = doitNewSkool( pscc, query, engine, pane, getFrameTitle(),
+						appending );
 			}
 			catch ( InstantiationException | IllegalAccessException e ) {
 				logger.error( e, e );
@@ -140,18 +146,17 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 		}
 	}
 
-	private static ProgressTask doitNewSkool( PlaySheetCentralComponent pscc, String query,
-			IEngine eng, JDesktopPane pane, String title, boolean appending ) {
+	private static ProgressTask doitNewSkool( PlaySheetCentralComponent pscc,
+			String query, IEngine eng, JDesktopPane pane, String frameTitle, 
+			boolean appending ) {
 		if ( appending ) {
 			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
-			return psf.getOverlayTask( query, title, title );
+			return psf.getOverlayTask( query, pscc.getTitle() );
 		}
 		else {
 			PlaySheetFrame psf = new PlaySheetFrame( eng );
-			pscc.setTitle( title );
-			psf.addTab( title, pscc );
-
-			psf.setTitle( title );
+			psf.addTab( pscc );
+			psf.setTitle( frameTitle );
 			DIHelper.getInstance().getDesktop().add( psf );
 
 			return psf.getCreateTask( query );

@@ -13,7 +13,7 @@ import gov.va.semoss.rdf.engine.api.UpdateExecutor;
  * @author ryan
  *
  */
-public class UpdateExecutorAdapter extends AbstractBindable<Void>
+public class UpdateExecutorAdapter extends AbstractBindable
 		implements UpdateExecutor {
 
 	public UpdateExecutorAdapter() {

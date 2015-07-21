@@ -27,7 +27,7 @@ import org.openrdf.query.Operation;
  * @author ryan
  * @param <T> the type of the result
  */
-public abstract class AbstractBindable<T> implements Bindable<T> {
+public abstract class AbstractBindable implements Bindable {
 
 	private static final Logger log = Logger.getLogger( AbstractBindable.class );
 	private final Map<String, Double> dmap = new HashMap<>();
@@ -147,7 +147,7 @@ public abstract class AbstractBindable<T> implements Bindable<T> {
 	}
 
 	@Override
-	public AbstractBindable<T> bindURI( String var, String uri ) {
+	public AbstractBindable bindURI( String var, String uri ) {
 		try {
 			umap.put( var, new URIImpl( uri ) );
 		}
@@ -158,7 +158,7 @@ public abstract class AbstractBindable<T> implements Bindable<T> {
 	}
 
 	@Override
-	public AbstractBindable<T> bindURI( String var, String basename, String localname ) {
+	public AbstractBindable bindURI( String var, String basename, String localname ) {
 		try {
 			ValueFactory vfac = new ValueFactoryImpl();
 			umap.put( var, vfac.createURI( basename, localname ) );
@@ -212,49 +212,49 @@ public abstract class AbstractBindable<T> implements Bindable<T> {
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, String s ) {
+	public AbstractBindable bind( String var, String s ) {
 		smap.put( var, new StringPair( s ) );
 		return this;
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, Resource r ) {
+	public AbstractBindable bind( String var, Resource r ) {
 		rmap.put( var, r );
 		return this;
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, String s, String lang ) {
+	public AbstractBindable bind( String var, String s, String lang ) {
 		smap.put( var, new StringPair( s, lang ) );
 		return this;
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, double d ) {
+	public AbstractBindable bind( String var, double d ) {
 		dmap.put( var, d );
 		return this;
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, int d ) {
+	public AbstractBindable bind( String var, int d ) {
 		imap.put( var, d );
 		return this;
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, Date d ) {
+	public AbstractBindable bind( String var, Date d ) {
 		amap.put( var, d );
 		return this;
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, boolean d ) {
+	public AbstractBindable bind( String var, boolean d ) {
 		bmap.put( var, d );
 		return this;
 	}
 
 	@Override
-	public AbstractBindable<T> bind( String var, URI uri ) {
+	public AbstractBindable bind( String var, URI uri ) {
 		umap.put( var, uri );
 		return this;
 	}

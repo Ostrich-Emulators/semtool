@@ -9,6 +9,6 @@ package gov.va.semoss.rdf.engine.api;
  *
  * @author ryan
  */
-public interface UpdateExecutor extends Bindable<Void>{
+public interface UpdateExecutor extends Bindable{
 	
 }
