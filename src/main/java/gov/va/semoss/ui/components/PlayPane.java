@@ -43,6 +43,7 @@ import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.api.IChakraListener;
+import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.main.listener.impl.ProcessQueryListener;
@@ -151,7 +152,8 @@ import org.openrdf.model.vocabulary.RDFS;
 public class PlayPane extends JFrame {
 	private static final long serialVersionUID = -715188668604903980L;
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
-	
+
+	private final String GQUERYBUILDER = "qQueryBuilderPanel";
 	private final String IMANAGE = "iManagePanel";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
@@ -169,6 +171,7 @@ public class PlayPane extends JFrame {
 	public JCheckBox appendChkBox;
 	public RepositoryList repoList = new RepositoryList();
 
+	private GraphicalQueryPanel gQueryBuilderPanel;
 	private InsightManagerPanel iManagePanel;
 
 	// Right graphPanel desktopPane
@@ -265,8 +268,12 @@ public class PlayPane extends JFrame {
 	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
 	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
+	private JCheckBoxMenuItem hidecsp;
 	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging",
 			DbAction.getIcon( "log_tab1" ) );
+	private final JCheckBoxMenuItem gQueryBuilderItem
+			= new JCheckBoxMenuItem( "Graphical Query Builder",
+					DbAction.getIcon( "insight_manager_tab1" ) );
 	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 
@@ -578,6 +585,8 @@ public class PlayPane extends JFrame {
 				if ( null != engine ) {
 					sparqler.setEnabled( engine.isServerSupported() );
 				}
+
+				gQueryBuilderPanel.setEngine( engine );
 			}
 		} );
 	}
@@ -612,6 +621,11 @@ public class PlayPane extends JFrame {
 		boolean lpref = prefs.getBoolean( LOGGING, false );
 		if ( !lpref ) {
 			rightTabs.remove( loggingPanel );
+		}
+
+		boolean gpref = prefs.getBoolean( GQUERYBUILDER, false );
+		if ( !gpref ) {
+			rightTabs.remove( gQueryBuilderPanel );
 		}
 
 		boolean ipref = prefs.getBoolean( IMANAGE, false );
@@ -664,6 +678,8 @@ public class PlayPane extends JFrame {
 		dislbl.setIconTextGap( 5 );
 		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
 		rightView.setTabComponentAt( 0, dislbl );
+		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS );
+		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
 
 		loggingPanel = new LoggingPanel();
 		CloseableTab ct = new PlayPaneCloseableTab( rightView, loggingItem,
@@ -680,8 +696,20 @@ public class PlayPane extends JFrame {
 				if ( rightView.getSelectedComponent().equals( loggingPanel ) ) {
 					loggingPanel.refresh();
 				}
+				else if( rightView.getSelectedComponent().equals( gQueryBuilderPanel ) ) {
+					if( !hidecsp.isSelected() ){
+						hidecsp.doClick();
+					}
+				}
 			}
 		} );
+
+		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
+				"Build queries graphically and generate Sparql" );
+		CloseableTab ct1 = new PlayPaneCloseableTab( rightView, gQueryBuilderItem,
+				DbAction.getIcon( "insight_manager_tab1" ) );
+		idx = rightView.indexOfComponent( gQueryBuilderPanel );
+		rightView.setTabComponentAt( idx, ct1 );
 
 		iManagePanel = new InsightManagerPanel( repoList );
 		rightView.addTab( "Insight Manager", null, iManagePanel,
@@ -1225,6 +1253,7 @@ public class PlayPane extends JFrame {
 		tools.getAccessibleContext().setAccessibleName("Additional data tools");
 		tools.getAccessibleContext().setAccessibleDescription("Additional data tools");
 		tools.add( loggingItem );
+		tools.add( gQueryBuilderItem );
 		tools.add( iManageItem );
 		return tools;
 	}
@@ -1751,8 +1780,38 @@ public class PlayPane extends JFrame {
 				}
 				else {
 					hidecsp.setToolTipText( "Enable the Query Panel" );
-					hidecsp.getAccessibleContext().setAccessibleName("Enable the Query Panel");
-					hidecsp.getAccessibleContext().setAccessibleDescription("Enable the Query Panel");
+				}
+			}
+		} );
+
+		gQueryBuilderItem.setSelected( getProp( prefs, GQUERYBUILDER ) );
+		if ( getProp( prefs, GQUERYBUILDER ) == true ) {
+			gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );
+		}
+		else {
+			gQueryBuilderItem.setToolTipText( "Enable the Graphical Query Builder Tab" );
+		}
+
+		gQueryBuilderItem.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {				
+				boolean ischecked = gQueryBuilderItem.isSelected();
+				prefs.putBoolean( GQUERYBUILDER, ischecked );
+				DIHelper.getInstance().getCoreProp().setProperty( GQUERYBUILDER,
+						Boolean.toString( ischecked ) );
+
+				if ( ischecked ) {					
+					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "insight_manager_tab1" ),
+							gQueryBuilderPanel, "Build queries graphically and generate Sparql" );
+					CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, gQueryBuilderItem,
+							DbAction.getIcon( "insight_manager_tab1" ) );
+					int idx = rightTabs.indexOfComponent( gQueryBuilderPanel );
+					rightTabs.setTabComponentAt( idx, ct1 );
+					gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );
+				}
+				else {
+					rightTabs.remove( gQueryBuilderPanel );
+					gQueryBuilderItem.setToolTipText( "Enable the Graphical Query Builder Tab" );
 				}
 			}
 		} );
@@ -1810,6 +1869,8 @@ public class PlayPane extends JFrame {
 		gfilt.setMnemonic( KeyEvent.VK_F );
 		view.add( gflab );
 		gflab.setMnemonic( KeyEvent.VK_G );
+		view.add( gQueryBuilderItem );
+		gQueryBuilderItem.setMnemonic( KeyEvent.VK_B );
 		view.add( iManageItem );
 		iManageItem.setMnemonic( KeyEvent.VK_I );
 		view.add( splithider );
