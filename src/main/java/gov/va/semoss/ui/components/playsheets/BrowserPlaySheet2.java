@@ -47,12 +47,17 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 /**
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
  * Javascript library to create visualizations.
  */
-public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
+public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 
 	private static final long serialVersionUID = 1142415334918968440L;
 	private static final Logger log = Logger.getLogger( BrowserPlaySheet2.class );
@@ -181,19 +186,6 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 		} );
 	}
 
-	public void log( String text ) {
-		log.debug( text );
-	}
-
-	/**
-	 * Method createCustomView.
-	 *
-	 * @see createView()
-	 */
-	public void createCustomView() {
-		super.createView();
-	}
-
 	/**
 	 * Method processQueryData. Processes the data from the SPARQL query into an
 	 * appropriate format for the specific play sheet.
@@ -223,5 +215,16 @@ public class BrowserPlaySheet2 extends PlaySheetCentralComponent {
 
 	private void downloadCSV( String data ) {
 		ExportUtility.doExportCSVWithDialogue( this, data );
+	}
+
+	@Override
+	protected BufferedImage getExportImage() throws IOException {
+		BufferedImage bufferedImage = new BufferedImage( getWidth(), getHeight(),
+				BufferedImage.TYPE_INT_ARGB );
+		paint( bufferedImage.getGraphics() );
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+			ImageIO.write( bufferedImage, Constants.PNG, baos );
+			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
+		}
 	}
 }
