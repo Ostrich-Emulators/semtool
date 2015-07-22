@@ -10,12 +10,12 @@ import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
 
-public class ListOfValueArraysQueryAdapterImpl extends ListQueryAdapter<Value[]> {
+public class ListOfValueArraysQueryAdapter extends ListQueryAdapter<Value[]> {
 
-	public ListOfValueArraysQueryAdapterImpl() {
+	public ListOfValueArraysQueryAdapter() {
 	}
 
-	public ListOfValueArraysQueryAdapterImpl( String sparq ) {
+	public ListOfValueArraysQueryAdapter( String sparq ) {
 		super( sparq );
 	}
 

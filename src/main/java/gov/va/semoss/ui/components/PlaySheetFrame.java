@@ -6,7 +6,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapterImpl;
+import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
@@ -292,7 +292,7 @@ public class PlaySheetFrame extends JInternalFrame {
 
 		updateProgress( "Preparing Query", 10 );
 		final ListQueryAdapter<Value[]> lqa
-				= new ListOfValueArraysQueryAdapterImpl( q );
+				= new ListOfValueArraysQueryAdapter( q );
 		final StringBuilder builder = new StringBuilder();
 		final int rows[] = { 0 };
 
@@ -363,7 +363,7 @@ public class PlaySheetFrame extends JInternalFrame {
 		String q = query;
 		final PlaySheetCentralComponent overlayee = getActivePlaySheet();
 		final ListQueryAdapter<Value[]> lqa
-				= new ListOfValueArraysQueryAdapterImpl( q );
+				= new ListOfValueArraysQueryAdapter( q );
 
 		ProgressTask pt = new DisappearingProgressBarTask( overlayee, new Runnable() {
 

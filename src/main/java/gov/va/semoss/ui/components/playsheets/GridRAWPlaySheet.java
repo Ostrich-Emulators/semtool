@@ -86,8 +86,8 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	private static final Logger log = Logger.getLogger( GridPlaySheet.class );
 	private final ValueTableModel model;
 	private final JTable table;
-	private final SaveGridAction save = new SaveGridAction( true );
-	private final SaveAsGridAction saveas = new SaveAsGridAction( false );
+	private final SaveGridAction save = new SaveGridAction( false );
+	private final SaveAsGridAction saveas = new SaveAsGridAction( true );
 	private final SaveAllGridAction saveall = new SaveAllGridAction();
 	private final JLabel searchlabel = new JLabel( "Search" );
 	private final JTextField searchfield = new JTextField();

@@ -1,8 +1,8 @@
 package gov.va.semoss.ui.helpers;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
+import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -22,8 +22,9 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.RepositoryException;
 
 /**
  * Contains a static method to build selected parameter values into a non-legacy
@@ -165,38 +166,23 @@ public class NonLegacyQueryBuilder {
 				//Check if URI is used in param filler:
 				if ( type.startsWith( "http://" ) ) {
 					//Use the type query defined on RDF Map, unless an external query has been defined:
-					String sparqlQuery = DIHelper.getInstance().getProperty( "TYPE_" + Constants.QUERY );
+					String sparqlQuery 
+							= DIHelper.getInstance().getProperty( "TYPE_" + Constants.QUERY );
 
 					Map<String, String> paramTable = new HashMap<>();
 					paramTable.put( Constants.ENTITY, type );
 					sparqlQuery = extQuery == null
 							? Utility.fillParam( sparqlQuery, paramTable ) : extQuery;
 
-					//Add a line of namespace prefixes to the top of the query for processing:
-					sparqlQuery = AbstractSesameEngine.processNamespaces( sparqlQuery, new HashMap<>() );
-
-					//Fetch all of the URIs (and perhaps associated labels) from the query:
-					TupleQueryResult result = (TupleQueryResult) eng.execSelectQuery( sparqlQuery );
 					Map<URI, String> mapURI_Labels = new HashMap<>();
 					try {
-						List<String> varNames = result.getBindingNames();
-						while ( result.hasNext() ) {
-							BindingSet element = result.next();
-							URI uri = (URI) element.getValue( varNames.get( 0 ) );
-
-							if ( varNames.size() == 2 ) {
-								String label = element.getValue( varNames.get( 1 ) ).stringValue();
-								mapURI_Labels.put( uri, label );
-							}
-							else {
-								mapURI_Labels.put( uri, "" );
-							}
-						}
+						List<URI> uris = eng.query( OneVarListQueryAdapter.getUriList( sparqlQuery ) );
+						mapURI_Labels.putAll( Utility.getInstanceLabels( uris, eng ) );
+						logger.debug( "URIs: " + mapURI_Labels );
 					}
-					catch ( QueryEvaluationException e ) {
+					catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 						logger.error( e, e );
 					}
-					logger.debug( "URIs: " + mapURI_Labels );
 
 					//Set return value:
 					if ( mapURI_Labels.isEmpty() ) {
