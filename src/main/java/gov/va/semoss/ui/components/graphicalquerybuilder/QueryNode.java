@@ -6,8 +6,11 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.NodeBase;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
+
 import java.awt.Shape;
+
 import org.openrdf.model.URI;
 
 /**
@@ -27,7 +30,7 @@ public class QueryNode extends AbstractQueryNodeEdgeBase implements NodeBase {
 		super( id, type, label );
 
 		if ( null != type ) {
-			setColor( TypeColorShapeTable.getInstance().getColor( type ) );
+			setColor( GraphColorRepository.instance().getColor( type ).color );
 			setShape( TypeColorShapeTable.getInstance().getShape( type ) );
 		}
 	}

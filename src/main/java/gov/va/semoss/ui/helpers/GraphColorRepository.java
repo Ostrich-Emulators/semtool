@@ -54,7 +54,7 @@ public class GraphColorRepository extends AbstractColorRepository {
 			color =  vertexColorGenerator.nextNamedColor();
 		}
 		else if (vertexColorHash.containsKey(typeURI)){
-			vertexColorHash.get(typeURI);
+			color = vertexColorHash.get(typeURI);
 		}
 		else {
 			color = vertexColorGenerator.nextNamedColor();

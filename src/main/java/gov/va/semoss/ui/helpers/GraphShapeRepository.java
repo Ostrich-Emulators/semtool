@@ -2,6 +2,7 @@ package gov.va.semoss.ui.helpers;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.DIHelper;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -70,9 +71,18 @@ public class GraphShapeRepository {
 	}
 	
 	public SEMOSSVertexShape getShape(URI typeURI){
-		System.out.println("Attempting to set shape using getShape()");
+		// next check if it is specified in the properties file
+		System.out.println("Producing shape.");
 		SEMOSSVertexShape newShape = null;
-		if (typeURI == null){
+		try {
+		String shapeStringSetInRDF_MapPropFile
+		= DIHelper.getInstance().getProperty( typeURI.getLocalName() + "_SHAPE" );
+		if ( shapeStringSetInRDF_MapPropFile != null
+				&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
+			Shape shape = DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
+			newShape = new SEMOSSVertexShape(shapeStringSetInRDF_MapPropFile, shape);shape = shape;
+		}
+		else if (typeURI == null){
 			newShape = shapeGenerator.nextShape();
 		}
 		else if (vertexShapeHash.containsKey(typeURI)){
@@ -89,6 +99,10 @@ public class GraphShapeRepository {
 		}
 		if (newShape == null){
 			System.out.println("Shape is null!!!");
+		}
+		}
+		catch (Exception e){
+			e.printStackTrace();
 		}
 		return newShape;
 	}

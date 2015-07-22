@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.openrdf.model.URI;
 
 /**
@@ -159,23 +160,9 @@ public class TypeColorShapeTable {
 		colorStringHash.put( key, colorString );
 	}
 
-	/**
-	 * Method setColor. Setes the color for a vertex
-	 *
-	 * @param colorString String - the color itself
-	 * @param SEMOSSVertex vertex - the vertex whose color we are setting
-	 */
-	public boolean setColor( String colorString, SEMOSSVertex vertex ) {
-		if ( colorString != null ) {
-			addColorToHashes( vertex.getType(), colorString );
-		}
-		vertex.setColor( colorHash.get( vertex.getType() ) );
-		vertex.setColorString( colorStringHash.get( vertex.getType() ) );
-		return true;
-	}
-
 	public Shape getShape( URI type ) {
 		//first check to see if we've seen this type before
+
 		if ( shapeHash.containsKey( type ) ) {
 			return shapeHash.get( type );
 		}
@@ -187,45 +174,20 @@ public class TypeColorShapeTable {
 				&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
 			return DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
 		}
-
 		// if the shape hasn't been set yet, use the first shape not yet in use
 		for ( String shapeString : shapes ) {
 			if ( !shapeStringHash.containsValue( shapeString ) ) {
+				
 				return DIHelper.getShape( shapeString );
 			}
 		}
-
+		
 		//if all of the shapes have already been used, just grab a random shape
 		List<String> strings = new ArrayList<>( shapeStringHash.values() );
 		Collections.shuffle( strings );
 		return DIHelper.getShape( strings.get( 0 ) );
+	
 	}
 
-	public Color getColor( URI type ) {
-		// first check if we've seen the type before
-		if ( colorHash.containsKey( type ) ) {
-			return colorHash.get( type );
-		}
 
-		// try to search the properties file for the first time
-		String colorStringSetInRDF_MapPropFile
-				= DIHelper.getInstance().getProperty( type.getLocalName() + "_COLOR" );
-		if ( colorStringSetInRDF_MapPropFile != null ) {
-			Color col = DIHelper.getColor( colorStringSetInRDF_MapPropFile );
-			colorHash.put( type, col );
-			return col;
-		}
-
-		//find the first color that hasn't been used yet
-		for ( String colorString : colors ) {
-			if ( !colorStringHash.containsValue( colorString ) ) {
-				return DIHelper.getColor( colorString );
-			}
-		}
-
-		//if all of the colors have already been used, just grab a random color
-		List<String> cols = new ArrayList<>( colorStringHash.values() );
-		Collections.shuffle( cols );
-		return DIHelper.getColor( cols.get( 0 ) );
-	}
 }
