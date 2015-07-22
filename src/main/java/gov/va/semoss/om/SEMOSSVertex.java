@@ -20,6 +20,7 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Constants;
 
@@ -48,7 +49,7 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 
 		if ( null != type ) {
 			setColor( GraphColorRepository.instance().getColor(type).color );
-			setShape( TypeColorShapeTable.getInstance().getShape( type ) );
+			setShape( GraphShapeRepository.instance().getShape(type).shape );
 		}
 	}
 
@@ -58,7 +59,12 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor(GraphColorRepository.instance().getColor(typeURI).color);
-			setShape( TypeColorShapeTable.getInstance().getShape( getType() ) );
+			try {
+				setShape( GraphShapeRepository.instance().getShape(getType()).shape );
+			}
+			catch(Exception e){
+				System.out.println();
+			}
 		}
 	}
 

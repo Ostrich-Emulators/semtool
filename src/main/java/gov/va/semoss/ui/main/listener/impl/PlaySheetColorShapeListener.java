@@ -24,6 +24,8 @@ import gov.va.semoss.ui.components.renderers.ColorRenderer;
 import gov.va.semoss.ui.components.renderers.ShapeRenderer;
 import gov.va.semoss.ui.components.renderers.TableColorRenderer;
 import gov.va.semoss.ui.components.renderers.TableShapeRenderer;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -56,12 +58,12 @@ public class PlaySheetColorShapeListener implements InternalFrameListener {
 		colorShapeTable.setModel( ps.getColorShapeData() );
 		TableColumnModel tcm = colorShapeTable.getColumnModel();
 
-		JComboBox<String> shapes = new JComboBox<>( TypeColorShapeTable.getAllShapes() );
+		JComboBox<String> shapes = new JComboBox<>( GraphShapeRepository.instance().getAllShapeNames() );
 		shapes.setRenderer( new ShapeRenderer() );
 		tcm.getColumn( 2 ).setCellRenderer( new TableShapeRenderer() );
 		tcm.getColumn( 2 ).setCellEditor( new DefaultCellEditor( shapes ) );
 
-		JComboBox<String> colors = new JComboBox<>( TypeColorShapeTable.getAllColors() );
+		JComboBox<String> colors = new JComboBox<>(  GraphColorRepository.instance().getAllColorNames() );
 		colors.setRenderer( new ColorRenderer() );
 		tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
 		tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );

@@ -62,6 +62,13 @@ public class GraphColorRepository extends AbstractColorRepository {
 		}
 		return color;
 	}
+	 
+	public void clearAll(){
+		vertexColorHash.clear();
+		edgeColorHash.clear();
+		vertexColorGenerator = new ColorGenerator();
+		edgeColorGenerator = new ColorGenerator();
+	}
 	
 	/**
 	 * Method setColor. Setes the color for a vertex

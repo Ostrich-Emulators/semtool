@@ -29,6 +29,7 @@ import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
@@ -207,8 +208,8 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 							button.setActionCommand( en.getKey().stringValue() );
 							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
-							v.setColor( GraphColorRepository.instance().getColor( en.getKey() ).color );
-							v.setShape( TypeColorShapeTable.getInstance().getShape( en.getKey() ) );
+							v.setColor( GraphColorRepository.instance().getColor( en.getKey()).color );
+							v.setShape( GraphShapeRepository.instance().getShape(en.getKey()).shape );
 							
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
 									new Dimension( 12, 12 ) ) );

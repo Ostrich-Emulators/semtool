@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.renderers;
 
 import gov.va.semoss.util.DIHelper;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -13,8 +14,10 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -36,13 +39,17 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent( JTable t, Object val,
 			boolean sel, boolean focus, int r, int c ) {
-
-		String valstr = val.toString();
-		Color color = ( valstr.isEmpty() ? t.getBackground()
-				: DIHelper.getColor( valstr ) );
-		Component cmp = super.getTableCellRendererComponent( t, val, sel, focus, r, c );
-		colorify( this, color );
-
+		JComponent cmp = null;
+		if (val != null){
+			String valstr = val.toString();
+			Color color = ( valstr.isEmpty() ? t.getBackground()
+					: DIHelper.getColor( valstr ) );
+			cmp = (JComponent)super.getTableCellRendererComponent( t, val, sel, focus, r, c );
+			colorify( this, color );
+		}
+		else {
+			cmp = (JComponent)super.getTableCellRendererComponent( t, val, sel, focus, r, c );
+		}
 		return cmp;
 	}
 

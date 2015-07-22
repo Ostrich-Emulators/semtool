@@ -23,14 +23,19 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object val,
 			boolean isSelected, boolean hasFocus, int row, int column ) {
-
-		String valstr = val.toString();
-		Shape s = ( valstr.isEmpty() ? null
-				: DIHelper.getShape( valstr + Constants.LEGEND ) );
-		Component c = super.getTableCellRendererComponent( table, val, isSelected,
-				hasFocus, row, column );
-		shapeify( this, s, new Dimension( 16, 16 ) );
-
+		Component c = null;
+		if (val != null){
+			String valstr = val.toString();
+			Shape s = ( valstr.isEmpty() ? null
+					: DIHelper.getShape( valstr + Constants.LEGEND ) );
+			c = super.getTableCellRendererComponent( table, val, isSelected,
+					hasFocus, row, column );
+			shapeify( this, s, new Dimension( 16, 16 ) );
+		}
+		else {
+			c = super.getTableCellRendererComponent( table, val, isSelected,
+					hasFocus, row, column );
+		}
 		return c;
 	}
 

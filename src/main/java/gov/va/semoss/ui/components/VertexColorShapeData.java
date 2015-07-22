@@ -26,6 +26,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Utility;
 
@@ -172,9 +173,8 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 		if ( row < 0 ) {
 			return;
 		}
-
 		data.get( row ).shape = shape;
-		TypeColorShapeTable.getInstance().setShape( shape, vertex );
+		GraphShapeRepository.instance().setShape(shape, vertex);
 	}
 
 	public void setColors( Collection<SEMOSSVertex> nodes, String color ) {

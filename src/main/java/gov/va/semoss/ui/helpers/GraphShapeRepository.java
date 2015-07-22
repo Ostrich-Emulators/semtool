@@ -23,7 +23,7 @@ public class GraphShapeRepository {
 	
 	private final Map<SEMOSSVertexShape, SEMOSSVertexShape> vertexShapeLegendHash = new HashMap<SEMOSSVertexShape, SEMOSSVertexShape>();
 	
-	private final ShapeGenerator shapeGenerator = new ShapeGenerator();
+	private ShapeGenerator shapeGenerator = new ShapeGenerator();
 	
 	// Do we still need a hash that correlates Vertex-type-URI to a shape string, rather than a shape?
 
@@ -72,34 +72,30 @@ public class GraphShapeRepository {
 	
 	public SEMOSSVertexShape getShape(URI typeURI){
 		// next check if it is specified in the properties file
-		System.out.println("Producing shape.");
 		SEMOSSVertexShape newShape = null;
 		try {
-		String shapeStringSetInRDF_MapPropFile
-		= DIHelper.getInstance().getProperty( typeURI.getLocalName() + "_SHAPE" );
-		if ( shapeStringSetInRDF_MapPropFile != null
-				&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
-			Shape shape = DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
-			newShape = new SEMOSSVertexShape(shapeStringSetInRDF_MapPropFile, shape);shape = shape;
-		}
-		else if (typeURI == null){
-			newShape = shapeGenerator.nextShape();
-		}
-		else if (vertexShapeHash.containsKey(typeURI)){
-			newShape = vertexShapeHash.get(typeURI);
-		}
-		else {
-			newShape = shapeGenerator.nextShape();
-			if (newShape == null){
-				logger.warn("Warning - Derived shape was null for vertex: " + typeURI.toString());
+			String shapeStringSetInRDF_MapPropFile
+				= DIHelper.getInstance().getProperty( typeURI.getLocalName() + "_SHAPE" );
+			if ( shapeStringSetInRDF_MapPropFile != null
+					&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
+				Shape shape = DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
+				newShape = new SEMOSSVertexShape(shapeStringSetInRDF_MapPropFile, shape);shape = shape;
+			}
+			else if (typeURI == null){
+				newShape = shapeGenerator.nextShape();
+			}
+			else if (vertexShapeHash.containsKey(typeURI)){
+				newShape = vertexShapeHash.get(typeURI);
 			}
 			else {
-				vertexShapeHash.put(typeURI, newShape);
+				newShape = shapeGenerator.nextShape();
+				if (newShape == null){
+					logger.warn("Warning - Derived shape was null for vertex: " + typeURI.toString());
+				}
+				else {
+					vertexShapeHash.put(typeURI, newShape);
+				}
 			}
-		}
-		if (newShape == null){
-			System.out.println("Shape is null!!!");
-		}
 		}
 		catch (Exception e){
 			e.printStackTrace();
@@ -113,6 +109,7 @@ public class GraphShapeRepository {
 	
 	public void clearAll(){
 		vertexShapeHash.clear();
+		shapeGenerator = new ShapeGenerator();
 	}
 	
 	public String[] getAllShapeNames(){
@@ -125,7 +122,7 @@ public class GraphShapeRepository {
 	
 	private class ShapeGenerator {
 
-		private HashMap<String, SEMOSSVertexShape> shapes = null;
+		private HashMap<String, SEMOSSVertexShape> shapes = new HashMap<String, SEMOSSVertexShape>();
 		
 		private static final int UP_TRIANGLE_ORIGIN = 6;
 		
