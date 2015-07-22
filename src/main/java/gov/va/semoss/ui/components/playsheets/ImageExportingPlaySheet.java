@@ -57,6 +57,10 @@ public abstract class ImageExportingPlaySheet extends PlaySheetCentralComponent 
 			boolean ispdf = PDF.equals( getValue( Action.SHORT_DESCRIPTION ) );
 			String sfx = ( ispdf ? ".pdf" : ".png" );
 			File output = getExportFileLocation( ImageExportingPlaySheet.this, sfx );
+			if( null == output ){
+				return;
+			}
+			
 			Exception exceptions[] = { null };
 
 			ProgressTask pt = new ProgressTask( "Exporting " + getTitle(), new Runnable() {

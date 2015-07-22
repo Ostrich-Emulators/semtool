@@ -621,6 +621,12 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 			Transcoder transcoder = new PNGTranscoder();
 			// transcoder.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
 
+			
+			if( log.isDebugEnabled() ){
+				File errsvg = new File( FileUtils.getTempDirectory(), "dendrogram.svg" );
+				FileUtils.write( errsvg, svgdoc.asXML() );
+			}
+			
 			transcoder.transcode( inputSvg, outputPng );
 			baos.flush();
 			baos.close();
@@ -628,16 +634,17 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
 		}
 		catch ( InvalidXPathException | DocumentException | TranscoderException e ) {
-			String msg;
-			try {
-				File errsvg = new File( FileUtils.getTempDirectory(), "dendrogram.svg" );
-				FileUtils.write( errsvg, svgdoc.asXML() );
-				msg = "Could not create the image. SVG data store here: "
-						+ errsvg.getAbsolutePath();
-			}
-			catch ( IOException ex ) {
-				// don't care
-				msg = "Problem creating image";
+			String msg = "Problem creating image";
+			if ( null != svgdoc ) {
+				try {
+					File errsvg = new File( FileUtils.getTempDirectory(), "dendrogram.svg" );
+					FileUtils.write( errsvg, svgdoc.asXML() );
+					msg = "Could not create the image. SVG data store here: "
+							+ errsvg.getAbsolutePath();
+				}
+				catch ( IOException ex ) {
+					// don't care
+				}
 			}
 			throw new IOException( msg, e );
 		}
