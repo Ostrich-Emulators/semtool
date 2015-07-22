@@ -12,42 +12,53 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
+/**
+ * The Graph Shape Repository is responsible for serving as a single point 
+ * of storage and retrieval for Shapes throughout the SEMOSS system (shapes
+ * in graphs and in graph-legends, such as lists and combo-boxes).
+ * @author Wayne Warren
+ *
+ */
 public class GraphShapeRepository {
-
+	/** A hash which tracks URIs that have been assigned shapes, so that we can consistently assign shapes 
+	 * through recall */
 	private final Map<URI, SEMOSSVertexShape> vertexShapeHash = new HashMap<URI, SEMOSSVertexShape>();
-	
+	/** A lookup for legend shapes, with actual shapes as keys and their corresponding legend shapes as values */
 	private final Map<SEMOSSVertexShape, SEMOSSVertexShape> vertexShapeLegendHash = new HashMap<SEMOSSVertexShape, SEMOSSVertexShape>();
-	
+	/** The utility class instance responsible for shape generation */
 	private ShapeGenerator shapeGenerator = new ShapeGenerator();
-	
-	// Do we still need a hash that correlates Vertex-type-URI to a shape string, rather than a shape?
-
+	/** The singleton instance of this class */
 	private static GraphShapeRepository instance = null;
-	
+	/** The logger that this class will use*/
 	private final Logger logger = Logger.getLogger(GraphShapeRepository.class);
 	
+	/**
+	 * Default constructor
+	 */
 	private GraphShapeRepository(){
 		
 	}
 	
+	/**
+	 * Singleton access method
+	 * @return The singleton instance
+	 */
 	public static GraphShapeRepository instance(){
 		if (instance == null){
 			instance = new GraphShapeRepository();
 		}
 		return instance;
 	}
-	
+
 	/**
-	 * 
-	 *
-	 * @param vertex SEMOSSVertex - The type of the vertex (serves as a key in the
-	 * hashtable)
-	 * @param shapeString String the shape itself.
+	 * Sets the shape for the supplied vertex
+	 * @param shapeString The name/handle of the shape, from that Constants class
+	 * @param vertex The vertex to which the shape will be assigned
+	 * @return True if the assignment was successful, false otherwise
 	 */
 	public boolean setShape( String shapeString, SEMOSSVertex vertex ) {
 		SEMOSSVertexShape shape = null;
@@ -65,61 +76,126 @@ public class GraphShapeRepository {
 		return true;
 	}
 	
+	/**
+	 * Get an appropriate shape for the supplied vertex
+	 * @param vertex The vertex to which the requested shape is correlated
+	 * @return The correlated shape, or a new shape if no correlation exists
+	 */
 	public SEMOSSVertexShape getShape(SEMOSSVertex vertex){
 		URI typeURI =vertex.getType(); 
 		return getShape(typeURI);
 	}
 	
+	/**
+	 * Retrieve a shape by handle/key
+	 * @param name The name of the shape (from the Constants class)
+	 * @return The shape identified by the supplied name, null otherwise
+	 */
+	public SEMOSSVertexShape getShapeByName(String name){
+		SEMOSSVertexShape shape = shapeGenerator.getNamedShape(name);
+		if (shape == null){
+			logger.warn("Shape was not found using key = " + name);
+		}
+		return shape;
+	}
+	
+	/**
+	 * Get a legend shape by name
+	 * @param name The legend shape's handle/key
+	 * @return The legend shape
+	 */
+	public SEMOSSVertexShape getLegendShapeByName(String name){
+		String nonLegendName = name.replace(Constants.LEGEND, "");
+		SEMOSSVertexShape svshape = this.getShapeByName(nonLegendName);
+		SEMOSSVertexShape legendShape = this.getLegendShape(svshape);
+		if (legendShape == null){
+			logger.warn("Legend shape was not found using key = " + name);
+		}
+		return legendShape;
+	}
+	
+	/**
+	 * Get the shape appropriate for the supplied "type" URI
+	 * @param typeURI The resource URI representing the "type" of a Vertex
+	 * @return An appropriate shape
+	 */
 	public SEMOSSVertexShape getShape(URI typeURI){
 		// next check if it is specified in the properties file
 		SEMOSSVertexShape newShape = null;
-		try {
+		if (typeURI == null){
+			newShape = shapeGenerator.nextShape();
+			
+			if (newShape == null){
+				logger.warn("Warning - Derived shape without type URI was null.");
+			}
+		}
+		else {
 			String shapeStringSetInRDF_MapPropFile
 				= DIHelper.getInstance().getProperty( typeURI.getLocalName() + "_SHAPE" );
-			if ( shapeStringSetInRDF_MapPropFile != null
-					&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
-				Shape shape = DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
-				newShape = new SEMOSSVertexShape(shapeStringSetInRDF_MapPropFile, shape);shape = shape;
-			}
-			else if (typeURI == null){
-				newShape = shapeGenerator.nextShape();
+			// This is the last surviving call to DIHelper in the shape/color area, 
+			// mostly because a full analysis hasn't been completed regarding what this 
+			// properties-style lookup might entail
+			Shape retrievedShape = DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
+			if ( shapeStringSetInRDF_MapPropFile != null && retrievedShape != null ) {
+				newShape = new SEMOSSVertexShape(shapeStringSetInRDF_MapPropFile, retrievedShape);
 			}
 			else if (vertexShapeHash.containsKey(typeURI)){
 				newShape = vertexShapeHash.get(typeURI);
 			}
 			else {
 				newShape = shapeGenerator.nextShape();
-				if (newShape == null){
-					logger.warn("Warning - Derived shape was null for vertex: " + typeURI.toString());
-				}
-				else {
-					vertexShapeHash.put(typeURI, newShape);
-				}
+				vertexShapeHash.put(typeURI, newShape);
 			}
-		}
-		catch (Exception e){
-			e.printStackTrace();
+			
+			if (newShape == null){
+				logger.warn("Warning - Derived shape was null: " + typeURI.toString());
+			}
 		}
 		return newShape;
 	}
 	
+	/**
+	 * Get the correlated Legend shape for a particular shape
+	 * @param svshape The shape to which the legend shape is correlated
+	 * @return The associated legend shape, null if it is not found
+	 */
 	public SEMOSSVertexShape getLegendShape(SEMOSSVertexShape svshape){
-		return this.shapeGenerator.getLegendShape(svshape.shape);
+		SEMOSSVertexShape legendShape = this.shapeGenerator.getLegendShape(svshape.shape);
+		if (legendShape == null){
+			logger.warn("Warning - Requested legend shape not found for shape: " + svshape.name);
+		}
+		return legendShape;
 	}
 	
+	/**
+	 * Clears all initialized shape data
+	 */
 	public void clearAll(){
 		vertexShapeHash.clear();
 		shapeGenerator = new ShapeGenerator();
 	}
 	
+	/**
+	 * Get all shape names in the system
+	 * @return A list of the keys/handles of the shapes
+	 */
 	public String[] getAllShapeNames(){
 		return shapeGenerator.shapeNames;
 	}
 	
+	/**
+	 * Get a set of all Shapes used in this system
+	 * @return An array of keys/handles, used to identify the shapes
+	 */
 	public Shape[] getAllShapes(){
 		return shapeGenerator.getAllShapes();
 	}
 	
+	/**
+	 * 
+	 * @author Wayne Warren
+	 *
+	 */
 	private class ShapeGenerator {
 
 		private HashMap<String, SEMOSSVertexShape> shapes = new HashMap<String, SEMOSSVertexShape>();
