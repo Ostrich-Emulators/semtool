@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.AbstractButton;
@@ -74,7 +73,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 				? explode( val ) : Arrays.asList( val ) );
 
 		ConstraintValueSet values = new ConstraintValueSet( included, property,
-				( newvals.size() > 1 ? JoinType.OR : JoinType.SINGLE ) );
+				( newvals.size() > 1 ? JoinType.OR : JoinType.SINGLE ), val );
 
 		for ( String v : newvals ) {
 			values.add( ( XMLSchema.ANYURI == type
@@ -513,20 +512,33 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		public final boolean included;
 		public final URI property;
 		public final JoinType joiner;
+		public final String raw;
 
-		public ConstraintValueSet( boolean included, URI property, JoinType joiner ) {
+		public ConstraintValueSet( boolean included, URI property, JoinType joiner,
+				String raw ) {
 			this.included = included;
 			this.property = property;
 			this.joiner = joiner;
+			this.raw = raw;
+		}
+
+		public ConstraintValueSet( boolean included, URI property, JoinType joiner ) {
+			this( included, property, joiner, null );
 		}
 
 		public ConstraintValueSet( boolean included, URI property, JoinType joiner,
-				Collection<Value> vals ) {
-			this( included, property, joiner );
-			//addAll( vals );
+				Collection<Value> vals, String raw ) {
+			this( included, property, joiner, raw );
+			addAll( vals );
 		}
 
-		public Set<ConstraintValue> asConstraintValues() {
+		/**
+		 * Presents the data of this set as a list of
+		 * {@link ConstraintValue ConstraintValues}
+		 *
+		 * @return
+		 */
+		public Set<ConstraintValue> asCVs() {
 			Set<ConstraintValue> ret = new HashSet<>();
 			Iterator<Value> it = this.iterator();
 			while ( it.hasNext() ) {
@@ -535,9 +547,15 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			return ret;
 		}
 
+		/**
+		 * Gets the first value as a {@link ConstraintValue}, or null if we have no
+		 * values
+		 *
+		 * @return the first value as a ConstraintValue or null if we have no values
+		 */
 		public ConstraintValue firstCV() {
 			if ( size() > 0 ) {
-				return new ConstraintValue( this.iterator().next(), included, property );
+				return new ConstraintValue( iterator().next(), included, property );
 			}
 			return null;
 		}

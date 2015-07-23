@@ -6,12 +6,10 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
-import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValue;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +132,7 @@ public class OneVariableDialogItem extends AbstractAction {
 			currvals.addAll( values );
 			node.setProperties( values.property, currvals );
 			node.setSelected( values.property, values.included );
+			node.setPropertyMetadata( property, values.raw );
 			panel.update();
 		}
 	}

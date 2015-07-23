@@ -7,7 +7,6 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.ui.components.models.ValueTableModel;
-import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.MultiSetMap;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,6 +28,7 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 	private final Set<URI> selecteds = new HashSet<>();
 	private final Set<URI> optionals = new HashSet<>();
 	private final Map<URI, String> labels = new HashMap<>();
+	private final Map<URI, String> rawstrings = new HashMap<>();
 	private String queryId;
 
 	public AbstractQueryNodeEdgeBase( URI id ) {
@@ -134,9 +134,12 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 		else {
 			if ( properties.containsKey( prop ) ) {
 				properties.get( prop ).remove( v );
+				rawstrings.remove( prop );
+
 
 				if ( properties.get( prop ).isEmpty() ) {
 					properties.remove( prop );
+					rawstrings.remove( prop );
 				}
 			}
 		}
@@ -145,12 +148,14 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 	@Override
 	public void setProperties( URI prop, Collection<Value> vals ) {
 		properties.remove( prop );
+		rawstrings.remove( prop );
 		properties.addAll( prop, vals );
 	}
 
 	@Override
 	public void setValue( URI prop, Value val ) {
 		properties.remove( prop );
+		rawstrings.remove( prop );
 		properties.add( prop, val );
 	}
 
@@ -187,5 +192,13 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 	@Override
 	public boolean hasProperty( URI prop ) {
 		return properties.containsKey( prop );
+	}
+	
+	public void setPropertyMetadata( URI prop, String str ){
+		rawstrings.put( prop, str );
+	}
+
+	public String getPropertyMetadata( URI prop ){
+		return rawstrings.get( prop );
 	}
 }
