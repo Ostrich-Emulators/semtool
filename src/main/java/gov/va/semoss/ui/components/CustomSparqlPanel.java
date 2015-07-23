@@ -14,7 +14,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -22,7 +21,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
@@ -376,112 +374,56 @@ public class CustomSparqlPanel extends JPanel {
 		};
 	}
 
-	/**
-	 * Displays a warning dialog to the user, indicating that the attempted
-	 * database-update query cannot be undone by a simple keystroke, and offers an
-	 * option to cancel out.
-	 *
-	 * @return showWarning -- (int) Corresponds to the "JOptionPane.YES_OPTION" or
-	 * the "JOptionPane.NO_OPTION".
-	 */
-	private boolean okToUpdate() {
-		Object[] buttons = { "Continue", "Cancel" };
-		int response = JOptionPane.showOptionDialog( null,
-				"The update query you are about to run \ncannot be undone.  Would you like to continue?",
-				"Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, buttons, buttons[1] );
-		return ( JOptionPane.YES_OPTION == response );
-	}
-
-	private class SubmitAction extends AbstractAction {
+	private class SubmitAction extends ExecuteQueryProcessor {
 
 		public SubmitAction() {
 			super( "Submit Query" );
 		}
 
 		@Override
-		public void actionPerformed( ActionEvent e ) {
-			//Open the "Display Pane": 
-			PlayPane.rightTabs.setSelectedIndex( 0 );
-
-			String playSheetString = playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
-			//Store the currently selected playsheet with the currently
-			//selected query tab:
+		protected void prepare( ActionEvent ae ) {
+			String playSheetString
+					= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
 			sparqlArea.setTagOfSelectedTab( playSheetString );
-			boolean appending = appendSparqlQueryChkBox.isSelected();
+		}
 
-			ExecuteQueryProcessor exQueryProcessor = new ExecuteQueryProcessor();
-			exQueryProcessor.setAppendBoolean( appending );
+		@Override
+		protected String getTitle() {
+			return sparqlArea.getTitleAt( sparqlArea.getSelectedIndex() );
+		}
 
-			//Setup playsheet, exQueryProcessor will also take care of append or create query: 
-			String query = sparqlArea.getTextOfSelectedTab();
+		@Override
+		protected String getQuery() {
+			return sparqlArea.getTextOfSelectedTab();
+		}
 
-			IEngine eng = DIHelper.getInstance().getRdfEngine();
-
-			if ( playSheetString.equals( "Update Query" ) ) {
-				if ( okToUpdate() ) {
-					// this is an update query
-					ProgressTask pt = new ProgressTask( "Executing Update", new Runnable() {
-
-						@Override
-						public void run() {
-							exQueryProcessor.processCustomQuery( query, playSheetString, appending );
-						}
-					} );
-
-					OperationsProgress op = OperationsProgress.getInstance( PlayPane.UIPROGRESS );
-					op.add( pt );
-				}
+		@Override
+		protected Class<? extends PlaySheetCentralComponent> getPlaySheetCentralComponent()
+				throws ClassNotFoundException {
+			String playSheetString
+					= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
+			if ( "Update Query".equalsIgnoreCase( playSheetString ) ) {
+				return null;
 			}
 			else {
-				// run a regular query
-				JDesktopPane pane = DIHelper.getInstance().getDesktop();
-				String tabTitle = sparqlArea.getTitleAt( sparqlArea.getSelectedIndex() );
+				String classname = PlaySheetEnum.getClassFromName( playSheetString );
+				Class<?> k = Class.forName( classname );
 
-				try {
-					String classname = PlaySheetEnum.getClassFromName( playSheetString );
-					Class<?> k = Class.forName( classname );
-					if ( PlaySheetCentralComponent.class.isAssignableFrom( k ) ) {
-						doitNewSkool( classname, query, eng, appending, pane, tabTitle );
-					}
+				if ( !PlaySheetCentralComponent.class.isAssignableFrom( k ) ) {
+					throw new ClassNotFoundException( "This playsheet is not supported/has not been updated" );
 				}
-				catch ( ClassNotFoundException ex ) {
-					// don't care
-					logger.error( ex, ex );
-				}
+				return (Class<PlaySheetCentralComponent>) k;
 			}
 		}
 
-		private void doitNewSkool( String output, String query, IEngine eng,
-				boolean appending, JDesktopPane pane, String title ) {
+		@Override
+		protected IEngine getEngine() {
+			return DIHelper.getInstance().getRdfEngine();
+		}
 
-			ProgressTask pt = null;
-			if ( appending ) {
-				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
-
-				pt = psf.getOverlayTask( query, title, title );
-			}
-			else {
-				PlaySheetCentralComponent pscc = null;
-				try {
-					Object o = Class.forName( output ).newInstance();
-					pscc = PlaySheetCentralComponent.class.cast( o );
-				}
-				catch ( ClassNotFoundException | InstantiationException | IllegalAccessException e ) {
-					throw new IllegalArgumentException( output
-							+ " not yet updated to the new handling", e );
-				}
-				PlaySheetFrame psf = new PlaySheetFrame( eng );
-				pscc.setTitle( title );
-				psf.addTab( title, pscc );
-
-				psf.setTitle( title );
-				DIHelper.getInstance().getDesktop().add( psf );
-
-				pt = psf.getCreateTask( query );
-			}
-
-			OperationsProgress op = OperationsProgress.getInstance( PlayPane.UIPROGRESS );
-			op.add( pt );
+		@Override
+		protected boolean isAppending() {
+			return appendSparqlQueryChkBox.isSelected();
 		}
 	}
 }

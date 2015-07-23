@@ -193,8 +193,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	@Override
-	public ProgressTask getOverlayTask( String query, String titleIfNeeded,
-			String tabTitleIfNeeded ) {
+	public ProgressTask getOverlayTask( String query, String titleIfNeeded ) {
 		return getLoadingTask();
 	}
 
