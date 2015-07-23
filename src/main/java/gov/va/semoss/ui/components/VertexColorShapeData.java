@@ -77,7 +77,7 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 
 			for ( SEMOSSVertex vertex : entry.getValue() ) {
 				data.add( new ColorShapeRow( null, vertex.getLabel(),
-						vertex.getShapeString(), vertex.getColorString() ) );
+						GraphShapeRepository.instance().getShapeName(vertex.getShape()), GraphColorRepository.instance().getColorName(vertex.getColor()) ) );
 			}
 		}
 

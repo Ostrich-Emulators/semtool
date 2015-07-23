@@ -71,7 +71,6 @@ public class GraphShapeRepository {
 		SEMOSSVertexShape legendShape = vertexShapeLegendHash.get(shape);
 		vertex.setShape( shape.shape );
 		vertex.setShapeLegend( legendShape.shape );
-		vertex.setShapeString( shape.name );
 		
 		return true;
 	}
@@ -192,6 +191,26 @@ public class GraphShapeRepository {
 	}
 	
 	/**
+	 * Get a name/tag/key of a shape based on its geometric - uses the
+	 * equals() method in the lookup iteration
+	 * @param shape The shape for which we need a name/key
+	 * @return The name, or null if no equivalent shape is found
+	 */
+	public String getShapeName(Shape shape) {
+		String shapeName = null;
+		SEMOSSVertexShape[] shapes = this.shapeGenerator.getAllShapesWithMetadata();
+		for (SEMOSSVertexShape candidate : shapes){
+			if (candidate.shape.equals(shape)){
+				shapeName = candidate.name;
+			}
+		}
+		if (shapeName == null){
+			logger.warn("Unable to find shape's name.");
+		}
+		return shapeName;
+	}
+	
+	/**
 	 * The Shape Generator class is responsible for producing the shapes that 
 	 * serve as visual metaphors for the Vertices in a graph
 	 * @author Wayne Warren
@@ -309,6 +328,17 @@ public class GraphShapeRepository {
 				array[counter] = svshape.shape;
 				counter++;
 			}
+			return array;
+		}
+		
+		/**
+		 * Get all of the Shapes (with names as attributes) which are prescribed within this generator
+		 * @return An array composed of each shape
+		 */
+		public SEMOSSVertexShape[] getAllShapesWithMetadata(){
+			Collection<SEMOSSVertexShape> collection = shapes.values();
+			SEMOSSVertexShape[] array = new SEMOSSVertexShape[collection.size()];
+			collection.toArray(array);
 			return array;
 		}
 		
@@ -487,6 +517,8 @@ public class GraphShapeRepository {
 			p0.closePath();
 			return p0;
 		}
+		
+	
 	}
 	
 	/**
@@ -530,5 +562,7 @@ public class GraphShapeRepository {
 			}
 		}
 		
-	}	
+	}
+
+
 }

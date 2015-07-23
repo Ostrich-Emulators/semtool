@@ -3,6 +3,7 @@ package gov.va.semoss.ui.helpers;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,7 +95,6 @@ public class GraphColorRepository extends AbstractColorRepository {
 		SEMOSSVertexColor svcolor = vertexColorGenerator.getNamedColor(colorString);
 		if (svcolor != null){
 			vertex.setColor(svcolor.color );
-			vertex.setColorString( svcolor.name );
 		}
 		else {
 			logger.warn("Named color not found: " + colorString);
@@ -129,6 +129,21 @@ public class GraphColorRepository extends AbstractColorRepository {
 			edgeColorHash.put(typeURI, color);
 			return color;
 		}
+	}
+
+	/**
+	 * Get the name associated with a given color
+	 * @param color The color for which a corresponding name is needed
+	 * @return The corresponding name
+	 */
+	public String getColorName(Color color) {
+		SEMOSSVertexColor[] svcolors = this.colorGenerator.getAllNamedColors();
+		for (SEMOSSVertexColor svcolor : svcolors){
+			if (svcolor.color.equals(color)){
+				return svcolor.name;
+			}
+		}
+		return null;
 	}
 
 }
