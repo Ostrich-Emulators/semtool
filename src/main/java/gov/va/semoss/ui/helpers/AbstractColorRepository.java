@@ -10,18 +10,30 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-public class AbstractColorRepository {
-	
+/**
+ * The Abstract Color Repository provides lots of common attributes and
+ * utility functions for child implementations.
+ * @author Wayne Warren
+ */
+public abstract class AbstractColorRepository {
+	/** A listing of the standard colors provided in the system, using the tag/key from the 
+	 * Constants class as the key and the color itself as the value  */
 	private HashMap<String, Color> standardColors = new HashMap<String, Color>();
-	
+	/** The logger used to post messages */
 	protected final Logger logger = Logger.getLogger(AbstractColorRepository.class);
-	
+	/** The generator utility class that produces the colors */
 	protected final ColorGenerator colorGenerator = new ColorGenerator();
 	
-	public AbstractColorRepository(){
+	/**
+	 * Default constructor
+	 */
+	protected AbstractColorRepository(){
 		initialize();
 	}
 	
+	/**
+	 * Initialize the basic attributes of the class
+	 */
 	private void initialize(){
 		Color blue = new Color(31, 119, 180);
 		Color green = new Color(44, 160, 44);
@@ -48,28 +60,40 @@ public class AbstractColorRepository {
 		standardColors.put(Constants.TRANSPARENT, transparent);
 	}
 	
-	
+	/**
+	 * Get the color named by the given key
+	 * @param key The name of the color
+	 * @return The color
+	 */
 	public Color getColor(String key){
 		return standardColors.get(key);
 	}
 	
+	/**
+	 * Get all standard color names listed in the system
+	 * @return The color names
+	 */
 	public String[] getAllColorNames(){
 		return colorGenerator.getAllColorNames();
 	}
 	
-	
+	/**
+	 * The utility class which generates all of the colors
+	 * @author Wayne Warren
+	 *
+	 */
 	protected class ColorGenerator {
-		
+		/** The values of red that have been used by the nextRandomColor() function */
 		private HashSet<Integer> reds = new HashSet<Integer>();
-		
+		/** The values of green that have been used by the nextRandomColor() function */
 		private HashSet<Integer> greens = new HashSet<Integer>();
-		
+		/** The values of blues that have been used by the nextRandomColor() function */
 		private HashSet<Integer> blues = new HashSet<Integer>();
-		
+		/** The series of named colors available in the system */
 		private final Map<String, SEMOSSVertexColor> named_colors = new HashMap<String, SEMOSSVertexColor>();
-		
+		/** The last index used in the nextColor() call */
 		private int lastNamedIndexPicked = -1;
-		
+		/** The full complement of the named color tags in the system */
 		private String[] allColorNames = new String[]{
 				Constants.BLUE,
 				Constants.GREEN,
@@ -82,6 +106,9 @@ public class AbstractColorRepository {
 				Constants.AQUA
 		};
 		
+		/**
+		 * Default constructor
+		 */
 		public ColorGenerator(){
 			Color blue = new Color(31, 119, 180);
 			Color green = new Color(44, 160, 44);
@@ -104,6 +131,10 @@ public class AbstractColorRepository {
 			named_colors.put(Constants.AQUA, new SEMOSSVertexColor(Constants.AQUA, aqua));
 		}
 		
+		/**
+		 * Get the next random color
+		 * @return A named color
+		 */
 		public Color nextRandomColor(){
 			Integer red = new Integer(255);
 			Integer green = new Integer(255);
@@ -115,6 +146,12 @@ public class AbstractColorRepository {
 			return color;
 		}
 		
+		/**
+		 * Get the next named color, when the choices have been exhausted the
+		 * color choices will continue from the start
+		 * @param set
+		 * @return
+		 */
 		private Integer nextValue(HashSet<Integer> set){
 			Integer selectedValue = new Integer(255);
 			Integer divisor = 2;
@@ -133,7 +170,11 @@ public class AbstractColorRepository {
 			return selectedValue;
 		}
 		
-		
+		/**
+		 * Get the next named color, when the choices have been exhausted the
+		 * color choices will continue from the start
+		 * @return A named color
+		 */
 		public SEMOSSVertexColor nextNamedColor(){
 			lastNamedIndexPicked++;
 			if (lastNamedIndexPicked == allColorNames.length){
@@ -142,10 +183,23 @@ public class AbstractColorRepository {
 			return named_colors.get(allColorNames[lastNamedIndexPicked]);
 		}
 		
+		/**
+		 * Get a color represented by a given name/key
+		 * @param name The name of the color, from the Constants file
+		 * @return The color 
+		 */
 		public SEMOSSVertexColor getNamedColor(String name){
-			return named_colors.get(name);
+			SEMOSSVertexColor namedColor = named_colors.get(name);
+			if (namedColor == null){
+				logger.warn("No named color referred to by: " + name);
+			}
+			return namedColor;
 		}
 		
+		/**
+		 * Get all of the named colors in the system
+		 * @return An array of the named colors
+		 */
 		public SEMOSSVertexColor[] getAllNamedColors(){
 			Collection<SEMOSSVertexColor> collection = named_colors.values();
 			SEMOSSVertexColor[] colorArray = new SEMOSSVertexColor[collection.size()];
@@ -153,17 +207,31 @@ public class AbstractColorRepository {
 			return colorArray;
 		}
 		
+		/**
+		 * Get all color names in the system
+		 * @return An array of color names, corresponding to those in the Constants class
+		 */
 		public String[] getAllColorNames(){
 			return allColorNames;
 		}
 	}
 	
+	/**
+	 * A convenience class designed to contain a color as well as its name
+	 * @author Wayne Warren
+	 *
+	 */
 	public class SEMOSSVertexColor {
-		
+		/** The name of the color */
 		public final String name;
-		
+		/** The color */
 		public final Color color;
 		
+		/**
+		 * Default constructor
+		 * @param name The name of the color
+		 * @param color The color itself
+		 */
 		public SEMOSSVertexColor(String name, Color color){
 			this.name = name;
 			this.color = color;

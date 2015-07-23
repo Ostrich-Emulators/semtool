@@ -192,24 +192,26 @@ public class GraphShapeRepository {
 	}
 	
 	/**
-	 * 
+	 * The Shape Generator class is responsible for producing the shapes that 
+	 * serve as visual metaphors for the Vertices in a graph
 	 * @author Wayne Warren
 	 *
 	 */
 	private class ShapeGenerator {
-
+		/** A listing of standard vertex shapes using the name/tag of the shape as the key and the 
+		 * composite shape class as the value */
 		private HashMap<String, SEMOSSVertexShape> shapes = new HashMap<String, SEMOSSVertexShape>();
-		
+		/** The translation applied to the triangle shape when it is drawn */
 		private static final int UP_TRIANGLE_ORIGIN = 6;
-		
+		/** The translation applied to the diamond shape when it is drawn */
 		private static final int RHOMBUS_ORIGIN = 7;
-		
+		/** The translation applied to the hexagon shape when it is drawn */
 		private static final int HEX_ORIGIN = 7;
-		
+		/** The translation applied to the pentagon shape when it is drawn */
 		private static final int PENT_ORIGIN = 7;
-		
+		/** The last shape index chosen when nextShape() was called */
 		private int lastIndexChosen = -1;
-		
+		/** A complete listing of the shape names/tags */
 		public final String[] shapeNames = {
 				Constants.STAR,
 				Constants.HEXAGON,
@@ -220,7 +222,11 @@ public class GraphShapeRepository {
 				Constants.SQUARE,
 		};
 		
+		/**
+		 * Default constructor
+		 */
 		public ShapeGenerator(){
+			// Create the shapes to populate the shapes hash
 			SEMOSSVertexShape star = new SEMOSSVertexShape(Constants.STAR, createStar());
 			SEMOSSVertexShape hex = new SEMOSSVertexShape(Constants.HEXAGON, createHex(HEX_ORIGIN)); 
 			SEMOSSVertexShape pent = new SEMOSSVertexShape(Constants.PENTAGON, createPent(PENT_ORIGIN));
@@ -235,7 +241,8 @@ public class GraphShapeRepository {
 			shapes.put(Constants.TRIANGLE, triangle);
 			shapes.put(Constants.CIRCLE, circle);
 			shapes.put(Constants.SQUARE, square);
-			
+			// Populate the legend hash, the "legend" shapes are correlated with their "normal"
+			// shape types
 			vertexShapeLegendHash.put(star, new SEMOSSVertexShape(Constants.STAR + Constants.LEGEND, createStarL()));
 			vertexShapeLegendHash.put(hex, new SEMOSSVertexShape(Constants.HEXAGON + Constants.LEGEND, createHexL()));
 			vertexShapeLegendHash.put(pent, new SEMOSSVertexShape(Constants.PENTAGON + Constants.LEGEND, createPentL()));
@@ -245,12 +252,24 @@ public class GraphShapeRepository {
 			vertexShapeLegendHash.put(square, new SEMOSSVertexShape(Constants.SQUARE + Constants.LEGEND, new Rectangle2D.Double(0,0,40, 40)));
 		}
 		
-		
+		/**
+		 * Get the "legend" shape, associated with a given normal shape 
+		 * @param shape The normal shape 
+		 * @return The legend shape, or null if it is not found
+		 */
 		public SEMOSSVertexShape getLegendShape(Shape shape) {
-			return vertexShapeLegendHash.get(shape);
+			SEMOSSVertexShape legendShape = vertexShapeLegendHash.get(shape);
+			if (legendShape == null){
+				logger.warn("Legend shape not found.");
+			}
+			return legendShape;
 		}
 
 
+		/**
+		 * Get the next shape in the queue
+		 * @return The next shape to associate with a vertex
+		 */
 		public SEMOSSVertexShape nextShape() {
 			lastIndexChosen++;
 			if (lastIndexChosen == shapeNames.length){
@@ -261,6 +280,11 @@ public class GraphShapeRepository {
 			return shape;
 		}
 		 
+		/**
+		 * Get the shape associated with a given name/key
+		 * @param key The name or key
+		 * @return The appropriate shape instance, or null if not found
+		 */
 		public SEMOSSVertexShape getNamedShape(String key){
 			if (shapes.containsKey(key)){
 				return shapes.get(key);
@@ -271,6 +295,10 @@ public class GraphShapeRepository {
 			}
 		}
 		
+		/**
+		 * Get all of the Shapes which are prescribed within this generator
+		 * @return An array composed of each shape
+		 */
 		public Shape[] getAllShapes(){
 			Collection<SEMOSSVertexShape> collection = shapes.values();
 			Iterator<SEMOSSVertexShape> iterator = collection.iterator();
@@ -286,7 +314,6 @@ public class GraphShapeRepository {
 		
 		/**
 		 * Creates a star shape.
-		 * 
 		 * @return Star
 		 * */
 		private Shape createStar() {
@@ -308,7 +335,6 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a star shape for the legend.
-		 * 
 		 * @return Star
 		 */
 		private Shape createStarL() {
@@ -329,10 +355,7 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a hexagon shape.
-		 * 
-		 * @param s
-		 *            start position (X-coordinate) for drawing the hexagon.
-		 * 
+		 * @param s start position (X-coordinate) for drawing the hexagon.
 		 * @return Hexagon
 		 */
 		private Shape createHex(final double s) {
@@ -347,7 +370,6 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a hexagon shape for the legend
-		 * 
 		 * @return Hexagon
 		 */
 		private Shape createHexL() {
@@ -365,11 +387,8 @@ public class GraphShapeRepository {
 		}
 
 		/**
-		 * Creates a pentagon shape.
-		 * 
-		 * @param s
-		 *            start position (X-coordinate) for drawing the pentagon
-		 * 
+		 * Creates a pentagon shape
+		 * @param s start position (X-coordinate) for drawing the pentagon
 		 * @return Pentagon
 		 */
 		private Shape createPent(final double s) {
@@ -388,7 +407,6 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a pentagon shape for the legend.
-		 * 
 		 * @return Pentagon
 		 */
 		private Shape createPentL() {
@@ -409,10 +427,7 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a rhombus shape.
-		 * 
-		 * @param s
-		 *            start position (X-coordinate) for drawing the rhombus
-		 * 
+		 * @param s start position (X-coordinate) for drawing the rhombus
 		 * @return Rhombus
 		 */
 		private Shape createRhombus(final double s) {
@@ -429,7 +444,6 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a rhombus shape for the legend.
-		 * 
 		 * @return Rhombus
 		 */
 		private Shape createRhombusL() {
@@ -447,9 +461,7 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a triangle.
-		 * 
-		 * @param s
-		 *            start position (X-coordinate) for drawing the triangle.
+		 * @param s start position (X-coordinate) for drawing the triangle.
 		 * 
 		 * @return Triangle
 		 */
@@ -464,7 +476,6 @@ public class GraphShapeRepository {
 
 		/**
 		 * Creates a triangle for the legend.
-		 * 
 		 * @return Triangle
 		 */
 		private Shape createUpTriangleL() {
@@ -478,18 +489,32 @@ public class GraphShapeRepository {
 		}
 	}
 	
-	
+	/**
+	 * A utility class which is designed to contain not its shape,
+	 * but the tag/name/handle as well
+	 * @author Wayne Warren
+	 *
+	 */
 	public class SEMOSSVertexShape {
-		
+		/** The name/tag of the shape */
 		public final String name;
-		
+		/** The geometric shape */
 		public final Shape shape;
 		
+		/**
+		 * Default constructor
+		 * @param name The name/tag of the shape
+		 * @param shape The geometric shape
+		 */
 		public SEMOSSVertexShape(String name, Shape shape){
 			this.name = name;
 			this.shape = shape;
 		}
 		
+		/**
+		 * Clone the shape to produce a new instance, so copying by reference is 
+		 * absolutely avoided
+		 */
 		public SEMOSSVertexShape clone(){
 			if (this.shape instanceof GeneralPath){
 				return new SEMOSSVertexShape(this.name, (Shape)((GeneralPath)shape).clone());
