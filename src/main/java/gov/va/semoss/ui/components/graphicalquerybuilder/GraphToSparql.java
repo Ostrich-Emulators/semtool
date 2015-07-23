@@ -116,24 +116,24 @@ public class GraphToSparql {
 		StringBuilder sb = new StringBuilder().append( '"' );
 		sb.append( lit.getLabel() );
 		sb.append( '"' );
-		
+
 		URI dt = lit.getDatatype();
 		if ( null != dt ) {
 			sb.append( "^^" );
-			
+
 			boolean found = false;
 			for ( Map.Entry<String, String> ns : namespaces.entrySet() ) {
 				if ( dt.getNamespace().equals( ns.getValue() ) ) {
-					sb.append( ns.getKey() ).append( ":" ).append(dt.getLocalName());
+					sb.append( ns.getKey() ).append( ":" ).append( dt.getLocalName() );
 					found = true;
 				}
 			}
-			
-			if( !found ){
+
+			if ( !found ) {
 				sb.append( '<' ).append( dt.toString() ).append( '>' );
 			}
 		}
-		
+
 		return sb.toString();
 	}
 
