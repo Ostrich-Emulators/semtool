@@ -52,6 +52,7 @@ public class GraphToSparql {
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
+		boolean hasone = false;
 		for ( QueryNodeEdgeBase v : todo ) {
 			for ( Map.Entry<URI, Set<Value>> en : v.getAllValues().entrySet() ) {
 				URI prop = en.getKey();
@@ -60,8 +61,13 @@ public class GraphToSparql {
 				if ( v.isSelected( prop ) ) {
 					select.append( " ?" ).
 							append( issubj ? v.getQueryId() : v.getLabel( prop ) );
+					hasone = true;
 				}
 			}
+		}
+
+		if ( !hasone ) {
+			select.append( " *" );
 		}
 
 		return select.toString();
@@ -233,7 +239,7 @@ public class GraphToSparql {
 
 				// our VALUES clause (below) needs to work on our base edge type,
 				// not the custom one
-				linkvar = "?"+edge.getLabel( RDF.TYPE );
+				linkvar = "?" + edge.getLabel( RDF.TYPE );
 			}
 
 			sb.append( " VALUES " ).append( linkvar ).append( " { " );
