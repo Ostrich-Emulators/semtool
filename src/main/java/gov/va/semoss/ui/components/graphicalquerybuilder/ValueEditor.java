@@ -6,11 +6,11 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValue;
+import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
@@ -69,14 +69,9 @@ public class ValueEditor extends AbstractCellEditor
 			try {
 				ConstraintValue cv = null;
 				if ( null == types ) {
-					Collection<ConstraintValue> cvs
+					ConstraintValueSet cvs
 							= ConstraintPanel.getValues( type, EDIT, Arrays.asList( value ), checked );
-					if ( null == cvs || cvs.isEmpty() ) {
-						cv = null;
-					}
-					else {
-						cv = cvs.iterator().next();
-					}
+					cv = ( null == cvs ? null : cvs.firstCV() );
 				}
 				else {
 					// editing a type

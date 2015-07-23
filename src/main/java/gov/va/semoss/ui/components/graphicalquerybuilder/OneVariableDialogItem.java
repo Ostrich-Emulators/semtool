@@ -7,11 +7,11 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValue;
+import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +89,7 @@ public class OneVariableDialogItem extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		Collection<ConstraintValue> values = null;
+		ConstraintValueSet values = null;
 
 		if ( null != choicesQuery ) {
 			try {
@@ -131,20 +131,9 @@ public class OneVariableDialogItem extends AbstractAction {
 
 		if ( null != values ) {
 			currvals.clear();
-			List<Value> vals = new ArrayList<>();
-			URI prop = null;
-			boolean incl = false;
-			for ( ConstraintValue cv : values ) {
-				vals.add( cv.val );
-				if ( null == prop ) {
-					prop = cv.property;
-					incl = cv.included;
-				}
-			}
-
-			currvals.addAll( vals );
-			node.setProperties( prop, currvals );
-			node.setSelected( prop, incl );
+			currvals.addAll( values );
+			node.setProperties( values.property, currvals );
+			node.setSelected( values.property, values.included );
 			panel.update();
 		}
 	}
