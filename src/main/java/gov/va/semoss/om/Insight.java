@@ -1,6 +1,8 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,13 +11,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 
-public class Insight {
-
+public class Insight implements Serializable{
+	private static final long serialVersionUID = 5192674160082789840L;
 	private static final Logger log = Logger.getLogger( Insight.class );
 	//ID of the question:
 	URI id = null;
@@ -60,7 +63,7 @@ public class Insight {
 
 	public Insight() {
 	}
-
+	
 	public Insight( String label, String sparql,
 			Class<? extends PlaySheetCentralComponent> output ) {
 		this.label = label;

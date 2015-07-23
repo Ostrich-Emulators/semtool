@@ -4,12 +4,16 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -17,34 +21,42 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.util.Callback;
 import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.DIHelper;
@@ -61,6 +73,10 @@ public class  InsightManagerController_2 implements Initializable{
 	protected SplitPane spaneInsightManager;
 	@FXML
 	protected TreeView<Object> treevPerspectives;
+	@FXML
+	protected RadioButton radioMove;
+	@FXML
+	protected RadioButton radioCopy;
 	
 //	@FXML
 //	protected TabPane tbpTabbedPane;
@@ -149,6 +165,7 @@ public class  InsightManagerController_2 implements Initializable{
 //	protected Button btnSaveParameter_Parm;
 //	@FXML
 //	protected Button btnReloadParameter_Parm;
+	private static final Logger log = Logger.getLogger( WriteablePerspectiveTab.class );
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -490,7 +507,163 @@ public class  InsightManagerController_2 implements Initializable{
             }
         }        
         treevPerspectives.setRoot(rootItem);    
+        treevPerspectives.setEditable(true);
+
+        //CellFactory to enable click-and-drag of Insights and display of Insight icons:
+        //------------------------------------------------------------------------------
+        treevPerspectives.setCellFactory(new Callback<TreeView<Object>, TreeCell<Object>>() {
+        	//This TransferMode could either enable "Move" or "Copy":
+            private TransferMode transferMode;
+            //This DataFormat allows entire Insight objects to be placed on the DragBoard:
+            private DataFormat insightFormat = new DataFormat("Object/Insight");      
+            
+            @Override
+            public TreeCell<Object> call(TreeView<Object> stringTreeView) {            	          	
+                TreeCell<Object> treeCell = new TreeCell<Object>() {
+                	@Override
+                	protected void updateItem(Object item, boolean empty) {
+                	    super.updateItem(item, empty);
+                	    if (!empty && item != null) {
+                	        setText(item.toString());
+                	        setGraphic(getTreeItem().getGraphic());
+                	    }else{
+                	        setText(null);
+                	        setGraphic(null);
+                	    }
+                	}                
+                };
+
+                treeCell.setOnDragDetected(new EventHandler<MouseEvent>() {
+                   @Override
+                   public void handle(MouseEvent mouseEvent) {
+                      if(treeCell.getItem() == null){
+                         return;
+                      }
+                      //Only allow Insights to be dragged:
+                      Object treeItem = treeCell.getItem();
+                      if(treeItem instanceof Perspective){
+                    	 return;
+                      }
+                  	  //Determine transfer mode based on which radio-button is selected:
+                      if(radioMove.isSelected() == true){
+                    	  transferMode = TransferMode.MOVE;
+                      }else if(radioCopy.isSelected() == true){
+                    	  transferMode = TransferMode.COPY;
+                      }else{
+                        transferMode = TransferMode.MOVE;
+                      }
+                      Dragboard dragBoard = treeCell.startDragAndDrop(transferMode);
+                      ClipboardContent content = new ClipboardContent();
+                      content.put(insightFormat, treeItem);
+                      dragBoard.setContent(content);
+                      mouseEvent.consume();
+                   }
+                });
+
+                treeCell.setOnDragDone(new EventHandler<DragEvent>() {
+                    @Override
+                    public void handle(DragEvent dragEvent) {
+                       dragEvent.consume();
+                    }
+                });
+
+                treeCell.setOnDragOver(new EventHandler<DragEvent>() {
+                    @Override
+                    public void handle(DragEvent dragEvent) {
+                        if (dragEvent.getDragboard().hasContent(insightFormat)) {
+                            Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
+                            if(!valueDragged.equals(treeCell.getItem())) {
+                                dragEvent.acceptTransferModes(transferMode);
+                            }
+                        }
+                        dragEvent.consume();
+                    }
+                });
+
+                treeCell.setOnDragDropped(new EventHandler<DragEvent>() {
+                    @Override
+                    public void handle(DragEvent dragEvent) {
+                        Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
+  
+                        TreeItem<Object> itemDragged = search(treevPerspectives.getRoot(), valueDragged);
+                        TreeItem<Object> itemTarget = search(treevPerspectives.getRoot(), (Insight) treeCell.getItem());
+                        
+                        ObservableList<TreeItem<Object>> olstOldInsights = itemDragged.getParent().getChildren(); 
+                        ObservableList<TreeItem<Object>> olstInsights = itemTarget.getParent().getChildren();
+                        int index = olstInsights.indexOf(itemTarget);
+                        if(itemTarget.getParent().getValue().toString().equals("Perspectives")){
+                           return;
+                        }
+                        //If "Move Insight" is selected, then remove the Insight 
+                        //from its old location and place it where dropped:
+                        if(transferMode.equals(TransferMode.MOVE)){
+                           olstOldInsights.remove(itemDragged);
+                           olstInsights.add(index, itemDragged);  
+                           
+                        }else{
+                           String strUniqueIdentifier = "_C"+String.valueOf(System.currentTimeMillis());
+                           Insight insight = (Insight) itemDragged.getValue();
+                           RepositoryConnection rc;
+						   try {
+							  //Make a deep copy of the Insight, and assign a unique URI to it:
+							  rc = engine.getInsightManager().getRepository().getConnection();
+	                   		  ValueFactory insightVF = rc.getValueFactory();
+	                   		  Insight insightCopy = (Insight) SerializationUtils.clone(insight);
+	                          URI uriInsightCopy = insightVF.createURI(insight.getIdStr() + strUniqueIdentifier);
+                              insightCopy.setId(uriInsightCopy);
+                              TreeItem<Object> itemDraggedCopy = new TreeItem<Object>(insightCopy);
+                              
+                              //Make a copy of the icon associated with "itemDragged":
+                              Image imageCopy = new Image(getInsightIcon(insightCopy));
+                              ImageView imageViewCopy = new ImageView(imageCopy);
+                              itemDraggedCopy.setGraphic(imageViewCopy);
+                              
+                              //Insert the copy of the dragged Insight into the ObservableList,
+                              //at the location dropped:
+                              olstInsights.add(index, itemDraggedCopy); 
+                              
+ 						   } catch (RepositoryException e) {
+ 							  log.error(e, e);
+						   }
+                        }
+                        dragEvent.consume();
+                    }
+                });
+                return treeCell;
+            }//End "treevPerspectives.setCellFactory".
+
+            /**   Searches the tree-view data for the Insight passed-in, and returns the TreeItem
+             * associated with that Insight. Note: This is a recursive function that compares URI's
+             * in its search.
+             * 
+             * @param currentNode -- (TreeItem<Object>) A node of the tree-view (usually is started
+             *    at the root).
+             * @param valueToSearch -- (Insight) A value that may exist in the tree-view.
+             * @return search -- TreeItem<Object> The TreeItem associated with "valueToSearch".
+             */
+            private TreeItem<Object> search(final TreeItem<Object> currentNode, final Insight valueToSearch) {
+               TreeItem<Object> result = null;
+             
+               if(currentNode.getValue().equals("Perspectives") == true ||
+            	  currentNode.getValue() instanceof Perspective == true){
+                  for(TreeItem<Object> child : currentNode.getChildren()) {
+                     result = search(child, valueToSearch);
+                     if (result != null) {
+                         break;
+                     }
+                  }                	 
+               }else if(currentNode.getValue() instanceof Insight == true &&
+                  ((Insight) currentNode.getValue()).getId().equals(valueToSearch.getId())){
+            	  result = currentNode;
+               }
+               return result;
+            }
+
+        });  
+        
 	}
+	
+	
 	
 	/**   Returns a PlaySheet icon for the passed-in Insight.The array-list of PlaySheets
 	 * is consulted. The base path to all icons is defined at the top of this class, 
@@ -513,6 +686,7 @@ public class  InsightManagerController_2 implements Initializable{
 	    }
 		return strReturnValue;
 	}
+
 ////----------------------------------------------------------------------------------------------------
 ////	                            P e r s p e c t i v e   T a b
 ////----------------------------------------------------------------------------------------------------
