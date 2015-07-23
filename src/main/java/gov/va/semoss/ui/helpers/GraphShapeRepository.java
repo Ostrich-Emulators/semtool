@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -106,7 +107,13 @@ public class GraphShapeRepository {
 	public SEMOSSVertexShape getLegendShapeByName(String name){
 		String nonLegendName = name.replace(Constants.LEGEND, "");
 		SEMOSSVertexShape svshape = this.getShapeByName(nonLegendName);
-		SEMOSSVertexShape legendShape = this.getLegendShape(svshape);
+		SEMOSSVertexShape legendShape = null;
+		try {
+			legendShape = this.getLegendShape(svshape);
+		}
+		catch (Exception e){
+			System.out.println();
+		}
 		if (legendShape == null){
 			logger.warn("Legend shape was not found using key = " + name);
 		}
@@ -159,7 +166,16 @@ public class GraphShapeRepository {
 	 * @return The associated legend shape, null if it is not found
 	 */
 	public SEMOSSVertexShape getLegendShape(SEMOSSVertexShape svshape){
-		SEMOSSVertexShape legendShape = this.shapeGenerator.getLegendShape(svshape.shape);
+		Set<SEMOSSVertexShape> shapeKeys =  vertexShapeLegendHash.keySet();
+		Iterator<SEMOSSVertexShape> iterator = shapeKeys.iterator();
+		SEMOSSVertexShape legendShape = null;
+		while (iterator.hasNext()){
+			SEMOSSVertexShape candidate = iterator.next();
+			if (candidate.shape.equals(svshape.shape)){
+				legendShape = vertexShapeLegendHash.get(candidate);
+				break;
+			}
+		}
 		if (legendShape == null){
 			logger.warn("Warning - Requested legend shape not found for shape: " + svshape.name);
 		}
