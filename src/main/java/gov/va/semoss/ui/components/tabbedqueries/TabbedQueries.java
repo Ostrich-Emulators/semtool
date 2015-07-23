@@ -2,6 +2,7 @@ package gov.va.semoss.ui.components.tabbedqueries;
 
 import gov.va.semoss.ui.components.CloseableTab;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -126,6 +127,10 @@ public class TabbedQueries extends JTabbedPane {
 	 */
 	private void addNewTab() {
 		SyntaxTextEditor textEditor = new SyntaxTextEditor();
+		Font f = getFont();
+		
+		// use a mono-spaced font so indentation works well		
+		textEditor.setFont( new Font( Font.MONOSPACED, f.getStyle(), f.getSize() ) );
 		RTextScrollPane sp = new RTextScrollPane( textEditor );
 		sp.setFoldIndicatorEnabled( false );
 		this.addTab( "*", sp );
