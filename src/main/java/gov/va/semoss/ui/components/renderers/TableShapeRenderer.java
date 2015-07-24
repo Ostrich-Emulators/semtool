@@ -5,11 +5,13 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Shape;
+
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -23,14 +25,19 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object val,
 			boolean isSelected, boolean hasFocus, int row, int column ) {
-
-		String valstr = val.toString();
-		Shape s = ( valstr.isEmpty() ? null
-				: DIHelper.getShape( valstr + Constants.LEGEND ) );
-		Component c = super.getTableCellRendererComponent( table, val, isSelected,
-				hasFocus, row, column );
-		shapeify( this, s, new Dimension( 16, 16 ) );
-
+		Component c = null;
+		if (val != null){
+			String valstr = val.toString();
+			Shape s = ( valstr.isEmpty() ? null
+					: GraphShapeRepository.instance().getLegendShapeByName(valstr + Constants.LEGEND).shape);
+			c = super.getTableCellRendererComponent( table, val, isSelected,
+					hasFocus, row, column );
+			shapeify( this, s, new Dimension( 16, 16 ) );
+		}
+		else {
+			c = super.getTableCellRendererComponent( table, val, isSelected,
+					hasFocus, row, column );
+		}
 		return c;
 	}
 

@@ -21,6 +21,7 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 
 import java.awt.event.ActionEvent;
@@ -40,7 +41,7 @@ public class ShapePopup extends JMenu {
 	public ShapePopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( _name );
 
-		for ( String shape : TypeColorShapeTable.getAllShapes() ) {
+		for ( String shape : GraphShapeRepository.instance().getAllShapeNames() ) {
 			JMenuItem menuItem = new JMenuItem( shape );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338448713648152673L;

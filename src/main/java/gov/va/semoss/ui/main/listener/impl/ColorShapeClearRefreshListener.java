@@ -28,6 +28,8 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -46,7 +48,8 @@ public class ColorShapeClearRefreshListener implements IChakraListener {
 		logger.info( "Calling action performed - refine view" );
 		GraphPlaySheet playSheet 
 				= (GraphPlaySheet) QuestionPlaySheetStore.getInstance().getActiveSheet();
-		TypeColorShapeTable.getInstance().clearAll();
+		GraphShapeRepository.instance().clearAll();
+		GraphColorRepository.instance().clearAll();
 
 		playSheet.getVertexLabelFontTransformer().clearSizeData();
 		playSheet.getEdgeLabelFontTransformer().clearSizeData();

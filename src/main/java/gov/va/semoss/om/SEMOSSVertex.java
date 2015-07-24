@@ -19,6 +19,8 @@
  */
 package gov.va.semoss.om;
 
+import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Constants;
 
@@ -34,7 +36,6 @@ import org.openrdf.model.vocabulary.RDF;
 public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 
 	private transient Shape shape, shapeLegend;
-	private transient String shapeString;
 	private transient int incount = 0;
 	private transient int outcount = 0;
 
@@ -46,8 +47,8 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 		super( id, type, label );
 
 		if ( null != type ) {
-			setColor( TypeColorShapeTable.getInstance().getColor( type ) );
-			setShape( TypeColorShapeTable.getInstance().getShape( type ) );
+			setColor( GraphColorRepository.instance().getColor(type).color );
+			setShape( GraphShapeRepository.instance().getShape(type).shape );
 		}
 	}
 
@@ -55,8 +56,14 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 	public void setValue( URI prop, Value val ) {
 		super.setValue( prop, val );
 		if ( RDF.TYPE.equals( prop ) ) {
-			setColor( TypeColorShapeTable.getInstance().getColor( getType() ) );
-			setShape( TypeColorShapeTable.getInstance().getShape( getType() ) );
+			URI typeURI = getType();
+			setColor(GraphColorRepository.instance().getColor(typeURI).color);
+			try {
+				setShape( GraphShapeRepository.instance().getShape(getType()).shape );
+			}
+			catch(Exception e){
+				System.out.println();
+			}
 		}
 	}
 
@@ -80,14 +87,6 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 	@Override
 	public Shape getShape() {
 		return shape;
-	}
-
-	public void setShapeString( String _shapeString ) {
-		shapeString = _shapeString;
-	}
-
-	public String getShapeString() {
-		return shapeString;
 	}
 
 	public void setShapeLegend( Shape _shapeLegend ) {

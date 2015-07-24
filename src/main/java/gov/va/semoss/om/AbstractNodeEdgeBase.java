@@ -35,7 +35,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	private transient boolean visible = true;
 	private transient URI id;
 	private transient Color color;
-	private transient String colorString;
+	
 	// callers can "mark" properties for their own use
 	private final Set<URI> markedProperties = new HashSet<>();
 
@@ -61,14 +61,6 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	@Override
 	public Color getColor() {
 		return color;
-	}
-
-	public void setColorString( String _colorString ) {
-		colorString = _colorString;
-	}
-
-	public String getColorString() {
-		return colorString;
 	}
 
 	@Override
