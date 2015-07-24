@@ -91,6 +91,7 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
+import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -784,13 +785,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet {
 		return new HashSet<>( est.getSelected() );
 	}
 
-	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
+	public void setColors( Collection<SEMOSSVertex> vertices, Color color ) {
 		colorShapeData.setColors( vertices, color );
 		view.repaint();
 		fireGraphUpdated();
 	}
 
-	public void setShapes( Collection<SEMOSSVertex> vertices, String shape ) {
+	public void setShapes( Collection<SEMOSSVertex> vertices, Shape shape ) {
 		colorShapeData.setShapes( vertices, shape );
 		view.repaint();
 		fireGraphUpdated();

@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
+import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.DIHelper;
 
 import java.awt.Color;
@@ -39,18 +40,18 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent( JTable t, Object val,
 			boolean sel, boolean focus, int r, int c ) {
-		JComponent cmp = null;
-		if (val != null){
-			String valstr = val.toString();
-			Color color = ( valstr.isEmpty() ? t.getBackground()
-					: DIHelper.getColor( valstr ) );
-			cmp = (JComponent)super.getTableCellRendererComponent( t, val, sel, focus, r, c );
+
+		if( null == val ){
+			super.getTableCellRendererComponent( t, val, sel, focus, r, c );			
+		}
+		else{
+			Color color = Color.class.cast( val );
+			val = GraphColorRepository.instance().getColorName( color );
+			super.getTableCellRendererComponent( t, val, sel, focus, r, c );
 			colorify( this, color );
 		}
-		else {
-			cmp = (JComponent)super.getTableCellRendererComponent( t, val, sel, focus, r, c );
-		}
-		return cmp;
+
+		return this;
 	}
 
 	public static void colorify( JLabel lbl, Color s ) {

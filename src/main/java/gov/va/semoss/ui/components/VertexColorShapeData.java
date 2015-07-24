@@ -26,10 +26,10 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
-import gov.va.semoss.ui.helpers.GraphShapeRepository;
-import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Utility;
 
+import java.awt.Color;
+import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,6 +48,8 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 	private static final long serialVersionUID = -8530913683566271008L;
 
 	private static final String[] columnNames = { "Node", "Instance", "Shape", "Color" };
+	private static final Class<?>[] columnClasses = { String.class, String.class,
+		Shape.class, String.class };
 	private Map<URI, List<SEMOSSVertex>> nodeMap = new HashMap<>();
 	private List<ColorShapeRow> data = new ArrayList<>();
 
@@ -55,7 +57,7 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
 		generateAllRows( gps.getFilterData().getNodeTypeMap() );
 	}
-	
+
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
@@ -63,7 +65,7 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 	}
 
 	/**
-	 * Fills the rows of vertex colors and shapes based on the vertex name and
+	 * Fills the rows of vertex colors and shapes based on the vertex node and
 	 * type.
 	 *
 	 * @param _typeHash
@@ -73,11 +75,11 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 
 		data = new ArrayList<>();
 		for ( Map.Entry<URI, List<SEMOSSVertex>> entry : nodeMap.entrySet() ) {
-			data.add( new ColorShapeRow( entry.getKey(), "Set for All", "", "" ) );
+			data.add( new ColorShapeRow( entry.getKey(), null, null, null ) );
 
 			for ( SEMOSSVertex vertex : entry.getValue() ) {
-				data.add( new ColorShapeRow( null, vertex.getLabel(),
-						GraphShapeRepository.instance().getShapeName(vertex.getShape()), GraphColorRepository.instance().getColorName(vertex.getColor()) ) );
+				data.add( new ColorShapeRow( null, vertex,
+						vertex.getShape(), vertex.getColor() ) );
 			}
 		}
 
@@ -95,7 +97,8 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 				return "";
 			}
 			case 1:
-				return csRow.name;
+				return ( null == csRow.node ? "Set For All"
+						: csRow.node.getLabel() );
 			case 2:
 				return csRow.shape;
 			case 3:
@@ -119,17 +122,9 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 		URI nodeType = data.get( row ).type;
 
 		if ( nodeType == null ) {
-			// find the node type by scanning up the first column
-			int numRowsUp = 0;
-			while ( nodeType == null ) {
-				numRowsUp++;
-				nodeType = data.get( row - numRowsUp ).type;
-			}
 
-			List<SEMOSSVertex> vertexList = nodeMap.get( nodeType );
-
-			SEMOSSVertex vertex = vertexList.get( numRowsUp - 1 );
-			setColorOrShape( row, column, vertex, value + "" );
+			SEMOSSVertex vertex = data.get( row ).node;
+			setColorOrShape( row, column, vertex, value );
 			Utility.repaintActiveGraphPlaysheet();
 
 			return;
@@ -137,9 +132,9 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 
 		//set the color or shape for all vertices of this type
 		List<SEMOSSVertex> vertexList = nodeMap.get( nodeType );
-		for ( int vertIndex = 0; vertIndex < vertexList.size(); vertIndex++ ) {
-			SEMOSSVertex vertex = vertexList.get( vertIndex );
-			setColorOrShape( row + vertIndex + 1, column, vertex, value + "" );
+		int vertIndex = row;
+		for ( SEMOSSVertex vertex : vertexList ) {
+			setColorOrShape( ++vertIndex, column, vertex, value );
 		}
 
 		fireTableCellUpdated( row, column );
@@ -152,49 +147,49 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 	 *
 	 * @param column Column index.
 	 * @param vertName Name of the vertex, in string form.
-	 * @param value Value associated with the vertex name, in string form.
+	 * @param value Value associated with the vertex node, in string form.
 	 */
-	private void setColorOrShape( int row, int column, SEMOSSVertex vertex, String value ) {
+	private void setColorOrShape( int row, int column, SEMOSSVertex vertex, Object value ) {
 		if ( column == 2 ) {
-			setShape( vertex, value, row );
+			setShape( vertex, Shape.class.cast( value ), row );
 		}
 		else if ( column == 3 ) {
-			setColor( vertex, value, row );
+			setColor( vertex, Color.class.cast( value ), row );
 		}
 	}
 
-	public void setShapes( Collection<SEMOSSVertex> nodes, String shape ) {
+	public void setShapes( Collection<SEMOSSVertex> nodes, Shape shape ) {
 		for ( SEMOSSVertex node : nodes ) {
-			setShape( node, shape, getRowForVertex( node.getLabel() ) );
+			setShape( node, shape, getRowForVertex( node ) );
 		}
 	}
 
-	public void setShape( SEMOSSVertex vertex, String shape, int row ) {
+	public void setShape( SEMOSSVertex vertex, Shape shape, int row ) {
 		if ( row < 0 ) {
 			return;
 		}
 		data.get( row ).shape = shape;
-		GraphShapeRepository.instance().setShape(shape, vertex);
+		vertex.setShape( shape );
 	}
 
-	public void setColors( Collection<SEMOSSVertex> nodes, String color ) {
+	public void setColors( Collection<SEMOSSVertex> nodes, Color color ) {
 		for ( SEMOSSVertex node : nodes ) {
-			setColor( node, color, getRowForVertex( node.getLabel() ) );
+			setColor( node, color, getRowForVertex( node ) );
 		}
 	}
 
-	public void setColor( SEMOSSVertex vertex, String color, int row ) {
+	public void setColor( SEMOSSVertex vertex, Color color, int row ) {
 		if ( row < 0 ) {
 			return;
 		}
 		data.get( row ).color = color;
-		GraphColorRepository.instance().setColor(color, vertex);
+		vertex.setColor( color );
 	}
 
-	private int getRowForVertex( String vertexName ) {
+	private int getRowForVertex( SEMOSSVertex vert ) {
 		int rowNum = -1;
 		for ( int i = 0; i < data.size(); i++ ) {
-			if ( data.get( i ).name.equals( vertexName ) ) {
+			if ( data.get( i ).node.equals( vert ) ) {
 				rowNum = i;
 			}
 		}
@@ -228,10 +223,10 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 	}
 
 	/**
-	 * Gets the column name at a particular index.
+	 * Gets the column node at a particular index.
 	 *
 	 * @param index Column index.
-	 * @return String Column name.
+	 * @return String Column node.
 	 */
 	@Override
 	public String getColumnName( int index ) {
@@ -246,17 +241,19 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 	 */
 	@Override
 	public Class<?> getColumnClass( int column ) {
-		return String.class;
+		return columnClasses[column];
 	}
 
 	public class ColorShapeRow {
 
 		URI type;
-		String name, shape, color;
+		SEMOSSVertex node;
+		Color color;
+		Shape shape;
 
-		public ColorShapeRow( URI type, String name, String shape, String color ) {
+		public ColorShapeRow( URI type, SEMOSSVertex name, Shape shape, Color color ) {
 			this.type = type;
-			this.name = name;
+			this.node = name;
 			this.shape = shape;
 			this.color = color;
 		}

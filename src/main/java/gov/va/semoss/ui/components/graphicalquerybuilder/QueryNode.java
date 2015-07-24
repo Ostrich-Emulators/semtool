@@ -31,8 +31,8 @@ public class QueryNode extends AbstractQueryNodeEdgeBase implements NodeBase {
 		super( id, type, label );
 
 		if ( null != type ) {
-			setColor( GraphColorRepository.instance().getColor( type ).color );
-			setShape( GraphShapeRepository.instance().getShape(type).shape );
+			setColor( GraphColorRepository.instance().getColor( type ) );
+			setShape( GraphShapeRepository.instance().getShape( type ) );
 		}
 	}
 

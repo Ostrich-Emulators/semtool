@@ -22,11 +22,12 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
-import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -41,14 +42,15 @@ public class ShapePopup extends JMenu {
 	public ShapePopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( _name );
 
-		for ( String shape : GraphShapeRepository.instance().getAllShapeNames() ) {
-			JMenuItem menuItem = new JMenuItem( shape );
+		GraphShapeRepository gsr = GraphShapeRepository.instance();
+		for( Map.Entry<String, Shape> en : gsr.getNamedShapeMap().entrySet() ){
+			JMenuItem menuItem = new JMenuItem( en.getKey() );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338448713648152673L;
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					gps.setShapes( vertices, shape );
+					gps.setShapes( vertices, en.getValue() );
 				}
 			} );
 			add( menuItem );
