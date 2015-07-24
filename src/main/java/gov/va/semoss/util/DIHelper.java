@@ -29,6 +29,7 @@ import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout;
 import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.RepositoryList;
 
 import java.awt.Color;
@@ -85,6 +86,7 @@ public class DIHelper {
   
   private RepositoryList repolist;
 	private JDesktopPane desktop;
+	private PlayPane playpane;
 	
 	/**
 	 * Constructor for DIHelper.
@@ -650,7 +652,15 @@ public class DIHelper {
   public void setRepoList( RepositoryList l ){
     repolist = l;
   }
-  
+	
+	public void setPlayPane( PlayPane pp ){
+		playpane = pp;
+	}
+	
+	public PlayPane getPlayPane(){
+		return playpane;
+	}
+	
   public static URI getConceptURI() {
     return getInstance().getRdfEngine().getSchemaBuilder().getConceptUri().build();
   }

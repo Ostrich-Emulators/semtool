@@ -15,17 +15,22 @@ import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -45,16 +50,10 @@ import org.openrdf.model.URI;
  * @author ryan
  */
 public class SelectDatabasePanel extends javax.swing.JPanel {
-	
-	private String selectedPlaySheet;
-	public void setSelectedPlaySheet(String selectedPlaySheet){
-		this.selectedPlaySheet = selectedPlaySheet;
-	}
-    public String getSelectedPlaySheet(){
-    	return this.selectedPlaySheet;
-    }
-	
+
 	private static final Logger log = Logger.getLogger( SelectDatabasePanel.class );
+	private ExecuteQueryProcessor insightAction = new InsightAction();
+	private ParamPanel currentParamPanel = null;
 
 	public SelectDatabasePanel() {
 		this( false );
@@ -160,6 +159,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		submitButton.setToolTipText( "Execute SPARQL query for selected question and display results in Display Pane" );
 		Image insightIcon = Utility.loadImage( "icons16/insight_16.png" );
 		submitButton.setIcon( new ImageIcon( insightIcon ) );
+		submitButton.setAction( insightAction );
 
 		appendChkBox.setToolTipText( "Display the question results graph on top of graph in the foreground window" );
 	}
@@ -195,30 +195,49 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 	}
 
 	private void setupForInsight( Insight question ) {
-		// get the question Hash from the DI Helper to get the question name
-		// get the ID for the question
 		if ( question != null ) {
-      //String id = DIHelper.getInstance().getIDForQuestion(question);
-			//id = in.getId();
-
-			// now get the SPARQL query for this id
-			//String sparql = DIHelper.getInstance().getProperty(id + "_" + Constants.QUERY);
 			String sparql = question.getSparql();
 			log.debug( "Sparql is " + sparql );
 
-			ParamPanel panel = new ParamPanel();
-			panel.setInsight( question );
-
-			panel.paintParam();
+			currentParamPanel = new ParamPanel();
+			currentParamPanel.setInsight( question );
+			currentParamPanel.paintParam();
 
 			// finally add the param to the core panel
 			// confused about how to add this need to revisit
 			JPanel env = new JPanel();
-			env.add( panel );
-			paramPanel.add( panel, question + "_1" ); // mark it to the question index
+			env.add( currentParamPanel );
+			paramPanel.add( currentParamPanel, question + "_1" ); // mark it to the question index
 			CardLayout layout = (CardLayout) paramPanel.getLayout();
 			layout.show( paramPanel, question + "_1" );
 		}
+	}
+
+	private Map<String, String> getParameterValues() {
+		Map<String, String> paramHash = new HashMap<>();
+		if ( null != currentParamPanel ) {
+			// get all the param field
+			Component[] fields = currentParamPanel.getComponents();
+
+			for ( Component field : fields ) {
+				if ( field instanceof ParamComboBox ) {
+					String fieldName = ( (ParamComboBox) field ).getParamName();
+					String fieldValue = ( (ParamComboBox) field ).getSelectedItem() + "";
+					String uriFill = ( (ParamComboBox) field ).getURI( fieldValue );
+					if ( uriFill == null ) {
+						uriFill = fieldValue;
+					}
+					paramHash.put( fieldName, uriFill );
+				}
+			}
+
+		}
+
+		return paramHash;
+	}
+
+	public Action getInsightAction() {
+		return insightAction;
 	}
 
 	/**
@@ -371,4 +390,69 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
   private javax.swing.JLabel threeLabel;
   private javax.swing.JLabel twoLabel;
   // End of variables declaration//GEN-END:variables
+
+	private class InsightAction extends ExecuteQueryProcessor {
+
+		public InsightAction() {
+			super( "Create Insight!" );
+		}
+
+		@Override
+		protected String getTitle() {
+			Perspective persp
+					= perspectiveSelector.getItemAt( perspectiveSelector.getSelectedIndex() );
+			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
+			return persp.getLabel() + "-Insight-" + insight.getOrder( persp.getUri() );
+		}
+
+		@Override
+		protected String getFrameTitle() {
+			return questionSelector.
+					getItemAt( questionSelector.getSelectedIndex() ).getLabel();
+		}
+
+		@Override
+		protected String getQuery() {
+			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
+			String sparql = Utility.normalizeParam( insight.getSparql() );
+
+			Map<String, String> paramHash = getParameterValues();
+
+			log.debug( "SPARQL " + sparql );
+			if ( insight.isLegacy() ) {
+				sparql = Utility.fillParam( sparql, paramHash );
+			}
+			else {
+				sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
+			}
+
+			return sparql;
+		}
+
+		@Override
+		protected Class<? extends PlaySheetCentralComponent> getPlaySheetCentralComponent() throws ClassNotFoundException {
+			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
+			String output = insight.getOutput();
+
+			//If a "Renderer Class" has been entered into the InsightManager,
+			//then the playsheet dropdown selection and query must not be used.
+			//Instead, use the "Renderer Class":
+			if ( null == insight.getRendererClass() ) {
+				output = "gov.va.semoss.ui.components.playsheets.rendererclasses."
+						+ insight.getRendererClass();
+			}
+
+			return (Class<PlaySheetCentralComponent>) Class.forName( output );
+		}
+
+		@Override
+		protected IEngine getEngine() {
+			return repoList.getSelectedValue();
+		}
+
+		@Override
+		protected boolean isAppending() {
+			return appendChkBox.isSelected();
+		}
+	}
 }

@@ -177,11 +177,11 @@ public class Insight {
 		return this.rendererClass;
 	}
 
-	public void setIsLegacy( boolean isLegacy ) {
+	public void setLegacy( boolean isLegacy ) {
 		this.isLegacy = isLegacy;
 	}
 
-	public boolean getIsLegacy() {
+	public boolean isLegacy() {
 		return this.isLegacy;
 	}
 
@@ -310,7 +310,7 @@ public class Insight {
 
 		Value isLegacyValue = resultSet.getValue( "isLegacy" );
 		if ( isLegacyValue != null ) {
-			setIsLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
+			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
 		}
 		// an insight order is always with respect to some perspective
 		Value ordr = resultSet.getValue( "order" );

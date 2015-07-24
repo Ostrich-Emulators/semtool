@@ -359,9 +359,7 @@ public class PlaySheetFrame extends JInternalFrame {
 		return pt;
 	}
 
-	public ProgressTask getOverlayTask( String query, String titleIfNeeded,
-			String tabTitleIfNeeded ) {
-		// String q = query.replaceAll( "(?i)^CONSTRUCT[\\s]*\\{([^\\.]+)[\\.][\\s]*\\}", "SELECT $1" );		
+	public ProgressTask getOverlayTask( String query,	String tabTitleIfNeeded ) {
 		String q = query;
 		final PlaySheetCentralComponent overlayee = getActivePlaySheet();
 		final ListQueryAdapter<Value[]> lqa
@@ -386,7 +384,7 @@ public class PlaySheetFrame extends JInternalFrame {
 						else {
 							try {
 								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
-								pscc.setTitle( titleIfNeeded );
+								pscc.setTitle( tabTitleIfNeeded );
 								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
 								pscc.create( model, engine );
 							}
@@ -406,7 +404,7 @@ public class PlaySheetFrame extends JInternalFrame {
 						else {
 							try {
 								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
-								pscc.setTitle( titleIfNeeded );
+								pscc.setTitle( tabTitleIfNeeded );
 								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
 								pscc.create( data, headers, engine );
 							}

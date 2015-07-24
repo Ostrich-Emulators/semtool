@@ -54,7 +54,8 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 	private final GraphPlaySheet gps;
 	private final Collection<SEMOSSVertex> pickedVertex;
 
-	private String mainQuery, mainQueryJENA, neighborQuery, neighborQueryJENA;
+	private static final String mainQuery = Constants.NEIGHBORHOOD_TYPE_QUERY;
+	private static final String neighborQuery = Constants.TRAVERSE_FREELY_QUERY;
 
 	private boolean populated = false;
 
@@ -68,10 +69,6 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 		this.gps = ps;
 		this.engine = e;
 		this.pickedVertex = pickedVertex;
-		this.mainQuery = Constants.NEIGHBORHOOD_TYPE_QUERY;
-		this.mainQueryJENA = Constants.NEIGHBORHOOD_TYPE_QUERY_JENA;
-		this.neighborQuery = Constants.TRAVERSE_FREELY_QUERY;
-		this.neighborQueryJENA = Constants.TRAVERSE_FREELY_QUERY_JENA;
 
 		addMouseListener( this );
 	}
@@ -89,26 +86,16 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 		// and the predicate selected
 		// the listener should then trigger the graph play sheet possibly
 		// and for each relationship add the listener
-		String typeQuery;
-		if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
-			typeQuery = DIHelper.getInstance().getProperty( this.neighborQueryJENA + prefix );
-		}
-		else {
-			typeQuery = DIHelper.getInstance().getProperty( this.neighborQuery + prefix );
-		}
+		String typeQuery
+				= DIHelper.getInstance().getProperty( TFInstanceRelationPopup.neighborQuery + prefix );
 		Map<String, String> hash = new HashMap<>();
 		String ignoreURI = DIHelper.getInstance().getProperty( Constants.IGNORE_URI );
 		int count = 0;
 		List<String> typeV = new ArrayList<>();
 		for ( SEMOSSVertex thisVert : pickedVertex ) {
 
-			String query2;
-			if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
-				query2 = DIHelper.getInstance().getProperty( this.mainQueryJENA + prefix );
-			}
-			else {
-				query2 = DIHelper.getInstance().getProperty( this.mainQuery + prefix );
-			}
+			String query2
+					= DIHelper.getInstance().getProperty( TFInstanceRelationPopup.mainQuery + prefix );
 			String typeName = Utility.getConceptType( engine, thisVert.getURI().stringValue() );
 			if ( typeV.contains( typeName ) ) {
 				continue;
@@ -126,18 +113,9 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 
 			// get the filter values
 			String fileName = "";
-			if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
-				for ( SEMOSSVertex pickedVertex1 : pickedVertex ) {
-					if ( pickedVertex1.getProperty( RDF.TYPE ).equals( thisVert.getProperty( RDF.TYPE ) ) ) {
-						fileName = fileName + "<" + pickedVertex1.getURI() + ">";
-					}
-				}
-			}
-			else {
-				for ( SEMOSSVertex pickedVertex1 : pickedVertex ) {
-					if ( pickedVertex1.getProperty( RDF.TYPE ).equals( thisVert.getProperty( RDF.TYPE ) ) ) {
-						fileName = fileName + "(<" + pickedVertex1.getURI() + ">)";
-					}
+			for ( SEMOSSVertex pickedVertex1 : pickedVertex ) {
+				if ( pickedVertex1.getProperty( RDF.TYPE ).equals( thisVert.getProperty( RDF.TYPE ) ) ) {
+					fileName = fileName + "(<" + pickedVertex1.getURI() + ">)";
 				}
 			}
 
