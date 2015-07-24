@@ -10,7 +10,7 @@ var valueArray      = [];
 var truncY          = [];
 var truncX          = [];
 var roundValueArray = [];
-var colorScale, heatMap;
+var heatMap;
 	
 function start(dataString) {
 	var jsonData = jQuery.parseJSON(dataString);
@@ -83,12 +83,9 @@ function start(dataString) {
 	var gridSize = 15;
 	var width = xAxisData.length * gridSize;
 	var height = yAxisData.length * gridSize;
-	var legendElementWidth = 60;
 	var buckets = 9;
 
-	colorScale = d3.scale.quantile()
-		.domain(valueArray)
-		.range( getColors() );
+	setColorScale(valueArray);
 
     var svg = d3.select("#chart").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -208,8 +205,6 @@ function start(dataString) {
 	
 	initSlider('slider', roundValueArray, decimalToKeep);
 	initColorChooserAndAddToEndOfHtmlElementWithId("nav");
-	$("#colorChooser").select2();
-	$("#colorChooser").on("change", updateVisualization);
 }
 	
 //Change Handler for the Alternate Color Selector. Also called whenever the data-range slider
@@ -229,9 +224,7 @@ function updateVisualization() {
 		}
 	}
 	
-	colorScale = d3.scale.quantile()
-		.domain(valueArrayUpdated)
-		.range( getColors() );
+	setColorScale(valueArrayUpdated);
 
 	heatMap.style("fill", function(d) {
 		if (d.Value >= domainArray[0] && d.Value <= domainArray[1]) {

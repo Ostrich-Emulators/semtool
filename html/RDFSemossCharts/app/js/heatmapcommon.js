@@ -1,3 +1,4 @@
+var colorScale;
 var currentColor = 'Red';
 
 var colorsRed            = ["#FFFFCC","#FFEDA0","#FED976","#FEB24C","#FD8D3C","#FC4E2A","#E31A1C","#BD0026","#800026"];
@@ -17,6 +18,12 @@ function getColors() {
 		return colorsTrafficReverse;
 
 	return colorsRed;
+}
+
+function setColorScale(domainArray) {
+	colorScale = d3.scale.quantile()
+		.domain(domainArray)
+		.range( getColors() );
 }
 
 //  Evaluating what places to round heatmap values to.
@@ -42,8 +49,10 @@ function determineHowManyDecimalsToKeep(allValuesSorted) {
 
 // Color Chooser
 function initColorChooserAndAddToEndOfHtmlElementWithId(elementId) {
+	var id = "colorChooser";
+	
 	d3.select("#" + elementId).append("select")
-		.attr("id", "colorChooser")
+		.attr("id", id)
 		.style("width", "130px")
 		.attr("class", "mySelect2")
 		.selectAll("option")
@@ -52,6 +61,9 @@ function initColorChooserAndAddToEndOfHtmlElementWithId(elementId) {
 		.append("option")
 		.attr("value", function(d){ return d; }) /* This gives me the value */
 		.text(function(d){ return d});
+	
+	$("#" + id).select2();
+	$("#" + id).on("change", updateVisualization);
 }
 
 //Define the Data-Range Slider, and its "slide" handler:
@@ -86,7 +98,8 @@ function initSlider(sliderId, allValuesSorted, decimals) {
 //Use this data to build a new heat-map legend
 function buildLegendHtml( sortedArr ) {
 	var uniqueColor = colorScale(sortedArr[0]);
-	var uniqueColorsArray = new Array(sortedArr[0], uniqueColor);
+	var uniqueColorsArray = [];
+	uniqueColorsArray.push(new Array(sortedArr[0], uniqueColor));
 	
 	for(i = 1; i < sortedArr.length; i++){
 	   if(colorScale(sortedArr[i]) != uniqueColor){
