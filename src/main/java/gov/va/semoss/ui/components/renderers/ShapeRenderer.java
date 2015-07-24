@@ -39,6 +39,10 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent( JList<?> list, Object val,
 			int index, boolean sel, boolean focus ) {
 
+		if( null == val ){
+			return super.getListCellRendererComponent( list, val, index, sel, focus );
+		}
+		
 		String valstr = val.toString();
 		Shape s = ( valstr.isEmpty() ? null
 				: GraphShapeRepository.instance().getLegendShapeByName(valstr + Constants.LEGEND).shape );
