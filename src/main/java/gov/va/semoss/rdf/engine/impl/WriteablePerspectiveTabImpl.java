@@ -147,7 +147,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab {
 		try {
 			rc.begin();
 			for ( Insight insight : arylInsights ) {
-				int currentOrder = insight.getOrder( perspective.getUri() );
+				int currentOrder = insight.getOrder();
 
 				if ( currentOrder >= newOrder && currentOrder < 999 ) {
 					Literal order = insightVF.createLiteral( currentOrder + 1 );
@@ -214,7 +214,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab {
 		try {
 			rc.begin();
 			for ( Insight insight : arylInsights ) {
-				Literal order = insightVF.createLiteral( insight.getOrder( perspectiveURI ) );
+				Literal order = insightVF.createLiteral( insight.getOrder() );
 				String query = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
 						+ "DELETE{ ?slot olo:index ?o .} "
 						+ "INSERT{ ?slot olo:index " + order + " .} "
@@ -262,7 +262,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab {
 		//as if this Insight has been removed:
 		arylInsights.remove( insight );
 		for ( int i = 0; i < arylInsights.size(); i++ ) {
-			arylInsights.get( i ).setOrder( perspective.getUri().toString(), i + 1 );
+			arylInsights.get( i ).setOrder(i + 1);
 		}
 
 		String query_1 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "

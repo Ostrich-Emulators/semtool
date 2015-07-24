@@ -95,7 +95,7 @@ public class ParameterTabController extends InsightManagerController {
           		    Utility.showMessage("Parameter fields saved ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), 
-          		       insight.getOrderedLabel(perspective.getUri()), parameter.getLabel());
+          		       insight.getOrderedLabel(), parameter.getLabel());
             	 }else{
             		Utility.showError("Error saving Parameter.");
             	 }          		 

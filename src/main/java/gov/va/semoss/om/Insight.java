@@ -50,8 +50,9 @@ public class Insight implements Serializable{
 	//A URI string of the containing Perspective,
 	//for use in the "toString()" method:
 	private String perspective;
-
-	Map<String, Integer> order = new HashMap<>();
+    //This Insight's Order under its Perspective.
+	//(Assuming that an Insight can belong to only one Perspective):
+	private int order = 0;
 
 	//The default value of this Insight is a Sparql query in most cases.
 	//Some Insights depend upon Java renderer classes, instead of queries.
@@ -196,28 +197,16 @@ public class Insight implements Serializable{
 		return this.defautlValueIsQuery;
 	}
 
-	public void setOrder( String perpsective, int index ) {
-		this.order.put( perpsective, index );
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
-	public int getOrder( URI perspectiveURI ) {
-		return this.order.get( perspectiveURI.stringValue() );
+	public int getOrder() {
+		return this.order;
 	}
 
-	// this works for the general case and will be suitable for the 2015.01 release:
 	public String getOrderedLabel() {
-		if ( this.order.size() > 1 ) {
-			log.warn( "Insight: " + this.label + " belongs to more than one perspective. Order returned may be invalid." );
-		}
-		Set<String> keySet = this.order.keySet();
-		String[] perspectives = keySet.toArray( new String[keySet.size()] );
-
-		// String[] perspectives = (String[]) this.order.keySet().toArray();
-		return this.order.get( perspectives[0] ) + ". " + this.label;
-	}
-
-	public String getOrderedLabel( URI perspectiveURI ) {
-		return getOrder( perspectiveURI ) + ". " + this.label;
+		return this.order + ". " + this.label;
 	}
 
 	//Description of Insight:
@@ -315,11 +304,11 @@ public class Insight implements Serializable{
 		if ( isLegacyValue != null ) {
 			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
 		}
-		// an insight order is always with respect to some perspective
+
 		Value ordr = resultSet.getValue( "order" );
 		if ( ordr != null ) {
 			perspective = resultSet.getValue( "perspective" ).stringValue();
-			setOrder( perspective, Integer.parseInt( ordr.stringValue() ) );
+			setOrder(Integer.parseInt(ordr.stringValue()));
 		}
 	}
 

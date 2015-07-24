@@ -514,7 +514,7 @@ public class  InsightManagerController implements Initializable{
 	            }else{
 	                setText(item.toString());
 	            	try{
-	                   Image image = new Image(getInsightIcon(item.getOrderedLabel(perspective.getUri())));
+	                   Image image = new Image(getInsightIcon(item.getOrderedLabel()));
 	                   imageView.setImage(image);
 	                   setGraphic(imageView);
 	            	}catch(Exception e){
@@ -536,7 +536,7 @@ public class  InsightManagerController implements Initializable{
 	                ClipboardContent content = new ClipboardContent();
 	                content.putString(getText());
 	                dragboard.setDragView(
-	                	new Image(getInsightIcon(getItem().getOrderedLabel(perspective.getUri())))
+	                	new Image(getInsightIcon(getItem().getOrderedLabel()))
 	                );
 	                dragboard.setContent(content);
 	                event.consume();
@@ -572,7 +572,7 @@ public class  InsightManagerController implements Initializable{
 	                    int thisIdx = arylInsights.indexOf(getItem());
 	                    int draggedIdx = 0;
 	                    for(Insight item: arylInsights){
-	                    	if(item.getOrderedLabel(perspective.getUri()).equals(dragboard.getString())){
+	                    	if(item.getOrderedLabel().equals(dragboard.getString())){
 	                    		break;
 	                    	}
 	                    	draggedIdx++;
@@ -619,7 +619,7 @@ public class  InsightManagerController implements Initializable{
 	        	}
 	        	//Reorder Insights and redisplay:
 	        	for(int i = 0; i < arylInsights.size(); i++){
-	        		arylInsights.get(i).setOrder(strPerspectiveUri, i + 1);
+	        		arylInsights.get(i).setOrder(i + 1);
 	        	}
 	        	lstvInsights.setItems(null);
 	        	lstvInsights.setItems(arylInsights);
@@ -631,7 +631,7 @@ public class  InsightManagerController implements Initializable{
 	    //the Perspective, if the previously selected Insight has been moved):
     	lstvInsights.getSelectionModel().selectFirst();
 	    for(Insight element: arylInsights){
-	    	 if(element.getOrderedLabel(perspective.getUri()).equals(prevQuestionLabel)){
+	    	 if(element.getOrderedLabel().equals(prevQuestionLabel)){
 	    	     lstvInsights.getSelectionModel().select(element);
 	    	     break;
 	    	 }
@@ -651,7 +651,7 @@ public class  InsightManagerController implements Initializable{
 		String strReturnValue = "";
 		
 		for(Insight insight: arylInsights){
-			if(insight.getOrderedLabel(((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getUri()).equals(strInsightLabel)){
+			if(insight.getOrderedLabel().equals(strInsightLabel)){
 			   for(PlaySheet playsheet: arylPlaySheets){
 				   if(insight.getOutput().equals(playsheet.getViewClass())){
 					  if(playsheet.getIcon() != null){

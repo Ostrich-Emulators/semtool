@@ -503,7 +503,7 @@ public class InsightManagerImpl implements InsightManager {
 
 				@Override
 				public int compare( Insight t, Insight t1 ) {
-					return t.getOrder( perspectiveURI ) - t1.getOrder( perspectiveURI );
+					return t.getOrder() - t1.getOrder();
 				}
 			} );
 		}

@@ -69,6 +69,9 @@ public class  InsightManagerController_2 implements Initializable{
 	protected final String ICON_LOCATION = "/images/icons16/";
 	
 	protected IEngine engine;
+    //This DataFormat allows entire Insight objects to be placed on the DragBoard
+	//of the "Perspectives" TreeView:
+    private static final DataFormat insightFormat = new DataFormat("Object/Insight");      
 	@FXML
 	protected SplitPane spaneInsightManager;
 	@FXML
@@ -489,6 +492,7 @@ public class  InsightManagerController_2 implements Initializable{
 //                          P e r s p e c t i v e   T r e e - V i e w
 //----------------------------------------------------------------------------------------------------
 	/**   Populates the Perspective tree-view. 
+	 * 
 	 * All Perspectives and their Insights are loaded into this tree-view,
 	 * so that the data can be used within the Insight Manager.
 	 */
@@ -514,9 +518,7 @@ public class  InsightManagerController_2 implements Initializable{
         treevPerspectives.setCellFactory(new Callback<TreeView<Object>, TreeCell<Object>>() {
         	//This TransferMode could either enable "Move" or "Copy":
             private TransferMode transferMode;
-            //This DataFormat allows entire Insight objects to be placed on the DragBoard:
-            private DataFormat insightFormat = new DataFormat("Object/Insight");      
-            
+           
             @Override
             public TreeCell<Object> call(TreeView<Object> stringTreeView) {            	          	
                 TreeCell<Object> treeCell = new TreeCell<Object>() {
@@ -588,8 +590,10 @@ public class  InsightManagerController_2 implements Initializable{
                         TreeItem<Object> itemDragged = search(treevPerspectives.getRoot(), valueDragged);
                         TreeItem<Object> itemTarget = search(treevPerspectives.getRoot(), (Insight) treeCell.getItem());
                         
-                        ObservableList<TreeItem<Object>> olstOldInsights = itemDragged.getParent().getChildren(); 
-                        ObservableList<TreeItem<Object>> olstInsights = itemTarget.getParent().getChildren();
+                        TreeItem<Object> oldPerspective = itemDragged.getParent();
+                        ObservableList<TreeItem<Object>> olstOldInsights = oldPerspective.getChildren(); 
+                        TreeItem<Object> newPerspective = itemTarget.getParent();
+                        ObservableList<TreeItem<Object>> olstInsights = newPerspective.getChildren();
                         int index = olstInsights.indexOf(itemTarget);
                         if(itemTarget.getParent().getValue().toString().equals("Perspectives")){
                            return;
@@ -598,7 +602,7 @@ public class  InsightManagerController_2 implements Initializable{
                         //from its old location and place it where dropped:
                         if(transferMode.equals(TransferMode.MOVE)){
                            olstOldInsights.remove(itemDragged);
-                           olstInsights.add(index, itemDragged);  
+                           olstInsights.add(index, itemDragged);
                            
                         }else{
                            String strUniqueIdentifier = "_C"+String.valueOf(System.currentTimeMillis());
@@ -625,12 +629,15 @@ public class  InsightManagerController_2 implements Initializable{
  						   } catch (RepositoryException e) {
  							  log.error(e, e);
 						   }
-                        }
+                        } 
+                        //Renumber Insights after move or copy:
+                        renumberInsights();
+
                         dragEvent.consume();
                     }
                 });
                 return treeCell;
-            }//End "treevPerspectives.setCellFactory".
+            }
 
             /**   Searches the tree-view data for the Insight passed-in, and returns the TreeItem
              * associated with that Insight. Note: This is a recursive function that compares URI's
@@ -659,12 +666,26 @@ public class  InsightManagerController_2 implements Initializable{
                return result;
             }
 
-        });  
+        	/**   Renumbers the Insights under each Perspective TreeItem.
+        	 */
+        	private void renumberInsights(){
+        		ObservableList<TreeItem<Object>> olstPerspectives = treevPerspectives.getRoot().getChildren();
+        		
+        		for(TreeItem<Object> treeItem: olstPerspectives){
+        			Perspective perspective = (Perspective) treeItem.getValue();
+                    ObservableList<TreeItem<Object>> olstInsights = treeItem.getChildren(); 
+             		
+            		for(int i = 0; i < olstInsights.size(); i++){
+            			Insight insight = (Insight) olstInsights.get(i).getValue();
+            			insight.setOrder(i + 1);
+            		}
+        		}
+        	}
+
+        });//End "treevPerspectives.setCellFactory".  
         
-	}
-	
-	
-	
+	}//End "populatePerspectiveTreeView()".
+		
 	/**   Returns a PlaySheet icon for the passed-in Insight.The array-list of PlaySheets
 	 * is consulted. The base path to all icons is defined at the top of this class, 
 	 * in "ICON_LOCATION".
@@ -1019,8 +1040,8 @@ public class  InsightManagerController_2 implements Initializable{
 //
 //  	    lstvInsightPerspective_Inst.getSelectionModel().clearSelection();
 //  	    for(Perspective perspective: arylPerspectives){
-//  	    	for(Insight insight_2: perspective.getInsights()){
-//  	    		if(insight.getId().equals(insight_2.getId())){
+//  	    	for(Insight Insight: perspective.getInsights()){
+//  	    		if(insight.getId().equals(Insight.getId())){
 //  	    			lstvInsightPerspective_Inst.getSelectionModel().select(perspective);
 //  	    			arylInsightPerspectives.add(perspective);
 //  	    		}

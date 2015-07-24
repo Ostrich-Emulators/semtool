@@ -175,7 +175,7 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 	      //as if this Insight has been removed:
 		  arylInsights.remove(insight);
 		  for(int i = 0; i < arylInsights.size(); i++){
-			 arylInsights.get(i).setOrder(perspective.getUri().toString(), i + 1);
+			 arylInsights.get(i).setOrder(i + 1);
 		  }
 		  
 		  String query_1 = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "

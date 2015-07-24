@@ -61,7 +61,7 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 
 		if ( !iconCache.containsKey( insight ) ) {
 			Icon icon = null;
-			String qtext = ( null == insight ? "" : insight.getOrderedLabel( pUri ) );
+			String qtext = ( null == insight ? "" : insight.getOrderedLabel() );
 
 			if ( null == engine || null == insight ) {
 				iconCache.put( insight, null == icon ? DefaultPlaySheetIcons.blank

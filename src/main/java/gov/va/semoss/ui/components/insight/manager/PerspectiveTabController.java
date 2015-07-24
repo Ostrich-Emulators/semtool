@@ -82,7 +82,7 @@ public class PerspectiveTabController extends InsightManagerController{
 		Task<Boolean> addInsight = new Task<Boolean>(){
 		   @Override 
 	       protected Boolean call() throws Exception{
-			   return imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().addInsight(insight.getOrder(perspective.getUri()), perspective);
+			   return imc.engine.getWriteableInsightManager().getWriteablePerspectiveTab().addInsight(insight.getOrder(), perspective);
 	       }
 		};
         //Define a listener to update the JavaFX UI when the Task completes:
@@ -291,7 +291,7 @@ public class PerspectiveTabController extends InsightManagerController{
 	            	if(savePerspective.getValue() == true){
           	 	       Utility.showMessage("Perspective Title and Description saved ok.");
        	 	           //Reload the UI from the database:
-             		   imc.loadData(imc.txtPerspectiveTitle.getText().trim(), insight.getOrderedLabel(perspective.getUri()), null);
+             		   imc.loadData(imc.txtPerspectiveTitle.getText().trim(), insight.getOrderedLabel(), null);
              		   
 	            	}else{
 		               Utility.showError("Error saving Perspective. Operation rolled back.");
@@ -350,7 +350,7 @@ public class PerspectiveTabController extends InsightManagerController{
 	            }
 	 	        //Reload the UI from the database:
 	            imc.loadData(imc.txtPerspectiveTitle.getText().trim(), 
-	               imc.arylInsights.get(imc.intCurInsightIndex).getOrderedLabel(imc.arylPerspectives.get(imc.intCurPerspectiveIndex).getUri()), null); 	            
+	               imc.arylInsights.get(imc.intCurInsightIndex).getOrderedLabel(), null); 	            
 	        }
 	    });
 		//Run the Task on a separate Thread:

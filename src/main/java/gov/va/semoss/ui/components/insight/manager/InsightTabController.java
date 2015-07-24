@@ -99,7 +99,7 @@ public class InsightTabController extends InsightManagerController {
            		    
          		    //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(),
-               		    insight.getOrderedLabel(perspective.getUri()), null);         		    	            		    
+               		    insight.getOrderedLabel(), null);         		    	            		    
             	 }else{
                 	Utility.showError("Error adding Parameter to current Insight. Operation rolled back.");
             	 }          		 
@@ -138,7 +138,7 @@ public class InsightTabController extends InsightManagerController {
            		    
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(),
-                   		insight.getOrderedLabel(perspective.getUri()), null);   
+                   		insight.getOrderedLabel(), null);   
             	 }else{
             		Utility.showError("Error deleting Parameter. Operation rolled back.");
             	 }          		 
@@ -301,7 +301,7 @@ public class InsightTabController extends InsightManagerController {
           		    Utility.showMessage("Insight, and associated Perspectives, saved ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), 
-          		       insight.getOrderedLabel(perspective.getUri()), null);
+          		       insight.getOrderedLabel(), null);
             	 }else{
             		Utility.showError("Error saving Insight.");
             	 }          		 
