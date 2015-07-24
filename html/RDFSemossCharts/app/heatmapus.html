@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<style>
+		.counties {
+		  fill: none;
+		}
+		.states {
+		  fill: none;
+		  stroke: #fff;
+		  stroke-linejoin: round;
+		}
+		.q0-9 { fill:rgb(247,251,255); }
+		.q1-9 { fill:rgb(222,235,247); }
+		.q2-9 { fill:rgb(198,219,239); }
+		.q3-9 { fill:rgb(158,202,225); }
+		.q4-9 { fill:rgb(107,174,214); }
+		.q5-9 { fill:rgb(66,146,198); }
+		.q6-9 { fill:rgb(33,113,181); }
+		.q7-9 { fill:rgb(8,81,156); }
+		.q8-9 { fill:rgb(8,48,107); }
+	</style>
+	
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/select2.css">
+    <link rel="stylesheet" type="text/css" href="css/slider.css">
+    <link rel="stylesheet" type="text/css" href="css/heatmap.css">
+
+	<script src="lib/jquery/jquery-1.8.3.min.js"></script>
+	<script src="lib/d3/d3.min.js"></script>
+	<script src="lib/d3/d3.queue.min.js"></script>
+	<script src="lib/d3/d3.topojson.min.js"></script>
+    <script src="lib/underscore/underscore.js"></script>
+    <script src="lib/select2/select2.js"></script>
+    <script src="lib/bootstrap/bootstrap-slider.js"></script>
+    <script src="js/heatmapcommon.js"></script>
+    <script src="js/heatmapus.js"></script>
+	<script src="js/semoss.js"></script>
+
+</head>
+<body>
+
+    <div id="nav" class="mySelect2">
+      <img id="logo" src="img/questions_us_heat_map1_16.png"><span class="brand userCanResize">US Heatmap</span>
+      <b id="min" class="userCanResize"></b><input type="text" class="slider userCanResize" id="slider" value=""><b id="max" class="userCanResize"></b>
+    </div>
+    <div id="heatmap" class="userCanResize"></div>
+
+</body>
+</html>

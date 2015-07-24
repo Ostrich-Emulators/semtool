@@ -26,3 +26,7 @@ function doTheResize(element, incr) {
   
   element.css("font-size", newSize + "px");
 }
+
+function invalid( item ){
+	return (item === undefined || item === null);
+}

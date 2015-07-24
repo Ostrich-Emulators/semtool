@@ -44,7 +44,7 @@ public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 	 * Constructor for USHeatMapPlaySheet.
 	 */
 	public USHeatMapPlaySheet() {
-		super( "/html/RDFSemossCharts/app/usheatmap.html" );
+		super( "/html/RDFSemossCharts/app/heatmapus.html" );
 	}
 
 	@Override
@@ -75,10 +75,9 @@ public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 			data.add( elementHash );
 		}
 		
-		Set<Map<String, Object>> convertedData = convertDataValuesToPercentages(data);
-
 		Map<String, Object> allHash = new HashMap<>();
-		allHash.put( "dataSeries", convertedData );
+//		allHash.put( "dataSeries", convertDataValuesToPercentages(data) );
+		allHash.put( "dataSeries", data );
 		addDataHash( allHash );
 		
 		createView();
