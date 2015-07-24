@@ -28,7 +28,8 @@ public class SemossFileView extends FileView {
 		icons.put( "xlsx", getIcon( "excel" ) );
 		icons.put( "csv", getIcon( "csv" ) );
 
-		for ( String ext : new String[]{ "ttl", "rdf", "owl", "rdfs", "n3" } ) {
+		for ( String ext : new String[]{ "ttl", "rdf", "owl", "rdfs", "n3",
+			"spq", "sparql" } ) {
 			icons.put( ext, getIcon( "semantic-webdoc" ) );
 		}
 	}

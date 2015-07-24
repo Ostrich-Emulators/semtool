@@ -41,6 +41,10 @@ public interface QueryNodeEdgeBase extends NodeEdgeBase {
 	public String getLabel( URI prop );
 
 	public void setQueryId( String id );
-	
+
 	public String getQueryId();
+
+	public void setPropertyMetadata( URI prop, String str );
+
+	public String getPropertyMetadata( URI prop );
 }

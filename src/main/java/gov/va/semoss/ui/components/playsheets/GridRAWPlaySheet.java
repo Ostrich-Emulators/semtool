@@ -19,7 +19,9 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
+import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.SaveAllGridAction;
 import gov.va.semoss.ui.actions.SaveAsGridAction;
@@ -44,18 +46,22 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -63,8 +69,14 @@ import javax.swing.table.JTableHeader;
 
 import javax.swing.table.TableColumnModel;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 
 /**
  */
@@ -74,8 +86,8 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	private static final Logger log = Logger.getLogger( GridPlaySheet.class );
 	private final ValueTableModel model;
 	private final JTable table;
-	private final SaveGridAction save = new SaveGridAction( true );
-	private final SaveAsGridAction saveas = new SaveAsGridAction( false );
+	private final SaveGridAction save = new SaveGridAction( false );
+	private final SaveAsGridAction saveas = new SaveAsGridAction( true );
 	private final SaveAllGridAction saveall = new SaveAllGridAction();
 	private final JLabel searchlabel = new JLabel( "Search" );
 	private final JTextField searchfield = new JTextField();
@@ -88,6 +100,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	public GridRAWPlaySheet( ValueTableModel mod ) {
 		model = mod;
 		table = new JTable( model );
+		addMouseListener();
 		setLayout( new BorderLayout() );
 
 		final JScrollPane jsp = new JScrollPane( table );
@@ -101,7 +114,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 				put( KeyStroke.getKeyStroke( KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK ),
 						"saveGridAction" );
 		table.getActionMap().put( "saveGridAction", save );
-		
+
 		table.setCellSelectionEnabled( true );
 
 		jsp.getVerticalScrollBar().setUI( new NewScrollBarUI() );
@@ -268,6 +281,97 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		return true;
 	}
 
+	/**
+	 * Retrieves a Resource if the data from {@link JTable#getValueAt(int, int) }
+	 * can be treated as Resource, or null.
+	 *
+	 * @param row
+	 * @param col
+	 * @return a Resource or null
+	 */
+	protected Resource asResource( int row, int col ) {
+		if ( Resource.class.isAssignableFrom( table.getColumnClass( col ) ) ) {
+			return Resource.class.cast( table.getValueAt( row, col ) );
+		}
+		return null;
+	}
+
+	private void addMouseListener() {
+		table.addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseReleased( MouseEvent e ) {
+				int r = table.rowAtPoint( e.getPoint() );
+				int c = table.columnAtPoint( e.getPoint() );
+				if ( r >= 0 && r < table.getRowCount() ) {
+					table.setRowSelectionInterval( r, r );
+				}
+				else {
+					table.clearSelection();
+				}
+
+				int rowindex = table.getSelectedRow();
+				if ( rowindex < 0 ) {
+					return;
+				}
+				if ( SwingUtilities.isRightMouseButton( e ) ) {
+					Resource rsr = asResource( r, c );
+					if ( null != rsr ) {
+						JPopupMenu popup = new JPopupMenu();
+						popup.add( new ShowInGraphAction( rsr ) );
+						popup.add( new EditPropertiesAction( rsr ) );
+						popup.show( e.getComponent(), e.getX(), e.getY() );
+					}
+				}
+			}
+		} );
+	}
+
+	private class ShowInGraphAction extends AbstractAction {
+
+		public final Resource uri;
+
+		public ShowInGraphAction( Resource myuri ) {
+			super( "Explore in Graph" );
+			uri = myuri;
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			GraphPlaySheet gps = new GraphPlaySheet();
+			gps.setTitle( "Node Explorer" );
+			List<Value[]> vals = new ArrayList<>();
+			vals.add( new Value[]{ uri } );
+			gps.create( vals, Arrays.asList( "Subject" ), getEngine() );
+			addSibling( gps );
+		}
+	}
+
+	private class EditPropertiesAction extends AbstractAction {
+
+		public final Resource uri;
+
+		public EditPropertiesAction( Resource myuri ) {
+			super( "View All Properties" );
+			uri = myuri;
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			SEMOSSVertex vertex = new SEMOSSVertex( URI.class.cast( uri ) );
+			try {
+				Model model = getEngine().construct( ModelQueryAdapter.describe( uri ) );
+				for ( Statement s : model ) {
+					vertex.setValue( s.getPredicate(), s.getObject() );
+				}
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
+				log.error( ex, ex );
+			}
+			addSibling( new PropertyEditorPlaySheet( Arrays.asList( vertex ),
+					"Selected Node Properties", getEngine() ) );
+		}
+	}
+
 	private class HighlightingRenderer extends DefaultTableCellRenderer {
 
 		private final MultiMap<Integer, Integer> highlights = new MultiMap<>();
@@ -275,9 +379,9 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		@Override
 		public Component getTableCellRendererComponent( JTable table, Object value,
 				boolean isSelected, boolean hasFocus, int row, int column ) {
-			JComponent comp = (JComponent)super.getTableCellRendererComponent( table, value, isSelected,
+			JComponent comp = (JComponent) super.getTableCellRendererComponent( table, value, isSelected,
 					hasFocus, row, column );
-			if( null != value ){
+			if ( null != value ) {
 				comp.setToolTipText( packageValueInHTML( value.toString() ) );
 			}
 			setOpaque( true );
@@ -292,26 +396,26 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 			}
 			return comp;
 		}
-		
-		private String packageValueInHTML(String val){
+
+		private String packageValueInHTML( String val ) {
 			StringBuilder content = new StringBuilder();
-			content.append("<html>");
-			String[] words = val.split(" ");
+			content.append( "<html>" );
+			String[] words = val.split( " " );
 			int lineLength = 0;
 			int maxLineLength = 80;
 			StringBuilder line = new StringBuilder();
-			for (String word : words){
-				line.append(word + " ");
+			for ( String word : words ) {
+				line.append( word ).append( " " );
 				lineLength += word.length();
-				if (lineLength > maxLineLength){
-					content.append(line.toString());
-					content.append("<br>");
+				if ( lineLength > maxLineLength ) {
+					content.append( line.toString() );
+					content.append( "<br>" );
 					lineLength = 0;
 					line = new StringBuilder();
 				}
 			}
-			content.append(line.toString());
-			content.append("</html>");
+			content.append( line.toString() );
+			content.append( "</html>" );
 			return content.toString();
 		}
 
@@ -323,5 +427,4 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 			highlights.add( row, col );
 		}
 	}
-
 }

@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet.JoinType;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
@@ -12,12 +13,16 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.AbstractButton;
@@ -61,7 +66,23 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return ( JOptionPane.YES_OPTION == ans );
 	}
 
-	public static Collection<ConstraintValue> getValues( URI property, String label,
+	private static ConstraintValueSet makeCVSet( String val, URI type,
+			URI property, boolean included ) {
+
+		List<String> newvals = ( val.contains( "|" )
+				? explode( val ) : Arrays.asList( val ) );
+
+		ConstraintValueSet values = new ConstraintValueSet( included, property,
+				( newvals.size() > 1 ? JoinType.OR : JoinType.SINGLE ), val );
+
+		for ( String v : newvals ) {
+			values.add( ( XMLSchema.ANYURI == type
+					? new URIImpl( v ) : new LiteralImpl( v, type ) ) );
+		}
+		return values;
+	}
+
+	public static ConstraintValueSet getValues( URI property, String label,
 			Collection<Value> value, boolean checked ) {
 		JTextField input = new JTextField();
 		if ( null != value ) {
@@ -75,30 +96,15 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		ConstraintPanel cp = new ConstraintPanel( property, label, input, checked,
 				value, propmap );
 		if ( showDialog( label, cp ) ) {
+
 			String val = input.getText();
 			URI type = cp.getType();
-
-			List<ConstraintValue> values = new ArrayList<>();
-
-			if ( val.contains( "|" ) ) {
-				List<String> newvals = explode( val );
-				for ( String v : newvals ) {
-					values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
-							? new URIImpl( v )
-							: new LiteralImpl( v, type ) ), cp.isIncluded(), property ) );
-				}
-			}
-			else {
-				values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
-						? new URIImpl( val )
-						: new LiteralImpl( val, type ) ), cp.isIncluded(), property ) );
-			}
-			return values;
+			return makeCVSet( val, type, property, cp.isIncluded() );
 		}
 		return null;
 	}
 
-	public static List<ConstraintValue> getValues( String label, Map<URI, String> propmap ) {
+	public static ConstraintValueSet getValues( String label, Map<URI, String> propmap ) {
 		JTextField input = new JTextField();
 
 		ConstraintPanel cp = new ConstraintPanel( null, label, input, true,
@@ -107,22 +113,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			String val = input.getText();
 			URI type = cp.getType();
 
-			List<ConstraintValue> values = new ArrayList<>();
-						if ( val.contains( "|" ) ) {
-				List<String> newvals = explode( val );
-				for ( String v : newvals ) {
-					values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
-							? new URIImpl( v )
-							: new LiteralImpl( v, type ) ), cp.isIncluded(), cp.getPropertyType() ) );
-				}
-			}
-			else {
-				values.add( new ConstraintValue( ( XMLSchema.ANYURI == type
-						? new URIImpl( val )
-						: new LiteralImpl( val, type ) ), cp.isIncluded(), cp.getPropertyType() ) );
-			}
-
-			return values;
+			return makeCVSet( val, type, cp.getPropertyType(), cp.isIncluded() );
 		}
 		return null;
 	}
@@ -176,7 +167,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	 * @param checked
 	 * @return
 	 */
-	public static Collection<ConstraintValue> getValues( URI property, String label,
+	public static ConstraintValueSet getValues( URI property, String label,
 			Collection<Value> values, Map<URI, String> choices, boolean checked ) {
 		choices = Utility.sortUrisByLabel( choices );
 
@@ -206,10 +197,12 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		ConstraintPanel cp = new ConstraintPanel( property, label,
 				new JScrollPane( list ), checked, values, propmap );
 		if ( showDialog( label, cp ) ) {
+			List<URI> vals = list.getSelectedValuesList();
 
-			List<ConstraintValue> returns = new ArrayList<>();
-			for ( URI u : list.getSelectedValuesList() ) {
-				returns.add( new ConstraintValue( u, cp.isIncluded(), property ) );
+			ConstraintValueSet returns = new ConstraintValueSet( cp.isIncluded(), property,
+					( vals.size() > 1 ? JoinType.AND : JoinType.SINGLE ) );
+			for ( Value v : vals ) {
+				returns.add( v );
 			}
 
 			return returns;
@@ -445,19 +438,6 @@ public class ConstraintPanel extends javax.swing.JPanel {
   private javax.swing.JRadioButton uritype;
   // End of variables declaration//GEN-END:variables
 
-	public static class ConstraintValue {
-
-		public final Value val;
-		public final boolean included;
-		public final URI property;
-
-		public ConstraintValue( Value val, boolean included, URI property ) {
-			this.val = val;
-			this.included = included;
-			this.property = property;
-		}
-	}
-
 	private static List<String> explode( String val ) {
 		List<String> vals = new ArrayList<>();
 		StringBuffer processed = new StringBuffer();
@@ -476,7 +456,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 
 		for ( String s : processed.toString().split( "\\s*\\|\\s*" ) ) {
-			if( !s.trim().isEmpty() ){
+			if ( !s.trim().isEmpty() ) {
 				vals.add( s.trim() );
 			}
 		}
@@ -506,5 +486,82 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 
 		return sb.toString();
+	}
+
+	public static class ConstraintValue {
+
+		public final Value val;
+		public final boolean included;
+		public final URI property;
+
+		public ConstraintValue( Value val, boolean included, URI property ) {
+			this.val = val;
+			this.included = included;
+			this.property = property;
+		}
+	}
+
+	// for the record, I have no idea why I can't use import statements for these classes
+	public static class ConstraintValueSet extends java.util.LinkedHashSet<org.openrdf.model.Value> {
+
+		public enum JoinType {
+
+			SINGLE, OR, AND
+		};
+
+		public final boolean included;
+		public final URI property;
+		public final JoinType joiner;
+		public final String raw;
+
+		public ConstraintValueSet( boolean included, URI property, JoinType joiner,
+				String raw ) {
+			this.included = included;
+			this.property = property;
+			this.joiner = joiner;
+			this.raw = raw;
+		}
+
+		public ConstraintValueSet( boolean included, URI property, JoinType joiner ) {
+			this( included, property, joiner, null );
+		}
+
+		public ConstraintValueSet( boolean included, URI property, JoinType joiner,
+				Collection<Value> vals, String raw ) {
+			this( included, property, joiner, raw );
+			addAll( vals );
+		}
+
+		/**
+		 * Presents the data of this set as a list of
+		 * {@link ConstraintValue ConstraintValues}
+		 *
+		 * @return
+		 */
+		public Set<ConstraintValue> asCVs() {
+			Set<ConstraintValue> ret = new HashSet<>();
+			Iterator<Value> it = this.iterator();
+			while ( it.hasNext() ) {
+				ret.add( new ConstraintValue( it.next(), included, property ) );
+			}
+			return ret;
+		}
+
+		/**
+		 * Gets the first value as a {@link ConstraintValue}, or null if we have no
+		 * values
+		 *
+		 * @return the first value as a ConstraintValue or null if we have no values
+		 */
+		public ConstraintValue firstCV() {
+			if ( size() > 0 ) {
+				return new ConstraintValue( iterator().next(), included, property );
+			}
+			return null;
+		}
+
+		public boolean isSingle() {
+			return ( 1 == size() );
+		}
 	}
 }

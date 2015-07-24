@@ -37,79 +37,63 @@ import org.apache.log4j.Logger;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
+import java.awt.HeadlessException;
+import java.io.ByteArrayOutputStream;
+import org.apache.commons.io.FileUtils;
 
 /**
  * The Utility class contains functions for use with exporting images.
  */
 public class ExportUtility {
-	private static final Logger log = Logger.getLogger( ExportUtility.class );
-	public static enum ExportType {
-		PNG, PDF, CSV
-	};
 
-	public static void doGraphExportPDFWithDialogue(Component component) {
-		doGraphExportWithDialogue(component, ExportType.PDF, ".pdf", null);
-	}
-	
-	public static void doGraphExportPNGWithDialogue(Component component) {
-		doGraphExportWithDialogue(component, ExportType.PNG, ".png", null);
-	}
-	
-	public static void doExportCSVWithDialogue(Component component, String data) {
-		doGraphExportWithDialogue(component, ExportType.CSV, ".csv", data);
-	}
-	
-	private static void doGraphExportWithDialogue(Component component, ExportType exportType, String suffix, String data) {
-		File file = getExportFileLocation(component, suffix);
-		if (file == null) {
+	private static final Logger log = Logger.getLogger( ExportUtility.class );
+
+	public static void doExportCSVWithDialogue( Component component, String data ) {
+		File file = getExportFileLocation( component, ".png" );
+		if ( null == file ) {
 			return;
 		}
 
 		try {
-			if (exportType == ExportType.PNG)
-				writePNG(component, file);
-			else if (exportType == ExportType.PDF)
-				writePDF(component, file.getAbsolutePath());			
-			else if (exportType == ExportType.CSV)
-				writeCSV(component, file, data);			
-			
-			Utility.showExportMessage( JOptionPane.getFrameForComponent( component ), 
+			FileUtils.write( file, data );
+			Utility.showExportMessage( JOptionPane.getFrameForComponent( component ),
 					"Export successful: " + file.getAbsolutePath(), "Export Successful", file );
 		}
-		catch ( IOException | DocumentException e ) {
-			Utility.showError( "Graph export to " + suffix + " failed." );
+		catch ( IOException e ) {
 			log.error( e, e );
+			Utility.showError( e.getLocalizedMessage() );
 		}
 	}
-	
-	private static File getExportFileLocation(Component component, String suffix) {
+
+	public static File getExportFileLocation( Component component, String suffix ) {
 		try {
 			String lastDirUsedKey = "lastgraphexportdir";
-			
+
 			Preferences prefs = Preferences.userNodeForPackage( ExportUtility.class );
 			File loc = FileBrowsePanel.getLocationForEmptyPref( prefs, lastDirUsedKey );
 
 			String p = prefs.get( lastDirUsedKey, loc.getAbsolutePath() );
 
 			JFileChooser fileChooser = new JFileChooser( p );
-			fileChooser.setDialogTitle("Specify a " + suffix + " file to save");
-			fileChooser.setSelectedFile( getSuggestedFilename(component, suffix) );
-			
+			fileChooser.setDialogTitle( "Specify a " + suffix + " file to save" );
+			fileChooser.setSelectedFile( getSuggestedFilename( component, suffix ) );
+
 			int userSelection = fileChooser.showSaveDialog( JOptionPane.getFrameForComponent( component ) );
-			if (userSelection != JFileChooser.APPROVE_OPTION) {
+			if ( userSelection != JFileChooser.APPROVE_OPTION ) {
 				return null;
 			}
-			
-			File file = fileChooser.getSelectedFile();			
+
+			File file = fileChooser.getSelectedFile();
 			prefs.put( lastDirUsedKey, file.getParent() );
-			
+
 			String fileLocation = file.getAbsolutePath();
-			if ( !fileLocation.toUpperCase().endsWith(suffix.toUpperCase()) ) {
-				file = new File(fileLocation + suffix);
+			if ( !fileLocation.toUpperCase().endsWith( suffix.toUpperCase() ) ) {
+				file = new File( fileLocation + suffix );
 			}
-			
+
 			return file;
 		}
 		catch ( Exception e ) {
@@ -119,44 +103,30 @@ public class ExportUtility {
 		}
 	}
 
-	private static File getSuggestedFilename(Component component, String suffix) {
+	public static File getSuggestedFilename( Component component, String suffix ) {
 		try {
-			String title = ((IPlaySheet) component).getTitle();
-			title = title.replaceAll("[^A-Za-z0-9 ()]", "");
-			if (title.length() > 100)
-				title = title.substring(0, 100);
+			String title = ( (IPlaySheet) component ).getTitle();
+			title = title.replaceAll( "[^A-Za-z0-9 ()]", "" );
+			if ( title.length() > 100 ) {
+				title = title.substring( 0, 100 );
+			}
 
-			return new File(title + suffix);
-		} catch (Exception e) {
-			log.debug("Couldn't create a suggested filename from component: " + component + "\n" + e, e);
-			return new File("SemossExport" + suffix);
+			return new File( title + suffix );
+		}
+		catch ( Exception e ) {
+			log.debug( "Couldn't create a suggested filename from component: " + component + "\n" + e, e );
+			return new File( "SemossExport" + suffix );
 		}
 	}
 
-	private static void writeCSV(Component component, File file, String data) throws IOException{
-        FileOutputStream os = null;
-        try {
-            os = new FileOutputStream(file);
-            os.write(data.getBytes());
-        } finally {
-            try { if (os != null) os.close(); } catch (IOException e) {}
-        }
-	}
-	
-	private static void writePNG(Component component, File file) throws IOException{
-		BufferedImage bufferedImage = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		component.paint(bufferedImage.getGraphics());
-		ImageIO.write(bufferedImage, Constants.PNG, file);
-	}
-
-	private static void writePDF(Component component, String fileLocation) throws IOException, DocumentException {
+	public static void exportAsPdf( BufferedImage img, File pdf )
+			throws IOException, DocumentException {
 		final double MAX_DIM = 14400;
 
-		BufferedImage bufferedImage = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		component.paint(bufferedImage.getGraphics());
-		ImageIO.write(bufferedImage, Constants.PNG, new File(fileLocation));
-		
-		com.itextpdf.text.Image image1 = com.itextpdf.text.Image.getInstance( fileLocation );
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write( img, "PNG", baos );
+		Image image1 = Image.getInstance( baos.toByteArray(), true );
+
 		Rectangle r;
 		if ( image1.getHeight() > MAX_DIM ) {
 			r = new Rectangle( (int) image1.getWidth(), (int) MAX_DIM );
@@ -169,24 +139,24 @@ public class ExportUtility {
 		}
 
 		Document document = new Document( r, 15, 25, 15, 25 );
-		PdfWriter.getInstance( document, new FileOutputStream( fileLocation ) );
+		PdfWriter.getInstance( document, new FileOutputStream( pdf ) );
 		document.open();
 
-		int pages = (int) Math.ceil( (double) bufferedImage.getHeight() / MAX_DIM );
+		int pages = (int) Math.ceil( (double) img.getHeight() / MAX_DIM );
 		if ( pages == 0 ) {
 			pages = 1;
 		}
 		for ( int i = 0; i < pages; i++ ) {
 			BufferedImage temp;
 			if ( i < pages - 1 ) {
-				temp = bufferedImage.getSubimage( 0, i * (int) MAX_DIM, bufferedImage.getWidth(), (int) MAX_DIM );
+				temp = img.getSubimage( 0, i * (int) MAX_DIM, img.getWidth(), (int) MAX_DIM );
 			}
 			else {
-				temp = bufferedImage.getSubimage( 0, i * (int) MAX_DIM, bufferedImage.getWidth(), bufferedImage.getHeight() % (int) MAX_DIM );
+				temp = img.getSubimage( 0, i * (int) MAX_DIM, img.getWidth(), img.getHeight() % (int) MAX_DIM );
 			}
 			File tempFile = new File( i + Constants.PNG );
 			ImageIO.write( temp, Constants.PNG, tempFile );
-			com.itextpdf.text.Image croppedImage = com.itextpdf.text.Image.getInstance( i + Constants.PNG );
+			Image croppedImage = Image.getInstance( i + Constants.PNG );
 			document.add( croppedImage );
 			tempFile.delete();
 
@@ -194,7 +164,7 @@ public class ExportUtility {
 				document.newPage();
 			}
 		}
-		
+
 		document.close();
 	}
 }
