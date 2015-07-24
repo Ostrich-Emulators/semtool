@@ -194,10 +194,12 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 		return properties.containsKey( prop );
 	}
 	
+	@Override
 	public void setPropertyMetadata( URI prop, String str ){
 		rawstrings.put( prop, str );
 	}
 
+	@Override
 	public String getPropertyMetadata( URI prop ){
 		return rawstrings.get( prop );
 	}
