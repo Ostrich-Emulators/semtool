@@ -27,7 +27,7 @@ public class ColorRenderer extends DefaultListCellRenderer {
 
 		Color color = Color.class.cast( val );
 		val = GraphColorRepository.instance().getColorName( color );
-		Component c = super.getListCellRendererComponent( list, val, index, sel, focus );
+		super.getListCellRendererComponent( list, val, index, sel, focus );
 		TableColorRenderer.colorify( this, color );
 
 		return this;

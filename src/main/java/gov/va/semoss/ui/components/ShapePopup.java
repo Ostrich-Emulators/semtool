@@ -50,7 +50,11 @@ public class ShapePopup extends JMenu {
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					gps.setShapes( vertices, en.getValue() );
+					for( SEMOSSVertex v : vertices ){
+						v.setShape( en.getValue() );
+					}
+					
+					gps.updateGraph();
 				}
 			} );
 			add( menuItem );

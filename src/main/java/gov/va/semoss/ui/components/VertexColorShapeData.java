@@ -25,7 +25,6 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.Utility;
 
 import java.awt.Color;
@@ -49,7 +48,7 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 
 	private static final String[] columnNames = { "Node", "Instance", "Shape", "Color" };
 	private static final Class<?>[] columnClasses = { String.class, String.class,
-		Shape.class, String.class };
+		Shape.class, Color.class };
 	private Map<URI, List<SEMOSSVertex>> nodeMap = new HashMap<>();
 	private List<ColorShapeRow> data = new ArrayList<>();
 
@@ -158,12 +157,6 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 		}
 	}
 
-	public void setShapes( Collection<SEMOSSVertex> nodes, Shape shape ) {
-		for ( SEMOSSVertex node : nodes ) {
-			setShape( node, shape, getRowForVertex( node ) );
-		}
-	}
-
 	public void setShape( SEMOSSVertex vertex, Shape shape, int row ) {
 		if ( row < 0 ) {
 			return;
@@ -172,29 +165,12 @@ public class VertexColorShapeData extends AbstractTableModel implements GraphLis
 		vertex.setShape( shape );
 	}
 
-	public void setColors( Collection<SEMOSSVertex> nodes, Color color ) {
-		for ( SEMOSSVertex node : nodes ) {
-			setColor( node, color, getRowForVertex( node ) );
-		}
-	}
-
 	public void setColor( SEMOSSVertex vertex, Color color, int row ) {
 		if ( row < 0 ) {
 			return;
 		}
 		data.get( row ).color = color;
 		vertex.setColor( color );
-	}
-
-	private int getRowForVertex( SEMOSSVertex vert ) {
-		int rowNum = -1;
-		for ( int i = 0; i < data.size(); i++ ) {
-			if ( data.get( i ).node.equals( vert ) ) {
-				rowNum = i;
-			}
-		}
-
-		return rowNum;
 	}
 
 	@Override
