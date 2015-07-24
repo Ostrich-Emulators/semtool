@@ -7,3 +7,5 @@ target
 .project
 .settings
 .settings/*
+src/main/resources/html.zip
+.gitignore
