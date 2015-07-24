@@ -64,7 +64,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		Map<URI, Color> colors = new HashMap<>();
 		for ( SEMOSSVertex v : gps.getVisibleGraph().getVertices() ) {
 			types.add( v.getType(), v );
-			shapes.put( v.getType(), v.getShapeLegend() );
+			shapes.put( v.getType(), GraphShapeRepository.instance().getLegendShape( v.getShape() ) );
 			colors.put( v.getType(), v.getColor() );
 		}
 

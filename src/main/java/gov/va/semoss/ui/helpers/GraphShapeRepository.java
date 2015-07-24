@@ -159,11 +159,14 @@ public class GraphShapeRepository {
 		return shapeGenerator.shapeNames;
 	}
 
-	public Map<String, Shape> getNamedShapeMap(){
-		return new HashMap<>( shapeGenerator.shapes );
+	public Map<String, Shape> getNamedShapeMap() {
+		Map<String, Shape> map = new HashMap<>();
+		for ( String name : shapeGenerator.shapeNames ) {
+			map.put( name, shapeGenerator.getNamedShape( name ) );
+		}
+		return map;
 	}
-	
-	
+
 	/**
 	 * Get a set of all Shapes used in this system
 	 *

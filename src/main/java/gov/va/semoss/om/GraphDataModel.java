@@ -167,7 +167,12 @@ public class GraphDataModel {
 		}
 	}
 
-	public void removeElementsSinceLevel( int overlayLevel ) {
+	/**
+	 * Removes elements that are "undone" when the history tree branches
+	 * @param overlayLevel
+	 * @return the vertices that were removed
+	 */
+	public Collection<SEMOSSVertex> removeElementsSinceLevel( int overlayLevel ) {
 		// if we've undone some data and now want to add 
 		// something else, get rid of the future redo data
 		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
@@ -188,6 +193,8 @@ public class GraphDataModel {
 			vizgraph.removeVertex( v );
 			level.remove( v );
 		}
+		
+		return nodesToRemove;
 	}
 
 	public int getLevel( NodeEdgeBase check ) {

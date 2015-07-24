@@ -58,7 +58,6 @@ public class ColorShapeClearRefreshListener implements IChakraListener {
 		table.repaint();
 
 		playSheet.updateGraph();
-		// playSheet.repaint();
 		playSheet.setVisible( true );
 	}
 

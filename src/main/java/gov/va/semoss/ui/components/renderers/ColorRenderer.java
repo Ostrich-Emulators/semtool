@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.renderers;
 
 import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.util.Constants;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
@@ -22,7 +23,7 @@ public class ColorRenderer extends DefaultListCellRenderer {
 			int index, boolean sel, boolean focus ) {
 
 		if ( null == val ) {
-			return super.getListCellRendererComponent( list, val, index, sel, focus );
+			val = GraphColorRepository.instance().getColor( Constants.TRANSPARENT );
 		}
 
 		Color color = Color.class.cast( val );

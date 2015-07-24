@@ -52,9 +52,7 @@ public class ColorPopup extends JMenu {
 				public void actionPerformed( ActionEvent e ) {
 					for( SEMOSSVertex v : vertices ){
 						v.setColor( en.getValue() );
-					}
-					
-					gps.updateGraph();
+					}					
 				}
 			} );
 			add( menuItem );

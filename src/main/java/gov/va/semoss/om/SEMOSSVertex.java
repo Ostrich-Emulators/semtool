@@ -34,7 +34,8 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 
-	private transient Shape shape, shapeLegend;
+	public static final String CHANGE_SHAPE = "shape";
+	private transient Shape shape;
 	private transient int incount = 0;
 	private transient int outcount = 0;
 
@@ -75,19 +76,13 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 
 	@Override
 	public void setShape( Shape _shape ) {
+		Shape old = shape;
 		shape = _shape;
+		firePropertyChanged( CHANGE_SHAPE, old, shape );
 	}
 
 	@Override
 	public Shape getShape() {
 		return shape;
-	}
-
-	public void setShapeLegend( Shape _shapeLegend ) {
-		shapeLegend = _shapeLegend;
-	}
-
-	public Shape getShapeLegend() {
-		return shapeLegend;
 	}
 }

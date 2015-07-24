@@ -43,18 +43,16 @@ public class ShapePopup extends JMenu {
 		super( _name );
 
 		GraphShapeRepository gsr = GraphShapeRepository.instance();
-		for( Map.Entry<String, Shape> en : gsr.getNamedShapeMap().entrySet() ){
+		for ( Map.Entry<String, Shape> en : gsr.getNamedShapeMap().entrySet() ) {
 			JMenuItem menuItem = new JMenuItem( en.getKey() );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338448713648152673L;
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					for( SEMOSSVertex v : vertices ){
+					for ( SEMOSSVertex v : vertices ) {
 						v.setShape( en.getValue() );
 					}
-					
-					gps.updateGraph();
 				}
 			} );
 			add( menuItem );
