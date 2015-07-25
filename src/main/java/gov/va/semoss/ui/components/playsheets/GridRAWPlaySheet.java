@@ -25,12 +25,11 @@ import gov.va.semoss.ui.actions.SaveAllGridAction;
 import gov.va.semoss.ui.actions.SaveAsGridAction;
 import gov.va.semoss.ui.actions.SaveGridAction;
 import gov.va.semoss.ui.components.LineNumberTableRowHeader;
-import gov.va.semoss.ui.components.NewScrollBarUI;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.URIEditor;
-
 import gov.va.semoss.util.MultiMap;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -60,8 +59,8 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
-
 import javax.swing.table.TableColumnModel;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -104,7 +103,6 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		
 		table.setCellSelectionEnabled( true );
 
-		jsp.getVerticalScrollBar().setUI( new NewScrollBarUI() );
 		jsp.setAutoscrolls( true );
 
 		LineNumberTableRowHeader tableLineNumber
@@ -269,7 +267,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	private class HighlightingRenderer extends DefaultTableCellRenderer {
-
+		private static final long serialVersionUID = 1858290305167884631L;
 		private final MultiMap<Integer, Integer> highlights = new MultiMap<>();
 
 		@Override

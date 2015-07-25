@@ -33,9 +33,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import gov.va.semoss.ui.components.NewHoriScrollBarUI;
-import gov.va.semoss.ui.components.NewScrollBarUI;
-
 /**
  * This class extends the basic JButton to create a drop down menu for buttons.
  */
@@ -85,8 +82,6 @@ public class ButtonMenuDropDown  extends JButton {
 		list = new JList(listArray);
 
 		pane.setViewportView(list);
-		pane.getVerticalScrollBar().setUI(new NewScrollBarUI());
-		pane.getHorizontalScrollBar().setUI(new NewHoriScrollBarUI());
 		pane.setPreferredSize(new Dimension((this.getPreferredSize()).width, 300));
 		popupMenu.add(pane);
 		
@@ -104,8 +99,6 @@ public class ButtonMenuDropDown  extends JButton {
 		list = new JList(listArray);
 	
 		pane.setViewportView(list);
-		pane.getVerticalScrollBar().setUI(new NewScrollBarUI());
-		pane.getHorizontalScrollBar().setUI(new NewHoriScrollBarUI());
 		pane.setPreferredSize(new Dimension(width, height));
 		popupMenu.add(pane);  
 	
@@ -123,8 +116,6 @@ public class ButtonMenuDropDown  extends JButton {
 		list = new JList(listArray);
 				
 		pane.setViewportView(list);
-		pane.getVerticalScrollBar().setUI(new NewScrollBarUI());
-		pane.getHorizontalScrollBar().setUI(new NewHoriScrollBarUI());
 		pane.setPreferredSize(new Dimension(width, height));
 		popupMenu.add(pane);
 	

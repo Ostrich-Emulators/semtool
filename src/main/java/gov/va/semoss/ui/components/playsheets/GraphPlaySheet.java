@@ -65,8 +65,6 @@ import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
 import gov.va.semoss.ui.components.LegendPanel2;
-import gov.va.semoss.ui.components.NewHoriScrollBarUI;
-import gov.va.semoss.ui.components.NewScrollBarUI;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.PropertySpecData;
 import gov.va.semoss.ui.components.VertexColorShapeData;
@@ -171,12 +169,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		controlPanel.setPlaySheet( this );
 		controlPanel.layoutChanged( gdm.getGraph(), null, layout );
 
-		GraphZoomScrollPane zoomer = new GraphZoomScrollPane( view );
-		zoomer.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		zoomer.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
-
 		graphSplitPane.setTopComponent( controlPanel );
-		graphSplitPane.setBottomComponent( zoomer );
+		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
 
 		filterData = new VertexFilterData();
 		

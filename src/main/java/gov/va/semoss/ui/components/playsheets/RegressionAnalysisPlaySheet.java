@@ -50,7 +50,6 @@ import javax.swing.border.LineBorder;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
-import gov.va.semoss.ui.components.NewScrollBarUI;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.ui.helpers.EntityFillerForSubClass;
 import gov.va.semoss.ui.main.listener.impl.RegressionAnalysisButtonListener;
@@ -68,6 +67,7 @@ import org.apache.log4j.Logger;
 /**
  */
 public class RegressionAnalysisPlaySheet extends AbstractRDFPlaySheet{
+	private static final long serialVersionUID = 5516995157916776436L;
 	private static final Logger log = Logger.getLogger( RegressionAnalysisPlaySheet.class );
 
   public RegressionAnalysisPlaySheet() {
@@ -355,7 +355,6 @@ public class RegressionAnalysisPlaySheet extends AbstractRDFPlaySheet{
 			JScrollPane listScrollPane = new JScrollPane(possibleInputList);
 			listScrollPane.setPreferredSize(new Dimension(20, 200));
 			listScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			listScrollPane.getVerticalScrollBar().setUI(new NewScrollBarUI());
 			regPanel.add(listScrollPane, gbc_possibleInputList);
 	
 			selDepVarBtn = new CustomButton("Select Dependent Variable");
@@ -458,7 +457,6 @@ public class RegressionAnalysisPlaySheet extends AbstractRDFPlaySheet{
 			JScrollPane indepVarListScrollPane = new JScrollPane(indepVarList);
 			indepVarListScrollPane.setPreferredSize(new Dimension(20, 460));
 			indepVarListScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			indepVarListScrollPane.getVerticalScrollBar().setUI(new NewScrollBarUI());
 			regPanel.add(indepVarListScrollPane, gbc_indepVarList);
 			DefaultListModel indepVarListModel = new DefaultListModel();
 			indepVarList.setModel(indepVarListModel);
