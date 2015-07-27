@@ -21,7 +21,6 @@ package gov.va.semoss.om;
 
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
-import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Shape;
@@ -35,7 +34,8 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 
-	private transient Shape shape, shapeLegend;
+	public static final String CHANGE_SHAPE = "shape";
+	private transient Shape shape;
 	private transient int incount = 0;
 	private transient int outcount = 0;
 
@@ -47,8 +47,8 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 		super( id, type, label );
 
 		if ( null != type ) {
-			setColor( GraphColorRepository.instance().getColor(type).color );
-			setShape( GraphShapeRepository.instance().getShape(type).shape );
+			setColor( GraphColorRepository.instance().getColor( type ) );
+			setShape( GraphShapeRepository.instance().getShape( type ) );
 		}
 	}
 
@@ -57,13 +57,8 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 		super.setValue( prop, val );
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
-			setColor(GraphColorRepository.instance().getColor(typeURI).color);
-			try {
-				setShape( GraphShapeRepository.instance().getShape(getType()).shape );
-			}
-			catch(Exception e){
-				System.out.println();
-			}
+			setColor( GraphColorRepository.instance().getColor( typeURI ) );
+			setShape( GraphShapeRepository.instance().getShape( getType() ) );
 		}
 	}
 
@@ -81,19 +76,13 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 
 	@Override
 	public void setShape( Shape _shape ) {
+		Shape old = shape;
 		shape = _shape;
+		firePropertyChanged( CHANGE_SHAPE, old, shape );
 	}
 
 	@Override
 	public Shape getShape() {
 		return shape;
-	}
-
-	public void setShapeLegend( Shape _shapeLegend ) {
-		shapeLegend = _shapeLegend;
-	}
-
-	public Shape getShapeLegend() {
-		return shapeLegend;
 	}
 }

@@ -600,10 +600,6 @@ public class PlayPane extends JFrame {
 			customSparqlPanel.setVisible( false );
 		}
 
-		if ( !getProp( prefs, Constants.GPSSudowl ) ) {
-			leftTabs.remove( owlPanel );
-		}
-
 		boolean cospref = prefs.getBoolean( GCOSMETICS, false );
 		if ( !cospref ) {
 			leftTabs.remove( cosmeticsPanel );
@@ -1432,7 +1428,6 @@ public class PlayPane extends JFrame {
 		final Preferences prefs = Preferences.userNodeForPackage( getClass() );
 
 		final Map<String, JPanel> preflistenermap = new HashMap<>();
-		preflistenermap.put( Constants.GPSSudowl, owlPanel );
 		preflistenermap.put( GCOSMETICS, cosmeticsPanel );
 		preflistenermap.put( GFILTER, filterPanel );
 		preflistenermap.put( GFLABEL, outputPanel );
@@ -1476,12 +1471,6 @@ public class PlayPane extends JFrame {
 							item.setToolTipText( "Disable the Graph Cosmetics Tab" );
 							item.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab " );
 							item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab " );
-
-						}
-						else if ( Constants.GPSSudowl.equals( cmd ) ) {
-							item.setToolTipText( "Disable the SUDOWL Tab" );
-							item.getAccessibleContext().setAccessibleName( "Disable the SUDOWL Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Disable the SUDOWL Tab " );
 
 						}
 						else {
@@ -1539,12 +1528,6 @@ public class PlayPane extends JFrame {
 							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
 
 						}
-						else if ( Constants.GPSSudowl.equals( cmd ) ) {
-							item.setToolTipText( "Enable the SUDOWL Tab" );
-							item.getAccessibleContext().setAccessibleName( "Enable the SUDOWL Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Enable the SUDOWL Tab " );
-
-						}
 						else {
 							item.setToolTipText( "Enable " + cmd );
 							item.getAccessibleContext().setAccessibleName( "Enable " + cmd );
@@ -1561,23 +1544,6 @@ public class PlayPane extends JFrame {
 				}
 			}
 		};
-
-		//Sudo Tab
-		final JCheckBoxMenuItem sudowl = new JCheckBoxMenuItem( "SUDOWL tab",
-				getProp( prefs, Constants.GPSSudowl ) );
-		sudowl.setActionCommand( Constants.GPSSudowl );
-		sudowl.addActionListener( preflistener );
-		//sudowl.setToolTipText( "Enables/Disables the SUDOWL tab" );
-		if ( getProp( prefs, Constants.GPSSudowl ) == true ) {
-			sudowl.setToolTipText( "Disable the Status bar" );
-			sudowl.getAccessibleContext().setAccessibleName( "Disable the Status bar" );
-			sudowl.getAccessibleContext().setAccessibleDescription( "Disable the Status bar" );
-		}
-		else {
-			sudowl.setToolTipText( "Enable the Status bar" );
-			sudowl.getAccessibleContext().setAccessibleName( "Enable the Status bar" );
-			sudowl.getAccessibleContext().setAccessibleDescription( "Enable the Status bar" );
-		}
 
 		//Status Tab
 		final JCheckBoxMenuItem statbar = new JCheckBoxMenuItem( "Status Bar",
@@ -1860,8 +1826,6 @@ public class PlayPane extends JFrame {
 		hidecsp.setMnemonic( KeyEvent.VK_Q );
 		view.add( statbar );
 		statbar.setMnemonic( KeyEvent.VK_S );
-		//view.add( sudowl );
-		sudowl.setMnemonic( KeyEvent.VK_O );
 		view.add( tb );
 		tb.setMnemonic( KeyEvent.VK_T );
 
@@ -2061,19 +2025,6 @@ public class PlayPane extends JFrame {
 	}
 
 	protected void initPreferenceValues( Preferences p ) {
-		final String MISSING = "not-here";
-		Map<String, Boolean> bools = new HashMap<>();
-		bools.put( Constants.GPSSudowl, false );
-		bools.put( Constants.GPSSearch, true );
-		bools.put( Constants.GPSProp, true );
-
-		for ( Map.Entry<String, Boolean> en : bools.entrySet() ) {
-			if ( MISSING.equals( p.get( en.getKey(), MISSING ) ) ) {
-				p.putBoolean( en.getKey(), en.getValue() );
-				DIHelper.getInstance().getCoreProp()
-						.setProperty( en.getKey(), en.getValue().toString() );
-			}
-		}
 	}
 
 	protected class PlayPaneCloseableTab extends CloseableTab {

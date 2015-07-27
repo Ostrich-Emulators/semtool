@@ -25,20 +25,15 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object val,
 			boolean isSelected, boolean hasFocus, int row, int column ) {
-		Component c = null;
-		if (val != null){
-			String valstr = val.toString();
-			Shape s = ( valstr.isEmpty() ? null
-					: GraphShapeRepository.instance().getLegendShapeByName(valstr + Constants.LEGEND).shape);
-			c = super.getTableCellRendererComponent( table, val, isSelected,
-					hasFocus, row, column );
-			shapeify( this, s, new Dimension( 16, 16 ) );
-		}
-		else {
-			c = super.getTableCellRendererComponent( table, val, isSelected,
+
+		if ( null == val ) {
+			return super.getTableCellRendererComponent( table, val, isSelected,
 					hasFocus, row, column );
 		}
-		return c;
+
+		String s = GraphShapeRepository.instance().getShapeName( Shape.class.cast( val ) );
+		return super.getTableCellRendererComponent( table, s, isSelected,
+				hasFocus, row, column );
 	}
 
 	public static void shapeify( JLabel lbl, Shape s, Dimension d ) {

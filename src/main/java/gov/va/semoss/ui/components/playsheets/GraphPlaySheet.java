@@ -78,7 +78,6 @@ import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetColorShapeListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetControlListener;
-import gov.va.semoss.ui.main.listener.impl.PlaySheetOWLListener;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -93,10 +92,13 @@ import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Set;
 
 /**
  */
-public class GraphPlaySheet extends ImageExportingPlaySheet {
+public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyChangeListener {
 
 	private static final long serialVersionUID = 4699492732234656487L;
 	protected static final Logger log = Logger.getLogger( GraphPlaySheet.class );
@@ -154,7 +156,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet {
 		log.debug( "new Graph PlaySheet" );
 		gdm = model;
 
-		controlPanel = new ControlPanel( gdm.enableSearchBar() );
+		controlPanel = new ControlPanel();
 
 		graphSplitPane = new JSplitPane();
 		graphSplitPane.setEnabled( false );
@@ -256,10 +258,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet {
 		return image;
 	}
 
-	public boolean getSudowl() {
-		return gdm.showSudowl();
-	}
-
 	public GraphDataModel getGraphData() {
 		return gdm;
 	}
@@ -316,7 +314,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet {
 
 		frame.addInternalFrameListener( new GraphPlaySheetListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetControlListener( this ) );
-		frame.addInternalFrameListener( new PlaySheetOWLListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetColorShapeListener( this ) );
 	}
 
@@ -327,10 +324,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet {
 		fireGraphUpdated();
 		setLayoutName( layoutName );
 		setUndoRedoBtn();
-	}
-
-	public boolean enableSearchBar() {
-		return gdm.enableSearchBar();
 	}
 
 	@Override
@@ -663,16 +656,27 @@ public class GraphPlaySheet extends ImageExportingPlaySheet {
 		}
 
 		if ( overlayLevel < maxOverlayLevel ) {
-			gdm.removeElementsSinceLevel( overlayLevel );
-		}
-
+			Collection<SEMOSSVertex> removed = gdm.removeElementsSinceLevel( overlayLevel );
+			for( SEMOSSVertex v :removed ){
+				v.removePropertyChangeListener( this );
+			}
+		}		
+		
 		overlayLevel++;
 
+		Set<SEMOSSVertex> oldverts = new HashSet<>( gdm.getGraph().getVertices() );		
 		if ( !m.isEmpty() ) {
 			gdm.addGraphLevel( m, engine, overlayLevel );
 		}
 		if ( !nodes.isEmpty() ) {
 			gdm.addGraphLevel( nodes, engine, overlayLevel );
+		}
+		
+		Set<SEMOSSVertex> newverts = new HashSet<>( gdm.getGraph().getVertices() );
+		newverts.removeAll( oldverts );
+		
+		for( SEMOSSVertex v : newverts ){
+			v.addPropertyChangeListener( this );
 		}
 
 		if ( overlayLevel > maxOverlayLevel ) {
@@ -784,14 +788,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet {
 		return new HashSet<>( est.getSelected() );
 	}
 
-	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
-		colorShapeData.setColors( vertices, color );
-		view.repaint();
-		fireGraphUpdated();
-	}
-
-	public void setShapes( Collection<SEMOSSVertex> vertices, String shape ) {
-		colorShapeData.setShapes( vertices, shape );
+	@Override
+	public void propertyChange( PropertyChangeEvent evt ) {
 		view.repaint();
 		fireGraphUpdated();
 	}

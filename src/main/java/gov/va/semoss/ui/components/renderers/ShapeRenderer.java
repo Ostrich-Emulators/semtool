@@ -43,12 +43,7 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 			return super.getListCellRendererComponent( list, val, index, sel, focus );
 		}
 		
-		String valstr = val.toString();
-		Shape s = ( valstr.isEmpty() ? null
-				: GraphShapeRepository.instance().getLegendShapeByName(valstr + Constants.LEGEND).shape );
-		Component c = super.getListCellRendererComponent( list, val, index, sel, focus );
-		TableShapeRenderer.shapeify( this, s, new Dimension( 22, 22 ) );
-
-		return c;
+		String s = GraphShapeRepository.instance().getShapeName( Shape.class.cast( val ) );
+		return super.getListCellRendererComponent( list, s, index, sel, focus );
 	}
 }

@@ -30,7 +30,6 @@ import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
-import gov.va.semoss.ui.helpers.TypeColorShapeTable;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -38,7 +37,6 @@ import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
@@ -208,9 +206,9 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 							button.setActionCommand( en.getKey().stringValue() );
 							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
-							v.setColor( GraphColorRepository.instance().getColor( en.getKey()).color );
-							v.setShape( GraphShapeRepository.instance().getShape(en.getKey()).shape );
-							
+							v.setColor( GraphColorRepository.instance().getColor( en.getKey() ) );
+							v.setShape( GraphShapeRepository.instance().getShape( en.getKey() ) );
+
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
 									new Dimension( 12, 12 ) ) );
 							typearea.add( button );
