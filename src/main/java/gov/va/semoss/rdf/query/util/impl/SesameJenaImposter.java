@@ -5,7 +5,9 @@
  */
 package gov.va.semoss.rdf.query.util.impl;
 
+import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
 import gov.va.semoss.ui.components.models.ValueTableModel;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -47,7 +49,7 @@ public class SesameJenaImposter extends ListQueryAdapter<Object[]> {
 
 		if ( v instanceof Literal ) {
 			Literal l = Literal.class.cast( v );
-			return ValueTableModel.getObjectFromValue( l );
+			return TheAwesomerClass.instance().getObjectFromValue( l );
 		}
 		return v;
 	}

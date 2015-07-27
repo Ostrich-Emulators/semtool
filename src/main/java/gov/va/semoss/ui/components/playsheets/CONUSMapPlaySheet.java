@@ -20,14 +20,18 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 import gov.va.semoss.ui.components.models.ValueTableModel;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
@@ -61,7 +65,7 @@ public class CONUSMapPlaySheet extends BrowserPlaySheet2 {
 			for ( int j = 0; j < headers.size(); j++ ) {
 				Value v = listElement[j];
 				colName = headers.get( j );
-				Class<?> k = ValueTableModel.getClassForValue( v );
+				Class<?> k = TheAwesomerClass.instance().getClassForValue( v );
 				
 				elementHash.put( "size", 1000000 );
 				if ( k.equals( String.class ) ){

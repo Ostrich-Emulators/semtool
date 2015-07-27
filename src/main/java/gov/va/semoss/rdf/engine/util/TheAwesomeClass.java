@@ -22,7 +22,7 @@ import org.openrdf.repository.RepositoryException;
  */
 public class TheAwesomeClass {
 	/** The logger for this class */
-	private static final Logger logger = Logger.getLogger( DBToLoadingSheetExporter.class );
+	private static final Logger logger = Logger.getLogger( TheAwesomeClass.class );
 	
 	/** The singleton instance */
 	private static TheAwesomeClass instance;

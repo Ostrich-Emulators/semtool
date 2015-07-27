@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.om;
 
+import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.Constants;
 
@@ -17,8 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import java.util.Set;
+
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
@@ -126,7 +127,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	}
 
 	public void setProperty( URI prop, Object propValue ) {
-		setValue( prop, ValueTableModel.getValueFromObject( propValue ) );
+		setValue( prop, TheAwesomerClass.instance().getValueFromObject( propValue ) );
 	}
 
 	@Override
@@ -144,7 +145,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	@Override
 	public Object getProperty( URI prop ) {
-		return ValueTableModel.getObjectFromValue( getValue( prop ) );
+		return TheAwesomerClass.instance().getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override
@@ -156,7 +157,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	public Map<URI, Object> getProperties() {
 		Map<URI, Object> map = new HashMap<>();
 		for ( Map.Entry<URI, Value> en : properties.entrySet() ) {
-			map.put( en.getKey(), ValueTableModel.getObjectFromValue( en.getValue() ) );
+			map.put( en.getKey(), TheAwesomerClass.instance().getObjectFromValue( en.getValue() ) );
 		}
 		return map;
 	}
