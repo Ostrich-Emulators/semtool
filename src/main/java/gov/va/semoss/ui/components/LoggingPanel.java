@@ -40,7 +40,7 @@ import gov.va.semoss.ui.components.models.LogReadingTableModel.Level;
  * @author ryan
  */
 public class LoggingPanel extends JPanel {
-
+  private static final long serialVersionUID = 3532097592377920709L;
   private static final Logger log = Logger.getLogger( LoggingPanel.class );
 
   final LogReadingTableModel model = new LogReadingTableModel();
@@ -66,9 +66,7 @@ public class LoggingPanel extends JPanel {
     }
 
     add( buttons, BorderLayout.NORTH );
-    JScrollPane scroller = new JScrollPane( table );
-    scroller.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-    add( scroller, BorderLayout.CENTER );
+    add( new JScrollPane( table ), BorderLayout.CENTER );
     table.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 
     JButton logButton = new JButton( "Refresh" );
@@ -88,6 +86,7 @@ public class LoggingPanel extends JPanel {
 
     final SimpleDateFormat SDF = new SimpleDateFormat( "MM/dd/yyyy hh:mm:ss" );
     table.setDefaultRenderer( Date.class, new DefaultTableCellRenderer() {
+      private static final long serialVersionUID = 2908354982706310508L;
 
       @Override
       public Component getTableCellRendererComponent( JTable table, Object value,

@@ -22,8 +22,6 @@ import edu.uci.ics.jung.visualization.control.EditingPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
-import gov.va.semoss.ui.components.NewHoriScrollBarUI;
-import gov.va.semoss.ui.components.NewScrollBarUI;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -98,13 +96,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		progress = progressname;
 		initComponents();
 		initVizualizer();
-
-		GraphZoomScrollPane zoomer = new GraphZoomScrollPane( view );
-		zoomer.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		zoomer.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
-		visarea.add( zoomer );
+		visarea.add( new GraphZoomScrollPane( view ) );
 
 		addConceptNodeAction = new AbstractAction() {
+			private static final long serialVersionUID = -2138227128423655724L;
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
