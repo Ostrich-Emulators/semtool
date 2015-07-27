@@ -736,6 +736,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		eft.clearSizeData();
 		vft.clearSizeData();
 		vht.clearSizeData();
+		view.repaint();
 	}
 
 	/**
