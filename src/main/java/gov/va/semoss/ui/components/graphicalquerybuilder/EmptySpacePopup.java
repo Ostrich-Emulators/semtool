@@ -8,11 +8,13 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.TheAwesomeClass;
 import gov.va.semoss.ui.components.SaveAsInsightPanel;
 import gov.va.semoss.ui.components.graphicalquerybuilder.SparqlResultTableModel.RowLocator;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,6 +31,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -47,7 +51,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 			public void actionPerformed( ActionEvent e ) {
 				JPanel jpnl = new JPanel( new BorderLayout() );
 
-				List<URI> concepts = DBToLoadingSheetExporter.createConceptList( pnl.getEngine() );
+				List<URI> concepts = TheAwesomeClass.instance().createConceptList( pnl.getEngine() );
 				Map<URI, String> conceptmap
 						= Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, pnl.getEngine() ) );
 				final ValueEditor types = new ValueEditor();
@@ -85,7 +89,7 @@ public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu 
 									URI starttype = verts.getFirst().getType();
 									URI endtype = verts.getSecond().getType();
 
-									List<URI> links = DBToLoadingSheetExporter.getPredicatesBetween( starttype,
+									List<URI> links = TheAwesomeClass.instance().getPredicatesBetween( starttype,
 											endtype, pnl.getEngine() );
 									Map<URI, String> labels = Utility.getInstanceLabels( links, pnl.getEngine() );
 									labels.put( Constants.ANYNODE, "<Any>" );

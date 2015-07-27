@@ -1,8 +1,10 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.TheAwesomeClass;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.XlsWriter;
+
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
 import org.openrdf.model.URI;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -27,10 +30,13 @@ import gov.va.semoss.ui.components.UriComboBox.UriLabelPair;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
 import gov.va.semoss.util.DIHelper;
+
 import java.awt.Desktop;
 import java.util.Map;
+
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -112,7 +118,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 	}
 
 	private URI[] getAllNodes() {
-		List<URI> uriconcepts = DBToLoadingSheetExporter.createConceptList( engine );
+		List<URI> uriconcepts = TheAwesomeClass.instance().createConceptList( engine );
 		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 

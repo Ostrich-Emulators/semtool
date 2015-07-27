@@ -34,6 +34,7 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.TheAwesomeClass;
 import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -482,7 +483,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		UriComboBox relCB = relationComboBoxes.get( index );
 		UriComboBox objectCB = objectComboBoxes.get( index );
 
-		List<URI> values = DBToLoadingSheetExporter.getPredicatesBetween( subjectCB.getSelectedUri(),
+		List<URI> values = TheAwesomeClass.instance().getPredicatesBetween( subjectCB.getSelectedUri(),
 				objectCB.getSelectedUri(), getEngine() );
 		if( values.isEmpty() ){
 			values.add( Constants.ANYNODE );

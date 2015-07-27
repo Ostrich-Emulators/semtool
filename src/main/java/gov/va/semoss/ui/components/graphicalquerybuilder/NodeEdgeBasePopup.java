@@ -8,11 +8,13 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 import edu.uci.ics.jung.graph.Graph;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.TheAwesomeClass;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -23,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
@@ -30,6 +33,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
@@ -135,7 +139,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 			@Override
 			protected Action makeTypeItem( QueryNode v, GraphicalQueryPanel pnl ) {
 				Map<URI, String> labels = Utility.getInstanceLabels(
-						DBToLoadingSheetExporter.createConceptList( pnl.getEngine() ), pnl.getEngine() );
+						TheAwesomeClass.instance().createConceptList( pnl.getEngine() ), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Vertex", "New Type", Utility.sortUrisByLabel( labels ) );
@@ -169,7 +173,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 				URI endtype = graph.getDest( v ).getType();
 
 				ListQueryAdapter<URI> links
-						= DBToLoadingSheetExporter.getPredicatesBetween( starttype, endtype );
+						= TheAwesomeClass.instance().getPredicatesBetween( starttype, endtype );
 
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Edge", "New Type", links );
