@@ -29,7 +29,6 @@ import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import info.aduna.io.IOUtil;
 
 import java.awt.Desktop;
 import java.awt.Frame;
@@ -40,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLDecoder;
@@ -989,9 +989,7 @@ public class Utility {
 
 	public static void extractHTML() throws IOException {
 		// check for html directory
-		// copy out html.zip
 		// extract
-		// remove html.zip
 
 		// this should look for an "html" folder under the current working (execution) directory of the tool:
 		Path localHtmlPath = Paths.get( "html" );
@@ -999,15 +997,8 @@ public class Utility {
 			return;
 		}
 
-		try {
-			IOUtil.writeStream( Utility.class.getResourceAsStream( "/html.zip" ), new File( "html.zip" ) );
-			unzip( "html.zip", "html" );
-			Files.delete( Paths.get( "html.zip" ) );
-		}
-		catch ( IOException ioe ) {
-			// success or fail we need to delete the html.zip file
-			Files.delete( Paths.get( "html.zip" ) );
-			throw ( ioe );
+		try( InputStream htmlIs = Utility.class.getResourceAsStream( "/html.zip" ) ) {
+			unzip( new ZipInputStream( htmlIs ), new File( "html" ) );
 		}
 	}
 
