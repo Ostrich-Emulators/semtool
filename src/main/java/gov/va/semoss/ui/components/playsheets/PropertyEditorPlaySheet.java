@@ -23,35 +23,57 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.models.PropertyEditorTableModel;
 
+import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  */
 public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 	private static final long serialVersionUID = -8685007953734205297L;
 	private static final Logger log = Logger.getLogger( GridPlaySheet.class );
-	
+
 	private final PropertyEditorTableModel model;
 	private final JTable table;
 
-	public PropertyEditorPlaySheet(Collection<SEMOSSVertex> pickedVertices, String title, IEngine engine) {
+	public PropertyEditorPlaySheet( Collection<SEMOSSVertex> pickedVertices,
+			String title, IEngine engine ) {
 		setLayout( new BorderLayout() );
-		setTitle(title);
-		
-		model = new PropertyEditorTableModel(pickedVertices, engine);
+		setTitle( title );
+
+		model = new PropertyEditorTableModel( pickedVertices, engine );
 		table = new JTable( model );
+
+		LabeledPairTableCellRenderer renderer
+				= LabeledPairTableCellRenderer.getUriPairRenderer();
+		Set<URI> labels = getUrisThatNeedLabels( pickedVertices );
+		renderer.cache( Utility.getInstanceLabels( labels, engine ) );
+		renderer.cache( XMLSchema.ANYURI, "URI" );
+
+		LabeledPairTableCellRenderer trenderer
+				= LabeledPairTableCellRenderer.getValuePairRenderer( engine );
+
+		table.setDefaultRenderer( URI.class, renderer );
+		table.setDefaultRenderer( Value.class, trenderer );
+
+		table.setDefaultEditor( Value.class, new SimpleValueEditor() );
 		
 		table.setAutoCreateRowSorter( true );
 		table.setCellSelectionEnabled( true );
@@ -61,8 +83,23 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 		add( jsp, BorderLayout.CENTER );
 	}
 
+	private Set<URI> getUrisThatNeedLabels( Collection<SEMOSSVertex> verts ) {
+		Set<URI> needs = new HashSet<>();
+		for ( SEMOSSVertex v : verts ) {
+			for ( Map.Entry<URI, Value> en : v.getValues().entrySet() ) {
+				needs.add( en.getKey() );
+				if ( en.getValue() instanceof URI ) {
+					needs.add( URI.class.cast( en.getValue() ) );
+				}
+			}
+		}
+
+		return needs;
+	}
+
 	@Override
-	public void populateToolBar( JToolBar jtb, final String tabTitle ) {}
+	public void populateToolBar( JToolBar jtb, final String tabTitle ) {
+	}
 
 	@Override
 	public boolean hasChanges() {

@@ -23,8 +23,6 @@
                   <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="graphprops" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="graphsearch" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="calcInfers" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="jButton1" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -39,10 +37,6 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="graphprops" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="graphsearch" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
               <Component id="calcInfers" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jButton1" min="-2" max="-2" attributes="0"/>
@@ -56,18 +50,6 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JCheckBox" name="graphprops">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Graph Properties"/>
-        <Property name="toolTipText" type="java.lang.String" value="Enables/Disables graph properties"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="graphsearch">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Graph Search"/>
-        <Property name="toolTipText" type="java.lang.String" value="Enables/Disables the graph search window on the Display Pane tab"/>
-      </Properties>
-    </Component>
     <Component class="javax.swing.JCheckBox" name="calcInfers">
       <Properties>
         <Property name="text" type="java.lang.String" value="Compute dependent relationships following load"/>

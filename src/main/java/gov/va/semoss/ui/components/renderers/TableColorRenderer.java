@@ -5,7 +5,9 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
-import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
+
+import gov.va.semoss.util.Constants;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -13,6 +15,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -37,13 +40,16 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent( JTable t, Object val,
 			boolean sel, boolean focus, int r, int c ) {
 
-		String valstr = val.toString();
-		Color color = ( valstr.isEmpty() ? t.getBackground()
-				: DIHelper.getColor( valstr ) );
-		Component cmp = super.getTableCellRendererComponent( t, val, sel, focus, r, c );
+		if ( null == val ) {
+			val = GraphColorRepository.instance().getColor( Constants.TRANSPARENT );
+		}
+
+		Color color = Color.class.cast( val );
+		val = GraphColorRepository.instance().getColorName( color );
+		super.getTableCellRendererComponent( t, val, sel, focus, r, c );
 		colorify( this, color );
 
-		return cmp;
+		return this;
 	}
 
 	public static void colorify( JLabel lbl, Color s ) {
@@ -70,4 +76,3 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 		}
 	}
 }
-	

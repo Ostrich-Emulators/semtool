@@ -15,8 +15,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -52,6 +55,7 @@ public class GraphToSparql {
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
+		boolean hasone = false;
 		for ( QueryNodeEdgeBase v : todo ) {
 			for ( Map.Entry<URI, Set<Value>> en : v.getAllValues().entrySet() ) {
 				URI prop = en.getKey();
@@ -60,8 +64,13 @@ public class GraphToSparql {
 				if ( v.isSelected( prop ) ) {
 					select.append( " ?" ).
 							append( issubj ? v.getQueryId() : v.getLabel( prop ) );
+					hasone = true;
 				}
 			}
+		}
+
+		if ( !hasone ) {
+			select.append( " *" );
 		}
 
 		return select.toString();
@@ -103,7 +112,29 @@ public class GraphToSparql {
 			return shortcut( URI.class.cast( v ) );
 		}
 
-		return v.toString();
+		Literal lit = Literal.class.cast( v );
+		StringBuilder sb = new StringBuilder().append( '"' );
+		sb.append( lit.getLabel() );
+		sb.append( '"' );
+
+		URI dt = lit.getDatatype();
+		if ( null != dt ) {
+			sb.append( "^^" );
+
+			boolean found = false;
+			for ( Map.Entry<String, String> ns : namespaces.entrySet() ) {
+				if ( dt.getNamespace().equals( ns.getValue() ) ) {
+					sb.append( ns.getKey() ).append( ":" ).append( dt.getLocalName() );
+					found = true;
+				}
+			}
+
+			if ( !found ) {
+				sb.append( '<' ).append( dt.toString() ).append( '>' );
+			}
+		}
+
+		return sb.toString();
 	}
 
 	private String buildOneConstraint( QueryNodeEdgeBase v, URI type,
@@ -233,7 +264,7 @@ public class GraphToSparql {
 
 				// our VALUES clause (below) needs to work on our base edge type,
 				// not the custom one
-				linkvar = "?"+edge.getLabel( RDF.TYPE );
+				linkvar = "?" + edge.getLabel( RDF.TYPE );
 			}
 
 			sb.append( " VALUES " ).append( linkvar ).append( " { " );
@@ -255,6 +286,10 @@ public class GraphToSparql {
 	}
 
 	private String shortcut( URI type ) {
+		if ( null == type ) {
+			return null;
+		}
+
 		for ( Map.Entry<String, String> ns : namespaces.entrySet() ) {
 			if ( type.getNamespace().equals( ns.getValue() ) ) {
 				return ns.getKey() + ":" + type.getLocalName();

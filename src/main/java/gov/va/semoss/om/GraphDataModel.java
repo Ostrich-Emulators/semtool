@@ -46,24 +46,12 @@ public class GraphDataModel {
 	private final Map<NodeEdgeBase, Integer> level = new HashMap<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
-	private boolean search, prop, sudowl;
+	private boolean search;
 
 	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	protected Map<URI, SEMOSSEdge> edgeStore = new HashMap<>();
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph = new DirectedSparseGraph<>();
-
-	public GraphDataModel() {
-		initPropSudowlSearch();
-	}
-
-	public boolean enableSearchBar() {
-		return search;
-	}
-
-	public boolean showSudowl() {
-		return sudowl;
-	}
 
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
 		return vizgraph;
@@ -167,7 +155,12 @@ public class GraphDataModel {
 		}
 	}
 
-	public void removeElementsSinceLevel( int overlayLevel ) {
+	/**
+	 * Removes elements that are "undone" when the history tree branches
+	 * @param overlayLevel
+	 * @return the vertices that were removed
+	 */
+	public Collection<SEMOSSVertex> removeElementsSinceLevel( int overlayLevel ) {
 		// if we've undone some data and now want to add 
 		// something else, get rid of the future redo data
 		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
@@ -188,6 +181,8 @@ public class GraphDataModel {
 			vizgraph.removeVertex( v );
 			level.remove( v );
 		}
+		
+		return nodesToRemove;
 	}
 
 	public int getLevel( NodeEdgeBase check ) {
@@ -225,23 +220,6 @@ public class GraphDataModel {
 	public void storeEdge( SEMOSSEdge edge ) {
 		URI key = edge.getURI();
 		edgeStore.put( key, edge );
-	}
-
-	public final void initPropSudowlSearch() {
-		prop = Boolean.parseBoolean( DIHelper.getInstance().getProperty( Constants.GPSProp ) );
-		sudowl = Boolean.parseBoolean( DIHelper.getInstance().getProperty( Constants.GPSSudowl ) );
-		search = Boolean.parseBoolean( DIHelper.getInstance().getProperty( Constants.GPSSearch ) );
-
-		log.debug( "Initializing boolean properties (prop, sudowl, search) to (" + prop + ", " + sudowl + ", " + search + ")" );
-
-		/*
-		 // these calls are not yet functional
-		 prop = Preferences.userNodeForPackage(PlayPane.class).getBoolean( Constants.GPSProp, true );
-		 sudowl = Preferences.userNodeForPackage(PlayPane.class).getBoolean( Constants.GPSSudowl, true );
-		 search = Preferences.userNodeForPackage(PlayPane.class).getBoolean( Constants.GPSSearch, true );
-    
-		 log.debug( "Initializing boolean properties (prop, sudowl, search) to (" + prop + ", " + sudowl + ", " + search + ")" );
-		 */
 	}
 
 	public Set<String> getBaseFilterSet() {

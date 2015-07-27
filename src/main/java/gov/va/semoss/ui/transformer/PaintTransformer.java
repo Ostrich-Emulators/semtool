@@ -30,7 +30,8 @@ public class PaintTransformer<T extends NodeEdgeBase> extends SelectingTransform
 
 	@Override
 	protected Paint transformNormal( T t ) {
-		return t.getColor();
+		Color c = t.getColor();
+		return c;
 	}
 
 	@Override

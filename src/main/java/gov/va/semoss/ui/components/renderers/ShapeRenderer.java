@@ -5,14 +5,17 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -36,12 +39,11 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent( JList<?> list, Object val,
 			int index, boolean sel, boolean focus ) {
 
-		String valstr = val.toString();
-		Shape s = ( valstr.isEmpty() ? null
-				: DIHelper.getShape( valstr + Constants.LEGEND ) );
-		Component c = super.getListCellRendererComponent( list, val, index, sel, focus );
-		TableShapeRenderer.shapeify( this, s, new Dimension( 22, 22 ) );
-
-		return c;
+		if( null == val ){
+			return super.getListCellRendererComponent( list, val, index, sel, focus );
+		}
+		
+		String s = GraphShapeRepository.instance().getShapeName( Shape.class.cast( val ) );
+		return super.getListCellRendererComponent( list, s, index, sel, focus );
 	}
 }

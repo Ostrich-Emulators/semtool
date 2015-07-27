@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.openrdf.model.URI;
 
 /**
@@ -83,149 +84,8 @@ public class TypeColorShapeTable {
 		return instance;
 	}
 
-	/**
-	 * Method clearAll. Clears all information from the shape and color
-	 * hashtables.
-	 */
-	public void clearAll() {
-		shapeHash.clear();
-		shapeHashL.clear();
-		colorHash.clear();
-		shapeStringHash.clear();
-		colorStringHash.clear();
-	}
 
-	/**
-	 * Method getAllShapes. Gets all the shapes from the instance of the shapes
-	 * array.
-	 *
-	 * @return String[] - An array containing all the shapes.
-	 */
-	public static String[] getAllShapes() {
-		return shapes;
-	}
 
-	/**
-	 * Method getAllColors. Gets all the colors from the instance of the shapes
-	 * array.
-	 *
-	 * @return String[] - An array containing all the colors.
-	 */
-	public static String[] getAllColors() {
-		return colors;
-	}
 
-	/**
-	 * Method addShapeToHashes. Adds a shape to the local Hashtable of shapes.
-	 * Gets the shape from DI Helper.
-	 *
-	 * @param type String - The type of the vertex (serves as a key in the
-	 * hashtable)
-	 * @param shapeString String - the shape itself.
-	 */
-	public void addShapeToHashes( URI vertexType, String shapeString ) {
-		shapeStringHash.put( vertexType, shapeString );
-		shapeHash.put( vertexType, DIHelper.getShape( shapeString ) );
-		shapeHashL.put( vertexType, DIHelper.getShape( shapeString + Constants.LEGEND ) );
-	}
 
-	/**
-	 * Method setShape. Adds a shape to the local Hashtable of shapes. Gets the
-	 * shape from DI Helper.
-	 *
-	 * @param type String - The type of the vertex (serves as a key in the
-	 * hashtable)
-	 * @param shapeString String - the shape itself.
-	 */
-	public boolean setShape( String shapeString, SEMOSSVertex vertex ) {
-		if ( shapeString != null ) {
-			addShapeToHashes( vertex.getType(), shapeString );
-		}
-		vertex.setShape( shapeHash.get( vertex.getType() ) );
-		vertex.setShapeString( shapeStringHash.get( vertex.getType() ) );
-		vertex.setShapeLegend( shapeHashL.get( vertex.getType() ) );
-		return true;
-	}
-
-	/**
-	 * Method addColorToHashes. Adds a color to the local Hashtable of colors.
-	 * Gets the color from DI Helper.
-	 *
-	 * @param key String - the type of the vertex
-	 * @param colorString String - the color of the shape
-	 */
-	public void addColorToHashes( URI key, String colorString ) {
-		colorHash.put( key, DIHelper.getColor( colorString ) );
-		colorStringHash.put( key, colorString );
-	}
-
-	/**
-	 * Method setColor. Setes the color for a vertex
-	 *
-	 * @param colorString String - the color itself
-	 * @param SEMOSSVertex vertex - the vertex whose color we are setting
-	 */
-	public boolean setColor( String colorString, SEMOSSVertex vertex ) {
-		if ( colorString != null ) {
-			addColorToHashes( vertex.getType(), colorString );
-		}
-		vertex.setColor( colorHash.get( vertex.getType() ) );
-		vertex.setColorString( colorStringHash.get( vertex.getType() ) );
-		return true;
-	}
-
-	public Shape getShape( URI type ) {
-		//first check to see if we've seen this type before
-		if ( shapeHash.containsKey( type ) ) {
-			return shapeHash.get( type );
-		}
-
-		// next check if it is specified in the properties file
-		String shapeStringSetInRDF_MapPropFile
-				= DIHelper.getInstance().getProperty( type.getLocalName() + "_SHAPE" );
-		if ( shapeStringSetInRDF_MapPropFile != null
-				&& DIHelper.getShape( shapeStringSetInRDF_MapPropFile ) != null ) {
-			return DIHelper.getShape( shapeStringSetInRDF_MapPropFile );
-		}
-
-		// if the shape hasn't been set yet, use the first shape not yet in use
-		for ( String shapeString : shapes ) {
-			if ( !shapeStringHash.containsValue( shapeString ) ) {
-				return DIHelper.getShape( shapeString );
-			}
-		}
-
-		//if all of the shapes have already been used, just grab a random shape
-		List<String> strings = new ArrayList<>( shapeStringHash.values() );
-		Collections.shuffle( strings );
-		return DIHelper.getShape( strings.get( 0 ) );
-	}
-
-	public Color getColor( URI type ) {
-		// first check if we've seen the type before
-		if ( colorHash.containsKey( type ) ) {
-			return colorHash.get( type );
-		}
-
-		// try to search the properties file for the first time
-		String colorStringSetInRDF_MapPropFile
-				= DIHelper.getInstance().getProperty( type.getLocalName() + "_COLOR" );
-		if ( colorStringSetInRDF_MapPropFile != null ) {
-			Color col = DIHelper.getColor( colorStringSetInRDF_MapPropFile );
-			colorHash.put( type, col );
-			return col;
-		}
-
-		//find the first color that hasn't been used yet
-		for ( String colorString : colors ) {
-			if ( !colorStringHash.containsValue( colorString ) ) {
-				return DIHelper.getColor( colorString );
-			}
-		}
-
-		//if all of the colors have already been used, just grab a random color
-		List<String> cols = new ArrayList<>( colorStringHash.values() );
-		Collections.shuffle( cols );
-		return DIHelper.getColor( cols.get( 0 ) );
-	}
 }

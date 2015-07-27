@@ -186,6 +186,9 @@ public class MetadataTabXmlHandler extends DefaultHandler {
 
 		String propName = rowdata.get( 1 );
 		String propertyMiddleColumn = rowdata.get( 2 );
+		if ( null == propertyMiddleColumn ) {
+			propertyMiddleColumn = "";
+		}
 		String propValue = rowdata.get( 3 );
 
 		if ( "@base".equals( propName ) ) {

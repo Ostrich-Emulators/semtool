@@ -9,8 +9,12 @@ import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Color;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -31,11 +35,13 @@ import org.openrdf.model.vocabulary.XMLSchema;
  */
 public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
+	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
+	public static final String CHANGE_COLOR = "color";
 	private transient boolean visible = true;
 	private transient URI id;
 	private transient Color color;
-	private transient String colorString;
+
 	// callers can "mark" properties for their own use
 	private final Set<URI> markedProperties = new HashSet<>();
 
@@ -47,28 +53,37 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
 		this.id = id;
-
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
 	}
 
+	public void addPropertyChangeListener( PropertyChangeListener pcl ) {
+		listeners.add( pcl );
+	}
+
+	public void removePropertyChangeListener( PropertyChangeListener pcl ) {
+		listeners.remove( pcl );
+	}
+
 	@Override
 	public final void setColor( Color _color ) {
+		Color old = color;
 		color = _color;
+		firePropertyChanged( CHANGE_COLOR, old, color );
+	}
+
+	protected void firePropertyChanged( String prop, Object oldval, Object newval ) {
+		PropertyChangeEvent pce
+				= new PropertyChangeEvent( this, prop, oldval, newval );
+		for ( PropertyChangeListener pcl : listeners ) {
+			pcl.propertyChange( pce );
+		}
 	}
 
 	@Override
 	public Color getColor() {
 		return color;
-	}
-
-	public void setColorString( String _colorString ) {
-		colorString = _colorString;
-	}
-
-	public String getColorString() {
-		return colorString;
 	}
 
 	@Override

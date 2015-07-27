@@ -42,8 +42,11 @@ import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
+import java.io.File;
+import java.io.IOException;
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Class to move the "Custom Sparql Query" window and related controls out of
@@ -316,6 +319,17 @@ public class CustomSparqlPanel extends JPanel {
 
 	public SyntaxTextEditor getOpenEditor() {
 		return sparqlArea.getEditorOfSelectedTab();
+	}
+
+	public void loadFileToEmptyEditor( File file ) {
+		try {
+			String sparql = FileUtils.readFileToString( file );
+			sparqlArea.loadToEmptyTab( sparql );
+		}
+		catch ( IOException ioe ) {
+			logger.error( ioe, ioe );
+			Utility.showError( ioe.getLocalizedMessage() );
+		}
 	}
 
 	public InternalFrameListener makeDesktopListener() {

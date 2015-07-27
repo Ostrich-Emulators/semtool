@@ -52,6 +52,7 @@ import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.MultiLayerTransformer;
 import edu.uci.ics.jung.visualization.RenderContext;
+import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.renderers.BasicRenderer;
@@ -75,7 +76,6 @@ import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetColorShapeListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetControlListener;
-import gov.va.semoss.ui.main.listener.impl.PlaySheetOWLListener;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -87,10 +87,16 @@ import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import java.awt.Dimension;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Set;
 
 /**
  */
-public class GraphPlaySheet extends PlaySheetCentralComponent {
+public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyChangeListener {
 
 	private static final long serialVersionUID = 4699492732234656487L;
 	protected static final Logger log = Logger.getLogger( GraphPlaySheet.class );
@@ -148,7 +154,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		log.debug( "new Graph PlaySheet" );
 		gdm = model;
 
-		controlPanel = new ControlPanel( gdm.enableSearchBar() );
+		controlPanel = new ControlPanel();
 
 		graphSplitPane = new JSplitPane();
 		graphSplitPane.setEnabled( false );
@@ -173,7 +179,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
 
 		filterData = new VertexFilterData();
-		
+
 		addGraphListener( legendPanel );
 		addGraphListener( controlData );
 		addGraphListener( filterData );
@@ -227,8 +233,23 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) filter.transform( gdm.getGraph() );
 	}
 
-	public boolean getSudowl() {
-		return gdm.showSudowl();
+	@Override
+	protected BufferedImage getExportImage() {
+
+		Dimension d = view.getGraphLayout().getSize();
+		d.setSize( d.getWidth() * 1.2, d.getHeight() * 1.2 );
+
+		VisualizationImageServer<SEMOSSVertex, SEMOSSEdge> vis
+				= new VisualizationImageServer<>( view.getGraphLayout(), d );
+
+		vis.setBackground( view.getBackground() );
+		vis.setRenderContext( view.getRenderContext() );
+
+		BufferedImage image = (BufferedImage) vis.getImage(
+				new Point2D.Double( view.getGraphLayout().getSize().getWidth(),
+						view.getGraphLayout().getSize().getHeight() ),
+				new Dimension( view.getGraphLayout().getSize() ) );
+		return image;
 	}
 
 	public GraphDataModel getGraphData() {
@@ -287,7 +308,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		frame.addInternalFrameListener( new GraphPlaySheetListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetControlListener( this ) );
-		frame.addInternalFrameListener( new PlaySheetOWLListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetColorShapeListener( this ) );
 	}
 
@@ -298,10 +318,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		fireGraphUpdated();
 		setLayoutName( layoutName );
 		setUndoRedoBtn();
-	}
-	
-	public boolean enableSearchBar() {
-		return gdm.enableSearchBar();
 	}
 
 	@Override
@@ -346,13 +362,6 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 	public String getLayoutName() {
 		return layoutName;
-	}
-
-	/**
-	 * Method exportDB not implemented.
-	 */
-	public void exportDB() {
-		log.error( "exportDB not implemented (being refactored)" );
 	}
 
 	/**
@@ -437,7 +446,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		if ( null == layout ) {
 			layout = new FRLayout<>( graph );
 		}
-		
+
 		fitGraphinWindow();
 		view.setGraphLayout( layout );
 
@@ -447,7 +456,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		return ok;
 	}
-	
+
 	/*
 	 * This method tries to fit the graph to the available space.
 	 * It could work better.
@@ -641,16 +650,27 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		}
 
 		if ( overlayLevel < maxOverlayLevel ) {
-			gdm.removeElementsSinceLevel( overlayLevel );
-		}
-
+			Collection<SEMOSSVertex> removed = gdm.removeElementsSinceLevel( overlayLevel );
+			for( SEMOSSVertex v :removed ){
+				v.removePropertyChangeListener( this );
+			}
+		}		
+		
 		overlayLevel++;
 
+		Set<SEMOSSVertex> oldverts = new HashSet<>( gdm.getGraph().getVertices() );		
 		if ( !m.isEmpty() ) {
 			gdm.addGraphLevel( m, engine, overlayLevel );
 		}
 		if ( !nodes.isEmpty() ) {
 			gdm.addGraphLevel( nodes, engine, overlayLevel );
+		}
+		
+		Set<SEMOSSVertex> newverts = new HashSet<>( gdm.getGraph().getVertices() );
+		newverts.removeAll( oldverts );
+		
+		for( SEMOSSVertex v : newverts ){
+			v.addPropertyChangeListener( this );
 		}
 
 		if ( overlayLevel > maxOverlayLevel ) {
@@ -762,14 +782,8 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		return new HashSet<>( est.getSelected() );
 	}
 
-	public void setColors( Collection<SEMOSSVertex> vertices, String color ) {
-		colorShapeData.setColors( vertices, color );
-		view.repaint();
-		fireGraphUpdated();
-	}
-
-	public void setShapes( Collection<SEMOSSVertex> vertices, String shape ) {
-		colorShapeData.setShapes( vertices, shape );
+	@Override
+	public void propertyChange( PropertyChangeEvent evt ) {
 		view.repaint();
 		fireGraphUpdated();
 	}
@@ -780,7 +794,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 			@Override
 			public boolean evaluate( SEMOSSEdge v ) {
-				return ( v.isVisible() && v.getVerticesVisible() 
+				return ( v.isVisible() && v.getVerticesVisible()
 						&& getGraphData().presentAtLevel( v, overlayLevel ) );
 			}
 		};
@@ -788,7 +802,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 		@Override
 		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext,
 				Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
-			setEdgeVisibilities(layout.getGraph());
+			setEdgeVisibilities( layout.getGraph() );
 			try {
 				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
 					if ( edgehider.evaluate( e ) ) {
@@ -814,45 +828,47 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 				renderContext.getScreenDevice().repaint();
 			}
 		}
-		
+
 		/**
-		 * Convenience method which sets t the visibility of edges in the current graph
-		 * based on the visibility flag within the edge, but ALSO on whether the
-		 * vertices which the edge connects are visible
+		 * Convenience method which sets t the visibility of edges in the current
+		 * graph based on the visibility flag within the edge, but ALSO on whether
+		 * the vertices which the edge connects are visible
 		 */
-		private void setEdgeVisibilities(Graph<SEMOSSVertex, SEMOSSEdge> graph) {
+		private void setEdgeVisibilities( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
 			Collection<SEMOSSEdge> allEdges = graph.getEdges();
-			for (SEMOSSEdge edge : allEdges) {
-				SEMOSSVertex destination = graph.getDest(edge);
-				SEMOSSVertex source = graph.getSource(edge);
+			for ( SEMOSSEdge edge : allEdges ) {
+				SEMOSSVertex destination = graph.getDest( edge );
+				SEMOSSVertex source = graph.getSource( edge );
 				boolean destVisible = true;
 				boolean sourceVisible = true;
 				// If the destination vertex/node is not visible, neither should the edge 
 				// be visible
 				// The edge may not have a destination vertex/node, so prepare for that
-				if (destination != null) {
-					if (!destination.isVisible()){
+				if ( destination != null ) {
+					if ( !destination.isVisible() ) {
 						destVisible = false;
 					}
-				} else {
+				}
+				else {
 					destVisible = false;
 				}
 				// If the destination vertex/node is not visible, neither should the edge 
 				// be visible
 				// The edge may not have a source vertex/node, so prepare for that
-				if (source != null) {
-					if (!source.isVisible()){
+				if ( source != null ) {
+					if ( !source.isVisible() ) {
 						sourceVisible = false;
 					}
-				} else {
+				}
+				else {
 					sourceVisible = false;
 				}
 				// If both of the edges are visible, set the edgesVisible flag in the Edge object
-				if (destVisible && sourceVisible){
-					edge.setVerticesVisible(true);
+				if ( destVisible && sourceVisible ) {
+					edge.setVerticesVisible( true );
 				}
 				else {
-					edge.setVerticesVisible(false);
+					edge.setVerticesVisible( false );
 				}
 			}
 		}
@@ -862,7 +878,7 @@ public class GraphPlaySheet extends PlaySheetCentralComponent {
 
 		@Override
 		public boolean evaluate( SEMOSSVertex v ) {
-			return ( v.isVisible() &&	getGraphData().presentAtLevel( v, overlayLevel ) );
+			return ( v.isVisible() && getGraphData().presentAtLevel( v, overlayLevel ) );
 		}
 	}
 }
