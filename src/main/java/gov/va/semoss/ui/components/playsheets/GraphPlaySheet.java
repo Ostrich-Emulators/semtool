@@ -78,7 +78,6 @@ import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetColorShapeListener;
 import gov.va.semoss.ui.main.listener.impl.PlaySheetControlListener;
-import gov.va.semoss.ui.main.listener.impl.PlaySheetOWLListener;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -157,7 +156,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		log.debug( "new Graph PlaySheet" );
 		gdm = model;
 
-		controlPanel = new ControlPanel( gdm.enableSearchBar() );
+		controlPanel = new ControlPanel();
 
 		graphSplitPane = new JSplitPane();
 		graphSplitPane.setEnabled( false );
@@ -259,10 +258,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		return image;
 	}
 
-	public boolean getSudowl() {
-		return gdm.showSudowl();
-	}
-
 	public GraphDataModel getGraphData() {
 		return gdm;
 	}
@@ -319,7 +314,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		frame.addInternalFrameListener( new GraphPlaySheetListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetControlListener( this ) );
-		frame.addInternalFrameListener( new PlaySheetOWLListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetColorShapeListener( this ) );
 	}
 
@@ -330,10 +324,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		fireGraphUpdated();
 		setLayoutName( layoutName );
 		setUndoRedoBtn();
-	}
-
-	public boolean enableSearchBar() {
-		return gdm.enableSearchBar();
 	}
 
 	@Override

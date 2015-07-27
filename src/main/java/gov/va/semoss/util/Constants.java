@@ -96,14 +96,13 @@ public class Constants {
 	
 	//graphplaysheet option constants
 	// layouts
-	public static final String GPSSudowl = "GPS_SUDOWL_DEFAULT";
-	public static final String GPSSearch = "GPS_SEARCH_DEFAULT";
-	public static final String GPSProp = "GPS_PROPERTIES_DEFAULT";
-	public static final String highQualityExport = "GPSHighQualityExport";
-	public static final String sudowlCheck = "sudowlCheck";
-	public static final String searchCheck = "searchCheck";
-	public static final String propertyCheck = "propertyCheck";
-	public static final String highQualityExportCheck = "highQualityExportCheck";
+	//public static final String GPSSudowl = "GPS_SUDOWL_DEFAULT";
+	//public static final String GPSSearch = "GPS_SEARCH_DEFAULT";
+	//public static final String highQualityExport = "GPSHighQualityExport";
+	//public static final String sudowlCheck = "sudowlCheck";
+	//public static final String searchCheck = "searchCheck";
+	//public static final String propertyCheck = "propertyCheck";
+	//public static final String highQualityExportCheck = "highQualityExportCheck";
 
 	//used by ExportSpecificRelationshipsToLoadingSheetAction
 	public static final URI ANYNODE = new URIImpl( "semoss://any" );
@@ -243,7 +242,7 @@ public class Constants {
 	public static final URI URI_KEY = RDF.SUBJECT;
 	public static final String CALC_NAMES_LIST = "_Names";
 	public static final String CALC_NAMES_TECH_STD_LIST = "_Names_Tech_Std";
-	public static final String GRID_VIEW = "gov.va.semoss.ui.components.playsheets.GridPlaySheet";
+	// public static final String GRID_VIEW = "gov.va.semoss.ui.components.playsheets.GridPlaySheet";
 	public static final String PROP_HASH = "_PropHash";
 	public static final String TRAVERSE_JENA_MODEL = "traverseJenaModel";
 	public static final String UNDO_BOOLEAN = "undoBoolean";
@@ -372,8 +371,6 @@ public class Constants {
 
 	public static final String PERSPECTIVE_SELECTOR = "perspectiveSelector";
 
-	public static final String BROWSER_TYPE = "BROWSER_TYPE";
-
 	public static final String SPARQL_QUERY_ENDPOINT = "SPARQL_QUERY_ENDPOINT";
 	public static final String SPARQL_UPDATE_ENDPOINT = "SPARQL_UPDATE_ENDPOINT";
 
@@ -418,23 +415,6 @@ public class Constants {
 	public static final String TYPE = "TYPE";
 	public static final String SPARQL = "SPARQL";
 	public static final String TAG = "TAG";
-	/*
-	 public static final URI INSIGHT_URI = new URIImpl( INSIGHT + ":" + INSIGHT );
-	 public static final URI INSIGHT_ID = new URIImpl( INSIGHT + ":" + ID );
-	 public static final URI INSIGHT_TYPE = new URIImpl( INSIGHT + ":" + TYPE );
-	 public static final URI INSIGHT_LABEL = new URIImpl( INSIGHT + ":" + LABEL );
-	 public static final URI INSIGHT_TAG = new URIImpl( INSIGHT + ":" + TAG );
-	 public static final URI INSIGHT_SPARQL = new URIImpl( INSIGHT + ":" + SPARQL );
-	 public static final URI INSIGHT_OUTPUT = new URIImpl( INSIGHT + ":" + OUTPUT );
-	 public static final URI INSIGHT_PARAM = new URIImpl( INSIGHT + ":PARAM" );
-	 public static final URI INSIGHT_PARAM_LABEL = new URIImpl( INSIGHT + ":PARAM:LABEL" );
-	 public static final URI PARAM_QUERY = new URIImpl( "PARAM:QUERY" );
-	 public static final URI HAS_PARAM_DEPEND = new URIImpl( "HAS:PARAM:DEPEND" );
-	 public static final URI PARAM_TYPE = new URIImpl( "PARAM:TYPE" );
-	 public static final URI PARAM_DEPEND = new URIImpl( "PARAM:DEPEND" );
-	 public static final URI PERSPECTIVE_URI = new URIImpl( PERSPECTIVE + ":" + PERSPECTIVE );
-	 public static final URI PERSPECTIVE_LABEL = new URIImpl( PERSPECTIVE + ":" + LABEL );
-	 */
 
 	public static final String ENGINE_WEB_WATCHER = "ENGINE_WEB_WATCHER";
 	public static final String DEPEND = "DEPEND";

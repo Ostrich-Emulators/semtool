@@ -69,33 +69,35 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 	private static final long serialVersionUID = 3128479498547975776L;
 
-	private JButton resetBtn, decreaseVertSizeButton, increaseVertSizeButton, undoButton, redoButton;
-	private JToggleButton treeButton, highlightButton, ringsButton;
-	private WeightDropDownButton weightButton;
-	private JTextField searchText = new JTextField();
+	private final JButton resetBtn;
+	private final JButton decreaseVertSizeButton;
+	private final JButton increaseVertSizeButton;
+	private final JButton undoButton;
+	private final JButton redoButton;
+	private final JToggleButton treeButton;
+	private final JToggleButton highlightButton;
+	private final JToggleButton ringsButton;
+	private final WeightDropDownButton weightButton;
+	private final JTextField searchText = new JTextField();
 
-	private GraphTransformerResetListener resetTransListener = new GraphTransformerResetListener();
-	private GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
-	private TreeConverterListener treeListener = new TreeConverterListener();
-	private RingsButtonListener ringsListener = new RingsButtonListener();
-	private SearchController searchController = new SearchController();
-	private RedoListener redoListener = new RedoListener();
-	private UndoListener undoListener = new UndoListener();
+	private final GraphTransformerResetListener resetTransListener 
+			= new GraphTransformerResetListener();
+	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
+	private final TreeConverterListener treeListener = new TreeConverterListener();
+	private final RingsButtonListener ringsListener = new RingsButtonListener();
+	private final SearchController searchController = new SearchController();
+	private final RedoListener redoListener = new RedoListener();
+	private final UndoListener undoListener = new UndoListener();
 
 	/**
 	 * Create the panel.
 	 *
 	 * @param search Boolean
 	 */
-	public ControlPanel( Boolean search ) {
+	public ControlPanel() {
 		searchText.setMaximumSize( new Dimension( 300, 20 ) );
 		searchText.setBorder( new BevelBorder( BevelBorder.LOWERED, null, null, null, null ) );
 		searchText.setText( Constants.ENTER_TEXT );
-
-		if ( !search ) {
-			searchText.setText( Constants.ENTER_SEARCH_DISABLED_TEXT );
-			searchText.setEnabled( false );
-		}
 
 		searchText.setColumns( 9 );
 		searchController.setText( searchText );
@@ -161,9 +163,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		if ( gps.enableSearchBar() ) {
-			searchController.indexGraph( graph, gps.getEngine() );
-		}
+		searchController.indexGraph( graph, gps.getEngine() );
 	}
 	
 	@Override

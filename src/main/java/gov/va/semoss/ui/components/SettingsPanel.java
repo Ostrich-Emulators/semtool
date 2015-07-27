@@ -51,8 +51,6 @@ public class SettingsPanel extends javax.swing.JPanel {
 		};
 
 		Map<JCheckBox, String> map = new HashMap<>();
-		map.put( graphsearch, Constants.GPSSearch );
-		map.put( graphprops, Constants.GPSProp );
 		map.put( calcInfers, Constants.CALC_INFERENCES_PREF );
 
 		for ( Map.Entry<JCheckBox, String> e : map.entrySet() ) {
@@ -95,8 +93,6 @@ public class SettingsPanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    graphprops = new javax.swing.JCheckBox();
-    graphsearch = new javax.swing.JCheckBox();
     calcInfers = new javax.swing.JCheckBox();
     jButton1 = new javax.swing.JButton();
     jPanel1 = new javax.swing.JPanel();
@@ -109,12 +105,6 @@ public class SettingsPanel extends javax.swing.JPanel {
     jPanel2 = new javax.swing.JPanel();
     jScrollPane2 = new javax.swing.JScrollPane();
     namespaces = new javax.swing.JTable();
-
-    graphprops.setText("Graph Properties");
-    graphprops.setToolTipText("Enables/Disables graph properties");
-
-    graphsearch.setText("Graph Search");
-    graphsearch.setToolTipText("Enables/Disables the graph search window on the Display Pane tab");
 
     calcInfers.setText("Compute dependent relationships following load");
 
@@ -201,8 +191,6 @@ public class SettingsPanel extends javax.swing.JPanel {
           .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
           .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(graphprops)
-              .addComponent(graphsearch)
               .addComponent(calcInfers)
               .addComponent(jButton1))
             .addGap(0, 0, Short.MAX_VALUE)))
@@ -212,10 +200,6 @@ public class SettingsPanel extends javax.swing.JPanel {
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(graphprops)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(graphsearch)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(calcInfers)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(jButton1)
@@ -254,8 +238,6 @@ public class SettingsPanel extends javax.swing.JPanel {
   private javax.swing.JCheckBox calcInfers;
   private javax.swing.JTextField email;
   private javax.swing.JTextField fullname;
-  private javax.swing.JCheckBox graphprops;
-  private javax.swing.JCheckBox graphsearch;
   private javax.swing.JButton jButton1;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
