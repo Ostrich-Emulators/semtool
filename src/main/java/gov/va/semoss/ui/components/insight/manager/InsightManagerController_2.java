@@ -49,6 +49,8 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
 import javafx.util.Callback;
 import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
@@ -506,8 +508,16 @@ public class  InsightManagerController_2 implements Initializable{
             for(Insight insight: perspective.getInsights()){
                 Image image = new Image(getInsightIcon(insight));
                 ImageView imageView = new ImageView(image);
-            	TreeItem<Object> item_2 = new TreeItem<Object>(insight, imageView);
+                InsightTreeItem<Object> item_2 = new InsightTreeItem(insight, imageView);
             	item_1.getChildren().add(item_2);
+            	
+            	if(insight.getInsightParameters().size() > 0){
+            	   for(Parameter parameter: insight.getInsightParameters()){
+            	  	   TreeItem<Object> item_3 = new TreeItem<Object>(parameter);
+            		   item_2.getChildren().add(item_3);
+            	   }
+            	}else{
+            	}
             }
         }        
         treevPerspectives.setRoot(rootItem);    
@@ -521,7 +531,7 @@ public class  InsightManagerController_2 implements Initializable{
            
             @Override
             public TreeCell<Object> call(TreeView<Object> stringTreeView) {            	          	
-                TreeCell<Object> treeCell = new TreeCell<Object>() {
+               TreeCell<Object> treeCell = new TreeCell<Object>() {
                 	@Override
                 	protected void updateItem(Object item, boolean empty) {
                 	    super.updateItem(item, empty);
@@ -532,9 +542,11 @@ public class  InsightManagerController_2 implements Initializable{
                 	        setText(null);
                 	        setGraphic(null);
                 	    }
-                	}                
+                	}
                 };
-
+                 
+                //Begins dragging of object:
+                //--------------------------
                 treeCell.setOnDragDetected(new EventHandler<MouseEvent>() {
                    @Override
                    public void handle(MouseEvent mouseEvent) {
@@ -562,40 +574,68 @@ public class  InsightManagerController_2 implements Initializable{
                    }
                 });
 
-                treeCell.setOnDragDone(new EventHandler<DragEvent>() {
+                //Indicates where drag transfer is possible:
+                //------------------------------------------
+                treeCell.setOnDragOver(new EventHandler<DragEvent>() {               	
                     @Override
                     public void handle(DragEvent dragEvent) {
-                       dragEvent.consume();
-                    }
-                });
-
-                treeCell.setOnDragOver(new EventHandler<DragEvent>() {
-                    @Override
-                    public void handle(DragEvent dragEvent) {
-                        if (dragEvent.getDragboard().hasContent(insightFormat)) {
-                            Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
-                            if(!valueDragged.equals(treeCell.getItem())) {
+                    	TreeCell<Object> cellDraggedOver = treeCell;
+                        
+                        if(dragEvent.getDragboard().hasContent(insightFormat) &&
+                           cellDraggedOver.getItem() instanceof Insight) {
+                             Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
+                             if(!valueDragged.equals(treeCell.getItem())) {
                                 dragEvent.acceptTransferModes(transferMode);
-                            }
+                             }
                         }
                         dragEvent.consume();
                     }
                 });
+ 
+                //Draws drag indication border:
+                //-----------------------------
+                treeCell.setOnDragEntered(new EventHandler<DragEvent>() {
+                    @Override
+                    public void handle(DragEvent dragEvent) {
+                        Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
+  
+                        TreeItem<Object> itemDragged = search(treevPerspectives.getRoot(), valueDragged);
+                        TreeItem<Object> itemTarget = treeCell.getTreeItem(); 
+                    	double itemTargetY = treeCell.localToScreen(treeCell.getBoundsInLocal()).getMinY();
 
+                        ObservableList<TreeItem<Object>> olstOldInsights = itemDragged.getParent().getChildren(); 
+                        ObservableList<TreeItem<Object>> olstNewInsights = itemTarget.getParent().getChildren();
+                        int index = olstNewInsights.indexOf(itemTarget);
+                        
+                        treeCell.setStyle("-fx-border-color: #111111 #111111 #111111 #111111");
+                    }              	
+                });
+                
+                //Clears drag indication border:
+                //------------------------------
+                treeCell.setOnDragExited(new EventHandler<DragEvent>() {
+					@Override
+					public void handle(DragEvent dragEvent) {
+					   //Clear the drag insertion line:
+                        treeCell.setStyle("-fx-border-color: transparent transparent transparent transparent");
+
+					}                	
+                });
+
+                //Transfers dragged object:
+                //-------------------------
                 treeCell.setOnDragDropped(new EventHandler<DragEvent>() {
                     @Override
                     public void handle(DragEvent dragEvent) {
                         Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
   
                         TreeItem<Object> itemDragged = search(treevPerspectives.getRoot(), valueDragged);
-                        TreeItem<Object> itemTarget = search(treevPerspectives.getRoot(), (Insight) treeCell.getItem());
-                        
-                        TreeItem<Object> oldPerspective = itemDragged.getParent();
-                        ObservableList<TreeItem<Object>> olstOldInsights = oldPerspective.getChildren(); 
-                        TreeItem<Object> newPerspective = itemTarget.getParent();
-                        ObservableList<TreeItem<Object>> olstInsights = newPerspective.getChildren();
+                        TreeItem<Object> itemTarget = treeCell.getTreeItem(); 
+
+                        ObservableList<TreeItem<Object>> olstOldInsights = itemDragged.getParent().getChildren(); 
+                        ObservableList<TreeItem<Object>> olstInsights = itemTarget.getParent().getChildren();
                         int index = olstInsights.indexOf(itemTarget);
-                        if(itemTarget.getParent().getValue().toString().equals("Perspectives")){
+                        if(itemTarget.getValue() instanceof Perspective){
                            return;
                         }
                         //If "Move Insight" is selected, then remove the Insight 
@@ -636,8 +676,17 @@ public class  InsightManagerController_2 implements Initializable{
                         dragEvent.consume();
                     }
                 });
+                //Completes drag operation:
+                //-------------------------
+                treeCell.setOnDragDone(new EventHandler<DragEvent>() {
+                    @Override
+                    public void handle(DragEvent dragEvent) {
+                       dragEvent.consume();
+                    }
+                });
                 return treeCell;
             }
+            
 
             /**   Searches the tree-view data for the Insight passed-in, and returns the TreeItem
              * associated with that Insight. Note: This is a recursive function that compares URI's
@@ -682,10 +731,36 @@ public class  InsightManagerController_2 implements Initializable{
         		}
         	}
 
-        });//End "treevPerspectives.setCellFactory".  
-        
+        });//End "treevPerspectives.setCellFactory".          
 	}//End "populatePerspectiveTreeView()".
-		
+	
+	/**   Class to override the ".isLeaf()" method for Insight tree-items.
+	 * We need to be sure that no Parameters are listed under the Insight.
+	 * 
+	 * @author Thomas
+	 *
+	 * @param <T>
+	 */
+    public class InsightTreeItem<T> extends TreeItem<Object>{
+    	 private Insight insight = null;
+    	
+         public InsightTreeItem(Insight insight, ImageView imageView){
+        	 super(insight, imageView);
+        	 this.insight = insight;
+         }
+    	
+      	 @Override
+      	 public boolean isLeaf() { 
+      		 boolean boolReturnValue = true;
+      		 
+      		 if(insight.getInsightParameters().size() > 0 &&
+      		    ((ArrayList) insight.getInsightParameters()).get(0).toString().equals("") == false){
+      		    boolReturnValue = false;
+      	     }
+      		 return boolReturnValue;
+      	 }
+    }
+	
 	/**   Returns a PlaySheet icon for the passed-in Insight.The array-list of PlaySheets
 	 * is consulted. The base path to all icons is defined at the top of this class, 
 	 * in "ICON_LOCATION".

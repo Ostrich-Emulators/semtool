@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.*?>
 
-<SplitPane fx:id="spaneInsightManager" dividerPositions="0.29797979797979796" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="601.0" prefWidth="795.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.semoss.ui.components.insight.manager.InsightManagerController_2">
+<SplitPane fx:id="spaneInsightManager" dividerPositions="0.29797979797979796" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="601.0" prefWidth="795.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@../css/InsightManagerPanel_2.css" fx:controller="gov.va.semoss.ui.components.insight.manager.InsightManagerController_2">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
          <children>

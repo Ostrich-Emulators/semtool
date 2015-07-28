@@ -1,0 +1,36 @@
+.root{
+    -fx-font-size: 13pt;
+    -fx-font-family: "Tahoma";
+    -fx-background-color: lightgray;
+}
+
+.tree-cell:filled:hover,
+.tree-table-row-cell:filled:hover {
+    -fx-background-color: -fx-cell-hover-color;
+    -fx-text-fill: -fx-text-inner-color;
+}
+
+.tree-cell:filled:hover > .tree-disclosure-node > .arrow,
+.tree-table-row-cell:filled:hover > .tree-disclosure-node > .arrow {
+    -fx-background-color: -fx-mark-color;
+}
+
+.tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:focused:hover,
+.tree-table-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-table-row-cell:filled:focused:hover {
+    -fx-background-insets: 0, 1, 2;
+    -fx-text-fill: -fx-text-inner-color;
+}
+
+.tree-cell:filled:selected:hover > .tree-disclosure-node > .arrow,
+.tree-table-row-cell:filled:selected:hover > .tree-disclosure-node > .arrow {
+    -fx-background-color: -fx-selection-bar-text;
+}
+
+.text-field, .text-area{
+  -fx-font-size: 0.9em;
+}
+
+.combo-box-base{
+    -fx-font-size: 0.9em;
+}
+
