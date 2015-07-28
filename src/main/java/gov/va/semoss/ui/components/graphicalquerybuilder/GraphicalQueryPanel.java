@@ -23,8 +23,6 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
-import gov.va.semoss.ui.components.NewHoriScrollBarUI;
-import gov.va.semoss.ui.components.NewScrollBarUI; 
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
