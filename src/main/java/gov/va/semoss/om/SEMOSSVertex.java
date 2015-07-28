@@ -46,7 +46,10 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 	public SEMOSSVertex( URI id, URI type, String label ) {
 		super( id, type, label );
 
-		if ( null != type ) {
+		if ( null == type ) {
+			setShape( GraphShapeRepository.instance().getShapeByName( Constants.CIRCLE ) );
+		}
+		else {
 			setColor( GraphColorRepository.instance().getColor( type ) );
 			setShape( GraphShapeRepository.instance().getShape( type ) );
 		}
@@ -75,9 +78,11 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 	}
 
 	@Override
-	public void setShape( Shape _shape ) {
+	public final void setShape( Shape _shape ) {
 		Shape old = shape;
-		shape = _shape;
+		shape = ( null == _shape
+				? GraphShapeRepository.instance().getShapeByName( Constants.CIRCLE )
+				: _shape );
 		firePropertyChanged( CHANGE_SHAPE, old, shape );
 	}
 
