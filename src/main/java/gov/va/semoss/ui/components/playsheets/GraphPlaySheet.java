@@ -453,12 +453,12 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		layout.initialize();
 		// make the layout a little smaller than our viewer, so stuff shows up on screen
-		double scale = 0.9;
+		double scale = 0.85;
 		Dimension d = view.getSize();
-		d.setSize( d.getWidth() * scale, d.getHeight() * 0.9 );
+		d.setSize( d.getWidth() * scale, d.getHeight() * scale );
 		layout.setSize( d );
 		view.setGraphLayout( layout );
-		// fitGraphinWindow( layout );
+		fitGraphinWindow( layout );
 
 		for ( GraphListener gl : listenees ) {
 			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName,
