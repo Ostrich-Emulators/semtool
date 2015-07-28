@@ -1287,6 +1287,7 @@ public class PlayPane extends JFrame {
 		gexp.getAccessibleContext().setAccessibleName( "Database Graphs" );
 		gexp.getAccessibleContext().setAccessibleDescription( "Database Graphs" );
 		gexp.setMnemonic( KeyEvent.VK_G );
+		gexp.setIcon( DbAction.getIcon( "graph-icon" ) );
 
 		gexp.add( expgraphml );
 		gexp.add( expgson );
@@ -1880,6 +1881,7 @@ public class PlayPane extends JFrame {
 		jmi.getAccessibleContext().setAccessibleName( "Open Local Files to Import" );
 		jmi.getAccessibleContext().setAccessibleDescription( "Open Local Files to Import" );
 		jmi.setMnemonic( KeyEvent.VK_L );
+		jmi.setIcon( DbAction.getIcon( "local-db" ) );
 
 		jmi = openmenu.add( remoteDb );
 		jmi.setText( "Remote DB" );
@@ -1887,6 +1889,7 @@ public class PlayPane extends JFrame {
 		jmi.getAccessibleContext().setAccessibleName( "Open Remote Files to Import" );
 		jmi.getAccessibleContext().setAccessibleDescription( "Open Remote Files to Import" );
 		jmi.setMnemonic( KeyEvent.VK_R );
+		jmi.setIcon( DbAction.getIcon( "remote-db" ) );
 
 		jmi = openmenu.add( new OpenSparqlAction( UIPROGRESS, this, customSparqlPanel ) );
 		jmi.setText( "SPARQL File" );
