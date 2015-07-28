@@ -6,6 +6,7 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.ui.components.models.ValueTableModel;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Color;
@@ -56,6 +57,8 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
+
+		setColor( GraphColorRepository.instance().getColor( type ) );
 	}
 
 	public void addPropertyChangeListener( PropertyChangeListener pcl ) {
@@ -69,7 +72,10 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	@Override
 	public final void setColor( Color _color ) {
 		Color old = color;
-		color = _color;
+		color = ( null == _color
+				? GraphColorRepository.instance().getColor( Constants.TRANSPARENT )
+				: _color );
+
 		firePropertyChanged( CHANGE_COLOR, old, color );
 	}
 
