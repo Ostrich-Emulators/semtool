@@ -264,6 +264,7 @@ public class PlayPane extends JFrame {
 	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
 	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
 	private JCheckBoxMenuItem hidecsp;
+	private JCheckBoxMenuItem splithider;
 	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging",
 			DbAction.getIcon( "log_tab1" ) );
 	private final JCheckBoxMenuItem gQueryBuilderItem
@@ -1653,12 +1654,14 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		JCheckBoxMenuItem splithider = new JCheckBoxMenuItem( "Left Panel", true );
-		splithider.setMnemonic( KeyEvent.VK_L );
-		splithider.setToolTipText( "Disable the Left Panel" );
-		splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
-		splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
-
+		splithider = new JCheckBoxMenuItem( "Left Panel", true );
+		
+		
+			splithider.setToolTipText( "Disable the Left Panel " );
+			splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
+			splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
+	
+			
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
@@ -1670,13 +1673,12 @@ public class PlayPane extends JFrame {
 					splithider.setToolTipText( "Disable the Left Panel" );
 					splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
 					splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
-					splithider.setMnemonic( KeyEvent.VK_L );
 				}
 				else {
 					splithider.setToolTipText( "Enable the Left Panel" );
 					splithider.getAccessibleContext().setAccessibleName( "Enable the Left Panel" );
 					splithider.getAccessibleContext().setAccessibleDescription( "Enable the Left Panel" );
-					splithider.setMnemonic( KeyEvent.VK_L );
+
 
 				}
 			}
@@ -1803,7 +1805,7 @@ public class PlayPane extends JFrame {
 		view.add( iManageItem );
 		iManageItem.setMnemonic( KeyEvent.VK_I );
 		view.add( splithider );
-		splithider.setMnemonic( KeyEvent.VK_M );
+		splithider.setMnemonic( KeyEvent.VK_L );
 		view.add( loggingItem );
 		//Icon for the Menu Item
 		//logging.setIcon( DbAction.getIcon( "log_tab1" ));
