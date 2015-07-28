@@ -426,10 +426,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		Graph<SEMOSSVertex, SEMOSSEdge> graph = filter.transform( gdm.getGraph() );
 
 		boolean ok = false;
-		AbstractLayout<SEMOSSVertex, SEMOSSEdge> layout = null;
+		Layout<SEMOSSVertex, SEMOSSEdge> layout = null;
 		try {
 			Constructor<?> constructor = layoutClass.getConstructor( Forest.class );
-			layout = (AbstractLayout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( asForest() );
+			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( asForest() );
 			ok = true;
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
@@ -439,7 +439,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		if ( null == layout ) {
 			try {
 				Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
-				layout = (AbstractLayout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
+				layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
 				ok = true;
 			}
 			catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
@@ -453,12 +453,14 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		layout.initialize();
 		// make the layout a little smaller than our viewer, so stuff shows up on screen
-		double scale = 0.85;
-		Dimension d = view.getSize();
-		d.setSize( d.getWidth() * scale, d.getHeight() * scale );
-		layout.setSize( d );
 		view.setGraphLayout( layout );
-		fitGraphinWindow( layout );
+		if( AbstractLayout.class.isAssignableFrom( layout.getClass() ) ){
+			double scale = 0.85;
+			Dimension d = view.getSize();
+			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
+			layout.setSize( d );
+			fitGraphinWindow( AbstractLayout.class.cast( layout ) );
+		}
 
 		for ( GraphListener gl : listenees ) {
 			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName,
