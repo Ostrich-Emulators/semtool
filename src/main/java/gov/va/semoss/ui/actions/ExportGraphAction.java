@@ -8,8 +8,8 @@ package gov.va.semoss.ui.actions;
 import gov.va.semoss.poi.main.GraphMLWriter;
 import gov.va.semoss.poi.main.GsonWriter;
 import gov.va.semoss.poi.main.ImportData;
-
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -48,14 +48,17 @@ public class ExportGraphAction extends DbAction {
 		super( optg, Style.GRAPHML == style ? "GraphML" : "GSON" );
 		this.frame = frame;
 		this.style = style;
+		
 
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Export the database as a "
 				+ ( Style.GRAPHML == style ? "GraphML" : "GSON" ) + " file" );
 		if ( Style.GRAPHML == style ) {
 			putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_G );
+			putValue( AbstractAction.SMALL_ICON, DbAction.getIcon( "graphml-icon" ) );
 		}
 		else {
 			putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_N );
+			putValue( AbstractAction.SMALL_ICON, DbAction.getIcon( "gson-icon" ) );
 		}
 	}
 
