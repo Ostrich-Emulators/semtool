@@ -8,7 +8,7 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 import edu.uci.ics.jung.graph.Graph;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
-import gov.va.semoss.rdf.engine.util.TheAwesomeClass;
+import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
@@ -139,7 +139,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 			@Override
 			protected Action makeTypeItem( QueryNode v, GraphicalQueryPanel pnl ) {
 				Map<URI, String> labels = Utility.getInstanceLabels(
-						TheAwesomeClass.instance().createConceptList( pnl.getEngine() ), pnl.getEngine() );
+						NodeDerivationTools.instance().createConceptList( pnl.getEngine() ), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Vertex", "New Type", Utility.sortUrisByLabel( labels ) );
@@ -173,7 +173,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 				URI endtype = graph.getDest( v ).getType();
 
 				ListQueryAdapter<URI> links
-						= TheAwesomeClass.instance().getPredicatesBetween( starttype, endtype );
+						= NodeDerivationTools.instance().getPredicatesBetween( starttype, endtype );
 
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Edge", "New Type", links );

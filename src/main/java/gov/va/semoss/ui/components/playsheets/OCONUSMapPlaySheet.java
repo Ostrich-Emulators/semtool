@@ -20,7 +20,7 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -68,7 +68,7 @@ public class OCONUSMapPlaySheet extends BrowserPlaySheet2 {
 				String colName = var[j];
 				elementHash.put( "size", 1000000 );
 
-				Class<?> k = TheAwesomerClass.instance().getClassForValue( v );
+				Class<?> k = RDFDatatypeTools.instance().getClassForValue( v );
 				if ( k.equals( String.class ) ) {
 					elementHash.put( colName, v.stringValue() );
 				}

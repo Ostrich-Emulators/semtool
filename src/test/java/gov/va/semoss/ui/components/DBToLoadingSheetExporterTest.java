@@ -6,7 +6,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
-import gov.va.semoss.rdf.engine.util.TheAwesomeClass;
+import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 
 import java.io.File;
 import java.io.IOException;
@@ -118,7 +118,7 @@ public class DBToLoadingSheetExporterTest {
 			}
 		} );
 
-		List<URI> concepts = TheAwesomeClass.instance().createConceptList( eng );
+		List<URI> concepts = NodeDerivationTools.instance().createConceptList( eng );
 		Collections.sort( concepts, new Comparator<URI>() {
 
 			@Override

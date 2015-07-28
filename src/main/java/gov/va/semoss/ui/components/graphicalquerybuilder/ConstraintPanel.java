@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet.JoinType;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
@@ -279,7 +279,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 		else {
 			Enumeration<AbstractButton> radios = typegroup.getElements();
-			Class<?> typeclass = TheAwesomerClass.instance().getClassForValue( o );
+			Class<?> typeclass = RDFDatatypeTools.instance().getClassForValue( o );
 
 			while ( radios.hasMoreElements() ) {
 				AbstractButton radio = radios.nextElement();

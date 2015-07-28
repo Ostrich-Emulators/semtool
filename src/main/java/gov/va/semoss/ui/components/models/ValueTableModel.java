@@ -6,7 +6,7 @@
 package gov.va.semoss.ui.components.models;
 
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
-import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.util.MultiMap;
 
 import java.beans.PropertyChangeEvent;
@@ -170,7 +170,7 @@ public class ValueTableModel extends AbstractTableModel {
 		headers.clear();
 		headers.addAll( heads );
 		columnClasses.clear();
-		columnClasses.addAll( TheAwesomerClass.instance().figureColumnClassesFromData( newdata, headers.size() ) );
+		columnClasses.addAll( RDFDatatypeTools.instance().figureColumnClassesFromData( newdata, headers.size() ) );
 
 		data.clear();
 		data.addAll( convertValuesToClassedData( newdata, columnClasses, useraw ) );

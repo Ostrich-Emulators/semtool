@@ -1,7 +1,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
-import gov.va.semoss.rdf.engine.util.TheAwesomeClass;
+import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.XlsWriter;
 
@@ -118,7 +118,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 	}
 
 	private URI[] getAllNodes() {
-		List<URI> uriconcepts = TheAwesomeClass.instance().createConceptList( engine );
+		List<URI> uriconcepts = NodeDerivationTools.instance().createConceptList( engine );
 		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 

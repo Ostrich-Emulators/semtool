@@ -6,7 +6,7 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
-import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.MultiSetMap;
 
@@ -104,7 +104,7 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 			}
 
 			map.put( en.getKey(),
-					TheAwesomerClass.instance().getObjectFromValue( en.getValue().iterator().next() ) );
+					RDFDatatypeTools.instance().getObjectFromValue( en.getValue().iterator().next() ) );
 		}
 		return map;
 	}
@@ -120,13 +120,13 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 
 	@Override
 	public Object getProperty( URI prop ) {
-		return TheAwesomerClass.instance().getObjectFromValue( getValue( prop ) );
+		return RDFDatatypeTools.instance().getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override
 	public void setProperty( URI prop, Object propValue ) {
 		properties.remove( prop );
-		setProperty( prop, TheAwesomerClass.instance().getValueFromObject( propValue ), true );
+		setProperty( prop, RDFDatatypeTools.instance().getValueFromObject( propValue ), true );
 	}
 
 	@Override

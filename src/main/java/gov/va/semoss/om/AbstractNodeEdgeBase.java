@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.om;
 
-import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.Constants;
 
@@ -127,7 +127,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	}
 
 	public void setProperty( URI prop, Object propValue ) {
-		setValue( prop, TheAwesomerClass.instance().getValueFromObject( propValue ) );
+		setValue( prop, RDFDatatypeTools.instance().getValueFromObject( propValue ) );
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	@Override
 	public Object getProperty( URI prop ) {
-		return TheAwesomerClass.instance().getObjectFromValue( getValue( prop ) );
+		return RDFDatatypeTools.instance().getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	public Map<URI, Object> getProperties() {
 		Map<URI, Object> map = new HashMap<>();
 		for ( Map.Entry<URI, Value> en : properties.entrySet() ) {
-			map.put( en.getKey(), TheAwesomerClass.instance().getObjectFromValue( en.getValue() ) );
+			map.put( en.getKey(), RDFDatatypeTools.instance().getObjectFromValue( en.getValue() ) );
 		}
 		return map;
 	}

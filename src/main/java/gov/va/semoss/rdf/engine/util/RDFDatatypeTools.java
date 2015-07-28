@@ -22,15 +22,25 @@ import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
 
-public class TheAwesomerClass {
+/**
+ * This class offers utility methods for converting between Objects and Values, as well
+ * as offering the ability to derive data types for RDF entities.
+ * @author Wayne Warren
+ *
+ */
+public class RDFDatatypeTools {
 	/** The logger for this class */
-	private static final Logger logger = Logger.getLogger( TheAwesomeClass.class );
-	
-	private static TheAwesomerClass instance;
-	
+	private static final Logger logger = Logger.getLogger( NodeDerivationTools.class );
+	/** The singleton instance for this class */
+	private static RDFDatatypeTools instance;
+	/** A lookup which stores the various static tags for the data types that one might
+	 * find in an XML Schema as keys, and the corresponding native Java classes as values */
 	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
 	
-	private TheAwesomerClass(){
+	/**
+	 * Default constructor
+	 */
+	private RDFDatatypeTools(){
 		TYPELOOKUP.put( XMLSchema.INT, Integer.class );
 		TYPELOOKUP.put( XMLSchema.INTEGER, Integer.class );
 		TYPELOOKUP.put( XMLSchema.DOUBLE, Double.class );
@@ -42,13 +52,20 @@ public class TheAwesomerClass {
 		TYPELOOKUP.put( XMLSchema.BOOLEAN, Boolean.class );
 	}
 	
-	public static TheAwesomerClass instance(){
+	public static RDFDatatypeTools instance(){
 		if (instance == null){
-			instance = new TheAwesomerClass();
+			instance = new RDFDatatypeTools();
 		}
 		return instance;
 	}
 	
+	/**
+	 * Derives the classes of a set of columns based on the row data that they
+	 * describe
+	 * @param newdata The row data described by the columns
+	 * @param columns The number of columns to be "classed"
+	 * @return A list (ordinal) of the classes describing the data types of the columns
+	 */
 	public List<Class<?>> figureColumnClassesFromData( List<Value[]> newdata,
 			int columns ) {
 		List<Class<?>> columnClasses = new ArrayList<>();
@@ -138,66 +155,68 @@ public class TheAwesomerClass {
 		return columnClasses;
 	}
 	
+	/**
+	 * Derive the data type for the value of a tabular field
+	 * @param v The value for which we need to derive a class
+	 * @return The class describing the value's data type
+	 */
 	public Class<?> getClassForValue( Value v ) {
-
 		if ( v instanceof URI ) {
 			return URI.class;
 		}
-
 		if ( v instanceof Literal ) {
 			Literal l = Literal.class.cast( v );
 			URI dt = l.getDatatype();
 			return ( TYPELOOKUP.containsKey( dt )
 					? TYPELOOKUP.get( dt ) : String.class );
 		}
-
 		return Object.class;
 	}
 
+	/**
+	 * Parse the data type of an XML entity based on its string content
+	 * @param input The XML entity, in string form
+	 * @return The entity instance, properly classes
+	 */
 	public Object parseXMLDatatype( String input ) {
 		if ( input == null ) {
 			return null;
 		}
-
 		input = input.trim();
-
 		String[] pieces = input.split( "\"" );
 		if ( pieces.length != 3 ) {
 			return removeExtraneousDoubleQuotes( input );
 		}
-
 		Class<?> theClass = null;
 		for ( URI datatypeUri : TYPELOOKUP.keySet() ) {
 			if ( pieces[2].contains( datatypeUri.stringValue() ) ) {
 				theClass = TYPELOOKUP.get( datatypeUri );
 			}
 		}
-
 		String dataPiece = pieces[1];
-
 		if ( theClass == Double.class && XMLDatatypeUtil.isValidDouble( dataPiece ) ) {
 			return XMLDatatypeUtil.parseDouble( dataPiece );
 		}
-
 		if ( theClass == Float.class && XMLDatatypeUtil.isValidFloat( dataPiece ) ) {
 			return XMLDatatypeUtil.parseFloat( dataPiece );
 		}
-
 		if ( theClass == Integer.class && XMLDatatypeUtil.isValidInteger( dataPiece ) ) {
 			return XMLDatatypeUtil.parseInteger( dataPiece );
 		}
-
 		if ( theClass == Boolean.class && XMLDatatypeUtil.isValidBoolean( dataPiece ) ) {
 			return XMLDatatypeUtil.parseBoolean( dataPiece );
 		}
-
 		if ( theClass == Date.class && XMLDatatypeUtil.isValidDate( dataPiece ) ) {
 			return XMLDatatypeUtil.parseCalendar( dataPiece );
 		}
-
 		return removeExtraneousDoubleQuotes( input );
 	}
 
+	/**
+	 * Gets a proper native object from a given RDF value
+	 * @param value The RDF Value
+	 * @return A proper native object
+	 */
 	public Object getObjectFromValue( Value value ) {
 		if ( value == null ) {
 			return null;
@@ -236,6 +255,11 @@ public class TheAwesomerClass {
 		return removeExtraneousDoubleQuotes( input.stringValue() );
 	}
 
+	/**
+	 * Converts a native object instance to its equivalent RDF value
+	 * @param o The native object to be converted
+	 * @return A proper RDF Value
+	 */
 	public static Value getValueFromObject( Object o ) {
 		if ( null == o ) {
 			return null;
@@ -269,7 +293,12 @@ public class TheAwesomerClass {
 		return null;
 	}
 	
-	public String removeExtraneousDoubleQuotes( String input ) {
+	/**
+	 * Internal convenience method to eliminate unnecessary quotes
+	 * @param input The input containing potentially unnecessary quote chars
+	 * @return The string content without the unnecessary quotes
+	 */
+	private String removeExtraneousDoubleQuotes( String input ) {
 		while ( input != null && input.length() > 2
 				&& input.charAt( 0 ) == '\"'
 				&& input.charAt( input.length() - 1 ) == '\"' ) {
@@ -279,6 +308,12 @@ public class TheAwesomerClass {
 		return input;
 	}
 
+	/**
+	 * Derives an RDF Value from a proper datatype and the stringified version of the content
+	 * @param datatype URI describing the datatype of the RDF entity
+	 * @param content The stringified version of the value
+	 * @return A proper RDF value
+	 */
 	public static Value getValueFromDatatypeAndString(URI datatype, String content) {
 		if ( XMLSchema.INTEGER == datatype || XMLSchema.INT == datatype) {
 			try {

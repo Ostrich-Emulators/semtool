@@ -63,7 +63,7 @@ public class DBToLoadingSheetExporter {
 	}
 
 	public ImportData runExport( boolean runNodeExport, boolean runRelationshipExport ) {
-		List<URI> nodes = TheAwesomeClass.instance().createConceptList( getEngine() );
+		List<URI> nodes = NodeDerivationTools.instance().createConceptList( getEngine() );
 
 		ImportData data = ImportData.forEngine( engine );
 

@@ -20,7 +20,7 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.util.TheAwesomerClass;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -65,7 +65,7 @@ public class CONUSMapPlaySheet extends BrowserPlaySheet2 {
 			for ( int j = 0; j < headers.size(); j++ ) {
 				Value v = listElement[j];
 				colName = headers.get( j );
-				Class<?> k = TheAwesomerClass.instance().getClassForValue( v );
+				Class<?> k = RDFDatatypeTools.instance().getClassForValue( v );
 				
 				elementHash.put( "size", 1000000 );
 				if ( k.equals( String.class ) ){
