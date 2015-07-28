@@ -570,6 +570,7 @@ public class  InsightManagerController_2 implements Initializable{
                       ClipboardContent content = new ClipboardContent();
                       content.put(insightFormat, treeItem);
                       dragBoard.setContent(content);
+                      
                       mouseEvent.consume();
                    }
                 });
@@ -597,17 +598,19 @@ public class  InsightManagerController_2 implements Initializable{
                 treeCell.setOnDragEntered(new EventHandler<DragEvent>() {
                     @Override
                     public void handle(DragEvent dragEvent) {
-                        Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
-  
-                        TreeItem<Object> itemDragged = search(treevPerspectives.getRoot(), valueDragged);
-                        TreeItem<Object> itemTarget = treeCell.getTreeItem(); 
-                    	double itemTargetY = treeCell.localToScreen(treeCell.getBoundsInLocal()).getMinY();
-
-                        ObservableList<TreeItem<Object>> olstOldInsights = itemDragged.getParent().getChildren(); 
-                        ObservableList<TreeItem<Object>> olstNewInsights = itemTarget.getParent().getChildren();
-                        int index = olstNewInsights.indexOf(itemTarget);
-                        
+//                        Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
+//  
+//                        TreeItem<Object> itemDragged = search(treevPerspectives.getRoot(), valueDragged);
+//                        TreeItem<Object> itemTarget = treeCell.getTreeItem(); 
+//                    	double itemTargetY = treeCell.localToScreen(treeCell.getBoundsInLocal()).getMinY();
+//
+//                        ObservableList<TreeItem<Object>> olstOldInsights = itemDragged.getParent().getChildren(); 
+//                        ObservableList<TreeItem<Object>> olstNewInsights = itemTarget.getParent().getChildren();
+//                        int index = olstNewInsights.indexOf(itemTarget);
+//                        
                         treeCell.setStyle("-fx-border-color: #111111 #111111 #111111 #111111");
+
+                        dragEvent.consume();
                     }              	
                 });
                 
@@ -619,6 +622,7 @@ public class  InsightManagerController_2 implements Initializable{
 					   //Clear the drag insertion line:
                         treeCell.setStyle("-fx-border-color: transparent transparent transparent transparent");
 
+                        dragEvent.consume();
 					}                	
                 });
 
