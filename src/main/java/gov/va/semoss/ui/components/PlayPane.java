@@ -22,12 +22,14 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
 import gov.va.semoss.ui.actions.CreateDbAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.EndpointAction;
+import gov.va.semoss.ui.actions.ExportGraphAction;
 import gov.va.semoss.ui.actions.ExportInsightsAction;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
 import gov.va.semoss.ui.actions.ExportSpecificNodesToLoadingSheetAction;
@@ -39,12 +41,16 @@ import gov.va.semoss.ui.actions.MergeAction;
 import gov.va.semoss.ui.actions.MountAction;
 import gov.va.semoss.ui.actions.NewLoadingSheetAction;
 import gov.va.semoss.ui.actions.OpenAction;
+import gov.va.semoss.ui.actions.OpenSparqlAction;
 import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
+import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
+import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
+import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.swing.custom.CustomAruiStyle;
 import gov.va.semoss.ui.swing.custom.CustomButton;
@@ -56,8 +62,6 @@ import gov.va.semoss.util.DefaultPlaySheetIcons;
 import gov.va.semoss.util.QuestionPlaySheetStore;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
@@ -76,10 +80,13 @@ import java.awt.event.ContainerListener;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
@@ -92,10 +99,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -114,36 +123,21 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 
 import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
 import com.ibm.icu.util.StringTokenizer;
-
-import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
-import gov.va.semoss.ui.actions.ExportGraphAction;
-import gov.va.semoss.ui.actions.OpenSparqlAction;
-import gov.va.semoss.ui.actions.RemoteDbAction;
-import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
-import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
-
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.HashMap;
-
-import javax.swing.JDialog;
-import javax.swing.JMenuBar;
-import javax.swing.event.InternalFrameEvent;
-
-import org.openrdf.model.URI;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -295,6 +289,7 @@ public class PlayPane extends JFrame {
 		// customSparqlPanel.loadCustomSparqlPanelListeners();
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
 		DIHelper.getInstance().setPlayPane( this );
+
 		// load all the listeners
 		// cast it to IChakraListener
 		// for each listener specify what is the view field - Listener_VIEW
@@ -303,16 +298,7 @@ public class PlayPane extends JFrame {
 		// utilize reflection to get all the fields
 		// for each field go into the properties file and find any of the
 		// listeners
-		// Drop down scrollbars
-		for ( JComboBox<?> combo : new JComboBox[]{ questionSelector, perspectiveSelector } ) {
-			Object popup = combo.getUI().getAccessibleChild( combo, 0 );
-			Component c = Container.class.cast( popup ).getComponent( 0 );
-			if ( c instanceof JScrollPane ) {
-				JScrollPane.class.cast( c ).getVerticalScrollBar()
-						.setUI( new NewScrollBarUI() );
-			}
-		}
-
+		
 		java.lang.reflect.Field[] fields = getClass().getFields();
 
 		// run through the view components
@@ -845,9 +831,6 @@ public class PlayPane extends JFrame {
 		gbc_btnRepaintGraph.gridy = 6;
 		owly.add( btnRepaintGraph, gbc_btnRepaintGraph );
 
-		scrollPane_7.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		scrollPane_8.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-
 		saveSudowl = initCustomButton( "Save" );
 		GridBagConstraints gbc_saveSudowl = new GridBagConstraints();
 		gbc_saveSudowl.gridx = 0;
@@ -1033,6 +1016,7 @@ public class PlayPane extends JFrame {
 				customSparqlPanel.enableAppend( frames.length > 0 );
 
 				JMenuItem closeone = new JMenuItem( new AbstractAction( "Close" ) {
+					private static final long serialVersionUID = -9155947477934035700L;
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -1054,6 +1038,7 @@ public class PlayPane extends JFrame {
 				} );
 
 				JMenuItem closeall = new JMenuItem( new AbstractAction( "Close All" ) {
+					private static final long serialVersionUID = 108861767551874851L;
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -1065,6 +1050,7 @@ public class PlayPane extends JFrame {
 				} );
 
 				JMenuItem tilehor = new JMenuItem( new AbstractAction( "Tile Horizontally" ) {
+					private static final long serialVersionUID = 8345138168576254769L;
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -1079,6 +1065,7 @@ public class PlayPane extends JFrame {
 				} );
 				//tileh to tilever
 				JMenuItem tilever = new JMenuItem( new AbstractAction( "Tile Vertically" ) {
+					private static final long serialVersionUID = -3082079771504175656L;
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -1093,6 +1080,7 @@ public class PlayPane extends JFrame {
 				} );
 
 				JMenuItem tilec = new JMenuItem( new AbstractAction( "Cascade" ) {
+					private static final long serialVersionUID = 5620428177844892386L;
 
 					@Override
 					public void actionPerformed( ActionEvent ae ) {
@@ -1207,8 +1195,6 @@ public class PlayPane extends JFrame {
 		about.setBackground( SystemColor.control );
 		about.setCaretPosition( 0 );
 		JScrollPane scroller = new JScrollPane( about );
-		scroller.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		scroller.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
 		about.setBorder( BorderFactory.createEmptyBorder( 0, 15, 10, 15 ) );
 		return scroller;
 	}
@@ -2028,7 +2014,7 @@ public class PlayPane extends JFrame {
 	}
 
 	protected class PlayPaneCloseableTab extends CloseableTab {
-
+		private static final long serialVersionUID = -1674137465659730374L;
 		private final JCheckBoxMenuItem item;
 
 		public PlayPaneCloseableTab( JTabbedPane parent, JCheckBoxMenuItem item,

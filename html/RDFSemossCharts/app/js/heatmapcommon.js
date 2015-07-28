@@ -1,23 +1,19 @@
 var colorScale;
-var currentColor = 'Red';
+var currentColor;
 
-var colorsRed            = ["#FFFFCC","#FFEDA0","#FED976","#FEB24C","#FD8D3C","#FC4E2A","#E31A1C","#BD0026","#800026"];
-var colorsBlue           = ["#F7FBFF","#DEEBF7","#C6DBEF","#9ECAE1","#6BAED6","#4292C6","#2171B5","#08519C","#08306B"];
-var colorsGreen          = ["#F7FCF5","#E5F5E0","#C7E9C0","#A1D99B","#74C476","#41AB5D","#238B45","#006D2C","#00441B"];
-var colorsTraffic        = ["#ae0e06","#e92e10","#fb741e","#fdc63f","#ffff57","#5cba24","#1e8b1f","#1e8b1f","#005715"];
-var colorsTrafficReverse = ["#005715","#1e8b1f","#1e8b1f","#5cba24","#ffff57","#fdc63f","#fb741e","#e92e10","#ae0e06"];
+var colorHash = {};
+colorHash["Red"]             = ["#FFFFCC","#FFEDA0","#FED976","#FEB24C","#FD8D3C","#FC4E2A","#E31A1C","#BD0026","#800026"];
+colorHash["Blue"]            = ["#F7FBFF","#DEEBF7","#C6DBEF","#9ECAE1","#6BAED6","#4292C6","#2171B5","#08519C","#08306B"];
+colorHash["Green"]           = ["#F7FCF5","#E5F5E0","#C7E9C0","#A1D99B","#74C476","#41AB5D","#238B45","#006D2C","#00441B"];
+colorHash["Traffic"]         = ["#AE0E06","#E92E10","#FB741E","#FDC63F","#FFFF57","#5CBA24","#1E8B1F","#005715"];
+colorHash["Traffic Reverse"] = ["#005715","#1E8B1F","#5CBA24","#FFFF57","#FDC63F","#FB741E","#E92E10","#AE0E06"];
 
 function getColors() {
-	if (currentColor == 'Green')
-		return colorsGreen;
-	if (currentColor == 'Blue')
-		return colorsBlue;
-	if (currentColor == 'Traffic')
-		return colorsTraffic;
-	if (currentColor == 'Traffic Reverse')
-		return colorsTrafficReverse;
-
-	return colorsRed;
+	var returnVar = colorHash[currentColor];
+	if (returnVar == null)
+		returnVar = colorHash["Red"];
+	
+	return returnVar;
 }
 
 function setColorScale(domainArray) {
