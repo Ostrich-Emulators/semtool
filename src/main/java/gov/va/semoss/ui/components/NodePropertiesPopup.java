@@ -20,7 +20,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.playsheets.PropertyEditorPlaySheet;
 
 import java.awt.event.ActionEvent;
@@ -33,15 +33,17 @@ import javax.swing.Action;
  * This class is used to display information about a node in a popup window.
  */
 public class NodePropertiesPopup extends AbstractAction {
-	private static final long serialVersionUID = -1859278887122010885L;
-	private GraphPlaySheet gps;
-	private Collection<SEMOSSVertex> pickedVertexList;
 
-	public NodePropertiesPopup( GraphPlaySheet _gps, Collection<SEMOSSVertex> _pickedVertexList ) {
+	private static final long serialVersionUID = -1859278887122010885L;
+	private final PlaySheetCentralComponent gps;
+	private final Collection<SEMOSSVertex> pickedVertexList;
+
+	public NodePropertiesPopup( PlaySheetCentralComponent _gps,
+			Collection<SEMOSSVertex> _pickedVertexList ) {
 		super( "Edit Properties for Node(s)" );
 		putValue( Action.SHORT_DESCRIPTION, "Edit the properties of this node" );
 		gps = _gps;
-		
+
 		pickedVertexList = _pickedVertexList;
 	}
 
@@ -49,8 +51,9 @@ public class NodePropertiesPopup extends AbstractAction {
 	public void actionPerformed( ActionEvent ae ) {
 		showPropertiesView();
 	}
-	
+
 	public void showPropertiesView() {
-		gps.addSibling( new PropertyEditorPlaySheet(pickedVertexList, "Selected Node Properties", gps.getEngine()) );
+		gps.addSibling( new PropertyEditorPlaySheet( pickedVertexList,
+				"Selected Node Properties", gps.getEngine() ) );
 	}
 }

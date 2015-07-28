@@ -8,6 +8,7 @@ package gov.va.semoss.rdf.query.util.impl;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.BindingSet;
@@ -34,5 +35,12 @@ public class ModelQueryAdapter extends QueryExecutorAdapter<Model> {
 	@Override
 	public void handleTuple( BindingSet set, ValueFactory fac ) {
 		Logger.getLogger( getClass() ).error( "use getResults().add() instead" );
+	}
+
+	public static ModelQueryAdapter describe( Resource rsr ) {
+		String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
+		ModelQueryAdapter mqa = new ModelQueryAdapter( query );
+		mqa.bind( "s", rsr );
+		return mqa;
 	}
 }

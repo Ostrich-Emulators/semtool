@@ -22,13 +22,12 @@ import edu.uci.ics.jung.visualization.control.EditingPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
-import gov.va.semoss.ui.components.NewHoriScrollBarUI;
-import gov.va.semoss.ui.components.NewScrollBarUI;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
-import gov.va.semoss.ui.helpers.TypeColorShapeTable;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -36,9 +35,9 @@ import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -54,11 +53,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -95,13 +96,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		progress = progressname;
 		initComponents();
 		initVizualizer();
-
-		GraphZoomScrollPane zoomer = new GraphZoomScrollPane( view );
-		zoomer.getVerticalScrollBar().setUI( new NewScrollBarUI() );
-		zoomer.getHorizontalScrollBar().setUI( new NewHoriScrollBarUI() );
-		visarea.add( zoomer );
+		visarea.add( new GraphZoomScrollPane( view ) );
 
 		addConceptNodeAction = new AbstractAction() {
+			private static final long serialVersionUID = -2138227128423655724L;
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
@@ -203,9 +201,9 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 							button.setActionCommand( en.getKey().stringValue() );
 							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
-							v.setColor( TypeColorShapeTable.getInstance().getColor( en.getKey() ) );
-							v.setShape( TypeColorShapeTable.getInstance().getShape( en.getKey() ) );
-							
+							v.setColor( GraphColorRepository.instance().getColor( en.getKey() ) );
+							v.setShape( GraphShapeRepository.instance().getShape( en.getKey() ) );
+
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
 									new Dimension( 12, 12 ) ) );
 							typearea.add( button );

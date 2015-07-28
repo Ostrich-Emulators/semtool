@@ -1,8 +1,8 @@
 package gov.va.semoss.ui.components.tabbedqueries;
 
 import gov.va.semoss.ui.components.CloseableTab;
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -12,9 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -129,6 +127,10 @@ public class TabbedQueries extends JTabbedPane {
 	 */
 	private void addNewTab() {
 		SyntaxTextEditor textEditor = new SyntaxTextEditor();
+		Font f = getFont();
+		
+		// use a mono-spaced font so indentation works well		
+		textEditor.setFont( new Font( Font.MONOSPACED, f.getStyle(), f.getSize() ) );
 		RTextScrollPane sp = new RTextScrollPane( textEditor );
 		sp.setFoldIndicatorEnabled( false );
 		this.addTab( "*", sp );
@@ -180,28 +182,13 @@ public class TabbedQueries extends JTabbedPane {
 		return "Query-" + ( highestId + 1 );
 	}
 
-	public static void main( String args[] ) {
-		// Start all Swing applications on the EDT.
-		SwingUtilities.invokeLater( new Runnable() {
-			@Override
-			public void run() {
-				JFrame frame = new JFrame();
-				JPanel panel = new JPanel( new BorderLayout() );
-				TabbedQueries tq = new TabbedQueries();
-				panel.add( tq );
-				frame.add( panel );
-				frame.setTitle( "Custom Query Window" );
-				frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-				frame.pack();
-				panel.setSize( 500, 300 );
-				frame.setSize( 500, 300 );
-				frame.setLocationRelativeTo( null );
-				frame.setVisible( true );
-				//Make sure that the first tab created has focus, 
-				//and shows a blinking carat:
-				tq.getEditorOfSelectedTab().requestFocusInWindow();
-			}
-		} );
+	public void loadToEmptyTab( String sparql ) {
+		if ( !getTextOfSelectedTab().trim().isEmpty() ) {
+			// our current tab has text on it, so make a new tab and switch to its
+			setSelectedIndex( getTabCount() - 1 );
+		}
+
+		setTextOfSelectedTab( sparql );
 	}
 
 	private class QueryCloseableTab extends CloseableTab {

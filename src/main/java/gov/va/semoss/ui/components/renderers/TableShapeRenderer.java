@@ -5,11 +5,13 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Shape;
+
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -24,14 +26,14 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent( JTable table, Object val,
 			boolean isSelected, boolean hasFocus, int row, int column ) {
 
-		String valstr = val.toString();
-		Shape s = ( valstr.isEmpty() ? null
-				: DIHelper.getShape( valstr + Constants.LEGEND ) );
-		Component c = super.getTableCellRendererComponent( table, val, isSelected,
-				hasFocus, row, column );
-		shapeify( this, s, new Dimension( 16, 16 ) );
+		if ( null == val ) {
+			return super.getTableCellRendererComponent( table, val, isSelected,
+					hasFocus, row, column );
+		}
 
-		return c;
+		String s = GraphShapeRepository.instance().getShapeName( Shape.class.cast( val ) );
+		return super.getTableCellRendererComponent( table, s, isSelected,
+				hasFocus, row, column );
 	}
 
 	public static void shapeify( JLabel lbl, Shape s, Dimension d ) {

@@ -10,20 +10,26 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
+import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
@@ -113,6 +119,15 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 
 	protected abstract Action makeTypeItem( T v, GraphicalQueryPanel pnl );
 
+	protected void addConstraintRemover( T v, GraphicalQueryPanel pnl ) {
+		ConstraintRemover cr = new ConstraintRemover( v, pnl );
+		add( cr );
+
+		Set<URI> myprops = v.getValues().keySet();
+		myprops.removeAll( Arrays.asList( RDF.SUBJECT, RDF.TYPE ) );
+		cr.setEnabled( !myprops.isEmpty() );
+	}
+
 	public static NodeEdgeBasePopup<QueryNode> forVertex( QueryNode v,
 			GraphicalQueryPanel pnl ) {
 		return new NodeEdgeBasePopup<QueryNode>( v, pnl ) {
@@ -136,6 +151,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 				propmap.put( Constants.ANYNODE, "<Any>" );
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
 						"Add a constraint to this Vertex", "New Value", propmap ) );
+				addConstraintRemover( v, pnl );
 			}
 		};
 	}
@@ -167,9 +183,44 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 				qa.bind( "type", type );
 
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
-						"Add a constraint to this Vertex", "New Value", qa ) );
+						"Add a constraint to this Edge", "New Value", qa ) );
+				addConstraintRemover( v, pnl );
 			}
 
 		};
 	}
+
+	private static class ConstraintRemover extends AbstractAction {
+
+		QueryNodeEdgeBase nodeedge;
+		GraphicalQueryPanel pnl;
+
+		public ConstraintRemover( QueryNodeEdgeBase ne, GraphicalQueryPanel p ) {
+			super( "Remove Constraint(s)" );
+			nodeedge = ne;
+			pnl = p;
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			Set<URI> props = new HashSet<>( nodeedge.getAllValues().keySet() );
+			props.remove( RDF.SUBJECT );
+			props.remove( RDF.TYPE );
+			JList<URI> cons = new JList<>( props.toArray( new URI[0] ) );
+			LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
+			renderer.cache( Utility.getInstanceLabels( props, pnl.getEngine() ) );
+			cons.setCellRenderer( renderer );
+
+			String[] choices = { "OK", "Cancel" };
+			int ans = JOptionPane.showOptionDialog( null, new JScrollPane( cons ),
+					"Constraints to Remove", JOptionPane.YES_NO_OPTION,
+					JOptionPane.PLAIN_MESSAGE, null, choices, choices[0] );
+			if ( 0 == ans ) {
+				for ( URI u : cons.getSelectedValuesList() ) {
+					nodeedge.removeProperty( u );
+				}
+				pnl.update();
+			}
+		}
+	};
 }

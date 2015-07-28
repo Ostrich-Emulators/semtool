@@ -70,6 +70,7 @@ public class PropertyTableModel extends AbstractTableModel {
 	 * @param index 	Column index.
 	
 	 * @return String 	Column name. */
+	@Override
 	public String getColumnName(int index)
 	{
 		return this.data.columnNames[index];
@@ -101,6 +102,7 @@ public class PropertyTableModel extends AbstractTableModel {
 	 * @param column 	Column index.
 	
 	 * @return Class 	Column class. */
+	@Override
 	public Class getColumnClass(int column)
 	{
 		//logger.debug("Getting clolumn " + column);
@@ -114,6 +116,7 @@ public class PropertyTableModel extends AbstractTableModel {
 	 * @param column 	Column index.
 	
 	 * @return boolean 	True if cell is editable. */
+	@Override
 	public boolean isCellEditable(int row, int column)
 	{
 		if(column >= 2)
@@ -128,6 +131,7 @@ public class PropertyTableModel extends AbstractTableModel {
 	 * @param row 		Row index.
 	 * @param column 	Column index.
 	 */
+	@Override
 	public void setValueAt(Object value, int row, int column)
 	{
 		logger.debug("Calling the edge filter set value at");
@@ -140,7 +144,6 @@ public class PropertyTableModel extends AbstractTableModel {
 		JTextField field = (JTextField)DIHelper.getInstance().getLocalProp(Constants.DATA_PROP_STRING);
 		field.setText(DIHelper.getInstance().getProperty(Constants.PROP_URI));
 		JTextField field2 = (JTextField)DIHelper.getInstance().getLocalProp(Constants.OBJECT_PROP_STRING);
-		field.setText(DIHelper.getInstance().getProperty(Constants.PREDICATE_URI));
-
+		field2.setText(DIHelper.getInstance().getProperty(Constants.PREDICATE_URI));
 	}	
 }

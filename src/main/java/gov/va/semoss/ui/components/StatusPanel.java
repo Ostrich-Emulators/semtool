@@ -31,6 +31,7 @@ import javax.swing.JTextArea;
  * This class creates the status panel.
  */
 public class StatusPanel extends JPanel {
+	private static final long serialVersionUID = 1779140230944266541L;
 	public JTextArea statusBox;
 
 	/**
@@ -40,7 +41,6 @@ public class StatusPanel extends JPanel {
 		setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.getVerticalScrollBar().setUI(new NewScrollBarUI());
 		add(scrollPane, BorderLayout.CENTER);
 		
 		JPanel panel = new JPanel();

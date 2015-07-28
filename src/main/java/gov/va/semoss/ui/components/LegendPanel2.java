@@ -26,6 +26,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
@@ -63,7 +64,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		Map<URI, Color> colors = new HashMap<>();
 		for ( SEMOSSVertex v : gps.getVisibleGraph().getVertices() ) {
 			types.add( v.getType(), v );
-			shapes.put( v.getType(), v.getShapeLegend() );
+			shapes.put( v.getType(), GraphShapeRepository.instance().getLegendShape( v.getShape() ) );
 			colors.put( v.getType(), v.getColor() );
 		}
 
@@ -77,7 +78,8 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 
 			MultiMap<ShapeColorHelper, SEMOSSVertex> mm = new MultiMap<>();
 			for ( SEMOSSVertex v : en.getValue() ) {
-				mm.add( new ShapeColorHelper( v.getShape(), v.getColor() ), v );
+				mm.add( new ShapeColorHelper( GraphShapeRepository.instance().getLegendShape( v.getShape() ),
+						v.getColor() ), v );
 			}
 
 			for ( Map.Entry<ShapeColorHelper, List<SEMOSSVertex>> sch : mm.entrySet() ) {

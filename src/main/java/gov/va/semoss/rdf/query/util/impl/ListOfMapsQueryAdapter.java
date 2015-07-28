@@ -17,12 +17,12 @@ import org.openrdf.query.BindingSet;
  * @author John Marquiss
  * @param <T>
  */
-public abstract class ListOfMapsQueryAdapterImpl<T> extends ListQueryAdapter<Map<String, T>> {
+public abstract class ListOfMapsQueryAdapter<T> extends ListQueryAdapter<Map<String, T>> {
 
-  public ListOfMapsQueryAdapterImpl() {
+  public ListOfMapsQueryAdapter() {
   }
 
-  public ListOfMapsQueryAdapterImpl( String sparq ) {
+  public ListOfMapsQueryAdapter( String sparq ) {
     super( sparq );
   }
 
@@ -37,8 +37,8 @@ public abstract class ListOfMapsQueryAdapterImpl<T> extends ListQueryAdapter<Map
 
   protected abstract T convertValue( String variable, Value v, ValueFactory fac );
 
-  public static ListOfMapsQueryAdapterImpl<String> forStrings( String sparql ) {
-    ListOfMapsQueryAdapterImpl<String> q = new ListOfMapsQueryAdapterImpl<String>() {
+  public static ListOfMapsQueryAdapter<String> forStrings( String sparql ) {
+    ListOfMapsQueryAdapter<String> q = new ListOfMapsQueryAdapter<String>() {
 
       @Override
       protected String convertValue( String variable, Value v, ValueFactory fac ) {
