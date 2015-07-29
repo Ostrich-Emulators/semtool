@@ -1,11 +1,14 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import java.util.ArrayList;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
@@ -41,5 +44,10 @@ public class ColumnChartPlaySheet extends BrowserPlaySheet2 {
 
 		addDataHash( columnChartHash );
 		createView();
+	}
+
+	@Override
+	protected BufferedImage getExportImage() throws IOException {
+		return getExportImageFromSVGBlock();
 	}
 }
