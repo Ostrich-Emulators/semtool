@@ -21,6 +21,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -29,8 +31,10 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
@@ -508,16 +512,13 @@ public class  InsightManagerController_2 implements Initializable{
             for(Insight insight: perspective.getInsights()){
                 Image image = new Image(getInsightIcon(insight));
                 ImageView imageView = new ImageView(image);
-                InsightTreeItem<Object> item_2 = new InsightTreeItem(insight, imageView);
+                InsightTreeItem<Object> item_2 = new InsightTreeItem<Object>(insight, imageView);
             	item_1.getChildren().add(item_2);
             	
-            	if(insight.getInsightParameters().size() > 0){
-            	   for(Parameter parameter: insight.getInsightParameters()){
-            	  	   TreeItem<Object> item_3 = new TreeItem<Object>(parameter);
-            		   item_2.getChildren().add(item_3);
-            	   }
-            	}else{
-            	}
+        	    for(Parameter parameter: insight.getInsightParameters()){
+        	  	    TreeItem<Object> item_3 = new TreeItem<Object>(parameter);
+        		    item_2.getChildren().add(item_3);
+        	    }
             }
         }        
         treevPerspectives.setRoot(rootItem);    
@@ -528,17 +529,38 @@ public class  InsightManagerController_2 implements Initializable{
         treevPerspectives.setCellFactory(new Callback<TreeView<Object>, TreeCell<Object>>() {
         	//This TransferMode could either enable "Move" or "Copy":
             private TransferMode transferMode;
-           
+            //Context menu variables:
+            private ContextMenu rootMenu;
+            private ContextMenu perspectiveMenu;
+            private ContextMenu insightMenu;
+            private ContextMenu parameterMenu;
+            //Initializer:
+     	    {
+     		  buildContextMenus();
+     	    }
+            
             @Override
             public TreeCell<Object> call(TreeView<Object> stringTreeView) {            	          	
-               TreeCell<Object> treeCell = new TreeCell<Object>() {
+               TreeCell<Object> treeCell = new TreeCell<Object>() {                   
                 	@Override
                 	protected void updateItem(Object item, boolean empty) {
                 	    super.updateItem(item, empty);
                 	    if (!empty && item != null) {
                 	        setText(item.toString());
                 	        setGraphic(getTreeItem().getGraphic());
-                	    }else{
+                	        //Set context menu:
+                            if(getTreeItem().getValue().equals("Perspectives")){
+                               setContextMenu(rootMenu);
+                            }else if(getTreeItem().getValue() instanceof Perspective){
+                               setContextMenu(perspectiveMenu);
+                            }else if(getTreeItem().getValue() instanceof Insight){
+                                setContextMenu(insightMenu);
+                            }else if(getTreeItem().getValue() instanceof Parameter){
+                                setContextMenu(parameterMenu);
+                            }else{
+                               setContextMenu(null);
+                            }
+                        }else{
                 	        setText(null);
                 	        setGraphic(null);
                 	    }
@@ -660,6 +682,14 @@ public class  InsightManagerController_2 implements Initializable{
 	                          URI uriInsightCopy = insightVF.createURI(insight.getIdStr() + strUniqueIdentifier);
                               insightCopy.setId(uriInsightCopy);
                               TreeItem<Object> itemDraggedCopy = new TreeItem<Object>(insightCopy);
+
+                              //Assign unique URIs to Insight Parameters, and add Parameter 
+                              //children to the Insight tree item:
+                              for(Parameter parameter: insightCopy.getInsightParameters()){
+                            	  parameter.setParameterURI(parameter.getParameterURI()+strUniqueIdentifier);
+                      	  	      TreeItem<Object> item = new TreeItem<Object>(parameter);
+                      	  	      itemDraggedCopy.getChildren().add(item);
+                              }
                               
                               //Make a copy of the icon associated with "itemDragged":
                               Image imageCopy = new Image(getInsightIcon(insightCopy));
@@ -668,7 +698,7 @@ public class  InsightManagerController_2 implements Initializable{
                               
                               //Insert the copy of the dragged Insight into the ObservableList,
                               //at the location dropped:
-                              olstInsights.add(index, itemDraggedCopy); 
+                              olstInsights.add(index, itemDraggedCopy);
                               
  						   } catch (RepositoryException e) {
  							  log.error(e, e);
@@ -725,7 +755,6 @@ public class  InsightManagerController_2 implements Initializable{
         		ObservableList<TreeItem<Object>> olstPerspectives = treevPerspectives.getRoot().getChildren();
         		
         		for(TreeItem<Object> treeItem: olstPerspectives){
-        			Perspective perspective = (Perspective) treeItem.getValue();
                     ObservableList<TreeItem<Object>> olstInsights = treeItem.getChildren(); 
              		
             		for(int i = 0; i < olstInsights.size(); i++){
@@ -734,6 +763,63 @@ public class  InsightManagerController_2 implements Initializable{
             		}
         		}
         	}
+        	
+        	/**   Builds context menus and menu-click-handlers for tree-view items
+        	 * (for the root item, Perspective items, Insight items, and Parameter
+        	 * items).
+        	 */
+			private void buildContextMenus(){
+				//Root menu:
+      		    rootMenu = new ContextMenu();
+                MenuItem rootItem = new MenuItem("Add Perspective");
+                rootMenu.getItems().add(rootItem);
+                rootItem.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent t) {
+                       Utility.showMessage("Adding Perspective!");
+                    }
+                });
+                //Perspective menu:
+                perspectiveMenu = new ContextMenu();
+                MenuItem perspectiveItem = new MenuItem("Delete Perspective");
+                perspectiveMenu.getItems().add(perspectiveItem);
+                perspectiveItem.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent t) {
+                       Utility.showMessage("Deleting Perspective!");
+                    }
+                });
+                perspectiveItem = new MenuItem("Add Insight");
+                perspectiveMenu.getItems().add(perspectiveItem);
+                perspectiveItem.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent t) {
+                       Utility.showMessage("Adding Insight!");
+                    }
+                });
+                //Insight menu:
+                insightMenu = new ContextMenu();
+                MenuItem insightItem = new MenuItem("Delete Insight");
+                insightMenu.getItems().add(insightItem);
+                insightItem.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent t) {
+                       Utility.showMessage("Deleting Insight!");
+                    }
+                });
+                insightItem = new MenuItem("Add Parameter");
+                insightMenu.getItems().add(insightItem);
+                insightItem.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent t) {
+                       Utility.showMessage("Adding Parameter!");
+                    }
+                });
+                //Parameter menu:
+                parameterMenu = new ContextMenu();
+                MenuItem parameterItem = new MenuItem("Delete Parameter");
+                parameterMenu.getItems().add(parameterItem);
+                parameterItem.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent t) {
+                       Utility.showMessage("Deleting Parameter!");
+                    }
+                });
+        	}//End "buildContextMenus()".
 
         });//End "treevPerspectives.setCellFactory".          
 	}//End "populatePerspectiveTreeView()".
@@ -758,7 +844,7 @@ public class  InsightManagerController_2 implements Initializable{
       		 boolean boolReturnValue = true;
       		 
       		 if(insight.getInsightParameters().size() > 0 &&
-      		    ((ArrayList) insight.getInsightParameters()).get(0).toString().equals("") == false){
+      		    ((ArrayList<?>) insight.getInsightParameters()).get(0).toString().equals("") == false){
       		    boolReturnValue = false;
       	     }
       		 return boolReturnValue;
