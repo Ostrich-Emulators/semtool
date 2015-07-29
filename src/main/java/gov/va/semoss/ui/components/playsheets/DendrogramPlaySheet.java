@@ -20,39 +20,23 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.imageio.ImageIO;
-import org.apache.batik.transcoder.Transcoder;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.PNGTranscoder;
-import org.apache.commons.io.FileUtils;
+
 import org.apache.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.InvalidXPathException;
-import org.dom4j.XPath;
-import org.dom4j.io.DOMReader;
-import org.dom4j.io.DOMWriter;
 import org.openrdf.model.Value;
 
 /**
  * The Play Sheet for creating a Dendrogram diagram using names and children.
  */
 public class DendrogramPlaySheet extends BrowserPlaySheet2 {
-
+	private static final long serialVersionUID = 3037305730873876699L;
 	private static final Logger log = Logger.getLogger( DendrogramPlaySheet.class );
 
 	/**
@@ -160,24 +144,24 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 				level1ThreeColumn.get( currentLevel1 ).get( currentLevel2 ).add( currentLevel3 );
 			}
 
-			Set<Map<String, Set<Map<String, Set<String>>>>> completeTree = new HashSet<>();
+			Set<Map<String, Object>> completeTree = new HashSet<>();
 
 			for ( String key1 : level1ThreeColumn.keySet() ) {
-				Set<Map<String, Set<String>>> levelTwoSet = new HashSet<>();
+				Set<Map<String, Object>> levelTwoSet = new HashSet<>();
 
-				HashMap levelOne = new HashMap();
+				HashMap<String, Object> levelOne = new HashMap<String, Object>();
 
 				levelOne.put( "name", key1 );
 
 				for ( String key2 : level1ThreeColumn.get( key1 ).keySet() ) {
-					HashSet levelThreeSet = new HashSet();
+					HashSet<Map<String, String>> levelThreeSet = new HashSet<Map<String, String>>();
 
-					HashMap levelTwo = new HashMap();
+					HashMap<String, Object> levelTwo = new HashMap<String, Object>();
 
 					levelTwo.put( "name", key2 );
 
 					for ( String key3 : level1ThreeColumn.get( key1 ).get( key2 ) ) {
-						Map<String, Object> levelThree = new HashMap<>();
+						Map<String, String> levelThree = new HashMap<String, String>();
 						levelThree.put( "name", key3 );
 						levelThreeSet.add( levelThree );
 					}
@@ -224,12 +208,12 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 				level1FourColumn.get( currentLevel1 ).get( currentLevel2 ).get( currentLevel3 ).add( currentLevel4 );
 			}
 
-			Set<Map<String, Set<Map<String, Set<Map<String, Set<String>>>>>>> completeTree = new HashSet<>();
+			Set<Map<String, Object>> completeTree = new HashSet<>();
 
 			for ( String key1 : level1FourColumn.keySet() ) {
 				Set<Map<String, Object>> levelTwoSet = new HashSet<>();
 
-				HashMap levelOne = new HashMap();
+				HashMap<String, Object> levelOne = new HashMap<String, Object>();
 				levelOne.put( "name", key1 );
 
 				for ( String key2 : level1FourColumn.get( key1 ).keySet() ) {
@@ -583,70 +567,6 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 
 	@Override
 	protected BufferedImage getExportImage() throws IOException {
-		DOMReader rdr = new DOMReader();
-		Document doc = rdr.read( engine.getDocument() );
-		Document svgdoc = null;
-		try {
-			Map<String, String> namespaceUris = new HashMap<>();
-			namespaceUris.put( "svg", "http://www.w3.org/2000/svg" );
-			namespaceUris.put( "xhtml", "http://www.w3.org/1999/xhtml" );
-
-			XPath xp = DocumentHelper.createXPath( "//svg:svg" );
-			xp.setNamespaceURIs( namespaceUris );
-
-			// don't forget about the styles
-			XPath stylexp = DocumentHelper.createXPath( "//xhtml:style" );
-			stylexp.setNamespaceURIs( namespaceUris );
-
-			svgdoc = DocumentHelper.createDocument();
-			Element svg = Element.class.cast( xp.selectSingleNode( doc ) ).createCopy();
-			svgdoc.setRootElement( svg );
-			Element oldstyle = Element.class.cast( stylexp.selectSingleNode( doc ) );
-			if ( null != oldstyle ) {
-				Element defs = svg.addElement( "defs" );
-				Element style = defs.addElement( "style" );
-				style.addAttribute( "type", "text/css" );
-				String styledata = oldstyle.getTextTrim();
-				style.addCDATA( styledata );
-
-				// put the stylesheet definitions first
-				List l = svg.elements();
-				l.remove( defs );
-				l.add( 0, defs );
-			}
-
-			TranscoderInput inputSvg = new TranscoderInput( new DOMWriter().write( svgdoc ) );
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			TranscoderOutput outputPng = new TranscoderOutput( baos );
-			Transcoder transcoder = new PNGTranscoder();
-			// transcoder.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
-
-			
-			if( log.isDebugEnabled() ){
-				File errsvg = new File( FileUtils.getTempDirectory(), "dendrogram.svg" );
-				FileUtils.write( errsvg, svgdoc.asXML() );
-			}
-			
-			transcoder.transcode( inputSvg, outputPng );
-			baos.flush();
-			baos.close();
-
-			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
-		}
-		catch ( InvalidXPathException | DocumentException | TranscoderException e ) {
-			String msg = "Problem creating image";
-			if ( null != svgdoc ) {
-				try {
-					File errsvg = new File( FileUtils.getTempDirectory(), "dendrogram.svg" );
-					FileUtils.write( errsvg, svgdoc.asXML() );
-					msg = "Could not create the image. SVG data store here: "
-							+ errsvg.getAbsolutePath();
-				}
-				catch ( IOException ex ) {
-					// don't care
-				}
-			}
-			throw new IOException( msg, e );
-		}
+		return getExportImageFromSVGBlock();
 	}
 }

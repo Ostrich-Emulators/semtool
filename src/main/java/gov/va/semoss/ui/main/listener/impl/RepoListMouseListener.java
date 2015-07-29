@@ -42,7 +42,6 @@ import gov.va.semoss.ui.actions.MergeAction;
 import gov.va.semoss.ui.actions.MountAction;
 import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
-import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.PlayPane;
 import static gov.va.semoss.ui.components.PlayPane.UIPROGRESS;
 import java.awt.event.KeyEvent;
@@ -77,7 +76,6 @@ public class RepoListMouseListener extends MouseAdapter {
 	private final DbAction expgson;
 	private final DbAction expSpecNodes;
 	private final DbAction expSpecRels;
-	private final UnmountAction unmounter;
 	private final EndpointAction sparqler;
 	private final JMenu mergeroot;
 	private final ImportInsightsAction resetInsights;
@@ -98,7 +96,6 @@ public class RepoListMouseListener extends MouseAdapter {
 				ExportTtlAction.Style.NT, frame );
 		exportrdf = new ExportTtlAction( PlayPane.UIPROGRESS,
 				ExportTtlAction.Style.RDF, frame );
-		unmounter = new UnmountAction( frame );
 		sparqler = new EndpointAction( PlayPane.UIPROGRESS, frame );
 		expnodes = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
 				true, false );
@@ -163,14 +160,14 @@ public class RepoListMouseListener extends MouseAdapter {
 		if ( null != engine ) {
 			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner,
 				clearer, exportttl, exportnt, exportrdf, exportinsights, importls,
-				unmounter, sparqler, mounter, expnodes, exprels, expSpecNodes,
+				sparqler, mounter, expnodes, exprels, expSpecNodes,
 				expSpecRels, expall, creater, resetInsights, importInsights,
 				consistencyCheck, expgraphml, expgson } ) {
 				dba.setEngine( opEngine );
 			}
 
 			db.add( toggler );
-			db.add( unmounter );
+
 			//Quality Check
 			db.add( consistencyCheck );
 			db.addSeparator();
