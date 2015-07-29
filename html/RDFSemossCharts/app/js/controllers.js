@@ -1082,7 +1082,7 @@ function SingleChartCtrl($scope, $http) {
                 if(data.colorSeries){
                     graphOptions.series.push({name: key, color: data.colorSeries[key], data: data.dataSeries[key]});
                 } else {
-                    graphOptions.series.push({name: key, data: data.dataSeries[key]});
+                    graphOptions.series.push({name: key, data: data.dataSeries[key], color: SEMOSS.getRandomHexColor()});
                 }
             } else {
 
@@ -1127,7 +1127,7 @@ function SingleChartCtrl($scope, $http) {
                 if(data.colorSeries){
                     graphOptions.series.push({name: key, color: data.colorSeries[key], data: series});
                 } else {
-                    graphOptions.series.push({name: key, data: series});
+                    graphOptions.series.push({name: key, data: series, color: SEMOSS.getRandomHexColor()});
                 }
             }
         }
@@ -1402,3 +1402,107 @@ function SingleChartCtrl($scope, $http) {
     
 }
 
+
+// **** The color utility functions for SEMOSS ****
+
+var SEMOSS = [];
+
+
+SEMOSS.redsUsed = [];
+SEMOSS.greensUsed = [];
+SEMOSS.bluesUsed = [];
+
+SEMOSS.redColorSets = 0;
+SEMOSS.greenColorSets = 0;
+SEMOSS.blueColorSets = 0;
+
+SEMOSS.getRandomColor = function(){
+	var rgbArray = [0,0,0];
+	rgbArray = SEMOSS.randomizeColor(rgbArray);
+	var rbgStringArray = [rgbArray[0] + "", rgbArray[1] + "", rgbArray[2] + ""];
+	return rbgStringArray;
+}
+
+SEMOSS.getRandomHexColor = function(){
+	var rgbArray = [0,0,0];
+	rgbArray = SEMOSS.randomizeColor(rgbArray);
+	return "#" + SEMOSS.convertToHex(rgbArray[0]) + SEMOSS.convertToHex(rgbArray[1]) + SEMOSS.convertToHex(rgbArray[2]);
+}
+
+
+SEMOSS.randomizeColor = function(rgbArray){
+	var numberOfChannelsToChange = Math.floor((Math.random() * 3) + 1);
+	var channels = [0,1,2];
+	var randomChannels = SEMOSS.shuffleArray(channels);
+	for (var i=0; i<numberOfChannelsToChange; i++){
+		var channelToChange = randomChannels[i];
+		if (channelToChange == 0){
+			var redChannelValue = SEMOSS.nextChannelValue(SEMOSS.redsUsed, SEMOSS.redColorSets);
+			rgbArray[0] = redChannelValue;
+		}
+		else if (channelToChange == 1){
+			var greenChannelValue = SEMOSS.nextChannelValue(SEMOSS.greensUsed, SEMOSS.greenColorSets);
+			rgbArray[1] = greenChannelValue;
+		}
+		else if (channelToChange == 2){
+			var blueChannelValue = SEMOSS.nextChannelValue(SEMOSS.bluesUsed, SEMOSS.greenColorSets);
+			rgbArray[2] = blueChannelValue;
+		}
+	}
+	return rgbArray;
+}
+
+SEMOSS.shuffleArray = function(array){
+		for(var j, x, i = array.length; i; j = Math.floor(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x);
+		return array;
+}
+
+SEMOSS.nextChannelValue = function (valuesUsed, colorSets) {
+	var selectedValue = 255;
+	var colorFound = false;
+
+	// If the color set is at 254, we have exhaused the semi-random possibilities and must
+	// begin to repeat, in order to avoid an infinite loop, or colors outside of the allowed
+	// range. 
+	while (colorSets < 255) {
+		// Set the selected value to a base portion of the 255, and increment, checking to see
+		// if each number has been used yet.  This guarantees a certain "distance" between values
+		// when producing colors, rather than producing to random colors which possibly differ by only
+		// a few RGB values, one after another.
+		selectedValue = Math.floor(255 / (colorSets + 1));
+
+		for (var i = 0; i < (colorSets + 1); i++) {
+			var transformedValue = selectedValue * ( i + 1 );
+			// If the value has not been used before, add it to the "used" array and return it
+			if ($.inArray(transformedValue, valuesUsed) < 0) {
+				valuesUsed.push( transformedValue );
+				colorFound = true;
+				return transformedValue;
+			}
+		}
+
+		// If we have made it here, then all value in the current divisor set (i.e. 2 -> 127,255) have been used
+		// and we must increment the divisor and derive the next set of values to try (i.e. 3->85,170,255)
+		colorSets++;
+	}
+	// If we have made it here, then we have exhausted the semi-random color possiblities
+	console.log('Semi-random color choices exhaused.  Repeating colors now.');
+	// Instead, select a truly random value and return it
+	var randomValue = Math.floor((Math.random() * 254) + 1);
+	return randomValue;
+}
+
+SEMOSS.resetColors = function(){
+	SEMOSS.redsUsed = [];
+	SEMOSS.greensUsed = [];
+	SEMOSS.bluesUsed = [];
+
+	SEMOSS.redColorSets = 0;
+	SEMOSS.greenColorSets = 0;
+	SEMOSS.blueColorSets = 0;
+}
+
+SEMOSS.convertToHex = function(channelValue) {
+		var hex = channelValue.toString(16);
+		return hex.length == 1 ? "0" + hex : hex;
+}
