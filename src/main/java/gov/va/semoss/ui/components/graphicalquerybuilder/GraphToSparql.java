@@ -6,20 +6,21 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
+import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel.QueryOrder;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiSetMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -45,27 +46,41 @@ public class GraphToSparql {
 		namespaces.putAll( ns );
 	}
 
-	public String select( DirectedGraph<QueryNode, QueryEdge> graph ) {
-		return buildSelect( graph ) + buildWhere( graph );
-	}
+	public String select( DirectedGraph<QueryNode, QueryEdge> graph,
+			List<QueryOrder> ordering ) {
 
-	private String buildSelect( DirectedGraph<QueryNode, QueryEdge> graph ) {
-		StringBuilder select = new StringBuilder( "SELECT" );
 		List<QueryNodeEdgeBase> todo = new ArrayList<>();
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
-		boolean hasone = false;
+		Set<QueryOrder> linkedOrderSet = new LinkedHashSet<>( ordering );
 		for ( QueryNodeEdgeBase v : todo ) {
-			for ( Map.Entry<URI, Set<Value>> en : v.getAllValues().entrySet() ) {
-				URI prop = en.getKey();
-				boolean issubj = RDF.SUBJECT.equals( prop );
-
-				if ( v.isSelected( prop ) ) {
-					select.append( " ?" ).
-							append( issubj ? v.getQueryId() : v.getLabel( prop ) );
-					hasone = true;
+			for ( URI prop : v.getAllValues().keySet() ) {
+				QueryOrder qo = new QueryOrder( v, prop );
+				if ( !linkedOrderSet.contains( qo ) ) {
+					linkedOrderSet.add( qo );
 				}
+			}
+		}
+
+		List<QueryOrder> fullOrdering = new ArrayList<>( linkedOrderSet );
+		return buildSelect( fullOrdering ) + buildWhere( graph, fullOrdering );
+	}
+
+	private String buildSelect( List<QueryOrder> ordering ) {
+		StringBuilder select = new StringBuilder( "SELECT" );
+
+		boolean hasone = false;
+		for ( QueryOrder qo : ordering ) {
+			QueryNodeEdgeBase v = qo.base;
+			URI prop = qo.property;
+
+			boolean issubj = RDF.SUBJECT.equals( prop );
+
+			if ( v.isSelected( prop ) ) {
+				select.append( " ?" ).
+						append( issubj ? v.getQueryId() : v.getLabel( prop ) );
+				hasone = true;
 			}
 		}
 
@@ -137,6 +152,14 @@ public class GraphToSparql {
 		return sb.toString();
 	}
 
+	private String makeFilter( QueryNodeEdgeBase nodeedge, URI type, String nodevar,
+			String filterVal ) {
+		StringBuilder sb = new StringBuilder( "FILTER ( " );
+		sb.append( filterVal );
+		sb.append( " )" );
+		return sb.toString();
+	}
+
 	private String buildOneConstraint( QueryNodeEdgeBase v, URI type,
 			Set<Value> vals ) {
 		StringBuilder sb = new StringBuilder();
@@ -161,6 +184,11 @@ public class GraphToSparql {
 					sb.append( makeOneValue( val ) ).append( " " );
 				}
 				sb.append( "}" );
+			}
+
+			if ( v.hasFilter( type ) ) {
+				sb.append( " " );
+				sb.append( makeFilter( v, type, nodevar, v.getFilter( type ) ) );
 			}
 		}
 		else if ( !vals.isEmpty() ) {
@@ -187,32 +215,37 @@ public class GraphToSparql {
 		return sb.toString();
 	}
 
-	private String buildWhere( DirectedGraph<QueryNode, QueryEdge> graph ) {
+	private String buildWhere( DirectedGraph<QueryNode, QueryEdge> graph,
+			List<QueryOrder> ordering ) {
+
 		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
-		for ( QueryNodeEdgeBase v : graph.getVertices() ) {
+		for ( QueryOrder qo : ordering ) {
+			QueryNodeEdgeBase v = qo.base;
+			URI prop = qo.property;
 			MultiSetMap<URI, Value> props = getWhereProps( v );
 
-			for ( Map.Entry<URI, Set<Value>> en : props.entrySet() ) {
-				sb.append( buildOneConstraint( v, en.getKey(), en.getValue() ) );
+			if ( !props.containsKey( qo.property ) ) {
+				continue;
 			}
-		}
 
-		for ( QueryEdge edge : graph.getEdges() ) {
-			MultiSetMap<URI, Value> props = getWhereProps( edge );
+			if ( v instanceof QueryNode ) {
+				sb.append( buildOneConstraint( v, prop, props.get( prop ) ) );
+			}
+			else {
+				QueryEdge edge = QueryEdge.class.cast( v );
 
-			for ( Map.Entry<URI, Set<Value>> en : props.entrySet() ) {
-				URI prop = en.getKey();
-				Set<Value> edgevals = en.getValue();
-				if ( !RDF.TYPE.equals( prop ) ) {
+				Set<Value> edgevals = props.get( prop );
+				if ( RDF.TYPE.equals( prop ) ) {
+					// handle endpoints and types a little differently
+					QueryNode src = graph.getSource( edge );
+					QueryNode dst = graph.getDest( edge );
+					sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
+							src, dst, props.keySet() ) );
+				}
+				else {
 					sb.append( buildOneConstraint( edge, prop, edgevals ) );
 				}
 			}
-
-			// handle endpoints and types a little differently
-			QueryNode src = graph.getSource( edge );
-			QueryNode dst = graph.getDest( edge );
-			sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
-					src, dst, props.keySet() ) );
 		}
 
 		return sb.append( "}" ).toString();
