@@ -21,6 +21,8 @@ package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -89,5 +91,10 @@ public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 		addDataHash( allHash );
 		
 		createView();
+	}
+
+	@Override
+	protected BufferedImage getExportImage() throws IOException {
+		return getExportImageFromSVGBlock();
 	}
 }
