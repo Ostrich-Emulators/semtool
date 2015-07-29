@@ -28,7 +28,7 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 	private final Set<URI> selecteds = new HashSet<>();
 	private final Set<URI> optionals = new HashSet<>();
 	private final Map<URI, String> labels = new HashMap<>();
-	private final Map<URI, String> rawstrings = new HashMap<>();
+	private final Map<URI, String> filters = new HashMap<>();
 	private String queryId;
 
 	public AbstractQueryNodeEdgeBase( URI id ) {
@@ -44,7 +44,7 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 
 		for ( Map.Entry<URI, Value> en : super.getValues().entrySet() ) {
 			properties.add( en.getKey(), en.getValue() );
-		}		
+		}
 	}
 
 	@Override
@@ -134,12 +134,11 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 		else {
 			if ( properties.containsKey( prop ) ) {
 				properties.get( prop ).remove( v );
-				rawstrings.remove( prop );
-
+				filters.remove( prop );
 
 				if ( properties.get( prop ).isEmpty() ) {
 					properties.remove( prop );
-					rawstrings.remove( prop );
+					filters.remove( prop );
 				}
 			}
 		}
@@ -148,14 +147,14 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 	@Override
 	public void setProperties( URI prop, Collection<Value> vals ) {
 		properties.remove( prop );
-		rawstrings.remove( prop );
+		filters.remove( prop );
 		properties.addAll( prop, vals );
 	}
 
 	@Override
 	public void setValue( URI prop, Value val ) {
 		properties.remove( prop );
-		rawstrings.remove( prop );
+		filters.remove( prop );
 		properties.add( prop, val );
 	}
 
@@ -171,6 +170,14 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 
 	@Override
 	public void setLabel( URI prop, String label ) {
+		String oldlabel = labels.get( prop );
+		if ( null != oldlabel && hasFilter( prop ) ) {
+			// update the filter labels, if we have any
+			String filter = getFilter( prop ).replaceAll( "\\?" + oldlabel + "\\b",
+					"?" + label );
+			setFilter( prop, filter );
+		}
+
 		labels.put( prop, label );
 	}
 
@@ -193,14 +200,19 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 	public boolean hasProperty( URI prop ) {
 		return properties.containsKey( prop );
 	}
-	
+
 	@Override
-	public void setPropertyMetadata( URI prop, String str ){
-		rawstrings.put( prop, str );
+	public void setFilter( URI prop, String str ) {
+		filters.put( prop, str );
 	}
 
 	@Override
-	public String getPropertyMetadata( URI prop ){
-		return rawstrings.get( prop );
+	public String getFilter( URI prop ) {
+		return filters.get( prop );
+	}
+
+	@Override
+	public boolean hasFilter( URI prop ) {
+		return filters.containsKey( prop );
 	}
 }

@@ -33,13 +33,20 @@ import gov.va.semoss.util.Utility;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
+import javax.swing.border.BevelBorder;
 import org.openrdf.model.URI;
 
 /**
@@ -47,14 +54,16 @@ import org.openrdf.model.URI;
  */
 public class LegendPanel2 extends JPanel implements GraphListener {
 
-	private static final long serialVersionUID = -2364666196260002413L;
+	private static final long serialVersionUID = -2364666196260002413L;	
+	private final List<SEMOSSVertex> selVs = new ArrayList<>();
 
 	/**
 	 * Create the panel.
 	 */
 	public LegendPanel2() {
-		setLayout( new WrapLayout( WrapLayout.LEFT, 15, 15 ) );
+		setLayout( new WrapLayout( WrapLayout.LEFT, 5, 5 ) );
 		setToolTipText( "You can adjust the shape and color by going to the cosmetics tab on the navigation panel" );
+		setBorder( BorderFactory.createLineBorder( Color.LIGHT_GRAY, 1 ) );
 	}
 
 	@Override
@@ -72,6 +81,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		Map<URI, String> labels = Utility.getInstanceLabels( shapes.keySet(), eng );
 
 		removeAll();
+		selVs.clear();
 
 		for ( Map.Entry<URI, List<SEMOSSVertex>> en : types.entrySet() ) {
 			String label = labels.get( en.getKey() );
@@ -84,7 +94,40 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 
 			for ( Map.Entry<ShapeColorHelper, List<SEMOSSVertex>> sch : mm.entrySet() ) {
 				String text = label + " (" + sch.getValue().size() + ")";
-				add( new PaintLabel( text, sch.getKey().shape, sch.getKey().color ) );
+				PaintLabel pl = new PaintLabel( text, sch.getKey().shape, sch.getKey().color );
+				add( pl );
+				pl.addMouseListener( new MouseAdapter() {
+
+					@Override
+					public void mouseClicked( MouseEvent e ) {
+						super.mouseClicked( e );
+						if ( !SwingUtilities.isRightMouseButton( e ) ) {
+							if( pl.isSelected() ){
+								selVs.addAll( sch.getValue() );								
+							}
+							else{
+								selVs.removeAll( sch.getValue() );
+							}
+
+							gps.clearHighlighting();
+							if( !selVs.isEmpty() ){
+								gps.skeleton( selVs, null );
+							}
+						}
+					}
+
+					@Override
+					public void mousePressed( MouseEvent e ) {
+						if ( SwingUtilities.isRightMouseButton( e ) ) {
+							e.consume();
+
+							JPopupMenu menu = new JPopupMenu();
+							menu.add( new ColorPopup( gps, sch.getValue() ) );
+							menu.add( new ShapePopup( gps, sch.getValue() ) );
+							menu.show( pl, e.getX(), e.getY() );
+						}
+					}
+				} );
 			}
 		}
 

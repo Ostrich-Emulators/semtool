@@ -25,7 +25,13 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.ExportUtility;
 
 import java.awt.BorderLayout;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.application.Platform;
@@ -40,18 +46,29 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 
+import javax.imageio.ImageIO;
 import javax.swing.JDesktopPane;
 
 import netscape.javascript.JSObject;
 
+import org.apache.batik.transcoder.Transcoder;
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.InvalidXPathException;
+import org.dom4j.XPath;
+import org.dom4j.Node;
+import org.dom4j.io.DOMReader;
+import org.dom4j.io.DOMWriter;
 
 import com.google.gson.Gson;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 
 /**
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
@@ -227,4 +244,93 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
 		}
 	}
+	
+	protected BufferedImage getExportImageFromSVGBlock() throws IOException {
+		log.debug("Using SVG block to save image.");
+		DOMReader rdr = new DOMReader();
+		Document doc = rdr.read( engine.getDocument() );
+		Document svgdoc = null;
+		try {
+			Map<String, String> namespaceUris = new HashMap<>();
+			namespaceUris.put( "svg", "http://www.w3.org/2000/svg" );
+			namespaceUris.put( "xhtml", "http://www.w3.org/1999/xhtml" );
+
+			XPath xp = DocumentHelper.createXPath( "//svg:svg" );
+			xp.setNamespaceURIs( namespaceUris );
+
+			// don't forget about the styles
+			XPath stylexp = DocumentHelper.createXPath( "//xhtml:style" );
+			stylexp.setNamespaceURIs( namespaceUris );
+
+			svgdoc = DocumentHelper.createDocument();
+			
+			Element svg = null;
+			List<?> theSVGElements = xp.selectNodes( doc );
+			if (theSVGElements.size() == 1) {
+				svg = Element.class.cast( theSVGElements.get(0) ).createCopy();
+			} else {
+				int currentTop = 0;
+				int biggestSize = 0;
+				for (int i=0; i<theSVGElements.size(); i++) {
+					Element thisElement = Element.class.cast( theSVGElements.get(i) ).createCopy();
+					int thisSize = thisElement.asXML().length();
+					if ( thisSize > biggestSize) {
+						currentTop = i;
+						biggestSize = thisSize;
+					}
+				}
+				svg = Element.class.cast( theSVGElements.get(currentTop) ).createCopy();
+			}
+
+			svgdoc.setRootElement( svg );
+			
+			Element oldstyle = Element.class.cast( stylexp.selectSingleNode( doc ) );
+			if ( null != oldstyle ) {
+				Element defs = svg.addElement( "defs" );
+				Element style = defs.addElement( "style" );
+				style.addAttribute( "type", "text/css" );
+				String styledata = oldstyle.getTextTrim();
+				style.addCDATA( styledata );
+
+				// put the stylesheet definitions first
+				List l = svg.elements();
+				l.remove( defs );
+				l.add( 0, defs );
+			}
+
+			TranscoderInput inputSvg = new TranscoderInput( new DOMWriter().write( svgdoc ) );
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			TranscoderOutput outputPng = new TranscoderOutput( baos );
+			Transcoder transcoder = new PNGTranscoder();
+			// transcoder.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
+
+			
+			if( log.isDebugEnabled() ){
+				File errsvg = new File( FileUtils.getTempDirectory(), "graphvisualization.svg" );
+				FileUtils.write( errsvg, svgdoc.asXML() );
+			}
+			
+			transcoder.transcode( inputSvg, outputPng );
+			baos.flush();
+			baos.close();
+
+			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
+		}
+		catch ( InvalidXPathException | DocumentException | TranscoderException e ) {
+			String msg = "Problem creating image";
+			if ( null != svgdoc ) {
+				try {
+					File errsvg = new File( FileUtils.getTempDirectory(), "graphvisualization.svg" );
+					FileUtils.write( errsvg, svgdoc.asXML() );
+					msg = "Could not create the image. SVG data store here: "
+							+ errsvg.getAbsolutePath();
+				}
+				catch ( IOException ex ) {
+					// don't care
+				}
+			}
+			throw new IOException( msg, e );
+		}
+	}
+
 }
