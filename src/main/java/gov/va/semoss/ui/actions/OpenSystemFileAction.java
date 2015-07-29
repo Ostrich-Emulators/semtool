@@ -26,6 +26,7 @@ public class OpenSystemFileAction extends AbstractAction {
 
 	private static final Logger log = Logger.getLogger( OpenSystemFileAction.class );
 	private final String filePath;
+	private static boolean firstrun = true;
 
 	/**
 	 * Creates an Action with the given key, short description, and image
@@ -40,26 +41,19 @@ public class OpenSystemFileAction extends AbstractAction {
 		super( text, getIcon( imagePart ) );
 
 		putValue( AbstractAction.SHORT_DESCRIPTION, description );
-		putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_M);
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_M );
 		this.filePath = filePath;
 
 		setEnabled( true );
 	}
-	/*
-	public void OpenSystemFileActionwithSC(String text, String description, String filePath,
-			String imagePart, String shortCut){
-		putValue( AbstractAction.SHORT_DESCRIPTION, description );
-		putValue(AbstractAction.MNEMONIC_KEY, KeyEvent.VK_L);
-		setEnabled( true );
-	}
-	*/
+
 	public static OpenSystemFileAction getHelpManual() {
 		try {
 			return new OpenSystemFileAction( "V-CAMP SEMOSS User Manual",
 					"Opens Local VCAMP SEMOSS User Manual",
 					"/help/V-CAMP SEMOSS Tool User Manual.pdf",
 					"helpbook" );
-			
+
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
@@ -70,30 +64,21 @@ public class OpenSystemFileAction extends AbstractAction {
 
 	public void openFileFromJar( String fileName ) {
 		try {
+			File cachedir = new File( defaultDirectory(),
+					System.getProperty( "release.name", "SEMOSS" ) );
+			File outputFile = new File( cachedir, fileName );
 
-			// InputStream inputStream = OpenSystemFileAction.class.getResourceAsStream( fileName );
-
-			// int readBytes;
-			// byte[] buffer = new byte[4096];
-
-			File outputFile = new File( defaultDirectory() + File.separator
-					+ System.getProperty( "release.name", "SEMOSS" ) + File.separator + fileName );
+			if ( firstrun ) {
+				// clear out the cache the first time we run (per app start)
+				firstrun = false;
+				if ( cachedir.exists() ) {
+					cachedir.delete();
+				}
+			}
 
 			if ( !outputFile.exists() ) {
-				outputFile.getParentFile().mkdirs();
-				IOUtil.writeStream( OpenSystemFileAction.class.getResourceAsStream( fileName ), outputFile );
-				
-				/*
-				outputFile.createNewFile();
-				try ( FileOutputStream outputStream = new FileOutputStream( outputFile ) ) {
-					while ( ( readBytes = inputStream.read( buffer ) ) > 0 ) {
-						outputStream.write( buffer, 0, readBytes );
-					}
-				}
-				catch ( FileNotFoundException e ) {
-					log.error( e, e );
-				}
-				*/
+				cachedir.mkdirs();
+				IOUtil.writeStream( getClass().getResourceAsStream( fileName ), outputFile );
 			}
 
 			Desktop.getDesktop().open( outputFile );

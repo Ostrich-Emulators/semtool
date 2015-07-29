@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.util;
+package gov.va.semoss.tools;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 

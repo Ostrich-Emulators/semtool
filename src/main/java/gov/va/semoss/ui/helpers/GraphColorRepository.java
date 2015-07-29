@@ -3,6 +3,7 @@ package gov.va.semoss.ui.helpers;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 
+import gov.va.semoss.util.Constants;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class GraphColorRepository extends AbstractColorRepository {
 	public Color getColor( URI typeURI ) {
 		Color color = null;
 		if ( typeURI == null ) {
-			color = vertexColorGenerator.nextNamedColor();
+			color = getColor( Constants.TRANSPARENT );
 		}
 		else if ( vertexColorHash.containsKey( typeURI ) ) {
 			color = vertexColorHash.get( typeURI );
