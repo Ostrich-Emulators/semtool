@@ -633,6 +633,7 @@ function chartitCtrl($scope, $http) {
                     var ylineVal = getyLineVal();
                     //adds a line for the quadrant grid and returns the title of the xAxis
                     return {
+                    	allowDecimals: false,
                         plotLines: [{
                             color: 'blue',
                             width: 2,
@@ -644,6 +645,7 @@ function chartitCtrl($scope, $http) {
                     };
                 }else{
                     return {
+                    	allowDecimals: false,
                     	title: {
                     		text: axisParams[1]
                     	},
