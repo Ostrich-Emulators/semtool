@@ -315,7 +315,7 @@ public class Insight implements Serializable{
 	@Override
 	public String toString() {
 		String strReturnValue = "";
-		if ( perspective.contains( "Detached-Insight-Perspective" ) ) {
+		if ( perspective != null && perspective.contains( "Detached-Insight-Perspective" ) ) {
 			strReturnValue = label;
 		}
 		else {

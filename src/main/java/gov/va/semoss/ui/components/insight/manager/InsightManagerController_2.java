@@ -2,6 +2,9 @@ package gov.va.semoss.ui.components.insight.manager;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -62,6 +65,7 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
@@ -620,16 +624,6 @@ public class  InsightManagerController_2 implements Initializable{
                 treeCell.setOnDragEntered(new EventHandler<DragEvent>() {
                     @Override
                     public void handle(DragEvent dragEvent) {
-//                        Insight valueDragged = (Insight) dragEvent.getDragboard().getContent(insightFormat);
-//  
-//                        TreeItem<Object> itemDragged = search(treevPerspectives.getRoot(), valueDragged);
-//                        TreeItem<Object> itemTarget = treeCell.getTreeItem(); 
-//                    	double itemTargetY = treeCell.localToScreen(treeCell.getBoundsInLocal()).getMinY();
-//
-//                        ObservableList<TreeItem<Object>> olstOldInsights = itemDragged.getParent().getChildren(); 
-//                        ObservableList<TreeItem<Object>> olstNewInsights = itemTarget.getParent().getChildren();
-//                        int index = olstNewInsights.indexOf(itemTarget);
-//                        
                         treeCell.setStyle("-fx-border-color: #111111 #111111 #111111 #111111");
 
                         dragEvent.consume();
@@ -719,63 +713,20 @@ public class  InsightManagerController_2 implements Initializable{
                     }
                 });
                 return treeCell;
-            }
+            }//End "call(...)".
             
-
-            /**   Searches the tree-view data for the Insight passed-in, and returns the TreeItem
-             * associated with that Insight. Note: This is a recursive function that compares URI's
-             * in its search.
-             * 
-             * @param currentNode -- (TreeItem<Object>) A node of the tree-view (usually is started
-             *    at the root).
-             * @param valueToSearch -- (Insight) A value that may exist in the tree-view.
-             * @return search -- TreeItem<Object> The TreeItem associated with "valueToSearch".
-             */
-            private TreeItem<Object> search(final TreeItem<Object> currentNode, final Insight valueToSearch) {
-               TreeItem<Object> result = null;
-             
-               if(currentNode.getValue().equals("Perspectives") == true ||
-            	  currentNode.getValue() instanceof Perspective == true){
-                  for(TreeItem<Object> child : currentNode.getChildren()) {
-                     result = search(child, valueToSearch);
-                     if (result != null) {
-                         break;
-                     }
-                  }                	 
-               }else if(currentNode.getValue() instanceof Insight == true &&
-                  ((Insight) currentNode.getValue()).getId().equals(valueToSearch.getId())){
-            	  result = currentNode;
-               }
-               return result;
-            }
-
-        	/**   Renumbers the Insights under each Perspective TreeItem.
-        	 */
-        	private void renumberInsights(){
-        		ObservableList<TreeItem<Object>> olstPerspectives = treevPerspectives.getRoot().getChildren();
-        		
-        		for(TreeItem<Object> treeItem: olstPerspectives){
-                    ObservableList<TreeItem<Object>> olstInsights = treeItem.getChildren(); 
-             		
-            		for(int i = 0; i < olstInsights.size(); i++){
-            			Insight insight = (Insight) olstInsights.get(i).getValue();
-            			insight.setOrder(i + 1);
-            		}
-        		}
-        	}
-        	
         	/**   Builds context menus and menu-click-handlers for tree-view items
         	 * (for the root item, Perspective items, Insight items, and Parameter
         	 * items).
         	 */
-			private void buildContextMenus(){
-				//Root menu:
-      		    rootMenu = new ContextMenu();
+        	private void buildContextMenus(){
+        		//Root menu:
+        		rootMenu = new ContextMenu();
                 MenuItem rootItem = new MenuItem("Add Perspective");
                 rootMenu.getItems().add(rootItem);
                 rootItem.setOnAction(new EventHandler<ActionEvent>() {
                     public void handle(ActionEvent t) {
-                       Utility.showMessage("Adding Perspective!");
+                    	addPerspective();
                     }
                 });
                 //Perspective menu:
@@ -784,14 +735,14 @@ public class  InsightManagerController_2 implements Initializable{
                 perspectiveMenu.getItems().add(perspectiveItem);
                 perspectiveItem.setOnAction(new EventHandler<ActionEvent>() {
                     public void handle(ActionEvent t) {
-                       Utility.showMessage("Deleting Perspective!");
+                       deletePerspective();
                     }
                 });
                 perspectiveItem = new MenuItem("Add Insight");
                 perspectiveMenu.getItems().add(perspectiveItem);
                 perspectiveItem.setOnAction(new EventHandler<ActionEvent>() {
                     public void handle(ActionEvent t) {
-                       Utility.showMessage("Adding Insight!");
+                       addInsight();
                     }
                 });
                 //Insight menu:
@@ -800,14 +751,14 @@ public class  InsightManagerController_2 implements Initializable{
                 insightMenu.getItems().add(insightItem);
                 insightItem.setOnAction(new EventHandler<ActionEvent>() {
                     public void handle(ActionEvent t) {
-                       Utility.showMessage("Deleting Insight!");
+                       deleteInsight();
                     }
                 });
                 insightItem = new MenuItem("Add Parameter");
                 insightMenu.getItems().add(insightItem);
                 insightItem.setOnAction(new EventHandler<ActionEvent>() {
                     public void handle(ActionEvent t) {
-                       Utility.showMessage("Adding Parameter!");
+                    	addParameter();
                     }
                 });
                 //Parameter menu:
@@ -816,13 +767,193 @@ public class  InsightManagerController_2 implements Initializable{
                 parameterMenu.getItems().add(parameterItem);
                 parameterItem.setOnAction(new EventHandler<ActionEvent>() {
                     public void handle(ActionEvent t) {
-                       Utility.showMessage("Deleting Parameter!");
+                       deleteParameter();
                     }
                 });
         	}//End "buildContextMenus()".
-
-        });//End "treevPerspectives.setCellFactory".          
+        	
+        });//End "treevPerspectives.setCellFactory".   
+        
 	}//End "populatePerspectiveTreeView()".
+	
+    /**   Searches the tree-view data for the Insight passed-in, and returns the TreeItem
+     * associated with that Insight. Note: This is a recursive function that compares URI's
+     * in its search.
+     * 
+     * @param currentNode -- (TreeItem<Object>) A node of the tree-view (usually is started
+     *    at the root).
+     * @param valueToSearch -- (Insight) A value that may exist in the tree-view.
+     * @return search -- TreeItem<Object> The TreeItem associated with "valueToSearch".
+     */
+    private TreeItem<Object> search(final TreeItem<Object> currentNode, final Insight valueToSearch) {
+       TreeItem<Object> result = null;
+     
+       if(currentNode.getValue().equals("Perspectives") == true ||
+    	  currentNode.getValue() instanceof Perspective == true){
+          for(TreeItem<Object> child : currentNode.getChildren()) {
+             result = search(child, valueToSearch);
+             if (result != null) {
+                 break;
+             }
+          }                	 
+       }else if(currentNode.getValue() instanceof Insight == true &&
+          ((Insight) currentNode.getValue()).getId().equals(valueToSearch.getId())){
+    	  result = currentNode;
+       }
+       return result;
+    }
+
+	/**   Renumbers the Insights under each Perspective TreeItem.
+	 */
+	private void renumberInsights(){
+		ObservableList<TreeItem<Object>> olstPerspectives = treevPerspectives.getRoot().getChildren();
+		
+		for(TreeItem<Object> treeItem: olstPerspectives){
+            ObservableList<TreeItem<Object>> olstInsights = treeItem.getChildren(); 
+     		
+    		for(int i = 0; i < olstInsights.size(); i++){
+    			Insight insight = (Insight) olstInsights.get(i).getValue();
+    			insight.setOrder(i + 1);
+    		}
+		}
+	}
+	
+	/**   Adds a new empty Perspective to the top of the tree-view.
+	 * (Called by "buildContextMenus()".)
+	 */
+	private void addPerspective(){
+		//Build new Perspective, giving it a unique URI:
+		//----------------------------------------------
+		String strUniqueIdentifier = "_"+String.valueOf(System.currentTimeMillis());	
+		Perspective perspective = new Perspective();
+		RepositoryConnection rc = null;
+		try {
+			rc = engine.getInsightManager().getRepository().getConnection();
+		} catch (RepositoryException e) {
+			log.warn(e, e);
+		}
+   		ValueFactory insightVF = rc.getValueFactory();
+        URI uriPerspective = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, 
+           "Perspective"+strUniqueIdentifier);
+		perspective.setUri(uriPerspective);
+		perspective.setLabel("(A New Perspective)");
+		
+		//Add new Perspective to the tree-view:
+		//-------------------------------------
+		TreeItem<Object> item = new TreeItem<Object>(perspective);
+        treevPerspectives.getRoot().getChildren().add(item);
+        treevPerspectives.getRoot().getChildren().sort(Comparator.comparing(t->t.toString()));
+	}
+	
+	/**    Removes the selected Perspective from the tree-view if the response to the
+	 *  warning popup is OK. (Called by "buildContextMenus()".)
+	 */
+	private void deletePerspective(){
+		if(Utility.showWarningOkCancel("Are you sure you want to delete this Perspective?") == 0){
+		   treevPerspectives.getRoot().getChildren()
+		      .remove(treevPerspectives.getSelectionModel().getSelectedItem());
+		}
+	}
+
+	/**    Adds a new empty Insight to the top of the current Perspective's Insight
+	 *  list. (Called by "buildContextMenus()".)
+	 */
+	private void addInsight(){
+		//Build new Insight, giving it a unique URI:
+		//------------------------------------------
+		String strUniqueIdentifier = "_"+String.valueOf(System.currentTimeMillis());	
+		Insight insight = new Insight();
+		RepositoryConnection rc = null;
+		try {
+			rc = engine.getInsightManager().getRepository().getConnection();
+		} catch (RepositoryException e) {
+			log.warn(e, e);
+		}
+   		ValueFactory insightVF = rc.getValueFactory();
+        URI uriInsight = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, 
+           "Insight"+strUniqueIdentifier);
+        insight.setId(uriInsight);
+        insight.setLabel("(A New Insight)");
+        insight.setOrder(0);
+		insight.setOutput("gov.va.semoss.ui.components.playsheets.GridPlaySheet");
+        
+		//Add new Insight to the tree-view:
+		//---------------------------------
+        Image image = new Image(getInsightIcon(insight));
+        ImageView imageView = new ImageView(image);
+        InsightTreeItem<Object> item = new InsightTreeItem<Object>(insight, imageView);
+        treevPerspectives.getSelectionModel().getSelectedItem().getChildren().add(0, item);
+        renumberInsights();
+	}
+	
+	/**    Removes the selected Insight from the tree-view if the response to the
+	 *  warning popup is OK. (Called by "buildContextMenus()".)
+	 */
+	private void deleteInsight(){
+		if(Utility.showWarningOkCancel("Are you sure you want to delete this Insight?") == 0){
+		   TreeItem<Object> itemPerspective = treevPerspectives.getSelectionModel()
+			  .getSelectedItem().getParent();
+		   
+		   itemPerspective.getChildren()
+		      .remove(treevPerspectives.getSelectionModel().getSelectedItem());
+           renumberInsights();
+		}
+	}
+
+	/**    Adds a new empty Parameter to the bottom of the current Insight's 
+     *  Parameter list. (Called by "buildContextMenus()".)
+	 */
+	private void addParameter(){
+		//Build new Parameter, giving it a unique URI:
+		//-------------------------------------------
+		String strUniqueIdentifier = "_"+String.valueOf(System.currentTimeMillis());	
+		Parameter parameter = new Parameter();
+		RepositoryConnection rc = null;
+		try {
+			rc = engine.getInsightManager().getRepository().getConnection();
+		} catch (RepositoryException e) {
+			log.warn(e, e);
+		}
+   		ValueFactory insightVF = rc.getValueFactory();
+        URI uriParameter = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, 
+           "Parameter"+strUniqueIdentifier);
+        parameter.setParameterURI(uriParameter.toString());
+        parameter.setLabel("(A New Parameter)");
+        
+		//Add new Parameter to the tree-view:
+		//-----------------------------------
+        InsightTreeItem<Object> insightTreeItem = (InsightTreeItem<Object>) treevPerspectives.getSelectionModel().getSelectedItem();
+        Insight insight = (Insight) insightTreeItem.getValue();
+        ObservableList<TreeItem<Object>> olstInsightParameters = insightTreeItem.getChildren();
+        ArrayList<Parameter> arylParameters = (ArrayList<Parameter>) insight.getInsightParameters();                
+        TreeItem<Object> parameterTreeItem = new TreeItem<Object>(parameter);
+        //First update the Insight's list of Parameters:
+        if(arylParameters.size() > 0 && arylParameters.get(0).toString().equals("")){
+	    	arylParameters.set(0, parameter);
+	    }else{
+        	arylParameters.add(parameter);
+	    }
+        //Then update the InsightTreeItem's children list:
+        if(olstInsightParameters.size() > 0 && olstInsightParameters.get(0).getValue().toString().equals("")){
+           olstInsightParameters.set(0, parameterTreeItem);
+        }else{
+           olstInsightParameters.add(parameterTreeItem);
+        }                
+	}//End "addParameter()".
+	
+	/**    Removes the selected Parameter from the tree-view if the response to the
+	 *  warning popup is OK. (Called by "buildContextMenus()".)
+	 */
+	private void deleteParameter(){
+		if(Utility.showWarningOkCancel("Are you sure you want to delete this Parameter?") == 0){
+		   TreeItem<Object> itemParameter = treevPerspectives.getSelectionModel().getSelectedItem();
+		   TreeItem<Object> itemInsight = itemParameter.getParent();
+		   Insight insight = (Insight) itemInsight.getValue();
+           ArrayList<Parameter> arylParameters = (ArrayList<Parameter>) insight.getInsightParameters();                
+           arylParameters.remove((Parameter) itemParameter.getValue());
+           itemInsight.getChildren().remove(itemParameter);
+		}
+	}
 	
 	/**   Class to override the ".isLeaf()" method for Insight tree-items.
 	 * We need to be sure that no Parameters are listed under the Insight.
