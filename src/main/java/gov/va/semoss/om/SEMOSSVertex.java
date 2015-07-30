@@ -44,10 +44,8 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 	}
 
 	public SEMOSSVertex( URI id, URI type, String label ) {
-		super( id, type, label );
-
-		setColor( GraphColorRepository.instance().getColor( type ) );
-		setShape( GraphShapeRepository.instance().getShape( type ) );
+		super( id, type, label, GraphColorRepository.instance().getColor( type ) );
+		shape = GraphShapeRepository.instance().getShape( type );
 	}
 
 	@Override

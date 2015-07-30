@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import static org.junit.Assert.assertEquals;
@@ -19,6 +20,7 @@ import org.junit.Test;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  *
@@ -31,6 +33,7 @@ public class GraphMLWriterTest {
 	private static final Date now;
 
 	static {
+		TimeZone.setDefault( TimeZone.getTimeZone( "GMT-04:00" ) );
 		Calendar cal = Calendar.getInstance();
 		cal.set( 2031, 9, 22, 6, 58, 59 );
 		cal.set( Calendar.MILLISECOND, 15 );
@@ -71,6 +74,8 @@ public class GraphMLWriterTest {
 			FileUtils.write( trace, strings.toString() );
 		}
 
+//		log.fatal( strings.toString() );
+//		log.fatal(  FileUtils.readFileToString( EXPECTED ) );
 		assertEquals( FileUtils.readFileToString( EXPECTED ), strings.toString() );
 	}
 }

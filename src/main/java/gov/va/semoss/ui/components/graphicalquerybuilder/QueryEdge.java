@@ -16,8 +16,6 @@ import org.openrdf.model.URI;
 public class QueryEdge extends AbstractQueryNodeEdgeBase implements QueryNodeEdgeBase {
 
 	public QueryEdge( URI _uri ) {
-		super( _uri );
-		
-		setColor( Color.DARK_GRAY );
+		super( _uri, Color.DARK_GRAY );
 	}
 }

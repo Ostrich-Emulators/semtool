@@ -58,6 +58,7 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import org.apache.log4j.Logger;
 
 /**
  * Icons used in this search panel contributed from gentleface.com.
@@ -130,6 +131,15 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 		treeButton = new JToggleButton( treeListener );
 		treeButton.setText( "" );
+		treeButton.addActionListener( new ActionListener(){
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				if( ringsButton.isSelected() ){
+					ringsButton.doClick();
+				}
+			}		
+		} );
 		
 		ringsButton = new JToggleButton( Utility.loadImageIcon( "ring.png" ) );
 		ringsButton.setToolTipText( "<html><b>Show Radial Rings</b><br>Only available with Balloon and Radial Tree layouts</html>" );
@@ -140,7 +150,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 		weightButton.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				( (WeightDropDownButton) e.getSource() ).showPopup();
+				weightButton.showPopup();
 			}
 		} );
 
@@ -163,6 +173,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+		Logger.getLogger(getClass()).debug( "graph updated...updating lucene");
 		searchController.indexGraph( graph, gps.getEngine() );
 	}
 	
