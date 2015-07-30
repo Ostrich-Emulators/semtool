@@ -34,8 +34,9 @@ public class GraphMLWriterTest {
 	
 	static {
 		Calendar cal = Calendar.getInstance();
-		cal.set( 2031, 9, 22, 3, 58, 59 );
+		cal.set( 2031, 9, 22, 6, 58, 59 );
 		cal.set( Calendar.MILLISECOND, 15 );
+		cal.setTimeZone( TimeZone.getTimeZone( "GMT-04:00" ) );
 		SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" );
 		sdf.setTimeZone( TimeZone.getTimeZone( "GMT-04:00" ) );
 		now = sdf.format( cal.getTime() );
@@ -75,8 +76,8 @@ public class GraphMLWriterTest {
 			FileUtils.write( trace, strings.toString() );
 		}
 		
-		log.fatal( strings.toString() );
-		log.fatal(  FileUtils.readFileToString( EXPECTED ) );
+//		log.fatal( strings.toString() );
+//		log.fatal(  FileUtils.readFileToString( EXPECTED ) );
 		assertEquals( FileUtils.readFileToString( EXPECTED ), strings.toString() );
 	}
 }
