@@ -7,9 +7,9 @@ package gov.va.semoss.poi.main;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  *
@@ -29,14 +30,16 @@ public class GraphMLWriterTest {
 	
 	private static final File EXPECTED = new File( "src/test/resources/graphtest.graphml" );
 	private static final Logger log = Logger.getLogger( GraphMLWriterTest.class );
-	private static final Date now;
+	private static final String now;
 	
 	static {
 		Calendar cal = Calendar.getInstance();
 		cal.set( 2031, 9, 22, 6, 58, 59 );
 		cal.set( Calendar.MILLISECOND, 15 );
 		cal.setTimeZone( TimeZone.getTimeZone( "GMT-04:00" ) );
-		now = cal.getTime();
+		SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" );
+		sdf.setTimeZone( TimeZone.getTimeZone( "GMT-04:00" ) );
+		now = sdf.format( cal.getTime() );
 	}
 	
 	@Test
@@ -54,7 +57,7 @@ public class GraphMLWriterTest {
 		ValueFactory vf = new ValueFactoryImpl();
 		Map<String, Value> props = new HashMap<>();
 		props.put( "Price", vf.createLiteral( "3000 USD" ) );
-		props.put( "Date", vf.createLiteral( now ) );
+		props.put( "Date", vf.createLiteral( now, XMLSchema.DATETIME ) );
 		rels.add( "Yuri", "Yugo", props );
 		rels.add( "Yuri", "Pinto" );
 		
