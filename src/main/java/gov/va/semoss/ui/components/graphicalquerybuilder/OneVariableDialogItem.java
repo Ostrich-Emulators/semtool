@@ -132,7 +132,7 @@ public class OneVariableDialogItem extends AbstractAction {
 			currvals.addAll( values );
 			node.setProperties( values.property, currvals );
 			node.setSelected( values.property, values.included );
-			node.setPropertyMetadata( property, values.raw );
+			node.setFilter( property, values.raw );
 			panel.update();
 		}
 	}

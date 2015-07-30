@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,6 +85,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			= new VisualizationViewer<>( vizlayout );
 	private final VertexFactory vfac = new VertexFactory();
 	private final EdgeFactory efac = new EdgeFactory();
+	private final List<QueryOrder> ordering = new ArrayList<>();
 	private GqbLabelTransformer<QueryNode> vlt;
 	private GqbLabelTransformer<QueryEdge> elt;
 	private SyntaxTextEditor sparqlarea;
@@ -283,6 +285,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		}
 
 		vizlayout.reset();
+		ordering.clear();
 		update();
 	}
 
@@ -328,7 +331,8 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		if ( null != sparqlarea ) {
 			String sparql = ( 0 == graph.getVertexCount()
 					? ""
-					: new GraphToSparql( getEngine().getNamespaces() ).select( graph ) );
+					: new GraphToSparql( getEngine().getNamespaces() ).select( graph, 
+							getQueryOrdering() ) );
 			sparqlarea.setText( sparql );
 		}
 	}
@@ -448,6 +452,16 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		} );
 	}
 
+	public List<QueryOrder> getQueryOrdering() {
+		return new ArrayList<>( ordering );
+	}
+
+	public void setQueryOrdering( List<QueryOrder> neworder ) {
+		ordering.clear();
+		ordering.addAll( neworder );
+		updateSparql();
+	}
+
 	private class MousePopuper extends EditingPopupGraphMousePlugin {
 
 		public MousePopuper() {
@@ -480,6 +494,43 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 					vertpop.show( view, p.x, p.y );
 				}
 			}
+		}
+	}
+
+	public static class QueryOrder {
+
+		public final QueryNodeEdgeBase base;
+		public final URI property;
+
+		public QueryOrder( QueryNodeEdgeBase base, URI property ) {
+			this.base = base;
+			this.property = property;
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 5;
+			hash = 47 * hash + Objects.hashCode( this.base );
+			hash = 47 * hash + Objects.hashCode( this.property );
+			return hash;
+		}
+
+		@Override
+		public boolean equals( Object obj ) {
+			if ( obj == null ) {
+				return false;
+			}
+			if ( getClass() != obj.getClass() ) {
+				return false;
+			}
+			final QueryOrder other = (QueryOrder) obj;
+			if ( !Objects.equals( this.base, other.base ) ) {
+				return false;
+			}
+			if ( !Objects.equals( this.property, other.property ) ) {
+				return false;
+			}
+			return true;
 		}
 	}
 }

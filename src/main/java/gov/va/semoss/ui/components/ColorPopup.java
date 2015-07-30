@@ -39,8 +39,8 @@ public class ColorPopup extends JMenu {
 
 	private static final long serialVersionUID = -4784260297860900414L;
 
-	public ColorPopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
-		super( _name );
+	public ColorPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
+		super( "Modify Color" );
 
 		GraphColorRepository gcr = GraphColorRepository.instance();
 		for( Map.Entry<String, Color> en : gcr.getNamedColorMap().entrySet() ){

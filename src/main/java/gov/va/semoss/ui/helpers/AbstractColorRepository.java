@@ -3,7 +3,6 @@ package gov.va.semoss.ui.helpers;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Color;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,7 +21,7 @@ public abstract class AbstractColorRepository {
 	 * A listing of the standard colors provided in the system, using the tag/key
 	 * from the Constants class as the key and the color itself as the value
 	 */
-	private HashMap<String, Color> standardColors = new HashMap<>();
+	private final HashMap<String, Color> standardColors = new HashMap<>();
 	/**
 	 * The logger used to post messages
 	 */

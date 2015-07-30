@@ -5,9 +5,11 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel.QueryOrder;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -22,22 +24,32 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	private static final Logger log = Logger.getLogger( SparqlResultTableModel.class );
 	private static final String[] COLS
-			= { "Node", "Property", "Value", "Label", "Returned?", "Optional?" };
+			= { "Node", "Property", "Value", "Label", "Returned?", "Optional?", "Filter" };
 	private static final Class<?>[] COLCLASSES
 			= { String.class, URI.class, Value.class, String.class, Boolean.class,
-				Boolean.class };
-	private final List<RowLocator> list = new ArrayList<>();
+				Boolean.class, String.class };
+	private final List<QueryOrder> list = new ArrayList<>();
 
-	public SparqlResultTableModel( List<QueryNodeEdgeBase> elements ) {
-		for ( QueryNodeEdgeBase element : elements ) {
+	public SparqlResultTableModel( List<QueryNodeEdgeBase> elements,
+			List<QueryOrder> ordering ) {
+		
+		Set<QueryOrder> seen = new HashSet<>( ordering );
+		list.addAll( ordering );
+
+		for( QueryNodeEdgeBase element : elements ){
 			for ( URI prop : element.getAllValues().keySet() ) {
 				if ( !RDF.SUBJECT.equals( prop ) ) {
-					list.add( new RowLocator( element, prop ) );
+					QueryOrder qo = new QueryOrder( element, prop );
+					if( !seen.contains( qo )){
+						list.add( qo );
+					}
 				}
 			}
-		}
-
-		Collections.sort( list );
+		}		
+	}
+	
+	public List<QueryOrder> getQueryOrdering(){
+		return list;
 	}
 
 	@Override
@@ -67,7 +79,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt( int row, int col ) {
-		RowLocator src = list.get( row );
+		QueryOrder src = list.get( row );
 		URI property = src.property;
 		QueryNodeEdgeBase base = src.base;
 
@@ -78,18 +90,14 @@ public class SparqlResultTableModel extends AbstractTableModel {
 				return property;
 			case 2:
 				return base.getValue( property );
-			case 3: {
-				if ( base.isSelected( property ) ) {
-					return base.getLabel( property );
-				}
-				else {
-					return "";
-				}
-			}
+			case 3:
+				return ( base.isSelected( property ) ? base.getLabel( property ) : "" );
 			case 4:
 				return base.isSelected( property );
 			case 5:
 				return base.isOptional( property );
+			case 6:
+				return base.getFilter( property );
 			default:
 				throw new IllegalArgumentException( "unknown column: " + col );
 		}
@@ -97,34 +105,50 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	@Override
 	public void setValueAt( Object aValue, int row, int col ) {
-		RowLocator src = list.get( row );
+		QueryOrder src = list.get( row );
 		QueryNodeEdgeBase base = src.base;
 
-		if ( 0 == col ) {
-			base.setQueryId( aValue.toString() );
-			fireTableDataChanged();
-		}
-		else if ( 2 == col ) {
-			log.debug( aValue );
-			base.setProperty( src.property, Value.class.cast( aValue ) );
-			fireTableCellUpdated( row, col );
-		}
-		else if ( 3 == col ) {
-			base.setLabel( src.property, aValue.toString() );
-			fireTableCellUpdated( row, col );
-		}
-		else if ( 4 == col ) {
-			base.setSelected( src.property, Boolean.class.cast( aValue ) );
-			fireTableDataChanged();
-		}
-		else if ( 5 == col ) {
-			base.setOptional( src.property, Boolean.class.cast( aValue ) );
-			fireTableDataChanged();
+		switch ( col ) {
+			case 0:
+				base.setQueryId( aValue.toString() );
+				fireTableDataChanged();
+				break;
+			case 2:
+				base.setProperty( src.property, Value.class.cast( aValue ) );
+				fireTableCellUpdated( row, col );
+				break;
+			case 3:
+				base.setLabel( src.property, aValue.toString() );
+				fireTableCellUpdated( row, col );
+				break;
+			case 4:
+				base.setSelected( src.property, Boolean.class.cast( aValue ) );
+				fireTableDataChanged();
+				break;
+			case 5:
+				base.setOptional( src.property, Boolean.class.cast( aValue ) );
+				fireTableDataChanged();
+				break;
+			case 6:
+				base.setFilter( src.property, aValue.toString() );
+				fireTableDataChanged();
+				break;
+			default:
+				throw new IllegalArgumentException( "Cannot edit column " + col );
 		}
 	}
 
-	public RowLocator getRawRow( int row ) {
+	public QueryOrder getRawRow( int row ) {
 		return list.get( row );
+	}
+
+	public void swap( int fromRow, int toRow ) {
+		if ( toRow > -1 && toRow < list.size() ) {
+			QueryOrder rl = list.remove( fromRow );
+			list.add( toRow, rl );
+
+			fireTableDataChanged();
+		}
 	}
 
 	public static class RowLocator implements Comparable<RowLocator> {
@@ -141,7 +165,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 		public int compareTo( RowLocator o ) {
 			int diff = base.getURI().stringValue().compareTo( o.base.getURI().stringValue() );
 			if ( 0 == diff ) {
-				return property.stringValue().compareTo( o.property.stringValue() );
+				diff = property.stringValue().compareTo( o.property.stringValue() );
 			}
 
 			return diff;
