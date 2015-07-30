@@ -58,6 +58,7 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import org.apache.log4j.Logger;
 
 /**
  * Icons used in this search panel contributed from gentleface.com.
@@ -172,6 +173,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+		Logger.getLogger(getClass()).debug( "graph updated...updating lucene");
 		searchController.indexGraph( graph, gps.getEngine() );
 	}
 	

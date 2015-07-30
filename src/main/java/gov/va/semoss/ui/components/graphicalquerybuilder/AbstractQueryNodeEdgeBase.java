@@ -7,7 +7,9 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.ui.components.models.ValueTableModel;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.MultiSetMap;
+import java.awt.Color;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,9 +41,16 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 		}
 	}
 
-	public AbstractQueryNodeEdgeBase( URI id, URI type, String label ) {
-		super( id, type, label );
+	public AbstractQueryNodeEdgeBase( URI id, Color col ) {
+		this( id, null, id.getLocalName(), col );
+	}
 
+	public AbstractQueryNodeEdgeBase( URI id, URI type, String label ) {
+		this( id, type, label, GraphColorRepository.instance().getColor( type ) );
+	}
+
+	public AbstractQueryNodeEdgeBase( URI id, URI type, String label, Color col ) {
+		super( id, type, label, col );
 		for ( Map.Entry<URI, Value> en : super.getValues().entrySet() ) {
 			properties.add( en.getKey(), en.getValue() );
 		}

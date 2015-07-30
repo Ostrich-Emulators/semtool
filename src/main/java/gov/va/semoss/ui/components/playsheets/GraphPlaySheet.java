@@ -67,7 +67,6 @@ import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.PlaySheetFrame;
-import gov.va.semoss.ui.components.PropertySpecData;
 import gov.va.semoss.ui.components.VertexColorShapeData;
 import gov.va.semoss.ui.components.VertexFilterData;
 import gov.va.semoss.ui.components.api.GraphListener;
@@ -110,7 +109,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	protected GraphDataModel gdm;
 	protected String layoutName = Constants.FR;
 	protected ControlData controlData = new ControlData();
-	protected PropertySpecData predData = new PropertySpecData();
 	protected VertexFilterData filterData;
 
 	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
@@ -142,6 +140,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final HidingPredicate predicate = new HidingPredicate();
 
 	private final List<GraphListener> listenees = new ArrayList<>();
+	private boolean inGraphOp = false;
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -186,7 +185,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		addGraphListener( legendPanel );
 		addGraphListener( controlData );
 		addGraphListener( filterData );
-		addGraphListener( predData );
+		//addGraphListener( predData );
 		addGraphListener( colorShapeData );
 		addGraphListener( controlPanel );
 	}
@@ -454,7 +453,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		layout.initialize();
 		// make the layout a little smaller than our viewer, so stuff shows up on screen
 		view.setGraphLayout( layout );
-		if( FRLayout.class.equals( layout.getClass() ) ){
+		if ( FRLayout.class.equals( layout.getClass() ) ) {
 			double scale = 0.85;
 			Dimension d = view.getSize();
 			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
@@ -596,15 +595,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 //		return listOfChilds;
 	}
 
-	/**
-	 * Method getPredicateData.
-	 *
-	 * @return PropertySpecData
-	 */
-	public PropertySpecData getPredicateData() {
-		return predData;
-	}
-
 	@Override
 	public void create( Model m, IEngine engine ) {
 		add( m, null, engine );
@@ -625,10 +615,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 */
 	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
-		List<Resource> nodes = new ArrayList<>();
+		List<URI> nodes = new ArrayList<>();
 		Model model = new LinkedHashModel();
 		for ( Value[] row : data ) {
-			Resource s = Resource.class.cast( row[0] );
+			URI s = URI.class.cast( row[0] );
 			if ( 1 == row.length ) {
 				nodes.add( s );
 			}
@@ -664,7 +654,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		create( data, headers, eng );
 	}
 
-	public void add( Model m, List<Resource> nodes, IEngine engine ) {
+	public void add( Model m, List<URI> nodes, IEngine engine ) {
 		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 		if ( null == nodes ) {
 			nodes = new ArrayList<>();
@@ -677,6 +667,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			return; // nothing to add to the graph
 		}
 
+		inGraphOp = true;
 		if ( overlayLevel < maxOverlayLevel ) {
 			Collection<SEMOSSVertex> removed = gdm.removeElementsSinceLevel( overlayLevel );
 			for ( SEMOSSVertex v : removed ) {
@@ -704,6 +695,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		if ( overlayLevel > maxOverlayLevel ) {
 			maxOverlayLevel = overlayLevel;
 		}
+		inGraphOp = false;
 
 		updateGraph();
 	}
@@ -813,8 +805,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	@Override
 	public void propertyChange( PropertyChangeEvent evt ) {
-		view.repaint();
-		fireGraphUpdated();
+		if( !inGraphOp ){
+			view.repaint();
+			fireGraphUpdated();
+		}
 	}
 
 	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {

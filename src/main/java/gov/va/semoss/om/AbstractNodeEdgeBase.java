@@ -53,12 +53,17 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	}
 
 	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
+		this( id, type, label,
+				GraphColorRepository.instance().getColor( (URI) null ) );
+	}
+
+	public AbstractNodeEdgeBase( URI id, URI type, String label, Color col ) {
 		this.id = id;
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
-
-		setColor( GraphColorRepository.instance().getColor( type ) );
+		color
+				= ( null == col ? GraphColorRepository.instance().getColor( type ) : col );
 	}
 
 	public void addPropertyChangeListener( PropertyChangeListener pcl ) {

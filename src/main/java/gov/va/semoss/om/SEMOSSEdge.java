@@ -46,15 +46,13 @@ public class SEMOSSEdge extends AbstractNodeEdgeBase implements Comparable<SEMOS
 	 * (InEdge)
 	 */
 	public SEMOSSEdge( SEMOSSVertex _outVertex, SEMOSSVertex _inVertex, URI _uri ) {
-		super( _uri, null, _uri.getLocalName() );
+		super( _uri, null, _uri.getLocalName(), Color.DARK_GRAY );
 		destinationVertexURI = _outVertex.getURI();
 		originVertexURI = _inVertex.getURI();
-		setColor( Color.DARK_GRAY );
 	}
 
 	public SEMOSSEdge( URI _uri ) {
-		super( _uri, null, _uri.getLocalName() );
-		setColor( Color.DARK_GRAY );
+		super( _uri, null, _uri.getLocalName(), Color.DARK_GRAY );
 	}
 
 	/**
