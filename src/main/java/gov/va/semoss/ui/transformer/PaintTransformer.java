@@ -36,11 +36,11 @@ public class PaintTransformer<T extends NodeEdgeBase> extends SelectingTransform
 
 	@Override
 	protected Paint transformSelected( T t ) {
-		return t.getColor();
+		return transformNormal( t );
 	}
 
 	@Override
 	protected Paint transformNotSelected( T t, boolean skel ) {
-		return ( skel ? Color.white : t.getColor() );
+		return ( skel ? Color.white : transformNormal( t ) );
 	}
 }

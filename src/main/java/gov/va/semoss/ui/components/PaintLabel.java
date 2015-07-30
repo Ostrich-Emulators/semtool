@@ -27,22 +27,19 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JToggleButton;
 
 /**
  * This class is used to paint a text string on a display area.
  */
-public class PaintLabel extends JPanel {
+public class PaintLabel extends JToggleButton {
 
 	private static final long serialVersionUID = 990020151L;
 	private Shape shape = null;
 	private Color color = null;
 	private Dimension dim = new Dimension( 20, 20 );
-	private final JLabel label = new JLabel( "", null, JLabel.CENTER );
-	private final JLabel image = new JLabel( "", null, JLabel.CENTER );
 
 	/**
 	 * Constructor for PaintLabel.
@@ -55,21 +52,14 @@ public class PaintLabel extends JPanel {
 
 	public PaintLabel( String text, Shape s, Color c ) {
 		super();
-		setLayout( new BoxLayout( this, BoxLayout.PAGE_AXIS ) );
-		label.setHorizontalTextPosition( JLabel.CENTER );
-		label.setAlignmentX( JLabel.CENTER_ALIGNMENT );
-		image.setAlignmentX( JLabel.CENTER_ALIGNMENT );
-
-		add( image );
-		add( label );
-
+		setHorizontalTextPosition( JButton.CENTER );
+		setVerticalTextPosition( JButton.BOTTOM );
 		set( text, s, c );
+		setContentAreaFilled( false );
 	}
 
 	public final void setTextAndTooltip( String s ) {
-		label.setText( s );
-		label.setToolTipText( s );
-		image.setToolTipText( s );
+		setText( s );
 		setToolTipText( s );
 	}
 
@@ -106,7 +96,9 @@ public class PaintLabel extends JPanel {
 	}
 
 	/**
-	 * Create a vector-graphics based Shape Icon for display in a JLabel or JButton
+	 * Create a vector-graphics based Shape Icon for display in a JLabel or
+	 * JButton
+	 *
 	 * @param color The color of the fill of the Shape Icon
 	 * @param shape The awt.Shape that the fill color is to occupy
 	 * @param dim The desired dimensions of the icon
@@ -118,39 +110,39 @@ public class PaintLabel extends JPanel {
 		// Get the bounds of the shape, for use in subsequent calculations
 		Rectangle rect = shape.getBounds();
 		// Add the padding (2 sides) to the height and width around the icon
-		int totalWidth =  dim.width + (padding * 2);
-		int totalHeight = dim.height + (padding * 2);
+		int totalWidth = dim.width + ( padding * 2 );
+		int totalHeight = dim.height + ( padding * 2 );
 		// Create the Buffered Image, using the bounds of the Shape instance it will contain, plus the padding
-		BufferedImage bi = new BufferedImage(totalWidth, totalHeight, BufferedImage.TYPE_INT_ARGB );
+		BufferedImage bi = new BufferedImage( totalWidth, totalHeight, BufferedImage.TYPE_INT_ARGB );
 		// Get the buffered image's graphics context
 		Graphics2D g = bi.createGraphics();
 		// If the origin of the shape is offset from zero (this shouldn't happen), then translate the x and y to compensate
 		// to compensate
 		int x = 0;
 		int y = 0;
-		if (rect.x != 0){
-			x = (rect.x) * (-1);
+		if ( rect.x != 0 ) {
+			x = ( rect.x ) * ( -1 );
 		}
-		if (rect.y != 0){
-			y = (rect.y) * (-1);
+		if ( rect.y != 0 ) {
+			y = ( rect.y ) * ( -1 );
 		}
 		// Move the graphics to compensate for the x and y offset found in the shape, above
-		g.translate(x, y);
+		g.translate( x, y );
 		// Move the graphics cursor to account for the padding
-		g.translate(padding,padding);
+		g.translate( padding, padding );
 		// If the dim requested is different from the shape extents, apply a scale
 		double requestedWidth = dim.getWidth();
 		double requestedHeight = dim.getHeight();
 		double scaleX = 1.0d;
 		double scaleY = 1.0d;
-		if (requestedWidth != ((double)rect.width)){
-			scaleX = requestedWidth / ((double)rect.width);
+		if ( requestedWidth != ( (double) rect.width ) ) {
+			scaleX = requestedWidth / ( (double) rect.width );
 		}
-		if (requestedHeight != ((double)rect.height)){
-			scaleY = requestedHeight / ((double)rect.width);
+		if ( requestedHeight != ( (double) rect.height ) ) {
+			scaleY = requestedHeight / ( (double) rect.width );
 		}
 		// Apply the scale
-		g.scale(scaleX, scaleY);
+		g.scale( scaleX, scaleY );
 		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
 		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 		g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
@@ -158,9 +150,8 @@ public class PaintLabel extends JPanel {
 		if ( null != color ) {
 			g.setColor( color );
 		}
-		if ( null != shape ) {
-			g.fill( shape );
-		}
+
+		g.fill( shape );
 		g.dispose();
 
 		return new ImageIcon( bi );
@@ -168,6 +159,6 @@ public class PaintLabel extends JPanel {
 
 	private void makeShapeIcon() {
 		ImageIcon ii = makeShapeIcon( color, shape, dim );
-		image.setIcon( ii );
+		setIcon( ii );
 	}
 }

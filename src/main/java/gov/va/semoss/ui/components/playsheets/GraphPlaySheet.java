@@ -43,6 +43,7 @@ import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 
 import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
+import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -50,7 +51,6 @@ import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.Layer;
-import edu.uci.ics.jung.visualization.MultiLayerTransformer;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -177,6 +177,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		graphSplitPane.setTopComponent( controlPanel );
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
+//		JPanel helper = new JPanel( new BorderLayout() );
+//		helper.add( new GraphZoomScrollPane( view ) );
+//		graphSplitPane.setBottomComponent( helper );
 
 		filterData = new VertexFilterData();
 
@@ -296,7 +299,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public void updateLayout() {
-		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter = new VertexPredicateFilter<>( predicate );
+		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter
+				= new VertexPredicateFilter<>( predicate );
 		Layout<SEMOSSVertex, SEMOSSEdge> layout = view.getGraphLayout();
 		layout.setGraph( filter.transform( gdm.getGraph() ) );
 		view.setGraphLayout( layout );
@@ -447,11 +451,20 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			layout = new FRLayout<>( graph );
 		}
 
-		fitGraphinWindow();
+		layout.initialize();
+		// make the layout a little smaller than our viewer, so stuff shows up on screen
 		view.setGraphLayout( layout );
+		if( AbstractLayout.class.isAssignableFrom( layout.getClass() ) ){
+			double scale = 0.85;
+			Dimension d = view.getSize();
+			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
+			layout.setSize( d );
+			fitGraphinWindow( AbstractLayout.class.cast( layout ) );
+		}
 
 		for ( GraphListener gl : listenees ) {
-			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName, layout );
+			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName,
+					layout );
 		}
 
 		return ok;
@@ -461,17 +474,32 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * This method tries to fit the graph to the available space.
 	 * It could work better.
 	 */
-	private void fitGraphinWindow() {
-		MultiLayerTransformer mlt = view.getRenderContext().getMultiLayerTransformer();
-		double vscalex = mlt.getTransformer( Layer.VIEW ).getScaleX() * 1.1;
-		double vscaley = mlt.getTransformer( Layer.VIEW ).getScaleY() * 1.1;
+	private void fitGraphinWindow( AbstractLayout<SEMOSSVertex, SEMOSSEdge> layout ) {
+		// two steps here: figure out the center of our layout, and translate
+		// that center so it's in the center of our visualization
+		// we'll take the average X and Y, so big clusters get closer to the center
+		double totalX = 0;
+		double totalY = 0;
 
-		// Dimension d = view.getSize();
-		// d.setSize( d.getWidth() / vscalex, d.getHeight() / vscaley );
-		double scalex = 1 / vscaley;
-		double scaley = 1 / vscalex;
+		Graph<SEMOSSVertex, SEMOSSEdge> graph = layout.getGraph();
+		Collection<SEMOSSVertex> verts = graph.getVertices();
+		for ( SEMOSSVertex v : verts ) {
+			double x = layout.getX( v );
+			double y = layout.getY( v );
 
-		mlt.getTransformer( Layer.LAYOUT ).setScale( scalex, scaley, view.getCenter() );
+			totalX += x;
+			totalY += y;
+		}
+
+		Point2D viewCenter = view.getCenter();
+		Point2D layoutCenter
+				= new Point2D.Double( totalX / verts.size(), totalY / verts.size() );
+		log.debug( "layout center is: " + layoutCenter );
+		log.debug( "view center is: " + view.getCenter() );
+
+		view.getRenderContext().getMultiLayerTransformer().getTransformer( Layer.LAYOUT ).
+				translate( viewCenter.getX() - layoutCenter.getX(),
+						viewCenter.getY() - layoutCenter.getY() );
 	}
 
 	public void fireGraphUpdated() {
@@ -651,25 +679,25 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		if ( overlayLevel < maxOverlayLevel ) {
 			Collection<SEMOSSVertex> removed = gdm.removeElementsSinceLevel( overlayLevel );
-			for( SEMOSSVertex v :removed ){
+			for ( SEMOSSVertex v : removed ) {
 				v.removePropertyChangeListener( this );
 			}
-		}		
-		
+		}
+
 		overlayLevel++;
 
-		Set<SEMOSSVertex> oldverts = new HashSet<>( gdm.getGraph().getVertices() );		
+		Set<SEMOSSVertex> oldverts = new HashSet<>( gdm.getGraph().getVertices() );
 		if ( !m.isEmpty() ) {
 			gdm.addGraphLevel( m, engine, overlayLevel );
 		}
 		if ( !nodes.isEmpty() ) {
 			gdm.addGraphLevel( nodes, engine, overlayLevel );
 		}
-		
+
 		Set<SEMOSSVertex> newverts = new HashSet<>( gdm.getGraph().getVertices() );
 		newverts.removeAll( oldverts );
-		
-		for( SEMOSSVertex v : newverts ){
+
+		for ( SEMOSSVertex v : newverts ) {
 			v.addPropertyChangeListener( this );
 		}
 
@@ -736,6 +764,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		eft.clearSizeData();
 		vft.clearSizeData();
 		vht.clearSizeData();
+		view.repaint();
 	}
 
 	/**
@@ -826,6 +855,16 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			}
 			catch ( ConcurrentModificationException cme ) {
 				renderContext.getScreenDevice().repaint();
+			}
+
+			if ( log.isTraceEnabled() ) {
+				renderContext.getGraphicsContext().setPaint( Color.RED );
+				log.debug( "size: (" + view.getX() + "," + view.getY() + ","
+						+ view.getWidth() + "," + view.getHeight() + ")" );
+				renderContext.getGraphicsContext().drawRect( view.getX() + 1, view.getY() + 1,
+						view.getWidth() - 2, view.getHeight() - 2 );
+				renderContext.getGraphicsContext().drawOval( (int) view.getCenter().getX(),
+						(int) view.getCenter().getY(), 20, 20 );
 			}
 		}
 

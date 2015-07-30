@@ -17,7 +17,7 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package gov.va.semoss.util;
+package gov.va.semoss.tools;
 
 import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
@@ -39,6 +39,8 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.Utility;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;

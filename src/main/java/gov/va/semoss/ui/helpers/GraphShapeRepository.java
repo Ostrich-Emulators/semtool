@@ -95,11 +95,7 @@ public class GraphShapeRepository {
 		// next check if it is specified in the properties file
 		Shape newShape = null;
 		if ( typeURI == null ) {
-			newShape = shapeGenerator.nextShape();
-
-			if ( newShape == null ) {
-				logger.warn( "Warning - Derived shape without type URI was null." );
-			}
+			newShape = shapeGenerator.getNamedShape( Constants.CIRCLE );
 		}
 		else {
 			String shapename

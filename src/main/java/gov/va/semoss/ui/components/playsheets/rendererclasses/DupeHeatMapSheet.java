@@ -23,6 +23,8 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.BrowserPlaySheet2;
 import gov.va.semoss.ui.components.playsheets.rendererclasses.DupeHeatMapFunctions;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -270,4 +272,8 @@ public class DupeHeatMapSheet extends BrowserPlaySheet2 {
 		this.yAxisObject = yAxisObject;
 	}
 
+	@Override
+	protected BufferedImage getExportImage() throws IOException {
+		return getExportImageFromSVGBlock();
+	}
 }

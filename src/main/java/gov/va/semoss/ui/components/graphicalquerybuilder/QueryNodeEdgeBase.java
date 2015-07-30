@@ -44,7 +44,9 @@ public interface QueryNodeEdgeBase extends NodeEdgeBase {
 
 	public String getQueryId();
 
-	public void setPropertyMetadata( URI prop, String str );
+	public void setFilter( URI prop, String str );
 
-	public String getPropertyMetadata( URI prop );
+	public String getFilter( URI prop );
+	
+	public boolean hasFilter( URI prop );
 }

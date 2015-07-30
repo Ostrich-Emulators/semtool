@@ -1,5 +1,7 @@
 package gov.va.semoss.ui.components.playsheets.rendererclasses;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Hashtable;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -64,5 +66,10 @@ public class AppDupeHeatMapSheet extends DupeHeatMapSheet {
 		allHash.put( "yAxisTitle", "App2" );
 		allHash.put( "value", "Score" );
 		progressComplete( "100%...Visualization Complete" );
+	}
+
+	@Override
+	protected BufferedImage getExportImage() throws IOException {
+		return getExportImageFromSVGBlock();
 	}
 }
