@@ -6,26 +6,34 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.URI;
+
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.Utility;
+
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+
 import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.StatementImpl;
@@ -110,7 +118,7 @@ public class DBToLoadingSheetExporterTest {
 			}
 		} );
 
-		List<URI> concepts = DBToLoadingSheetExporter.createConceptList( eng );
+		List<URI> concepts = NodeDerivationTools.instance().createConceptList( eng );
 		Collections.sort( concepts, new Comparator<URI>() {
 
 			@Override

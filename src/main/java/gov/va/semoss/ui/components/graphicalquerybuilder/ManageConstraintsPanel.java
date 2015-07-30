@@ -9,21 +9,25 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel.QueryOrder;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -187,7 +191,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 
 		public ConstraintTable( IEngine eng, DirectedGraph<QueryNode, QueryEdge> gr ) {
 			super();
-			concepts = DBToLoadingSheetExporter.createConceptList( eng );
+			concepts = NodeDerivationTools.instance().createConceptList( eng );
 			conceptmap
 					= Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, eng ) );
 			engine = eng;
@@ -223,7 +227,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 						URI starttype = verts.getFirst().getType();
 						URI endtype = verts.getSecond().getType();
 
-						List<URI> links = DBToLoadingSheetExporter.getPredicatesBetween( starttype,
+						List<URI> links = NodeDerivationTools.instance().getPredicatesBetween( starttype,
 								endtype, engine );
 						Map<URI, String> labels = Utility.getInstanceLabels( links, engine );
 						labels.put( Constants.ANYNODE, "<Any>" );
