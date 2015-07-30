@@ -1868,9 +1868,9 @@ public class PlayPane extends JFrame {
 
 		//Open Menu
 		JMenu openmenu = new JMenu( "Open" );
-		openmenu.setToolTipText( "Open Local or Remote database" );
-		openmenu.getAccessibleContext().setAccessibleName( "Open Local or Remote database" );
-		openmenu.getAccessibleContext().setAccessibleDescription( "Open Local or Remote database" );
+		openmenu.setToolTipText( "Open Database or SPARQL file" );
+		openmenu.getAccessibleContext().setAccessibleName( openmenu.getToolTipText() );
+		openmenu.getAccessibleContext().setAccessibleDescription( openmenu.getToolTipText() );
 		openmenu.setMnemonic( KeyEvent.VK_O );
 		openmenu.setIcon( DbAction.getIcon( "open-file3" ) );
 		fileMenu.add( openmenu );

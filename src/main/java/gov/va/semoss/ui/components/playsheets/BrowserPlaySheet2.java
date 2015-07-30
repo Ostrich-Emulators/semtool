@@ -68,7 +68,6 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.InvalidXPathException;
 import org.dom4j.XPath;
-import org.dom4j.Node;
 import org.dom4j.io.DOMReader;
 import org.dom4j.io.DOMWriter;
 
