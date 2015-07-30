@@ -5,12 +5,14 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet.JoinType;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -34,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
@@ -275,7 +279,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 		else {
 			Enumeration<AbstractButton> radios = typegroup.getElements();
-			Class<?> typeclass = ValueTableModel.getClassForValue( o );
+			Class<?> typeclass = RDFDatatypeTools.instance().getClassForValue( o );
 
 			while ( radios.hasMoreElements() ) {
 				AbstractButton radio = radios.nextElement();
