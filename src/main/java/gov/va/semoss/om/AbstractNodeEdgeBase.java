@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.om;
 
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.Constants;
@@ -18,8 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import java.util.Set;
+
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
@@ -53,12 +54,17 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	}
 
 	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
+		this( id, type, label,
+				GraphColorRepository.instance().getColor( (URI) null ) );
+	}
+
+	public AbstractNodeEdgeBase( URI id, URI type, String label, Color col ) {
 		this.id = id;
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
-
-		setColor( GraphColorRepository.instance().getColor( type ) );
+		color
+				= ( null == col ? GraphColorRepository.instance().getColor( type ) : col );
 	}
 
 	public void addPropertyChangeListener( PropertyChangeListener pcl ) {
@@ -132,7 +138,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	}
 
 	public void setProperty( URI prop, Object propValue ) {
-		setValue( prop, ValueTableModel.getValueFromObject( propValue ) );
+		setValue( prop, RDFDatatypeTools.instance().getValueFromObject( propValue ) );
 	}
 
 	@Override
@@ -150,7 +156,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	@Override
 	public Object getProperty( URI prop ) {
-		return ValueTableModel.getObjectFromValue( getValue( prop ) );
+		return RDFDatatypeTools.instance().getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override
@@ -162,7 +168,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	public Map<URI, Object> getProperties() {
 		Map<URI, Object> map = new HashMap<>();
 		for ( Map.Entry<URI, Value> en : properties.entrySet() ) {
-			map.put( en.getKey(), ValueTableModel.getObjectFromValue( en.getValue() ) );
+			map.put( en.getKey(), RDFDatatypeTools.instance().getObjectFromValue( en.getValue() ) );
 		}
 		return map;
 	}

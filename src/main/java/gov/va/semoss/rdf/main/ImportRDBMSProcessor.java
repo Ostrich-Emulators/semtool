@@ -33,13 +33,14 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import gov.va.semoss.poi.main.PropFileWriter;
+//import gov.va.semoss.poi.main.PropFileWriter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 
 public class ImportRDBMSProcessor {
-	private static final Logger logger = Logger.getLogger(ImportRDBMSProcessor.class);
+
+	private static final Logger logger = Logger.getLogger( ImportRDBMSProcessor.class );
 	
 	private StringBuilder tableMapping = new StringBuilder();
 	private StringBuilder propertyTypeMapping = new StringBuilder();
@@ -47,7 +48,7 @@ public class ImportRDBMSProcessor {
 	private StringBuilder relationshipMapping = new StringBuilder();
 	private String dbConnection = new String();
 	
-	public PropFileWriter propWriter;
+	// public PropFileWriter propWriter;
 	
 	private String customBaseURI = "";
 	private String baseRelURI = "";
@@ -64,7 +65,7 @@ public class ImportRDBMSProcessor {
 	private String owlPath = "";
 	
 	private final static String spacer = " \n\t";
-
+	
 	private Set<String> propertyList = new HashSet<>();
 	private Set<String> relationshipList = new HashSet<>();
 	private Set<String> baseConcepts = new HashSet<>();
@@ -84,8 +85,8 @@ public class ImportRDBMSProcessor {
 		
 	}
 	
-	public ImportRDBMSProcessor(String customBaseURI, Collection<File> files,
-      String repoName, String type, String url, String username, char[] password) {
+	public ImportRDBMSProcessor( String customBaseURI, Collection<File> files,
+			String repoName, String type, String url, String username, char[] password ) {
 		this.customBaseURI = customBaseURI + "/" + Constants.DEFAULT_NODE_CLASS + "/";
 		this.baseRelURI = customBaseURI + "/" + Constants.DEFAULT_RELATION_CLASS + "/";		
 		this.dbName = repoName;
@@ -93,153 +94,153 @@ public class ImportRDBMSProcessor {
 		this.url = url;
 		this.username = username;
 		this.password = password;
-    
-    StringBuilder sb =new StringBuilder();
-    for( File f : files ){
-      if( 0==sb.length() ){
-        sb.append( ";");
-      }
-      sb.append( f.getAbsoluteFile() );
-    }
-    this.filePath = sb.toString();
+		
+		StringBuilder sb = new StringBuilder();
+		for ( File f : files ) {
+			if ( 0 == sb.length() ) {
+				sb.append( ";" );
+			}
+			sb.append( f.getAbsoluteFile() );
+		}
+		this.filePath = sb.toString();
 	}
 	
-	public File setUpRDBMS()
-	{
-		if(!checkConnection(this.type, url, username, password)) {
+	public File setUpRDBMS() {
+		if ( !checkConnection( this.type, url, username, password ) ) {
 			return null;
 		}
-		processExcel(this.filePath);
-		
+		processExcel( this.filePath );
+
 		//Change path for where the template file is
-		String templatePath = DIHelper.getInstance().getProperty(Constants.BASE_FOLDER) 
-        + File.separator+"rdbms" + File.separator + "MappingTemplate.ttl";
-		String requiredMapping = readRequiredMappings(templatePath);
-		
+		String templatePath = DIHelper.getInstance().getProperty( Constants.BASE_FOLDER )
+				+ File.separator + "rdbms" + File.separator + "MappingTemplate.ttl";
+		String requiredMapping = readRequiredMappings( templatePath );
+
 		// Write the file
 		String outputDir = "db" + File.separator + this.dbName;
-		File mappingFileDir = new File(outputDir);
+		File mappingFileDir = new File( outputDir );
 		try {
-			if(!mappingFileDir.getCanonicalFile().isDirectory()) {
-				if(!mappingFileDir.mkdirs())
+			if ( !mappingFileDir.getCanonicalFile().isDirectory() ) {
+				if ( !mappingFileDir.mkdirs() ) {
 					return null;
+				}
 			}
-		} catch(IOException e) {
+		}
+		catch ( IOException e ) {
 			logger.error( e );
 			return null;
 		}
 		
-		File mappingFile = new File(outputDir + File.separator + this.dbName + "_Mapping.ttl");
-      try (FileWriter writer = new FileWriter(mappingFile.getAbsolutePath())) {
-        writer.write("@prefix map: <#> . \n");
-        writer.write("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> . \n");
-        writer.write("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n");
-        writer.write("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n");
-        writer.write("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . \n");
-        writer.write("@prefix jdbc: <http://d2rq.org/terms/jdbc/> . \n");
-        writer.write("\n");
-        writer.write(createDatabase(this.url, this.username, new String(this.password)));
-        writer.write(tableMapping.toString() + "\n" +
-            propertyTypeMapping.toString() + "\n" +
-            relationshipMapping.toString() + "\n" +
-            relationshipTypeMapping.toString() + "\n" +
-            requiredMapping);
-		} catch (IOException e) {
-			Utility.showError("Could not create mapping file!");
+		File mappingFile = new File( outputDir + File.separator + this.dbName + "_Mapping.ttl" );
+		try ( FileWriter writer = new FileWriter( mappingFile.getAbsolutePath() ) ) {
+			writer.write( "@prefix map: <#> . \n" );
+			writer.write( "@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> . \n" );
+			writer.write( "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n" );
+			writer.write( "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n" );
+			writer.write( "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . \n" );
+			writer.write( "@prefix jdbc: <http://d2rq.org/terms/jdbc/> . \n" );
+			writer.write( "\n" );
+			writer.write( createDatabase( this.url, this.username, new String( this.password ) ) );
+			writer.write( tableMapping.toString() + "\n"
+					+ propertyTypeMapping.toString() + "\n"
+					+ relationshipMapping.toString() + "\n"
+					+ relationshipTypeMapping.toString() + "\n"
+					+ requiredMapping );
+		}
+		catch ( IOException e ) {
+			Utility.showError( "Could not create mapping file!" );
 			logger.error( e );
 		}
 		
 		this.owlPath = outputDir + File.separator + this.dbName + "_OWL.OWL";
 		
-		writeOWL(baseConcepts, baseRels, baseRelationships, owlPath);
-		Map<String, File> files = writeSMSS(outputDir);
-		return ( files.containsKey( Constants.PROPS ) ? 
-        files.get( Constants.PROPS ) : null );
+		writeOWL( baseConcepts, baseRels, baseRelationships, owlPath );
+		
+		logger.error( "this function has been refactored, and probably doesn't work" );
+		Map<String, File> files = new HashMap<>();
+		//Map<String, File> files = writeSMSS(outputDir);
+		return ( files.containsKey( Constants.PROPS ) ? files.get( Constants.PROPS )
+				: null );
 	}
 	
-	private void processExcel(String wb){
-		String[] files = wb.split(";");
-		for(String file : files) {
+	private void processExcel( String wb ) {
+		String[] files = wb.split( ";" );
+		for ( String file : files ) {
 			XSSFWorkbook workbook = null;
 			try {
-				workbook = new XSSFWorkbook(new FileInputStream(file));
-			} catch (Exception e) {
+				workbook = new XSSFWorkbook( new FileInputStream( file ) );
+			}
+			catch ( Exception e ) {
 				logger.error( e );
-				Utility.showError("Couldn't Find Workbook");
+				Utility.showError( "Couldn't Find Workbook" );
 			}
 
 			// process properties
-			XSSFSheet propSheet = workbook.getSheet("Nodes");
+			XSSFSheet propSheet = workbook.getSheet( "Nodes" );
 
 			// check rows in correct order
-			XSSFRow headerPropRow = propSheet.getRow(0);
-			if(!headerPropRow.getCell(0).toString().equals("Table") && !headerPropRow.getCell(0).toString().equals("Subject") && !headerPropRow.getCell(0).toString().equals("Property") && !headerPropRow.getCell(0).toString().equals("DataType")){
-				logger.error("Headers are incorrect in property sheet! \nPlease correct your workbook format");
+			XSSFRow headerPropRow = propSheet.getRow( 0 );
+			if ( !headerPropRow.getCell( 0 ).toString().equals( "Table" ) && !headerPropRow.getCell( 0 ).toString().equals( "Subject" ) && !headerPropRow.getCell( 0 ).toString().equals( "Property" ) && !headerPropRow.getCell( 0 ).toString().equals( "DataType" ) ) {
+				logger.error( "Headers are incorrect in property sheet! \nPlease correct your workbook format" );
 			}
-
+			
 			String tableInput = "";
 			String tableInstanceColumn = "";
 			String propertyName = "";
 			String dataType = "";
 			String nodeType = "";
-
+			
 			int propRows = propSheet.getLastRowNum();
-			for(int i = 1; i <= propRows; i++){
-				XSSFRow dataRow = propSheet.getRow(i);
-				tableInput = dataRow.getCell(0).toString();
+			for ( int i = 1; i <= propRows; i++ ) {
+				XSSFRow dataRow = propSheet.getRow( i );
+				tableInput = dataRow.getCell( 0 ).toString();
 				
-				if(tableInput.isEmpty()) {
+				if ( tableInput.isEmpty() ) {
 					continue;
 				}
 				
-				tableInstanceColumn = dataRow.getCell(1).toString();
+				tableInstanceColumn = dataRow.getCell( 1 ).toString();
 				
-				if(dataRow.getCell(2) != null)
-				{
-					propertyName = dataRow.getCell(2).toString();
-					dataType = dataRow.getCell(3).toString();
+				if ( dataRow.getCell( 2 ) != null ) {
+					propertyName = dataRow.getCell( 2 ).toString();
+					dataType = dataRow.getCell( 3 ).toString();
 					
-					if(dataType.equalsIgnoreCase("int") || dataType.equalsIgnoreCase("Integer"))
-					{
+					if ( dataType.equalsIgnoreCase( "int" ) || dataType.equalsIgnoreCase( "Integer" ) ) {
 						dataType = "integer";
 					}
-					else if(dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("String"))
-					{
+					else if ( dataType.equalsIgnoreCase( "varchar" ) || dataType.equalsIgnoreCase( "String" ) ) {
 						dataType = "string";
 					}
-					else if(dataType.equalsIgnoreCase("DateTime") || dataType.equalsIgnoreCase("Date"))
-					{
+					else if ( dataType.equalsIgnoreCase( "DateTime" ) || dataType.equalsIgnoreCase( "Date" ) ) {
 						dataType = "dateTime";
 					}
-					else if(dataType.equalsIgnoreCase("Double") || dataType.equalsIgnoreCase("Decimal"))
-					{
+					else if ( dataType.equalsIgnoreCase( "Double" ) || dataType.equalsIgnoreCase( "Decimal" ) ) {
 						dataType = "double";
 					}
-					else if(dataType.equalsIgnoreCase("Float"))
-					{
+					else if ( dataType.equalsIgnoreCase( "Float" ) ) {
 						dataType = "float";
-					} else {
+					}
+					else {
 						dataType = "string";
 					}
 				}
 				
-				nodeType = dataRow.getCell(4).toString();
-
-				if(!baseConcepts.contains(nodeType)) {
-					baseConcepts.add(nodeType);
-					processTable(tableInput, tableInstanceColumn, nodeType);
+				nodeType = dataRow.getCell( 4 ).toString();
+				
+				if ( !baseConcepts.contains( nodeType ) ) {
+					baseConcepts.add( nodeType );
+					processTable( tableInput, tableInstanceColumn, nodeType );
 				}
 				
-				if(propertyName != null && !propertyName.equals("") && dataType != null && !dataType.equals(""))
-				{
-					processTableProperty(tableInput, propertyName, dataType);	
+				if ( propertyName != null && !propertyName.equals( "" ) && dataType != null && !dataType.equals( "" ) ) {
+					processTableProperty( tableInput, propertyName, dataType );					
 				}
 			}
-
-			processProperties(propertyList);
+			
+			processProperties( propertyList );
 
 			// process relationships
-			XSSFSheet relSheet = workbook.getSheet("Relationships");
+			XSSFSheet relSheet = workbook.getSheet( "Relationships" );
 
 			//TODO: add check that columns are in correct order
 			String relTable = "";
@@ -254,337 +255,346 @@ public class ImportRDBMSProcessor {
 			String objectID = "";
 			String subjectNodeType = "";
 			String objectNodeType = "";
-
-
+			
 			int relRows = relSheet.getLastRowNum();
-			for(int i = 1; i <= relRows; i++){
-				XSSFRow dataRow = relSheet.getRow(i);
-				relTable = dataRow.getCell(0).toString();
-				relSubjectColumn = dataRow.getCell(1).toString();
-				relObjectColumn = dataRow.getCell(2).toString();
-				subjectTable = dataRow.getCell(3).toString();
-				subjectInstance = dataRow.getCell(4).toString();
-				subjectID = dataRow.getCell(5).toString();
-
-				objectTable = dataRow.getCell(6).toString();
-				objectInstance = dataRow.getCell(7).toString();
-				objectID = dataRow.getCell(8).toString();
-
-				relation = dataRow.getCell(9).toString();
-				subjectNodeType = dataRow.getCell(10).toString();
-				objectNodeType = dataRow.getCell(11).toString();
-				baseConcepts.add(subjectNodeType);
-				baseConcepts.add(objectNodeType);
-				baseRels.add(relation);
+			for ( int i = 1; i <= relRows; i++ ) {
+				XSSFRow dataRow = relSheet.getRow( i );
+				relTable = dataRow.getCell( 0 ).toString();
+				relSubjectColumn = dataRow.getCell( 1 ).toString();
+				relObjectColumn = dataRow.getCell( 2 ).toString();
+				subjectTable = dataRow.getCell( 3 ).toString();
+				subjectInstance = dataRow.getCell( 4 ).toString();
+				subjectID = dataRow.getCell( 5 ).toString();
+				
+				objectTable = dataRow.getCell( 6 ).toString();
+				objectInstance = dataRow.getCell( 7 ).toString();
+				objectID = dataRow.getCell( 8 ).toString();
+				
+				relation = dataRow.getCell( 9 ).toString();
+				subjectNodeType = dataRow.getCell( 10 ).toString();
+				objectNodeType = dataRow.getCell( 11 ).toString();
+				baseConcepts.add( subjectNodeType );
+				baseConcepts.add( objectNodeType );
+				baseRels.add( relation );
 				ArrayList<String> baseRel = new ArrayList<String>();
-				baseRel.add(subjectNodeType);
-				baseRel.add(relation);
-				baseRel.add(objectNodeType);
-				baseRelationships.put(String.valueOf(i), baseRel);
-
-				processRelationships(relTable, relSubjectColumn, relObjectColumn, subjectTable, objectTable, relation,
-						subjectInstance, objectInstance, subjectID, objectID, subjectNodeType, objectNodeType);
+				baseRel.add( subjectNodeType );
+				baseRel.add( relation );
+				baseRel.add( objectNodeType );
+				baseRelationships.put( String.valueOf( i ), baseRel );
+				
+				processRelationships( relTable, relSubjectColumn, relObjectColumn, subjectTable, objectTable, relation,
+						subjectInstance, objectInstance, subjectID, objectID, subjectNodeType, objectNodeType );
 			}
-
-			processRelationshipType(relationshipList);
+			
+			processRelationshipType( relationshipList );
 		}
 	}
-
-	private String createDatabase(String url, String username, String password)
-	{
+	
+	private String createDatabase( String url, String username, String password ) {
 		//Account for the single backslash in a SQL Server URL and escape it when writing D2RQ mapping
-		if(this.type.equalsIgnoreCase(this.SQLSERVER)) {
-			url = url.replace("\\", "\\\\");
+		if ( this.type.equalsIgnoreCase( this.SQLSERVER ) ) {
+			url = url.replace( "\\", "\\\\" );
 		}
 		
-		String dbConnection = "map:database a d2rq:Database;" + spacer + 
-				"d2rq:jdbcDSN \"" + url + "\";" + spacer + 
-				"d2rq:jdbcDriver \"";
+		String dbConnection = "map:database a d2rq:Database;" + spacer
+				+ "d2rq:jdbcDSN \"" + url + "\";" + spacer
+				+ "d2rq:jdbcDriver \"";
 		
-		if(this.type.equalsIgnoreCase(this.MYSQL)) {
+		if ( this.type.equalsIgnoreCase( this.MYSQL ) ) {
 			dbConnection += this.MYSQL_DRIVER;
-		} else if(this.type.equalsIgnoreCase(this.ORACLE)) {
+		}
+		else if ( this.type.equalsIgnoreCase( this.ORACLE ) ) {
 			dbConnection += this.ORACLE_DRIVER;
-		} else if(this.type.equalsIgnoreCase(this.SQLSERVER)) {
+		}
+		else if ( this.type.equalsIgnoreCase( this.SQLSERVER ) ) {
 			dbConnection += this.SQLSERVER_DRIVER;
-		} else if(this.type.equalsIgnoreCase(this.ASTER)) {
+		}
+		else if ( this.type.equalsIgnoreCase( this.ASTER ) ) {
 			dbConnection += this.ASTER_DRIVER;
 		}
 		
-		dbConnection += "\";" + spacer + 
-				"d2rq:username \"" + username + "\";" + spacer + 
-				"d2rq:password \"" + password + "\";" + spacer + 
-				"jdbc:keepAlive \"3600\";" + spacer + 
-				".\n";
+		dbConnection += "\";" + spacer
+				+ "d2rq:username \"" + username + "\";" + spacer
+				+ "d2rq:password \"" + password + "\";" + spacer
+				+ "jdbc:keepAlive \"3600\";" + spacer
+				+ ".\n";
 		
 		return dbConnection;
 	}
-
-	private void processTable(String tableName, String tableInstance, String nodeType){
-		tableMapping.append("#####Table ").append(tableName).append("\n").append(
-				"#Create the instanceNode typeOf baseNode triple \n").append(
-				"map:Instance").append(tableName).append("_TypeOf_Base").append(tableName).append(" a d2rq:ClassMap;").append(spacer).append(
-				"d2rq:dataStorage map:database;").append(spacer).append(
-				"d2rq:uriPattern \"").append(customBaseURI).append(nodeType).append("/@@").append(tableName).append(".").append(tableInstance).append("@@\";").append(spacer).append(
-				"d2rq:class ").append("<").append(semossURI).append(nodeType).append(">;").append(spacer).append(
-				"d2rq:additionalProperty map:TypeOf_Concept;").append(spacer).append(
-				"d2rq:additionalProperty map:SubClassOf_Resource; ").append(spacer).append(
-				".\n").append(
-				"#Create the baseNode subclassOf Concept triple \n").append(
-				"map:Base").append(tableName).append("_SubClassOf_Concept a d2rq:ClassMap;").append(spacer).append(
-				"d2rq:dataStorage map:database;").append(spacer).append(
-				"d2rq:constantValue <").append(semossURI).append(nodeType).append(">;").append(spacer).append(
-				"d2rq:additionalProperty map:SubClassOf_Concept;").append(spacer).append(
-				"d2rq:additionalProperty map:SubClassOf_Resource; ").append(spacer).append(
-				".\n").append(
-				"#####Property Label for Table ").append(tableName).append("\n").append(
-				"#Create the rdfs:label for the concept").append(tableName).append(spacer).append(
-				"map:Instance").append(tableName).append("_Label a d2rq:PropertyBridge;").append(spacer).append(
-				"d2rq:belongsToClassMap map:Instance").append(tableName).append("_TypeOf_Base").append(tableName).append(";").append(spacer).append(
-				"d2rq:property rdfs:label;").append(spacer).append(
-				"d2rq:column \"").append(tableName).append(".").append(tableInstance).append("\";").append(spacer).append(
-				".\n");
+	
+	private void processTable( String tableName, String tableInstance, String nodeType ) {
+		tableMapping.append( "#####Table " ).append( tableName ).append( "\n" ).append(
+				"#Create the instanceNode typeOf baseNode triple \n" ).append(
+						"map:Instance" ).append( tableName ).append( "_TypeOf_Base" ).append( tableName ).append( " a d2rq:ClassMap;" ).append( spacer ).append(
+						"d2rq:dataStorage map:database;" ).append( spacer ).append(
+						"d2rq:uriPattern \"" ).append( customBaseURI ).append( nodeType ).append( "/@@" ).append( tableName ).append( "." ).append( tableInstance ).append( "@@\";" ).append( spacer ).append(
+						"d2rq:class " ).append( "<" ).append( semossURI ).append( nodeType ).append( ">;" ).append( spacer ).append(
+						"d2rq:additionalProperty map:TypeOf_Concept;" ).append( spacer ).append(
+						"d2rq:additionalProperty map:SubClassOf_Resource; " ).append( spacer ).append(
+						".\n" ).append(
+						"#Create the baseNode subclassOf Concept triple \n" ).append(
+						"map:Base" ).append( tableName ).append( "_SubClassOf_Concept a d2rq:ClassMap;" ).append( spacer ).append(
+						"d2rq:dataStorage map:database;" ).append( spacer ).append(
+						"d2rq:constantValue <" ).append( semossURI ).append( nodeType ).append( ">;" ).append( spacer ).append(
+						"d2rq:additionalProperty map:SubClassOf_Concept;" ).append( spacer ).append(
+						"d2rq:additionalProperty map:SubClassOf_Resource; " ).append( spacer ).append(
+						".\n" ).append(
+						"#####Property Label for Table " ).append( tableName ).append( "\n" ).append(
+						"#Create the rdfs:label for the concept" ).append( tableName ).append( spacer ).append(
+						"map:Instance" ).append( tableName ).append( "_Label a d2rq:PropertyBridge;" ).append( spacer ).append(
+						"d2rq:belongsToClassMap map:Instance" ).append( tableName ).append( "_TypeOf_Base" ).append( tableName ).append( ";" ).append( spacer ).append(
+						"d2rq:property rdfs:label;" ).append( spacer ).append(
+						"d2rq:column \"" ).append( tableName ).append( "." ).append( tableInstance ).append( "\";" ).append( spacer ).append(
+						".\n" );
 	}
-
-	private void processTableProperty(String tableName, String propertyName, String dataType){
+	
+	private void processTableProperty( String tableName, String propertyName, String dataType ) {
 		//add property to total list of unique properties
-		propertyList.add(propertyName);
-		tableMapping.append("#####Property ").append(propertyName).append(" for Table ").append(tableName).append("\n").append(
-				"#Create the instanceNode contains/prop propValue triple \n").append(
-				"map:Instance").append(tableName).append("_BaseProp_").append(propertyName).append(" a d2rq:PropertyBridge; \n").append(
-				"d2rq:belongsToClassMap map:Instance").append(tableName).append("_TypeOf_Base").append(tableName).append(";").append(spacer).append(
-				"d2rq:property ").append("<").append(propURI).append(propertyName).append(">;").append(spacer).append(
-				"d2rq:column ").append("\"").append(tableName).append(".").append(propertyName).append("\";").append(spacer).append(
-				"d2rq:datatype xsd:").append(dataType).append(";").append(spacer).append(
-				".\n");
+		propertyList.add( propertyName );
+		tableMapping.append( "#####Property " ).append( propertyName ).append( " for Table " ).append( tableName ).append( "\n" ).append(
+				"#Create the instanceNode contains/prop propValue triple \n" ).append(
+						"map:Instance" ).append( tableName ).append( "_BaseProp_" ).append( propertyName ).append( " a d2rq:PropertyBridge; \n" ).append(
+						"d2rq:belongsToClassMap map:Instance" ).append( tableName ).append( "_TypeOf_Base" ).append( tableName ).append( ";" ).append( spacer ).append(
+						"d2rq:property " ).append( "<" ).append( propURI ).append( propertyName ).append( ">;" ).append( spacer ).append(
+						"d2rq:column " ).append( "\"" ).append( tableName ).append( "." ).append( propertyName ).append( "\";" ).append( spacer ).append(
+						"d2rq:datatype xsd:" ).append( dataType ).append( ";" ).append( spacer ).append(
+						".\n" );
 	}
 	
-	private void processProperties(Set<String> propertyList){
+	private void processProperties( Set<String> propertyList ) {
 		Iterator<String> propIterator = propertyList.iterator();
-		while(propIterator.hasNext()){
+		while ( propIterator.hasNext() ) {
 			String propertyName = propIterator.next();
-			propertyTypeMapping.append("#####Property ").append(propertyName).append("\n").append(
-				"#Create the Necessary Definitions for the property ").append(propertyName).append("\n").append(
-				"map:Base").append(propertyName).append(" a d2rq:ClassMap;").append(spacer).append(
-				"d2rq:dataStorage map:database;").append(spacer).append(
-				"d2rq:constantValue <").append(propURI).append(propertyName).append(">;").append(spacer).append(
-				"d2rq:additionalProperty map:TypeOf_Property;").append(spacer).append(
-				"d2rq:additionalProperty map:TypeOf_Contains;").append(spacer).append(
-				"d2rq:additionalProperty map:Base").append(propertyName).append("_SubPropertyOf_Base").append(propertyName).append(";").append(spacer).append(
-				".\n").append(
-				"map:Base").append(propertyName).append("_SubPropertyOf_Base").append(propertyName).append(" a d2rq:AdditionalProperty;").append(spacer).append(
-				"d2rq:propertyName rdfs:subPropertyOf;").append(spacer).append(
-				"d2rq:propertyValue <").append(propURI).append(propertyName).append(">;").append(spacer).append(
-				".\n");
+			propertyTypeMapping.append( "#####Property " ).append( propertyName ).append( "\n" ).append(
+					"#Create the Necessary Definitions for the property " ).append( propertyName ).append( "\n" ).append(
+							"map:Base" ).append( propertyName ).append( " a d2rq:ClassMap;" ).append( spacer ).append(
+							"d2rq:dataStorage map:database;" ).append( spacer ).append(
+							"d2rq:constantValue <" ).append( propURI ).append( propertyName ).append( ">;" ).append( spacer ).append(
+							"d2rq:additionalProperty map:TypeOf_Property;" ).append( spacer ).append(
+							"d2rq:additionalProperty map:TypeOf_Contains;" ).append( spacer ).append(
+							"d2rq:additionalProperty map:Base" ).append( propertyName ).append( "_SubPropertyOf_Base" ).append( propertyName ).append( ";" ).append( spacer ).append(
+							".\n" ).append(
+							"map:Base" ).append( propertyName ).append( "_SubPropertyOf_Base" ).append( propertyName ).append( " a d2rq:AdditionalProperty;" ).append( spacer ).append(
+							"d2rq:propertyName rdfs:subPropertyOf;" ).append( spacer ).append(
+							"d2rq:propertyValue <" ).append( propURI ).append( propertyName ).append( ">;" ).append( spacer ).append(
+							".\n" );
 		}
 	}
 	
-	private void processRelationships(String relTable, String relSubjectColumn, String relObjectColumn, String subjectTable, 
+	private void processRelationships( String relTable, String relSubjectColumn, String relObjectColumn, String subjectTable,
 			String objectTable, String relation, String subjectInstance, String objectInstance, String subjectID, String objectID,
-			String subjectNodeType, String objectNodeType){
+			String subjectNodeType, String objectNodeType ) {
 		//add relationship to total list of unique relationships
-		relationshipList.add(relation);
-		relationshipMapping.append("#####Defining Relationship: ").append(subjectTable).append(" ").append(relation).append(" ").append(objectTable).append("\n").append(
-			"#Create the instance ").append(subjectTable).append(" ").append(relation).append(" ").append(objectTable).append("\n").append(
-			"map:Instance").append(subjectTable).append("_InstanceRel_Instance").append(objectTable).append(" a d2rq:PropertyBridge;").append(spacer).append(
-			"d2rq:belongsToClassMap map:Instance").append(subjectTable).append("_TypeOf_Base").append(subjectTable).append(";").append(spacer).append(
-			"d2rq:refersToClassMap map:Instance").append(objectTable).append("_TypeOf_Base").append(objectTable).append(";").append(spacer).append(
-			"d2rq:dynamicProperty \"").append(baseRelURI).append(relation).append("/@@").append(subjectTable).append(".").append(subjectInstance).append("@@:@@").append(objectTable).append(".").append(objectInstance).append("@@\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relSubjectColumn).append(" = ").append(subjectTable).append( ".").append(subjectID).append("\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relObjectColumn).append(" = ").append(objectTable).append( ".").append(objectID).append("\";").append(spacer).append(
-			".\n").append(
-			"#Create the higher level triples for the relationship \n").append(
-			"map:InstanceRel_").append(subjectTable).append("_").append(objectTable).append(" a d2rq:ClassMap;").append(spacer).append(
-			"d2rq:dataStorage map:database;").append(spacer).append(
-			"d2rq:uriPattern \"").append(baseRelURI).append(relation).append("/@@").append(subjectTable).append(".").append(subjectInstance).append("@@:@@").append(objectTable).append(".").append(objectInstance).append("@@\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relSubjectColumn).append(" = ").append(subjectTable).append( ".").append(subjectID).append("\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relObjectColumn).append(" = ").append(objectTable).append( ".").append(objectID).append("\";").append(spacer).append(
-			"d2rq:additionalProperty map:TypeOf_Property;").append(spacer).append(
-			"d2rq:additionalProperty map:SubPropertyOf_Relation;").append(spacer).append(
-			"d2rq:additionalProperty map:SubPropertyOf_").append(relation).append("_").append(subjectTable).append("_").append(objectTable).append(";").append(spacer).append(
-			".\n").append(
-			"map:SubPropertyOf_").append(relation).append("_").append(subjectTable).append("_").append(objectTable).append(" a d2rq:AdditionalProperty;").append(spacer).append(
-			"d2rq:propertyName rdfs:subPropertyOf;").append(spacer).append(
-			"d2rq:propertyValue <").append(semossRelURI).append(relation).append(">;").append(spacer).append(
-			".\n").append(
-			"map:Label_").append(relation).append("_").append(subjectTable).append("_").append(objectTable).append(" a d2rq:PropertyBridge;").append(spacer).append(
-			"d2rq:belongsToClassMap map:InstanceRel_").append(subjectTable).append("_").append(objectTable).append(";").append(spacer).append(
-			"d2rq:property rdfs:label;").append(spacer).append(
-			"d2rq:pattern \"@@").append(subjectTable).append(".").append(subjectInstance).append("@@:@@").append(objectTable).append(".").append(objectInstance).append( "@@\";").append(spacer).append(
-			".\n").append(
-			"map:").append(subjectTable).append("_").append(objectTable).append("_SubPropertyOf_Self a d2rq:PropertyBridge;").append(spacer).append(
-			"d2rq:belongsToClassMap map:InstanceRel_").append(subjectTable).append("_").append(objectTable).append(";").append(spacer).append(
-			"d2rq:property rdfs:subPropertyOf;").append(spacer).append(
-			"d2rq:uriPattern \"").append(baseRelURI).append(relation).append("/@@").append(subjectTable).append(".").append(subjectInstance).append("@@:@@").append(objectTable).append(".").append(objectInstance).append("@@\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relSubjectColumn).append(" = ").append(subjectTable).append(".").append(subjectID).append("\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relObjectColumn).append(" = ").append(objectTable).append(".").append(objectID).append("\";").append(spacer).append(
-			".\n").append(
-			"map:Instance").append(subjectTable).append("_Rel_Instance_").append(objectTable).append(" a d2rq:PropertyBridge;").append(spacer).append(
-			"d2rq:belongsToClassMap map:Instance").append(subjectTable).append("_TypeOf_Base").append(subjectTable).append(";").append(spacer).append(
-			"d2rq:refersToClassMap map:Instance").append(objectTable).append("_TypeOf_Base").append(objectTable).append(";").append(spacer).append(
-			"d2rq:property <http://semoss.org/ontologies/Relation>;").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relSubjectColumn).append(" = ").append(subjectTable).append(".").append(subjectID).append("\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relObjectColumn).append(" = ").append(objectTable).append(".").append(objectID).append("\";").append(spacer).append(
-			".\n").append(
-			"map:Instance").append(subjectTable).append("_Rel_").append(objectTable).append(" a d2rq:PropertyBridge;").append(spacer).append(
-			"d2rq:belongsToClassMap map:Instance").append(subjectTable).append("_TypeOf_Base").append(subjectTable).append(";").append(spacer).append(
-			"d2rq:refersToClassMap map:Instance").append(objectTable).append("_TypeOf_Base").append(objectTable).append(";").append(spacer).append(
-			"d2rq:property <").append(semossRelURI).append(relation).append(">;").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relSubjectColumn).append(" = ").append(subjectTable).append(".").append(subjectID).append("\";").append(spacer).append(
-			"d2rq:join \"").append(relTable).append(".").append(relObjectColumn).append(" = ").append(objectTable).append(".").append(objectID).append("\";").append(spacer).append(
-			".\n");
+		relationshipList.add( relation );
+		relationshipMapping.append( "#####Defining Relationship: " ).append( subjectTable ).append( " " ).append( relation ).append( " " ).append( objectTable ).append( "\n" ).append(
+				"#Create the instance " ).append( subjectTable ).append( " " ).append( relation ).append( " " ).append( objectTable ).append( "\n" ).append(
+						"map:Instance" ).append( subjectTable ).append( "_InstanceRel_Instance" ).append( objectTable ).append( " a d2rq:PropertyBridge;" ).append( spacer ).append(
+						"d2rq:belongsToClassMap map:Instance" ).append( subjectTable ).append( "_TypeOf_Base" ).append( subjectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:refersToClassMap map:Instance" ).append( objectTable ).append( "_TypeOf_Base" ).append( objectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:dynamicProperty \"" ).append( baseRelURI ).append( relation ).append( "/@@" ).append( subjectTable ).append( "." ).append( subjectInstance ).append( "@@:@@" ).append( objectTable ).append( "." ).append( objectInstance ).append( "@@\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relSubjectColumn ).append( " = " ).append( subjectTable ).append( "." ).append( subjectID ).append( "\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relObjectColumn ).append( " = " ).append( objectTable ).append( "." ).append( objectID ).append( "\";" ).append( spacer ).append(
+						".\n" ).append(
+						"#Create the higher level triples for the relationship \n" ).append(
+						"map:InstanceRel_" ).append( subjectTable ).append( "_" ).append( objectTable ).append( " a d2rq:ClassMap;" ).append( spacer ).append(
+						"d2rq:dataStorage map:database;" ).append( spacer ).append(
+						"d2rq:uriPattern \"" ).append( baseRelURI ).append( relation ).append( "/@@" ).append( subjectTable ).append( "." ).append( subjectInstance ).append( "@@:@@" ).append( objectTable ).append( "." ).append( objectInstance ).append( "@@\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relSubjectColumn ).append( " = " ).append( subjectTable ).append( "." ).append( subjectID ).append( "\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relObjectColumn ).append( " = " ).append( objectTable ).append( "." ).append( objectID ).append( "\";" ).append( spacer ).append(
+						"d2rq:additionalProperty map:TypeOf_Property;" ).append( spacer ).append(
+						"d2rq:additionalProperty map:SubPropertyOf_Relation;" ).append( spacer ).append(
+						"d2rq:additionalProperty map:SubPropertyOf_" ).append( relation ).append( "_" ).append( subjectTable ).append( "_" ).append( objectTable ).append( ";" ).append( spacer ).append(
+						".\n" ).append(
+						"map:SubPropertyOf_" ).append( relation ).append( "_" ).append( subjectTable ).append( "_" ).append( objectTable ).append( " a d2rq:AdditionalProperty;" ).append( spacer ).append(
+						"d2rq:propertyName rdfs:subPropertyOf;" ).append( spacer ).append(
+						"d2rq:propertyValue <" ).append( semossRelURI ).append( relation ).append( ">;" ).append( spacer ).append(
+						".\n" ).append(
+						"map:Label_" ).append( relation ).append( "_" ).append( subjectTable ).append( "_" ).append( objectTable ).append( " a d2rq:PropertyBridge;" ).append( spacer ).append(
+						"d2rq:belongsToClassMap map:InstanceRel_" ).append( subjectTable ).append( "_" ).append( objectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:property rdfs:label;" ).append( spacer ).append(
+						"d2rq:pattern \"@@" ).append( subjectTable ).append( "." ).append( subjectInstance ).append( "@@:@@" ).append( objectTable ).append( "." ).append( objectInstance ).append( "@@\";" ).append( spacer ).append(
+						".\n" ).append(
+						"map:" ).append( subjectTable ).append( "_" ).append( objectTable ).append( "_SubPropertyOf_Self a d2rq:PropertyBridge;" ).append( spacer ).append(
+						"d2rq:belongsToClassMap map:InstanceRel_" ).append( subjectTable ).append( "_" ).append( objectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:property rdfs:subPropertyOf;" ).append( spacer ).append(
+						"d2rq:uriPattern \"" ).append( baseRelURI ).append( relation ).append( "/@@" ).append( subjectTable ).append( "." ).append( subjectInstance ).append( "@@:@@" ).append( objectTable ).append( "." ).append( objectInstance ).append( "@@\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relSubjectColumn ).append( " = " ).append( subjectTable ).append( "." ).append( subjectID ).append( "\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relObjectColumn ).append( " = " ).append( objectTable ).append( "." ).append( objectID ).append( "\";" ).append( spacer ).append(
+						".\n" ).append(
+						"map:Instance" ).append( subjectTable ).append( "_Rel_Instance_" ).append( objectTable ).append( " a d2rq:PropertyBridge;" ).append( spacer ).append(
+						"d2rq:belongsToClassMap map:Instance" ).append( subjectTable ).append( "_TypeOf_Base" ).append( subjectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:refersToClassMap map:Instance" ).append( objectTable ).append( "_TypeOf_Base" ).append( objectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:property <http://semoss.org/ontologies/Relation>;" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relSubjectColumn ).append( " = " ).append( subjectTable ).append( "." ).append( subjectID ).append( "\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relObjectColumn ).append( " = " ).append( objectTable ).append( "." ).append( objectID ).append( "\";" ).append( spacer ).append(
+						".\n" ).append(
+						"map:Instance" ).append( subjectTable ).append( "_Rel_" ).append( objectTable ).append( " a d2rq:PropertyBridge;" ).append( spacer ).append(
+						"d2rq:belongsToClassMap map:Instance" ).append( subjectTable ).append( "_TypeOf_Base" ).append( subjectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:refersToClassMap map:Instance" ).append( objectTable ).append( "_TypeOf_Base" ).append( objectTable ).append( ";" ).append( spacer ).append(
+						"d2rq:property <" ).append( semossRelURI ).append( relation ).append( ">;" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relSubjectColumn ).append( " = " ).append( subjectTable ).append( "." ).append( subjectID ).append( "\";" ).append( spacer ).append(
+						"d2rq:join \"" ).append( relTable ).append( "." ).append( relObjectColumn ).append( " = " ).append( objectTable ).append( "." ).append( objectID ).append( "\";" ).append( spacer ).append(
+						".\n" );
 	}
 	
-	
-	private void processRelationshipType(Set<String> relationshipList){
+	private void processRelationshipType( Set<String> relationshipList ) {
 		Iterator<String> relIterator = relationshipList.iterator();
-		while(relIterator.hasNext()){
+		while ( relIterator.hasNext() ) {
 			String relationshipName = relIterator.next();
-			relationshipTypeMapping.append("#####Relationship ").append(relationshipName).append("\n").append(
-				"#Create the rel/relName subPropertyOf rel triple \n").append(
-				"map:").append(relationshipName).append(" a d2rq:ClassMap;").append(spacer).append(
-				"d2rq:dataStorage map:database;").append(spacer).append(
-				"d2rq:constantValue <").append(semossRelURI).append(relationshipName).append(">;").append(spacer).append(
-				"d2rq:additionalProperty map:SubPropertyOf_Relation;").append(spacer).append(
-				".\n");
+			relationshipTypeMapping.append( "#####Relationship " ).append( relationshipName ).append( "\n" ).append(
+					"#Create the rel/relName subPropertyOf rel triple \n" ).append(
+							"map:" ).append( relationshipName ).append( " a d2rq:ClassMap;" ).append( spacer ).append(
+							"d2rq:dataStorage map:database;" ).append( spacer ).append(
+							"d2rq:constantValue <" ).append( semossRelURI ).append( relationshipName ).append( ">;" ).append( spacer ).append(
+							"d2rq:additionalProperty map:SubPropertyOf_Relation;" ).append( spacer ).append(
+							".\n" );
 		}
 	}
 	
-	private String readRequiredMappings(String templatePath){
+	private String readRequiredMappings( String templatePath ) {
 		String requiredMapping = "";
 		try {
-			requiredMapping = new Scanner(new File(templatePath)).useDelimiter("\\Z").next();
-		} catch (FileNotFoundException e) {
-			Utility.showError("Could not find template file!");
+			requiredMapping = new Scanner( new File( templatePath ) ).useDelimiter( "\\Z" ).next();
+		}
+		catch ( FileNotFoundException e ) {
+			Utility.showError( "Could not find template file!" );
 			logger.error( e );
 		}
 		return requiredMapping;
 	}
 	
-	private void writeOWL(Set<String> baseConcepts, Set<String> baseRels, Map<String, List<String>> baseRelationships, String path)
-	{
+	private void writeOWL( Set<String> baseConcepts, Set<String> baseRels, Map<String, List<String>> baseRelationships, String path ) {
 		StringBuilder owlFile = new StringBuilder();
-		owlFile.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n").append(
-				"<rdf:RDF").append(spacer).append(
-					"xmlns=\"http://semoss.org/ontologies/Relation\"").append(spacer).append(
-					"xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"").append(spacer).append(
-					"xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"> \n").append(
-				"<rdfs:Class rdf:about=\"http://semoss.org/ontologies/Concept\"/> \n").append(
-				"<rdf:Property rdf:about=\"http://semoss.org/ontologies/Relation\"/> \n");
+		owlFile.append( "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" ).append(
+				"<rdf:RDF" ).append( spacer ).append(
+						"xmlns=\"http://semoss.org/ontologies/Relation\"" ).append( spacer ).append(
+						"xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" ).append( spacer ).append(
+						"xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"> \n" ).append(
+						"<rdfs:Class rdf:about=\"http://semoss.org/ontologies/Concept\"/> \n" ).append(
+						"<rdf:Property rdf:about=\"http://semoss.org/ontologies/Relation\"/> \n" );
 		
-		for(String conceptName : baseConcepts)
-		{
-			owlFile.append("<rdf:Description rdf:about=\"http://semoss.org/ontologies/Concept/").append(conceptName).append("\">").append(spacer).append(
-				"rdfs:subClassOf rdf:resource=\"http://semoss.org/ontologies/Concept\"/> \n").append(
-					"</rdf:Description>\n");
+		for ( String conceptName : baseConcepts ) {
+			owlFile.append( "<rdf:Description rdf:about=\"http://semoss.org/ontologies/Concept/" ).append( conceptName ).append( "\">" ).append( spacer ).append(
+					"rdfs:subClassOf rdf:resource=\"http://semoss.org/ontologies/Concept\"/> \n" ).append(
+							"</rdf:Description>\n" );
 		}
-		
+
 //		for(String relName : baseRels)
 //		{
 //			owlFile.append("<rdf:Description rdf:about=\"http://semoss.org/ontologies/Relation/").append(relName).append("\">").append(spacer).append(
 //				"<rdfs:subPropertyOf rdf:resource=\"http://semoss.org/ontologies/Relation\"/> \n").append(
 //					"</rdf:Description>\n");
 //		}
-		
-		for(String key: baseRelationships.keySet())
-		{
-			List<String> relation = baseRelationships.get(key);
-			String sub = relation.get(0);
-			String rel = relation.get(1);
-			String obj = relation.get(2);
+		for ( String key : baseRelationships.keySet() ) {
+			List<String> relation = baseRelationships.get( key );
+			String sub = relation.get( 0 );
+			String rel = relation.get( 1 );
+			String obj = relation.get( 2 );
 			
-			owlFile.append("<rdf:Description rdf:about=\"http://semoss.org/ontologies/Concept/").append(sub).append("\">").append(spacer).append(
-					"<").append(rel).append(" rdf:resource=\"http://semoss.org/ontologies/Concept/").append(obj).append("\"/> \n").append(
-					"</rdf:Description>\n");
+			owlFile.append( "<rdf:Description rdf:about=\"http://semoss.org/ontologies/Concept/" ).append( sub ).append( "\">" ).append( spacer ).append(
+					"<" ).append( rel ).append( " rdf:resource=\"http://semoss.org/ontologies/Concept/" ).append( obj ).append( "\"/> \n" ).append(
+							"</rdf:Description>\n" );
 		}
 		
-		owlFile.append("</rdf:RDF>");
+		owlFile.append( "</rdf:RDF>" );
 		
-		try{
-			FileWriter owlWriter = new FileWriter(path);
-			owlWriter.write(owlFile.toString());
+		try {
+			FileWriter owlWriter = new FileWriter( path );
+			owlWriter.write( owlFile.toString() );
 			owlWriter.close();
-		} catch (IOException e) {
-			Utility.showError("Could not create owl file!");
+		}
+		catch ( IOException e ) {
+			Utility.showError( "Could not create owl file!" );
 			logger.error( e );
 		}
 	}
-	
-	private Map<String, File> writeSMSS(String dbDir) {	
-    String base = DIHelper.getInstance().getProperty(Constants.BASE_FOLDER);
-    File dbdir = 
-        new File( base, "db" );
-    File newdbloc = new File( dbdir, dbName );
-		propWriter = new PropFileWriter( base );
-		propWriter.setEngineClassName( "gov.va.semoss.rdf.engine.impl.RDBMSD2RQEngine" );
-		propWriter.setHasMap( true );
-		return propWriter.runWriter(this.dbName, "", "", "", newdbloc);
-	}
-	
-	public boolean checkConnection(String type, String url, String username, char[] password) {
+//	
+//	private Map<String, File> writeSMSS(String dbDir) {	
+//    String base = DIHelper.getInstance().getProperty(Constants.BASE_FOLDER);
+//    File dbdir = 
+//        new File( base, "db" );
+//    File newdbloc = new File( dbdir, dbName );
+//		propWriter = new PropFileWriter( base );
+//		propWriter.setEngineClassName( "gov.va.semoss.rdf.engine.impl.RDBMSD2RQEngine" );
+//		propWriter.setHasMap( true );
+//		return propWriter.runWriter(this.dbName, "", "", "", newdbloc);
+//	}
+//	
+
+	public boolean checkConnection( String type, String url, String username, char[] password ) {
 		boolean isValid = false;
 		
-		if(!url.contains("jdbc") || url.contains("<") || url.contains(">") || url.contains("[") || url.contains("]")) {
+		if ( !url.contains( "jdbc" ) || url.contains( "<" ) || url.contains( ">" ) || url.contains( "[" ) || url.contains( "]" ) ) {
 			return isValid;
 		}
 		
 		Connection con;
 		
-		if(type.equals(this.MYSQL)) {
+		if ( type.equals( this.MYSQL ) ) {
 			try {
-				Class.forName(this.MYSQL_DRIVER);
-				
+				Class.forName( this.MYSQL_DRIVER );
+
 				//Connection URL format: jdbc:mysql://<hostname>[:port]/<DBname>?user=username&password=pw
 				con = DriverManager
-						.getConnection(url + "?user=" + username + "&password=" + new String(password));
-				if(con.isValid(10)) {
+						.getConnection( url + "?user=" + username + "&password=" + new String( password ) );
+				if ( con.isValid( 10 ) ) {
 					isValid = true;
 				}
-			} catch (SQLException e) {
-				logger.error( e );
-			} catch (ClassNotFoundException e) {
+			}
+			catch ( SQLException e ) {
 				logger.error( e );
 			}
-		} else if(type.equals(this.ORACLE)) {
+			catch ( ClassNotFoundException e ) {
+				logger.error( e );
+			}
+		}
+		else if ( type.equals( this.ORACLE ) ) {
 			try {
-				Class.forName(this.ORACLE_DRIVER);
-				
+				Class.forName( this.ORACLE_DRIVER );
+
 				//Connection URL format: jdbc:oracle:thin:@<hostname>[:port]/<service or sid>
 				con = DriverManager
-						.getConnection(url, username, new String(password));
-				if(con.isValid(10)) {
+						.getConnection( url, username, new String( password ) );
+				if ( con.isValid( 10 ) ) {
 					isValid = true;
 				}
-			} catch (SQLException e) {
-				logger.error( e );
-			} catch (ClassNotFoundException e) {
+			}
+			catch ( SQLException e ) {
 				logger.error( e );
 			}
-		} else if(type.equals(this.SQLSERVER)) {
+			catch ( ClassNotFoundException e ) {
+				logger.error( e );
+			}
+		}
+		else if ( type.equals( this.SQLSERVER ) ) {
 			try {
-				Class.forName(this.SQLSERVER_DRIVER);
-				
+				Class.forName( this.SQLSERVER_DRIVER );
+
 				//Connection URL format: jdbc:sqlserver://<hostname>[:port];databaseName=<DBname>;user=username;password=password				
 				con = DriverManager
-						.getConnection(url + ";" + "user=" + username + ";" + "password=" + new String(password));
-				if(con.isValid(10)) {
+						.getConnection( url + ";" + "user=" + username + ";" + "password=" + new String( password ) );
+				if ( con.isValid( 10 ) ) {
 					isValid = true;
 				}
-			} catch (SQLException e) {
-				logger.error( e );
-			} catch (ClassNotFoundException e) {
+			}
+			catch ( SQLException e ) {
 				logger.error( e );
 			}
-		} else if(type.equals(this.ASTER)) {
+			catch ( ClassNotFoundException e ) {
+				logger.error( e );
+			}
+		}
+		else if ( type.equals( this.ASTER ) ) {
 			try {
-				Class.forName(this.ASTER_DRIVER);
-				
+				Class.forName( this.ASTER_DRIVER );
+
 				//Connection URL: jdbc:teradata://<HostName>/DATABASE=<DBName>
-				con = DriverManager.getConnection(url, username, new String(password));
-				if(con != null) {
+				con = DriverManager.getConnection( url, username, new String( password ) );
+				if ( con != null ) {
 					isValid = true;
 				}
-			} catch (Exception e) {
+			}
+			catch ( Exception e ) {
 				logger.error( e );
 			}
 		}
@@ -592,335 +602,330 @@ public class ImportRDBMSProcessor {
 		return isValid;
 	}
 	
-	public boolean processRDBMSSchema(String type, String url, String username, char[] password)
-	{
+	public boolean processRDBMSSchema( String type, String url, String username, char[] password ) {
 		boolean success = true;
-		if(!url.contains("jdbc") || url.contains("<") || url.contains(">") || url.contains("[") || url.contains("]")) {
-			return (success = false);
+		if ( !url.contains( "jdbc" ) || url.contains( "<" ) || url.contains( ">" ) || url.contains( "[" ) || url.contains( "]" ) ) {
+			return ( success = false );
 		}
-
+		
 		Connection con;
 		String dbName = "";
 		String sql = "";
 		Hashtable<String, Hashtable<String, ArrayList<String>>> schemaHash = new Hashtable<String, Hashtable<String, ArrayList<String>>>();
 		ResultSet resultSet = null;
-
-		if(type.equals(this.MYSQL)) 
-		{
+		
+		if ( type.equals( this.MYSQL ) ) {
 			try {
-				Class.forName(this.MYSQL_DRIVER);
+				Class.forName( this.MYSQL_DRIVER );
 				con = DriverManager
-						.getConnection(url + "?user=" + username + "&password=" + new String(password));
+						.getConnection( url + "?user=" + username + "&password=" + new String( password ) );
 				//Get DBname from URL
-				dbName = url.substring(url.lastIndexOf("/")+1);
+				dbName = url.substring( url.lastIndexOf( "/" ) + 1 );
 				sql = "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + dbName + "';";
-				logger.info("SQL Query for all Tables/Columns/DataTypes: " + sql);
+				logger.info( "SQL Query for all Tables/Columns/DataTypes: " + sql );
 				Statement statement = con.createStatement();
-				resultSet = statement.executeQuery(sql);
+				resultSet = statement.executeQuery( sql );
 			}
-			catch (ClassNotFoundException e) {
+			catch ( ClassNotFoundException e ) {
 				logger.error( e );
-				return (success = false);
-			} catch (SQLException e) {
+				return ( success = false );
+			}
+			catch ( SQLException e ) {
 				logger.error( e );
-				return (success = false);
+				return ( success = false );
 			}
 		}
-		else if(type.equals(this.ORACLE)) 
-		{
+		else if ( type.equals( this.ORACLE ) ) {
 			try {
-				Class.forName(this.ORACLE_DRIVER);
+				Class.forName( this.ORACLE_DRIVER );
 				con = DriverManager
-						.getConnection(url, username, new String(password));
+						.getConnection( url, username, new String( password ) );
 				//Get DBname from URL
-				dbName = url.substring(url.lastIndexOf("/")+1);
+				dbName = url.substring( url.lastIndexOf( "/" ) + 1 );
 				sql = "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM ALL_TAB_COLUMNS";
-				logger.info("SQL Query for all Tables/Columns/DataTypes: " + sql);
+				logger.info( "SQL Query for all Tables/Columns/DataTypes: " + sql );
 				Statement statement = con.createStatement();
-				resultSet = statement.executeQuery(sql);
-			} catch (ClassNotFoundException e) {
-				logger.error( e );
-				return (success = false);
-			} catch (SQLException e) {
-				logger.error( e );
-				return (success = false);
+				resultSet = statement.executeQuery( sql );
 			}
-		} 
-		else if(type.equals(this.SQLSERVER)) 
-		{
+			catch ( ClassNotFoundException e ) {
+				logger.error( e );
+				return ( success = false );
+			}
+			catch ( SQLException e ) {
+				logger.error( e );
+				return ( success = false );
+			}
+		}		
+		else if ( type.equals( this.SQLSERVER ) ) {
 			try {
-				Class.forName(this.SQLSERVER_DRIVER);
+				Class.forName( this.SQLSERVER_DRIVER );
 				con = DriverManager
-						.getConnection(url + ";" + "user=" + username + ";" + "password=" + new String(password));				
+						.getConnection( url + ";" + "user=" + username + ";" + "password=" + new String( password ) );
 				//Get DBname from URL
-				dbName = url.substring(url.indexOf("=")+1);
+				dbName = url.substring( url.indexOf( "=" ) + 1 );
 				sql = "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = '" + dbName + "';";
-				logger.info("SQL Query for all Tables/Columns/DataTypes: " + sql);
+				logger.info( "SQL Query for all Tables/Columns/DataTypes: " + sql );
 				Statement statement = con.createStatement();
-				resultSet = statement.executeQuery(sql);
-			} catch (ClassNotFoundException e) {
-				logger.error( e );
-				return (success = false);
-			} catch (SQLException e) {
-				logger.error( e );
-				return (success = false);
+				resultSet = statement.executeQuery( sql );
 			}
-		} else if(type.equals(this.ASTER)) {
+			catch ( ClassNotFoundException e ) {
+				logger.error( e );
+				return ( success = false );
+			}
+			catch ( SQLException e ) {
+				logger.error( e );
+				return ( success = false );
+			}
+		}
+		else if ( type.equals( this.ASTER ) ) {
 			try {
-				Class.forName(this.ASTER_DRIVER);
-				con = DriverManager.getConnection(url, username, new String(password));
+				Class.forName( this.ASTER_DRIVER );
+				con = DriverManager.getConnection( url, username, new String( password ) );
 				
 				DatabaseMetaData md = con.getMetaData();
-				resultSet = md.getColumns(null, null, null, null);
-			} catch (ClassNotFoundException e) {
+				resultSet = md.getColumns( null, null, null, null );
+			}
+			catch ( ClassNotFoundException e ) {
 				logger.error( e );
-				return (success = false);
-			} catch (SQLException e) {
+				return ( success = false );
+			}
+			catch ( SQLException e ) {
 				logger.error( e );
-				return (success = false);
+				return ( success = false );
 			}
 		}
-
+		
 		try {
-			while(resultSet.next())
-			{
+			while ( resultSet.next() ) {
 				String tableName = "";
 				String columnName = "";
 				String dataType = "";
 				
-				if(type.equals(this.ASTER)) {
-					tableName = resultSet.getString("TABLE_NAME");
-					if(tableName.startsWith("nc_")) {
+				if ( type.equals( this.ASTER ) ) {
+					tableName = resultSet.getString( "TABLE_NAME" );
+					if ( tableName.startsWith( "nc_" ) ) {
 						continue;
 					}
-					columnName = resultSet.getString("COLUMN_NAME");
-					logger.debug(tableName + " " + columnName);
-					dataType = resultSet.getString("DATA_TYPE");
-				} else {
-					tableName = resultSet.getString(1);
-					columnName = resultSet.getString(2);
-					dataType = resultSet.getString(3);
+					columnName = resultSet.getString( "COLUMN_NAME" );
+					logger.debug( tableName + " " + columnName );
+					dataType = resultSet.getString( "DATA_TYPE" );
+				}
+				else {
+					tableName = resultSet.getString( 1 );
+					columnName = resultSet.getString( 2 );
+					dataType = resultSet.getString( 3 );
 				}
 				
-				logger.debug("SQL Result:     " + tableName + ">>>>>" + columnName + ">>>>>" + dataType);
-
-				if(!schemaHash.containsKey(tableName))
-				{
+				logger.debug( "SQL Result:     " + tableName + ">>>>>" + columnName + ">>>>>" + dataType );
+				
+				if ( !schemaHash.containsKey( tableName ) ) {
 					ArrayList<String> columnList = new ArrayList<String>();
-					columnList.add(columnName);
+					columnList.add( columnName );
 					ArrayList<String> dataTypeList = new ArrayList<String>();
-					dataTypeList.add(dataType);
-					schemaHash.put(tableName, new Hashtable<String, ArrayList<String>>());
-					Hashtable<String, ArrayList<String>> innerHash = schemaHash.get(tableName);
-					innerHash.put("COLUMN", columnList);
-					innerHash.put("DATATYPE", dataTypeList);
+					dataTypeList.add( dataType );
+					schemaHash.put( tableName, new Hashtable<String, ArrayList<String>>() );
+					Hashtable<String, ArrayList<String>> innerHash = schemaHash.get( tableName );
+					innerHash.put( "COLUMN", columnList );
+					innerHash.put( "DATATYPE", dataTypeList );
 				}
-				else
-				{
-					Hashtable<String, ArrayList<String>> innerHash = schemaHash.get(tableName);
-					ArrayList<String> columnList = innerHash.get("COLUMN");
-					columnList.add(columnName);
-					ArrayList<String> dataTypeList = innerHash.get("DATATYPE");
-					dataTypeList.add(dataType);
+				else {
+					Hashtable<String, ArrayList<String>> innerHash = schemaHash.get( tableName );
+					ArrayList<String> columnList = innerHash.get( "COLUMN" );
+					columnList.add( columnName );
+					ArrayList<String> dataTypeList = innerHash.get( "DATATYPE" );
+					dataTypeList.add( dataType );
 				}
 			}
-		} catch (SQLException e1) {
-			logger.error( e1 );
-			return (success = false);
 		}
-
-		String path = DIHelper.getInstance().getProperty(Constants.BASE_FOLDER) + "/rdbms/";
+		catch ( SQLException e1 ) {
+			logger.error( e1 );
+			return ( success = false );
+		}
+		
+		String path = DIHelper.getInstance().getProperty( Constants.BASE_FOLDER ) + "/rdbms/";
 		String excelLoc = path + "RDBMS_Import_Sheet.xlsx";
-
+		
 		XSSFWorkbook wb = null;
 		try {
-			wb = new XSSFWorkbook(new FileInputStream(excelLoc));
-		} catch (IOException e) {
-			logger.error( e );
-			return (success = false);
+			wb = new XSSFWorkbook( new FileInputStream( excelLoc ) );
 		}
-		
-		
+		catch ( IOException e ) {
+			logger.error( e );
+			return ( success = false );
+		}
+
 		// add schema sheet
-		XSSFSheet schemaSheet = wb.createSheet(dbName + "_Schema");
-		XSSFRow row = schemaSheet.createRow(0);
-		row.createCell(0).setCellValue("TABLE NAME");
-		row.createCell(1).setCellValue("COLUMN NAME");
-		row.createCell(2).setCellValue("COLUMN DATA TYPE");
-
+		XSSFSheet schemaSheet = wb.createSheet( dbName + "_Schema" );
+		XSSFRow row = schemaSheet.createRow( 0 );
+		row.createCell( 0 ).setCellValue( "TABLE NAME" );
+		row.createCell( 1 ).setCellValue( "COLUMN NAME" );
+		row.createCell( 2 ).setCellValue( "COLUMN DATA TYPE" );
+		
 		int counter = 1;
-		for(String tName : schemaHash.keySet())
-		{
-			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get(tName);
-			ArrayList<String> columnList = innerHash.get("COLUMN");
-			ArrayList<String> dataTypeList = innerHash.get("DATATYPE");
-
-			for(int i = 0; i < columnList.size(); i++)
-			{
-				row = schemaSheet.createRow(counter); 
-				row.createCell(0).setCellValue(tName);
-				row.createCell(1).setCellValue(columnList.get(i));
-				row.createCell(2).setCellValue(dataTypeList.get(i));
+		for ( String tName : schemaHash.keySet() ) {
+			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get( tName );
+			ArrayList<String> columnList = innerHash.get( "COLUMN" );
+			ArrayList<String> dataTypeList = innerHash.get( "DATATYPE" );
+			
+			for ( int i = 0; i < columnList.size(); i++ ) {
+				row = schemaSheet.createRow( counter );				
+				row.createCell( 0 ).setCellValue( tName );
+				row.createCell( 1 ).setCellValue( columnList.get( i ) );
+				row.createCell( 2 ).setCellValue( dataTypeList.get( i ) );
 				counter++;
 			}			
 		}
 		
-		XSSFSheet dataSheet = wb.createSheet(dbName + "_DataSheet_DO_NOT_DELETE");
-		buildDataSheeet(dataSheet, schemaHash);
-		dataSheet.getWorkbook().setSheetHidden(4, true);
-		
+		XSSFSheet dataSheet = wb.createSheet( dbName + "_DataSheet_DO_NOT_DELETE" );
+		buildDataSheeet( dataSheet, schemaHash );
+		dataSheet.getWorkbook().setSheetHidden( 4, true );
+
 		// create drop downs for node and relationship tabs
-		
 		HashSet<String> allColumnNames = new HashSet<String>();
 		HashSet<String> allDataTypes = new HashSet<String>();
 		String[] tableNames = new String[schemaHash.keySet().size()];
-		
+
 		// remove duplicated results
 		counter = 0;
-		for(String tName : schemaHash.keySet())
-		{
-			tableNames[counter] = tName; 
+		for ( String tName : schemaHash.keySet() ) {
+			tableNames[counter] = tName;			
 			
-			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get(tName);
-			ArrayList<String> columnList = innerHash.get("COLUMN");
-			ArrayList<String> dataTypeList = innerHash.get("DATATYPE");
+			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get( tName );
+			ArrayList<String> columnList = innerHash.get( "COLUMN" );
+			ArrayList<String> dataTypeList = innerHash.get( "DATATYPE" );
 			
-			allColumnNames.addAll(columnList);
-			allDataTypes.addAll(dataTypeList);
+			allColumnNames.addAll( columnList );
+			allDataTypes.addAll( dataTypeList );
 			counter++;
 		}
-		allColumnNames.toArray(new String[allColumnNames.size()]);
-		allDataTypes.toArray(new String[allDataTypes.size()]);
+		allColumnNames.toArray( new String[allColumnNames.size()] );
+		allDataTypes.toArray( new String[allDataTypes.size()] );
 		
-		XSSFSheet nodeSheet = wb.getSheet("Nodes");
-		XSSFSheet relationshipSheet = wb.getSheet("Relationships");
-		
+		XSSFSheet nodeSheet = wb.getSheet( "Nodes" );
+		XSSFSheet relationshipSheet = wb.getSheet( "Relationships" );
+
 		// create drop down validation helper
-		XSSFDataValidationHelper nodeSheetValidationHelper = new XSSFDataValidationHelper(nodeSheet);
+		XSSFDataValidationHelper nodeSheetValidationHelper = new XSSFDataValidationHelper( nodeSheet );
 		// create all lists
-		DataValidationConstraint nodeSheetTableNameConstraint = nodeSheetValidationHelper.createFormulaListConstraint("TABLES");
-		DataValidationConstraint nodeSheetColumnNameConstraint = nodeSheetValidationHelper.createFormulaListConstraint("INDIRECT(UPPER(A2))");
-		DataValidationConstraint nodeSheetDataTypeConstraint = nodeSheetValidationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(UPPER(A2),\"_\",UPPER(C2)))");
+		DataValidationConstraint nodeSheetTableNameConstraint = nodeSheetValidationHelper.createFormulaListConstraint( "TABLES" );
+		DataValidationConstraint nodeSheetColumnNameConstraint = nodeSheetValidationHelper.createFormulaListConstraint( "INDIRECT(UPPER(A2))" );
+		DataValidationConstraint nodeSheetDataTypeConstraint = nodeSheetValidationHelper.createFormulaListConstraint( "INDIRECT(CONCATENATE(UPPER(A2),\"_\",UPPER(C2)))" );
 		// create all ranges
-		CellRangeAddressList nodeSheetTableNameAddressList = new CellRangeAddressList(1,6,0,0);
-		CellRangeAddressList nodeSheetColumnNameAddressList1 = new CellRangeAddressList(1,6,1,1);
-		CellRangeAddressList nodeSheetColumnNameAddressList2 = new CellRangeAddressList(1,6,2,2);
-		CellRangeAddressList nodeSheetDataTypeAddressList = new CellRangeAddressList(1,6,3,3);
+		CellRangeAddressList nodeSheetTableNameAddressList = new CellRangeAddressList( 1, 6, 0, 0 );
+		CellRangeAddressList nodeSheetColumnNameAddressList1 = new CellRangeAddressList( 1, 6, 1, 1 );
+		CellRangeAddressList nodeSheetColumnNameAddressList2 = new CellRangeAddressList( 1, 6, 2, 2 );
+		CellRangeAddressList nodeSheetDataTypeAddressList = new CellRangeAddressList( 1, 6, 3, 3 );
 		// create the drop downs
-		DataValidation nodeSheetTableNameDataValidation = nodeSheetValidationHelper.createValidation(nodeSheetTableNameConstraint, nodeSheetTableNameAddressList);
-		DataValidation nodeSheetColumnNameDataValidation1 = nodeSheetValidationHelper.createValidation(nodeSheetColumnNameConstraint, nodeSheetColumnNameAddressList1);
-		DataValidation nodeSheetColumnNameDataValidation2 = nodeSheetValidationHelper.createValidation(nodeSheetColumnNameConstraint, nodeSheetColumnNameAddressList2);
-		DataValidation nodeSheetDataTypeDataValidation = nodeSheetValidationHelper.createValidation(nodeSheetDataTypeConstraint, nodeSheetDataTypeAddressList);
+		DataValidation nodeSheetTableNameDataValidation = nodeSheetValidationHelper.createValidation( nodeSheetTableNameConstraint, nodeSheetTableNameAddressList );
+		DataValidation nodeSheetColumnNameDataValidation1 = nodeSheetValidationHelper.createValidation( nodeSheetColumnNameConstraint, nodeSheetColumnNameAddressList1 );
+		DataValidation nodeSheetColumnNameDataValidation2 = nodeSheetValidationHelper.createValidation( nodeSheetColumnNameConstraint, nodeSheetColumnNameAddressList2 );
+		DataValidation nodeSheetDataTypeDataValidation = nodeSheetValidationHelper.createValidation( nodeSheetDataTypeConstraint, nodeSheetDataTypeAddressList );
 		// create the drop down side btn
-		nodeSheetTableNameDataValidation.setSuppressDropDownArrow(true);
-		nodeSheetColumnNameDataValidation1.setSuppressDropDownArrow(true);
-		nodeSheetColumnNameDataValidation2.setSuppressDropDownArrow(true);
-		nodeSheetDataTypeDataValidation.setSuppressDropDownArrow(true);
+		nodeSheetTableNameDataValidation.setSuppressDropDownArrow( true );
+		nodeSheetColumnNameDataValidation1.setSuppressDropDownArrow( true );
+		nodeSheetColumnNameDataValidation2.setSuppressDropDownArrow( true );
+		nodeSheetDataTypeDataValidation.setSuppressDropDownArrow( true );
 		// add the validation to the node sheet
-		nodeSheet.addValidationData(nodeSheetTableNameDataValidation);
-		nodeSheet.addValidationData(nodeSheetColumnNameDataValidation1);
-		nodeSheet.addValidationData(nodeSheetColumnNameDataValidation2);
-		nodeSheet.addValidationData(nodeSheetDataTypeDataValidation);
-		
-		
+		nodeSheet.addValidationData( nodeSheetTableNameDataValidation );
+		nodeSheet.addValidationData( nodeSheetColumnNameDataValidation1 );
+		nodeSheet.addValidationData( nodeSheetColumnNameDataValidation2 );
+		nodeSheet.addValidationData( nodeSheetDataTypeDataValidation );
+
 		// create drop down validation helper
-		XSSFDataValidationHelper relationshipSheetValidationHelper = new XSSFDataValidationHelper(relationshipSheet);
-	    // create all lists
-		DataValidationConstraint relationshipSheetTableNameConstraint = relationshipSheetValidationHelper.createFormulaListConstraint("TABLES");
-		DataValidationConstraint relationshipSheetColumnNameConstraint1 = relationshipSheetValidationHelper.createFormulaListConstraint("INDIRECT(UPPER(A2))");
-		DataValidationConstraint relationshipSheetColumnNameConstraint2 = relationshipSheetValidationHelper.createFormulaListConstraint("INDIRECT(UPPER(D2))");
-		DataValidationConstraint relationshipSheetColumnNameConstraint3 = relationshipSheetValidationHelper.createFormulaListConstraint("INDIRECT(UPPER(G2))");
+		XSSFDataValidationHelper relationshipSheetValidationHelper = new XSSFDataValidationHelper( relationshipSheet );
+		// create all lists
+		DataValidationConstraint relationshipSheetTableNameConstraint = relationshipSheetValidationHelper.createFormulaListConstraint( "TABLES" );
+		DataValidationConstraint relationshipSheetColumnNameConstraint1 = relationshipSheetValidationHelper.createFormulaListConstraint( "INDIRECT(UPPER(A2))" );
+		DataValidationConstraint relationshipSheetColumnNameConstraint2 = relationshipSheetValidationHelper.createFormulaListConstraint( "INDIRECT(UPPER(D2))" );
+		DataValidationConstraint relationshipSheetColumnNameConstraint3 = relationshipSheetValidationHelper.createFormulaListConstraint( "INDIRECT(UPPER(G2))" );
 
 		// create all ranges
-		CellRangeAddressList relationshipSheetTableNameAddressList1 = new  CellRangeAddressList(1,6,0,0);
-	    CellRangeAddressList relationshipSheetTableNameAddressList2 = new  CellRangeAddressList(1,6,3,3);
-	    CellRangeAddressList relationshipSheetTableNameAddressList3 = new  CellRangeAddressList(1,6,6,6);
-	    
-	    CellRangeAddressList relationshipSheetColumnNameAddressList1 = new CellRangeAddressList(1,6,1,1);
-	    CellRangeAddressList relationshipSheetColumnNameAddressList2 = new CellRangeAddressList(1,6,2,2);
-	    CellRangeAddressList relationshipSheetColumnNameAddressList3 = new CellRangeAddressList(1,6,4,4);
-	    CellRangeAddressList relationshipSheetColumnNameAddressList4 = new CellRangeAddressList(1,6,5,5);
-	    CellRangeAddressList relationshipSheetColumnNameAddressList5 = new CellRangeAddressList(1,6,7,7);
-	    CellRangeAddressList relationshipSheetColumnNameAddressList6 = new CellRangeAddressList(1,6,8,8);
+		CellRangeAddressList relationshipSheetTableNameAddressList1 = new CellRangeAddressList( 1, 6, 0, 0 );
+		CellRangeAddressList relationshipSheetTableNameAddressList2 = new CellRangeAddressList( 1, 6, 3, 3 );
+		CellRangeAddressList relationshipSheetTableNameAddressList3 = new CellRangeAddressList( 1, 6, 6, 6 );
+		
+		CellRangeAddressList relationshipSheetColumnNameAddressList1 = new CellRangeAddressList( 1, 6, 1, 1 );
+		CellRangeAddressList relationshipSheetColumnNameAddressList2 = new CellRangeAddressList( 1, 6, 2, 2 );
+		CellRangeAddressList relationshipSheetColumnNameAddressList3 = new CellRangeAddressList( 1, 6, 4, 4 );
+		CellRangeAddressList relationshipSheetColumnNameAddressList4 = new CellRangeAddressList( 1, 6, 5, 5 );
+		CellRangeAddressList relationshipSheetColumnNameAddressList5 = new CellRangeAddressList( 1, 6, 7, 7 );
+		CellRangeAddressList relationshipSheetColumnNameAddressList6 = new CellRangeAddressList( 1, 6, 8, 8 );
 
-	    // create the drop downs	    
-	    DataValidation relationshipSheetTableNameDataValidation1 = relationshipSheetValidationHelper.createValidation(relationshipSheetTableNameConstraint, relationshipSheetTableNameAddressList1);
-	    DataValidation relationshipSheetTableNameDataValidation2 = relationshipSheetValidationHelper.createValidation(relationshipSheetTableNameConstraint, relationshipSheetTableNameAddressList2);
-	    DataValidation relationshipSheetTableNameDataValidation3 = relationshipSheetValidationHelper.createValidation(relationshipSheetTableNameConstraint, relationshipSheetTableNameAddressList3);
-	    DataValidation relationshipSheetColumnNameDataValidation1 = relationshipSheetValidationHelper.createValidation(relationshipSheetColumnNameConstraint1, relationshipSheetColumnNameAddressList1);
-	    DataValidation relationshipSheetColumnNameDataValidation2 = relationshipSheetValidationHelper.createValidation(relationshipSheetColumnNameConstraint1, relationshipSheetColumnNameAddressList2);
-	    DataValidation relationshipSheetColumnNameDataValidation3 = relationshipSheetValidationHelper.createValidation(relationshipSheetColumnNameConstraint2, relationshipSheetColumnNameAddressList3);
-	    DataValidation relationshipSheetColumnNameDataValidation4 = relationshipSheetValidationHelper.createValidation(relationshipSheetColumnNameConstraint2, relationshipSheetColumnNameAddressList4);
-	    DataValidation relationshipSheetColumnNameDataValidation5 = relationshipSheetValidationHelper.createValidation(relationshipSheetColumnNameConstraint3, relationshipSheetColumnNameAddressList5);
-	    DataValidation relationshipSheetColumnNameDataValidation6 = relationshipSheetValidationHelper.createValidation(relationshipSheetColumnNameConstraint3, relationshipSheetColumnNameAddressList6);
-	    // create the drop down side btn
-	    relationshipSheetTableNameDataValidation1.setSuppressDropDownArrow(true);
-	    relationshipSheetTableNameDataValidation2.setSuppressDropDownArrow(true);
-	    relationshipSheetTableNameDataValidation3.setSuppressDropDownArrow(true);
-	    relationshipSheetColumnNameDataValidation1.setSuppressDropDownArrow(true);
-	    relationshipSheetColumnNameDataValidation2.setSuppressDropDownArrow(true);
-	    relationshipSheetColumnNameDataValidation3.setSuppressDropDownArrow(true);
-	    relationshipSheetColumnNameDataValidation4.setSuppressDropDownArrow(true);
-	    relationshipSheetColumnNameDataValidation5.setSuppressDropDownArrow(true);
-	    relationshipSheetColumnNameDataValidation6.setSuppressDropDownArrow(true);
-	    // add the validations to the relationship sheet
-	    relationshipSheet.addValidationData(relationshipSheetTableNameDataValidation1);
-	    relationshipSheet.addValidationData(relationshipSheetTableNameDataValidation2);
-	    relationshipSheet.addValidationData(relationshipSheetTableNameDataValidation3);
-	    relationshipSheet.addValidationData(relationshipSheetColumnNameDataValidation1);
-	    relationshipSheet.addValidationData(relationshipSheetColumnNameDataValidation2);
-	    relationshipSheet.addValidationData(relationshipSheetColumnNameDataValidation3);
-	    relationshipSheet.addValidationData(relationshipSheetColumnNameDataValidation4);
-	    relationshipSheet.addValidationData(relationshipSheetColumnNameDataValidation5);
-	    relationshipSheet.addValidationData(relationshipSheetColumnNameDataValidation6);
-
+		// create the drop downs	    
+		DataValidation relationshipSheetTableNameDataValidation1 = relationshipSheetValidationHelper.createValidation( relationshipSheetTableNameConstraint, relationshipSheetTableNameAddressList1 );
+		DataValidation relationshipSheetTableNameDataValidation2 = relationshipSheetValidationHelper.createValidation( relationshipSheetTableNameConstraint, relationshipSheetTableNameAddressList2 );
+		DataValidation relationshipSheetTableNameDataValidation3 = relationshipSheetValidationHelper.createValidation( relationshipSheetTableNameConstraint, relationshipSheetTableNameAddressList3 );
+		DataValidation relationshipSheetColumnNameDataValidation1 = relationshipSheetValidationHelper.createValidation( relationshipSheetColumnNameConstraint1, relationshipSheetColumnNameAddressList1 );
+		DataValidation relationshipSheetColumnNameDataValidation2 = relationshipSheetValidationHelper.createValidation( relationshipSheetColumnNameConstraint1, relationshipSheetColumnNameAddressList2 );
+		DataValidation relationshipSheetColumnNameDataValidation3 = relationshipSheetValidationHelper.createValidation( relationshipSheetColumnNameConstraint2, relationshipSheetColumnNameAddressList3 );
+		DataValidation relationshipSheetColumnNameDataValidation4 = relationshipSheetValidationHelper.createValidation( relationshipSheetColumnNameConstraint2, relationshipSheetColumnNameAddressList4 );
+		DataValidation relationshipSheetColumnNameDataValidation5 = relationshipSheetValidationHelper.createValidation( relationshipSheetColumnNameConstraint3, relationshipSheetColumnNameAddressList5 );
+		DataValidation relationshipSheetColumnNameDataValidation6 = relationshipSheetValidationHelper.createValidation( relationshipSheetColumnNameConstraint3, relationshipSheetColumnNameAddressList6 );
+		// create the drop down side btn
+		relationshipSheetTableNameDataValidation1.setSuppressDropDownArrow( true );
+		relationshipSheetTableNameDataValidation2.setSuppressDropDownArrow( true );
+		relationshipSheetTableNameDataValidation3.setSuppressDropDownArrow( true );
+		relationshipSheetColumnNameDataValidation1.setSuppressDropDownArrow( true );
+		relationshipSheetColumnNameDataValidation2.setSuppressDropDownArrow( true );
+		relationshipSheetColumnNameDataValidation3.setSuppressDropDownArrow( true );
+		relationshipSheetColumnNameDataValidation4.setSuppressDropDownArrow( true );
+		relationshipSheetColumnNameDataValidation5.setSuppressDropDownArrow( true );
+		relationshipSheetColumnNameDataValidation6.setSuppressDropDownArrow( true );
+		// add the validations to the relationship sheet
+		relationshipSheet.addValidationData( relationshipSheetTableNameDataValidation1 );
+		relationshipSheet.addValidationData( relationshipSheetTableNameDataValidation2 );
+		relationshipSheet.addValidationData( relationshipSheetTableNameDataValidation3 );
+		relationshipSheet.addValidationData( relationshipSheetColumnNameDataValidation1 );
+		relationshipSheet.addValidationData( relationshipSheetColumnNameDataValidation2 );
+		relationshipSheet.addValidationData( relationshipSheetColumnNameDataValidation3 );
+		relationshipSheet.addValidationData( relationshipSheetColumnNameDataValidation4 );
+		relationshipSheet.addValidationData( relationshipSheetColumnNameDataValidation5 );
+		relationshipSheet.addValidationData( relationshipSheetColumnNameDataValidation6 );
+		
 		try {
-			wb.write(new FileOutputStream(path + dbName + "_" + "RDBMS_Import_Sheet.xlsx"));
-		} catch (FileNotFoundException e) {
-			logger.error( e );	
-			return (success = false);
-		} catch (IOException e) {
-			logger.error( e );
-			return (success = false);
+			wb.write( new FileOutputStream( path + dbName + "_" + "RDBMS_Import_Sheet.xlsx" ) );
 		}
-
+		catch ( FileNotFoundException e ) {
+			logger.error( e );			
+			return ( success = false );
+		}
+		catch ( IOException e ) {
+			logger.error( e );
+			return ( success = false );
+		}
+		
 		return success;
 	}
 	
-	private void buildDataSheeet(XSSFSheet dataSheet, Hashtable<String, Hashtable<String, ArrayList<String>>> schemaHash) 
-	{
+	private void buildDataSheeet( XSSFSheet dataSheet, Hashtable<String, Hashtable<String, ArrayList<String>>> schemaHash ) {
 		int rowNum = 1;
 		int colColumnNum = 0;
 		int totalRowsOfColumns = 0;
 		
 		ArrayList<String> tableNameList = new ArrayList<String>();
 		ArrayList<String> table_columnNameList = new ArrayList<String>();
-		XSSFRow tableNameRow = dataSheet.createRow(0);
+		XSSFRow tableNameRow = dataSheet.createRow( 0 );
 		
 		int cellTableNum = 0;
-		for( String tableName : schemaHash.keySet() )
-		{
-			tableNameList.add(tableName);
+		for ( String tableName : schemaHash.keySet() ) {
+			tableNameList.add( tableName );
 			
-			tableNameRow.createCell(cellTableNum).setCellValue(tableName);
+			tableNameRow.createCell( cellTableNum ).setCellValue( tableName );
 			cellTableNum++;
 			
-			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get(tableName);
-			ArrayList<String> columnList = innerHash.get("COLUMN");
+			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get( tableName );
+			ArrayList<String> columnList = innerHash.get( "COLUMN" );
 			
-			for( String colName : columnList)
-			{
-				table_columnNameList.add(tableName + "_" + colName);
+			for ( String colName : columnList ) {
+				table_columnNameList.add( tableName + "_" + colName );
 				
-				XSSFRow currColRow = dataSheet.getRow(rowNum);
-				if(currColRow == null)
-				{
-					currColRow = dataSheet.createRow(rowNum);
-					currColRow.createCell(colColumnNum).setCellValue(colName);
+				XSSFRow currColRow = dataSheet.getRow( rowNum );
+				if ( currColRow == null ) {
+					currColRow = dataSheet.createRow( rowNum );
+					currColRow.createCell( colColumnNum ).setCellValue( colName );
 				}
-				else
-				{
-					currColRow.createCell(colColumnNum).setCellValue(colName);
+				else {
+					currColRow.createCell( colColumnNum ).setCellValue( colName );
 				}
 				colColumnNum++;
 			}
@@ -929,57 +934,50 @@ public class ImportRDBMSProcessor {
 		}
 		totalRowsOfColumns = rowNum - 1;
 		
-		for( String tableName : schemaHash.keySet() )
-		{
-			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get(tableName);
-			ArrayList<String> dataTypeList = innerHash.get("DATATYPE");
+		for ( String tableName : schemaHash.keySet() ) {
+			Hashtable<String, ArrayList<String>> innerHash = schemaHash.get( tableName );
+			ArrayList<String> dataTypeList = innerHash.get( "DATATYPE" );
 			
-			for( String dataTypeName : dataTypeList)
-			{
-				XSSFRow currColRow = dataSheet.createRow(rowNum);
-				currColRow.createCell(0).setCellValue(dataTypeName);
+			for ( String dataTypeName : dataTypeList ) {
+				XSSFRow currColRow = dataSheet.createRow( rowNum );
+				currColRow.createCell( 0 ).setCellValue( dataTypeName );
 				rowNum++;
 			}
 		}
-			
+		
 		char tableColStart = 'A';
 		int currRowNum = 1;
 		int internalTableCounter = 0;
 		int internalTableColumnCounter = 0;
-		for(int processRow = 0; processRow <= dataSheet.getLastRowNum(); processRow++)
-		{
-			XSSFRow currRow = dataSheet.getRow(processRow);
+		for ( int processRow = 0; processRow <= dataSheet.getLastRowNum(); processRow++ ) {
+			XSSFRow currRow = dataSheet.getRow( processRow );
 			
-			if(processRow == 0)
-			{
-				char endRowCol = (char) (tableColStart + currRow.getLastCellNum() - 1);
+			if ( processRow == 0 ) {
+				char endRowCol = (char) ( tableColStart + currRow.getLastCellNum() - 1 );
 				Name nameTable = dataSheet.getWorkbook().createName();
-				nameTable.setNameName("TABLES");
-				nameTable.setRefersToFormula("'" + dataSheet.getSheetName() +"'!" + "$" + tableColStart + "$" + currRowNum + ":$" + endRowCol + "$" + currRowNum);
+				nameTable.setNameName( "TABLES" );
+				nameTable.setRefersToFormula( "'" + dataSheet.getSheetName() + "'!" + "$" + tableColStart + "$" + currRowNum + ":$" + endRowCol + "$" + currRowNum );
 			}
-			else if (1 <= processRow && processRow <= totalRowsOfColumns)
-			{
-				char endRowCol = (char) (tableColStart + currRow.getLastCellNum() - 1);
-
+			else if ( 1 <= processRow && processRow <= totalRowsOfColumns ) {
+				char endRowCol = (char) ( tableColStart + currRow.getLastCellNum() - 1 );
+				
 				Name nameCol = dataSheet.getWorkbook().createName();
-				nameCol.setNameName(tableNameList.get(internalTableCounter));
-				nameCol.setRefersToFormula("'" + dataSheet.getSheetName() +"'!" + "$" + tableColStart + "$" + currRowNum + ":$" + endRowCol + "$" + currRowNum);
+				nameCol.setNameName( tableNameList.get( internalTableCounter ) );
+				nameCol.setRefersToFormula( "'" + dataSheet.getSheetName() + "'!" + "$" + tableColStart + "$" + currRowNum + ":$" + endRowCol + "$" + currRowNum );
 				internalTableCounter++;
 			}
-			else
-			{
+			else {
 				char endRowCol = 'A';
 				
 				Name nameCol = dataSheet.getWorkbook().createName();
-				nameCol.setNameName(table_columnNameList.get(internalTableColumnCounter));
-				nameCol.setRefersToFormula("'" + dataSheet.getSheetName() +"'!" + "$" + tableColStart + "$" + currRowNum + ":$" + endRowCol + "$" + currRowNum);
+				nameCol.setNameName( table_columnNameList.get( internalTableColumnCounter ) );
+				nameCol.setRefersToFormula( "'" + dataSheet.getSheetName() + "'!" + "$" + tableColStart + "$" + currRowNum + ":$" + endRowCol + "$" + currRowNum );
 				internalTableColumnCounter++;
 			}
 			currRowNum++;
 		}
 	}
 
-	
 //	private void buildDataSheeet(XSSFSheet dataSheet)
 //	{
 //		int numRows = dataSheet.getLastRowNum();

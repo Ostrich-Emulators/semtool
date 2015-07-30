@@ -20,14 +20,18 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 import gov.va.semoss.ui.components.models.ValueTableModel;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
@@ -64,7 +68,7 @@ public class OCONUSMapPlaySheet extends BrowserPlaySheet2 {
 				String colName = var[j];
 				elementHash.put( "size", 1000000 );
 
-				Class<?> k = ValueTableModel.getClassForValue( v );
+				Class<?> k = RDFDatatypeTools.instance().getClassForValue( v );
 				if ( k.equals( String.class ) ) {
 					elementHash.put( colName, v.stringValue() );
 				}

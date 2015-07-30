@@ -89,18 +89,21 @@ public class GraphDataModel {
 	 */
 	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
 		try {
-			Set<Resource> needProps = new HashSet<>( model.subjects() );
+			Set<URI> needProps = new HashSet<>();
+			for( Resource r : model.subjects() ){
+				needProps.add( URI.class.cast( r ) );
+			}
 
 			for ( Statement s : model ) {
-				Resource sub = s.getSubject();
+				URI sub = URI.class.cast( s.getSubject() );
 				URI pred = s.getPredicate();
 				Value obj = s.getObject();
 
-				if ( obj instanceof Resource ) {
-					needProps.add( Resource.class.cast( obj ) );
+				if ( obj instanceof URI ) {
+					needProps.add( URI.class.cast( obj ) );
 				}
 
-				SEMOSSVertex vert1 = createOrRetrieveVertex( URI.class.cast( sub ), overlayLevel );
+				SEMOSSVertex vert1 = createOrRetrieveVertex( sub, overlayLevel );
 				SEMOSSVertex vert2;
 				if ( obj instanceof URI ) {
 					vert2 = createOrRetrieveVertex( URI.class.cast( obj ), overlayLevel );
@@ -141,13 +144,13 @@ public class GraphDataModel {
 		}
 	}
 
-	public void addGraphLevel( Collection<Resource> nodes, IEngine engine, int overlayLevel ) {
+	public void addGraphLevel( Collection<URI> nodes, IEngine engine, int overlayLevel ) {
 		try {
-			for ( Resource sub : nodes ) {
-				SEMOSSVertex vert1 = createOrRetrieveVertex( URI.class.cast( sub ), overlayLevel );
+			for ( URI sub : nodes ) {
+				SEMOSSVertex vert1 = createOrRetrieveVertex( sub, overlayLevel );
 				vizgraph.addVertex( vert1 );
 			}
-
+			
 			fetchProperties( nodes, null, engine, overlayLevel );
 		}
 		catch ( RepositoryException | QueryEvaluationException e ) {
@@ -226,7 +229,7 @@ public class GraphDataModel {
 		return baseFilterSet;
 	}
 
-	private void fetchProperties( Collection<Resource> concepts, Collection<URI> preds,
+	private void fetchProperties( Collection<URI> concepts, Collection<URI> preds,
 			IEngine engine, int overlayLevel ) throws RepositoryException, QueryEvaluationException {
 
 		String conceptprops

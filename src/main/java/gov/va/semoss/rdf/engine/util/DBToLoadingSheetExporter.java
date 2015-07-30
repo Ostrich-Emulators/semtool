@@ -3,6 +3,7 @@ package gov.va.semoss.rdf.engine.util;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+
 import java.text.DateFormat;
 import java.io.File;
 import java.util.ArrayList;
@@ -32,8 +33,10 @@ import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
+
 import java.util.Arrays;
 import java.util.Collection;
+
 import org.openrdf.model.Value;
 
 public class DBToLoadingSheetExporter {
@@ -60,7 +63,7 @@ public class DBToLoadingSheetExporter {
 	}
 
 	public ImportData runExport( boolean runNodeExport, boolean runRelationshipExport ) {
-		List<URI> nodes = createConceptList( getEngine() );
+		List<URI> nodes = NodeDerivationTools.instance().createConceptList( getEngine() );
 
 		ImportData data = ImportData.forEngine( engine );
 
@@ -202,22 +205,7 @@ public class DBToLoadingSheetExporter {
 		return new File( fileloc.toString() );
 	}
 
-	public static List<URI> createConceptList( IEngine engine ) {
-		final List<URI> conceptList = new ArrayList<>();
-		String query = "SELECT ?entity WHERE "
-				+ "{ ?entity rdfs:subClassOf+ ?concept . FILTER( ?entity != ?concept ) }";
-		OneVarListQueryAdapter<URI> qe
-				= OneVarListQueryAdapter.getUriList( query, "entity" );
-		qe.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 
-		try {
-			conceptList.addAll( engine.query( qe ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( e, e );
-		}
-		return conceptList;
-	}
 
 	private List<URI> findSubclassNodesToAdd( List<URI> nodes ) {
 		findDupsToFilterOut();
@@ -391,39 +379,6 @@ public class DBToLoadingSheetExporter {
 		needlabels.removeAll( labels.keySet() );
 		labels.putAll( Utility.getInstanceLabels( needlabels, engine ) );
 		return seen.values();
-	}
-
-	public static ListQueryAdapter<URI> getPredicatesBetween( URI subjectNodeType,
-			URI objectNodeType ) {
-		String q
-				= "SELECT DISTINCT ?relationship WHERE {"
-				+ "?in  a ?stype . "
-				+ "?out a ?otype . "
-				+ "?in ?relationship ?out . "
-				+ "MINUS{ ?relationship rdf:predicate ?p }"
-				+ "}";
-		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q, "relationship" );
-		varq.useInferred( false );
-		varq.bind( "stype", subjectNodeType );
-
-		if ( !objectNodeType.equals( Constants.ANYNODE ) ) {
-			varq.bind( "otype", objectNodeType );
-		}
-		return varq;
-	}
-
-	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
-			IEngine engine ) {
-
-		List<URI> values;
-		try {
-			values = engine.query( getPredicatesBetween( subjectNodeType, objectNodeType ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			values = new ArrayList<>();
-		}
-
-		return values;
 	}
 
 	private Collection<NodeAndPropertyValues> getOneRelationshipsData( URI subjectType,

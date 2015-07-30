@@ -31,8 +31,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -64,7 +68,6 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.InvalidXPathException;
 import org.dom4j.XPath;
-import org.dom4j.Node;
 import org.dom4j.io.DOMReader;
 import org.dom4j.io.DOMWriter;
 
@@ -155,6 +158,15 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	 * results.
 	 */
 	public void callIt() {
+		// Initialize the key used to store the Data Series being visualized
+		String dataSeriesKey = "dataSeries";
+		// Get the data series
+		HashMap<?,?> dataSeries = (HashMap<?,?>)dataHash.get(dataSeriesKey);
+		// Call the sorting convenience method, to derive an order data structure
+		LinkedHashMap<?,?> sortedHash = sort(dataSeries);
+		// Put the data series back
+		dataHash.put(dataSeriesKey, sortedHash);
+		// Continue with the processing
 		String json = new Gson().toJson( dataHash );
 		if ( null != json && !"".equals( json ) && !"{}".equals( json ) ) {
 			json = json.replace( "\\n", " " );
@@ -331,6 +343,24 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 			}
 			throw new IOException( msg, e );
 		}
+	}
+	
+	/**
+	 * Convenience method for sorting (insertion order-based) data in a 
+	 * HashMap according to alpha-numeric order
+	 * @param hashMap The unordered table
+	 * @return An ordered lookup table
+	 */
+	private LinkedHashMap<?,?> sort(HashMap<?,?> hashMap){
+		SortedSet keys = new TreeSet(hashMap.keySet());
+		LinkedHashMap sortedHash = new LinkedHashMap();
+		Iterator keyIterator = keys.iterator();
+		while (keyIterator.hasNext()){
+			String key = (String)keyIterator.next();
+			Object value = hashMap.get(key);
+			sortedHash.put(key, value);
+		}
+		return sortedHash;
 	}
 
 }
