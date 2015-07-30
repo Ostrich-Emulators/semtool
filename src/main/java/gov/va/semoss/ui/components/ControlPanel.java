@@ -130,6 +130,15 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 		treeButton = new JToggleButton( treeListener );
 		treeButton.setText( "" );
+		treeButton.addActionListener( new ActionListener(){
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				if( ringsButton.isSelected() ){
+					ringsButton.doClick();
+				}
+			}		
+		} );
 		
 		ringsButton = new JToggleButton( Utility.loadImageIcon( "ring.png" ) );
 		ringsButton.setToolTipText( "<html><b>Show Radial Rings</b><br>Only available with Balloon and Radial Tree layouts</html>" );
@@ -140,7 +149,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 		weightButton.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				( (WeightDropDownButton) e.getSource() ).showPopup();
+				weightButton.showPopup();
 			}
 		} );
 

@@ -454,7 +454,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		layout.initialize();
 		// make the layout a little smaller than our viewer, so stuff shows up on screen
 		view.setGraphLayout( layout );
-		if( AbstractLayout.class.isAssignableFrom( layout.getClass() ) ){
+		if( FRLayout.class.equals( layout.getClass() ) ){
 			double scale = 0.85;
 			Dimension d = view.getSize();
 			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
