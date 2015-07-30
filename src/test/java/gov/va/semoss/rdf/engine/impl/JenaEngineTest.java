@@ -119,7 +119,7 @@ public class JenaEngineTest {
 		Set<String> expected = new HashSet<>( Arrays.asList( "Yuri", "Yugo", "Pinto",
 				"Yuri Purchased Yugo", "Human Being", "Car", "Price", "Date", "First Name",
 				"Last Name", "Purchased", "extra" ) );
-		
+		instance.closeDB();
 		assertEquals( expected, names );
 	}
 	

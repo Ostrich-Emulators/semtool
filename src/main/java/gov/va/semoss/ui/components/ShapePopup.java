@@ -39,8 +39,8 @@ public class ShapePopup extends JMenu {
 
 	private static final long serialVersionUID = 3874311709020126729L;
 
-	public ShapePopup( String _name, GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
-		super( _name );
+	public ShapePopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
+		super( "Modify Shape" );
 
 		GraphShapeRepository gsr = GraphShapeRepository.instance();
 		for ( Map.Entry<String, Shape> en : gsr.getNamedShapeMap().entrySet() ) {
