@@ -22,6 +22,7 @@ import edu.uci.ics.jung.visualization.control.EditingPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -189,7 +190,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						typearea.removeAll();
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
 
-						List<URI> concepts = DBToLoadingSheetExporter.createConceptList( engine );
+						List<URI> concepts = NodeDerivationTools.instance().createConceptList( engine );
 						Map<URI, String> conceptlabels = Utility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );

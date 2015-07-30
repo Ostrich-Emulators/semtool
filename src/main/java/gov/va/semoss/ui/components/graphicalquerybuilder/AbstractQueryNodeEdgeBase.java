@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.MultiSetMap;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -110,7 +112,7 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 			}
 
 			map.put( en.getKey(),
-					ValueTableModel.getObjectFromValue( en.getValue().iterator().next() ) );
+					RDFDatatypeTools.instance().getObjectFromValue( en.getValue().iterator().next() ) );
 		}
 		return map;
 	}
@@ -126,13 +128,13 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 
 	@Override
 	public Object getProperty( URI prop ) {
-		return ValueTableModel.getObjectFromValue( getValue( prop ) );
+		return RDFDatatypeTools.instance().getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override
 	public void setProperty( URI prop, Object propValue ) {
 		properties.remove( prop );
-		setProperty( prop, ValueTableModel.getValueFromObject( propValue ), true );
+		setProperty( prop, RDFDatatypeTools.instance().getValueFromObject( propValue ), true );
 	}
 
 	@Override
