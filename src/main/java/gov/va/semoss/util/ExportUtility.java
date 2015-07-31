@@ -40,7 +40,6 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
-import java.awt.HeadlessException;
 import java.io.ByteArrayOutputStream;
 import org.apache.commons.io.FileUtils;
 
@@ -52,7 +51,7 @@ public class ExportUtility {
 	private static final Logger log = Logger.getLogger( ExportUtility.class );
 
 	public static void doExportCSVWithDialogue( Component component, String data ) {
-		File file = getExportFileLocation( component, ".png" );
+		File file = getExportFileLocation( component, ".csv" );
 		if ( null == file ) {
 			return;
 		}

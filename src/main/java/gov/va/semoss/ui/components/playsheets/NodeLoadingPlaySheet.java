@@ -21,7 +21,9 @@ package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.ui.components.models.LoadingSheetModel;
+import java.util.List;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Value;
 
 /**
  */
@@ -29,8 +31,8 @@ public class NodeLoadingPlaySheet extends LoadingPlaySheetBase {
 
 	private static final Logger log = Logger.getLogger( NodeLoadingPlaySheet.class );
 
-	public NodeLoadingPlaySheet() {
-		super( new LoadingSheetModel() );
+	public NodeLoadingPlaySheet( List<Value[]> data, List<String> headers ) {
+		super( LoadingSheetModel.forNode( data, headers ) );
 	}
 	
 	public NodeLoadingPlaySheet( LoadingSheetData lsd ) {

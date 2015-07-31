@@ -51,6 +51,7 @@ import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.Layer;
+import edu.uci.ics.jung.visualization.MultiLayerTransformer;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -450,16 +451,17 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			layout = new FRLayout<>( graph );
 		}
 
+		fitGraphinWindow();
 		layout.initialize();
 		// make the layout a little smaller than our viewer, so stuff shows up on screen
 		view.setGraphLayout( layout );
-		if ( FRLayout.class.equals( layout.getClass() ) ) {
-			double scale = 0.85;
-			Dimension d = view.getSize();
-			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
-			layout.setSize( d );
-			fitGraphinWindow( AbstractLayout.class.cast( layout ) );
-		}
+//		if ( FRLayout.class.equals( layout.getClass() ) ) {
+//			double scale = 0.85;
+//			Dimension d = view.getSize();
+//			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
+//			layout.setSize( d );
+//			// fitGraphinWindow( AbstractLayout.class.cast( layout ) );
+//		}
 
 		for ( GraphListener gl : listenees ) {
 			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName,
@@ -473,32 +475,45 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * This method tries to fit the graph to the available space.
 	 * It could work better.
 	 */
-	private void fitGraphinWindow( AbstractLayout<SEMOSSVertex, SEMOSSEdge> layout ) {
-		// two steps here: figure out the center of our layout, and translate
-		// that center so it's in the center of our visualization
-		// we'll take the average X and Y, so big clusters get closer to the center
-		double totalX = 0;
-		double totalY = 0;
+	private void fitGraphinWindow() {
+		MultiLayerTransformer mlt = view.getRenderContext().getMultiLayerTransformer();
+		double vscalex = mlt.getTransformer( Layer.VIEW ).getScaleX() * 1.1;
+		double vscaley = mlt.getTransformer( Layer.VIEW ).getScaleY() * 1.1;
 
-		Graph<SEMOSSVertex, SEMOSSEdge> graph = layout.getGraph();
-		Collection<SEMOSSVertex> verts = graph.getVertices();
-		for ( SEMOSSVertex v : verts ) {
-			double x = layout.getX( v );
-			double y = layout.getY( v );
+		// Dimension d = view.getSize();
+		// d.setSize( d.getWidth() / vscalex, d.getHeight() / vscaley );
+		double scalex = 1 / vscaley;
+		double scaley = 1 / vscalex;
 
-			totalX += x;
-			totalY += y;
-		}
-
-		Point2D viewCenter = view.getCenter();
-		Point2D layoutCenter
-				= new Point2D.Double( totalX / verts.size(), totalY / verts.size() );
-		log.debug( "layout center is: " + layoutCenter );
-		log.debug( "view center is: " + view.getCenter() );
-
-		view.getRenderContext().getMultiLayerTransformer().getTransformer( Layer.LAYOUT ).
-				translate( viewCenter.getX() - layoutCenter.getX(),
-						viewCenter.getY() - layoutCenter.getY() );
+		mlt.getTransformer( Layer.LAYOUT ).setScale( scalex, scaley, view.getCenter() );
+//
+//		
+//		
+//		// two steps here: figure out the center of our layout, and translate
+//		// that center so it's in the center of our visualization
+//		// we'll take the average X and Y, so big clusters get closer to the center
+//		double totalX = 0;
+//		double totalY = 0;
+//
+//		Graph<SEMOSSVertex, SEMOSSEdge> graph = layout.getGraph();
+//		Collection<SEMOSSVertex> verts = graph.getVertices();
+//		for ( SEMOSSVertex v : verts ) {
+//			double x = layout.getX( v );
+//			double y = layout.getY( v );
+//
+//			totalX += x;
+//			totalY += y;
+//		}
+//
+//		Point2D viewCenter = view.getCenter();
+//		Point2D layoutCenter
+//				= new Point2D.Double( totalX / verts.size(), totalY / verts.size() );
+//		log.debug( "layout center is: " + layoutCenter );
+//		log.debug( "view center is: " + view.getCenter() );
+//
+//		view.getRenderContext().getMultiLayerTransformer().getTransformer( Layer.LAYOUT ).
+//				translate( viewCenter.getX() - layoutCenter.getX(),
+//						viewCenter.getY() - layoutCenter.getY() );
 	}
 
 	public void fireGraphUpdated() {

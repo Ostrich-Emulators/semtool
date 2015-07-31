@@ -22,8 +22,8 @@ package gov.va.semoss.ui.main.listener.impl;
 import edu.uci.ics.jung.algorithms.scoring.PageRank;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 
+import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,12 +50,6 @@ public class GraphNodeRankListener extends AbstractAction {
 		playsheet = gps;
 	}
 
-	/**
-	 * Method actionPerformed. Dictates what actions to take when an Action Event
-	 * is performed.
-	 *
-	 * @param e ActionEvent - The event that triggers the actions in the method.
-	 */
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 
@@ -64,13 +58,13 @@ public class GraphNodeRankListener extends AbstractAction {
 		double tolerance = 0.001;
 		int maxIterations = 100;
 		final PageRank<SEMOSSVertex, ?> ranker
-				= new PageRank<>( playsheet.asForest(), alpha );
+				= new PageRank<>( playsheet.getVisibleGraph(), alpha );
 
 		ranker.setTolerance( tolerance );
 		ranker.setMaxIterations( maxIterations );
 		ranker.evaluate();
 
-		List<SEMOSSVertex> col = new ArrayList<>( playsheet.asForest().getVertices() );
+		List<SEMOSSVertex> col = new ArrayList<>( playsheet.getVisibleGraph().getVertices() );
 		// sort based on ranking score
 		Collections.sort( col, new Comparator<SEMOSSVertex>() {
 
@@ -84,7 +78,7 @@ public class GraphNodeRankListener extends AbstractAction {
 			}
 		} );
 
-		GridRAWPlaySheet grid = new GridRAWPlaySheet();
+		GridPlaySheet grid = new GridPlaySheet();
 
 		List<String> colNames
 				= Arrays.asList( "Vertex Name", "Vertex Type", "Page Rank Score" );
@@ -94,14 +88,10 @@ public class GraphNodeRankListener extends AbstractAction {
 		ValueFactory vf = new ValueFactoryImpl();
 		for ( SEMOSSVertex v : col ) {
 			URI url = v.getURI();
-			String[] urlSplit = url.stringValue().split( "/" );
+			URI type = v.getType();
 			double r = ranker.getVertexScore( v );
 
-			Value[] scores = { vf.createLiteral( v.getLabel() ),
-				// FIXME: we should get this from the metamodel, not the URI structure
-				vf.createLiteral( urlSplit[urlSplit.length - 2] ),
-				vf.createLiteral( r )
-			};
+			Value[] scores = { url, type, vf.createLiteral( r )	};
 			list.add( scores );
 		}
 
