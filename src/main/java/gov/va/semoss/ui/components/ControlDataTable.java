@@ -78,6 +78,18 @@ public class ControlDataTable {
 		properties.clear();
 	}
 
+	public Set<URI> getShowing(){
+		return propertyShow;
+	}
+	
+	public Set<URI> getShowingTT(){
+		return propertyShowTT;
+	}
+	
+	public Set<URI> getHidden(){
+		return propertyHide;
+	}
+	
 	/**
 	 * Generates all the rows in the control panel for the specified table and
 	 * properties

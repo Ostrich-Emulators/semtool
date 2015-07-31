@@ -102,8 +102,8 @@ public class WeightDropDownButton extends JButton {
 			return;
 		}
 
-		initMenus( nodePropTree, 2, playSheet.getFilterData().getNodeTypeMap() );
-		initMenus( edgePropTree, 1, playSheet.getFilterData().getEdgeTypeMap() );
+		initMenus( nodePropTree, 2, playSheet.getVerticesByType() );
+		initMenus( edgePropTree, 1, playSheet.getEdgesByType() );
 		
 		setScrollPaneSize(nodeScrollPane, nodePropTree);
 		setScrollPaneSize(edgeScrollPane, edgePropTree);

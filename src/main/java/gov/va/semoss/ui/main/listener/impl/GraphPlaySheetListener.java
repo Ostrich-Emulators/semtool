@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
-import gov.va.semoss.ui.components.models.EdgeFilterTableModel;
 import gov.va.semoss.ui.components.models.VertexFilterTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
@@ -31,6 +30,7 @@ import javax.swing.event.InternalFrameListener;
 /**
  */
 public class GraphPlaySheetListener implements InternalFrameListener {
+
 	private final GraphPlaySheet ps;
 
 	public GraphPlaySheetListener( GraphPlaySheet gps ) {
@@ -38,7 +38,7 @@ public class GraphPlaySheetListener implements InternalFrameListener {
 	}
 
 	/**
-	 * Method internalFrameActivated.  Gets the playsheet that is being activated
+	 * Method internalFrameActivated. Gets the playsheet that is being activated
 	 * TODO unused method Method internalFrameActivated. Gets the playsheet that
 	 * is being activated
 	 *
@@ -46,35 +46,41 @@ public class GraphPlaySheetListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameActivated( InternalFrameEvent e ) {
-		Utility.addModelToJTable( new VertexFilterTableModel( ps.getFilterData()), Constants.FILTER_TABLE);
-		Utility.addModelToJTable( new EdgeFilterTableModel(   ps.getFilterData()), Constants.EDGE_TABLE);
+		Utility.addModelToJTable( new VertexFilterTableModel<>( ps.getVisibleGraph(),
+				ps.getVisibleGraph().getVertices(), "Node Type" ), Constants.FILTER_TABLE );
+		Utility.addModelToJTable( new VertexFilterTableModel<>( ps.getVisibleGraph(),
+				ps.getVisibleGraph().getEdges(), "Edge Type" ), Constants.EDGE_TABLE );
 	}
 
 	/**
-	 * Method internalFrameClosed.
-	 * TODO unused method Method internalFrameClosed.
+	 * Method internalFrameClosed. TODO unused method Method internalFrameClosed.
 	 *
 	 * @param e InternalFrameEvent
 	 */
 	@Override
 	public void internalFrameClosed( InternalFrameEvent e ) {
-		Utility.resetJTable(Constants.FILTER_TABLE);
-		Utility.resetJTable(Constants.EDGE_TABLE);
-		Utility.resetJTable(Constants.PROP_TABLE);
+		Utility.resetJTable( Constants.FILTER_TABLE );
+		Utility.resetJTable( Constants.EDGE_TABLE );
+		Utility.resetJTable( Constants.PROP_TABLE );
 	}
 
 	@Override
-	public void internalFrameOpened( InternalFrameEvent e ) {}
+	public void internalFrameOpened( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameClosing( InternalFrameEvent e ) {}
+	public void internalFrameClosing( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameIconified( InternalFrameEvent e ) {}
+	public void internalFrameIconified( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameDeiconified( InternalFrameEvent e ) {}
+	public void internalFrameDeiconified( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameDeactivated( InternalFrameEvent e ) {}
+	public void internalFrameDeactivated( InternalFrameEvent e ) {
+	}
 }

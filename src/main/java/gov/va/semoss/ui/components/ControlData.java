@@ -78,6 +78,11 @@ public class ControlData implements GraphListener {
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+
+		List<URI> eshow = new ArrayList<>( edgeCDT.getShowing() );
+		List<URI> eshowTT = new ArrayList<>( edgeCDT.getShowingTT() );
+		
+		
 		clear();
 
 		for ( SEMOSSVertex vertex : graph.getVertices() ) {
