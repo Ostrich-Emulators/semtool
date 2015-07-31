@@ -69,6 +69,7 @@ import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.VertexColorShapeData;
 import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.models.VertexFilterTableModel;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
@@ -86,6 +87,7 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.Utility;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -301,7 +303,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void setFrame( PlaySheetFrame frame ) {
 		super.setFrame( frame );
 
-		frame.addInternalFrameListener( new GraphPlaySheetListener( this ) );
+		GraphPlaySheetListener gpsl = new GraphPlaySheetListener( this );
+		addGraphListener( gpsl );
+		frame.addInternalFrameListener( gpsl );
 		frame.addInternalFrameListener( new PlaySheetControlListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetColorShapeListener( this ) );
 	}

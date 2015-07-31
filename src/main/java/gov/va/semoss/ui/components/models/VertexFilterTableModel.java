@@ -27,9 +27,11 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import java.util.Map;
+import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 
 import org.openrdf.model.URI;
@@ -43,8 +45,8 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 	private static final Class<?>[] classNames = { Boolean.class, URI.class, URI.class };
 
 	private final String[] columnNames = { "Show", "Node Type", "Instance" };
-	private final Graph<SEMOSSVertex, SEMOSSEdge> graph;
 	private final List<FilterRow> data = new ArrayList<>();
+	private final Set<URI> visibleTypes = new HashSet<>();
 
 	/**
 	 * Constructor for VertexFilterTableModel.
@@ -53,8 +55,6 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 	 */
 	public VertexFilterTableModel( Graph<SEMOSSVertex, SEMOSSEdge> graph,
 			Collection<T> instances, String middleColumnName ) {
-		this.graph = graph;
-
 		columnNames[1] = middleColumnName;
 
 		MultiMap<URI, T> typeToInstances = new MultiMap<>();
@@ -67,7 +67,26 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 			for ( T instance : en.getValue() ) {
 				data.add( new FilterRow( en.getKey(), instance ) );
 			}
+
+			populateVisibleTypes( en.getKey(), en.getValue() );
 		}
+	}
+
+	private void populateVisibleTypes( URI type, Collection<T> items ) {
+		int visibles = 0;
+		for ( T t : items ) {
+			if ( t.isVisible() ) {
+				visibles++;
+			}
+		}
+
+		if ( visibles > 0 ) {
+			visibleTypes.add( type );
+		}
+	}
+
+	public FilterRow<T> getRawRow( int row ) {
+		return data.get( row );
 	}
 
 	/**
@@ -83,14 +102,20 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 		FilterRow vfRow = data.get( row );
 		switch ( column ) {
 			case 0:
-				return ( vfRow.isHeader() || vfRow.instance.isVisible() );
+				return ( vfRow.isHeader()
+						? typeIsVisible( vfRow.type )
+						: vfRow.instance.isVisible() );
 			case 1:
 				return ( vfRow.isHeader() ? vfRow.type : null );
 			case 2:
-				return vfRow.instance;
+				return ( vfRow.isHeader() ? null : vfRow.instance.getURI() );
 			default:
 				return null;
 		}
+	}
+
+	private boolean typeIsVisible( URI type ) {
+		return visibleTypes.contains( type );
 	}
 
 	/**
@@ -103,19 +128,27 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 	@Override
 	public void setValueAt( Object value, int row, int column ) {
 		FilterRow vfRow = data.get( row );
+		boolean visible = Boolean.class.cast( value );
 
 		if ( vfRow.isHeader() ) {
 			for ( FilterRow fr : data ) {
-				if ( fr.type.equals( vfRow.type ) ) {
-					vfRow.instance.setVisible( (Boolean) value );
+				if ( fr.type.equals( vfRow.type ) && !fr.isHeader() ) {
+					fr.instance.setVisible( visible );
 				}
 			}
-			this.fireTableDataChanged();
+
+			if ( visible ) {
+				visibleTypes.add( vfRow.type );
+			}
+			else {
+				visibleTypes.remove( vfRow.type );
+			}
+			fireTableDataChanged();
 			return;
 		}
 
 		// we are only dealing with one vertex
-		vfRow.instance.setVisible( (Boolean) value );
+		vfRow.instance.setVisible( visible );
 		fireTableCellUpdated( row, row );
 	}
 

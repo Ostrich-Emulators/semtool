@@ -39,6 +39,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
 	public static final String CHANGE_COLOR = "color";
+	public static final String CHANGE_VISIBLE = "visible";
 	private transient boolean visible = true;
 	private transient URI id;
 	private transient Color color;
@@ -110,7 +111,9 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	@Override
 	public void setVisible( boolean b ) {
+		boolean old = visible;
 		visible = b;
+		this.fireIfPropertyChanged( CHANGE_VISIBLE, old, b );
 	}
 
 	@Override
@@ -142,10 +145,10 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	}
 
 	@Override
-	public Set<URI> getPropertyKeys(){
+	public Set<URI> getPropertyKeys() {
 		return new HashSet<>( properties.keySet() );
 	}
-	
+
 	@Override
 	public String getLabel() {
 		return ( properties.containsKey( RDFS.LABEL )
@@ -189,7 +192,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 		}
 		return map;
 	}
-	
+
 	@Override
 	public Map<URI, Value> getValues() {
 		return properties;
