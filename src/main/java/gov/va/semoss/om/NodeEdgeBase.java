@@ -7,6 +7,7 @@ package gov.va.semoss.om;
 
 import java.awt.Color;
 import java.util.Map;
+import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
@@ -34,6 +35,8 @@ public interface NodeEdgeBase {
 
 	public Map<URI, Value> getValues();
 
+	public Set<URI> getPropertyKeys();
+	
 	public boolean hasProperty( URI prop );
 
 	public boolean isMarked( URI prop );

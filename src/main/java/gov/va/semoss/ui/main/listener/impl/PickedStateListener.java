@@ -34,12 +34,16 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.models.VertexPropertyTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.util.Arrays;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  * Controls what happens when a picked state occurs.
@@ -69,7 +73,7 @@ public class PickedStateListener implements ItemListener {
 
 		//need to check if there are any size resets that need to be done
 		VertexShapeTransformer vst = (VertexShapeTransformer) rc.getVertexShapeTransformer();
-					
+
 		// increase/decrease the size of nodes as they get selected/unselected
 		if ( e.getItem() instanceof SEMOSSVertex ) {
 			SEMOSSVertex v = SEMOSSVertex.class.cast( e.getItem() );
@@ -95,8 +99,18 @@ public class PickedStateListener implements ItemListener {
 		selectedVertices.addAll( viewer.getPickedVertexState().getPicked() );
 
 		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
-			VertexPropertyTableModel pm = new VertexPropertyTableModel( vertex );
+			VertexPropertyTableModel pm
+					= new VertexPropertyTableModel( vertex, gps.getVisibleGraph() );
 			table.setModel( pm );
+
+			LabeledPairTableCellRenderer<Value> pr
+					= LabeledPairTableCellRenderer.getValuePairRenderer( gps.getEngine() );
+			table.setDefaultRenderer( Value.class, pr );
+			table.setDefaultRenderer( URI.class, pr );
+			table.getColumnModel().getColumn( 1 ).setCellEditor( new SimpleValueEditor() );
+			pr.cache( Constants.IN_EDGE_CNT, "In-Edges" );
+			pr.cache( Constants.OUT_EDGE_CNT, "Out-Edges" );
+
 			pm.fireTableDataChanged();
 		}
 
