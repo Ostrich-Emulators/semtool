@@ -1,6 +1,8 @@
 package gov.va.semoss.ui.components.tabbedqueries;
 
+import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.components.CloseableTab;
+import gov.va.semoss.ui.components.FileBrowsePanel;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -8,10 +10,13 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
@@ -19,6 +24,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -28,6 +36,7 @@ public class TabbedQueries extends JTabbedPane {
 	private static final long serialVersionUID = -490582079689204119L;
 
 	private final TabRenameAction renamer = new TabRenameAction();
+	private final QuerySavingAction saver = new QuerySavingAction();
 
 	public TabbedQueries() {
 		/**
@@ -128,7 +137,7 @@ public class TabbedQueries extends JTabbedPane {
 	private void addNewTab() {
 		SyntaxTextEditor textEditor = new SyntaxTextEditor();
 		Font f = getFont();
-		
+
 		// use a mono-spaced font so indentation works well		
 		textEditor.setFont( new Font( Font.MONOSPACED, f.getStyle(), f.getSize() ) );
 		RTextScrollPane sp = new RTextScrollPane( textEditor );
@@ -142,6 +151,7 @@ public class TabbedQueries extends JTabbedPane {
 		//Add an item to the context-popup menu that allows one to rename the current tab:
 		JPopupMenu popup = textEditor.getPopupMenu();
 		popup.addSeparator();
+		popup.add( saver );
 		popup.add( renamer );
 		//Remove the code-folding component and it's separator from the popup menu:
 		popup.remove( popup.getComponent( 10 ) ); // the item
@@ -203,6 +213,7 @@ public class TabbedQueries extends JTabbedPane {
 					e.consume();
 					if ( SwingUtilities.isRightMouseButton( e ) ) {
 						JPopupMenu popup = new JPopupMenu();
+						popup.add( saver );
 						popup.add( renamer );
 						popup.show( e.getComponent(), e.getX(), e.getY() );
 					}
@@ -267,4 +278,28 @@ public class TabbedQueries extends JTabbedPane {
 			}
 		}
 	}
+
+	private class QuerySavingAction extends AbstractSavingAction {
+
+		public QuerySavingAction() {
+			super( "Save Query" );
+			super.setAppendDate( true );
+			super.setDefaultFileName( "Query" );
+		}
+
+		@Override
+		protected void saveTo( File exploc ) throws IOException {
+			FileUtils.write( exploc, TabbedQueries.this.getTextOfSelectedTab() );
+		}
+
+		@Override
+		protected void finishFileChooser( JFileChooser chsr ) {
+			super.finishFileChooser( chsr );
+			FileFilter spqFilter
+					= new FileNameExtensionFilter( "SPARQL Files (*.sparql, *.spq)",
+							"sparql", "spq" );
+			chsr.setFileFilter( spqFilter );
+			chsr.setAcceptAllFileFilterUsed( true );
+		}
+	};
 }
