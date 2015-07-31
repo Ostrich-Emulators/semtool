@@ -30,6 +30,9 @@ import org.openrdf.model.vocabulary.XMLSchema;
  */
 public class Constants {
 
+	private Constants() {
+	}
+
 	public static final String PDF = "PDF";
 	public static final String PNG = "PNG";
 
@@ -92,8 +95,6 @@ public class Constants {
 	public static final String CURRENT_PLAYSHEET = "layoutValue";
 	public static final String BASE_FOLDER = "BaseFolder";
 
-	
-	
 	//graphplaysheet option constants
 	// layouts
 	//public static final String GPSSudowl = "GPS_SUDOWL_DEFAULT";
@@ -103,7 +104,6 @@ public class Constants {
 	//public static final String searchCheck = "searchCheck";
 	//public static final String propertyCheck = "propertyCheck";
 	//public static final String highQualityExportCheck = "highQualityExportCheck";
-
 	//used by ExportSpecificRelationshipsToLoadingSheetAction
 	public static final URI ANYNODE = new URIImpl( "semoss://any" );
 	public static final URI NONODE = new URIImpl( "semoss://none" );
@@ -141,7 +141,7 @@ public class Constants {
 	public static final String CLASS_URI = RDFS.CLASS.toString();
 	public static final String DEFAULT_PROPERTY_URI = RDF.PROPERTY.toString();
 	public static final String RDFTYPE_URI = RDF.TYPE.toString();
-	
+
 	public static final String STRING_URI = XMLSchema.STRING.toString();
 	public static final String ANYURI_URI = XMLSchema.ANYURI.toString();
 	public static final String INT_URI = XMLSchema.INT.toString();
