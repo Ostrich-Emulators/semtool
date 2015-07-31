@@ -296,8 +296,8 @@ public class TabbedQueries extends JTabbedPane {
 		protected void finishFileChooser( JFileChooser chsr ) {
 			super.finishFileChooser( chsr );
 			FileFilter spqFilter
-					= new FileNameExtensionFilter( "SPARQL Files (*.sparql, *.spq)",
-							"sparql", "spq" );
+					= new FileNameExtensionFilter( "SPARQL Files (*.spq, *.sparql)",
+							"spq", "sparql" );
 			chsr.setFileFilter( spqFilter );
 			chsr.setAcceptAllFileFilterUsed( true );
 		}
