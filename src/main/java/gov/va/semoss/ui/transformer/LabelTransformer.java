@@ -20,7 +20,7 @@
 package gov.va.semoss.ui.transformer;
 
 import gov.va.semoss.om.NodeEdgeBase;
-import gov.va.semoss.ui.components.ControlData;
+import gov.va.semoss.ui.components.ControlDataTable;
 import gov.va.semoss.util.PropComparator;
 
 import java.util.Collections;
@@ -33,14 +33,14 @@ import org.openrdf.model.URI;
  */
 public class LabelTransformer<T extends NodeEdgeBase> extends SelectingTransformer<T, String> {
 
-	private final ControlData data;
+	private final ControlDataTable data;
 
 	/**
 	 * Constructor for VertexLabelTransformer.
 	 *
 	 * @param data ControlData
 	 */
-	public LabelTransformer( ControlData data ) {
+	public LabelTransformer( ControlDataTable data ) {
 		this.data = data;
 	}
 
@@ -52,7 +52,7 @@ public class LabelTransformer<T extends NodeEdgeBase> extends SelectingTransform
 	 * @return String - the property name of the vertex
 	 */
 	public String getText( T vertex ) {
-		List<URI> properties = data.getSelectedProperties( vertex );
+		List<URI> properties = data.getSelectedProperties( vertex.getType() );
 		
 		if ( properties.isEmpty() ) {
 			return "";

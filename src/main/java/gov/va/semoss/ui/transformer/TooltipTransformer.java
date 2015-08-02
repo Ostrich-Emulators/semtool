@@ -20,8 +20,8 @@
 package gov.va.semoss.ui.transformer;
 
 import gov.va.semoss.om.NodeEdgeBase;
-import gov.va.semoss.ui.components.ControlData;
 
+import gov.va.semoss.ui.components.ControlDataTable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -39,14 +39,14 @@ import org.openrdf.model.vocabulary.RDFS;
 public class TooltipTransformer<T extends NodeEdgeBase> implements Transformer<T, String> {
 
 	private static final Logger logger = Logger.getLogger(TooltipTransformer.class );
-	ControlData data;
+	private final ControlDataTable data;
 
 	/**
 	 * Constructor for VertexTooltipTransformer.
 	 *
 	 * @param data ControlData
 	 */
-	public TooltipTransformer( ControlData data ) {
+	public TooltipTransformer( ControlDataTable data ) {
 		this.data = data;
 	}
 

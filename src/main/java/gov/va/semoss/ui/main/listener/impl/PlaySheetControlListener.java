@@ -43,8 +43,8 @@ public class PlaySheetControlListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameActivated( InternalFrameEvent e ) {
-		Utility.addModelToJTable( ps.getControlData().getVertexTableModel(), Constants.LABEL_TABLE);
-		Utility.addModelToJTable( ps.getControlData().getEdgeTableModel(),   Constants.TOOLTIP_TABLE);
+		Utility.addModelToJTable( ps.getVertexLabelModel(), Constants.LABEL_TABLE);
+		Utility.addModelToJTable( ps.getEdgeLabelModel(), Constants.TOOLTIP_TABLE);
 	}
 
 	/**
