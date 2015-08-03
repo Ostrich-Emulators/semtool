@@ -7,7 +7,6 @@ package gov.va.semoss.ui.components;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.Graph;
 import gov.va.semoss.om.AbstractNodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
@@ -118,10 +117,9 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 		}
 		else {
 			currentGps.addGraphListener( this );
-			propmodel.setGraph( currentGps.getView(), currentGps.getVisibleGraph() );
 			currentGps.getView().getPickedEdgeState().addItemListener( propmodel );
 			currentGps.getView().getPickedVertexState().addItemListener( propmodel );
-			graphUpdated(currentGps.getGraphData().getGraph(), currentGps );
+			graphUpdated( currentGps.getGraphData().getGraph(), currentGps );
 		}
 	}
 
@@ -157,9 +155,10 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			GraphPlaySheet gps ) {
 		if ( gps == currentGps ) {
-			Graph<SEMOSSVertex, SEMOSSEdge> g = gps.getGraphData().getGraph();
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> g = gps.getGraphData().getGraph();
 			nodemodel.refresh( g.getVertices() );
 			edgemodel.refresh( g.getEdges() );
+			propmodel.setGraph( gps.getView(), g );
 		}
 	}
 
