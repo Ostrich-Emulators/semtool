@@ -13,8 +13,8 @@ import java.util.TreeSet;
  *
  */
 public class ColumnPlotDataSeriesProcessor implements DataSeriesProcessor {
-	/** The file path of the Column Graph file in the HTML directory */
-	public static final String HTML_FILEPATH = "";
+	/** The file name of the Column Graph file in the HTML directory */
+	public static final String HTML_FILE_NAME = "columnchart.html";
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override

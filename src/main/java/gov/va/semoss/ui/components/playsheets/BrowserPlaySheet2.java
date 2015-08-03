@@ -162,9 +162,10 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
 		HashMap<?,?> dataSeries = (HashMap<?,?>)dataHash.get(dataSeriesKey);
-		
-		dataSeries = DataSeriesDigester.instance().digestData(dataSeries, fileName);
-		
+		// Digest/process the data for display
+		String fileNameOnly = getFileName(fileName);
+		dataSeries = DataSeriesDigester.instance().digestData(dataSeries, fileNameOnly);
+		// After digestion, put the data back
 		dataHash.put(dataSeriesKey, dataSeries);
 		// Continue with the processing
 		String json = new Gson().toJson( dataHash );
@@ -174,6 +175,21 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		}
 
 		executeJavaScript( "start(" + json + ");" );
+	}
+
+	/**
+	 * Convenience method for extracting only the filename, plus extension
+	 * out of a complete file path
+	 * @param filepath The file path, plus filename, with extension 
+	 * @return Just the filename, with extension
+	 */
+	private String getFileName(String filepath) {
+		int separatorIndex = filepath.lastIndexOf('/');
+		String onlyFilename = "";
+		if (separatorIndex >= 0){
+			onlyFilename = filepath.substring(separatorIndex + 1);
+		}
+		return onlyFilename;
 	}
 
 	@Override

@@ -14,15 +14,12 @@ public class DataSeriesDigester {
 	private static DataSeriesDigester instance;
 	/** The set of parsers, looked up a file name key */
 	private static HashMap<String, DataSeriesProcessor> parsers = new HashMap<String, DataSeriesProcessor>();
-	/** The static String indicating that the PlaySheet is using a grid plot - the
-	 * html file path + name */
-	private static final String GRID_PLOT_KEY = "";
-	
+
 	/**
 	 * The singleton constructor
 	 */
 	private DataSeriesDigester(){
-		parsers.put(GRID_PLOT_KEY, new ColumnPlotDataSeriesProcessor());
+		parsers.put(ColumnPlotDataSeriesProcessor.HTML_FILE_NAME, new ColumnPlotDataSeriesProcessor());
 	}
 
 	/**
@@ -44,10 +41,13 @@ public class DataSeriesDigester {
 	 * @return A processed data series
 	 */
 	public HashMap<?,?> digestData(HashMap<?,?> undigestedData, String fileName){
+		// Get the parser associated with that file name
 		DataSeriesProcessor parser = parsers.get(fileName);
-		if (parser != null){
+		// If there is no parser, return the data series untouched
+		if (parser == null){
 			return undigestedData;
 		}
+		// Otherwise, let the parser handle the data, and return the result
 		return parser.parseData(undigestedData);
 	}
 	
