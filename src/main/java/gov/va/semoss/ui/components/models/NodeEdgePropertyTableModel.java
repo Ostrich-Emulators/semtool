@@ -24,7 +24,11 @@ import gov.va.semoss.om.NodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.PropComparator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,37 +36,65 @@ import javax.swing.table.AbstractTableModel;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  * This class is used to create a table model for vertex properties.
  */
-public class NodeEdgePropertyTableModel<T extends NodeEdgeBase> extends AbstractTableModel {
+public class NodeEdgePropertyTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = -1980815818428292267L;
+	private static final Comparator<PropertyRow> COMPARER = new Comparator<PropertyRow>() {
+		PropComparator comp = new PropComparator();
+
+		@Override
+		public int compare( PropertyRow o1, PropertyRow o2 ) {
+			return comp.compare( o1.name, o2.name );
+		}
+	};
 
 	private static final String[] columnNames = { "Name ", "Value" };
 	private static final Class<?>[] classNames = { URI.class, Value.class };
 	private final List<PropertyRow> rows = new ArrayList<>();
-	private final T vertex;
+	private NodeEdgeBase vertex = null;
 
-	/**
-	 * Constructor for VertexPropertyTableModel.
-	 *
-	 * @param vertex SEMOSSVertex
-	 */
-	public NodeEdgePropertyTableModel( T vertex,
-			Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		this.vertex = vertex;
-		for ( Map.Entry<URI, Value> entry : vertex.getValues().entrySet() ) {
+	public NodeEdgePropertyTableModel() {
+	}
+
+	public void clear() {
+		rows.clear();
+		fireTableDataChanged();
+	}
+
+	public void setVertex( SEMOSSVertex item, Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		rows.clear();
+
+		rows.add( new PropertyRow( Constants.IN_EDGE_CNT,
+				new LiteralImpl( Integer.toString( graph.getInEdges( item ).size() ),
+						XMLSchema.INT ), true ) );
+		rows.add( new PropertyRow( Constants.OUT_EDGE_CNT,
+				new LiteralImpl( Integer.toString( graph.getOutEdges( item ).size() ),
+						XMLSchema.INT ), true ) );
+		refresh( item );
+	}
+
+	public void setEdge( SEMOSSEdge item, Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		rows.clear();
+		refresh( vertex );
+	}
+
+	private void refresh( NodeEdgeBase item ) {
+		vertex = item;
+		for ( Map.Entry<URI, Value> entry : item.getValues().entrySet() ) {
 			if ( !RDF.SUBJECT.equals( entry.getKey() ) ) {
 				rows.add( new PropertyRow( entry.getKey(), entry.getValue() ) );
 			}
 		}
-	}
 
-	protected void addRow( PropertyRow pr ) {
-		rows.add( pr );
+		Collections.sort( rows, COMPARER );
+		fireTableDataChanged();
 	}
 
 	/**

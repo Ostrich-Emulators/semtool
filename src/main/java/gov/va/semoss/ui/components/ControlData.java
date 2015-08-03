@@ -77,14 +77,7 @@ public class ControlData implements GraphListener {
 	}
 
 	@Override
-	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-
-		List<URI> eshow = new ArrayList<>( edgeCDT.getShowing() );
-		List<URI> eshowTT = new ArrayList<>( edgeCDT.getShowingTT() );
-		
-		
-		clear();
-
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {		
 		for ( SEMOSSVertex vertex : graph.getVertices() ) {
 			for ( URI property : vertex.getProperties().keySet() ) {
 				addVertexProperty( vertex.getType(), property );

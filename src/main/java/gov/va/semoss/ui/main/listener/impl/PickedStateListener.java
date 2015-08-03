@@ -24,26 +24,19 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
 
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.models.VertexPropertyTableModel;
+import gov.va.semoss.ui.components.FilterPanel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
-import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.util.Arrays;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 
 /**
  * Controls what happens when a picked state occurs.
@@ -66,8 +59,7 @@ public class PickedStateListener implements ItemListener {
 	 */
 	@Override
 	public void itemStateChanged( ItemEvent e ) {
-		JTable table = (JTable) DIHelper.getInstance().getLocalProp( Constants.PROP_TABLE );
-		table.setModel( new DefaultTableModel() );
+		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
 
 		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = viewer.getRenderContext();
 
@@ -99,19 +91,7 @@ public class PickedStateListener implements ItemListener {
 		selectedVertices.addAll( viewer.getPickedVertexState().getPicked() );
 
 		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
-			VertexPropertyTableModel pm
-					= new VertexPropertyTableModel( vertex, gps.getVisibleGraph() );
-			table.setModel( pm );
-
-			LabeledPairTableCellRenderer<Value> pr
-					= LabeledPairTableCellRenderer.getValuePairRenderer( gps.getEngine() );
-			table.setDefaultRenderer( Value.class, pr );
-			table.setDefaultRenderer( URI.class, pr );
-			table.getColumnModel().getColumn( 1 ).setCellEditor( new SimpleValueEditor() );
-			pr.cache( Constants.IN_EDGE_CNT, "In-Edges" );
-			pr.cache( Constants.OUT_EDGE_CNT, "Out-Edges" );
-
-			pm.fireTableDataChanged();
+			fp.getPropertyModel().setVertex( vertex, gps.getVisibleGraph() );
 		}
 
 		if ( null != vlft ) {

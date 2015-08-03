@@ -24,7 +24,6 @@ import java.awt.event.MouseEvent;
 import java.util.Set;
 
 import javax.swing.JComponent;
-import javax.swing.JTable;
 
 import org.apache.log4j.Logger;
 
@@ -33,20 +32,15 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalLensGraphMouse;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.ui.components.FilterPanel;
 import gov.va.semoss.ui.components.GraphNodePopup;
 import gov.va.semoss.ui.components.NodePropertiesPopup;
 import gov.va.semoss.ui.components.api.IChakraListener;
-import gov.va.semoss.ui.components.models.EdgePropertyTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
-import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
 import java.util.HashSet;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 
 /**
  * Controls what happens when a user clicks on a node in a graph.
@@ -143,24 +137,12 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
 	 * to use to get the edges
 	 */
-	protected void handleEdges(
-			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		JTable table = (JTable) DIHelper.getInstance().getLocalProp(
-				Constants.PROP_TABLE );
+	protected void handleEdges( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
+		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
 
 		Set<SEMOSSEdge> pickedEdges = viewer.getPickedEdgeState().getPicked();
 		for ( SEMOSSEdge edge : pickedEdges ) {
-			EdgePropertyTableModel pm = new EdgePropertyTableModel( edge,
-					gps.getVisibleGraph() );
-			table.setModel( pm );
-
-			LabeledPairTableCellRenderer<Value> pr
-					= LabeledPairTableCellRenderer.getValuePairRenderer( gps.getEngine() );
-			table.setDefaultRenderer( Value.class, pr );
-			table.setDefaultRenderer( URI.class, pr );
-			table.getColumnModel().getColumn( 1 ).setCellEditor( new SimpleValueEditor() );
-
-			pm.fireTableDataChanged();
+			fp.getPropertyModel().setEdge( edge, null );
 		}
 	}
 

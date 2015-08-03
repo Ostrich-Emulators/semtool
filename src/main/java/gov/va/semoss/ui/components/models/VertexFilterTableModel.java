@@ -19,14 +19,12 @@
  */
 package gov.va.semoss.ui.components.models;
 
-import edu.uci.ics.jung.graph.Graph;
 import gov.va.semoss.om.NodeEdgeBase;
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -48,14 +46,27 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 	private final List<FilterRow> data = new ArrayList<>();
 	private final Set<URI> visibleTypes = new HashSet<>();
 
+	public VertexFilterTableModel( String middleColumnName ) {
+		columnNames[1] = middleColumnName;
+	}
+
 	/**
 	 * Constructor for VertexFilterTableModel.
 	 *
 	 * @param _data VertexFilterData
 	 */
-	public VertexFilterTableModel( Graph<SEMOSSVertex, SEMOSSEdge> graph,
-			Collection<T> instances, String middleColumnName ) {
-		columnNames[1] = middleColumnName;
+	public VertexFilterTableModel( Collection<T> instances, String middleColumnName ) {
+		this( middleColumnName );
+		refresh( instances );
+	}
+	
+	public void clear(){
+		data.clear();
+		fireTableDataChanged();
+	}
+
+	public final void refresh( Collection<T> instances ) {
+		data.clear();
 
 		MultiMap<URI, T> typeToInstances = new MultiMap<>();
 		for ( T t : instances ) {
@@ -70,6 +81,9 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 
 			populateVisibleTypes( en.getKey(), en.getValue() );
 		}
+
+		Collections.sort( data );
+		fireTableDataChanged();
 	}
 
 	private void populateVisibleTypes( URI type, Collection<T> items ) {
@@ -131,10 +145,16 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 		boolean visible = Boolean.class.cast( value );
 
 		if ( vfRow.isHeader() ) {
+			List<FilterRow> tochange = new ArrayList<>();
+
 			for ( FilterRow fr : data ) {
 				if ( fr.type.equals( vfRow.type ) && !fr.isHeader() ) {
-					fr.instance.setVisible( visible );
+					tochange.add( fr );
 				}
+			}
+
+			for ( FilterRow fr : tochange ) {
+				fr.instance.setVisible( visible );
 			}
 
 			if ( visible ) {
@@ -144,12 +164,12 @@ public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTabl
 				visibleTypes.remove( vfRow.type );
 			}
 			fireTableDataChanged();
-			return;
 		}
-
-		// we are only dealing with one vertex
-		vfRow.instance.setVisible( visible );
-		fireTableCellUpdated( row, row );
+		else {
+			// we are only dealing with one vertex
+			vfRow.instance.setVisible( visible );
+			fireTableCellUpdated( row, row );
+		}
 	}
 
 	/**

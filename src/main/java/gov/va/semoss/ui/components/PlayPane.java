@@ -177,7 +177,7 @@ public class PlayPane extends JFrame {
 	public JTable colorShapeTable, sizeTable;
 
 	// Left label panel
-	private JPanel filterPanel;
+	private FilterPanel filterPanel;
 	//private JPanel filterLabel;
 	private JPanel outputPanel;
 	public JTable labelTable, tooltipTable;
@@ -573,6 +573,7 @@ public class PlayPane extends JFrame {
 				}
 
 				gQueryBuilderPanel.setEngine( engine );
+				filterPanel.setEngine( engine );
 			}
 		} );
 	}
@@ -869,19 +870,12 @@ public class PlayPane extends JFrame {
 		return panel;
 	}
 
-	private JPanel makeFilterPanel() {
-		GridBagLayout panelLayout = new GridBagLayout();
-		panelLayout.columnWeights = new double[]{ 1.0 };
-		panelLayout.rowWeights = new double[]{ 1.0, 1.0, 1.0, 0.0 };
-
-		JPanel panel = new JPanel( panelLayout );
-		panel.setBackground( SystemColor.control );
-
-		filterTable = initJTableAndAddTo( panel, true );
-		propertyTable = initJTableAndAddTo( panel, true );
-		edgeTable = initJTableAndAddTo( panel, true );
-		
-		return panel;
+	private FilterPanel makeFilterPanel() {
+		return new FilterPanel();
+	}
+	
+	public FilterPanel getFilterPanel(){
+		return filterPanel;
 	}
 
 	private CustomButton initCustomButton( String title ) {
