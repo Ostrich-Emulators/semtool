@@ -162,18 +162,10 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
 		HashMap<?,?> dataSeries = (HashMap<?,?>)dataHash.get(dataSeriesKey);
-		// If this graphic is a column chart, then sort the data series categories
-		if (this.fileName.endsWith("columnchart.html")){
-			// Call the sorting convenience method, to derive an order data structure
-			LinkedHashMap<?,?> sortedHash = sort(dataSeries);
-			// Put the data series back
-			dataHash.put(dataSeriesKey, sortedHash);
-		}
-		// Otherwise, use the unsorted data series
-		else {
-			// Put the data series back
-			dataHash.put(dataSeriesKey, dataSeries);
-		}
+		
+		dataSeries = DataSeriesDigester.instance().digestData(dataSeries, fileName);
+		
+		dataHash.put(dataSeriesKey, dataSeries);
 		// Continue with the processing
 		String json = new Gson().toJson( dataHash );
 		if ( null != json && !"".equals( json ) && !"{}".equals( json ) ) {
@@ -352,23 +344,4 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 			throw new IOException( msg, e );
 		}
 	}
-	
-	/**
-	 * Convenience method for sorting (insertion order-based) data in a 
-	 * HashMap according to alpha-numeric order
-	 * @param hashMap The unordered table
-	 * @return An ordered lookup table
-	 */
-	private LinkedHashMap<?,?> sort(HashMap<?,?> hashMap){
-		SortedSet keys = new TreeSet(hashMap.keySet());
-		LinkedHashMap sortedHash = new LinkedHashMap();
-		Iterator keyIterator = keys.iterator();
-		while (keyIterator.hasNext()){
-			String key = (String)keyIterator.next();
-			Object value = hashMap.get(key);
-			sortedHash.put(key, value);
-		}
-		return sortedHash;
-	}
-
 }
