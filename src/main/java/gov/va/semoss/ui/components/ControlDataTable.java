@@ -28,7 +28,9 @@ import gov.va.semoss.util.PropComparator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
@@ -40,6 +42,7 @@ import org.openrdf.model.URI;
  */
 public class ControlDataTable {
 
+	private static final PropComparator PROPCOMP = new PropComparator();
 	private List<ControlDataRow> data = new ArrayList<>();
 	private Class<?>[] rowClasses = { URI.class, URI.class, Boolean.class,
 		Boolean.class, String.class };
@@ -76,6 +79,19 @@ public class ControlDataTable {
 
 	public void clear() {
 		properties.clear();
+		data.clear();
+	}
+
+	public Set<URI> getShowing() {
+		return propertyShow;
+	}
+
+	public Set<URI> getShowingTT() {
+		return propertyShowTT;
+	}
+
+	public Set<URI> getHidden() {
+		return propertyHide;
 	}
 
 	/**
@@ -83,7 +99,9 @@ public class ControlDataTable {
 	 * properties
 	 */
 	public void populateAllRows() {
-		data.clear();
+		//data.clear();
+
+		Set<ControlDataRow> seen = new HashSet<>( data );
 
 		List<URI> types = new ArrayList<>( properties.keySet() );
 		Collections.sort( types, new PropComparator() );
@@ -91,11 +109,11 @@ public class ControlDataTable {
 		for ( URI type : types ) {
 			ControlDataRow header
 					= new ControlDataRow( type, Constants.ANYNODE, false, false );
-			data.add( header );
+			if ( !seen.contains( header ) ) {
+				data.add( header );
+			}
 
 			List<URI> propertiesForThisType = properties.getNN( type );
-			Collections.sort( propertiesForThisType, new PropComparator() );
-
 			for ( URI property : propertiesForThisType ) {
 				if ( propertyHide.contains( property ) ) {
 					continue;
@@ -104,11 +122,13 @@ public class ControlDataTable {
 				ControlDataRow cdr = new ControlDataRow( type, property,
 						propertyShow.contains( property ),
 						propertyShowTT.contains( property ) );
-
-				data.add( cdr );
+				if ( !seen.contains( cdr ) ) {
+					data.add( cdr );
+				}
 			}
 		}
 
+		Collections.sort( data );
 		tableModel.fireTableDataChanged();
 	}
 
@@ -305,7 +325,7 @@ public class ControlDataTable {
 		}
 	}
 
-	public class ControlDataRow {
+	public class ControlDataRow implements Comparable<ControlDataRow> {
 
 		URI type;
 		URI prop;
@@ -322,6 +342,51 @@ public class ControlDataTable {
 
 		public ControlDataRow( URI type, URI prop ) {
 			this( type, prop, false, false );
+		}
+
+		public boolean isHeader() {
+			return ( null == type || Constants.ANYNODE.equals( prop ) );
+		}
+
+		@Override
+		public int compareTo( ControlDataRow o ) {
+			if ( type.equals( o.type ) ) {
+				if ( isHeader() ) {
+					return -1;
+				}
+				if ( o.isHeader() ) {
+					return 1;
+				}
+
+				return PROPCOMP.compare( prop, o.prop );
+			}
+			return type.stringValue().compareTo( o.type.stringValue() );
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 71 * hash + Objects.hashCode( this.type );
+			hash = 71 * hash + Objects.hashCode( this.prop );
+			return hash;
+		}
+
+		@Override
+		public boolean equals( Object obj ) {
+			if ( obj == null ) {
+				return false;
+			}
+			if ( getClass() != obj.getClass() ) {
+				return false;
+			}
+			final ControlDataRow other = (ControlDataRow) obj;
+			if ( !Objects.equals( this.type, other.type ) ) {
+				return false;
+			}
+			if ( !Objects.equals( this.prop, other.prop ) ) {
+				return false;
+			}
+			return true;
 		}
 	}
 }

@@ -43,7 +43,6 @@ import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 
 import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
-import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -69,7 +68,6 @@ import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.VertexColorShapeData;
-import gov.va.semoss.ui.components.VertexFilterData;
 import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
@@ -87,6 +85,7 @@ import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.MultiMap;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -110,7 +109,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	protected GraphDataModel gdm;
 	protected String layoutName = Constants.FR;
 	protected ControlData controlData = new ControlData();
-	protected VertexFilterData filterData;
 
 	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
 	protected LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
@@ -177,16 +175,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		graphSplitPane.setTopComponent( controlPanel );
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
-//		JPanel helper = new JPanel( new BorderLayout() );
-//		helper.add( new GraphZoomScrollPane( view ) );
-//		graphSplitPane.setBottomComponent( helper );
-
-		filterData = new VertexFilterData();
 
 		addGraphListener( legendPanel );
 		addGraphListener( controlData );
-		addGraphListener( filterData );
-		//addGraphListener( predData );
 		addGraphListener( colorShapeData );
 		addGraphListener( controlPanel );
 	}
@@ -310,6 +301,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void setFrame( PlaySheetFrame frame ) {
 		super.setFrame( frame );
 
+		DIHelper.getInstance().getPlayPane().getFilterPanel().setPlaySheet( this );
 		frame.addInternalFrameListener( new GraphPlaySheetListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetControlListener( this ) );
 		frame.addInternalFrameListener( new PlaySheetColorShapeListener( this ) );
@@ -376,13 +368,20 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		controlPanel.setRedoButtonEnabled( maxOverlayLevel > overlayLevel );
 	}
 
-	/**
-	 * Method getFilterData.
-	 *
-	 * @return VertexFilterData
-	 */
-	public VertexFilterData getFilterData() {
-		return filterData;
+	public MultiMap<URI, SEMOSSVertex> getVerticesByType() {
+		MultiMap<URI, SEMOSSVertex> typeToInstances = new MultiMap<>();
+		for ( SEMOSSVertex v : getVisibleGraph().getVertices() ) {
+			typeToInstances.add( v.getType(), v );
+		}
+		return typeToInstances;
+	}
+
+	public MultiMap<URI, SEMOSSEdge> getEdgesByType() {
+		MultiMap<URI, SEMOSSEdge> typeToInstances = new MultiMap<>();
+		for ( SEMOSSEdge v : getVisibleGraph().getEdges() ) {
+			typeToInstances.add( v.getType(), v );
+		}
+		return typeToInstances;
 	}
 
 	/**
@@ -684,8 +683,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		inGraphOp = true;
 		if ( overlayLevel < maxOverlayLevel ) {
-			Collection<SEMOSSVertex> removed = gdm.removeElementsSinceLevel( overlayLevel );
-			for ( SEMOSSVertex v : removed ) {
+			Set<SEMOSSVertex> removedVs = new HashSet<>();
+			Set<SEMOSSEdge> removedEs = new HashSet<>();
+			gdm.removeElementsSinceLevel( overlayLevel, removedVs, removedEs );
+			for ( SEMOSSVertex v : removedVs ) {
+				v.removePropertyChangeListener( this );
+			}
+			for ( SEMOSSEdge v : removedEs ) {
 				v.removePropertyChangeListener( this );
 			}
 		}
@@ -693,6 +697,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		overlayLevel++;
 
 		Set<SEMOSSVertex> oldverts = new HashSet<>( gdm.getGraph().getVertices() );
+		Set<SEMOSSEdge> oldedges = new HashSet<>( gdm.getGraph().getEdges() );
 		if ( !m.isEmpty() ) {
 			gdm.addGraphLevel( m, engine, overlayLevel );
 		}
@@ -701,9 +706,14 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 
 		Set<SEMOSSVertex> newverts = new HashSet<>( gdm.getGraph().getVertices() );
+		Set<SEMOSSEdge> newedges = new HashSet<>( gdm.getGraph().getEdges() );
 		newverts.removeAll( oldverts );
+		newedges.removeAll( oldedges );
 
 		for ( SEMOSSVertex v : newverts ) {
+			v.addPropertyChangeListener( this );
+		}
+		for ( SEMOSSEdge v : newedges ) {
 			v.addPropertyChangeListener( this );
 		}
 
@@ -820,7 +830,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	@Override
 	public void propertyChange( PropertyChangeEvent evt ) {
-		if( !inGraphOp ){
+		if ( !inGraphOp ) {
 			view.repaint();
 			fireGraphUpdated();
 		}

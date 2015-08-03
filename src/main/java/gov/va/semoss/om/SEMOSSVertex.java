@@ -76,7 +76,7 @@ public class SEMOSSVertex extends AbstractNodeEdgeBase implements NodeBase {
 		shape = ( null == _shape
 				? GraphShapeRepository.instance().getShapeByName( Constants.CIRCLE )
 				: _shape );
-		firePropertyChanged( CHANGE_SHAPE, old, shape );
+		fireIfPropertyChanged( CHANGE_SHAPE, old, shape );
 	}
 
 	@Override
