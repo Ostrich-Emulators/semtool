@@ -493,7 +493,7 @@
 				<version>1.7</version>
 				<executions>
 					<execution>
-						<phase>clean</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<tasks>
 								<zip
