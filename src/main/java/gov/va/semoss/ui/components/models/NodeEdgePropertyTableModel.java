@@ -19,19 +19,24 @@
  */
 package gov.va.semoss.ui.components.models;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.NodeEdgeBase;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.PropComparator;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 
 import org.openrdf.model.URI;
@@ -43,7 +48,7 @@ import org.openrdf.model.vocabulary.XMLSchema;
 /**
  * This class is used to create a table model for vertex properties.
  */
-public class NodeEdgePropertyTableModel extends AbstractTableModel {
+public class NodeEdgePropertyTableModel extends AbstractTableModel implements ItemListener {
 
 	private static final long serialVersionUID = -1980815818428292267L;
 	private static final Comparator<PropertyRow> COMPARER = new Comparator<PropertyRow>() {
@@ -59,13 +64,36 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel {
 	private static final Class<?>[] classNames = { URI.class, Value.class };
 	private final List<PropertyRow> rows = new ArrayList<>();
 	private NodeEdgeBase vertex = null;
+	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph;
 
 	public NodeEdgePropertyTableModel() {
+	}
+
+	public void setGraph( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view,
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> g ) {
+		graph = g;
+		Set<SEMOSSVertex> pickedVerts = view.getPickedVertexState().getPicked();
+			Set<SEMOSSEdge> pickedEdges = view.getPickedEdgeState().getPicked();
+		if ( !pickedVerts.isEmpty() ) {
+			setVertex( pickedVerts.iterator().next(), graph );
+		}
+		else if( !pickedEdges.isEmpty() ) {
+			setEdge( pickedEdges.iterator().next(), graph );
+		}
 	}
 
 	public void clear() {
 		rows.clear();
 		fireTableDataChanged();
+	}
+
+	public void setItem( NodeEdgeBase item, Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
+		if ( item instanceof SEMOSSVertex ) {
+			setVertex( SEMOSSVertex.class.cast( item ), graph );
+		}
+		else {
+			setEdge( SEMOSSEdge.class.cast( item ), graph );
+		}
 	}
 
 	public void setVertex( SEMOSSVertex item, Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
@@ -195,6 +223,18 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel {
 		PropertyRow pr = rows.get( row );
 		boolean ok = ( 1 == column && !pr.ro );
 		return ok;
+	}
+
+	@Override
+	public void itemStateChanged( ItemEvent e ) {
+		rows.clear();
+
+		if ( ItemEvent.SELECTED == e.getStateChange() ) {
+			setItem( NodeEdgeBase.class.cast( e.getItem() ), graph );
+		}
+		else{
+			fireTableDataChanged();
+		}
 	}
 
 	protected class PropertyRow {

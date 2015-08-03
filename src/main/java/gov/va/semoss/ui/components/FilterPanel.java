@@ -105,6 +105,8 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 	public void setPlaySheet( GraphPlaySheet gps ) {
 		if ( null != currentGps ) {
 			currentGps.removeGraphListener( this );
+			currentGps.getView().getPickedEdgeState().removeItemListener( propmodel );
+			currentGps.getView().getPickedVertexState().removeItemListener( propmodel );
 		}
 
 		currentGps = gps;
@@ -116,6 +118,10 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 		}
 		else {
 			currentGps.addGraphListener( this );
+			propmodel.setGraph( currentGps.getView(), currentGps.getVisibleGraph() );
+			currentGps.getView().getPickedEdgeState().addItemListener( propmodel );
+			currentGps.getView().getPickedVertexState().addItemListener( propmodel );
+			graphUpdated(currentGps.getGraphData().getGraph(), currentGps );
 		}
 	}
 

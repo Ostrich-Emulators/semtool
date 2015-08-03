@@ -90,10 +90,6 @@ public class PickedStateListener implements ItemListener {
 
 		selectedVertices.addAll( viewer.getPickedVertexState().getPicked() );
 
-		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
-			fp.getPropertyModel().setVertex( vertex, gps.getVisibleGraph() );
-		}
-
 		if ( null != vlft ) {
 			vlft.setSelected( selectedVertices );
 			PaintTransformer<SEMOSSVertex> ptx
