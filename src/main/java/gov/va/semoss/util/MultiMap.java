@@ -46,6 +46,16 @@ public class MultiMap<T, V> extends HashMap<T, List<V>> {
 		return ( null == v ? new ArrayList<>() : v );
 	}
 
+	/**
+	 * Flips the map such that keys become values, and values, keys. If there are
+	 * multiple keys with the same value, the values are added to the MultiMap's
+	 * list
+	 *
+	 * @param <T>
+	 * @param <V>
+	 * @param map
+	 * @return
+	 */
 	public static <T, V> MultiMap<T, V> flip( Map<V, T> map ) {
 		MultiMap<T, V> multi = new MultiMap<>();
 		for ( Map.Entry<V, T> en : map.entrySet() ) {

@@ -24,7 +24,6 @@ import java.awt.event.MouseEvent;
 import java.util.Set;
 
 import javax.swing.JComponent;
-import javax.swing.JTable;
 
 import org.apache.log4j.Logger;
 
@@ -33,16 +32,16 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalLensGraphMouse;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.ui.components.FilterPanel;
 import gov.va.semoss.ui.components.GraphNodePopup;
 import gov.va.semoss.ui.components.NodePropertiesPopup;
 import gov.va.semoss.ui.components.api.IChakraListener;
-import gov.va.semoss.ui.components.models.EdgePropertyTableModel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
 import java.util.HashSet;
+import javax.swing.SwingUtilities;
 
 /**
  * Controls what happens when a user clicks on a node in a graph.
@@ -76,17 +75,13 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 
 		SEMOSSVertex clickedVertex = checkIfVertexWasClicked( viewer, e.getX(),
 				e.getY() );
-		
-		if (clickedVertex != null) {
+
+		if ( clickedVertex != null ) {
 			checkForDoubleClick( viewer, clickedVertex, e );
 		}
 
-		if ( clickedVertex == null ) {
-			handleEdges( viewer );
-		}
-
 		Set<SEMOSSVertex> vertHash = new HashSet<>();
-		if ( e.getButton() == MouseEvent.BUTTON3 ) {
+		if ( SwingUtilities.isRightMouseButton( e ) ) {
 			vertHash = handleRightClick( viewer, clickedVertex, e );
 		}
 
@@ -98,14 +93,15 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 	}
 
 	long lastTimeClicked = 0;
+
 	private void checkForDoubleClick( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
 			SEMOSSVertex clickedVertex, MouseEvent e ) {
-		
+
 		long thisTimeClicked = System.currentTimeMillis();
-		if ( (thisTimeClicked - lastTimeClicked) < 250 ) {
+		if ( ( thisTimeClicked - lastTimeClicked ) < 250 ) {
 			new NodePropertiesPopup( gps, viewer.getPickedVertexState().getPicked() ).showPropertiesView();
 		}
-		
+
 		lastTimeClicked = thisTimeClicked;
 	}
 
@@ -129,26 +125,6 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 		}
 
 		return null;
-	}
-
-	/*
-	 * Method handleEdges only need to work with the edges if an edge was
-	 * clicked directly
-	 * 
-	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
-	 * to use to get the edges
-	 */
-	protected void handleEdges(
-			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		JTable table = (JTable) DIHelper.getInstance().getLocalProp(
-				Constants.PROP_TABLE );
-
-		Set<SEMOSSEdge> pickedEdges = viewer.getPickedEdgeState().getPicked();
-		for ( SEMOSSEdge edge : pickedEdges ) {
-			EdgePropertyTableModel pm = new EdgePropertyTableModel( edge );
-			table.setModel( pm );
-			pm.fireTableDataChanged();
-		}
 	}
 
 	/*

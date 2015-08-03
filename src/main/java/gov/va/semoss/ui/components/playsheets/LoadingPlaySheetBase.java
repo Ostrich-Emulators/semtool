@@ -32,6 +32,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import org.apache.log4j.Logger;
@@ -62,7 +63,6 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 			tbl.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );
 		}
 
-		// tbl.setDefaultRenderer( String.class, renderer );
 		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
 		sorter.setRowFilter( filter );
 		tbl.setRowSorter( sorter );
@@ -73,10 +73,10 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 			public void tableChanged( TableModelEvent e ) {
 				// not sure why we need to reset the renderer so much
 				TableColumnModel tcm = tbl.getColumnModel();
-				tcm.getColumn( 0 ).setCellRenderer( renderer );
+					tcm.getColumn( 0 ).setCellRenderer( renderer );
 				if ( LoadingPlaySheetBase.this.getLoadingModel().isRel() ) {
-					tcm.getColumn( 1 ).setCellRenderer( renderer );
-				}
+						tcm.getColumn( 1 ).setCellRenderer( renderer );
+					}
 
 				setErrorLabel();
 			}

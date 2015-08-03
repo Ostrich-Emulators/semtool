@@ -119,7 +119,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 			// get the filter values
 			String fileName = "";
 
-			List<SEMOSSVertex> vertVector = ps.getFilterData().getNodeTypeMap().get( type );
+			List<SEMOSSVertex> vertVector = ps.getVerticesByType().get( type );
 			logger.debug( "Vert vector size is " + vertVector.size() );
 
 			if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {

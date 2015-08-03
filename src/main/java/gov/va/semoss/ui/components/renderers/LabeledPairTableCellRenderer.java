@@ -84,6 +84,10 @@ public class LabeledPairTableCellRenderer<T> extends DefaultTableCellRenderer {
 		return new LabeledPairTableCellRenderer<Value>() {
 			@Override
 			protected String getLabelForCacheMiss( Value val ) {
+				if( null == val ){
+					return "";
+				}
+			
 				String ret;
 				if ( val instanceof URI ) {
 					URI uri = URI.class.cast( val );

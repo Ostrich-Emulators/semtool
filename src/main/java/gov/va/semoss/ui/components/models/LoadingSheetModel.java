@@ -29,13 +29,52 @@ public class LoadingSheetModel extends ValueTableModel {
 	private int errorcount = 0;
 	private QaChecker realtimer = null;
 
-	public LoadingSheetModel() {
+	private LoadingSheetModel() {
 		super( true );
 	}
 
 	public LoadingSheetModel( LoadingSheetData naps ) {
 		this();
 		setLoadingSheetData( naps );
+	}
+
+	public static LoadingSheetModel forRel( String rel, List<Value[]> valdata,
+			List<String> headers ) {
+		List<String> list = new ArrayList<>( headers );
+		String props[] = list.toArray( new String[0] );
+		String stype = list.remove( 0 );
+		String otype = list.remove( 0 );
+
+		LoadingSheetData lsd = LoadingSheetData.relsheet( stype, otype, rel );
+		lsd.addProperties( list );
+
+		for ( Value[] val : valdata ) {
+			LoadingNodeAndPropertyValues nap
+					= lsd.add( val[0].stringValue(), val[1].stringValue() );
+			for ( int i = 2; i < val.length; i++ ) {
+				nap.put( props[i], val[i] );
+			}
+		}
+
+		return new LoadingSheetModel( lsd );
+	}
+
+	public static LoadingSheetModel forNode( List<Value[]> valdata, List<String> headers ) {
+		List<String> list = new ArrayList<>( headers );
+		String props[] = list.toArray( new String[0] );
+		String stype = list.remove( 0 );
+
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( stype );
+		lsd.addProperties( list );
+
+		for ( Value[] val : valdata ) {
+			LoadingNodeAndPropertyValues nap = lsd.add( val[0].stringValue() );
+			for ( int i = 1; i < val.length; i++ ) {
+				nap.put( props[i], val[i] );
+			}
+		}
+
+		return new LoadingSheetModel( lsd );
 	}
 
 	public void setQaChecker( QaChecker el ) {
@@ -242,8 +281,8 @@ public class LoadingSheetModel extends ValueTableModel {
 		LoadingSheetData lsd = realtimer.checkModelConformance( sheetdata );
 		setModelErrors( lsd );
 	}
-	
-	public LoadingSheetData copyLoadingSheetHeaders(){
+
+	public LoadingSheetData copyLoadingSheetHeaders() {
 		return LoadingSheetData.copyHeadersOf( sheetdata );
 	}
 
@@ -264,10 +303,10 @@ public class LoadingSheetModel extends ValueTableModel {
 			errors.add( 1 );
 		}
 
-		if( sheetdata.hasRelationError() ){
+		if ( sheetdata.hasRelationError() ) {
 			errors.add( -1 );
 		}
-		
+
 		int i = ( isRel() ? 2 : 1 );
 		for ( String p : sheetdata.getProperties() ) {
 			if ( sheetdata.propertyIsError( p ) ) {
