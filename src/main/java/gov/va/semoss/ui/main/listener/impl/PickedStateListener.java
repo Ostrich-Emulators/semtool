@@ -24,20 +24,17 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
 
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.models.VertexPropertyTableModel;
+import gov.va.semoss.ui.components.FilterPanel;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.util.Arrays;
 
@@ -62,14 +59,13 @@ public class PickedStateListener implements ItemListener {
 	 */
 	@Override
 	public void itemStateChanged( ItemEvent e ) {
-		JTable table = (JTable) DIHelper.getInstance().getLocalProp( Constants.PROP_TABLE );
-		table.setModel( new DefaultTableModel() );
+		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
 
 		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = viewer.getRenderContext();
 
 		//need to check if there are any size resets that need to be done
 		VertexShapeTransformer vst = (VertexShapeTransformer) rc.getVertexShapeTransformer();
-					
+
 		// increase/decrease the size of nodes as they get selected/unselected
 		if ( e.getItem() instanceof SEMOSSVertex ) {
 			SEMOSSVertex v = SEMOSSVertex.class.cast( e.getItem() );
@@ -93,12 +89,6 @@ public class PickedStateListener implements ItemListener {
 		}
 
 		selectedVertices.addAll( viewer.getPickedVertexState().getPicked() );
-
-		for ( SEMOSSVertex vertex : viewer.getPickedVertexState().getPicked() ) {
-			VertexPropertyTableModel pm = new VertexPropertyTableModel( vertex );
-			table.setModel( pm );
-			pm.fireTableDataChanged();
-		}
 
 		if ( null != vlft ) {
 			vlft.setSelected( selectedVertices );

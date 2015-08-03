@@ -74,7 +74,7 @@ public class CustomSparqlPanel extends JPanel {
 		Style.registerTargetClassName( btnShowHint, ".standardButton" );
 		Style.registerTargetClassName( btnSubmitSparqlQuery, ".standardButton" );
 
-		JLabel lblSectionCCustomize = new JLabel( "Custom SPARQL Query" );
+		JLabel lblSectionCCustomize = new JLabel( "Query Panel" );
 		lblSectionCCustomize.setForeground( Color.DARK_GRAY );
 		lblSectionCCustomize.setFont( new Font( "Tahoma", Font.BOLD, 12 ) );
 		GridBagConstraints gbc_lblSectionCCustomize = new GridBagConstraints();

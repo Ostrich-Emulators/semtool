@@ -46,30 +46,13 @@ public class RelationshipLoadingPlaySheet extends LoadingPlaySheetBase {
 
 	public RelationshipLoadingPlaySheet( String rel, List<Value[]> valdata,
 			List<String> headers ) {
-		super( new LoadingSheetModel() );
+		super( LoadingSheetModel.forRel( rel, valdata, headers ) );
 		defaultRelationship = rel;
 
 		if ( headers.size() < 2 ) {
 			throw new IllegalArgumentException( "Incomplete headers given" );
 		}
 
-		List<String> list = new ArrayList<>( headers );
-		String props[] = list.toArray( new String[0] );
-		String stype = list.remove( 0 );
-		String otype = list.remove( 0 );
-
-		LoadingSheetData lsd = LoadingSheetData.relsheet( stype, otype, rel );
-		lsd.addProperties( list );
-
-		for ( Value[] val : valdata ) {
-			LoadingNodeAndPropertyValues nap
-					= lsd.add( val[0].stringValue(), val[1].stringValue() );
-			for ( int i = 2; i < val.length; i++ ) {
-				nap.put( props[i], val[i] );
-			}
-		}
-
-		getLoadingModel().setLoadingSheetData( lsd );
 		init();
 	}
 

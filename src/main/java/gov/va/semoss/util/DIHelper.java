@@ -493,10 +493,6 @@ public class DIHelper {
         logger.warn( "please use getEngine() instead");
         return engines.get( key );
       }
-      else if( Constants.REPO_LIST.equals( key ) ){
-        logger.warn( "please use getRepoList() instead");
-        return repolist;
-      }
           
       if ( localProp.containsKey( key ) ) {
         return localProp.get( key );
@@ -585,10 +581,6 @@ public class DIHelper {
       if( engines.containsKey( property ) || Constants.ENGINES.equals( property )
           || Constants.ENGINE_NAME.equals( property )){
         logger.warn( "please use registerEngine() instead" );
-        return;
-      }
-      else if( Constants.REPO_LIST.equals(  property ) ) {
-        repolist = RepositoryList.class.cast( value );
         return;
       }
       

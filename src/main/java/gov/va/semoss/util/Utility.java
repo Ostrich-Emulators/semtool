@@ -28,6 +28,7 @@ import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
 import java.awt.Desktop;
@@ -69,6 +70,7 @@ import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -980,7 +982,12 @@ public class Utility {
 	}
 
 	public static GraphPlaySheet getActiveGraphPlaysheet() {
-		return (GraphPlaySheet) QuestionPlaySheetStore.getInstance().getActiveSheet();
+		JInternalFrame jif = DIHelper.getInstance().getDesktop().getSelectedFrame();
+		if( jif instanceof PlaySheetFrame ){
+			PlaySheetFrame psf = PlaySheetFrame.class.cast( jif );
+			return GraphPlaySheet.class.cast( psf.getActivePlaySheet() );
+		}
+		return null;
 	}
 
 	public static void repaintActiveGraphPlaysheet() {
