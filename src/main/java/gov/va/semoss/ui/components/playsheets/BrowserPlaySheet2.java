@@ -162,10 +162,18 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
 		HashMap<?,?> dataSeries = (HashMap<?,?>)dataHash.get(dataSeriesKey);
-		// Call the sorting convenience method, to derive an order data structure
-		LinkedHashMap<?,?> sortedHash = sort(dataSeries);
-		// Put the data series back
-		dataHash.put(dataSeriesKey, sortedHash);
+		// If this graphic is a column chart, then sort the data series categories
+		if (this.fileName.endsWith("columnchart.html")){
+			// Call the sorting convenience method, to derive an order data structure
+			LinkedHashMap<?,?> sortedHash = sort(dataSeries);
+			// Put the data series back
+			dataHash.put(dataSeriesKey, sortedHash);
+		}
+		// Otherwise, use the unsorted data series
+		else {
+			// Put the data series back
+			dataHash.put(dataSeriesKey, dataSeries);
+		}
 		// Continue with the processing
 		String json = new Gson().toJson( dataHash );
 		if ( null != json && !"".equals( json ) && !"{}".equals( json ) ) {
