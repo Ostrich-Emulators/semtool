@@ -110,7 +110,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 
 	public void setEdge( SEMOSSEdge item, Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
 		rows.clear();
-		refresh( vertex );
+		refresh( item );
 	}
 
 	private void refresh( NodeEdgeBase item ) {

@@ -44,7 +44,6 @@ public class Constants {
 	public static final String OBJECT = "OBJECT";
 	public static final String TRANSPARENT = "TRANSPARENT";
 	public static final String ENTER_TEXT = "Enter your search text here";
-	public static final String ENTER_SEARCH_DISABLED_TEXT = "Search is disabled for faster processing";
 	public static final String DB_NAME_FIELD = "dbSelectorField";
 	public static final String IMPORT_FILE_FIELD = "importFileNameField";
 	public static final String BASE_URI_TEXT_FIELD = "customBaseURItextField";
@@ -213,19 +212,12 @@ public class Constants {
 	public static final String TCCALC_PROGRESS_BAR = "calcTCprogressBar";
 	public static final String TMCALC_PROGRESS_BAR = "calcTMprogressBar";
 	public static final String ENTITY = "entity";
-	public static final String REPO_LIST = "repoList";
-	public static final String FILTER_TABLE = "filterTable";
-	public static final String EDGE_TABLE = "edgeTable";
-	public static final String PROP_TABLE = "propertyTable";
-	public static final String FILTER_PANEL = "filterPanel";
-	public static final String PLAYSHEETS = "playsheetList";
 	public static final String APPEND = "appendChkBox";
 	public static final String PROP_URI = "PROP_URI";
 	public static final String PREDICATE_URI = "PREDICATE_URI";
 	public static final URI EDGE_NAME = RDFS.LABEL;
 	public static final URI EDGE_TYPE = RDF.TYPE;
 	public static final String OPTION = "OPTION"; // used by entity filler
-	public static final String FILTER = "FILTER_NAME";
 	public static final String EDGE_ADJUSTER_TABLE = "edgeAdjusterTable";
 	public static final String LABEL_TABLE = "labelTable";
 	public static final String TOOLTIP_TABLE = "tooltipTable";
@@ -382,13 +374,6 @@ public class Constants {
 	public static final String PROPERTY = "PROPERTY";
 
 	//Load Sheet Export Panel
-	public static final String EXPORT_LOAD_SHEET_SOURCE_COMBOBOX = "exportDataSourceComboBox";
-	public static final String EXPORT_LOAD_SHEET_SUBJECT_NODE_TYPE_COMBOBOX = "subjectNodeTypeComboBox";
-	public static final String EXPORT_LOAD_SHEET_OBJECT_NODE_TYPE_COMBOBOX = "objectNodeTypeComboBox";
-	public static final String EXPORT_LOAD_SHEET_NODE_RELATIONSHIP_COMBOBOX = "nodeRelationshipComboBox";
-	public static final String EXPORT_LOAD_SHEET_MAX_LIMIT_MESSAGE = "lblMaxExportLimit";
-	public static final String EXPORT_LOAD_SHEET_CLEAR_ALL_BUTTON = "btnClearAll";
-	public static final String EXPORT_LOAD_SHEET_ADD_EXPORT_BUTTON = "btnAddExport";
 	public static final int MAX_EXPORTS = 9;
 
 	//Update Cost DB Panel
@@ -396,14 +381,10 @@ public class Constants {
 	public static final String COST_DB_COMBOBOX = "costDBComboBox";
 
 	public static final String COST_DB_BASE_URI_FIELD = "costDBBaseURIField";
-	public static final String GLITEM_LOADING_SHEET = "LoadingSheets1.xlsx";
 	public static final String WATCHERS = "WATCHERS";
 	public static final String ENGINE_WATCHER = "ENGINE_WATCHER";
 	public static final String ENGINE_EXT = "ENGINE_EXT";
 
-	public static final String GLITEM_CORE_LOADING_SHEET = "LoadingSheets1.xlsx";
-
-	public static final String GLITEM_SITE_LOADING_SHEET = "Site_HWSW_GLItems.xlsx";
 	public static final String OWLFILE = "OWL";
 	public static final String URL_PARAM = "URL_PARAM";
 	public static final String PROPS = "PROPS";

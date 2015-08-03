@@ -41,6 +41,7 @@ import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.util.DIHelper;
 
 import java.util.HashSet;
+import javax.swing.SwingUtilities;
 
 /**
  * Controls what happens when a user clicks on a node in a graph.
@@ -79,12 +80,8 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 			checkForDoubleClick( viewer, clickedVertex, e );
 		}
 
-		if ( clickedVertex == null ) {
-			handleEdges( viewer );
-		}
-
 		Set<SEMOSSVertex> vertHash = new HashSet<>();
-		if ( e.getButton() == MouseEvent.BUTTON3 ) {
+		if ( SwingUtilities.isRightMouseButton( e ) ) {
 			vertHash = handleRightClick( viewer, clickedVertex, e );
 		}
 
@@ -128,22 +125,6 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 		}
 
 		return null;
-	}
-
-	/*
-	 * Method handleEdges only need to work with the edges if an edge was
-	 * clicked directly
-	 * 
-	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
-	 * to use to get the edges
-	 */
-	protected void handleEdges( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
-
-		Set<SEMOSSEdge> pickedEdges = viewer.getPickedEdgeState().getPicked();
-		for ( SEMOSSEdge edge : pickedEdges ) {
-			fp.getPropertyModel().setEdge( edge, null );
-		}
 	}
 
 	/*
