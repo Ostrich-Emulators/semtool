@@ -19,20 +19,16 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.om.NodeEdgeBase;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.PropComparator;
 
-import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
@@ -42,37 +38,26 @@ import org.openrdf.model.URI;
 /**
  * This class is used to keep track of specific properties for a table.
  */
-public class ControlDataTable<T extends NodeEdgeBase> extends AbstractTableModel {
+public class ControlDataTable {
 
 	private List<ControlDataRow> data = new ArrayList<>();
 	private Class<?>[] rowClasses = { URI.class, URI.class, Boolean.class,
 		Boolean.class, String.class };
-	private final String[] headers = { "", "Property", "Label", "Tooltip" };
-	private final GraphPlaySheet gps;
-	private final Map<URI, String> labelcache = new HashMap<>();
 
 	private MultiMap<URI, URI> properties = new MultiMap<>(); // type -> properties
 	private Set<URI> propertyShow;
 	private Set<URI> propertyShowTT;
 	private Set<URI> propertyHide;
 
-	public ControlDataTable( Set<URI> show, String col0Name, GraphPlaySheet ps ) {
-		this( show, new HashSet<>( Arrays.asList( RDF.TYPE, RDFS.LABEL, RDF.SUBJECT ) ),
-				new HashSet<>(), ps, col0Name );
-	}
+	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
+	private ControlDataTableModel tableModel;
 
 	public ControlDataTable( Set<URI> _propertyShow,
-			Set<URI> _propertyShowTT, Set<URI> _propertyHide, String column0Name,
-			GraphPlaySheet ps ) {
-		headers[0] = column0Name;
+			Set<URI> _propertyShowTT, Set<URI> _propertyHide, String[] columnNames ) {
 		propertyShow = _propertyShow;
 		propertyShowTT = _propertyShowTT;
 		propertyHide = _propertyHide;
-		gps = ps;
-	}
-
-	public String getLabel( URI uri ) {
-		return labelcache.get( uri );
+		tableModel = new ControlDataTableModel( columnNames );
 	}
 
 	/**
@@ -93,43 +78,35 @@ public class ControlDataTable<T extends NodeEdgeBase> extends AbstractTableModel
 		properties.clear();
 	}
 
-	public Set<URI> getShowing() {
+	public Set<URI> getShowing(){
 		return propertyShow;
 	}
-
-	public Set<URI> getShowingTT() {
+	
+	public Set<URI> getShowingTT(){
 		return propertyShowTT;
 	}
-
-	public Set<URI> getHidden() {
+	
+	public Set<URI> getHidden(){
 		return propertyHide;
 	}
-
+	
 	/**
 	 * Generates all the rows in the control panel for the specified table and
 	 * properties
 	 */
 	public void populateAllRows() {
-		// data.clear();
-
-		Set<URI> labelsToGet = new HashSet<>();
+		data.clear();
 
 		List<URI> types = new ArrayList<>( properties.keySet() );
 		Collections.sort( types, new PropComparator() );
 
-		labelsToGet.addAll( types );
-
-		Set<ControlDataRow> seen = new HashSet<>( data );
-
 		for ( URI type : types ) {
 			ControlDataRow header
 					= new ControlDataRow( type, Constants.ANYNODE, false, false );
-			if ( !seen.contains( header ) ) {
-				data.add( header );
-			}
+			data.add( header );
 
 			List<URI> propertiesForThisType = properties.getNN( type );
-			labelsToGet.addAll( propertiesForThisType );
+			Collections.sort( propertiesForThisType, new PropComparator() );
 
 			for ( URI property : propertiesForThisType ) {
 				if ( propertyHide.contains( property ) ) {
@@ -140,17 +117,46 @@ public class ControlDataTable<T extends NodeEdgeBase> extends AbstractTableModel
 						propertyShow.contains( property ),
 						propertyShowTT.contains( property ) );
 
-				if ( !seen.contains( cdr ) ) {
-					data.add( cdr );
-				}
+				data.add( cdr );
 			}
 		}
 
-		labelsToGet.removeAll( labelcache.keySet() );
-		labelcache.putAll( Utility.getInstanceLabels( labelsToGet, gps.getEngine() ) );
+		tableModel.fireTableDataChanged();
+	}
 
-		Collections.sort( data );
-		fireTableDataChanged();
+	/**
+	 * Sets value at a particular row and column location.
+	 *
+	 * @param val Label value.
+	 * @param row Row number.
+	 * @param column Column number.
+	 */
+	public void setValue( Object val, int row, int column ) {
+		List<ControlDataRow> tochange = new ArrayList<>();
+
+		ControlDataRow myrow = data.get( row );
+		if ( Constants.ANYNODE.equals( myrow.prop ) ) {
+			// this is the "SELECT ALL" row, so select all the properties of this type
+			for ( ControlDataRow cc : data ) {
+				if ( cc.type.equals( myrow.type ) ) {
+					tochange.add( cc );
+				}
+			}
+		}
+		else {
+			tochange.add( myrow );
+		}
+
+		if ( 2 == column ) {
+			for ( ControlDataRow cdr : tochange ) {
+				cdr.label = Boolean.class.cast( val );
+			}
+		}
+		else if ( 3 == column ) {
+			for ( ControlDataRow cdr : tochange ) {
+				cdr.tooltip = Boolean.class.cast( val );
+			}
+		}
 	}
 
 	/**
@@ -189,139 +195,135 @@ public class ControlDataTable<T extends NodeEdgeBase> extends AbstractTableModel
 		return selecteds;
 	}
 
-	/**
-	 * Returns the column count.
-	 *
-	 * @return int Column count.
-	 */
-	@Override
-	public int getColumnCount() {
-		return headers.length;
+	public ControlDataTableModel getTableModel() {
+		return tableModel;
 	}
 
-	/**
-	 * Gets the column name at a particular index.
-	 *
-	 * @param index Column index.
-	 *
-	 * @return String Column name.
-	 */
-	@Override
-	public String getColumnName( int index ) {
-		return headers[index];
+	public void setViewer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> _viewer ) {
+		viewer = _viewer;
+
 	}
 
-	/**
-	 * Returns the row count.
-	 *
-	 * @return int Row count.
-	 */
-	@Override
-	public int getRowCount() {
-		return data.size();
-	}
+	public class ControlDataTableModel extends AbstractTableModel {
 
-	/**
-	 * Gets the cell value at a particular row and column index.
-	 *
-	 * @param row Row index.
-	 * @param column Column index.
-	 *
-	 * @return Object Cell value.
-	 */
-	@Override
-	public Object getValueAt( int row, int column ) {
-		ControlDataRow cdr = data.get( row );
-		switch ( column ) {
-			case 0: {
-				if ( Constants.ANYNODE.equals( cdr.prop ) ) {
-					return cdr.type;
+		private static final long serialVersionUID = 502758220766389041L;
+		private final String[] columnNames;
+
+		public ControlDataTableModel( String[] _columnNames ) {
+			columnNames = _columnNames;
+		}
+
+		/**
+		 * Returns the column count.
+		 *
+		 * @return int Column count.
+		 */
+		@Override
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		/**
+		 * Gets the column name at a particular index.
+		 *
+		 * @param index Column index.
+		 *
+		 * @return String Column name.
+		 */
+		@Override
+		public String getColumnName( int index ) {
+			return columnNames[index];
+		}
+
+		/**
+		 * Returns the row count.
+		 *
+		 * @return int Row count.
+		 */
+		@Override
+		public int getRowCount() {
+			return data.size();
+		}
+
+		/**
+		 * Gets the cell value at a particular row and column index.
+		 *
+		 * @param row Row index.
+		 * @param column Column index.
+		 *
+		 * @return Object Cell value.
+		 */
+		@Override
+		public Object getValueAt( int row, int column ) {
+			ControlDataRow cdr = data.get( row );
+			switch ( column ) {
+				case 0: {
+					if ( Constants.ANYNODE.equals( cdr.prop ) ) {
+						return cdr.type;
+					}
+					return "";
 				}
-				return "";
-			}
-			case 1:
-				return cdr.prop;
-			case 2:
-				return cdr.label;
-			case 3:
-				return cdr.tooltip;
-			default:
-				return null;
-		}
-	}
-
-	/**
-	 * Gets the column class at a particular index.
-	 *
-	 * @param column Column index.
-	 *
-	 * @return Class Column class.
-	 */
-	@Override
-	public Class<?> getColumnClass( int column ) {
-		return rowClasses[column];
-	}
-
-	/**
-	 * Checks whether the cell at a particular row and column index is editable.
-	 *
-	 * @param row Row index.
-	 * @param column Column index.
-	 *
-	 * @return boolean True if cell is editable.
-	 */
-	@Override
-	public boolean isCellEditable( int row, int column ) {
-		return ( column == 2 || column == 3 );
-	}
-
-	/**
-	 * Sets the label value at a particular row and column index.
-	 *
-	 * @param value Label value.
-	 * @param row Row index.
-	 * @param column Column index.
-	 */
-	@Override
-	public void setValueAt( Object value, int row, int column ) {
-		List<ControlDataRow> tochange = new ArrayList<>();
-
-		ControlDataRow myrow = data.get( row );
-		if ( Constants.ANYNODE.equals( myrow.prop ) ) {
-			// this is the "SELECT ALL" row, so select all the properties of this type
-			for ( ControlDataRow cc : data ) {
-				if ( cc.type.equals( myrow.type ) ) {
-					tochange.add( cc );
-				}
-			}
-		}
-		else {
-			tochange.add( myrow );
-		}
-
-		boolean val = Boolean.class.cast( value );
-
-		if ( 2 == column ) {
-			for ( ControlDataRow cdr : tochange ) {
-				cdr.label = Boolean.class.cast( val );
-			}
-		}
-		else if ( 3 == column ) {
-			for ( ControlDataRow cdr : tochange ) {
-				cdr.tooltip = Boolean.class.cast( val );
+				case 1:
+					return cdr.prop;
+				case 2:
+					return cdr.label;
+				case 3:
+					return cdr.tooltip;
+				default:
+					return null;
 			}
 		}
 
-		fireTableDataChanged();
+		/**
+		 * Gets the column class at a particular index.
+		 *
+		 * @param column Column index.
+		 *
+		 * @return Class Column class.
+		 */
+		@Override
+		public Class<?> getColumnClass( int column ) {
+			return rowClasses[column];
+		}
+
+		/**
+		 * Checks whether the cell at a particular row and column index is editable.
+		 *
+		 * @param row Row index.
+		 * @param column Column index.
+		 *
+		 * @return boolean True if cell is editable.
+		 */
+		@Override
+		public boolean isCellEditable( int row, int column ) {
+			return ( column == 2 || column == 3 );
+		}
+
+		/**
+		 * Sets the label value at a particular row and column index.
+		 *
+		 * @param value Label value.
+		 * @param row Row index.
+		 * @param column Column index.
+		 */
+		@Override
+		public void setValueAt( Object value, int row, int column ) {
+			setValue( value, row, column );
+			fireTableDataChanged();
+
+			if ( viewer != null ) {
+				viewer.repaint();
+			}
+		}
 	}
 
-	public class ControlDataRow implements Comparable<ControlDataRow> {
+	public class ControlDataRow {
 
-		private final URI type;
-		private final URI prop;
-		private final PropComparator propcomp = new PropComparator();
+		URI type;
+		URI prop;
 		boolean label;
 		boolean tooltip;
+		String other;
 
 		public ControlDataRow( URI type, URI prop, boolean label, boolean toolt ) {
 			this.type = type;
@@ -332,54 +334,6 @@ public class ControlDataTable<T extends NodeEdgeBase> extends AbstractTableModel
 
 		public ControlDataRow( URI type, URI prop ) {
 			this( type, prop, false, false );
-		}
-
-		public boolean isHeader() {
-			return Constants.ANYNODE.equals( prop );
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 3;
-			hash = 37 * hash + Objects.hashCode( this.type );
-			hash = 37 * hash + Objects.hashCode( this.prop );
-			return hash;
-		}
-
-		@Override
-		public boolean equals( Object obj ) {
-			if ( obj == null ) {
-				return false;
-			}
-			if ( getClass() != obj.getClass() ) {
-				return false;
-			}
-			final ControlDataRow other = (ControlDataRow) obj;
-			if ( !Objects.equals( this.type, other.type ) ) {
-				return false;
-			}
-			if ( !Objects.equals( this.prop, other.prop ) ) {
-				return false;
-			}
-			return true;
-		}
-
-		@Override
-		public int compareTo( ControlDataRow o ) {
-			// sort the header rows above the property rows of the same type
-			// otherwise sort the header rows alphabetically
-			if ( o.type.equals( type ) ) {
-				if ( isHeader() ) {
-					return -1;
-				}
-				if ( o.isHeader() ) {
-					return 1;
-				}
-				return propcomp.compare( prop, o.prop );
-			}
-
-			// else different types, so just sort on type
-			return type.stringValue().compareTo( o.type.stringValue() );
 		}
 	}
 }

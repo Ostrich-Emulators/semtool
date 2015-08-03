@@ -61,7 +61,7 @@ import gov.va.semoss.om.GraphDataModel;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.ControlDataTable;
+import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
@@ -69,6 +69,7 @@ import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.VertexColorShapeData;
 import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.models.VertexFilterTableModel;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
@@ -86,13 +87,13 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.Utility;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
-import org.openrdf.model.vocabulary.RDFS;
 
 /**
  */
@@ -109,17 +110,18 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	protected GraphDataModel gdm;
 	protected String layoutName = Constants.FR;
+	protected ControlData controlData = new ControlData();
 
 	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
-	protected final LabelTransformer<SEMOSSVertex> vlt;
-	protected final TooltipTransformer<SEMOSSVertex> vtt;
+	protected LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
+	protected TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
 	protected PaintTransformer<SEMOSSVertex> vpt = new PaintTransformer<>();
 	protected VertexShapeTransformer vht = new VertexShapeTransformer();
 	protected VertexStrokeTransformer vst = new VertexStrokeTransformer();
 
 	protected LabelFontTransformer<SEMOSSEdge> eft = new LabelFontTransformer<>();
-	protected final LabelTransformer<SEMOSSEdge> elt;
-	protected final TooltipTransformer<SEMOSSEdge> ett;
+	protected LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
+	protected TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
 	protected PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<SEMOSSEdge>() {
 		@Override
 		protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
@@ -133,9 +135,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	protected boolean traversable = true;
 	protected boolean nodesHidable = true;
-
-	private final ControlDataTable vertexCDT;
-	private final ControlDataTable edgeCDT;
 
 	protected int overlayLevel = 0;
 	protected int maxOverlayLevel = 0;
@@ -171,15 +170,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		view = new VisualizationViewer<>( layout );
 		initVisualizer( view );
 
-		vertexCDT = new ControlDataTable( new HashSet<>( Arrays.asList( RDFS.LABEL ) ),
-				"Node Type", this );
-		edgeCDT = new ControlDataTable( new HashSet<>(), "Edge Type", this );
-
-		vlt = new LabelTransformer<>( vertexCDT );
-		vtt = new TooltipTransformer<>( vertexCDT );
-
-		elt = new LabelTransformer<>( edgeCDT );
-		ett = new TooltipTransformer<>( edgeCDT );
+		controlData.setViewer( view );
 
 		controlPanel.setPlaySheet( this );
 		controlPanel.layoutChanged( gdm.getGraph(), null, layout );
@@ -188,6 +179,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
 
 		addGraphListener( legendPanel );
+		addGraphListener( controlData );
 		addGraphListener( colorShapeData );
 		addGraphListener( controlPanel );
 	}
@@ -197,14 +189,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 				view.getPickedVertexState().getPicked(), Search.BFS );
 		GraphToTreeConverter.printForest( forest );
 		return forest;
-	}
-	
-	public ControlDataTable getVertexLabelModel(){
-		return vertexCDT;
-	}
-
-	public ControlDataTable getEdgeLabelModel(){
-		return edgeCDT;
 	}
 
 	/**
@@ -410,6 +394,15 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 */
 	public VertexColorShapeData getColorShapeData() {
 		return colorShapeData;
+	}
+
+	/**
+	 * Method getControlData.
+	 *
+	 * @return ControlData
+	 */
+	public ControlData getControlData() {
+		return controlData;
 	}
 
 	/**
