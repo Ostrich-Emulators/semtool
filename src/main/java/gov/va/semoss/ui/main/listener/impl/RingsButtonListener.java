@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.main.listener.impl;
 
@@ -31,6 +31,8 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
 
 /**
  * Controls the rendering of rings on a graph if the layout is a balloon or a
@@ -38,24 +40,17 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
  */
 public class RingsButtonListener implements ActionListener {
 
-	VisualizationViewer view;
-	BalloonLayoutRings rings = new BalloonLayoutRings();
-	RadialTreeLayoutRings treeRings = new RadialTreeLayoutRings();
-	Layout lay;
-
-	/**
-	 * Constructor for RingsButtonListener.
-	 */
-	public RingsButtonListener() {
-		this.view = view;
-	}
+	private final BalloonLayoutRings rings = new BalloonLayoutRings();
+	private final RadialTreeLayoutRings treeRings = new RadialTreeLayoutRings();
+	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
+	private Layout lay;
 
 	/**
 	 * Method setViewer. Sets the view that the listener will access.
 	 *
 	 * @param view VisualizationViewer
 	 */
-	public void setViewer( VisualizationViewer view ) {
+	public void setViewer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view ) {
 		this.view = view;
 		this.rings.setViewer( view );
 		this.treeRings.setViewer( view );
@@ -66,7 +61,7 @@ public class RingsButtonListener implements ActionListener {
 	 *
 	 * @param forest Forest
 	 */
-	public void setGraph( Forest forest ) {
+	public void setGraph( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {
 		treeRings.setForest( forest );
 	}
 
@@ -78,10 +73,10 @@ public class RingsButtonListener implements ActionListener {
 	public void setLayout( Layout lay ) {
 		this.lay = lay;
 		if ( lay instanceof BalloonLayout ) {
-			this.rings.setLayout( lay );
+			this.rings.setLayout( BalloonLayout.class.cast( lay ) );
 		}
 		else if ( lay instanceof RadialTreeLayout ) {
-			this.treeRings.setLayout( lay );
+			this.treeRings.setLayout( RadialTreeLayout.class.cast( lay ) );
 		}
 	}
 
@@ -94,10 +89,9 @@ public class RingsButtonListener implements ActionListener {
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		// Get if the button is selected
-		JToggleButton button = (JToggleButton) e.getSource();
+		JToggleButton button = JToggleButton.class.cast( e.getSource() );
 
 		if ( !button.isSelected() ) {
-			button.setSelected( false );
 			if ( lay instanceof BalloonLayout ) {
 				view.removePreRenderPaintable( rings );
 			}
@@ -106,7 +100,6 @@ public class RingsButtonListener implements ActionListener {
 			}
 		}
 		else {
-			button.setSelected( true );
 			if ( lay instanceof BalloonLayout ) {
 				view.addPreRenderPaintable( rings );
 			}

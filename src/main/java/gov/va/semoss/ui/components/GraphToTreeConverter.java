@@ -28,16 +28,11 @@ import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Tree;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import java.awt.event.ActionEvent;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Queue;
-import java.util.Set;
-import javax.swing.AbstractAction;
 
 /**
  * This class extends downstream processing in order to convert the graph into

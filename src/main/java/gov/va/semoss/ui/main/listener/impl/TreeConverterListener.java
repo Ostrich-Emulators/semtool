@@ -94,7 +94,7 @@ public class TreeConverterListener extends AbstractAction {
 			newgraph = GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes );
 			layoutname = Constants.TREE_LAYOUT;
 		}
-		//if the button is unselected, revert to old forest
+		//if the button is unselected, revert to old graph
 		else {
 			newgraph = oldgraph;
 			layoutname = Constants.FR;
