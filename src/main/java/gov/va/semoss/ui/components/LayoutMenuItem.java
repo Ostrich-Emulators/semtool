@@ -19,25 +19,31 @@
  */
 package gov.va.semoss.ui.components;
 
+import edu.uci.ics.jung.graph.Forest;
+import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSVertex;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
+import java.util.Collection;
 import javax.swing.AbstractAction;
+import org.apache.log4j.Logger;
 
 /**
  * This class is used to configure menu items in the layout.
  */
 public class LayoutMenuItem extends AbstractAction {
+
 	private static final long serialVersionUID = 3303474056533355632L;
-	
-	private GraphPlaySheet ps;
-	private String layout;
+
+	private final GraphPlaySheet gps;
+	private final String layout;
+	private final Collection<SEMOSSVertex> verts;
 
 	/**
 	 * Constructor for LayoutMenuItem.
@@ -45,38 +51,55 @@ public class LayoutMenuItem extends AbstractAction {
 	 * @param layout String
 	 * @param ps IPlaySheet
 	 */
-	public LayoutMenuItem( String layout, GraphPlaySheet ps ) {
+	public LayoutMenuItem( String layout, GraphPlaySheet ps, Collection<SEMOSSVertex> verts ) {
 		super( layout );
-		this.ps = ps;
+		this.gps = ps;
 		this.layout = layout;
+		this.verts = verts;
 	}
-	
+
 	@Override
-	public void actionPerformed( ActionEvent ae ){
-		paintLayout();
+	public void actionPerformed( ActionEvent ae ) {
+		if ( !( gps.getGraphData().getGraph() instanceof Forest ) ) {
+			// if we're not already a tree, but the user selected a tree layout
+			// *AND* at least one tree root, then convert to a tree before
+			// processing the layout
+
+			if ( ( layout.equals( Constants.RADIAL_TREE_LAYOUT )
+					|| layout.equals( Constants.BALLOON_LAYOUT )
+					|| layout.equals( Constants.TREE_LAYOUT ) ) && !verts.isEmpty() ) {
+				Logger.getLogger( getClass() ).debug( "automatically converting to a tree layout" );
+				gps.getSearchPanel().clickTreeButton();
+//				Forest<SEMOSSVertex, SEMOSSEdge> forest
+//						= GraphToTreeConverter.convert( gps.getVisibleGraph(), verts );
+//				gps.getGraphData().setGraph( forest );
+			}
+		}
+
+		setGraphLayout();
 	}
 
 	/**
 	 * Paints the specified layout.
 	 */
-	public void paintLayout() {
-		String oldLayout = ps.getLayoutName();		
-		boolean success = ps.setLayoutName( layout );
-		if( !success ){
+	public void setGraphLayout() {
+		String oldLayout = gps.getLayoutName();
+		boolean success = gps.setLayoutName( layout );
+		if ( !success ) {
 			if ( layout.equals( Constants.RADIAL_TREE_LAYOUT )
 					|| layout.equals( Constants.BALLOON_LAYOUT )
 					|| layout.equals( Constants.TREE_LAYOUT ) ) {
 				int response = showOptionPopup();
 				if ( response == 1 ) {
-					ps.getSearchPanel().clickTreeButton();
+					gps.getSearchPanel().clickTreeButton();
 				}
 				else {
-					ps.setLayoutName( oldLayout );
+					gps.setLayoutName( oldLayout );
 				}
 			}
 			else {
 				Utility.showError( "This layout cannot be used with the current graph" );
-				ps.setLayoutName( oldLayout );
+				gps.setLayoutName( oldLayout );
 			}
 		}
 	}
