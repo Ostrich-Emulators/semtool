@@ -3,6 +3,7 @@ package gov.va.semoss.ui.components.playsheets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -18,15 +19,21 @@ public class ColumnPlotDataSeriesProcessor implements DataSeriesProcessor {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public HashMap<?, ?> parseData(HashMap<?, ?> undigestedData) {
-		SortedSet keys = new TreeSet(undigestedData.keySet());
-		LinkedHashMap sortedHash = new LinkedHashMap();
-		Iterator keyIterator = keys.iterator();
-		while (keyIterator.hasNext()){
-			String key = (String)keyIterator.next();
-			Object value = undigestedData.get(key);
-			sortedHash.put(key, value);
+	public Object parseData(Object undigestedData) {
+		if (undigestedData instanceof HashMap) {
+			Set<?> keySet = ((HashMap<?, ?>) undigestedData).keySet();
+			SortedSet keys = new TreeSet(keySet);
+			LinkedHashMap sortedHash = new LinkedHashMap();
+			Iterator keyIterator = keys.iterator();
+			while (keyIterator.hasNext()) {
+				String key = (String) keyIterator.next();
+				Object value = ((HashMap<?,?>)undigestedData).get(key);
+				sortedHash.put(key, value);
+			}
+			return sortedHash;
+		} 
+		else {
+			return undigestedData;
 		}
-		return sortedHash;
 	}
 }
