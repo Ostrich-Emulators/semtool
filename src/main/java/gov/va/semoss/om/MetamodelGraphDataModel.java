@@ -120,10 +120,13 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 		
 		int numQueriesRun = 1;
 		for(SEMOSSEdge edge:edgeStore.values()) {
+			SEMOSSVertex src = getGraph().getSource( edge );
+			SEMOSSVertex dst = getGraph().getDest( edge );
+			
 			log.debug("populateRelationshipInstanceCount run " + (numQueriesRun++) + " of " + edgeStore.size() + 
-					" for subject " + edge.getDestinationVertexURI() + " and object " + edge.getOriginVertexURI());
-			edgeCounts.put(edge, populateRelationshipInstanceCount(edge.getDestinationVertexURI().stringValue(),
-					edge.getOriginVertexURI().stringValue()));
+					" for subject " + dst.getURI()+ " and object " + src.getURI() );
+			edgeCounts.put(edge, populateRelationshipInstanceCount(dst.getURI().stringValue(),
+					src.getURI().stringValue()));
 		}
 	}
 	

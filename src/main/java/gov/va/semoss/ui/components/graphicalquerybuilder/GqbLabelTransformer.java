@@ -44,7 +44,7 @@ import org.openrdf.model.vocabulary.RDFS;
 /**
  * Transforms the property label on a node vertex in the graph.
  */
-public class GqbLabelTransformer<T extends QueryNodeEdgeBase> extends LabelTransformer<T> {
+public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTransformer<T> {
 
 	private final Map<URI, String> labels = new HashMap<>();
 	private final Comparator<URI> comparator
@@ -76,7 +76,7 @@ public class GqbLabelTransformer<T extends QueryNodeEdgeBase> extends LabelTrans
 	 * @return String - the property name of the vertex
 	 */
 	@Override
-	public String getText( QueryNodeEdgeBase vertex ) {
+	public String getText( QueryGraphElement vertex ) {
 		Map<URI, Set<Value>> properties = new HashMap<>( vertex.getAllValues() );
 		properties.remove( RDF.SUBJECT );
 

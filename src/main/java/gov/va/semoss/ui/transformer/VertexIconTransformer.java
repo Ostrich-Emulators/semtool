@@ -29,14 +29,14 @@ import javax.swing.ImageIcon;
 import org.apache.commons.collections15.Transformer;
 
 import edu.uci.ics.jung.visualization.decorators.DefaultVertexIconTransformer;
-import gov.va.semoss.om.NodeBase;
+import gov.va.semoss.om.SEMOSSVertex;
 import org.apache.log4j.Logger;
 import gov.va.semoss.util.Utility;
 
 /**
  */
-public class VertexIconTransformer extends DefaultVertexIconTransformer<NodeBase>
-		implements Transformer<NodeBase, Icon> {
+public class VertexIconTransformer extends DefaultVertexIconTransformer<SEMOSSVertex>
+		implements Transformer<SEMOSSVertex, Icon> {
 
 	private static final Logger log = Logger.getLogger( VertexIconTransformer.class );
 	private boolean fillImages = true;
@@ -89,7 +89,7 @@ public class VertexIconTransformer extends DefaultVertexIconTransformer<NodeBase
 	 * @return Icon
 	 */
 	@Override
-	public Icon transform( NodeBase vertex ) {
+	public Icon transform( SEMOSSVertex vertex ) {
 		try {
 			BufferedImage img = Utility.loadImage( "globe.jpg" );
 			if ( img == null ) {

@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import java.awt.Font;
 
 import gov.va.semoss.util.Constants;
@@ -27,7 +27,7 @@ import gov.va.semoss.util.Constants;
 /**
  * Transforms the font label on a node vertex in the graph.
  */
-public class LabelFontTransformer<T extends NodeEdgeBase> extends SizedSelectingTransformer<T, Font> {
+public class LabelFontTransformer<T extends GraphElement> extends SizedSelectingTransformer<T, Font> {
 
 	private static final int DEFAULT_SIZE = Constants.INITIAL_GRAPH_FONT_SIZE;
 	private static final int MAXSIZE = 55;

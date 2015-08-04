@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.NodeBase;
+import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 
@@ -21,7 +21,7 @@ import org.openrdf.model.vocabulary.RDF;
  *
  * @author ryan
  */
-public class QueryNode extends AbstractQueryNodeEdgeBase implements NodeBase {
+public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex {
 
 	private Shape shape;
 

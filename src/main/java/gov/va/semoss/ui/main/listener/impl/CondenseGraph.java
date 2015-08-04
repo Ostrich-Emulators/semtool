@@ -10,6 +10,7 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.om.SEMOSSEdge;
+import gov.va.semoss.om.SEMOSSEdgeImpl;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.GraphCondensePanel;
 import gov.va.semoss.ui.components.GraphCondensePanel.EdgePropertySource;
@@ -30,6 +31,7 @@ import javax.swing.Action;
 import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  *
@@ -136,28 +138,28 @@ public class CondenseGraph extends AbstractAction {
 			SEMOSSVertex middle = en.getKey();
 
 			for ( CondenserTuple tup : en.getValue() ) {
-				SEMOSSVertex from = new SEMOSSVertex(tup.in.getDestinationVertexURI());
-				SEMOSSVertex to =  new SEMOSSVertex(tup.out.getOriginVertexURI());
+				SEMOSSVertex from = graph.getSource( tup.in );
+				SEMOSSVertex to =  graph.getDest( tup.out );
 
-				SEMOSSEdge edge = new SEMOSSEdge( from, to, middle.getURI() );
+				SEMOSSEdge edge = new SEMOSSEdgeImpl( from, to, middle.getURI() );
 
-				Map<URI, Object> props;
+				Map<URI, Value> props;
 				switch ( strat ) {
 					case NODE:
-						props = middle.getProperties();
+						props = middle.getValues();
 						break;
 					case INEDGE:
-						props = tup.in.getProperties();
+						props = tup.in.getValues();
 						break;
 					case OUTEDGE:
-						props = tup.out.getProperties();
+						props = tup.out.getValues();
 						break;
 					default:
 						throw new IllegalArgumentException( "no edge property source provided!" );
 				}
 
-				for ( Map.Entry<URI, Object> prop : props.entrySet() ) {
-					edge.setProperty( prop.getKey(), prop.getValue() );
+				for ( Map.Entry<URI, Value> prop : props.entrySet() ) {
+					edge.setValue( prop.getKey(), prop.getValue() );
 				}
 				edge.setType( middle.getType() );
 

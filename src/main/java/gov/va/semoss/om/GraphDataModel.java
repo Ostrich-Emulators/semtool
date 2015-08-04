@@ -29,7 +29,6 @@ import edu.uci.ics.jung.graph.util.EdgeType;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
@@ -43,7 +42,7 @@ public class GraphDataModel {
 	private static final Logger log = Logger.getLogger( GraphDataModel.class );
 
 	private final Set<String> baseFilterSet = new HashSet<>();
-	private final Map<NodeEdgeBase, Integer> level = new HashMap<>();
+	private final Map<GraphElement, Integer> level = new HashMap<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
 	private boolean search;
@@ -117,7 +116,7 @@ public class GraphDataModel {
 				vizgraph.addVertex( vert1 );
 				vizgraph.addVertex( vert2 );
 
-				SEMOSSEdge edge = new SEMOSSEdge( vert1, vert2, pred );
+				SEMOSSEdge edge = new SEMOSSEdgeImpl( vert1, vert2, pred );
 				level.put( edge, overlayLevel );
 				edge.setType( pred );
 				storeEdge( edge );
@@ -134,7 +133,7 @@ public class GraphDataModel {
 					= Utility.getInstanceLabels( model.predicates(), engine );
 			for ( URI u : model.predicates() ) {
 				SEMOSSEdge edge = edgeStore.get( u );
-				edge.setProperty( RDFS.LABEL, edgelabels.get( u ) );
+				edge.setLabel( edgelabels.get( u ) );
 			}
 
 			fetchProperties( needProps, model.predicates(), engine, overlayLevel );
@@ -191,7 +190,7 @@ public class GraphDataModel {
 		removedVs.addAll( nodesToRemove );		
 	}
 
-	public int getLevel( NodeEdgeBase check ) {
+	public int getLevel( GraphElement check ) {
 		if ( level.containsKey( check ) ) {
 			return level.get( check );
 		}
@@ -204,13 +203,13 @@ public class GraphDataModel {
 	 * @param level
 	 * @return 
 	 */
-	public boolean presentAtLevel( NodeEdgeBase check, int level ) {
+	public boolean presentAtLevel( GraphElement check, int level ) {
 		return getLevel( check ) <= level;
 	}
 
 	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey, int overlayLevel ) {
 		if ( !vertStore.containsKey( vertexKey ) ) {
-			SEMOSSVertex vertex = new SEMOSSVertex( vertexKey );
+			SEMOSSVertex vertex = new SEMOSSVertexImpl( vertexKey );
 			level.put( vertex, overlayLevel );
 			storeVertex( vertex );
 		}
@@ -269,11 +268,11 @@ public class GraphDataModel {
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
 					URI s = URI.class.cast( set.getValue( "s" ) );
 					URI prop = URI.class.cast( set.getValue( "p" ) );
-					String val = set.getValue( "o" ).stringValue();
+					Value val = set.getValue( "o" );
 					URI type = URI.class.cast( set.getValue( "type" ) );
 
 					SEMOSSVertex v = createOrRetrieveVertex( s, overlayLevel );
-					v.setProperty( prop, val );
+					v.setValue( prop, val );
 					v.setType( type );
 				}
 			};
@@ -293,20 +292,20 @@ public class GraphDataModel {
 					URI rel = URI.class.cast( set.getValue( "rel" ) );
 					URI prop = URI.class.cast( set.getValue( "prop" ) );
 					URI o = URI.class.cast( set.getValue( "o" ) );
-					String propval = set.getValue( "literal" ).stringValue();
+					Value propval = set.getValue( "literal" );
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
 					if ( concepts.contains( s ) && concepts.contains( o ) ) {
 						if ( !edgeStore.containsKey( rel ) ) {
 							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
 							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
-							SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
+							SEMOSSEdge edge = new SEMOSSEdgeImpl( v1, v2, rel );
 							storeEdge( edge );
 							level.put( edge, overlayLevel );
 						}
 
 						SEMOSSEdge edge = edgeStore.get( rel );
-						edge.setProperty( prop, propval );
+						edge.setValue( prop, propval );
 						edge.setType( superrel );
 					}
 				}
@@ -321,19 +320,19 @@ public class GraphDataModel {
 					URI rel = URI.class.cast( set.getValue( "rel" ) );
 					URI prop = URI.class.cast( set.getValue( "prop" ) );
 					URI o = URI.class.cast( set.getValue( "o" ) );
-					String propval = set.getValue( "literal" ).stringValue();
+					Value propval = set.getValue( "literal" );
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
 					if ( concepts.contains( s ) && concepts.contains( o ) ) {
 						if ( !edgeStore.containsKey( rel ) ) {
 							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
 							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
-							SEMOSSEdge edge = new SEMOSSEdge( v1, v2, rel );
+							SEMOSSEdge edge = new SEMOSSEdgeImpl( v1, v2, rel );
 							storeEdge( edge );
 						}
 
 						SEMOSSEdge edge = edgeStore.get( rel );
-						edge.setProperty( prop, propval );
+						edge.setValue( prop, propval );
 						edge.setType( superrel );
 					}
 				}

@@ -7,7 +7,7 @@ package gov.va.semoss.ui.components;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -180,9 +180,9 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 		public Component getTableCellRendererComponent( JTable table, Object value,
 				boolean sel, boolean foc, int r, int c ) {
 
-			VertexFilterTableModel<? extends AbstractNodeEdgeBase> model
-					= (VertexFilterTableModel<? extends AbstractNodeEdgeBase>) table.getModel();
-			FilterRow<? extends AbstractNodeEdgeBase> row = model.getRawRow( r );
+			VertexFilterTableModel<? extends GraphElement> model
+					= (VertexFilterTableModel<? extends GraphElement>) table.getModel();
+			FilterRow<? extends GraphElement> row = model.getRawRow( r );
 
 			if ( row.isHeader() ) {
 				return super.getTableCellRendererComponent( table,

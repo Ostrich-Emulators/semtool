@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import java.awt.Color;
 import java.awt.Paint;
 
@@ -27,20 +27,20 @@ import java.awt.Paint;
 /**
  * Transforms the edges of a graph so they can be highlighted.
  */
-public class ArrowPaintTransformer<T extends NodeEdgeBase> extends SelectingTransformer<T, Paint> {
+public class ArrowPaintTransformer<T extends GraphElement> extends SelectingTransformer<T, Paint> {
 
 	@Override
-	protected Paint transformNormal( NodeEdgeBase t ) {
+	protected Paint transformNormal( GraphElement t ) {
 		return t.getColor();
 	}
 
 	@Override
-	protected Paint transformSelected( NodeEdgeBase t ) {
+	protected Paint transformSelected( GraphElement t ) {
 		return t.getColor();
 	}
 
 	@Override
-	protected Paint transformNotSelected( NodeEdgeBase t, boolean skel ) {
+	protected Paint transformNotSelected( GraphElement t, boolean skel ) {
 		return ( skel ? Color.white : t.getColor() );
 	}
 }

@@ -46,7 +46,7 @@ import org.openrdf.repository.RepositoryException;
  *
  * @author ryan
  */
-public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPopupMenu {
+public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPopupMenu {
 
 	private static final Logger log = Logger.getLogger( NodeEdgeBasePopup.class );
 
@@ -196,10 +196,10 @@ public abstract class NodeEdgeBasePopup<T extends QueryNodeEdgeBase> extends JPo
 
 	private static class ConstraintRemover extends AbstractAction {
 
-		QueryNodeEdgeBase nodeedge;
+		QueryGraphElement nodeedge;
 		GraphicalQueryPanel pnl;
 
-		public ConstraintRemover( QueryNodeEdgeBase ne, GraphicalQueryPanel p ) {
+		public ConstraintRemover( QueryGraphElement ne, GraphicalQueryPanel p ) {
 			super( "Remove Constraint(s)" );
 			nodeedge = ne;
 			pnl = p;

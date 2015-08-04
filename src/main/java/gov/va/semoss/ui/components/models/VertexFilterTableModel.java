@@ -19,8 +19,8 @@
  */
 package gov.va.semoss.ui.components.models;
 
-import gov.va.semoss.om.NodeEdgeBase;
 
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +37,7 @@ import org.openrdf.model.URI;
 /**
  * This class is used to create a table model for the vertex filter.
  */
-public class VertexFilterTableModel<T extends NodeEdgeBase> extends AbstractTableModel {
+public class VertexFilterTableModel<T extends GraphElement> extends AbstractTableModel {
 
 	private static final long serialVersionUID = 6010606033514579342L;
 	private static final Class<?>[] classNames = { Boolean.class, URI.class, URI.class };
