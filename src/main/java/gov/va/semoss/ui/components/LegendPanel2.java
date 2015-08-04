@@ -46,7 +46,6 @@ import javax.swing.JPanel;
 
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.border.BevelBorder;
 import org.openrdf.model.URI;
 
 /**
@@ -137,7 +136,8 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout,
+			GraphPlaySheet gps ) {
 		// nothing to update in this case
 	}
 
