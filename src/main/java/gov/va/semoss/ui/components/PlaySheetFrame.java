@@ -11,6 +11,7 @@ import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
 
 import gov.va.semoss.util.Utility;
@@ -206,7 +207,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	}
 
 	public IEngine getEngine() {
-		return this.engine;
+		return DIHelper.getInstance().getRdfEngine();
 	}
 
 	public void addTab( PlaySheetCentralComponent c ) {
@@ -359,7 +360,8 @@ public class PlaySheetFrame extends JInternalFrame {
 		return pt;
 	}
 
-	public ProgressTask getOverlayTask( String query,	String tabTitleIfNeeded ) {
+	public ProgressTask getOverlayTask( String query, IEngine engine,
+			String tabTitleIfNeeded ) {
 		String q = query;
 		final PlaySheetCentralComponent overlayee = getActivePlaySheet();
 		final ListQueryAdapter<Value[]> lqa
