@@ -20,7 +20,6 @@
 package gov.va.semoss.ui.components;
 
 import edu.uci.ics.jung.graph.Forest;
-import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -70,9 +69,6 @@ public class LayoutMenuItem extends AbstractAction {
 					|| layout.equals( Constants.TREE_LAYOUT ) ) && !verts.isEmpty() ) {
 				Logger.getLogger( getClass() ).debug( "automatically converting to a tree layout" );
 				gps.getSearchPanel().clickTreeButton();
-//				Forest<SEMOSSVertex, SEMOSSEdge> forest
-//						= GraphToTreeConverter.convert( gps.getVisibleGraph(), verts );
-//				gps.getGraphData().setGraph( forest );
 			}
 		}
 
