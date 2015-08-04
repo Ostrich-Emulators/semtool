@@ -31,14 +31,14 @@ import org.openrdf.repository.RepositoryException;
 public class OneVariableDialogItem extends AbstractAction {
 
 	private final URI property;
-	private final QueryNodeEdgeBase node;
+	private final QueryGraphElement node;
 	private final String dlgtext;
 	private final GraphicalQueryPanel panel;
 	private final Set<Value> currvals;
 	private Map<URI, String> propTypeChoices;
 	private ListQueryAdapter<URI> choicesQuery;
 
-	public OneVariableDialogItem( QueryNodeEdgeBase node, GraphicalQueryPanel panel,
+	public OneVariableDialogItem( QueryGraphElement node, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext ) {
 
 		super( label );
@@ -54,7 +54,7 @@ public class OneVariableDialogItem extends AbstractAction {
 		propTypeChoices = null;
 	}
 
-	public OneVariableDialogItem( QueryNodeEdgeBase nod, GraphicalQueryPanel panel,
+	public OneVariableDialogItem( QueryGraphElement nod, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext, Map<URI, String> labels ) {
 
 		super( label );
@@ -69,7 +69,7 @@ public class OneVariableDialogItem extends AbstractAction {
 				? new HashSet<>() : node.getValues( property ) );
 	}
 
-	public OneVariableDialogItem( QueryNodeEdgeBase nod, GraphicalQueryPanel panel,
+	public OneVariableDialogItem( QueryGraphElement nod, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext,
 			ListQueryAdapter<URI> choicesQ ) {
 
@@ -132,7 +132,9 @@ public class OneVariableDialogItem extends AbstractAction {
 			currvals.addAll( values );
 			node.setProperties( values.property, currvals );
 			node.setSelected( values.property, values.included );
-			node.setFilter( property, values.raw );
+			if ( null != values.raw ) {
+				node.setFilter( property, values.raw );
+			}
 			panel.update();
 		}
 	}

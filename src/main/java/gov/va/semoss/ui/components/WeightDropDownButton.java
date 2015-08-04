@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.NodeEdgeNumberedPropertyUtility;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
@@ -31,7 +31,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +62,7 @@ import org.openrdf.model.URI;
  * adjusted.
  */
 public class WeightDropDownButton extends JButton {
+
 	private static final long serialVersionUID = 2981760820784735327L;
 
 	private final static int scrollPaneWidth = 180;
@@ -75,21 +75,18 @@ public class WeightDropDownButton extends JButton {
 	private boolean listsPopulated = false;
 //	private ControlData controlData;
 	private GraphPlaySheet playSheet;
-	
+
 //	private static Map<String, URI> localNameToURIHash = new HashMap<String, URI>();
 //	private static Map<String, String> displayNameMap = new HashMap<String, String>();
 //	private static Set<String> hidePropertySet = new HashSet<String>();
-
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
 		initializeButton();
-		
+
 //		controlData = new ControlData();
 //		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
-
 //		displayNameMap.put("count.edge.in",  "In-Degree");
 //		displayNameMap.put("count.edge.out", "Out-Degree");
-		
 //		hidePropertySet.add("graphing.level");
 	}
 
@@ -104,37 +101,40 @@ public class WeightDropDownButton extends JButton {
 
 		initMenus( nodePropTree, 2, playSheet.getVerticesByType() );
 		initMenus( edgePropTree, 1, playSheet.getEdgesByType() );
-		
-		setScrollPaneSize(nodeScrollPane, nodePropTree);
-		setScrollPaneSize(edgeScrollPane, edgePropTree);
+
+		setScrollPaneSize( nodeScrollPane, nodePropTree );
+		setScrollPaneSize( edgeScrollPane, edgePropTree );
 
 		popupMenu.pack();
 		popupMenu.repaint();
 
 		listsPopulated = true;
 	}
-	
-	private void setScrollPaneSize(JScrollPane scrollPane, JTree tree) {
+
+	private void setScrollPaneSize( JScrollPane scrollPane, JTree tree ) {
 		int scrollPaneHeight = 10;
-		for (int i=0; i<tree.getRowCount(); i++)
-			scrollPaneHeight += tree.getRowBounds(i).getHeight();
-		
-		Dimension preferredSize = new Dimension(scrollPaneWidth, scrollPaneHeight);
-		Dimension minimumSize = new Dimension(scrollPaneWidth, scrollPaneHeightMinimum);
-		Dimension maximumSize = new Dimension(scrollPaneWidth, scrollPaneHeightMaximum);
-		
-		if (preferredSize.getHeight() < minimumSize.getHeight())
+		for ( int i = 0; i < tree.getRowCount(); i++ ) {
+			scrollPaneHeight += tree.getRowBounds( i ).getHeight();
+		}
+
+		Dimension preferredSize = new Dimension( scrollPaneWidth, scrollPaneHeight );
+		Dimension minimumSize = new Dimension( scrollPaneWidth, scrollPaneHeightMinimum );
+		Dimension maximumSize = new Dimension( scrollPaneWidth, scrollPaneHeightMaximum );
+
+		if ( preferredSize.getHeight() < minimumSize.getHeight() ) {
 			preferredSize = minimumSize;
-		
-		if (preferredSize.getHeight() > maximumSize.getHeight())
+		}
+
+		if ( preferredSize.getHeight() > maximumSize.getHeight() ) {
 			preferredSize = maximumSize;
-		
-		scrollPane.setPreferredSize(preferredSize);
-		scrollPane.setMinimumSize(minimumSize);
-		scrollPane.setMaximumSize(maximumSize);
+		}
+
+		scrollPane.setPreferredSize( preferredSize );
+		scrollPane.setMinimumSize( minimumSize );
+		scrollPane.setMaximumSize( maximumSize );
 	}
 
-	private <X extends AbstractNodeEdgeBase> void initMenus( JTree tree, int selectNum, Map<URI, List<X>> nodesOrEdgesMapByType ) {
+	private <X extends GraphElement> void initMenus( JTree tree, int selectNum, Map<URI, List<X>> nodesOrEdgesMapByType ) {
 		tree.addTreeSelectionListener( getTreeSelectionListener( selectNum ) );
 		DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "not visible" );
 		tree.setModel( new DefaultTreeModel( invisibleRoot ) );
@@ -142,9 +142,10 @@ public class WeightDropDownButton extends JButton {
 		Map<String, Set<String>> propertiesToAdd = buildPropertyDataset( nodesOrEdgesMapByType );
 		addPropertiesToTreeNode( propertiesToAdd, invisibleRoot );
 
-		for (int i=0; i<tree.getRowCount(); i++)
-			tree.expandRow(i);
-		tree.setRootVisible( false );		
+		for ( int i = 0; i < tree.getRowCount(); i++ ) {
+			tree.expandRow( i );
+		}
+		tree.setRootVisible( false );
 	}
 
 	/**
@@ -157,7 +158,7 @@ public class WeightDropDownButton extends JButton {
 	 * @return Map<String, Set<String>> maps of the types of the nodes or edges to
 	 * the names of their numerical properties
 	 */
-	private <X extends AbstractNodeEdgeBase> Map<String, Set<String>> buildPropertyDataset( Map<URI, List<X>> nodesOrEdgesMapByType ) {
+	private <X extends GraphElement> Map<String, Set<String>> buildPropertyDataset( Map<URI, List<X>> nodesOrEdgesMapByType ) {
 		Map<String, Set<String>> propertiesToAdd = new HashMap<>();
 		for ( Map.Entry<URI, List<X>> entry : nodesOrEdgesMapByType.entrySet() ) {
 			if ( entry.getValue().size() < 2 ) {
@@ -165,11 +166,11 @@ public class WeightDropDownButton extends JButton {
 				continue;
 			}
 
-			Set<String> propertiesForThisType = new TreeSet<String>();
+			Set<String> propertiesForThisType = new TreeSet<>();
 			propertiesToAdd.put( entry.getKey().getLocalName(), propertiesForThisType );
 			for ( X nodeOrEdge : entry.getValue() ) {
-				Map<String, Object> props = NodeEdgeNumberedPropertyUtility.transformProperties(nodeOrEdge.getProperties(), false);
-				propertiesForThisType.addAll(props.keySet());
+				Map<String, Object> props = NodeEdgeNumberedPropertyUtility.transformProperties( nodeOrEdge.getProperties(), false );
+				propertiesForThisType.addAll( props.keySet() );
 			}
 		}
 
@@ -195,15 +196,15 @@ public class WeightDropDownButton extends JButton {
 	private void initializeButton() {
 		nodePropTree = initJTree();
 		edgePropTree = initJTree();
-		
+
 		nodeScrollPane = new JScrollPane( nodePropTree );
 		edgeScrollPane = new JScrollPane( edgePropTree );
 
-		JPanel nodePanel = new JPanel(new BorderLayout());
+		JPanel nodePanel = new JPanel( new BorderLayout() );
 		nodePanel.add( new JLabel( "  Node Properties" ), BorderLayout.NORTH );
 		nodePanel.add( nodeScrollPane, BorderLayout.SOUTH );
 
-		JPanel edgePanel = new JPanel(new BorderLayout());
+		JPanel edgePanel = new JPanel( new BorderLayout() );
 		edgePanel.add( new JLabel( "  Edge Properties" ), BorderLayout.NORTH );
 		edgePanel.add( edgeScrollPane, BorderLayout.SOUTH );
 
@@ -337,7 +338,7 @@ public class WeightDropDownButton extends JButton {
 	 * @return Hashtable<String, Double> of the nodes and weights
 	 */
 	@SuppressWarnings( "unchecked" )
-	public static <X extends AbstractNodeEdgeBase> Map<X, Double>
+	public static <X extends GraphElement> Map<X, Double>
 			getWeightHash( Collection<X> collection, String selectedValue,
 					double defaultScale ) {
 
@@ -350,7 +351,7 @@ public class WeightDropDownButton extends JButton {
 		Double highValue = null, lowValue = null;
 		Map<X, Double> weightHash = new HashMap<>();
 
-		for ( AbstractNodeEdgeBase nodeOrEdge : collection ) {
+		for ( GraphElement nodeOrEdge : collection ) {
 			Object propertyValue = null;
 
 			URI selectedURI = NodeEdgeNumberedPropertyUtility.getURI( selectedValue );
@@ -378,7 +379,7 @@ public class WeightDropDownButton extends JButton {
 
 		if ( highValue == null || highValue.equals( lowValue ) ) {
 			//we have no resize data
-			return new Hashtable<>();
+			return new HashMap<>();
 		}
 
 		for ( X key : weightHash.keySet() ) {

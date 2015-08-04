@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +35,7 @@ import java.util.Set;
  * calculated as Doubles.
  *
  */
-public abstract class SizedSelectingTransformer<T extends NodeEdgeBase, V>
+public abstract class SizedSelectingTransformer<T extends GraphElement, V>
 		extends SelectingTransformer<T, V> {
 
 	// This stores all data. it is separate from what is selected or not

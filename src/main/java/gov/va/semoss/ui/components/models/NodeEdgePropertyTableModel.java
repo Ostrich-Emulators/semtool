@@ -22,7 +22,7 @@ package gov.va.semoss.ui.components.models;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 
@@ -63,7 +63,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	private static final String[] columnNames = { "Name ", "Value" };
 	private static final Class<?>[] classNames = { URI.class, Value.class };
 	private final List<PropertyRow> rows = new ArrayList<>();
-	private NodeEdgeBase vertex = null;
+	private GraphElement vertex = null;
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph;
 
 	public NodeEdgePropertyTableModel() {
@@ -87,7 +87,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 		fireTableDataChanged();
 	}
 
-	public void setItem( NodeEdgeBase item, Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
+	public void setItem( GraphElement item, Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
 		if ( item instanceof SEMOSSVertex ) {
 			setVertex( SEMOSSVertex.class.cast( item ), graph );
 		}
@@ -113,7 +113,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 		refresh( item );
 	}
 
-	private void refresh( NodeEdgeBase item ) {
+	private void refresh( GraphElement item ) {
 		vertex = item;
 		for ( Map.Entry<URI, Value> entry : item.getValues().entrySet() ) {
 			if ( !RDF.SUBJECT.equals( entry.getKey() ) ) {
@@ -230,7 +230,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 		rows.clear();
 
 		if ( ItemEvent.SELECTED == e.getStateChange() ) {
-			setItem( NodeEdgeBase.class.cast( e.getItem() ), graph );
+			setItem(GraphElement.class.cast( e.getItem() ), graph );
 		}
 		else{
 			fireTableDataChanged();

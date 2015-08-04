@@ -5,9 +5,8 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.AbstractGraphElement;
 import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
-import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.MultiSetMap;
 import java.awt.Color;
@@ -25,8 +24,8 @@ import org.openrdf.model.Value;
  *
  * @author ryan
  */
-public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
-		implements QueryNodeEdgeBase {
+public abstract class AbstractQueryGraphElement extends AbstractGraphElement
+		implements QueryGraphElement {
 
 	private final MultiSetMap<URI, Value> properties = new MultiSetMap<>();
 	private final Set<URI> selecteds = new HashSet<>();
@@ -35,7 +34,7 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 	private final Map<URI, String> filters = new HashMap<>();
 	private String queryId;
 
-	public AbstractQueryNodeEdgeBase( URI id ) {
+	public AbstractQueryGraphElement( URI id ) {
 		super( id );
 
 		for ( Map.Entry<URI, Value> en : super.getValues().entrySet() ) {
@@ -43,15 +42,15 @@ public abstract class AbstractQueryNodeEdgeBase extends AbstractNodeEdgeBase
 		}
 	}
 
-	public AbstractQueryNodeEdgeBase( URI id, Color col ) {
+	public AbstractQueryGraphElement( URI id, Color col ) {
 		this( id, null, id.getLocalName(), col );
 	}
 
-	public AbstractQueryNodeEdgeBase( URI id, URI type, String label ) {
+	public AbstractQueryGraphElement( URI id, URI type, String label ) {
 		this( id, type, label, GraphColorRepository.instance().getColor( type ) );
 	}
 
-	public AbstractQueryNodeEdgeBase( URI id, URI type, String label, Color col ) {
+	public AbstractQueryGraphElement( URI id, URI type, String label, Color col ) {
 		super( id, type, label, col );
 		for ( Map.Entry<URI, Value> en : super.getValues().entrySet() ) {
 			properties.add( en.getKey(), en.getValue() );

@@ -52,6 +52,7 @@ public class ChartItPlaySheet extends BrowserPlaySheet2 {
 		for(URI nodeType:nodeHash.keySet()) {
 			for (SEMOSSVertex node:nodeHash.get(nodeType)) {
 				Map<String, Object> props = transformProperties(node.getProperties(), true);
+				
 				node.setPropHash(props);
 			}
 			

@@ -1,6 +1,7 @@
 package gov.va.semoss.util;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.AbstractGraphElement;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
@@ -83,7 +84,7 @@ public class StatementPersistenceUtility {
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 	}
 
-	public static void deleteNodeOrEdgeProperty(IEngine engine, AbstractNodeEdgeBase nodeOrEdge, URI name, Value value) {
+	public static void deleteNodeOrEdgeProperty(IEngine engine, GraphElement nodeOrEdge, URI name, Value value) {
 		Value subject = nodeOrEdge.getValue(Constants.URI_KEY);
 		if (!(subject instanceof Resource)) {
 			log.warn("Trying to delete property with name: " + name + " and value: " + value + 
@@ -94,7 +95,7 @@ public class StatementPersistenceUtility {
 		deleteStatement( engine, new StatementImpl((Resource)subject, name, value) );
 	}
 
-	public static void saveNodeOrEdgeProperty(IEngine engine, AbstractNodeEdgeBase nodeOrEdge, URI name, Value value) {
+	public static void saveNodeOrEdgeProperty(IEngine engine, GraphElement nodeOrEdge, URI name, Value value) {
 		Value subject = nodeOrEdge.getValue(Constants.URI_KEY);
 		if (!(subject instanceof Resource)) {
 			log.warn("Trying to save property with name: " + name + " and value: " + 
@@ -105,7 +106,7 @@ public class StatementPersistenceUtility {
 		saveStatement( engine, new StatementImpl((Resource)subject, name, value) );
 	}
 
-	public static void updateNodeOrEdgePropertyValue(IEngine engine, AbstractNodeEdgeBase nodeOrEdge,
+	public static void updateNodeOrEdgePropertyValue(IEngine engine, GraphElement nodeOrEdge,
 			URI name, Value oldValue, Value newValue) {
 		deleteNodeOrEdgeProperty(engine, nodeOrEdge, name, oldValue);
 		saveNodeOrEdgeProperty(engine, nodeOrEdge, name, newValue);
