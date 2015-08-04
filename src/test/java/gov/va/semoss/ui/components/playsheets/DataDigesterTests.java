@@ -16,7 +16,7 @@ public class DataDigesterTests {
 		data.put("Charlie", 789);
 		data.put("Beta", 456);
 		
-		HashMap<?,?> digestedData = DataSeriesDigester.instance().digestData(data, 
+		HashMap<?,?> digestedData = (HashMap<?,?>)DataSeriesDigester.instance().digestData(data, 
 				ColumnPlotDataSeriesProcessor.HTML_FILE_NAME);
 		if (digestedData == null){
 			fail("Transformed data was return null");

@@ -1,6 +1,6 @@
 package gov.va.semoss.ui.components.playsheets;
 
-import java.util.HashMap;
+import java.util.Collection;
 
 public interface DataSeriesProcessor {
 
@@ -9,5 +9,5 @@ public interface DataSeriesProcessor {
 	 * @param undigestedData The unprocessed data
 	 * @return A processed dataset
 	 */
-	public HashMap<?,?> parseData(HashMap<?,?> undigestedData);
+	public Object parseData(Object undigestedData);
 }
