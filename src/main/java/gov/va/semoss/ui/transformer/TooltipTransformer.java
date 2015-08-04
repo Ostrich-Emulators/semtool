@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.ui.components.ControlData;
 
 import java.util.Arrays;
@@ -36,7 +36,7 @@ import org.openrdf.model.vocabulary.RDFS;
  * Transforms what is displayed on the tooltip when a vertex/node is selected on
  * a graph.
  */
-public class TooltipTransformer<T extends NodeEdgeBase> implements Transformer<T, String> {
+public class TooltipTransformer<T extends GraphElement> implements Transformer<T, String> {
 
 	private static final Logger logger = Logger.getLogger(TooltipTransformer.class );
 	ControlData data;
@@ -59,7 +59,7 @@ public class TooltipTransformer<T extends NodeEdgeBase> implements Transformer<T
 	 * @return String - The name of the property.
 	 */
 	@Override
-	public String transform( NodeEdgeBase vertex ) {
+	public String transform( GraphElement vertex ) {
 		StringBuilder propName = new StringBuilder();
 		// don't show property type for these properties
 		Set<URI> mains = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );

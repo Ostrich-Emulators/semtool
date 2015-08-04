@@ -19,7 +19,7 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.util.PropComparator;
 
@@ -31,7 +31,7 @@ import org.openrdf.model.URI;
 /**
  * Transforms the property label on a node vertex in the graph.
  */
-public class LabelTransformer<T extends NodeEdgeBase> extends SelectingTransformer<T, String> {
+public class LabelTransformer<T extends GraphElement> extends SelectingTransformer<T, String> {
 
 	private final ControlData data;
 

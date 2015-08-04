@@ -52,7 +52,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 			DirectedGraph<QueryNode, QueryEdge> graph, List<QueryOrder> ordering ) {
 		this.engine = engine;
 		this.graph = graph;
-		List<QueryNodeEdgeBase> elements = new ArrayList<>( graph.getVertices() );
+		List<QueryGraphElement> elements = new ArrayList<>( graph.getVertices() );
 		elements.addAll( graph.getEdges() );
 		model = new SparqlResultTableModel( elements, ordering );
 		filterRenderer = new FilterRenderer( model );
@@ -171,9 +171,9 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
   private javax.swing.JButton upbtn;
   // End of variables declaration//GEN-END:variables
 
-	private static Set<URI> getAllProperties( Collection<QueryNodeEdgeBase> data ) {
+	private static Set<URI> getAllProperties( Collection<QueryGraphElement> data ) {
 		Set<URI> props = new HashSet<>();
-		for ( QueryNodeEdgeBase b : data ) {
+		for ( QueryGraphElement b : data ) {
 			props.addAll( b.getAllValues().keySet() );
 		}
 		return props;

@@ -227,7 +227,7 @@ public class DataLatencyPerformer implements IAlgorithm {
 		SEMOSSVertex nextVert = null;
 		Collection<SEMOSSEdge> edgeArray = getValidEdges( forest.getOutEdges( vert ) );
 		for ( SEMOSSEdge edge : edgeArray ) {
-			SEMOSSVertex inVert = new SEMOSSVertex(edge.getOriginVertexURI());
+			SEMOSSVertex inVert = ps.getGraphData().getGraph().getSource( edge );
 			String freqString = "";
 			if ( edge.getProperty( FREQUENCY ) != null ) {
 				String frequency = edge.getProperty( FREQUENCY ) + "";

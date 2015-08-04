@@ -289,7 +289,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		update();
 	}
 
-	public void remove( QueryNodeEdgeBase v ) {
+	public void remove( QueryGraphElement v ) {
 		if ( v instanceof QueryNode ) {
 			graph.removeVertex( QueryNode.class.cast( v ) );
 		}
@@ -337,8 +337,8 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		}
 	}
 
-	private String createQueryId( QueryNodeEdgeBase v,
-			List<QueryNodeEdgeBase> nodesAndEdges ) {
+	private String createQueryId( QueryGraphElement v,
+			List<QueryGraphElement> nodesAndEdges ) {
 		// this is a two-step process
 		// 1) figure out what names have been used
 		// 2) come up with a name based on my first type
@@ -352,7 +352,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 		Pattern pat = Pattern.compile( base + "([0-9]+)$" );
 
-		for ( QueryNodeEdgeBase qn : nodesAndEdges ) {
+		for ( QueryGraphElement qn : nodesAndEdges ) {
 			String usedlabel = qn.getQueryId();
 
 			if ( null != usedlabel ) {
@@ -379,15 +379,15 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 	}
 
-	private String createVariableId( QueryNodeEdgeBase v, URI type,
-			List<QueryNodeEdgeBase> nodesAndEdges ) {
+	private String createVariableId( QueryGraphElement v, URI type,
+			List<QueryGraphElement> nodesAndEdges ) {
 		// just like createQueryId, but for objects
 		Set<String> used = new HashSet<>();
 		int maxid = -1;
 		String base = v.getQueryId() + "_" + type.getLocalName();
 		Pattern pat = Pattern.compile( base + "([0-9]+)$" );
 
-		for ( QueryNodeEdgeBase qn : nodesAndEdges ) {
+		for ( QueryGraphElement qn : nodesAndEdges ) {
 			for ( URI prop : qn.getAllValues().keySet() ) {
 				String usedlabel = qn.getLabel( prop );
 
@@ -419,11 +419,11 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	 * Assigns new configs to nodes in the graph after first removing old configs.
 	 */
 	private void updateSparqlConfigs() {
-		List<QueryNodeEdgeBase> todo = new ArrayList<>();
+		List<QueryGraphElement> todo = new ArrayList<>();
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
-		for ( QueryNodeEdgeBase v : todo ) {
+		for ( QueryGraphElement v : todo ) {
 			if ( null == v.getQueryId() ) {
 				v.setQueryId( createQueryId( v, todo ) );
 			}
@@ -499,10 +499,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 	public static class QueryOrder {
 
-		public final QueryNodeEdgeBase base;
+		public final QueryGraphElement base;
 		public final URI property;
 
-		public QueryOrder( QueryNodeEdgeBase base, URI property ) {
+		public QueryOrder( QueryGraphElement base, URI property ) {
 			this.base = base;
 			this.property = property;
 		}

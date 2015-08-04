@@ -19,30 +19,30 @@
  */
 package gov.va.semoss.ui.transformer;
 
-import gov.va.semoss.om.NodeBase;
+import gov.va.semoss.om.SEMOSSVertex;
 import java.awt.BasicStroke;
 import java.awt.Stroke;
 
 /**
  */
-public class VertexStrokeTransformer<T extends NodeBase>
+public class VertexStrokeTransformer<T extends SEMOSSVertex>
 		extends SelectingTransformer<T, Stroke> {
 
 	private final Stroke selected = new BasicStroke( 1f );
 	private final Stroke normal = new BasicStroke( 0f );
 
 	@Override
-	protected Stroke transformNormal( NodeBase t ) {
+	protected Stroke transformNormal( SEMOSSVertex t ) {
 		return normal;
 	}
 
 	@Override
-	protected Stroke transformSelected( NodeBase t ) {
+	protected Stroke transformSelected( SEMOSSVertex t ) {
 		return selected;
 	}
 
 	@Override
-	protected Stroke transformNotSelected( NodeBase t, boolean skel ) {
+	protected Stroke transformNotSelected( SEMOSSVertex t, boolean skel ) {
 		return normal;
 	}
 }

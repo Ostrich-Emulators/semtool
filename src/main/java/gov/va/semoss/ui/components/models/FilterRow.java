@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components.models;
 
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.util.Constants;
 import org.openrdf.model.URI;
 
@@ -14,7 +14,7 @@ import org.openrdf.model.URI;
  *
  * @author ryan
  */
-public class FilterRow<T extends NodeEdgeBase> implements Comparable<FilterRow> {
+public class FilterRow<T extends GraphElement> implements Comparable<FilterRow> {
 	public final URI type;
 	public final T instance;
 
