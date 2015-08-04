@@ -1,5 +1,6 @@
 package gov.va.semoss.ui.components.playsheets;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -40,7 +41,7 @@ public class DataSeriesDigester {
 	 * @param fileName The file path and name of the HTML file used to render the Play Sheet
 	 * @return A processed data series
 	 */
-	public HashMap<?,?> digestData(HashMap<?,?> undigestedData, String fileName){
+	public Object digestData(Object undigestedData, String fileName){
 		// Get the parser associated with that file name
 		DataSeriesProcessor parser = parsers.get(fileName);
 		// If there is no parser, return the data series untouched

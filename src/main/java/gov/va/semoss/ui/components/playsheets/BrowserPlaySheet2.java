@@ -161,7 +161,7 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		// Initialize the key used to store the Data Series being visualized
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
-		HashMap<?,?> dataSeries = (HashMap<?,?>)dataHash.get(dataSeriesKey);
+		Object dataSeries = dataHash.get(dataSeriesKey);
 		// Digest/process the data for display
 		String fileNameOnly = getFileName(fileName);
 		dataSeries = DataSeriesDigester.instance().digestData(dataSeries, fileNameOnly);
