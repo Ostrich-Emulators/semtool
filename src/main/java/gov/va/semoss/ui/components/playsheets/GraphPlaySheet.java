@@ -186,8 +186,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gdm.getGraph();
 		Forest<SEMOSSVertex, SEMOSSEdge> forest = ( graph instanceof Forest
-				? Forest.class.cast( graph ) : GraphToTreeConverter.convert( graph,
-						view.getPickedVertexState().getPicked(), Search.BFS ) );
+				? Forest.class.cast( graph )
+				: new GraphToTreeConverter( true ).convert( graph,
+						view.getPickedVertexState().getPicked() ) );
 		GraphToTreeConverter.printForest( forest );
 		return forest;
 	}
@@ -314,8 +315,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
-		fireGraphUpdated();
 		setLayoutName( layoutName );
+		fireGraphUpdated();
 		setUndoRedoBtn();
 	}
 
