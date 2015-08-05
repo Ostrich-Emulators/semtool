@@ -1,23 +1,19 @@
 package gov.va.semoss.ui.components.insight.manager;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
+import javafx.fxml.FXMLLoader;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -25,26 +21,14 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -56,8 +40,7 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
@@ -67,18 +50,14 @@ import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
-import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
-import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 
-import java.util.HashMap;
-
-
 public class  InsightManagerController_2 implements Initializable{
-	protected final String ICON_LOCATION = "/images/icons16/";
+	public static final String ICON_LOCATION = "/images/icons16/";
 	
 	protected IEngine engine;
+	private FXMLLoader loaderRightPane = null;
     //This DataFormat allows entire Insight objects to be placed on the DragBoard
 	//of the "Perspectives" TreeView:
     private static final DataFormat insightFormat = new DataFormat("Object/Insight");      
@@ -90,102 +69,21 @@ public class  InsightManagerController_2 implements Initializable{
 	protected RadioButton radioMove;
 	@FXML
 	protected RadioButton radioCopy;
+	@FXML
+	protected AnchorPane apaneContent;
 	
-//	@FXML
-//	protected TabPane tbpTabbedPane;
-//	@FXML
-//	protected ComboBox<Perspective> cboPerspectiveTitle;
+	
 	protected ObservableList<Perspective> arylPerspectives;
-//	protected int intCurPerspectiveIndex;
-//	@FXML
-//	protected TextField txtPerspectiveTitle;
-//	@FXML
-//	protected TextArea txtaPerspectiveDesc;	
-//	@FXML
-//	protected ListView<Insight> lstvInsights;
-	protected ObservableList<Insight> arylInsights;
-//	protected int intCurInsightIndex;
-//	protected String prevQuestionLabel;
-//	@FXML
-//	protected TextField txtQuestion_Inst;
-//	@FXML
-//	protected ComboBox<PlaySheet> cboDisplayWith_Inst;
 	protected ObservableList<PlaySheet> arylPlaySheets;
-//	@FXML
-//	protected TextField txtRendererClass_Inst;
-//	@FXML
-//	protected CheckBox chkLegacyQuery_Inst;
-//	@FXML
-//	protected TextArea txtaQuery_Inst;
-//	@FXML
-//	protected ListView<Parameter> lstvParameter_Inst;
-	protected ObservableList<Parameter> arylInsightParameters;
-//	protected int intCurParameterIndex;
-//	protected String prevParameterLabel;
-//	@FXML
-//	protected ListView<Perspective> lstvInsightPerspective_Inst;
-	protected ArrayList<Perspective> arylInsightPerspectives;
-//	@FXML
-//	protected TextArea txtaInsightDesc_Inst;
-//	@FXML
-//	protected TextField txtCreator_Inst;
-//	@FXML
-//	protected TextField txtCreated_Inst;
-//	@FXML
-//	protected TextField txtModified_Inst;
-//	@FXML
-//	protected TextField txtLabel_parm;
-//    @FXML 
-//    protected TextField txtVariable_parm;
-//	@FXML
-//	protected ComboBox<ParameterType> cboParameterType_parm;
 	protected ObservableList<ParameterType> arylParameterTypes;
-//    @FXML
-//    protected TextArea txtaDefaultQuery_parm;
-//	@FXML
-//	protected Tab tabParameter;
-	
-//	protected PerspectiveTabController ptc;
-//	@FXML
-//	protected Button btnAddInsight;
-//	@FXML
-//	protected Button btnRemoveInsight;
-//	@FXML
-//	protected Button btnAddPerspective;
-//	@FXML
-//	protected Button btnDeletePerspective;
-//	@FXML
-//	protected Button btnSavePerspective;
-//	@FXML
-//	protected Button btnReloadPerspective;
-	
-//	protected InsightTabController itc;
-//	@FXML
-//	protected Button btnAddParameter_Inst;
-//	@FXML
-//	protected Button btnDeleteParameter_Inst;
-//	@FXML
-//	protected Button btnDeleteInsight_Inst;
-//	@FXML
-//	protected Button btnSaveInsight_Inst;
-//	@FXML
-//	protected Button btnReloadInsight_Inst;
-//	
-//    protected ParameterTabController prmtc;	
-//    @FXML
-//    protected Button btnBuildQuery_Parm;
-//	@FXML
-//	protected Button btnSaveParameter_Parm;
-//	@FXML
-//	protected Button btnReloadParameter_Parm;
 	private static final Logger log = Logger.getLogger( WriteablePerspectiveTab.class );
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 	} 
 	
-	/**    Populates controls when the Insight Manager is loaded. Also provides change-listeners 
-	 * for text-fields, combo-boxes and list-views that affect other controls.
+	/**    Populates controls when the Insight Manager is loaded. Also provides 
+	 * change-listeners for the "Perspectives" tree-view.
 	 */
 	public void setData(){		    
 		engine = DIHelper.getInstance().getRdfEngine();
@@ -193,201 +91,23 @@ public class  InsightManagerController_2 implements Initializable{
 		if(engine != null){
 		   arylPerspectives = FXCollections.observableArrayList();
 		   arylPlaySheets = FXCollections.observableArrayList();
-		   arylInsightParameters = FXCollections.observableArrayList();
 		   arylParameterTypes = FXCollections.observableArrayList();
-		   
-//		   //The Insight Perspective list-view must handle multiple selections:
-//		   lstvInsightPerspective_Inst.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//		   //Instantiate button-handlers for the "Perspective" tab:
-////		   ptc = new PerspectiveTabController(this);
-//		   //Instantiate button-handlers for the "Insight" tab:
-////		   itc = new InsightTabController(this);
-//		   //Instantiate button-handlers for the "Parameter" tab:
-////		   prmtc = new ParameterTabController(this);
-		   
+		   		   
 		   loadReferencesAndData();
 		   
-//		   //If the "Perspective" changes on the "Perspective" tab, then repopulate its text-field, 
-//		   //its "Description", and its associated "Insights":
-//		   //--------------------------------------------------------------------------------------
-//           cboPerspectiveTitle.valueProperty().addListener(new ChangeListener<Object>() {
-//		        @Override 
-//		        public void changed(ObservableValue<?> ov, Object t, Object t1) {
-//		        	if(t1 != null && arylPerspectives != null && arylPerspectives.size() > 0){
-//			        	//Get selected "Perspective":
-//			            Perspective perspective = new Perspective();
-//			            intCurPerspectiveIndex = 0;
-//			            for(int i = 0; i < arylPerspectives.size(); i++){
-//			            	perspective = (Perspective) arylPerspectives.get(i);
-//			            	if((perspective.getUri().equals(((Perspective) t1).getUri()))){
-//			            		intCurPerspectiveIndex = i;
-//			            		break;
-//			            	}
-//			            }
-//						arylInsights = FXCollections.observableArrayList(((Perspective) arylPerspectives.get(intCurPerspectiveIndex)).getInsights());
-//						 
-//			            //When the selected "Perspective" changes, re-populate fields on the "Perspective" tab:
-//			            //-------------------------------------------------------------------------------------
-//			            populatePerspectiveTitleTextField(intCurPerspectiveIndex);
-//			            populatePerspectiveDescTextArea(intCurPerspectiveIndex);		        	
-//			 		    populateInsightListView(intCurPerspectiveIndex);
-//		        	}
-//		 		}    
-//		   });	
-//           
-//           //If the "Insights" list-view changes on the "Perspective" tab, then repopulate
-//           //the "Insight" tab fields:
-//           //-----------------------------------------------------------------------------
-//           lstvInsights.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Object>(){
-//			  @Override
-//			  public void changed(ObservableValue<?> ov, Object t, Object t1){
-//				 if(t1 != null){
-//				    //Get selected "Insight":
-//	                Insight insight = new Insight();
-//	                intCurInsightIndex = 0;
-//	                for(int i = 0; i < arylInsights.size(); i++){
-//	              	    insight = (Insight) arylInsights.get(i);
-//	            	    if((insight.getId()).equals(((Insight) t1).getId())){
-//	            		   intCurInsightIndex = i;
-//	            		   break;
-//	            	    }
-//	                }
-//				    arylInsightParameters = FXCollections.observableArrayList(arylInsights.get(intCurInsightIndex).getInsightParameters());
-//
-//                    //When the selected "Insight" changes, re-populate fields on the "Insight" tab:
-//	                //-----------------------------------------------------------------------------
-//	                populateQuestionTextField(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateRendererClassTextField(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateLegacyQueryCheckBox(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex);	
-//	                populatePlaysheetComboBox(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateInsightDescTextArea(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateCreatorTextField(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateCreatedTextField(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateModifiedTextField(intCurPerspectiveIndex, intCurInsightIndex);
-//	                populateInsightParameterListView(intCurPerspectiveIndex, intCurInsightIndex);
-//	     	        //Whenever the "Parameters" list-view is reloaded,
-//	     	        //if it has no elements, disable the "Parameter" tab:
-//	                if(lstvParameter_Inst.getItems() == null || 
-//	             	   lstvParameter_Inst.getItems().get(0).getLabel().equals("")){
-//	     			    tabParameter.setDisable(true);
-//	     		    //Otherwise, enable the "Parameter" tab only if
-//	     		    //the "Renderer Class" text-field is empty:
-//	     		    }else{
-//	     		        if(txtRendererClass_Inst.getText() == null || 
-//	     		    	   txtRendererClass_Inst.getText().trim().isEmpty()){
-//		     			    tabParameter.setDisable(false);
-//	     		        }else{
-//	     			        tabParameter.setDisable(true);
-//	     		        }
-//	     		    }
-//	                populateInsightPerspectivesListView(intCurPerspectiveIndex, intCurInsightIndex);
-//	             }
-//			  }
-//		   });
-//           
-//           //If the "Parameters" list-view changes on the "Insight" tab, then repopulate
-//           //the "Parameter" tab fields:
-//           //---------------------------------------------------------------------------
-//           lstvParameter_Inst.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Object>(){
-//			  @Override
-//			  public void changed(ObservableValue<?> ov, Object t, Object t1){
-//				 //Get selected "Parameter":
-//	             Parameter parameter = new Parameter();
-//	             intCurParameterIndex = 0;
-//	             for(int i = 0; i < arylInsightParameters.size(); i++){
-//	            	 parameter = (Parameter) arylInsightParameters.get(i);
-//	            	 if(parameter.equals((Parameter) t1)){
-//	            		intCurParameterIndex = i;
-//	            		break;
-//	            	 }
-//	             }
-//                 //When the selected "Parameter" changes, re-populate fields on the "Parameter" tab:
-//	             //---------------------------------------------------------------------------------
-//	             populateNameTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);	          				   
-//			     populateVariableTextField(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
-//			     populateParameterTypeComboBox(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
-//			     populateDefaultQueryTextArea(intCurPerspectiveIndex, intCurInsightIndex, intCurParameterIndex);
-//			  }
-//		   });
-//		   
-//           //Initially check the "Renderer Class" text-field on the "Insight" tab. 
-//           //If it is not empty, then disable the various query-related controls:
-//	       if(txtRendererClass_Inst.getText().trim().isEmpty()){
-//	    	  cboDisplayWith_Inst.setDisable(false);
-//	    	  chkLegacyQuery_Inst.setDisable(false);
-//	    	  txtaQuery_Inst.setDisable(false);
-//	    	  lstvParameter_Inst.setDisable(false);
-//	    	  tabParameter.setDisable(false);			   
-//	       }else{
-//	    	  cboDisplayWith_Inst.setDisable(true);
-//	    	  chkLegacyQuery_Inst.setDisable(true);
-//	    	  txtaQuery_Inst.setDisable(true);
-//	    	  lstvParameter_Inst.setDisable(true);
-//	    	  tabParameter.setDisable(true);
-//	       }
-//	       //If the "Renderer Class" text-field changes, and it is not empty, 
-//	       //then disable query-related controls. Otherwise, enable them:
-//	       //----------------------------------------------------------------
-//           txtRendererClass_Inst.textProperty().addListener(new ChangeListener<Object>(){
-//			   @Override
-//			   public void changed(ObservableValue<?> ov, Object t, Object t1) {
-//				  String strNewText = (String) t1;
-//			      if(strNewText == null || strNewText.trim().isEmpty()){
-//			    	  cboDisplayWith_Inst.setDisable(false);
-//			    	  chkLegacyQuery_Inst.setDisable(false);
-//			    	  txtaQuery_Inst.setDisable(false);
-//			    	  lstvParameter_Inst.setDisable(false);
-//			    	  //If the "Renderer Class" text-field becomes empty, enable the 
-//			    	  //"Parameter" tab only if external Parameters are defined:
-//			          if(lstvParameter_Inst.getItems() == null || 
-//			        	 lstvParameter_Inst.getItems().size() == 0 ||	  
-//			             lstvParameter_Inst.getItems().get(0).getLabel().equals("")){
-//			     		  tabParameter.setDisable(true);
-//			     	  }else{
-//			     		  tabParameter.setDisable(false);
-//			     	  }
-//			      }else{
-//			    	  cboDisplayWith_Inst.setDisable(true);
-//			    	  chkLegacyQuery_Inst.setDisable(true);
-//			    	  txtaQuery_Inst.setDisable(true);
-//			    	  lstvParameter_Inst.setDisable(true);
-//			    	  tabParameter.setDisable(true);
-//			      }
-//			   }        	   
-//           });  		
 		}//End if(engine != null).		
 	}
 	
 	/**   Loads all data needed for the Insight Manager from the database into
 	 * the ArrayList<Perspective>, "arylPerspectives". After all Perspectives,
 	 * and their Insights, have been loaded, a call is made to populate the
-	 * "Perspective" combo-box.
+	 * "Perspectives" tree-view.
 	 * 
-	 * Note: "Perspective" is a value-object for populating various ui fields
-	 * One such value is "get/setInsight(...)", which refers to an ArrayList<Insight>,
+	 * Note: "Perspective" is a value-object for populating various UI fields
+	 * One such value is "get/setInsights(...)", which refers to an ArrayList<Insight>,
 	 * based upon another value-object containing Insight data.
-	 * 
-     * @param perspectiveLabel -- (String) The current Perspective Title, passed in
-     *    from the "PerspectiveTabController" click-handlers. Enables maintaining the 
-     *    selected Perspective, after adding/deleting Insights and adding/saving
-     *    Perspectives. If null is passed in (as in the case of the initial load,
-     *    and when a Perspective is deleted), then the first Perspective is selected
-     *    from the combo-box.	 
-     *    
-     * @param prevQuestionLabel -- (String) Before new data is loaded, a previous
-     *    Insight may have been selected. This is the label of that Insight. In the 
-     *    case of a starting load or a removal/deletion, this value can be null.
-     *    
-     * @param prevParameterLabel -- (String) Before new data is loaded, a previous
-     *    Insight Parameter may have been selected. This is the label of that Parameter. 
-     *    In the case of a starting load, removal/deletion, or a persistence on the 
-     *    "Perspective" or "Insight" tab, this value can be null.
      */
-	protected void loadData(String perspectiveLabel, String prevQuestionLabel, String prevParameterLabel){
-//		this.prevQuestionLabel = prevQuestionLabel;
-//		this.prevParameterLabel = prevParameterLabel;
-	    //Convert mouse-pointer to a "wait" cursor:
+	protected void loadData(){
 		treevPerspectives.getScene().setCursor(Cursor.WAIT);
 		
 		//Define a Task to fetch an ArrayList of Perspectives/Insights:
@@ -417,21 +137,10 @@ public class  InsightManagerController_2 implements Initializable{
 	            	//Restore mouse-pointer:
 	            	treevPerspectives.getScene().setCursor(Cursor.DEFAULT);
 	     		   
-	     		    //Populate "Perspectives" combo-box (first, we must change the value, so that 
-	            	//population triggers the change-handler that populates the Insight list-view:
+	     		    //Populate "Perspectives" tree-view:
 	     		    populatePerspectiveTreeView();
 	     		    
 	     		    treevPerspectives.getSelectionModel().selectFirst();
-	     		    
-//	     		    //If passed-in label is not null, then navigate to that Perspective:
-//	     		    if(cboPerspectiveTitle.getItems().size() != 0 && 
-//	     		       perspectiveLabel != null && perspectiveLabel.trim().equals("") == false){
-//	     		    	cboPerspectiveTitle.getSelectionModel().select(arylPerspectives.get(intCurPerspectiveIndex));
-//
-//	     		    //Otherwise, navigate to the first Perspective:
-//	     		    }else{
-//	     		    	cboPerspectiveTitle.getSelectionModel().selectFirst();
-//	     		    }
 	      	    }    	    
 	        }
 	     });
@@ -443,7 +152,10 @@ public class  InsightManagerController_2 implements Initializable{
 	 * combo-box and the Parameter tab's "Value Type" combo-box: Designed to be run once when 
 	 * the Insight Manager is loaded initially.
 	 */
+	private boolean isDataLoaded;
 	private void loadReferencesAndData(){		
+		isDataLoaded = false;
+		
 	    //Convert mouse-pointer to a "wait" cursor:
 		treevPerspectives.getScene().setCursor(Cursor.WAIT);
 		
@@ -462,40 +174,48 @@ public class  InsightManagerController_2 implements Initializable{
 	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
 	            if(newState == Worker.State.SUCCEEDED){
 	            	if(arylPlaySheets.size() > 0){
-	            	   //Restore mouse-pointer:
-	            		treevPerspectives.getScene().setCursor(Cursor.DEFAULT);	            	
-	            	   //Load Insight Manager data:
-	            	   loadData(null, null, null);
+	            	    //Restore mouse-pointer:
+	            		treevPerspectives.getScene().setCursor(Cursor.DEFAULT);	  
+	            		
+		                //Load Insight Manager data if it has not already been loaded:
+	            		if(isDataLoaded == false){
+	            		   loadData();
+	            		   isDataLoaded = true;
+	            		}
 	            	}
 	      	    }    	    
 	        }
 	     });
-//		//Define a Task to fetch an ArrayList of Concept Value Types:
-//		Task<ObservableList<ParameterType>> getParameterTypeData = new Task<ObservableList<ParameterType>>(){
-//		    @Override 
-//		    protected ObservableList<ParameterType> call() throws Exception {
-//		    	arylParameterTypes = FXCollections.observableArrayList(engine.getInsightManager().getParameterTypes());		    	
-//		        return arylParameterTypes;
-//		    }
-//		};
-//	    //Define a listener to load Insight Manager data when Task completes,
-//		//but only if the PlaySheets have been loaded:
-//		getParameterTypeData.stateProperty().addListener(new ChangeListener<Worker.State>() {
-//	        @Override 
-//	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
-//	            if(newState == Worker.State.SUCCEEDED){
-//	            	if(arylPlaySheets.size() > 0){
-//	            	   //Restore mouse-pointer:
-//	            		treevPerspectives.getScene().setCursor(Cursor.DEFAULT);	            	
-//	            	   //Load Insight Manager data:
-//	            	   loadData(null, null, null);
-//	            	}
-//	      	    }    	    
-//	        }
-//	     });
+		//Define a Task to fetch an ArrayList of Concept Value Types:
+		Task<ObservableList<ParameterType>> getParameterTypeData = new Task<ObservableList<ParameterType>>(){
+		    @Override 
+		    protected ObservableList<ParameterType> call() throws Exception {
+		    	arylParameterTypes = FXCollections.observableArrayList(engine.getInsightManager().getParameterTypes());		    	
+		        return arylParameterTypes;
+		    }
+		};
+	    //Define a listener to load Insight Manager data when Task completes,
+		//but only if the Parameter Types have been loaded:
+		getParameterTypeData.stateProperty().addListener(new ChangeListener<Worker.State>() {
+	        @Override 
+	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
+	            if(newState == Worker.State.SUCCEEDED){
+	            	if(arylParameterTypes.size() > 0){
+	            	    //Restore mouse-pointer:
+	            		treevPerspectives.getScene().setCursor(Cursor.DEFAULT);	
+	            		
+		                //Load Insight Manager data if it has not already been loaded:
+	            		if(isDataLoaded == false){
+	            		   loadData();
+	            		   isDataLoaded = true;
+	            		}
+	            	}
+	      	    }    	    
+	        }
+	     });
 		 //Run the Tasks on a separate Threads:
 		 new Thread(getPlaySheetData).start();
-//		 new Thread(getParameterTypeData).start();
+		 new Thread(getParameterTypeData).start();
 	}
 
 //----------------------------------------------------------------------------------------------------
@@ -506,6 +226,7 @@ public class  InsightManagerController_2 implements Initializable{
 	 * All Perspectives and their Insights are loaded into this tree-view,
 	 * so that the data can be used within the Insight Manager.
 	 */
+    private boolean isItemExpanded;
 	protected void populatePerspectiveTreeView(){
         TreeItem<Object> rootItem = new TreeItem<Object>("Perspectives", null);
         rootItem.setExpanded(true);
@@ -527,6 +248,30 @@ public class  InsightManagerController_2 implements Initializable{
         }        
         treevPerspectives.setRoot(rootItem);    
         treevPerspectives.setEditable(true);
+
+        //On mouse-pressed, note whether the selected tree-view item
+        //has been expanded or not:
+        treevPerspectives.setOnMousePressed(new EventHandler<MouseEvent>(){
+			@Override
+			public void handle(MouseEvent mouseEvent){
+	           isItemExpanded = treevPerspectives.getSelectionModel().getSelectedItem().isExpanded();
+	           mouseEvent.consume();
+			}
+        });
+        //Set double-click handler for the tree-view to display editors
+        //for Perspectives, Insights, and Parameters:
+        treevPerspectives.setOnMouseClicked(new EventHandler<MouseEvent>(){
+           @Override
+           public void handle(MouseEvent mouseEvent){    
+              if(mouseEvent.getClickCount() == 2){
+            	 doubleClickTreeItem();
+            	 //Restore selected tree-view item's expanded state to what it was before the
+            	 //first click:
+            	 treevPerspectives.getSelectionModel().getSelectedItem().setExpanded(isItemExpanded); 
+              }
+              mouseEvent.consume();
+           }
+        });
 
         //CellFactory to enable click-and-drag of Insights and display of Insight icons:
         //------------------------------------------------------------------------------
@@ -558,9 +303,9 @@ public class  InsightManagerController_2 implements Initializable{
                             }else if(getTreeItem().getValue() instanceof Perspective){
                                setContextMenu(perspectiveMenu);
                             }else if(getTreeItem().getValue() instanceof Insight){
-                                setContextMenu(insightMenu);
+                               setContextMenu(insightMenu);
                             }else if(getTreeItem().getValue() instanceof Parameter){
-                                setContextMenu(parameterMenu);
+                               setContextMenu(parameterMenu);
                             }else{
                                setContextMenu(null);
                             }
@@ -704,6 +449,7 @@ public class  InsightManagerController_2 implements Initializable{
                         dragEvent.consume();
                     }
                 });
+                
                 //Completes drag operation:
                 //-------------------------
                 treeCell.setOnDragDone(new EventHandler<DragEvent>() {
@@ -843,15 +589,22 @@ public class  InsightManagerController_2 implements Initializable{
 		TreeItem<Object> item = new TreeItem<Object>(perspective);
         treevPerspectives.getRoot().getChildren().add(item);
         treevPerspectives.getRoot().getChildren().sort(Comparator.comparing(t->t.toString()));
+        
+        //Select new Perspective and open its editor:
+        //-------------------------------------------
+        treevPerspectives.getSelectionModel().select(item);
+        doubleClickTreeItem();
 	}
 	
 	/**    Removes the selected Perspective from the tree-view if the response to the
-	 *  warning popup is OK. (Called by "buildContextMenus()".)
+	 *  warning popup is OK. Also clears the editor in the right-pane if it represents
+	 *  or is contained by the deleted Perspective. (Called by "buildContextMenus()".)
 	 */
 	private void deletePerspective(){
 		if(Utility.showWarningOkCancel("Are you sure you want to delete this Perspective?") == 0){
-		   treevPerspectives.getRoot().getChildren()
-		      .remove(treevPerspectives.getSelectionModel().getSelectedItem());
+		   TreeItem<Object> itemPerspective = treevPerspectives.getSelectionModel().getSelectedItem();
+		   clearRightPane(itemPerspective);
+		   treevPerspectives.getRoot().getChildren().remove(itemPerspective);
 		}
 	}
 
@@ -884,18 +637,25 @@ public class  InsightManagerController_2 implements Initializable{
         InsightTreeItem<Object> item = new InsightTreeItem<Object>(insight, imageView);
         treevPerspectives.getSelectionModel().getSelectedItem().getChildren().add(0, item);
         renumberInsights();
+        
+        //Select new Insight and open its editor:
+        //---------------------------------------
+        treevPerspectives.getSelectionModel().select(item);
+        doubleClickTreeItem();
 	}
 	
 	/**    Removes the selected Insight from the tree-view if the response to the
-	 *  warning popup is OK. (Called by "buildContextMenus()".)
+	 *  warning popup is OK. Also clears the editor in the right-pane if it represents
+	 *  or is contained by the deleted Insight. (Called by "buildContextMenus()".)
 	 */
 	private void deleteInsight(){
 		if(Utility.showWarningOkCancel("Are you sure you want to delete this Insight?") == 0){
+		   TreeItem<Object> itemInsight = treevPerspectives.getSelectionModel().getSelectedItem();
+		   clearRightPane(itemInsight);
 		   TreeItem<Object> itemPerspective = treevPerspectives.getSelectionModel()
 			  .getSelectedItem().getParent();
 		   
-		   itemPerspective.getChildren()
-		      .remove(treevPerspectives.getSelectionModel().getSelectedItem());
+		   itemPerspective.getChildren().remove(itemInsight);
            renumberInsights();
 		}
 	}
@@ -939,14 +699,21 @@ public class  InsightManagerController_2 implements Initializable{
         }else{
            olstInsightParameters.add(parameterTreeItem);
         }                
+        
+        //Select new Parameter and open its editor:
+        //-----------------------------------------
+        treevPerspectives.getSelectionModel().select(parameterTreeItem);
+        doubleClickTreeItem();
 	}//End "addParameter()".
 	
 	/**    Removes the selected Parameter from the tree-view if the response to the
-	 *  warning popup is OK. (Called by "buildContextMenus()".)
+	 *  warning popup is OK. Also clears the editor in the right-pane if it represents
+	 *  or is contained by the deleted Parameter. (Called by "buildContextMenus()".)
 	 */
 	private void deleteParameter(){
 		if(Utility.showWarningOkCancel("Are you sure you want to delete this Parameter?") == 0){
 		   TreeItem<Object> itemParameter = treevPerspectives.getSelectionModel().getSelectedItem();
+		   clearRightPane(itemParameter);
 		   TreeItem<Object> itemInsight = itemParameter.getParent();
 		   Insight insight = (Insight) itemInsight.getValue();
            ArrayList<Parameter> arylParameters = (ArrayList<Parameter>) insight.getInsightParameters();                
@@ -954,6 +721,53 @@ public class  InsightManagerController_2 implements Initializable{
            itemInsight.getChildren().remove(itemParameter);
 		}
 	}
+	
+	/**   Clears the right pane when a TreeItem is deleted, if that TreeItem represents or
+	 * contains the data displayed in the right pane.
+	 * 
+	 * Note: This is a recursive function.
+	 * 
+	 * @param treeItem -- (TreeItem<Object>) TreeItem to be deleted.
+	 */
+	private void clearRightPane(TreeItem<Object> treeItem){
+		URI uriTreeItem = null;
+		Object objTreeItem = treeItem.getValue();
+		URI uriController = null;
+		if(loaderRightPane == null){
+			return;
+		}
+		Object objController = loaderRightPane.getController();
+		
+		//Get the URI of the object (Parameter, Insight, or Perspective)
+		//behind the TreeItem passed in:
+		if(objTreeItem instanceof Perspective){
+			uriTreeItem = ((Perspective) objTreeItem).getUri();
+		}else if(objTreeItem instanceof Insight){
+			uriTreeItem = ((Insight) objTreeItem).getId();
+		}else if(objTreeItem instanceof Parameter){
+			uriTreeItem = ((Parameter) objTreeItem).getParameterId();
+		}
+		
+		//Get the URI of the object (Parameter, Insight, or Perspective)
+		//displayed in the right-pane:
+		if(objController instanceof PerspectiveEditorController){
+			uriController = ((PerspectiveEditorController) objController).itemURI;			
+		}else if(objController instanceof InsightEditorController){
+			uriController = ((InsightEditorController) objController).itemURI;		   
+		}else if(objController instanceof ParameterEditorController){
+			uriController = ((ParameterEditorController) objController).itemURI;
+	    }
+		
+		if(uriTreeItem != null && uriController != null &&
+		   uriTreeItem.equals(uriController)){
+			apaneContent.getChildren().clear();
+			
+		}else{
+			for(TreeItem<Object> treeItem_2: treeItem.getChildren()){
+				clearRightPane(treeItem_2);
+			}
+		}	
+	}//End "clearRightPane(...)".
 	
 	/**   Class to override the ".isLeaf()" method for Insight tree-items.
 	 * We need to be sure that no Parameters are listed under the Insight.
@@ -1003,7 +817,40 @@ public class  InsightManagerController_2 implements Initializable{
 	    }
 		return strReturnValue;
 	}
+	
+	/**   When double-clicking a TreeItem, we must load the right-pane with 
+	 * the contents of the item clicked. Provides dynamic loading of FXML
+	 * editors with their controllers.
+	 */
+	private void doubleClickTreeItem(){
+		PerspectiveEditorController contPerspectiveEditor = null;
+		InsightEditorController contInsightEditor = null;
+		ParameterEditorController contParameterEditor = null;
+	    TreeItem<Object> item = treevPerspectives.getSelectionModel().getSelectedItem();
+  	    apaneContent.getChildren().clear();
+	    try{
+	       if(item.getValue() instanceof Perspective){    	
+			  loaderRightPane = new FXMLLoader(getClass().getResource("/fxml/PerspectiveEditor.fxml"));
+			  apaneContent.getChildren().add(loaderRightPane.load());
+			  contPerspectiveEditor = loaderRightPane.getController();
+			  contPerspectiveEditor.setData(treevPerspectives);
 
+	       }else if(item.getValue() instanceof Insight){
+			  loaderRightPane = new FXMLLoader(getClass().getResource("/fxml/InsightEditor.fxml"));
+			  apaneContent.getChildren().add(loaderRightPane.load());
+			  contInsightEditor = loaderRightPane.getController();
+			  contInsightEditor.setData(treevPerspectives, arylPlaySheets);
+
+	       }else if(item.getValue() instanceof Parameter){
+			  loaderRightPane = new FXMLLoader(getClass().getResource("/fxml/ParameterEditor.fxml"));
+			  apaneContent.getChildren().add(loaderRightPane.load());
+			  contParameterEditor = loaderRightPane.getController();
+			  contParameterEditor.setData(treevPerspectives, arylParameterTypes);
+	       }
+	    }catch(IOException e){
+			log.warn(e, e);
+		}
+	}
 ////----------------------------------------------------------------------------------------------------
 ////	                            P e r s p e c t i v e   T a b
 ////----------------------------------------------------------------------------------------------------
