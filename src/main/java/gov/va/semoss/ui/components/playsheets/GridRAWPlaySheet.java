@@ -20,6 +20,7 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.om.SEMOSSVertexImpl;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
@@ -355,7 +356,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 
 		@Override
 		public void actionPerformed( ActionEvent e ) {
-			SEMOSSVertex vertex = new SEMOSSVertex( URI.class.cast( uri ) );
+			SEMOSSVertex vertex = new SEMOSSVertexImpl( URI.class.cast( uri ) );
 			try {
 				Model model = getEngine().construct( ModelQueryAdapter.describe( uri ) );
 				for ( Statement s : model ) {

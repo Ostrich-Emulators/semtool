@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,7 @@ import org.openrdf.model.Value;
  *
  * @author ryan
  */
-public interface QueryNodeEdgeBase extends NodeEdgeBase {
+public interface QueryGraphElement extends GraphElement {
 
 	public boolean isSelected( URI prop );
 

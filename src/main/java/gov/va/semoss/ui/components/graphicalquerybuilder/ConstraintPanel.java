@@ -7,7 +7,6 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet.JoinType;
-import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -523,7 +522,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			this.included = included;
 			this.property = property;
 			this.joiner = joiner;
-			this.raw = raw;
+			this.raw = ( JoinType.SINGLE == joiner ? null : raw );
 		}
 
 		public ConstraintValueSet( boolean included, URI property, JoinType joiner ) {

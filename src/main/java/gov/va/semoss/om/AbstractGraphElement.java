@@ -6,7 +6,6 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
-import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.Constants;
 
@@ -14,6 +13,7 @@ import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,11 +35,12 @@ import org.openrdf.model.vocabulary.XMLSchema;
  *
  * @author ryan
  */
-public class AbstractNodeEdgeBase implements NodeEdgeBase {
+public class AbstractGraphElement implements GraphElement {
 
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
 	public static final String CHANGE_COLOR = "color";
+	public static final String CHANGE_VISIBLE = "visible";
 	private transient boolean visible = true;
 	private transient URI id;
 	private transient Color color;
@@ -49,16 +50,16 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	private Map<String, Object> propHash = new HashMap<>(); //this is sent to the js (ChartIt)
 
-	public AbstractNodeEdgeBase( URI id ) {
+	public AbstractGraphElement( URI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
-	public AbstractNodeEdgeBase( URI id, URI type, String label ) {
+	public AbstractGraphElement( URI id, URI type, String label ) {
 		this( id, type, label,
 				GraphColorRepository.instance().getColor( (URI) null ) );
 	}
 
-	public AbstractNodeEdgeBase( URI id, URI type, String label, Color col ) {
+	public AbstractGraphElement( URI id, URI type, String label, Color col ) {
 		this.id = id;
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
@@ -67,10 +68,12 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 				= ( null == col ? GraphColorRepository.instance().getColor( type ) : col );
 	}
 
+	@Override
 	public void addPropertyChangeListener( PropertyChangeListener pcl ) {
 		listeners.add( pcl );
 	}
 
+	@Override
 	public void removePropertyChangeListener( PropertyChangeListener pcl ) {
 		listeners.remove( pcl );
 	}
@@ -82,14 +85,30 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 				? GraphColorRepository.instance().getColor( Constants.TRANSPARENT )
 				: _color );
 
-		firePropertyChanged( CHANGE_COLOR, old, color );
+		fireIfPropertyChanged( CHANGE_COLOR, old, color );
 	}
 
-	protected void firePropertyChanged( String prop, Object oldval, Object newval ) {
-		PropertyChangeEvent pce
-				= new PropertyChangeEvent( this, prop, oldval, newval );
-		for ( PropertyChangeListener pcl : listeners ) {
-			pcl.propertyChange( pce );
+	@Override
+	public Collection<PropertyChangeListener> getPropertyChangeListeners() {
+		return new ArrayList<>( listeners );
+	}
+
+	protected void fireIfPropertyChanged( String prop, Object oldval, Object newval ) {
+		// we only want to fire if we need to, so check that something has 
+		// actually changed
+		boolean oldNull = ( null == oldval );
+		boolean newNull = ( null == newval );
+
+		if ( oldNull && newNull ) {
+			return;
+		}
+
+		if ( !Objects.equals( oldval, newval ) ) {
+			PropertyChangeEvent pce
+					= new PropertyChangeEvent( this, prop, oldval, newval );
+			for ( PropertyChangeListener pcl : listeners ) {
+				pcl.propertyChange( pce );
+			}
 		}
 	}
 
@@ -100,7 +119,9 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 
 	@Override
 	public void setVisible( boolean b ) {
+		boolean old = visible;
 		visible = b;
+		this.fireIfPropertyChanged( CHANGE_VISIBLE, old, b );
 	}
 
 	@Override
@@ -132,18 +153,25 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 	}
 
 	@Override
+	public Set<URI> getPropertyKeys() {
+		return new HashSet<>( properties.keySet() );
+	}
+
+	@Override
 	public String getLabel() {
 		return ( properties.containsKey( RDFS.LABEL )
 				? properties.get( RDFS.LABEL ).stringValue() : "" );
 	}
 
 	public void setProperty( URI prop, Object propValue ) {
-		setValue( prop, RDFDatatypeTools.instance().getValueFromObject( propValue ) );
+		setValue( prop, RDFDatatypeTools.getValueFromObject( propValue ) );
 	}
 
 	@Override
 	public void setValue( URI prop, Value val ) {
+		Value oldval = properties.get( prop );
 		properties.put( prop, val );
+		fireIfPropertyChanged( prop.getLocalName(), oldval, val );
 	}
 
 	public void setPropHash( Map<String, Object> _propHash ) {
@@ -264,7 +292,7 @@ public class AbstractNodeEdgeBase implements NodeEdgeBase {
 		if ( getClass() != obj.getClass() ) {
 			return false;
 		}
-		final AbstractNodeEdgeBase other = (AbstractNodeEdgeBase) obj;
+		final AbstractGraphElement other = (AbstractGraphElement) obj;
 		if ( !Objects.equals( this.id, other.id ) ) {
 			return false;
 		}

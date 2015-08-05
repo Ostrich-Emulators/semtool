@@ -28,16 +28,20 @@ import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Tree;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import java.awt.event.ActionEvent;
+import gov.va.semoss.om.SEMOSSEdgeImpl;
+import gov.va.semoss.om.SEMOSSVertexImpl;
+import gov.va.semoss.util.UriBuilder;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import javax.swing.AbstractAction;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  * This class extends downstream processing in order to convert the graph into
@@ -51,59 +55,74 @@ public class GraphToTreeConverter {
 	};
 
 	private static final Logger log = Logger.getLogger( GraphToTreeConverter.class );
+	private final Search method;
+	private final boolean makeDupes;
 
 	/**
-	 * Converts the given graph to a tree using a DFS
+	 * Converts the given graph to a tree
 	 *
-	 * @param <V>
+	 * @param <SEMOSSVertex>
 	 * @param <E>
 	 * @param graph
 	 * @param roots
+	 * @param search
 	 * @return
 	 */
-	public static <V, E> Forest<V, E> convert( DirectedGraph<V, E> graph,
-			Collection<V> roots, Search s ) {
-		DelegateForest<V, E> newforest = new DelegateForest<>();
-		for ( V v : roots ) {
-			if ( Search.DFS == s ) {
-				newforest.addTree( dfs( v, graph ) );
+	public static Forest<SEMOSSVertex, SEMOSSEdge> convert( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			Collection<SEMOSSVertex> roots, Search search ) {
+		return convert( graph, roots, search, false );
+	}
+
+	public static Forest<SEMOSSVertex, SEMOSSEdge> convert( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			Collection<SEMOSSVertex> roots, Search s, boolean makeDupes ) {
+		return new GraphToTreeConverter( s, makeDupes ).convert( graph, roots );
+	}
+
+	public GraphToTreeConverter( Search search, boolean duplicateNodes ) {
+		method = search;
+		makeDupes = duplicateNodes;
+	}
+
+	public GraphToTreeConverter( Search search ) {
+		this( search, false );
+	}
+
+	public GraphToTreeConverter( boolean duplicateNodes ) {
+		this( Search.BFS, duplicateNodes );
+	}
+
+	public GraphToTreeConverter() {
+		this( false );
+	}
+
+	public Forest<SEMOSSVertex, SEMOSSEdge> convert( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Collection<SEMOSSVertex> roots ) {
+		DelegateForest<SEMOSSVertex, SEMOSSEdge> newforest = new DelegateForest<>();
+
+		Set<SEMOSSVertex> seen = new HashSet<>();
+		for ( SEMOSSVertex v : roots ) {
+			if ( Search.DFS == method ) {
+				newforest.addTree( dfs( v, graph, seen ) );
 			}
 			else {
-				newforest.addTree( bfs( v, graph ) );
+				newforest.addTree( bfs( v, graph, seen ) );
 			}
 		}
 
 		return newforest;
 	}
 
-	/**
-	 * A convenience function to {@link
-	 * #convert(edu.uci.ics.jung.graph.DirectedGraph, java.util.Collection,
-	 * gov.va.semoss.ui.components.GraphToTreeConverter.Search) } using
-	 * {@link Search#BFS}
-	 *
-	 * @param <V>
-	 * @param <E>
-	 * @param graph
-	 * @param roots
-	 * @return
-	 */
-	public static <V, E> Forest<V, E> convert( DirectedGraph<V, E> graph,
-			Collection<V> roots ) {
-		return convert( graph, roots, Search.BFS );
-	}
-
-	private static <V, E> Tree<V, E> dfs( V root, DirectedGraph<V, E> graph ) {
-		DelegateTree<V, E> tree = new DelegateTree<>();
+	private Tree<SEMOSSVertex, SEMOSSEdge> dfs( SEMOSSVertex root,
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Set<SEMOSSVertex> seen ) {
+		DelegateTree<SEMOSSVertex, SEMOSSEdge> tree = new DelegateTree<>();
 		tree.setRoot( root );
-		Queue<V> todo = Collections.asLifoQueue( new ArrayDeque<>() );
+		Queue<SEMOSSVertex> todo = Collections.asLifoQueue( new ArrayDeque<>() );
 		todo.add( root );
 
 		while ( !todo.isEmpty() ) {
-			V v = todo.poll();
+			SEMOSSVertex v = todo.poll();
 
-			for ( E e : graph.getOutEdges( v ) ) {
-				V child = graph.getOpposite( v, e );
+			for ( SEMOSSEdge e : graph.getOutEdges( v ) ) {
+				SEMOSSVertex child = graph.getOpposite( v, e );
 				if ( !tree.containsVertex( child ) ) {
 					tree.addChild( e, v, child );
 					todo.add( child );
@@ -114,25 +133,62 @@ public class GraphToTreeConverter {
 		return tree;
 	}
 
-	private static <V, E> Tree<V, E> bfs( V root, DirectedGraph<V, E> graph ) {
-		DelegateTree<V, E> tree = new DelegateTree<>();
+	private Tree<SEMOSSVertex, SEMOSSEdge> bfs( SEMOSSVertex root,
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Set<SEMOSSVertex> seen ) {
+		DelegateTree<SEMOSSVertex, SEMOSSEdge> tree = new DelegateTree<>();
 		tree.setRoot( root );
-		Deque<V> todo = new ArrayDeque<>();
+		Deque<SEMOSSVertex> todo = new ArrayDeque<>();
 		todo.add( root );
 
 		while ( !todo.isEmpty() ) {
-			V v = todo.poll();
+			SEMOSSVertex v = todo.poll();
+			seen.add( v );
 
-			for ( E e : graph.getOutEdges( v ) ) {
-				V child = graph.getOpposite( v, e );
+			boolean isdupe = false;
+			for ( SEMOSSEdge e : graph.getOutEdges( v ) ) {
+				SEMOSSVertex child = graph.getOpposite( v, e );
+
+				if ( seen.contains( child ) ) {
+					isdupe = true;
+					child = duplicate( child );
+					e = duplicate( e, v, child );
+				}
+
 				if ( !tree.containsVertex( child ) ) {
 					tree.addChild( e, v, child );
-					todo.add( child );
+					if ( !isdupe ) {
+						todo.add( child );
+					}
 				}
 			}
 		}
 
 		return tree;
+	}
+
+	private static SEMOSSVertex duplicate( SEMOSSVertex old ) {
+		URI uri = UriBuilder.getBuilder( old.getURI().getNamespace() ).uniqueUri();
+		SEMOSSVertex c2 = new SEMOSSVertexImpl( uri, old.getType(), old.getLabel() );
+		for ( Map.Entry<URI, Value> en : old.getValues().entrySet() ) {
+			c2.setValue( en.getKey(), en.getValue() );
+		}
+		for ( PropertyChangeListener pcl : old.getPropertyChangeListeners() ) {
+			c2.addPropertyChangeListener( pcl );
+		}
+
+		return c2;
+	}
+
+	private static SEMOSSEdge duplicate( SEMOSSEdge old, SEMOSSVertex src, SEMOSSVertex dst ) {
+		SEMOSSEdge c2 = new SEMOSSEdgeImpl( src, dst, old.getURI() );
+		for ( Map.Entry<URI, Value> en : old.getValues().entrySet() ) {
+			c2.setValue( en.getKey(), en.getValue() );
+		}
+		for ( PropertyChangeListener pcl : old.getPropertyChangeListeners() ) {
+			c2.addPropertyChangeListener( pcl );
+		}
+
+		return c2;
 	}
 
 	public static void printForest( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {

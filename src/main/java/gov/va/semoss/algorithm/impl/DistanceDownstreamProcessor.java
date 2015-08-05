@@ -26,11 +26,11 @@ import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.GridFilterData;
-import gov.va.semoss.ui.components.api.IPlaySheet;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Tree;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
+import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import java.awt.event.ActionEvent;
@@ -76,7 +76,7 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 	public void actionPerformed( ActionEvent e ) {
 		ValueFactory vf = new ValueFactoryImpl();
 		Forest<SEMOSSVertex, SEMOSSEdge> forest
-				= GraphToTreeConverter.convert( graph, selecteds );
+				= GraphToTreeConverter.convert( graph, selecteds, Search.BFS );
 
 		List<Value[]> rows = new ArrayList<>();
 		for ( Tree<SEMOSSVertex, SEMOSSEdge> tree : forest.getTrees() ) {

@@ -30,13 +30,13 @@ public class SparqlResultTableModel extends AbstractTableModel {
 				Boolean.class, String.class };
 	private final List<QueryOrder> list = new ArrayList<>();
 
-	public SparqlResultTableModel( List<QueryNodeEdgeBase> elements,
+	public SparqlResultTableModel( List<QueryGraphElement> elements,
 			List<QueryOrder> ordering ) {
 		
 		Set<QueryOrder> seen = new HashSet<>( ordering );
 		list.addAll( ordering );
 
-		for( QueryNodeEdgeBase element : elements ){
+		for( QueryGraphElement element : elements ){
 			for ( URI prop : element.getAllValues().keySet() ) {
 				if ( !RDF.SUBJECT.equals( prop ) ) {
 					QueryOrder qo = new QueryOrder( element, prop );
@@ -81,7 +81,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	public Object getValueAt( int row, int col ) {
 		QueryOrder src = list.get( row );
 		URI property = src.property;
-		QueryNodeEdgeBase base = src.base;
+		QueryGraphElement base = src.base;
 
 		switch ( col ) {
 			case 0:
@@ -106,7 +106,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	@Override
 	public void setValueAt( Object aValue, int row, int col ) {
 		QueryOrder src = list.get( row );
-		QueryNodeEdgeBase base = src.base;
+		QueryGraphElement base = src.base;
 
 		switch ( col ) {
 			case 0:
@@ -153,10 +153,10 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 	public static class RowLocator implements Comparable<RowLocator> {
 
-		public final QueryNodeEdgeBase base;
+		public final QueryGraphElement base;
 		public final URI property;
 
-		public RowLocator( QueryNodeEdgeBase base, URI prop ) {
+		public RowLocator( QueryGraphElement base, URI prop ) {
 			this.base = base;
 			this.property = prop;
 		}

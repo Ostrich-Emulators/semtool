@@ -161,11 +161,12 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		// Initialize the key used to store the Data Series being visualized
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
-		HashMap<?,?> dataSeries = (HashMap<?,?>)dataHash.get(dataSeriesKey);
-		// Call the sorting convenience method, to derive an order data structure
-		LinkedHashMap<?,?> sortedHash = sort(dataSeries);
-		// Put the data series back
-		dataHash.put(dataSeriesKey, sortedHash);
+		Object dataSeries = dataHash.get(dataSeriesKey);
+		// Digest/process the data for display
+		String fileNameOnly = getFileName(fileName);
+		dataSeries = DataSeriesDigester.instance().digestData(dataSeries, fileNameOnly);
+		// After digestion, put the data back
+		dataHash.put(dataSeriesKey, dataSeries);
 		// Continue with the processing
 		String json = new Gson().toJson( dataHash );
 		if ( null != json && !"".equals( json ) && !"{}".equals( json ) ) {
@@ -174,6 +175,21 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		}
 
 		executeJavaScript( "start(" + json + ");" );
+	}
+
+	/**
+	 * Convenience method for extracting only the filename, plus extension
+	 * out of a complete file path
+	 * @param filepath The file path, plus filename, with extension 
+	 * @return Just the filename, with extension
+	 */
+	private String getFileName(String filepath) {
+		int separatorIndex = filepath.lastIndexOf('/');
+		String onlyFilename = "";
+		if (separatorIndex >= 0){
+			onlyFilename = filepath.substring(separatorIndex + 1);
+		}
+		return onlyFilename;
 	}
 
 	@Override
@@ -344,23 +360,4 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 			throw new IOException( msg, e );
 		}
 	}
-	
-	/**
-	 * Convenience method for sorting (insertion order-based) data in a 
-	 * HashMap according to alpha-numeric order
-	 * @param hashMap The unordered table
-	 * @return An ordered lookup table
-	 */
-	private LinkedHashMap<?,?> sort(HashMap<?,?> hashMap){
-		SortedSet keys = new TreeSet(hashMap.keySet());
-		LinkedHashMap sortedHash = new LinkedHashMap();
-		Iterator keyIterator = keys.iterator();
-		while (keyIterator.hasNext()){
-			String key = (String)keyIterator.next();
-			Object value = hashMap.get(key);
-			sortedHash.put(key, value);
-		}
-		return sortedHash;
-	}
-
 }

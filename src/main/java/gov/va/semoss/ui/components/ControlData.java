@@ -22,7 +22,7 @@ package gov.va.semoss.ui.components;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import gov.va.semoss.om.NodeEdgeBase;
+import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -77,9 +77,7 @@ public class ControlData implements GraphListener {
 	}
 
 	@Override
-	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		clear();
-
+	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {		
 		for ( SEMOSSVertex vertex : graph.getVertices() ) {
 			for ( URI property : vertex.getProperties().keySet() ) {
 				addVertexProperty( vertex.getType(), property );
@@ -97,7 +95,8 @@ public class ControlData implements GraphListener {
 
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout,
+			GraphPlaySheet gps ) {
 		// nothing to update in this case
 	}
 
@@ -154,7 +153,7 @@ public class ControlData implements GraphListener {
 	 *
 	 * @return Vector<String> List of properties.
 	 */
-	public List<URI> getSelectedProperties( NodeEdgeBase v ) {
+	public List<URI> getSelectedProperties( GraphElement v ) {
 		return ( v instanceof SEMOSSVertex
 				? vertexCDT.getSelectedProperties( v.getType() )
 				: edgeCDT.getSelectedProperties( v.getType() ) );

@@ -6,7 +6,10 @@
 package gov.va.semoss.om;
 
 import java.awt.Color;
+import java.beans.PropertyChangeListener;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
@@ -14,7 +17,7 @@ import org.openrdf.model.Value;
  *
  * @author ryan
  */
-public interface NodeEdgeBase {
+public interface GraphElement {
 
 	public Color getColor();
 
@@ -33,6 +36,8 @@ public interface NodeEdgeBase {
 	public Value getValue( URI prop );
 
 	public Map<URI, Value> getValues();
+
+	public Set<URI> getPropertyKeys();
 
 	public boolean hasProperty( URI prop );
 
@@ -53,4 +58,10 @@ public interface NodeEdgeBase {
 	public void setValue( URI prop, Value val );
 
 	public void setVisible( boolean b );
+
+	public void addPropertyChangeListener( PropertyChangeListener pcl );
+
+	public void removePropertyChangeListener( PropertyChangeListener pcl );
+
+	public Collection<PropertyChangeListener> getPropertyChangeListeners();
 }

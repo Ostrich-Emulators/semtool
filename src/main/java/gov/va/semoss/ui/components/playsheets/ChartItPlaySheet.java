@@ -46,12 +46,13 @@ public class ChartItPlaySheet extends BrowserPlaySheet2 {
 	}
 	
 	public void pullData(GraphPlaySheet gps) {
-		Map<URI, List<SEMOSSVertex>> nodeHash = gps.getFilterData().getNodeTypeMap();
-		Map<String, List<SEMOSSVertex>> nodeHashAsLocalNames = new HashMap<String, List<SEMOSSVertex>>();
+		Map<URI, List<SEMOSSVertex>> nodeHash = gps.getVerticesByType();
+		Map<String, List<SEMOSSVertex>> nodeHashAsLocalNames = new HashMap<>();
 		
 		for(URI nodeType:nodeHash.keySet()) {
 			for (SEMOSSVertex node:nodeHash.get(nodeType)) {
 				Map<String, Object> props = transformProperties(node.getProperties(), true);
+				
 				node.setPropHash(props);
 			}
 			

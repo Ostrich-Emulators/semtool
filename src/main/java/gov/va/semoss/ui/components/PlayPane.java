@@ -60,7 +60,6 @@ import gov.va.semoss.util.CSSApplication;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
-import gov.va.semoss.util.QuestionPlaySheetStore;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -139,6 +138,7 @@ import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
 import com.ibm.icu.util.StringTokenizer;
+import gov.va.semoss.util.Utility;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -173,7 +173,6 @@ public class PlayPane extends JFrame {
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
-	public JButton refreshButton;
 	public JTable filterTable, edgeTable, propertyTable;
 
 	// left cosmetic panel components
@@ -181,7 +180,7 @@ public class PlayPane extends JFrame {
 	public JTable colorShapeTable, sizeTable;
 
 	// Left label panel
-	private JPanel filterPanel;
+	private FilterPanel filterPanel;
 	//private JPanel filterLabel;
 	private JPanel outputPanel;
 	public JTable labelTable, tooltipTable;
@@ -515,7 +514,6 @@ public class PlayPane extends JFrame {
 		// Components to style
 		//Style.registerTargetClassName( submitButton, ".createBtn" );
 		Style.registerTargetClassName( btnRepaintGraph, ".standardButton" );
-		Style.registerTargetClassName( refreshButton, ".standardButton" );
 		Style.registerTargetClassName( saveSudowl, ".standardButton" );
 
 		new CSSApplication( getContentPane() );
@@ -580,6 +578,7 @@ public class PlayPane extends JFrame {
 				}
 
 				gQueryBuilderPanel.setEngine( engine );
+				filterPanel.setEngine( engine );
 			}
 		} );
 	}
@@ -889,28 +888,12 @@ public class PlayPane extends JFrame {
 		return panel;
 	}
 
-	private JPanel makeFilterPanel() {
-		GridBagLayout panelLayout = new GridBagLayout();
-		panelLayout.columnWeights = new double[]{ 1.0 };
-		panelLayout.rowWeights = new double[]{ 1.0, 1.0, 1.0, 0.0 };
-
-		JPanel panel = new JPanel( panelLayout );
-		panel.setBackground( SystemColor.control );
-
-		filterTable = initJTableAndAddTo( panel, true );
-		propertyTable = initJTableAndAddTo( panel, true );
-		edgeTable = initJTableAndAddTo( panel, true );
-
-		refreshButton = initCustomButton( "Refresh Graph" );
-		refreshButton.addActionListener( new ActionListener() {
-			@Override
-			public void actionPerformed( ActionEvent actionevent ) {
-				QuestionPlaySheetStore.getInstance().getActiveSheet().refineView();
-			}
-		} );
-		panel.add( refreshButton, getGBC( GridBagConstraints.NONE ) );
-
-		return panel;
+	private FilterPanel makeFilterPanel() {
+		return new FilterPanel();
+	}
+	
+	public FilterPanel getFilterPanel(){
+		return filterPanel;
 	}
 
 	private CustomButton initCustomButton( String title ) {

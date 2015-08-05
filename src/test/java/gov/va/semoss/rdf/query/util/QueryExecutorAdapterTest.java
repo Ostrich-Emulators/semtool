@@ -19,6 +19,7 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.repository.RepositoryConnection;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
+import java.util.TimeZone;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -62,6 +63,7 @@ public class QueryExecutorAdapterTest {
 
 	@BeforeClass
 	public static void setupClass() {
+		TimeZone.setDefault( TimeZone.getTimeZone( "GMT-04:00" ) );
 		engine = new InMemorySesameEngine();
 		try {
 			RepositoryConnection rc = engine.getRawConnection();

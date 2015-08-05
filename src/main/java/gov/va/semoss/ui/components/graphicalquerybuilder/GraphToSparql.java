@@ -17,7 +17,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -49,12 +48,12 @@ public class GraphToSparql {
 	public String select( DirectedGraph<QueryNode, QueryEdge> graph,
 			List<QueryOrder> ordering ) {
 
-		List<QueryNodeEdgeBase> todo = new ArrayList<>();
+		List<QueryGraphElement> todo = new ArrayList<>();
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
 
 		Set<QueryOrder> linkedOrderSet = new LinkedHashSet<>( ordering );
-		for ( QueryNodeEdgeBase v : todo ) {
+		for ( QueryGraphElement v : todo ) {
 			for ( URI prop : v.getAllValues().keySet() ) {
 				QueryOrder qo = new QueryOrder( v, prop );
 				if ( !linkedOrderSet.contains( qo ) ) {
@@ -72,7 +71,7 @@ public class GraphToSparql {
 
 		boolean hasone = false;
 		for ( QueryOrder qo : ordering ) {
-			QueryNodeEdgeBase v = qo.base;
+			QueryGraphElement v = qo.base;
 			URI prop = qo.property;
 
 			boolean issubj = RDF.SUBJECT.equals( prop );
@@ -91,7 +90,7 @@ public class GraphToSparql {
 		return select.toString();
 	}
 
-	private MultiSetMap<URI, Value> getWhereProps( QueryNodeEdgeBase v ) {
+	private MultiSetMap<URI, Value> getWhereProps( QueryGraphElement v ) {
 		MultiSetMap<URI, Value> nodeEdgeVals = MultiSetMap.deepCopy( v.getAllValues() );
 		nodeEdgeVals.remove( RDF.SUBJECT );
 
@@ -152,7 +151,7 @@ public class GraphToSparql {
 		return sb.toString();
 	}
 
-	private String makeFilter( QueryNodeEdgeBase nodeedge, URI type, String nodevar,
+	private String makeFilter( QueryGraphElement nodeedge, URI type, String nodevar,
 			String filterVal ) {
 		StringBuilder sb = new StringBuilder( "FILTER ( " );
 		sb.append( filterVal );
@@ -160,7 +159,7 @@ public class GraphToSparql {
 		return sb.toString();
 	}
 
-	private String buildOneConstraint( QueryNodeEdgeBase v, URI type,
+	private String buildOneConstraint( QueryGraphElement v, URI type,
 			Set<Value> vals ) {
 		StringBuilder sb = new StringBuilder();
 
@@ -220,7 +219,7 @@ public class GraphToSparql {
 
 		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
 		for ( QueryOrder qo : ordering ) {
-			QueryNodeEdgeBase v = qo.base;
+			QueryGraphElement v = qo.base;
 			URI prop = qo.property;
 			MultiSetMap<URI, Value> props = getWhereProps( v );
 
@@ -251,7 +250,7 @@ public class GraphToSparql {
 		return sb.append( "}" ).toString();
 	}
 
-	private String buildEdgeTypeAndEndpoints( QueryNodeEdgeBase edge,
+	private String buildEdgeTypeAndEndpoints( QueryGraphElement edge,
 			Set<Value> vals, QueryNode src, QueryNode dst, Set<URI> otherprops ) {
 		String fromvar = "?" + src.getQueryId();
 		String linkvar = "?" + edge.getQueryId();

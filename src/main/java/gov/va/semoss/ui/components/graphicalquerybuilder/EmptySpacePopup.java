@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.om.AbstractNodeEdgeBase;
+import gov.va.semoss.om.AbstractGraphElement;
 import gov.va.semoss.ui.components.SaveAsInsightPanel;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
  *
  * @author ryan
  */
-public class EmptySpacePopup<T extends AbstractNodeEdgeBase> extends JPopupMenu {
+public class EmptySpacePopup<T extends AbstractGraphElement> extends JPopupMenu {
 
 	private static final Logger log = Logger.getLogger( EmptySpacePopup.class );
 
