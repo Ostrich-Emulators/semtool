@@ -24,23 +24,36 @@ import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.MultiSetMap;
 
-import java.awt.Cursor;
-import java.awt.HeadlessException;
+import java.awt.Color;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
+import javax.swing.DefaultRowSorter;
+import javax.swing.JComponent;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
@@ -55,20 +68,32 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 
 	private static final long serialVersionUID = 983237700844677993L;
 
-	@SuppressWarnings( "unused" )
 	private static final Logger log = Logger.getLogger( GridPlaySheet.class );
 
 	private final LabeledPairTableCellRenderer<URI> renderer = new LabeledPairTableCellRenderer<>();
+	
 	private final MultiSetMap<Integer, Integer> urilocations = new MultiSetMap<>();
+	
 	private final Map<RowCol, Resource> uris = new HashMap<>();
+	
+	private final CopyPasteMediator cpMediator;
 
 	public GridPlaySheet() {
 		super( new ValueTableModel( false ) );
 		JTable table = getTable();
+		// Initialize a Copy/Paste mediator to handle the Ctrl+C, Ctrl+V events
+		cpMediator = new CopyPasteMediator();
+		JTableHeader header = getTable().getTableHeader();
+		header.addMouseListener(new HeaderActionMediator(getTable()));
 		table.setDefaultRenderer( URI.class, renderer );
 		// In order to enable the excel-style mouse interactions, we'll set
 		// the enhanced table interactions here
-		setEnhancedUserInteractions(table);
+		HeaderActionMediator headerMediator = new HeaderActionMediator(table);
+		header.addMouseListener(headerMediator);
+		
+		CellActionMediator cellMediator = new CellActionMediator(table);
+		table.setCellSelectionEnabled(true);
+		table.setSelectionBackground(new Color(120,120,255));
 	}
 
 	@Override
@@ -146,146 +171,224 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 		}
 	}
 	
-	private void setEnhancedUserInteractions(JTable table) {
-		final JTableHeader header = table.getTableHeader();
-		//table.setCellEditor(new CustomCellEditor());
-		header.setReorderingAllowed(false);
-		table.addKeyListener(new TableKeyListener(table));
-		header.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				int col = header.columnAtPoint(e.getPoint());
-				System.out.printf("click cursor = %d%n", header.getCursor()
-						.getType());
-				if (header.getCursor().getType() == Cursor.E_RESIZE_CURSOR)
-					e.consume();
-				else {
-					// System.out.printf("sorting column %d%n", col);
-					table.setColumnSelectionAllowed(false);
-					table.setRowSelectionAllowed(true);
-					table.clearSelection();
-					table.setColumnSelectionInterval(col, col);
-					// tableModel[selectedTab].sortArrayList(col);
-				}
-			}
-		});
-	}
-	
-	private void setCellEditor(){
-		
-	}
 	
 	
-	class AltInteractionTable extends JTable
-	{
-		AltInteractionTable(Object[][] data, String[] columnNames)
-	    {
-	        super(data, columnNames);
-	        // That's already the default        
-	        //	        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-	    }
+	public class HeaderActionMediator extends MouseAdapter {
+		
+		private final JTableHeader header;  
+ 
+		public HeaderActionMediator(JTable table){
+			header = table.getTableHeader();
+			int columnCount = table.getColumnCount();
+			TableRowSorter sorter = (TableRowSorter)getTable().getRowSorter();
+			getTable().getTableHeader().setEnabled(false);
+			for (int i=0; i<columnCount; i++){
+				sorter.setSortable(i, false);
+				
+			}
 
-	    /**
-	     * Called by javax.swing.plaf.basic.BasicTableUI.Handler.adjustSelection(MouseEvent)
-	     * like: table.changeSelection(pressedRow, pressedCol, e.isControlDown(), e.isShiftDown());
-	     */
-	    @Override
-	    public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend)
-	    {
-	        if (toggle && !isRowSelected(rowIndex)){
-	            return; // Don't do the selection
-	        }
-	        super.changeSelection(rowIndex, columnIndex, toggle, extend);
-	    }
-	}
-	
-	class TableKeyListener implements KeyListener {
-
-		public boolean CTRL_PRESSED = false;
-		
-		private final TableModel model;
-		
-		private final JTable table;
-		
-		public TableKeyListener(JTable table){
-			this.model = table.getModel();
-			this.table = table;
 		}
 		
-		@Override
-		public void keyTyped(KeyEvent e) {
-			// Do nothing, conditions are handled by keyPressed
-		}
+        public void mouseClicked(MouseEvent event) {  
+            int col = header.columnAtPoint(event.getPoint());
+            getTable().clearSelection();
+            if ((event.getModifiers()& ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {
+            	getTable().setColumnSelectionAllowed(false);
+                getTable().setRowSelectionAllowed(true);
+            	sort(col);
+            }
+            else {
+            	ListSelectionModel lsModel = getTable().getSelectionModel();
+            	lsModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            	getTable().setColumnSelectionAllowed(true);
+                getTable().setRowSelectionAllowed(false);
+                getTable().setColumnSelectionInterval(col, col);
+            }  
+        }   
 
-		@Override
-		public void keyPressed(KeyEvent e) {
-			int keycode = e.getKeyCode();
-			if (keycode == KeyEvent.CTRL_DOWN_MASK){
-				CTRL_PRESSED = true;
-			}
-			if (keycode == KeyEvent.VK_C){
-				if (CTRL_PRESSED){
-					initiateCopy();
-				}
-			}
-			if (keycode == KeyEvent.VK_V){
-				if (CTRL_PRESSED){
-					initiatePaste();
-				}
-			}
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			int keycode = e.getKeyCode();
-			if (keycode == KeyEvent.CTRL_DOWN_MASK){
-				CTRL_PRESSED = false;
-			}
-		}
-		
-		public void initiateCopy(){
+		private boolean descending = false;
+        
+		private void sort(int columnIndex){
+			TableRowSorter sorter = (TableRowSorter)getTable().getRowSorter();
+			sorter.setSortable(columnIndex, true); 
+			sorter.toggleSortOrder(columnIndex);
+			sorter.setSortable(columnIndex, false);
+			int rowCount = getTable().getRowCount();
+			getModel().fireTableRowsUpdated(0, rowCount - 1);
 			
-			table.updateUI();
-		}
-		
-		public void initiatePaste(){
-			try {
-				String data = (String) Toolkit.getDefaultToolkit()
-				        .getSystemClipboard().getData(DataFlavor.stringFlavor);
-				int rowIndex = table.getSelectedRow();
-				if (rowIndex >= 0){
-					System.out.println(data);
-				}
-			} catch (HeadlessException e) {
-				log.error("Error - applicaiton is running headless.");
-				log.error(e);
-			} catch (UnsupportedFlavorException e) {
-				log.error("Error - Unsupported data flavor encountered during paste action.");
-				log.error(e);
-			} catch (IOException e) {
-				log.error("Error - IO Exception encountered during paste action.");
-				log.error(e);
-			} 
-		}
-		
-		public void initiateInsert(){
-			try {
-				String data = (String) Toolkit.getDefaultToolkit()
-				        .getSystemClipboard().getData(DataFlavor.stringFlavor);
-				int rowIndex = table.getSelectedRow();
-				if (rowIndex >= 0){
-					System.out.println(data);
-				}
-			} catch (HeadlessException e) {
-				log.error("Error - applicaiton is running headless.");
-				log.error(e);
-			} catch (UnsupportedFlavorException e) {
-				log.error("Error - Unsupported data flavor encountered during paste action.");
-				log.error(e);
-			} catch (IOException e) {
-				log.error("Error - IO Exception encountered during paste action.");
-				log.error(e);
-			} 
+			if (descending){
+				sorter.setSortKeys( Arrays.asList( new RowSorter.SortKey( columnIndex, SortOrder.DESCENDING ) ) );
+			}
+			else {
+				sorter.setSortKeys( Arrays.asList( new RowSorter.SortKey( columnIndex, SortOrder.ASCENDING ) ) );
+			}
+			descending = !descending;
 			
+			/*
+			TableRowSorter<ValueTableModel> trs = new TableRowSorter<>( getModel() );
+			getTable().setRowSorter( trs );
+			
+			trs.sort();
+			getModel().fireTableDataChanged();
+			*/
+		}
+	}
+	
+	public class CellActionMediator extends MouseAdapter {
+ 
+		public CellActionMediator(JTable table){
+
+		}
+		
+		
+        public void mouseClicked(MouseEvent event) {  
+        	getTable().setColumnSelectionAllowed(false);
+            getTable().setRowSelectionAllowed(true);
+        }   
+
+	}
+	
+	
+
+	
+	/**
+	 * The CopyPasteMediator enables copying and pasting into and out of,
+	 * respectively, the system clipboard. Typically, programs like excel, and
+	 * data from HTML tables are stored as /t and /n delimited strings in the
+	 * clipboard. This mediator allows for copying and pasting to and from this
+	 * parent class' JTable, using such syntax.
+	 */
+	public class CopyPasteMediator implements ActionListener {
+
+		public CopyPasteMediator() {
+			// Map the copy and paste keystroke to local attributes
+			KeyStroke copy = KeyStroke.getKeyStroke(KeyEvent.VK_C,
+					ActionEvent.CTRL_MASK, false);
+			KeyStroke paste = KeyStroke.getKeyStroke(KeyEvent.VK_V,
+					ActionEvent.CTRL_MASK, false);
+			// Register the keyboard actions to the JTable
+			getTable().registerKeyboardAction(this, "Copy", copy,
+					JComponent.WHEN_FOCUSED);
+			getTable().registerKeyboardAction(this, "Paste", paste,
+					JComponent.WHEN_FOCUSED);
+		}
+
+		/**
+		 * Listens to CTRL+C, and CTRL+V keystroke events
+		 */
+		public void actionPerformed(ActionEvent e) {
+			if (e.getActionCommand().compareTo("Copy") == 0) {
+				copy();
+			}
+			if (e.getActionCommand().compareTo("Paste") == 0) {
+				paste();
+			}
+		}
+
+		/**
+		 * Copy content from the JTable, based on the current selection
+		 * @return True if the selection is valid and contiguous, and false otherwise
+		 */
+		private boolean copy() {
+			// Initialize the String
+			StringBuilder content = new StringBuilder();
+			// Ensure the cells are contiguous
+			int totalCols = getTable().getSelectedColumnCount();
+			int totalRows = getTable().getSelectedRowCount();
+			int[] selectedRows = getTable().getSelectedRows();
+			int[] seletedCols = getTable().getSelectedColumns();
+			// Check if the cells are contiguous, othwise, the copy/paste won't
+			// work
+			if (areCellsContiguous(totalRows, totalCols, selectedRows,
+					seletedCols)) {
+				// If the selection is valid, build a string with tabs as
+				// delimiters between
+				// cells, and line feeds between rows
+				for (int i = 0; i < totalRows; i++) {
+					for (int j = 0; j < totalCols; j++) {
+						content.append(getTable().getValueAt(selectedRows[i],
+								seletedCols[j]));
+						if (j < totalCols - 1) {
+							content.append("\t");
+						}
+					}
+					content.append("\n");
+				}
+				// Set the selection contents
+				StringSelection copiedContent = new StringSelection(
+						content.toString());
+				// Get a reference to the system clipboard
+				Clipboard clipboard = Toolkit.getDefaultToolkit()
+						.getSystemClipboard();
+				// Set the contents of the clipboard
+				clipboard.setContents(copiedContent, copiedContent);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+
+		/**
+		 * Paste data into the JTable of the parent class, currently 
+		 * found in the system clipboard
+		 * @return True if the paste is successful, false otherwise
+		 */
+		private boolean paste() {
+			// Get the location row/col of the "cursor" so that we
+			// know where to begin the paste operation
+			int startRow = (getTable().getSelectedRows())[0];
+			int startCol = (getTable().getSelectedColumns())[0];
+			try {
+				// Get a reference to the system clipboard
+				Clipboard clipboard = Toolkit.getDefaultToolkit()
+						.getSystemClipboard();
+				// Get the contents of the clipboard
+				String content = (String) (clipboard.getContents(this)
+						.getTransferData(DataFlavor.stringFlavor));
+				// Create a tokenizer to iterate through the lines/rows
+				StringTokenizer rowTokenizer = new StringTokenizer(content,
+						"\n");
+				int rowCount = 0;
+				while (rowTokenizer.hasMoreTokens()) {
+					// Get the row content
+					String rowContent = rowTokenizer.nextToken();
+					// Initialize the cell tokenizer on the row content
+					StringTokenizer cellTokenizer = new StringTokenizer(
+							rowContent, "\t");
+					int cellCount = 0;
+					// Iterate through the cells in the row
+					while (cellTokenizer.hasMoreTokens()) {
+						// Capture the value
+						String value = (String) cellTokenizer.nextToken();
+						// If the row and cell position of the paste action is
+						// not beyond the total
+						// row and cells of the table, proceed with setting the
+						// value
+						if (startRow + rowCount < getTable().getRowCount()
+								&& startCol + cellCount < getTable()
+										.getColumnCount())
+							getTable().setValueAt(value, startRow + rowCount,
+									startCol + cellCount);
+						cellCount++;
+					}
+					rowCount++;
+				}
+				return true;
+			} catch (Exception ex) {
+				return false;
+			}
+		}
+
+		private boolean areCellsContiguous(int totalRows, int totalCols,
+				int[] seletedRows, int[] selectedColumns) {
+			if (((totalRows - 1 == seletedRows[seletedRows.length - 1]
+					- seletedRows[0] && totalRows == seletedRows.length) && (totalCols - 1 == selectedColumns[selectedColumns.length - 1]
+					- selectedColumns[0] && totalCols == selectedColumns.length))) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 		
 	}
