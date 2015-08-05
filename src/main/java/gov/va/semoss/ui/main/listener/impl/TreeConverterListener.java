@@ -28,6 +28,7 @@ import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ItemEvent;
@@ -91,7 +92,8 @@ public class TreeConverterListener extends AbstractAction {
 				nodes = gps.getVisibleGraph().getVertices();
 			}
 
-			newgraph = GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes );
+			newgraph 
+					= GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes, 	Search.BFS );
 			layoutname = Constants.TREE_LAYOUT;
 		}
 		//if the button is unselected, revert to old graph

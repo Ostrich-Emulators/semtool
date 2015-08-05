@@ -7,6 +7,7 @@ package gov.va.semoss.om;
 
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.URI;
@@ -61,4 +62,6 @@ public interface GraphElement {
 	public void addPropertyChangeListener( PropertyChangeListener pcl );
 
 	public void removePropertyChangeListener( PropertyChangeListener pcl );
+
+	public Collection<PropertyChangeListener> getPropertyChangeListeners();
 }
