@@ -25,6 +25,7 @@ import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.MultiSetMap;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -189,20 +190,29 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 
 		}
 		
-        public void mouseClicked(MouseEvent event) {  
+        public void mouseClicked(MouseEvent event) {
+        	// Set the focus on the table, because our CRTL+C and CTRL+V events
+        	// are mapped to the table, and proper processing relies on the table, 
+        	// not the header to have focus.
+        	getTable().requestFocus();
+        	// Figure out the column header that was clicked
             int col = header.columnAtPoint(event.getPoint());
             getTable().clearSelection();
+            // If we're holding down CTRL, then sort
             if ((event.getModifiers()& ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {
             	getTable().setColumnSelectionAllowed(false);
                 getTable().setRowSelectionAllowed(true);
             	sort(col);
             }
+            // Otherwise, select the column
             else {
             	ListSelectionModel lsModel = getTable().getSelectionModel();
             	lsModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             	getTable().setColumnSelectionAllowed(true);
                 getTable().setRowSelectionAllowed(false);
                 getTable().setColumnSelectionInterval(col, col);
+                int rowCount = getTable().getRowCount();
+                getTable().setRowSelectionInterval(0, rowCount - 1);
             }  
         }   
 
