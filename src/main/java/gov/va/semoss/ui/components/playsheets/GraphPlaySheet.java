@@ -315,8 +315,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
-		fireGraphUpdated();
 		setLayoutName( layoutName );
+		fireGraphUpdated();
 		setUndoRedoBtn();
 	}
 

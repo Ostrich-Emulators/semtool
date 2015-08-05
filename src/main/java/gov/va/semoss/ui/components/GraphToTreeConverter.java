@@ -111,7 +111,8 @@ public class GraphToTreeConverter {
 		return newforest;
 	}
 
-	private Tree<SEMOSSVertex, SEMOSSEdge> dfs( SEMOSSVertex root, DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Set<SEMOSSVertex> seen ) {
+	private Tree<SEMOSSVertex, SEMOSSEdge> dfs( SEMOSSVertex root,
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Set<SEMOSSVertex> seen ) {
 		DelegateTree<SEMOSSVertex, SEMOSSEdge> tree = new DelegateTree<>();
 		tree.setRoot( root );
 		Queue<SEMOSSVertex> todo = Collections.asLifoQueue( new ArrayDeque<>() );
@@ -132,7 +133,8 @@ public class GraphToTreeConverter {
 		return tree;
 	}
 
-	private Tree<SEMOSSVertex, SEMOSSEdge> bfs( SEMOSSVertex root, DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Set<SEMOSSVertex> seen ) {
+	private Tree<SEMOSSVertex, SEMOSSEdge> bfs( SEMOSSVertex root,
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Set<SEMOSSVertex> seen ) {
 		DelegateTree<SEMOSSVertex, SEMOSSEdge> tree = new DelegateTree<>();
 		tree.setRoot( root );
 		Deque<SEMOSSVertex> todo = new ArrayDeque<>();
@@ -146,15 +148,15 @@ public class GraphToTreeConverter {
 			for ( SEMOSSEdge e : graph.getOutEdges( v ) ) {
 				SEMOSSVertex child = graph.getOpposite( v, e );
 
-//				if ( seen.contains( child ) ) {
-//					isdupe=true;
-//					child = duplicate( child );
-//					e = duplicate( e, v, child );
-//				}
+				if ( seen.contains( child ) ) {
+					isdupe = true;
+					child = duplicate( child );
+					e = duplicate( e, v, child );
+				}
 
 				if ( !tree.containsVertex( child ) ) {
 					tree.addChild( e, v, child );
-					if( !isdupe ){
+					if ( !isdupe ) {
 						todo.add( child );
 					}
 				}

@@ -103,6 +103,6 @@ public class TreeConverterListener extends AbstractAction {
 		}
 
 		gps.getGraphData().setGraph( newgraph );
-		gps.setLayoutName( layoutname );
+		gps.updateGraph();
 	}
 }
