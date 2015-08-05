@@ -27,6 +27,7 @@ import javax.swing.JMenu;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,22 +46,22 @@ public class LayoutPopup extends JMenu {
 	 * @param name String
 	 * @param ps IPlaySheet
 	 */
-	public LayoutPopup( String name, GraphPlaySheet ps ) {
+	public LayoutPopup( String name, GraphPlaySheet ps, Collection<SEMOSSVertex> verts ) {
 		super( name );
 
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> viz = ps.getVisibleGraph();
-		boolean isforest = ( viz instanceof Forest );
+		boolean forestok = ( viz instanceof Forest || !verts.isEmpty() );
 		Set<String> treelayouts = new HashSet<>();
 		treelayouts.add( Constants.TREE_LAYOUT );
 		treelayouts.add( Constants.RADIAL_TREE_LAYOUT );
 		treelayouts.add( Constants.BALLOON_LAYOUT );
 
 		for ( String layoutName : layoutNames ) {
-			LayoutMenuItem mi = new LayoutMenuItem( layoutName, ps );
+			LayoutMenuItem mi = new LayoutMenuItem( layoutName, ps, verts );
 			add( mi );
 
 			if ( treelayouts.contains( layoutName ) ) {
-				mi.setEnabled( isforest );
+				mi.setEnabled( forestok );
 			}
 		}
 	}

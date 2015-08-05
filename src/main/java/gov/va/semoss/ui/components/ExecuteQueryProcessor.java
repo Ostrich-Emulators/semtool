@@ -151,7 +151,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			boolean appending ) {
 		if ( appending ) {
 			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
-			return psf.getOverlayTask( query, pscc.getTitle() );
+			return psf.getOverlayTask( query, eng, pscc.getTitle() );
 		}
 		else {
 			PlaySheetFrame psf = new PlaySheetFrame( eng );

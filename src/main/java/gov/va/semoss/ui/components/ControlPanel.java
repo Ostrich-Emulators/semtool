@@ -22,8 +22,8 @@ package gov.va.semoss.ui.components;
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
-import edu.uci.ics.jung.graph.DelegateForest;
 import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
@@ -179,9 +179,9 @@ public class ControlPanel extends JPanel implements GraphListener{
 	
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
 		if ( newlayout instanceof BalloonLayout || newlayout instanceof RadialTreeLayout ) {
-			ringsListener.setGraph( new DelegateForest<>( graph ) );
+			ringsListener.setGraph( Forest.class.cast( graph ) );
 			ringsButton.setEnabled( true );
 		}
 		else {

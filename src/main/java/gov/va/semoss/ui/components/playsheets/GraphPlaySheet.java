@@ -48,6 +48,7 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.MultiLayerTransformer;
@@ -171,7 +172,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		controlData.setViewer( view );
 
 		controlPanel.setPlaySheet( this );
-		controlPanel.layoutChanged( gdm.getGraph(), null, layout );
+		controlPanel.layoutChanged( gdm.getGraph(), null, layout, this );
 
 		graphSplitPane.setTopComponent( controlPanel );
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
@@ -183,8 +184,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
-		Forest<SEMOSSVertex, SEMOSSEdge> forest = GraphToTreeConverter.convert( gdm.getGraph(),
-				view.getPickedVertexState().getPicked(), Search.BFS );
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gdm.getGraph();
+		Forest<SEMOSSVertex, SEMOSSEdge> forest = ( graph instanceof Forest
+				? Forest.class.cast( graph )
+				: new GraphToTreeConverter( true ).convert( graph,
+						view.getPickedVertexState().getPicked() ) );
 		GraphToTreeConverter.printForest( forest );
 		return forest;
 	}
@@ -311,8 +315,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
-		fireGraphUpdated();
 		setLayoutName( layoutName );
+		fireGraphUpdated();
 		setUndoRedoBtn();
 	}
 
@@ -452,19 +456,22 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		fitGraphinWindow();
 		layout.initialize();
-		// make the layout a little smaller than our viewer, so stuff shows up on screen
+		try {
+			double scale = 0.85;
+			Dimension d = view.getSize();
+			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
+			layout.setSize( view.getSize() );
+		}
+		catch ( UnsupportedOperationException uoe ) {
+			// you can set the layout size for some layouts...but there's no way to
+			// know which ones
+		}
+
 		view.setGraphLayout( layout );
-//		if ( FRLayout.class.equals( layout.getClass() ) ) {
-//			double scale = 0.85;
-//			Dimension d = view.getSize();
-//			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
-//			layout.setSize( d );
-//			// fitGraphinWindow( AbstractLayout.class.cast( layout ) );
-//		}
 
 		for ( GraphListener gl : listenees ) {
 			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName,
-					layout );
+					layout, this );
 		}
 
 		return ok;

@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -85,6 +86,11 @@ public class AbstractGraphElement implements GraphElement {
 				: _color );
 
 		fireIfPropertyChanged( CHANGE_COLOR, old, color );
+	}
+
+	@Override
+	public Collection<PropertyChangeListener> getPropertyChangeListeners() {
+		return new ArrayList<>( listeners );
 	}
 
 	protected void fireIfPropertyChanged( String prop, Object oldval, Object newval ) {

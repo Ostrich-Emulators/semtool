@@ -164,8 +164,9 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout ) {
-		// don't care if layout changes
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout,
+			GraphPlaySheet gps ) {
+		// nothing to update in this case
 	}
 
 	private class ShowRenderer extends LabeledPairTableCellRenderer<Value> {

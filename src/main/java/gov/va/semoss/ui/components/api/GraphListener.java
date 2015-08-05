@@ -20,6 +20,6 @@ public interface GraphListener {
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps );
 
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout );
+			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps );
 
 }
