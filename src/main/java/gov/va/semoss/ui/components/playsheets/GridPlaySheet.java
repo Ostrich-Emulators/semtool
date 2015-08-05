@@ -25,7 +25,6 @@ import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.MultiSetMap;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -35,25 +34,19 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
-import javax.swing.DefaultRowSorter;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.log4j.Logger;
@@ -76,7 +69,8 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 	private final MultiSetMap<Integer, Integer> urilocations = new MultiSetMap<>();
 	
 	private final Map<RowCol, Resource> uris = new HashMap<>();
-	
+	/** The copy-paste mediator that listens for CTRL+C and CTRL+V keystrokes when the 
+	 * user is in the table */
 	private final CopyPasteMediator cpMediator;
 
 	public GridPlaySheet() {
@@ -91,10 +85,7 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 		// the enhanced table interactions here
 		HeaderActionMediator headerMediator = new HeaderActionMediator(table);
 		header.addMouseListener(headerMediator);
-		
-		CellActionMediator cellMediator = new CellActionMediator(table);
 		table.setCellSelectionEnabled(true);
-		table.setSelectionBackground(new Color(120,120,255));
 	}
 
 	@Override
@@ -173,23 +164,36 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 	}
 	
 	
-	
+	/**
+	 * The Header Action Mediator is responsible for handling left-click and CTL+left-click 
+	 * events on a column header, initiating a column-select or a sort, respectively, to 
+	 * match a User's expectations in using MS Excel.
+	 * @author Wayne Warren
+	 *
+	 */
 	public class HeaderActionMediator extends MouseAdapter {
-		
+		/** The JTable header from which we will be accepting mouse and key actions */
 		private final JTableHeader header;  
+		/** The current sorting direction of the clicked column, which enables toggling 
+		 * through simple logic.*/
+		private boolean descending = false;
+		/** The index of the last column sorted */
+		private int lastSorted = 0;
  
+		/**
+		 * Default constructor
+		 * @param table The JTable to which this mediator will listen and 
+		 * act upon
+		 */
 		public HeaderActionMediator(JTable table){
 			header = table.getTableHeader();
-			int columnCount = table.getColumnCount();
-			TableRowSorter sorter = (TableRowSorter)getTable().getRowSorter();
 			getTable().getTableHeader().setEnabled(false);
-			for (int i=0; i<columnCount; i++){
-				sorter.setSortable(i, false);
-				
-			}
-
 		}
 		
+		/**
+		 * Implements the processing of the mouse click on the column header
+		 * @param event The mouse event
+		 */
         public void mouseClicked(MouseEvent event) {
         	// Set the focus on the table, because our CRTL+C and CTRL+V events
         	// are mapped to the table, and proper processing relies on the table, 
@@ -216,50 +220,40 @@ public class GridPlaySheet extends GridRAWPlaySheet {
             }  
         }   
 
-		private boolean descending = false;
-        
+        /**
+         * Toggle-sort a column
+         * @param columnIndex The index of the column to be sorted
+         */
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void sort(int columnIndex){
+			// Get the default, already registered, sorter
 			TableRowSorter sorter = (TableRowSorter)getTable().getRowSorter();
+			// Ensure the row is sortable
 			sorter.setSortable(columnIndex, true); 
+			// Disable the row sorting capability to remove the native functionality
 			sorter.toggleSortOrder(columnIndex);
-			sorter.setSortable(columnIndex, false);
+			// Let all listeners (ui-display-related objects) know that we've sorted, so
+			// please repaint()
 			int rowCount = getTable().getRowCount();
 			getModel().fireTableRowsUpdated(0, rowCount - 1);
-			
+			// If the column clicked doesn't match the last column that was sorted, there is
+			// no need to toggle, and we'll just sort descending
+			if (lastSorted != columnIndex){
+				descending = true;
+				lastSorted = columnIndex;
+			}
+			// If the direction is descending, sort descending
 			if (descending){
 				sorter.setSortKeys( Arrays.asList( new RowSorter.SortKey( columnIndex, SortOrder.DESCENDING ) ) );
 			}
+			// Otherwise, sort ascending
 			else {
 				sorter.setSortKeys( Arrays.asList( new RowSorter.SortKey( columnIndex, SortOrder.ASCENDING ) ) );
 			}
+			// Toggle the sort direction, in case we click on the chosen column again
 			descending = !descending;
-			
-			/*
-			TableRowSorter<ValueTableModel> trs = new TableRowSorter<>( getModel() );
-			getTable().setRowSorter( trs );
-			
-			trs.sort();
-			getModel().fireTableDataChanged();
-			*/
 		}
 	}
-	
-	public class CellActionMediator extends MouseAdapter {
- 
-		public CellActionMediator(JTable table){
-
-		}
-		
-		
-        public void mouseClicked(MouseEvent event) {  
-        	getTable().setColumnSelectionAllowed(false);
-            getTable().setRowSelectionAllowed(true);
-        }   
-
-	}
-	
-	
-
 	
 	/**
 	 * The CopyPasteMediator enables copying and pasting into and out of,
@@ -269,7 +263,12 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 	 * parent class' JTable, using such syntax.
 	 */
 	public class CopyPasteMediator implements ActionListener {
-
+		
+		/**
+		 * Default constructor, registers key events to the table as a 
+		 * side effect
+		 * TODO Fix the side-effect style
+		 */
 		public CopyPasteMediator() {
 			// Map the copy and paste keystroke to local attributes
 			KeyStroke copy = KeyStroke.getKeyStroke(KeyEvent.VK_C,
@@ -390,6 +389,14 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 			}
 		}
 
+		/**
+		 * Check if the cells selected are contiguous
+		 * @param totalRows The total rows selected
+		 * @param totalCols The total columns selected
+		 * @param seletedRows The selected row indices
+		 * @param selectedColumns The selected column indices
+		 * @return True if the selection is contiguous, false otherwise
+		 */
 		private boolean areCellsContiguous(int totalRows, int totalCols,
 				int[] seletedRows, int[] selectedColumns) {
 			if (((totalRows - 1 == seletedRows[seletedRows.length - 1]
