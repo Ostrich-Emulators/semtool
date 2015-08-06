@@ -121,11 +121,9 @@ public class ExportUtility {
 	public static void exportAsPdf( BufferedImage img, File pdf )
 			throws IOException, DocumentException {
 		final double MAX_DIM = 14400;
-
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ImageIO.write( img, "PNG", baos );
 		Image image1 = Image.getInstance( baos.toByteArray(), true );
-
 		Rectangle r;
 		if ( image1.getHeight() > MAX_DIM ) {
 			r = new Rectangle( (int) image1.getWidth(), (int) MAX_DIM );
@@ -136,7 +134,6 @@ public class ExportUtility {
 		else {
 			r = new Rectangle( (int) image1.getWidth() + 20, (int) image1.getHeight() + 20 );
 		}
-
 		Document document = new Document( r, 15, 25, 15, 25 );
 		PdfWriter.getInstance( document, new FileOutputStream( pdf ) );
 		document.open();
@@ -158,7 +155,6 @@ public class ExportUtility {
 			Image croppedImage = Image.getInstance( i + Constants.PNG );
 			document.add( croppedImage );
 			tempFile.delete();
-
 			if ( i < pages - 1 ) {
 				document.newPage();
 			}

@@ -31,12 +31,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -55,10 +51,10 @@ import javax.swing.JDesktopPane;
 
 import netscape.javascript.JSObject;
 
-import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -88,6 +84,7 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	protected final JFXPanel jfxPanel = new JFXPanel();
 	protected WebEngine engine;
 	protected Scene scene;
+	protected final ImageTranscoder transcoder = new PNGTranscoder();
 
 	public BrowserPlaySheet2( String htmlPath ) {
 		setLayout( new BorderLayout() );
@@ -285,13 +282,11 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 
 			XPath xp = DocumentHelper.createXPath( "//svg:svg" );
 			xp.setNamespaceURIs( namespaceUris );
-
 			// don't forget about the styles
 			XPath stylexp = DocumentHelper.createXPath( "//xhtml:style" );
 			stylexp.setNamespaceURIs( namespaceUris );
 
 			svgdoc = DocumentHelper.createDocument();
-			
 			Element svg = null;
 			List<?> theSVGElements = xp.selectNodes( doc );
 			if (theSVGElements.size() == 1) {
@@ -309,7 +304,7 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				}
 				svg = Element.class.cast( theSVGElements.get(currentTop) ).createCopy();
 			}
-
+			
 			svgdoc.setRootElement( svg );
 			
 			Element oldstyle = Element.class.cast( stylexp.selectSingleNode( doc ) );
@@ -319,17 +314,15 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				style.addAttribute( "type", "text/css" );
 				String styledata = oldstyle.getTextTrim();
 				style.addCDATA( styledata );
-
 				// put the stylesheet definitions first
 				List l = svg.elements();
 				l.remove( defs );
 				l.add( 0, defs );
 			}
-
 			TranscoderInput inputSvg = new TranscoderInput( new DOMWriter().write( svgdoc ) );
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			TranscoderOutput outputPng = new TranscoderOutput( baos );
-			Transcoder transcoder = new PNGTranscoder();
+
 			// transcoder.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
 
 			
@@ -337,7 +330,6 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				File errsvg = new File( FileUtils.getTempDirectory(), "graphvisualization.svg" );
 				FileUtils.write( errsvg, svgdoc.asXML() );
 			}
-			
 			transcoder.transcode( inputSvg, outputPng );
 			baos.flush();
 			baos.close();
@@ -345,6 +337,7 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
 		}
 		catch ( InvalidXPathException | DocumentException | TranscoderException e ) {
+			log.error(e);
 			String msg = "Problem creating image";
 			if ( null != svgdoc ) {
 				try {
