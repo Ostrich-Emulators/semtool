@@ -53,7 +53,9 @@ import netscape.javascript.JSObject;
 
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -64,6 +66,7 @@ import org.dom4j.XPath;
 import org.dom4j.io.DOMReader;
 
 import com.google.gson.Gson;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -281,6 +284,7 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		DOMReader rdr = new DOMReader();
 		Document doc = rdr.read( engine.getDocument() );
 		Document svgdoc = null;
+		File svgfile = null;
 		try {
 			Map<String, String> namespaceUris = new HashMap<>();
 			namespaceUris.put( "svg", "http://www.w3.org/2000/svg" );
@@ -330,23 +334,39 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 			// clean up the SVG a little...
 			// d3 comes up with coords like
 			// M360,27475.063247863247C450,27475.063247863247 450,27269.907692307694 540,27269.907692307694
-			XPath cleanxp = DocumentHelper.createXPath( "//svg:path" );
+			XPath cleanxp1 = DocumentHelper.createXPath( "//svg:path" );
 			Pattern pat = Pattern.compile( ",([0-9]+)\\.([0-9]{1,2})[0-9]+" );
-			cleanxp.setNamespaceURIs( namespaceUris );
-			List<?> cleanups = cleanxp.selectNodes( svgdoc );
+			cleanxp1.setNamespaceURIs( namespaceUris );
+			List<?> cleanups = cleanxp1.selectNodes( svgdoc );
 			for ( Object n : cleanups ) {
 				Element e = Element.class.cast( n );
 				String dstr = e.attributeValue( "d" );
 				Matcher m = pat.matcher( dstr );
 				dstr = m.replaceAll( ",$1.$2 " );
-				e.addAttribute( "d", dstr );
+				e.addAttribute( "d", dstr.replaceAll( "([0-9])C([0-9])", "$1 C$2" ).trim() );
+			}
+			XPath cleanxp2 = DocumentHelper.createXPath( "//svg:g[@class='node']" );
+			cleanxp2.setNamespaceURIs( namespaceUris );
+			cleanups = cleanxp2.selectNodes( svgdoc );
+			for ( Object n : cleanups ) {
+				Element e = Element.class.cast( n );
+				String dstr = e.attributeValue( "transform" );
+				Matcher m = pat.matcher( dstr );
+				dstr = m.replaceAll( ",$1.$2" );
+				e.addAttribute( "transform", dstr.trim() );
 			}
 
-			File svgfile = File.createTempFile( "graphviz-", ".svg" );
+			svgfile = File.createTempFile( "graphviz-", ".svg" );
 			try ( Writer svgw = new BufferedWriter( new FileWriter( svgfile ) ) ) {
 				OutputFormat format = OutputFormat.createPrettyPrint();
 				XMLWriter xmlw = new XMLWriter( svgw, format );
 				xmlw.write( svgdoc );
+				xmlw.close();
+
+				if ( log.isDebugEnabled() ) {
+					FileUtils.copyFile( svgfile,
+							new File( FileUtils.getTempDirectory(), "graphvisualization.svg" ) );
+				}
 			}
 
 			try ( Reader svgr = new BufferedReader( new FileReader( svgfile ) ) ) {
@@ -354,10 +374,12 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream( (int) svgfile.length() );
 				TranscoderOutput outputPng = new TranscoderOutput( baos );
-				// transcoder.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
 
 				try {
 					PNGTranscoder transcoder = new PNGTranscoder();
+					transcoder.addTranscodingHint( PNGTranscoder.KEY_INDEXED, 256 );
+					transcoder.addTranscodingHint( ImageTranscoder.KEY_BACKGROUND_COLOR,
+							Color.WHITE );
 					transcoder.transcode( inputSvg, outputPng );
 				}
 				catch ( Throwable t ) {
@@ -384,6 +406,14 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				}
 			}
 			throw new IOException( msg, e );
+		}
+		catch ( Throwable t ) {
+			throw new IOException( t.getLocalizedMessage(), t );
+		}
+		finally {
+			if ( null != svgfile ) {
+				FileUtils.deleteQuietly( svgfile );
+			}
 		}
 	}
 }
