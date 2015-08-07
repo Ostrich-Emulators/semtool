@@ -30,6 +30,7 @@ import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
+import org.openrdf.model.impl.URIImpl;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data
@@ -44,12 +45,8 @@ public class GraphDataModel {
 	private final Map<GraphElement, Integer> level = new HashMap<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
-	/**
-	 * Inexplicably, when we used URI has a key, vertStore.containsKey would
-	 * sometimes incorrectly return false.
-	 */
-	protected Map<String, SEMOSSVertex> vertStore = new HashMap<>();
-	protected Map<String, SEMOSSEdge> edgeStore = new HashMap<>();
+	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
+	protected Map<URI, SEMOSSEdge> edgeStore = new HashMap<>();
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph = new DirectedSparseGraph<>();
 
@@ -133,7 +130,7 @@ public class GraphDataModel {
 			Map<URI, String> edgelabels
 					= Utility.getInstanceLabels( model.predicates(), engine );
 			for ( URI u : model.predicates() ) {
-				SEMOSSEdge edge = edgeStore.get( u.stringValue() );
+				SEMOSSEdge edge = edgeStore.get( u );
 				edge.setLabel( edgelabels.get( u ) );
 			}
 
@@ -174,7 +171,7 @@ public class GraphDataModel {
 		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
 			if ( getLevel( v ) > overlayLevel ) {
-				nodesToRemove.add( vertStore.remove( v.getURI().stringValue() ) );
+				nodesToRemove.add( vertStore.remove( v.getURI() ) );
 			}
 		}
 
@@ -216,23 +213,23 @@ public class GraphDataModel {
 	}
 
 	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey, int overlayLevel ) {
-		if ( !vertStore.containsKey( vertexKey.stringValue() ) ) {
+		if ( !vertStore.containsKey( vertexKey ) ) {
 			SEMOSSVertex vertex = new SEMOSSVertexImpl( vertexKey );
 			level.put( vertex, overlayLevel );
 			storeVertex( vertex );
 		}
 
-		return vertStore.get( vertexKey.stringValue() );
+		return vertStore.get( vertexKey );
 	}
 
 	public void storeVertex( SEMOSSVertex vert ) {
-		URI key = vert.getURI();
-		vertStore.put( key.stringValue(), vert );
+		URI key = new URIImpl( vert.getURI().stringValue() );
+		vertStore.put( key, vert );
 	}
 
 	public void storeEdge( SEMOSSEdge edge ) {
-		URI key = edge.getURI();
-		edgeStore.put( key.stringValue(), edge );
+		URI key = new URIImpl( edge.getURI().stringValue() );
+		edgeStore.put( key, edge );
 	}
 
 	public Set<String> getBaseFilterSet() {
@@ -304,7 +301,7 @@ public class GraphDataModel {
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
 					if ( concepts.contains( s ) && concepts.contains( o ) ) {
-						if ( !edgeStore.containsKey( rel.stringValue() ) ) {
+						if ( !edgeStore.containsKey( rel ) ) {
 							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
 							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
 							SEMOSSEdge edge = new SEMOSSEdgeImpl( v1, v2, rel );
@@ -312,7 +309,7 @@ public class GraphDataModel {
 							level.put( edge, overlayLevel );
 						}
 
-						SEMOSSEdge edge = edgeStore.get( rel.stringValue() );
+						SEMOSSEdge edge = edgeStore.get( rel );
 						edge.setValue( prop, propval );
 						edge.setType( superrel );
 					}
@@ -332,14 +329,14 @@ public class GraphDataModel {
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
 					if ( concepts.contains( s ) && concepts.contains( o ) ) {
-						if ( !edgeStore.containsKey( rel.stringValue() ) ) {
+						if ( !edgeStore.containsKey( rel ) ) {
 							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
 							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
 							SEMOSSEdge edge = new SEMOSSEdgeImpl( v1, v2, rel );
 							storeEdge( edge );
 						}
 
-						SEMOSSEdge edge = edgeStore.get( rel.stringValue() );
+						SEMOSSEdge edge = edgeStore.get( rel );
 						edge.setValue( prop, propval );
 						edge.setType( superrel );
 					}
