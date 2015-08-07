@@ -1,5 +1,7 @@
 var colorScale;
 var currentColor;
+var decimalsToKeep;
+var valueArray = [];
 
 var colorHash = {};
 colorHash["Red"]             = ["#FFFFCC","#FFEDA0","#FED976","#FEB24C","#FD8D3C","#FC4E2A","#E31A1C","#BD0026","#800026"];
@@ -26,25 +28,29 @@ function setColorScale(domainArray) {
 //  It seems better to have a difference within the sorted array > 10, than to chance
 //  having a long mantissa with seemingly no regard for significant digits.
 //
-//  e.g.: 3.25 < 4  (decimals == 1) --> 32.5 < 33  (decimals == 2) --> 325 == 325 (stop).
+//  e.g.: 3.25 < 4  (decimalsToKeep == 1) --> 32.5 < 33  (decimalsToKeep == 2) --> 325 == 325 (stop).
 function determineHowManyDecimalsToKeep(allValuesSorted) {
-	var valueArrayDiff = allValuesSorted[Math.floor(allValuesSorted.length*3/4)]-allValuesSorted[Math.floor(allValuesSorted.length/4)];
+	var val1 = allValuesSorted[Math.floor(allValuesSorted.length*3/4)];
+	var val2 = allValuesSorted[Math.floor(allValuesSorted.length*1/4)];
+	var valueArrayDiff = (val1 - val2).toPrecision(2);
+	
+	decimalsToKeep = 0;
 	if(valueArrayDiff > 10) {
-		return 0;
+		return;
 	}
 	
-	var decimals = 0;
-	valueArrayDiff = valueArrayDiff.toPrecision(2);
 	while(valueArrayDiff < Math.ceil(valueArrayDiff)){
 		valueArrayDiff = valueArrayDiff*10;
-		decimals++;
+		decimalsToKeep++;
 	}
-	
-	return decimals;
+}
+
+function roundNumber(inputNumber) {
+	return inputNumber.toFixed(decimalsToKeep);
 }
 
 // Color Chooser
-function initColorChooserAndAddToEndOfHtmlElementWithId(elementId) {
+function initColorChooserAndAddToEndOfHtmlElementWithId(elementId, functionToCallOnChange) {
 	var id = "colorChooser";
 	
 	d3.select("#" + elementId).append("select")
@@ -59,18 +65,20 @@ function initColorChooserAndAddToEndOfHtmlElementWithId(elementId) {
 		.text(function(d){ return d});
 	
 	$("#" + id).select2();
-	$("#" + id).on("change", updateVisualization);
+	$("#" + id).on("change", functionToCallOnChange);
 }
 
 //Define the Data-Range Slider, and its "slide" handler:
-function initSlider(sliderId, allValuesSorted, decimals) {
+function initSlider(sliderId, allValuesSorted) {
+	determineHowManyDecimalsToKeep(allValuesSorted);
+	
 	$('#'+sliderId).slider({
 		min: allValuesSorted[0],
 		max: allValuesSorted[allValuesSorted.length-1],
 		value:[allValuesSorted[0], allValuesSorted[allValuesSorted.length-1]],
-		step:Math.pow(10,-1*decimals),
+		step:Math.pow(10,-1*decimalsToKeep),
 		formater: function(value) {
-			return value.toFixed(decimals);
+			return roundNumber(value);
 		}
 	}).on('slide', function(){
 		updateVisualization();
@@ -79,40 +87,52 @@ function initSlider(sliderId, allValuesSorted, decimals) {
 	$('#'+sliderId).trigger('slide');
 
 	d3.select("#min").append("text")
-		.text("Min: " + allValuesSorted[0].toFixed(decimals))
+		.text("Min: " + roundNumber(allValuesSorted[0]))
 		.attr("x", 20)
 		.attr("y", 0);
 
 	d3.select("#max").append("text")
-		.text("Max: " + allValuesSorted[allValuesSorted.length-1].toFixed(decimals))
+		.text("Max: " + roundNumber(allValuesSorted[allValuesSorted.length-1]))
 		.attr("x", 20)
 		.attr("y", 0);
 }
 
-//Build an array of heat-map values that have unique colors,
-//where each value is the smallest number having that color
-//Use this data to build a new heat-map legend
-function buildLegendHtml( sortedArr ) {
-	var uniqueColor = colorScale(sortedArr[0]);
-	var uniqueColorsArray = [];
-	uniqueColorsArray.push(new Array(sortedArr[0], uniqueColor));
-	
-	for(i = 1; i < sortedArr.length; i++){
-	   if(colorScale(sortedArr[i]) != uniqueColor){
-	      uniqueColor = colorScale(sortedArr[i]);
-	      uniqueColorsArray.push(new Array(sortedArr[i], uniqueColor));
-	   }
+//Change Handler for the Alternate Color Selector. Also called whenever the data-range slider
+//is moved (and when the heat-map is initially opened). Re-adjust the color scale of data-points
+//on the chart, as well as the legend.
+function updateVisualization() {
+	currentColor = $('#colorChooser').attr('value');
+
+	var valueArrayUpdated = [];
+	var domainArray = $('#slider').data('slider').getValue();
+	for(i = 0; i < valueArray.length; i++){
+		if(valueArray[i] >= domainArray[0] && valueArray[i] <= domainArray[1]){
+			valueArrayUpdated.push(valueArray[i]);
+		}
 	}
 	
-	uniqueColorsArray.sort(function(a, b) {
-	   return a[0] - b[0];
-	});
+	setColorScale(valueArrayUpdated);
+	updateHeatmap(domainArray);
+}
+
+function buildLegend(legendSelector, startingX, startingY, legendElementWidth, legendElementHeight) {
+	d3.select(legendSelector).selectAll(".legend").remove();
 	
-	var strLegend = '<table><tr>';
-	for(i = 0; i < uniqueColorsArray.length; i++){
-	   strLegend += '<td style="text-align: left;"><div style="background-color: '+uniqueColorsArray[i][1]+'; width: 50px; height: 20px;"></div>'+uniqueColorsArray[i][0]+'</td>';
-	}
-	strLegend += '</tr></table>';
-	
-	return strLegend;
+	var legend = d3.select(legendSelector).selectAll(".legend")
+		.data([0].concat(colorScale.quantiles()), function(d) { return d; })
+		.enter().append("g")
+		.attr("class", "legend");
+
+	legend.append("rect")
+		.attr("x", function(d, i) { return startingX + (legendElementWidth * i); })
+		.attr("y", startingY)
+		.attr("width", legendElementWidth)
+		.attr("height", legendElementHeight)
+		.style("fill", function(d, i) { return getColors()[i]; });
+
+	legend.append("text")
+		.attr("class", "legend-text")
+		.text(function(d) { return Math.round(d); })
+		.attr("x", function(d, i) { return startingX + (legendElementWidth * i); })
+		.attr("y", startingY + legendElementHeight + 15);
 }
