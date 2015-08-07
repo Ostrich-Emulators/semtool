@@ -293,10 +293,8 @@ public class AbstractGraphElement implements GraphElement {
 			return false;
 		}
 		final AbstractGraphElement other = (AbstractGraphElement) obj;
-		if ( !Objects.equals( this.id, other.id ) ) {
-			return false;
-		}
-		return true;
+		
+		return Objects.equals( this.id, other.id );
 	}
 
 	@Override

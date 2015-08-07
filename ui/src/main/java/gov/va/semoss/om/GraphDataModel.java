@@ -16,7 +16,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -45,10 +44,12 @@ public class GraphDataModel {
 	private final Map<GraphElement, Integer> level = new HashMap<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
-	private boolean search;
-
-	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
-	protected Map<URI, SEMOSSEdge> edgeStore = new HashMap<>();
+	/**
+	 * Inexplicably, when we used URI has a key, vertStore.containsKey would
+	 * sometimes incorrectly return false.
+	 */
+	protected Map<String, SEMOSSVertex> vertStore = new HashMap<>();
+	protected Map<String, SEMOSSEdge> edgeStore = new HashMap<>();
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph = new DirectedSparseGraph<>();
 
@@ -89,7 +90,7 @@ public class GraphDataModel {
 	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
 		try {
 			Set<URI> needProps = new HashSet<>();
-			for( Resource r : model.subjects() ){
+			for ( Resource r : model.subjects() ) {
 				needProps.add( URI.class.cast( r ) );
 			}
 
@@ -132,7 +133,7 @@ public class GraphDataModel {
 			Map<URI, String> edgelabels
 					= Utility.getInstanceLabels( model.predicates(), engine );
 			for ( URI u : model.predicates() ) {
-				SEMOSSEdge edge = edgeStore.get( u );
+				SEMOSSEdge edge = edgeStore.get( u.stringValue() );
 				edge.setLabel( edgelabels.get( u ) );
 			}
 
@@ -149,7 +150,7 @@ public class GraphDataModel {
 				SEMOSSVertex vert1 = createOrRetrieveVertex( sub, overlayLevel );
 				vizgraph.addVertex( vert1 );
 			}
-			
+
 			fetchProperties( nodes, null, engine, overlayLevel );
 		}
 		catch ( RepositoryException | QueryEvaluationException e ) {
@@ -159,9 +160,12 @@ public class GraphDataModel {
 
 	/**
 	 * Removes elements that are "undone" when the history tree branches
+	 *
 	 * @param overlayLevel
-	 * @param removedVs if not null, the vertices that were removed will be added to this list
-	 * @param removedEs if not null, the edges that were removed will be added to this list
+	 * @param removedVs if not null, the vertices that were removed will be added
+	 * to this list
+	 * @param removedEs if not null, the edges that were removed will be added to
+	 * this list
 	 */
 	public void removeElementsSinceLevel( int overlayLevel,
 			Collection<SEMOSSVertex> removedVs, Collection<SEMOSSEdge> removedEs ) {
@@ -170,7 +174,7 @@ public class GraphDataModel {
 		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
 			if ( getLevel( v ) > overlayLevel ) {
-				nodesToRemove.add( vertStore.remove( v.getURI() ) );
+				nodesToRemove.add( vertStore.remove( v.getURI().stringValue() ) );
 			}
 		}
 
@@ -187,7 +191,7 @@ public class GraphDataModel {
 			level.remove( v );
 		}
 
-		removedVs.addAll( nodesToRemove );		
+		removedVs.addAll( nodesToRemove );
 	}
 
 	public int getLevel( GraphElement check ) {
@@ -200,31 +204,35 @@ public class GraphDataModel {
 	/**
 	 * Is this node present at the given level (is it's level <= the given level?)
 	 * @param check
-	 * @param level
-	 * @return 
+	 *
+	 *
+	 *
+	 * @
+	 * param level
+	 * @return
 	 */
 	public boolean presentAtLevel( GraphElement check, int level ) {
 		return getLevel( check ) <= level;
 	}
 
 	public SEMOSSVertex createOrRetrieveVertex( URI vertexKey, int overlayLevel ) {
-		if ( !vertStore.containsKey( vertexKey ) ) {
+		if ( !vertStore.containsKey( vertexKey.stringValue() ) ) {
 			SEMOSSVertex vertex = new SEMOSSVertexImpl( vertexKey );
 			level.put( vertex, overlayLevel );
 			storeVertex( vertex );
 		}
 
-		return vertStore.get( vertexKey );
+		return vertStore.get( vertexKey.stringValue() );
 	}
 
 	public void storeVertex( SEMOSSVertex vert ) {
 		URI key = vert.getURI();
-		vertStore.put( key, vert );
+		vertStore.put( key.stringValue(), vert );
 	}
 
 	public void storeEdge( SEMOSSEdge edge ) {
 		URI key = edge.getURI();
-		edgeStore.put( key, edge );
+		edgeStore.put( key.stringValue(), edge );
 	}
 
 	public Set<String> getBaseFilterSet() {
@@ -296,7 +304,7 @@ public class GraphDataModel {
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
 					if ( concepts.contains( s ) && concepts.contains( o ) ) {
-						if ( !edgeStore.containsKey( rel ) ) {
+						if ( !edgeStore.containsKey( rel.stringValue() ) ) {
 							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
 							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
 							SEMOSSEdge edge = new SEMOSSEdgeImpl( v1, v2, rel );
@@ -304,7 +312,7 @@ public class GraphDataModel {
 							level.put( edge, overlayLevel );
 						}
 
-						SEMOSSEdge edge = edgeStore.get( rel );
+						SEMOSSEdge edge = edgeStore.get( rel.stringValue() );
 						edge.setValue( prop, propval );
 						edge.setType( superrel );
 					}
@@ -324,14 +332,14 @@ public class GraphDataModel {
 					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
 
 					if ( concepts.contains( s ) && concepts.contains( o ) ) {
-						if ( !edgeStore.containsKey( rel ) ) {
+						if ( !edgeStore.containsKey( rel.stringValue() ) ) {
 							SEMOSSVertex v1 = createOrRetrieveVertex( s, overlayLevel );
 							SEMOSSVertex v2 = createOrRetrieveVertex( o, overlayLevel );
 							SEMOSSEdge edge = new SEMOSSEdgeImpl( v1, v2, rel );
 							storeEdge( edge );
 						}
 
-						SEMOSSEdge edge = edgeStore.get( rel );
+						SEMOSSEdge edge = edgeStore.get( rel.stringValue() );
 						edge.setValue( prop, propval );
 						edge.setType( superrel );
 					}

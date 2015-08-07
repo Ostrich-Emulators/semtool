@@ -73,19 +73,16 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
 			<version>2.13.0</version>
-			<!--<version>2.12.1</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-iri</artifactId>
 			<version>1.1.2</version>
-			<!--<version>0.9.4</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-tdb</artifactId>
 			<version>1.1.2</version>
-			<!--<version>0.9.4</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -199,20 +196,17 @@
     
 	<profiles>
 		<profile>
-			<id>ryan-dev</id>
+			<id>jacoco</id>
 			
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.4.201502262128</version>
+						<version>0.7.5.201505241946</version>
 						<configuration>
 							<excludes>
-								<!-- these excludes don't seem to work -->
-								<exclude>src/main/java/gov/va/semoss/ui/components/playsheets/**/*</exclude>
-								<exclude>src/main/java/gov/va/semoss/ui/components/renderers/**/*</exclude>
-								<exclude>src/main/java/gov/va/semoss/ui/actions/**/*</exclude>
+								<exclude>gov/va/semoss/ui/**</exclude>
 							</excludes>
 						</configuration>
 						<executions>
