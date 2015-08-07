@@ -44,15 +44,15 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * Controls the running of the node rank algorithm
  */
 public class GraphNodeRankListener extends AbstractAction {
-	
+
 	private static final long serialVersionUID = 5899960815619489928L;
 	private final GraphPlaySheet playsheet;
-	
+
 	public GraphNodeRankListener( GraphPlaySheet gps ) {
 		super( "NodeRank Algorithm" );
 		playsheet = gps;
 	}
-	
+
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 
@@ -62,15 +62,15 @@ public class GraphNodeRankListener extends AbstractAction {
 		int maxIterations = 100;
 		final PageRank<SEMOSSVertex, ?> ranker
 				= new PageRank<>( playsheet.getVisibleGraph(), alpha );
-		
+
 		ranker.setTolerance( tolerance );
 		ranker.setMaxIterations( maxIterations );
 		ranker.evaluate();
-		
+
 		List<SEMOSSVertex> col = new ArrayList<>( playsheet.getVisibleGraph().getVertices() );
 		// sort based on ranking score
 		Collections.sort( col, new Comparator<SEMOSSVertex>() {
-			
+
 			@Override
 			public int compare( SEMOSSVertex t, SEMOSSVertex t1 ) {
 				double d = ranker.getVertexScore( t ) - ranker.getVertexScore( t1 );
@@ -80,9 +80,9 @@ public class GraphNodeRankListener extends AbstractAction {
 				return ( d < 0 ? -1 : 1 );
 			}
 		} );
-		
+
 		GridRAWPlaySheet grid = new GridPlaySheet();
-		
+
 		List<String> colNames
 				= Arrays.asList( "Vertex Name", "Vertex Type", "Page Rank Score" );
 		List<Value[]> list = new ArrayList<>();
@@ -94,11 +94,12 @@ public class GraphNodeRankListener extends AbstractAction {
 		for ( SEMOSSVertex v : col ) {
 			URI type = v.getType();
 			double r = ranker.getVertexScore( v );
-			
-			Value[] scores = { vf.createLiteral( v.getLabel() ), type, vf.createLiteral( r ) };
+
+			Value[] scores
+					= { vf.createLiteral( v.getLabel() ), type, vf.createLiteral( r ) };
 			list.add( scores );
 		}
-		
+
 		grid.create( list, colNames, playsheet.getEngine() );
 		playsheet.addSibling( "NodeRank Scores", grid );
 	}
