@@ -11,6 +11,13 @@ body {
 	stroke-linejoin: round;
 }
 
+.legend-text {
+	font-size: 9pt;
+	font-family: arial, courier;
+	font-weight: bold;
+	color: #000000;
+}
+
 #chart {
 	background-color: #fff;
 	margin-left: 320px;

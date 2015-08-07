@@ -1,5 +1,13 @@
+var runOutsideOfApp = false;
+
+//uncomment the following for testing outside of SEMOSS
+//runOutsideOfApp = true;
+
 $( document ).ready(function() {
-	alert("document:loaded");
+	if (!runOutsideOfApp)
+		alert("document:loaded");
+	else 
+		runOutsideApp();
 });
 
 function disable(selector){
