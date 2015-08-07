@@ -16,7 +16,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -31,6 +30,7 @@ import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
+import org.openrdf.model.impl.URIImpl;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data
@@ -44,8 +44,6 @@ public class GraphDataModel {
 	private final Set<String> baseFilterSet = new HashSet<>();
 	private final Map<GraphElement, Integer> level = new HashMap<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
-
-	private boolean search;
 
 	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	protected Map<URI, SEMOSSEdge> edgeStore = new HashMap<>();
@@ -89,7 +87,7 @@ public class GraphDataModel {
 	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
 		try {
 			Set<URI> needProps = new HashSet<>();
-			for( Resource r : model.subjects() ){
+			for ( Resource r : model.subjects() ) {
 				needProps.add( URI.class.cast( r ) );
 			}
 
@@ -149,7 +147,7 @@ public class GraphDataModel {
 				SEMOSSVertex vert1 = createOrRetrieveVertex( sub, overlayLevel );
 				vizgraph.addVertex( vert1 );
 			}
-			
+
 			fetchProperties( nodes, null, engine, overlayLevel );
 		}
 		catch ( RepositoryException | QueryEvaluationException e ) {
@@ -159,9 +157,12 @@ public class GraphDataModel {
 
 	/**
 	 * Removes elements that are "undone" when the history tree branches
+	 *
 	 * @param overlayLevel
-	 * @param removedVs if not null, the vertices that were removed will be added to this list
-	 * @param removedEs if not null, the edges that were removed will be added to this list
+	 * @param removedVs if not null, the vertices that were removed will be added
+	 * to this list
+	 * @param removedEs if not null, the edges that were removed will be added to
+	 * this list
 	 */
 	public void removeElementsSinceLevel( int overlayLevel,
 			Collection<SEMOSSVertex> removedVs, Collection<SEMOSSEdge> removedEs ) {
@@ -187,7 +188,7 @@ public class GraphDataModel {
 			level.remove( v );
 		}
 
-		removedVs.addAll( nodesToRemove );		
+		removedVs.addAll( nodesToRemove );
 	}
 
 	public int getLevel( GraphElement check ) {
@@ -200,8 +201,12 @@ public class GraphDataModel {
 	/**
 	 * Is this node present at the given level (is it's level <= the given level?)
 	 * @param check
-	 * @param level
-	 * @return 
+	 *
+	 *
+	 *
+	 * @
+	 * param level
+	 * @return
 	 */
 	public boolean presentAtLevel( GraphElement check, int level ) {
 		return getLevel( check ) <= level;
@@ -218,12 +223,12 @@ public class GraphDataModel {
 	}
 
 	public void storeVertex( SEMOSSVertex vert ) {
-		URI key = vert.getURI();
+		URI key = new URIImpl( vert.getURI().stringValue() );
 		vertStore.put( key, vert );
 	}
 
 	public void storeEdge( SEMOSSEdge edge ) {
-		URI key = edge.getURI();
+		URI key = new URIImpl( edge.getURI().stringValue() );
 		edgeStore.put( key, edge );
 	}
 

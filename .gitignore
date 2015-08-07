@@ -7,5 +7,14 @@ target
 .project
 .settings
 .settings/*
-src/main/resources/html.zip
-.gitignore
+ui/nb-configuration.xml
+ui/nbactions*
+ui/*.log
+ui/*.log.*
+ui/target
+ui/.classpath
+ui/.project
+ui/.settings
+ui/.settings/*
+ui/src/main/resources/html.zip
+ui/nbactions.xml

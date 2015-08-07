@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import com.itextpdf.text.DocumentException;
+
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
@@ -13,15 +14,18 @@ import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.util.ExportUtility;
 import static gov.va.semoss.util.ExportUtility.getExportFileLocation;
 import gov.va.semoss.util.Utility;
+
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -60,7 +64,6 @@ public abstract class ImageExportingPlaySheet extends PlaySheetCentralComponent 
 			if( null == output ){
 				return;
 			}
-			
 			Exception exceptions[] = { null };
 
 			ProgressTask pt = new ProgressTask( "Exporting " + getTitle(), new Runnable() {
@@ -72,7 +75,6 @@ public abstract class ImageExportingPlaySheet extends PlaySheetCentralComponent 
 						if( null == img ){
 							throw new IOException( "An unknown error occurred" );
 						}
-						
 						if ( ispdf ) {
 							ExportUtility.exportAsPdf( img, output );
 						}
@@ -81,6 +83,7 @@ public abstract class ImageExportingPlaySheet extends PlaySheetCentralComponent 
 						}
 					}
 					catch ( IOException | DocumentException e ) {
+						e.printStackTrace();
 						exceptions[0] = e;
 					}
 				}

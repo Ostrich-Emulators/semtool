@@ -31,12 +31,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -55,23 +51,32 @@ import javax.swing.JDesktopPane;
 
 import netscape.javascript.JSObject;
 
-import org.apache.batik.transcoder.Transcoder;
-import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.InvalidXPathException;
 import org.dom4j.XPath;
 import org.dom4j.io.DOMReader;
-import org.dom4j.io.DOMWriter;
 
 import com.google.gson.Gson;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 /**
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
@@ -161,12 +166,12 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		// Initialize the key used to store the Data Series being visualized
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
-		Object dataSeries = dataHash.get(dataSeriesKey);
+		Object dataSeries = dataHash.get( dataSeriesKey );
 		// Digest/process the data for display
-		String fileNameOnly = getFileName(fileName);
-		dataSeries = DataSeriesDigester.instance().digestData(dataSeries, fileNameOnly);
+		String fileNameOnly = getFileName( fileName );
+		dataSeries = DataSeriesDigester.instance().digestData( dataSeries, fileNameOnly );
 		// After digestion, put the data back
-		dataHash.put(dataSeriesKey, dataSeries);
+		dataHash.put( dataSeriesKey, dataSeries );
 		// Continue with the processing
 		String json = new Gson().toJson( dataHash );
 		if ( null != json && !"".equals( json ) && !"{}".equals( json ) ) {
@@ -178,16 +183,17 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	}
 
 	/**
-	 * Convenience method for extracting only the filename, plus extension
-	 * out of a complete file path
-	 * @param filepath The file path, plus filename, with extension 
+	 * Convenience method for extracting only the filename, plus extension out of
+	 * a complete file path
+	 *
+	 * @param filepath The file path, plus filename, with extension
 	 * @return Just the filename, with extension
 	 */
-	private String getFileName(String filepath) {
-		int separatorIndex = filepath.lastIndexOf('/');
+	private String getFileName( String filepath ) {
+		int separatorIndex = filepath.lastIndexOf( '/' );
 		String onlyFilename = "";
-		if (separatorIndex >= 0){
-			onlyFilename = filepath.substring(separatorIndex + 1);
+		if ( separatorIndex >= 0 ) {
+			onlyFilename = filepath.substring( separatorIndex + 1 );
 		}
 		return onlyFilename;
 	}
@@ -267,17 +273,18 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		BufferedImage bufferedImage = new BufferedImage( getWidth(), getHeight(),
 				BufferedImage.TYPE_INT_ARGB );
 		paint( bufferedImage.getGraphics() );
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		try ( ByteArrayOutputStream baos = new ByteArrayOutputStream() ) {
 			ImageIO.write( bufferedImage, Constants.PNG, baos );
 			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
 		}
 	}
-	
+
 	protected BufferedImage getExportImageFromSVGBlock() throws IOException {
-		log.debug("Using SVG block to save image.");
+		log.debug( "Using SVG block to save image." );
 		DOMReader rdr = new DOMReader();
 		Document doc = rdr.read( engine.getDocument() );
 		Document svgdoc = null;
+		File svgfile = null;
 		try {
 			Map<String, String> namespaceUris = new HashMap<>();
 			namespaceUris.put( "svg", "http://www.w3.org/2000/svg" );
@@ -285,33 +292,32 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 
 			XPath xp = DocumentHelper.createXPath( "//svg:svg" );
 			xp.setNamespaceURIs( namespaceUris );
-
 			// don't forget about the styles
 			XPath stylexp = DocumentHelper.createXPath( "//xhtml:style" );
 			stylexp.setNamespaceURIs( namespaceUris );
 
 			svgdoc = DocumentHelper.createDocument();
-			
 			Element svg = null;
 			List<?> theSVGElements = xp.selectNodes( doc );
-			if (theSVGElements.size() == 1) {
-				svg = Element.class.cast( theSVGElements.get(0) ).createCopy();
-			} else {
+			if ( theSVGElements.size() == 1 ) {
+				svg = Element.class.cast( theSVGElements.get( 0 ) ).createCopy();
+			}
+			else {
 				int currentTop = 0;
 				int biggestSize = 0;
-				for (int i=0; i<theSVGElements.size(); i++) {
-					Element thisElement = Element.class.cast( theSVGElements.get(i) ).createCopy();
+				for ( int i = 0; i < theSVGElements.size(); i++ ) {
+					Element thisElement = Element.class.cast( theSVGElements.get( i ) ).createCopy();
 					int thisSize = thisElement.asXML().length();
-					if ( thisSize > biggestSize) {
+					if ( thisSize > biggestSize ) {
 						currentTop = i;
 						biggestSize = thisSize;
 					}
 				}
-				svg = Element.class.cast( theSVGElements.get(currentTop) ).createCopy();
+				svg = Element.class.cast( theSVGElements.get( currentTop ) ).createCopy();
 			}
 
 			svgdoc.setRootElement( svg );
-			
+
 			Element oldstyle = Element.class.cast( stylexp.selectSingleNode( doc ) );
 			if ( null != oldstyle ) {
 				Element defs = svg.addElement( "defs" );
@@ -319,32 +325,74 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				style.addAttribute( "type", "text/css" );
 				String styledata = oldstyle.getTextTrim();
 				style.addCDATA( styledata );
-
 				// put the stylesheet definitions first
 				List l = svg.elements();
 				l.remove( defs );
 				l.add( 0, defs );
 			}
 
-			TranscoderInput inputSvg = new TranscoderInput( new DOMWriter().write( svgdoc ) );
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			TranscoderOutput outputPng = new TranscoderOutput( baos );
-			Transcoder transcoder = new PNGTranscoder();
-			// transcoder.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
-
-			
-			if( log.isDebugEnabled() ){
-				File errsvg = new File( FileUtils.getTempDirectory(), "graphvisualization.svg" );
-				FileUtils.write( errsvg, svgdoc.asXML() );
+			// clean up the SVG a little...
+			// d3 comes up with coords like
+			// M360,27475.063247863247C450,27475.063247863247 450,27269.907692307694 540,27269.907692307694
+			XPath cleanxp1 = DocumentHelper.createXPath( "//svg:path" );
+			Pattern pat = Pattern.compile( ",([0-9]+)\\.([0-9]{1,2})[0-9]+" );
+			cleanxp1.setNamespaceURIs( namespaceUris );
+			List<?> cleanups = cleanxp1.selectNodes( svgdoc );
+			for ( Object n : cleanups ) {
+				Element e = Element.class.cast( n );
+				String dstr = e.attributeValue( "d" );
+				Matcher m = pat.matcher( dstr );
+				dstr = m.replaceAll( ",$1.$2 " );
+				e.addAttribute( "d", dstr.replaceAll( "([0-9])C([0-9])", "$1 C$2" ).trim() );
 			}
-			
-			transcoder.transcode( inputSvg, outputPng );
-			baos.flush();
-			baos.close();
+			XPath cleanxp2 = DocumentHelper.createXPath( "//svg:g[@class='node']" );
+			cleanxp2.setNamespaceURIs( namespaceUris );
+			cleanups = cleanxp2.selectNodes( svgdoc );
+			for ( Object n : cleanups ) {
+				Element e = Element.class.cast( n );
+				String dstr = e.attributeValue( "transform" );
+				Matcher m = pat.matcher( dstr );
+				dstr = m.replaceAll( ",$1.$2" );
+				e.addAttribute( "transform", dstr.trim() );
+			}
 
-			return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
+			svgfile = File.createTempFile( "graphviz-", ".svg" );
+			try ( Writer svgw = new BufferedWriter( new FileWriter( svgfile ) ) ) {
+				OutputFormat format = OutputFormat.createPrettyPrint();
+				XMLWriter xmlw = new XMLWriter( svgw, format );
+				xmlw.write( svgdoc );
+				xmlw.close();
+
+				if ( log.isDebugEnabled() ) {
+					FileUtils.copyFile( svgfile,
+							new File( FileUtils.getTempDirectory(), "graphvisualization.svg" ) );
+				}
+			}
+
+			try ( Reader svgr = new BufferedReader( new FileReader( svgfile ) ) ) {
+				TranscoderInput inputSvg = new TranscoderInput( svgr );
+
+				ByteArrayOutputStream baos = new ByteArrayOutputStream( (int) svgfile.length() );
+				TranscoderOutput outputPng = new TranscoderOutput( baos );
+
+				try {
+					PNGTranscoder transcoder = new PNGTranscoder();
+					transcoder.addTranscodingHint( PNGTranscoder.KEY_INDEXED, 256 );
+					transcoder.addTranscodingHint( ImageTranscoder.KEY_BACKGROUND_COLOR,
+							Color.WHITE );
+					transcoder.transcode( inputSvg, outputPng );
+				}
+				catch ( Throwable t ) {
+					log.error( t, t );
+				}
+				baos.flush();
+				baos.close();
+
+				return ImageIO.read( new ByteArrayInputStream( baos.toByteArray() ) );
+			}
 		}
-		catch ( InvalidXPathException | DocumentException | TranscoderException e ) {
+		catch ( InvalidXPathException e ) {
+			log.error( e );
 			String msg = "Problem creating image";
 			if ( null != svgdoc ) {
 				try {
@@ -358,6 +406,14 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				}
 			}
 			throw new IOException( msg, e );
+		}
+		catch ( Throwable t ) {
+			throw new IOException( t.getLocalizedMessage(), t );
+		}
+		finally {
+			if ( null != svgfile ) {
+				FileUtils.deleteQuietly( svgfile );
+			}
 		}
 	}
 }
