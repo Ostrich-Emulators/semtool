@@ -24,24 +24,27 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
-import gov.va.semoss.om.DuplicateEdge;
-import gov.va.semoss.om.DuplicateVertex;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import org.apache.log4j.Logger;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.om.TreeGraphDataModel;
+import gov.va.semoss.ui.main.listener.impl.DuplicatingPickedStateListener;
+import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 /**
  */
 public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 	private static final Logger log = Logger.getLogger( TreeGraphPlaySheet.class );
-
+	private TreeGraphDataModel model;
 	/**
 	 * Constructor for GraphPlaySheetFrame.
 	 */
@@ -51,24 +54,32 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 	public TreeGraphPlaySheet( TreeGraphDataModel model ) {
 		super( model );
+		this.model = model;
 		log.debug( "new TreeGrap PlaySheet" );
 
 		setLayoutName( Constants.TREE_LAYOUT );
 		fixVis();
 
-		for ( DuplicateVertex v : model.getForest().getVertices() ) {
+		for ( SEMOSSVertex v : model.getForest().getVertices() ) {
 			v.addPropertyChangeListener( this );
 		}
 
-		for ( DuplicateEdge e : model.getForest().getEdges() ) {
+		for ( SEMOSSEdge e : model.getForest().getEdges() ) {
 			e.addPropertyChangeListener( this );
 		}
 	}
 
 	private void fixVis() {
-		//VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = getView();
-		//view.setGraphMouse( null );
-
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = getView();
+		GraphNodeListener gl = new GraphNodeListener( this );
+		gl.setMode( ModalGraphMouse.Mode.PICKING );
+		view.setGraphMouse( gl );
+		
+		setPicker( new DuplicatingPickedStateListener( view, this ) );
+	}
+	
+	public Set<SEMOSSVertex> getDuplicates( SEMOSSVertex v ){
+		return model.getDuplicatesOf( v );
 	}
 
 	/**

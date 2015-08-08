@@ -86,6 +86,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
 import java.awt.Dimension;
+import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -139,6 +140,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
+	private ItemListener pickStateListener = null;
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -302,7 +304,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void setFrame( PlaySheetFrame frame ) {
 		super.setFrame( frame );
-		
+
 		frame.addInternalFrameListener( new GraphPlaySheetListener( frame ) );
 		frame.addInternalFrameListener( new PlaySheetControlListener( frame ) );
 		frame.addInternalFrameListener( new PlaySheetColorShapeListener( frame ) );
@@ -352,9 +354,20 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		viewer.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.S );
 		rc.setLabelOffset( 0 );
 
-		PickedStateListener psl = new PickedStateListener( viewer, this );
-		viewer.getPickedVertexState().addItemListener( psl );
-		viewer.getPickedEdgeState().addItemListener( psl );
+		setPicker( new PickedStateListener( viewer, this ) );
+	}
+
+	protected void setPicker( ItemListener psl ) {
+		if ( null != pickStateListener ) {
+			// remove the old listener
+			view.getPickedVertexState().removeItemListener(pickStateListener );
+			view.getPickedEdgeState().removeItemListener(pickStateListener );
+		}
+		if ( null != psl ) {
+			pickStateListener = psl;
+			view.getPickedVertexState().addItemListener(pickStateListener );
+			view.getPickedEdgeState().addItemListener(pickStateListener );
+		}
 	}
 
 	public String getLayoutName() {
