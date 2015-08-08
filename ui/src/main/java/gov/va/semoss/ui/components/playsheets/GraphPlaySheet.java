@@ -97,9 +97,9 @@ import java.util.Set;
 public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyChangeListener {
 
 	private static final long serialVersionUID = 4699492732234656487L;
-	protected static final Logger log = Logger.getLogger( GraphPlaySheet.class );
+	private static final Logger log = Logger.getLogger( GraphPlaySheet.class );
 
-	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
+	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
 	private JSplitPane graphSplitPane;
 	private ControlPanel controlPanel;
 
@@ -135,7 +135,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	protected int overlayLevel = 0;
 	protected int maxOverlayLevel = 0;
-	private final HidingPredicate predicate = new HidingPredicate();
+	private final HidingPredicate<SEMOSSVertex> predicate = new HidingPredicate<>();
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
@@ -185,7 +185,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gdm.getGraph();
 		Forest<SEMOSSVertex, SEMOSSEdge> forest = ( graph instanceof Forest
 				? Forest.class.cast( graph )
-				: new GraphToTreeConverter( true ).convert( graph,
+				: new GraphToTreeConverter().convert( graph,
 						view.getPickedVertexState().getPicked() ) );
 		GraphToTreeConverter.printForest( forest );
 		return forest;
@@ -302,11 +302,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void setFrame( PlaySheetFrame frame ) {
 		super.setFrame( frame );
-
-		DIHelper.getInstance().getPlayPane().getFilterPanel().setPlaySheet( this );
-		frame.addInternalFrameListener( new GraphPlaySheetListener( this ) );
-		frame.addInternalFrameListener( new PlaySheetControlListener( this ) );
-		frame.addInternalFrameListener( new PlaySheetColorShapeListener( this ) );
+		
+		frame.addInternalFrameListener( new GraphPlaySheetListener( frame ) );
+		frame.addInternalFrameListener( new PlaySheetControlListener( frame ) );
+		frame.addInternalFrameListener( new PlaySheetColorShapeListener( frame ) );
 	}
 
 	/**
@@ -326,7 +325,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	/**
 	 * Method initVisualizer.
 	 */
-	protected void initVisualizer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
+	private void initVisualizer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
 		viewer.setRenderer( new SemossBasicRenderer() );
 
 		GraphNodeListener gl = new GraphNodeListener( this );
@@ -413,7 +412,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * @return true if the desired layout was applied
 	 * @param layout String
 	 */
-	@SuppressWarnings( "unchecked" )
 	public boolean setLayoutName( String newName ) {
 		String oldName = this.layoutName;
 		this.layoutName = newName;
@@ -422,30 +420,17 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		log.debug( "Create layout from layoutName " + layoutName
 				+ ", and layoutClass " + layoutClass );
 
-		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter
-				= new VertexPredicateFilter<>( predicate );
-		Graph<SEMOSSVertex, SEMOSSEdge> graph = filter.transform( gdm.getGraph() );
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = getVisibleGraph();
 
 		boolean ok = false;
 		Layout<SEMOSSVertex, SEMOSSEdge> layout = null;
 		try {
-			Constructor<?> constructor = layoutClass.getConstructor( Forest.class );
-			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( asForest() );
+			Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
+			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
 			ok = true;
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-			log.warn( "no forest constructor for " + layoutName + " layout" );
-		}
-
-		if ( null == layout ) {
-			try {
-				Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
-				layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
-				ok = true;
-			}
-			catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-				log.error( "could not create layout", e );
-			}
+			log.error( "could not create layout", e );
 		}
 
 		if ( null == layout ) {
@@ -458,7 +443,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			double scale = 0.85;
 			Dimension d = view.getSize();
 			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
-			layout.setSize( view.getSize() );
+			layout.setSize( d );
 		}
 		catch ( UnsupportedOperationException uoe ) {
 			// you can set the layout size for some layouts...but there's no way to
@@ -467,10 +452,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		view.setGraphLayout( layout );
 
-		for ( GraphListener gl : listenees ) {
-			gl.layoutChanged( (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) graph, oldName,
-					layout, this );
-		}
+		fireLayoutUpdated( graph, oldName );
 
 		return ok;
 	}
@@ -479,7 +461,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * This method tries to fit the graph to the available space.
 	 * It could work better.
 	 */
-	private void fitGraphinWindow() {
+	protected void fitGraphinWindow() {
 		MultiLayerTransformer mlt = view.getRenderContext().getMultiLayerTransformer();
 		double vscalex = mlt.getTransformer( Layer.VIEW ).getScaleX() * 1.1;
 		double vscaley = mlt.getTransformer( Layer.VIEW ).getScaleY() * 1.1;
@@ -520,6 +502,18 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 //						viewCenter.getY() - layoutCenter.getY() );
 	}
 
+	public void fireLayoutUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+			String oldName ) {
+		for ( GraphListener gl : listenees ) {
+			try {
+				gl.layoutChanged( graph, oldName, view.getGraphLayout(), this );
+			}
+			catch ( Exception ex ) {
+				log.error( "Error updating layout for GraphListener " + gl + ": " + ex, ex );
+			}
+		}
+	}
+
 	public void fireGraphUpdated() {
 		for ( GraphListener gl : listenees ) {
 			try {
@@ -543,6 +537,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		return view;
 	}
 
+	protected void setView( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> v ) {
+		view = v;
+	}
+
 	/**
 	 * Method getEdgeLabelFontTransformer.
 	 *
@@ -559,59 +557,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 */
 	public LabelFontTransformer<SEMOSSVertex> getVertexLabelFontTransformer() {
 		return vft;
-	}
-
-	public void removeExistingConcepts( List<String> subVector ) {
-		throw new UnsupportedOperationException( "this function is not operational until refactored" );
-
-//		for ( String remQuery : subVector ) {
-//			try {
-//				log.debug( "Removing query " + remQuery );
-//				Update update = gdm.getRC().prepareUpdate( QueryLanguage.SPARQL, remQuery );
-//				update.execute();
-//				log.error( "removing concepts not implemented (being refactored)" );
-//				//this.gdm.baseRelEngine.execInsertQuery(remQuery);
-//
-//			}
-//			catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
-//				log.error( e, e );
-//			}
-//		}
-	}
-
-	/**
-	 * Method addNewConcepts.
-	 *
-	 * @param subjects String
-	 * @param baseObject String
-	 * @param predicate String
-	 * @return String
-	 */
-	public String addNewConcepts( String subjects, String baseObject, String predicate ) {
-		throw new UnsupportedOperationException( "this function is not operational until refactored" );
-
-//		String listOfChilds = null;
-//		for ( String adder : subjects.split( ";" ) ) {
-//			String parent = adder.substring( 0, adder.indexOf( "@@" ) );
-//			String child = adder.substring( adder.indexOf( "@@" ) + 2 );
-//
-//			if ( listOfChilds == null ) {
-//				listOfChilds = child;
-//			}
-//			else {
-//				listOfChilds = listOfChilds + ";" + child;
-//			}
-//
-//			SesameJenaConstructStatement st = new SesameJenaConstructStatement();
-//			st.setSubject( child );
-//			st.setPredicate( predicate );
-//			st.setObject( baseObject );
-//
-//			gdm.addToSesame( st );
-//			log.debug( " Query....  " + parent + "<>" + child );
-//		}
-//
-//		return listOfChilds;
 	}
 
 	@Override
@@ -841,23 +786,23 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 	}
 
-	private class SemossBasicRenderer extends BasicRenderer<SEMOSSVertex, SEMOSSEdge> {
+	protected class SemossBasicRenderer<V extends SEMOSSVertex, E extends SEMOSSEdge> extends BasicRenderer<V, E> {
 
-		Predicate<SEMOSSEdge> edgehider = new Predicate<SEMOSSEdge>() {
+		Predicate<E> edgehider = new Predicate<E>() {
 
 			@Override
-			public boolean evaluate( SEMOSSEdge v ) {
+			public boolean evaluate( E v ) {
 				return ( v.isVisible() && v.getVerticesVisible()
 						&& getGraphData().presentAtLevel( v, overlayLevel ) );
 			}
 		};
 
 		@Override
-		public void render( RenderContext<SEMOSSVertex, SEMOSSEdge> renderContext,
-				Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
+		public void render( RenderContext<V, E> renderContext,
+				Layout<V, E> layout ) {
 			setEdgeVisibilities( layout.getGraph() );
 			try {
-				for ( SEMOSSEdge e : layout.getGraph().getEdges() ) {
+				for ( E e : layout.getGraph().getEdges() ) {
 					if ( edgehider.evaluate( e ) ) {
 						renderEdge( renderContext, layout, e );
 						renderEdgeLabel( renderContext, layout, e );
@@ -870,7 +815,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 			// paint all the vertices
 			try {
-				for ( SEMOSSVertex v : layout.getGraph().getVertices() ) {
+				for ( V v : layout.getGraph().getVertices() ) {
 					if ( predicate.evaluate( v ) ) {
 						renderVertex( renderContext, layout, v );
 						renderVertexLabel( renderContext, layout, v );
@@ -897,11 +842,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		 * graph based on the visibility flag within the edge, but ALSO on whether
 		 * the vertices which the edge connects are visible
 		 */
-		private void setEdgeVisibilities( Graph<SEMOSSVertex, SEMOSSEdge> graph ) {
-			Collection<SEMOSSEdge> allEdges = graph.getEdges();
-			for ( SEMOSSEdge edge : allEdges ) {
-				SEMOSSVertex destination = graph.getDest( edge );
-				SEMOSSVertex source = graph.getSource( edge );
+		private void setEdgeVisibilities( Graph<V, E> graph ) {
+			Collection<E> allEdges = graph.getEdges();
+			for ( E edge : allEdges ) {
+				V destination = graph.getDest( edge );
+				V source = graph.getSource( edge );
 				boolean destVisible = true;
 				boolean sourceVisible = true;
 				// If the destination vertex/node is not visible, neither should the edge 
@@ -937,10 +882,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 	}
 
-	private class HidingPredicate implements Predicate<SEMOSSVertex> {
+	protected class HidingPredicate<V extends SEMOSSVertex> implements Predicate<V> {
 
 		@Override
-		public boolean evaluate( SEMOSSVertex v ) {
+		public boolean evaluate( V v ) {
 			return ( v.isVisible() && getGraphData().presentAtLevel( v, overlayLevel ) );
 		}
 	}

@@ -15,11 +15,13 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.ColorRenderer;
 import gov.va.semoss.ui.components.renderers.ResourceNameRenderer;
 import gov.va.semoss.ui.components.renderers.ShapeRenderer;
@@ -43,10 +45,11 @@ import javax.swing.table.TableColumnModel;
 /**
  */
 public class PlaySheetColorShapeListener implements InternalFrameListener {
-	private final GraphPlaySheet ps;
 
-	public PlaySheetColorShapeListener( GraphPlaySheet ps ) {
-		this.ps = ps;
+	private final PlaySheetFrame psf;
+
+	public PlaySheetColorShapeListener( PlaySheetFrame ps ) {
+		this.psf = ps;
 	}
 
 	/**
@@ -57,23 +60,30 @@ public class PlaySheetColorShapeListener implements InternalFrameListener {
 	@Override
 	public void internalFrameActivated( InternalFrameEvent e ) {
 		JTable colorShapeTable = DIHelper.getJTable( Constants.COLOR_SHAPE_TABLE );
-		colorShapeTable.setModel( ps.getColorShapeData() );
-		
-		TableColumnModel tcm = colorShapeTable.getColumnModel();
 
-		tcm.getColumn(1).setCellRenderer(new ResourceNameRenderer());
-		
-		JComboBox<Shape> shapes = new JComboBox<>( GraphShapeRepository.instance().getAllShapes() );
-		shapes.setRenderer( new ShapeRenderer() );
-		tcm.getColumn( 2 ).setCellRenderer( new TableShapeRenderer() );
-		tcm.getColumn( 2 ).setCellEditor( new DefaultCellEditor( shapes ) );
+		PlaySheetCentralComponent pscc = psf.getActivePlaySheet();
+		if ( pscc instanceof GraphPlaySheet ) {
+			GraphPlaySheet ps = GraphPlaySheet.class.cast( pscc );
 
-		
-		JComboBox<Color> colors = new JComboBox<>( GraphColorRepository.instance().getAllNamedColors() );
-		colors.setRenderer( new ColorRenderer() );
-		tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
-		tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );
-		
+			colorShapeTable.setModel( ps.getColorShapeData() );
+
+			TableColumnModel tcm = colorShapeTable.getColumnModel();
+
+			tcm.getColumn( 1 ).setCellRenderer( new ResourceNameRenderer() );
+
+			JComboBox<Shape> shapes = new JComboBox<>( GraphShapeRepository.instance().getAllShapes() );
+			shapes.setRenderer( new ShapeRenderer() );
+			tcm.getColumn( 2 ).setCellRenderer( new TableShapeRenderer() );
+			tcm.getColumn( 2 ).setCellEditor( new DefaultCellEditor( shapes ) );
+
+			JComboBox<Color> colors = new JComboBox<>( GraphColorRepository.instance().getAllNamedColors() );
+			colors.setRenderer( new ColorRenderer() );
+			tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
+			tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );
+		}
+		else {
+			internalFrameClosed( null );
+		}
 	}
 
 	/**
@@ -83,21 +93,26 @@ public class PlaySheetColorShapeListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameClosed( InternalFrameEvent e ) {
-		Utility.resetJTable(Constants.COLOR_SHAPE_TABLE);
+		Utility.resetJTable( Constants.COLOR_SHAPE_TABLE );
 	}
 
 	@Override
-	public void internalFrameOpened( InternalFrameEvent e ) {}
+	public void internalFrameOpened( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameClosing( InternalFrameEvent e ) {}
+	public void internalFrameClosing( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameIconified( InternalFrameEvent e ) {}
+	public void internalFrameIconified( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameDeiconified( InternalFrameEvent e ) {}
+	public void internalFrameDeiconified( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameDeactivated( InternalFrameEvent e ) {}
+	public void internalFrameDeactivated( InternalFrameEvent e ) {
+	}
 }

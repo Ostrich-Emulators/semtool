@@ -66,7 +66,7 @@ import org.apache.log4j.Logger;
  * @author karverma
  * @version $Revision: 1.0 $
  */
-public class ControlPanel extends JPanel implements GraphListener{
+public class ControlPanel extends JPanel implements GraphListener {
 
 	private static final long serialVersionUID = 3128479498547975776L;
 
@@ -75,13 +75,13 @@ public class ControlPanel extends JPanel implements GraphListener{
 	private final JButton increaseVertSizeButton;
 	private final JButton undoButton;
 	private final JButton redoButton;
-	private final JToggleButton treeButton;
+	private final JButton treeButton;
 	private final JToggleButton highlightButton;
 	private final JToggleButton ringsButton;
 	private final WeightDropDownButton weightButton;
 	private final JTextField searchText = new JTextField();
 
-	private final GraphTransformerResetListener resetTransListener 
+	private final GraphTransformerResetListener resetTransListener
 			= new GraphTransformerResetListener();
 	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
 	private final TreeConverterListener treeListener = new TreeConverterListener();
@@ -129,18 +129,18 @@ public class ControlPanel extends JPanel implements GraphListener{
 				"control Y", KeyStroke.getKeyStroke( KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK ) );
 		redoButton.setEnabled( false );
 
-		treeButton = new JToggleButton( treeListener );
+		treeButton = new JButton( treeListener );
 		treeButton.setText( "" );
-		treeButton.addActionListener( new ActionListener(){
+		treeButton.addActionListener( new ActionListener() {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				if( ringsButton.isSelected() ){
+				if ( ringsButton.isSelected() ) {
 					ringsButton.doClick();
 				}
-			}		
+			}
 		} );
-		
+
 		ringsButton = new JToggleButton( Utility.loadImageIcon( "ring.png" ) );
 		ringsButton.setToolTipText( "<html><b>Show Radial Rings</b><br>Only available with Balloon and Radial Tree layouts</html>" );
 		ringsButton.addActionListener( ringsListener );
@@ -173,10 +173,10 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		Logger.getLogger(getClass()).debug( "graph updated...updating lucene");
+		Logger.getLogger( getClass() ).debug( "graph updated...updating lucene" );
 		searchController.indexGraph( graph, gps.getEngine() );
 	}
-	
+
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
@@ -260,7 +260,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
 		vertSizeListener.setViewer( viewer );
-		ringsListener.setViewer( viewer );		
+		ringsListener.setViewer( viewer );
 	}
 
 	public void setUndoButtonEnabled( boolean enabled ) {

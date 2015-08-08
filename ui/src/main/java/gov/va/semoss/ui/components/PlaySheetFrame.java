@@ -226,6 +226,10 @@ public class PlaySheetFrame extends JInternalFrame {
 		}
 	}
 
+	public void addChangeListener( ChangeListener cl ){
+		tabs.addChangeListener( cl );
+	}
+	
 	public void closeTab( PlaySheetCentralComponent c ) {
 		tabs.remove( c );
 	}

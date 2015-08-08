@@ -19,7 +19,9 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 
@@ -30,10 +32,11 @@ import javax.swing.event.InternalFrameListener;
  * Controls the play sheet.
  */
 public class PlaySheetControlListener implements InternalFrameListener {
-	private final GraphPlaySheet ps;
 
-	public PlaySheetControlListener( GraphPlaySheet gps ) {
-		ps = gps;
+	private final PlaySheetFrame psf;
+
+	public PlaySheetControlListener( PlaySheetFrame gps ) {
+		psf = gps;
 	}
 
 	/**
@@ -43,8 +46,15 @@ public class PlaySheetControlListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameActivated( InternalFrameEvent e ) {
-		Utility.addModelToJTable( ps.getControlData().getVertexTableModel(), Constants.LABEL_TABLE);
-		Utility.addModelToJTable( ps.getControlData().getEdgeTableModel(),   Constants.TOOLTIP_TABLE);
+		PlaySheetCentralComponent pscc = psf.getActivePlaySheet();
+		if ( pscc instanceof GraphPlaySheet ) {
+			GraphPlaySheet gps = GraphPlaySheet.class.cast( pscc );
+			Utility.addModelToJTable( gps.getControlData().getVertexTableModel(), Constants.LABEL_TABLE );
+			Utility.addModelToJTable( gps.getControlData().getEdgeTableModel(), Constants.TOOLTIP_TABLE );
+		}
+		else {
+			internalFrameClosed( null );
+		}
 	}
 
 	/**
@@ -54,22 +64,27 @@ public class PlaySheetControlListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameClosed( InternalFrameEvent e ) {
-		Utility.resetJTable(Constants.LABEL_TABLE);
-		Utility.resetJTable(Constants.TOOLTIP_TABLE);
+		Utility.resetJTable( Constants.LABEL_TABLE );
+		Utility.resetJTable( Constants.TOOLTIP_TABLE );
 	}
 
 	@Override
-	public void internalFrameOpened( InternalFrameEvent e ) {}
+	public void internalFrameOpened( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameClosing( InternalFrameEvent e ) {}
+	public void internalFrameClosing( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameIconified( InternalFrameEvent e ) {}
+	public void internalFrameIconified( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameDeiconified( InternalFrameEvent e ) {}
+	public void internalFrameDeiconified( InternalFrameEvent e ) {
+	}
 
 	@Override
-	public void internalFrameDeactivated( InternalFrameEvent e ) {}
+	public void internalFrameDeactivated( InternalFrameEvent e ) {
+	}
 }

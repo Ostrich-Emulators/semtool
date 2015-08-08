@@ -20,7 +20,9 @@
 package gov.va.semoss.ui.main.listener.impl;
 
 import gov.va.semoss.ui.components.FilterPanel;
+import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.DIHelper;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
@@ -29,10 +31,10 @@ import javax.swing.event.InternalFrameListener;
  */
 public class GraphPlaySheetListener implements InternalFrameListener {
 
-	private final GraphPlaySheet ps;
+	private final PlaySheetFrame psf;
 
-	public GraphPlaySheetListener( GraphPlaySheet gps ) {
-		ps = gps;
+	public GraphPlaySheetListener( PlaySheetFrame gps ) {
+		psf = gps;
 	}
 
 	/**
@@ -44,8 +46,14 @@ public class GraphPlaySheetListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameActivated( InternalFrameEvent e ) {
-		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();		
-		fp.setPlaySheet( ps );
+		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
+		PlaySheetCentralComponent pscc = psf.getActivePlaySheet();
+		if ( pscc instanceof GraphPlaySheet ) {
+			fp.setPlaySheet( GraphPlaySheet.class.cast( pscc ) );
+		}
+		else {
+			internalFrameClosed( null );
+		}
 	}
 
 	/**
@@ -55,7 +63,7 @@ public class GraphPlaySheetListener implements InternalFrameListener {
 	 */
 	@Override
 	public void internalFrameClosed( InternalFrameEvent e ) {
-		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();		
+		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
 		fp.setPlaySheet( null );
 	}
 
