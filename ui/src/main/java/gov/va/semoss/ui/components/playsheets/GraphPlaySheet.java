@@ -102,7 +102,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
 	private JSplitPane graphSplitPane;
-	private ControlPanel controlPanel;
+	protected ControlPanel controlPanel;
 
 	private VertexColorShapeData colorShapeData = new VertexColorShapeData();
 
@@ -360,13 +360,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	protected void setPicker( ItemListener psl ) {
 		if ( null != pickStateListener ) {
 			// remove the old listener
-			view.getPickedVertexState().removeItemListener(pickStateListener );
-			view.getPickedEdgeState().removeItemListener(pickStateListener );
+			view.getPickedVertexState().removeItemListener( pickStateListener );
+			view.getPickedEdgeState().removeItemListener( pickStateListener );
 		}
 		if ( null != psl ) {
 			pickStateListener = psl;
-			view.getPickedVertexState().addItemListener(pickStateListener );
-			view.getPickedEdgeState().addItemListener(pickStateListener );
+			view.getPickedVertexState().addItemListener( pickStateListener );
+			view.getPickedEdgeState().addItemListener( pickStateListener );
 		}
 	}
 
@@ -465,7 +465,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		view.setGraphLayout( layout );
 
-		fireLayoutUpdated( graph, oldName );
+		fireLayoutUpdated( graph, oldName, layout );
 
 		return ok;
 	}
@@ -516,10 +516,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public void fireLayoutUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldName ) {
+			String oldName, Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
 		for ( GraphListener gl : listenees ) {
 			try {
-				gl.layoutChanged( graph, oldName, view.getGraphLayout(), this );
+				gl.layoutChanged( graph, oldName, layout, this );
 			}
 			catch ( Exception ex ) {
 				log.error( "Error updating layout for GraphListener " + gl + ": " + ex, ex );
@@ -790,10 +790,23 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public Collection<SEMOSSEdge> getHighlightedEdges() {
 		return new HashSet<>( est.getSelected() );
 	}
+	
+	/**
+	 * Allow subclasses to substitute a different vertex for the given one
+	 * @param v
+	 * @return 
+	 */
+	public SEMOSSVertex getRealVertex( SEMOSSVertex v ){
+		return v;
+	}
 
+	protected boolean isloading(){
+		return inGraphOp;
+	}
+	
 	@Override
 	public void propertyChange( PropertyChangeEvent evt ) {
-		if ( !inGraphOp ) {
+		if ( !isloading() ) {
 			view.repaint();
 			fireGraphUpdated();
 		}

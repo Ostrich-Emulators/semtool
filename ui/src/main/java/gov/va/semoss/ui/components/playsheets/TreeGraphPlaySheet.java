@@ -35,6 +35,7 @@ import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
@@ -45,19 +46,21 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 	private static final Logger log = Logger.getLogger( TreeGraphPlaySheet.class );
 	private TreeGraphDataModel model;
+
 	/**
 	 * Constructor for GraphPlaySheetFrame.
 	 */
 	public TreeGraphPlaySheet() {
-		this( new TreeGraphDataModel() );
+		this( new TreeGraphDataModel(), Constants.TREE_LAYOUT );
 	}
 
-	public TreeGraphPlaySheet( TreeGraphDataModel model ) {
+	public TreeGraphPlaySheet( TreeGraphDataModel model, String layoutname ) {
 		super( model );
 		this.model = model;
 		log.debug( "new TreeGrap PlaySheet" );
 
-		setLayoutName( Constants.TREE_LAYOUT );
+		setLayoutName( layoutname );
+		controlPanel.setForTree( true );
 		fixVis();
 
 		for ( SEMOSSVertex v : model.getForest().getVertices() ) {
@@ -74,12 +77,17 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		GraphNodeListener gl = new GraphNodeListener( this );
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		view.setGraphMouse( gl );
-		
+
 		setPicker( new DuplicatingPickedStateListener( view, this ) );
 	}
-	
-	public Set<SEMOSSVertex> getDuplicates( SEMOSSVertex v ){
+
+	public Set<SEMOSSVertex> getDuplicates( SEMOSSVertex v ) {
 		return model.getDuplicatesOf( v );
+	}
+
+	@Override
+	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
+		return model.getRealVertex( v );
 	}
 
 	/**
@@ -143,7 +151,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 		getView().setGraphLayout( layout );
 
-		this.fireLayoutUpdated( graph, oldName );
+		fireLayoutUpdated( graph, oldName, layout );
 
 		return ok;
 	}

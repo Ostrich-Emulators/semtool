@@ -25,6 +25,7 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.om.TreeGraphDataModel;
 import gov.va.semoss.ui.components.playsheets.TreeGraphPlaySheet;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -36,12 +37,13 @@ import javax.swing.Action;
  * Controls converting the graph to a tree layout.
  */
 public class TreeConverterListener extends AbstractAction {
-	
+
+	public static final String LAYOUT_NAME = "layout";
 	private GraphPlaySheet gps;
-	
+
 	public TreeConverterListener() {
 		super( "Convert to Tree", Utility.loadImageIcon( "tree.png" ) );
-		
+
 		putValue( Action.SHORT_DESCRIPTION,
 				"<html><b>Convert to Tree</b><br>Convert graph to tree by"
 				+ " duplicating nodes with multiple in-edges (in new tab)</html>" );
@@ -55,28 +57,34 @@ public class TreeConverterListener extends AbstractAction {
 	public void setPlaySheet( GraphPlaySheet ps ) {
 		gps = ps;
 		setEnabled( false );
-		
+
 		gps.getView().getPickedVertexState().addItemListener( new ItemListener() {
-			
+
 			@Override
 			public void itemStateChanged( ItemEvent e ) {
 				Collection<? extends SEMOSSVertex> picks
 						= gps.getView().getPickedVertexState().getPicked();
-				
+
 				if ( !isEnabled() ) {
 					setEnabled( !picks.isEmpty() );
 				}
 			}
 		} );
 	}
-	
+
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		TreeGraphDataModel model = new TreeGraphDataModel( gps.getGraphData().getGraph(),
 				gps.getView().getPickedVertexState().getPicked() );
-		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( model );
+		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( model, getLayoutName() );
 		tgps.setTitle( "Tree Conversion" );
 		gps.addSibling( tgps );
 		tgps.fireGraphUpdated();
 	}
+
+	private String getLayoutName() {
+		Object obj = getValue( LAYOUT_NAME );
+		return ( null == obj ? Constants.TREE_LAYOUT : obj.toString() );
+	}
+
 }

@@ -20,7 +20,6 @@
 package gov.va.semoss.ui.main.listener.impl;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JToggleButton;
 
@@ -33,12 +32,13 @@ import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
+import javax.swing.AbstractAction;
 
 /**
  * Controls the rendering of rings on a graph if the layout is a balloon or a
  * radial tree.
  */
-public class RingsButtonListener implements ActionListener {
+public class RingsButtonListener extends AbstractAction {
 
 	private final BalloonLayoutRings rings = new BalloonLayoutRings();
 	private final RadialTreeLayoutRings treeRings = new RadialTreeLayoutRings();

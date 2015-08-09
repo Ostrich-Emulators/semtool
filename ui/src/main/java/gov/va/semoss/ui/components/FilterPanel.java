@@ -158,7 +158,7 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 			DirectedGraph<SEMOSSVertex, SEMOSSEdge> g = gps.getGraphData().getGraph();
 			nodemodel.refresh( g.getVertices() );
 			edgemodel.refresh( g.getEdges() );
-			propmodel.setGraph( gps.getView(), g );
+			propmodel.setPlaySheet( gps );
 		}
 	}
 

@@ -89,6 +89,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 	private final SearchController searchController = new SearchController();
 	private final RedoListener redoListener = new RedoListener();
 	private final UndoListener undoListener = new UndoListener();
+	private boolean forTree = false;
 
 	/**
 	 * Create the panel.
@@ -169,6 +170,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 				"control ]", KeyStroke.getKeyStroke( KeyEvent.VK_CLOSE_BRACKET, InputEvent.CTRL_DOWN_MASK ) );
 
 		buildLayout();
+		setForTree( false );
 	}
 
 	@Override
@@ -182,14 +184,20 @@ public class ControlPanel extends JPanel implements GraphListener {
 			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
 		if ( newlayout instanceof BalloonLayout || newlayout instanceof RadialTreeLayout ) {
 			ringsListener.setGraph( Forest.class.cast( graph ) );
-			ringsButton.setEnabled( true );
-		}
-		else {
-			ringsButton.setEnabled( false );
-			ringsButton.setSelected( false );
+			ringsListener.setEnabled( true );
 		}
 
 		ringsListener.setLayout( newlayout );
+	}
+
+	public void setForTree( boolean b ) {
+		forTree = b;
+
+		ringsListener.setEnabled( b );
+		ringsButton.setVisible( b );
+
+		treeListener.setEnabled( !b );
+		treeButton.setVisible( !b );
 	}
 
 	private void buildLayout() {
@@ -215,10 +223,11 @@ public class ControlPanel extends JPanel implements GraphListener {
 		add( getJSeparator(), getGBC() );
 
 		add( decreaseVertSizeButton, getGBC() );
-		add( increaseVertSizeButton, getGBC() );
+		add( increaseVertSizeButton, getGBC() );		
 	}
 
-	private void addKeyListener( JButton button, Action action, String keyStrokeString, KeyStroke keyStroke ) {
+	private void addKeyListener( JButton button, Action action, String keyStrokeString,
+			KeyStroke keyStroke ) {
 		button.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( keyStroke, keyStrokeString );
 		button.getActionMap().put( keyStrokeString, action );
 	}
@@ -275,7 +284,9 @@ public class ControlPanel extends JPanel implements GraphListener {
 		return highlightButton.isSelected();
 	}
 
-	public void clickTreeButton() {
+	public void clickTreeButton( String layout ) {
+		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, layout );
 		treeButton.doClick();
+		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, Constants.TREE_LAYOUT );
 	}
 }

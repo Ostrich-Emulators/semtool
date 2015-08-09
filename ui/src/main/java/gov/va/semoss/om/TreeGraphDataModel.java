@@ -32,6 +32,8 @@ public class TreeGraphDataModel extends GraphDataModel {
 	private final MultiSetMap<URI, URI> dupesets = new MultiSetMap();
 	private final Map<URI, SEMOSSVertex> uriToNode = new HashMap<>();
 	private final Map<URI, SEMOSSEdge> uriToEdge = new HashMap<>();
+	private final Map<SEMOSSVertex, SEMOSSVertex> dupeNodeToTrue = new HashMap<>();
+	private final Map<SEMOSSEdge, SEMOSSEdge> dupeEdgeToTrue = new HashMap<>();
 
 	public TreeGraphDataModel() {
 		super( new DelegateForest<>() );
@@ -48,8 +50,13 @@ public class TreeGraphDataModel extends GraphDataModel {
 	}
 
 	public Set<SEMOSSVertex> getDuplicatesOf( SEMOSSVertex v ) {
+		// if we're looking at a duplicate, first figure out the true node
+		// if we're looking at the true node, just get the duplicates from dupesets.
+		URI realuri = ( dupeNodeToTrue.containsKey( v )
+				? dupeNodeToTrue.get( v ).getURI() : v.getURI() );
+
 		Set<SEMOSSVertex> dupes = new HashSet<>();
-		Set<URI> uris = dupesets.getNN( v.getURI() );
+		Set<URI> uris = dupesets.getNN( realuri );
 		for ( URI u : uris ) {
 			dupes.add( uriToNode.get( u ) );
 		}
@@ -57,20 +64,8 @@ public class TreeGraphDataModel extends GraphDataModel {
 		return dupes;
 	}
 
-	@Override
-	protected SEMOSSEdge createEdge( SEMOSSVertex src, SEMOSSVertex dst, URI uri ) {
-		SEMOSSEdge de = new SEMOSSEdgeImpl( src, dst,
-				UriBuilder.getBuilder( uri.getNamespace() ).uniqueUri() );
-		// FIXME: need to keep track of the real URI and this guy's URI
-		return de;
-	}
-
-	@Override
-	protected SEMOSSVertex createVertex( URI uri ) {
-		SEMOSSVertex dv
-				= new SEMOSSVertexImpl( UriBuilder.getBuilder( uri.getNamespace() ).uniqueUri() );
-		// FIXME: need to keep track of the real URI and this guy's URI
-		return dv;
+	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
+		return dupeNodeToTrue.get( v );
 	}
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> makeDuplicateForest(
@@ -92,13 +87,15 @@ public class TreeGraphDataModel extends GraphDataModel {
 			Deque<SEMOSSVertex> todo = new ArrayDeque<>( tree.getChildren( root ) );
 			while ( !todo.isEmpty() ) {
 				SEMOSSVertex child = todo.poll();
-				dupeVlkp.put( child, duplicate( child ) );
+				if( !dupeVlkp.containsKey( child ) ){
+					dupeVlkp.put( child, duplicate( child ) );
+				}
 
 				SEMOSSEdge edge = tree.getParentEdge( child );
 				SEMOSSVertex parent = tree.getParent( child );
 
 				SEMOSSVertex dp = dupeVlkp.get( parent );
-				SEMOSSVertex dc = duplicate( child );
+				SEMOSSVertex dc = dupeVlkp.get( child );
 				SEMOSSEdge de = duplicate( edge, dp, dc );
 
 				dupetree.addChild( de, dp, dc );
@@ -118,9 +115,9 @@ public class TreeGraphDataModel extends GraphDataModel {
 		URI uri = UriBuilder.getBuilder( old.getURI().getNamespace() ).uniqueUri();
 		SEMOSSVertex c2 = new SEMOSSVertexImpl( uri, old.getType(), old.getLabel() );
 		dupesets.add( old.getURI(), c2.getURI() );
-		dupesets.add( c2.getURI(), old.getURI() );
+		//dupesets.add( c2.getURI(), old.getURI() );
 		uriToNode.put( c2.getURI(), c2 );
-		uriToNode.put( old.getURI(), old );
+		dupeNodeToTrue.put( c2, old );
 
 		for ( Map.Entry<URI, Value> en : old.getValues().entrySet() ) {
 			c2.setValue( en.getKey(), en.getValue() );
@@ -133,9 +130,9 @@ public class TreeGraphDataModel extends GraphDataModel {
 			SEMOSSVertex dst ) {
 		SEMOSSEdge c2 = new SEMOSSEdgeImpl( src, dst, old.getURI() );
 		dupesets.add( old.getURI(), c2.getURI() );
-		dupesets.add( c2.getURI(), old.getURI() );
+		//dupesets.add( c2.getURI(), old.getURI() );
 		uriToEdge.put( c2.getURI(), c2 );
-		uriToEdge.put( old.getURI(), old );
+		dupeEdgeToTrue.put( c2, old );
 
 		for ( Map.Entry<URI, Value> en : old.getValues().entrySet() ) {
 			c2.setValue( en.getKey(), en.getValue() );
@@ -143,4 +140,8 @@ public class TreeGraphDataModel extends GraphDataModel {
 
 		return c2;
 	}
+	
+	
+	
+	
 }
