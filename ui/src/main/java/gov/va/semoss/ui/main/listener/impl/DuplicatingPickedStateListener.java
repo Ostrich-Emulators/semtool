@@ -21,7 +21,6 @@ package gov.va.semoss.ui.main.listener.impl;
 
 import edu.uci.ics.jung.visualization.RenderContext;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,25 +29,26 @@ import org.apache.log4j.Logger;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.playsheets.TreeGraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
 import gov.va.semoss.ui.transformer.PaintTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
+import java.awt.event.ItemListener;
 import java.util.Arrays;
 
 /**
  * Controls what happens when a picked state occurs.
  */
-public class PickedStateListener implements ItemListener {
+public class DuplicatingPickedStateListener implements ItemListener {
 
-	private static final Logger logger = Logger.getLogger( PickedStateListener.class );
+	private static final Logger logger = Logger.getLogger( DuplicatingPickedStateListener.class );
 	private final VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer;
-	private final GraphPlaySheet gps;
+	private final TreeGraphPlaySheet tps;
 
-	public PickedStateListener( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> v,
-			GraphPlaySheet ps ) {
+	public DuplicatingPickedStateListener( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> v,
+			TreeGraphPlaySheet ps ) {
 		viewer = v;
-		gps = ps;
+		tps = ps;
 	}
 
 	/**
@@ -80,12 +80,17 @@ public class PickedStateListener implements ItemListener {
 		Set<SEMOSSVertex> selectedVertices = new HashSet<>();
 		LabelFontTransformer<SEMOSSVertex> vlft = null;
 
-		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+		if ( tps.getSearchPanel().isHighlightButtonSelected() ) {
 			vlft = (LabelFontTransformer<SEMOSSVertex>) rc.getVertexFontTransformer();
 			selectedVertices.addAll( vlft.getSelected() );
 		}
 
 		selectedVertices.addAll( viewer.getPickedVertexState().getPicked() );
+
+		selectedVertices = expandSelection( selectedVertices );
+		for ( SEMOSSVertex v : selectedVertices ) {
+			viewer.getPickedVertexState().pick( v, true );
+		}
 
 		if ( null != vlft ) {
 			vlft.setSelected( selectedVertices );
@@ -94,5 +99,15 @@ public class PickedStateListener implements ItemListener {
 					getVertexFillPaintTransformer();
 			ptx.setSelected( selectedVertices );
 		}
+	}
+
+	private Set<SEMOSSVertex> expandSelection( Set<SEMOSSVertex> selected ) {
+		// make sure we pick all the duplicates of what's selected
+		Set<SEMOSSVertex> newselection = new HashSet<>( selected );
+		for ( SEMOSSVertex v : selected ) {
+			newselection.addAll( tps.getDuplicates( v ) );
+		}
+
+		return newselection;
 	}
 }

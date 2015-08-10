@@ -14,6 +14,7 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
@@ -22,8 +23,9 @@ import javax.swing.event.ChangeListener;
  * @author ryan
  */
 public class HideableTabbedPane extends JPanel {
+
 	private static final long serialVersionUID = 1149198288527605328L;
-	
+
 	private static final String NOTABS = "no-tabs-component";
 	private static final String TABS = "tabs-component";
 
@@ -33,6 +35,7 @@ public class HideableTabbedPane extends JPanel {
 	private final JTabbedPane tabs = new ReorderableTabbedPane();
 	private boolean showingTabs = false;
 	private ContainerListener containerListener;
+	private ChangeListener changeListener;
 
 	public HideableTabbedPane( LayoutManager layout, boolean isDoubleBuffered ) {
 		super( layout, isDoubleBuffered );
@@ -56,7 +59,7 @@ public class HideableTabbedPane extends JPanel {
 		add( tabs, TABS );
 
 		tabs.setTabLayoutPolicy( JTabbedPane.SCROLL_TAB_LAYOUT );
-		
+
 		containerListener = new ContainerListener() {
 
 			@Override
@@ -69,24 +72,35 @@ public class HideableTabbedPane extends JPanel {
 			@Override
 			public void componentRemoved( ContainerEvent e ) {
 				if ( 1 == tabs.getTabCount() ) {
-					pscc = PlaySheetCentralComponent.class.cast( tabs.getComponentAt( 0 ) );
+					pscc = getPsccAt( 0 );
 					showTabs( pscc.prefersTabs() );
 				}
-				else if ( 0 == tabs.getTabCount() ) {
-					// need to alert the parent that we don't have any more playsheets
-					for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
-						cl.componentRemoved( e );
-					}
+
+				// need to alert the parent that we lost a playsheet
+				for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
+					cl.componentRemoved( e );
 				}
 			}
 		};
 
+		changeListener = new ChangeListener() {
+
+			@Override
+			public void stateChanged( ChangeEvent e ) {
+				PlaySheetCentralComponent pscc = getPsccAt( tabs.getSelectedIndex() );
+				pscc.activated();
+			}
+		};
+		
 		tabs.addContainerListener( containerListener );
+		tabs.addChangeListener( changeListener );
+
 	}
 
 	public void add( String title, PlaySheetCentralComponent c ) {
 		if ( getTabCount() > 0 || c.prefersTabs() ) {
 			showTabs( true );
+
 			tabs.add( title, c );
 			tabs.setSelectedComponent( c );
 			int idx = tabs.indexOfComponent( c );
@@ -96,18 +110,35 @@ public class HideableTabbedPane extends JPanel {
 			pscc = c;
 			notabs.add( pscc, BorderLayout.CENTER );
 			showTabs( false );
+			c.activated();
+
+			ChangeEvent ce = new ChangeEvent( tabs );
+			for ( ChangeListener cl : tabs.getChangeListeners() ) {
+				cl.stateChanged( ce );
+			}
+		}
+	}
+
+	private PlaySheetCentralComponent getPsccAt( int idx ) {
+		if ( showingTabs ) {
+			return ( idx >= tabs.getTabCount() || idx < 0 ? null
+					: PlaySheetCentralComponent.class.cast( tabs.getComponentAt( idx ) ) );
+		}
+		else{
+			return pscc;
 		}
 	}
 
 	private void showTabs( boolean showtab ) {
+		tabs.removeContainerListener( containerListener );
+		tabs.removeChangeListener( changeListener );
+
 		if ( showingTabs && !showtab ) {
 			// move our first tab to the main area
 			int tc = tabs.getTabCount();
 			if ( tc > 0 ) {
-				tabs.removeContainerListener( containerListener );
-				pscc = PlaySheetCentralComponent.class.cast( tabs.getComponentAt( 0 ) );
+				pscc = getPsccAt( 0 );
 				notabs.add( pscc );
-				tabs.addContainerListener( containerListener );
 			}
 		}
 		else if ( !showingTabs && showtab ) {
@@ -122,6 +153,9 @@ public class HideableTabbedPane extends JPanel {
 
 		cards.show( this, showtab ? TABS : NOTABS );
 		showingTabs = showtab;
+		
+		tabs.addContainerListener( containerListener );
+		tabs.addChangeListener( changeListener );
 	}
 
 	public void setTabPlacement( int tablocation ) {
@@ -176,5 +210,5 @@ public class HideableTabbedPane extends JPanel {
 
 	public CloseableTab getTabComponentAt( int idx ) {
 		return CloseableTab.class.cast( tabs.getTabComponentAt( idx ) );
-	}	
+	}
 }

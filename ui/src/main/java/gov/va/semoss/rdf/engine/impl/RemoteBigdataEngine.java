@@ -58,7 +58,7 @@ public class RemoteBigdataEngine extends BigDataEngine {
 
 			String sparqlUEndpoint = prop.getProperty( Constants.SPARQL_UPDATE_ENDPOINT );
 
-			BigdataSailRemoteRepository repo = new BigdataSailRemoteRepository( sparqlUEndpoint );
+			BigdataSailRemoteRepository repo = null;//new BigdataSailRemoteRepository( sparqlUEndpoint );
 			repo.initialize();
 
 			//SPARQLRepository repo = new SPARQLRepository(sparqlQEndpoint);

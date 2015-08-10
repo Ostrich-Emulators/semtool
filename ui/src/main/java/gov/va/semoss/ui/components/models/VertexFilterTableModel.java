@@ -49,23 +49,13 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 	public VertexFilterTableModel( String middleColumnName ) {
 		columnNames[1] = middleColumnName;
 	}
-
-	/**
-	 * Constructor for VertexFilterTableModel.
-	 *
-	 * @param _data VertexFilterData
-	 */
-	public VertexFilterTableModel( Collection<T> instances, String middleColumnName ) {
-		this( middleColumnName );
-		refresh( instances );
-	}
 	
 	public void clear(){
 		data.clear();
 		fireTableDataChanged();
 	}
 
-	public final void refresh( Collection<T> instances ) {
+	public void refresh( Collection<T> instances ) {
 		data.clear();
 
 		MultiMap<URI, T> typeToInstances = new MultiMap<>();
