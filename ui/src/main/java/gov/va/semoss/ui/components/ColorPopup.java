@@ -25,8 +25,8 @@ import javax.swing.JMenuItem;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
 
+import gov.va.semoss.om.GraphColorRepository;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.Collection;

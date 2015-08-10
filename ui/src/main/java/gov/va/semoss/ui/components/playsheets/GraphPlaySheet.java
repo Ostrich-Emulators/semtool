@@ -75,7 +75,7 @@ import gov.va.semoss.ui.components.renderers.ResourceNameRenderer;
 import gov.va.semoss.ui.components.renderers.ShapeRenderer;
 import gov.va.semoss.ui.components.renderers.TableColorRenderer;
 import gov.va.semoss.ui.components.renderers.TableShapeRenderer;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.om.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;

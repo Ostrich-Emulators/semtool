@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.om;
 
-import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.util.Constants;
 

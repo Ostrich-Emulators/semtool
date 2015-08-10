@@ -18,6 +18,7 @@
 
 	<modules>
 		<module>ui</module>
+	 <module>common</module>
 	</modules>
   
 	<scm>

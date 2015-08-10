@@ -5,8 +5,8 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
-import gov.va.semoss.ui.helpers.GraphColorRepository;
 
+import gov.va.semoss.om.GraphColorRepository;
 import gov.va.semoss.util.Constants;
 import java.awt.Color;
 import java.awt.Component;
