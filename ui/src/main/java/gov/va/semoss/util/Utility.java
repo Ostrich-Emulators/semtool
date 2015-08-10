@@ -22,6 +22,7 @@ package gov.va.semoss.util;
 import gov.va.semoss.model.vocabulary.SEMOSS;
 import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.model.vocabulary.VCAMP;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
@@ -121,6 +122,7 @@ public class Utility {
 		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
 		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
 		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
+		DEFAULTNAMESPACES.put( VCAMP.PREFIX, VCAMP.NAMESPACE );
 	}
 
 	/**

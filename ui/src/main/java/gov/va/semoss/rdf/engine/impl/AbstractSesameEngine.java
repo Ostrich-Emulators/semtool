@@ -355,8 +355,9 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			Map<String, String> customNamespaces ) {
 		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
 		namespaces.putAll( Utility.DEFAULTNAMESPACES );
-		namespaces.putAll( customNamespaces );
-
+		if(customNamespaces != null){
+		   namespaces.putAll( customNamespaces );
+		}
 		Set<String> existingNamespaces = new HashSet<>();
 		if ( rawsparql.toUpperCase().contains( "PREFIX" ) ) {
 			Pattern pat = Pattern.compile( "prefix[\\s]+([A-Za-z0-9_-]+)[\\s]*:",

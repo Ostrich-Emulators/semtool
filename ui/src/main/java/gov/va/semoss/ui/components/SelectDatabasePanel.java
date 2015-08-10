@@ -425,7 +425,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			else {
 				sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
 			}
-
 			return sparql;
 		}
 
@@ -437,11 +436,11 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			//If a "Renderer Class" has been entered into the InsightManager,
 			//then the playsheet dropdown selection and query must not be used.
 			//Instead, use the "Renderer Class":
-			if ( null == insight.getRendererClass() ) {
+			if (insight.getRendererClass() != null && 
+				insight.getRendererClass().equals("") == false) {
 				output = "gov.va.semoss.ui.components.playsheets.rendererclasses."
 						+ insight.getRendererClass();
 			}
-
 			return (Class<PlaySheetCentralComponent>) Class.forName( output );
 		}
 
