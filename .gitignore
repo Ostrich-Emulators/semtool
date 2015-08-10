@@ -9,4 +9,3 @@ target
 .settings/*
 src/main/resources/html.zip
 .gitignore
-ui/semoss.log
