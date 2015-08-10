@@ -63,11 +63,19 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
+import gov.va.semoss.ui.components.FilterPanel;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.VertexColorShapeData;
 import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.renderers.ColorRenderer;
+import gov.va.semoss.ui.components.renderers.ResourceNameRenderer;
+import gov.va.semoss.ui.components.renderers.ShapeRenderer;
+import gov.va.semoss.ui.components.renderers.TableColorRenderer;
+import gov.va.semoss.ui.components.renderers.TableShapeRenderer;
+import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
@@ -85,13 +93,19 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.Utility;
 import java.awt.Dimension;
+import java.awt.Shape;
 import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.JTable;
+import javax.swing.table.TableColumnModel;
 
 /**
  */
@@ -302,12 +316,39 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	@Override
-	public void setFrame( PlaySheetFrame frame ) {
-		super.setFrame( frame );
+	public void activated() {
+		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
+		fp.setPlaySheet( this );
 
-		frame.addInternalFrameListener( new GraphPlaySheetListener( frame ) );
-		frame.addInternalFrameListener( new PlaySheetControlListener( frame ) );
-		frame.addInternalFrameListener( new PlaySheetColorShapeListener( frame ) );
+		Utility.addModelToJTable( controlData.getVertexTableModel(), Constants.LABEL_TABLE );
+		Utility.addModelToJTable( controlData.getEdgeTableModel(), Constants.TOOLTIP_TABLE );
+
+		JTable colorShapeTable = DIHelper.getJTable( Constants.COLOR_SHAPE_TABLE );
+		colorShapeTable.setModel( colorShapeData );
+
+		TableColumnModel tcm = colorShapeTable.getColumnModel();
+
+		tcm.getColumn( 1 ).setCellRenderer( new ResourceNameRenderer() );
+
+		JComboBox<Shape> shapes = new JComboBox<>( GraphShapeRepository.instance().getAllShapes() );
+		shapes.setRenderer( new ShapeRenderer() );
+		tcm.getColumn( 2 ).setCellRenderer( new TableShapeRenderer() );
+		tcm.getColumn( 2 ).setCellEditor( new DefaultCellEditor( shapes ) );
+
+		JComboBox<Color> colors = new JComboBox<>( GraphColorRepository.instance().getAllNamedColors() );
+		colors.setRenderer( new ColorRenderer() );
+		tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
+		tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );
+	}
+
+	@Override
+	public void deactivated() {
+		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
+		fp.setPlaySheet( null );
+
+		Utility.resetJTable( Constants.LABEL_TABLE );
+		Utility.resetJTable( Constants.TOOLTIP_TABLE );
+		Utility.resetJTable( Constants.COLOR_SHAPE_TABLE );
 	}
 
 	/**
@@ -790,20 +831,21 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public Collection<SEMOSSEdge> getHighlightedEdges() {
 		return new HashSet<>( est.getSelected() );
 	}
-	
+
 	/**
 	 * Allow subclasses to substitute a different vertex for the given one
+	 *
 	 * @param v
-	 * @return 
+	 * @return
 	 */
-	public SEMOSSVertex getRealVertex( SEMOSSVertex v ){
+	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
 		return v;
 	}
 
-	protected boolean isloading(){
+	protected boolean isloading() {
 		return inGraphOp;
 	}
-	
+
 	@Override
 	public void propertyChange( PropertyChangeEvent evt ) {
 		if ( !isloading() ) {

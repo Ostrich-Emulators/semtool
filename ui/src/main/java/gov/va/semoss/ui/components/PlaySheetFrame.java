@@ -16,6 +16,7 @@ import gov.va.semoss.util.DefaultPlaySheetIcons;
 
 import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ContainerEvent;
@@ -100,21 +101,6 @@ public class PlaySheetFrame extends JInternalFrame {
 
 		engine = eng;
 
-		tabs.addChangeListener( new ChangeListener() {
-
-			@Override
-			public void stateChanged( ChangeEvent e ) {
-				try {
-					// we need to make sure our first tab throws a "selected" event
-					PlaySheetFrame.this.setSelected( false );
-					PlaySheetFrame.this.setSelected( true );
-				}
-				catch ( Exception ex ) {
-					log.error( ex, ex );
-				}
-			}
-		} );
-
 		tabs.addContainerListener( new ContainerListener() {
 
 			@Override
@@ -125,6 +111,13 @@ public class PlaySheetFrame extends JInternalFrame {
 			public void componentRemoved( ContainerEvent e ) {
 				if ( 0 == tabs.getTabCount() ) {
 					dispose();
+				}
+				else {
+					Component cmp = e.getChild();
+					
+					if ( cmp instanceof PlaySheetCentralComponent ) {
+						PlaySheetCentralComponent.class.cast( cmp ).deactivated();
+					}
 				}
 			}
 		} );
@@ -226,10 +219,10 @@ public class PlaySheetFrame extends JInternalFrame {
 		}
 	}
 
-	public void addChangeListener( ChangeListener cl ){
+	public void addChangeListener( ChangeListener cl ) {
 		tabs.addChangeListener( cl );
 	}
-	
+
 	public void closeTab( PlaySheetCentralComponent c ) {
 		tabs.remove( c );
 	}
