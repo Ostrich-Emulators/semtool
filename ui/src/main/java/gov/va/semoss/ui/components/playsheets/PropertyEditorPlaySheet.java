@@ -56,7 +56,7 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 	public PropertyEditorPlaySheet( Collection<SEMOSSVertex> pickedVertices,
 			String title, IEngine engine ) {
 		setLayout( new BorderLayout() );
-		setTitle( title );
+		setTitle( title );	
 
 		model = new PropertyEditorTableModel( pickedVertices, engine );
 		table = new JTable( model );

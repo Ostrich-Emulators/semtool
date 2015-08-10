@@ -83,13 +83,13 @@ public class GraphNodePopup extends JPopupMenu {
 		addGraphOptions();
 		addDataOptions();
 		addSOATransitionOptions();
-		if( !forTree ){
+		if ( !forTree ) {
 			addTraverseAndAlgorithmOptions();
 		}
 		addCosmeticsOptions();
 		addHidingOptions();
-		
-		if( !forTree ){
+
+		if ( !forTree ) {
 			addChartOptions();
 		}
 	}
@@ -170,10 +170,10 @@ public class GraphNodePopup extends JPopupMenu {
 		add( new GraphPlaySheetExportListener( gps ) );
 		add( new NodeInfoPopup( gps, highlightedVertices ) );
 
-		JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
-		item.setEnabled( highlightedVertices.size() >= 1 );
-
-		if( !forTree ){
+		if ( !forTree ) {
+			JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
+			item.setEnabled( highlightedVertices.size() >= 1 );
+			
 			add( new CondenseGraph( gps ) );
 		}
 	}
