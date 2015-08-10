@@ -11,6 +11,10 @@ import edu.uci.ics.jung.graph.Tree;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.util.MultiSetMap;
 import gov.va.semoss.util.UriBuilder;
+import java.awt.Color;
+import java.awt.Shape;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -19,13 +23,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.URIImpl;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data
  * mainly consists of the edgeStore and vertStore as well as models/repository
  * connections
  */
-public class TreeGraphDataModel extends GraphDataModel {
+public class TreeGraphDataModel extends GraphDataModel implements PropertyChangeListener {
 
 	private static final Logger log = Logger.getLogger( TreeGraphDataModel.class );
 
@@ -64,8 +69,27 @@ public class TreeGraphDataModel extends GraphDataModel {
 		return dupes;
 	}
 
+	public Set<SEMOSSEdge> getDuplicatesOf( SEMOSSEdge v ) {
+		// if we're looking at a duplicate, first figure out the true node
+		// if we're looking at the true node, just get the duplicates from dupesets.
+		URI realuri = ( dupeEdgeToTrue.containsKey( v )
+				? dupeEdgeToTrue.get( v ).getURI() : v.getURI() );
+
+		Set<SEMOSSEdge> dupes = new HashSet<>();
+		Set<URI> uris = dupesets.getNN( realuri );
+		for ( URI u : uris ) {
+			dupes.add( uriToEdge.get( u ) );
+		}
+
+		return dupes;
+	}
+
 	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
 		return dupeNodeToTrue.get( v );
+	}
+
+	public SEMOSSEdge getRealEdge( SEMOSSEdge e ) {
+		return dupeEdgeToTrue.get( e );
 	}
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> makeDuplicateForest(
@@ -87,7 +111,7 @@ public class TreeGraphDataModel extends GraphDataModel {
 			Deque<SEMOSSVertex> todo = new ArrayDeque<>( tree.getChildren( root ) );
 			while ( !todo.isEmpty() ) {
 				SEMOSSVertex child = todo.poll();
-				if( !dupeVlkp.containsKey( child ) ){
+				if ( !dupeVlkp.containsKey( child ) ) {
 					dupeVlkp.put( child, duplicate( child ) );
 				}
 
@@ -115,13 +139,14 @@ public class TreeGraphDataModel extends GraphDataModel {
 		URI uri = UriBuilder.getBuilder( old.getURI().getNamespace() ).uniqueUri();
 		SEMOSSVertex c2 = new SEMOSSVertexImpl( uri, old.getType(), old.getLabel() );
 		dupesets.add( old.getURI(), c2.getURI() );
-		//dupesets.add( c2.getURI(), old.getURI() );
 		uriToNode.put( c2.getURI(), c2 );
 		dupeNodeToTrue.put( c2, old );
 
 		for ( Map.Entry<URI, Value> en : old.getValues().entrySet() ) {
 			c2.setValue( en.getKey(), en.getValue() );
 		}
+
+		old.addPropertyChangeListener( this );
 
 		return c2;
 	}
@@ -130,7 +155,6 @@ public class TreeGraphDataModel extends GraphDataModel {
 			SEMOSSVertex dst ) {
 		SEMOSSEdge c2 = new SEMOSSEdgeImpl( src, dst, old.getURI() );
 		dupesets.add( old.getURI(), c2.getURI() );
-		//dupesets.add( c2.getURI(), old.getURI() );
 		uriToEdge.put( c2.getURI(), c2 );
 		dupeEdgeToTrue.put( c2, old );
 
@@ -138,10 +162,50 @@ public class TreeGraphDataModel extends GraphDataModel {
 			c2.setValue( en.getKey(), en.getValue() );
 		}
 
+		old.addPropertyChangeListener( this );
+
 		return c2;
 	}
-	
-	
-	
-	
+
+	@Override
+	public void propertyChange( PropertyChangeEvent evt ) {
+		// propagate changes from the "real" vertices to our duplicate vertices
+		Object src = evt.getSource();
+		String propname = evt.getPropertyName();
+		Object newval = evt.getNewValue();
+
+		if ( src instanceof SEMOSSVertex ) {
+			for ( SEMOSSVertex v : this.getDuplicatesOf( SEMOSSVertex.class.cast( src ) ) ) {
+				if ( null != propname ) switch ( propname ) {
+					case AbstractGraphElement.CHANGE_COLOR:
+						v.setColor( Color.class.cast( newval ) );
+						break;
+					case AbstractGraphElement.CHANGE_VISIBLE:
+						v.setVisible( Boolean.class.cast( newval ) );
+						break;
+					case SEMOSSVertex.CHANGE_SHAPE:
+						v.setShape( Shape.class.cast( newval ) );
+						break;
+					default:
+						v.setValue( new URIImpl( propname ), Value.class.cast( newval ) );
+						break;
+				}
+			}
+		}
+		else if ( src instanceof SEMOSSEdge ) {
+			for ( SEMOSSEdge v : this.getDuplicatesOf( SEMOSSEdge.class.cast( src ) ) ) {
+				if ( null != propname ) switch ( propname ) {
+					case AbstractGraphElement.CHANGE_COLOR:
+						v.setColor( Color.class.cast( newval ) );
+						break;
+					case AbstractGraphElement.CHANGE_VISIBLE:
+						v.setVisible( Boolean.class.cast( newval ) );
+						break;
+					default:
+						v.setValue( new URIImpl( propname ), Value.class.cast( newval ) );
+						break;
+				}
+			}
+		}
+	}
 }

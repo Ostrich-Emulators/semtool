@@ -53,7 +53,8 @@ public class FilterPanel extends javax.swing.JPanel {
 	}
 
 	public void setModels( VertexFilterTableModel<SEMOSSVertex> nmodel,
-			VertexFilterTableModel<SEMOSSEdge> emodel, NodeEdgePropertyTableModel pmodel ) {
+			VertexFilterTableModel<SEMOSSEdge> emodel, NodeEdgePropertyTableModel pmodel,
+			IEngine engine ) {
 		nodemodel = nmodel;
 		edgemodel = emodel;
 		propmodel = pmodel;
@@ -61,10 +62,17 @@ public class FilterPanel extends javax.swing.JPanel {
 		nodes.setModel( nmodel );
 		edges.setModel( emodel );
 		props.setModel( pmodel );
-		
+
 		nodemodel.fireTableDataChanged();
 		edgemodel.fireTableDataChanged();
 		propmodel.fireTableDataChanged();
+
+		int sizes[] = { 15, 50, 50 };
+		for ( int i = 0; i < sizes.length; i++ ) {
+			nodes.getColumnModel().getColumn( i ).setPreferredWidth( sizes[i] );
+			edges.getColumnModel().getColumn( i ).setPreferredWidth( sizes[i] );
+		}
+		setEngine( engine );
 	}
 
 	/**
@@ -139,7 +147,7 @@ public class FilterPanel extends javax.swing.JPanel {
 		pr.cache( Constants.OUT_EDGE_CNT, "Out-Edges" );
 
 		props.setDefaultRenderer( Value.class, pr );
-		props.setDefaultRenderer( URI.class, pr );		
+		props.setDefaultRenderer( URI.class, pr );
 
 		ShowRenderer valrend = new ShowRenderer( eng );
 		for ( JTable tbl : Arrays.asList( nodes, edges ) ) {

@@ -335,7 +335,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void activated() {
 		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
-		fp.setModels( nodemodel, edgemodel, propmodel );
+		fp.setModels( nodemodel, edgemodel, propmodel, getEngine() );
 
 		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
 		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
@@ -875,6 +875,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * @return
 	 */
 	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
+		return v;
+	}
+
+	public SEMOSSEdge getRealEdge( SEMOSSEdge v ) {
 		return v;
 	}
 

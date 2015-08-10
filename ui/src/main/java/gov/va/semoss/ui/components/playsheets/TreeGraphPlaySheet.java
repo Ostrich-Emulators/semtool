@@ -30,14 +30,17 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.om.TreeGraphDataModel;
+import gov.va.semoss.ui.components.models.NodeEdgePropertyTableModel;
+import gov.va.semoss.ui.components.models.VertexFilterTableModel;
 import gov.va.semoss.ui.main.listener.impl.DuplicatingPickedStateListener;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Dimension;
-import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -86,8 +89,47 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 	}
 
 	@Override
+	protected NodeEdgePropertyTableModel createPropertyModel() {
+		return super.createPropertyModel();
+	}
+
+	@Override
+	protected VertexFilterTableModel<SEMOSSEdge> createEdgeModel() {
+		return new VertexFilterTableModel<SEMOSSEdge>( "Edge Type" ) {
+
+			@Override
+			public void refresh( Collection<SEMOSSEdge> instances ) {
+				Set<SEMOSSEdge> edges = new HashSet<>();
+				for ( SEMOSSEdge e : instances ) {
+					edges.add( getRealEdge( e ) );
+				}
+				super.refresh( edges );
+			}
+		};
+	}
+
+	@Override
+	protected VertexFilterTableModel<SEMOSSVertex> createNodeModel() {
+		return new VertexFilterTableModel<SEMOSSVertex>( "Node Type" ) {
+			@Override
+			public void refresh( Collection<SEMOSSVertex> instances ) {
+				Set<SEMOSSVertex> nodes = new HashSet<>();
+				for ( SEMOSSVertex v : instances ) {
+					nodes.add( getRealVertex( v ) );
+				}
+				super.refresh( nodes );
+			}
+		};
+	}
+
+	@Override
 	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
 		return model.getRealVertex( v );
+	}
+
+	@Override
+	public SEMOSSEdge getRealEdge( SEMOSSEdge v ) {
+		return model.getRealEdge( v );
 	}
 
 	/**
@@ -154,5 +196,5 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		fireLayoutUpdated( graph, oldName, layout );
 
 		return ok;
-	}
+	}	
 }
