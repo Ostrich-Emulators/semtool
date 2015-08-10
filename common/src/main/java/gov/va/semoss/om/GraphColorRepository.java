@@ -1,8 +1,6 @@
-package gov.va.semoss.ui.helpers;
+package gov.va.semoss.om;
 
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
-
+import gov.va.semoss.om.AbstractColorRepository;
 import gov.va.semoss.util.Constants;
 import java.awt.Color;
 import java.util.HashMap;

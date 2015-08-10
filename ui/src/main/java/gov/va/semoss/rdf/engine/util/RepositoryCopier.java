@@ -12,7 +12,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFHandlerException;
-import gov.va.semoss.rdf.engine.impl.AbstractEngine;
 
 /**
  *
