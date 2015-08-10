@@ -59,6 +59,8 @@ import javax.swing.event.ListSelectionListener;
 public class Starter {
 
 	final Object monitor = new Object();
+	
+	private static final String[] SPLASH_SCREEN_IMAGE_PATHS = {"/images/V-CAMP-Splash.png", "/images/SEMOSS-Splash.png"};
 
 	/**
 	 * Method main. Starts the SEMOSS application. read the properties file -
@@ -78,6 +80,7 @@ public class Starter {
 		final Logger logger = Logger.getLogger( Starter.class );
 
 		final String WORKINGDIR = System.getProperty( "user.dir" );
+		
 		final File propFile = new File( WORKINGDIR, "RDF_Map.prop" );
 
 		final EngineUtil engineutil = EngineUtil.getInstance();
@@ -150,7 +153,7 @@ public class Starter {
 		}
 
 		final PlayPane frame = new PlayPane();
-		final SplashScreen ss = new SplashScreen();
+		final SEMOSSSplashScreen ss = new SEMOSSSplashScreen(SPLASH_SCREEN_IMAGE_PATHS);
 		java.awt.EventQueue.invokeLater( new Runnable() {
 			@Override
 			public void run() {
