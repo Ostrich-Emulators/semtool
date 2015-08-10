@@ -6,7 +6,6 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Color;
@@ -293,10 +292,8 @@ public class AbstractGraphElement implements GraphElement {
 			return false;
 		}
 		final AbstractGraphElement other = (AbstractGraphElement) obj;
-		if ( !Objects.equals( this.id, other.id ) ) {
-			return false;
-		}
-		return true;
+		
+		return Objects.equals( this.id, other.id );
 	}
 
 	@Override

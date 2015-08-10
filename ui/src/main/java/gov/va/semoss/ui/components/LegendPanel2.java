@@ -47,13 +47,14 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class is used to create the legend for visualizations.
  */
 public class LegendPanel2 extends JPanel implements GraphListener {
 
-	private static final long serialVersionUID = -2364666196260002413L;	
+	private static final long serialVersionUID = -2364666196260002413L;
 	private final List<SEMOSSVertex> selVs = new ArrayList<>();
 
 	/**
@@ -71,9 +72,10 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		Map<URI, Shape> shapes = new HashMap<>();
 		Map<URI, Color> colors = new HashMap<>();
 		for ( SEMOSSVertex v : gps.getVisibleGraph().getVertices() ) {
-			types.add( v.getType(), v );
-			shapes.put( v.getType(), GraphShapeRepository.instance().getLegendShape( v.getShape() ) );
-			colors.put( v.getType(), v.getColor() );
+			URI type = new URIImpl( v.getType().stringValue() );
+			types.add( type, v );
+			shapes.put( type, GraphShapeRepository.instance().getLegendShape( v.getShape() ) );
+			colors.put( type, v.getColor() );
 		}
 
 		IEngine eng = DIHelper.getInstance().getRdfEngine();
@@ -101,15 +103,15 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 					public void mouseClicked( MouseEvent e ) {
 						super.mouseClicked( e );
 						if ( !SwingUtilities.isRightMouseButton( e ) ) {
-							if( pl.isSelected() ){
-								selVs.addAll( sch.getValue() );								
+							if ( pl.isSelected() ) {
+								selVs.addAll( sch.getValue() );
 							}
-							else{
+							else {
 								selVs.removeAll( sch.getValue() );
 							}
 
 							gps.clearHighlighting();
-							if( !selVs.isEmpty() ){
+							if ( !selVs.isEmpty() ) {
 								gps.skeleton( selVs, null );
 							}
 						}

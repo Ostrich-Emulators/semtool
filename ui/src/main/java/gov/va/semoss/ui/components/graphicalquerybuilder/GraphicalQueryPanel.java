@@ -27,7 +27,7 @@ import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.om.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;

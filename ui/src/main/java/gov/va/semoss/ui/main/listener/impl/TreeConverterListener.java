@@ -19,17 +19,13 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JToggleButton;
-
-import gov.va.semoss.ui.components.GraphToTreeConverter;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.GraphToTreeConverter.Search;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.om.TreeGraphDataModel;
+import gov.va.semoss.ui.components.playsheets.TreeGraphPlaySheet;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -42,15 +38,15 @@ import javax.swing.Action;
  */
 public class TreeConverterListener extends AbstractAction {
 
+	public static final String LAYOUT_NAME = "layout";
 	private GraphPlaySheet gps;
-	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> oldgraph;
 
 	public TreeConverterListener() {
 		super( "Convert to Tree", Utility.loadImageIcon( "tree.png" ) );
 
 		putValue( Action.SHORT_DESCRIPTION,
-				"<html><b>Convert to Tree</b><br>Convert current graph to tree by"
-				+ " duplicating nodes with multiple in-edges</html>" );
+				"<html><b>Convert to Tree</b><br>Convert graph to tree by"
+				+ " duplicating nodes with multiple in-edges (in new tab)</html>" );
 	}
 
 	/**
@@ -66,43 +62,29 @@ public class TreeConverterListener extends AbstractAction {
 
 			@Override
 			public void itemStateChanged( ItemEvent e ) {
-				Collection<SEMOSSVertex> picks
+				Collection<? extends SEMOSSVertex> picks
 						= gps.getView().getPickedVertexState().getPicked();
 
-				if( !isEnabled() ){
+				if ( !isEnabled() ) {
 					setEnabled( !picks.isEmpty() );
-				}				
+				}
 			}
 		} );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		JToggleButton button = (JToggleButton) e.getSource();
-
-		String layoutname;
-		DirectedGraph<SEMOSSVertex, SEMOSSEdge> newgraph;
-		//if the button is selected run converter
-		if ( button.isSelected() ) {
-			oldgraph = gps.getGraphData().getGraph();
-
-			Collection<SEMOSSVertex> nodes
-					= gps.getView().getPickedVertexState().getPicked();
-			if ( nodes.isEmpty() ) {
-				nodes = gps.getVisibleGraph().getVertices();
-			}
-
-			newgraph 
-					= GraphToTreeConverter.convert( gps.getVisibleGraph(), nodes, 	Search.BFS );
-			layoutname = Constants.TREE_LAYOUT;
-		}
-		//if the button is unselected, revert to old graph
-		else {
-			newgraph = oldgraph;
-			layoutname = Constants.FR;
-		}
-
-		gps.getGraphData().setGraph( newgraph );
-		gps.updateGraph();
+		TreeGraphDataModel model = new TreeGraphDataModel( gps.getGraphData().getGraph(),
+				gps.getView().getPickedVertexState().getPicked() );
+		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( model, getLayoutName() );
+		tgps.setTitle( "Tree Conversion" );
+		gps.addSibling( tgps );
+		tgps.fireGraphUpdated();
 	}
+
+	private String getLayoutName() {
+		Object obj = getValue( LAYOUT_NAME );
+		return ( null == obj ? Constants.TREE_LAYOUT : obj.toString() );
+	}
+
 }

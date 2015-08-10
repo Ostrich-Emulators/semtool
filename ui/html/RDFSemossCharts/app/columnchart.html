@@ -31,11 +31,10 @@
             ctrlScope.setJSONData(data);
         };
 
-        //for unit testing outside the app, uncomment the start() call
-        $( document ).ready(function() {
+        function runOutsideApp() {
             var dataHC = '{"dataSeries":{"Level_2":[48.0],"Level_1":[8.0],"Level_4":[215.0],"Level_3":[203.0],"Level_6":[19.0],"Level_5":[15.0]},"xAxis":["ActivityCount"],"type":"column","title":"Show Count of Activities by Level"}';
-//            start(dataHC);
-        });
+            start(dataHC);
+        }
     </script>
     
 </head>

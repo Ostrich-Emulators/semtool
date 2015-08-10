@@ -11,6 +11,7 @@ import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
 
@@ -41,7 +42,6 @@ import javax.swing.Painter;
 import javax.swing.Timer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import javax.swing.event.InternalFrameEvent;
@@ -100,21 +100,6 @@ public class PlaySheetFrame extends JInternalFrame {
 
 		engine = eng;
 
-		tabs.addChangeListener( new ChangeListener() {
-
-			@Override
-			public void stateChanged( ChangeEvent e ) {
-				try {
-					// we need to make sure our first tab throws a "selected" event
-					PlaySheetFrame.this.setSelected( false );
-					PlaySheetFrame.this.setSelected( true );
-				}
-				catch ( Exception ex ) {
-					log.error( ex, ex );
-				}
-			}
-		} );
-
 		tabs.addContainerListener( new ContainerListener() {
 
 			@Override
@@ -167,36 +152,44 @@ public class PlaySheetFrame extends JInternalFrame {
 	 */
 	protected void onFrameClose() {
 		PlaySheetCentralComponent pscc = getActivePlaySheet();
-		if ( null != pscc && pscc.hasChanges() ) {
-			Map<String, Action> actions = pscc.getActions();
-			Map<String, Action> optactions = new LinkedHashMap<>();
+		if ( null != pscc ) {
+			DIHelper.getInstance().getPlayPane().getFilterPanel().useBlankModels();
 
-			if ( actions.containsKey( SAVE ) ) {
-				optactions.put( "Save", actions.get( SAVE ) );
-			}
+			if ( pscc.hasChanges() ) {
+				Utility.resetJTable( Constants.LABEL_TABLE );
+				Utility.resetJTable( Constants.TOOLTIP_TABLE );
+				Utility.resetJTable( Constants.COLOR_SHAPE_TABLE );
 
-			if ( actions.containsKey( SAVE_ALL ) ) {
-				optactions.put( "Save All", actions.get( SAVE_ALL ) );
-			}
+				Map<String, Action> actions = pscc.getActions();
+				Map<String, Action> optactions = new LinkedHashMap<>();
 
-			if ( optactions.isEmpty() ) {
-				return;
-			}
+				if ( actions.containsKey( SAVE ) ) {
+					optactions.put( "Save", actions.get( SAVE ) );
+				}
 
-			optactions.put( "Discard", null );
+				if ( actions.containsKey( SAVE_ALL ) ) {
+					optactions.put( "Save All", actions.get( SAVE_ALL ) );
+				}
 
-			int dtype = ( 2 == optactions.size() ? JOptionPane.YES_NO_OPTION
-					: JOptionPane.YES_NO_CANCEL_OPTION );
-			String[] options = optactions.keySet().toArray( new String[0] );
+				if ( optactions.isEmpty() ) {
+					return;
+				}
 
-			int ret = JOptionPane.showOptionDialog( this, "Playsheet \"" + pscc.getTitle()
-					+ "\" has unsaved data. Save it? ", "Save Unsaved Data?", dtype,
-					JOptionPane.QUESTION_MESSAGE, null, options, options[0] );
+				optactions.put( "Discard", null );
 
-			Action a = optactions.get( options[ret] );
+				int dtype = ( 2 == optactions.size() ? JOptionPane.YES_NO_OPTION
+						: JOptionPane.YES_NO_CANCEL_OPTION );
+				String[] options = optactions.keySet().toArray( new String[0] );
 
-			if ( null != a ) {
-				a.actionPerformed( null );
+				int ret = JOptionPane.showOptionDialog( this, "Playsheet \"" + pscc.getTitle()
+						+ "\" has unsaved data. Save it? ", "Save Unsaved Data?", dtype,
+						JOptionPane.QUESTION_MESSAGE, null, options, options[0] );
+
+				Action a = optactions.get( options[ret] );
+
+				if ( null != a ) {
+					a.actionPerformed( null );
+				}
 			}
 		}
 	}
@@ -226,12 +219,20 @@ public class PlaySheetFrame extends JInternalFrame {
 		}
 	}
 
+	public void addChangeListener( ChangeListener cl ) {
+		tabs.addChangeListener( cl );
+	}
+
 	public void closeTab( PlaySheetCentralComponent c ) {
 		tabs.remove( c );
 	}
 
 	public PlaySheetCentralComponent getActivePlaySheet() {
-		return PlaySheetCentralComponent.class.cast( tabs.getSelectedComponent() );
+		if ( tabs.getTabCount() > 0 ) {
+			return PlaySheetCentralComponent.class.cast( tabs.getSelectedComponent() );
+		}
+
+		return null;
 	}
 
 	public Collection<PlaySheetCentralComponent> getPlaySheets() {

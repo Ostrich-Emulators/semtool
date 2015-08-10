@@ -24,6 +24,8 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
+import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
+import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +44,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * Controls the running of the node rank algorithm
  */
 public class GraphNodeRankListener extends AbstractAction {
+
 	private static final long serialVersionUID = 5899960815619489928L;
 	private final GraphPlaySheet playsheet;
 
@@ -78,20 +81,22 @@ public class GraphNodeRankListener extends AbstractAction {
 			}
 		} );
 
-		GridPlaySheet grid = new GridPlaySheet();
+		GridRAWPlaySheet grid = new GridPlaySheet();
 
 		List<String> colNames
 				= Arrays.asList( "Vertex Name", "Vertex Type", "Page Rank Score" );
 		List<Value[]> list = new ArrayList<>();
+		LabeledPairTableCellRenderer<Value> renderer
+				= LabeledPairTableCellRenderer.getValuePairRenderer( playsheet.getEngine() );
 
-		//process through graph and list out all nodes, type, pagerank
+		// process the graph and list out all nodes, type, pagerank
 		ValueFactory vf = new ValueFactoryImpl();
 		for ( SEMOSSVertex v : col ) {
-			URI url = v.getURI();
 			URI type = v.getType();
 			double r = ranker.getVertexScore( v );
 
-			Value[] scores = { url, type, vf.createLiteral( r )	};
+			Value[] scores
+					= { vf.createLiteral( v.getLabel() ), type, vf.createLiteral( r ) };
 			list.add( scores );
 		}
 
