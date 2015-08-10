@@ -35,7 +35,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 
 import org.openrdf.model.URI;
@@ -63,9 +62,10 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	private static final Class<?>[] classNames = { URI.class, Value.class };
 	private final List<PropertyRow> rows = new ArrayList<>();
 	private GraphElement vertex = null;
-	private GraphPlaySheet gps;
+	private final GraphPlaySheet gps;
 
-	public NodeEdgePropertyTableModel() {
+	public NodeEdgePropertyTableModel( GraphPlaySheet gps ) {
+		this.gps = gps;
 	}
 
 	public void clear() {
@@ -79,18 +79,6 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 		}
 		else {
 			setEdge( SEMOSSEdge.class.cast( item ) );
-		}
-	}
-	
-	public void setPlaySheet( GraphPlaySheet ps){
-		gps = ps;
-		Set<SEMOSSVertex> pickedVerts = gps.getView().getPickedVertexState().getPicked();
-		Set<SEMOSSEdge> pickedEdges = gps.getView().getPickedEdgeState().getPicked();
-		if ( !pickedVerts.isEmpty() ) {
-			setVertex( pickedVerts.iterator().next() );
-		}
-		else if ( !pickedEdges.isEmpty() ) {
-			setEdge( pickedEdges.iterator().next() );
 		}
 	}
 

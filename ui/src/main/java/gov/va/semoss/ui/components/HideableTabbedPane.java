@@ -35,6 +35,7 @@ public class HideableTabbedPane extends JPanel {
 	private final JTabbedPane tabs = new ReorderableTabbedPane();
 	private boolean showingTabs = false;
 	private ContainerListener containerListener;
+	private ChangeListener changeListener;
 
 	public HideableTabbedPane( LayoutManager layout, boolean isDoubleBuffered ) {
 		super( layout, isDoubleBuffered );
@@ -70,36 +71,35 @@ public class HideableTabbedPane extends JPanel {
 
 			@Override
 			public void componentRemoved( ContainerEvent e ) {
-				Component c = e.getChild();
-				if ( c instanceof PlaySheetCentralComponent ) {
-					PlaySheetCentralComponent.class.cast( c ).deactivated();
+				if ( 1 == tabs.getTabCount() ) {
+					pscc = getPsccAt( 0 );
+					showTabs( pscc.prefersTabs() );
 				}
 
-				if ( 1 == tabs.getTabCount() ) {
-					pscc = PlaySheetCentralComponent.class.cast( tabs.getComponentAt( 0 ) );
-					showTabs( pscc.prefersTabs() );
-					pscc.activated();
-				}
-				else if ( 0 == tabs.getTabCount() ) {
-					// need to alert the parent that we don't have any more playsheets
-					for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
-						cl.componentRemoved( e );
-					}
+				// need to alert the parent that we lost a playsheet
+				for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
+					cl.componentRemoved( e );
 				}
 			}
 		};
 
+		changeListener = new ChangeListener() {
+
+			@Override
+			public void stateChanged( ChangeEvent e ) {
+				PlaySheetCentralComponent pscc = getPsccAt( tabs.getSelectedIndex() );
+				pscc.activated();
+			}
+		};
+		
 		tabs.addContainerListener( containerListener );
+		tabs.addChangeListener( changeListener );
+
 	}
 
 	public void add( String title, PlaySheetCentralComponent c ) {
 		if ( getTabCount() > 0 || c.prefersTabs() ) {
 			showTabs( true );
-
-			PlaySheetCentralComponent lastcc = getPsccAt( tabs.getSelectedIndex() );
-			if ( null != lastcc ) {
-				lastcc.deactivated();
-			}
 
 			tabs.add( title, c );
 			tabs.setSelectedComponent( c );
@@ -110,28 +110,34 @@ public class HideableTabbedPane extends JPanel {
 			pscc = c;
 			notabs.add( pscc, BorderLayout.CENTER );
 			showTabs( false );
+			c.activated();
 
 			ChangeEvent ce = new ChangeEvent( tabs );
 			for ( ChangeListener cl : tabs.getChangeListeners() ) {
 				cl.stateChanged( ce );
 			}
 		}
-
-		c.activated();
 	}
 
 	private PlaySheetCentralComponent getPsccAt( int idx ) {
-		return PlaySheetCentralComponent.class.cast( tabs.getComponentAt( idx ) );
+		if ( showingTabs ) {
+			return ( idx >= tabs.getTabCount() || idx < 0 ? null
+					: PlaySheetCentralComponent.class.cast( tabs.getComponentAt( idx ) ) );
+		}
+		else{
+			return pscc;
+		}
 	}
 
 	private void showTabs( boolean showtab ) {
 		tabs.removeContainerListener( containerListener );
+		tabs.removeChangeListener( changeListener );
 
 		if ( showingTabs && !showtab ) {
 			// move our first tab to the main area
 			int tc = tabs.getTabCount();
 			if ( tc > 0 ) {
-				pscc = PlaySheetCentralComponent.class.cast( tabs.getComponentAt( 0 ) );
+				pscc = getPsccAt( 0 );
 				notabs.add( pscc );
 			}
 		}
@@ -147,7 +153,9 @@ public class HideableTabbedPane extends JPanel {
 
 		cards.show( this, showtab ? TABS : NOTABS );
 		showingTabs = showtab;
+		
 		tabs.addContainerListener( containerListener );
+		tabs.addChangeListener( changeListener );
 	}
 
 	public void setTabPlacement( int tablocation ) {

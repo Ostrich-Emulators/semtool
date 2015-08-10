@@ -66,9 +66,10 @@ import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.FilterPanel;
 import gov.va.semoss.ui.components.GraphToTreeConverter;
 import gov.va.semoss.ui.components.LegendPanel2;
-import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.VertexColorShapeData;
 import gov.va.semoss.ui.components.api.GraphListener;
+import gov.va.semoss.ui.components.models.NodeEdgePropertyTableModel;
+import gov.va.semoss.ui.components.models.VertexFilterTableModel;
 import gov.va.semoss.ui.components.renderers.ColorRenderer;
 import gov.va.semoss.ui.components.renderers.ResourceNameRenderer;
 import gov.va.semoss.ui.components.renderers.ShapeRenderer;
@@ -77,10 +78,7 @@ import gov.va.semoss.ui.components.renderers.TableShapeRenderer;
 import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeListener;
-import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetListener;
 import gov.va.semoss.ui.main.listener.impl.PickedStateListener;
-import gov.va.semoss.ui.main.listener.impl.PlaySheetColorShapeListener;
-import gov.va.semoss.ui.main.listener.impl.PlaySheetControlListener;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
@@ -155,6 +153,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
 	private ItemListener pickStateListener = null;
+	private VertexFilterTableModel nodemodel;
+	private VertexFilterTableModel edgemodel;
+	private NodeEdgePropertyTableModel propmodel;
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -179,6 +180,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		LegendPanel2 legendPanel = new LegendPanel2();
 		add( legendPanel, BorderLayout.SOUTH );
 
+		nodemodel = createNodeModel();
+		edgemodel = createEdgeModel();
+		propmodel = createPropertyModel();
+
 		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout<>( gdm.getGraph() );
 		view = new VisualizationViewer<>( layout );
 		initVisualizer( view );
@@ -195,6 +200,18 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		addGraphListener( controlData );
 		addGraphListener( colorShapeData );
 		addGraphListener( controlPanel );
+	}
+
+	protected VertexFilterTableModel<SEMOSSVertex> createNodeModel() {
+		return new VertexFilterTableModel( "Node Type" );
+	}
+
+	protected VertexFilterTableModel<SEMOSSEdge> createEdgeModel() {
+		return new VertexFilterTableModel( "Edge Type" );
+	}
+
+	protected NodeEdgePropertyTableModel createPropertyModel() {
+		return new NodeEdgePropertyTableModel( this );
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -318,7 +335,16 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void activated() {
 		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
-		fp.setPlaySheet( this );
+		fp.setModels( nodemodel, edgemodel, propmodel );
+
+		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
+		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
+		if ( !pickedVerts.isEmpty() ) {
+			propmodel.setVertex( pickedVerts.iterator().next() );
+		}
+		else if ( !pickedEdges.isEmpty() ) {
+			propmodel.setEdge( pickedEdges.iterator().next() );
+		}
 
 		Utility.addModelToJTable( controlData.getVertexTableModel(), Constants.LABEL_TABLE );
 		Utility.addModelToJTable( controlData.getEdgeTableModel(), Constants.TOOLTIP_TABLE );
@@ -339,16 +365,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		colors.setRenderer( new ColorRenderer() );
 		tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
 		tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );
-	}
-
-	@Override
-	public void deactivated() {
-		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
-		fp.setPlaySheet( null );
-
-		Utility.resetJTable( Constants.LABEL_TABLE );
-		Utility.resetJTable( Constants.TOOLTIP_TABLE );
-		Utility.resetJTable( Constants.COLOR_SHAPE_TABLE );
 	}
 
 	/**
@@ -403,11 +419,17 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			// remove the old listener
 			view.getPickedVertexState().removeItemListener( pickStateListener );
 			view.getPickedEdgeState().removeItemListener( pickStateListener );
+
+			view.getPickedVertexState().removeItemListener( propmodel );
+			view.getPickedEdgeState().removeItemListener( propmodel );
 		}
 		if ( null != psl ) {
 			pickStateListener = psl;
 			view.getPickedVertexState().addItemListener( pickStateListener );
 			view.getPickedEdgeState().addItemListener( pickStateListener );
+
+			view.getPickedVertexState().addItemListener( propmodel );
+			view.getPickedEdgeState().addItemListener( propmodel );
 		}
 	}
 
@@ -576,6 +598,20 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			catch ( Exception ex ) {
 				log.error( "Error updating graph for GraphListener " + gl + ": " + ex, ex );
 			}
+		}
+
+		// these aren't true graph listeners, but we
+		// need to update them when the graph updates
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> g = getGraphData().getGraph();
+		nodemodel.refresh( g.getVertices() );
+		edgemodel.refresh( g.getEdges() );
+		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
+		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
+		if ( !pickedVerts.isEmpty() ) {
+			propmodel.setVertex( pickedVerts.iterator().next() );
+		}
+		else if ( !pickedEdges.isEmpty() ) {
+			propmodel.setEdge( pickedEdges.iterator().next() );
 		}
 	}
 

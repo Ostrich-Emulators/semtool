@@ -116,13 +116,6 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	public void activated() {
 	}
 
-	/**
-	 * Signals when this playsheet's tab is deselected in the frame. By default,
-	 * does nothing
-	 */
-	public void deactivated() {
-	}
-
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
 		log.error( "into create: " + data.size() + " items" );
 	}
