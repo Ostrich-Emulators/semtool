@@ -58,7 +58,6 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
-import org.apache.log4j.Logger;
 
 /**
  * Icons used in this search panel contributed from gentleface.com.
@@ -89,8 +88,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 	private final SearchController searchController = new SearchController();
 	private final RedoListener redoListener = new RedoListener();
 	private final UndoListener undoListener = new UndoListener();
-	private boolean forTree = false;
-
+	
 	/**
 	 * Create the panel.
 	 *
@@ -175,7 +173,6 @@ public class ControlPanel extends JPanel implements GraphListener {
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		Logger.getLogger( getClass() ).debug( "graph updated...updating lucene" );
 		searchController.indexGraph( graph, gps.getEngine() );
 	}
 
@@ -191,8 +188,6 @@ public class ControlPanel extends JPanel implements GraphListener {
 	}
 
 	public void setForTree( boolean b ) {
-		forTree = b;
-
 		ringsListener.setEnabled( b );
 		ringsButton.setVisible( b );
 
@@ -223,7 +218,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 		add( getJSeparator(), getGBC() );
 
 		add( decreaseVertSizeButton, getGBC() );
-		add( increaseVertSizeButton, getGBC() );		
+		add( increaseVertSizeButton, getGBC() );
 	}
 
 	private void addKeyListener( JButton button, Action action, String keyStrokeString,
