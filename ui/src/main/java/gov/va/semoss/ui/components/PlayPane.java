@@ -137,7 +137,6 @@ import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
 import com.ibm.icu.util.StringTokenizer;
-import gov.va.semoss.util.Utility;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -170,7 +169,6 @@ public class PlayPane extends JFrame {
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
-	public JTable filterTable, edgeTable, propertyTable;
 
 	// left cosmetic panel components
 	private JPanel cosmeticsPanel;

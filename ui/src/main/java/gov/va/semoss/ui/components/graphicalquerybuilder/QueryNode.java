@@ -6,7 +6,7 @@
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.om.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 
 import java.awt.Shape;

@@ -30,7 +30,7 @@ import org.openrdf.model.vocabulary.XMLSchema;
  */
 public class RDFDatatypeTools {
 	/** The logger for this class */
-	private static final Logger logger = Logger.getLogger( NodeDerivationTools.class );
+	private static final Logger logger = Logger.getLogger( RDFDatatypeTools.class );
 	/** The singleton instance for this class */
 	private static RDFDatatypeTools instance;
 	/** A lookup which stores the various static tags for the data types that one might

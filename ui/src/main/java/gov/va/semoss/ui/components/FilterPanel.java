@@ -5,17 +5,13 @@
  */
 package gov.va.semoss.ui.components;
 
-import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.models.FilterRow;
 import gov.va.semoss.ui.components.models.NodeEdgePropertyTableModel;
 import gov.va.semoss.ui.components.models.VertexFilterTableModel;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
 import gov.va.semoss.util.Constants;
@@ -23,6 +19,7 @@ import gov.va.semoss.util.Utility;
 import java.awt.Component;
 import java.util.Arrays;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
@@ -32,17 +29,15 @@ import org.openrdf.model.Value;
  *
  * @author ryan
  */
-public class FilterPanel extends javax.swing.JPanel implements GraphListener {
+public class FilterPanel extends javax.swing.JPanel {
 
-	private final VertexFilterTableModel<SEMOSSVertex> nodemodel
+	private VertexFilterTableModel<SEMOSSVertex> nodemodel
 			= new VertexFilterTableModel<>( "Node Type" );
 
-	private final VertexFilterTableModel<SEMOSSEdge> edgemodel
+	private VertexFilterTableModel<SEMOSSEdge> edgemodel
 			= new VertexFilterTableModel<>( "Edge Type" );
 
-	private final NodeEdgePropertyTableModel propmodel
-			= new NodeEdgePropertyTableModel();
-	private GraphPlaySheet currentGps;
+	private NodeEdgePropertyTableModel propmodel;
 
 	/**
 	 * Creates new form FilterPanel2
@@ -55,6 +50,29 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 		for ( int i = 0; i < sizes.length; i++ ) {
 			nodes.getColumnModel().getColumn( i ).setPreferredWidth( sizes[i] );
 		}
+	}
+
+	public void setModels( VertexFilterTableModel<SEMOSSVertex> nmodel,
+			VertexFilterTableModel<SEMOSSEdge> emodel, NodeEdgePropertyTableModel pmodel,
+			IEngine engine ) {
+		nodemodel = nmodel;
+		edgemodel = emodel;
+		propmodel = pmodel;
+
+		nodes.setModel( nmodel );
+		edges.setModel( emodel );
+		props.setModel( pmodel );
+
+		nodemodel.fireTableDataChanged();
+		edgemodel.fireTableDataChanged();
+		propmodel.fireTableDataChanged();
+
+		int sizes[] = { 15, 50, 50 };
+		for ( int i = 0; i < sizes.length; i++ ) {
+			nodes.getColumnModel().getColumn( i ).setPreferredWidth( sizes[i] );
+			edges.getColumnModel().getColumn( i ).setPreferredWidth( sizes[i] );
+		}
+		setEngine( engine );
 	}
 
 	/**
@@ -75,17 +93,38 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 
     setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
-    nodes.setModel(nodemodel);
+    nodes.setModel(new javax.swing.table.DefaultTableModel(
+      new Object [][] {
+
+      },
+      new String [] {
+        "Show", "Type", "Instance"
+      }
+    ));
     jScrollPane1.setViewportView(nodes);
 
     add(jScrollPane1);
 
-    props.setModel(propmodel);
+    props.setModel(new javax.swing.table.DefaultTableModel(
+      new Object [][] {
+
+      },
+      new String [] {
+        "Property", "Value"
+      }
+    ));
     jScrollPane2.setViewportView(props);
 
     add(jScrollPane2);
 
-    edges.setModel(edgemodel);
+    edges.setModel(new javax.swing.table.DefaultTableModel(
+      new Object [][] {
+
+      },
+      new String [] {
+        "Show", "Type", "Instance"
+      }
+    ));
     jScrollPane3.setViewportView(edges);
 
     add(jScrollPane3);
@@ -100,28 +139,6 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
   private javax.swing.JTable nodes;
   private javax.swing.JTable props;
   // End of variables declaration//GEN-END:variables
-
-	public void setPlaySheet( GraphPlaySheet gps ) {
-		if ( null != currentGps ) {
-			currentGps.removeGraphListener( this );
-			currentGps.getView().getPickedEdgeState().removeItemListener( propmodel );
-			currentGps.getView().getPickedVertexState().removeItemListener( propmodel );
-		}
-
-		currentGps = gps;
-
-		if ( null == currentGps ) {
-			propmodel.clear();
-			nodemodel.clear();
-			edgemodel.clear();
-		}
-		else {
-			currentGps.addGraphListener( this );
-			currentGps.getView().getPickedEdgeState().addItemListener( propmodel );
-			currentGps.getView().getPickedVertexState().addItemListener( propmodel );
-			graphUpdated( currentGps.getGraphData().getGraph(), currentGps );
-		}
-	}
 
 	public void setEngine( IEngine eng ) {
 		LabeledPairTableCellRenderer<Value> pr
@@ -139,6 +156,12 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 		}
 	}
 
+	public void useBlankModels() {
+		nodes.setModel( new DefaultTableModel( new String[]{ "Show", "Type", "Instance" }, 0 ) );
+		edges.setModel( nodes.getModel() );
+		props.setModel( new DefaultTableModel( new String[]{ "Property", "Value" }, 0 ) );
+	}
+
 	public NodeEdgePropertyTableModel getPropertyModel() {
 		return propmodel;
 	}
@@ -149,24 +172,6 @@ public class FilterPanel extends javax.swing.JPanel implements GraphListener {
 
 	public VertexFilterTableModel<SEMOSSEdge> getEdgeModel() {
 		return edgemodel;
-	}
-
-	@Override
-	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			GraphPlaySheet gps ) {
-		if ( gps == currentGps ) {
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> g = gps.getGraphData().getGraph();
-			nodemodel.refresh( g.getVertices() );
-			edgemodel.refresh( g.getEdges() );
-			propmodel.setGraph( gps.getView(), g );
-		}
-	}
-
-	@Override
-	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout,
-			GraphPlaySheet gps ) {
-		// nothing to update in this case
 	}
 
 	private class ShowRenderer extends LabeledPairTableCellRenderer<Value> {

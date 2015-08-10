@@ -6,10 +6,6 @@
 package gov.va.semoss.ui.main.listener.impl;
 
 import gov.va.semoss.ui.components.PlaySheetFrame;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
-
-import javax.swing.JCheckBox;
 import javax.swing.JToolBar;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;

@@ -7,7 +7,7 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 
 import gov.va.semoss.om.AbstractGraphElement;
 import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
+import gov.va.semoss.om.GraphColorRepository;
 import gov.va.semoss.util.MultiSetMap;
 import java.awt.Color;
 import java.util.Collection;

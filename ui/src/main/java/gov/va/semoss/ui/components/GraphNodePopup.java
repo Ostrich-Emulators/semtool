@@ -52,17 +52,19 @@ import javax.swing.JPopupMenu;
  * playsheet.
  */
 public class GraphNodePopup extends JPopupMenu {
+
 	private static final long serialVersionUID = 7106248215097748901L;
 
 	private final GraphPlaySheet gps;
 	private final Set<SEMOSSVertex> highlightedVertices;
 	private SEMOSSVertex pickedVertex;
 	private final IEngine engine;
+	private final boolean forTree;
 
 	public GraphNodePopup( GraphPlaySheet gps, SEMOSSVertex pickedVertex,
-			SEMOSSVertex[] highlightedVertices ) {
-		super();
+			SEMOSSVertex[] highlightedVertices, boolean forTree ) {
 
+		this.forTree = forTree;
 		this.gps = gps;
 		this.highlightedVertices = new HashSet<>( Arrays.asList( highlightedVertices ) );
 		this.pickedVertex = pickedVertex;
@@ -81,10 +83,15 @@ public class GraphNodePopup extends JPopupMenu {
 		addGraphOptions();
 		addDataOptions();
 		addSOATransitionOptions();
-		addTraverseAndAlgorithmOptions();
+		if ( !forTree ) {
+			addTraverseAndAlgorithmOptions();
+		}
 		addCosmeticsOptions();
 		addHidingOptions();
-		addChartOptions();
+
+		if ( !forTree ) {
+			addChartOptions();
+		}
 	}
 
 	private void addChartOptions() {
@@ -163,10 +170,12 @@ public class GraphNodePopup extends JPopupMenu {
 		add( new GraphPlaySheetExportListener( gps ) );
 		add( new NodeInfoPopup( gps, highlightedVertices ) );
 
-		JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
-		item.setEnabled( highlightedVertices.size() >= 1 );
-		
-		add( new CondenseGraph( gps ) );
+		if ( !forTree ) {
+			JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
+			item.setEnabled( highlightedVertices.size() >= 1 );
+			
+			add( new CondenseGraph( gps ) );
+		}
 	}
 
 	private void addGraphOptions() {

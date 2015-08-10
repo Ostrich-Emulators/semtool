@@ -6,7 +6,6 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
-import gov.va.semoss.ui.helpers.GraphColorRepository;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Color;

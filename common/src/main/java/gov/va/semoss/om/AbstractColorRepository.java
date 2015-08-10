@@ -1,4 +1,4 @@
-package gov.va.semoss.ui.helpers;
+package gov.va.semoss.om;
 
 import gov.va.semoss.util.Constants;
 

@@ -19,11 +19,9 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.Set;
 
-import javax.swing.JComponent;
 
 import org.apache.log4j.Logger;
 
@@ -32,13 +30,11 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalLensGraphMouse;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.FilterPanel;
 import gov.va.semoss.ui.components.GraphNodePopup;
 import gov.va.semoss.ui.components.NodePropertiesPopup;
-import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.playsheets.TreeGraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelFontTransformer;
-import gov.va.semoss.util.DIHelper;
 
 import java.util.HashSet;
 import javax.swing.SwingUtilities;
@@ -46,13 +42,20 @@ import javax.swing.SwingUtilities;
 /**
  * Controls what happens when a user clicks on a node in a graph.
  */
-public class GraphNodeListener extends ModalLensGraphMouse implements IChakraListener {
+public class GraphNodeListener extends ModalLensGraphMouse {
 
 	private static final Logger logger = Logger.getLogger( GraphNodeListener.class );
 	private final GraphPlaySheet gps;
+	private final boolean forTree;
 
 	public GraphNodeListener( GraphPlaySheet _gps ) {
 		gps = _gps;
+		forTree = false;
+	}
+
+	public GraphNodeListener( TreeGraphPlaySheet _gps ) {
+		gps = _gps;
+		forTree = true;
 	}
 
 	/**
@@ -135,7 +138,8 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 	 * @param e
 	 * @return all the currently selected nodes
 	 */
-	protected Set<SEMOSSVertex> handleRightClick( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
+	protected Set<SEMOSSVertex> handleRightClick( 
+			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
 			SEMOSSVertex clickedVertex, MouseEvent e ) {
 		logger.debug( "The user right clicked." );
 
@@ -146,7 +150,7 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 
 		SEMOSSVertex[] vertices
 				= pickedVertices.toArray( new SEMOSSVertex[pickedVertices.size()] );
-		new GraphNodePopup( gps, clickedVertex, vertices ).show( e );
+		new GraphNodePopup( gps, clickedVertex, vertices, forTree ).show( e );
 
 		return vertHash;
 	}
@@ -168,26 +172,5 @@ public class GraphNodeListener extends ModalLensGraphMouse implements IChakraLis
 		LabelFontTransformer<SEMOSSVertex> vlft = gps.getVertexLabelFontTransformer();
 		vlft.select( verts );
 		viewer.repaint();
-	}
-
-	/**
-	 * Method actionPerformed. Dictates what actions to take when an Action Event
-	 * is performed.
-	 *
-	 * @param arg0 ActionEvent - The event that triggers the actions in the
-	 * method.
-	 */
-	@Override
-	public void actionPerformed( ActionEvent arg0 ) {
-	}
-
-	/**
-	 * Method setView. Sets a JComponent that the listener will access and/or
-	 * modify when an action event occurs.
-	 *
-	 * @param view the component that the listener will access
-	 */
-	@Override
-	public void setView( JComponent view ) {
 	}
 }
