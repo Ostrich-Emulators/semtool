@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
+import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet.JoinType;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;

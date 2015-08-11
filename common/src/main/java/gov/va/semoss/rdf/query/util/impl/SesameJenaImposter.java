@@ -5,8 +5,8 @@
  */
 package gov.va.semoss.rdf.query.util.impl;
 
-import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
 
+import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;

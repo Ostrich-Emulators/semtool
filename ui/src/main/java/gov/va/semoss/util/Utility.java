@@ -80,7 +80,6 @@ import javax.swing.table.TableColumnModel;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
-import org.apache.xerces.util.XMLChar;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
@@ -794,13 +793,6 @@ public class Utility {
 		return to;
 	}
 
-	public static boolean isValidUriChars( String raw ) {
-		// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
-		// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
-		return XMLChar.isValidNCName( raw );
-		// return VALIDCHARS.matcher( raw ).matches();
-	}
-
 	/**
 	 * Generates a URI-compatible string
 	 *
@@ -820,7 +812,7 @@ public class Utility {
 		StringBuilder sb = new StringBuilder();
 		try {
 			if ( replaceForwardSlash || !trimmed.contains( "/" ) ) {
-				if ( isValidUriChars( trimmed ) ) {
+				if ( RDFDatatypeTools.isValidUriChars( trimmed ) ) {
 					sb.append( trimmed );
 				}
 				else {
@@ -841,7 +833,7 @@ public class Utility {
 				}
 				boolean first = true;
 				for ( String part : extras.split( "/" ) ) {
-					String add = ( isValidUriChars( part ) ? part
+					String add = ( RDFDatatypeTools.isValidUriChars( part ) ? part
 							: RandomStringUtils.randomAlphabetic( 1 )
 							+ UUID.randomUUID().toString() );
 
