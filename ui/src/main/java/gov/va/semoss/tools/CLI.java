@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
-import gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler;
 import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
 import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
@@ -41,6 +40,7 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
+import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import gov.va.semoss.util.Utility;
 import java.net.URL;
 import java.util.ArrayList;
@@ -293,7 +293,7 @@ public class CLI {
 						public void exec( RepositoryConnection conn ) throws RepositoryException {
 							ValueFactory vf = conn.getValueFactory();
 							for ( Map.Entry<URI, String> en : metadatas.entrySet() ) {
-								Value val = AbstractEdgeModeler.getRDFStringValue( en.getValue(),
+								Value val = getRDFStringValue( en.getValue(),
 										engine.getNamespaces(), vf );
 								conn.add( engine.getBaseUri(), en.getKey(), val );
 							}

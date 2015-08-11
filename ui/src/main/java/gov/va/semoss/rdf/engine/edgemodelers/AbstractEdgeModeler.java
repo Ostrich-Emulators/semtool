@@ -13,17 +13,17 @@ import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
+import static gov.va.semoss.util.RDFDatatypeTools.URISTARTPATTERN;
+import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
+import static gov.va.semoss.util.RDFDatatypeTools.getUriFromRawString;
 import gov.va.semoss.util.UriBuilder;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -37,12 +37,6 @@ import org.openrdf.repository.RepositoryException;
 public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 	private static final Logger log = Logger.getLogger( AbstractEdgeModeler.class );
-	protected static final Pattern NAMEPATTERN
-			= Pattern.compile( "(?:(?:\"([^\"]+)\")|([^@]+))@([a-z-A-Z]{1,8})" );
-	protected static final Pattern DTPATTERN
-			= Pattern.compile( "\"([^\\\\^]+)\"\\^\\^(.*)" );
-	protected static final Pattern URISTARTPATTERN
-			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
 	private final Set<URI> duplicates;
 	private QaChecker qaer;
 
@@ -75,94 +69,6 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 			}
 		}
 		return false;
-	}
-
-	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
-		//resolve namespace
-		ValueFactory vf = new ValueFactoryImpl();
-		URI uri = null;
-
-		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
-			uri = vf.createURI( raw.substring( 1, raw.length() - 1 ) );
-			return uri;
-		}
-
-		// if raw starts with <something>://, then assume it's just a URI
-		Matcher m = URISTARTPATTERN.matcher( raw );
-		if ( m.matches() ) {
-			return vf.createURI( raw );
-		}
-
-		if ( raw.contains( ":" ) ) {
-			String[] pieces = raw.split( ":" );
-			if ( 2 == pieces.length ) {
-				String namespace = namespaces.get( pieces[0] );
-				if ( null == namespace || namespace.trim().isEmpty() ) {
-					log.warn( "No namespace found for raw value: " + raw );
-				}
-				else {
-					uri = vf.createURI( namespace, pieces[1] );
-				}
-			}
-			else {
-				log.warn( "cannot resolve namespace for: " + raw + " (too many colons)" );
-			}
-		}
-		//else {
-		// since this will will always throw an error (it can't be an absolute URI)
-		// we'll just return null, as usual
-		//uri = vf.createURI( raw );
-		//}
-
-		return uri;
-	}
-
-	public static Value getRDFStringValue( String rawval, Map<String, String> namespaces,
-			ValueFactory vf ) {
-		// if rawval looks like a URI, assume it is
-		Matcher urimatcher = URISTARTPATTERN.matcher( rawval );
-		if ( urimatcher.matches() ) {
-			return vf.createURI( rawval );
-		}
-
-		Matcher m = NAMEPATTERN.matcher( rawval );
-		String val;
-		String lang;
-		if ( m.matches() ) {
-			String g1 = m.group( 1 );
-			String g2 = m.group( 2 );
-			val = ( null == g1 ? g2 : g1 );
-			lang = m.group( 3 );
-		}
-		else {
-			val = rawval;
-			lang = "";
-
-			m = DTPATTERN.matcher( rawval );
-			if ( m.matches() ) {
-				val = m.group( 1 );
-				String typestr = m.group( 2 );
-				try {
-					URI type = getUriFromRawString( typestr, namespaces );
-					if ( null == type ) {
-						log.warn( "probably misinterpreting as string (unknown type URI?) :"
-								+ rawval );
-						val = rawval;
-					}
-					else {
-						return vf.createLiteral( val, type );
-					}
-				}
-				catch ( Exception e ) {
-					log.warn( "probably misinterpreting as string (unknown type URI?) :"
-							+ rawval, e );
-					val = rawval;
-				}
-			}
-		}
-
-		return ( lang.isEmpty() ? vf.createLiteral( val )
-				: vf.createLiteral( val, lang ) );
 	}
 
 	/**

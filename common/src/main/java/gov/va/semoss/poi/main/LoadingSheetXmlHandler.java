@@ -6,7 +6,7 @@
 package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
-import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
+import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

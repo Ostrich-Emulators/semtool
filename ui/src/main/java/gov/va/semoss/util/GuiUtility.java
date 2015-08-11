@@ -88,21 +88,6 @@ public class GuiUtility {
 	private static final Logger log = Logger.getLogger( GuiUtility.class );
 	private static int id = 0;
 
-	public static final Map<String, String> DEFAULTNAMESPACES = new HashMap<>();
-
-	static {
-		DEFAULTNAMESPACES.put( RDF.PREFIX, RDF.NAMESPACE );
-		DEFAULTNAMESPACES.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		DEFAULTNAMESPACES.put( OWL.PREFIX, OWL.NAMESPACE );
-		DEFAULTNAMESPACES.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		DEFAULTNAMESPACES.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		DEFAULTNAMESPACES.put( FOAF.PREFIX, FOAF.NAMESPACE );
-		DEFAULTNAMESPACES.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
-		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
-		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
-		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
-	}
-
 	/**
 	 * Splits up a string URI into tokens based on "/" character, and uses logic
 	 * to return the instance name. If the input string is not a URI, then it is

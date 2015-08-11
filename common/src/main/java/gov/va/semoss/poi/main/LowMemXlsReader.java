@@ -6,8 +6,8 @@
 package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
-import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.Utility;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -182,7 +182,7 @@ public class LowMemXlsReader {
 
 	public ImportMetadata getMetadata() throws ImportValidationException {
 		ImportData id = new ImportData();
-		EngineLoader.initNamespaces( id );
+		id.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 
 		try {
 			XMLReader parser = XMLReaderFactory.createXMLReader();
@@ -213,7 +213,7 @@ public class LowMemXlsReader {
 
 	public ImportData getData() throws ImportValidationException {
 		ImportData id = new ImportData();
-		EngineLoader.initNamespaces( id );
+		id.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 
 		try {
 			XMLReader parser = XMLReaderFactory.createXMLReader();
