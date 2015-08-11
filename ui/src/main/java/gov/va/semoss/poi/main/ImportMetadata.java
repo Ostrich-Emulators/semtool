@@ -6,8 +6,6 @@
 package gov.va.semoss.poi.main;
 
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.util.UriBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,9 +14,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 /**
  *
@@ -44,27 +39,6 @@ public final class ImportMetadata {
 		this.base = base;
 		this.databuilder = data;
 		this.schemabuilder = schema;
-	}
-
-	public static ImportMetadata forEngine( IEngine eng ) {
-		if ( null == eng ) {
-			return new ImportMetadata();
-		}
-
-		ImportMetadata metas = new ImportMetadata( eng.getBaseUri(),
-				eng.getSchemaBuilder(), eng.getDataBuilder() );
-		metas.setNamespaces( eng.getNamespaces() );
-
-		try {
-			MetadataQuery mq = new MetadataQuery();
-			eng.query( mq );
-			metas.setExtras( mq.asStrings() );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-		}
-
-		return metas;
 	}
 
 	public void setSourceOfData( URI s ) {

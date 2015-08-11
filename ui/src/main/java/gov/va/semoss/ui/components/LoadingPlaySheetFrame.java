@@ -393,7 +393,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
-			final ImportData importdata = ImportData.forEngine( engine );
+			final ImportData importdata = GuiUtility.createImportData( engine );
 
 			final int progressPerTab = 100 / sheets.size();
 			for ( LoadingPlaySheetBase c : sheets ) {
@@ -671,7 +671,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
-			ImportData data = ImportData.forEngine( getEngine() );
+			ImportData data =  GuiUtility.createImportData( getEngine() );
 			fillImportData( data, dogoods, dobads );
 
 			for ( LoadingSheetData lsd : data.getSheets() ) {

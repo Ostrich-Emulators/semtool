@@ -372,7 +372,7 @@ public class ImportExistingDbPanel extends JPanel {
 							ImportDataProcessor.clearEngine( engine, file.getFiles() );
 						}
 						try {
-							ImportData errs = ( conformance ? ImportData.forEngine( eng )
+							ImportData errs = ( conformance ? GuiUtility.createImportData( eng )
 									: null );
 							EngineLoader el = new EngineLoader( stageInMemory );
 							el.setDefaultBaseUri( defaultBaseUri,

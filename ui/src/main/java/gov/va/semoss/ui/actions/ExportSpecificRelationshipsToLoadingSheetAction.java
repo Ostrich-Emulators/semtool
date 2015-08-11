@@ -72,7 +72,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 	private List<URI[]> selectedTriples;
 	private final OneVarListQueryAdapter<URI> query
 			= OneVarListQueryAdapter.getUriList( "SELECT ?entity WHERE {?entity ?subclass ?concept}", "entity" );
-	private JCheckBox togrid = new JCheckBox( "Export to Grid" );
+	private final JCheckBox togrid = new JCheckBox( "Export to Grid" );
 
 	public ExportSpecificRelationshipsToLoadingSheetAction( String optg, Frame _owner ) {
 		super( optg, EXPORTLSSOMERELS, "excel" );
@@ -296,7 +296,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 			@Override
 			public void run() {
 				DBToLoadingSheetExporter exper = new DBToLoadingSheetExporter( getEngine() );
-				ImportData data = ImportData.forEngine( getEngine() );
+				ImportData data = GuiUtility.createImportData( getEngine() );
 				exper.exportTheseRelationships( selectedTriples, data );
 
 				if ( togrid.isSelected() ) {

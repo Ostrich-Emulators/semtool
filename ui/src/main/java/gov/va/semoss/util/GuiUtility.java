@@ -22,11 +22,14 @@ package gov.va.semoss.util;
 import gov.va.semoss.model.vocabulary.SEMOSS;
 import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
@@ -46,9 +49,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -60,7 +60,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Resource;
@@ -510,5 +509,28 @@ public class GuiUtility {
 	public static void resetJTable( String tableKey ) {
 		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
 		log.debug( "Resetting the " + tableKey + " table model." );
+	}
+
+	public static ImportData createImportData( IEngine eng ) {
+		ImportMetadata metas = null;
+		if ( null == eng ) {
+			metas = new ImportMetadata();
+		}
+		else {
+			metas = new ImportMetadata( eng.getBaseUri(), eng.getSchemaBuilder(),
+					eng.getDataBuilder() );
+			metas.setNamespaces( eng.getNamespaces() );
+
+			try {
+				MetadataQuery mq = new MetadataQuery();
+				eng.query( mq );
+				metas.setExtras( mq.asStrings() );
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+				log.error( e, e );
+			}
+		}
+		
+		return new ImportData( metas );
 	}
 }

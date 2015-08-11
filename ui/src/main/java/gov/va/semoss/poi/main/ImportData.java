@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.poi.main;
 
-import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -27,10 +26,6 @@ public final class ImportData {
 
 	public ImportData( ImportMetadata md ) {
 		setMetadata( md );
-	}
-
-	public static ImportData forEngine( IEngine eng ) {
-		return new ImportData( ImportMetadata.forEngine( eng ) );
 	}
 
 	public void clear() {
