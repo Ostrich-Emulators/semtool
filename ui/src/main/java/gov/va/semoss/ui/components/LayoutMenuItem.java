@@ -68,11 +68,12 @@ public class LayoutMenuItem extends AbstractAction {
 					|| layout.equals( Constants.BALLOON_LAYOUT )
 					|| layout.equals( Constants.TREE_LAYOUT ) ) && !verts.isEmpty() ) {
 				Logger.getLogger( getClass() ).debug( "automatically converting to a tree layout" );
-				gps.getSearchPanel().clickTreeButton();
+				gps.getSearchPanel().clickTreeButton( layout );
 			}
 		}
-
-		setGraphLayout();
+		else{
+			setGraphLayout();
+		}
 	}
 
 	/**
@@ -87,7 +88,7 @@ public class LayoutMenuItem extends AbstractAction {
 					|| layout.equals( Constants.TREE_LAYOUT ) ) {
 				int response = showOptionPopup();
 				if ( response == 1 ) {
-					gps.getSearchPanel().clickTreeButton();
+					gps.getSearchPanel().clickTreeButton( layout );
 				}
 				else {
 					gps.setLayoutName( oldLayout );

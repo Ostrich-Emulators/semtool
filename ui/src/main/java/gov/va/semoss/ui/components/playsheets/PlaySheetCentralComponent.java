@@ -66,11 +66,11 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return title;
 	}
 
-	public void addSibling( PlaySheetCentralComponent pscc ){
+	public void addSibling( PlaySheetCentralComponent pscc ) {
 		getPlaySheetFrame().addTab( pscc );
 	}
-	
-	public void addSibling( String title, PlaySheetCentralComponent pscc ){
+
+	public void addSibling( String title, PlaySheetCentralComponent pscc ) {
 		getPlaySheetFrame().addTab( title, pscc );
 	}
 
@@ -107,6 +107,13 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 	public PlaySheetFrame getPlaySheetFrame() {
 		return playframe;
+	}
+
+	/**
+	 * Signals when this playsheet's tab is selected in the frame. By default,
+	 * does nothing
+	 */
+	public void activated() {
 	}
 
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
@@ -146,7 +153,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 		overlay( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), engine );
 	}
-	
+
 	public void populateToolBar( JToolBar toolBar, final String tabTitle ) {
 	}
 

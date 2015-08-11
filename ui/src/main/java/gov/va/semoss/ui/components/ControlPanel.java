@@ -66,7 +66,7 @@ import org.apache.log4j.Logger;
  * @author karverma
  * @version $Revision: 1.0 $
  */
-public class ControlPanel extends JPanel implements GraphListener{
+public class ControlPanel extends JPanel implements GraphListener {
 
 	private static final long serialVersionUID = 3128479498547975776L;
 
@@ -75,13 +75,13 @@ public class ControlPanel extends JPanel implements GraphListener{
 	private final JButton increaseVertSizeButton;
 	private final JButton undoButton;
 	private final JButton redoButton;
-	private final JToggleButton treeButton;
+	private final JButton treeButton;
 	private final JToggleButton highlightButton;
 	private final JToggleButton ringsButton;
 	private final WeightDropDownButton weightButton;
 	private final JTextField searchText = new JTextField();
 
-	private final GraphTransformerResetListener resetTransListener 
+	private final GraphTransformerResetListener resetTransListener
 			= new GraphTransformerResetListener();
 	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
 	private final TreeConverterListener treeListener = new TreeConverterListener();
@@ -89,6 +89,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 	private final SearchController searchController = new SearchController();
 	private final RedoListener redoListener = new RedoListener();
 	private final UndoListener undoListener = new UndoListener();
+	private boolean forTree = false;
 
 	/**
 	 * Create the panel.
@@ -129,18 +130,18 @@ public class ControlPanel extends JPanel implements GraphListener{
 				"control Y", KeyStroke.getKeyStroke( KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK ) );
 		redoButton.setEnabled( false );
 
-		treeButton = new JToggleButton( treeListener );
+		treeButton = new JButton( treeListener );
 		treeButton.setText( "" );
-		treeButton.addActionListener( new ActionListener(){
+		treeButton.addActionListener( new ActionListener() {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				if( ringsButton.isSelected() ){
+				if ( ringsButton.isSelected() ) {
 					ringsButton.doClick();
 				}
-			}		
+			}
 		} );
-		
+
 		ringsButton = new JToggleButton( Utility.loadImageIcon( "ring.png" ) );
 		ringsButton.setToolTipText( "<html><b>Show Radial Rings</b><br>Only available with Balloon and Radial Tree layouts</html>" );
 		ringsButton.addActionListener( ringsListener );
@@ -169,27 +170,34 @@ public class ControlPanel extends JPanel implements GraphListener{
 				"control ]", KeyStroke.getKeyStroke( KeyEvent.VK_CLOSE_BRACKET, InputEvent.CTRL_DOWN_MASK ) );
 
 		buildLayout();
+		setForTree( false );
 	}
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		Logger.getLogger(getClass()).debug( "graph updated...updating lucene");
+		Logger.getLogger( getClass() ).debug( "graph updated...updating lucene" );
 		searchController.indexGraph( graph, gps.getEngine() );
 	}
-	
+
 	@Override
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
 		if ( newlayout instanceof BalloonLayout || newlayout instanceof RadialTreeLayout ) {
 			ringsListener.setGraph( Forest.class.cast( graph ) );
-			ringsButton.setEnabled( true );
-		}
-		else {
-			ringsButton.setEnabled( false );
-			ringsButton.setSelected( false );
+			ringsListener.setEnabled( true );
 		}
 
 		ringsListener.setLayout( newlayout );
+	}
+
+	public void setForTree( boolean b ) {
+		forTree = b;
+
+		ringsListener.setEnabled( b );
+		ringsButton.setVisible( b );
+
+		treeListener.setEnabled( !b );
+		treeButton.setVisible( !b );
 	}
 
 	private void buildLayout() {
@@ -215,10 +223,11 @@ public class ControlPanel extends JPanel implements GraphListener{
 		add( getJSeparator(), getGBC() );
 
 		add( decreaseVertSizeButton, getGBC() );
-		add( increaseVertSizeButton, getGBC() );
+		add( increaseVertSizeButton, getGBC() );		
 	}
 
-	private void addKeyListener( JButton button, Action action, String keyStrokeString, KeyStroke keyStroke ) {
+	private void addKeyListener( JButton button, Action action, String keyStrokeString,
+			KeyStroke keyStroke ) {
 		button.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( keyStroke, keyStrokeString );
 		button.getActionMap().put( keyStrokeString, action );
 	}
@@ -260,7 +269,7 @@ public class ControlPanel extends JPanel implements GraphListener{
 
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
 		vertSizeListener.setViewer( viewer );
-		ringsListener.setViewer( viewer );		
+		ringsListener.setViewer( viewer );
 	}
 
 	public void setUndoButtonEnabled( boolean enabled ) {
@@ -275,7 +284,9 @@ public class ControlPanel extends JPanel implements GraphListener{
 		return highlightButton.isSelected();
 	}
 
-	public void clickTreeButton() {
+	public void clickTreeButton( String layout ) {
+		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, layout );
 		treeButton.doClick();
+		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, Constants.TREE_LAYOUT );
 	}
 }
