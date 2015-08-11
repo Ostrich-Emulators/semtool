@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.ui.components.OperationsProgress;
-import gov.va.semoss.ui.components.ProgressTask;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -27,8 +25,8 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.OperationsProgress.OperationsProgressListener;
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
 import javax.swing.border.BevelBorder;
@@ -103,10 +101,10 @@ public class StatusBar extends JPanel {
 		message.setPreferredSize( new Dimension( 800, 20 ) );
 		opprog.setPreferredSize( new Dimension( 200, 20 ) );
 
-		opprog.addOperationsProgressListener( new OperationsProgressListener() {
+		opprog.addOperationsProgressListener(new OperationsProgressListener() {
 			@Override
 			public void taskComplete( ProgressTask pt ) {
-				addStatus( "Completed: " + pt.getLabel()
+				addStatus("Completed: " + pt.getLabel()
 						+ " [in " + Utility.getDuration( pt.getStartTime(), pt.getStopTime() ) + "]" );
 			}
 		} );

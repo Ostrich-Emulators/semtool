@@ -10,7 +10,7 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.RemoteDbPanel;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -60,7 +60,7 @@ public class RemoteDbAction extends DbAction {
 				return true;
 			}
 			catch ( MalformedURLException mue ) {
-				Utility.showError( mue.getLocalizedMessage() );
+				GuiUtility.showError( mue.getLocalizedMessage() );
 			}
 		}
 
@@ -86,7 +86,7 @@ public class RemoteDbAction extends DbAction {
 				}
 				catch ( IOException | EngineManagementException e ) {
 					log.error( e, e );
-					Utility.showError( e.getLocalizedMessage() );
+					GuiUtility.showError( e.getLocalizedMessage() );
 				}
 			}
 		} );

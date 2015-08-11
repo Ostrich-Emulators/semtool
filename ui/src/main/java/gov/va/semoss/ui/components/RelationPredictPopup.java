@@ -37,6 +37,7 @@ import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 
 /**
@@ -107,13 +108,13 @@ public class RelationPredictPopup extends JMenu implements MouseListener {
 		String query = DIHelper.getInstance().getProperty( mainQuery );
 
 		if ( found1 && uri.contains( "/" ) ) {
-			subject = "\"" + Utility.getInstanceName( uri ) + "\"";
+			subject = "\"" + GuiUtility.getInstanceName( uri ) + "\"";
 		}
 		else if ( uri.contains( "/" ) ) {
 			subject = "<" + uri + ">";
 		}
 		if ( found2 && uri2.contains( "/" ) ) {
-			object = "\"" + Utility.getInstanceName( uri2 ) + "\"";
+			object = "\"" + GuiUtility.getInstanceName( uri2 ) + "\"";
 		}
 		else if ( uri2.contains( "/" ) ) {
 			object = "<" + uri2 + ">";

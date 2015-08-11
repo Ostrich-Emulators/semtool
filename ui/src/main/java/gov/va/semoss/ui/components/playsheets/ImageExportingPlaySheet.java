@@ -13,8 +13,8 @@ import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.util.ExportUtility;
 import static gov.va.semoss.util.ExportUtility.getExportFileLocation;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -94,7 +94,7 @@ public abstract class ImageExportingPlaySheet extends PlaySheetCentralComponent 
 					super.done();
 
 					if ( null == exceptions[0] ) {
-						Utility.showExportMessage(
+						GuiUtility.showExportMessage(
 								JOptionPane.getFrameForComponent( ImageExportingPlaySheet.this ),
 								"Export successful: " + output.getAbsolutePath(),
 								"Export Successful", output );

@@ -31,8 +31,8 @@ import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -226,7 +226,7 @@ public class OpenAction extends DbAction {
 		List<File> unknowns = map.getNN( FileHandling.UNKNOWN );
 
 		if ( !unknowns.isEmpty() ) {
-			Utility.showError( "Could not read/parse " + unknowns.size()
+			GuiUtility.showError( "Could not read/parse " + unknowns.size()
 					+ " files.\nPlease correct them before continuing.\n"
 					+ Arrays.toString( unknowns.toArray() ) );
 			return null;

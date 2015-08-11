@@ -45,7 +45,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.util.HashMap;
 
 
@@ -1005,7 +1005,7 @@ public class  InsightManagerController implements Initializable{
 		}
 		
 		if(exception.equals("") == false){
-			int msgResponse = Utility.showWarningOkCancel("The following problems exist with your query:\n" +
+			int msgResponse = GuiUtility.showWarningOkCancel("The following problems exist with your query:\n" +
 		       exception + "Would you still like to save it?");
 
 			if(msgResponse == 0){

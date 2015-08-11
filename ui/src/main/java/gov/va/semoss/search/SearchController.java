@@ -26,8 +26,9 @@ import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -249,7 +250,7 @@ public class SearchController implements KeyListener, FocusListener,
 					needLabels.addAll( e.getProperties().keySet() );
 				}
 
-				Map<Resource, String> labels = Utility.getInstanceLabels( needLabels, engine );
+				Map<Resource, String> labels = GuiUtility.getInstanceLabels( needLabels, engine );
 				RepositoryIndexer ri = new RepositoryIndexer( labels );
 
 				for ( SEMOSSEdge e : graph.getEdges() ) {
@@ -288,7 +289,7 @@ public class SearchController implements KeyListener, FocusListener,
 				}
 				finally {
 					indexing = false;
-					log.debug( "done indexing graph: "
+					log.debug("done indexing graph: "
 							+ Utility.getDuration( lastIndexed, new Date() ) );
 				}
 			}

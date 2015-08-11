@@ -23,7 +23,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.DIHelper;
 import java.awt.Frame;
@@ -340,7 +340,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			}
 			catch ( IOException | ImportValidationException e ) {
 				log.error( e, e );
-				Utility.showError( e.getLocalizedMessage() );
+				GuiUtility.showError( e.getLocalizedMessage() );
 			}
 		}
 	}
@@ -410,7 +410,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 								if ( null != smss[0]
 								&& smssloc.equals( smss[0].getAbsolutePath() ) ) {
 									eutil.removeEngineOpListener( this );
-									Utility.showMessage(
+									GuiUtility.showMessage(
 											"Your database has been successfully created!" );
 
 									if ( conformance && !errors.isEmpty() ) {
@@ -447,7 +447,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 						}
 						catch ( IOException | EngineManagementException ioe ) {
 							log.error( ioe, ioe );
-							Utility.showError( ioe.getMessage() );
+							GuiUtility.showError( ioe.getMessage() );
 						}
 					}
 				} );

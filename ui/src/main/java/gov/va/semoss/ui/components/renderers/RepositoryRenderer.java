@@ -12,7 +12,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JList;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 
 /**
  *
@@ -26,10 +26,10 @@ public class RepositoryRenderer extends DefaultListCellRenderer {
 	private static final Icon pinserver;
 
 	static {
-		pin = new ImageIcon( Utility.loadImage( "icons16/dbpin_16.png" ) );
-		nopin = new ImageIcon( Utility.loadImage( "icons16/db_16.png" ) );
-		nopinserver = new ImageIcon( Utility.loadImage( "icons16/db_sparql_endpoint1_16.png" ) );
-		pinserver = new ImageIcon( Utility.loadImage( "icons16/dbpin_sparql_endpoint1_16.png" ) );
+		pin = new ImageIcon( GuiUtility.loadImage( "icons16/dbpin_16.png" ) );
+		nopin = new ImageIcon( GuiUtility.loadImage( "icons16/db_16.png" ) );
+		nopinserver = new ImageIcon( GuiUtility.loadImage( "icons16/db_sparql_endpoint1_16.png" ) );
+		pinserver = new ImageIcon( GuiUtility.loadImage( "icons16/dbpin_sparql_endpoint1_16.png" ) );
 	}
 
 	@Override

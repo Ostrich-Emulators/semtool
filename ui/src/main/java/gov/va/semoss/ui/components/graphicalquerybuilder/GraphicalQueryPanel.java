@@ -21,7 +21,6 @@ import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.EditingPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
@@ -37,8 +36,9 @@ import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -179,7 +179,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private void buildTypeSelector() {
 
 		try {
-			SwingUtilities.invokeAndWait( new Runnable() {
+			SwingUtilities.invokeAndWait(new Runnable() {
 
 				@Override
 				public void run() {
@@ -191,7 +191,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
 
 						List<URI> concepts = NodeDerivationTools.instance().createConceptList( engine );
-						Map<URI, String> conceptlabels = Utility.getInstanceLabels( concepts, engine );
+						Map<URI, String> conceptlabels = GuiUtility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );
 

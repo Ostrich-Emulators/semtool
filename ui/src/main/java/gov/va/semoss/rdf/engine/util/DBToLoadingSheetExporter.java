@@ -31,8 +31,8 @@ import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -133,7 +133,7 @@ public class DBToLoadingSheetExporter {
 		subjectTypes.addAll( findSubclassNodesToAdd( subjectTypes ) );
 
 		Map<URI, String> labels
-				= Utility.getInstanceLabels( subjectTypes, engine );
+				= GuiUtility.getInstanceLabels( subjectTypes, engine );
 
 		for ( URI subjectType : subjectTypes ) {
 			Set<URI> properties = new HashSet<>();
@@ -153,7 +153,7 @@ public class DBToLoadingSheetExporter {
 		for ( URI[] spo : relationships ) {
 			needlabels.addAll( Arrays.asList( spo ) );
 		}
-		Map<URI, String> labels = Utility.getInstanceLabels( needlabels, engine );
+		Map<URI, String> labels = GuiUtility.getInstanceLabels( needlabels, engine );
 
 		int count = 0;
 		for ( URI[] spo : relationships ) {
@@ -376,7 +376,7 @@ public class DBToLoadingSheetExporter {
 
 		// don't refetch stuff already in the labels cache
 		needlabels.removeAll( labels.keySet() );
-		labels.putAll( Utility.getInstanceLabels( needlabels, engine ) );
+		labels.putAll(GuiUtility.getInstanceLabels( needlabels, engine ) );
 		return seen.values();
 	}
 
@@ -473,7 +473,7 @@ public class DBToLoadingSheetExporter {
 
 		// don't refetch stuff already in the labels cache
 		needlabels.removeAll( labels.keySet() );
-		labels.putAll( Utility.getInstanceLabels( needlabels, engine ) );
+		labels.putAll(GuiUtility.getInstanceLabels( needlabels, engine ) );
 		return seen.values();
 	}
 }

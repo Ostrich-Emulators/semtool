@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
@@ -83,7 +83,7 @@ public class MountAction extends DbAction {
               String msg = ( ErrorCode.DUPLICATE_NAME == eme.getCode()
                   ? "A repository with this name is already open. Please choose another."
                   : eme.getLocalizedMessage() );
-              Utility.showError( msg );
+              GuiUtility.showError( msg );
               log.error( eme );
             }
           }

@@ -12,7 +12,7 @@ import javax.swing.AbstractAction;
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.components.CopyWhatPanel;
@@ -89,7 +89,7 @@ public class MergeAction extends DbAction {
 						}
 						catch ( Exception e ) {
 							String msg = "Could not merge data";
-							Utility.showError( msg );
+							GuiUtility.showError( msg );
 							log.error( msg, e );
 						}
 					}

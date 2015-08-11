@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -160,28 +160,6 @@ public class UtilityTest {
 
   //@Test
   public void testSciToDollar() {
-  }
-
-  @Test
-  public void testCleanString() throws Exception {
-    List<String> strings = IOUtils.readLines( getClass()
-        .getResourceAsStream( "/cleanable-strings.txt" ) );
-    List<String> failures = new ArrayList<>();
-    for( String s : strings ){
-      String got = Utility.getUriCompatibleString( s, false );
-      try{
-        URI uri = new URIImpl( got );
-      }
-      catch( Exception e ){
-        failures.add( s );
-      }
-    }
-    
-    for( String s : failures ){
-      System.err.println( s );
-    }
-    
-    assertTrue( failures.isEmpty() );
   }
 
   //@Test

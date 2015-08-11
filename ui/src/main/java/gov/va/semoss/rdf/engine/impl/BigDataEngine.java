@@ -25,7 +25,6 @@ import com.bigdata.journal.Journal;
 
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
 
 import com.bigdata.rdf.rules.InferenceEngine;
 import com.bigdata.rdf.sail.BigdataSail;
@@ -50,6 +49,7 @@ import org.openrdf.model.Statement;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
 import gov.va.semoss.rdf.engine.util.StatementSorter;
+import gov.va.semoss.util.Utility;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;

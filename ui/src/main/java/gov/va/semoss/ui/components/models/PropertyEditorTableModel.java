@@ -21,8 +21,8 @@ package gov.va.semoss.ui.components.models;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.StatementPersistenceUtility;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -142,7 +142,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		Value oldValue = pRow.getValue();
 		
 		if ( !pRow.setValue(val) ) {
-			Utility.showError("This value is invalid for this datatype, or this datatype is not yet supported.");
+			GuiUtility.showError("This value is invalid for this datatype, or this datatype is not yet supported.");
 			return;
 		}
 		

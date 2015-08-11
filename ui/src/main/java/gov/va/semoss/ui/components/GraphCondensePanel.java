@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 			}
 		}
 
-		Map<URI, String> labels = Utility.getInstanceLabels( seen, gps.getEngine() );
+		Map<URI, String> labels = GuiUtility.getInstanceLabels( seen, gps.getEngine() );
 		labels = Utility.sortUrisByLabel( labels );
 
 		for ( URI t : labels.keySet() ) {

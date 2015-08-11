@@ -30,6 +30,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import org.openrdf.model.impl.URIImpl;
 
@@ -134,7 +135,7 @@ public class GraphDataModel {
 			}
 
 			Map<URI, String> edgelabels
-					= Utility.getInstanceLabels( model.predicates(), engine );
+					= GuiUtility.getInstanceLabels( model.predicates(), engine );
 			for ( Statement s : model ) {
 				String edgekey = s.getPredicate().stringValue()
 						+ s.getSubject().stringValue() + s.getObject().stringValue();
@@ -189,7 +190,12 @@ public class GraphDataModel {
 			removedEs.addAll( edges );
 			for ( SEMOSSEdge e : edges ) {
 				level.remove( e );
-				edgeStore.remove( e.getURI() );
+
+				SEMOSSVertex src = vizgraph.getSource( e );
+				SEMOSSVertex dst = vizgraph.getDest( e );
+				String edgekey = e.getURI().stringValue()
+						+ src.getURI().stringValue() + dst.getURI().stringValue();
+				edgeStore.remove( edgekey );
 			}
 
 			vizgraph.removeVertex( v );
@@ -209,6 +215,7 @@ public class GraphDataModel {
 	/**
 	 * Is this node present at the given level (is it's level <= the given level?)
 	 * @param check
+	 *
 	 *
 	 *
 	 *

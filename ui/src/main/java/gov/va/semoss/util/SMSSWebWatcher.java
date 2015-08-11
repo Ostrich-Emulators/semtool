@@ -71,7 +71,7 @@ public class SMSSWebWatcher extends AbstractFileWatcher {
    * @throws java.lang.Exception 
 	 */
 	public void loadNewDB(String newFile) throws Exception {
-		Utility.loadEngine( new File( newFile ) );
+		GuiUtility.loadEngine( new File( newFile ) );
 	}
 	
 	

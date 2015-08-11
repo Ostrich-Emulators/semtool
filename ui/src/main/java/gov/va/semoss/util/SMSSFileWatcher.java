@@ -74,7 +74,7 @@ public class SMSSFileWatcher extends AbstractFileWatcher {
 	public void loadNewDB(String newFile) throws Exception {
     File smssfile = new File( folderToWatch, newFile );
   
-    IEngine eng = Utility.loadEngine(smssfile);
+    IEngine eng = GuiUtility.loadEngine(smssfile);
 		RepositoryList list = DIHelper.getInstance().getRepoList();
 		list.getRepositoryModel().add( eng );
 		list.setSelectedIndex( 0 );

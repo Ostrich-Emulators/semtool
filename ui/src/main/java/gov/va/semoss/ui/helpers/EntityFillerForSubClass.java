@@ -32,7 +32,7 @@ import org.openrdf.model.URI;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 
 /**
  * This gets access to the engine and runs a query with parameters for a
@@ -90,7 +90,7 @@ public class EntityFillerForSubClass implements Runnable {
       }
     }
 
-    Map<URI, String> labels = Utility.getInstanceLabels( names, engine );
+    Map<URI, String> labels = GuiUtility.getInstanceLabels( names, engine );
     for ( JComboBox box : boxes ) {
       if ( box != null ) {
         // if it is a paramcombobox, set the whole hashtable--will need to look

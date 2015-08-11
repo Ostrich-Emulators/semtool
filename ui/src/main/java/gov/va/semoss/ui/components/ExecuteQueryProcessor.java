@@ -10,8 +10,9 @@ import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -109,7 +110,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 		}
 		catch ( ClassNotFoundException ex ) {
 			logger.error( ex, ex );
-			Utility.showError( ex.getLocalizedMessage() );
+			GuiUtility.showError( ex.getLocalizedMessage() );
 			return;
 		}
 
@@ -136,7 +137,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			}
 			catch ( InstantiationException | IllegalAccessException e ) {
 				logger.error( e, e );
-				Utility.showError( e.getLocalizedMessage() );
+				GuiUtility.showError( e.getLocalizedMessage() );
 			}
 		}
 
@@ -184,7 +185,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			public void done() {
 				super.done();
 				if ( null != ok[0] ) {
-					Utility.showError( ok[0].getLocalizedMessage() );
+					GuiUtility.showError( ok[0].getLocalizedMessage() );
 				}
 			}
 		};

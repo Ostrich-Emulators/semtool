@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.util.HashSet;
@@ -92,7 +93,7 @@ public class OneVariableDialogItem extends AbstractAction {
 		if ( null != choicesQuery ) {
 			try {
 				List<URI> uris = panel.getEngine().query( choicesQuery );
-				propTypeChoices = Utility.getInstanceLabels( uris, panel.getEngine() );
+				propTypeChoices = GuiUtility.getInstanceLabels( uris, panel.getEngine() );
 
 				// if there are no property choices, don't show the dialog
 				if ( propTypeChoices.isEmpty() ) {

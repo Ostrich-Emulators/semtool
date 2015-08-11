@@ -38,6 +38,7 @@ import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.util.Collection;
 import org.openrdf.model.URI;
@@ -65,8 +66,8 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 	 */
 	public TFRelationPopup( SEMOSSVertex vertex, GraphPlaySheet ps,
 			Collection<SEMOSSVertex> pickedVertex ) {
-		super( "Traverse Freely: All "
-				+ Utility.getInstanceLabel( vertex.getType(), ps.getEngine() ) + "(s) " );
+		super("Traverse Freely: All "
+				+ GuiUtility.getInstanceLabel( vertex.getType(), ps.getEngine() ) + "(s) " );
 
 		this.ps = ps;
 		this.pickedVertex = pickedVertex;
@@ -101,7 +102,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 			String query2
 					= DIHelper.getInstance().getProperty( TFRelationPopup.mainQuery + prefix );
 
-			String typeName = Utility.getConceptType( engine, thisVert.getURI().stringValue() );
+			String typeName = GuiUtility.getConceptType( engine, thisVert.getURI().stringValue() );
 			if ( typeV.contains( typeName ) ) {
 				continue;
 			}
@@ -193,7 +194,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 					count++;
 
 					logger.debug( "Adding Relation " + objClassName );
-					String instance = Utility.getInstanceName( objClassName );
+					String instance = GuiUtility.getInstanceName( objClassName );
 
 					if ( prefix.equals( "" ) ) {
 						hash.put( "OBJECT_TYPE", objClassName );
@@ -209,7 +210,7 @@ public class TFRelationPopup extends JMenu implements MouseListener {
 
 					NeighborMenuItem nItem = new NeighborMenuItem( instance, ps, nFillQuery );
 					if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
-						nItem = new NeighborMenuItem( "->" + Utility.getInstanceName( pred )
+						nItem = new NeighborMenuItem( "->" + GuiUtility.getInstanceName( pred )
 								+ "->" + instance, ps, nFillQuery );
 					}
 					add( nItem );

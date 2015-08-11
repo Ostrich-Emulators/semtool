@@ -13,7 +13,7 @@ import gov.va.semoss.rdf.engine.util.EngineConsistencyChecker;
 import gov.va.semoss.rdf.engine.util.EngineConsistencyChecker.Hit;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.MultiMap;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -93,7 +93,7 @@ public class ConsistencyPlaySheet extends GridRAWPlaySheet {
 			}
 		}
 
-		labels.putAll( Utility.getInstanceLabels( needlabels, engine ) );
+		labels.putAll(GuiUtility.getInstanceLabels( needlabels, engine ) );
 
 		float min = Float.MAX_VALUE;
 		float max = -Float.MAX_VALUE;
