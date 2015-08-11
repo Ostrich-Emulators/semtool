@@ -355,11 +355,11 @@
 			<artifactId>batik-codec</artifactId>
 			<version>1.8</version>
 		</dependency>
-	 <dependency>
-	  <groupId>${project.groupId}</groupId>
-	  <artifactId>va-semoss-common</artifactId>
-	  <version>${project.version}</version>
-	 </dependency>
+	 	<dependency>
+	  		<groupId>${project.groupId}</groupId>
+	  		<artifactId>va-semoss-common</artifactId>
+	  		<version>${project.version}</version>
+	 	</dependency>
 	</dependencies>    
     
 	<profiles>
