@@ -141,8 +141,8 @@ public class GraphNodePopup extends JPopupMenu {
 			add( "Traverse Freely" ).setEnabled( false );
 		}
 		else {
-			add( new TFRelationPopup( pickedVertex, gps, highlightedVertices ) );
-			add( new TFInstanceRelationPopup( pickedVertex, engine, gps, highlightedVertices ) );
+			add( new TraverseFreelyPopup( pickedVertex, engine, gps, highlightedVertices, false ) );
+			add( new TraverseFreelyPopup( pickedVertex, engine, gps, highlightedVertices, true ) );
 		}
 
 		JMenu menu = new JMenu( "Perform Algorithms" );

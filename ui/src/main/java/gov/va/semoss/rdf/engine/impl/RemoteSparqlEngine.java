@@ -21,8 +21,6 @@ package gov.va.semoss.rdf.engine.impl;
 
 import java.util.Properties;
 
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.MalformedQueryException;
@@ -30,8 +28,6 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.Update;
-import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLConnection;
@@ -42,7 +38,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
-import com.bigdata.rdf.rules.InferenceEngine;
 import com.bigdata.rdf.sail.BigdataSail;
 import java.util.Collection;
 import java.util.HashMap;
@@ -147,46 +142,6 @@ public abstract class RemoteSparqlEngine extends AbstractEngine {
 			log.error( e );
 		}
 		return sparqlResults;
-	}
-
-	/**
-	 * Runs the passed string query against the engine as an INSERT query. The
-	 * query passed must be in the structure of an INSERT SPARQL query or an
-	 * INSERT DATA SPARQL query and there are no returned results. The query will
-	 * result in the specified triples getting added to the data store.
-	 *
-	 * @param query the INSERT or INSERT DATA SPARQL query to be run against the
-	 * engine
-	 */
-	@Override
-	public void execInsertQuery( String query ) throws SailException, UpdateExecutionException, RepositoryException, MalformedQueryException {
-
-		Update up = rc.prepareUpdate( QueryLanguage.SPARQL, query );
-		//sc.addStatement(vf.createURI("<http://semoss.org/ontologies/Concept/Service/tom2>"),vf.createURI("<http://semoss.org/ontologies/Relation/Exposes>"),vf.createURI("<http://semoss.org/ontologies/Concept/BusinessLogicUnit/tom1>"));
-		log.debug( "SPARQL: " + query );
-		//tq.setIncludeInferred(true /* includeInferred */);
-		//tq.evaluate();
-		rc.begin();
-		InferenceEngine ie = bdSail.getInferenceEngine();
-		ie.computeClosure( null );
-		rc.commit();
-
-	}
-
-	@Override
-	public boolean execAskQuery( String query ) {
-		BooleanQuery bq;
-		boolean response = false;
-		try {
-			bq = rc.prepareBooleanQuery( QueryLanguage.SPARQL, query );
-			log.debug( "SPARQL: " + query );
-			response = bq.evaluate();
-		}
-		catch ( MalformedQueryException | RepositoryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-
-		return response;
 	}
 
 	/**

@@ -19,19 +19,14 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.GuiUtility;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.query.BindingSet;
+import org.openrdf.model.Model;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
@@ -43,13 +38,13 @@ public class NeighborMenuItem extends AbstractAction {
 
 	private static final Logger logger = Logger.getLogger( NeighborMenuItem.class );
 
-	private final String query;
 	private final GraphPlaySheet gps;
+	private final ModelQueryAdapter mqa;
 
-	public NeighborMenuItem( String name, GraphPlaySheet ps, String query ) {
-		super( name );
-		this.query = query;
+	public NeighborMenuItem( String tName, GraphPlaySheet ps, ModelQueryAdapter mqa ) {
+		super( tName );
 		this.gps = ps;
+		this.mqa = mqa;
 	}
 
 	@Override
@@ -58,20 +53,8 @@ public class NeighborMenuItem extends AbstractAction {
 
 			@Override
 			public void run() {
-				LinkedHashModel model = new LinkedHashModel();
-				VoidQueryAdapter q = new VoidQueryAdapter( query ) {
-
-					@Override
-					public void handleTuple( BindingSet set, ValueFactory fac ) {
-						Resource s = Resource.class.cast( set.getValue( "subject" ) );
-						URI p = URI.class.cast( set.getValue( "predicate" ) );
-						Value o = set.getValue( "object" );
-						model.add( s, p, o );
-					}
-				};
-
 				try {
-					gps.getEngine().query( q );
+					Model model = gps.getEngine().construct( mqa );
 					gps.overlay( model, gps.getEngine() );
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
@@ -82,6 +65,5 @@ public class NeighborMenuItem extends AbstractAction {
 		} );
 
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
-
 	}
 }

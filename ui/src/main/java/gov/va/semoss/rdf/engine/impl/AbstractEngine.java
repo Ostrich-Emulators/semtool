@@ -30,7 +30,6 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -325,21 +324,6 @@ public abstract class AbstractEngine implements IEngine {
 	@Override
 	public void commit() {
 
-	}
-
-	/**
-	 * Writes the database back with updated properties if necessary
-	 */
-	@Override
-	public void saveConfiguration() {
-		String propFile = prop.getProperty( Constants.SMSS_LOCATION );
-		try ( FileWriter fw = new FileWriter( propFile ) ) {
-			log.debug( "Writing to file " + propFile );
-			prop.store( fw, null );
-		}
-		catch ( IOException e ) {
-			log.debug( e );
-		}
 	}
 
 	@Override

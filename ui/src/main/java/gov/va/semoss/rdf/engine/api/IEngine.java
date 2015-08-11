@@ -29,7 +29,6 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.sail.SailException;
 import gov.va.semoss.util.UriBuilder;
 import java.util.Map;
 import org.openrdf.model.Model;
@@ -105,23 +104,6 @@ public interface IEngine {
 	public Object execSelectQuery( String query );
 
 	/**
-	 * Runs the passed string query against the engine as an INSERT query. The
-	 * query passed must be in the structure of an INSERT SPARQL query or an
-	 * INSERT DATA SPARQL query and there are no returned results. The query will
-	 * result in the specified triples getting added to the data store.
-	 *
-	 * @param query the INSERT or INSERT DATA SPARQL query to be run against the
-	 * engine
-	 *
-	 * @throws org.openrdf.sail.SailException
-	 * @throws org.openrdf.query.UpdateExecutionException
-	 * @throws org.openrdf.repository.RepositoryException
-	 * @throws org.openrdf.query.MalformedQueryException
-	 */
-	public void execInsertQuery( String query ) throws SailException,
-			UpdateExecutionException, RepositoryException, MalformedQueryException;
-
-	/**
 	 * Gets the type of the engine. The engine type is often used to determine
 	 * what API to use while running queries against the engine.
 	 *
@@ -158,19 +140,6 @@ public interface IEngine {
 	public void calculateInferences() throws RepositoryException;
 
 	/**
-	 * Processes the passed ASK SPARQL query against the engine. The query must be
-	 * in the structure of an ASK query and the result will be a boolean
-	 * indicating whether or not the data store connected to the engine has
-	 * triples matching the pattern of the ASK query.
-	 *
-	 * @param query the ASK SPARQL query to be run against the engine
-	 *
-	 * @return true if the data store connected to the engine contains triples
-	 * that match the pattern of the query and false if it does not.
-	 */
-	public boolean execAskQuery( String query );
-
-	/**
 	 * Sets the name of the engine. This may be a lot of times the same as the
 	 * Repository Name
 	 *
@@ -190,11 +159,6 @@ public interface IEngine {
 	 * the active transaction.
 	 */
 	public void commit();
-
-	/**
-	 * Writes the database back with updated properties if necessary
-	 */
-	public void saveConfiguration();
 
 	/**
 	 * Gets a prefix-to-namespace mapping

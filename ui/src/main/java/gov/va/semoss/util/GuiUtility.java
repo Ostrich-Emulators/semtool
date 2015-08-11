@@ -23,8 +23,6 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.components.PlaySheetFrame;
@@ -217,46 +215,6 @@ public class GuiUtility {
 		}
 
 		return (Map<X, String>) retHash;
-	}
-
-	/**
-	 * Executes a query on a specific engine, iterates through variables from the
-	 * sesame wrapper, and uses logic to obtain the concept URI.
-	 *
-	 * @param engine engine.
-	 * @param subjectURI.
-	 *
-	 * @return Concept URI.
-	 */
-	public static String getConceptType( IEngine engine, String subjectURI ) {
-		if ( !subjectURI.startsWith( "http://" ) ) {
-			return "";
-		}
-
-		String query = DIHelper.getInstance().getProperty(
-				Constants.SUBJECT_TYPE_QUERY );
-		Map<String, String> paramHash = new HashMap<>();
-		paramHash.put( "ENTITY", subjectURI );
-		query = Utility.fillParam( query, paramHash );
-		SesameJenaSelectWrapper sjw = new SesameJenaSelectWrapper();
-		sjw.setEngine( engine );
-		sjw.setEngineType( engine.getEngineType() );
-		sjw.setQuery( query );
-		sjw.executeQuery();
-		String[] vars = sjw.getVariables();
-		String returnType = null;
-		while ( sjw.hasNext() ) {
-			SesameJenaSelectStatement stmt = sjw.next();
-			String objURI = stmt.getRawVar( vars[0] ) + "";
-			if ( !objURI.equals( engine.getSchemaBuilder().getConceptUri().toString() ) ) {
-				returnType = objURI;
-			}
-		}
-		if ( returnType == null ) {
-			returnType = engine.getSchemaBuilder().getConceptUri().toString();
-		}
-
-		return returnType;
 	}
 
 	/**
