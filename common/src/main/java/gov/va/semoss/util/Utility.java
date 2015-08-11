@@ -73,8 +73,6 @@ import org.openrdf.model.vocabulary.XMLSchema;
 public class Utility {
 
 	private static final Logger log = Logger.getLogger( Utility.class );
-	private static int id = 0;
-
 	public static final Map<String, String> DEFAULTNAMESPACES = new HashMap<>();
 
 	static {
@@ -297,16 +295,6 @@ public class Utility {
 			return strs[strs.length - 2];
 		}
 		return null;
-	}
-
-	/**
-	 * Increases the counter and gets the next ID for a URI.
-	 *
-	 * @return Next ID
-	 */
-	public static String getNextID() {
-		id++;
-		return Constants.BLANK_URL + "/" + id;
 	}
 
 	/**

@@ -23,7 +23,6 @@ import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  * This class contains all of the constants referenced elsewhere in the code.
@@ -94,61 +93,17 @@ public class Constants {
 	public static final String CURRENT_PLAYSHEET = "layoutValue";
 	public static final String BASE_FOLDER = "BaseFolder";
 
-	//graphplaysheet option constants
-	// layouts
-	//public static final String GPSSudowl = "GPS_SUDOWL_DEFAULT";
-	//public static final String GPSSearch = "GPS_SEARCH_DEFAULT";
-	//public static final String highQualityExport = "GPSHighQualityExport";
-	//public static final String sudowlCheck = "sudowlCheck";
-	//public static final String searchCheck = "searchCheck";
-	//public static final String propertyCheck = "propertyCheck";
-	//public static final String highQualityExportCheck = "highQualityExportCheck";
-	//used by ExportSpecificRelationshipsToLoadingSheetAction
 	public static final URI ANYNODE = new URIImpl( "semoss://any" );
 	public static final URI NONODE = new URIImpl( "semoss://none" );
 
 	//Used by POIReader
 	public static final String RELATION_URI_CONCATENATOR = "_x_"; //used in between the in node and out node for relation instance uris.
 	public static final String RELATION_LABEL_CONCATENATOR = ":"; //used in between the in node and out node for relation instance uris.
-	public static final String SLASH = "/";
 	public static final String DEFAULT_NODE_CLASS = "Concept";
-	public static final String DEFAULT_RELATION_CLASS = "Relation";
 	public static final String CONTAINS = "Contains";
 
 	public static final String SEMOSS_URI = "SEMOSS_URI";
-	public static final String CLASS = "_CLASS";
 	public static final String DEFAULT_SEMOSS_URI = "http://semoss.org/ontologies";
-	/**
-	 * @deprecated use {@link OwlUriBuilder#getRelationUri(java.lang.String) }
-	 * instead
-	 */
-	@Deprecated
-	public static final String RELATION_URI = DEFAULT_SEMOSS_URI + SLASH + DEFAULT_RELATION_CLASS + SLASH;
-	/**
-	 * @deprecated use {@link OwlUriBuilder#getContainsUri() } instead
-	 */
-	@Deprecated
-	public static final String CONTAINS_URI = RELATION_URI + CONTAINS;
-	/**
-	 * @deprecated use {@link OwlUriBuilder#getConceptUri() } instead
-	 */
-	@Deprecated
-	public static final String CONCEPT_URI = DEFAULT_SEMOSS_URI + SLASH + DEFAULT_NODE_CLASS;
-
-	public static final String SUBPROPERTY_URI = RDFS.SUBPROPERTYOF.toString();
-	public static final String SUBCLASS_URI = RDFS.SUBCLASSOF.toString();
-	public static final String CLASS_URI = RDFS.CLASS.toString();
-	public static final String DEFAULT_PROPERTY_URI = RDF.PROPERTY.toString();
-	public static final String RDFTYPE_URI = RDF.TYPE.toString();
-
-	public static final String STRING_URI = XMLSchema.STRING.toString();
-	public static final String ANYURI_URI = XMLSchema.ANYURI.toString();
-	public static final String INT_URI = XMLSchema.INT.toString();
-	public static final String INTEGER_URI = XMLSchema.INTEGER.toString();
-	public static final String DOUBLE_URI = XMLSchema.DOUBLE.toString();
-	public static final String FLOAT_URI = XMLSchema.FLOAT.toString();
-	public static final String BOOLEAN_URI = XMLSchema.BOOLEAN.toString();
-	public static final String DATE_URI = XMLSchema.DATETIME.toString();
 
 	// layouts
 	public static final String FR = "Fruchterman-Reingold";
@@ -234,7 +189,7 @@ public class Constants {
 	public static final URI URI_KEY = RDF.SUBJECT;
 	public static final String CALC_NAMES_LIST = "_Names";
 	public static final String CALC_NAMES_TECH_STD_LIST = "_Names_Tech_Std";
-	// public static final String GRID_VIEW = "gov.va.semoss.ui.components.playsheets.GridPlaySheet";
+
 	public static final String PROP_HASH = "_PropHash";
 	public static final String TRAVERSE_JENA_MODEL = "traverseJenaModel";
 	public static final String UNDO_BOOLEAN = "undoBoolean";
@@ -271,19 +226,6 @@ public class Constants {
 	public static final String BLANK_URL = "http://bornhere.com/noparent/blank/";
 	public static final String PPT_TRAINING_BUTTON = "pptTrainingBtn";
 	public static final String HTML_TRAINING_BUTTON = "htmlTrainingBtn";
-
-	//Traverse Freely Queries
-	//public static final String NEIGHBORHOOD_TYPE_QUERY = "NEIGHBORHOOD_TYPE_QUERY";
-	//public static final String NEIGHBORHOOD_TYPE_QUERY_JENA = "NEIGHBORHOOD_TYPE_QUERY_JENA";
-	//public static final String NEIGHBORHOOD_OBJECT_QUERY = "NEIGHBORHOOD_OBJECT_QUERY";
-	public static final String NEIGHBORHOOD_PREDICATE_FINDER_QUERY = "NEIGHBORHOOD_PREDICATE_FINDER_QUERY";
-	public static final String NEIGHBORHOOD_PREDICATE_ALT2_FINDER_QUERY = "NEIGHBORHOOD_PREDICATE_ALT2_FINDER_QUERY";
-	public static final String NEIGHBORHOOD_PREDICATE_ALT3_FINDER_QUERY = "NEIGHBORHOOD_PREDICATE_ALT3_FINDER_QUERY";
-	//public static final String TRAVERSE_FREELY_QUERY = "TRAVERSE_FREELY_QUERY";
-	//public static final String TRAVERSE_FREELY_QUERY_JENA = "TRAVERSE_FREELY_QUERY_JENA";
-	//public static final String TRAVERSE_INSTANCE_FREELY_QUERY = "TRAVERSE_INSTANCE_FREELY_QUERY";
-	public static final String PREDICATE = "PREDICATE";
-	public static final String IGNORE_URI = "IGNORE_URI";
 
 	//TAP Cost Transition Queries 
 	public static final String TRANSITION_COST_INSERT_WITH_OVERHEAD = "TRANSITION_COST_INSERT_WITH_OVERHEAD";
