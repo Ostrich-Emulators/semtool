@@ -1,0 +1,23 @@
+<http://semoss.va.gov/database/oc49c8598-4cc9-45d7-b1e3-3db33c176b32> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://example.org/ex1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://example.org/ex1> <http://www.w3.org/2002/07/owl#versionInfo> "Created with TopBraid Composer"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Aeroplane> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://foo.bar/model#Aeroplane> <http://www.w3.org/2000/01/rdf-schema#label> "Plane"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Aeroplane> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
+<http://foo.bar/model#Horseless_Carriage> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://foo.bar/model#Horseless_Carriage> <http://www.w3.org/2000/01/rdf-schema#label> "Horseless Carriage"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Horseless_Carriage> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
+<http://foo.bar/model#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://foo.bar/model#Person> <http://www.w3.org/2000/01/rdf-schema#label> "Person"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Person> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
+<http://foo.bar/model#price> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://foo.bar/model#price> <http://www.w3.org/2000/01/rdf-schema#label> "Cost"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#purchased> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://foo.bar/model#purchased> <http://www.w3.org/2000/01/rdf-schema#label> "bought"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://example.org/ex1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
+<http://foo.bar/data#Relation/R38f1f5c98d163ec8c9c3578af2225dc1> <http://foo.bar/model#price> "5000 USD" .
+<http://semoss.va.gov/database/oc49c8598-4cc9-45d7-b1e3-3db33c176b32> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/ticket583.xlsx> .
+<http://semoss.va.gov/database/oc49c8598-4cc9-45d7-b1e3-3db33c176b32> <http://rdfs.org/ns/void#subset> <http://example.org/ex1> .
+<http:/foo.bar/data#Volvo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://foo.bar/model#Horseless_Carriage> .
+<http:/foo.bar/data#Yuri> <http://foo.bar/data#Relation/R38f1f5c98d163ec8c9c3578af2225dc1> <http:/foo.bar/data#Volvo> .
+<http:/foo.bar/data#Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://foo.bar/model#Person> .

@@ -1,0 +1,119 @@
+<http://semoss.va.gov/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
+<http://schema.org/subject> <http://www.w3.org/2000/01/rdf-schema#label> "<http://junk/just-for-fun>" .
+<http://seman.tc/data/northwind/Beverages> <http://purl.org/dc/terms/Description> "Soft drinks, coffees, teas, beers, and ales" .
+<http://seman.tc/data/northwind/Beverages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/Beverages> <http://www.w3.org/2000/01/rdf-schema#label> "Refrescos, caf\u00E9s, t\u00E9s, cervezas"@es .
+<http://seman.tc/data/northwind/Chai> <http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://seman.tc/data/northwind/Beverages> .
+<http://seman.tc/data/northwind/Chai> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Chang> <http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://seman.tc/data/northwind/Beverages> .
+<http://seman.tc/data/northwind/Chang> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Condiments> <http://purl.org/dc/terms/Description> "Sweet and savory sauces, relishes, spreads, and seasonings" .
+<http://seman.tc/data/northwind/Condiments> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/Condiments> <http://www.w3.org/2000/01/rdf-schema#label> "condimentos"@es .
+<http://seman.tc/data/northwind/Confections> <http://purl.org/dc/terms/Description> "Desserts, candies, and sweet breads" .
+<http://seman.tc/data/northwind/Confections> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/Confections> <http://www.w3.org/2000/01/rdf-schema#label> "Postres, dulces, pan dulce"@es .
+<http://seman.tc/data/northwind/Db3ded23ecae42112e1674bd5e682862e> <http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> <http://seman.tc/data/northwind/Condiments> .
+<http://seman.tc/data/northwind/Db3ded23ecae42112e1674bd5e682862e> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/E0d5bad031547be1f7fe7e228ffcd57aa> <http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://seman.tc/data/northwind/Confections> .
+<http://seman.tc/data/northwind/E0d5bad031547be1f7fe7e228ffcd57aa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/E63a96ac40a464f73b3c3752c2586b260> <http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://seman.tc/data/northwind/I32b9362b68f85875109bfff5b519485b> .
+<http://seman.tc/data/northwind/E63a96ac40a464f73b3c3752c2586b260> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Gdada55a7e4bebd7cad3e4a3075a0a15f> <http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> <http://seman.tc/data/northwind/Condiments> .
+<http://seman.tc/data/northwind/Gdada55a7e4bebd7cad3e4a3075a0a15f> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Gf01f1e04f87f02d5f8ab91c3549195dc> <http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> <http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> .
+<http://seman.tc/data/northwind/Gf01f1e04f87f02d5f8ab91c3549195dc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/H0ea16f792ac270c2946977aaad53f145> <http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> <http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> .
+<http://seman.tc/data/northwind/H0ea16f792ac270c2946977aaad53f145> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/I32b9362b68f85875109bfff5b519485b> <http://purl.org/dc/terms/Description> "Cheeses" .
+<http://seman.tc/data/northwind/I32b9362b68f85875109bfff5b519485b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/I32b9362b68f85875109bfff5b519485b> <http://www.w3.org/2000/01/rdf-schema#label> "quesos"@es .
+<http://seman.tc/data/northwind/Ic2dcc41e2a43a0b58daa94f2bd97aa04> <http://seman.tc/data/northwind/Relation/Category/Nd2230249abc44b5ed06c99b34f6f57ae> <http://seman.tc/data/northwind/Seafood> .
+<http://seman.tc/data/northwind/Ic2dcc41e2a43a0b58daa94f2bd97aa04> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Ikura> <http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> <http://seman.tc/data/northwind/Seafood> .
+<http://seman.tc/data/northwind/Ikura> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/J14d75b0e1f88dd9bd61bae3614ecb053> <http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> <http://seman.tc/data/northwind/Confections> .
+<http://seman.tc/data/northwind/J14d75b0e1f88dd9bd61bae3614ecb053> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Konbu> <http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> <http://seman.tc/data/northwind/Seafood> .
+<http://seman.tc/data/northwind/Konbu> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/L04c0e1167641c32dea29f87197d5164e> <http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> <http://seman.tc/data/northwind/Mc6c1692d90d5908a813621c031a9711a> .
+<http://seman.tc/data/northwind/L04c0e1167641c32dea29f87197d5164e> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Mc6c1692d90d5908a813621c031a9711a> <http://purl.org/dc/terms/Description> "Breads, crackers, pasta, and cereal" .
+<http://seman.tc/data/northwind/Mc6c1692d90d5908a813621c031a9711a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/Mc6c1692d90d5908a813621c031a9711a> <http://www.w3.org/2000/01/rdf-schema#label> "panes, galletas, fideos y cereal"@es .
+<http://seman.tc/data/northwind/N0b677687597b4307d21e0a7700da5796> <http://seman.tc/data/northwind/Relation/Category/L87d596b1e1f701f7b38b803a76511f01> <http://seman.tc/data/northwind/Confections> .
+<http://seman.tc/data/northwind/N0b677687597b4307d21e0a7700da5796> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/N252647b7492887e2b542002989c90c98> <http://seman.tc/data/northwind/Relation/Category/Gde372ee0359f5dacdffe7e8343294b0e> <http://seman.tc/data/northwind/Condiments> .
+<http://seman.tc/data/northwind/N252647b7492887e2b542002989c90c98> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Nc048539149fef7df12f0fef12f30bf40> <http://seman.tc/data/northwind/Relation/Category/P7ea07c2f9825c93d58d32640016ba720> <http://seman.tc/data/northwind/Confections> .
+<http://seman.tc/data/northwind/Nc048539149fef7df12f0fef12f30bf40> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Nf21f088cfac6ddb0e035f9afc4de6f29> <http://seman.tc/data/northwind/Relation/Category/O9b134401beb13725e7c9aea5df57a1e4> <http://seman.tc/data/northwind/Produce> .
+<http://seman.tc/data/northwind/Nf21f088cfac6ddb0e035f9afc4de6f29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/P046eef41fc9fce246337c3581b4cc9d1> <http://seman.tc/data/northwind/Relation/Category/N3664e5198c2583a3732327b315a91614> <http://seman.tc/data/northwind/Condiments> .
+<http://seman.tc/data/northwind/P046eef41fc9fce246337c3581b4cc9d1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/P443a29a664140d7d08416acc383bb5d4> <http://seman.tc/data/northwind/Relation/Category/K1153067c792696d2d09c8eee1d5e1725> <http://seman.tc/data/northwind/Confections> .
+<http://seman.tc/data/northwind/P443a29a664140d7d08416acc383bb5d4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Pavlova> <http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> <http://seman.tc/data/northwind/Confections> .
+<http://seman.tc/data/northwind/Pavlova> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Produce> <http://purl.org/dc/terms/Description> "Dried fruit and bean curd" .
+<http://seman.tc/data/northwind/Produce> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/Produce> <http://www.w3.org/2000/01/rdf-schema#label> "frutos secos y queso de soja"@es .
+<http://seman.tc/data/northwind/Qc88016920f943656f9ebcceaf3bb6198> <http://seman.tc/data/northwind/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://seman.tc/data/northwind/I32b9362b68f85875109bfff5b519485b> .
+<http://seman.tc/data/northwind/Qc88016920f943656f9ebcceaf3bb6198> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Ra315185ee8709c338c7fb631d9d869b9> <http://seman.tc/data/northwind/Relation/Category/E5a1e8fe14eed82a4fbdfb415a0169012> <http://seman.tc/data/northwind/Confections> .
+<http://seman.tc/data/northwind/Ra315185ee8709c338c7fb631d9d869b9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Relation/Category/A5fc94edcaacc7957d23c3d9d62043214> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Chai_x_Beverages> <http://schema.org/extraprop> "1.2"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://seman.tc/data/northwind/Relation/Category/Chang_x_Beverages> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/E4b131db618bea5a5859b8203bc2a882a> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/E5a1e8fe14eed82a4fbdfb415a0169012> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Gde372ee0359f5dacdffe7e8343294b0e> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Ikura_x_Seafood> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/K1153067c792696d2d09c8eee1d5e1725> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Kb0260b663aad53caddfc42536983aad6> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Konbu_x_Seafood> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/L87d596b1e1f701f7b38b803a76511f01> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/N3664e5198c2583a3732327b315a91614> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Nd2230249abc44b5ed06c99b34f6f57ae> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/O88810e5c740203a13ff5b2cced9c647b> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/O9b134401beb13725e7c9aea5df57a1e4> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/P7ea07c2f9825c93d58d32640016ba720> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Pavlova_x_Confections> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Q182b5efd2cd8b7b23aa06426fb2192ae> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Sb0ab1f8ed47a584c8320dff4203f035c> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/T492c4c55f4aa7a1e25d3d0e9fc626667> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/T62f6262cd26a15994c82a7f02db4b193> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Y5bd1bb5efa5e3bab5bb28d8befc12f54> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Ya88e76c302a617b11394b7f1d7fae38b> <http://schema.org/extraprop> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/Relation/Category/Z827e1b40dd07183cafa4f60360482a5e> <http://schema.org/extraprop> "1.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://seman.tc/data/northwind/S68c298e288abb0d90da056fbe74547d5> <http://seman.tc/data/northwind/Relation/Category/Kb0260b663aad53caddfc42536983aad6> <http://seman.tc/data/northwind/Beverages> .
+<http://seman.tc/data/northwind/S68c298e288abb0d90da056fbe74547d5> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Seafood> <http://purl.org/dc/terms/Description> "Seaweed and fish" .
+<http://seman.tc/data/northwind/Seafood> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/Seafood> <http://www.w3.org/2000/01/rdf-schema#label> "Algas y pesces"@es .
+<http://seman.tc/data/northwind/T5b711d7a7c857a47516abb2044a55a02> <http://seman.tc/data/northwind/Relation/Category/E4e8b7ce52832e8975ee4f5591bd1e1b2> <http://seman.tc/data/northwind/Produce> .
+<http://seman.tc/data/northwind/T5b711d7a7c857a47516abb2044a55a02> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Ta60d7ad5ed9a6b8e0ae5f12bcfb732cf> <http://seman.tc/data/northwind/Relation/Category/T492c4c55f4aa7a1e25d3d0e9fc626667> <http://seman.tc/data/northwind/Condiments> .
+<http://seman.tc/data/northwind/Ta60d7ad5ed9a6b8e0ae5f12bcfb732cf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Tef01006da466edde22c97c4d5f2d31f9> <http://seman.tc/data/northwind/Relation/Category/Xc64ba00ead3cc9987d0a26429598464b> <http://seman.tc/data/northwind/Condiments> .
+<http://seman.tc/data/northwind/Tef01006da466edde22c97c4d5f2d31f9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Tofu> <http://seman.tc/data/northwind/Relation/Category/Tofu_x_Produce> <http://seman.tc/data/northwind/Produce> .
+<http://seman.tc/data/northwind/Tofu> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Tunnbr\u00F6d> <http://seman.tc/data/northwind/Relation/Category/Rc42c34387b97c109b23f33e956fc22b2> <http://seman.tc/data/northwind/Mc6c1692d90d5908a813621c031a9711a> .
+<http://seman.tc/data/northwind/Tunnbr\u00F6d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://seman.tc/data/northwind/Vccbfe74780d34a39bc3ba7c46f93b149> <http://purl.org/dc/terms/Description> "a colon testing item" .
+<http://seman.tc/data/northwind/Vccbfe74780d34a39bc3ba7c46f93b149> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> <http://purl.org/dc/terms/Description> "Prepared meats" .
+<http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Category> .
+<http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> <http://www.w3.org/2000/01/rdf-schema#label> "carnes preparadas"@es .
+<http://seman.tc/data/northwind/Y6fb185e92be8114afa4b9e554f3acd84> <http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> .
+<http://seman.tc/data/northwind/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
+<http://semoss.va.gov/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/custom.xlsx> .
+<http://semoss.va.gov/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

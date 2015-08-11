@@ -1,0 +1,18 @@
+<http://example.org/ex1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://example.org/ex1> <http://www.w3.org/2002/07/owl#versionInfo> "Created with TopBraid Composer"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Aeroplane> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://foo.bar/model#Aeroplane> <http://www.w3.org/2000/01/rdf-schema#label> "Plane"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Aeroplane> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
+<http://foo.bar/model#Horseless_Carriage> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://foo.bar/model#Horseless_Carriage> <http://www.w3.org/2000/01/rdf-schema#label> "Horseless Carriage"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Horseless_Carriage> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
+<http://foo.bar/model#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://foo.bar/model#Person> <http://www.w3.org/2000/01/rdf-schema#label> "Person"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#Person> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
+<http://foo.bar/model#price> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://foo.bar/model#price> <http://www.w3.org/2000/01/rdf-schema#label> "Cost"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/model#purchased> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://foo.bar/model#purchased> <http://www.w3.org/2000/01/rdf-schema#label> "bought"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://foo.bar/data#Q8c826b0d87f810f2c46e03e19c6aeb47> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://foo.bar/model#Plane> .
+<http://foo.bar/data#Yuri> <http://foo.bar/data#Relation/bought/R43613d1e2960e985ee927232dde3e7eb> <http://foo.bar/data#Q8c826b0d87f810f2c46e03e19c6aeb47> .
+<http://foo.bar/data#Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://foo.bar/model#Person> .

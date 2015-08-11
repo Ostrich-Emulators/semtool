@@ -1,0 +1,40 @@
+<http://semoss.va.gov/database/qdb6c395a-8d72-412f-b437-a4a4786997a3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://owl.junk.com/testfiles/ApplicationModule> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://owl.junk.com/testfiles/ApplicationModule> <http://www.w3.org/2000/01/rdf-schema#label> "ApplicationModule" .
+<http://owl.junk.com/testfiles/ApplicationModule> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://owl.junk.com/testfiles/Concept> .
+<http://owl.junk.com/testfiles/ApplicationModule_Description> <http://www.w3.org/2000/01/rdf-schema#label> "ApplicationModule_Description" .
+<http://owl.junk.com/testfiles/ApplicationModule_Description> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
+<http://owl.junk.com/testfiles/ApplicationModule_Description> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Contains> .
+<http://owl.junk.com/testfiles/ApplicationModule_Name> <http://www.w3.org/2000/01/rdf-schema#label> "ApplicationModule_Name" .
+<http://owl.junk.com/testfiles/ApplicationModule_Name> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
+<http://owl.junk.com/testfiles/ApplicationModule_Name> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Contains> .
+<http://owl.junk.com/testfiles/ClinicianDescription> <http://www.w3.org/2000/01/rdf-schema#label> "ClinicianDescription" .
+<http://owl.junk.com/testfiles/ClinicianDescription> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
+<http://owl.junk.com/testfiles/ClinicianDescription> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Contains> .
+<http://owl.junk.com/testfiles/O9ad875087392fbe401d539bd7ffff63a> <http://www.w3.org/2000/01/rdf-schema#label> "ApplicationModule_Availability_(Required)" .
+<http://owl.junk.com/testfiles/O9ad875087392fbe401d539bd7ffff63a> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
+<http://owl.junk.com/testfiles/O9ad875087392fbe401d539bd7ffff63a> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Contains> .
+<http://owl.junk.com/testfiles/Order> <http://www.w3.org/2000/01/rdf-schema#label> "Order" .
+<http://owl.junk.com/testfiles/Order> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
+<http://owl.junk.com/testfiles/Order> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Contains> .
+<http://owl.junk.com/testfiles/UseCase> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://owl.junk.com/testfiles/UseCase> <http://www.w3.org/2000/01/rdf-schema#label> "UseCase" .
+<http://owl.junk.com/testfiles/UseCase> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://owl.junk.com/testfiles/Concept> .
+<http://owl.junk.com/testfiles/UseCaseID> <http://www.w3.org/2000/01/rdf-schema#label> "UseCaseID" .
+<http://owl.junk.com/testfiles/UseCaseID> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation> .
+<http://owl.junk.com/testfiles/UseCaseID> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://owl.junk.com/testfiles/Relation/Contains> .
+<http://semoss.va.gov/database/qdb6c395a-8d72-412f-b437-a4a4786997a3> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/test17.xlsx> .
+<http://semoss.va.gov/database/qdb6c395a-8d72-412f-b437-a4a4786997a3> <http://rdfs.org/ns/void#subset> <http://va.gov/ontologies> .
+<http://va.gov/ontologies> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://va.gov/ontologies> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
+<http://va.gov/ontologies/> <http://www.w3.org/2000/01/rdf-schema#label> "\"Node as Attribute Test Dataset\"" .
+<http://va.gov/ontologies/Concept/ApplicationModule/BCMA> <http://owl.junk.com/testfiles/ApplicationModule_Description> "The Bar Code Medication Administration (BCMA) package provides a real-time point-of-care solution for validating the administration of Unit Dose (UD) and Intravenous (IV) medications to inpatients in Veterans Administration Medical Centers (VAMCs). BCMA - Inpatient Medications Request for Special Focus Group (SFG) Initial Requirements Analysis (IRA): Phase I of the Inpatient Medications Requirements for the Special Focus Group Initial Requirements Analysis (IMR for SFGIRA) includes upgrades to the Inpatient Medications, Pharmacy Benefits Management (PBM), Pharmacy Data Management (PDM), and Computerized Patient Record System (CPRS) software packages. The goal of Phase I is to optimize the functionality used by clinicians who enter, maintain, and administer medication orders. It can be accomplished by providing changes to pharmacy medication ordering and by improving the communication of order information between the Inpatient Medications and CPRS packages." .
+<http://va.gov/ontologies/Concept/ApplicationModule/BCMA> <http://owl.junk.com/testfiles/ApplicationModule_Name> "Pharmacy: Bar Code Medication Administration (BCMA)" .
+<http://va.gov/ontologies/Concept/ApplicationModule/BCMA> <http://owl.junk.com/testfiles/O9ad875087392fbe401d539bd7ffff63a> "TBD" .
+<http://va.gov/ontologies/Concept/ApplicationModule/BCMA> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/ApplicationModule> .
+<http://va.gov/ontologies/Concept/ApplicationModule/BCMA> <http://www.w3.org/2000/01/rdf-schema#label> "BCMA" .
+<http://va.gov/ontologies/Concept/UseCase/R8ae47860b38d4106f4fcab5a06dea9d3> <http://owl.junk.com/testfiles/Order> "BCMA%1132" .
+<http://va.gov/ontologies/Concept/UseCase/R8ae47860b38d4106f4fcab5a06dea9d3> <http://owl.junk.com/testfiles/UseCaseID> "BCMA-UC-22" .
+<http://va.gov/ontologies/Concept/UseCase/R8ae47860b38d4106f4fcab5a06dea9d3> <http://semoss.org/ontologies/has> <http://va.gov/ontologies/Concept/ApplicationModule/BCMA> .
+<http://va.gov/ontologies/Concept/UseCase/R8ae47860b38d4106f4fcab5a06dea9d3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://owl.junk.com/testfiles/UseCase> .
+<http://va.gov/ontologies/Concept/UseCase/R8ae47860b38d4106f4fcab5a06dea9d3> <http://www.w3.org/2000/01/rdf-schema#label> "Access the CHUI BCMA Manager Menu" .
