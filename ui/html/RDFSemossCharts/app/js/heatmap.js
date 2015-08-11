@@ -191,8 +191,8 @@ function start(dataString) {
 		})
 		.style("stroke", "#EEEEEE");
 	
-	initSlider('slider', roundValueArray);
-	initColorChooserAndAddToEndOfHtmlElementWithId("nav", updateVisualization);
+	initSlider('slider', roundValueArray, updateVisualization);
+	initColorChooserAndAddToEndOfHtmlElementWithId("nav", updateVisualization, true);
 }
 	
 function updateHeatmap(domainArray) {

@@ -111,8 +111,8 @@ function ready(error, us) {
 	
 	usMapData = us;
 	
-	initSlider('slider', valueArray);
-	initColorChooserAndAddToEndOfHtmlElementWithId("nav", updateVisualization);
+	initSlider('slider', valueArray, updateVisualization);
+	initColorChooserAndAddToEndOfHtmlElementWithId("nav", updateVisualization, true);
 
 	initVisualization();
 	updateVisualization();

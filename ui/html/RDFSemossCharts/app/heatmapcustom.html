@@ -1,28 +1,33 @@
 <!DOCTYPE html>
-<html >
-
+<html>
   <head>
-    <meta charset="utf-8">
+	<meta charset="utf-8">
+	
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/select2.css">
     <link rel="stylesheet" type="text/css" href="css/slider.css">
     <link rel="stylesheet" type="text/css" href="css/heatmap.css">
+
     <script src="lib/jquery/jquery-1.8.3.min.js"></script>
     <script src="lib/d3/d3.min.js"></script>
     <script src="lib/d3/d3.tip.js"></script>
     <script src="lib/underscore/underscore.js"></script>
     <script src="lib/select2/select2.js"></script>
     <script src="lib/bootstrap/bootstrap-slider.js"></script>
-<!--     <script src="js/heatmapcommon.js"></script> need to make some edits before this will work  -->
+    <script src="js/heatmapcommon.js"></script>
     <script src="js/heatmapcustom.js"></script>
     <script src="js/semoss.js"></script>
+    
   </head>
-  
   <body>
+
     <div id="nav">
-      <img id="logo" src="img/heatmap.png"><span class="brand">Heatmap</span>
-      <b id="min"></b><input type="text" class="slider" id="slider" ><b id="max"></b>
+      <span class="brand userCanResize">Heatmap</span>
+      <b id="min" class="userCanResize"></b>
+      <input id="slider" class="slider userCanResize" type="text">
+      <b id="max" class="userCanResize"></b>
     </div>
+
     <div id="sidebarContainer">
    	  <div id="sidebarHeader"></div>
 	  <div id="sidebarContentArea">
@@ -38,7 +43,8 @@
       </div>
       <div id="sidebarFooter"></div>
     </div>
+    
     <div id="chart"></div>
+    
   </body>
-
 </html>

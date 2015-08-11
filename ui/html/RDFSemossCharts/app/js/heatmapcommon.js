@@ -50,15 +50,20 @@ function roundNumber(inputNumber) {
 }
 
 // Color Chooser
-function initColorChooserAndAddToEndOfHtmlElementWithId(elementId, functionToCallOnChange) {
+function initColorChooserAndAddToEndOfHtmlElementWithId(elementId, functionToCallOnChange, useTraffic) {
 	var id = "colorChooser";
+	
+	var colorList = ["Red","Blue","Green"];
+	if (useTraffic) {
+		colorList = ["Red","Blue","Green","Traffic", "Traffic Reverse"];
+	}
 	
 	d3.select("#" + elementId).append("select")
 		.attr("id", id)
 		.style("width", "130px")
 		.attr("class", "mySelect2")
 		.selectAll("option")
-		.data(["Red","Blue","Green","Traffic", "Traffic Reverse"])
+		.data(colorList)
 		.enter()
 		.append("option")
 		.attr("value", function(d){ return d; }) /* This gives me the value */
@@ -69,7 +74,7 @@ function initColorChooserAndAddToEndOfHtmlElementWithId(elementId, functionToCal
 }
 
 //Define the Data-Range Slider, and its "slide" handler:
-function initSlider(sliderId, allValuesSorted) {
+function initSlider(sliderId, allValuesSorted, functionToCallOnChange) {
 	determineHowManyDecimalsToKeep(allValuesSorted);
 	
 	$('#'+sliderId).slider({
@@ -81,7 +86,7 @@ function initSlider(sliderId, allValuesSorted) {
 			return roundNumber(value);
 		}
 	}).on('slide', function(){
-		updateVisualization();
+		functionToCallOnChange();
 	});
 	
 	$('#'+sliderId).trigger('slide');
