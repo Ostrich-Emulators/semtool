@@ -85,10 +85,10 @@ public class ControlPanel extends JPanel implements GraphListener {
 	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
 	private final TreeConverterListener treeListener = new TreeConverterListener();
 	private final RingsButtonListener ringsListener = new RingsButtonListener();
-	private final SearchController searchController = new SearchController();
+	private final SearchController searchController;
 	private final RedoListener redoListener = new RedoListener();
 	private final UndoListener undoListener = new UndoListener();
-	
+
 	/**
 	 * Create the panel.
 	 *
@@ -97,12 +97,8 @@ public class ControlPanel extends JPanel implements GraphListener {
 	public ControlPanel() {
 		searchText.setMaximumSize( new Dimension( 300, 20 ) );
 		searchText.setBorder( new BevelBorder( BevelBorder.LOWERED, null, null, null, null ) );
-		searchText.setText( Constants.ENTER_TEXT );
-
 		searchText.setColumns( 9 );
-		searchController.setText( searchText );
-		searchText.addFocusListener( searchController );
-		searchText.addKeyListener( searchController );
+		searchController = new SearchController( searchText );
 
 		highlightButton = new JToggleButton( Utility.loadImageIcon( "search.png" ) );
 		highlightButton.setToolTipText( "<html><b>Search</b><br>Depress to see your results on the graph,<br>keep it depressed to see results as you type (slow)</html>" );

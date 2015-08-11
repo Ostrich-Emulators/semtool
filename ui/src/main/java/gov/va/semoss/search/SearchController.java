@@ -74,19 +74,14 @@ import org.openrdf.model.impl.URIImpl;
 /**
  */
 public class SearchController implements KeyListener, FocusListener,
-		ActionListener, Runnable {
+		ActionListener {
 
 	private static final Logger log = Logger.getLogger( SearchController.class );
-	private static final int REINDEX_WAIT_MS = 5000; // 5 seconds
+	private static final int REINDEX_WAIT_MS = 2500; // 2.5 seconds
 
 	private static final String TEXT_FIELD = "alltext";
 	private static final String URI_FIELD = "URI";
-	private JTextField searchText;
-
-	private long lastTime = 0;
-	private Thread thread = null;
-	private boolean typed = false;
-	private boolean searchContinue = true;
+	private final JTextField searchText;
 
 	private GraphPlaySheet gps;
 
@@ -97,6 +92,14 @@ public class SearchController implements KeyListener, FocusListener,
 	private final Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	private Date lastIndexed = null;
 	private boolean indexing = false;
+
+	public SearchController( JTextField field ) {
+		searchText = field;
+
+		field.addKeyListener( this );
+		field.addFocusListener( this );
+		field.setText( Constants.ENTER_TEXT );
+	}
 
 	// toggle button listener
 	// this will swap the view based on what is being presented
@@ -122,20 +125,19 @@ public class SearchController implements KeyListener, FocusListener,
 	}
 
 	private void handleDeselectionOfButton() {
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
 		gps.clearHighlighting();
-
-		if ( !searchText.getText().isEmpty() ) {
-			searchStatement( searchText.getText() );
-		}
+		gps.highlight( view.getPickedVertexState().getPicked(), null );
 	}
 
-	/**
-	 * Method searchStatement.
-	 *
-	 * @param searchString String
-	 */
 	private void searchStatement( String searchString ) {
 		StringBuilder query = new StringBuilder();
+		if( searchString.isEmpty() ){
+			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
+			view.getPickedVertexState().clear();
+			gps.clearHighlighting();
+		}
+		
 		query.append( " label: " ).append( searchString ).append( "*" );
 		query.append( " description: " ).append( searchString );
 		query.append( " type: " ).append( searchString );
@@ -179,51 +181,6 @@ public class SearchController implements KeyListener, FocusListener,
 		searchText.requestFocus( true );
 	}
 
-	/**
-	 * Method run.
-	 */
-	@Override
-	public void run() {
-		try {
-			while ( searchContinue ) {
-				long thisTime = System.currentTimeMillis();
-				if ( thisTime - lastTime > 300 && typed ) {
-
-					if ( !( searchText.getText().isEmpty() || 0 == lastTime ) ) {
-						searchStatement( searchText.getText() );
-					}
-					else if ( searchText.getText().isEmpty() && lastTime != 0 ) {
-						handleDeselectionOfButton();
-						log.debug( "cleared" );
-					}
-					lastTime = System.currentTimeMillis();
-					typed = false;
-				}
-				else {
-					// menu.setVisible(false);
-					Thread.sleep( 100 );
-				}
-			}
-		}
-		catch ( InterruptedException e ) {
-			log.error( e, e );
-		}
-	}
-
-	/**
-	 * Method keyTyped.
-	 *
-	 * @param e KeyEvent
-	 */
-	@Override
-	public void keyTyped( KeyEvent e ) {
-		lastTime = System.currentTimeMillis();
-		typed = true;
-		synchronized ( this ) {
-			this.notify();
-		}
-	}
-
 	// focus listener
 	/**
 	 * Method focusGained.
@@ -235,12 +192,6 @@ public class SearchController implements KeyListener, FocusListener,
 		if ( searchText.getText().equalsIgnoreCase( Constants.ENTER_TEXT ) ) {
 			searchText.setText( "" );
 		}
-		if ( thread == null || thread.getState() == Thread.State.TERMINATED ) {
-			thread = new Thread( this );
-			searchContinue = true;
-			thread.start();
-			log.info( "Starting thread again" );
-		}
 	}
 
 	/**
@@ -250,10 +201,8 @@ public class SearchController implements KeyListener, FocusListener,
 	 */
 	@Override
 	public void focusLost( FocusEvent e ) {
-		if ( searchText.getText().equalsIgnoreCase( "" ) ) {
+		if ( searchText.getText().isEmpty() ) {
 			searchText.setText( Constants.ENTER_TEXT );
-			searchContinue = false;
-			log.info( "Ended the thread" );
 		}
 	}
 
@@ -348,41 +297,21 @@ public class SearchController implements KeyListener, FocusListener,
 		sw.execute();
 	}
 
-	/**
-	 * Method setText.
-	 *
-	 * @param text JTextField
-	 */
-	public void setText( JTextField _searchText ) {
-		searchText = _searchText;
-	}
-
-	/**
-	 * Method setGPS.
-	 *
-	 * @param ps GraphPlaySheet
-	 */
 	public void setGPS( GraphPlaySheet _gps ) {
 		gps = _gps;
 	}
 
-	/**
-	 * Method keyPressed.
-	 *
-	 * @param arg0 KeyEvent
-	 */
 	@Override
-	public void keyPressed( KeyEvent arg0 ) {
+	public void keyTyped( KeyEvent e ) {
 	}
 
-	/**
-	 * Method keyReleased.
-	 *
-	 * @param arg0 KeyEvent
-	 */
 	@Override
-	public
-			void keyReleased( KeyEvent arg0 ) {
+	public void keyPressed( KeyEvent e ) {
+	}
+
+	@Override
+	public void keyReleased( KeyEvent e ) {
+		searchStatement( searchText.getText() );
 	}
 
 	private class RepositoryIndexer {
@@ -424,11 +353,10 @@ public class SearchController implements KeyListener, FocusListener,
 							= new File( FileUtils.getTempDirectory(), "search.lucene" );
 					IndexWriterConfig config
 							= new IndexWriterConfig( Version.LUCENE_36, analyzer );
-					IndexWriter iw
-							= new IndexWriter( FSDirectory.open( lucenedir ), config );
-					iw.addDocuments( doccache.values() );
-					iw.commit();
-					iw.close();
+					try ( IndexWriter iw = new IndexWriter( FSDirectory.open( lucenedir ), config ) ) {
+						iw.addDocuments( doccache.values() );
+						iw.commit();
+					}
 				}
 
 				textcache.clear();
@@ -459,14 +387,18 @@ public class SearchController implements KeyListener, FocusListener,
 						? labels.get( pred ) : pred.getLocalName() );
 				Field f = new Field( label, en.getValue().toString(), Field.Store.YES,
 						Field.Index.ANALYZED );
-				if ( "Description".equals( label ) ) {
-					f.setBoost( 2.0f );
-				}
-				else if ( "type".equals( label ) ) {
-					f.setBoost( 4.0f );
-				}
-				else if ( "label".equals( label ) ) {
-					f.setBoost( 8.0f );
+				if ( null != label ) {
+					switch ( label ) {
+						case "Description":
+							f.setBoost( 2.0f );
+							break;
+						case "type":
+							f.setBoost( 4.0f );
+							break;
+						case "label":
+							f.setBoost( 8.0f );
+							break;
+					}
 				}
 
 				doc.add( f );
