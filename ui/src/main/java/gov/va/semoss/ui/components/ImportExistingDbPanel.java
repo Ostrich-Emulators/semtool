@@ -25,9 +25,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
+import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.ui.actions.OpenAction.FileHandling;
 import gov.va.semoss.util.Constants;
@@ -36,7 +36,6 @@ import gov.va.semoss.util.MultiMap;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.ListIterator;
 import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -96,7 +95,7 @@ public class ImportExistingDbPanel extends JPanel {
 		ImportExistingDbPanel iedp = new ImportExistingDbPanel( eng );
 		iedp.setFiles( files );
 
-		String ename = MetadataQuery.getEngineLabel( eng );
+		String ename = EngineUtil.getEngineLabel( eng );
 		Object options[] = { "Import to " + ename, "Cancel" };
 
 		int opt = JOptionPane.showOptionDialog( frame, iedp,

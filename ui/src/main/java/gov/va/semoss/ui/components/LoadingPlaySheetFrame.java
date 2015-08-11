@@ -16,7 +16,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.engine.util.QaChecker;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.CloseableTab.MarkType;
@@ -200,7 +199,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 	public ProgressTask getLoadingTask() {
 		String t = "Loading data" + ( isLoadable() ? " to "
-				+ MetadataQuery.getEngineLabel( getEngine() ) : "" );
+				+ EngineUtil.getEngineLabel( getEngine() ) : "" );
 		final String error[] = new String[1];
 		ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
 			@Override
@@ -366,7 +365,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			super( "Import Data", DbAction.getIcon( "importdb" ) );
 			if ( isLoadable() ) {
 				putValue( Action.SHORT_DESCRIPTION, "Commit this data to "
-						+ MetadataQuery.getEngineLabel( getEngine() ) );
+						+ EngineUtil.getEngineLabel( getEngine() ) );
 			}
 			else {
 				putValue( Action.SHORT_DESCRIPTION, "Commit this data to a DB" );
@@ -424,7 +423,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						updateProgress( "Preparing data", 0 );
 
 						try {
-							String ename = MetadataQuery.getEngineLabel( engine );
+							String ename = EngineUtil.getEngineLabel( engine );
 
 							if ( doreplace ) {
 								updateProgress( "Clearing " + ename, 15 );
@@ -491,7 +490,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			JPanel questions = new JPanel();
 			questions.setLayout( new BoxLayout( questions, BoxLayout.PAGE_AXIS ) );
 			top.add( new JLabel( "Commit this data to "
-					+ MetadataQuery.getEngineLabel( engine ) + "?" ),
+					+ EngineUtil.getEngineLabel( engine ) + "?" ),
 					BorderLayout.NORTH );
 			top.add( questions, BorderLayout.CENTER );
 
@@ -573,8 +572,8 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		private void recheckConformance( final IEngine eng ) {
 			showerrs.setVisible( true );
 
-			final String t = "Checking Conformance against "
-					+ MetadataQuery.getEngineLabel( eng );
+			final String t
+					= "Checking Conformance against " + EngineUtil.getEngineLabel( eng );
 			int progressPerTab = 100 / sheets.size();
 			boolean ok[] = { true };
 			ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
@@ -671,7 +670,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
-			ImportData data =  GuiUtility.createImportData( getEngine() );
+			ImportData data = GuiUtility.createImportData( getEngine() );
 			fillImportData( data, dogoods, dobads );
 
 			for ( LoadingSheetData lsd : data.getSheets() ) {

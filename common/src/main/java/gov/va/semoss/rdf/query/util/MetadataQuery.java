@@ -6,7 +6,6 @@
 package gov.va.semoss.rdf.query.util;
 
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.HashMap;
 import java.util.Map;
 import org.openrdf.model.URI;
@@ -16,13 +15,7 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.api.ReificationStyle;
-import gov.va.semoss.util.Constants;
 import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 /**
  * A Query Adapter that returns the metadata for an engine. The metadata is in
@@ -96,45 +89,5 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 		}
 
 		result.put( pred, val );
-	}
-
-	public static String getEngineLabel( IEngine engine ) {
-		String label = engine.getEngineName();
-		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
-		try {
-			engine.query( mq );
-			String str = mq.getString();
-			if ( null != str ) {
-				label = str;
-			}
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// don't care
-		}
-		return label;
-	}
-
-	/**
-	 * Gets the reification model URI from the given engine
-	 *
-	 * @param engine
-	 * @return return the reification model, or {@link Constants#NONODE} if none
-	 * is defined
-	 */
-	public static ReificationStyle getReificationStyle( IEngine engine ) {
-		URI reif = Constants.NONODE;
-		if ( null != engine ) {
-			MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
-			try {
-				engine.query( mq );
-				Value str = mq.getOne();
-				reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
-			}
-			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-				// don't care
-			}
-		}
-
-		return ReificationStyle.fromUri( reif );
 	}
 }

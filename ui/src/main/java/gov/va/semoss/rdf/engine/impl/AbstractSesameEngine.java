@@ -64,7 +64,7 @@ import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.engine.api.UpdateExecutor;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
+import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
@@ -230,7 +230,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
 
-		setEngineName( MetadataQuery.getEngineLabel( this ) );
+		setEngineName( EngineUtil.getEngineLabel( this ) );
 
 		RepositoryConnection rc = getRawConnection();
 		rc.begin();

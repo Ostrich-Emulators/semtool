@@ -46,7 +46,6 @@ import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
 import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.UriBuilder;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
@@ -270,7 +269,7 @@ public class EngineLoader {
 			}
 
 			// create all metamodel triples, even if we don't add them to the repository
-			EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
+			EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 			modeler.createMetamodel( data, namespaces, myrc );
 
 			for ( LoadingSheetData n : data.getNodes() ) {
@@ -370,7 +369,7 @@ public class EngineLoader {
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-		EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
+		EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
