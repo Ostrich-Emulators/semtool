@@ -1,4 +1,4 @@
-package gov.va.semoss.rdf.engine.util;
+package gov.va.semoss.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,35 +12,44 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.apache.xerces.util.XMLChar;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
- * This class offers utility methods for converting between Objects and Values, as well
- * as offering the ability to derive data types for RDF entities.
+ * This class offers utility methods for converting between Objects and Values,
+ * as well as offering the ability to derive data types for RDF entities.
+ *
  * @author Wayne Warren
  *
  */
 public class RDFDatatypeTools {
-	/** The logger for this class */
+
+	/**
+	 * The logger for this class
+	 */
 	private static final Logger logger = Logger.getLogger( RDFDatatypeTools.class );
-	/** The singleton instance for this class */
+	private static final ValueFactory vf = new ValueFactoryImpl();
+	/**
+	 * The singleton instance for this class
+	 */
 	private static RDFDatatypeTools instance;
-	/** A lookup which stores the various static tags for the data types that one might
-	 * find in an XML Schema as keys, and the corresponding native Java classes as values */
+	/**
+	 * A lookup which stores the various static tags for the data types that one
+	 * might find in an XML Schema as keys, and the corresponding native Java
+	 * classes as values
+	 */
 	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
 	
 	/**
 	 * Default constructor
 	 */
-	private RDFDatatypeTools(){
+	private RDFDatatypeTools() {
 		TYPELOOKUP.put( XMLSchema.INT, Integer.class );
 		TYPELOOKUP.put( XMLSchema.INTEGER, Integer.class );
 		TYPELOOKUP.put( XMLSchema.DOUBLE, Double.class );
@@ -51,20 +60,22 @@ public class RDFDatatypeTools {
 		TYPELOOKUP.put( XMLSchema.DATETIME, Date.class );
 		TYPELOOKUP.put( XMLSchema.BOOLEAN, Boolean.class );
 	}
-	
-	public static RDFDatatypeTools instance(){
-		if (instance == null){
+
+	public static RDFDatatypeTools instance() {
+		if ( instance == null ) {
 			instance = new RDFDatatypeTools();
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Derives the classes of a set of columns based on the row data that they
 	 * describe
+	 *
 	 * @param newdata The row data described by the columns
 	 * @param columns The number of columns to be "classed"
-	 * @return A list (ordinal) of the classes describing the data types of the columns
+	 * @return A list (ordinal) of the classes describing the data types of the
+	 * columns
 	 */
 	public List<Class<?>> figureColumnClassesFromData( List<Value[]> newdata,
 			int columns ) {
@@ -154,9 +165,10 @@ public class RDFDatatypeTools {
 
 		return columnClasses;
 	}
-	
+
 	/**
 	 * Derive the data type for the value of a tabular field
+	 *
 	 * @param v The value for which we need to derive a class
 	 * @return The class describing the value's data type
 	 */
@@ -175,8 +187,9 @@ public class RDFDatatypeTools {
 
 	/**
 	 * Parse the data type of an XML entity based on its string content
+	 *
 	 * @param input The XML entity, in string form
-	 * @return The entity instance, properly classes
+	 * @return The entity instance, properly classed
 	 */
 	public Object parseXMLDatatype( String input ) {
 		if ( input == null ) {
@@ -214,6 +227,7 @@ public class RDFDatatypeTools {
 
 	/**
 	 * Gets a proper native object from a given RDF value
+	 *
 	 * @param value The RDF Value
 	 * @return A proper native object
 	 */
@@ -252,11 +266,12 @@ public class RDFDatatypeTools {
 			return ( isempty ? null : input.calendarValue() );
 		}
 
-		return removeExtraneousDoubleQuotes( input.stringValue() );
+		return input.stringValue();
 	}
 
 	/**
 	 * Converts a native object instance to its equivalent RDF value
+	 *
 	 * @param o The native object to be converted
 	 * @return A proper RDF Value
 	 */
@@ -269,7 +284,6 @@ public class RDFDatatypeTools {
 			return Value.class.cast( o );
 		}
 
-		ValueFactory vf = new ValueFactoryImpl();
 		if ( o instanceof String ) {
 			return vf.createLiteral( String.class.cast( o ) );
 		}
@@ -292,9 +306,10 @@ public class RDFDatatypeTools {
 		logger.warn( "unhandled data type for object: " + o );
 		return null;
 	}
-	
+
 	/**
 	 * Internal convenience method to eliminate unnecessary quotes
+	 *
 	 * @param input The input containing potentially unnecessary quote chars
 	 * @return The string content without the unnecessary quotes
 	 */
@@ -308,48 +323,22 @@ public class RDFDatatypeTools {
 		return input;
 	}
 
+	public static boolean isValidUriChars( String raw ) {
+		// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
+		// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
+		return XMLChar.isValidNCName( raw );
+		// return VALIDCHARS.matcher( raw ).matches();
+	}
+
 	/**
-	 * Derives an RDF Value from a proper datatype and the stringified version of the content
+	 * Derives an RDF Value from a proper datatype and the stringified version of
+	 * the content
+	 *
 	 * @param datatype URI describing the datatype of the RDF entity
 	 * @param content The stringified version of the value
 	 * @return A proper RDF value
 	 */
-	public static Value getValueFromDatatypeAndString(URI datatype, String content) {
-		if ( XMLSchema.INTEGER == datatype || XMLSchema.INT == datatype) {
-			try {
-				return new LiteralImpl(Integer.parseInt(content) + "");
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		} else if ( XMLSchema.DOUBLE == datatype ) {
-			try {
-				return new LiteralImpl(Double.parseDouble(content) + "");
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		} else if ( XMLSchema.FLOAT == datatype ) {
-			try {
-				return new LiteralImpl(Float.parseFloat(content) + "");
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		} else if ( XMLSchema.BOOLEAN == datatype ) {
-			return new LiteralImpl(Boolean.parseBoolean(content) + "");
-		} else if ( XMLSchema.DATE == datatype ) {
-			logger.warn("Parsing RDF datatype Date not yet supported.");
-			return null;
-		} else if ( XMLSchema.ANYURI == datatype ) {
-			try {
-				return new URIImpl(content);
-			} catch (Exception e) {
-				return null;
-			}
-		} else if ( XMLSchema.STRING == datatype ) {
-			return new LiteralImpl(content);
-		} else {
-			logger.warn("Trying to parse a value for a datatype not yet supported: " + datatype);
-			return null;
-		}
+	public static Value getValueFromDatatypeAndString( URI datatype, String content ) {
+		return vf.createLiteral( content, datatype );
 	}
-	
 }

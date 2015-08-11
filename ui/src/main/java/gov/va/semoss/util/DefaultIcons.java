@@ -19,7 +19,7 @@ public class DefaultIcons {
 
 	static {
 		defaultIcons.put( SAVE,
-				new ImageIcon( Utility.loadImage( "icons16/save_diskette1_16.png" ) ) );
+				new ImageIcon( GuiUtility.loadImage( "icons16/save_diskette1_16.png" ) ) );
 	}
 
 }

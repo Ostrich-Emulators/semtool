@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.ProgressTask;
 
 /**
@@ -101,7 +101,7 @@ public class OpenURLAction extends DbAction {
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
-			Utility.showError( e.getMessage() );
+			GuiUtility.showError( e.getMessage() );
 			throw new IllegalArgumentException( "Could not find manual" );
 		}
 	}
@@ -118,7 +118,7 @@ public class OpenURLAction extends DbAction {
 								Desktop.getDesktop().browse( uri );
 							}
 							catch ( IOException ioe ) {
-								Utility.showError( "Problem opening the browser" );
+								GuiUtility.showError( "Problem opening the browser" );
 								log.error( ioe, ioe );
 							}
 						}

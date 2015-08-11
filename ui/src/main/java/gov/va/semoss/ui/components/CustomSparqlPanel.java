@@ -37,7 +37,7 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
@@ -116,7 +116,7 @@ public class CustomSparqlPanel extends JPanel {
 
 		btnShowHint = new JButton();
 		btnShowHint.setToolTipText( "Display Hint for PlaySheet" );
-		Image img3 = Utility.loadImage( "questionMark.png" );
+		Image img3 = GuiUtility.loadImage( "questionMark.png" );
 		if ( null != img3 ) {
 			Image newimg = img3.getScaledInstance( 15, 15, java.awt.Image.SCALE_SMOOTH );
 			btnShowHint.setIcon( new ImageIcon( newimg ) );
@@ -133,7 +133,7 @@ public class CustomSparqlPanel extends JPanel {
 
 		btnGetQuestionSparql = new JButton();
 		btnGetQuestionSparql.setToolTipText( "Display SPARQL Query for Current Question" );
-		Image img2 = Utility.loadImage( "download.png" );
+		Image img2 = GuiUtility.loadImage( "download.png" );
 		if ( null != img2 ) {
 			Image newimg = img2.getScaledInstance( 15, 15, java.awt.Image.SCALE_SMOOTH );
 			btnGetQuestionSparql.setIcon( new ImageIcon( newimg ) );
@@ -328,7 +328,7 @@ public class CustomSparqlPanel extends JPanel {
 		}
 		catch ( IOException ioe ) {
 			logger.error( ioe, ioe );
-			Utility.showError( ioe.getLocalizedMessage() );
+			GuiUtility.showError( ioe.getLocalizedMessage() );
 		}
 	}
 

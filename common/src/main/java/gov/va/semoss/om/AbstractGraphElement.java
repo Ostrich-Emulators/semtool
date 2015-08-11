@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.om;
 
-import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
+import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.util.Constants;
 
 import java.awt.Color;

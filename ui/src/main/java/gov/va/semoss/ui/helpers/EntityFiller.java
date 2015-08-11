@@ -34,6 +34,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 
 /**
@@ -107,7 +108,7 @@ public class EntityFiller{
    */
   public void fill( ParamComboBox box, IEngine engine, String type) {
     List<URI> names = getData( engine, type );
-    Map<URI, String> labellkp = Utility.getInstanceLabels( names, engine );
+    Map<URI, String> labellkp = GuiUtility.getInstanceLabels( names, engine );
     box.setData( labellkp );
     box.setEditable( false );
   }

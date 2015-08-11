@@ -22,19 +22,10 @@ package gov.va.semoss.util;
 import gov.va.semoss.model.vocabulary.SEMOSS;
 import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.impl.BigDataEngine;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
-import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.ui.components.PlaySheetFrame;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
 import java.awt.Desktop;
 import java.awt.Frame;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,48 +34,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
-import org.apache.xerces.util.XMLChar;
-import org.openrdf.model.BNode;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.FOAF;
@@ -92,16 +63,12 @@ import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 /**
- * The Utility class contains a variety of miscellaneous functions implemented
- * extensively throughout SEMOSS. Some of these functionalities include getting
- * concept names, printing messages, loading engines, and writing Excel
- * workbooks.
+ * The GuiUtility class contains a variety of miscellaneous functions
+ * implemented extensively throughout SEMOSS. Some of these functionalities
+ * include getting concept names, printing messages, loading engines, and
+ * writing Excel workbooks.
  */
 public class Utility {
 
@@ -289,120 +256,6 @@ public class Utility {
 	}
 
 	/**
-	 * Overload on the above method, to get the URI's label from the passed-in uri
-	 * string. If the passed-in value is not a URI, then the above method is
-	 * called to extract the ending word, after the last "/".
-	 *
-	 * This method calls "String getInstanceLabel(URI uri, IEngine eng)" and
-	 * "String getInstanceName(String uri)".
-	 *
-	 * @param uri -- (String) A string URI.
-	 * @param eng -- (IEngine) The active query engine.
-	 *
-	 * @return getInstanceName -- (String) Described above.
-	 */
-	public static String getInstanceName( String uri, IEngine eng ) {
-		String strReturnValue;
-
-		//If the string is really a URI, then return its label:
-		try {
-			ValueFactory vf = new ValueFactoryImpl();
-			URI uriURI = vf.createURI( uri );
-			strReturnValue = getInstanceLabel( uriURI, eng );
-
-			//If the previous method call returned nothing,
-			//then extract the ending word of the URI's string:
-			if ( null == strReturnValue || strReturnValue.equals( "" ) ) {
-				strReturnValue = getInstanceName( uri );
-			}
-			//Otherwise, simply return the input string:
-		}
-		catch ( IllegalArgumentException e ) {
-			strReturnValue = uri;
-		}
-		return strReturnValue;
-	}
-
-	/**
-	 * A convenience function to {@link #getInstanceLabels(java.util.Collection,
-	 * gov.va.semoss.rdf.engine.api.IEngine) } when you only have a single URI. If
-	 * you have more than one URI, {@link #getInstanceLabels(java.util.Collection,
-	 * gov.va.semoss.rdf.engine.api.IEngine) } is much more performant.
-	 *
-	 * @param eng where to get the label from
-	 * @param uri the uri we need a label for
-	 *
-	 * @return the label, or the localname if no label is in the engine
-	 */
-	public static <X extends Resource> String getInstanceLabel( X uri, IEngine eng ) {
-		return getInstanceLabels( Arrays.asList( uri ), eng ).get( uri );
-	}
-
-	/**
-	 * Gets labels for the given uris from the given engine. If the engine doesn't
-	 * contain a {@link RDFS#LABEL} element, just use a
-	 * {@link URLDecoder#decode(java.lang.String, java.lang.String) URLDecoded}
-	 * version of the local name
-	 *
-	 * @param uris the URIs to retrieve the labels from
-	 * @param eng the engine to search for labels
-	 *
-	 * @return a map of URI=&gt;label
-	 */
-	public static <X extends Resource> Map<X, String>
-			getInstanceLabels( final Collection<X> uris, IEngine eng ) {
-		if ( uris.isEmpty() ) {
-			return new HashMap<>();
-		}
-
-		final Map<Resource, String> retHash = new HashMap<>();
-
-		StringBuilder sb
-				= new StringBuilder( "SELECT ?s ?label WHERE { ?s rdfs:label ?label }" );
-		sb.append( " VALUES ?s {" );
-		for ( Resource uri : uris ) {
-			if ( null == uri ) {
-				log.warn( "trying to find the label of a null Resource? (probably a bug)" );
-			}
-			else {
-				sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
-			}
-		}
-		sb.append( "}" );
-
-		VoidQueryAdapter vqa = new VoidQueryAdapter( sb.toString() ) {
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				String lbl = set.getValue( "label" ).stringValue();
-				retHash.put( fac.createURI( set.getValue( "s" ).stringValue() ), lbl );
-			}
-		};
-		try {
-			eng.query( vqa );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( sb, e );
-		}
-
-		// add any URIs that don't have a label, but were in the argument collection
-		Set<Resource> todo = new HashSet<>( uris );
-		todo.removeAll( retHash.keySet() );
-		for ( Resource u : todo ) {
-			if ( u instanceof URI ) {
-				retHash.put( u, URI.class.cast( u ).getLocalName() );
-			}
-			else if ( u instanceof BNode ) {
-				retHash.put( u, BNode.class.cast( u ).getID() );
-			}
-			else {
-				retHash.put( u, u.stringValue() );
-			}
-		}
-
-		return (Map<X, String>) retHash;
-	}
-
-	/**
 	 * A convenience for {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) }, but returns a sorted map with
 	 * consistent iteration pattern
@@ -428,62 +281,6 @@ public class Utility {
 		}
 
 		return (Map<X, String>) ret;
-	}
-
-	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
-
-		public final Resource r;
-		public final String l;
-
-		public ResourceLabelPair( Resource r, String l ) {
-			this.r = r;
-			this.l = l;
-		}
-
-		@Override
-		public int compareTo( ResourceLabelPair t ) {
-			return l.compareTo( t.l );
-		}
-	}
-
-	/**
-	 * Executes a query on a specific engine, iterates through variables from the
-	 * sesame wrapper, and uses logic to obtain the concept URI.
-	 *
-	 * @param engine engine.
-	 * @param subjectURI.
-	 *
-	 * @return Concept URI.
-	 */
-	public static String getConceptType( IEngine engine, String subjectURI ) {
-		if ( !subjectURI.startsWith( "http://" ) ) {
-			return "";
-		}
-
-		String query = DIHelper.getInstance().getProperty(
-				Constants.SUBJECT_TYPE_QUERY );
-		Map<String, String> paramHash = new HashMap<>();
-		paramHash.put( "ENTITY", subjectURI );
-		query = Utility.fillParam( query, paramHash );
-		SesameJenaSelectWrapper sjw = new SesameJenaSelectWrapper();
-		sjw.setEngine( engine );
-		sjw.setEngineType( engine.getEngineType() );
-		sjw.setQuery( query );
-		sjw.executeQuery();
-		String[] vars = sjw.getVariables();
-		String returnType = null;
-		while ( sjw.hasNext() ) {
-			SesameJenaSelectStatement stmt = sjw.next();
-			String objURI = stmt.getRawVar( vars[0] ) + "";
-			if ( !objURI.equals( engine.getSchemaBuilder().getConceptUri().toString() ) ) {
-				returnType = objURI;
-			}
-		}
-		if ( returnType == null ) {
-			returnType = engine.getSchemaBuilder().getConceptUri().toString();
-		}
-
-		return returnType;
 	}
 
 	/**
@@ -566,70 +363,6 @@ public class Utility {
 		return false;
 	}
 
-	/**
-	 * Displays error message.
-	 *
-	 * @param text to be displayed.
-	 */
-	public static void showError( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
-		JOptionPane.showMessageDialog( playPane, text, "Error",
-				JOptionPane.ERROR_MESSAGE );
-	}
-
-	/**
-	 * Displays option message.
-	 *
-	 * @param text to be displayed.
-	 *
-	 * @return int value of choice selected: 0 Yes, 1 No, 2 Cancel, -1 message
-	 * closed
-	 */
-	public static int showOptionsYesNoCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
-		return JOptionPane.showConfirmDialog( playPane, text );
-	}
-
-	/**
-	 * Displays warning message.
-	 *
-	 * @param text to be displayed.
-	 *
-	 * @return int value of choice selected: 0 Ok, 2 Cancel, -1 message closed
-	 */
-	public static int showWarningOkCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
-		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE );
-	}
-
-	/**
-	 * Displays confirmation message.
-	 *
-	 * @param text to be displayed.
-	 *
-	 * @return int value of choice selected: 0 Ok, 2 Cancel, -1 message closed
-	 */
-	public static int showConfirmOkCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
-		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option",
-				JOptionPane.OK_CANCEL_OPTION );
-	}
-
-	/**
-	 * Displays a message on the screen.
-	 *
-	 * @param text to be displayed.
-	 */
-	public static void showMessage( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
-		JOptionPane.showMessageDialog( playPane, text );
-	}
-
 	public static void showExportMessage( Frame frame, String message, String title,
 			File exportloc ) {
 		if ( Desktop.isDesktopSupported() ) {
@@ -664,58 +397,6 @@ public class Utility {
 		double multipicationFactor = Math.pow( 10, numberOfDecimalPlaces );
 		double interestedInZeroDPs = valueToRound * multipicationFactor;
 		return Math.round( interestedInZeroDPs ) / multipicationFactor;
-	}
-
-	/**
-	 * Loads an engine - sets the core properties, loads base data engine and
-	 * ontology file.
-	 *
-	 * @param smssfile
-	 *
-	 * @return Loaded engine.
-	 *
-	 * @throws java.io.IOException
-	 */
-	public static IEngine loadEngine( File smssfile ) throws IOException {
-		Properties props;
-		if ( smssfile.getName().toLowerCase().endsWith( "jnl" ) ) {
-			// we're loading a BigData journal file, so make up our properties
-			props = BigDataEngine.generateProperties( smssfile );
-		}
-		else {
-			props = loadProp( smssfile );
-		}
-
-		IEngine engine = null;
-
-		log.debug( "In Utility file name is " + smssfile );
-		String engineName = props.getProperty( Constants.ENGINE_NAME,
-				FilenameUtils.getBaseName( smssfile.getAbsolutePath() ) );
-
-		try {
-			String smssloc = smssfile.getCanonicalPath();
-			props.setProperty( Constants.SMSS_LOCATION, smssloc );
-
-			String engineClass = props.getProperty( Constants.ENGINE_IMPL );
-			engineClass = engineClass.replaceAll( "prerna", "gov.va.semoss" );
-			engine = (IEngine) Class.forName( engineClass ).newInstance();
-			engine.setEngineName( engineName );
-			//if ( props.getProperty( "MAP" ) != null ) {
-			//	engine.setMap( props.getProperty( "MAP" ) );
-			//}
-
-			engine.openDB( props );
-			DIHelper.getInstance().registerEngine( engine );
-		}
-		catch ( InstantiationException | IllegalAccessException | ClassNotFoundException e ) {
-			log.error( e );
-		}
-		return engine;
-	}
-
-	public static void closeEngine( IEngine eng ) {
-		eng.closeDB();
-		DIHelper.getInstance().unregisterEngine( eng );
 	}
 
 	/**
@@ -794,74 +475,6 @@ public class Utility {
 		return to;
 	}
 
-	public static boolean isValidUriChars( String raw ) {
-		// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
-		// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
-		return XMLChar.isValidNCName( raw );
-		// return VALIDCHARS.matcher( raw ).matches();
-	}
-
-	/**
-	 * Generates a URI-compatible string
-	 *
-	 * @param original string
-	 * @param replaceForwardSlash if true, makes the whole string URI compatible.
-	 * If false, splits the string on /, and URI-encodes the intervening
-	 * characters
-	 *
-	 * @return Cleaned string
-	 */
-	public static String getUriCompatibleString( String original,
-			boolean replaceForwardSlash ) {
-		String trimmed = original.trim();
-		if ( trimmed.isEmpty() ) {
-			return trimmed;
-		}
-		StringBuilder sb = new StringBuilder();
-		try {
-			if ( replaceForwardSlash || !trimmed.contains( "/" ) ) {
-				if ( isValidUriChars( trimmed ) ) {
-					sb.append( trimmed );
-				}
-				else {
-					sb.append( RandomStringUtils.randomAlphabetic( 1 ) )
-							.append( UUID.randomUUID().toString() );
-				}
-			}
-			else {
-				Pattern pat = Pattern.compile( "([A-Za-z0-9-_]+://)(.*)" );
-				Matcher m = pat.matcher( trimmed );
-				String extras;
-				if ( m.matches() ) {
-					sb.append( m.group( 1 ) );
-					extras = m.group( 2 );
-				}
-				else {
-					extras = trimmed;
-				}
-				boolean first = true;
-				for ( String part : extras.split( "/" ) ) {
-					String add = ( isValidUriChars( part ) ? part
-							: RandomStringUtils.randomAlphabetic( 1 )
-							+ UUID.randomUUID().toString() );
-
-					if ( first ) {
-						first = false;
-					}
-					else {
-						sb.append( "/" );
-					}
-					sb.append( add );
-				}
-			}
-		}
-		catch ( Exception e ) {
-			log.warn( e, e );
-		}
-
-		return sb.toString();
-	}
-
 	public static Map<String, Object> getParamsFromString( String params ) {
 		Map<String, Object> paramHash = new HashMap<>();
 		if ( params != null ) {
@@ -891,52 +504,6 @@ public class Utility {
 			}
 		}
 		return paramHash;
-	}
-
-	/**
-	 * Tries to load an image by first checking the filesystem, then the jar
-	 * itself. The filesystem location is &lt;CWD&gt;/pictures/&lt;filename&gt;
-	 * while the jar location is jar:/images/&lt;filename&gt
-	 *
-	 * @param imagename
-	 *
-	 * @return the image, or null if anything went wrong
-	 */
-	public static BufferedImage loadImage( String imagename ) {
-		try {
-			return ImageIO.read( new File( "pictures", imagename ) );
-		}
-		catch ( IOException ignored ) {
-		}
-
-		try {
-			return ImageIO.read( Utility.class.getResourceAsStream(
-					"/images/" + imagename ) );
-		}
-		catch ( IOException | IllegalArgumentException ie ) {
-			log.warn( "could not load file: " + imagename );
-		}
-
-		return null;
-	}
-
-	/**
-	 * Loads the image, scales it to Icon size, and creates an ImageIcon to return
-	 *
-	 * @param imagename
-	 * @return the loaded ImageIcon, or blank ImageIcon if anything went wrong
-	 */
-	public static ImageIcon loadImageIcon( String imagename ) {
-		try {
-			Image img = loadImage( imagename );
-			Image newimg = img.getScaledInstance( 15, 15, java.awt.Image.SCALE_SMOOTH );
-			return new ImageIcon( newimg );
-		}
-		catch ( Exception e ) {
-			log.warn( "Error loading image icon for imagename " + imagename + ": " + e, e );
-		}
-
-		return new ImageIcon();
 	}
 
 	/**
@@ -981,19 +548,6 @@ public class Utility {
 				+ ( extension.startsWith( "." ) ? extension.substring( 1 ) : extension );
 	}
 
-	public static GraphPlaySheet getActiveGraphPlaysheet() {
-		JInternalFrame jif = DIHelper.getInstance().getDesktop().getSelectedFrame();
-		if( jif instanceof PlaySheetFrame ){
-			PlaySheetFrame psf = PlaySheetFrame.class.cast( jif );
-			return GraphPlaySheet.class.cast( psf.getActivePlaySheet() );
-		}
-		return null;
-	}
-
-	public static void repaintActiveGraphPlaysheet() {
-		getActiveGraphPlaysheet().fireGraphUpdated();
-	}
-
 	public static void extractHTML() throws IOException {
 		// check for html directory
 		// extract
@@ -1004,7 +558,7 @@ public class Utility {
 			return;
 		}
 
-		try( InputStream htmlIs = Utility.class.getResourceAsStream( "/html.zip" ) ) {
+		try ( InputStream htmlIs = Utility.class.getResourceAsStream( "/html.zip" ) ) {
 			unzip( new ZipInputStream( htmlIs ), new File( "html" ) );
 		}
 	}
@@ -1050,26 +604,7 @@ public class Utility {
 		}
 	}
 
-	public static void addModelToJTable( AbstractTableModel tableModel, String tableKey ) {
-		JTable table = DIHelper.getJTable( tableKey );
-		table.setModel( tableModel );
-		tableModel.fireTableDataChanged();
 
-		for ( int i = 0; i < tableModel.getColumnCount(); i++ ) {
-			if ( Boolean.class.equals( tableModel.getColumnClass( i ) ) ) {
-				TableColumnModel columnModel = table.getColumnModel();
-
-				if ( i < columnModel.getColumnCount() ) {
-					columnModel.getColumn( i ).setPreferredWidth( 35 );
-				}
-			}
-		}
-	}
-
-	public static void resetJTable( String tableKey ) {
-		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
-		log.debug( "Resetting the " + tableKey + " table model." );
-	}
 
 	/**
 	 * Implodes the given collection, appending <code>start</code> before each
@@ -1099,5 +634,21 @@ public class Utility {
 		}
 
 		return sb.toString();
+	}
+	
+	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
+
+		public final Resource r;
+		public final String l;
+
+		public ResourceLabelPair( Resource r, String l ) {
+			this.r = r;
+			this.l = l;
+		}
+
+		@Override
+		public int compareTo( ResourceLabelPair t ) {
+			return l.compareTo( t.l );
+		}
 	}
 }

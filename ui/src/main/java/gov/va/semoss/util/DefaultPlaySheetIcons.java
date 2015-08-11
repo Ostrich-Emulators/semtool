@@ -41,7 +41,7 @@ public class DefaultPlaySheetIcons {
 	static {
 		// when adding new known classes, you must add the subclass before the 
 		// superclass, as the list is checked in order
-		blank = new ImageIcon( Utility.loadImage( "icons16/blank_16.png" ) );
+		blank = new ImageIcon( GuiUtility.loadImage( "icons16/blank_16.png" ) );
 
 		setDefaultIcon( LoadingPlaySheetBase.class, "icons16/import_data_review_16.png" );
 
@@ -95,7 +95,7 @@ public class DefaultPlaySheetIcons {
 	}
 
 	public static void setDefaultIcon( String key, String imgloc ) {
-		defaultIcons.put( key, Utility.loadImageIcon( imgloc ) );
+		defaultIcons.put( key, GuiUtility.loadImageIcon( imgloc ) );
 	}
 
 	public static ImageIcon getDefaultIcon( Class<?> klass ) {

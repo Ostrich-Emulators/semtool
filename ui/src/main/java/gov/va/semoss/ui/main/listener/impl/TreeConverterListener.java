@@ -26,7 +26,7 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.om.TreeGraphDataModel;
 import gov.va.semoss.ui.components.playsheets.TreeGraphPlaySheet;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
@@ -42,7 +42,7 @@ public class TreeConverterListener extends AbstractAction {
 	private GraphPlaySheet gps;
 
 	public TreeConverterListener() {
-		super( "Convert to Tree", Utility.loadImageIcon( "tree.png" ) );
+		super("Convert to Tree", GuiUtility.loadImageIcon( "tree.png" ) );
 
 		putValue( Action.SHORT_DESCRIPTION,
 				"<html><b>Convert to Tree</b><br>Convert graph to tree by"

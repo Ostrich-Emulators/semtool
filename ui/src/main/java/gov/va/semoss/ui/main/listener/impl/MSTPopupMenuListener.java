@@ -29,7 +29,7 @@ import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
@@ -82,7 +82,7 @@ public class MSTPopupMenuListener extends AbstractAction {
 		ps.getView().repaint();
 		int originalSize = ps.asForest().getEdgeCount();
 		int shortestPathSize = kmst.getEdgeSet().size();
-		Utility.showMessage( "Minimum Spanning Tree uses " + shortestPathSize
+		GuiUtility.showMessage( "Minimum Spanning Tree uses " + shortestPathSize
 				+ " edges out of " + originalSize + " original edges" );
 	}
 }

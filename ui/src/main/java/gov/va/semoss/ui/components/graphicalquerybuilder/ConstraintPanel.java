@@ -5,13 +5,14 @@
  */
 package gov.va.semoss.ui.components.graphicalquerybuilder;
 
-import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
+import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet.JoinType;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,7 +94,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 
 		Map<URI, String> propmap = new HashMap<>();
-		propmap.put( property, Utility.getInstanceLabel( property,
+		propmap.put(property, GuiUtility.getInstanceLabel( property,
 				DIHelper.getInstance().getRdfEngine() ) );
 
 		ConstraintPanel cp = new ConstraintPanel( property, label, input, checked,
@@ -129,7 +130,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 				= LabeledPairRenderer.getUriPairRenderer().cache( choices );
 
 		Map<URI, String> propmap = new HashMap<>();
-		propmap.put( property, Utility.getInstanceLabel( property,
+		propmap.put(property, GuiUtility.getInstanceLabel( property,
 				DIHelper.getInstance().getRdfEngine() ) );
 
 		if ( choices.size() > 5 ) {
@@ -188,7 +189,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 				= LabeledPairRenderer.getUriPairRenderer().cache( choices );
 
 		Map<URI, String> propmap = new HashMap<>();
-		propmap.put( property, Utility.getInstanceLabel( property,
+		propmap.put(property, GuiUtility.getInstanceLabel( property,
 				DIHelper.getInstance().getRdfEngine() ) );
 
 		JList<URI> list = new JList<>( uris );

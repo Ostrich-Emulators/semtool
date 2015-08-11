@@ -40,6 +40,7 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.net.URL;
 import java.util.ArrayList;
@@ -284,7 +285,7 @@ public class CLI {
 
 			if ( !metadatas.isEmpty() ) {
 				// set the metadata on the just-created database
-				IEngine engine = Utility.loadEngine( smss );
+				IEngine engine = GuiUtility.loadEngine( smss );
 				try {
 					engine.execute( new ModificationExecutorAdapter() {
 
@@ -300,7 +301,7 @@ public class CLI {
 					} );
 					
 					engine.commit();
-					Utility.closeEngine( engine );
+					GuiUtility.closeEngine( engine );
 				}
 				catch ( Exception e ) {
 					logger.error( e, e );
@@ -316,7 +317,7 @@ public class CLI {
 				throw new FileNotFoundException( "Journal not found:  " + update );
 			}
 
-			IEngine engine = Utility.loadEngine( smss );
+			IEngine engine = GuiUtility.loadEngine( smss );
 			if ( replace ) {
 				ImportDataProcessor.clearEngine( engine, loads );
 			}

@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.ProgressTask;
 
 /**
@@ -89,7 +89,7 @@ public class EndpointAction extends DbAction {
 //    // prompt the user for a new port (give them a valid option)
 //    String val = JOptionPane.showInputDialog( "Port (almost any is fine)?", port );
 //    if ( null == val ) {
-//      Utility.showMessage( "You must select a port to start the server" );
+//      GuiUtility.showMessage( "You must select a port to start the server" );
 //      return false;
 //    }
 //
@@ -98,7 +98,7 @@ public class EndpointAction extends DbAction {
 //      return true;
 //    }
 //    catch ( Exception npe ) {
-//      Utility.showError( "Unparseable port number: " + val );
+//      GuiUtility.showError( "Unparseable port number: " + val );
 //      log.error( "Unparseable port number: " + val, npe );
 //    }
 //
@@ -125,7 +125,7 @@ public class EndpointAction extends DbAction {
               }
             }
             catch ( Exception re ) {
-              Utility.showError( re.getLocalizedMessage() );
+              GuiUtility.showError( re.getLocalizedMessage() );
               log.error( re );
             }
           }

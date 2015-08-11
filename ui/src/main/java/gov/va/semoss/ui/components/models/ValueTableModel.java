@@ -6,7 +6,7 @@
 package gov.va.semoss.ui.components.models;
 
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
-import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
+import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.util.MultiMap;
 
 import java.beans.PropertyChangeEvent;

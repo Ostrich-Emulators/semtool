@@ -29,7 +29,7 @@ import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.main.listener.impl.RepoListMouseListener;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -130,7 +130,7 @@ public class RepositoryList extends JList<IEngine> {
 	}
 
 	private void setTransferHandler() {
-		setTransferHandler( new TransferHandler() {
+		setTransferHandler(new TransferHandler() {
 			@Override
 			public boolean canImport( TransferHandler.TransferSupport support ) {
 				return support.isDataFlavorSupported( DataFlavor.javaFileListFlavor );
@@ -170,7 +170,7 @@ public class RepositoryList extends JList<IEngine> {
 							EngineUtil.getInstance().mount( f, true );
 						}
 						catch ( EngineManagementException eme ) {
-							Utility.showError( eme.getLocalizedMessage() );
+							GuiUtility.showError( eme.getLocalizedMessage() );
 						}
 						ok = true;
 					}
@@ -226,7 +226,7 @@ public class RepositoryList extends JList<IEngine> {
 								EngineUtil.getInstance().clone( copiedsmss );
 							}
 							catch ( IOException | RepositoryException | EngineManagementException e ) {
-								Utility.showError( e.getMessage() );
+								GuiUtility.showError( e.getMessage() );
 								log.error( e, e );
 							}
 						}

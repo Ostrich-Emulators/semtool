@@ -38,7 +38,7 @@ import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.ExportSpecificNodesPanel;
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.OperationsProgress;
@@ -241,7 +241,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 	private void exportButtonActionPerformed( ActionEvent evt ) {
 		selectedTriples = getSelectedTriples();
 		if ( selectedTriples == null || selectedTriples.isEmpty() ) {
-			Utility.showMessage( "You must select at least one relationship to export." );
+			GuiUtility.showMessage( "You must select at least one relationship to export." );
 			return;
 		}
 
@@ -324,7 +324,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 				super.done();
 
 				if ( successMessage != null && !successMessage.equals( "" ) ) {
-					Utility.showMessage( successMessage );
+					GuiUtility.showMessage( successMessage );
 				}
 			}
 		};
@@ -444,7 +444,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		Map<URI, String> labels = new HashMap<>();
 		try {
 			List<URI> uris = getEngine().query( query );
-			labels.putAll( Utility.getInstanceLabels( uris, getEngine() ) );
+			labels.putAll(GuiUtility.getInstanceLabels( uris, getEngine() ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
@@ -490,7 +490,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		}
 		
 		relCB.setEditable( false );
-		relCB.setData( Utility.getInstanceLabels( values, getEngine() ) );
+		relCB.setData(GuiUtility.getInstanceLabels( values, getEngine() ) );
 
 		dialog.pack();
 	}
@@ -515,7 +515,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 			int index = getIndexNumber( evt );
 
 			UriComboBox objs = objectComboBoxes.get( index );
-			objs.setData( Utility.getInstanceLabels( results, getEngine() ) );
+			objs.setData(GuiUtility.getInstanceLabels( results, getEngine() ) );
 			objs.setEditable( false );
 
 			if ( objs.getSelectedItem() != null ) {

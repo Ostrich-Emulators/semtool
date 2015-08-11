@@ -28,7 +28,7 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.util.List;
 
 public class WriteableInsightTabImpl implements WriteableInsightTab {
@@ -381,14 +381,14 @@ public class WriteableInsightTabImpl implements WriteableInsightTab {
 		  
 		  for(Perspective perspective: colPerspectivesToRemoveInsight){
 			  if(wim.getWriteablePerspectiveTab().removeInsight(arylInsights, insight, perspective, false) == false){
-                  Utility.showWarningOkCancel("WARNING: Insight, \""+insight.getLabel()
+                  GuiUtility.showWarningOkCancel("WARNING: Insight, \""+insight.getLabel()
                 	 +"\",\ncould not be removed from Perspective, \""+perspective.getLabel()+"\"");
                   boolReturnValue = false;
 			  }
 		  }
 		  for(Perspective perspective: colPerspectivesToAddInsight){
 			  if(addExistingInsight(insight, perspective) == false){
-                  Utility.showWarningOkCancel("WARNING: Insight, \""+insight.getLabel()
+                  GuiUtility.showWarningOkCancel("WARNING: Insight, \""+insight.getLabel()
                 	 +"\",\ncould not be added to the Perspective, \""+perspective.getLabel()+"\"");
                   boolReturnValue = false;
 			  }

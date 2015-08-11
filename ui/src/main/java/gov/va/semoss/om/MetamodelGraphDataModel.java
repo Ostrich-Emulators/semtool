@@ -11,7 +11,7 @@ import java.util.Map;
 
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 
 public class MetamodelGraphDataModel extends GraphDataModel {
 	private static final Logger log = Logger.getLogger( MetamodelGraphDataModel.class );
@@ -160,8 +160,7 @@ public class MetamodelGraphDataModel extends GraphDataModel {
 		HashMap<String, Integer> relationshipCounts = new HashMap<String, Integer>();
 		for (Map.Entry<String,String> entry: vals.entrySet()) {
 			try {
-				relationshipCounts.put(
-					Utility.getInstanceName(entry.getKey()), 
+				relationshipCounts.put(GuiUtility.getInstanceName(entry.getKey()), 
 					Integer.parseInt(entry.getValue())
 				);
 			} catch (NumberFormatException ignored) {}

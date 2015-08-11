@@ -8,7 +8,7 @@ package gov.va.semoss.ui.actions;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.SemossFileView;
 import gov.va.semoss.util.DefaultIcons;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.actions.DbAction;
 
 import java.awt.event.ActionEvent;
@@ -163,12 +163,12 @@ public abstract class AbstractSavingAction extends AbstractAction {
 
 		try {
 			saveTo( lastsave );
-			Utility.showExportMessage( null, getSuccessMessage( lastsave ),
+			GuiUtility.showExportMessage( null, getSuccessMessage( lastsave ),
 					getSuccessTitle(), lastsave );
 		}
 		catch ( IOException ex ) {
 			log.error( ex, ex );
-			Utility.showError( getFailMessage( lastsave, ex ) );
+			GuiUtility.showError( getFailMessage( lastsave, ex ) );
 			lastsave = null;
 		}
 	}

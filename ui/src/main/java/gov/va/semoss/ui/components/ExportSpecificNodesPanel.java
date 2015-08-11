@@ -27,7 +27,7 @@ import org.openrdf.model.URI;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.ui.components.UriComboBox.UriLabelPair;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
 import gov.va.semoss.util.DIHelper;
 
@@ -119,7 +119,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 
 	private URI[] getAllNodes() {
 		List<URI> uriconcepts = NodeDerivationTools.instance().createConceptList( engine );
-		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
+		Map<URI, String> labels = GuiUtility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 
 		List<UriLabelPair> pairs = new ArrayList<>();
@@ -140,7 +140,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 	private void exportButtonActionPerformed( ActionEvent evt ) {
 		selectedNodes = nodesJList.getSelectedValuesList();
 		if ( selectedNodes == null || selectedNodes.isEmpty() ) {
-			Utility.showMessage( "You must select at least one node to export." );
+			GuiUtility.showMessage( "You must select at least one node to export." );
 			return;
 		}
 
@@ -230,10 +230,10 @@ public class ExportSpecificNodesPanel extends JPanel {
 
 				if ( successMessage != null && !successMessage.equals( "" ) ) {
 					if ( ok[0] && Desktop.isDesktopSupported() ) {
-						Utility.showExportMessage( null, successMessage, "Success", exportFile );
+						GuiUtility.showExportMessage( null, successMessage, "Success", exportFile );
 					}
 					else {
-						Utility.showMessage( successMessage );
+						GuiUtility.showMessage( successMessage );
 					}
 				}
 			}

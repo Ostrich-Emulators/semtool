@@ -91,7 +91,7 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.event.ItemListener;
@@ -346,8 +346,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			propmodel.setEdge( pickedEdges.iterator().next() );
 		}
 
-		Utility.addModelToJTable( controlData.getVertexTableModel(), Constants.LABEL_TABLE );
-		Utility.addModelToJTable( controlData.getEdgeTableModel(), Constants.TOOLTIP_TABLE );
+		GuiUtility.addModelToJTable( controlData.getVertexTableModel(), Constants.LABEL_TABLE );
+		GuiUtility.addModelToJTable( controlData.getEdgeTableModel(), Constants.TOOLTIP_TABLE );
 
 		JTable colorShapeTable = DIHelper.getJTable( Constants.COLOR_SHAPE_TABLE );
 		colorShapeTable.setModel( colorShapeData );

@@ -10,7 +10,7 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -95,16 +95,16 @@ public class InsightTabController extends InsightManagerController {
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
             	 if(addParameter.getValue() == true){
-           		    Utility.showMessage("New Parameter added to current Insight ok.");
+           		    GuiUtility.showMessage("New Parameter added to current Insight ok.");
            		    
          		    //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(),
                		    insight.getOrderedLabel(perspective.getUri()), null);         		    	            		    
             	 }else{
-                	Utility.showError("Error adding Parameter to current Insight. Operation rolled back.");
+                	GuiUtility.showError("Error adding Parameter to current Insight. Operation rolled back.");
             	 }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error adding Parameter to current Insight. Operation rolled back.");
+            	 GuiUtility.showError("Error adding Parameter to current Insight. Operation rolled back.");
               }
            }
         });
@@ -134,21 +134,21 @@ public class InsightTabController extends InsightManagerController {
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
             	 if(deleteParameter.getValue() == true){
-           		    Utility.showMessage("Insight Parameter, deleted ok.");
+           		    GuiUtility.showMessage("Insight Parameter, deleted ok.");
            		    
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(),
                    		insight.getOrderedLabel(perspective.getUri()), null);   
             	 }else{
-            		Utility.showError("Error deleting Parameter. Operation rolled back.");
+            		GuiUtility.showError("Error deleting Parameter. Operation rolled back.");
             	 }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error deleting Parameter. Operation rolled back.");
+            	 GuiUtility.showError("Error deleting Parameter. Operation rolled back.");
               }
            }
         });
 		if(parameter.getParameterURI().equals("") == false && 
-		   Utility.showWarningOkCancel("Are you sure you want to delete this Parameter\npermanently from the Insight?") == 0){
+		   GuiUtility.showWarningOkCancel("Are you sure you want to delete this Parameter\npermanently from the Insight?") == 0){
 		   //Run the Task on a separate Thread:
 		   new Thread(deleteParameter).start();
 	    }	
@@ -176,26 +176,26 @@ public class InsightTabController extends InsightManagerController {
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
             	 if(deleteInsight.getValue() == true){
-          		    Utility.showMessage("Insight, and all references to it, deleted ok.");
+          		    GuiUtility.showMessage("Insight, and all references to it, deleted ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), null, null);
 
             	 }else{
-            		Utility.showError("Error deleting Insight. Operation rolled back.");
+            		GuiUtility.showError("Error deleting Insight. Operation rolled back.");
             	 }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error deleting Insight. Operation rolled back.");
+            	 GuiUtility.showError("Error deleting Insight. Operation rolled back.");
               }
            }
         });
-		if(Utility.showWarningOkCancel("Are you sure you want to delete this Insight permanently,\nalong with all Perspective references to it?") == 0){
+		if(GuiUtility.showWarningOkCancel("Are you sure you want to delete this Insight permanently,\nalong with all Perspective references to it?") == 0){
 		   Collection<Perspective> colEndangeredPerspectives = getEndangeredPerspectives(insight.getId());
 		   if(colEndangeredPerspectives.size() == 0){
 			  //Run the Task on a separate Thread:
 		      new Thread(deleteInsight).start();
 		      
 		   }else{
-			  Utility.showError("Error removing Insight. Cannot remove the only Insight under the following Perspectives:\n"
+			  GuiUtility.showError("Error removing Insight. Cannot remove the only Insight under the following Perspectives:\n"
 				  + colEndangeredPerspectives.toString()); 
 		   }
 	    }
@@ -298,15 +298,15 @@ public class InsightTabController extends InsightManagerController {
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
             	 if(saveInsight.getValue() == true){
-          		    Utility.showMessage("Insight, and associated Perspectives, saved ok.");
+          		    GuiUtility.showMessage("Insight, and associated Perspectives, saved ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), 
           		       insight.getOrderedLabel(perspective.getUri()), null);
             	 }else{
-            		Utility.showError("Error saving Insight.");
+            		GuiUtility.showError("Error saving Insight.");
             	 }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error saving Insight. Operation rolled back.");
+            	 GuiUtility.showError("Error saving Insight. Operation rolled back.");
               }
            }
         });

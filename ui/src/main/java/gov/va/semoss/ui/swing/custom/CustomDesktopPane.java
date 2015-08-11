@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JDesktopPane;
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.datatransfer.DataFlavor;
@@ -70,7 +70,7 @@ public class CustomDesktopPane extends JDesktopPane {
 	}
 
 	public CustomDesktopPane( JToolBar tb ) {
-		img = Utility.loadImage( "desktop.png" );
+		img = GuiUtility.loadImage( "desktop.png" );
 		if ( null == img ) {
 			log.error( "could not load desktop image" );
 		}

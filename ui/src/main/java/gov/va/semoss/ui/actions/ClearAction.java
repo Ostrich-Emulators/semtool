@@ -20,7 +20,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.CopyWhatPanel;
 import gov.va.semoss.ui.components.ProgressTask;
 
@@ -86,7 +86,7 @@ public class ClearAction extends DbAction {
 							}
 						}
 						catch ( RepositoryException | IOException | EngineManagementException re ) {
-							Utility.showError( re.getLocalizedMessage() );
+							GuiUtility.showError( re.getLocalizedMessage() );
 							log.error( re, re );
 						}
 					}
@@ -115,7 +115,7 @@ public class ClearAction extends DbAction {
 
 						msg.append( " erased" );
 
-						Utility.showMessage( msg.toString() );
+						GuiUtility.showMessage( msg.toString() );
 					}
 				};
 

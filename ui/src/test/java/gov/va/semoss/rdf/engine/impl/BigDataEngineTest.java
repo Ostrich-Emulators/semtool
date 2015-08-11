@@ -10,7 +10,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.ui.components.DBToLoadingSheetExporterTest;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -68,7 +68,7 @@ public class BigDataEngineTest {
 		extractKb();
 
 		try {
-			eng = Utility.loadEngine( dbfile );
+			eng = GuiUtility.loadEngine( dbfile );
 		}
 		catch ( IOException ioe ) {
 			log.error( ioe, ioe );
@@ -77,7 +77,7 @@ public class BigDataEngineTest {
 
 	@After
 	public void tearDown() {
-		Utility.closeEngine( eng );
+		GuiUtility.closeEngine( eng );
 		FileUtils.deleteQuietly( dbfile );
 	}
 

@@ -13,7 +13,7 @@ import javax.swing.JList;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 
 /**
  *
@@ -25,7 +25,7 @@ public class DatasetsRenderer extends DefaultListCellRenderer {
 
 
 	static {
-		dbpin = new ImageIcon( Utility.loadImage( "icons16/semantic_dataset1_16.png" ) );
+		dbpin = new ImageIcon( GuiUtility.loadImage( "icons16/semantic_dataset1_16.png" ) );
 	}
 
 	@Override

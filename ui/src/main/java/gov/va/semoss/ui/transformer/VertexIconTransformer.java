@@ -31,7 +31,7 @@ import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.visualization.decorators.DefaultVertexIconTransformer;
 import gov.va.semoss.om.SEMOSSVertex;
 import org.apache.log4j.Logger;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 
 /**
  */
@@ -91,7 +91,7 @@ public class VertexIconTransformer extends DefaultVertexIconTransformer<SEMOSSVe
 	@Override
 	public Icon transform( SEMOSSVertex vertex ) {
 		try {
-			BufferedImage img = Utility.loadImage( "globe.jpg" );
+			BufferedImage img = GuiUtility.loadImage( "globe.jpg" );
 			if ( img == null ) {
 				return null;
 			}

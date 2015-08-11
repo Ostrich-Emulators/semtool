@@ -23,7 +23,7 @@ import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import org.openrdf.model.Resource;
@@ -76,7 +76,7 @@ public class NeighborMenuItem extends AbstractAction {
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 					logger.error( e, e );
-					Utility.showError( e.getLocalizedMessage() );
+					GuiUtility.showError( e.getLocalizedMessage() );
 				}
 			}
 		} );

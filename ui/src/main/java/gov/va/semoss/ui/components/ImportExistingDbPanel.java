@@ -26,7 +26,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.ui.actions.OpenAction.FileHandling;
@@ -108,7 +108,7 @@ public class ImportExistingDbPanel extends JPanel {
 			}
 			catch ( IOException | ImportValidationException fle ) {
 				log.error( fle, fle );
-				Utility.showError( fle.getLocalizedMessage() );
+				GuiUtility.showError( fle.getLocalizedMessage() );
 			}
 		}
 	}
@@ -398,10 +398,10 @@ public class ImportExistingDbPanel extends JPanel {
 						super.done();
 						//finally, show whether or not successful
 						if ( null == error[0] ) {
-							Utility.showMessage( "Your database has been successfully updated!" );
+							GuiUtility.showMessage( "Your database has been successfully updated!" );
 						}
 						else {
-							Utility.showError( "Import has failed: " + error[0] );
+							GuiUtility.showError( "Import has failed: " + error[0] );
 						}
 					}
 				};
