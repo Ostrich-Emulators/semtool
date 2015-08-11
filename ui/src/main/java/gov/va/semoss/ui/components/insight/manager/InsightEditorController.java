@@ -2,6 +2,7 @@ package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.PlaySheet;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -27,8 +28,6 @@ public class InsightEditorController implements Initializable{
 	protected TextField txtQuestion_Inst;
 	@FXML
 	protected ComboBox<PlaySheet> cboDisplayWith_Inst;
-	@FXML
-	protected TextField txtRendererClass_Inst;
 	@FXML
 	protected CheckBox chkLegacyQuery_Inst;
 	@FXML
@@ -77,6 +76,21 @@ public class InsightEditorController implements Initializable{
  	    for(PlaySheet playsheet: obsPlaySheets){
  	    	if(playsheet.getViewClass().equals(playSheetClass)){
  	    		cboDisplayWith_Inst.getSelectionModel().select(playsheet);	
+ 	    		
+ 				//Disable "Query" text-area and "Legacy Query" check-box only 
+ 				//if the underlying playsheet requires no query:
+ 	    		try {
+					if(((Class<PlaySheetCentralComponent>) Class.forName(playsheet.getViewClass())).newInstance().requiresQuery()){
+						txtaQuery_Inst.setDisable(false);
+						chkLegacyQuery_Inst.setDisable(false);
+					}else{
+						txtaQuery_Inst.setDisable(true);
+						chkLegacyQuery_Inst.setDisable(true);
+					}
+				} catch (Exception e) {
+					txtaQuery_Inst.setDisable(false);
+					chkLegacyQuery_Inst.setDisable(false);
+				}
  	    	}
 	    }
         //Cell Factory for "Display with" combo-box list-view to display 
@@ -117,36 +131,22 @@ public class InsightEditorController implements Initializable{
 			itemSelected.getParent().setExpanded(false);
 			itemSelected.getParent().setExpanded(true);
 			treevPerspectives.getSelectionModel().select(itemSelected);
- 	    });
 
-		//Renderer Class:
-		//---------------
-	    txtRendererClass_Inst.setText(insight.getRendererClass());
-        //Initially check the "Renderer Class" text-field on the "Insight" tab. 
-        //If it is not empty, then disable the various query-related controls:
-        if(txtRendererClass_Inst.getText() == null || txtRendererClass_Inst.getText().trim().isEmpty()){
-   	       cboDisplayWith_Inst.setDisable(false);
-   	       chkLegacyQuery_Inst.setDisable(false);
-   	       txtaQuery_Inst.setDisable(false);
-        }else{
-   	       cboDisplayWith_Inst.setDisable(true);
-   	       chkLegacyQuery_Inst.setDisable(true);
-   	       txtaQuery_Inst.setDisable(true);  	       
-        }
-        txtRendererClass_Inst.textProperty().addListener((observable, oldValue, newValue) -> {
-        	insight.setRendererClass(newValue);
-            //If the "Renderer Class" text-field changes, and it is not empty, 
-            //then disable query-related controls. Otherwise, enable them:
-        	if(newValue.trim().isEmpty()){
-		       cboDisplayWith_Inst.setDisable(false);
-		       chkLegacyQuery_Inst.setDisable(false);
-		       txtaQuery_Inst.setDisable(false);
-		    }else{
-		       cboDisplayWith_Inst.setDisable(true);
-		       chkLegacyQuery_Inst.setDisable(true);
-		       txtaQuery_Inst.setDisable(true);
-		    }
-		}); 
+			//Disable "Query" text-area and "Legacy Query" check-box only 
+			//if the underlying playsheet requires no query:
+	    	try {
+				if(((Class<PlaySheetCentralComponent>) Class.forName(newValue.getViewClass())).newInstance().requiresQuery()){
+					txtaQuery_Inst.setDisable(false);
+					chkLegacyQuery_Inst.setDisable(false);
+				}else{
+					txtaQuery_Inst.setDisable(true);
+					chkLegacyQuery_Inst.setDisable(true);
+				}
+			} catch (Exception e) {
+				txtaQuery_Inst.setDisable(false);
+				chkLegacyQuery_Inst.setDisable(false);
+			}
+ 	    });
 		
 		//Legacy Query:
 		//-------------

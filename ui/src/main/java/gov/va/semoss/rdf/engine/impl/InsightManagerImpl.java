@@ -601,7 +601,6 @@ public class InsightManagerImpl implements InsightManager {
 			};
 			log.debug( "Playsheet Query... " + query );
 			colPlaysheet.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
-
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );

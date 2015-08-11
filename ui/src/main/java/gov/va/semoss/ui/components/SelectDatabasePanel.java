@@ -433,14 +433,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
 			String output = insight.getOutput();
 
-			//If a "Renderer Class" has been entered into the InsightManager,
-			//then the playsheet dropdown selection and query must not be used.
-			//Instead, use the "Renderer Class":
-			if (insight.getRendererClass() != null && 
-				insight.getRendererClass().equals("") == false) {
-				output = "gov.va.semoss.ui.components.playsheets.rendererclasses."
-						+ insight.getRendererClass();
-			}
 			return (Class<PlaySheetCentralComponent>) Class.forName( output );
 		}
 

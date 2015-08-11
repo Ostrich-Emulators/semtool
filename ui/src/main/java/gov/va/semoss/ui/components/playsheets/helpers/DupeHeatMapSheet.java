@@ -17,11 +17,11 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package gov.va.semoss.ui.components.playsheets.rendererclasses;
+package gov.va.semoss.ui.components.playsheets.helpers;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.BrowserPlaySheet2;
-import gov.va.semoss.ui.components.playsheets.rendererclasses.DupeHeatMapFunctions;
+import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapFunctions;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;

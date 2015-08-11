@@ -1,6 +1,6 @@
-package gov.va.semoss.ui.components.playsheets.rendererclasses;
+package gov.va.semoss.ui.components.playsheets.helpers;
 
-import gov.va.semoss.ui.components.playsheets.rendererclasses.DupeHeatMapSheet;
+import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
 
 import java.util.Hashtable;
 

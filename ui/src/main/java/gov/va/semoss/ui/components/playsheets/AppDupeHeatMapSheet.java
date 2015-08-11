@@ -1,10 +1,12 @@
-package gov.va.semoss.ui.components.playsheets.rendererclasses;
+package gov.va.semoss.ui.components.playsheets;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Hashtable;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.playsheets.helpers.DupeFunctions;
+import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
 import gov.va.semoss.util.DIHelper;
 
 import java.util.List;
@@ -20,6 +22,14 @@ public class AppDupeHeatMapSheet extends DupeHeatMapSheet {
 
 	private static final String PREFIXES = "PREFIX semoss: <http://semoss.org/ontologies/>\nPREFIX vcamp: <http://va.gov/ontologies/vcamp#>\n";
 
+	/**   The Application Duplication Heatmap defines its own queries.
+	 * So, the user need not enter one into the Insight Manager.
+	 */
+	@Override
+	public boolean requiresQuery(){
+		return false;
+	}
+	
 	@Override
 	public void createData() {
 		IEngine engine  = DIHelper.getInstance().getRdfEngine();

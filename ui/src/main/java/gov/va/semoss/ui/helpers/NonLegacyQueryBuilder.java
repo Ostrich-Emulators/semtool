@@ -174,8 +174,6 @@ public class NonLegacyQueryBuilder {
 					paramTable.put( Constants.ENTITY, type );
 					sparqlQuery = extQuery == null
 							? Utility.fillParam( sparqlQuery, paramTable ) : extQuery;
-                    sparqlQuery = AbstractSesameEngine.processNamespaces(sparqlQuery, null); 
-
 					Map<URI, String> mapURI_Labels = new HashMap<>();
 					try {
 						List<URI> uris = eng.query( OneVarListQueryAdapter.getUriList( sparqlQuery ) );

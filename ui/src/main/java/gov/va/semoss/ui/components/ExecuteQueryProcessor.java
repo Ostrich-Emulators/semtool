@@ -105,7 +105,6 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
 		String query = getQuery();
-        query = AbstractSesameEngine.processNamespaces(query, null); 
         
 		Class<? extends PlaySheetCentralComponent> klass = null;
 		try {

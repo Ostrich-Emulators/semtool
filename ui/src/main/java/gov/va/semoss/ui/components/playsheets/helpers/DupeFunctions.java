@@ -1,4 +1,4 @@
-package gov.va.semoss.ui.components.playsheets.rendererclasses;
+package gov.va.semoss.ui.components.playsheets.helpers;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.SesameJenaImposter;

@@ -201,17 +201,11 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
   vas:icon "questions_world_heat_map1_16.png"^^xsd:string ;
   rdfs:label "World Heat Map"^^xsd:string ;
 .
-<http://va.gov/ontologies/semoss#gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet>
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet>
   rdf:type vas:DataView ;
-  ui:viewClass "gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
   vas:icon "questions_heat_map3_16.png"^^xsd:string ;
   rdfs:label "Application Duplication Heat Map"^^xsd:string ;
-.
-<http://va.gov/ontologies/semoss#gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet>
-  rdf:type vas:DataView ;
-  ui:viewClass "gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet"^^xsd:string ;
-  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
-  rdfs:label "Dupe Heat Map"^^xsd:string ;
 .
 vas:icon
   rdf:type owl:DatatypeProperty ;
@@ -435,16 +429,10 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
 
 
 
-vas:gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet ui:viewClass "gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
+vas:gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet ui:viewClass "gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
 	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
 	a vas:DataView ;
 	rdfs:label "Application Duplication Heat Map"^^xsd:string .
-
-
-vas:gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet ui:viewClass "gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet"^^xsd:string ;
-	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
-	a vas:DataView ;
-	rdfs:label "Dupe Heat Map"^^xsd:string .
 
 
 vas:icon a owl:DatatypeProperty ;

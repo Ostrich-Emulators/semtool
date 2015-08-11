@@ -317,4 +317,15 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	public boolean prefersTabs() {
 		return false;
 	}
+	
+	/**   Returns whether or not the playsheet requires a user-defined
+	 * query. This would normally be true, but for those cases where
+	 * a custom playsheet has been written that defines its requiere 
+	 * queries, this function can be overridden to return false.
+	 * 
+	 * @return
+	 */
+	public boolean requiresQuery(){
+		return true;
+	}
 }

@@ -176,8 +176,8 @@ public class  InsightManagerController_2 implements Initializable{
 	            	if(arylPlaySheets.size() > 0){
 	            	    //Restore mouse-pointer:
 	            		treevPerspectives.getScene().setCursor(Cursor.DEFAULT);	  
-	            		
-		                //Load Insight Manager data if it has not already been loaded:
+
+	            		//Load Insight Manager data if it has not already been loaded:
 	            		if(isDataLoaded == false){
 	            		   loadData();
 	            		   isDataLoaded = true;
@@ -235,9 +235,15 @@ public class  InsightManagerController_2 implements Initializable{
             rootItem.getChildren().add(item_1);
             
             for(Insight insight: perspective.getInsights()){
-                Image image = new Image(getInsightIcon(insight));
-                ImageView imageView = new ImageView(image);
-                InsightTreeItem<Object> item_2 = new InsightTreeItem<Object>(insight, imageView);
+                InsightTreeItem<Object> item_2;
+                try{
+                   String strIcon = getInsightIcon(insight);
+                   Image image = new Image(strIcon);
+                   ImageView imageView = new ImageView(image);
+                   item_2 = new InsightTreeItem<Object>(insight, imageView);
+                }catch(Exception e){
+                   item_2 = new InsightTreeItem<Object>(insight, null);
+                }
             	item_1.getChildren().add(item_2);
             	
         	    for(Parameter parameter: insight.getInsightParameters()){
@@ -248,7 +254,7 @@ public class  InsightManagerController_2 implements Initializable{
         }        
         treevPerspectives.setRoot(rootItem);    
         treevPerspectives.setEditable(true);
-
+        
         //On mouse-pressed, note whether the selected tree-view item
         //has been expanded or not:
         treevPerspectives.setOnMousePressed(new EventHandler<MouseEvent>(){
