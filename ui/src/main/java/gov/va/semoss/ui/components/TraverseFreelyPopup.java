@@ -33,6 +33,7 @@ import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,14 +54,14 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 			= Logger.getLogger( TraverseFreelyPopup.class );
 	private static final long serialVersionUID = -3788376340326236013L;
 	private final GraphPlaySheet gps;
-	private final Collection<SEMOSSVertex> pickedVertex;
+	private final Set<SEMOSSVertex> pickedVertex = new HashSet<>();
 	private final boolean isInstance;
 	private boolean populated = false;
 
 	private final IEngine engine;
 
 	public TraverseFreelyPopup( SEMOSSVertex vertex, IEngine e,
-			GraphPlaySheet ps, Collection<SEMOSSVertex> pickedVertex, boolean instance ) {
+			GraphPlaySheet ps, Collection<SEMOSSVertex> picked, boolean instance ) {
 		super( "Traverse Freely: "
 				+ ( instance
 						? LabelTransformer.chop( GuiUtility.getInstanceLabel( vertex.getURI(), e ), 30 )
@@ -68,7 +69,24 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 		this.isInstance = instance;
 		this.gps = ps;
 		this.engine = e;
-		this.pickedVertex = pickedVertex;
+
+		// if we're only looking at this one instance, just use the URIs from
+		// pickedVertex. if we're looking at all instances with this type, we 
+		// need to process the graph
+		if ( isInstance ) {
+			pickedVertex.addAll( picked );
+		}
+		else {
+			MultiMap<URI, SEMOSSVertex> typelkp = gps.getVerticesByType();
+			Set<URI> seen = new HashSet<>();
+
+			for ( SEMOSSVertex v : picked ) {
+				if ( !seen.contains( v.getType() ) ) {
+					seen.add( v.getType() );
+					pickedVertex.addAll( typelkp.getNN( v.getType() ) );
+				}
+			}
+		}
 
 		addMouseListener( this );
 	}
@@ -213,5 +231,15 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 		ModelQueryAdapter mqa = new ModelQueryAdapter( query.toString() );
 		mqa.bind( instanceIsSubject ? "objtype" : "subtype", totype );
 		return mqa;
+	}
+
+	private Set<URI> getInstances() {
+		Set<URI> instances = new HashSet<>();
+
+		for ( SEMOSSVertex thisVert : pickedVertex ) {
+			instances.add( thisVert.getURI() );
+		}
+
+		return instances;
 	}
 }
