@@ -155,9 +155,4 @@ public class Constants {
 
 	public static final String CALC_INFERENCES_PREF = "calculateInferences";
 	public static final String INSIGHTKB = "insights";
-
-	public static final String USERPREF_NAME = "userFullName";
-	public static final String USERPREF_EMAIL = "userEmail";
-	public static final String USERPREF_ORG = "userOrganization";
-	public static final String USERPREF_NAMESPACES = "userNamespaces";
 }

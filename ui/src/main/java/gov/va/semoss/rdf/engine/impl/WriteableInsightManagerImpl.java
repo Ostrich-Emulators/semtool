@@ -16,8 +16,9 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
-import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.util.Constants;
+import gov.va.semoss.user.User;
+import gov.va.semoss.user.User.UserProperty;
+import gov.va.semoss.user.UserImpl;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 
@@ -26,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
@@ -345,14 +345,14 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	 */
 	@Override
 	public String userInfoFromToolPreferences( String strOldUserInfo ) {
+		User user = UserImpl.getUser();
 		String userInfo = strOldUserInfo;
-		Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
-		String userPrefName = prefs.get( Constants.USERPREF_NAME, "" ).trim();
-		String userPrefEmail = prefs.get( Constants.USERPREF_EMAIL, "" ).trim();
-		userPrefEmail = ( userPrefEmail.trim().equals( "" ) == false )
-				? " <" + userPrefEmail.trim() + ">" : "";
-		String userPrefOrg = prefs.get( Constants.USERPREF_ORG, "" ).trim();
-		if ( userPrefName.equals( "" ) == false || userPrefEmail.equals( "" ) == false || userPrefOrg.equals( "" ) == false ) {
+		String userPrefName = user.getProperty( UserProperty.USER_NAME );
+		String userPrefEmail = user.getProperty( UserProperty.USER_EMAIL );
+		userPrefEmail = ( !userPrefEmail.isEmpty() ? " <" + userPrefEmail + ">" : "" );
+		String userPrefOrg = user.getProperty( UserProperty.USER_ORG );
+
+		if ( !userPrefName.equals( "" ) == false || userPrefEmail.equals( "" ) == false || userPrefOrg.equals( "" ) == false ) {
 			if ( userPrefName.equals( "" ) || userPrefOrg.equals( "" ) ) {
 				userInfo = userPrefName + userPrefEmail + " " + userPrefOrg;
 			}

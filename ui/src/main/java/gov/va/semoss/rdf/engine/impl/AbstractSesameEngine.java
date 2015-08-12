@@ -66,7 +66,7 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.user.UserImpl;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.HashSet;
@@ -334,7 +334,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	public static String processNamespaces( String rawsparql,
 			Map<String, String> customNamespaces ) {
-		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
+		Map<String, String> namespaces = UserImpl.getUser().getNamespaces();
 		namespaces.putAll( Utility.DEFAULTNAMESPACES );
 		namespaces.putAll( customNamespaces );
 
