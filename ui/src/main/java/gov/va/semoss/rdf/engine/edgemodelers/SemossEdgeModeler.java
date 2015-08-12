@@ -10,6 +10,7 @@ import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.rdf.engine.util.QaChecker.RelationCacheKey;
+import static gov.va.semoss.util.RDFDatatypeTools.getUriFromRawString;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;

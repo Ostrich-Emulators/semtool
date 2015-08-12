@@ -56,7 +56,6 @@ public class ControlData implements GraphListener {
 	public ControlData() {
 		// put what we want to show first in all of these things
 		Set<URI> propertyHide = new HashSet<>();
-		propertyHide.add( Constants.VERTEX_COLOR );
 
 		Set<URI> vertexPropertyShow = new HashSet<>();
 		vertexPropertyShow.add( Constants.VERTEX_NAME );

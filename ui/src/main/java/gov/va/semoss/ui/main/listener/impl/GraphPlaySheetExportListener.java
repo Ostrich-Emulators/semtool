@@ -22,8 +22,6 @@ package gov.va.semoss.ui.main.listener.impl;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import java.awt.event.ActionEvent;
-import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -129,67 +127,5 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 		newGps.create( vals, Arrays.asList( "Vertex or Edge Label", "Property", "Value" ),
 				gps.getEngine() );
 		gps.addSibling( "Graph as Table", newGps );
-	}
-
-	/**
-	 * Method convertConstructToSelect. Converts the construct query to a select
-	 * query.
-	 *
-	 * @param ConstructQuery String The construct query to be converted.
-	 *
-	 * @return String the converted select query.
-	 */
-	public String convertConstructToSelect( String ConstructQuery ) {
-		logger.info( "Begining to convert query" );
-		String result;
-		String newConstructQuery;
-
-		//need to separate {{ so that tokenizer gets every piece of the construct query
-		if ( ConstructQuery.contains( "{{" ) ) {
-			newConstructQuery = ConstructQuery.replaceAll( Pattern.quote( "{{" ), "{ {" );
-		}
-		else {
-			newConstructQuery = ConstructQuery;
-		}
-		StringTokenizer QueryBracketTokens = new StringTokenizer( newConstructQuery, "{" );
-		//Everything before first { becomes SELECT
-		String firstToken = QueryBracketTokens.nextToken();
-		String newFirstToken = null;
-		if ( firstToken.toUpperCase().contains( "CONSTRUCT" ) ) {
-			newFirstToken = firstToken.toUpperCase().replace( "CONSTRUCT", "SELECT DISTINCT " );
-		}
-		else {
-			logger.info( "Converting query that is not CONSTRUCT...." );
-		}
-
-		//the second token coming from between the first two brackets must have all period and semicolons removed
-		String secondToken = QueryBracketTokens.nextToken();
-		String newsecondToken = null;
-		if ( secondToken.contains( ";" ) && secondToken.contains( "." ) ) {
-			String secondTokensansSemi = secondToken.replaceAll( ";", " " );
-			String secondTokensansPer = secondTokensansSemi.replaceAll( "\\.", " " );
-			newsecondToken = secondTokensansPer.replace( "}", " " );
-		}
-		else if ( secondToken.contains( "." ) && !secondToken.contains( ";" ) ) {
-			String secondTokensansPer = secondToken.replaceAll( "\\.", " " );
-			newsecondToken = secondTokensansPer.replace( "}", " " );
-		}
-		else if ( secondToken.contains( ";" ) && !secondToken.contains( "." ) ) {
-			String secondTokensansSemi = secondToken.replaceAll( ";", " " );
-			newsecondToken = secondTokensansSemi.replace( "}", " " );
-		}
-		else if ( !secondToken.contains( ";" ) && !secondToken.contains( "." ) ) {
-			String secondTokensansSemi = secondToken.replaceAll( ";", " " );
-			newsecondToken = secondTokensansSemi.replace( "}", " " );
-		}
-
-		// Rest of the tokens go unchanged.  Must iterate through and replace {
-		String restOfQuery = "";
-		while ( QueryBracketTokens.hasMoreTokens() ) {
-			String token = QueryBracketTokens.nextToken();
-			restOfQuery = restOfQuery + "{" + token;
-		}
-		result = newFirstToken + newsecondToken + restOfQuery;
-		return result;
 	}
 }

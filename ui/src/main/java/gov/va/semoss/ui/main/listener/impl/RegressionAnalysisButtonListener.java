@@ -104,7 +104,7 @@ public class RegressionAnalysisButtonListener implements IChakraListener {
 	 * variable and/or regressors are not selected.
 	 */
 	public void displayCheckBoxError() {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp( Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		JOptionPane.showMessageDialog( playPane, "Please select at least one dependent and independent variable.", "Error", JOptionPane.ERROR_MESSAGE );
 
 	}

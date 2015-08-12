@@ -626,7 +626,7 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @return -- (boolean) Whether the import succeeded.
 	 */
-	public synchronized boolean importInsights( WriteableInsightManager wim ){
+	public synchronized boolean importInsights( WriteableInsightManager wim ) {
 		try {
 			IEngine engine = DIHelper.getInstance().getRdfEngine();
 			insightqueue.put( engine, new InsightsImportConfig( wim.getStatements(), true ) );
@@ -911,6 +911,46 @@ public class EngineUtil implements Runnable {
 		}
 
 		return stmts;
+	}
+
+	public static String getEngineLabel( IEngine engine ) {
+		String label = engine.getEngineName();
+		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
+		try {
+			engine.query( mq );
+			String str = mq.getString();
+			if ( null != str ) {
+				label = str;
+			}
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			// don't care
+		}
+		return label;
+	}
+
+	/**
+	 * Gets the reification model URI from the given engine
+	 *
+	 * @param engine
+	 * @return return the reification model, or {@link Constants#NONODE} if none
+	 * is defined
+	 */
+	public static ReificationStyle getReificationStyle( IEngine engine ) {
+		URI reif = Constants.NONODE;
+		if ( null != engine ) {
+			MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
+			try {
+				engine.query( mq );
+				Value str = mq.getOne();
+				reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+				// don't care
+			}
+		}
+
+		return ReificationStyle.fromUri( reif );
 	}
 
 	public static class DbCloneMetadata {

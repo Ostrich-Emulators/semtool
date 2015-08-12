@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.ui.components.CopyWhatPanel;
 import gov.va.semoss.ui.components.ProgressTask;
 
@@ -56,7 +55,7 @@ public class MergeAction extends DbAction {
 	public void setTarget( IEngine to ) {
 		target = to;
 		if ( null != target ) {
-			putValue( AbstractAction.NAME, MetadataQuery.getEngineLabel( to ) );
+			putValue( AbstractAction.NAME, EngineUtil.getEngineLabel( to ) );
 		}
 		setEnabled( !( null == getEngine() || null == to ) );
 	}

@@ -277,7 +277,7 @@ public class RegExplorerPlaySheet extends AbstractRDFPlaySheet{
 	 */
 	
 	public void displayCheckBoxError(){
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(Constants.MAIN_FRAME);
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		JOptionPane.showMessageDialog(playPane, "One of the elements is not a number.", "Error", JOptionPane.ERROR_MESSAGE);
 		
 	}
