@@ -255,13 +255,6 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		dataHash.putAll( newdata );
 	}
 
-	@SuppressWarnings( "unchecked" )
-	public Object getData() {
-		Map<String, Object> returnHash = new HashMap<>();
-		returnHash.put( "specificData", dataHash );
-		return returnHash;
-	}
-
 	private void downloadCSV( String data ) {
 		ExportUtility.doExportCSVWithDialogue( this, data );
 	}
@@ -404,9 +397,6 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				}
 			}
 			throw new IOException( msg, e );
-		}
-		catch ( Throwable t ) {
-			throw new IOException( t.getLocalizedMessage(), t );
 		}
 		finally {
 			if ( null != svgfile ) {

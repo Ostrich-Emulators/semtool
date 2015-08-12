@@ -127,7 +127,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
-		log.error( "into create: " + data.size() + " items" );
+		log.warn( "create not supported in this playsheet (" + data.size() + " items)" );
 	}
 
 	@Override
@@ -219,7 +219,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 	@Override
 	public void overlay( List<Value[]> data, List<String> headers, IEngine eng ) {
-		log.error( "into overlay: " + data.size() + " items" );
+		log.warn( "overlay not supported in this playsheet (" + data.size() + " items)" );
 	}
 
 	@Override
