@@ -26,7 +26,7 @@ import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.main.SemossPreferences;
@@ -148,7 +148,7 @@ public class ExportTtlAction extends DbAction {
 							} );
 						}
 						catch ( RepositoryException re ) {
-							Utility.showError( re.getLocalizedMessage() );
+							GuiUtility.showError( re.getLocalizedMessage() );
 							ok[0] = false;
 							log.error( re, re );
 						}
@@ -159,11 +159,11 @@ public class ExportTtlAction extends DbAction {
 						super.done();
 
 						if ( ok[0] ) {
-							Utility.showExportMessage( frame, "Exported to " + exportfile,
+							GuiUtility.showExportMessage( frame, "Exported to " + exportfile,
 									"Success", exportfile );
 						}
 						else {
-							Utility.showMessage( "Exported to " + exportfile );
+							GuiUtility.showMessage( "Exported to " + exportfile );
 						}
 					}
 				};

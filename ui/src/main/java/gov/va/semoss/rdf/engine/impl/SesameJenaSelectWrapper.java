@@ -27,8 +27,8 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.query.TupleQueryResult;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -232,10 +232,10 @@ public class SesameJenaSelectWrapper {
 					}
 					else if( val instanceof URI ) {
 						URI u = URI.class.cast( val );
-						// FIXME: Utility.getInstanceLabel() is much slower than 
-						// Utility.getInstanceLabels(), but we'll use a cache to help a bit
+						// FIXME: GuiUtility.getInstanceLabel() is much slower than 
+						// GuiUtility.getInstanceLabels(), but we'll use a cache to help a bit
 //						if( !labelcache.containsKey( u ) ){
-//							labelcache.put( u, Utility.getInstanceLabel( u, engine ) );
+//							labelcache.put( u, GuiUtility.getInstanceLabel( u, engine ) );
 //						}
 //						retSt.setVar( var1, labelcache.get( u ) );
 						retSt.setVar( var1, u );
@@ -252,7 +252,7 @@ public class SesameJenaSelectWrapper {
           RDFNode node = row.get( var1 );
           if ( node.isAnon() ) {
             logger.debug( "Ok.. an anon node" );
-            String id = Utility.getNextID();
+            String id = GuiUtility.getNextID();
             retSt.setVar( var1, id );
           }
           else {

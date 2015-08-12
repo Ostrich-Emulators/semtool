@@ -39,6 +39,7 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.util.Collection;
 import org.openrdf.model.vocabulary.RDF;
@@ -63,8 +64,7 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 
 	public TFInstanceRelationPopup( SEMOSSVertex vertex, IEngine e,
 			GraphPlaySheet ps, Collection<SEMOSSVertex> pickedVertex ) {
-		super( "Traverse Freely: " + LabelTransformer.chop(
-				Utility.getInstanceLabel( vertex.getURI(), e ), 30 ) );
+		super("Traverse Freely: " + LabelTransformer.chop(GuiUtility.getInstanceLabel( vertex.getURI(), e ), 30 ) );
 
 		this.gps = ps;
 		this.engine = e;
@@ -96,7 +96,7 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 
 			String query2
 					= DIHelper.getInstance().getProperty( TFInstanceRelationPopup.mainQuery + prefix );
-			String typeName = Utility.getConceptType( engine, thisVert.getURI().stringValue() );
+			String typeName = GuiUtility.getConceptType( engine, thisVert.getURI().stringValue() );
 			if ( typeV.contains( typeName ) ) {
 				continue;
 			}
@@ -155,7 +155,7 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 						&& !objClassName.equals( "http://www.w3.org/2000/01/rdf-schema#Class" )
 						&& !pred.equals( "http://semoss.org/ontologies/Relation" )
 						&& ( pred.equals( "" ) || pred.startsWith( "http://semoss.org" ) ) ) {
-					String inst = Utility.getInstanceName( objClassName );
+					String inst = GuiUtility.getInstanceName( objClassName );
 					//add the to: and from: labels
 					if ( count == 0 ) {
 						if ( this.getItemCount() > 0 ) {
@@ -186,7 +186,7 @@ public class TFInstanceRelationPopup extends JMenu implements MouseListener {
 					logger.debug( nFillQuery );
 					NeighborMenuItem nItem = new NeighborMenuItem( inst, gps, nFillQuery );
 					if ( engine.getEngineType() == IEngine.ENGINE_TYPE.JENA ) {
-						nItem = new NeighborMenuItem( "->" + Utility.getInstanceName( pred )
+						nItem = new NeighborMenuItem( "->" + GuiUtility.getInstanceName( pred )
 								+ "->" + inst, gps, nFillQuery );
 					}
 					add( nItem );

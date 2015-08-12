@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.util.MultiMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;

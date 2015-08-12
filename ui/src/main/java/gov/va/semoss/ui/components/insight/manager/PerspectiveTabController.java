@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -92,15 +92,15 @@ public class PerspectiveTabController extends InsightManagerController{
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
             	 if(addInsight.getValue() == true){
-          		    Utility.showMessage("New Insight added to current Perspective ok.");
+          		    GuiUtility.showMessage("New Insight added to current Perspective ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), null, null);         		    
           		    
             	 }else{
-                	Utility.showError("Error adding Insight to current Perspective. Operation rolled back.");
+                	GuiUtility.showError("Error adding Insight to current Perspective. Operation rolled back.");
             	 }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error adding Insight to current Perspective. Operation rolled back.");
+            	 GuiUtility.showError("Error adding Insight to current Perspective. Operation rolled back.");
               }
            }
         });
@@ -129,24 +129,24 @@ public class PerspectiveTabController extends InsightManagerController{
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
             	 if(removeInsight.getValue() == true){
-          		    Utility.showMessage("Insight removed ok.");
+          		    GuiUtility.showMessage("Insight removed ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), null, null);
 
             	 }else{
-            		Utility.showError("Error removing Insight. Operation rolled back.");
+            		GuiUtility.showError("Error removing Insight. Operation rolled back.");
             	 }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error removing Insight. Operation rolled back.");
+            	 GuiUtility.showError("Error removing Insight. Operation rolled back.");
               }
            }
         });
-		if(Utility.showWarningOkCancel("Are you sure you want to remove this Insight?") == 0){
+		if(GuiUtility.showWarningOkCancel("Are you sure you want to remove this Insight?") == 0){
 		   if(imc.lstvInsights.getItems().size() > 1){
 			  //Run the Task on a separate Thread:
 		      new Thread(removeInsight).start();
 		   }else{
-			  Utility.showError("Error removing Insight. Cannot remove the only Insight under a Perspective."); 
+			  GuiUtility.showError("Error removing Insight. Cannot remove the only Insight under a Perspective."); 
 		   }
 	    }
 	}
@@ -179,15 +179,15 @@ public class PerspectiveTabController extends InsightManagerController{
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){           	  
                  if(addPerspective.getValue() == true){
-                	Utility.showMessage("New Perspective with Title and Description added ok.");
+                	GuiUtility.showMessage("New Perspective with Title and Description added ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), null, null);          		 
 
                  }else{
-                	Utility.showError("Error adding Perspective. Operation rolled back.");
+                	GuiUtility.showError("Error adding Perspective. Operation rolled back.");
                  }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error adding Perspective. Operation rolled back.");
+            	 GuiUtility.showError("Error adding Perspective. Operation rolled back.");
               }
            }
         });
@@ -195,7 +195,7 @@ public class PerspectiveTabController extends InsightManagerController{
 		     //Run the Task on a separate Thread:
 	         new Thread(addPerspective).start();
 		}else{
-			 Utility.showError("Error: The internal Perspective identifier must be unique and non-empty.\n" +
+			 GuiUtility.showError("Error: The internal Perspective identifier must be unique and non-empty.\n" +
 		        "It is based upon the Title, and all spaces within the Title are compressed\n" +
 				"to form the identifier.");
 		}
@@ -244,24 +244,24 @@ public class PerspectiveTabController extends InsightManagerController{
         	  Worker.State oldState, Worker.State newState){
                 if(newState == Worker.State.SUCCEEDED){
             	   if(deletePerspective.getValue() == true){
-      	 	          Utility.showMessage("Perspective deleted ok.");
+      	 	          GuiUtility.showMessage("Perspective deleted ok.");
        	 	          //Reload the UI from the database:
              		  imc.loadData(null, null, null);                  		  
           		    
             	   }else{
-                      Utility.showError("Error deleting Perspective. Operation rolled back.");
+                      GuiUtility.showError("Error deleting Perspective. Operation rolled back.");
             	   }         		 
                 }else if(newState == Worker.State.FAILED){
-            	   Utility.showError("Error deleting Perspective. Operation rolled back.");
+            	   GuiUtility.showError("Error deleting Perspective. Operation rolled back.");
                 }
            }
         });
 		//Run the Task on a separate Thread:
-		if(Utility.showWarningOkCancel("Are you sure you want to delete this Perspective permanently,\nand remove all of its Insights?") == 0){
+		if(GuiUtility.showWarningOkCancel("Are you sure you want to delete this Perspective permanently,\nand remove all of its Insights?") == 0){
 		   if(imc.cboPerspectiveTitle.getItems().size() > 1){
 		      new Thread(deletePerspective).start();
 		   }else{
-			  Utility.showError("Error deleting Perspective. Cannot delete the only Perspective.");		  
+			  GuiUtility.showError("Error deleting Perspective. Cannot delete the only Perspective.");		  
 		   }
 		}
 	}
@@ -289,15 +289,15 @@ public class PerspectiveTabController extends InsightManagerController{
 	        	 Worker.State oldState, Worker.State newState){
 	             if(newState == Worker.State.SUCCEEDED){
 	            	if(savePerspective.getValue() == true){
-          	 	       Utility.showMessage("Perspective Title and Description saved ok.");
+          	 	       GuiUtility.showMessage("Perspective Title and Description saved ok.");
        	 	           //Reload the UI from the database:
              		   imc.loadData(imc.txtPerspectiveTitle.getText().trim(), insight.getOrderedLabel(), null);
              		   
 	            	}else{
-		               Utility.showError("Error saving Perspective. Operation rolled back.");
+		               GuiUtility.showError("Error saving Perspective. Operation rolled back.");
 	            	}
 	              }else if(newState == Worker.State.FAILED){
-	             	 Utility.showError("Error saving Perspective. Operation rolled back.");
+	             	 GuiUtility.showError("Error saving Perspective. Operation rolled back.");
 	              }
 	          }
 	       });
@@ -305,7 +305,7 @@ public class PerspectiveTabController extends InsightManagerController{
 		      //Run the Task on a separate Thread:
 		      new Thread(savePerspective).start();
 		   }else{
-			  Utility.showError("Error: You must enter a Title, and you should enter a Description."); 
+			  GuiUtility.showError("Error: You must enter a Title, and you should enter a Description."); 
 		   }
 	}
 	
@@ -340,13 +340,13 @@ public class PerspectiveTabController extends InsightManagerController{
 	           Worker.State oldState, Worker.State newState){    	
 	            if(newState == Worker.State.SUCCEEDED){
 	               if(associateInsights.getValue() == true){
-       	 	          Utility.showMessage("Dangling Insights may have been moved to Detached-Insight-Perspective.");
+       	 	          GuiUtility.showMessage("Dangling Insights may have been moved to Detached-Insight-Perspective.");
 
 	               }else{
-		              Utility.showError("Error reassociating dangling Insights. Operation rolled back.");
+		              GuiUtility.showError("Error reassociating dangling Insights. Operation rolled back.");
 	               }
 	            }else if(newState == Worker.State.FAILED){
-	               Utility.showError("Error reassociating dangling Insights. Operation rolled back.");
+	               GuiUtility.showError("Error reassociating dangling Insights. Operation rolled back.");
 	            }
 	 	        //Reload the UI from the database:
 	            imc.loadData(imc.txtPerspectiveTitle.getText().trim(), 

@@ -25,7 +25,7 @@ import gov.va.semoss.ui.components.models.PropertyEditorTableModel;
 
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,7 +64,7 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 		LabeledPairTableCellRenderer renderer
 				= LabeledPairTableCellRenderer.getUriPairRenderer();
 		Set<URI> labels = getUrisThatNeedLabels( pickedVertices );
-		renderer.cache( Utility.getInstanceLabels( labels, engine ) );
+		renderer.cache(GuiUtility.getInstanceLabels( labels, engine ) );
 		renderer.cache( XMLSchema.ANYURI, "URI" );
 
 		LabeledPairTableCellRenderer trenderer

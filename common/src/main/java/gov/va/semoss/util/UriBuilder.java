@@ -14,7 +14,6 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import static gov.va.semoss.util.Utility.isValidUriChars;
 import org.apache.xerces.util.XMLChar;
 
 /**
@@ -373,11 +372,11 @@ public class UriBuilder {
 		public String sanitize( String raw ) {
 			// Check if the string is already valid:
 			String sanitized = raw;
-			if ( !isValidUriChars( raw ) ) {
+			if ( !RDFDatatypeTools.isValidUriChars( raw ) ) {
 				// Attempt a simple sanitizing:
 				String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
 
-				if ( isValidUriChars( rawWithUnderscores ) ) {
+				if ( RDFDatatypeTools.isValidUriChars( rawWithUnderscores ) ) {
 					sanitized = rawWithUnderscores;
 				}
 				else {

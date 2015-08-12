@@ -4,7 +4,7 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.ParameterType;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -92,15 +92,15 @@ public class ParameterTabController extends InsightManagerController {
         	  Worker.State oldState, Worker.State newState){
               if(newState == Worker.State.SUCCEEDED){
             	 if(saveParameter.getValue() == true){
-          		    Utility.showMessage("Parameter fields saved ok.");
+          		    GuiUtility.showMessage("Parameter fields saved ok.");
     	 	        //Reload the UI from the database:
           		    imc.loadData(imc.txtPerspectiveTitle.getText().trim(), 
           		       insight.getOrderedLabel(), parameter.getLabel());
             	 }else{
-            		Utility.showError("Error saving Parameter.");
+            		GuiUtility.showError("Error saving Parameter.");
             	 }          		 
               }else if(newState == Worker.State.FAILED){
-            	 Utility.showError("Error saving Parameter. Operation rolled back.");
+            	 GuiUtility.showError("Error saving Parameter. Operation rolled back.");
               }
            }
         });

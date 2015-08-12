@@ -57,12 +57,12 @@ import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 
+import gov.va.semoss.util.Utility;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -222,7 +222,7 @@ public class InsightManagerImpl implements InsightManager {
 		//This is a private utility method of this class, that is only being run
 		//to remove old PlaySheet triples, left over before changes to the Insight
 		//KB were made on 4 April 2015. This call may be removed in the future:
-//    Utility.showMessage(String.valueOf(deleteInsightData()));    
+//    GuiUtility.showMessage(String.valueOf(deleteInsightData()));    
 	}
 
 	private void loadQuestions( String perspectiveKey, URI perspectiveURI,

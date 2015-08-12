@@ -51,7 +51,7 @@ import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import info.aduna.iteration.Iterations;
 
 import java.io.BufferedWriter;
@@ -504,14 +504,14 @@ public class EngineLoader {
 	private static void initNamespaces( RepositoryConnection conn ) throws RepositoryException {
 
 		conn.begin();
-		for ( Map.Entry<String, String> e : Utility.DEFAULTNAMESPACES.entrySet() ) {
+		for ( Map.Entry<String, String> e : GuiUtility.DEFAULTNAMESPACES.entrySet() ) {
 			conn.setNamespace( e.getKey(), e.getValue() );
 		}
 		conn.commit();
 	}
 
 	public static void initNamespaces( ImportData conn ) {
-		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
+		conn.getMetadata().setNamespaces(GuiUtility.DEFAULTNAMESPACES );
 	}
 
 	public EdgeModeler getEdgeModeler( ReificationStyle reif ) {

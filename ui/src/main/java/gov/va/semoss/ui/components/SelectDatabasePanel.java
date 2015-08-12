@@ -17,8 +17,9 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -157,7 +158,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		} );
 
 		submitButton.setToolTipText( "Execute SPARQL query for selected question and display results in Display Pane" );
-		Image insightIcon = Utility.loadImage( "icons16/insight_16.png" );
+		Image insightIcon = GuiUtility.loadImage( "icons16/insight_16.png" );
 		submitButton.setIcon( new ImageIcon( insightIcon ) );
 		submitButton.setAction( insightAction );
 

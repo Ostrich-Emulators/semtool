@@ -44,7 +44,7 @@ import java.io.ByteArrayOutputStream;
 import org.apache.commons.io.FileUtils;
 
 /**
- * The Utility class contains functions for use with exporting images.
+ * The GuiUtility class contains functions for use with exporting images.
  */
 public class ExportUtility {
 
@@ -58,12 +58,12 @@ public class ExportUtility {
 
 		try {
 			FileUtils.write( file, data );
-			Utility.showExportMessage( JOptionPane.getFrameForComponent( component ),
+			GuiUtility.showExportMessage( JOptionPane.getFrameForComponent( component ),
 					"Export successful: " + file.getAbsolutePath(), "Export Successful", file );
 		}
 		catch ( IOException e ) {
 			log.error( e, e );
-			Utility.showError( e.getLocalizedMessage() );
+			GuiUtility.showError( e.getLocalizedMessage() );
 		}
 	}
 
@@ -96,7 +96,7 @@ public class ExportUtility {
 			return file;
 		}
 		catch ( Exception e ) {
-			Utility.showError( "Export failed." );
+			GuiUtility.showError( "Export failed." );
 			log.error( e, e );
 			return null;
 		}

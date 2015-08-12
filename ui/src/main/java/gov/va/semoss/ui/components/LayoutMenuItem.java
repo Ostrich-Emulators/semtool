@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import javax.swing.AbstractAction;
@@ -95,7 +95,7 @@ public class LayoutMenuItem extends AbstractAction {
 				}
 			}
 			else {
-				Utility.showError( "This layout cannot be used with the current graph" );
+				GuiUtility.showError( "This layout cannot be used with the current graph" );
 				gps.setLayoutName( oldLayout );
 			}
 		}

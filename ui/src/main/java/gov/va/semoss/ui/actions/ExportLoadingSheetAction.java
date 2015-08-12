@@ -20,7 +20,7 @@ import javax.swing.JFileChooser;
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.LoadingPlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -147,10 +147,10 @@ public class ExportLoadingSheetAction extends DbAction {
 					}
 
 					if ( ok ) {
-						Utility.showExportMessage( frame, msg, "Success", exportfile );
+						GuiUtility.showExportMessage( frame, msg, "Success", exportfile );
 					}
 					else {
-						Utility.showMessage( msg );
+						GuiUtility.showMessage( msg );
 					}
 				}
 			}

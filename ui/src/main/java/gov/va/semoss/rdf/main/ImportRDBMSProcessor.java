@@ -36,7 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 //import gov.va.semoss.poi.main.PropFileWriter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 
 public class ImportRDBMSProcessor {
 
@@ -148,7 +148,7 @@ public class ImportRDBMSProcessor {
 					+ requiredMapping );
 		}
 		catch ( IOException e ) {
-			Utility.showError( "Could not create mapping file!" );
+			GuiUtility.showError( "Could not create mapping file!" );
 			logger.error( e );
 		}
 		
@@ -172,7 +172,7 @@ public class ImportRDBMSProcessor {
 			}
 			catch ( Exception e ) {
 				logger.error( e );
-				Utility.showError( "Couldn't Find Workbook" );
+				GuiUtility.showError( "Couldn't Find Workbook" );
 			}
 
 			// process properties
@@ -457,7 +457,7 @@ public class ImportRDBMSProcessor {
 			requiredMapping = new Scanner( new File( templatePath ) ).useDelimiter( "\\Z" ).next();
 		}
 		catch ( FileNotFoundException e ) {
-			Utility.showError( "Could not find template file!" );
+			GuiUtility.showError( "Could not find template file!" );
 			logger.error( e );
 		}
 		return requiredMapping;
@@ -504,7 +504,7 @@ public class ImportRDBMSProcessor {
 			owlWriter.close();
 		}
 		catch ( IOException e ) {
-			Utility.showError( "Could not create owl file!" );
+			GuiUtility.showError( "Could not create owl file!" );
 			logger.error( e );
 		}
 	}

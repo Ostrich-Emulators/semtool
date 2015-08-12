@@ -20,7 +20,7 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.util.RDFDatatypeTools;
+import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.Constants;
 

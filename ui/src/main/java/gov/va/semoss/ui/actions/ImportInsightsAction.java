@@ -23,7 +23,7 @@ import javax.swing.JFileChooser;
 
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 
@@ -95,7 +95,7 @@ public class ImportInsightsAction extends DbAction {
 									if ( eng.equals( getEngine() ) ) {
 										EngineUtil.getInstance().removeEngineOpListener( this );
 										int numPs = ps.size();
-										Utility.showMessage( "Imported " + numPs + " perspective"
+										GuiUtility.showMessage( "Imported " + numPs + " perspective"
 												+ ( numPs > 1 ? "s" : "" ) + " to " + getEngineName() );
 									}
 								}
@@ -106,7 +106,7 @@ public class ImportInsightsAction extends DbAction {
 									clear, VocabularyRegistry.getVocabularies( true ).values() );
 						}
 						catch ( IOException | EngineManagementException re ) {
-							Utility.showError( re.getLocalizedMessage() );
+							GuiUtility.showError( re.getLocalizedMessage() );
 							log.error( re, re );
 						}
 					}

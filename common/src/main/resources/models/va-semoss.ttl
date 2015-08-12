@@ -1,0 +1,572 @@
+# baseURI: http://va.gov/ontologies/semoss
+# imports: http://purl.org/dc/terms/
+# imports: http://purl.org/ontology/olo/core#
+# imports: http://rdfs.org/ns/void
+# imports: http://spinrdf.org/spin
+# imports: http://uispin.org/ui
+# imports: http://va.gov/ontologies/core
+
+@prefix arg: <http://spinrdf.org/arg#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix insights: <http://va.gov/dataset/insights#> .
+
+@prefix olo: <http://purl.org/ontology/olo/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix semoss: <http://semoss.org/ontologies/> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix spl: <http://spinrdf.org/spl#> .
+@prefix ui: <http://uispin.org/ui#> .
+@prefix vac: <http://va.gov/ontologies/core#> .
+@prefix vas: <http://va.gov/ontologies/semoss#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://va.gov/ontologies/semoss>
+  rdf:type owl:Ontology ;
+  owl:imports dcterms: ;
+  owl:imports olo: ;
+  owl:imports <http://rdfs.org/ns/void> ;
+  owl:imports <http://spinrdf.org/spin> ;
+  owl:imports <http://uispin.org/ui> ;
+  owl:imports <http://va.gov/ontologies/core> ;
+  owl:versionInfo "Created with TopBraid Composer"^^xsd:string ;
+.
+vas:DataView
+  rdf:type owl:Class ;
+  rdfs:label "Data View"^^xsd:string ;
+  rdfs:subClassOf ui:DataViews ;
+  rdfs:subClassOf [
+      rdf:type owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:onProperty vas:icon ;
+    ] ;
+.
+vas:Database
+  rdf:type owl:Class ;
+  rdfs:label "Database"^^xsd:string ;
+  rdfs:subClassOf <http://rdfs.org/ns/void#Dataset> ;
+.
+vas:InsightProperties
+  rdf:type spin:MagicProperty ;
+  rdfs:label "Insight Properties"^^xsd:string ;
+  rdfs:subClassOf spin:MagicProperties ;
+.
+vas:Perspective
+  rdf:type owl:Class ;
+  rdfs:label "Perspective"^^xsd:string ;
+  rdfs:subClassOf olo:OrderedList ;
+  rdfs:subClassOf ui:Element ;
+  rdfs:subClassOf [
+      rdf:type owl:Restriction ;
+      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:onClass vas:InsightProperties ;
+      owl:onProperty olo:item ;
+    ] ;
+.
+vas:RDR-Reification
+  rdf:type vas:ReificationModel ;
+  rdfs:label "RDR Reification"^^xsd:string ;
+.
+vas:ReificationModel
+  rdf:type owl:Class ;
+  rdfs:label "Reification Model"^^xsd:string ;
+  rdfs:subClassOf owl:Thing ;
+.
+vas:VASEMOSS-Reification
+  rdf:type vas:ReificationModel ;
+  rdfs:label "VA-SEMOSS Reification"^^xsd:string ;
+.
+vas:W3C-Reification
+  rdf:type vas:ReificationModel ;
+  rdfs:label "W3C Reification"^^xsd:string ;
+.
+# <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.CONUSMapPlaySheet>
+#   rdf:type vas:DataView ;
+#   ui:viewClass "gov.va.semoss.ui.components.playsheets.CONUSMapPlaySheet"^^xsd:string ;
+#   vac:description """The Play Sheet for Continental United States (CONUS) geo-location data.  
+# Visualizes Latitude/Longitude coordinates on a map of the CONUS."""^^xsd:string ;
+#   vas:icon "questions_conus_map1_16.png"^^xsd:string ;
+#   rdfs:label "Continental US Heat Map"^^xsd:string ;
+# .
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet"^^xsd:string ;
+  vas:icon "questions_bar_chart1_16.png"^^xsd:string ;
+  rdfs:label "Column Chart"^^xsd:string ;
+.
+# <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.CountyHeatMapPlaySheet>
+#   rdf:type vas:DataView ;
+#   ui:viewClass "gov.va.semoss.ui.components.playsheets.CountyHeatMapPlaySheet"^^xsd:string ;
+#   vac:description """The Play Sheet for the United States geo-location data heatmap.  
+# Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+#   vas:icon "questions_country_heat_map1_16.png"^^xsd:string ;
+#   rdfs:label "County Heat Map"^^xsd:string ;
+# .
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet"^^xsd:string ;
+  vac:description "The Play Sheet for creating a Dendrogram diagram using names and children.  "^^xsd:string ;
+  vas:icon "questions_dendrogram1_16.png"^^xsd:string ;
+  rdfs:label "Dendrogram"^^xsd:string ;
+.
+# <http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.DualEngineGridPlaySheet>
+#   rdf:type vas:DataView ;
+#   ui:viewClass "gov.va.semoss.ui.components.playsheets.DualEngineGridPlaySheet"^^xsd:string ;
+#   rdfs:comment "Uncertain if this play sheet would ever be user selectable."^^xsd:string ;
+#   rdfs:label "Dual Engine Grid"^^xsd:string ;
+# .
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GraphPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.GraphPlaySheet"^^xsd:string ;
+  vas:icon "questions_graph_16.png"^^xsd:string ;
+  rdfs:label "Graph"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
+  vac:description "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^xsd:string ;
+  vas:icon "questions_grid2_16.png"^^xsd:string ;
+  rdfs:label "Grid"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
+  vac:description "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
+  vas:icon "questions_raw_grid2_16.png"^^xsd:string ;
+  rdfs:label "Raw Grid"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridScatterSheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
+  vac:description "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^xsd:string ;
+  vas:icon "questions_grid_scatter1_16.png"^^xsd:string ;
+  rdfs:label "Grid Scatter"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet"^^xsd:string ;
+  vac:description "The Play Sheet for creating a heat map diagram. "^^xsd:string ;
+  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+  rdfs:label "Heat Map"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
+  vas:icon "questions_metamodel1_16.png"^^xsd:string ;
+  rdfs:label "Metamodel Graph"^^xsd:string ;
+.
+#<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.OCONUSMapPlaySheet>
+#  rdf:type vas:DataView ;
+#  ui:viewClass "gov.va.semoss.ui.components.playsheets.OCONUSMapPlaySheet"^^xsd:string ;
+#  vac:description """The Play Sheet for Outside the Continental United States (OCONUS) geo-location data.  
+# Visualizes Latitude/Longitude coordinates on a map of OCONUS."""^^xsd:string ;
+#  vas:icon "questions_oconus_map1_16.png"^^xsd:string ;
+#  rdfs:label "Outside Continental US Heat Map"^^xsd:string ;
+# .
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet"^^xsd:string ;
+  vac:description "The Play Sheet for creating a Parallel Coordinates diagram."^^xsd:string ;
+  vas:icon "questions_parcoords4_16.png"^^xsd:string ;
+  rdfs:label "Parallel Coordinates"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.PieChartPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet"^^xsd:string ;
+  vas:icon "questions_pie_chart1_16.png"^^xsd:string ;
+  rdfs:label "Pie Chart"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.SankeyPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
+  vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships."^^xsd:string ;
+  vas:icon "questions_sankey2_16.png"^^xsd:string ;
+  rdfs:label "Sankey Diagram"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet"^^xsd:string ;
+  vac:description """The Play Sheet for the United States geo-location data heatmap.  
+Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+  vas:icon "questions_us_heat_map1_16.png"^^xsd:string ;
+  rdfs:label "US Heat Map"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet"^^xsd:string ;
+  vac:description """The Play Sheet for the World geo-location data heatmap.  
+Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+  vas:icon "questions_world_heat_map1_16.png"^^xsd:string ;
+  rdfs:label "World Heat Map"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
+  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+  rdfs:label "Application Duplication Heat Map"^^xsd:string ;
+.
+<http://va.gov/ontologies/semoss#gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet>
+  rdf:type vas:DataView ;
+  ui:viewClass "gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet"^^xsd:string ;
+  vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+  rdfs:label "Dupe Heat Map"^^xsd:string ;
+.
+vas:icon
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain ui:Element ;
+  rdfs:label "icon"^^xsd:string ;
+.
+vas:insight
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "insight"^^xsd:string ;
+  rdfs:range vas:InsightProperties ;
+.
+vas:isLegacy
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Is Legacy"^^xsd:string ;
+  rdfs:range xsd:boolean ;
+.
+vas:reification
+  rdf:type rdf:Property ;
+  rdfs:label "Reification"^^xsd:string ;
+  rdfs:range vas:ReificationModel ;
+.
+insights:Generic-Perspective dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
+	olo:slot insights:Generic-Perspective-slot-1 , insights:Generic-Perspective-slot-2 , insights:Generic-Perspective-slot-3 ;
+	a vas:Perspective ;
+	rdfs:label "Generic-Perspective" ;
+	dcterms:description "System Provided Generic Perspective" ;
+	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
+
+insights:Generic-Perspective-slot-1 olo:index "1"^^xsd:int ;
+	olo:item insights:GQ0 .
+
+insights:Generic-Perspective-slot-2 olo:index "2"^^xsd:int ;
+	olo:item insights:GQ1 .
+
+insights:GQ0 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+	spin:body insights:GQ0-CONSTRUCT ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "View the Database Metamodel" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "The need to filter semoss:Relation indicates an error occuring somewhere, possibly in the importer." ;
+	dcterms:modified "2015-05-27T22:02:17.224Z"^^xsd:dateTime .
+
+insights:GQ0-CONSTRUCT sp:text """CONSTRUCT{ ?source ?relation ?target }
+WHERE {
+  ?relation a owl:ObjectProperty .
+  ?s ?relation ?o .
+  ?s a ?source . 
+  ?o a ?target . 
+  FILTER( ?source != semoss:Concept && ?source != owl:Class && ?source != rdfs:Resource  && ?source != semoss:Relation )
+  FILTER( ?target != semoss:Concept && ?target != owl:Class && ?target != rdfs:Resource )
+}""" ;
+	a sp:Construct .
+
+
+
+insights:GQ1 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+	spin:body insights:GQ1-CONSTRUCT ;
+	spin:constraint insights:GQ1-Concept , insights:GQ1-Instance ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	vas:isLegacy "true"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:MagicProperty ;
+	rdfs:label "Explore an instance of a selected node type" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "The legacy mode requires both ?entity and ?instance to be in the WHERE clause." ;
+	dcterms:modified "2015-05-27T20:25:40.600Z"^^xsd:dateTime .
+
+
+
+insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
+	spl:predicate arg:Concept ;
+	spl:valueType semoss:Concept ;
+	a spl:Argument ;
+	rdfs:label "Concept" .
+
+
+
+insights:GQ1-Concept-Query sp:text "SELECT ?entity WHERE { ?entity rdfs:subClassOf semoss:Concept }" ;
+	a sp:Select .
+
+
+
+insights:GQ1-CONSTRUCT sp:text "SELECT ?instance WHERE { BIND(<@Concept-http://semoss.org/ontologies/Concept@> AS ?entity) BIND(<@Instance-http://semoss.org/ontologies/Concept/Instance@> AS ?instance) }" ;
+	a sp:Construct .
+
+
+
+insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
+	spl:predicate arg:Instance ;
+	spl:valueType semoss:Concept ;
+	a spl:Argument ;
+	rdfs:label "Instance" .
+
+
+insights:GQ1-Instance-Query sp:text "SELECT ?Instance WHERE { {?Instance a <@Concept@> ;} }" ;
+	a sp:Select .
+
+
+
+<http://va.gov/ontologies/semoss> a owl:Ontology ;
+	owl:imports <http://purl.org/ontology/olo/core#> , <http://rdfs.org/ns/void> , <http://spinrdf.org/spin> , <http://uispin.org/ui> , <http://va.gov/ontologies/core> , <http://purl.org/dc/terms/> ;
+	owl:versionInfo "Created with TopBraid Composer"^^xsd:string .
+
+
+
+vas:Database a owl:Class ;
+	rdfs:label "Database"^^xsd:string ;
+	rdfs:subClassOf void:Dataset .
+
+
+
+vas:DataView a owl:Class ;
+	rdfs:label "Data View"^^xsd:string ;
+	rdfs:subClassOf ui:DataViews , _:t2274 , _:t2283 , _:t2293 , _:t2301 , _:t2309 , _:t2317 , _:t2325 .
+
+
+vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet"^^xsd:string ;
+	vas:icon "questions_bar_chart1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Column Chart"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a Dendrogram diagram using names and children.  "^^xsd:string ;
+	vas:icon "questions_dendrogram1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Dendrogram"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GraphPlaySheet"^^xsd:string ;
+	vas:icon "questions_graph_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Graph"^^xsd:string .
+
+
+vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
+	vac:description "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^xsd:string ;
+	vas:icon "questions_grid2_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Grid"^^xsd:string , "gov.va.semoss.ui.components.playsheets.GridPlaySheet" .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
+	vac:description "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
+	vas:icon "questions_raw_grid2_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Raw Grid"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.GridScatterSheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
+	vac:description "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^xsd:string ;
+	vas:icon "questions_grid_scatter1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Grid Scatter"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a heat map diagram. "^^xsd:string ;
+	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Heat Map"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
+	vas:icon "questions_metamodel1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Metamodel Graph"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a Parallel Coordinates diagram."^^xsd:string ;
+	vas:icon "questions_parcoords4_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Parallel Coordinates"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.PieChartPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet"^^xsd:string ;
+	vas:icon "questions_pie_chart1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Pie Chart"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.SankeyPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
+	vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships."^^xsd:string ;
+	vas:icon "questions_sankey2_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Sankey Diagram"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet"^^xsd:string ;
+	vac:description """The Play Sheet for the United States geo-location data heatmap.  
+Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+	vas:icon "questions_us_heat_map1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "US Heat Map"^^xsd:string .
+
+
+
+vas:gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet"^^xsd:string ;
+	vac:description """The Play Sheet for the World geo-location data heatmap.  
+Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
+	vas:icon "questions_world_heat_map1_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "World Heat Map"^^xsd:string .
+
+
+
+vas:gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet ui:viewClass "gov.va.vcamp.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
+	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Application Duplication Heat Map"^^xsd:string .
+
+
+vas:gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet ui:viewClass "gov.va.vcamp.ui.components.playsheets.DupeHeatMapSheet"^^xsd:string ;
+	vas:icon "questions_heat_map3_16.png"^^xsd:string ;
+	a vas:DataView ;
+	rdfs:label "Dupe Heat Map"^^xsd:string .
+
+
+vas:icon a owl:DatatypeProperty ;
+	rdfs:domain ui:Element ;
+	rdfs:label "icon"^^xsd:string .
+
+
+vas:insight a owl:ObjectProperty ;
+	rdfs:label "insight"^^xsd:string ;
+	rdfs:range vas:InsightProperties .
+
+
+
+vas:InsightProperties a spin:MagicProperty ;
+	rdfs:label "Insight Properties"^^xsd:string ;
+	rdfs:subClassOf spin:MagicProperties .
+
+
+
+vas:isLegacy a owl:DatatypeProperty ;
+	rdfs:label "Is Legacy"^^xsd:string ;
+	rdfs:range xsd:boolean .
+
+
+
+vas:Perspective a owl:Class ;
+	rdfs:label "Perspective"^^xsd:string ;
+	rdfs:subClassOf olo:OrderedList , ui:Element , _:t2275 , _:t2284 , _:t2294 , _:t2302 , _:t2310 , _:t2318 , _:t2326 .
+
+
+
+vas:RDR-Reification a vas:ReificationModel ;
+	rdfs:label "RDR Reification"^^xsd:string .
+
+
+
+vas:reification a rdf:Property ;
+	rdfs:label "Reification"^^xsd:string ;
+	rdfs:range vas:ReificationModel .
+
+
+
+vas:ReificationModel a owl:Class ;
+	rdfs:label "Reification Model"^^xsd:string ;
+	rdfs:subClassOf owl:Thing .
+
+
+
+vas:VASEMOSS-Reification a vas:ReificationModel ;
+	rdfs:label "VA-SEMOSS Reification"^^xsd:string .
+
+
+
+vas:W3C-Reification a vas:ReificationModel ;
+	rdfs:label "W3C Reification"^^xsd:string .
+
+
+
+<http://va.gov/ontologies/vcamp> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
+	vac:headURL "$HeadURL: http://104.130.3.174/svn/vcamp/V-CAMP/branches/dev/src/main/resources/models/vcamp.ttl $"^^xsd:string ;
+	vac:namespace "http://semoss.org/ontologies/vcamp#"^^xsd:string ;
+	vac:namespacePrefix "vcamp"^^xsd:string ;
+	vac:revision "$Revision: 2128 $"^^xsd:string ;
+	vac:revisionDate "$Date: 2015-04-05 21:14:03 -0400 (Sun, 05 Apr 2015) $"^^xsd:string ;
+	vac:specificity "1"^^xsd:integer ;
+	vac:version "0.5"^^xsd:string ;
+	owl:versionIRI <http://semoss.org/ontologies/vcamp/v0.5> , <http://semoss.org/ontololgies/vcamp/v0.5> ;
+	a owl:Ontology ;
+	owl:imports <http://semoss.org/ontologies> , <http://va.gov/ontologies/core> ;
+	owl:versionInfo "$Id: vcamp.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^xsd:string .
+
+
+
+insights:Generic-Perspective-insight-3 dcterms:created "2015-05-27T20:34:46.426Z"^^xsd:dateTime ;
+	dcterms:creator "tyom, lagartija" ;
+	spin:body insights:Generic-Perspective-insight-body-1432758886428 ;
+	spin:constraint insights:constraint-1436573056737 , insights:constraint-1436575564812 ;
+	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	vas:isLegacy "false"^^xsd:boolean ;
+	vas:rendererClass "" ;
+	a spin:Function ;
+	rdfs:label "Show One Neighbor Away from Selected Node" ;
+	rdfs:subClassOf vas:InsightProperties ;
+	dcterms:description "" ;
+	dcterms:modified "2015-07-10T20:03:27.732Z"^^xsd:dateTime .
+
+insights:Generic-Perspective-insight-body-1432758886428 sp:text """CONSTRUCT {
+   ?entity ?p1 ?o1 .
+   ?o2 ?p2 ?entity .
+}WHERE { 
+   BIND(?Instance AS ?entity) .
+   OPTIONAL { ?entity ?p1 ?o1 .}
+   OPTIONAL { ?o2 ?p2 ?entity .}
+}""" ;
+	a sp:Select .
+
+insights:constraint-1436573056737 sp:query insights:query-1436573135434 ;
+	spl:predicate arg:predicate-1436573135434 ;
+	spl:valueType owl:Nothing ;
+	a spl:Argument ;
+	rdfs:label "Concept" .
+
+arg:predicate-1436573135434 rdfs:label "Concept" .
+
+insights:query-1436573135434 sp:text """SELECT ?entity
+WHERE {
+    ?entity rdfs:subClassOf semoss:Concept .
+}""" .
+
+insights:constraint-1436575564812 sp:query insights:query-1436585575543 ;
+	spl:predicate arg:predicate-1436585575543 ;
+	spl:valueType owl:Nothing ;
+	a spl:Argument ;
+	rdfs:label "Instance" .
+
+arg:predicate-1436585575543 rdfs:label "Instance" .
+
+insights:query-1436585575543 sp:text """SELECT ?entity 
+WHERE { 
+   ?entity a ?Concept .
+}""" .
+
+insights:Generic-Perspective-slot-3 olo:index "3"^^xsd:int ;
+	olo:item insights:Generic-Perspective-insight-3 .
+

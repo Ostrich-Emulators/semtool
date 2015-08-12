@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.query.util.impl;
 
+import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import java.util.List;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;

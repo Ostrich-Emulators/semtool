@@ -51,6 +51,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 
 public class  InsightManagerController_2 implements Initializable{
@@ -607,7 +608,7 @@ public class  InsightManagerController_2 implements Initializable{
 	 *  or is contained by the deleted Perspective. (Called by "buildContextMenus()".)
 	 */
 	private void deletePerspective(){
-		if(Utility.showWarningOkCancel("Are you sure you want to delete this Perspective?") == 0){
+		if(GuiUtility.showWarningOkCancel("Are you sure you want to delete this Perspective?") == 0){
 		   TreeItem<Object> itemPerspective = treevPerspectives.getSelectionModel().getSelectedItem();
 		   clearRightPane(itemPerspective);
 		   treevPerspectives.getRoot().getChildren().remove(itemPerspective);
@@ -655,7 +656,7 @@ public class  InsightManagerController_2 implements Initializable{
 	 *  or is contained by the deleted Insight. (Called by "buildContextMenus()".)
 	 */
 	private void deleteInsight(){
-		if(Utility.showWarningOkCancel("Are you sure you want to delete this Insight?") == 0){
+		if(GuiUtility.showWarningOkCancel("Are you sure you want to delete this Insight?") == 0){
 		   TreeItem<Object> itemInsight = treevPerspectives.getSelectionModel().getSelectedItem();
 		   clearRightPane(itemInsight);
 		   TreeItem<Object> itemPerspective = treevPerspectives.getSelectionModel()
@@ -717,7 +718,7 @@ public class  InsightManagerController_2 implements Initializable{
 	 *  or is contained by the deleted Parameter. (Called by "buildContextMenus()".)
 	 */
 	private void deleteParameter(){
-		if(Utility.showWarningOkCancel("Are you sure you want to delete this Parameter?") == 0){
+		if(GuiUtility.showWarningOkCancel("Are you sure you want to delete this Parameter?") == 0){
 		   TreeItem<Object> itemParameter = treevPerspectives.getSelectionModel().getSelectedItem();
 		   clearRightPane(itemParameter);
 		   TreeItem<Object> itemInsight = itemParameter.getParent();

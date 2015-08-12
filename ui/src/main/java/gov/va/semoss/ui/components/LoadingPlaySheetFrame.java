@@ -28,8 +28,9 @@ import gov.va.semoss.ui.components.playsheets.RelationshipLoadingPlaySheet;
 import gov.va.semoss.ui.components.renderers.RepositoryRenderer;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultIcons;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -248,7 +249,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			public void done() {
 				super.done();
 				if ( null != error[0] ) {
-					Utility.showError( error[0] );
+					GuiUtility.showError( error[0] );
 				}
 			}
 		};
@@ -378,7 +379,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					? askForEngine( "Load" ) : getEngine() );
 
 			if ( null == engine ) {
-				Utility.showMessage( "Load canceled" );
+				GuiUtility.showMessage( "Load canceled" );
 				return;
 			}
 
@@ -386,7 +387,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				if ( !ps.okToLoad() ) {
 					selectTab( ps );
 					if ( !ps.correct() ) {
-						Utility.showMessage( "Load canceled" );
+						GuiUtility.showMessage( "Load canceled" );
 						return;
 					}
 				}
@@ -533,7 +534,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						? LoadingPlaySheetFrame.this.askForEngine( "Check" ) : getEngine() );
 
 				if ( null == eng ) {
-					Utility.showMessage( "QA Check canceled" );
+					GuiUtility.showMessage( "QA Check canceled" );
 					timertoggle.setSelected( false );
 				}
 

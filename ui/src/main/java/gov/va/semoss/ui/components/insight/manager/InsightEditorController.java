@@ -1,28 +1,47 @@
 package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.ParameterType;
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.ExecuteQueryProcessor;
+import gov.va.semoss.ui.components.ParamComboBox;
+import gov.va.semoss.ui.components.SelectDatabasePanel;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 
+import java.awt.Component;
+import java.awt.Event;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ListCell;
 
+import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 
 public class InsightEditorController implements Initializable{
+	TreeView<Object> treevPerspectives;
 	public URI itemURI;
 	@FXML
 	protected TextField txtQuestion_Inst;
@@ -33,6 +52,8 @@ public class InsightEditorController implements Initializable{
 	@FXML
 	protected TextArea txtaQuery_Inst;
 	@FXML
+	protected Button btnTestQuery_Inst;
+	@FXML
 	protected TextArea txtaInsightDesc_Inst;
 	@FXML
 	protected TextField txtCreator_Inst;
@@ -40,6 +61,8 @@ public class InsightEditorController implements Initializable{
 	protected TextField txtCreated_Inst;
 	@FXML
 	protected TextField txtModified_Inst;
+
+	private static final Logger log = Logger.getLogger( SelectDatabasePanel.class );
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -54,6 +77,7 @@ public class InsightEditorController implements Initializable{
 	 * @param obsPlaySheets -- (ObservableList<PlaySheet>) A list of available PlaySheets.
 	 */
 	public void setData(TreeView<Object> treevPerspectives, ObservableList<PlaySheet> obsPlaySheets){
+		this.treevPerspectives = treevPerspectives;
 		TreeItem<Object> itemSelected = treevPerspectives.getSelectionModel().getSelectedItem();
 		Insight insight = (Insight) itemSelected.getValue();
 		itemURI = insight.getId();
@@ -162,6 +186,11 @@ public class InsightEditorController implements Initializable{
 			insight.setSparql(newValue);
 		});
 
+		//Build Test Query Button:
+ 	    //------------------------
+ 	    btnTestQuery_Inst.setOnAction(this::handleTestQuery);
+		btnTestQuery_Inst.setTooltip(new Tooltip("Test Insight Query and its Parameters."));
+
 		//Insight Description:
 		//--------------------
 		txtaInsightDesc_Inst.setText(insight.getDescription());
@@ -204,6 +233,78 @@ public class InsightEditorController implements Initializable{
 		   }
 	   }
 	   return strReturnValue;
+	}
+
+	/**
+	 * 
+	 * @param event
+	 */
+	private void handleTestQuery(ActionEvent event){
+		ExecuteQueryProcessor insightAction = new InsightAction();
+		insightAction.actionPerformed(new java.awt.event.ActionEvent(event.getSource(), 1, null));
+	}
+
+	/**   Provides methods to test an Insight Query and its Parameter settings
+	 * in the Display Pane.
+	 * 
+	 * @author Thomas
+	 */
+	private class InsightAction extends ExecuteQueryProcessor {
+        Perspective perspective;
+        Insight insight;
+		
+		public InsightAction() {
+			super( "Test Query" );
+			perspective = (Perspective) treevPerspectives.getSelectionModel().getSelectedItem().getParent().getValue();
+			insight = (Insight) treevPerspectives.getSelectionModel().getSelectedItem().getValue();
+		}
+
+		@Override
+		protected String getTitle() {
+			return perspective.getLabel() + "-Insight-" + insight.getOrder();
+		}
+
+		@Override
+		protected String getFrameTitle() {
+			return "TEST OF  \"" + insight.getLabel() + "\"";
+		}
+
+		@Override
+		protected String getQuery() {
+			String sparql = Utility.normalizeParam(insight.getSparql());
+
+			Map<String, String> paramHash = getParameterValues();
+
+			log.debug( "SPARQL " + sparql );
+			if ( insight.isLegacy() ) {
+				sparql = Utility.fillParam( sparql, paramHash );
+			}
+			else {
+				sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
+			}
+			return sparql;
+		}
+
+		@Override
+		protected Class<? extends PlaySheetCentralComponent> getPlaySheetCentralComponent() throws ClassNotFoundException {
+			String output = insight.getOutput();
+			return (Class<PlaySheetCentralComponent>) Class.forName(output);
+		}
+
+		@Override
+		protected IEngine getEngine() {
+			return DIHelper.getInstance().getRdfEngine();
+		}
+
+		@Override
+		protected boolean isAppending() {
+			return false;
+		}
+	}
+	private Map<String, String> getParameterValues() {
+		Map<String, String> paramHash = new HashMap<>();
+
+		return paramHash;
 	}
 
 }

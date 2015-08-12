@@ -70,7 +70,7 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -234,7 +234,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 		RepositoryConnection rc = getRawConnection();
 		rc.begin();
-		for ( Map.Entry<String, String> en : Utility.DEFAULTNAMESPACES.entrySet() ) {
+		for ( Map.Entry<String, String> en : GuiUtility.DEFAULTNAMESPACES.entrySet() ) {
 			rc.setNamespace( en.getKey(), en.getValue() );
 		}
 		rc.commit();
@@ -354,10 +354,9 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	public static String processNamespaces( String rawsparql,
 			Map<String, String> customNamespaces ) {
 		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
-		namespaces.putAll( Utility.DEFAULTNAMESPACES );
-		if(customNamespaces != null){
-		   namespaces.putAll( customNamespaces );
-		}
+		namespaces.putAll(GuiUtility.DEFAULTNAMESPACES );
+		namespaces.putAll( customNamespaces );
+
 		Set<String> existingNamespaces = new HashSet<>();
 		if ( rawsparql.toUpperCase().contains( "PREFIX" ) ) {
 			Pattern pat = Pattern.compile( "prefix[\\s]+([A-Za-z0-9_-]+)[\\s]*:",

@@ -8,13 +8,13 @@ package gov.va.semoss.ui.components.graphicalquerybuilder;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel.QueryOrder;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -62,7 +62,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 		LabeledPairTableCellRenderer renderer
 				= LabeledPairTableCellRenderer.getUriPairRenderer();
 		Set<URI> labels = getAllProperties( elements );
-		renderer.cache( Utility.getInstanceLabels( labels, engine ) );
+		renderer.cache( GuiUtility.getInstanceLabels( labels, engine ) );
 
 		LabeledPairTableCellRenderer trenderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( engine );
@@ -193,16 +193,17 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 			super();
 			concepts = NodeDerivationTools.instance().createConceptList( eng );
 			conceptmap
-					= Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, eng ) );
+					= Utility.sortUrisByLabel( GuiUtility.getInstanceLabels( concepts, eng ) );
 			engine = eng;
 			graph = gr;
 		}
 
 		@Override
 		public TableCellRenderer getCellRenderer( int row, int column ) {
-			return( 6 == column ? filterRenderer : super.getCellRenderer( row, column ) );
+			return ( 6 == column ? filterRenderer
+					: super.getCellRenderer( row, column ) );
 		}
-		
+
 		@Override
 		public TableCellEditor getCellEditor( int row, int column ) {
 			QueryOrder src = model.getRawRow( row );
@@ -229,7 +230,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 
 						List<URI> links = NodeDerivationTools.instance().getPredicatesBetween( starttype,
 								endtype, engine );
-						Map<URI, String> labels = Utility.getInstanceLabels( links, engine );
+						Map<URI, String> labels = GuiUtility.getInstanceLabels( links, engine );
 						labels.put( Constants.ANYNODE, "<Any>" );
 						types.setChoices( Utility.sortUrisByLabel( labels ) );
 					}

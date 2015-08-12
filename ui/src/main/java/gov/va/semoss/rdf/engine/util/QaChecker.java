@@ -15,7 +15,7 @@ import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -436,7 +436,7 @@ public class QaChecker {
 
 			vqa2.useInferred( false );
 			List<URI[]> data = engine.query( vqa2 );
-			Map<URI, String> labels = Utility.getInstanceLabels( needlabels, engine );
+			Map<URI, String> labels = GuiUtility.getInstanceLabels( needlabels, engine );
 			for ( URI[] uris : data ) {
 				cacheRelationNode( uris[5], labels.get( uris[0] ),
 						labels.get( uris[1] ), labels.get( uris[2] ),

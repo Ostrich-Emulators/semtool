@@ -6,7 +6,7 @@
 package gov.va.semoss.ui.components.renderers;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Component;
 import java.util.HashMap;
 import java.util.Map;
@@ -92,7 +92,7 @@ public class LabeledPairTableCellRenderer<T> extends DefaultTableCellRenderer {
 				if ( val instanceof URI ) {
 					URI uri = URI.class.cast( val );
 					ret = ( null == eng ? uri.getLocalName()
-							: Utility.getInstanceLabel( Resource.class.cast( val ), eng ) );
+							: GuiUtility.getInstanceLabel( Resource.class.cast( val ), eng ) );
 					cache( val, ret );
 				}
 				else if ( val instanceof Literal ) {

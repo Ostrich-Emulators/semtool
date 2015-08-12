@@ -28,10 +28,11 @@ import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
+import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 
 import java.io.FileWriter;
@@ -157,7 +158,7 @@ public class ExportInsightsAction extends DbAction {
 
 						}
 						catch ( RepositoryException re ) {
-							Utility.showError( re.getLocalizedMessage() );
+							GuiUtility.showError( re.getLocalizedMessage() );
 							log.error( re, re );
 						}
 					}
@@ -165,7 +166,7 @@ public class ExportInsightsAction extends DbAction {
 					@Override
 					public void done() {
 						super.done();
-						Utility.showExportMessage( null, "Exported to " + exportfile,
+						GuiUtility.showExportMessage( null, "Exported to " + exportfile,
 								"Success", exportfile );
 					}
 				};

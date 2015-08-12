@@ -37,8 +37,8 @@ import gov.va.semoss.ui.main.listener.impl.RingsButtonListener;
 import gov.va.semoss.ui.main.listener.impl.TreeConverterListener;
 import gov.va.semoss.ui.main.listener.impl.UndoListener;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -58,7 +58,6 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
-import org.apache.log4j.Logger;
 
 /**
  * Icons used in this search panel contributed from gentleface.com.
@@ -86,10 +85,9 @@ public class ControlPanel extends JPanel implements GraphListener {
 	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
 	private final TreeConverterListener treeListener = new TreeConverterListener();
 	private final RingsButtonListener ringsListener = new RingsButtonListener();
-	private final SearchController searchController = new SearchController();
+	private final SearchController searchController;
 	private final RedoListener redoListener = new RedoListener();
 	private final UndoListener undoListener = new UndoListener();
-	private boolean forTree = false;
 
 	/**
 	 * Create the panel.
@@ -99,31 +97,27 @@ public class ControlPanel extends JPanel implements GraphListener {
 	public ControlPanel() {
 		searchText.setMaximumSize( new Dimension( 300, 20 ) );
 		searchText.setBorder( new BevelBorder( BevelBorder.LOWERED, null, null, null, null ) );
-		searchText.setText( Constants.ENTER_TEXT );
-
 		searchText.setColumns( 9 );
-		searchController.setText( searchText );
-		searchText.addFocusListener( searchController );
-		searchText.addKeyListener( searchController );
+		searchController = new SearchController( searchText );
 
-		highlightButton = new JToggleButton( Utility.loadImageIcon( "search.png" ) );
+		highlightButton = new JToggleButton( GuiUtility.loadImageIcon( "search.png" ) );
 		highlightButton.setToolTipText( "<html><b>Search</b><br>Depress to see your results on the graph,<br>keep it depressed to see results as you type (slow)</html>" );
 		highlightButton.addActionListener( searchController );
 
-		resetBtn = new JButton( Utility.loadImageIcon( "refresh.png" ) );
+		resetBtn = new JButton( GuiUtility.loadImageIcon( "refresh.png" ) );
 		resetBtn.addActionListener( resetTransListener );
 		resetBtn.setToolTipText( "<html><b>Reset (F5)</b><br>Reset Graph Transformers</html>" );
 		addKeyListener( resetBtn, resetTransListener,
 				"F5", KeyStroke.getKeyStroke( "F5" ) );
 
-		undoButton = new JButton( Utility.loadImageIcon( "undo.png" ) );
+		undoButton = new JButton( GuiUtility.loadImageIcon( "undo.png" ) );
 		undoButton.setToolTipText( "<html><b>Undo (CRTL+Z)</b><br>Undo the last graph action</html>" );
 		undoButton.addActionListener( undoListener );
 		addKeyListener( undoButton, undoListener,
 				"control Z", KeyStroke.getKeyStroke( KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK ) );
 		undoButton.setEnabled( false );
 
-		redoButton = new JButton( Utility.loadImageIcon( "redo.png" ) );
+		redoButton = new JButton( GuiUtility.loadImageIcon( "redo.png" ) );
 		redoButton.setToolTipText( "<html><b>Redo (CRTL+Y)</b><br>Redo the previous action</html>" );
 		redoButton.addActionListener( redoListener );
 		addKeyListener( redoButton, redoListener,
@@ -142,11 +136,11 @@ public class ControlPanel extends JPanel implements GraphListener {
 			}
 		} );
 
-		ringsButton = new JToggleButton( Utility.loadImageIcon( "ring.png" ) );
+		ringsButton = new JToggleButton( GuiUtility.loadImageIcon( "ring.png" ) );
 		ringsButton.setToolTipText( "<html><b>Show Radial Rings</b><br>Only available with Balloon and Radial Tree layouts</html>" );
 		ringsButton.addActionListener( ringsListener );
 
-		weightButton = new WeightDropDownButton( Utility.loadImageIcon( "width.png" ) );
+		weightButton = new WeightDropDownButton( GuiUtility.loadImageIcon( "width.png" ) );
 		weightButton.setToolTipText( "<html><b>Edge Weight</b><br>Convert edge thickness corresponding to properties that exist on the edges</html>" );
 		weightButton.addActionListener( new ActionListener() {
 			@Override
@@ -155,14 +149,14 @@ public class ControlPanel extends JPanel implements GraphListener {
 			}
 		} );
 
-		decreaseVertSizeButton = new JButton( Utility.loadImageIcon( "decreaseNodeSize.png" ) );
+		decreaseVertSizeButton = new JButton( GuiUtility.loadImageIcon( "decreaseNodeSize.png" ) );
 		decreaseVertSizeButton.setName( "Decrease" );
 		decreaseVertSizeButton.addActionListener( vertSizeListener );
 		decreaseVertSizeButton.setToolTipText( "<html><b>Decrease Node Size (CTRL+[)</b><br>Decrease the node size of selected nodes or all nodes</html>" );
 		addKeyListener( decreaseVertSizeButton, vertSizeListener,
 				"control [", KeyStroke.getKeyStroke( KeyEvent.VK_OPEN_BRACKET, InputEvent.CTRL_DOWN_MASK ) );
 
-		increaseVertSizeButton = new JButton( Utility.loadImageIcon( "increaseNodeSize.png" ) );
+		increaseVertSizeButton = new JButton( GuiUtility.loadImageIcon( "increaseNodeSize.png" ) );
 		increaseVertSizeButton.setName( "Increase" );
 		increaseVertSizeButton.addActionListener( vertSizeListener );
 		increaseVertSizeButton.setToolTipText( "<html><b>Increase Node Size (CTRL+])</b><br>Increase the node size of selected nodes or all nodes</html>" );
@@ -175,7 +169,6 @@ public class ControlPanel extends JPanel implements GraphListener {
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		Logger.getLogger( getClass() ).debug( "graph updated...updating lucene" );
 		searchController.indexGraph( graph, gps.getEngine() );
 	}
 
@@ -191,8 +184,6 @@ public class ControlPanel extends JPanel implements GraphListener {
 	}
 
 	public void setForTree( boolean b ) {
-		forTree = b;
-
 		ringsListener.setEnabled( b );
 		ringsButton.setVisible( b );
 
@@ -223,7 +214,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 		add( getJSeparator(), getGBC() );
 
 		add( decreaseVertSizeButton, getGBC() );
-		add( increaseVertSizeButton, getGBC() );		
+		add( increaseVertSizeButton, getGBC() );
 	}
 
 	private void addKeyListener( JButton button, Action action, String keyStrokeString,

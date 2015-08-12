@@ -15,7 +15,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
 
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -156,9 +156,9 @@ public class PlaySheetFrame extends JInternalFrame {
 			DIHelper.getInstance().getPlayPane().getFilterPanel().useBlankModels();
 
 			if ( pscc.hasChanges() ) {
-				Utility.resetJTable( Constants.LABEL_TABLE );
-				Utility.resetJTable( Constants.TOOLTIP_TABLE );
-				Utility.resetJTable( Constants.COLOR_SHAPE_TABLE );
+				GuiUtility.resetJTable( Constants.LABEL_TABLE );
+				GuiUtility.resetJTable( Constants.TOOLTIP_TABLE );
+				GuiUtility.resetJTable( Constants.COLOR_SHAPE_TABLE );
 
 				Map<String, Action> actions = pscc.getActions();
 				Map<String, Action> optactions = new LinkedHashMap<>();
@@ -339,7 +339,7 @@ public class PlaySheetFrame extends JInternalFrame {
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 					log.error( e, e );
-					Utility.showError( e.getLocalizedMessage() );
+					GuiUtility.showError( e.getLocalizedMessage() );
 				}
 			}
 		} ) {

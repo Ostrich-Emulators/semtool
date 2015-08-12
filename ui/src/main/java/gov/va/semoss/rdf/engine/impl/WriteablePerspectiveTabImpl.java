@@ -12,8 +12,8 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -103,7 +103,7 @@ public class WriteablePerspectiveTabImpl implements WriteablePerspectiveTab {
 
 			//Reorder Insights, inserting the new Insight at the new order value:
 			if ( setInsightOrders( newOrder, perspective ) == false ) {
-				Utility.showWarningOkCancel( "Insight could not be placed at desired position." );
+				GuiUtility.showWarningOkCancel( "Insight could not be placed at desired position." );
 			};
 
 			//Import Insights into the repository:

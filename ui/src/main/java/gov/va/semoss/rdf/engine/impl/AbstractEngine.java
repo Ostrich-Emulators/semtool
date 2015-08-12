@@ -28,7 +28,6 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -41,6 +40,7 @@ import java.util.regex.Pattern;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.util.UriBuilder;
+import gov.va.semoss.util.Utility;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 

@@ -32,12 +32,17 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.remote.BigdataSailRemoteRepository;
+import gov.va.semoss.util.RDFDatatypeTools;
+import gov.va.semoss.util.Utility;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -92,16 +97,17 @@ public class RemoteBigdataEngine extends BigDataEngine {
 	 * @param concept boolean - True if the statement is a concept
 	 * @param graph Graph - The graph where the triple will be added.
 	 */
-	public void addStatement( String subject, String predicate, Object object, boolean concept, Graph graph ) {
+	public void addStatement( String subject, String predicate, Object object, 
+			boolean concept, Graph graph ) {
 		String subString;
 		String predString;
 		String sub = subject.trim();
 		String pred = predicate.trim();
-
-		subString = Utility.getUriCompatibleString( sub, false );
+		
+		subString = getUriCompatibleString( sub, false );
 		URI newSub = vf.createURI( subString );
 
-		predString = Utility.getUriCompatibleString( pred, false );
+		predString = getUriCompatibleString( pred, false );
 		URI newPred = vf.createURI( predString );
 
 		if ( !concept ) {
@@ -142,5 +148,66 @@ public class RemoteBigdataEngine extends BigDataEngine {
 		catch ( RepositoryException e ) {
 			log.error( e );
 		}
+	}
+	
+		/**
+	 * Generates a URI-compatible string
+	 *
+	 * @param original string
+	 * @param replaceForwardSlash if true, makes the whole string URI compatible.
+	 * If false, splits the string on /, and URI-encodes the intervening
+	 * characters
+	 *
+	 * @return Cleaned string
+	 */
+	public static String getUriCompatibleString( String original,
+			boolean replaceForwardSlash ) {
+		String trimmed = original.trim();
+		if ( trimmed.isEmpty() ) {
+			return trimmed;
+		}
+		StringBuilder sb = new StringBuilder();
+		try {
+			if ( replaceForwardSlash || !trimmed.contains( "/" ) ) {
+				if ( RDFDatatypeTools.isValidUriChars( trimmed ) ) {
+					sb.append( trimmed );
+				}
+				else {
+					sb.append( RandomStringUtils.randomAlphabetic( 1 ) )
+							.append( UUID.randomUUID().toString() );
+				}
+			}
+			else {
+				Pattern pat = Pattern.compile( "([A-Za-z0-9-_]+://)(.*)" );
+				Matcher m = pat.matcher( trimmed );
+				String extras;
+				if ( m.matches() ) {
+					sb.append( m.group( 1 ) );
+					extras = m.group( 2 );
+				}
+				else {
+					extras = trimmed;
+				}
+				boolean first = true;
+				for ( String part : extras.split( "/" ) ) {
+					String add = ( RDFDatatypeTools.isValidUriChars( part ) ? part
+							: RandomStringUtils.randomAlphabetic( 1 )
+							+ UUID.randomUUID().toString() );
+
+					if ( first ) {
+						first = false;
+					}
+					else {
+						sb.append( "/" );
+					}
+					sb.append( add );
+				}
+			}
+		}
+		catch ( Exception e ) {
+			log.warn( e, e );
+		}
+
+		return sb.toString();
 	}
 }

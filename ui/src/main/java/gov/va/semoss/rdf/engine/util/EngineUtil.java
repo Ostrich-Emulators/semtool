@@ -38,7 +38,6 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFHandlerException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -54,10 +53,11 @@ import gov.va.semoss.ui.components.RepositoryList;
 import gov.va.semoss.ui.components.RepositoryList.RepositoryListModel;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
 import java.net.URL;
@@ -168,7 +168,7 @@ public class EngineUtil implements Runnable {
 						}
 
 						if ( domount ) {
-							IEngine eng = Utility.loadEngine( entry.getKey() );
+							IEngine eng = GuiUtility.loadEngine( entry.getKey() );
 							// avoid a possible ConcurrentModificationException
 							List<EngineOperationListener> lls = new ArrayList<>( listeners );
 							for ( EngineOperationListener eol : lls ) {
@@ -254,7 +254,7 @@ public class EngineUtil implements Runnable {
 		File oldfile = new File( oldsmss );
 		// not opened, but maybe still exists
 		if ( null == from ) {
-			from = Utility.loadEngine( oldfile );
+			from = GuiUtility.loadEngine( oldfile );
 			fromWasOpened = true;
 		}
 
@@ -345,7 +345,7 @@ public class EngineUtil implements Runnable {
 		ecb.setReificationModel( ReificationStyle.fromUri( reification ) );
 
 		File newsmss = EngineUtil.createNew( ecb, null );
-		IEngine neweng = Utility.loadEngine( newsmss );
+		IEngine neweng = GuiUtility.loadEngine( newsmss );
 
 		merge( from, neweng, metadata.isData(), false );
 
@@ -358,7 +358,7 @@ public class EngineUtil implements Runnable {
 		}
 
 		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
-		Utility.closeEngine( neweng );
+		GuiUtility.closeEngine( neweng );
 		mount( newsmss, addToRepoList, true );
 	}
 
@@ -545,7 +545,7 @@ public class EngineUtil implements Runnable {
 		}
 
 		File smssfile = createEngine( ecb );
-		IEngine bde = Utility.loadEngine( smssfile.getAbsoluteFile() );
+		IEngine bde = GuiUtility.loadEngine( smssfile.getAbsoluteFile() );
 		List<Statement> vocabs = new ArrayList<>();
 
 		for ( URL url : ecb.getVocabularies() ) {

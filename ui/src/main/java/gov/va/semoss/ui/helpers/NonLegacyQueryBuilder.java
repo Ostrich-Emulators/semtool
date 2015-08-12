@@ -7,8 +7,9 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -110,7 +111,7 @@ public class NonLegacyQueryBuilder {
 		//If the query did not fetch labels for URIs 
 		//then fetch the labels via a utility method:
 		if ( colURIs.size() == mapURI_Labels.size() ) {
-			Map<URI, String> labellkp = Utility.getInstanceLabels( colURIs, engine );
+			Map<URI, String> labellkp = GuiUtility.getInstanceLabels( colURIs, engine );
 			box.setData( labellkp );
 
 			//If labels were fetched with URIs, then use them:
@@ -177,7 +178,7 @@ public class NonLegacyQueryBuilder {
 					Map<URI, String> mapURI_Labels = new HashMap<>();
 					try {
 						List<URI> uris = eng.query( OneVarListQueryAdapter.getUriList( sparqlQuery ) );
-						mapURI_Labels.putAll( Utility.getInstanceLabels( uris, eng ) );
+						mapURI_Labels.putAll(GuiUtility.getInstanceLabels( uris, eng ) );
 						logger.debug( "URIs: " + mapURI_Labels );
 					}
 					catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {

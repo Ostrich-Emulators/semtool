@@ -27,8 +27,8 @@ import org.openrdf.model.URI;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.util.GuiUtility;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -73,7 +73,7 @@ public class DBToLoadingSheetExporterTest {
 		}
 
 		try {
-			eng = Utility.loadEngine( dbfile );
+			eng = GuiUtility.loadEngine( dbfile );
 		}
 		catch ( IOException ioe ) {
 			log.error( ioe, ioe );
@@ -82,7 +82,7 @@ public class DBToLoadingSheetExporterTest {
 
 	@After
 	public void tearDown() {
-		Utility.closeEngine( eng );
+		GuiUtility.closeEngine( eng );
 		FileUtils.deleteQuietly( dbfile );
 	}
 

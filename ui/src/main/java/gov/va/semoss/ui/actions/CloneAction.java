@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.util.Utility;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.CloneDataPanel;
@@ -68,7 +68,7 @@ public class CloneAction extends DbAction {
           EngineUtil.getInstance().clone( getEngine(), md, true );
         }
         catch ( RepositoryException | IOException | EngineManagementException ex ) {
-          Utility.showError( ex.getMessage() );
+          GuiUtility.showError( ex.getMessage() );
           log.error( ex );
         }
       }
