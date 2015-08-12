@@ -20,7 +20,6 @@
 package gov.va.semoss.algorithm.impl;
 
 import gov.va.semoss.algorithm.api.IAlgorithm;
-import lpsolve.LpSolveException;
 
 /**
  * Extended to optimize the functionalities of various algorithms.
@@ -55,5 +54,5 @@ public abstract class AbstractOptimizer implements IAlgorithm {
 	/**
 	 * Sets variables in algorithm.
 	 */
-	public abstract void setVariables() throws LpSolveException;
+	public abstract void setVariables() throws Exception;
 }

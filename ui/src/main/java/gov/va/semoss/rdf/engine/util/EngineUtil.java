@@ -56,12 +56,12 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
-import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.user.User;
+import gov.va.semoss.user.UserImpl;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.prefs.Preferences;
 import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
@@ -756,10 +756,10 @@ public class EngineUtil implements Runnable {
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
 
-			Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
-			String username = prefs.get( Constants.USERPREF_NAME, "" );
-			String email = prefs.get( Constants.USERPREF_EMAIL, "" );
-			String org = prefs.get( Constants.USERPREF_ORG, "" );
+			User user = UserImpl.getUser();
+			String username = user.getProperty( User.UserProperty.USER_NAME );
+			String email = user.getProperty( User.UserProperty.USER_EMAIL );
+			String org = user.getProperty( User.UserProperty.USER_ORG );
 
 			if ( !( username.isEmpty() && email.isEmpty() ) ) {
 				StringBuilder poc = new StringBuilder();

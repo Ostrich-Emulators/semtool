@@ -32,7 +32,7 @@ import javax.swing.event.InternalFrameListener;
 
 import org.apache.log4j.Logger;
 
-import aurelienribon.ui.css.Style;
+//import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.DIHelper;
@@ -70,9 +70,9 @@ public class CustomSparqlPanel extends JPanel {
 	public CustomSparqlPanel() {
 		setLayout( new GridBagLayout() );
 
-		Style.registerTargetClassName( btnGetQuestionSparql, ".standardButton" );
-		Style.registerTargetClassName( btnShowHint, ".standardButton" );
-		Style.registerTargetClassName( btnSubmitSparqlQuery, ".standardButton" );
+//		Style.registerTargetClassName( btnGetQuestionSparql, ".standardButton" );
+//		Style.registerTargetClassName( btnShowHint, ".standardButton" );
+//		Style.registerTargetClassName( btnSubmitSparqlQuery, ".standardButton" );
 
 		JLabel lblSectionCCustomize = new JLabel( "Query Panel" );
 		lblSectionCCustomize.setForeground( Color.DARK_GRAY );

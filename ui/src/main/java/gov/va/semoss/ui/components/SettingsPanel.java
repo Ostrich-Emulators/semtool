@@ -21,6 +21,9 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.models.NamespaceTableModel;
 import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.user.User;
+import gov.va.semoss.user.User.UserProperty;
+import gov.va.semoss.user.UserImpl;
 
 /**
  *
@@ -30,7 +33,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger( SettingsPanel.class );
 	private final NamespaceTableModel namespacemodel = new NamespaceTableModel();
-
+	
 	protected SettingsPanel( Class<?> preferenceRoot ) {
 		initComponents();
 
@@ -61,11 +64,11 @@ public class SettingsPanel extends javax.swing.JPanel {
 			c.setSelected( PlayPane.getProp( prefs, val ) );
 		}
 
-		fullname.setText( prefs.get( Constants.USERPREF_NAME, "" ) );
-		email.setText( prefs.get( Constants.USERPREF_EMAIL, "" ) );
-		organization.setText( prefs.get( Constants.USERPREF_ORG, "" ) );
-
-		namespacemodel.setNamespaces( SemossPreferences.getInstance().getNamespaces() );
+		User user = UserImpl.getUser();
+		fullname.setText( user.getProperty( UserProperty.USER_NAME ) );
+		email.setText( user.getProperty( UserProperty.USER_EMAIL ) );
+		organization.setText( user.getProperty( UserProperty.USER_ORG ) );
+		namespacemodel.setNamespaces( UserImpl.getUser().getNamespaces() );
 	}
 
 	public static void showDialog( Frame frame ) {
@@ -75,13 +78,12 @@ public class SettingsPanel extends javax.swing.JPanel {
 				JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );
 
 		if ( 0 == ans ) {
-			Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
-			prefs.put( Constants.USERPREF_NAME, sp.fullname.getText() );
-			prefs.put( Constants.USERPREF_EMAIL, sp.email.getText() );
-			prefs.put( Constants.USERPREF_ORG, sp.organization.getText() );
-
-			SemossPreferences.getInstance().setNamespaces( sp.namespacemodel.getNamespaces() );
-		};
+			User user = UserImpl.getUser();
+			user.setProperty( UserProperty.USER_NAME, sp.fullname.getText() );
+			user.setProperty( UserProperty.USER_ORG, sp.organization.getText() );
+			user.setProperty( UserProperty.USER_EMAIL, sp.email.getText() );
+			user.setNamespaces( sp.namespacemodel.getNamespaces() );
+		}
 	}
 
 	/**
