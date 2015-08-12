@@ -39,9 +39,6 @@ import javax.swing.border.EmptyBorder;
 
 import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
 import gov.va.semoss.ui.components.WrapLayout;
-import gov.va.semoss.ui.swing.custom.CustomButton;
-import gov.va.semoss.util.CSSApplication;
-import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -209,7 +206,7 @@ public class RegExplorerPlaySheet extends AbstractRDFPlaySheet{
 			regPanel.add(depPanel,gbc_depPanel);
 			
 			
-			JButton recalculateBtn = new CustomButton("Recalculate");
+			JButton recalculateBtn = new JButton("Recalculate");
 			recalculateBtn.setFont(new Font("Tahoma", Font.BOLD, 11));
 			recalculateBtn.setAlignmentX(CENTER_ALIGNMENT);
 
@@ -236,10 +233,6 @@ public class RegExplorerPlaySheet extends AbstractRDFPlaySheet{
           }
         }
       } );
-			CSSApplication css = new CSSApplication(recalculateBtn,".standardButton");
-
-			
-			
 			
 			pane.add(this);
 			this.setMaximum(true);

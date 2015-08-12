@@ -25,7 +25,8 @@
 			<groupId>com.fifesoft</groupId>
 			<artifactId>autocomplete</artifactId>
 			<version>2.5.4</version>
-		</dependency>
+		</dependency>		
+<!--
 		<dependency>
 			<groupId>vcamp.cssengine</groupId>
 			<artifactId>aurelienribon</artifactId>
@@ -46,6 +47,7 @@
 			<artifactId>lpsolve</artifactId>
 			<version>55j</version>
 		</dependency>
+-->
 		<dependency>
 			<groupId>com.sksamuel.diff</groupId>
 			<artifactId>diff</artifactId>
@@ -123,19 +125,16 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
 			<version>2.13.0</version>
-			<!--<version>2.12.1</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-iri</artifactId>
 			<version>1.1.2</version>
-			<!--<version>0.9.4</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-tdb</artifactId>
 			<version>1.1.2</version>
-			<!--<version>0.9.4</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -157,17 +156,6 @@
 			<artifactId>stanford-corenlp</artifactId>
 			<version>3.3.0</version>
 		</dependency>
-    
-		<!-- RPB: we don't use NLP, so I don't think we need these models -->
-		<!--
-		<dependency>
-			<groupId>edu.stanford.nlp</groupId>
-			<artifactId>stanford-corenlp</artifactId>
-			<version>3.3.0</version>
-			<classifier>models</classifier>
-		</dependency>
-		-->
-
 		<dependency>
 			<groupId>net.sf.supercsv</groupId>
 			<artifactId>super-csv</artifactId>
@@ -517,26 +505,6 @@
 		<system>Jenkins</system>
 		<url>http://104.130.3.174:8888/view/GitHub%20Builds/job/VA-SEMOSS%20GitHub%20All%20Branches/</url>
 	</ciManagement>
-  
-	<repositories>
-		<repository>
-			<id>apache-snapshots</id>
-			<url>http://repository.apache.org/snapshots/</url>
-		</repository>
-	</repositories>
-  
-	<distributionManagement>
-		<repository>
-			<id>vcamp-repo</id>
-			<name>vcamp-releases</name>
-			<url>http://104.130.3.174:8080/archiva/repository/internal/</url>
-		</repository>
-		<snapshotRepository>
-			<id>vcamp-snapshots</id>
-			<name>vcamp-snapshots</name>
-			<url>http://104.130.3.174:8080/archiva/repository/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
   
 	<organization>
 		<url>http://va.gov</url>

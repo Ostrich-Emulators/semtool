@@ -18,7 +18,7 @@
 
 	<modules>
 		<module>ui</module>
-	 <module>common</module>
+		<module>common</module>
 	</modules>
   
 	<scm>
@@ -327,14 +327,8 @@
 		<system>Jenkins</system>
 		<url>http://104.130.3.174:8888/view/GitHub%20Builds/job/VA-SEMOSS%20GitHub%20All%20Branches/</url>
 	</ciManagement>
-  
-	<repositories>
-		<repository>
-			<id>apache-snapshots</id>
-			<url>http://repository.apache.org/snapshots/</url>
-		</repository>
-	</repositories>
-  
+    
+	<!--
 	<distributionManagement>
 		<repository>
 			<id>vcamp-repo</id>
@@ -347,6 +341,14 @@
 			<url>http://104.130.3.174:8080/archiva/repository/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
+	-->
+	
+	<repositories>
+		<repository>
+			<id>bigdata.releases</id>
+			<url>http://www.systap.com/maven/releases</url>
+		</repository>
+	</repositories>
   
 	<organization>
 		<url>http://va.gov</url>

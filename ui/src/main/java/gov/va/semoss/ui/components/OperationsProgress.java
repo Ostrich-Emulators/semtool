@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.ui.components;
 
-import aurelienribon.ui.css.Style;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,7 +52,6 @@ public class OperationsProgress extends JPanel {
 		bar.setStringPainted( true );
 		more.setVisible( false );
 		add( more, BorderLayout.EAST );
-		Style.registerTargetClassName( more, ".standardButton" );
 
 		more.addActionListener( new ActionListener() {
 			@Override
