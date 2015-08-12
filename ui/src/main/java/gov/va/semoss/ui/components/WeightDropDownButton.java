@@ -73,21 +73,11 @@ public class WeightDropDownButton extends JButton {
 	private JTree edgePropTree, nodePropTree;
 	private JScrollPane nodeScrollPane, edgeScrollPane;
 	private boolean listsPopulated = false;
-//	private ControlData controlData;
 	private GraphPlaySheet playSheet;
 
-//	private static Map<String, URI> localNameToURIHash = new HashMap<String, URI>();
-//	private static Map<String, String> displayNameMap = new HashMap<String, String>();
-//	private static Set<String> hidePropertySet = new HashSet<String>();
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
 		initializeButton();
-
-//		controlData = new ControlData();
-//		controlData.setEngine( DIHelper.getInstance().getRdfEngine() );
-//		displayNameMap.put("count.edge.in",  "In-Degree");
-//		displayNameMap.put("count.edge.out", "Out-Degree");
-//		hidePropertySet.add("graphing.level");
 	}
 
 	public void setPlaySheet( GraphPlaySheet gps ) {
@@ -134,7 +124,8 @@ public class WeightDropDownButton extends JButton {
 		scrollPane.setMaximumSize( maximumSize );
 	}
 
-	private <X extends GraphElement> void initMenus( JTree tree, int selectNum, Map<URI, List<X>> nodesOrEdgesMapByType ) {
+	private <X extends GraphElement> void initMenus( JTree tree, int selectNum, 
+			Map<URI, List<X>> nodesOrEdgesMapByType ) {
 		tree.addTreeSelectionListener( getTreeSelectionListener( selectNum ) );
 		DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "not visible" );
 		tree.setModel( new DefaultTreeModel( invisibleRoot ) );

@@ -33,14 +33,13 @@ import javax.swing.AbstractAction;
  * Controls hiding the pop up menu for nodes on the graph play sheet.
  */
 public class HideVertexPopupMenuListener extends AbstractAction {
+
 	private static final long serialVersionUID = -2864866456286018607L;
 
-	private final GraphPlaySheet gps;
 	private final List<SEMOSSVertex> highlightedVertices = new ArrayList<>();
 
-	public HideVertexPopupMenuListener( GraphPlaySheet gps, Collection<SEMOSSVertex> highlights ) {
+	public HideVertexPopupMenuListener( Collection<SEMOSSVertex> highlights ) {
 		super( "Hide Nodes" );
-		this.gps = gps;
 		highlightedVertices.addAll( highlights );
 	}
 
@@ -49,7 +48,5 @@ public class HideVertexPopupMenuListener extends AbstractAction {
 		for ( SEMOSSVertex vertex : highlightedVertices ) {
 			vertex.setVisible( false );
 		}
-		
-		gps.getView().repaint();
 	}
 }

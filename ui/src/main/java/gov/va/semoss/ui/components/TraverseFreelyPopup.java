@@ -128,7 +128,6 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 		}
 
 		populated = true;
-		repaint();
 		return neighborTypes.size();
 	}
 
@@ -213,9 +212,6 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 
 		ModelQueryAdapter mqa = new ModelQueryAdapter( query.toString() );
 		mqa.bind( instanceIsSubject ? "objtype" : "subtype", totype );
-		logger.debug( mqa.bindAndGetSparql() );
-
 		return mqa;
 	}
-
 }
