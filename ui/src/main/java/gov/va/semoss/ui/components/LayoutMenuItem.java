@@ -108,7 +108,7 @@ public class LayoutMenuItem extends AbstractAction {
 	 * @return int User response.
 	 */
 	private int showOptionPopup() {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp( Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		Object[] buttons = { "Cancel Layout", "Continue With Tree" };
 		int response = JOptionPane.showOptionDialog( playPane, "This layout requires the graph to be in the format of a tree.\nWould you like to duplicate nodes so that it is in the fromat of a tree?\n\nPreferred root node must already be selected",
 				"Convert to Tree", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[1] );

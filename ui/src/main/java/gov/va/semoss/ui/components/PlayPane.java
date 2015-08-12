@@ -46,7 +46,6 @@ import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
-import gov.va.semoss.ui.components.api.IChakraListener;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
@@ -65,7 +64,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -76,15 +74,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
-import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -106,17 +101,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
@@ -136,8 +125,6 @@ import org.openrdf.model.vocabulary.RDFS;
 import aurelienribon.ui.css.Style;
 import aurelienribon.ui.css.swing.SwingStyle;
 
-import com.ibm.icu.util.StringTokenizer;
-
 /**
  * The playpane houses all of the components that create the user interface in
  * SEMOSS.
@@ -147,22 +134,21 @@ public class PlayPane extends JFrame {
 	private static final long serialVersionUID = -715188668604903980L;
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
 
-	private final String GQUERYBUILDER = "qQueryBuilderPanel";
-	private final String IMANAGE = "iManagePanel";
-	private final String GCOSMETICS = "graphcosmetics";
-	private final String GFILTER = "graphfilter";
-	private final String GFLABEL = "graphlabel";
-	private final String LOGGING = "loggingpanel";
-	private final String QUERYPANEL = "customSparqlPanel";
+	private static final String GQUERYBUILDER = "qQueryBuilderPanel";
+	private static final String IMANAGE = "iManagePanel";
+	private static final String GCOSMETICS = "graphcosmetics";
+	private static final String GFILTER = "graphfilter";
+	private static final String GFLABEL = "graphlabel";
+	private static final String LOGGING = "loggingpanel";
+	private static final String QUERYPANEL = "customSparqlPanel";
 	public static final String UIPROGRESS = "UI";
 
 	// Left Control Panel Components
-	public JComboBox<Perspective> perspectiveSelector;
-	public JComboBox<Insight> questionSelector;
-	public JPanel paramPanel;
+	private JComboBox<Perspective> perspectiveSelector;
+	private JComboBox<Insight> questionSelector;
 
-	public JCheckBox appendChkBox;
-	public RepositoryList repoList = new RepositoryList();
+	private JCheckBox appendChkBox;
+	protected final RepositoryList repoList = new RepositoryList();
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
 	private InsightManagerPanel iManagePanel;
@@ -172,41 +158,13 @@ public class PlayPane extends JFrame {
 
 	// left cosmetic panel components
 	private JPanel cosmeticsPanel;
-	public JTable colorShapeTable, sizeTable;
 
 	// Left label panel
 	private FilterPanel filterPanel;
 	//private JPanel filterLabel;
 	private JPanel outputPanel;
-	public JTable labelTable, tooltipTable;
 
-	// SUDOWL Panel Components
-	private JPanel owlPanel;
 	private LoggingPanel loggingPanel;
-	public JTable objectPropertiesTable, dataPropertiesTable;
-	public JTextField dataPropertiesString, objectPropertiesString;
-	public JButton btnRepaintGraph, saveSudowl;
-
-	// Custom Update Components
-	public JButton btnCustomUpdate;
-	public JTextPane customUpdateTextPane;
-
-	// Import Components
-	public JComboBox<String> dbImportTypeComboBox, loadingFormatComboBox;
-	public JPanel advancedImportOptionsPanel, dbImportPanel;
-	public JTextField importFileNameField, customBaseURItextField,
-			importMapFileNameField, dbPropFileNameField, questionFileNameField,
-			dbSelectorField, dbImportURLField, dbImportUsernameField;
-	public JPasswordField dbImportPWField;
-
-	//V-CAMP RTM Import ("rtmLoadButton"):
-	public JButton mapBrowseBtn, dbPropBrowseButton, questionBrowseButton,
-			btnShowAdvancedImportFeatures, importButton, rtmLoadButton, fileBrowseBtn,
-			btnTestRDBMSConnection, btnGetRDBMSSchema;
-
-	public JLabel lblSelectOneFile, selectionFileLbl, dbNameLbl, lblDataInputFormat,
-			lblDBImportURL, lblDesignateBaseUri, lblDBImportUsername, lblDBImportPW,
-			lblDBImportDriverType;
 
 	private final JTabbedPane leftTabs;
 	private final JTabbedPane rightTabs;
@@ -276,6 +234,11 @@ public class PlayPane extends JFrame {
 	private final JSplitPane combinedSplitPane;
 	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
 
+	public JTable colorShapeTable;
+	public JTable sizeTable;
+	public JTable labelTable;
+	public JTable tooltipTable;
+
 	/**
 	 * Launch the application.
 	 *
@@ -288,107 +251,16 @@ public class PlayPane extends JFrame {
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
 		DIHelper.getInstance().setPlayPane( this );
 
-		// load all the listeners
-		// cast it to IChakraListener
-		// for each listener specify what is the view field - Listener_VIEW
-		// for each listener specify the right panel field -
-		// Listener_RIGHT_PANEL
-		// utilize reflection to get all the fields
-		// for each field go into the properties file and find any of the
-		// listeners
-		
-		java.lang.reflect.Field[] fields = getClass().getFields();
-
 		// run through the view components
-		for ( Field field : fields ) {
-			Object obj = field.get( this );
-			String fieldName = field.getName();
+		Map<JTable, String> publics = new HashMap<>();
+		publics.put( colorShapeTable, Constants.COLOR_SHAPE_TABLE );
+		publics.put( sizeTable, Constants.SIZE_TABLE );
+		publics.put( labelTable, Constants.LABEL_TABLE );
+		publics.put( tooltipTable, Constants.TOOLTIP_TABLE );
 
-			logger.debug( "Checking for listeners for PlayPane." + fieldName );
-
-			if ( obj instanceof JComboBox || obj instanceof JButton
-					|| obj instanceof JToggleButton || obj instanceof JSlider
-					|| obj instanceof JInternalFrame
-					|| obj instanceof JRadioButton || obj instanceof JTextArea ) {
-				// load the controllers
-				// find the view
-				// right view and listener
-				String ctrlNames
-						= DIHelper.getInstance().getProperty( fieldName + "_" + Constants.CONTROL );
-				if ( !( ctrlNames == null || ctrlNames.isEmpty() ) ) {
-					logger.debug( "Defined listeners: " + ctrlNames );
-					StringTokenizer listenerTokens = new StringTokenizer( ctrlNames, ";" );
-					while ( listenerTokens.hasMoreTokens() ) {
-						String ctrlName = listenerTokens.nextToken();
-						logger.debug( "Creating new instance of: " + ctrlName );
-						String className = DIHelper.getInstance().getProperty( ctrlName );
-						final IChakraListener listener
-								= IChakraListener.class.cast( Class.forName( className ).
-										getConstructor().newInstance() );
-						// check to if this is a combobox or button
-						if ( obj instanceof JComboBox<?> ) {
-							( (JComboBox<?>) obj ).addActionListener( listener );
-						}
-						else if ( obj instanceof JButton ) {
-							JButton btn = JButton.class.cast( obj );
-							btn.addActionListener( new ActionListener() {
-
-								@Override
-								public void actionPerformed( final ActionEvent e ) {
-									ProgressTask pt = new ProgressTask( "Executing Query", new Runnable() {
-
-										@Override
-										public void run() {
-											listener.actionPerformed( e );
-										}
-
-									} );
-									OperationsProgress.getInstance( UIPROGRESS ).add( pt );
-								}
-							} );
-						}
-						else if ( obj instanceof JRadioButton ) {
-							( (JRadioButton) obj ).addActionListener( listener );
-						}
-						else if ( obj instanceof JToggleButton ) {
-							( (JToggleButton) obj ).addActionListener( listener );
-						}
-						else if ( obj instanceof JSlider ) {
-							( (JSlider) obj ).addChangeListener( (ChangeListener) listener );
-						}
-						else if ( obj instanceof JTextArea ) {
-							( (JTextArea) obj ).addFocusListener( (FocusListener) listener );
-						}
-						else {
-							( (JInternalFrame) obj ).addInternalFrameListener( (InternalFrameListener) listener );
-						}
-
-						logger.debug( "Loading " + ctrlName + " to local prop cache" );
-						DIHelper.getInstance().setLocalProperty( ctrlName, listener );
-					}
-				}
-			}
-			logger.debug( "Loading " + fieldName + " to local prop cache" );
-			DIHelper.getInstance().setLocalProperty( fieldName, obj );
-		}
-
-		// need to also add the listeners respective views
-		// Go through the listeners and add the model
-		String listeners = DIHelper.getInstance().getProperty( Constants.LISTENERS );
-		StringTokenizer lTokens = new StringTokenizer( listeners, ";" );
-		while ( lTokens.hasMoreElements() ) {
-			String lToken = lTokens.nextToken();
-
-			// set the views
-			String viewName = DIHelper.getInstance().getProperty( lToken + "_" + Constants.VIEW );
-			Object listener = DIHelper.getInstance().getLocalProp( lToken );
-			if ( viewName != null && listener != null ) {
-				// get the listener object and set it
-				Method method = listener.getClass().getMethod( "setView", JComponent.class );
-				Object param = DIHelper.getInstance().getLocalProp( viewName );
-				logger.debug( "Param is <" + viewName + "><" + param + ">" );
-				method.invoke( listener, param );
-			}
+		for ( Map.Entry<JTable, String> en : publics.entrySet() ) {
+			logger.debug( "Loading " + en.getValue() + " to local prop cache" );
+			DIHelper.getInstance().setLocalProperty( en.getValue(), en.getKey() );
 		}
 
 		statusbar.addStatus( "SEMOSS started" );
@@ -505,12 +377,7 @@ public class PlayPane extends JFrame {
 		CustomAruiStyle.init(); // for custom components rules and functions
 
 		// Components to style
-		//Style.registerTargetClassName( submitButton, ".createBtn" );
-		Style.registerTargetClassName( btnRepaintGraph, ".standardButton" );
-		Style.registerTargetClassName( saveSudowl, ".standardButton" );
-
-		new CSSApplication( getContentPane() );
-		DIHelper.getInstance().setLocalProperty( Constants.MAIN_FRAME, this );
+		new CSSApplication( getContentPane() );		
 
 		this.addWindowListener( new WindowAdapter() {
 
@@ -627,9 +494,6 @@ public class PlayPane extends JFrame {
 		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
 		leftView.setTabComponentAt( 0, dislbl );
 
-		owlPanel = makeOwlTab();
-		//leftView.addTab( "SUDOWL", null, owlPanel, null );
-
 		//Label
 		outputPanel = makeOutputPanel();
 		leftView.addTab( "Graph Labels", null, outputPanel,
@@ -723,7 +587,6 @@ public class PlayPane extends JFrame {
 		repoList.setFont( selectorFont );
 		appendChkBox = pnl.getOverlay();
 		JButton submitButton = pnl.getSubmitButton();
-		paramPanel = pnl.getParamPanel();
 
 		Action handleQuestionKeys = pnl.getInsightAction();
 		submitButton.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
@@ -732,110 +595,6 @@ public class PlayPane extends JFrame {
 		Style.registerTargetClassName( submitButton, ".createBtn" );
 
 		return pnl;
-	}
-
-	private JPanel makeOwlTab() {
-		JPanel owly = new JPanel();
-		owly.setBackground( SystemColor.control );
-		GridBagLayout gbl_owlPanel = new GridBagLayout();
-		gbl_owlPanel.columnWidths = new int[]{ 228, 0 };
-		gbl_owlPanel.rowHeights = new int[]{ 29, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_owlPanel.columnWeights = new double[]{ 1.0, Double.MIN_VALUE };
-		gbl_owlPanel.rowWeights = new double[]{ 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		owly.setLayout( gbl_owlPanel );
-
-		JLabel lblDataProperties = new JLabel( "Data Properties" );
-		lblDataProperties.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
-		lblDataProperties.setHorizontalAlignment( SwingConstants.CENTER );
-		GridBagConstraints gbc_lblDataProperties = new GridBagConstraints();
-		gbc_lblDataProperties.anchor = GridBagConstraints.WEST;
-		gbc_lblDataProperties.insets = new Insets( 0, 0, 5, 0 );
-		gbc_lblDataProperties.gridx = 0;
-		gbc_lblDataProperties.gridy = 0;
-		owly.add( lblDataProperties, gbc_lblDataProperties );
-
-		JScrollPane scrollPane_8 = new JScrollPane();
-		scrollPane_8.setPreferredSize( new Dimension( 150, 350 ) );
-		scrollPane_8.setMinimumSize( new Dimension( 150, 350 ) );
-		scrollPane_8.setMaximumSize( new Dimension( 150, 350 ) );
-		GridBagConstraints gbc_scrollPane_8 = new GridBagConstraints();
-		gbc_scrollPane_8.fill = GridBagConstraints.HORIZONTAL;
-		gbc_scrollPane_8.insets = new Insets( 0, 0, 5, 0 );
-		gbc_scrollPane_8.gridx = 0;
-		gbc_scrollPane_8.gridy = 1;
-		owly.add( scrollPane_8, gbc_scrollPane_8 );
-
-		dataPropertiesTable = new JTable();
-		dataPropertiesTable.setAutoResizeMode( JTable.AUTO_RESIZE_LAST_COLUMN );
-		scrollPane_8.setViewportView( dataPropertiesTable );
-		dataPropertiesTable.setFillsViewportHeight( true );
-		dataPropertiesTable.setShowGrid( true );
-		dataPropertiesTable.setShowHorizontalLines( true );
-		dataPropertiesTable.setShowVerticalLines( true );
-
-		dataPropertiesString = new JTextField();
-		dataPropertiesString.setText( DIHelper.getInstance().getProperty( Constants.PROP_URI ) );
-		GridBagConstraints gbc_dataPropertiesString = new GridBagConstraints();
-		gbc_dataPropertiesString.insets = new Insets( 0, 0, 5, 0 );
-		gbc_dataPropertiesString.fill = GridBagConstraints.HORIZONTAL;
-		gbc_dataPropertiesString.gridx = 0;
-		gbc_dataPropertiesString.gridy = 2;
-		owly.add( dataPropertiesString, gbc_dataPropertiesString );
-		dataPropertiesString.setColumns( 10 );
-		// add the routine to do the predicate and properties
-
-		JLabel lblObjectProperties = new JLabel( "Object Properties" );
-		lblObjectProperties.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
-		GridBagConstraints gbc_lblObjectProperties = new GridBagConstraints();
-		gbc_lblObjectProperties.anchor = GridBagConstraints.WEST;
-		gbc_lblObjectProperties.insets = new Insets( 0, 0, 5, 0 );
-		gbc_lblObjectProperties.gridx = 0;
-		gbc_lblObjectProperties.gridy = 3;
-		owly.add( lblObjectProperties, gbc_lblObjectProperties );
-
-		JScrollPane scrollPane_7 = new JScrollPane();
-		scrollPane_7.setPreferredSize( new Dimension( 150, 350 ) );
-		scrollPane_7.setMinimumSize( new Dimension( 150, 350 ) );
-		scrollPane_7.setMaximumSize( new Dimension( 150, 350 ) );
-		GridBagConstraints gbc_scrollPane_7 = new GridBagConstraints();
-		gbc_scrollPane_7.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_7.insets = new Insets( 0, 0, 5, 0 );
-		gbc_scrollPane_7.gridx = 0;
-		gbc_scrollPane_7.gridy = 4;
-		owly.add( scrollPane_7, gbc_scrollPane_7 );
-
-		objectPropertiesTable = new JTable();
-		scrollPane_7.setViewportView( objectPropertiesTable );
-		objectPropertiesTable.setShowGrid( true );
-		objectPropertiesTable.setShowHorizontalLines( true );
-		objectPropertiesTable.setShowVerticalLines( true );
-
-		objectPropertiesString = new JTextField();
-		objectPropertiesString.setText( DIHelper.getInstance().getProperty( Constants.PREDICATE_URI ) );
-
-		GridBagConstraints gbc_objectPropertiesString = new GridBagConstraints();
-		gbc_objectPropertiesString.anchor = GridBagConstraints.BELOW_BASELINE;
-		gbc_objectPropertiesString.insets = new Insets( 0, 0, 5, 0 );
-		gbc_objectPropertiesString.fill = GridBagConstraints.HORIZONTAL;
-		gbc_objectPropertiesString.gridx = 0;
-		gbc_objectPropertiesString.gridy = 5;
-		owly.add( objectPropertiesString, gbc_objectPropertiesString );
-		objectPropertiesString.setColumns( 10 );
-
-		btnRepaintGraph = initCustomButton( "Refresh" );
-		GridBagConstraints gbc_btnRepaintGraph = new GridBagConstraints();
-		gbc_btnRepaintGraph.insets = new Insets( 0, 0, 5, 0 );
-		gbc_btnRepaintGraph.gridx = 0;
-		gbc_btnRepaintGraph.gridy = 6;
-		owly.add( btnRepaintGraph, gbc_btnRepaintGraph );
-
-		saveSudowl = initCustomButton( "Save" );
-		GridBagConstraints gbc_saveSudowl = new GridBagConstraints();
-		gbc_saveSudowl.gridx = 0;
-		gbc_saveSudowl.gridy = 7;
-		owly.add( saveSudowl, gbc_saveSudowl );
-
-		return owly;
 	}
 
 	private JPanel makeGraphCosmeticsPanel() {
@@ -871,8 +630,8 @@ public class PlayPane extends JFrame {
 	private FilterPanel makeFilterPanel() {
 		return new FilterPanel();
 	}
-	
-	public FilterPanel getFilterPanel(){
+
+	public FilterPanel getFilterPanel() {
 		return filterPanel;
 	}
 
@@ -1449,10 +1208,7 @@ public class PlayPane extends JFrame {
 
 						}
 
-						if ( owlPanel == panel ) {
-							leftTabs.addTab( "SUDOWL", null, owlPanel, null );
-						}
-						else if ( cosmeticsPanel == panel ) {
+						if ( cosmeticsPanel == panel ) {
 							leftTabs.addTab( "Graph Cosmetics", null, cosmeticsPanel,
 									"Modify visual appearance of a node" );
 						}
@@ -1637,13 +1393,11 @@ public class PlayPane extends JFrame {
 		} );
 
 		splithider = new JCheckBoxMenuItem( "Left Panel", true );
-		
-		
-			splithider.setToolTipText( "Disable the Left Panel " );
-			splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
-			splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
-	
-			
+
+		splithider.setToolTipText( "Disable the Left Panel " );
+		splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
+		splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
+
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
@@ -1660,7 +1414,6 @@ public class PlayPane extends JFrame {
 					splithider.setToolTipText( "Enable the Left Panel" );
 					splithider.getAccessibleContext().setAccessibleName( "Enable the Left Panel" );
 					splithider.getAccessibleContext().setAccessibleDescription( "Enable the Left Panel" );
-
 
 				}
 			}
@@ -2000,6 +1753,7 @@ public class PlayPane extends JFrame {
 	}
 
 	protected class PlayPaneCloseableTab extends CloseableTab {
+
 		private static final long serialVersionUID = -1674137465659730374L;
 		private final JCheckBoxMenuItem item;
 

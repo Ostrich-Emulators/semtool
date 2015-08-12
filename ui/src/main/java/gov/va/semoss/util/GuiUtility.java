@@ -233,8 +233,7 @@ public class GuiUtility {
 	 * @param text to be displayed.
 	 */
 	public static void showError( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		JOptionPane.showMessageDialog( playPane, text, "Error",
 				JOptionPane.ERROR_MESSAGE );
 	}
@@ -248,8 +247,7 @@ public class GuiUtility {
 	 * closed
 	 */
 	public static int showOptionsYesNoCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		return JOptionPane.showConfirmDialog( playPane, text );
 	}
 
@@ -261,9 +259,9 @@ public class GuiUtility {
 	 * @return int value of choice selected: 0 Ok, 2 Cancel, -1 message closed
 	 */
 	public static int showWarningOkCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
-		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
+		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE );
 	}
 
 	/**
@@ -274,8 +272,7 @@ public class GuiUtility {
 	 * @return int value of choice selected: 0 Ok, 2 Cancel, -1 message closed
 	 */
 	public static int showConfirmOkCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option",
 				JOptionPane.OK_CANCEL_OPTION );
 	}
@@ -286,8 +283,7 @@ public class GuiUtility {
 	 * @param text to be displayed.
 	 */
 	public static void showMessage( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		JOptionPane.showMessageDialog( playPane, text );
 	}
 
@@ -464,7 +460,7 @@ public class GuiUtility {
 				log.error( e, e );
 			}
 		}
-		
+
 		return new ImportData( metas );
 	}
 }
