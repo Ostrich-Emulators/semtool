@@ -44,14 +44,13 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
-import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getRDFStringValue;
-import static gov.va.semoss.rdf.engine.edgemodelers.AbstractEdgeModeler.getUriFromRawString;
 import gov.va.semoss.rdf.engine.edgemodelers.LegacyEdgeModeler;
 import gov.va.semoss.rdf.engine.edgemodelers.SemossEdgeModeler;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.GuiUtility;
+import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
+import static gov.va.semoss.util.RDFDatatypeTools.getUriFromRawString;
+import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 
 import java.io.BufferedWriter;
@@ -270,7 +269,7 @@ public class EngineLoader {
 			}
 
 			// create all metamodel triples, even if we don't add them to the repository
-			EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
+			EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 			modeler.createMetamodel( data, namespaces, myrc );
 
 			for ( LoadingSheetData n : data.getNodes() ) {
@@ -370,7 +369,7 @@ public class EngineLoader {
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-		EdgeModeler modeler = getEdgeModeler( MetadataQuery.getReificationStyle( engine ) );
+		EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 
 		if ( sheet.isRel() ) {
 			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
@@ -504,14 +503,14 @@ public class EngineLoader {
 	private static void initNamespaces( RepositoryConnection conn ) throws RepositoryException {
 
 		conn.begin();
-		for ( Map.Entry<String, String> e : GuiUtility.DEFAULTNAMESPACES.entrySet() ) {
+		for ( Map.Entry<String, String> e : Utility.DEFAULTNAMESPACES.entrySet() ) {
 			conn.setNamespace( e.getKey(), e.getValue() );
 		}
 		conn.commit();
 	}
 
 	public static void initNamespaces( ImportData conn ) {
-		conn.getMetadata().setNamespaces(GuiUtility.DEFAULTNAMESPACES );
+		conn.getMetadata().setNamespaces( Utility.DEFAULTNAMESPACES );
 	}
 
 	public EdgeModeler getEdgeModeler( ReificationStyle reif ) {

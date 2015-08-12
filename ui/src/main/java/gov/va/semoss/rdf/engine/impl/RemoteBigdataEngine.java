@@ -36,7 +36,6 @@ import gov.va.semoss.util.DIHelper;
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.remote.BigdataSailRemoteRepository;
 import gov.va.semoss.util.RDFDatatypeTools;
-import gov.va.semoss.util.Utility;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

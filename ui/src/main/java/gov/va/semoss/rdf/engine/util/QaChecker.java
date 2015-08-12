@@ -11,7 +11,6 @@ import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import static gov.va.semoss.rdf.engine.util.EngineLoader.cleanValue;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
@@ -139,7 +138,7 @@ public class QaChecker {
 			log.error( "this engine does not have a schema or data URI defined" );
 		}
 
-		if ( ReificationStyle.LEGACY == MetadataQuery.getReificationStyle( engine ) ) {
+		if ( ReificationStyle.LEGACY == EngineUtil.getReificationStyle( engine ) ) {
 			loadLegacy( engine );
 		}
 		else {

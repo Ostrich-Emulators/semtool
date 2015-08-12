@@ -13,6 +13,7 @@ import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.util.DeterministicSanitizer;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
@@ -26,7 +27,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.io.FileUtils;
@@ -123,7 +123,7 @@ public class SemossEdgeModelerTest {
 		nodes = LoadingSheetData.nodesheet( "Human Being" );
 		nodes.addProperties( Arrays.asList( "First Name", "Last Name" ) );
 
-		data = ImportData.forEngine( engine );
+		data = GuiUtility.createImportData( engine );
 		data.add( rels );
 		data.add( nodes );
 	}
@@ -282,7 +282,7 @@ public class SemossEdgeModelerTest {
 		LoadingSheetData oranges = LoadingSheetData.relsheet( "Person", "Orange", "hates" );
 		LoadingNodeAndPropertyValues orange = oranges.add( "John", "Golden Delicious" );
 
-		ImportData id = ImportData.forEngine( engine );
+		ImportData id = GuiUtility.createImportData( engine );
 		id.add( apples );
 		id.add( oranges );
 

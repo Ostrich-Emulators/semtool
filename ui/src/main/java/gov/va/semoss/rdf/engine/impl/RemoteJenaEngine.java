@@ -112,18 +112,6 @@ public abstract class RemoteJenaEngine extends AbstractEngine {
 	}
 
 	/**
-	 * Runs the passed string query against the engine as an INSERT query.  The query passed must be in the structure of an INSERT 
-	 * SPARQL query or an INSERT DATA SPARQL query 
-	 * and there are no returned results.  The query will result in the specified triples getting added to the 
-	 * data store.
-	 * @param query the INSERT or INSERT DATA SPARQL query to be run against the engine
-	 */
-	@Override
-	public void execInsertQuery(String query) {
-		// TODO Auto-generated method stub		
-	}
-
-	/**
 	 * Gets the type of the engine.  The engine type is often used to determine what API to use while running queries against the 
 	 * engine.
 	
@@ -163,10 +151,5 @@ public abstract class RemoteJenaEngine extends AbstractEngine {
 	public void startLoading(Properties props ) throws RepositoryException {
 		this.serviceURI = prop.getProperty(Constants.SPARQL_QUERY_ENDPOINT);
 		this.connected = true;
-	}
-
-	@Override
-	public boolean execAskQuery(String query) {
-		throw new UnsupportedOperationException( "Not supported yet." );
 	}
 }

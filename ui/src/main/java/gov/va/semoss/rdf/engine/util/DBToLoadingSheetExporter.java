@@ -64,7 +64,7 @@ public class DBToLoadingSheetExporter {
 	public ImportData runExport( boolean runNodeExport, boolean runRelationshipExport ) {
 		List<URI> nodes = NodeDerivationTools.instance().createConceptList( getEngine() );
 
-		ImportData data = ImportData.forEngine( engine );
+		ImportData data = GuiUtility.createImportData( engine );
 
 		if ( runNodeExport ) {
 			exportNodes( nodes, data );

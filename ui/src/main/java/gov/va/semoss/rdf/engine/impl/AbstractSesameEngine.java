@@ -20,7 +20,6 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.rdf.engine.api.IEngine;
 import info.aduna.iteration.Iterations;
 import java.io.IOException;
 import java.util.Properties;
@@ -39,7 +38,6 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.util.Constants;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -64,13 +62,13 @@ import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.engine.api.UpdateExecutor;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
+import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -78,12 +76,10 @@ import java.util.regex.Pattern;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.Update;
 import org.openrdf.query.UpdateExecutionException;
-import org.openrdf.sail.SailException;
 
 /**
  * An Abstract Engine that sets up the base constructs needed to create an
@@ -230,11 +226,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
 
-		setEngineName( MetadataQuery.getEngineLabel( this ) );
+		setEngineName( EngineUtil.getEngineLabel( this ) );
 
 		RepositoryConnection rc = getRawConnection();
 		rc.begin();
-		for ( Map.Entry<String, String> en : GuiUtility.DEFAULTNAMESPACES.entrySet() ) {
+		for ( Map.Entry<String, String> en : Utility.DEFAULTNAMESPACES.entrySet() ) {
 			rc.setNamespace( en.getKey(), en.getValue() );
 		}
 		rc.commit();
@@ -336,25 +332,10 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	/**
-	 * Writes the database back with updated properties if necessary
-	 */
-	@Override
-	public void saveConfiguration() {
-		String propFile = prop.getProperty( Constants.SMSS_LOCATION );
-		try ( FileWriter fw = new FileWriter( propFile ) ) {
-			log.debug( "Writing to file " + propFile );
-			prop.store( fw, null );
-		}
-		catch ( IOException e ) {
-			log.debug( e );
-		}
-	}
-
 	public static String processNamespaces( String rawsparql,
 			Map<String, String> customNamespaces ) {
 		Map<String, String> namespaces = SemossPreferences.getInstance().getNamespaces();
-		namespaces.putAll(GuiUtility.DEFAULTNAMESPACES );
+		namespaces.putAll( Utility.DEFAULTNAMESPACES );
 		namespaces.putAll( customNamespaces );
 
 		Set<String> existingNamespaces = new HashSet<>();
@@ -452,16 +433,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		gqr.close();
 
 		return query.getResults();
-	}
-
-	/**
-	 * Creates a new IEngine instance from the given repository connection.
-	 *
-	 * @param rc
-	 * @return
-	 */
-	public static IEngine wrap( RepositoryConnection rc ) {
-		return new InMemorySesameEngine( rc );
 	}
 
 	@Override
@@ -689,48 +660,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void updateLastModifiedDate() {
 		RepositoryConnection rc = getRawConnection();
 		updateLastModifiedDate( rc, getBaseUri() );
-	}
-
-	/**
-	 * Runs the passed string query against the engine as an INSERT query. The
-	 * query passed must be in the structure of an INSERT SPARQL query or an
-	 * INSERT DATA SPARQL query and there are no returned results. The query will
-	 * result in the specified triples getting added to the data store.
-	 *
-	 * @param query the INSERT or INSERT DATA SPARQL query to be run against the
-	 * engine
-	 *
-	 * @throws org.openrdf.sail.SailException
-	 * @throws org.openrdf.query.UpdateExecutionException
-	 * @throws org.openrdf.repository.RepositoryException
-	 * @throws org.openrdf.query.MalformedQueryException
-	 */
-	@Override
-	public void execInsertQuery( String query )
-			throws SailException, UpdateExecutionException, RepositoryException, MalformedQueryException {
-		RepositoryConnection rc = getRawConnection();
-		Update up = rc.prepareUpdate( QueryLanguage.SPARQL, query );
-		log.debug( "SPARQL: " + query );
-		rc.begin();
-		up.execute();
-		rc.commit();
-		calculateInferences();
-	}
-
-	@Override
-	public boolean execAskQuery( String query ) {
-		boolean response = false;
-		try {
-			RepositoryConnection rc = getRawConnection();
-			BooleanQuery bq = rc.prepareBooleanQuery( QueryLanguage.SPARQL, query );
-			log.debug( "SPARQL: " + query );
-			response = bq.evaluate();
-		}
-		catch ( MalformedQueryException | RepositoryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-
-		return response;
 	}
 
 	/**

@@ -43,22 +43,11 @@ public class UnHideVertexPopupMenuListener extends AbstractAction {
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		Graph<SEMOSSVertex, SEMOSSEdge> realg = gps.getGraphData().getGraph();
-		Graph<SEMOSSVertex, SEMOSSEdge> vizg = gps.getView().getGraphLayout().getGraph();
 
 		for ( SEMOSSVertex v : realg.getVertices() ) {
 			if( !v.isVisible() ){
 				v.setVisible( true );
-				vizg.addVertex( v );
 			}
 		}
-		
-		for ( SEMOSSEdge v : realg.getEdges() ) {
-			if( !vizg.containsEdge( v ) ){
-				v.setVisible( true );
-				vizg.addEdge( v, realg.getSource( v ), realg.getDest( v ), EdgeType.DIRECTED );
-			}
-		}
-		
-		gps.getView().repaint();		
 	}
 }

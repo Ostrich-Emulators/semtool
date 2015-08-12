@@ -19,14 +19,11 @@
  */
 package gov.va.semoss.util;
 
-import gov.va.semoss.model.vocabulary.SEMOSS;
-import gov.va.semoss.model.vocabulary.VAC;
-import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectStatement;
-import gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
@@ -46,9 +43,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -60,19 +54,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.FOAF;
-import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -88,21 +76,6 @@ public class GuiUtility {
 
 	private static final Logger log = Logger.getLogger( GuiUtility.class );
 	private static int id = 0;
-
-	public static final Map<String, String> DEFAULTNAMESPACES = new HashMap<>();
-
-	static {
-		DEFAULTNAMESPACES.put( RDF.PREFIX, RDF.NAMESPACE );
-		DEFAULTNAMESPACES.put( RDFS.PREFIX, RDFS.NAMESPACE );
-		DEFAULTNAMESPACES.put( OWL.PREFIX, OWL.NAMESPACE );
-		DEFAULTNAMESPACES.put( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
-		DEFAULTNAMESPACES.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-		DEFAULTNAMESPACES.put( FOAF.PREFIX, FOAF.NAMESPACE );
-		DEFAULTNAMESPACES.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
-		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
-		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
-		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
-	}
 
 	/**
 	 * Splits up a string URI into tokens based on "/" character, and uses logic
@@ -245,46 +218,6 @@ public class GuiUtility {
 	}
 
 	/**
-	 * Executes a query on a specific engine, iterates through variables from the
-	 * sesame wrapper, and uses logic to obtain the concept URI.
-	 *
-	 * @param engine engine.
-	 * @param subjectURI.
-	 *
-	 * @return Concept URI.
-	 */
-	public static String getConceptType( IEngine engine, String subjectURI ) {
-		if ( !subjectURI.startsWith( "http://" ) ) {
-			return "";
-		}
-
-		String query = DIHelper.getInstance().getProperty(
-				Constants.SUBJECT_TYPE_QUERY );
-		Map<String, String> paramHash = new HashMap<>();
-		paramHash.put( "ENTITY", subjectURI );
-		query = Utility.fillParam( query, paramHash );
-		SesameJenaSelectWrapper sjw = new SesameJenaSelectWrapper();
-		sjw.setEngine( engine );
-		sjw.setEngineType( engine.getEngineType() );
-		sjw.setQuery( query );
-		sjw.executeQuery();
-		String[] vars = sjw.getVariables();
-		String returnType = null;
-		while ( sjw.hasNext() ) {
-			SesameJenaSelectStatement stmt = sjw.next();
-			String objURI = stmt.getRawVar( vars[0] ) + "";
-			if ( !objURI.equals( engine.getSchemaBuilder().getConceptUri().toString() ) ) {
-				returnType = objURI;
-			}
-		}
-		if ( returnType == null ) {
-			returnType = engine.getSchemaBuilder().getConceptUri().toString();
-		}
-
-		return returnType;
-	}
-
-	/**
 	 * Increases the counter and gets the next ID for a URI.
 	 *
 	 * @return Next ID
@@ -300,8 +233,7 @@ public class GuiUtility {
 	 * @param text to be displayed.
 	 */
 	public static void showError( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		JOptionPane.showMessageDialog( playPane, text, "Error",
 				JOptionPane.ERROR_MESSAGE );
 	}
@@ -315,8 +247,7 @@ public class GuiUtility {
 	 * closed
 	 */
 	public static int showOptionsYesNoCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		return JOptionPane.showConfirmDialog( playPane, text );
 	}
 
@@ -328,9 +259,9 @@ public class GuiUtility {
 	 * @return int value of choice selected: 0 Ok, 2 Cancel, -1 message closed
 	 */
 	public static int showWarningOkCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
-		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
+		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE );
 	}
 
 	/**
@@ -341,8 +272,7 @@ public class GuiUtility {
 	 * @return int value of choice selected: 0 Ok, 2 Cancel, -1 message closed
 	 */
 	public static int showConfirmOkCancel( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		return JOptionPane.showConfirmDialog( playPane, text, "Select An Option",
 				JOptionPane.OK_CANCEL_OPTION );
 	}
@@ -353,8 +283,7 @@ public class GuiUtility {
 	 * @param text to be displayed.
 	 */
 	public static void showMessage( String text ) {
-		JFrame playPane = (JFrame) DIHelper.getInstance().getLocalProp(
-				Constants.MAIN_FRAME );
+		JFrame playPane = DIHelper.getInstance().getPlayPane();
 		JOptionPane.showMessageDialog( playPane, text );
 	}
 
@@ -510,5 +439,28 @@ public class GuiUtility {
 	public static void resetJTable( String tableKey ) {
 		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
 		log.debug( "Resetting the " + tableKey + " table model." );
+	}
+
+	public static ImportData createImportData( IEngine eng ) {
+		ImportMetadata metas = null;
+		if ( null == eng ) {
+			metas = new ImportMetadata();
+		}
+		else {
+			metas = new ImportMetadata( eng.getBaseUri(), eng.getSchemaBuilder(),
+					eng.getDataBuilder() );
+			metas.setNamespaces( eng.getNamespaces() );
+
+			try {
+				MetadataQuery mq = new MetadataQuery();
+				eng.query( mq );
+				metas.setExtras( mq.asStrings() );
+			}
+			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+				log.error( e, e );
+			}
+		}
+
+		return new ImportData( metas );
 	}
 }

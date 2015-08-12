@@ -198,7 +198,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 			@Override
 			public void run() {
 				DBToLoadingSheetExporter exper = new DBToLoadingSheetExporter( engine );
-				ImportData data = ImportData.forEngine( engine );
+				ImportData data = GuiUtility.createImportData( engine );
 				exper.exportNodes( selectedNodes, data );
 
 				if ( dorels.isSelected() ) {
