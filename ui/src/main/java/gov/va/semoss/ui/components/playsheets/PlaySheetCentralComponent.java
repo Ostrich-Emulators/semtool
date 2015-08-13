@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
-import gov.va.semoss.om.Insight;
-import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.api.IPlaySheet;
@@ -27,8 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
 import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
@@ -51,6 +49,13 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	private PlaySheetFrame playframe;
 	private String title;
 	private final List<String> headers = new ArrayList<>();
+	
+	private static final Map<String, ImageIcon> defaultIcons = new HashMap<>();
+	public static void setDefaultIcons( Map<String, ImageIcon> icons ) {
+		defaultIcons.clear();
+		defaultIcons.putAll( icons );
+	}
+	
 
 	public void setFrame( PlaySheetFrame f ) {
 		playframe = f;
@@ -74,6 +79,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		getPlaySheetFrame().addTab( title, pscc );
 	}
 
+	@Override
 	public boolean hasChanges() {
 		return false;
 	}
@@ -89,6 +95,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	 * @see PlaySheetFrame#getActions()
 	 * @return a (by default, empty) mapping of actions
 	 */
+	@Override
 	public Map<String, Action> getActions() {
 		return new HashMap<>();
 	}
@@ -101,6 +108,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	 *
 	 * @return
 	 */
+	@Override
 	public List<String> getHeaders() {
 		return new ArrayList<>( headers );
 	}
@@ -113,13 +121,16 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	 * Signals when this playsheet's tab is selected in the frame. By default,
 	 * does nothing
 	 */
+	@Override
 	public void activated() {
 	}
 
+	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
-		log.error( "into create: " + data.size() + " items" );
+		log.warn( "create not supported in this playsheet (" + data.size() + " items)" );
 	}
 
+	@Override
 	public void incrementFont( float incr ) {
 		Deque<Component> components = new ArrayDeque<>();
 		components.addAll( Arrays.asList( getComponents() ) );
@@ -134,6 +145,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		}
 	}
 
+	@Override
 	public void create( Model m, IEngine engine ) {
 		List<Value[]> valdata = new ArrayList<>();
 		for ( Statement s : m ) {
@@ -144,6 +156,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		create( valdata, Arrays.asList( "Subject", "Predicate", "Object" ), engine );
 	}
 
+	@Override
 	public void overlay( Model m, IEngine engine ) {
 		List<Value[]> valdata = new ArrayList<>();
 		for ( Statement s : m ) {
@@ -204,33 +217,9 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		return list;
 	}
 
+	@Override
 	public void overlay( List<Value[]> data, List<String> headers, IEngine eng ) {
-		log.error( "into overlay: " + data.size() + " items" );
-	}
-
-	public void remove( List<Value[]> data ) {
-		log.error( "into remove: " + data.size() + " items" );
-	}
-
-	public void refine() {
-		log.error( "into refine" );
-	}
-
-	// all this stuff is temporary until we get rid of the IPlaySheet interface
-	@Override
-	public void runAnalytics() {
-		log.error( "runAnalytics does nothing" );
-	}
-
-	@Override
-	public Object getData() {
-		log.error( "getdata is not yet implemented" );
-		return null;
-	}
-
-	@Override
-	public void createData() {
-		log.error( "createData is not yet implemented" );
+		log.warn( "overlay not supported in this playsheet (" + data.size() + " items)" );
 	}
 
 	@Override
@@ -239,67 +228,11 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	}
 
 	@Override
-	public void setEngine( IEngine engine ) {
-		playframe.setEngine( engine );
-	}
-
-	@Override
-	public void overlayView() {
-		log.error( "overlayView is not yet implemented" );
-	}
-
-	@Override
-	public void refineView() {
-		refine();
-	}
-
-	@Override
-	public void createView() {
-		log.error( "createView does nothing" );
-	}
-
-	@Override
-	public Insight getInsight() {
-		log.error( "insight doesn't mean anything here" );
-		return null;
-	}
-
-	@Override
-	public void setInsight( Insight insight ) {
-		log.error( "insight doesn't mean anything here" );
-	}
-
-	@Override
-	public void setJDesktopPane( JDesktopPane pane ) {
-		log.error( "this function is meaningless. use pane.add(this) instead" );
-	}
-
-	@Override
-	public String getQuery() {
-		log.error( "query doesn't mean anything here" );
-		return "";
-	}
-
-	@Override
-	public void setQuery( String query ) {
-		log.error( "query doesn't mean anything here" );
-	}
-
-	@Override
-	public Perspective getPerspective() {
-		log.error( "setPerspective doesn't make sense here" );
-		return null;
-	}
-
-	@Override
-	public void setPerspective( Perspective p ) {
-		log.error( "getPerspective doesn't make sense here" );
-	}
-
 	public boolean canAcceptDataWithHeaders( List<String> newheaders ) {
 		return headers.equals( newheaders );
 	}
 
+	@Override
 	public boolean canAcceptModelData() {
 		return canAcceptDataWithHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 	}
@@ -311,6 +244,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	 * @return tabular data, or null if this playsheet does not support tables
 	 * @see @link #getHeaders()}
 	 */
+	@Override
 	public List<Object[]> getTabularData() {
 		return null;
 	}
@@ -321,6 +255,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	 *
 	 * @return true, if the frame should have visible tabs initially
 	 */
+	@Override
 	public boolean prefersTabs() {
 		return false;
 	}

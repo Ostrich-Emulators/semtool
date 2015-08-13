@@ -35,22 +35,22 @@ import org.openrdf.repository.RepositoryException;
  * This class is used to create a menu item for the neighborhood.
  */
 public class NeighborMenuItem extends AbstractAction {
-
+	
 	private static final Logger logger = Logger.getLogger( NeighborMenuItem.class );
-
+	
 	private final GraphPlaySheet gps;
 	private final ModelQueryAdapter mqa;
-
+	
 	public NeighborMenuItem( String tName, GraphPlaySheet ps, ModelQueryAdapter mqa ) {
 		super( tName );
 		this.gps = ps;
 		this.mqa = mqa;
 	}
-
+	
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
 		ProgressTask pt = new ProgressTask( "Expanding Graph", new Runnable() {
-
+			
 			@Override
 			public void run() {
 				try {
@@ -63,7 +63,7 @@ public class NeighborMenuItem extends AbstractAction {
 				}
 			}
 		} );
-
+		
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 	}
 }
