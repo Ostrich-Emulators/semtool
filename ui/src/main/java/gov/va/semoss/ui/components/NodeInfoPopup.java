@@ -33,7 +33,6 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JTable;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -48,8 +47,6 @@ public class NodeInfoPopup extends AbstractAction {
 	
 	private final GraphPlaySheet gps;
 	private final Collection<SEMOSSVertex> pickedVertex;
-	GridFilterData gfd = new GridFilterData();
-	JTable table = null;
 
 	public NodeInfoPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> picked ) {
 		super( "Show Information about Selected Node(s)" );
@@ -82,8 +79,6 @@ public class NodeInfoPopup extends AbstractAction {
 		GridPlaySheet grid = new GridPlaySheet();
 		grid.setTitle( "Selected Node Information" );
 		grid.create( data, Arrays.asList( "Property Name", "Value" ), gps.getEngine() );
-		//PlaySheetFrame psf = new PlaySheetFrame( gps.getEngine() );
-		//psf.setTitle( "Selected Node Information" );
 		gps.addSibling( grid );
 	}
 }
