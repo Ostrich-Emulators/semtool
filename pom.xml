@@ -20,6 +20,7 @@
 	<modules>
 		<module>ui</module>
 		<module>common</module>
+	 <module>webapp</module>
 	</modules>
   
 	<scm>

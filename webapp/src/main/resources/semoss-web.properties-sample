@@ -1,0 +1,4 @@
+
+## copy this file to semoss-web.properties, and put installation-specific data here
+#
+#rdfstore=/tmp/x1
