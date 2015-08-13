@@ -36,7 +36,7 @@ import org.openrdf.model.Value;
 
 import com.google.gson.Gson;
 
-public class DupeHeatMapSheet extends BrowserPlaySheet2 {
+public abstract class DupeHeatMapSheet extends BrowserPlaySheet2 {
 
 	private static final long serialVersionUID = -8725998287263132738L;
 	private static final Logger logger = Logger.getLogger( DupeHeatMapSheet.class );
@@ -66,7 +66,7 @@ public class DupeHeatMapSheet extends BrowserPlaySheet2 {
 	@Override
 	public void callIt() {
 		Gson gson = new Gson();
-		ArrayList<String> args = new ArrayList<String>();
+		ArrayList<String> args = new ArrayList<>();
 
 		ArrayList<Integer> sizes = new ArrayList<>();
 		for ( String paramKey : paramDataHash.keySet() ) {

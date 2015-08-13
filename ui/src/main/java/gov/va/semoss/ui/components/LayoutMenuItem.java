@@ -70,6 +70,9 @@ public class LayoutMenuItem extends AbstractAction {
 				Logger.getLogger( getClass() ).debug( "automatically converting to a tree layout" );
 				gps.getSearchPanel().clickTreeButton( layout );
 			}
+			else{
+				setGraphLayout();
+			}
 		}
 		else{
 			setGraphLayout();
