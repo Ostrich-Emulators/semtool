@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.security;
 
+import java.security.Permission;
 import java.util.Map;
 
 /**
@@ -34,4 +35,6 @@ public interface User {
 	public String getProperty( UserProperty prop );
 
 	public void setProperties( Map<UserProperty, String> props );
+	
+	public boolean hasPermission( Permission p );
 }

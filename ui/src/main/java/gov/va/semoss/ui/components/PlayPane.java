@@ -23,6 +23,8 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
+import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
