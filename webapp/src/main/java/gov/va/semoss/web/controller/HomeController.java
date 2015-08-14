@@ -20,6 +20,6 @@ public class HomeController extends SemossControllerBase {
 
   @RequestMapping( value = "/", method = RequestMethod.GET )
   public String getWelcome() {
-    return "index";
+    return "index.vm";
   }
 }
