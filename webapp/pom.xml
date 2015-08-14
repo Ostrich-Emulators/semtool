@@ -159,6 +159,7 @@
 			<artifactId>standard</artifactId>
 			<version>1.1.2</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.tiles</groupId>
 			<artifactId>tiles-api</artifactId>
@@ -184,7 +185,7 @@
 			<artifactId>tiles-extras</artifactId>
 			<version>${tiles.version}</version>
 		</dependency>
-<!--		
+<!--
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
