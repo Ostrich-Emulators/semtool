@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import gov.va.semoss.om.SEMOSSVertex;
-import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.PolarPoint;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.graph.Forest;

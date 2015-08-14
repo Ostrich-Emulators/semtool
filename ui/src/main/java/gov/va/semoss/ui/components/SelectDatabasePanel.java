@@ -53,7 +53,7 @@ import org.openrdf.model.URI;
 public class SelectDatabasePanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger( SelectDatabasePanel.class );
-	private ExecuteQueryProcessor insightAction = new InsightAction();
+	private final ExecuteQueryProcessor insightAction = new InsightAction();
 	private ParamPanel currentParamPanel = null;
 
 	public SelectDatabasePanel() {
@@ -161,6 +161,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		Image insightIcon = GuiUtility.loadImage( "icons16/insight_16.png" );
 		submitButton.setIcon( new ImageIcon( insightIcon ) );
 		submitButton.setAction( insightAction );
+		submitButton.setForeground( Color.WHITE );
 
 		appendChkBox.setToolTipText( "Display the question results graph on top of graph in the foreground window" );
 	}

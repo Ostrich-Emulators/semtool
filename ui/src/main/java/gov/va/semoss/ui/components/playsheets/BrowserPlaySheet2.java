@@ -82,7 +82,7 @@ import org.dom4j.io.XMLWriter;
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
  * Javascript library to create visualizations.
  */
-public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
+public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 
 	private static final long serialVersionUID = 1142415334918968440L;
 	private static final Logger log = Logger.getLogger( BrowserPlaySheet2.class );
@@ -145,7 +145,6 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	 * PlaysheetCreateRunner is the runner used whenever a play sheet is to first
 	 * be created, most notably in ProcessQueryListener.
 	 */
-	@Override
 	public void createView() {
 		Platform.runLater( new Runnable() {
 			@Override
@@ -155,6 +154,10 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		} );
 	}
 
+	protected void createData(){
+		// we don't have any data to create
+	}
+	
 	/**
 	 * Method callIt. Converts a given Hashtable to a Json and passes it to the
 	 * browser.
@@ -250,18 +253,6 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 
 	public void addDataHash( Map<String, Object> newdata ) {
 		dataHash.putAll( newdata );
-	}
-
-	@SuppressWarnings( "unchecked" )
-	@Override
-	public Object getData() {
-		Map<String, Object> returnHash = (Map<String, Object>) super.getData();
-		returnHash.put( "specificData", dataHash );
-		return returnHash;
-	}
-
-	@Override
-	public void run() {
 	}
 
 	private void downloadCSV( String data ) {
@@ -406,9 +397,6 @@ public class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				}
 			}
 			throw new IOException( msg, e );
-		}
-		catch ( Throwable t ) {
-			throw new IOException( t.getLocalizedMessage(), t );
 		}
 		finally {
 			if ( null != svgfile ) {

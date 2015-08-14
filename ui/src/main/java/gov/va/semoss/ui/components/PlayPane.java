@@ -49,13 +49,10 @@ import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel_2;
-import gov.va.semoss.ui.components.playsheets.AbstractRDFPlaySheet;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.ui.swing.custom.CustomAruiStyle;
-import gov.va.semoss.ui.swing.custom.CustomButton;
 import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
-import gov.va.semoss.util.CSSApplication;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
@@ -122,9 +119,6 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-
-import aurelienribon.ui.css.Style;
-import aurelienribon.ui.css.swing.SwingStyle;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -298,7 +292,7 @@ public class PlayPane extends JFrame {
 		VocabularyRegistry.registerVocabulary( "va-semoss",
 				getClass().getResource( "/models/va-semoss.ttl" ), true );
 
-		AbstractRDFPlaySheet.setDefaultIcons( DefaultPlaySheetIcons.defaultIcons );
+		PlaySheetCentralComponent.setDefaultIcons( DefaultPlaySheetIcons.defaultIcons );
 
 		setSize( new Dimension( 1024, 768 ) );
 		if ( "".equals( wloc ) ) {
@@ -377,12 +371,6 @@ public class PlayPane extends JFrame {
 		getContentPane().add( statusbar, BorderLayout.SOUTH );
 
 		syncUIWithMenuBar();
-
-		SwingStyle.init(); // for swing rules and functions
-		CustomAruiStyle.init(); // for custom components rules and functions
-
-		// Components to style
-		new CSSApplication( getContentPane() );		
 
 		this.addWindowListener( new WindowAdapter() {
 
@@ -610,7 +598,6 @@ public class PlayPane extends JFrame {
 		submitButton.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getInputMap( JComponent.WHEN_FOCUSED ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getActionMap().put( "handleQuestionKeys", handleQuestionKeys );
-		Style.registerTargetClassName( submitButton, ".createBtn" );
 
 		return pnl;
 	}
@@ -651,12 +638,6 @@ public class PlayPane extends JFrame {
 
 	public FilterPanel getFilterPanel() {
 		return filterPanel;
-	}
-
-	private CustomButton initCustomButton( String title ) {
-		CustomButton button = new CustomButton( title );
-		button.setFont( new Font( "Tahoma", Font.BOLD, 11 ) );
-		return button;
 	}
 
 	private JTable initJTableAndAddTo( JPanel panel, boolean useGBC ) {

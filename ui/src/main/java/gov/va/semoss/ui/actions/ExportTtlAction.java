@@ -31,6 +31,7 @@ import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.main.SemossPreferences;
 
+import gov.va.semoss.user.UserImpl;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -132,8 +133,7 @@ public class ExportTtlAction extends DbAction {
 										handler.handleComment( "baseURI: "
 												+ getEngine().getDataBuilder().toString() );
 
-										Map<String, String> ns
-										= SemossPreferences.getInstance().getNamespaces();
+										Map<String, String> ns = UserImpl.getUser().getNamespaces();
 										for ( Map.Entry<String, String> en : ns.entrySet() ) {
 											handler.handleNamespace( en.getKey(), en.getValue() );
 										}

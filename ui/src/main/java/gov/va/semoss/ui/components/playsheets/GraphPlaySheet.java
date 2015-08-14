@@ -376,11 +376,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		setUndoRedoBtn();
 	}
 
-	@Override
-	public void refineView() {
-		updateGraph();
-	}
-
 	/**
 	 * Method initVisualizer.
 	 */
@@ -770,10 +765,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		// we can accept either a model's headers, or a single header 
 		return ( Arrays.asList( "Subject", "Predicate", "Object" ).equals( newheaders )
 				|| ( 1 == newheaders.size() ) );
-	}
-
-	@Override
-	public void run() {
 	}
 
 	@Override

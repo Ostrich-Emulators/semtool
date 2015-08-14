@@ -243,10 +243,6 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		model.addData( data );
 	}
 
-	@Override
-	public void run() {
-	}
-
 	protected JTable getTable() {
 		return table;
 	}

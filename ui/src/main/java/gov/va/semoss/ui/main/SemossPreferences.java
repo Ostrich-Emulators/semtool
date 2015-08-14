@@ -12,8 +12,6 @@ import java.util.prefs.Preferences;
 import org.apache.log4j.Logger;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * A helper class for working with preferences. The goal is to provide a FULLY
@@ -48,33 +46,6 @@ public class SemossPreferences {
 		}
 
 		return pins;
-	}
-
-	public Map<String, String> getNamespaces() {
-		Map<String, String> namespaces = new LinkedHashMap<>();
-
-		String ns = get( Constants.USERPREF_NAMESPACES, "" );
-		for ( String s : ns.split( ";" ) ) {
-			int idx = s.indexOf( ":" );
-			if( idx > 0 ){
-				namespaces.put( s.substring( 0, idx ), s.substring( idx + 1 ) );
-			}
-		}
-
-		return namespaces;
-	}
-
-	public void setNamespaces( Map<String, String> ns ) {
-		StringBuilder sb = new StringBuilder();
-		for ( Map.Entry<String, String> en : ns.entrySet() ) {
-			if ( sb.length() > 0 ) {
-				sb.append( ";" );
-			}
-
-			sb.append( en.getKey() ).append( ":" ).append( en.getValue() );
-		}
-		
-		put( Constants.USERPREF_NAMESPACES, sb.toString() );		
 	}
 
 	/**

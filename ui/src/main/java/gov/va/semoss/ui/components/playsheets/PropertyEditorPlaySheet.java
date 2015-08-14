@@ -129,10 +129,6 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 	}
 
 	@Override
-	public void run() {
-	}
-
-	@Override
 	public List<Object[]> getTabularData() {
 		List<Object[]> data = new ArrayList<>();
 
