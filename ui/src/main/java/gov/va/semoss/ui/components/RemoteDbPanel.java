@@ -6,12 +6,16 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
-import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.SesameEngine;
+import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.web.io.DbInfo;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
+import java.util.prefs.Preferences;
+import javax.swing.DefaultListModel;
+import org.springframework.web.client.RestTemplate;
 
 /**
  *
@@ -19,51 +23,35 @@ import java.util.Properties;
  */
 public class RemoteDbPanel extends javax.swing.JPanel {
 
-	public static final URL INTERNAL;
-
-	static {
-		URL temp;
-		try {
-			temp = new URL( "http://internal" );
-		}
-		catch ( Exception e ) {
-			temp = null;
-		}
-		INTERNAL = temp;
-	}
+	private final DefaultListModel model = new DefaultListModel();
+	private final LabeledPairRenderer<DbInfo> render = new LabeledPairRenderer<>();
 
 	/**
 	 * Creates new form RemoteDbPanel
 	 */
-	public RemoteDbPanel( String ext, String inter ) {
+	public RemoteDbPanel() {
 		initComponents();
+		dblist.setModel( model );
+		dblist.setCellRenderer( render );
 
-		remoteurl.setText( ext );
-		insightsurl.setText( inter );
-	}
-
-	public URL getUrl() throws MalformedURLException {
-		return new URL( remoteurl.getText() );
-	}
-
-	public URL getInsights() throws MalformedURLException {
-		return new URL( insightsurl.getText() );
+		Preferences prefs = Preferences.userNodeForPackage( getClass() );
+		remoteurl.setText( prefs.get( "lastexturl", "http://" ) );
+		username.setText( prefs.get( "lastusername", "" ) );
 	}
 
 	public Properties getConnectionProperties() throws MalformedURLException {
-		Properties props = new Properties();
-		if ( bigdataRb.isSelected() ) {
-			props.setProperty( Constants.ENGINE_IMPL, BigDataEngine.class.getCanonicalName() );
-		}
-		else {
+		DbInfo info = dblist.getSelectedValue();
+		if ( null != info ) {
+			Properties props = new Properties();
 			props.setProperty( Constants.ENGINE_IMPL, SesameEngine.class.getCanonicalName() );
+
+			props.setProperty( SesameEngine.REPOSITORY_KEY, info.getDataUrl() );
+			props.setProperty( SesameEngine.INSIGHTS_KEY, info.getInsightsUrl() );
+			props.setProperty( AbstractSesameEngine.REMOTE_KEY, "true" );
+
+			return props;
 		}
-
-		props.setProperty( SesameEngine.REPOSITORY_KEY, getUrl().toExternalForm() );
-		props.setProperty( SesameEngine.INSIGHTS_KEY, getInsights().toExternalForm() );
-		props.setProperty( AbstractSesameEngine.REMOTE_KEY, "true" );
-
-		return props;
+		return null;
 	}
 
 	/**
@@ -75,89 +63,162 @@ public class RemoteDbPanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    buttonGroup1 = new javax.swing.ButtonGroup();
+    jPanel1 = new javax.swing.JPanel();
+    jLabel4 = new javax.swing.JLabel();
+    jLabel3 = new javax.swing.JLabel();
+    username = new javax.swing.JTextField();
+    password = new javax.swing.JPasswordField();
+    connect = new javax.swing.JButton();
     jLabel1 = new javax.swing.JLabel();
     remoteurl = new javax.swing.JTextField();
-    insightsurl = new javax.swing.JTextField();
+    jPanel2 = new javax.swing.JPanel();
     jLabel2 = new javax.swing.JLabel();
-    jPanel1 = new javax.swing.JPanel();
-    bigdataRb = new javax.swing.JRadioButton();
-    sesameRb = new javax.swing.JRadioButton();
+    jScrollPane1 = new javax.swing.JScrollPane();
+    dblist = new javax.swing.JList<DbInfo>();
 
-    jLabel1.setText("Remote URL");
+    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "Connection Information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 12))); // NOI18N
 
-    jLabel2.setText("Insights URL");
+    jLabel4.setText("Password");
 
-    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "Database Provider"));
+    jLabel3.setText("Username");
 
-    buttonGroup1.add(bigdataRb);
-    bigdataRb.setText("Big Data/Blazegraph");
-    bigdataRb.setEnabled(false);
+    connect.setText("Connect");
+    connect.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        connectActionPerformed(evt);
+      }
+    });
 
-    buttonGroup1.add(sesameRb);
-    sesameRb.setSelected(true);
-    sesameRb.setText("Sesame");
+    jLabel1.setText("Server URL");
 
     javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
     jPanel1.setLayout(jPanel1Layout);
     jPanel1Layout.setHorizontalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel1Layout.createSequentialGroup()
+        .addContainerGap()
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(bigdataRb)
-          .addComponent(sesameRb))
-        .addGap(0, 81, Short.MAX_VALUE))
+          .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(connect))
+          .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                  .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                  .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                  .addComponent(jLabel3)
+                  .addGap(17, 17, 17)))
+              .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jLabel4)
+                .addGap(19, 19, 19)))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+              .addComponent(password)
+              .addComponent(username)
+              .addComponent(remoteurl, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE))))
+        .addContainerGap())
     );
     jPanel1Layout.setVerticalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel1Layout.createSequentialGroup()
-        .addComponent(bigdataRb)
+        .addContainerGap()
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel1)
+          .addComponent(remoteurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(sesameRb))
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel3)
+          .addComponent(username))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel4)
+          .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(connect)
+        .addContainerGap())
+    );
+
+    jLabel2.setText("Databases");
+
+    dblist.setModel(new javax.swing.AbstractListModel() {
+      String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+      public int getSize() { return strings.length; }
+      public Object getElementAt(int i) { return strings[i]; }
+    });
+    jScrollPane1.setViewportView(dblist);
+
+    javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+    jPanel2.setLayout(jPanel2Layout);
+    jPanel2Layout.setHorizontalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addGap(0, 0, 0)
+        .addComponent(jLabel2)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+        .addGap(0, 0, 0))
+    );
+    jPanel2Layout.setVerticalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addGap(0, 0, 0)
+        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(jPanel2Layout.createSequentialGroup()
+            .addComponent(jLabel2)
+            .addGap(0, 121, Short.MAX_VALUE))
+          .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+        .addGap(0, 0, 0))
     );
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
-          .addGroup(layout.createSequentialGroup()
-            .addComponent(jLabel2)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-          .addComponent(insightsurl, javax.swing.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
-          .addComponent(remoteurl)))
-      .addGroup(layout.createSequentialGroup()
-        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(0, 0, Short.MAX_VALUE))
+      .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+      .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jLabel1)
-          .addComponent(remoteurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(insightsurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(jLabel2))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGap(0, 0, 0)
         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
+  private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
+		model.clear();
+		render.clearCache();
+
+		RestTemplate rest = DIHelper.getInstance().getAppCtx().getBean( "restTemplate",
+				RestTemplate.class );
+		String url = remoteurl.getText();
+		DbInfo dbs[] = rest.getForObject( url, DbInfo[].class );
+
+		Preferences prefs = Preferences.userNodeForPackage( getClass() );
+		prefs.put( "lastexturl", url );
+
+		for ( DbInfo i : dbs ) {
+			render.cache( i, i.getName() );
+			model.addElement( i );
+		}
+  }//GEN-LAST:event_connectActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JRadioButton bigdataRb;
-  private javax.swing.ButtonGroup buttonGroup1;
-  private javax.swing.JTextField insightsurl;
+  private javax.swing.JButton connect;
+  private javax.swing.JList<DbInfo> dblist;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
+  private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel4;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JPanel jPanel2;
+  private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JPasswordField password;
   private javax.swing.JTextField remoteurl;
-  private javax.swing.JRadioButton sesameRb;
+  private javax.swing.JTextField username;
   // End of variables declaration//GEN-END:variables
 }

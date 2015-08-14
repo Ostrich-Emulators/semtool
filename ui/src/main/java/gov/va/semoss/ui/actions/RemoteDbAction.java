@@ -37,26 +37,19 @@ public class RemoteDbAction extends DbAction {
 		super( optg, "Open Remote DB", "open-file3" );
 		this.frame = frame;
 		putValue( SHORT_DESCRIPTION, "Open Remote DB" );
-		//putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_O );
 	}
 
 	@Override
 	public boolean preAction( ActionEvent ae ) {
-
-		Preferences prefs = Preferences.userNodeForPackage( getClass() );
-
-		RemoteDbPanel panel = new RemoteDbPanel( prefs.get( "lastexturl", "http://" ),
-				prefs.get( "lastinsighturl", "http://" ) );
-
-		String options[] = { "Connect", "Cancel" };
+		RemoteDbPanel panel = new RemoteDbPanel();
+		
+		String options[] = { "Open", "Cancel" };
 		int opt = JOptionPane.showOptionDialog( frame, panel, "Open Remote DB",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
 				options[0] );
 		if ( 0 == opt ) {
 			try {
 				props = panel.getConnectionProperties();
-				prefs.put( "lastexturl", props.getProperty( SesameEngine.REPOSITORY_KEY ) );
-				prefs.put( "lastinsighturl", props.getProperty( SesameEngine.INSIGHTS_KEY ) );
 				return true;
 			}
 			catch ( MalformedURLException mue ) {

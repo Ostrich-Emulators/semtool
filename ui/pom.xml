@@ -48,17 +48,7 @@
 			<artifactId>commons-configuration</artifactId>
 			<version>1.10</version>
 		</dependency>
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata</artifactId>
-			<version>${bigdata.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata-ganglia</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-    
+		    
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
@@ -347,6 +337,13 @@
 	  <artifactId>spring-oxm</artifactId>
 	  <version>${spring.version}</version>
 	 </dependency>
+	 <!--
+	 <dependency>
+	  <groupId>com.thoughtworks.xstream</groupId>
+	  <artifactId>xstream</artifactId>
+	  <version>1.4.7</version>
+	 </dependency>
+	 -->
 	</dependencies>    
     
 	<profiles>

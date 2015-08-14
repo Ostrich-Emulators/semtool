@@ -4,22 +4,5 @@
 			 xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
-		<property name="messageConverters">
-			<list>
-				<bean id="messageConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-					<property name="marshaller" ref="xstreamMarshaller" />
-					<property name="unmarshaller" ref="xstreamMarshaller" />
-				</bean>
-			</list>
-		</property>
-	</bean>
-
-	<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
-		<property name="aliases">
-			<props>
-				<prop key="customer">com.spring.controller.Customer</prop>
-			</props>
-		</property>
-	</bean>
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate"/>
 </beans>

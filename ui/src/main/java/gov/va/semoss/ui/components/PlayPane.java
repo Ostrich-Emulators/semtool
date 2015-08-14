@@ -118,6 +118,8 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -243,6 +245,8 @@ public class PlayPane extends JFrame {
 		//exist in a separate class, load all of their listeners first:
 		// customSparqlPanel.loadCustomSparqlPanelListeners();
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
+		ApplicationContext ctx = new ClassPathXmlApplicationContext( "/appContext.xml" );
+		DIHelper.getInstance().setAppCtx( ctx );
 		DIHelper.getInstance().setPlayPane( this );
 
 		// run through the view components
