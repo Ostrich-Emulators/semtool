@@ -31,17 +31,6 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata</artifactId>
-			<version>${bigdata.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata-ganglia</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-    
-		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
 			<version>1.8.1</version>
