@@ -51,6 +51,8 @@ import javax.swing.Painter;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * The Starter class is run to start the SEMOSS application. This launches the
@@ -59,7 +61,9 @@ import javax.swing.event.ListSelectionListener;
 public class Starter {
 
 	final Object monitor = new Object();
-	/** The set of possible image paths which define the Splash screen */
+	/**
+	 * The set of possible image paths which define the Splash screen
+	 */
 	private static final String SPLASH_SCREEN_IMAGE_PATH = "/images/SEMOSS-Splash.png";
 
 	/**
@@ -80,7 +84,7 @@ public class Starter {
 		final Logger logger = Logger.getLogger( Starter.class );
 
 		final String WORKINGDIR = System.getProperty( "user.dir" );
-		
+
 		final File propFile = new File( WORKINGDIR, "RDF_Map.prop" );
 
 		final EngineUtil engineutil = EngineUtil.getInstance();
@@ -153,7 +157,7 @@ public class Starter {
 		}
 
 		final PlayPane frame = new PlayPane();
-		final SEMOSSSplashScreen ss = new SEMOSSSplashScreen(SPLASH_SCREEN_IMAGE_PATH);
+		final SEMOSSSplashScreen ss = new SEMOSSSplashScreen( SPLASH_SCREEN_IMAGE_PATH );
 		java.awt.EventQueue.invokeLater( new Runnable() {
 			@Override
 			public void run() {

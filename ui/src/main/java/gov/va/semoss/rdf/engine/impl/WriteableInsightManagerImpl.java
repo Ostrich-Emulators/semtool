@@ -16,9 +16,9 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
-import gov.va.semoss.user.User;
-import gov.va.semoss.user.User.UserProperty;
-import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.security.User;
+import gov.va.semoss.security.User.UserProperty;
+import gov.va.semoss.security.UserImpl;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 

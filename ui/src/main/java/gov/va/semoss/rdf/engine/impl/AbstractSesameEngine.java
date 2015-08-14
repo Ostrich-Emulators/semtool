@@ -66,7 +66,7 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.security.UserImpl;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.HashSet;

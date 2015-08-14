@@ -21,9 +21,9 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.models.NamespaceTableModel;
 import gov.va.semoss.ui.main.SemossPreferences;
-import gov.va.semoss.user.User;
-import gov.va.semoss.user.User.UserProperty;
-import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.security.User;
+import gov.va.semoss.security.User.UserProperty;
+import gov.va.semoss.security.UserImpl;
 
 /**
  *

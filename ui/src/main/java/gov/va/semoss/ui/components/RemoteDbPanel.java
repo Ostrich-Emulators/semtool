@@ -11,11 +11,11 @@ import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.web.io.DbInfo;
+import gov.va.semoss.web.io.ServiceClient;
 import java.net.MalformedURLException;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
-import org.springframework.web.client.RestTemplate;
 
 /**
  *
@@ -25,7 +25,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 
 	private final DefaultListModel model = new DefaultListModel();
 	private final LabeledPairRenderer<DbInfo> render = new LabeledPairRenderer<>();
-
+	
 	/**
 	 * Creates new form RemoteDbPanel
 	 */
@@ -192,10 +192,9 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 		model.clear();
 		render.clearCache();
 
-		RestTemplate rest = DIHelper.getInstance().getAppCtx().getBean( "restTemplate",
-				RestTemplate.class );
+		ServiceClient rest = DIHelper.getInstance().getAppCtx().getBean( ServiceClient.class );
 		String url = remoteurl.getText();
-		DbInfo dbs[] = rest.getForObject( url, DbInfo[].class );
+		DbInfo dbs[] = rest.getDbs( url );
 
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		prefs.put( "lastexturl", url );
