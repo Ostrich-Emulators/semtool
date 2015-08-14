@@ -1,9 +1,12 @@
 package gov.va.semoss.ui.components.insight.manager;
 
+import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.ParameterType;
+import gov.va.semoss.om.Perspective;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import javafx.collections.ObservableList;
@@ -21,17 +24,22 @@ import javafx.scene.control.TreeView;
 import org.openrdf.model.URI;
 
 public class ParameterEditorController implements Initializable{
-	public URI itemURI;
+	protected URI itemURI;
+	private int indexParameter;
+	private ArrayList<Insight> arylInsights;
+	private int indexInsight;
+	private Insight insight;
+	private Parameter parameter;
 	@FXML
-	protected TextField txtLabel_parm;
+	private TextField txtLabel_parm;
     @FXML 
-    protected TextField txtVariable_parm;
+    private TextField txtVariable_parm;
 	@FXML
-	protected ComboBox<ParameterType> cboParameterType_parm;
+	private ComboBox<ParameterType> cboParameterType_parm;
     @FXML
-    protected Button btnBuildQuery_Parm;
+    private Button btnBuildQuery_Parm;
     @FXML
-    protected TextArea txtaDefaultQuery_parm;
+    private TextArea txtaDefaultQuery_parm;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -47,14 +55,19 @@ public class ParameterEditorController implements Initializable{
 	 */
 	public void setData(TreeView<Object> treevPerspectives, ObservableList<ParameterType> obsParameterTypes){
 		TreeItem<Object> itemSelected = treevPerspectives.getSelectionModel().getSelectedItem();
-		Parameter parameter = (Parameter) itemSelected.getValue();
+		insight = (Insight) itemSelected.getParent().getValue();
+		arylInsights  = ((Perspective) itemSelected.getParent().getParent().getValue()).getInsights();
+		indexInsight = arylInsights.indexOf(insight);
+		parameter = (Parameter) itemSelected.getValue();
+		indexParameter = ((ArrayList<Parameter>) insight.getInsightParameters()).indexOf(parameter);
 		itemURI = parameter.getParameterId();
-		
+				
 		//Parameter Name:
 		//---------------
 		txtLabel_parm.setText(parameter.getLabel());
 		txtLabel_parm.textProperty().addListener((observable, oldValue, newValue) -> {
 			parameter.setLabel(newValue);
+			updateParameterInInsightInPerspective();
 			//This hack is necessary to update the TreeItem:
 			itemSelected.getParent().setExpanded(false);
 			itemSelected.getParent().setExpanded(true);
@@ -66,6 +79,7 @@ public class ParameterEditorController implements Initializable{
 		txtVariable_parm.setText(parameter.getVariable());
 		txtVariable_parm.textProperty().addListener((observable, oldValue, newValue) -> {
 			parameter.setVariable(newValue);
+			updateParameterInInsightInPerspective();
 		});
 				
 		//Parameter Type Combo-Box:
@@ -86,6 +100,7 @@ public class ParameterEditorController implements Initializable{
 	    }
  	    cboParameterType_parm.valueProperty().addListener((observable, oldValue, newValue) -> {
  		    parameter.setParameterType(newValue.getParameterClass());  
+			updateParameterInInsightInPerspective();
  	    });
 
  	    //Build Default Query Button:
@@ -98,6 +113,7 @@ public class ParameterEditorController implements Initializable{
 		txtaDefaultQuery_parm.setText(parameter.getDefaultQuery());
 		txtaDefaultQuery_parm.textProperty().addListener((observable, oldValue, newValue) -> {
 			parameter.setDefaultQuery(newValue);
+			updateParameterInInsightInPerspective();
 		});
 
 	}//End "setData(...)"
@@ -123,5 +139,17 @@ public class ParameterEditorController implements Initializable{
 		      "?entity rdfs:label ?label . \n}";
 		   txtaDefaultQuery_parm.setText(generatedQuery);
         }
+	}
+	
+	/**   Updates this Parameter in its parent Insight, in the "getParameters()" Map and in
+	 * the "getInsightParameters()" Collection. Also updates the parent Insight in its Perspective.
+	 * This method is called by each screen-field change handler.
+	 */
+	private void updateParameterInInsightInPerspective(){
+		ArrayList<Parameter> arylParameters = (ArrayList<Parameter>) insight.getInsightParameters();
+		arylParameters.set(indexParameter, parameter);
+		insight.setParameter(parameter.getVariable(), parameter.getLabel(), 
+		   parameter.getParameterType(), parameter.getDefaultQuery());
+		arylInsights.set(indexInsight, insight);
 	}
 }

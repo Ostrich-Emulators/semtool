@@ -143,7 +143,7 @@ public class NonLegacyQueryBuilder {
 	 * @return getData -- (Map<URI, String>) Described above, where "URI" is a URI
 	 * and "String" may be an "rdfs:label" value, or "".
 	 */
-	private Map<URI, String> getData( IEngine eng, String type ) {
+	public Map<URI, String> getData( IEngine eng, String type ) {
 		logger.debug( "NonLegacyQueryBuilder using engine: " + eng );
 		Map<URI, String> mapReturnValue = new HashMap<>();
 

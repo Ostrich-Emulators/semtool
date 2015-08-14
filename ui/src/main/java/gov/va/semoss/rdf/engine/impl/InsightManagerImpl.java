@@ -61,12 +61,12 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
-
 import gov.va.semoss.util.Utility;
+
 import java.util.Collections;
 import java.util.Comparator;
-
 import java.util.HashMap;
+
 import org.openrdf.repository.Repository;
 
 /**

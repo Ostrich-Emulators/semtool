@@ -11,10 +11,9 @@ import java.util.Objects;
 import org.openrdf.model.URI;
 
 /**
- * A class for managing a collection of {@link Insight}. As is, this class is
- * just a skeleton for later additions
+ * A class for managing a collection of {@link Insight}.
  *
- * @author ryan
+ * @author Thomas
  */
 public class Perspective {
 

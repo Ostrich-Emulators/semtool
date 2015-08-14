@@ -1339,58 +1339,6 @@ public class  InsightManagerController_2 implements Initializable{
 //		return strReturnValue;
 //	}
 //	
-//	/**   If the passed-in query is invalid or cannot be executed, this method
-//	 * displays a dialog, indicating the problem, and asks the user if he would
-//	 * like to save the query anyway. Returns true if the query is valid and can
-//	 * be executed, or if the user clicks "Ok" on the dialog. If the user cancels
-//	 * out of the dialog, or closes it, false is returned.
-//	 * 
-//	 * @param strQuery -- (String) A query to test.
-//	 * 
-//	 * @return queryValidationDialog -- (boolean) Described above.
-//	 */
-//	public boolean queryValidationDialog(String strQuery){
-//		boolean boolReturnValue = true;
-//		String exception = "";
-//		
-//		QueryExecutorAdapter<String> querySelect = new QueryExecutorAdapter<String>() {
-//			@Override
-//			public void handleTuple( BindingSet set, ValueFactory fac ) {
-//               //Nothing is done here.
-//			}
-//		};		
-//		try{
-//			if(strQuery.toUpperCase().startsWith("SELECT")){
-//			   querySelect.setSparql(strQuery);
-//			   engine.query(querySelect);
-//			   
-//			}else if(strQuery.toUpperCase().startsWith("CONSTRUCT")){
-//				Repository repo = engine.getInsightManager().getRepository();
-//				RepositoryConnection rc = null;
-//			    rc = repo.getConnection();
-//                strQuery = AbstractSesameEngine.processNamespaces(strQuery, new HashMap<>());
-//				rc.prepareGraphQuery(QueryLanguage.SPARQL, strQuery);
-//			}else{
-//				exception += "   The query must begin with SELECT or CONSTRUCT.\n";
-//			}
-//		}catch(MalformedQueryException e){
-//			exception += "   The query is malformed.\n";			
-//		} catch (Exception e) {
-//			exception += "   The query cannot be evaluated as written.\n";
-//		}
-//		
-//		if(exception.equals("") == false){
-//			int msgResponse = Utility.showWarningOkCancel("The following problems exist with your query:\n" +
-//		       exception + "Would you still like to save it?");
-//
-//			if(msgResponse == 0){
-//				boolReturnValue = true;
-//			}else{
-//		        boolReturnValue = false;
-//			}
-//		}		
-//		return boolReturnValue;
-//	}
 
 
 }
