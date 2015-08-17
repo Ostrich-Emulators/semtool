@@ -1,0 +1,105 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SEMOSS DB Test Driver</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    
+  </head>
+
+<body>
+
+  <div style="margin-left: 2cm;">
+    <H3>SEMOSS DB Test Driver</H3>
+    <BR />
+    <button type="button" id="getAllDBIDsBtn">See Available RemoteDatabases</button>
+    <div id="databaseIDList"></div>
+    <BR />
+    <input type="text" id="thisDBID" /><button type="button" id="getOneDBBtn">Get URIs for this Database ID</button>
+    <div id="databaseInfo"></div>
+    <BR />
+    <button type="button" id="getAllDBsInfoBtn">Get All Database Info</button>
+    <div id="allDBInfo"></div>
+    <BR />
+  </div>
+
+<script>
+
+function getAllDBIDs() {
+	$.ajax({
+		url : '../semoss/allDatabaseIDs',
+		success : function(data) {
+			var theDatabaseIDs = jQuery.parseJSON(data);
+			
+			var theHtml = "";
+			for (var i = 0; i<theDatabaseIDs.length; i++) {
+				theHtml += theDatabaseIDs[i] + "<BR />";
+			}
+
+			$('#databaseIDList').html(theHtml);
+		}
+	});
+}
+
+function getDatabaseURIs(dbId) {
+	$.ajax({
+		url : '../semoss/oneDatabase/' + dbId,
+		success : function(data) {
+			var theDatabaseInfo = jQuery.parseJSON(data);
+			
+			var theHtml = "<BR />";
+			theHtml += "<BR />Database Name: " + theDatabaseInfo.name;
+			theHtml += "<BR />Server URI: " + theDatabaseInfo.serverUrl;
+			theHtml += "<BR />Database URI: " + theDatabaseInfo.dataUrl;
+			theHtml += "<BR />Insight URI: " + theDatabaseInfo.insightsUrl;
+
+			$('#databaseInfo').html(theHtml);
+		}
+	});
+}
+
+function getAllDBsInfo() {
+	$.ajax({
+		url : '../semoss/allDatabases',
+		success : function(data) {
+			var allDatabases = jQuery.parseJSON(data);
+			
+			var theHtml = "";
+			for (var i = 0; i<allDatabases.length; i++) {
+				theHtml += "<BR />";
+				theHtml += "<BR />Database Name: " + allDatabases[i].name;
+				theHtml += "<BR />Server URI: " + allDatabases[i].serverUrl;
+				theHtml += "<BR />Database URI: " + allDatabases[i].dataUrl;
+				theHtml += "<BR />Insight URI: " + allDatabases[i].insightsUrl;
+			}
+
+			$('#allDBInfo').html(theHtml);
+		}
+	});
+}
+
+$( "#getAllDBIDsBtn" ).click(function() {
+  getAllDBIDs();
+});
+
+$( "#getOneDBBtn" ).click(function() {
+  var dbId = $("#thisDBID").val();
+  getDatabaseURIs(dbId);
+});
+
+$( "#getAllDBsInfoBtn" ).click(function() {
+  getAllDBsInfo();
+});
+
+</script>
+    
+  </body>
+</html>
