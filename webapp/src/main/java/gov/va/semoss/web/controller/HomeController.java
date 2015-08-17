@@ -4,26 +4,19 @@
  */
 package gov.va.semoss.web.controller;
 
-import org.apache.log4j.Logger;
+import gov.va.semoss.web.io.DbInfo;
 
+import java.util.ArrayList;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.Gson;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import gov.va.semoss.web.io.DbInfo;
 
 /**
  *
@@ -33,7 +26,6 @@ import gov.va.semoss.web.io.DbInfo;
 public class HomeController extends SemossControllerBase {
 
 	private static final Logger log = Logger.getLogger( HomeController.class );
-	private static ArrayList<Map<String, Object>> knowledgeBases;
 
 	@RequestMapping( value = "/", method = RequestMethod.GET )
 	public String getWelcome() {
@@ -60,6 +52,8 @@ public class HomeController extends SemossControllerBase {
 	
 	@RequestMapping( value = "/semoss/allDatabases", method = RequestMethod.GET )
 	public @ResponseBody String getAllDatabases() {
+		log.debug("Getting all databases..");
+		
 		ArrayList<Map<String, Object>> knowledgeBases = DbInfo.getTestDatabases();
 		
 		String json = new Gson().toJson( knowledgeBases );
