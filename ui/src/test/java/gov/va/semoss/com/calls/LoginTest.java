@@ -9,7 +9,7 @@ public class LoginTest {
 
 	@Test
 	public void test() {
-		LoginCall loginCall = new LoginCall("ryan", "123456");
+		GenericLoginCall loginCall = new GenericLoginCall("ryan", "123456");
 		WebServerAPI.initialize("localhost", 8080);
 		if (!WebServerAPI.instance().execute(loginCall)){
 			fail("Unable to log in");

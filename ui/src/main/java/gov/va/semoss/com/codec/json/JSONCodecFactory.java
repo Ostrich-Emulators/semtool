@@ -7,9 +7,9 @@ public class JSONCodecFactory implements CodecFactory {
 
 	@Override
 	public WebCodec getCodec(Class<?> targetClass) {
-		if (targetClass == UserInfo.class){
-			
-		}
+		//if (targetClass == UserInfo.class){
+		//	
+		//}
 		return null;
 	}
 

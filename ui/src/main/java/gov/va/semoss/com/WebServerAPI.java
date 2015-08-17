@@ -1,6 +1,7 @@
 package gov.va.semoss.com;
 
-import gov.va.semoss.com.calls.APICall;
+import gov.va.semoss.com.calls.GenericAPICall;
+import gov.va.semoss.com.calls.SpringRESTCall;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,9 +50,14 @@ public class WebServerAPI {
 		initialized = true;
 	}
 	
-	public boolean execute(APICall apiCall){
+	public boolean execute(GenericAPICall apiCall){
 		String endpoint = urls.getProperty(apiCall.getName());
 		return apiCall.execute(client, HOST, PORT, endpoint);
+	}
+	
+	public boolean execute(SpringRESTCall restCall){
+		String endpoint = urls.getProperty(restCall.getName());
+		return restCall.execute(HOST, PORT, endpoint);
 	}
 	
 	private static void loadProperties(){

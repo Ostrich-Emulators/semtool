@@ -3,9 +3,9 @@ package gov.va.semoss.com.calls;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 
-public class LogoutCall extends APICall {
+public class GenericLogoutCall extends GenericAPICall {
 
-	protected LogoutCall() {
+	protected GenericLogoutCall() {
 		super("logout");
 	}
 

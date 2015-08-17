@@ -8,9 +8,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.log4j.Logger;
 
-public abstract class APICall {
+public abstract class GenericAPICall {
 	
-	protected static final Logger log = Logger.getLogger(APICall.class);
+	protected static final Logger log = Logger.getLogger(GenericAPICall.class);
 	
 	protected String name;
 	
@@ -22,7 +22,7 @@ public abstract class APICall {
 	
 	protected HashMap<String, Object> returnedData = new HashMap<String, Object>();
 	
-	protected APICall(String name){
+	protected GenericAPICall(String name){
 		this.name = name;
 	}
 	
