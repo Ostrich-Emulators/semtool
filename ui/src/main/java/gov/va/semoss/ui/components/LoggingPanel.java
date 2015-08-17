@@ -138,7 +138,7 @@ public class LoggingPanel extends JPanel {
 	}
 
 	public void refresh() {
-		if ( UserImpl.getUser().hasPermission( SemossPermission.logViewer() ) ) {
+		if ( UserImpl.getUser().hasPermission( SemossPermission.LOGVIEWER ) ) {
 			model.refresh();
 			table.scrollRectToVisible( table.getCellRect( model.getRowCount() - 1, 0, true ) );
 		}

@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
+import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
@@ -148,7 +150,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	}
 
 	private static ProgressTask doitNewSkool( PlaySheetCentralComponent pscc,
-			String query, IEngine eng, JDesktopPane pane, String frameTitle, 
+			String query, IEngine eng, JDesktopPane pane, String frameTitle,
 			boolean appending ) {
 		if ( appending ) {
 			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
@@ -174,7 +176,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 				try {
 					engine.update( new UpdateExecutorAdapter( query ) );
 				}
-				catch ( RepositoryException | MalformedQueryException | UpdateExecutionException ex ) {
+				catch ( RepositoryException | MalformedQueryException | UpdateExecutionException | SecurityException ex ) {
 					logger.error( ex, ex );
 					ok[0] = ex;
 				}
