@@ -7,6 +7,7 @@ package gov.va.semoss.security;
 
 import gov.va.semoss.security.permissions.SemossPermission;
 import java.security.Permission;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,9 +44,8 @@ public class UserImpl implements User {
 				namespaces.put( s.substring( 0, idx ), s.substring( idx + 1 ) );
 			}
 		}
-		
-		permissions.add( SemossPermission.insightManager() );
-		permissions.add( SemossPermission.logViewer() );
+
+		permissions.add( SemossPermission.ADMIN );
 	}
 
 	@Override
@@ -97,7 +97,18 @@ public class UserImpl implements User {
 	}
 
 	@Override
-	public boolean hasPermission( Permission p ) {
-		return permissions.contains( p );
+	public boolean hasPermission( Permission theirs ) {
+		for ( Permission mine : permissions ) {
+			if ( mine.implies( theirs ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void resetPermissions( Collection<Permission> perms ) {
+		permissions.clear();
+		permissions.addAll( perms );
 	}
 }

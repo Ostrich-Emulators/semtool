@@ -13,21 +13,12 @@ import java.security.BasicPermission;
  */
 public class SemossPermission extends BasicPermission {
 
-	public static enum PermissionType {
-
-		INSIGHT_MANAGER( "semoss.insightmanager" ),
-		LOG_VIEWER( "semoss.logviewer" );
-
-		private final String val;
-
-		PermissionType( String val ) {
-			this.val = val;
-		}
-
-		public String stringValue() {
-			return val;
-		}
-	};
+	public static final SemossPermission ADMIN = new SemossPermission( "semoss.*" );
+	public static final SemossPermission LOGVIEWER = new SemossPermission( "semoss.gui.logviewer" );
+	public static final SemossPermission INSIGHTREADER = new SemossPermission( "semoss.insight.reader" );
+	public static final SemossPermission INSIGHTWRITER = new SemossPermission( "semoss.insight.*" );
+	public static final SemossPermission DATAWRITER = new SemossPermission( "semoss.data.*" );
+	public static final SemossPermission DATAREADER = new SemossPermission( "semoss.data.reader" );
 
 	public SemossPermission( String name ) {
 		super( name );
@@ -37,12 +28,7 @@ public class SemossPermission extends BasicPermission {
 		super( name, actions );
 	}
 
-	public static BasicPermission insightManager() {
-		return new SemossPermission( PermissionType.INSIGHT_MANAGER.stringValue() );
+	public static SecurityException newSecEx() {
+		return new SecurityException( "You do not have permission to access this feature" );
 	}
-
-	public static BasicPermission logViewer() {
-		return new SemossPermission( PermissionType.LOG_VIEWER.stringValue() );
-	}
-
 }
