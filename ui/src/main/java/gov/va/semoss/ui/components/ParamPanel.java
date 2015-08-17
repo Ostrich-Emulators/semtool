@@ -48,7 +48,6 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 
 /**

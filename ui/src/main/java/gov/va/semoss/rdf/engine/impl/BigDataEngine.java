@@ -49,6 +49,8 @@ import org.openrdf.model.Statement;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
 import gov.va.semoss.rdf.engine.util.StatementSorter;
+import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -235,34 +237,39 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 			@Override
 			public void commit() {
-				if ( hasCommittableChanges() ) {
-					try {
-						List<Statement> stmts = new ArrayList<>( getStatements() );
-						Collections.sort( stmts, new StatementSorter() );
+				if ( UserImpl.getUser().hasPermission( SemossPermission.INSIGHTWRITER ) ) {
+					if ( hasCommittableChanges() ) {
+						try {
+							List<Statement> stmts = new ArrayList<>( getStatements() );
+							Collections.sort( stmts, new StatementSorter() );
 
-						copyInsightsToDisk( stmts ); // from the WriteableInsightManager
+							copyInsightsToDisk( stmts ); // from the WriteableInsightManager
 
-						// refresh the insight engine's KB
-						RepositoryConnection src = insightEngine.getRawConnection();
-						src.begin();
-						src.clear();
-						src.add( stmts );
-						src.commit();
+							// refresh the insight engine's KB
+							RepositoryConnection src = insightEngine.getRawConnection();
+							src.begin();
+							src.clear();
+							src.add( stmts );
+							src.commit();
+						}
+						catch ( RepositoryException re ) {
+							log.error( re, re );
+						}
 					}
-					catch ( RepositoryException re ) {
-						log.error( re, re );
+
+					if ( log.isTraceEnabled() ) {
+						File dumpfile
+								= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
+						try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
+							insightEngine.getRawConnection().export( new TurtleWriter( w ) );
+						}
+						catch ( Exception ioe ) {
+							log.warn( ioe, ioe );
+						}
 					}
 				}
-
-				if ( log.isTraceEnabled() ) {
-					File dumpfile
-							= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
-					try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
-						insightEngine.getRawConnection().export( new TurtleWriter( w ) );
-					}
-					catch ( Exception ioe ) {
-						log.warn( ioe, ioe );
-					}
+				else {
+					throw SemossPermission.newSecEx();
 				}
 			}
 		};

@@ -83,10 +83,14 @@ public class LogReadingTableModel extends AbstractTableModel {
 		file = logfile;
 	}
 
-	public void refresh() {
+	public void clear(){
 		data.clear();
 		fireTableDataChanged();
-
+	}
+	
+	public void refresh() {
+		clear();
+		
 		SwingWorker<Void, LogRow> sw = new SwingWorker<Void, LogRow>() {
 
 			@Override

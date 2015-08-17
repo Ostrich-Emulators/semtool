@@ -56,8 +56,9 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
-import gov.va.semoss.user.User;
-import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.security.User;
+import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
@@ -605,17 +606,23 @@ public class EngineUtil implements Runnable {
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
 			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
-		List<Statement> stmts = new ArrayList<>();
-		if ( null != insightsfile ) {
-			stmts.addAll( createInsightStatements( insightsfile ) );
-		}
+		if ( UserImpl.getUser().hasPermission( SemossPermission.INSIGHTWRITER ) ) {
 
-		for ( URL url : vocabs ) {
-			stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
-		}
+			List<Statement> stmts = new ArrayList<>();
+			if ( null != insightsfile ) {
+				stmts.addAll( createInsightStatements( insightsfile ) );
+			}
 
-		insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
-		notify();
+			for ( URL url : vocabs ) {
+				stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+			}
+
+			insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
+			notify();
+		}
+		else {
+			throw new EngineManagementException( SemossPermission.newSecEx() );
+		}
 	}
 
 	/**
