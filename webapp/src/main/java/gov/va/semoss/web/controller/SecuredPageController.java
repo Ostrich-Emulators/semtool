@@ -80,13 +80,11 @@ public class SecuredPageController  extends SemossControllerBase  {
 			HttpServletResponse response ) {
 		log.debug( "Getting database with ID " + id + "." );
 		DbInfo[] testDbs = DbInfo.getAllDBs();
-
 		for ( DbInfo testDb : testDbs ) {
 			if ( testDb.getName().equals( id ) ) {
 				return testDb;
 			}
 		}
-
 		response.setStatus( HttpServletResponse.SC_NOT_FOUND );
 		return null;
 	}

@@ -28,7 +28,7 @@ public class LoginTest {
 		String url = "http://localhost:8080/semoss-webserver/admin";
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<String> request = RestAuthenticator.instance().getEntity(username, password);
-		ResponseEntity<Object> response = restTemplate.exchange(url, HttpMethod.GET, request, Object.class);
+		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
 		Object object = response.getBody();
 	}
 	

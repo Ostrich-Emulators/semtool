@@ -10,6 +10,7 @@
 		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/data**" access="hasRole('ROLE_DATA_ADMIN')" />
 		<intercept-url pattern="/insight**" access="hasRole('ROLE_INSIGHT_ADMIN')" />
+		<intercept-url pattern="/semoss/allDatabases" access="hasRole('ROLE_INSIGHT_ADMIN')" />
 	</http>
 
 	<authentication-manager>
