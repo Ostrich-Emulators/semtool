@@ -60,15 +60,6 @@ public class DbInfo {
 		this.insightsUrl = insightsUrl;
 	}
 	
-	public static DbInfo getEmptyDatabase() {
-		return new DbInfo(
-				"invalidID", 
-				"http://www.invalidID.gov/", 
-				"http://www.invalidID.gov/", 
-				"http://www.invalidID.gov/"
-				);
-	}
-	
 	public static DbInfo[] getTestDatabases() {
 		ArrayList<DbInfo> testDbs = new ArrayList<DbInfo>();
 		
@@ -94,5 +85,14 @@ public class DbInfo {
 				));
 		
 		return testDbs.toArray( new DbInfo[testDbs.size()] );
+	}
+	
+
+	/*
+	 * Returns all current DB info we have access to. Currently it returns test data
+	 * but should be updated to hit a configuration file or to hit a data store. JPM 08/18/2015
+	 */
+	public static DbInfo[] getAllDBs() {
+		return DbInfo.getTestDatabases();
 	}
 }
