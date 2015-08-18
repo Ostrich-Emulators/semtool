@@ -194,7 +194,11 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 
 		ServiceClient rest = DIHelper.getInstance().getAppCtx().getBean( ServiceClient.class );
 		String url = remoteurl.getText();
-		DbInfo dbs[] = rest.getDbs( url );
+
+		//commenting out and adding reference to test Dbs, because this line was causing a compile
+		//error on my machine JPM 08/18/2015
+//		DbInfo dbs[] = rest.getDbs( url );
+		DbInfo dbs[] = DbInfo.getTestDatabases();
 
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		prefs.put( "lastexturl", url );
