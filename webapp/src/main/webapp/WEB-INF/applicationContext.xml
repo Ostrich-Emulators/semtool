@@ -15,4 +15,7 @@
 	<bean id="rdfstore" class="gov.va.semoss.web.datastore.DataStore">
 		<constructor-arg value="${rdfstore}"/>
 	</bean>
+	
+	<bean id="dbinfomapper" class="gov.va.semoss.web.datastore.DbInfoMapper"/>
+	
 </beans>
