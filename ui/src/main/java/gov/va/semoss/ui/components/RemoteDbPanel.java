@@ -194,6 +194,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 
 		ServiceClient rest = DIHelper.getInstance().getAppCtx().getBean( ServiceClient.class );
 		String url = remoteurl.getText();
+
 		DbInfo dbs[] = rest.getDbs( url );
 
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );

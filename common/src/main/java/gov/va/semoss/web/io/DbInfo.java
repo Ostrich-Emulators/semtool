@@ -6,19 +6,12 @@
 package gov.va.semoss.web.io;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
  * @author ryan
  */
 public class DbInfo {
-	public final static String NAME_KEY = "name";
-	public final static String SERVERURL_KEY = "serverUrl";
-	public final static String DATAURL_KEY = "dataUrl";
-	public final static String INSIGHTSURL_KEY = "insightsUrl";
-	
 	private String name;
 	private String serverUrl;
 	private String dataUrl;
@@ -29,6 +22,10 @@ public class DbInfo {
 		this.serverUrl = serverUrl;
 		this.dataUrl = dataUrl;
 		this.insightsUrl = insightsUrl;
+	}
+	
+	public DbInfo(){
+		
 	}
 	
 	public String getName() {
@@ -63,49 +60,39 @@ public class DbInfo {
 		this.insightsUrl = insightsUrl;
 	}
 	
-	public Map<String, Object> getAsMap() {
-		HashMap<String, Object> returnMap = new HashMap<String, Object>();
-		returnMap.put(NAME_KEY, name);
-		returnMap.put(SERVERURL_KEY, serverUrl);
-		returnMap.put(DATAURL_KEY, dataUrl);
-		returnMap.put(INSIGHTSURL_KEY, insightsUrl);
+	public static DbInfo[] getTestDatabases() {
+		ArrayList<DbInfo> testDbs = new ArrayList<DbInfo>();
 		
-		return returnMap;
-	}
-	
-	public static DbInfo getEmptyDatabase() {
-		return new DbInfo(
-				"invalidID", 
-				"http://www.invalidID.gov/", 
-				"http://www.invalidID.gov/", 
-				"http://www.invalidID.gov/"
-				);
-	}
-	
-	public static ArrayList<Map<String, Object>> getTestDatabases() {
-		ArrayList<Map<String, Object>> knowledgeBases = new ArrayList<Map<String, Object>>();
-		
-		knowledgeBases.add(new DbInfo(
+		testDbs.add(new DbInfo(
 				"thisKB", 
 				"http://www.storagePlace.gov/choiceOne/serverURI", 
 				"http://www.storagePlace.gov/choiceOne/databaseURI", 
 				"http://www.storagePlace.gov/choiceOne/insightURI"
-			).getAsMap());
+			));
 
-		knowledgeBases.add(new DbInfo(
+		testDbs.add(new DbInfo(
 				"thatKB", 
 				"http://www.storagePlace.gov/choiceTwo/serverURI", 
 				"http://www.storagePlace.gov/choiceTwo/databaseURI", 
 				"http://www.storagePlace.gov/choiceTwo/insightURI"
-			).getAsMap());
+				));
 	
-		knowledgeBases.add(new DbInfo(
+		testDbs.add(new DbInfo(
 				"theOtherKB", 
 				"http://www.storagePlace.gov/choiceThree/serverURI", 
 				"http://www.storagePlace.gov/choiceThree/databaseURI", 
 				"http://www.storagePlace.gov/choiceThree/insightURI"
-			).getAsMap());
+				));
 		
-		return knowledgeBases;
+		return testDbs.toArray( new DbInfo[testDbs.size()] );
+	}
+	
+
+	/*
+	 * Returns all current DB info we have access to. Currently it returns test data
+	 * but should be updated to hit a configuration file or to hit a data store. JPM 08/18/2015
+	 */
+	public static DbInfo[] getAllDBs() {
+		return DbInfo.getTestDatabases();
 	}
 }
