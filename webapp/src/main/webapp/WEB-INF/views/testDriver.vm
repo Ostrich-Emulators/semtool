@@ -18,17 +18,18 @@
 <body>
 
   <div style="margin-left: 2cm;">
-    <H3>SEMOSS DB Test Driver</H3>
-    <BR />
-    <button type="button" id="getAllDBIDsBtn">See Available RemoteDatabases</button>
-    <div id="databaseIDList"></div>
-    <BR />
-    <input type="text" id="thisDBID" /><button type="button" id="getOneDBBtn">Get URIs for this Database ID</button>
-    <div id="databaseInfo"></div>
-    <BR />
-    <button type="button" id="getAllDBsInfoBtn">Get All Database Info</button>
-    <div id="allDBInfo"></div>
-    <BR />
+  
+    <H3>SEMOSS DB Test Driver</H3><BR />
+    
+    <button type="button" id="getAllDBIDsBtn">See Available RemoteDatabases</button><BR />
+    <div id="databaseIDList"></div><BR />
+
+    <input type="text" id="thisDBID" /><button type="button" id="getOneDBBtn">Get URIs for this Database ID</button><BR />
+    <div id="databaseInfo"></div><BR />
+
+    <button type="button" id="getAllDBsInfoBtn">Get All Database Info</button><BR />
+    <div id="allDBInfo"></div><BR />
+    
   </div>
 
 <script>
@@ -37,11 +38,9 @@ function getAllDBIDs() {
 	$.ajax({
 		url : '../semoss/allDatabaseIDs',
 		success : function(data) {
-			var theDatabaseIDs = jQuery.parseJSON(data);
-			
-			var theHtml = "";
-			for (var i = 0; i<theDatabaseIDs.length; i++) {
-				theHtml += theDatabaseIDs[i] + "<BR />";
+			var theHtml = "<BR />";
+			for (var i = 0; i<data.length; i++) {
+				theHtml += data[i] + "<BR />";
 			}
 
 			$('#databaseIDList').html(theHtml);
@@ -53,15 +52,7 @@ function getDatabaseURIs(dbId) {
 	$.ajax({
 		url : '../semoss/oneDatabase/' + dbId,
 		success : function(data) {
-			var theDatabaseInfo = jQuery.parseJSON(data);
-			
-			var theHtml = "<BR />";
-			theHtml += "<BR />Database Name: " + theDatabaseInfo.name;
-			theHtml += "<BR />Server URI: " + theDatabaseInfo.serverUrl;
-			theHtml += "<BR />Database URI: " + theDatabaseInfo.dataUrl;
-			theHtml += "<BR />Insight URI: " + theDatabaseInfo.insightsUrl;
-
-			$('#databaseInfo').html(theHtml);
+			$('#databaseInfo').html( buildHTMLStringForOneDB(data) );
 		}
 	});
 }
@@ -70,15 +61,13 @@ function getAllDBsInfo() {
 	$.ajax({
 		url : '../semoss/allDatabases',
 		success : function(data) {
-			var allDatabases = jQuery.parseJSON(data);
-			
+//			data coming from new Gson().toJson() needs this line, 
+//			but this line will break data coming from spring automagic
+//			data = jQuery.parseJSON(data);
+
 			var theHtml = "";
-			for (var i = 0; i<allDatabases.length; i++) {
-				theHtml += "<BR />";
-				theHtml += "<BR />Database Name: " + allDatabases[i].name;
-				theHtml += "<BR />Server URI: " + allDatabases[i].serverUrl;
-				theHtml += "<BR />Database URI: " + allDatabases[i].dataUrl;
-				theHtml += "<BR />Insight URI: " + allDatabases[i].insightsUrl;
+			for (var i = 0; i<data.length; i++) {
+				theHtml += buildHTMLStringForOneDB(data[i]);
 			}
 
 			$('#allDBInfo').html(theHtml);
@@ -86,17 +75,26 @@ function getAllDBsInfo() {
 	});
 }
 
+function buildHTMLStringForOneDB(data) {
+	var theHtml = "<BR />";
+	theHtml += "Database Name: " + data.name        + "<BR />";
+	theHtml += "Server URI: "    + data.serverUrl   + "<BR />";
+	theHtml += "Database URI: "  + data.dataUrl     + "<BR />";
+	theHtml += "Insight URI: "   + data.insightsUrl + "<BR />";
+	
+	return theHtml;
+}
+
 $( "#getAllDBIDsBtn" ).click(function() {
-  getAllDBIDs();
+	getAllDBIDs();
 });
 
 $( "#getOneDBBtn" ).click(function() {
-  var dbId = $("#thisDBID").val();
-  getDatabaseURIs(dbId);
+	getDatabaseURIs( $("#thisDBID").val() );
 });
 
 $( "#getAllDBsInfoBtn" ).click(function() {
-  getAllDBsInfo();
+	getAllDBsInfo();
 });
 
 </script>

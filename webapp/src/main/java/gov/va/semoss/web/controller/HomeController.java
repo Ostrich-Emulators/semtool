@@ -6,17 +6,12 @@ package gov.va.semoss.web.controller;
 
 import gov.va.semoss.web.io.DbInfo;
 
-import java.util.ArrayList;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.google.gson.Gson;
 
 /**
  *
@@ -38,39 +33,45 @@ public class HomeController extends SemossControllerBase {
 	}
 	
 	@RequestMapping( value = "/semoss/allDatabaseIDs", method = RequestMethod.GET )
-	public @ResponseBody String getAllDatabaseIDs() {
-		ArrayList<Map<String, Object>> knowledgeBases = DbInfo.getTestDatabases();
+	public @ResponseBody String[] getAllDatabaseIDs() {
+		log.debug("Getting all database IDs.");
+		DbInfo[] testDbs = getAllDBs();
 		
-		ArrayList<String> theDatabaseIDs = new ArrayList<String>();
-		for (Map<String, Object> knowledgeBase: knowledgeBases) {
-			theDatabaseIDs.add( knowledgeBase.get("name")+"" );
+		String[] testDbIDs = new String[testDbs.length];
+		for (int i=0; i<testDbs.length; i++) {
+			testDbIDs[i] = testDbs[i].getName();
 		}
 		
-		String json = new Gson().toJson( theDatabaseIDs );
-		return json;
+		return testDbIDs;
 	}
 	
 	@RequestMapping( value = "/semoss/allDatabases", method = RequestMethod.GET )
-	public @ResponseBody String getAllDatabases() {
-		log.debug("Getting all databases..");
+	public @ResponseBody DbInfo[] getAllDatabases() {
+		log.debug("Getting all databases.");
+		DbInfo[] testDbs = getAllDBs();
 		
-		ArrayList<Map<String, Object>> knowledgeBases = DbInfo.getTestDatabases();
-		
-		String json = new Gson().toJson( knowledgeBases );
-		return json;
+		return testDbs;
 	}
 	
 	@RequestMapping( value = "/semoss/oneDatabase/{id}", method = RequestMethod.GET )
-	public @ResponseBody String getOneDatabaseWithID(@PathVariable("id") String id) {
-		ArrayList<Map<String, Object>> knowledgeBases = DbInfo.getTestDatabases();
-
-		for (Map<String, Object> knowledgeBase: knowledgeBases) {
-			if ( knowledgeBase.get("name").equals(id) ) {
-				return new Gson().toJson( knowledgeBase );
+	public @ResponseBody DbInfo getOneDatabaseWithID(@PathVariable("id") String id) {
+		log.debug("Getting database with ID " + id + ".");
+		DbInfo[] testDbs = getAllDBs();
+		
+		for (int i=0; i<testDbs.length; i++) {
+			if ( testDbs[i].getName().equals(id) ) {
+				return testDbs[i];
 			}
 		}
 		
-		return new Gson().toJson( DbInfo.getEmptyDatabase().getAsMap() );
+		return DbInfo.getEmptyDatabase();
 	}
 
+	/*
+	 * Returns all current DB info we have access to. Currently it returns test data
+	 * but should be updated to hit a configuration file or to hit a data store. JPM 08/18/2015
+	 */
+	private DbInfo[] getAllDBs() {
+		return DbInfo.getTestDatabases();
+	}
 }
