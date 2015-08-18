@@ -6,6 +6,7 @@ package gov.va.semoss.web.controller;
 
 import gov.va.semoss.web.io.DbInfo;
 
+import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,40 +32,42 @@ public class HomeController extends SemossControllerBase {
 	public String getTestDriver() {
 		return "testDriver.vm";
 	}
-	
+
 	@RequestMapping( value = "/semoss/allDatabaseIDs", method = RequestMethod.GET )
 	public @ResponseBody String[] getAllDatabaseIDs() {
 		log.debug("Getting all database IDs.");
 		DbInfo[] testDbs = getAllDBs();
-		
+
 		String[] testDbIDs = new String[testDbs.length];
-		for (int i=0; i<testDbs.length; i++) {
+		for ( int i = 0; i < testDbs.length; i++ ) {
 			testDbIDs[i] = testDbs[i].getName();
 		}
-		
+
 		return testDbIDs;
 	}
-	
+
 	@RequestMapping( value = "/semoss/allDatabases", method = RequestMethod.GET )
 	public @ResponseBody DbInfo[] getAllDatabases() {
-		log.debug("Getting all databases.");
+		log.debug( "Getting all databases." );
 		DbInfo[] testDbs = getAllDBs();
-		
+
 		return testDbs;
 	}
-	
+
 	@RequestMapping( value = "/semoss/oneDatabase/{id}", method = RequestMethod.GET )
-	public @ResponseBody DbInfo getOneDatabaseWithID(@PathVariable("id") String id) {
-		log.debug("Getting database with ID " + id + ".");
+	public @ResponseBody DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
+			HttpServletResponse response ) {
+		log.debug( "Getting database with ID " + id + "." );
 		DbInfo[] testDbs = getAllDBs();
-		
-		for (int i=0; i<testDbs.length; i++) {
-			if ( testDbs[i].getName().equals(id) ) {
-				return testDbs[i];
+
+		for ( DbInfo testDb : testDbs ) {
+			if ( testDb.getName().equals( id ) ) {
+				return testDb;
 			}
 		}
-		
-		return DbInfo.getEmptyDatabase();
+
+		response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+		return null;
 	}
 
 	/*

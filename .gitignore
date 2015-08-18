@@ -19,3 +19,4 @@ ui/.settings/*
 ui/src/main/resources/html.zip
 ui/nbactions.xml
 /webapp/src/main/resources/semoss-web.properties
+/webapp/nb-configuration.xml

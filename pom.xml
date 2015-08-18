@@ -123,6 +123,26 @@
 			<version>${openrdf.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-sail-api</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-sail-memory</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-http</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-sail</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>net.sf.jgrapht</groupId>
 			<artifactId>jgrapht</artifactId>
 			<version>0.8.3</version>

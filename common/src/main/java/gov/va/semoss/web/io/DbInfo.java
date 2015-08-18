@@ -24,6 +24,10 @@ public class DbInfo {
 		this.insightsUrl = insightsUrl;
 	}
 	
+	public DbInfo(){
+		
+	}
+	
 	public String getName() {
 		return name;
 	}
