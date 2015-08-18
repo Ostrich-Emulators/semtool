@@ -24,18 +24,33 @@ import org.openrdf.sail.nativerdf.NativeStore;
  * @author ryan
  */
 public class DataStore {
-
+	
 	private static final Logger log = Logger.getLogger( DataStore.class );
 	private static final Pattern pat
 			= Pattern.compile( "^(http.*/openrdf-sesame)/repositories/(.*)",
 					Pattern.CASE_INSENSITIVE );
-
+	
 	private RepositoryConnection rc;
+	
+	public DataStore() {
+		log.error( "into zero-arg ctor for DataStore" );
+		// must call setStoreLocation( ... ) before this instance is usable
+	}
+	
+	public DataStore( String rawstoreloc ) {
+		log.error( "into 1-arg ctor for DataStore" );
+		try {
+			setStoreLocation( rawstoreloc );
+		}
+		catch ( RepositoryException | RepositoryConfigException e ) {
+			log.fatal( e, e );
+		}
+	}
 
 	/**
-	 * Creates a new datastore. Any existing connection is shut down first. This
-	 * function decodes the rawstoreloc to add some options. The available options
-	 * are:
+	 * Shuts down the current connection (if any), and opens a connection to the
+	 * given store location. This function decodes the rawstoreloc to add some
+	 * options. The available options are:
    * <code>
 	 * <li>/tmp - create/open a local repository from the given path</li>
 	 * <li>http://... - open a remote repository from the given url</li>
@@ -45,61 +60,57 @@ public class DataStore {
 	 * </code>
 	 *
 	 * @param rawstoreloc The location
+	 * @throws RepositoryException
+	 * @throws RepositoryConfigException
 	 */
-	public DataStore( String rawstoreloc ) {
-
-		try {
-			Repository repository = null;
-
-			log.debug( "setting RDF store location to: " + rawstoreloc );
-
-			boolean inmem = rawstoreloc.toLowerCase().startsWith( ":memory:" );
-			String storeloc
-					= ( inmem ? rawstoreloc.substring( ":memory:".length() ) : rawstoreloc );
-
-			if ( inmem ) {
-				MemoryStore ms = null;
-				if ( ":memory:".equalsIgnoreCase( storeloc ) ) {
-					ms = new MemoryStore();
-				}
-				else {
-					File syncdir = new File( storeloc );
-					if ( !syncdir.exists() ) {
-						syncdir.mkdirs();
-					}
-
-					if ( syncdir.isDirectory() ) {
-						ms = new MemoryStore( syncdir );
-						ms.setSyncDelay( 3000L );
-					}
-				}
-
-				repository = new SailRepository( ms );
+	public final void setStoreLocation( String rawstoreloc )
+			throws RepositoryException, RepositoryConfigException {
+		log.debug( "setting RDF store location to: " + rawstoreloc );
+		
+		shutdown();
+		
+		Repository repository = null;
+		
+		boolean inmem = rawstoreloc.toLowerCase().startsWith( ":memory:" );
+		String storeloc
+				= ( inmem ? rawstoreloc.substring( ":memory:".length() ) : rawstoreloc );
+		
+		if ( inmem ) {
+			MemoryStore ms = null;
+			if ( ":memory:".equalsIgnoreCase( storeloc ) ) {
+				ms = new MemoryStore();
 			}
 			else {
-				repository = getRepository( storeloc );
+				File syncdir = new File( storeloc );
+				log.debug( "putting persistence database at " + syncdir.getAbsolutePath() );
+				if ( !syncdir.exists() ) {
+					syncdir.mkdirs();
+				}
+				
+				if ( syncdir.isDirectory() ) {
+					ms = new MemoryStore( syncdir );
+					ms.setSyncDelay( 3000L );
+				}
 			}
-
-			if ( !repository.isInitialized() ) {
-				repository.initialize();
-			}
-
-			rc = repository.getConnection();
+			
+			repository = new SailRepository( ms );
 		}
-		catch ( RepositoryException | RepositoryConfigException re ) {
-			log.fatal( re, re );
+		else {
+			repository = getRepository( storeloc );
 		}
-
-		if ( null == rc ) {
-			throw new IllegalArgumentException( "No data repository opened!" );
+		
+		if ( !repository.isInitialized() ) {
+			repository.initialize();
 		}
+		
+		rc = repository.getConnection();
 	}
-
+	
 	private Repository getRepository( String storeloc )
 			throws RepositoryException, RepositoryConfigException, IllegalArgumentException {
 		Repository srcrepo = null;
 		Matcher httpmatch = pat.matcher( storeloc );
-
+		
 		if ( httpmatch.matches() ) {
 			// remote repository
 			String httpstore = httpmatch.group( 1 );
@@ -109,22 +120,23 @@ public class DataStore {
 		else {
 			if ( !storeloc.isEmpty() ) {
 				File datadir = new File( storeloc );
-
+				log.debug( "datadir store is: " + datadir.getAbsolutePath() );
+				
 				if ( !datadir.exists() ) { // make the data store if it's not there
 					log.warn( "Creating a new database at " + storeloc );
 					datadir.mkdirs();
 				}
-
-				if ( !datadir.isFile() ) { // we have to have a directory					
+				
+				if ( datadir.isDirectory() ) { // we have to have a directory					
 					srcrepo = new SailRepository( new NativeStore( datadir ) );
 				}
 			}
 		}
-
+		
 		if ( null == srcrepo ) {
 			throw new IllegalArgumentException( "No data repository opened!" );
 		}
-
+		
 		return srcrepo;
 	}
 
@@ -137,7 +149,7 @@ public class DataStore {
 	public RepositoryConnection getConnection() {
 		return rc;
 	}
-
+	
 	private static void closeRc( RepositoryConnection closer ) {
 		if ( null != closer ) {
 			try {
@@ -146,7 +158,7 @@ public class DataStore {
 			catch ( RepositoryException re ) {
 				log.warn( re, re );
 			}
-
+			
 			try {
 				closer.getRepository().shutDown();
 			}
@@ -154,9 +166,9 @@ public class DataStore {
 				log.warn( re, re );
 			}
 		}
-
+		
 	}
-
+	
 	public void shutdown() {
 		closeRc( rc );
 	}

@@ -11,21 +11,8 @@
 	<bean id="propertyConfigurer"
 				class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
 				p:location="classpath:/semoss-web.properties" />
-	
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
-		<property name="prefix" value="/"/>
-		<property name="suffix" value=".vm"/>
-		<property name="exposeSpringMacroHelpers" value="true"/>
-	</bean>
-
-	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="resourceLoaderPath" value="/WEB-INF/views/"/>
-	</bean>
 
 	<bean id="rdfstore" class="gov.va.semoss.web.datastore.DataStore">
 		<constructor-arg value="${rdfstore}"/>
 	</bean>
-
-	<bean id="dbinfomapper" class="gov.va.semoss.web.datastore.DbInfoMapper"/>
-	
 </beans>

@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DbInfoMapper implements DataMapper<DbInfo, String> {
 
-	private static final Logger log = Logger.getLogger( DbInfoMapper.class );
+	private static final Logger log = Logger.getLogger(DbInfoMapper.class );
 	private static final URI DATA_PREDICATE
 			= new URIImpl( WEBDS.NAMESPACE + "dbinfo/dataurl" );
 	private static final URI INSIGHTS_PREDICATE
