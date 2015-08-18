@@ -17,10 +17,7 @@ import org.springframework.web.client.RestTemplate;
 public class ServiceClient {
 
 	@Autowired
-	RestTemplate rest;
+	protected RestTemplate rest;
 
-	public DbInfo[] getDbs( String serviceurl ) {
-		DbInfo dbs[] = rest.getForObject( serviceurl, DbInfo[].class );
-		return dbs;
-	}
+
 }
