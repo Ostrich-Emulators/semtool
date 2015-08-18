@@ -23,11 +23,11 @@ public class SecuredPageController  extends SemossControllerBase  {
 		// Note - this call is used in case you need to produce a UI through 
 		// Velocity somewhere in the codebase, but do not have access to 
 		// the ModelAndView managed by Spring
-		String ui = SEMOSSUIFactory.instance().getUI("admin.vm", valueMap);
+		//String ui = SEMOSSUIFactory.instance().getUI("admin.vm", valueMap);
 		// Now for the Springified UI production version
 		ModelAndView model = new ModelAndView();
 		model.addObject("message", "Admin Page");
-		model.setViewName("admin.vm");
+		model.setViewName("admin");
 		return model;
  
 	}
@@ -37,7 +37,7 @@ public class SecuredPageController  extends SemossControllerBase  {
 		// Create the model and view 
 		ModelAndView model = new ModelAndView();
 		model.addObject("message", "Data Page");
-		model.setViewName("data.vm");
+		model.setViewName("data");
  		return model;
  
 	}
@@ -46,7 +46,7 @@ public class SecuredPageController  extends SemossControllerBase  {
 	public ModelAndView insightPage() {
 		ModelAndView model = new ModelAndView();
 		model.addObject("message", "Insight Page");
-		model.setViewName("insight.vm");
+		model.setViewName("insight");
 		return model;
  
 	}

@@ -29,12 +29,12 @@ public class HomeController extends SemossControllerBase {
 
 	@RequestMapping( value = "/", method = RequestMethod.GET )
 	public String getWelcome() {
-		return "index.vm";
+		return "index";
 	}
 
 	@RequestMapping( value = "/testDriver", method = RequestMethod.GET )
 	public String getTestDriver() {
-		return "testDriver.vm";
+		return "testDriver";
 	}
 	
 	@RequestMapping( value = "/semoss/allDatabaseIDs", method = RequestMethod.GET )

@@ -1,6 +1,5 @@
 package gov.va.semoss.web.ui;
 
-import gov.va.semoss.web.config.ViewConfiguration;
 import gov.va.semoss.web.init.ContextBean;
 import gov.va.semoss.web.init.SpringContextHolder;
 
@@ -15,9 +14,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 public class SEMOSSUIFactory {
 	
@@ -28,7 +24,7 @@ public class SEMOSSUIFactory {
 	private Logger log = Logger.getLogger(SEMOSSUIFactory.class);
 
 	private SEMOSSUIFactory() {
-		SEMOSSUIFactory.engine = ViewConfiguration.VELOCITY_ENGINE;
+		//SEMOSSUIFactory.engine = ViewConfiguration.VELOCITY_ENGINE;
 	}
 
 	public static SEMOSSUIFactory instance() {
