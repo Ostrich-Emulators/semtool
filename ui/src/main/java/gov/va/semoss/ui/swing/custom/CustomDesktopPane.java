@@ -139,7 +139,11 @@ public class CustomDesktopPane extends JDesktopPane {
 				toadd.setLocation( topleft, topleft );
 
 				if ( jif instanceof PlaySheetFrame ) {
-					PlaySheetFrame.class.cast( jif ).addedToDesktop( this );
+					PlaySheetFrame psf = PlaySheetFrame.class.cast(  jif );
+					
+					psf.addChangeListener( tblistener );
+					
+					psf.addedToDesktop( this );
 				}
 
 				toadd.setVisible( true );
