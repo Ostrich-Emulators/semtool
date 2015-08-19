@@ -97,7 +97,12 @@ public class HideableTabbedPane extends JPanel {
 			public void stateChanged( ChangeEvent e ) {
 				if ( !movingStuff ) {
 					PlaySheetCentralComponent pscc = getPsccAt( tabs.getSelectedIndex() );
-					pscc.activated();
+
+					// we get this signal before the componentRemoved signal, which
+					// is problematic when the last tab closes
+					if ( null != pscc ) {
+						pscc.activated();
+					}
 
 					for ( ChangeListener cl : changeListenees ) {
 						cl.stateChanged( e );
