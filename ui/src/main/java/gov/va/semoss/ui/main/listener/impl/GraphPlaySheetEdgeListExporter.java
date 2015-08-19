@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.ui.main.listener.impl;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import java.awt.event.ActionEvent;
@@ -27,30 +28,27 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
-import gov.va.semoss.util.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
 
 /**
  * Controls the export graph to grid feature.
  */
-public class GraphPlaySheetExportListener extends AbstractAction {
+public class GraphPlaySheetEdgeListExporter extends AbstractAction {
+
 	private static final long serialVersionUID = -8428913823791195745L;
 	private static final Logger logger
-			= Logger.getLogger( GraphPlaySheetExportListener.class );
+			= Logger.getLogger( GraphPlaySheetEdgeListExporter.class );
 	private final GraphPlaySheet gps;
 
-	public GraphPlaySheetExportListener( GraphPlaySheet ps ) {
-		super( "Convert to Table" );
+	public GraphPlaySheetEdgeListExporter( GraphPlaySheet ps ) {
+		super( "Convert to Edge List" );
 		putValue( Action.SHORT_DESCRIPTION,
 				"Convert graph display to a table display" );
 		gps = ps;
@@ -67,65 +65,25 @@ public class GraphPlaySheetExportListener extends AbstractAction {
 	public void actionPerformed( ActionEvent arg0 ) {
 		logger.debug( "Export button has been pressed" );
 
-		Set<SEMOSSVertex> verts
-				= new HashSet<>( gps.getView().getGraphLayout().getGraph().getVertices() );
-		Set<SEMOSSEdge> edges
-				= new HashSet<>( gps.getView().getGraphLayout().getGraph().getEdges() );
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
 
 		ValueFactory vf = new ValueFactoryImpl();
 		List<Value[]> vals = new ArrayList<>();
-		for ( SEMOSSVertex v : verts ) {
-			Value subj = vf.createLiteral( v.getLabel() );
-			Object o = v.getProperty( RDF.TYPE );
-			if ( null != o ) {
-				Value pred = vf.createLiteral( "Vertex Type" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
-			}
-			o = v.getURI();
-			if ( null != o ) {
-				Value pred = vf.createLiteral( "URI" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
-			}
-			Value pred = vf.createLiteral( "Type" );
-			Value obj = vf.createLiteral( "Vertex" );
-			vals.add( new Value[]{ subj, pred, obj } );
-		}
 
-		for ( SEMOSSEdge v : edges ) {
-			Value subj = vf.createLiteral( v.getLabel() );
-			Object o = v.getProperty( Constants.EDGE_NAME );
-			if ( null != o ) {
-				Value pred = vf.createLiteral( "Name" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
-			}
-			o = v.getURI();
-			if ( null != o ) {
-				Value pred = vf.createLiteral( "URI" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
-			}
+		for ( SEMOSSEdge edge : graph.getEdges() ) {
+			SEMOSSVertex src = graph.getSource( edge );
+			SEMOSSVertex dst = graph.getDest( edge );
 
-			o = v.getProperty( Constants.EDGE_TYPE );
-			if ( null != o ) {
-				Value pred = vf.createLiteral( "Edge Type" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
-			}
-
-			Value pred = vf.createLiteral( "Type" );
-			Value obj = vf.createLiteral( "Edge" );
-			vals.add( new Value[]{ subj, pred, obj } );
+			Value subj = vf.createLiteral( src.getLabel() );
+			Value obj = vf.createLiteral( dst.getLabel() );
+			vals.add( new Value[] { subj, obj } );
 		}
 
 		GridRAWPlaySheet.convertUrisToLabels( vals, gps.getEngine() );
 
 		GridRAWPlaySheet newGps = new GridRAWPlaySheet();
 		newGps.setTitle( "EXPORT: " + gps.getTitle() );
-		newGps.create( vals, Arrays.asList( "Vertex or Edge Label", "Property", "Value" ),
-				gps.getEngine() );
-		gps.addSibling( "Graph as Table", newGps );
+		newGps.create( vals, Arrays.asList( "Source", "Destination" ), gps.getEngine() );
+		gps.addSibling( "Graph Edge List", newGps );
 	}
 }

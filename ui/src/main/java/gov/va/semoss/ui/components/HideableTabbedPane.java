@@ -12,10 +12,13 @@ import java.awt.Component;
 import java.awt.LayoutManager;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.apache.log4j.Logger;
 
 /**
  * A class that pretends to have a tab bar that only shows tabs when needed
@@ -33,9 +36,9 @@ public class HideableTabbedPane extends JPanel {
 	private PlaySheetCentralComponent pscc;
 	private final CardLayout cards = new CardLayout();
 	private final JTabbedPane tabs = new ReorderableTabbedPane();
-	private boolean showingTabs = false;
 	private ContainerListener containerListener;
-	private ChangeListener changeListener;
+	private final List<ChangeListener> changeListenees = new ArrayList<>();
+	private boolean movingStuff = false;
 
 	public HideableTabbedPane( LayoutManager layout, boolean isDoubleBuffered ) {
 		super( layout, isDoubleBuffered );
@@ -64,37 +67,47 @@ public class HideableTabbedPane extends JPanel {
 
 			@Override
 			public void componentAdded( ContainerEvent e ) {
-				for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
-					cl.componentAdded( e );
+				if ( !movingStuff ) {
+					for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
+						cl.componentAdded( e );
+					}
 				}
 			}
 
 			@Override
 			public void componentRemoved( ContainerEvent e ) {
+				Logger.getLogger( getClass() ).debug( "component removed" );
 				if ( 1 == tabs.getTabCount() ) {
 					pscc = getPsccAt( 0 );
 					showTabs( pscc.prefersTabs() );
 				}
 
-				// need to alert the parent that we lost a playsheet
-				for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
-					cl.componentRemoved( e );
+				if ( !movingStuff ) {
+					// need to alert the parent that we lost a playsheet
+					for ( ContainerListener cl : HideableTabbedPane.this.getContainerListeners() ) {
+						cl.componentRemoved( e );
+					}
 				}
 			}
 		};
 
-		changeListener = new ChangeListener() {
+		ChangeListener changeListener = new ChangeListener() {
 
 			@Override
 			public void stateChanged( ChangeEvent e ) {
-				PlaySheetCentralComponent pscc = getPsccAt( tabs.getSelectedIndex() );
-				pscc.activated();
+				if ( !movingStuff ) {
+					PlaySheetCentralComponent pscc = getPsccAt( tabs.getSelectedIndex() );
+					pscc.activated();
+
+					for ( ChangeListener cl : changeListenees ) {
+						cl.stateChanged( e );
+					}
+				}
 			}
 		};
-		
+
 		tabs.addContainerListener( containerListener );
 		tabs.addChangeListener( changeListener );
-
 	}
 
 	public void add( String title, PlaySheetCentralComponent c ) {
@@ -112,28 +125,34 @@ public class HideableTabbedPane extends JPanel {
 			showTabs( false );
 			c.activated();
 
-			ChangeEvent ce = new ChangeEvent( tabs );
-			for ( ChangeListener cl : tabs.getChangeListeners() ) {
-				cl.stateChanged( ce );
+			if ( tabs.getTabCount() > 1 ) {
+				ChangeEvent ce = new ChangeEvent( tabs );
+				for ( ChangeListener cl : tabs.getChangeListeners() ) {
+					cl.stateChanged( ce );
+				}
 			}
 		}
 	}
 
 	private PlaySheetCentralComponent getPsccAt( int idx ) {
-		if ( showingTabs ) {
+		if ( tabs.isVisible() ) {
 			return ( idx >= tabs.getTabCount() || idx < 0 ? null
 					: PlaySheetCentralComponent.class.cast( tabs.getComponentAt( idx ) ) );
 		}
-		else{
+		else {
 			return pscc;
 		}
 	}
 
 	private void showTabs( boolean showtab ) {
-		tabs.removeContainerListener( containerListener );
-		tabs.removeChangeListener( changeListener );
+		Logger.getLogger( getClass() ).debug( "showTabs " + showtab );
 
-		if ( showingTabs && !showtab ) {
+		boolean oldshowing = tabs.isVisible();
+
+		movingStuff = ( oldshowing != showtab );
+
+		if ( oldshowing && !showtab ) {
+			Logger.getLogger( getClass() ).debug( "moving visible tab to panel" );
 			// move our first tab to the main area
 			int tc = tabs.getTabCount();
 			if ( tc > 0 ) {
@@ -141,7 +160,8 @@ public class HideableTabbedPane extends JPanel {
 				notabs.add( pscc );
 			}
 		}
-		else if ( !showingTabs && showtab ) {
+		else if ( !oldshowing && showtab ) {
+			Logger.getLogger( getClass() ).debug( "moving panel to first tab" );
 			// move whatever we were showing to the first tab
 			Component cmps[] = notabs.getComponents();
 			if ( cmps.length > 0 ) {
@@ -151,11 +171,9 @@ public class HideableTabbedPane extends JPanel {
 			}
 		}
 
+		movingStuff = false;
+
 		cards.show( this, showtab ? TABS : NOTABS );
-		showingTabs = showtab;
-		
-		tabs.addContainerListener( containerListener );
-		tabs.addChangeListener( changeListener );
 	}
 
 	public void setTabPlacement( int tablocation ) {
@@ -163,46 +181,46 @@ public class HideableTabbedPane extends JPanel {
 	}
 
 	public void addChangeListener( ChangeListener cl ) {
-		tabs.addChangeListener( cl );
+		changeListenees.add( cl );
 	}
 
 	public int getTabCount() {
-		if ( showingTabs ) {
+		if ( tabs.isVisible() ) {
 			return tabs.getTabCount();
 		}
 		return ( null == pscc ? 0 : 1 );
 	}
 
 	public void setSelectedComponent( Component c ) {
-		if ( showingTabs ) {
+		if ( tabs.isVisible() ) {
 			tabs.setSelectedComponent( c );
 		}
 	}
 
 	public int getSelectedIndex() {
-		if ( showingTabs ) {
+		if ( tabs.isVisible() ) {
 			return tabs.getSelectedIndex();
 		}
 		return ( null == pscc ? -1 : 0 );
 	}
 
 	public Component getSelectedComponent() {
-		return ( showingTabs ? tabs.getSelectedComponent() : pscc );
+		return ( tabs.isVisible() ? tabs.getSelectedComponent() : pscc );
 	}
 
 	public Component getComponentAt( int idx ) {
-		return ( showingTabs ? tabs.getComponentAt( idx ) : pscc );
+		return ( tabs.isVisible() ? tabs.getComponentAt( idx ) : pscc );
 	}
 
 	public String getTitleAt( int idx ) {
-		if ( showingTabs ) {
+		if ( tabs.isVisible() ) {
 			return tabs.getTitleAt( idx );
 		}
 		return ( null == pscc ? null : pscc.getTitle() );
 	}
 
 	public int indexOfComponent( Component c ) {
-		if ( showingTabs ) {
+		if ( tabs.isVisible() ) {
 			return tabs.indexOfComponent( c );
 		}
 		return ( c == pscc ? 0 : -1 );

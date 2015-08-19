@@ -195,7 +195,6 @@ public class PlaySheetFrame extends JInternalFrame {
 	}
 
 	public void setEngine( IEngine engine ) {
-		log.debug( "Set the engine " + engine );
 		this.engine = engine;
 	}
 
@@ -428,10 +427,12 @@ public class PlaySheetFrame extends JInternalFrame {
 	}
 
 	public void populateToolbar( JToolBar tb ) {
-		int selidx = tabs.getSelectedIndex();
-		if ( selidx > -1 ) {
-			String tabTitle = tabs.getTitleAt( tabs.getSelectedIndex() );
-			getActivePlaySheet().populateToolBar( tb, tabTitle );
+		PlaySheetCentralComponent pscc
+				= PlaySheetCentralComponent.class.cast( tabs.getSelectedComponent() );
+
+		if ( null != pscc ) {
+			String tabTitle = pscc.getTitle();
+			pscc.populateToolBar( tb, tabTitle );
 
 			tb.add( fontup );
 			tb.add( fontdown );
