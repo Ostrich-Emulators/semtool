@@ -6,6 +6,7 @@
 package gov.va.semoss.web.io;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -58,41 +59,5 @@ public class DbInfo {
 
 	public void setInsightsUrl(String insightsUrl) {
 		this.insightsUrl = insightsUrl;
-	}
-	
-	public static DbInfo[] getTestDatabases() {
-		ArrayList<DbInfo> testDbs = new ArrayList<DbInfo>();
-		
-		testDbs.add(new DbInfo(
-				"thisKB", 
-				"http://www.storagePlace.gov/choiceOne/serverURI", 
-				"http://www.storagePlace.gov/choiceOne/databaseURI", 
-				"http://www.storagePlace.gov/choiceOne/insightURI"
-			));
-
-		testDbs.add(new DbInfo(
-				"thatKB", 
-				"http://www.storagePlace.gov/choiceTwo/serverURI", 
-				"http://www.storagePlace.gov/choiceTwo/databaseURI", 
-				"http://www.storagePlace.gov/choiceTwo/insightURI"
-				));
-	
-		testDbs.add(new DbInfo(
-				"theOtherKB", 
-				"http://www.storagePlace.gov/choiceThree/serverURI", 
-				"http://www.storagePlace.gov/choiceThree/databaseURI", 
-				"http://www.storagePlace.gov/choiceThree/insightURI"
-				));
-		
-		return testDbs.toArray( new DbInfo[testDbs.size()] );
-	}
-	
-
-	/*
-	 * Returns all current DB info we have access to. Currently it returns test data
-	 * but should be updated to hit a configuration file or to hit a data store. JPM 08/18/2015
-	 */
-	public static DbInfo[] getAllDBs() {
-		return DbInfo.getTestDatabases();
 	}
 }

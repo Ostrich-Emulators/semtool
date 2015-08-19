@@ -48,21 +48,18 @@ public class DatabaseController extends SemossControllerBase {
 	public DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
 			HttpServletResponse response ) {
 		log.debug( "Getting database with ID " + id + "." );
-		DbInfo[] testDbs = DbInfo.getAllDBs();
-		for ( DbInfo testDb : testDbs ) {
-			if ( testDb.getName().equals( id ) ) {
-				return testDb;
-			}
+		DbInfo test = datastore.getOne( id );
+		if ( null == test ) {
+			throw new ForbiddenException();
 		}
-
-		throw new ForbiddenException();
+		return test;
 	}
 
 	@RequestMapping
-	@ResponseBody()
+	@ResponseBody
 	public DbInfo[] getAllDatabases() {
 		log.debug( "Getting all databases." );
-		DbInfo[] testDbs = DbInfo.getAllDBs();
+		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
 		return testDbs;
 	}
 }
