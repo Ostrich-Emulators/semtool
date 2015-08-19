@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 
 public class NodeEdgeNumberedPropertyUtility {
@@ -93,6 +94,14 @@ public class NodeEdgeNumberedPropertyUtility {
 			catch ( NumberFormatException e ) {
 				return -1;
 			}
+		}
+		else if( propertyValue instanceof Literal ){
+			try {
+				return Double.parseDouble( Literal.class.cast( propertyValue ).getLabel() );
+			}
+			catch ( NumberFormatException e ) {
+				return -1;
+			}			
 		}
 
 		try {

@@ -20,21 +20,27 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.GraphElement;
+import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.renderers.LabeledPairTreeCellRenderer;
 import gov.va.semoss.ui.helpers.NodeEdgeNumberedPropertyUtility;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
 
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.MultiMap;
+import gov.va.semoss.util.MultiSetMap;
+import gov.va.semoss.util.RDFDatatypeTools;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -49,13 +55,13 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  * This class is used to create the button that allows the weight to be
@@ -74,6 +80,8 @@ public class WeightDropDownButton extends JButton {
 	private JScrollPane nodeScrollPane, edgeScrollPane;
 	private boolean listsPopulated = false;
 	private GraphPlaySheet playSheet;
+	private LabeledPairTreeCellRenderer renderer;
+	private static URI lastSelectedValue;
 
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
@@ -88,6 +96,16 @@ public class WeightDropDownButton extends JButton {
 		if ( listsPopulated ) {
 			return;
 		}
+
+		renderer = LabeledPairTreeCellRenderer.getValuePairRenderer( playSheet.getEngine() );
+		renderer.setClosedIcon( null );
+		renderer.setOpenIcon( null );
+		renderer.setLeafIcon( null );
+		renderer.cache( Constants.IN_EDGE_CNT, "In-Degree" );
+		renderer.cache( Constants.OUT_EDGE_CNT, "Out-Degree" );
+		renderer.cache( Constants.EDGE_CNT, "Degree" );
+		edgePropTree.setCellRenderer( renderer );
+		nodePropTree.setCellRenderer( renderer );
 
 		initMenus( nodePropTree, 2, playSheet.getVerticesByType() );
 		initMenus( edgePropTree, 1, playSheet.getEdgesByType() );
@@ -124,13 +142,13 @@ public class WeightDropDownButton extends JButton {
 		scrollPane.setMaximumSize( maximumSize );
 	}
 
-	private <X extends GraphElement> void initMenus( JTree tree, int selectNum, 
-			Map<URI, List<X>> nodesOrEdgesMapByType ) {
+	private <X extends GraphElement> void initMenus( JTree tree, int selectNum,
+			MultiMap<URI, X> nodesOrEdgesMapByType ) {
 		tree.addTreeSelectionListener( getTreeSelectionListener( selectNum ) );
 		DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "not visible" );
 		tree.setModel( new DefaultTreeModel( invisibleRoot ) );
 
-		Map<String, Set<String>> propertiesToAdd = buildPropertyDataset( nodesOrEdgesMapByType );
+		MultiSetMap<URI, URI> propertiesToAdd = buildPropertyDataset( nodesOrEdgesMapByType );
 		addPropertiesToTreeNode( propertiesToAdd, invisibleRoot );
 
 		for ( int i = 0; i < tree.getRowCount(); i++ ) {
@@ -149,37 +167,57 @@ public class WeightDropDownButton extends JButton {
 	 * @return Map<String, Set<String>> maps of the types of the nodes or edges to
 	 * the names of their numerical properties
 	 */
-	private <X extends GraphElement> Map<String, Set<String>> buildPropertyDataset( Map<URI, List<X>> nodesOrEdgesMapByType ) {
-		Map<String, Set<String>> propertiesToAdd = new HashMap<>();
+	private <X extends GraphElement> MultiSetMap<URI, URI> buildPropertyDataset( Map<URI, List<X>> nodesOrEdgesMapByType ) {
+		MultiSetMap<URI, URI> propertiesToAdd = new MultiSetMap<>();
 		for ( Map.Entry<URI, List<X>> entry : nodesOrEdgesMapByType.entrySet() ) {
 			if ( entry.getValue().size() < 2 ) {
 				//we don't want to list items that are the only one of their type
 				continue;
 			}
 
-			Set<String> propertiesForThisType = new TreeSet<>();
-			propertiesToAdd.put( entry.getKey().getLocalName(), propertiesForThisType );
 			for ( X nodeOrEdge : entry.getValue() ) {
-				Map<String, Object> props = NodeEdgeNumberedPropertyUtility.transformProperties( nodeOrEdge.getProperties(), false );
-				propertiesForThisType.addAll( props.keySet() );
+				propertiesToAdd.addAll( entry.getKey(), getNumberedProperties( nodeOrEdge ) );
+
+				if ( nodeOrEdge instanceof SEMOSSVertex ) {
+					// nodes always have degree properties
+					propertiesToAdd.add( entry.getKey(), Constants.IN_EDGE_CNT );
+					propertiesToAdd.add( entry.getKey(), Constants.OUT_EDGE_CNT );
+					propertiesToAdd.add( entry.getKey(), Constants.EDGE_CNT );
+				}
 			}
 		}
 
 		return propertiesToAdd;
 	}
 
-	private void addPropertiesToTreeNode( Map<String, Set<String>> propertiesToAdd,
-			DefaultMutableTreeNode invisibleNodeRoot ) {
-		for ( String key : propertiesToAdd.keySet() ) {
-			Set<String> propertiesForThisNodeType = propertiesToAdd.get( key );
-			if ( propertiesForThisNodeType.isEmpty() ) {
-				continue;
+	/**
+	 * Gets this element's properties that contain literals that are numbers
+	 *
+	 * @param ge
+	 * @return
+	 */
+	private static Set<URI> getNumberedProperties( GraphElement ge ) {
+		Set<URI> numbers = new HashSet<>();
+		for ( Map.Entry<URI, Value> en : ge.getValues().entrySet() ) {
+			Value v = en.getValue();
+			if ( RDFDatatypeTools.isNumericValue( v ) ) {
+				numbers.add( en.getKey() );
 			}
+		}
 
-			DefaultMutableTreeNode nodeType = new DefaultMutableTreeNode( key );
-			invisibleNodeRoot.add( nodeType );
-			for ( String property : propertiesForThisNodeType ) {
-				nodeType.add( new DefaultMutableTreeNode( property ) );
+		return numbers;
+	}
+
+	private void addPropertiesToTreeNode( MultiSetMap<URI, URI> propertiesToAdd,
+			DefaultMutableTreeNode invisibleNodeRoot ) {
+		for ( Map.Entry<URI, Set<URI>> en : propertiesToAdd.entrySet() ) {
+			Set<URI> propertiesForThisNodeType = en.getValue();
+			if ( !propertiesForThisNodeType.isEmpty() ) {
+				DefaultMutableTreeNode nodeType = new DefaultMutableTreeNode( en.getKey() );
+				invisibleNodeRoot.add( nodeType );
+				for ( URI property : propertiesForThisNodeType ) {
+					nodeType.add( new DefaultMutableTreeNode( property ) );
+				}
 			}
 		}
 	}
@@ -210,11 +248,6 @@ public class WeightDropDownButton extends JButton {
 	private JTree initJTree() {
 		JTree tree = new JTree();
 		tree.setSelectionModel( getDeselectableTreeSelectionModel() );
-
-		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
-		renderer.setClosedIcon( null );
-		renderer.setOpenIcon( null );
-		renderer.setLeafIcon( null );
 
 		return tree;
 	}
@@ -291,7 +324,9 @@ public class WeightDropDownButton extends JButton {
 					return;
 				}
 
-				String tselectedValue = e.getPath().getLastPathComponent().toString();
+				DefaultMutableTreeNode dmtn
+						= DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
+				URI tselectedValue = URI.class.cast( dmtn.getUserObject() );
 
 				if ( thisMode == edgeMode ) {
 					rescaleEdges( tselectedValue );
@@ -303,16 +338,17 @@ public class WeightDropDownButton extends JButton {
 		};
 	}
 
-	private void rescaleVertices( String selectedValue ) {
+	private void rescaleVertices( URI selectedValue ) {
 		VertexShapeTransformer vst
 				= (VertexShapeTransformer) playSheet.getView().getRenderContext().getVertexShapeTransformer();
+
 		vst.setSizeMap( getWeightHash( playSheet.getGraphData().getGraph().getVertices(),
 				selectedValue, vst.getDefaultSize() ) );
 
 		playSheet.getView().repaint();
 	}
 
-	private void rescaleEdges( String selectedValue ) {
+	private void rescaleEdges( URI selectedValue ) {
 		EdgeStrokeTransformer est = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
 		est.setEdges( getWeightHash( playSheet.getGraphData().getGraph().getEdges(),
 				selectedValue, 1.0 ) );
@@ -329,13 +365,13 @@ public class WeightDropDownButton extends JButton {
 	 * @return Hashtable<String, Double> of the nodes and weights
 	 */
 	@SuppressWarnings( "unchecked" )
-	public static <X extends GraphElement> Map<X, Double>
-			getWeightHash( Collection<X> collection, String selectedValue,
+	public <X extends GraphElement> Map<X, Double>
+			getWeightHash( Collection<X> collection, URI selectedURI,
 					double defaultScale ) {
 
 		double minimumValue = .5, multiplier = 3;
 
-		if ( checkForUnselectionEvent( selectedValue ) ) {
+		if ( checkForUnselectionEvent( selectedURI ) ) {
 			return new HashMap<>();
 		}
 
@@ -343,28 +379,43 @@ public class WeightDropDownButton extends JButton {
 		Map<X, Double> weightHash = new HashMap<>();
 
 		for ( GraphElement nodeOrEdge : collection ) {
-			Object propertyValue = null;
+			Value propertyValue = null;
 
-			URI selectedURI = NodeEdgeNumberedPropertyUtility.getURI( selectedValue );
-			propertyValue = nodeOrEdge.getProperty( selectedURI );
-			double propertyDouble = NodeEdgeNumberedPropertyUtility.getDoubleIfPossibleFrom( propertyValue );
+			propertyValue = nodeOrEdge.getValue( selectedURI );
+			double propertyDouble;
+
+			if ( Constants.IN_EDGE_CNT.equals( selectedURI ) ) {
+				propertyDouble = playSheet.getGraphData().getGraph().
+						getInEdges( SEMOSSVertex.class.cast( nodeOrEdge ) ).size();
+			}
+			else if ( Constants.OUT_EDGE_CNT.equals( selectedURI ) ) {
+				propertyDouble = playSheet.getGraphData().getGraph().
+						getOutEdges( SEMOSSVertex.class.cast( nodeOrEdge ) ).size();
+			}
+			else if ( Constants.EDGE_CNT.equals( selectedURI ) ) {
+				propertyDouble = playSheet.getGraphData().getGraph().
+						getIncidentEdges( SEMOSSVertex.class.cast( nodeOrEdge ) ).size();
+			}
+			else {
+				propertyDouble
+						= NodeEdgeNumberedPropertyUtility.getDoubleIfPossibleFrom( propertyValue );
+			}
 
 			if ( propertyDouble > 0 ) {
-				double value = Double.parseDouble( propertyValue.toString() );
 				if ( highValue == null ) {
-					highValue = value;
+					highValue = propertyDouble;
 				}
 				if ( lowValue == null ) {
-					lowValue = value;
+					lowValue = propertyDouble;
 				}
-				if ( value > highValue ) {
-					highValue = value;
+				if ( propertyDouble > highValue ) {
+					highValue = propertyDouble;
 				}
-				if ( value < lowValue ) {
-					lowValue = value;
+				if ( propertyDouble < lowValue ) {
+					lowValue = propertyDouble;
 				}
 
-				weightHash.put( (X) nodeOrEdge, value );
+				weightHash.put( (X) nodeOrEdge, propertyDouble );
 			}
 		}
 
@@ -381,9 +432,7 @@ public class WeightDropDownButton extends JButton {
 		return weightHash;
 	}
 
-	private static String lastSelectedValue;
-
-	private static boolean checkForUnselectionEvent( String selectedValue ) {
+	private static boolean checkForUnselectionEvent( URI selectedValue ) {
 		if ( selectedValue == null ) {
 			//i don't think this should happen, but just in case
 			lastSelectedValue = null;
