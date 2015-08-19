@@ -12,10 +12,11 @@
 				class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
 				p:location="classpath:/semoss-web.properties" />
 
-	<bean id="rdfstore" class="gov.va.semoss.web.datastore.DataStore">
+	<bean id="datastore" class="gov.va.semoss.web.datastore.DataStore">
 		<constructor-arg value="${rdfstore}"/>
 	</bean>
 	
-	<bean id="dbinfomapper" class="gov.va.semoss.web.datastore.DbInfoMapper"/>
+	<bean id="dbinfomapper" class="gov.va.semoss.web.datastore.DbInfoMapper"
+		p:dataStore-ref="datastore"/>
 	
 </beans>

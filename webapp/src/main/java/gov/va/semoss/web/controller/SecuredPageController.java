@@ -1,17 +1,10 @@
 package gov.va.semoss.web.controller;
 
-import gov.va.semoss.web.datastore.DbInfoMapper;
-import javax.servlet.http.HttpServletResponse;
-
-import gov.va.semoss.web.io.DbInfo;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -23,8 +16,6 @@ import org.springframework.web.servlet.ModelAndView;
 public class SecuredPageController  extends SemossControllerBase  {
 	private static final Logger log = Logger.getLogger( SecuredPageController.class );
 
-	@Autowired
-	private DbInfoMapper datastore;
 	
 	@RequestMapping(value = { "/admin**" }, method = RequestMethod.GET)
 	public ModelAndView adminPage() {
@@ -60,40 +51,5 @@ public class SecuredPageController  extends SemossControllerBase  {
 		model.addObject("message", "User Page");
 		model.setViewName("user.vm");
 		return model;
-	}
-	
-	@RequestMapping( value = "/semoss/allDatabaseIDs", method = RequestMethod.GET )
-	public @ResponseBody String[] getAllDatabaseIDs() {
-		log.debug("Getting all database IDs.");
-		DbInfo[] testDbs = DbInfo.getAllDBs();
-
-		String[] testDbIDs = new String[testDbs.length];
-		for ( int i = 0; i < testDbs.length; i++ ) {
-			testDbIDs[i] = testDbs[i].getName();
-		}
-
-		return testDbIDs;
-	}
-
-	@RequestMapping( value = "/semoss/oneDatabase/{id}", method = RequestMethod.GET )
-	public @ResponseBody DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
-			HttpServletResponse response ) {
-		log.debug( "Getting database with ID " + id + "." );
-		DbInfo[] testDbs = DbInfo.getAllDBs();
-		for ( DbInfo testDb : testDbs ) {
-			if ( testDb.getName().equals( id ) ) {
-				return testDb;
-			}
-		}
-		response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-		return null;
-	}
-
-	@RequestMapping( value = "/semoss/allDatabases", method = RequestMethod.GET )
-	public @ResponseBody DbInfo[] getAllDatabases() {
-		log.debug("Getting all databases.");
-		DbInfo[] testDbs = DbInfo.getAllDBs();
-		
-		return testDbs;
-	}
+	}	
 }
