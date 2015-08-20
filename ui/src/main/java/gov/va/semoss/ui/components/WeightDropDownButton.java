@@ -81,7 +81,7 @@ public class WeightDropDownButton extends JButton {
 	private boolean listsPopulated = false;
 	private GraphPlaySheet playSheet;
 	private LabeledPairTreeCellRenderer renderer;
-	private static URI lastSelectedValue;
+	private URI lastSelectedValue;
 
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
@@ -314,8 +314,9 @@ public class WeightDropDownButton extends JButton {
 
 	private TreeSelectionListener getTreeSelectionListener( int mode ) {
 		return new TreeSelectionListener() {
-			int edgeMode = 1, vertMode = 2;
-			int thisMode = mode;
+			private static final int edgeMode = 1;
+			private static final int vertMode = 2;
+			private final int thisMode = mode;
 
 			@Override
 			public void valueChanged( TreeSelectionEvent e ) {
@@ -324,35 +325,38 @@ public class WeightDropDownButton extends JButton {
 					return;
 				}
 
+				TreePath path = e.getPath();
+				DefaultMutableTreeNode typenode
+						= DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
+				URI type = URI.class.cast( typenode.getUserObject() );
+
 				DefaultMutableTreeNode dmtn
 						= DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
-				URI tselectedValue = URI.class.cast( dmtn.getUserObject() );
+				URI prop = URI.class.cast( dmtn.getUserObject() );
 
 				if ( thisMode == edgeMode ) {
-					rescaleEdges( tselectedValue );
+					rescaleEdges( type, prop );
 				}
 				else if ( thisMode == vertMode ) {
-					rescaleVertices( tselectedValue );
+					rescaleVertices( type, prop );
 				}
 			}
 		};
 	}
 
-	private void rescaleVertices( URI selectedValue ) {
+	private void rescaleVertices( URI type, URI prop ) {
 		VertexShapeTransformer vst
 				= (VertexShapeTransformer) playSheet.getView().getRenderContext().getVertexShapeTransformer();
-
-		vst.setSizeMap( getWeightHash( playSheet.getGraphData().getGraph().getVertices(),
-				selectedValue, vst.getDefaultSize() ) );
-
+		vst.setSizeMap( getWeightHash( playSheet.getVerticesByType().getNN( type ),
+				prop, vst.getDefaultSize() ) );
 		playSheet.getView().repaint();
 	}
 
-	private void rescaleEdges( URI selectedValue ) {
-		EdgeStrokeTransformer est = (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
-		est.setEdges( getWeightHash( playSheet.getGraphData().getGraph().getEdges(),
-				selectedValue, 1.0 ) );
-
+	private void rescaleEdges( URI type, URI prop ) {
+		EdgeStrokeTransformer est
+				= (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
+		est.setEdges( getWeightHash( playSheet.getEdgesByType().getNN( type ),
+				prop, 1.0 ) );
 		playSheet.getView().repaint();
 	}
 
@@ -371,7 +375,7 @@ public class WeightDropDownButton extends JButton {
 
 		double minimumValue = .5, multiplier = 3;
 
-		if ( checkForUnselectionEvent( selectedURI ) ) {
+		if ( isUnselectionEvent( selectedURI ) ) {
 			return new HashMap<>();
 		}
 
@@ -432,7 +436,7 @@ public class WeightDropDownButton extends JButton {
 		return weightHash;
 	}
 
-	private static boolean checkForUnselectionEvent( URI selectedValue ) {
+	private boolean isUnselectionEvent( URI selectedValue ) {
 		if ( selectedValue == null ) {
 			//i don't think this should happen, but just in case
 			lastSelectedValue = null;
