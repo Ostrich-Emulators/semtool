@@ -50,7 +50,7 @@ public class DatabaseController extends SemossControllerBase {
 		log.debug( "Getting database with ID " + id + "." );
 		DbInfo test = datastore.getOne( id );
 		if ( null == test ) {
-			throw new ForbiddenException();
+			throw new UnauthorizedException();
 		}
 		return test;
 	}

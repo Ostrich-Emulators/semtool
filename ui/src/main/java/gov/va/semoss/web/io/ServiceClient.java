@@ -5,11 +5,12 @@
  */
 package gov.va.semoss.web.io;
 
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 
 /**
  *
@@ -17,12 +18,21 @@ import org.springframework.web.client.RestTemplate;
  */
 @Component
 public class ServiceClient extends AbstractServiceClient {
-	
-	public DbInfo[] getDbs( String serviceurl) {
-			HttpEntity<String> request = prepareHeaders(serviceurl);
-			ResponseEntity<DbInfo[]> response = (new RestTemplate()).exchange(serviceurl, HttpMethod.GET, request, DbInfo[].class);
-			DbInfo[] dbs = response.getBody();
-			return dbs;
-		
+
+	private static final Logger log = Logger.getLogger( ServiceClient.class );
+
+	/**
+	 *
+	 * @param serviceurl
+	 * @return
+	 * @throws RestClientException if there is a network/password problem
+	 */
+	public DbInfo[] getDbs( String serviceurl ) throws RestClientException {
+		HttpEntity<String> request = prepareHeaders( serviceurl );
+
+		ResponseEntity<DbInfo[]> response = rest.exchange( serviceurl,
+				HttpMethod.GET, request, DbInfo[].class );
+		DbInfo[] dbs = response.getBody();
+		return dbs;
 	}
 }
