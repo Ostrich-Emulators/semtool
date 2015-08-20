@@ -181,7 +181,7 @@ public class RDFDatatypeTools {
 	 * @param v The value for which we need to derive a class
 	 * @return The class describing the value's data type
 	 */
-	public Class<?> getClassForValue( Value v ) {
+	public static Class<?> getClassForValue( Value v ) {
 		if ( v instanceof URI ) {
 			return URI.class;
 		}
@@ -278,6 +278,16 @@ public class RDFDatatypeTools {
 		return input.stringValue();
 	}
 
+	public static boolean isNumericValue( Value value ) {
+		if ( value == null ) {
+			return false;
+		}
+
+		Set<Class<?>> numberTypes
+				= new HashSet<>( Arrays.asList( Double.class, Integer.class, Float.class ) );
+		return numberTypes.contains( getClassForValue( value ) );
+	}
+
 	/**
 	 * Converts a native object instance to its equivalent RDF value
 	 *
@@ -353,7 +363,6 @@ public class RDFDatatypeTools {
 
 	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
 		//resolve namespace
-		ValueFactory vf = new ValueFactoryImpl();
 		URI uri = null;
 
 		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
