@@ -429,8 +429,8 @@ public class WeightDropDownButton extends JButton {
 		}
 
 		for ( X key : weightHash.keySet() ) {
-			double value = ( ( weightHash.get( key ) - lowValue ) / ( highValue - lowValue ) ) * multiplier * defaultScale + minimumValue;
-			weightHash.put( key, value );
+			double rawval = ( weightHash.get( key ) - lowValue ) / ( highValue - lowValue );
+			weightHash.put( key, rawval * multiplier * defaultScale + minimumValue );
 		}
 
 		return weightHash;
