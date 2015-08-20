@@ -52,6 +52,7 @@ public class Constants {
 	public static final URI VERTEX_TYPE = RDF.TYPE;
 	public static final URI IN_EDGE_CNT = new URIImpl( "semoss://count.edge.in" );
 	public static final URI OUT_EDGE_CNT = new URIImpl( "semoss://count.edge.out" );
+	public static final URI EDGE_CNT = new URIImpl( "semoss://count.edge" );
 
 	public static final URI ANYNODE = new URIImpl( "semoss://any" );
 	public static final URI NONODE = new URIImpl( "semoss://none" );

@@ -6,7 +6,12 @@
 package gov.va.semoss.ui.main.listener.impl;
 
 import gov.va.semoss.ui.components.PlaySheetFrame;
+import gov.va.semoss.util.DIHelper;
+import javax.swing.JDesktopPane;
+import javax.swing.JInternalFrame;
 import javax.swing.JToolBar;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
@@ -14,7 +19,8 @@ import javax.swing.event.InternalFrameListener;
  *
  * @author ryan
  */
-public class PlaySheetFrameToolBarListener implements InternalFrameListener {
+public class PlaySheetFrameToolBarListener
+		implements InternalFrameListener, ChangeListener {
 
 	private final JToolBar jtb;
 
@@ -43,18 +49,26 @@ public class PlaySheetFrameToolBarListener implements InternalFrameListener {
 	}
 
 	@Override
-	public void internalFrameActivated( InternalFrameEvent e ) { 
-
+	public void internalFrameActivated( InternalFrameEvent e ) {
 		jtb.removeAll();
 		if ( e.getInternalFrame() instanceof PlaySheetFrame ) {
 			PlaySheetFrame.class.cast( e.getInternalFrame() ).populateToolbar( jtb );
 		}
-		jtb.revalidate();		
+		jtb.revalidate();
 	}
 
 	@Override
 	public void internalFrameDeactivated( InternalFrameEvent e ) {
 		jtb.removeAll();
 		jtb.revalidate();
+	}
+
+	@Override
+	public void stateChanged( ChangeEvent e ) {
+		JDesktopPane desktop = DIHelper.getInstance().getDesktop();
+		JInternalFrame jif = desktop.getSelectedFrame();
+		if ( null != jif ) {
+			internalFrameActivated( new InternalFrameEvent( jif, 0 ) );
+		}
 	}
 }
