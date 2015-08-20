@@ -208,7 +208,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 			dblist.setEnabled( true );
 		}
 		catch ( HttpStatusCodeException hse ) {
-			log.error( hse, hse );
+			log.error( hse );
 			HttpStatus status = hse.getStatusCode();
 			if ( HttpStatus.UNAUTHORIZED == status ) {
 				GuiUtility.showError( "Access Denied (invalid username/password?)" );
