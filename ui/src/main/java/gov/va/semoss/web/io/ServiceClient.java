@@ -5,34 +5,29 @@
  */
 package gov.va.semoss.web.io;
 
-import org.apache.log4j.Logger;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
 /**
  *
  * @author ryan
  */
-@Component
-public class ServiceClient extends AbstractServiceClient {
-
-	private static final Logger log = Logger.getLogger( ServiceClient.class );
+public interface ServiceClient {
 
 	/**
+	 * Gets the available databases from the given url
 	 *
-	 * @param serviceurl
-	 * @return
+	 * @param serviceurl the url to hit
+	 * @return a (possibly empty) array of database objects
 	 * @throws RestClientException if there is a network/password problem
 	 */
-	public DbInfo[] getDbs( String serviceurl ) throws RestClientException {
-		HttpEntity<String> request = prepareHeaders( serviceurl );
+	public DbInfo[] getDbs( String serviceurl ) throws RestClientException;
 
-		ResponseEntity<DbInfo[]> response = rest.exchange( serviceurl,
-				HttpMethod.GET, request, DbInfo[].class );
-		DbInfo[] dbs = response.getBody();
-		return dbs;
-	}
+	/**
+	 * Sets the username/password pair for authenticating against the given url
+	 *
+	 * @param url
+	 * @param username
+	 * @param pass
+	 */
+	public void setAuthentication( String url, String username, char[] pass );
 }

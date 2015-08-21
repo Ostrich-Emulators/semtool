@@ -15,6 +15,7 @@
 		<jetty.version>9.2.3.v20140905</jetty.version>
 		<lucene.version>3.6.2</lucene.version>
 		<spring.version>4.1.5.RELEASE</spring.version>
+		<http.version>4.4</http.version>
 	</properties>
 
 	<modules>
@@ -209,6 +210,22 @@
 			<artifactId>jaxen</artifactId>
 			<version>1.1.6</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${http.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>${http.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-cache</artifactId>
+			<version>${http.version}</version>
+		</dependency>
+
 	</dependencies>    
     
 	<profiles>
