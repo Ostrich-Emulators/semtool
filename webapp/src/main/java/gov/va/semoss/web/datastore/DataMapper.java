@@ -14,6 +14,10 @@ import java.util.Collection;
  */
 public interface DataMapper<T, I> {
 
+	public DataStore getDataStore();
+
+	public void setDataStore( DataStore store );
+
 	public Collection<T> getAll();
 
 	public T getOne( I id );

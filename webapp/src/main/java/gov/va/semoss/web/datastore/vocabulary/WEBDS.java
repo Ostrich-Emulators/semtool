@@ -30,12 +30,6 @@ public class WEBDS {
 	 */
 	public static final Namespace NS = new NamespaceImpl( PREFIX, NAMESPACE );
 
-	// ----- Classes ------
-	/**
-	 * http://semoss.org/ontologies/Concept
-	 */
-	public final static URI User;
-
 	/**
 	 * http://semoss.org/ontologies/Relation
 	 */
@@ -45,7 +39,6 @@ public class WEBDS {
 		final ValueFactory factory = ValueFactoryImpl.getInstance();
 
 		// ----- Classes ------
-		User = factory.createURI( NAMESPACE, "User" );
 		DBINFO = factory.createURI( NAMESPACE, "DbInfo" );
 	}
 }

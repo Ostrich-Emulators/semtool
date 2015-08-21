@@ -5,22 +5,25 @@
  */
 package gov.va.semoss.web.datastore;
 
+import gov.va.semoss.security.RemoteUserImpl;
+import gov.va.semoss.security.User;
+import gov.va.semoss.security.User.UserProperty;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.web.datastore.vocabulary.WEBDS;
-import gov.va.semoss.web.io.DbInfo;
 import info.aduna.iteration.Iterations;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
@@ -28,13 +31,16 @@ import org.openrdf.repository.RepositoryException;
  *
  * @author ryan
  */
-public class DbInfoMapper implements DataMapper<DbInfo, String> {
+public class UserMapper implements DataMapper<User, String> {
 
-	private static final Logger log = Logger.getLogger(DbInfoMapper.class );
-	private static final URI DATA_PREDICATE
-			= new URIImpl( WEBDS.NAMESPACE + "dbinfo/dataurl" );
-	private static final URI INSIGHTS_PREDICATE
-			= new URIImpl( WEBDS.NAMESPACE + "dbinfo/insightsurl" );
+	private static final Logger log = Logger.getLogger( UserMapper.class );
+	private static final Map<UserProperty, URI> PROPMAP = new HashMap<>();
+
+	static {
+		PROPMAP.put( UserProperty.USER_ORG, FOAF.ORGANIZATION );
+		PROPMAP.put( UserProperty.USER_EMAIL, FOAF.ONLINE_ACCOUNT );
+		PROPMAP.put( UserProperty.USER_FULLNAME, FOAF.NAME );
+	}
 
 	private DataStore store;
 
@@ -49,13 +55,13 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 	}
 
 	@Override
-	public Collection<DbInfo> getAll() {
+	public Collection<User> getAll() {
 		RepositoryConnection rc = store.getConnection();
-		List<DbInfo> databases = new ArrayList<>();
+		List<User> databases = new ArrayList<>();
 		try {
 			for ( Statement stmt : Iterations.asList( rc.getStatements( null, RDF.TYPE,
-					WEBDS.DBINFO, false ) ) ) {
-				databases.add( getDbInfo( stmt.getSubject(), rc ) );
+					FOAF.PERSON, false ) ) ) {
+				databases.add( getUser( stmt.getSubject(), rc ) );
 			}
 		}
 		catch ( RepositoryException e ) {
@@ -65,19 +71,19 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 	}
 
 	@Override
-	public DbInfo getOne( String name ) {
-		for ( DbInfo dbi : getAll() ) {
-			if ( name.equals( dbi.getName() ) ) {
-				return dbi;
+	public User getOne( String name ) {
+		for ( User usr : getAll() ) {
+			if ( name.equals( usr.getUsername() ) ) {
+				return usr;
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public DbInfo create( DbInfo t ) {
+	public User create( User t ) {
 		RepositoryConnection rc = store.getConnection();
-		UriBuilder urib = UriBuilder.getBuilder( WEBDS.NAMESPACE + "dbinfo" );
+		UriBuilder urib = UriBuilder.getBuilder( WEBDS.NAMESPACE + "user" );
 
 		try {
 			rc.add( getCreateStatements( urib.uniqueUri(), t, rc.getValueFactory() ) );
@@ -90,7 +96,7 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 	}
 
 	@Override
-	public void remove( DbInfo t ) {
+	public void remove( User t ) {
 		RepositoryConnection rc = store.getConnection();
 
 		try {
@@ -105,7 +111,7 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 	}
 
 	@Override
-	public void update( DbInfo data ) {
+	public void update( User data ) {
 		RepositoryConnection rc = store.getConnection();
 		try {
 			Resource id = getId( data, rc );
@@ -119,38 +125,41 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 		}
 	}
 
-	private static DbInfo getDbInfo( Resource id, RepositoryConnection rc )
+	private static User getUser( Resource id, RepositoryConnection rc )
 			throws RepositoryException {
 
-		DbInfo dbi = new DbInfo();
+		RemoteUserImpl user = new RemoteUserImpl();
+
 		for ( Statement stmt : Iterations.asList( rc.getStatements( id, null, null, false ) ) ) {
 			URI pred = stmt.getPredicate();
 			String val = stmt.getObject().stringValue();
-			if ( DATA_PREDICATE.equals( pred ) ) {
-				dbi.setDataUrl( val );
+
+			if ( FOAF.ACCOUNT.equals( pred ) ) {
+				user.setUsername( val );
 			}
-			else if ( INSIGHTS_PREDICATE.equals( pred ) ) {
-				dbi.setInsightsUrl( val );
-			}
-			else if ( RDFS.LABEL.equals( pred ) ) {
-				dbi.setName( val );
+			else {
+				for ( Map.Entry<UserProperty, URI> en : PROPMAP.entrySet() ) {
+					if ( en.getValue().equals( pred ) ) {
+						user.setProperty( en.getKey(), val );
+					}
+				}
 			}
 		}
 
-		return dbi;
+		return user;
 	}
 
-	private static Resource getId( DbInfo t, RepositoryConnection rc )
+	private static Resource getId( User t, RepositoryConnection rc )
 			throws RepositoryException {
 		List<Statement> stmts = Iterations.asList( rc.getStatements( null, RDF.TYPE,
-				WEBDS.DBINFO, false ) );
+				FOAF.PERSON, false ) );
 		Resource idToRemove = null;
 		for ( Statement s : stmts ) {
 			Resource sbj = s.getSubject();
 			List<Statement> individuals
-					= Iterations.asList( rc.getStatements( sbj, RDFS.LABEL, null, false ) );
+					= Iterations.asList( rc.getStatements( sbj, FOAF.ACCOUNT, null, false ) );
 			for ( Statement ind : individuals ) {
-				if ( ind.getObject().stringValue().equals( t.getName() ) ) {
+				if ( ind.getObject().stringValue().equals( t.getUsername() ) ) {
 					idToRemove = sbj;
 				}
 			}
@@ -159,13 +168,20 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 		return idToRemove;
 	}
 
-	private static Collection<Statement> getCreateStatements( Resource id, DbInfo t,
+	private static Collection<Statement> getCreateStatements( Resource id, User t,
 			ValueFactory vf ) {
 		List<Statement> stmts = new ArrayList<>();
-		stmts.add( new StatementImpl( id, RDFS.LABEL, vf.createLiteral( t.getName() ) ) );
-		stmts.add( new StatementImpl( id, RDF.TYPE, WEBDS.DBINFO ) );
-		stmts.add( new StatementImpl( id, DATA_PREDICATE, vf.createLiteral( t.getDataUrl() ) ) );
-		stmts.add( new StatementImpl( id, INSIGHTS_PREDICATE, vf.createLiteral( t.getInsightsUrl() ) ) );
+		stmts.add( new StatementImpl( id, RDF.TYPE, FOAF.PERSON ) );
+		stmts.add( new StatementImpl( id, FOAF.ACCOUNT, vf.createLiteral( t.getUsername() ) ) );
+
+		for ( Map.Entry<UserProperty, URI> en : PROPMAP.entrySet() ) {
+			UserProperty prop = en.getKey();
+
+			String str = t.getProperty( prop );
+			if ( !str.trim().isEmpty() ) {
+				stmts.add( new StatementImpl( id, en.getValue(), vf.createLiteral( str ) ) );
+			}
+		}
 
 		return stmts;
 	}
