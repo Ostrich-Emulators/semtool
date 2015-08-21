@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class APITests {
 
-	@Test
+	//@Test
 	public void test() {
 		ServiceClient client = new ServiceClient();
 		String endpoint = "/semoss/allDatabases";

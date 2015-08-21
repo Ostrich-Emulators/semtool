@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class LoginTest {
 
-	@Test
+	//@Test
 	public void testScreenScrapeLogin() {
 		GenericLoginCall loginCall = new GenericLoginCall("ryan", "123456");
 		WebServerAPI.initialize("localhost", 8080);
@@ -21,7 +21,7 @@ public class LoginTest {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void testRestTemplateLogin() {
 		String username = "ryan";
 		String password = "123456";
