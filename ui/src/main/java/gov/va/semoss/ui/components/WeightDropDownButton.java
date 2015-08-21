@@ -405,7 +405,7 @@ public class WeightDropDownButton extends JButton {
 						= NodeEdgeNumberedPropertyUtility.getDoubleIfPossibleFrom( propertyValue );
 			}
 
-			if ( propertyDouble > 0 ) {
+			if ( propertyDouble >= 0 ) {
 				if ( highValue == null ) {
 					highValue = propertyDouble;
 				}
