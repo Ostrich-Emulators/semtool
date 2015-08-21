@@ -13,3 +13,28 @@
 .instance_action_glyph {}
 .loading_image_container {}
 .spinner {}
+
+.semoss_nav_menu {
+	
+	
+}
+
+.admin_nav_item {
+
+}
+
+.semoss_glyph {
+	margin-right:10px;
+}
+
+#nav_menu_toggle {
+	border-radius:20px;
+	display:inline-block;
+	background:rgb(100,100,100);
+	vertical-align:middle;
+	color:white;
+	display:table-cell;
+	width:3px;
+	background: linear-gradient(to bottom, white, white ,rgb(100,100,100) ,rgb(100,100,100),rgb(100,100,100),white, white); 
+	cursor: pointer;
+}

@@ -143,3 +143,68 @@
 							return true;
 						}
 					}
+					
+					
+					SEMOSS.menuVisible = true;
+					
+					SEMOSS.toggleNavMenu = function (){
+						if (menuVisible){
+							$('#dt_navigation_menu').hide(200);
+							$('#expand_border').removeClass('glyphicon-menu-left');
+							$('#expand_border').addClass('glyphicon-menu-right');
+							menuVisible = false;
+						}
+						else {
+							$('#dt_navigation_menu').show(200);
+							$('#expand_border').removeClass('glyphicon-menu-right');
+							$('#expand_border').addClass('glyphicon-menu-left');
+							menuVisible = true;
+						}
+					}
+					
+					SEMOSS.showPanel(id) {
+						$('.main_div').each(function() {
+							$(this).hide(200);
+						});
+						$('#' + id).show(200);
+						
+						$('.admin_nav_item').each(function() {
+							$(this).removeClass('active');
+						});
+						$('#' + id + "_nav").addClass('active');
+					}
+					
+					SEMOSS.showNavMenu(navmenuID, buttonID){
+						$('.semoss_nav_menu_btn').each(function() {
+							$(this).removeClass('btn-info');
+						});
+						$('.semoss_nav_menu').each(function() {
+							$(this).hide();
+						});
+						$('#' + buttonID).addClass('btn-info');
+						$('#' + navmenuID).show();
+					}
+					
+					$(document).ready(function (){
+						$('#success_message_panel').hide();
+						$('#warning_message_panel').hide();
+						$('#failure_message_panel').hide();
+						$('.main_div').each(function() {
+							$(this).hide();
+						});
+
+						
+						// Set the set of nav items 
+						$('.semoss_nav_menu_btn').each(function() {
+							$(this).removeClass('btn-info');
+						});
+						
+						
+						// Set the active nave item (Organizations)
+						$('.admin_nav_item').each(function() {
+							$(this).removeClass('active');
+						});
+						$('#dtorganizations_nav').addClass('active');
+						$('#dt_organizations').hide();
+						
+					});
