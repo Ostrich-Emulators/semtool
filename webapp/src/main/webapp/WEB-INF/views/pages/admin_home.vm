@@ -5,7 +5,7 @@
 	</div>
 	#parse("/navs/nav_manage.vm")
 </div>
-<div id="nav_menu_toggle" onclick="toggleNavMenu()" >
+<div id="nav_menu_toggle" onclick="SEMOSS.toggleNavMenu()" >
 		<span id="expand_border" class="glyphicon glyphicon-menu-left" ></span>
 </div>
 
@@ -34,7 +34,7 @@
 		</div>
 		
 		<div>	
-		#parse("/databases/main.html")
+		#parse("/databases/main.vm")
 		
 		</div>
 </div>	
