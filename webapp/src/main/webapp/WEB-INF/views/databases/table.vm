@@ -1,0 +1,25 @@
+	<table id="semoss_databases_table" class="row-border hover" datatable="ng"  dt-options="databaseManager.dtOptions" dt-columns="databaseManager.dtColumns" dt-instance="databaseManager.dtInstance">                
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>URL</th>      
+                    <th></th>
+                    <th></th>
+                    <th></th>      
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-click="rowSelected($index)" ng-repeat="instance in instances"  >
+                    <td>{{instance.name}}</td>
+                    <td>{{instance.description}}</td>
+                    <td>{{instance.URL}}</td>
+                    <td><button class="btn btn-default btn-info view_instance_button" ng-click="view(instance.id)" ><span class="glyphicon glyphicon-eye-open instance_action_glyph"></span></button></td>
+                    <td><button class="btn btn-default btn-warning edit_instance_button" ng-click="showEdit(instance.id)" ><span class="glyphicon glyphicon-pencil instance_action_glyph"></span></button></td>
+                    <td><button class="btn btn-default btn-danger delete_instance_button" ng-click="showDelete(instance.id)" ><span class="glyphicon glyphicon-remove"></span></button></td>
+                </tr>
+            </tbody>            
+        </table>
+        <div class="loading_image_container">
+        	<img class="spinner" src="img/loading.gif" ng-if="loading">
+        </div>
