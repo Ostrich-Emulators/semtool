@@ -2,9 +2,9 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>serverURL</th>
-                    <th>dataURL</th>     
-                    <th>insightsURL</th> 
+                    <th>Server URL</th>
+                    <th>Data URL</th>     
+                    <th>Insights URL</th> 
                     <th></th>
                     <th></th>
                     <th></th>      
