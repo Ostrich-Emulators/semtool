@@ -18,7 +18,7 @@
         // Initialization function
         $scope.init = function () {
             $scope.loading = true;
-            DT.listDatabases(
+            SEMOSS.listDatabases(
                     function (token) {
     	                var returnedInstances = JSON.parse(token.data.data);
     	                $scope.instances = [];
@@ -37,7 +37,7 @@
         }
         
         $scope.showEdit = function(id){
-       	 	DT.getDatabase(id, function(token){
+       	 	SEMOSS.getDatabase(id, function(token){
        	 		var foreignInstance = JSON.parse(token.data.data);
        	 		var nativeInstance = new SEMOSS.VcampDatabase();
        	 		nativeInstance.setAttributes(foreignInstance);
@@ -49,8 +49,8 @@
         }
         
         $scope.update = function(){
-       	 	DT.updateDatabase($scope.activeInstance, function(token){
-       	 		DT.processAnyFailures(token, 'Database successfully updated.');
+       	 	SEMOSS.updateDatabase($scope.activeInstance, function(token){
+       	 		SEMOSS.processAnyFailures(token, 'Database successfully updated.');
         		if (token.result <= 1){
         			$scope.instances.splice($scope.currentRow, 1, angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
@@ -62,7 +62,7 @@
         }
         
         $scope.view = function(id){
-       	 	DT.getDatabase(id, function(token){
+       	 	SEMOSS.getDatabase(id, function(token){
        	 		var foreignInstance = JSON.parse(token.data.data);
        	 		var nativeInstance = new SEMOSS.VcampDatabase();
        	 		nativeInstance.setAttributes(foreignInstance);
@@ -81,9 +81,9 @@
         }
 
         $scope.create = function(){
-        	DT.createApplicationDataType($scope.activeInstance, function(token){
+        	SEMOSS.createApplicationDataType($scope.activeInstance, function(token){
         		$scope.activeInstance.id = token.data.id;
-        		DT.processAnyFailures(token, 'Database successfully created.');
+        		SEMOSS.processAnyFailures(token, 'Database successfully created.');
         		if (token.result <= 1){
         			$scope.instances.push(angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
@@ -94,7 +94,7 @@
 
         $scope.listInstances = function () {
             $scope.loading = true;
-            DT.listApplicationDataTypes(
+            SEMOSS.listApplicationDataTypes(
                     function (token) {
     	                var returnedInstances = JSON.parse(token.data.data);
     	                $scope.instances = [];
@@ -110,8 +110,8 @@
         };
         
         $scope.deleteInstance = function(){
-        	DT.deleteApplicationDataType($scope.deleteID, function(token){
-        		DT.processAnyFailures(token, 'Database successfully deleted.');
+        	SEMOSS.deleteApplicationDataType($scope.deleteID, function(token){
+        		SEMOSS.processAnyFailures(token, 'Database successfully deleted.');
         		if (token.result <= 1){
         			$scope.instances.splice($scope.currentRow, 1);
         			vm.dtInstance.rerender();
