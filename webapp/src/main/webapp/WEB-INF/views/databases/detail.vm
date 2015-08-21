@@ -16,15 +16,22 @@
 						placeholder="The Database Name">
 				</div>
 				<div class="form-group">
-					<label for="database_description">Description</label> 
-					<input  ng-model="activeInstance.description"
-						type="text" class="instance_field string_field form-control" id="database_description"
+					<label for="semoss_database_server_url">Server URL</label> 
+					<input  ng-model="activeInstance.serverUrl"
+						type="text" class="instance_field string_field form-control" id="semoss_database_server_url"
 						placeholder="The Database Description">
 				</div>
 				<div class="form-group">
-					<label for="database_url">URL</label> 
-					<input  ng-model="activeInstance.url"
-						type="text" class="instance_field string_field form-control" id="database_url"
+					<label for="semoss_database_data_url">Data URL</label> 
+					<input  ng-model="activeInstance.dataUrl"
+						type="text" class="instance_field string_field form-control" id="semoss_database_data_url"
+						placeholder="The Database URL">
+				</div>
+				
+				<div class="form-group">
+					<label for="semoss_database_insights_url">Insights URL</label> 
+					<input  ng-model="activeInstance.insightsUrl"
+						type="text" class="instance_field string_field form-control" id="semoss_database_insights_url"
 						placeholder="The Database URL">
 				</div>
 			</div>
