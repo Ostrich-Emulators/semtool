@@ -23,6 +23,8 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
+import gov.va.semoss.security.User;
+import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
@@ -61,9 +63,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
@@ -119,6 +119,8 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * The playpane houses all of the components that create the user interface in
@@ -221,7 +223,7 @@ public class PlayPane extends JFrame {
 			DbAction.getIcon( "log_tab1" ) );
 	private final JCheckBoxMenuItem gQueryBuilderItem
 			= new JCheckBoxMenuItem( "Graphical Query Builder",
-					DbAction.getIcon( "insight_manager_tab1" ) );
+					DbAction.getIcon( "graphic_query" ) );
 	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 	private final JCheckBoxMenuItem iManageItem_2 = new JCheckBoxMenuItem( "Insight Manager 2",
@@ -248,6 +250,8 @@ public class PlayPane extends JFrame {
 		//exist in a separate class, load all of their listeners first:
 		// customSparqlPanel.loadCustomSparqlPanelListeners();
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
+		ApplicationContext ctx = new ClassPathXmlApplicationContext( "/appContext.xml" );
+		DIHelper.getInstance().setAppCtx( ctx );
 		DIHelper.getInstance().setPlayPane( this );
 
 		// run through the view components
@@ -549,7 +553,7 @@ public class PlayPane extends JFrame {
 		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
 				"Build queries graphically and generate Sparql" );
 		CloseableTab ct1 = new PlayPaneCloseableTab( rightView, gQueryBuilderItem,
-				DbAction.getIcon( "insight_manager_tab1" ) );
+				DbAction.getIcon( "graphic_query" ) );
 		idx = rightView.indexOfComponent( gQueryBuilderPanel );
 		rightView.setTabComponentAt( idx, ct1 );
 
@@ -605,9 +609,7 @@ public class PlayPane extends JFrame {
 	private JPanel makeGraphCosmeticsPanel() {
 		JPanel panel = new JPanel( new GridLayout( 1, 1 ) );
 		panel.setBackground( SystemColor.control );
-
-		colorShapeTable = initJTableAndAddTo( panel, false );
-
+		colorShapeTable = initJTableAndAddTo( panel );
 		return panel;
 	}
 
@@ -623,8 +625,8 @@ public class PlayPane extends JFrame {
 		renderer.cache( Constants.IN_EDGE_CNT, "Inputs" );
 		renderer.cache( Constants.OUT_EDGE_CNT, "Outputs" );
 
-		labelTable = initJTableAndAddTo( panel, false );
-		tooltipTable = initJTableAndAddTo( panel, false );
+		labelTable = initJTableAndAddTo( panel );
+		tooltipTable = initJTableAndAddTo( panel );
 
 		labelTable.setDefaultRenderer( URI.class, renderer );
 		tooltipTable.setDefaultRenderer( URI.class, renderer );
@@ -640,33 +642,33 @@ public class PlayPane extends JFrame {
 		return filterPanel;
 	}
 
-	private JTable initJTableAndAddTo( JPanel panel, boolean useGBC ) {
+	/**
+	 * Resets the interface to account for <code>user</code>'s permissions
+	 *
+	 * @param user
+	 */
+	public void resetForUser( User user ) {
+		iManageItem.setEnabled( user.hasPermission( SemossPermission.INSIGHTWRITER ) );
+		int idx = rightTabs.indexOfComponent( iManagePanel );
+		if ( idx >= 0 ) {
+			if ( !user.hasPermission( SemossPermission.INSIGHTWRITER ) ) {
+				iManageItem.doClick();
+			}
+		}
+
+		idx = rightTabs.indexOfComponent( loggingPanel );
+		if ( idx >= 0 ) {
+			if ( !user.hasPermission( SemossPermission.LOGVIEWER ) ) {
+				loggingItem.doClick();
+			}
+		}
+	}
+
+	private JTable initJTableAndAddTo( JPanel panel ) {
 		JTable table = new JTable();
 		table.setShowGrid( true );
-
-		if ( useGBC ) {
-			panel.add( new JScrollPane( table ), getGBC() );
-		}
-		else {
-			panel.add( new JScrollPane( table ) );
-		}
-
+		panel.add( new JScrollPane( table ) );
 		return table;
-	}
-
-	private int gbcY = 0;
-
-	private GridBagConstraints getGBC() {
-		return getGBC( GridBagConstraints.BOTH );
-	}
-
-	private GridBagConstraints getGBC( int fill ) {
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets( 0, 0, 5, 0 );
-		gbc.fill = fill;
-		gbc.gridx = 0;
-		gbc.gridy = gbcY++;
-		return gbc;
 	}
 
 	private JComponent makeGraphTab() {
@@ -1467,10 +1469,10 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "insight_manager_tab1" ),
+					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "graphic_query" ),
 							gQueryBuilderPanel, "Build queries graphically and generate Sparql" );
 					CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, gQueryBuilderItem,
-							DbAction.getIcon( "insight_manager_tab1" ) );
+							DbAction.getIcon( "graphic_query" ) );
 					int idx = rightTabs.indexOfComponent( gQueryBuilderPanel );
 					rightTabs.setTabComponentAt( idx, ct1 );
 					gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );

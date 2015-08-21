@@ -1,0 +1,10 @@
+## copy this file to semoss-web.properties, and put installation-specific data here
+##########
+# rdfstore -- Can be either a local directory or a remote sesame endpoint.
+#     use: rdfstore=/tmp/x1 (local directory)
+#     or   rdfstore=http://localhost:8280/openrdf-sesame/repositories/semoss-webapp 
+#     or   rdfstore=:memory: (blank in-memory datastore)
+#     or   rdfstore=:memory:/tmp/database (in-memory database, persisted at ./database)
+# for testing, the :memory:/tmp/x1 style is probably easiest. For production, 
+# a remote database is the most reliable.
+rdfstore=:memory:

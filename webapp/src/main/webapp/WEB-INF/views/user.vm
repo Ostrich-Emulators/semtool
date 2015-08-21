@@ -1,0 +1,7 @@
+<html>
+<body>
+ #parse("/common/header.vt")
+ <br>
+	$message
+</body>
+</html>

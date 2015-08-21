@@ -1,0 +1,4 @@
+table.datatable td {
+  border: 1px solid gray;
+  padding: .25em;
+}

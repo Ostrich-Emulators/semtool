@@ -1,0 +1,11 @@
+<html>
+	#include( "/common/adminHead.vm")
+<body ng-app="semoss" >
+<div class="pages_container" style="display:table; width:100%;margin:5px; padding:10px">
+	#parse("/pages/admin_home.vm")
+</div>
+<div class="pages_container ">
+	#include( "/common/copyright.vm")
+</div>
+</body>
+</html>

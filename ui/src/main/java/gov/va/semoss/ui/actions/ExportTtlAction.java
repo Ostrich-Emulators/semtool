@@ -31,7 +31,7 @@ import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.main.SemossPreferences;
 
-import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.security.UserImpl;
 import java.util.Map;
 
 import javax.swing.JOptionPane;

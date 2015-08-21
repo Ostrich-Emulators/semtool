@@ -1,0 +1,22 @@
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+	<!-- base layout -->
+	<definition name="base" template="/WEB-INF/jsp/common/base.jsp">
+		<put-attribute name="header-includes" value="/WEB-INF/jspf/headers.jsp" />
+		<put-attribute name="banner-content" value="/WEB-INF/jspf/banner.jsp" />
+		<put-attribute name="footer-content" value="/WEB-INF/jspf/footer.jsp" />
+	</definition> 
+
+	<definition name="welcome" extends="base">
+		<put-attribute name="title-content" value="Home" />
+		<put-attribute name="primary-content" value="/WEB-INF/jsp/index.jsp" />
+		<put-attribute name="back-home" value="" />
+	</definition> 
+
+	<definition name="exception" extends="base">
+		<put-attribute name="title-content" value="An error occurred" />
+		<put-attribute name="primary-content" value="/WEB-INF/jsp/common/exception.jsp" />
+	</definition> 
+
+</tiles-definitions>

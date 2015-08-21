@@ -66,7 +66,8 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.HashSet;
@@ -459,9 +460,14 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public void update( UpdateExecutor ue ) throws RepositoryException,
 			MalformedQueryException, UpdateExecutionException {
-		if ( isConnected() ) {
-			RepositoryConnection rc = getRawConnection();
-			doUpdate( ue, rc, supportsSparqlBindings() );
+		if ( UserImpl.getUser().hasPermission( SemossPermission.DATAWRITER ) ) {
+			if ( isConnected() ) {
+				RepositoryConnection rc = getRawConnection();
+				doUpdate( ue, rc, supportsSparqlBindings() );
+			}
+		}
+		else {
+			throw SemossPermission.newSecEx();
 		}
 	}
 
