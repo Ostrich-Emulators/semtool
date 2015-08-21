@@ -13,12 +13,12 @@ import org.openrdf.query.BindingSet;
  */
 public class Parameter implements Serializable{
 	private static final long serialVersionUID = 5672795936332918133L;
-    private URI uriId;
-	private String strLabel;
-    private String strVariable;
-    private String strParameterType;
-    private String strDefaultQuery;
-    private String strParameterURI;
+    private URI uriId = null;
+	private String strLabel = "";
+    private String strVariable = "";
+    private String strParameterType = "";
+    private String strDefaultQuery = "";
+    private String strParameterURI = "";
     
     public Parameter(){
     }    

@@ -23,33 +23,33 @@ public class Insight implements Serializable{
 	//ID of the question:
 	URI id = null;
 	//Name of the question:
-	String label = null;
+	String label = "";
 	//Query Parameters:
 	Map<String, Map<String, String>> parameters = new HashMap<>();
 	//Sparql for the question:
-	String sparql = null;
+	String sparql = "";
 	//Database id indicating Insight location.
 	//This may be a URL in memory or a file:
-	String databaseID = null;
+	String databaseID = "";
 	//Type of entity this insight has:
-	String entityType = null;
+	String entityType = "";
 	//The layout used to render this insight:
-	String output = null;
+	String output = "";
 	//A renderer class for the Insight (if standard playsheets aren't used):
-	String rendererClass = null;
+	String rendererClass = "";
 	//Whether the query uses legacy internal parameter specifications:
 	boolean isLegacy = false;
 	//Description of Insight:
-	String description = null;
+	String description = "";
 	//Author of Insight:
-	String creator = null;
+	String creator = "";
 	//Date Created:
-	String created = null;
+	String created = "";
 	//Date Modified:
-	String modified = null;
+	String modified = "";
 	//A URI string of the containing Perspective,
 	//for use in the "toString()" method:
-	private String perspective;
+	private String perspective = "";
     //This Insight's Order under its Perspective.
 	//(Assuming that an Insight can belong to only one Perspective):
 	private int order = 0;

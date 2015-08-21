@@ -15,6 +15,7 @@ import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
 import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
+import gov.va.semoss.rdf.engine.api.WriteablePerspective;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.user.User;
 import gov.va.semoss.user.User.UserProperty;
@@ -54,9 +55,11 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	private final UriSanitizer sanitizer = new DeterministicSanitizer();
 	private final Collection<Statement> initialStatements = new ArrayList<>();
 
+	private final WriteablePerspectiveImpl wp;
 	private final WriteablePerspectiveTabImpl wpt;
 	private final WriteableInsightTabImpl wit;
 	private final WriteableParameterTabImpl wprmt;
+	
 
 	public WriteableInsightManagerImpl( InsightManager im ) {
 		super( new SailRepository( new ForwardChainingRDFSInferencer( new MemoryStore() ) ) );
@@ -69,6 +72,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			log.error( re, re );
 		}
 
+		wp = new WriteablePerspectiveImpl( this );
 		wpt = new WriteablePerspectiveTabImpl( this );
 		wit = new WriteableInsightTabImpl( this );
 		wprmt = new WriteableParameterTabImpl( this );
@@ -299,6 +303,17 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		}
 	}
 
+	/**   Provides access to methods that persist changes to all Perspectives,
+	 * their Insights, and their Parameters.
+     * 
+     * @return getWriteablePerspective -- (WriteablePerspective)
+     *    Methods described above.
+     */
+	@Override
+	public WriteablePerspective getWriteablePerspective(){
+		return wp;
+	}
+	
 	/**
 	 * Provides access to methods that persist changes to "Perspective" tab data.
 	 *

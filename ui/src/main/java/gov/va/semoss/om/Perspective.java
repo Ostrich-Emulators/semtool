@@ -17,10 +17,10 @@ import org.openrdf.model.URI;
  */
 public class Perspective {
 
-	private URI id;
-	private String label;
-	private String description;
-	private ArrayList<Insight> arylInsights;
+	private URI id = null;
+	private String label = "";
+	private String description = "";
+	private ArrayList<Insight> arylInsights = new ArrayList<Insight>();
 
 	//Constructors:
 	//-------------

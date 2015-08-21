@@ -86,6 +86,14 @@ public interface WriteableInsightManager extends InsightManager {
    */
   public void clear();
   
+  /**   Provides access to methods that persist changes to all Perspectives,
+   * their Insights, and their Parameters.
+   * 
+   * @return getWriteablePerspective -- (WriteablePerspective)
+   *    Methods described above.
+   */
+  public WriteablePerspective getWriteablePerspective();
+  
   /**   Provides access to methods that persist changes to "Perspective" tab data.
    * 
    * @return getWriteablePerspectiveTab -- (WriteablePerspectiveTab)

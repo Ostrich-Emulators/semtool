@@ -25,10 +25,12 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -52,7 +54,6 @@ import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.util.Utility;
 
 public class  InsightManagerController_2 implements Initializable{
 	public static final String ICON_LOCATION = "/images/icons16/";
@@ -72,6 +73,10 @@ public class  InsightManagerController_2 implements Initializable{
 	protected RadioButton radioCopy;
 	@FXML
 	protected AnchorPane apaneContent;
+	@FXML
+	protected Button btnSave;
+	@FXML
+	protected Button btnReload;
 	
 	
 	protected ObservableList<Perspective> arylPerspectives;
@@ -95,6 +100,16 @@ public class  InsightManagerController_2 implements Initializable{
 		   arylParameterTypes = FXCollections.observableArrayList();
 		   		   
 		   loadReferencesAndData();
+			
+		   //Build Save Button:
+	 	   //------------------
+	 	   btnSave.setOnAction(this::handleSave);
+		   btnSave.setTooltip(new Tooltip("Save changes to all Perspectives, Insights, and Parameters."));
+		   
+		   //Build Reload Button:
+		   //--------------------
+		   btnReload.setOnAction(this::handleReload);
+		   btnReload.setTooltip(new Tooltip("Reload Insight Manager from Database."));
 		   
 		}//End if(engine != null).		
 	}
@@ -140,7 +155,9 @@ public class  InsightManagerController_2 implements Initializable{
 	     		   
 	     		    //Populate "Perspectives" tree-view:
 	     		    populatePerspectiveTreeView();
-	     		    
+	     		    //Clear the editor pane:
+	     	  	    apaneContent.getChildren().clear();
+
 	     		    treevPerspectives.getSelectionModel().selectFirst();
 	      	    }    	    
 	        }
@@ -577,7 +594,7 @@ public class  InsightManagerController_2 implements Initializable{
 	private void addPerspective(){
 		//Build new Perspective, giving it a unique URI:
 		//----------------------------------------------
-		String strUniqueIdentifier = "_"+String.valueOf(System.currentTimeMillis());	
+		String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());	
 		Perspective perspective = new Perspective();
 		RepositoryConnection rc = null;
 		try {
@@ -587,7 +604,7 @@ public class  InsightManagerController_2 implements Initializable{
 		}
    		ValueFactory insightVF = rc.getValueFactory();
         URI uriPerspective = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, 
-           "Perspective"+strUniqueIdentifier);
+           "Perspective-"+strUniqueIdentifier);
 		perspective.setUri(uriPerspective);
 		perspective.setLabel("(A New Perspective)");
 		
@@ -621,7 +638,7 @@ public class  InsightManagerController_2 implements Initializable{
 	private void addInsight(){
 		//Build new Insight, giving it a unique URI:
 		//------------------------------------------
-		String strUniqueIdentifier = "_"+String.valueOf(System.currentTimeMillis());	
+		String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());	
 		Insight insight = new Insight();
 		RepositoryConnection rc = null;
 		try {
@@ -631,7 +648,7 @@ public class  InsightManagerController_2 implements Initializable{
 		}
    		ValueFactory insightVF = rc.getValueFactory();
         URI uriInsight = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, 
-           "Insight"+strUniqueIdentifier);
+           "Insight-"+strUniqueIdentifier);
         insight.setId(uriInsight);
         insight.setLabel("(A New Insight)");
         insight.setOrder(0);
@@ -645,23 +662,28 @@ public class  InsightManagerController_2 implements Initializable{
         treevPerspectives.getSelectionModel().getSelectedItem().getChildren().add(0, item);
         renumberInsights();
         
+        Perspective perspective = (Perspective) item.getParent().getValue();
+        perspective.getInsights().add(insight); 
+        
         //Select new Insight and open its editor:
         //---------------------------------------
         treevPerspectives.getSelectionModel().select(item);
         doubleClickTreeItem();
 	}
 	
-	/**    Removes the selected Insight from the tree-view if the response to the
-	 *  warning popup is OK. Also clears the editor in the right-pane if it represents
-	 *  or is contained by the deleted Insight. (Called by "buildContextMenus()".)
+	/**    Removes the selected Insight from the tree-view and from its parent Perspective
+	 *  if the response to the warning popup is OK. Also clears the editor in the right-pane 
+	 *  if it represents or is contained by the deleted Insight. (Called by "buildContextMenus()".)
 	 */
 	private void deleteInsight(){
 		if(GuiUtility.showWarningOkCancel("Are you sure you want to delete this Insight?") == 0){
 		   TreeItem<Object> itemInsight = treevPerspectives.getSelectionModel().getSelectedItem();
-		   clearRightPane(itemInsight);
+		   Insight insight = (Insight) itemInsight.getValue();
 		   TreeItem<Object> itemPerspective = treevPerspectives.getSelectionModel()
 			  .getSelectedItem().getParent();
-		   
+		   Perspective perspective = (Perspective) itemPerspective.getValue();
+		   perspective.getInsights().remove(insight);
+		   clearRightPane(itemInsight);
 		   itemPerspective.getChildren().remove(itemInsight);
            renumberInsights();
 		}
@@ -713,6 +735,7 @@ public class  InsightManagerController_2 implements Initializable{
         doubleClickTreeItem();
 	}//End "addParameter()".
 	
+	
 	/**    Removes the selected Parameter from the tree-view if the response to the
 	 *  warning popup is OK. Also clears the editor in the right-pane if it represents
 	 *  or is contained by the deleted Parameter. (Called by "buildContextMenus()".)
@@ -720,15 +743,15 @@ public class  InsightManagerController_2 implements Initializable{
 	private void deleteParameter(){
 		if(GuiUtility.showWarningOkCancel("Are you sure you want to delete this Parameter?") == 0){
 		   TreeItem<Object> itemParameter = treevPerspectives.getSelectionModel().getSelectedItem();
-		   clearRightPane(itemParameter);
 		   TreeItem<Object> itemInsight = itemParameter.getParent();
 		   Insight insight = (Insight) itemInsight.getValue();
-           ArrayList<Parameter> arylParameters = (ArrayList<Parameter>) insight.getInsightParameters();                
-           arylParameters.remove((Parameter) itemParameter.getValue());
-           itemInsight.getChildren().remove(itemParameter);
+	       ArrayList<Parameter> arylParameters = (ArrayList<Parameter>) insight.getInsightParameters();                
+	       arylParameters.remove((Parameter) itemParameter.getValue());
+		   clearRightPane(itemParameter);
+	       itemInsight.getChildren().remove(itemParameter);
 		}
 	}
-	
+
 	/**   Clears the right pane when a TreeItem is deleted, if that TreeItem represents or
 	 * contains the data displayed in the right pane.
 	 * 
@@ -858,487 +881,30 @@ public class  InsightManagerController_2 implements Initializable{
 			log.warn(e, e);
 		}
 	}
-////----------------------------------------------------------------------------------------------------
-////	                            P e r s p e c t i v e   T a b
-////----------------------------------------------------------------------------------------------------
-//	/**   Populates the Perspective combo-box on the "Perspective" tab.
-//	 */
-//	protected void populatePerspectiveComboBox(){
-//  	    cboPerspectiveTitle.setItems(arylPerspectives);
-// 	}
-//
-//	/**   Populates the Perspective Title text-field with the title of
-//	 * the currently selected Perspective.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 */
-//	protected void populatePerspectiveTitleTextField(int perspectiveIndex){
-//		String strTitle = "";
-//		if(arylPerspectives.get(perspectiveIndex).getLabel() != null){
-//		   strTitle = arylPerspectives.get(perspectiveIndex).getLabel();
-//		}
-//	    txtPerspectiveTitle.setText(strTitle);	
-//	}
-//	
-//	/**   Populates the Perspective Description text-area with the description of
-//	 * the currently selected Perspective.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 */
-//	protected void populatePerspectiveDescTextArea(int perspectiveIndex){		
-//		String strDescription = "";
-//		if(arylPerspectives.get(perspectiveIndex).getDescription() != null){
-//		   strDescription = arylPerspectives.get(perspectiveIndex).getDescription();
-//		}
-//	    txtaPerspectiveDesc.setText(strDescription);	
-//	}
-//	
-//	/**   Populates the Insight list-view with Insights under the currently
-//	 * selected Perspective.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 */
-//	protected void populateInsightListView(int perspectiveIndex){
-//		Perspective perspective = (Perspective) arylPerspectives.get(perspectiveIndex);
-//  	    lstvInsights.setItems(arylInsights);
-//
-//  	    //Cell Factory for "Insight" list-view to display PlaySheet icons
-//	    //to the left of Insight labels:
-//	    lstvInsights.setCellFactory(listView -> new ListCell<Insight>() {
-//	        private ImageView imageView = new ImageView();
-//	        
-//	        @Override
-//	        public void updateItem(Insight item, boolean empty) {
-//	            super.updateItem(item, empty);
-//	            if (empty) {
-//	                setText(null);
-//	                setGraphic(null);
-//	            }else{
-//	                setText(item.toString());
-//	            	try{
-//	                   Image image = new Image(getInsightIcon(item.getOrderedLabel(perspective.getUri())));
-//	                   imageView.setImage(image);
-//	                   setGraphic(imageView);
-//	            	}catch(Exception e){
-//		               setGraphic(null);
-//	            	}
-//	            }
-//	        }
-//	        
-//	        /**   Class-initializer to define drag-and-drop operations.
-//	         */
-//	        {
-//	            ListCell thisCell = this;
-//
-//	            setOnDragDetected(event ->{
-//	                if(getItem() == null){
-//	                    return;
-//	                }
-//	                Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
-//	                ClipboardContent content = new ClipboardContent();
-//	                content.putString(getText());
-//	                dragboard.setDragView(
-//	                	new Image(getInsightIcon(getItem().getOrderedLabel(perspective.getUri())))
-//	                );
-//	                dragboard.setContent(content);
-//	                event.consume();
-//	            });
-//
-//	            setOnDragOver(event -> {
-//	                if(event.getGestureSource() != thisCell && event.getDragboard().hasString()){
-//	                    event.acceptTransferModes(TransferMode.MOVE);
-//	                }
-//	                event.consume();
-//	            });
-//
-//	            setOnDragEntered(event -> {
-//	                if(event.getGestureSource() != thisCell && event.getDragboard().hasString()){
-//	                    setOpacity(0.3);
-//	                }
-//	            });
-//
-//	            setOnDragExited(event -> {
-//	                if(event.getGestureSource() != thisCell && event.getDragboard().hasString()){
-//	                    setOpacity(1);
-//	                }
-//	            });
-//
-//	            setOnDragDropped(event -> {
-//	                if(getItem() == null){
-//	                    return;
-//	                }
-//	                Dragboard dragboard = event.getDragboard();
-//	                boolean success = false;
-//
-//	                if (dragboard.hasString()) {
-//	                    int thisIdx = arylInsights.indexOf(getItem());
-//	                    int draggedIdx = 0;
-//	                    for(Insight item: arylInsights){
-//	                    	if(item.getOrderedLabel(perspective.getUri()).equals(dragboard.getString())){
-//	                    		break;
-//	                    	}
-//	                    	draggedIdx++;
-//	                    }
-//                        moveInsight(draggedIdx, thisIdx, perspective.getUri().toString(), 
-//                           arylInsights.get(draggedIdx));
-//
-//	                    success = true;
-//	                }
-//	                event.setDropCompleted(success);
-//	                event.consume();
-//	            });
-//
-//	            setOnDragDone(DragEvent::consume);
-//
-//	        }//End Class-initializer.
-//
-//	        /**   Moves a dragged Insight to a new position in the list-view, and either pushes 
-//	         * other Insights back or forward, depending upon the drag direction
-//	         * 
-//	         * @param startIdx -- (int) Origin index of dragged Insight in the list-view's
-//	         *     ObservableList.
-//	         *     
-//	         * @param endIdx -- (int) Destination index of dragged Insight in the list-view's
-//	         *     ObservableList.
-//	         *     
-//	         * @param strPerspectiveUri -- (String) URI string of the Perspective that contains
-//	         *     the visible Insights.
-//	         *     
-//	         * @param insight -- (Insight) The Insight to be moved.
-//	         */
-//	        private void moveInsight(int startIdx, int endIdx, String strPerspectiveUri, Insight insight){
-//	        	if(startIdx < endIdx){
-//	        	   for(int i = startIdx; i < endIdx; i++){
-//	        		   arylInsights.set(i, arylInsights.get(i + 1));
-//	        	   }
-//	        	   arylInsights.set(endIdx, insight);
-//	        	}
-//	        	if(startIdx > endIdx){
-//	        	   for(int i = startIdx; i > endIdx; i--){
-//	        		   arylInsights.set(i, arylInsights.get(i - 1));
-//	        	   }
-//		           arylInsights.set(endIdx, insight);
-//	        	}
-//	        	//Reorder Insights and redisplay:
-//	        	for(int i = 0; i < arylInsights.size(); i++){
-//	        		arylInsights.get(i).setOrder(strPerspectiveUri, i + 1);
-//	        	}
-//	        	lstvInsights.setItems(null);
-//	        	lstvInsights.setItems(arylInsights);
-//	        }
-//	        
-//	    });//End setCellFactory.
-//	    
-//	    //Navigate to the previously selected Insight (or the first Insight under
-//	    //the Perspective, if the previously selected Insight has been moved):
-//    	lstvInsights.getSelectionModel().selectFirst();
-//	    for(Insight element: arylInsights){
-//	    	 if(element.getOrderedLabel(perspective.getUri()).equals(prevQuestionLabel)){
-//	    	     lstvInsights.getSelectionModel().select(element);
-//	    	     break;
-//	    	 }
-//	    }
-// 	}
-//	
-////----------------------------------------------------------------------------------------------------
-////                                   I n s i g h t   T a b
-////----------------------------------------------------------------------------------------------------
-//	/**   Populates the question text-field with the question from the 
-//	 * currently selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateQuestionTextField(int perspectiveIndex, int insightIndex){
-//  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    txtQuestion_Inst.setText(((Insight) arylInsights.get(insightIndex)).getLabel());		   
-//	}
-//
-//	/**   Populates the "Display with" dropdown with all playsheets defined
-//	 * in the Insights KB. Also, pre-selects the playsheet associated with 
-//	 * the passed-in Insight index.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populatePlaysheetComboBox(int perspectiveIndex, int insightIndex){
-//  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    String playSheetClass = ((Insight) arylInsights.get(insightIndex)).getOutput();
-//	    cboDisplayWith_Inst.setItems(arylPlaySheets);
-// 	    for(PlaySheet playsheet: arylPlaySheets){
-// 	    	if(playsheet.getViewClass().equals(playSheetClass)){
-// 	    		cboDisplayWith_Inst.getSelectionModel().select(playsheet);	
-// 	    	}
-//	    }
-//        //Cell Factory for "Display with" combo-box list-view to display 
-//	    //PlaySheet icons to the left of Playsheet labels:
-// 	    cboDisplayWith_Inst.setCellFactory(ListView -> new ListCell<PlaySheet>() {
-//	        private ImageView imageView = new ImageView();
-//	        @Override
-//	        public void updateItem(PlaySheet item, boolean empty) {
-//	            super.updateItem(item, empty);
-//	            if (empty) {
-//	                setText(null);
-//	                setGraphic(null);
-//	            }else{
-//                    setText(item.toString());
-//                    try{
-//	                   Image image = new Image(getPlaySheetIcon(item.toString()));
-//	                   imageView.setImage(image);
-//	                   setGraphic(imageView);
-//                    }catch(Exception e){
-//                       setGraphic(null);
-//                    }
-//	            } 
-//	        }
-//	    });	
-// 	    //Necessary to display an icon on the button area of the combo-box:
-// 	    cboDisplayWith_Inst.setButtonCell(cboDisplayWith_Inst.getCellFactory().call(null));
-//	}
-//	
-//	/**   Returns a PlaySheet icon for the passed-in PlaySheet label. The array-list
-//	 * of PlaySheets is consulted. The base path to all icons is defined at the top 
-//	 * of this class, in "ICON_LOCATION".
-//	 * 
-//	 * @param strPlaySheetLabel -- (String) The label of the PlaySheet for which an 
-//	 *    icon is required.
-//	 *    
-//	 * @return getPlaySheetIcon -- (String) The file-path to the icon, described above.
-//	 */
-//	private String getPlaySheetIcon(String strPlaySheetLabel){
-//	   String strReturnValue = "";
-//	   
-//	   for(PlaySheet playsheet: arylPlaySheets){
-//		   if(playsheet.getLabel().equals(strPlaySheetLabel)){
-//			  if(playsheet.getIcon() != null){
-//			     strReturnValue = ICON_LOCATION + playsheet.getIcon();
-//			  }
-//			  break;
-//		   }
-//	   }
-//	   return strReturnValue;
-//	}
-//
-//	/**   Populates the Renderer-Class text-field from the 
-//	 * currently selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateRendererClassTextField(int perspectiveIndex, int insightIndex){
-//  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    txtRendererClass_Inst.setText(((Insight) arylInsights.get(insightIndex)).getRendererClass());		   
-//	}
-//	
-//	/**   Populates the legacy-query check-box with a check from the 
-//	 * currently selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateLegacyQueryCheckBox(int perspectiveIndex, int insightIndex){
-//  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    chkLegacyQuery_Inst.setSelected(((Insight) arylInsights.get(insightIndex)).getIsLegacy());		   
-//	}
-//	
-//	/**   Populates the query text-area with Sparql from the currently 
-//	 * selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.git
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateQueryTextArea(int perspectiveIndex, int insightIndex){
-//  	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//		String strQuery = "";
-//		if(arylInsights.get(insightIndex).getSparql() != null){
-//			strQuery = arylInsights.get(insightIndex).getSparql();
-//		}
-//	    txtaQuery_Inst.setText(strQuery);		   
-//	}
-//	
-//	/**   Populates the Parameter list-view with Parameters under the currently
-//	 * selected Insight.
-//	 * 
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateInsightParameterListView(int perspectiveIndex, int insightIndex){
-//		lstvParameter_Inst.setItems(arylInsightParameters);
-//	    //Navigate to the previously selected Parameter (or the first Parameter
-//	    //under the Insight, if the previously selected Parameter has been moved):
-//    	lstvParameter_Inst.getSelectionModel().selectFirst();
-//	    for(Parameter element: arylInsightParameters){
-//	    	 if(element.getLabel().equals(prevParameterLabel)){
-//	    	     lstvParameter_Inst.getSelectionModel().select(element);
-//	    	     break;
-//	    	 }
-//	    }
-//	}
-//	
-//	/**   Populates the Insight Perspectives list-view with all Perspectives,
-//	 * and selects the Perspectives having the current Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateInsightPerspectivesListView(int perspectiveIndex, int insightIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    Insight insight = (Insight) arylInsights.get(insightIndex);
-//	    arylInsightPerspectives = new ArrayList<Perspective>();
-//          
-//	    lstvInsightPerspective_Inst.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//  	    lstvInsightPerspective_Inst.setItems(arylPerspectives);
-//
-//  	    lstvInsightPerspective_Inst.getSelectionModel().clearSelection();
-//  	    for(Perspective perspective: arylPerspectives){
-//  	    	for(Insight Insight: perspective.getInsights()){
-//  	    		if(insight.getId().equals(Insight.getId())){
-//  	    			lstvInsightPerspective_Inst.getSelectionModel().select(perspective);
-//  	    			arylInsightPerspectives.add(perspective);
-//  	    		}
-//  	    	}
-//  	    }
-//	}
-//	
-//	/**   Populates the Description text-area with a description  
-//	 * from the currently selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateInsightDescTextArea(int perspectiveIndex, int insightIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//		String strDescription = "";
-//		if(arylInsights.get(insightIndex).getDescription() != null){
-//			strDescription = arylInsights.get(insightIndex).getDescription();
-//		}
-//	    txtaInsightDesc_Inst.setText(strDescription);		   
-//	}
-//	
-//	/**   Populates the Creator text-field with the Insight creator  
-//	 * from the currently selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateCreatorTextField(int perspectiveIndex, int insightIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    txtCreator_Inst.setText(((Insight) arylInsights.get(insightIndex)).getCreator());		   
-//	}
-//	
-//	/**   Populates the Created text-field with the Insight create-date  
-//	 * from the currently selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateCreatedTextField(int perspectiveIndex, int insightIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    txtCreated_Inst.setText(((Insight) arylInsights.get(insightIndex)).getCreated());		   
-//	}
-//	
-//	/**   Populates the Modified text-field with the Insight update-date  
-//	 * from the currently selected Insight.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 */
-//	private void populateModifiedTextField(int perspectiveIndex, int insightIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//	    txtModified_Inst.setText(((Insight) arylInsights.get(insightIndex)).getModified());		   
-//	}
-//
-////----------------------------------------------------------------------------------------------------
-////                                   P a r a m e t e r   T a b
-////----------------------------------------------------------------------------------------------------
-//
-//	/**   Populates the "Name" text-field with the "label" property from the currently  
-//	 * selected Parameter.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 * @param parameterIndex -- (int) Index of currently selected Parameter.
-//	 */
-//	private void populateNameTextField(int perspectiveIndex, int insightIndex, int parameterIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//        Insight insight = arylInsights.get(insightIndex);
-//        ArrayList<Parameter> arylParameters = (ArrayList<Parameter>)insight.getInsightParameters();
-//        txtLabel_parm.setText(arylParameters.get(parameterIndex).getLabel());
-//	}
-//	
-//	/**   Populates the "Variable" text-field with the "variable" property from the currently  
-//	 * selected Parameter.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 * @param parameterIndex -- (int) Index of currently selected Parameter.
-//	 */
-//	private void populateVariableTextField(int perspectiveIndex, int insightIndex, int parameterIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//        Insight insight = arylInsights.get(insightIndex);
-//        ArrayList<Parameter> arylParameters = (ArrayList<Parameter>)insight.getInsightParameters();
-//        txtVariable_parm.setText(arylParameters.get(parameterIndex).getVariable());
-//	}
-//	
-//	/**   Populates the "Parameter Type" dropdown with all Concept Types defined
-//	 * in the Main KB, and pre-selects the Type associated with the current Parameter.
-//	 */
-//	private void populateParameterTypeComboBox(int perspectiveIndex, int insightIndex, int parameterIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//        Insight insight = arylInsights.get(insightIndex);
-//        ArrayList<Parameter> arylParameters = (ArrayList<Parameter>)insight.getInsightParameters();
-//        Parameter parameter = arylParameters.get(parameterIndex);
-//	    cboParameterType_parm.setItems(arylParameterTypes);
-//	    
-//	    boolean boolSelected = false;
-//	    for(ParameterType valueType: cboParameterType_parm.getItems()){
-//	    	if(parameter.getParameterType().equals(valueType.getParameterClass())){
-//	    		cboParameterType_parm.getSelectionModel().select(valueType);
-//	    		boolSelected = true;
-//	    		break;
-//	    	}
-//	    }
-//	    //If nothing has been selected, the select the "(Unselected)" item:
-//	    if(boolSelected == false){
-//    		cboParameterType_parm.getSelectionModel().selectFirst();
-//	    }
-//	}
-//	
-//	/**   Populates the "Default Query" text-field with the "defaultQuery" property from  
-//	 * the currently selected Parameter.
-//	 * 
-//	 * @param perspectiveIndex -- (int) Index of currently selected Perspective.
-//	 * @param insightIndex -- (int) Index of currently selected Insight.
-//	 * @param parameterIndex -- (int) Index of currently selected Parameter.
-//	 */
-//	private void populateDefaultQueryTextArea(int perspectiveIndex, int insightIndex, int parameterIndex){
-// 	    ArrayList<Insight> arylInsights = ((Perspective) arylPerspectives.get(perspectiveIndex)).getInsights();
-//        Insight insight = arylInsights.get(insightIndex);
-//        ArrayList<Parameter> arylParameters = (ArrayList<Parameter>)insight.getInsightParameters();
-//        txtaDefaultQuery_parm.setText(arylParameters.get(parameterIndex).getDefaultQuery());
-//	}
-//	
-////----------------------------------------------------------------------------------------------------
-////                      I n s i g h t   M a n a g e r   U t i l i t i e s
-////----------------------------------------------------------------------------------------------------
-//
-//	/**   Prepares a string for use in a dynamic Sparql query, where " and ' are
-//	 * delimiters. The double-quote, ", is changed to ', and existing single-quotes
-//	 * are left alone. This utility is also used thoughout the Insight Manager,
-//	 * where user-editable RDF strings are persisted.
-//	 *
-//	 * @param quotedString -- (String) The string containing double and single
-//	 * quotes.
-//	 *
-//	 * @return legalizeQuotes -- (String) The cleaned string, as described above.
-//	 */
-//	public String legalizeQuotes( String quotedString ) {
-//		String strReturnValue = quotedString;
-//
-//		strReturnValue = strReturnValue.replaceAll( "\"", "'" );
-//
-//		return strReturnValue;
-//	}
-//	
 
+	/**   Click-handler for the "Save" button, beneath the TreeView. Fires methods to rebuild the
+	 * Insights KB from the contents of the Insight Manager TreeView. Then reloads the TreeView
+	 * from the database.
+	 * 
+	 * @param event -- (ActionEvent)
+	 */
+	private void handleSave(ActionEvent event){
+		ObservableList<TreeItem<Object>> olstPerspectives = treevPerspectives.getRoot().getChildren();
+		boolean boolReturnValue = engine.getWriteableInsightManager().getWriteablePerspective().persistenceWrapper(olstPerspectives);
+        loadData();
+        if(boolReturnValue){
+		    GuiUtility.showMessage("Perspective, Insights, and Parameters saved OK.");
+        }else{
+        	GuiUtility.showError("ERROR: Some Perspectives, Insights, and/or Parameters could not be saved.");
+        }
+	}
+	
+	/**   Reloads the Insight Manager TreeView from the database.
+	 * 
+	 * @param event -- (ActionEvent)
+	 */
+	private void handleReload(ActionEvent event){
+		loadData();
+	}
 
 }
