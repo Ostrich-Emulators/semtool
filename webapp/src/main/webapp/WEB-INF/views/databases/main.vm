@@ -1,19 +1,16 @@
-<style>
-#include("/components-admin/crud/application/style.css")
-</style>
 <div id="semoss_databases" class="main_div" ng-controller="DatabaseManagementController as databaseManager">
 <div class="panel panel-default">
   <div class="panel-heading">
     <h2 class="panel-title table_title">Knowledgebase Inventory&nbsp&nbsp<button id="load_applications_button" class="btn btn-primary" ng-click="init()"><span class="glyphicon glyphicon glyphicon-download-alt table_refresh_button" aria-hidden="true" ></span></button></h2>
   </div>
   <div class="panel-body" >
-    #include("/databases/table.html")
-	#include("/databases/detail.html")
+    #include("/databases/table.vm")
+	#include("/databases/detail.vm")
   </div>
   <button class="btn btn-success btn-lg instance_create_button" ng-click="showCreate()"><span class="glyphicon glyphicon-plus instance_creation_glyphicon"></span></button>
 </div>
 <script>
 	$('#semoss_databases_table').DataTable();
 </script>
-	#include("/databases/delete_confirm.html")
+	#include("/databases/delete_confirm.vm")
 </div>

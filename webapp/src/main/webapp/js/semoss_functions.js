@@ -1,9 +1,23 @@
 					
 					var SEMOSS = [];
+					
+					SEMOSS.DbInfo = function(){};
+					
+					SEMOSS.DbInfo.prototype.name = null;
+					SEMOSS.DbInfo.prototype.serverUrl = null;
+					SEMOSS.DbInfo.prototype.dataUrl = null;
+					SEMOSS.DbInfo.prototype.insightsUrl = null;
+					
+					SEMOSS.DbInfo.prototype.setAttributes = function(object){
+						this.name = object['name'];
+						this.name = object['serverUrl'];
+						this.name = object['dataUrl'];
+						this.name = object['insightsUrl'];
+					}
 
 					SEMOSS.createDatabase = function (knowledgebase, callBackFunction, asynchronous){
 						var json = SEMOSS.encodeParamObject(knowledgebase);
-						var url = '/semoss//create/knowledgebase/' + json;
+						var url = 'databases/create' + json;
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -20,7 +34,7 @@
 					
 					SEMOSS.updateDatabase = function (knowledgebase, callBackFunction, asynchronous){
 						var json = SEMOSS.encodeParamObject(knowledgebase);
-						var url = '/semoss//update/knowledgebase/' + json;
+						var url = 'databases/create' + json;
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -35,7 +49,7 @@
 					}
 					
 					SEMOSS.deleteDatabase = function (id, callBackFunction, asynchronous){
-						var url = '/semoss//delete/knowledgebase/' + id;
+						var url = 'databases/delete/' + id;
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -50,7 +64,7 @@
 					}
 					
 					SEMOSS.getDatabase = function (id, callBackFunction, asynchronous){
-						var url = '/semoss//get/knowledgebase/' + id;
+						var url = 'databases/' + id;
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -65,7 +79,7 @@
 					}
 					
 					SEMOSS.listDatabases = function (callBackFunction, asynchronous){
-						var url = '/semoss//list/knowledgebase/';
+						var url = 'databases/';
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -144,25 +158,24 @@
 						}
 					}
 					
-					
 					SEMOSS.menuVisible = true;
 					
 					SEMOSS.toggleNavMenu = function (){
-						if (menuVisible){
+						if (SEMOSS.menuVisible){
 							$('#dt_navigation_menu').hide(200);
 							$('#expand_border').removeClass('glyphicon-menu-left');
 							$('#expand_border').addClass('glyphicon-menu-right');
-							menuVisible = false;
+							SEMOSS.menuVisible = false;
 						}
 						else {
 							$('#dt_navigation_menu').show(200);
 							$('#expand_border').removeClass('glyphicon-menu-right');
 							$('#expand_border').addClass('glyphicon-menu-left');
-							menuVisible = true;
+							SEMOSS.menuVisible = true;
 						}
 					}
 					
-					SEMOSS.showPanel(id) {
+					SEMOSS.showPanel = function(id) {
 						$('.main_div').each(function() {
 							$(this).hide(200);
 						});
@@ -174,7 +187,7 @@
 						$('#' + id + "_nav").addClass('active');
 					}
 					
-					SEMOSS.showNavMenu(navmenuID, buttonID){
+					SEMOSS.showNavMenu = function(navmenuID, buttonID){
 						$('.semoss_nav_menu_btn').each(function() {
 							$(this).removeClass('btn-info');
 						});

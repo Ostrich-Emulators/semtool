@@ -20,7 +20,7 @@
             $scope.loading = true;
             SEMOSS.listDatabases(
                     function (token) {
-    	                var returnedInstances = JSON.parse(token.data.data);
+    	                var returnedInstances = JSON.parse(token.data);
     	                $scope.instances = [];
     	                for (var i=0; i<returnedInstances.length; i++){
     	                	var nativeInstance = new SEMOSS.VcampDatabase();
@@ -81,7 +81,7 @@
         }
 
         $scope.create = function(){
-        	SEMOSS.createApplicationDataType($scope.activeInstance, function(token){
+        	SEMOSS.createDatabase($scope.activeInstance, function(token){
         		$scope.activeInstance.id = token.data.id;
         		SEMOSS.processAnyFailures(token, 'Database successfully created.');
         		if (token.result <= 1){
@@ -94,7 +94,7 @@
 
         $scope.listInstances = function () {
             $scope.loading = true;
-            SEMOSS.listApplicationDataTypes(
+            SEMOSS.listDatabases(
                     function (token) {
     	                var returnedInstances = JSON.parse(token.data.data);
     	                $scope.instances = [];
@@ -110,7 +110,7 @@
         };
         
         $scope.deleteInstance = function(){
-        	SEMOSS.deleteApplicationDataType($scope.deleteID, function(token){
+        	SEMOSS.deleteDatabase($scope.deleteID, function(token){
         		SEMOSS.processAnyFailures(token, 'Database successfully deleted.');
         		if (token.result <= 1){
         			$scope.instances.splice($scope.currentRow, 1);
@@ -133,5 +133,5 @@
 
     DatabaseManagementController.$inject = ['$scope', '$log'];
     
-    DTAngular.app.controller('DatabaseManagementController', DatabaseManagementController)
+    SEMOSSAngular.app.controller('DatabaseManagementController', DatabaseManagementController)
 
