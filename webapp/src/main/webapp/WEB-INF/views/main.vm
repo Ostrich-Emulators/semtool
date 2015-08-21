@@ -1,6 +1,5 @@
 <style>
-#parse("/components-admin/style.css")
-#parse("/components-admin/crud/common/style.css")
+#parse("/common/style.css")
 </style>
 <div id="dt_navigation_menu" style="display:table-cell;background-color:rgb(245,245,245);border:solid 1px black;border-radius:15px;padding:10px;width:20%">
 	<div style="text-align:center;padding-bottom:10px;">
@@ -43,18 +42,6 @@
 		</div>
 		
 		<div>	
-		#parse("/components-admin/crud/application/main.html")
-		#parse("/components-admin/crud/applicationDataType/main.html")
-		#parse("/components-admin/crud/destination/main.html")
-		#parse("/components-admin/crud/destinationCredential/main.html")
-		#parse("/components-admin/crud/notificationPreference/main.html")
-		#parse("/components-admin/crud/notificationType/main.html")
-		#parse("/components-admin/crud/organization/main.html")
-		#parse("/components-admin/crud/orgAppAccess/main.html")
-		#parse("/components-admin/crud/registration/main.html")
-		#parse("/components-admin/crud/rule/main.html")
-		#parse("/components-admin/crud/ruleType/main.html")
-		#parse("/components-admin/crud/user/main.html")
-		#parse("/components-admin/crud/userAppAccess/main.html")
+		#parse("main.html")
 		</div>
 </div>	
