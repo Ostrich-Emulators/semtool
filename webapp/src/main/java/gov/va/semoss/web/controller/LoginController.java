@@ -1,7 +1,7 @@
 package gov.va.semoss.web.controller;
 
 import gov.va.semoss.security.User;
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.RemoteUserImpl;
 import org.apache.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,7 +25,7 @@ public class LoginController extends SemossControllerBase {
 
 	@RequestMapping( value = "/login2", method = RequestMethod.GET )
 	@ResponseBody
-	public gov.va.semoss.security.User login( @AuthenticationPrincipal UserImpl user ) {
+	public gov.va.semoss.security.User login( @AuthenticationPrincipal RemoteUserImpl user ) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		org.springframework.security.core.userdetails.User ldap
 				= org.springframework.security.core.userdetails.User.class.cast(
@@ -40,8 +40,7 @@ public class LoginController extends SemossControllerBase {
 	}
 
 	@RequestMapping( "/logout" )
-	@ResponseBody
-	public User logout() {
+	public String logout() {
 		return null;
 	}
 }

@@ -21,6 +21,9 @@ public class RemoteUserImpl extends AbstractUser {
 		super( name );
 	}
 
+	public RemoteUserImpl() {
+	}
+
 	@Override
 	public Map<String, String> getNamespaces() {
 		return new HashMap<>( namespaces );
