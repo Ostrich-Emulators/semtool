@@ -17,6 +17,17 @@
     
 	<dependencies>
 		<dependency>
+			<groupId>com.bigdata</groupId>
+			<artifactId>bigdata</artifactId>
+			<version>${bigdata.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.bigdata</groupId>
+			<artifactId>bigdata-ganglia</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+    
+		<dependency>
 			<groupId>com.fifesoft</groupId>
 			<artifactId>rsyntaxtextarea</artifactId>
 			<version>2.5.6</version>
@@ -37,17 +48,7 @@
 			<artifactId>commons-configuration</artifactId>
 			<version>1.10</version>
 		</dependency>
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata</artifactId>
-			<version>${bigdata.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata-ganglia</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-    
+		    
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>

@@ -1,0 +1,103 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SEMOSS DB Test Driver</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    
+  </head>
+
+<body>
+
+  <div style="margin-left: 2cm;">
+  
+    <H3>SEMOSS DB Test Driver</H3><BR />
+    
+    <button type="button" id="getAllDBIDsBtn">See Available RemoteDatabases</button><BR />
+    <div id="databaseIDList"></div><BR />
+
+    <input type="text" id="thisDBID" /><button type="button" id="getOneDBBtn">Get URIs for this Database ID</button><BR />
+    <div id="databaseInfo"></div><BR />
+
+    <button type="button" id="getAllDBsInfoBtn">Get All Database Info</button><BR />
+    <div id="allDBInfo"></div><BR />
+    
+  </div>
+
+<script>
+
+function getAllDBIDs() {
+	$.ajax({
+		url : '../semoss/allDatabaseIDs',
+		success : function(data) {
+			var theHtml = "<BR />";
+			for (var i = 0; i<data.length; i++) {
+				theHtml += data[i] + "<BR />";
+			}
+
+			$('#databaseIDList').html(theHtml);
+		}
+	});
+}
+
+function getDatabaseURIs(dbId) {
+	$.ajax({
+		url : '../semoss/oneDatabase/' + dbId,
+		success : function(data) {
+			$('#databaseInfo').html( buildHTMLStringForOneDB(data) );
+		}
+	});
+}
+
+function getAllDBsInfo() {
+	$.ajax({
+		url : '../semoss/allDatabases',
+		success : function(data) {
+//			data coming from new Gson().toJson() needs this line, 
+//			but this line will break data coming from spring automagic
+//			data = jQuery.parseJSON(data);
+
+			var theHtml = "";
+			for (var i = 0; i<data.length; i++) {
+				theHtml += buildHTMLStringForOneDB(data[i]);
+			}
+
+			$('#allDBInfo').html(theHtml);
+		}
+	});
+}
+
+function buildHTMLStringForOneDB(data) {
+	var theHtml = "<BR />";
+	theHtml += "Database Name: " + data.name        + "<BR />";
+	theHtml += "Server URI: "    + data.serverUrl   + "<BR />";
+	theHtml += "Database URI: "  + data.dataUrl     + "<BR />";
+	theHtml += "Insight URI: "   + data.insightsUrl + "<BR />";
+	
+	return theHtml;
+}
+
+$( "#getAllDBIDsBtn" ).click(function() {
+	getAllDBIDs();
+});
+
+$( "#getOneDBBtn" ).click(function() {
+	getDatabaseURIs( $("#thisDBID").val() );
+});
+
+$( "#getAllDBsInfoBtn" ).click(function() {
+	getAllDBsInfo();
+});
+
+</script>
+    
+  </body>
+</html>

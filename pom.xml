@@ -15,11 +15,13 @@
 		<jetty.version>9.2.3.v20140905</jetty.version>
 		<lucene.version>3.6.2</lucene.version>
 		<spring.version>4.1.5.RELEASE</spring.version>
+		<http.version>4.4</http.version>
 	</properties>
 
 	<modules>
 		<module>ui</module>
 		<module>common</module>
+		<module>webapp</module>
 	</modules>
   
 	<scm>
@@ -29,17 +31,6 @@
     
 	<dependencies>
 
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata</artifactId>
-			<version>${bigdata.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata-ganglia</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-    
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
@@ -133,6 +124,26 @@
 			<version>${openrdf.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-sail-api</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-sail-memory</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-http</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-sail</artifactId>
+			<version>${openrdf.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>net.sf.jgrapht</groupId>
 			<artifactId>jgrapht</artifactId>
 			<version>0.8.3</version>
@@ -199,6 +210,22 @@
 			<artifactId>jaxen</artifactId>
 			<version>1.1.6</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${http.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>${http.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-cache</artifactId>
+			<version>${http.version}</version>
+		</dependency>
+
 	</dependencies>    
     
 	<profiles>

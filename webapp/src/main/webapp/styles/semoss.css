@@ -1,0 +1,342 @@
+
+root { 
+  display: block;
+}
+
+body{ 
+  margin: 0;
+  padding: 0;
+  font: 12px "Trebuchet MS", sans-serif; 
+}
+
+ul {
+  margin: 0;
+}
+
+form {
+  margin-bottom: 1em;
+}
+.ui-protein {
+  background-image: url( "../images/protein.png" ) !important;
+}
+
+.ui-drug {
+  background-image: url( "../images/drug.png" ) !important;
+}
+
+.ui-gene {
+  background-image: url( "../images/gene.png" ) !important;
+}
+
+.ui-person {
+  background-image: url( "../images/scientist.png" ) !important;
+}
+
+.ui-bacterium {
+  background-image: url( "../images/bacterium.png" ) !important;
+}
+
+.ui-book {
+  background-image: url( "../images/book.png" ) !important;
+}
+
+.formlabel {
+  width: 10em;
+  display: inline;
+  float: left;
+}
+
+.formfield {
+  margin-left: 11em;
+  width: 20em;
+}
+
+#pagewrapper {
+  /* IE10 Consumer Preview */ 
+  background-image: -ms-linear-gradient(top, #E8DABD 0%, #FFFFFF 70%);
+
+  /* Mozilla Firefox */ 
+  background-image: -moz-linear-gradient(top, #E8DABD 0%, #FFFFFF 70%);
+
+  /* Opera */ 
+  background-image: -o-linear-gradient(top, #E8DABD 0%, #FFFFFF 70%);
+
+  /* Webkit (Safari/Chrome 10) */ 
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #E8DABD), color-stop(.5, #FFFFFF));
+
+  /* Webkit (Chrome 11+) */ 
+  background-image: -webkit-linear-gradient(top, #E8DABD 0%, #FFFFFF 70%);
+
+  /* W3C Markup, IE10 Release Preview */ 
+  background-image: linear-gradient(to bottom, #E8DABD 0%, #FFFFFF 70%);
+}
+
+#contentwrapper {
+  padding: 2em;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+#pagebanner {
+  padding-left: 50px;
+  padding-bottom: 0px;
+  background: #091e5d;
+}
+
+.banner-style {
+  font-weight: bold;
+  color: #FFFFFF;
+  background: #091e5d;
+  font-size: 300%;
+  padding-top: .2em;
+  padding-bottom: .2em;
+}
+
+.banner-style img {
+  vertical-align: middle;  
+}
+
+.highlight {
+  border: 1px solid darkgray;
+}
+
+.content-title-style {
+  font-size: 150%;
+  padding-bottom: 0.5em;
+}
+
+.sub-title {
+  font-style: italic;
+  margin-left: 1em;
+  margin-bottom: 1em;
+}
+
+.content-style {
+}
+
+.footer-style {
+  padding-top: .2em;
+  padding-bottom: .2em;
+  clear: both;
+}
+
+.content-header {
+  background: #e8dabd;
+  font-weight: normal;
+  color: black;
+  margin-right: 50px;
+  padding-bottom: 0px;
+  min-height: 2em;
+}
+
+#content-header-ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+.content-header-li {
+  float: left;
+  padding-top: 0.5em;
+  padding-left: 1em;
+}
+
+#main-conversion-display {
+}
+
+table.datatable td {
+  border: 1px solid gray;
+  padding: .25em;
+}
+
+table.datatable2 td {
+  font-size: 80%;
+  border: 1px solid gray;
+  padding: .25em;
+}
+
+.ajax-loader {
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
+
+#upload-button {
+  margin-top: 1.5em;
+}
+
+#back-button {
+}
+
+.separated {
+  margin-top: 1.5em;
+}
+
+.table-title {
+  font-style: italic;
+  font-size: 125%;
+}
+
+.floatright {
+  float: right;
+}
+
+.entity-menu {
+  margin-left: 1em;
+  margin-bottom: 1em;
+  float: right;
+  padding-left: 1em;
+  padding-bottom: 1em;
+  border: 1px solid gray;
+}
+
+.sentence {
+  display: inline;
+  line-height: 1.5em;
+}
+
+.sentencegroup {
+  margin-bottom: 2em;
+}
+
+.reference-number {
+  vertical-align: super;
+  font-size: 75%;
+}
+
+.buttonbox {
+  font-style: italic;
+  color: red;
+}
+
+.typechange-label {
+  width: 100%;
+}
+
+#grapharea {
+  margin-left:auto;
+  margin-right:auto;
+  border-radius: 4px;
+  border: 1px solid darkgray;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  top: 0;
+  left: 0;
+  width: 95%;
+}
+
+#legend-btn {
+  float: right;
+  display: block;  
+}
+
+#legendarea {
+  margin-left: 95%;
+  display: block;  
+}
+
+#graphlegend {
+  border: 1px solid gray;
+  border-radius: 4px;
+  border: 1px solid darkgray;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+}
+
+#graphlegend ul {
+  margin: 0;
+  padding: 0;
+  list-style-position: inside;  
+  list-style-type: none;
+  position: relative;
+  zoom: 1;
+}
+
+#graphlegend ul li {
+  margin:2px;
+}
+
+.field-container label {
+  width: 5em;
+  display: inline-block;
+}
+
+.picker-bar {
+  width: 15em;
+  float: left;
+}
+
+.search-canvas-highlight {
+  border: 3px double blue !important;
+}
+
+#grapharea-search {
+  margin-left:auto;
+  margin-right:auto;
+  border-radius: 4px;
+  border: 1px solid darkgray;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  margin-right: auto;
+  margin-left: 20em;
+  min-height: 500px;
+}
+
+#searchbox {
+  width:140px; 
+}
+
+#browse-area {
+  border: 1px solid orange;
+  min-height: 600px;
+  margin-left: 160px;
+}
+
+input.text_filter {
+  color: lightgray;
+  width: 10em;
+  padding: 0;
+}
+
+.fixed-right {
+  position: fixed;
+  border: 1px solid gray;
+}
+
+.button-mark-remove {
+  margin: 0.25em;
+}
+
+.button-mark-remove .ui-button-text {
+  padding: 0;
+}
+
+.markbox {
+  padding: 0;
+}
+
+.BACTERIUM.highlight {
+  background-color: #0000FF;
+  color: white;
+}
+
+.GENE.highlight {
+  background-color: #00FF00;
+}
+
+.PROTEIN.highlight {
+  background-color: #FFFF00;
+}
+
+.ANTIBIOTIC.highlight {
+  background-color: #FF0000;
+}
+
+.STRAIN.highlight {
+  background-color: #0000FF;
+}
+
+.propsearch {
+  margin-left: 5em;
+}

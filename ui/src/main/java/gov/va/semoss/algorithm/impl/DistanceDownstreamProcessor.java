@@ -25,7 +25,6 @@ import java.util.Collection;
 import gov.va.semoss.algorithm.api.IAlgorithm;
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
-import gov.va.semoss.ui.components.GridFilterData;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Tree;
@@ -61,7 +60,6 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 			= Logger.getLogger( DistanceDownstreamProcessor.class );
 	protected final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph;
 	protected Set<SEMOSSVertex> selecteds = new HashSet<>();
-	GridFilterData gfd = new GridFilterData();
 	protected GraphPlaySheet gps;
 
 	public DistanceDownstreamProcessor( GraphPlaySheet gps, Collection<SEMOSSVertex> verts ) {

@@ -257,9 +257,11 @@ public interface IEngine {
 	public <T> T queryNoEx( QueryExecutor<T> exe );
 
 	/**
-	 * Runs an update on the engine
+	 * Runs an update on the engine.
 	 *
 	 * @param ue
+	 * @throws SecurityException if the user does not have enough permissions to
+	 * run the update
 	 */
 	public void update( UpdateExecutor ue ) throws RepositoryException,
 			MalformedQueryException, UpdateExecutionException;
