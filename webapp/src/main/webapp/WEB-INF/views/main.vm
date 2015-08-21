@@ -1,0 +1,60 @@
+<style>
+#parse("/components-admin/style.css")
+#parse("/components-admin/crud/common/style.css")
+</style>
+<div id="dt_navigation_menu" style="display:table-cell;background-color:rgb(245,245,245);border:solid 1px black;border-radius:15px;padding:10px;width:20%">
+	<div style="text-align:center;padding-bottom:10px;">
+		<button id="nav_manage_btn" onclick="showNavMenu('nav_manage', 'nav_manage_btn')" class=" btn btn-info dt_nav_menu_btn" style="margin:auto"><span class="glyphicon glyphicon-pencil"></span><br><span style="font-size:70%">Manage</span></button>
+		<button id="nav_simulate_btn" onclick="showNavMenu('nav_simulate', 'nav_simulate_btn')" class="btn btn-default dt_nav_menu_btn" style="margin:5px"><span class="glyphicon glyphicon-cog"></span><br><span style="font-size:70%">Simulate</span></button>
+		<button id="nav_test_btn" onclick="showNavMenu('nav_test', 'nav_test_btn')" class=" btn btn-default dt_nav_menu_btn" style="margin:auto"><span class="glyphicon glyphicon-thumbs-up"></span><br><span style="font-size:70%">Test</span></button>
+		<button id="nav_support_btn" onclick="showNavMenu('nav_support', 'nav_support_btn')" class=" btn btn-default dt_nav_menu_btn" style="margin:auto"><span class="glyphicon glyphicon-wrench"></span><br><span style="font-size:70%">Support</span></button>
+	</div>
+	#parse("/components-admin/navs/nav_manage.html")
+	#parse("/components-admin/navs/nav_simulate.html")
+	#parse("/components-admin/navs/nav_test.html")
+	#parse("/components-admin/navs/nav_support.html")
+</div>
+<div id="nav_menu_toggle" onclick="toggleNavMenu()" >
+		<span id="expand_border" class="glyphicon glyphicon-menu-left" ></span>
+</div>
+
+<div style="display:table-cell;width:7px;">
+</div>
+<div style="display:table-cell;background-color:rgb(250,250,250);border:solid 1px black;border-radius:15px;padding:20px;margin-left:4%;">
+		<div id="success_message_panel" class="panel panel-success">
+			<div class="panel-heading">
+				<h3 class="panel-title">Operation Succeeded</h3>
+			</div>
+			<div id="success_message_area" class="panel-body"></div>
+		</div>
+
+		<div id="warning_message_panel" class="panel panel-warning">
+			<div class="panel-heading">
+				<h3 class="panel-title">Operation Has Warnings</h3>
+			</div>
+			<div id="error_message_area" class="panel-body"></div>
+		</div>
+
+		<div id="failure_message_panel" class="panel panel-danger">
+			<div class="panel-heading">
+				<h3 class="panel-title">Operation Failed</h3>
+			</div>
+			<div id="error_message_area" class="panel-body"></div>
+		</div>
+		
+		<div>	
+		#parse("/components-admin/crud/application/main.html")
+		#parse("/components-admin/crud/applicationDataType/main.html")
+		#parse("/components-admin/crud/destination/main.html")
+		#parse("/components-admin/crud/destinationCredential/main.html")
+		#parse("/components-admin/crud/notificationPreference/main.html")
+		#parse("/components-admin/crud/notificationType/main.html")
+		#parse("/components-admin/crud/organization/main.html")
+		#parse("/components-admin/crud/orgAppAccess/main.html")
+		#parse("/components-admin/crud/registration/main.html")
+		#parse("/components-admin/crud/rule/main.html")
+		#parse("/components-admin/crud/ruleType/main.html")
+		#parse("/components-admin/crud/user/main.html")
+		#parse("/components-admin/crud/userAppAccess/main.html")
+		</div>
+</div>	
