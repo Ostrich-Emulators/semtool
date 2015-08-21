@@ -19,11 +19,13 @@
  */
 package gov.va.semoss.ui.helpers;
 
+import gov.va.semoss.util.Constants;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 
 public class NodeEdgeNumberedPropertyUtility {
@@ -33,8 +35,8 @@ public class NodeEdgeNumberedPropertyUtility {
 	private static final Set<String> keepPropertySet = new HashSet<>();
 
 	static {
-		displayNameMap.put("count.edge.in",  "In-Degree");
-		displayNameMap.put("count.edge.out", "Out-Degree");
+		displayNameMap.put(Constants.IN_EDGE_CNT.getLocalName(),  "In-Degree");
+		displayNameMap.put(Constants.OUT_EDGE_CNT.getLocalName(), "Out-Degree");
 		
 		hidePropertySet.add("graphing.level");
 		
@@ -85,18 +87,20 @@ public class NodeEdgeNumberedPropertyUtility {
 			return -1;
 		}
 
+		String stringval;
+
 		if ( propertyValue instanceof URI ) {
-			URI uri = (URI) propertyValue;
-			try {
-				return Double.parseDouble( uri.getLocalName() );
-			}
-			catch ( NumberFormatException e ) {
-				return -1;
-			}
+			stringval = URI.class.cast( propertyValue ).getLocalName();
+		}
+		else if ( propertyValue instanceof Literal ) {
+			stringval = Literal.class.cast( propertyValue ).getLabel();
+		}
+		else {
+			stringval = propertyValue.toString();
 		}
 
 		try {
-			return Double.parseDouble( propertyValue.toString() );
+			return Double.parseDouble( stringval );
 		}
 		catch ( NumberFormatException e ) {
 			return -1;

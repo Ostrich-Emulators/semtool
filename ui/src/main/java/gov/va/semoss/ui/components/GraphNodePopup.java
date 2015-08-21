@@ -30,7 +30,8 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.main.listener.impl.AdjacentPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.CondenseGraph;
 import gov.va.semoss.ui.main.listener.impl.GraphNodeRankListener;
-import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetExportListener;
+import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetEdgeListExporter;
+import gov.va.semoss.ui.main.listener.impl.GraphPlaySheetTableExporter;
 import gov.va.semoss.ui.main.listener.impl.HideVertexPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.MSTPopupMenuListener;
 import gov.va.semoss.ui.main.listener.impl.MouseTransformPickPopupMenuListener;
@@ -167,13 +168,14 @@ public class GraphNodePopup extends JPopupMenu {
 	private void addDataOptions() {
 		addSeparator();
 
-		add( new GraphPlaySheetExportListener( gps ) );
+		add( new GraphPlaySheetTableExporter( gps ) );
+		add( new GraphPlaySheetEdgeListExporter( gps ) );
 		add( new NodeInfoPopup( gps, highlightedVertices ) );
 
 		if ( !forTree ) {
 			JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
 			item.setEnabled( highlightedVertices.size() >= 1 );
-			
+
 			add( new CondenseGraph( gps ) );
 		}
 	}

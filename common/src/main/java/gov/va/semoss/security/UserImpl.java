@@ -8,10 +8,8 @@ package gov.va.semoss.security;
 import gov.va.semoss.security.permissions.SemossPermission;
 import java.security.Permission;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.prefs.Preferences;
@@ -24,8 +22,6 @@ public class UserImpl implements User {
 
 	private static User user;
 	private static final String NAMESPACE_KEY = "USER_NAMESPACES";
-	private final Map<UserProperty, String> propmap = new EnumMap<>( UserProperty.class );
-	private final Map<String, String> namespaces = new LinkedHashMap<>();
 	private final Preferences prefs = Preferences.userNodeForPackage( User.class );
 	private final Set<Permission> permissions = new HashSet<>();
 
@@ -37,6 +33,12 @@ public class UserImpl implements User {
 	}
 
 	private UserImpl() {
+		permissions.add( SemossPermission.ADMIN );
+	}
+
+	@Override
+	public Map<String, String> getNamespaces() {
+		Map<String, String> namespaces = new HashMap<>();
 		String ns = prefs.get( NAMESPACE_KEY, "" );
 		for ( String s : ns.split( ";" ) ) {
 			int idx = s.indexOf( ":" );
@@ -44,25 +46,19 @@ public class UserImpl implements User {
 				namespaces.put( s.substring( 0, idx ), s.substring( idx + 1 ) );
 			}
 		}
-
-		permissions.add( SemossPermission.ADMIN );
-	}
-
-	@Override
-	public Map<String, String> getNamespaces() {
-		return new HashMap<>( namespaces );
+		
+		return namespaces;
 	}
 
 	@Override
 	public void addNamespace( String prefix, String ns ) {
+		Map<String, String> namespaces = getNamespaces();
 		namespaces.put( prefix, ns );
+		setNamespaces( namespaces );
 	}
 
 	@Override
-	public void setNamespaces( Map<String, String> nsmap ) {
-		namespaces.clear();
-		namespaces.putAll( nsmap );
-
+	public void setNamespaces( Map<String, String> namespaces ) {
 		StringBuilder sb = new StringBuilder();
 		for ( Map.Entry<String, String> en : namespaces.entrySet() ) {
 			if ( sb.length() > 0 ) {
@@ -77,21 +73,17 @@ public class UserImpl implements User {
 
 	@Override
 	public void setProperty( UserProperty prop, String value ) {
-		propmap.put( prop, value.trim() );
 		prefs.put( prop.toString(), value.trim() );
 	}
 
 	@Override
 	public String getProperty( UserProperty prop ) {
-		return ( propmap.containsKey( prop ) ? propmap.get( prop ) : "" );
+		return prefs.get( prop.toString(), "" );
 	}
 
 	@Override
 	public void setProperties( Map<UserProperty, String> props ) {
-		propmap.clear();
-		propmap.putAll( props );
-
-		for ( Map.Entry<UserProperty, String> en : propmap.entrySet() ) {
+		for ( Map.Entry<UserProperty, String> en : props.entrySet() ) {
 			prefs.put( en.getKey().toString(), en.getValue() );
 		}
 	}

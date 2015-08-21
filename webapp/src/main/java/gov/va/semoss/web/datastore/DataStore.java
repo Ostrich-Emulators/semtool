@@ -33,12 +33,10 @@ public class DataStore {
 	private RepositoryConnection rc;
 
 	public DataStore() {
-		log.error( "into zero-arg ctor for DataStore" );
 		// must call setStoreLocation( ... ) before this instance is usable
 	}
 
 	public DataStore( String rawstoreloc ) {
-		log.error( "into 1-arg ctor for DataStore" );
 		try {
 			setStoreLocation( rawstoreloc );
 		}
