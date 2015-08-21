@@ -56,8 +56,9 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
+import gov.va.semoss.security.LocalUserImpl;
 import gov.va.semoss.security.User;
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.Security;
 import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
@@ -545,8 +546,12 @@ public class EngineUtil implements Runnable {
 			f.deleteOnExit();
 		}
 
-		File smssfile = createEngine( ecb );
+		User user = new LocalUserImpl( SemossPermission.ADMIN );
+		File smssfile = createEngine( ecb, user );
+
 		IEngine bde = GuiUtility.loadEngine( smssfile.getAbsoluteFile() );
+		Security.getSecurity().associateUser( bde, user );
+		
 		List<Statement> vocabs = new ArrayList<>();
 
 		for ( URL url : ecb.getVocabularies() ) {
@@ -606,7 +611,8 @@ public class EngineUtil implements Runnable {
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
 			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
-		if ( UserImpl.getUser().hasPermission( SemossPermission.INSIGHTWRITER ) ) {
+		if ( Security.getSecurity().getAssociatedUser( engine ).
+				hasPermission( SemossPermission.INSIGHTWRITER ) ) {
 
 			List<Statement> stmts = new ArrayList<>();
 			if ( null != insightsfile ) {
@@ -688,7 +694,7 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	public static File createEngine( EngineCreateBuilder ecb )
+	private static File createEngine( EngineCreateBuilder ecb, User user )
 			throws IOException, EngineManagementException {
 
 		String dbname = ecb.getEngineName();
@@ -763,8 +769,7 @@ public class EngineUtil implements Runnable {
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
 
-			User user = UserImpl.getUser();
-			String username = user.getProperty( User.UserProperty.USER_NAME );
+			String username = user.getProperty( User.UserProperty.USER_FULLNAME );
 			String email = user.getProperty( User.UserProperty.USER_EMAIL );
 			String org = user.getProperty( User.UserProperty.USER_ORG );
 

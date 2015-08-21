@@ -20,6 +20,8 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.security.LocalUserImpl;
+import gov.va.semoss.security.Security;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
@@ -69,6 +71,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			return;
 		}
 
+		Security.getSecurity().associateUser( this, LocalUserImpl.admin() );
 		ForwardChainingRDFSInferencer inferencer
 				= new ForwardChainingRDFSInferencer( new MemoryStore() );
 		Repository repo = new SailRepository( inferencer );

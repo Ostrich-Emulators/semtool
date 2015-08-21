@@ -13,8 +13,8 @@ import java.security.BasicPermission;
  */
 public class SemossPermission extends BasicPermission {
 
+	public static final SemossPermission NONE = new SemossPermission( "no-permission" );
 	public static final SemossPermission ADMIN = new SemossPermission( "semoss.*" );
-	public static final SemossPermission LOGVIEWER = new SemossPermission( "semoss.gui.logviewer" );
 	public static final SemossPermission INSIGHTREADER = new SemossPermission( "semoss.insight.reader" );
 	public static final SemossPermission INSIGHTWRITER = new SemossPermission( "semoss.insight.*" );
 	public static final SemossPermission DATAWRITER = new SemossPermission( "semoss.data.*" );

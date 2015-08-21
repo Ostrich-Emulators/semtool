@@ -1,6 +1,6 @@
 package gov.va.semoss.web.io;
 
-import gov.va.semoss.web.security.BasicAuthRequestFactory;
+import gov.va.semoss.security.BasicAuthRequestFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.HttpHost;

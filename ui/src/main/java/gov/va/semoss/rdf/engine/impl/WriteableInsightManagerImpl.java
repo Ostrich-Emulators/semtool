@@ -18,7 +18,7 @@ import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.security.User;
 import gov.va.semoss.security.User.UserProperty;
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.RemoteUserImpl;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 
@@ -53,14 +53,15 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	private boolean haschanges = false;
 	private final UriSanitizer sanitizer = new DeterministicSanitizer();
 	private final Collection<Statement> initialStatements = new ArrayList<>();
-
+	private final User author;
+	
 	private final WriteablePerspectiveTabImpl wpt;
 	private final WriteableInsightTabImpl wit;
 	private final WriteableParameterTabImpl wprmt;
 
-	public WriteableInsightManagerImpl( InsightManager im ) {
+	public WriteableInsightManagerImpl( InsightManager im, User auth ) {
 		super( new SailRepository( new ForwardChainingRDFSInferencer( new MemoryStore() ) ) );
-
+		author = auth;
 		try {
 			initialStatements.addAll( im.getStatements() );
 			getRawConnection().add( initialStatements );
@@ -345,12 +346,11 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	 */
 	@Override
 	public String userInfoFromToolPreferences( String strOldUserInfo ) {
-		User user = UserImpl.getUser();
 		String userInfo = strOldUserInfo;
-		String userPrefName = user.getProperty( UserProperty.USER_NAME );
-		String userPrefEmail = user.getProperty( UserProperty.USER_EMAIL );
+		String userPrefName = author.getProperty(UserProperty.USER_FULLNAME );
+		String userPrefEmail = author.getProperty( UserProperty.USER_EMAIL );
 		userPrefEmail = ( !userPrefEmail.isEmpty() ? " <" + userPrefEmail + ">" : "" );
-		String userPrefOrg = user.getProperty( UserProperty.USER_ORG );
+		String userPrefOrg = author.getProperty( UserProperty.USER_ORG );
 
 		if ( !( userPrefName.isEmpty() || userPrefEmail.isEmpty() || userPrefOrg.isEmpty() ) ){
 			if ( userPrefName.isEmpty() || userPrefOrg.isEmpty() ) {

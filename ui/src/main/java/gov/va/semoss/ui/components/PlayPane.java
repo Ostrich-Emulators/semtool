@@ -637,13 +637,6 @@ public class PlayPane extends JFrame {
 				iManageItem.doClick();
 			}
 		}
-
-		idx = rightTabs.indexOfComponent( loggingPanel );
-		if ( idx >= 0 ) {
-			if ( !user.hasPermission( SemossPermission.LOGVIEWER ) ) {
-				loggingItem.doClick();
-			}
-		}
 	}
 
 	private JTable initJTableAndAddTo( JPanel panel ) {
