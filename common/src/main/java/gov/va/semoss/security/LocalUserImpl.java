@@ -6,34 +6,30 @@
 package gov.va.semoss.security;
 
 import gov.va.semoss.security.permissions.SemossPermission;
-import java.security.Permission;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.prefs.Preferences;
 
 /**
  *
  * @author ryan
  */
-public class UserImpl implements User {
+public class LocalUserImpl extends AbstractUser {
 
-	private static User user;
 	private static final String NAMESPACE_KEY = "USER_NAMESPACES";
 	private final Preferences prefs = Preferences.userNodeForPackage( User.class );
-	private final Set<Permission> permissions = new HashSet<>();
 
-	public static User getUser() {
-		if ( null == user ) {
-			user = new UserImpl();
-		}
-		return user;
+	public static LocalUserImpl admin() {
+		return new LocalUserImpl( SemossPermission.ADMIN );
 	}
 
-	private UserImpl() {
-		permissions.add( SemossPermission.ADMIN );
+	public LocalUserImpl() {
+		this( SemossPermission.NONE );
+	}
+
+	public LocalUserImpl( SemossPermission... perms ) {
+		super( "", Arrays.asList( perms ) );
 	}
 
 	@Override
@@ -46,7 +42,7 @@ public class UserImpl implements User {
 				namespaces.put( s.substring( 0, idx ), s.substring( idx + 1 ) );
 			}
 		}
-		
+
 		return namespaces;
 	}
 
@@ -73,7 +69,12 @@ public class UserImpl implements User {
 
 	@Override
 	public void setProperty( UserProperty prop, String value ) {
-		prefs.put( prop.toString(), value.trim() );
+		if ( null == value ) {
+			prefs.remove( prop.toString() );
+		}
+		else {
+			prefs.put( prop.toString(), value.trim() );
+		}
 	}
 
 	@Override
@@ -89,18 +90,7 @@ public class UserImpl implements User {
 	}
 
 	@Override
-	public boolean hasPermission( Permission theirs ) {
-		for ( Permission mine : permissions ) {
-			if ( mine.implies( theirs ) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public void resetPermissions( Collection<Permission> perms ) {
-		permissions.clear();
-		permissions.addAll( perms );
+	public boolean isLocal() {
+		return true;
 	}
 }

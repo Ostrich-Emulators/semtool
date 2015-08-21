@@ -2,12 +2,12 @@ package gov.va.semoss.com.calls;
 
 import java.util.HashMap;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.web.io.ServiceClient;
+import gov.va.semoss.web.io.ServiceClientImpl;
+import java.util.Map;
 
-public abstract class SpringRESTCall extends ServiceClient {
+public abstract class SpringRESTCall extends ServiceClientImpl {
 
 	protected static final Logger log = Logger.getLogger(SpringRESTCall.class);
 	
@@ -15,7 +15,7 @@ public abstract class SpringRESTCall extends ServiceClient {
 
 	protected String errorMessage;
 	
-	protected HashMap<String, Object> parameters = new HashMap<String, Object>();
+	protected Map<String, Object> parameters = new HashMap<>();
 	
 	protected int statusCode;
 	

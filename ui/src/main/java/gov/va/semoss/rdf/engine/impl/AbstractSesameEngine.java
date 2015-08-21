@@ -20,6 +20,7 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.rdf.engine.api.Bindable;
 import info.aduna.iteration.Iterations;
 import java.io.IOException;
 import java.util.Properties;
@@ -66,7 +67,8 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.Security;
+import gov.va.semoss.security.User;
 import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
@@ -335,8 +337,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	public static String processNamespaces( String rawsparql,
 			Map<String, String> customNamespaces ) {
-		Map<String, String> namespaces = UserImpl.getUser().getNamespaces();
-		namespaces.putAll( Utility.DEFAULTNAMESPACES );
+		Map<String, String> namespaces = new HashMap<>( Utility.DEFAULTNAMESPACES );
 		namespaces.putAll( customNamespaces );
 
 		Set<String> existingNamespaces = new HashSet<>();
@@ -436,10 +437,16 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		return query.getResults();
 	}
 
+	private void addUserNamespaces( Bindable ab ) {
+		User user = Security.getSecurity().getAssociatedUser( this );
+		ab.addNamespaces( user.getNamespaces() );
+	}
+
 	@Override
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 		if ( isConnected() ) {
+			addUserNamespaces( exe );
 			RepositoryConnection rc = getRawConnection();
 			return getSelect( exe, rc, supportsSparqlBindings() );
 		}
@@ -450,6 +457,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public <T> T queryNoEx( QueryExecutor<T> exe ) {
 		if ( isConnected() ) {
+			addUserNamespaces( exe );
 			RepositoryConnection rc = getRawConnection();
 			return getSelectNoEx( exe, rc, supportsSparqlBindings() );
 		}
@@ -460,8 +468,10 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public void update( UpdateExecutor ue ) throws RepositoryException,
 			MalformedQueryException, UpdateExecutionException {
-		if ( UserImpl.getUser().hasPermission( SemossPermission.DATAWRITER ) ) {
+		User user = Security.getSecurity().getAssociatedUser( this );
+		if ( user.hasPermission( SemossPermission.DATAWRITER ) ) {
 			if ( isConnected() ) {
+				addUserNamespaces( ue );
 				RepositoryConnection rc = getRawConnection();
 				doUpdate( ue, rc, supportsSparqlBindings() );
 			}
@@ -474,6 +484,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public Model construct( QueryExecutor<Model> q ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
+		addUserNamespaces( q );
 		return getConstruct( q, getRawConnection() );
 	}
 

@@ -17,9 +17,13 @@ public interface User {
 
 	public static enum UserProperty {
 
-		USER_EMAIL, USER_NAME, USER_ORG
+		USER_EMAIL, USER_FULLNAME, USER_ORG
 	};
 
+	public String getUsername();
+	
+	public void setUsername( String name );
+	
 	public Map<String, String> getNamespaces();
 
 	public void addNamespace( String prefix, String ns );
@@ -40,4 +44,10 @@ public interface User {
 	public boolean hasPermission( Permission p );
 
 	public void resetPermissions( Collection<Permission> perms );
+	
+	/**
+	 * Is this user authorized remotely, or from the local computer?
+	 * @return 
+	 */
+	public boolean isLocal();
 }
