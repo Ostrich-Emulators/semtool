@@ -23,7 +23,7 @@
     	                var returnedInstances = JSON.parse(token.data);
     	                $scope.instances = [];
     	                for (var i=0; i<returnedInstances.length; i++){
-    	                	var nativeInstance = new SEMOSS.VcampDatabase();
+    	                	var nativeInstance = new SEMOSS.DbInfo();
     	                	nativeInstance.setAttributes(returnedInstances[i]);
     	                	$scope.instances.push(nativeInstance);
     	                }
@@ -39,7 +39,7 @@
         $scope.showEdit = function(id){
        	 	SEMOSS.getDatabase(id, function(token){
        	 		var foreignInstance = JSON.parse(token.data.data);
-       	 		var nativeInstance = new SEMOSS.VcampDatabase();
+       	 		var nativeInstance = new SEMOSS.DbInfo();
        	 		nativeInstance.setAttributes(foreignInstance);
        	 		$scope.activeInstance = nativeInstance;
            	 	$scope.mode = 'edit';
@@ -64,7 +64,7 @@
         $scope.view = function(id){
        	 	SEMOSS.getDatabase(id, function(token){
        	 		var foreignInstance = JSON.parse(token.data.data);
-       	 		var nativeInstance = new SEMOSS.VcampDatabase();
+       	 		var nativeInstance = new SEMOSS.DbInfo();
        	 		nativeInstance.setAttributes(foreignInstance);
        	 		$scope.activeInstance = nativeInstance;
            	 	$scope.mode = 'view';
@@ -74,7 +74,7 @@
         }
         
         $scope.showCreate = function(){
-   	 		var nativeInstance = new SEMOSS.VcampDatabase();
+   	 		var nativeInstance = new SEMOSS.DbInfo();
    	 		$scope.activeInstance = nativeInstance;
        	 	$scope.mode = 'create';
         	$('#semossdb_modal').modal('show');
@@ -99,8 +99,7 @@
     	                var returnedInstances = JSON.parse(token.data.data);
     	                $scope.instances = [];
     	                for (var i=0; i<returnedInstances.length; i++){
-    	                	var nativeInstance = new SEMOSS.VcampDatabase();
-    	                	alert(returnedInstances[i]);
+    	                	var nativeInstance = new SEMOSS.DbInfo();
     	                	nativeInstance.setAttributes(returnedInstances[i]);
     	                	$scope.instances.push(nativeInstance);
     	                }
