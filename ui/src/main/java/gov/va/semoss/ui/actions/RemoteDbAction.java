@@ -5,9 +5,9 @@
  */
 package gov.va.semoss.ui.actions;
 
-import gov.va.semoss.rdf.engine.impl.SesameEngine;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.security.User;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.RemoteDbPanel;
 import gov.va.semoss.util.GuiUtility;
@@ -18,7 +18,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Properties;
-import java.util.prefs.Preferences;
 import static javax.swing.Action.SHORT_DESCRIPTION;
 import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
@@ -32,6 +31,7 @@ public class RemoteDbAction extends DbAction {
 	private static final Logger log = Logger.getLogger( RemoteDbAction.class );
 	private final Frame frame;
 	private Properties props = null;
+	private User user = null;
 
 	public RemoteDbAction( String optg, Frame frame ) {
 		super( optg, "Open Remote DB", "open-file3" );
@@ -50,6 +50,7 @@ public class RemoteDbAction extends DbAction {
 		if ( 0 == opt ) {
 			try {
 				props = panel.getConnectionProperties();
+				user = panel.getConnectedUser();
 				return true;
 			}
 			catch ( MalformedURLException mue ) {
@@ -75,7 +76,7 @@ public class RemoteDbAction extends DbAction {
 						props.store( fw, "" );
 					}
 
-					EngineUtil.getInstance().mount( propfile, true );
+					EngineUtil.getInstance().mount( propfile, true, user );
 				}
 				catch ( IOException | EngineManagementException e ) {
 					log.error( e, e );

@@ -26,25 +26,7 @@ public class SecuredPageController  extends SemossControllerBase  {
 		model.setViewName("admin");
 		return model;
 	}
- 
-	@RequestMapping(value = "/data**", method = RequestMethod.GET)
-	public ModelAndView dataPage() {
-		// Create the model and view 
-		ModelAndView model = new ModelAndView();
-		model.addObject("message", "Data Page");
-		model.setViewName("data");
- 		return model;
- 
-	}
- 
-	@RequestMapping(value = "/insight**", method = RequestMethod.GET)
-	public ModelAndView insightPage() {
-		ModelAndView model = new ModelAndView();
-		model.addObject("message", "Insight Page");
-		model.setViewName("insight");
-		return model;
-	}
-	
+ 	
 	@RequestMapping(value = "/user**", method = RequestMethod.GET)
 	public ModelAndView userPage() {
 		ModelAndView model = new ModelAndView();

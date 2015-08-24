@@ -18,7 +18,6 @@ import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.security.User;
 import gov.va.semoss.security.User.UserProperty;
-import gov.va.semoss.security.RemoteUserImpl;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 

@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
+import gov.va.semoss.security.LocalUserImpl;
 import gov.va.semoss.ui.main.SemossPreferences;
 import org.openrdf.model.URI;
 
@@ -53,7 +54,7 @@ public class PinningEngineListener extends AbstractFileWatcher
 			// we care...so load the db
 
 			try {
-				EngineUtil.getInstance().mount( file, true, true );
+				EngineUtil.getInstance().mount( file, true, true, LocalUserImpl.admin() );
 			}
 			catch ( EngineManagementException ioe ) {
 				log.error( "could not load db from file: " + file, ioe );

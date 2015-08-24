@@ -81,7 +81,7 @@ public class UserMapper implements DataMapper<User, String> {
 	}
 
 	@Override
-	public User create( User t ) {
+	public User create( User t ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 		UriBuilder urib = UriBuilder.getBuilder( WEBDS.NAMESPACE + "user" );
 
@@ -96,7 +96,7 @@ public class UserMapper implements DataMapper<User, String> {
 	}
 
 	@Override
-	public void remove( User t ) {
+	public void remove( User t ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 
 		try {
@@ -111,7 +111,7 @@ public class UserMapper implements DataMapper<User, String> {
 	}
 
 	@Override
-	public void update( User data ) {
+	public void update( User data ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 		try {
 			Resource id = getId( data, rc );

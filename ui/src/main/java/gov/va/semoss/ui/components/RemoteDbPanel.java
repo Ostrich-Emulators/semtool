@@ -7,6 +7,9 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameEngine;
+import gov.va.semoss.security.RemoteUserImpl;
+import gov.va.semoss.security.Security;
+import gov.va.semoss.security.User;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
@@ -45,6 +48,10 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 		username.setText( prefs.get( "lastusername", "" ) );
 	}
 
+	public User getConnectedUser(){
+		return new RemoteUserImpl();
+	}
+	
 	public Properties getConnectionProperties() throws MalformedURLException {
 		DbInfo info = dblist.getSelectedValue();
 		if ( null != info ) {

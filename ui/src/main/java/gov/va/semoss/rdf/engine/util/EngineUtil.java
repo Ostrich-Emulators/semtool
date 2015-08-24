@@ -90,6 +90,7 @@ public class EngineUtil implements Runnable {
 	private static EngineUtil instance;
 
 	private final Map<File, Boolean> toopen = Collections.synchronizedMap( new HashMap<File, Boolean>() );
+	private final Map<File, User> openusers = Collections.synchronizedMap( new HashMap<File, User>() );
 	private final List<IEngine> toclose = Collections.synchronizedList( new ArrayList<IEngine>() );
 	private final List<EngineOperationListener> listeners = new ArrayList<>();
 	private final Map<IEngine, InsightsImportConfig> insightqueue = new HashMap<>();
@@ -153,9 +154,14 @@ public class EngineUtil implements Runnable {
 
 				// avoid concurrent mod exception
 				Map<File, Boolean> todo;
+				Map<File, User> users;
 				synchronized ( toopen ) { // we need an atomic copy and clear operation
 					todo = new HashMap<>( toopen );
 					toopen.clear();
+				}
+				synchronized ( openusers ) { // we need an atomic copy and clear operation
+					users = new HashMap<>( openusers );
+					openusers.clear();
 				}
 
 				for ( Map.Entry<File, Boolean> entry : todo.entrySet() ) {
@@ -171,6 +177,8 @@ public class EngineUtil implements Runnable {
 
 						if ( domount ) {
 							IEngine eng = GuiUtility.loadEngine( entry.getKey() );
+							Security.getSecurity().associateUser( eng, users.get( entry.getKey() ) );
+							
 							// avoid a possible ConcurrentModificationException
 							List<EngineOperationListener> lls = new ArrayList<>( listeners );
 							for ( EngineOperationListener eol : lls ) {
@@ -361,7 +369,7 @@ public class EngineUtil implements Runnable {
 
 		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
 		GuiUtility.closeEngine( neweng );
-		mount( newsmss, addToRepoList, true );
+		mount( newsmss, addToRepoList, true, LocalUserImpl.admin() );
 	}
 
 	/**
@@ -379,7 +387,7 @@ public class EngineUtil implements Runnable {
 	 * @throws EngineManagementException
 	 */
 	public synchronized void mount( File smssfile, boolean updateRepoList,
-			boolean noDupeEx ) throws EngineManagementException {
+			boolean noDupeEx, User user ) throws EngineManagementException {
 		// at this point, we don't know if smssfile is a directory containing the 
 		// smss file, or the file itself, so figure out what we're looking at    
 
@@ -425,12 +433,18 @@ public class EngineUtil implements Runnable {
 		}
 
 		toopen.put( smssfile, updateRepoList );
+		openusers.put( smssfile, user );
 		notify();
 	}
 
 	public void mount( File smssfile, boolean updateRepoList )
 			throws EngineManagementException {
-		mount( smssfile, updateRepoList, false );
+		mount( smssfile, updateRepoList, LocalUserImpl.admin() );
+	}
+
+	public void mount( File smssfile, boolean updateRepoList, User user )
+			throws EngineManagementException {
+		mount( smssfile, updateRepoList, false, user );
 	}
 
 	public synchronized void unmount( final IEngine engineToClose ) {
