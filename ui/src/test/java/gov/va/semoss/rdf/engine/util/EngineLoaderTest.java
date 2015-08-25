@@ -371,16 +371,16 @@ public class EngineLoaderTest {
 				= el.loadToEngine( Arrays.asList( TESTSPECIAL ), engine, true, errors );
 		el.release();
 
-		//if ( log.isTraceEnabled() ) {
+		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
 					"test-special.nt" ) ) ) ) {
 				engine.getRawConnection().export( new NTriplesWriter( w ) );
 			}
-		//}
+		}
 
 		compareOwls( owls, TESTSPECIAL_EXP, engine.getSchemaBuilder() );
-		compareData( engine.getRawConnection(), getExpectedGraph( CUSTOM_EXP ),
+		compareData( engine.getRawConnection(), getExpectedGraph( TESTSPECIAL_EXP ),
 				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 
