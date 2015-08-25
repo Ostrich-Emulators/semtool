@@ -15,7 +15,6 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class SecuredPageController  extends SemossControllerBase  {
 	private static final Logger log = Logger.getLogger( SecuredPageController.class );
-
 	
 	@RequestMapping(value = { "/admin**" }, method = RequestMethod.GET)
 	public ModelAndView adminPage() {
