@@ -19,16 +19,17 @@
         $scope.init = function () {
             $scope.loading = true;
             SEMOSS.listDatabases(
-                    function (token) {
-    	                var returnedInstances = JSON.parse(token.data);
+                    function (databases) {
+    	                //var returnedInstances = JSON.parse(token.data);
     	                $scope.instances = [];
-    	                for (var i=0; i<returnedInstances.length; i++){
+    	                for (var i=0; i<databases.length; i++){
     	                	var nativeInstance = new SEMOSS.DbInfo();
-    	                	nativeInstance.setAttributes(returnedInstances[i]);
+    	                	nativeInstance.setAttributes(databases[i]);
     	                	$scope.instances.push(nativeInstance);
     	                }
     	                $scope.loading = false;
     	                vm.dtInstance.rerender();
+    	                $('#semoss_databases_nav').prop('disabled', false);
                     }, true);
         };
         
@@ -95,8 +96,8 @@
         $scope.listInstances = function () {
             $scope.loading = true;
             SEMOSS.listDatabases(
-                    function (token) {
-    	                var returnedInstances = JSON.parse(token.data.data);
+                    function (response) {
+    	                var returnedInstances = response;
     	                $scope.instances = [];
     	                for (var i=0; i<returnedInstances.length; i++){
     	                	var nativeInstance = new SEMOSS.DbInfo();

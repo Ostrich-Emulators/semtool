@@ -1,6 +1,7 @@
 package gov.va.semoss.web.controller;
 
 import gov.va.semoss.web.datastore.DbInfoMapper;
+
 import javax.servlet.http.HttpServletResponse;
 
 import gov.va.semoss.web.io.DbInfo;
@@ -10,7 +11,9 @@ import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -28,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -83,12 +87,21 @@ public class DatabaseController extends SemossControllerBase {
 		return test;
 	}
 
-	@RequestMapping
+	@RequestMapping( value = "/list", method = RequestMethod.GET  )
 	@ResponseBody
 	public DbInfo[] getAllDatabases( HttpServletRequest req ) {
 		log.debug( "Getting all databases." );
-		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
-
+		boolean testing = true;
+		DbInfo[] testDbs = null;
+		if (testing){
+			DbInfo db1 = new DbInfo("DB1", "localhost/db1", "localhost/data1", "localhost/insights1");
+			DbInfo db2 = new DbInfo("DB2", "localhost/db2", "localhost/data2", "localhost/insights2");
+			DbInfo db3 = new DbInfo("DB3", "localhost/db3", "localhost/data3", "localhost/insights3");
+			testDbs = new DbInfo[]{db1, db2, db3};
+		}
+		else {
+			testDbs = datastore.getAll().toArray( new DbInfo[0] );
+		}
 		String reqpath = req.getRequestURL().toString() + "/";
 
 		for ( DbInfo dbi : testDbs ) {
