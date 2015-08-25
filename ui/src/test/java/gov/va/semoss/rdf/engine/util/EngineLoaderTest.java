@@ -129,6 +129,9 @@ public class EngineLoaderTest {
 	private static final File TEST17 = new File( "src/test/resources/test17.xlsx" );
 	private static final File TEST17_EXP = new File( "src/test/resources/test17.nt" );
 
+	private static final File TESTSPECIAL = new File( "src/test/resources/test-special.xlsx" );
+	private static final File TESTSPECIAL_EXP = new File( "src/test/resources/test-special.nt" );
+
 	private InMemorySesameEngine engine;
 	private File dbfile;
 
@@ -353,6 +356,31 @@ public class EngineLoaderTest {
 		}
 
 		compareData( engine.getRawConnection(), getExpectedGraph( CUSTOM2_EXP ),
+				engine.getSchemaBuilder(), engine.getDataBuilder() );
+	}
+
+	@Test
+	public void testImportXlsSpecial() throws Exception {
+		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
+				UriBuilder.getBuilder( SCHEMAURI ) );
+
+		EngineLoader el = new EngineLoader();
+		el.setDefaultBaseUri( BASEURI, false );
+		ImportData errors = new ImportData();
+		Collection<Statement> owls
+				= el.loadToEngine( Arrays.asList( TESTSPECIAL ), engine, true, errors );
+		el.release();
+
+		//if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"test-special.nt" ) ) ) ) {
+				engine.getRawConnection().export( new NTriplesWriter( w ) );
+			}
+		//}
+
+		compareOwls( owls, TESTSPECIAL_EXP, engine.getSchemaBuilder() );
+		compareData( engine.getRawConnection(), getExpectedGraph( CUSTOM_EXP ),
 				engine.getSchemaBuilder(), engine.getDataBuilder() );
 	}
 

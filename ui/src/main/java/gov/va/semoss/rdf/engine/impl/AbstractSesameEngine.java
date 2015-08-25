@@ -63,13 +63,12 @@ import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.engine.api.UpdateExecutor;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.security.Security;
 import gov.va.semoss.security.User;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.HashSet;
@@ -79,6 +78,7 @@ import java.util.regex.Pattern;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.Update;
@@ -222,14 +222,20 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 		return baseuri;
-
 	}
 
 	@Override
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
 
-		setEngineName( EngineUtil.getEngineLabel( this ) );
+		String realname = getEngineName();
+		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
+		queryNoEx( mq );
+		String str = mq.getString();
+		if ( null != str ) {
+			realname = str;
+		}
+		setEngineName( realname );
 
 		RepositoryConnection rc = getRawConnection();
 		rc.begin();
