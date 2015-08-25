@@ -468,16 +468,10 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public void update( UpdateExecutor ue ) throws RepositoryException,
 			MalformedQueryException, UpdateExecutionException {
-		User user = Security.getSecurity().getAssociatedUser( this );
-		if ( user.hasPermission( SemossPermission.DATAWRITER ) ) {
-			if ( isConnected() ) {
-				addUserNamespaces( ue );
-				RepositoryConnection rc = getRawConnection();
-				doUpdate( ue, rc, supportsSparqlBindings() );
-			}
-		}
-		else {
-			throw SemossPermission.newSecEx();
+		if ( isConnected() ) {
+			addUserNamespaces( ue );
+			RepositoryConnection rc = getRawConnection();
+			doUpdate( ue, rc, supportsSparqlBindings() );
 		}
 	}
 
