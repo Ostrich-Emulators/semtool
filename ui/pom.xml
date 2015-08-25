@@ -337,13 +337,6 @@
 	  <artifactId>spring-oxm</artifactId>
 	  <version>${spring.version}</version>
 	 </dependency>
-	 <!--
-	 <dependency>
-	  <groupId>com.thoughtworks.xstream</groupId>
-	  <artifactId>xstream</artifactId>
-	  <version>1.4.7</version>
-	 </dependency>
-	 -->
 	</dependencies>    
     
 	<profiles>

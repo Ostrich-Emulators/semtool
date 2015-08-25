@@ -20,7 +20,7 @@ public class HomeController extends SemossControllerBase {
 	@RequestMapping( value = "/", method = RequestMethod.GET )
 	public String getWelcome() {
 		log.debug("Controller routing to index page.");
-		return "index";
+		return "main";
 	}
 
 	@RequestMapping( value = "/testDriver", method = RequestMethod.GET )

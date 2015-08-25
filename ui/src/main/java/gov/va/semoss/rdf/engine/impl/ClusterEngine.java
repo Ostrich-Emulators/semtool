@@ -16,6 +16,7 @@ import org.openrdf.sail.memory.MemoryStore;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
+import gov.va.semoss.security.Security;
 import java.util.List;
 import java.util.Properties;
 
@@ -93,7 +94,8 @@ public class ClusterEngine extends AbstractSesameEngine {
 
 	public void initializeInsightBase() {
 		if ( null == insights ) {
-			insights = new WriteableInsightManagerImpl( getInsightManager() ) {
+			insights = new WriteableInsightManagerImpl( getInsightManager(),
+			Security.getSecurity().getAssociatedUser( this )) {
 				@Override
 				public void commit() {
 					log.warn( "commit means nothing here" );

@@ -158,6 +158,7 @@ public class Starter {
 
 		final PlayPane frame = new PlayPane();
 		final SEMOSSSplashScreen ss = new SEMOSSSplashScreen( SPLASH_SCREEN_IMAGE_PATH );
+		ss.displaySplashScreen();
 		java.awt.EventQueue.invokeLater( new Runnable() {
 			@Override
 			public void run() {

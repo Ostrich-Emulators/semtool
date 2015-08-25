@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components.models;
 
+import gov.va.semoss.security.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -20,12 +21,15 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class NamespaceTableModel extends ValueTableModel {
 
-	public NamespaceTableModel() {
-		this( true );
+	private final boolean editable;
+
+	public NamespaceTableModel( boolean editable ) {
+		this( editable, true );
 	}
 
-	public NamespaceTableModel( boolean allowinserts ) {
-		setAllowInsertsInPlace( allowinserts );
+	public NamespaceTableModel( boolean editable, boolean allowinserts ) {
+		this.editable = editable;
+		setAllowInsertsInPlace( editable && allowinserts );
 	}
 
 	public void setNamespaces( Map<String, String> ns ) {
@@ -48,5 +52,10 @@ public class NamespaceTableModel extends ValueTableModel {
 		}
 
 		return ret;
+	}
+
+	@Override
+	public boolean isCellEditable( int row, int col ) {
+		return ( editable && super.isCellEditable( row, col ) );
 	}
 }

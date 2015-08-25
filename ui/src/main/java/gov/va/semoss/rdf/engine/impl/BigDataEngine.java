@@ -49,7 +49,8 @@ import org.openrdf.model.Statement;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
 import gov.va.semoss.rdf.engine.util.StatementSorter;
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.LocalUserImpl;
+import gov.va.semoss.security.Security;
 import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedWriter;
@@ -94,6 +95,9 @@ public class BigDataEngine extends AbstractSesameEngine {
 			throw new UnsupportedOperationException( "Remote Bigdata repositories are not yet supported" );
 		}
 		else {
+			// users have full access to local DBs 
+			Security.getSecurity().associateUser( this, LocalUserImpl.admin() );
+
 			// the journal is the file itself
 			journal = new Journal( rws );
 
@@ -233,46 +237,42 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 	@Override
 	public WriteableInsightManager getWriteableInsightManager() {
-		return new WriteableInsightManagerImpl( insightEngine ) {
+		return new WriteableInsightManagerImpl( insightEngine,
+				Security.getSecurity().getAssociatedUser( this ) ) {
 
-			@Override
-			public void commit() {
-				if ( UserImpl.getUser().hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-					if ( hasCommittableChanges() ) {
-						try {
-							List<Statement> stmts = new ArrayList<>( getStatements() );
-							Collections.sort( stmts, new StatementSorter() );
+					@Override
+					public void commit() {
+						if ( hasCommittableChanges() ) {
+							try {
+								List<Statement> stmts = new ArrayList<>( getStatements() );
+								Collections.sort( stmts, new StatementSorter() );
 
-							copyInsightsToDisk( stmts ); // from the WriteableInsightManager
+								copyInsightsToDisk( stmts ); // from the WriteableInsightManager
 
-							// refresh the insight engine's KB
-							RepositoryConnection src = insightEngine.getRawConnection();
-							src.begin();
-							src.clear();
-							src.add( stmts );
-							src.commit();
+								// refresh the insight engine's KB
+								RepositoryConnection src = insightEngine.getRawConnection();
+								src.begin();
+								src.clear();
+								src.add( stmts );
+								src.commit();
+							}
+							catch ( RepositoryException re ) {
+								log.error( re, re );
+							}
 						}
-						catch ( RepositoryException re ) {
-							log.error( re, re );
+
+						if ( log.isTraceEnabled() ) {
+							File dumpfile
+							= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
+							try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
+								insightEngine.getRawConnection().export( new TurtleWriter( w ) );
+							}
+							catch ( Exception ioe ) {
+								log.warn( ioe, ioe );
+							}
 						}
 					}
-
-					if ( log.isTraceEnabled() ) {
-						File dumpfile
-								= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
-						try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
-							insightEngine.getRawConnection().export( new TurtleWriter( w ) );
-						}
-						catch ( Exception ioe ) {
-							log.warn( ioe, ioe );
-						}
-					}
-				}
-				else {
-					throw SemossPermission.newSecEx();
-				}
-			}
-		};
+				};
 	}
 
 	/**

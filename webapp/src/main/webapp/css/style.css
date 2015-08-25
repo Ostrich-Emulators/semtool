@@ -1,0 +1,140 @@
+.semoss_header {
+	width:100%;
+	height:80px;
+	border: solid black 1px;
+	background: linear-gradient(to right, rgb(235,235,235), white, white);
+	border-radius:10px;
+	display:table;
+}
+
+.semoss_header_text {
+	display:table-cell;
+}
+
+.semoss_header_title {
+	font-size:170%;
+}
+
+.semoss_header_byline {
+	font-size:100%;
+}
+
+.semoss_logo {
+	margin-top:5px;
+	height:70px;
+	margin-left:100px;
+	display:table-cell;
+}
+
+.semoss_logo_detail {
+	margin-top:5px;
+	height:70px;
+	margin-right:100px;
+	display:table-cell;
+}
+
+.semoss_explore_section {
+	color:#680000 ;
+}
+
+.semoss_manage_section{
+	color:#336633 ;
+}
+
+.semoss_content_section{
+	color:#000066;
+}
+	
+.pages_container {
+	display:table; 
+	width:100%;
+	margin:5px; 
+	padding:10px;
+}	
+
+.main_div{
+	margin:15px;
+	padding:10px;
+}
+
+.instance_create_button {
+	margin:5px;
+}
+
+.table_refresh_button {
+	
+}
+
+.table_title {
+	
+}
+
+.instance_creation_glyphicon {
+	
+}
+
+.instance_field {
+	
+}
+
+.string_field {
+	
+}
+
+.update_instance_button {
+	
+}
+
+.create_instance_button {
+	
+}
+
+.view_instance_button {
+	
+}
+
+.edit_instance_button {
+	
+}
+
+.delete_instance_button {
+	
+}
+
+.instance_action_glyph {
+	
+}
+
+.loading_image_container {
+	text-align:center;
+}
+
+.spinner {
+	height:100px;
+	width:150px;
+}
+
+.semoss_nav_menu {
+	
+	
+}
+
+.admin_nav_item {
+
+}
+
+.semoss_glyph {
+	margin-right:10px;
+}
+
+#nav_menu_toggle {
+	border-radius:20px;
+	display:inline-block;
+	background:rgb(100,100,100);
+	vertical-align:middle;
+	color:white;
+	display:table-cell;
+	width:3px;
+	background: linear-gradient(to bottom, white, white ,rgb(100,100,100) ,rgb(100,100,100),rgb(100,100,100),white, white); 
+	cursor: pointer;
+}

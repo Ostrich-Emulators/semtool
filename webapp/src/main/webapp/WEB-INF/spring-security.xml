@@ -6,21 +6,32 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-4.0.xsd">
 
-	<http auto-config="true">
-		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/data**" access="hasRole('ROLE_DATA_ADMIN')" />
-		<intercept-url pattern="/insight**" access="hasRole('ROLE_INSIGHT_ADMIN')" />
-		<intercept-url pattern="/databases**" access="hasRole('ROLE_INSIGHT_ADMIN')" />
-	</http>
+	<beans:bean id="customAuthenticationProvider" class="gov.va.semoss.web.security.CustomAuthenticationManager" />
 
-	<authentication-manager>
-		<authentication-provider>
-			<user-service>
-				<user name="ryan" password="123456" authorities="ROLE_ADMIN" />
-				<user name="thomas" password="123456" authorities="ROLE_DATA_ADMIN" />
-				<user name="john" password="123456" authorities="ROLE_INSIGHT_ADMIN" />
-			</user-service>
-		</authentication-provider>
-	</authentication-manager>
+<authentication-manager>
+    <authentication-provider ref="customAuthenticationProvider"/>
+</authentication-manager>
+		
+
+	<beans:bean name="csrfmatcher" class="gov.va.semoss.security.CsrfMatcher"/>
+	
+	<http auto-config="true">
+		<csrf request-matcher-ref="csrfmatcher"/>
+		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" />
+		<intercept-url pattern="/insight**" access="hasAnyRole('ROLE_INSIGHT_ADMIN','ROLE_ADMIN')" />
+		<intercept-url pattern="/databases**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMIN')" />
+		<intercept-url pattern="/data**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMIN')" />
+		<form-login 
+		    login-page="/login" 
+		    default-target-url="/" 
+			authentication-failure-url="/login?error" 
+			username-parameter="username"
+			password-parameter="password" />
+		<logout logout-success-url="/login?logout" />
+		<!-- enable csrf protection -->
+		<csrf/>
+	</http>
+	
+
 
 </beans:beans>

@@ -1,0 +1,10 @@
+<div class="semoss_header">
+	<img class="semoss_logo" src="images/logo.png">
+	
+	<div class="semoss_header_text">
+		<span class="semoss_header_title">Semantic Open Source Software - Web Portal V1.0 </span>
+		<br>
+		<span class="semoss_header_byline" >Visualizing knowledge for, well, you</span>
+	</div>
+	<img class="semoss_logo_detail" src="images/logo_detail.jpg">
+</div>

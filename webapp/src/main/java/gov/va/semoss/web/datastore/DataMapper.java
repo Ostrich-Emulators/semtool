@@ -14,13 +14,17 @@ import java.util.Collection;
  */
 public interface DataMapper<T, I> {
 
+	public DataStore getDataStore();
+
+	public void setDataStore( DataStore store );
+
 	public Collection<T> getAll();
 
 	public T getOne( I id );
 
-	public T create( T t );
+	public T create( T t ) throws Exception;
 
-	public void remove( T t );
+	public void remove( T t ) throws Exception;
 
-	public void update( T data );
+	public void update( T data ) throws Exception;
 }

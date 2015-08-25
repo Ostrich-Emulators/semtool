@@ -1,0 +1,21 @@
+<head>
+   	<script src="js/lib/jquery/jquery-1.11.2.min.js"></script>
+    <script src="js/lib/jquery/jquery.dataTables.min.js"></script>
+	<link rel="stylesheet" href="css/jquery.dataTables.css">
+   	<script src="js/lib/angular/angular.js"></script>
+   	<script src="js/lib/angular/angular-datatables.min.js"></script>  
+	<script src="js/lib/angular/ui-bootstrap-tpls-0.13.3.min.js"></script>
+	
+	<script src="js/angularControllers/main/controller.js"></script>
+	<script src="js/angularControllers/databases/controller.js"></script>
+	<script src="js/lib/jquery/jquery.ba-hashchange.js"></script>
+		
+	<script src="js/semoss_functions.js"></script>
+	<!-- Bootstrap resources (3.3.4) -->
+	<link rel="stylesheet" href="js/lib/bootstrap-3.3.4-dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="js/lib/bootstrap-3.3.4-dist/css/bootstrap-theme.min.css">
+	<script src="js/lib/bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
+
+	<link rel="stylesheet" href="css/style.css">
+
+</head>

@@ -5,24 +5,29 @@
  */
 package gov.va.semoss.web.io;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 
 /**
  *
  * @author ryan
  */
-@Component
-public class ServiceClient extends AbstractServiceClient {
-	
-	public DbInfo[] getDbs( String serviceurl) {
-			HttpEntity<String> request = prepareHeaders(serviceurl);
-			ResponseEntity<DbInfo[]> response = (new RestTemplate()).exchange(serviceurl, HttpMethod.GET, request, DbInfo[].class);
-			DbInfo[] dbs = response.getBody();
-			return dbs;
-		
-	}
+public interface ServiceClient {
+
+	/**
+	 * Gets the available databases from the given url
+	 *
+	 * @param serviceurl the url to hit
+	 * @return a (possibly empty) array of database objects
+	 * @throws RestClientException if there is a network/password problem
+	 */
+	public DbInfo[] getDbs( String serviceurl ) throws RestClientException;
+
+	/**
+	 * Sets the username/password pair for authenticating against the given url
+	 *
+	 * @param url
+	 * @param username
+	 * @param pass
+	 */
+	public void setAuthentication( String url, String username, char[] pass );
 }

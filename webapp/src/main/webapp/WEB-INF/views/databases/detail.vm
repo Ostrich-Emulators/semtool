@@ -1,0 +1,48 @@
+<div id="semossdb_modal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">Database Detail</h4>
+			</div>
+			<div class="modal-body"> 
+				<div class="form-group">
+					<label for="database_name">Name</label> 
+					<input ng-model="activeInstance.name"
+						type="text" class="form-control instance_field string_field" id="database_name"
+						placeholder="The Database Name">
+				</div>
+				<div class="form-group">
+					<label for="semoss_database_server_url">Server URL</label> 
+					<input  ng-model="activeInstance.serverUrl"
+						type="text" class="instance_field string_field form-control" id="semoss_database_server_url"
+						placeholder="The Database Description">
+				</div>
+				<div class="form-group">
+					<label for="semoss_database_data_url">Data URL</label> 
+					<input  ng-model="activeInstance.dataUrl"
+						type="text" class="instance_field string_field form-control" id="semoss_database_data_url"
+						placeholder="The Database URL">
+				</div>
+				
+				<div class="form-group">
+					<label for="semoss_database_insights_url">Insights URL</label> 
+					<input  ng-model="activeInstance.insightsUrl"
+						type="text" class="instance_field string_field form-control" id="semoss_database_insights_url"
+						placeholder="The Database URL">
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button ng-if="mode=='edit'" type="button" class="btn btn-primary update_instance_button" ng-click="update()" >Save changes</button>
+				<button ng-if="mode=='create'" type="button" class="btn btn-primary create_instance_button" ng-click="create()" >Create</button>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

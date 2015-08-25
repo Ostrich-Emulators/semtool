@@ -220,7 +220,7 @@ public class PlayPane extends JFrame {
 			DbAction.getIcon( "log_tab1" ) );
 	private final JCheckBoxMenuItem gQueryBuilderItem
 			= new JCheckBoxMenuItem( "Graphical Query Builder",
-					DbAction.getIcon( "insight_manager_tab1" ) );
+					DbAction.getIcon( "graphic_query" ) );
 	private final JCheckBoxMenuItem iManageItem = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 
@@ -544,7 +544,7 @@ public class PlayPane extends JFrame {
 		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
 				"Build queries graphically and generate Sparql" );
 		CloseableTab ct1 = new PlayPaneCloseableTab( rightView, gQueryBuilderItem,
-				DbAction.getIcon( "insight_manager_tab1" ) );
+				DbAction.getIcon( "graphic_query" ) );
 		idx = rightView.indexOfComponent( gQueryBuilderPanel );
 		rightView.setTabComponentAt( idx, ct1 );
 
@@ -635,13 +635,6 @@ public class PlayPane extends JFrame {
 		if ( idx >= 0 ) {
 			if ( !user.hasPermission( SemossPermission.INSIGHTWRITER ) ) {
 				iManageItem.doClick();
-			}
-		}
-
-		idx = rightTabs.indexOfComponent( loggingPanel );
-		if ( idx >= 0 ) {
-			if ( !user.hasPermission( SemossPermission.LOGVIEWER ) ) {
-				loggingItem.doClick();
 			}
 		}
 	}
@@ -1450,10 +1443,10 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "insight_manager_tab1" ),
+					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "graphic_query" ),
 							gQueryBuilderPanel, "Build queries graphically and generate Sparql" );
 					CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, gQueryBuilderItem,
-							DbAction.getIcon( "insight_manager_tab1" ) );
+							DbAction.getIcon( "graphic_query" ) );
 					int idx = rightTabs.indexOfComponent( gQueryBuilderPanel );
 					rightTabs.setTabComponentAt( idx, ct1 );
 					gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );

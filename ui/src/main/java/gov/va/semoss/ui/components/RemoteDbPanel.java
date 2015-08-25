@@ -7,15 +7,23 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameEngine;
+import gov.va.semoss.security.RemoteUserImpl;
+import gov.va.semoss.security.Security;
+import gov.va.semoss.security.User;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.web.io.DbInfo;
 import gov.va.semoss.web.io.ServiceClient;
 import java.net.MalformedURLException;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
+import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 
 /**
  *
@@ -23,9 +31,10 @@ import javax.swing.DefaultListModel;
  */
 public class RemoteDbPanel extends javax.swing.JPanel {
 
+	private static final Logger log = Logger.getLogger( RemoteDbPanel.class );
 	private final DefaultListModel model = new DefaultListModel();
 	private final LabeledPairRenderer<DbInfo> render = new LabeledPairRenderer<>();
-	
+
 	/**
 	 * Creates new form RemoteDbPanel
 	 */
@@ -39,6 +48,10 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 		username.setText( prefs.get( "lastusername", "" ) );
 	}
 
+	public User getConnectedUser(){
+		return new RemoteUserImpl();
+	}
+	
 	public Properties getConnectionProperties() throws MalformedURLException {
 		DbInfo info = dblist.getSelectedValue();
 		if ( null != info ) {
@@ -72,11 +85,10 @@ public class RemoteDbPanel extends javax.swing.JPanel {
     jLabel1 = new javax.swing.JLabel();
     remoteurl = new javax.swing.JTextField();
     jPanel2 = new javax.swing.JPanel();
-    jLabel2 = new javax.swing.JLabel();
     jScrollPane1 = new javax.swing.JScrollPane();
     dblist = new javax.swing.JList<DbInfo>();
 
-    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "Connection Information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 12))); // NOI18N
+    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(javax.swing.UIManager.getDefaults().getColor("Panel.background")), "Connection Information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 12))); // NOI18N
 
     jLabel4.setText("Password");
 
@@ -122,7 +134,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
     jPanel1Layout.setVerticalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel1Layout.createSequentialGroup()
-        .addContainerGap()
+        .addGap(0, 0, 0)
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(jLabel1)
           .addComponent(remoteurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -136,16 +148,14 @@ public class RemoteDbPanel extends javax.swing.JPanel {
           .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(connect)
-        .addContainerGap())
+        .addGap(0, 0, 0))
     );
 
-    jLabel2.setText("Databases");
+    jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(javax.swing.UIManager.getDefaults().getColor("Panel.background")), "Databases", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 12))); // NOI18N
 
-    dblist.setModel(new javax.swing.AbstractListModel() {
-      String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-      public int getSize() { return strings.length; }
-      public Object getElementAt(int i) { return strings[i]; }
-    });
+    dblist.setModel(model);
+    dblist.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    dblist.setEnabled(false);
     jScrollPane1.setViewportView(dblist);
 
     javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -153,21 +163,15 @@ public class RemoteDbPanel extends javax.swing.JPanel {
     jPanel2Layout.setHorizontalGroup(
       jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel2Layout.createSequentialGroup()
-        .addGap(0, 0, 0)
-        .addComponent(jLabel2)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
-        .addGap(0, 0, 0))
+        .addContainerGap()
+        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
+        .addContainerGap())
     );
     jPanel2Layout.setVerticalGroup(
       jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel2Layout.createSequentialGroup()
         .addGap(0, 0, 0)
-        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(jPanel2Layout.createSequentialGroup()
-            .addComponent(jLabel2)
-            .addGap(0, 121, Short.MAX_VALUE))
-          .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
         .addGap(0, 0, 0))
     );
 
@@ -183,7 +187,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
       .addGroup(layout.createSequentialGroup()
         .addGap(0, 0, 0)
         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addGap(0, 0, 0)
         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
@@ -191,18 +195,42 @@ public class RemoteDbPanel extends javax.swing.JPanel {
   private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
 		model.clear();
 		render.clearCache();
-
+		dblist.setEnabled( false );
+		
 		ServiceClient rest = DIHelper.getInstance().getAppCtx().getBean( ServiceClient.class );
 		String url = remoteurl.getText();
+		rest.setAuthentication( url, username.getText(), password.getPassword() );
 
-		DbInfo dbs[] = rest.getDbs( url );
+		try {
+			DbInfo dbs[] = rest.getDbs( url );
 
-		Preferences prefs = Preferences.userNodeForPackage( getClass() );
-		prefs.put( "lastexturl", url );
+			Preferences prefs = Preferences.userNodeForPackage( getClass() );
+			prefs.put( "lastexturl", url );
+			prefs.put( "lastusername", username.getText() );
 
-		for ( DbInfo i : dbs ) {
-			render.cache( i, i.getName() );
-			model.addElement( i );
+			for ( DbInfo i : dbs ) {
+				render.cache( i, i.getName() );
+				model.addElement( i );
+			}
+			dblist.setEnabled( true );
+		}
+		catch ( HttpStatusCodeException hse ) {
+			log.error( hse );
+			HttpStatus status = hse.getStatusCode();
+			if ( HttpStatus.UNAUTHORIZED == status ) {
+				GuiUtility.showError( "Access Denied (invalid username/password?)" );
+			}
+			else if ( HttpStatus.NOT_FOUND == status ) {
+				GuiUtility.showError( "The server URL was not found" );
+			}
+			else {
+				GuiUtility.showError( "Server responded: (" + status.value() + ") "
+						+ status.getReasonPhrase() );
+			}
+		}
+		catch ( RestClientException ioe ) {
+			log.error( ioe, ioe );
+			GuiUtility.showError( "Connection to the server failed" );
 		}
   }//GEN-LAST:event_connectActionPerformed
 
@@ -211,7 +239,6 @@ public class RemoteDbPanel extends javax.swing.JPanel {
   private javax.swing.JButton connect;
   private javax.swing.JList<DbInfo> dblist;
   private javax.swing.JLabel jLabel1;
-  private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JPanel jPanel1;

@@ -29,9 +29,7 @@ import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
-import gov.va.semoss.ui.main.SemossPreferences;
-
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.Security;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -133,7 +131,8 @@ public class ExportTtlAction extends DbAction {
 										handler.handleComment( "baseURI: "
 												+ getEngine().getDataBuilder().toString() );
 
-										Map<String, String> ns = UserImpl.getUser().getNamespaces();
+										Map<String, String> ns
+										= Security.getSecurity().getAssociatedUser( getEngine() ).getNamespaces();
 										for ( Map.Entry<String, String> en : ns.entrySet() ) {
 											handler.handleNamespace( en.getKey(), en.getValue() );
 										}
