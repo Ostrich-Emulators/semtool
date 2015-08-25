@@ -13,10 +13,7 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.rdf.engine.api.WriteableInsightTab;
-import gov.va.semoss.rdf.engine.api.WriteableParameterTab;
 import gov.va.semoss.rdf.engine.api.WriteablePerspective;
-import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.security.User;
 import gov.va.semoss.security.User.UserProperty;
 import gov.va.semoss.security.UserImpl;
@@ -24,7 +21,6 @@ import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -56,9 +52,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	private final Collection<Statement> initialStatements = new ArrayList<>();
 
 	private final WriteablePerspectiveImpl wp;
-	private final WriteablePerspectiveTabImpl wpt;
-	private final WriteableInsightTabImpl wit;
-	private final WriteableParameterTabImpl wprmt;
 	
 
 	public WriteableInsightManagerImpl( InsightManager im ) {
@@ -73,11 +66,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		}
 
 		wp = new WriteablePerspectiveImpl( this );
-		wpt = new WriteablePerspectiveTabImpl( this );
-		wit = new WriteableInsightTabImpl( this );
-		wprmt = new WriteableParameterTabImpl( this );
-		//Get current repository from the "InsightManagerImpl":
-		//repo = im.getRepository();    
 	}
 
 	@Override
@@ -250,8 +238,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		if( insights.isEmpty() ){
 			return;
 		}
-		
-		wit.saveInsight( current, insights.get( 0 ), Arrays.asList( p ), new ArrayList<>() );
 	}
 
 	//We do not want to release the this object, because the connection will
@@ -314,39 +300,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		return wp;
 	}
 	
-	/**
-	 * Provides access to methods that persist changes to "Perspective" tab data.
-	 *
-	 * @return getWriteablePerspectiveTab -- (WriteablePerspectiveTab) Methods
-	 * described above.
-	 */
-	@Override
-	public WriteablePerspectiveTab getWriteablePerspectiveTab() {
-		return wpt;
-	}
-
-	/**
-	 * Provides access to methods that persist changes to "Insight" tab data.
-	 *
-	 * @return getWriteableInsightTab -- (WriteableInsightTab) Methods described
-	 * above.
-	 */
-	@Override
-	public WriteableInsightTab getWriteableInsightTab() {
-		return wit;
-	}
-
-	/**
-	 * Provides access to methods that persist changes to "Parameter" tab data.
-	 *
-	 * @return getWriteableParameterTab -- (WriteableParameterTab) Methods
-	 * described above.
-	 */
-	@Override
-	public WriteableParameterTab getWriteableParameterTab() {
-		return wprmt;
-	}
-
 	/**
 	 * Extracts from V-CAMP/SEMOSS preferences the user's name, email, and
 	 * organization, and returns a string of user-info for saving with Insights,

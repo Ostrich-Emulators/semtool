@@ -4,6 +4,10 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
 public interface WriteablePerspective {	
+	 public Object getGuiUpdateMonitor();
+	 public boolean getLeftPaneUpdated();
+	 public void setLeftPaneUpdated(boolean boolLeftPaneUpdated);
+	
 	 /**   Loops through each Perspective of the Insight Manager's TreeView, and persists
 	  * data (Perspectives, Insights, and Parameters) to the Insights KB on disk. This method
 	  * first deletes all Perspectives, Insights, and Parameters from the KB. Then it attempts

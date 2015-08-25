@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -14,6 +15,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import javafx.fxml.FXMLLoader;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -28,6 +30,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
@@ -51,7 +54,6 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
-import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 
@@ -77,12 +79,13 @@ public class  InsightManagerController_2 implements Initializable{
 	protected Button btnSave;
 	@FXML
 	protected Button btnReload;
-	
+	@FXML
+	protected ProgressBar pbSaveReload;
 	
 	protected ObservableList<Perspective> arylPerspectives;
 	protected ObservableList<PlaySheet> arylPlaySheets;
 	protected ObservableList<ParameterType> arylParameterTypes;
-	private static final Logger log = Logger.getLogger( WriteablePerspectiveTab.class );
+	private static final Logger log = Logger.getLogger(InsightManagerController_2.class);
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -111,6 +114,9 @@ public class  InsightManagerController_2 implements Initializable{
 		   btnReload.setOnAction(this::handleReload);
 		   btnReload.setTooltip(new Tooltip("Reload Insight Manager from Database."));
 		   
+		   //Initially hide the Save-Reload ProgressBar:
+		   //-------------------------------------------
+		   pbSaveReload.setVisible(false);
 		}//End if(engine != null).		
 	}
 	
@@ -649,10 +655,15 @@ public class  InsightManagerController_2 implements Initializable{
    		ValueFactory insightVF = rc.getValueFactory();
         URI uriInsight = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, 
            "Insight-"+strUniqueIdentifier);
+        String now = new Date().toString();
+        
         insight.setId(uriInsight);
         insight.setLabel("(A New Insight)");
         insight.setOrder(0);
 		insight.setOutput("gov.va.semoss.ui.components.playsheets.GridPlaySheet");
+		insight.setCreator(engine.getWriteableInsightManager().userInfoFromToolPreferences("V-CAMP/SEMOSS Insight Manager"));
+        insight.setCreated(now);
+        insight.setModified(now);
         
 		//Add new Insight to the tree-view:
 		//---------------------------------
@@ -890,20 +901,48 @@ public class  InsightManagerController_2 implements Initializable{
 	 */
 	private void handleSave(ActionEvent event){
 		ObservableList<TreeItem<Object>> olstPerspectives = treevPerspectives.getRoot().getChildren();
-		boolean boolReturnValue = engine.getWriteableInsightManager().getWriteablePerspective().persistenceWrapper(olstPerspectives);
-        loadData();
-        if(boolReturnValue){
-		    GuiUtility.showMessage("Perspective, Insights, and Parameters saved OK.");
-        }else{
-        	GuiUtility.showError("ERROR: Some Perspectives, Insights, and/or Parameters could not be saved.");
-        }
+
+        pbSaveReload.setVisible(true);
+		//Define a Task to persist the TreeView's data:
+		Task<ObservableValue<Boolean>> doPersistence = new Task<ObservableValue<Boolean>>(){
+		    @Override 
+		    protected ObservableValue<Boolean> call() throws Exception {
+		    	ObservableValue<Boolean> oboolReturnValue;
+				oboolReturnValue = new SimpleBooleanProperty(engine.getWriteableInsightManager().getWriteablePerspective().persistenceWrapper(olstPerspectives)).asObject();
+                if(oboolReturnValue.getValue().booleanValue() == false){
+				   updateProgress(-1.0, 1.0);
+                }else{
+ 				   updateProgress(1.0, 1.0);
+ 				   Thread.sleep(1000);
+				   loadData();
+                }
+				return oboolReturnValue;
+		    }
+		};
+	    //Define a listener to display status when the  Task completes:
+		doPersistence.stateProperty().addListener(new ChangeListener<Worker.State>() {
+	        @Override 
+	        public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState){
+	           if(newState == Worker.State.SUCCEEDED){
+				  if(doPersistence.getValue().getValue().booleanValue() == true){
+					 GuiUtility.showMessage("Perspective, Insights, and Parameters saved OK.");
+					 pbSaveReload.setVisible(false);
+				  }else{
+					 GuiUtility.showError("ERROR: Some Perspectives, Insights, and/or Parameters could not be saved.");
+				  }
+	      	   }    	    
+	        }
+	     });
+		 //Run the Task on a separate Thread:
+		 new Thread(doPersistence).start();
+	     pbSaveReload.progressProperty().bind(doPersistence.progressProperty());
 	}
 	
 	/**   Reloads the Insight Manager TreeView from the database.
 	 * 
 	 * @param event -- (ActionEvent)
 	 */
-	private void handleReload(ActionEvent event){
+	private void handleReload(ActionEvent event){ 
 		loadData();
 	}
 

@@ -4,6 +4,10 @@
     -fx-background-color: lightgray;
 }
 
+.progress-bar > .track{
+    -fx-background-color: lightgray;
+}
+
 .tree-cell:filled:hover,
 .tree-table-row-cell:filled:hover {
     -fx-background-color: -fx-cell-hover-color;

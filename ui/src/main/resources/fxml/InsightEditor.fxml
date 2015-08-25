@@ -54,7 +54,7 @@
          <GridPane.margin>
             <Insets bottom="10.0" right="10.0" />
          </GridPane.margin></TextArea>
-      <TextArea fx:id="txtaInsightDesc_Inst" maxWidth="1.7976931348623157E308" minHeight="60.0" minWidth="100.0" prefHeight="100.0" prefWidth="400.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" GridPane.vgrow="ALWAYS">
+      <TextArea fx:id="txtaInsightDesc_Inst" maxWidth="1.7976931348623157E308" minHeight="60.0" minWidth="100.0" prefHeight="100.0" prefWidth="400.0" wrapText="true" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" GridPane.vgrow="ALWAYS">
          <GridPane.margin>
             <Insets bottom="10.0" right="10.0" />
          </GridPane.margin></TextArea>

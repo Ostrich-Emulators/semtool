@@ -85,14 +85,6 @@ public interface WriteableInsightManager extends InsightManager {
 	public void addRawStatements( Collection<Statement> stmts ) throws RepositoryException;
 
 
-	/**
-	 * Provides access to methods that persist changes to "Parameter" tab data.
-	 *
-	 * @return getWriteableParameterTab -- (WriteableParameterTab) Methods
-	 * described above.
-	 */
-	public WriteableParameterTab getWriteableParameterTab();
-
   /**
    * Removes all perspectives and insights
    */
@@ -104,21 +96,8 @@ public interface WriteableInsightManager extends InsightManager {
    * @return getWriteablePerspective -- (WriteablePerspective)
    *    Methods described above.
    */
+  
   public WriteablePerspective getWriteablePerspective();
-  
-  /**   Provides access to methods that persist changes to "Perspective" tab data.
-   * 
-   * @return getWriteablePerspectiveTab -- (WriteablePerspectiveTab)
-   *    Methods described above.
-   */
-  public WriteablePerspectiveTab getWriteablePerspectiveTab(); 
-  
-  /**   Provides access to methods that persist changes to "Insight" tab data.
-   * 
-   * @return getWriteableInsightTab -- (WriteableInsightTab)
-   *    Methods described above.
-   */
-  public WriteableInsightTab getWriteableInsightTab();
 	/**
 	 * Extracts from V-CAMP/SEMOSS preferences the user's name, email, and
 	 * organization, and returns a string of user-info for saving with Insights,
@@ -130,6 +109,7 @@ public interface WriteableInsightManager extends InsightManager {
 	 *
 	 * @return userInfoFromToolPreferences -- (String) Described above.
 	 */
+  
 	public String userInfoFromToolPreferences( String strOldUserInfo );
 
 }//End "WriteableInsightManager" interface.

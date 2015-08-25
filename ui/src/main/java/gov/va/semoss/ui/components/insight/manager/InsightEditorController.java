@@ -20,6 +20,7 @@ import gov.va.semoss.util.Utility;
 import java.awt.Component;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -62,7 +63,6 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 public class InsightEditorController implements Initializable{
 	protected TreeView<Object> treevPerspectives;
@@ -121,6 +121,7 @@ public class InsightEditorController implements Initializable{
 			itemSelected.getParent().setExpanded(false);
 			itemSelected.getParent().setExpanded(true);
 			treevPerspectives.getSelectionModel().select(itemSelected);
+			setCreatorModifiedFields(insight);
 		});
 		
 		//"Display with" Combo-Box:
@@ -202,6 +203,7 @@ public class InsightEditorController implements Initializable{
 				txtaQuery_Inst.setDisable(false);
 				chkLegacyQuery_Inst.setDisable(false);
 			}
+			setCreatorModifiedFields(insight);
  	    });
 		
 		//Legacy Query check-box:
@@ -211,6 +213,7 @@ public class InsightEditorController implements Initializable{
 			insight.setLegacy(newValue);
 			//Update Perspective's Insight collection:
 			arylInsights.set(indexInsight, insight);
+			setCreatorModifiedFields(insight);
 		});
 
 		//Insight Query:
@@ -220,6 +223,7 @@ public class InsightEditorController implements Initializable{
 			insight.setSparql(newValue);
 			//Update Perspective's Insight collection:
 			arylInsights.set(indexInsight, insight);
+			setCreatorModifiedFields(insight);
 		});
 
 		//Build Test Query Button:
@@ -234,6 +238,7 @@ public class InsightEditorController implements Initializable{
 			insight.setDescription(newValue);
 			//Update Perspective's Insight collection:
 			arylInsights.set(indexInsight, insight);
+			setCreatorModifiedFields(insight);
 		});
 		
 		//Author (read-only):
@@ -250,6 +255,17 @@ public class InsightEditorController implements Initializable{
         
 	}//End "setData()".
 
+	/**   Updates the "Creator" and "Modified" fields of the Insight.
+	 * 
+	 * @param insight -- (Insight).
+	 */
+	private void setCreatorModifiedFields(Insight insight){
+		IEngine engine = DIHelper.getInstance().getRdfEngine();	    
+		String now = new Date().toString();
+		insight.setCreator(engine.getWriteableInsightManager().userInfoFromToolPreferences(insight.getCreator()));
+        insight.setModified(now);	    
+	}
+	
 	/**   Returns a PlaySheet icon for the passed-in PlaySheet label. The array-list
 	 * of PlaySheets is consulted. The base path to all icons is defined at the top 
 	 * of this class, in "ICON_LOCATION".

@@ -29,14 +29,32 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteablePerspective;
-import gov.va.semoss.rdf.engine.api.WriteablePerspectiveTab;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 
 public class WriteablePerspectiveImpl implements WriteablePerspective {
 	  private final WriteableInsightManager wim;
 	  private final RepositoryConnection rc;
-	  private static final Logger log = Logger.getLogger( WriteablePerspectiveTab.class );
+	  private static final Logger log = Logger.getLogger( WriteablePerspective.class );
 	  private final Pattern pattern = Pattern.compile( "^(\\w+)(.*)$" );
+	  private static long lngUniqueIdentifier = System.currentTimeMillis();
+		
+	  //These are necessary to make sure that the Insight Manager 
+	  //loads after the left-pane is completely loaded:
+	  //---------------------------------------------------------
+	  private static Object guiUpdateMonitor = new Object();
+	  private static boolean boolLeftPaneUpdated = false;
+	  @Override
+	  public Object getGuiUpdateMonitor(){
+		  return guiUpdateMonitor;
+	  }
+	  @Override
+	  public boolean getLeftPaneUpdated(){
+		  return boolLeftPaneUpdated;
+	  }
+	  @Override
+	  public void setLeftPaneUpdated(boolean boolLeftPaneUpdated){
+		  WriteablePerspectiveImpl.boolLeftPaneUpdated = boolLeftPaneUpdated;
+	  }
 
 	  /**    Class constructor. Sets the WriteableInsightManagerObject (passed in), and
 	   * the raw connection from it.
@@ -290,14 +308,9 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 		 * @return savePerspective -- (boolean) Whether the save to disk succeeded.
 		 */
 	  private boolean savePerspective(Perspective perspective) {
-	    	//We do this to keep "strUniqueIdentifier" unique, since the
-	    	//loop involving this save method is so blindingly fast:
-	   		try{
-				Thread.sleep(5);
-			}catch(InterruptedException e) {}
-	   		
 			boolean boolReturnValue = false;
-			String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
+			lngUniqueIdentifier += 1;
+			String strUniqueIdentifier = String.valueOf(lngUniqueIdentifier);
 			ValueFactory insightVF = rc.getValueFactory();
 			String perspectiveUriName = "perspective-" + strUniqueIdentifier;
 			URI perspectiveURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, perspectiveUriName);
@@ -350,14 +363,9 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 	     * @return saveInsight -- (boolean) Whether the save succeeded.
 	     */
 	    private boolean saveInsight(Perspective perspective, Insight insight){
-	    	//We do this to keep "strUniqueIdentifier" unique, since the
-	    	//loop involving this save method is so blindingly fast:
-	   		try{
-				Thread.sleep(5);
-			}catch(InterruptedException e) {}
-	   		
 			boolean boolReturnValue = false;
-			String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
+			lngUniqueIdentifier += 1;
+			String strUniqueIdentifier = String.valueOf(lngUniqueIdentifier);
 			ValueFactory insightVF = rc.getValueFactory();
 			String perspectiveURI_String = "<" + perspective.getUri().toString() + ">";
 		    String insightURI_String = "<" + insight.getIdStr() + ">";
@@ -368,8 +376,6 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 			//Make sure that embedded quotes and new-line characters can be persisted:
 		    String sparql = legalizeQuotes(insight.getSparql().trim());
 		    String description = legalizeQuotes(insight.getDescription().trim());
-		    String creator = wim.userInfoFromToolPreferences(insight.getCreator());		  
-	        Literal modified = insightVF.createLiteral(new Date());
 			String slotUriName = perspective.getUri().getLocalName() + "-slot-" + strUniqueIdentifier;
 			String slotURI_String = "<" + insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName).toString() + ">";
 			Literal order = insightVF.createLiteral(insight.getOrder());
@@ -409,9 +415,9 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 	                + "?spinBodyURI rdf:type " + spinBodyType + " . "
 	                + "?spinBodyURI sp:text \"" + sparql + "\" . "
 	                + "?insightURI dcterms:description \"" + description + "\" . "
-	                + "?insightURI dcterms:creator \"" + creator + "\" . "
+	                + "?insightURI dcterms:creator \"" + insight.getCreator() + "\" . "
 	                + "?insightURI dcterms:created \"" + insight.getCreated() + "\" . "
-	                + "?insightURI dcterms:modified " + modified + " . } "
+	                + "?insightURI dcterms:modified \"" + insight.getModified() + "\" . } "
 	                + "WHERE { BIND(" + insightURI_String + " AS ?insightURI) . "
 	                + "BIND(" + spinBodyURI_String + " AS ?spinBodyURI) .}";	                
 
@@ -447,14 +453,9 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 	     */
 	    private boolean saveParameter(Insight insight, Parameter parameter){
 	    	boolean boolReturnValue = false;
-	    	//We do this to keep "strUniqueIdentifier" unique, since the
-	    	//loop involving this save method is so blindingly fast:
-	   		try{
-				Thread.sleep(5);
-			}catch(InterruptedException e) {}
-	   		
+			lngUniqueIdentifier += 1;
+			String strUniqueIdentifier = String.valueOf(lngUniqueIdentifier);	   		
 		    ValueFactory insightVF = rc.getValueFactory();
-		    String strUniqueIdentifier = String.valueOf(System.currentTimeMillis());
             String insightURI_String = "<" + insight.getIdStr() + ">";		
             //We are rebuilding the Constraint URI here, because the designers of VA_MainDB, v20, 
             //decided to reuse Parameters, and we discourage that. No objects on the tree-view
@@ -523,12 +524,19 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 			//Import Insights into the repository:
 			boolean boolReturnValue = EngineUtil.getInstance().importInsights(wim);
 			
-			//Give the left-pane drop-downs enough time to refresh from the import:
-			try {
-				Thread.sleep( 2000 );
-			} catch (InterruptedException e) {
-				log.warn(e, e);
-			}		
+			//This is necessary to make sure that the Insight Manager loads
+			//after the left-pane is completely loaded:
+	        synchronized(guiUpdateMonitor) {
+	        	while(!boolLeftPaneUpdated){
+ 	               try {
+	            	   guiUpdateMonitor.wait();
+	            	   
+	               }catch(InterruptedException e){
+	   	        	   boolLeftPaneUpdated = false;
+	               }
+	        	}
+	        	boolLeftPaneUpdated = false;
+	          }
 			return boolReturnValue;
 	   }
 
