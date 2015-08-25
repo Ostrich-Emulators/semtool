@@ -6,14 +6,18 @@ import javax.servlet.http.HttpServletResponse;
 import gov.va.semoss.web.io.DbInfo;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Collection;
-import java.util.Enumeration;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -86,9 +90,24 @@ public class DatabaseController extends SemossControllerBase {
 
 	@RequestMapping
 	@ResponseBody
-	public DbInfo[] getAllDatabases() {
+	public DbInfo[] getAllDatabases( HttpServletRequest req ) {
 		log.debug( "Getting all databases." );
 		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
+
+		String reqpath = req.getRequestURL().toString() + "/";
+
+		for ( DbInfo dbi : testDbs ) {
+			try {
+				String serverpath = reqpath + URLEncoder.encode( dbi.getName(), "UTF-8" );
+				dbi.setServerUrl( serverpath );
+				dbi.setDataUrl( serverpath + "/data" );
+				dbi.setInsightsUrl( serverpath + "/insights" );
+			}
+			catch ( Exception e ) {
+				log.error( e, e );
+			}
+		}
+
 		return testDbs;
 	}
 
@@ -165,6 +184,7 @@ public class DatabaseController extends SemossControllerBase {
 
 		try ( CloseableHttpClient httpclient = HttpClients.createDefault() ) {
 			HttpRequestBase method = null;
+			
 			switch ( request.getMethod() ) {
 				case "POST":
 					HttpPost post = new HttpPost( requestUrl.toString() );
@@ -182,16 +202,26 @@ public class DatabaseController extends SemossControllerBase {
 					break;
 				default: // "GET"
 					if ( null != request.getQueryString() ) {
-						requestUrl.append( request.getQueryString() );
+						char concatenator = '?';
+						Map<String, String[]> params = request.getParameterMap();
+						for ( Map.Entry<String, String[]> en : params.entrySet() ) {
+							for ( String val : en.getValue() ) {
+								requestUrl.append( concatenator );
+								requestUrl.append( en.getKey() );
+								requestUrl.append( "=" );
+								requestUrl.append( URLEncoder.encode( val, "UTF-8" ) );
+								concatenator = '&';
+							}
+						}
 					}
+
 					method = new HttpGet( requestUrl.toString() );
 			}
 
-			Enumeration<String> heads = request.getHeaderNames();
-			while ( heads.hasMoreElements() ) {
-				String headname = heads.nextElement();
-				method.addHeader( new BasicHeader( headname, request.getHeader( headname ) ) );
-			}
+			method.addHeader( HttpHeaders.ACCEPT, request.getHeader( HttpHeaders.ACCEPT ) );
+			method.addHeader( HttpHeaders.CONTENT_TYPE, 
+					request.getHeader( HttpHeaders.CONTENT_TYPE ) );
+			method.addHeader( new BasicHeader( "host", request.getHeader( "host" ) ) );
 
 			// Create a custom response handler
 			ResponseHandler<Void> responseHandler = new ResponseHandler<Void>() {
@@ -206,25 +236,44 @@ public class DatabaseController extends SemossControllerBase {
 						return null;
 					}
 
-					if ( status >= 200 && status < 300 ) {
+					response.addHeader( HttpHeaders.CONTENT_TYPE,
+							ws.getFirstHeader( HttpHeaders.CONTENT_TYPE ).getValue() );
+					response.addHeader( HttpHeaders.VARY, "Accept" );
+					if( entity.isChunked() ){
+						response.addHeader( HttpHeaders.TRANSFER_ENCODING, "chunked" );
+					}
+							
+					response.addHeader( HttpHeaders.SERVER,
+							ws.getFirstHeader( HttpHeaders.SERVER ).getValue() );
+					response.addHeader( HttpHeaders.DATE,
+							ws.getFirstHeader( HttpHeaders.DATE ).getValue() );
 
-						if ( entity.isStreaming() ) {
-							IOUtils.copy( ws.getEntity().getContent(), response.getOutputStream() );
-						}
-						else {
-							response.getWriter().write( EntityUtils.toString( entity ) );
-						}
-						return null;
+					for ( Header header : ws.getAllHeaders() ) {
+						log.debug( "header: " + header.getName() + "--->" + header.getValue() );
+						response.setHeader( header.getName(), header.getValue() );
+					}
+//
+//					CsrfToken csrf = CsrfToken.class.cast( request.getAttribute( "_csrf" ) );
+//					if ( null != csrf ) {
+//						response.setHeader( "X-CSRF-HEADER", csrf.getHeaderName() );
+//						// Spring Security will allow the token to be included in this parameter name
+//						response.setHeader( "X-CSRF-PARAM", csrf.getParameterName() );
+//						// this is the value of the token to be included as either a header or an HTTP parameter
+//						response.setHeader( "X-CSRF-TOKEN", csrf.getToken() );
+//					}
+
+					if ( entity.isStreaming() ) {
+						IOUtils.copy( ws.getEntity().getContent(), response.getOutputStream() );
 					}
 					else {
-						String err = EntityUtils.toString( entity );
-						response.getWriter().write( err );
+						response.getWriter().write( EntityUtils.toString( entity ) );
 					}
+					response.flushBuffer();
 
 					return null;
 				}
-
 			};
+
 			httpclient.execute( method, responseHandler );
 		}
 	}

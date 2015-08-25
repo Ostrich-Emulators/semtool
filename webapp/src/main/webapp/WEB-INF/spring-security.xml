@@ -6,7 +6,11 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-4.0.xsd">
 
+	<beans:bean name="csrfmatcher" class="gov.va.semoss.security.CsrfMatcher"/>
+	
 	<http auto-config="true">
+		<csrf request-matcher-ref="csrfmatcher"/>
+		
 		<!-- order is important here -->
 		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/insight**" access="hasAnyRole('ROLE_INSIGHT_ADMIN','ROLE_ADMIN')" />
