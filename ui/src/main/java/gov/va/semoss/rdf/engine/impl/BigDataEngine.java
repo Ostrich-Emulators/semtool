@@ -242,40 +242,34 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 					@Override
 					public void commit() {
-						if ( Security.getSecurity().getAssociatedUser( BigDataEngine.this ).
-						hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-							if ( hasCommittableChanges() ) {
-								try {
-									List<Statement> stmts = new ArrayList<>( getStatements() );
-									Collections.sort( stmts, new StatementSorter() );
+						if ( hasCommittableChanges() ) {
+							try {
+								List<Statement> stmts = new ArrayList<>( getStatements() );
+								Collections.sort( stmts, new StatementSorter() );
 
-									copyInsightsToDisk( stmts ); // from the WriteableInsightManager
+								copyInsightsToDisk( stmts ); // from the WriteableInsightManager
 
-									// refresh the insight engine's KB
-									RepositoryConnection src = insightEngine.getRawConnection();
-									src.begin();
-									src.clear();
-									src.add( stmts );
-									src.commit();
-								}
-								catch ( RepositoryException re ) {
-									log.error( re, re );
-								}
+								// refresh the insight engine's KB
+								RepositoryConnection src = insightEngine.getRawConnection();
+								src.begin();
+								src.clear();
+								src.add( stmts );
+								src.commit();
 							}
-
-							if ( log.isTraceEnabled() ) {
-								File dumpfile
-								= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
-								try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
-									insightEngine.getRawConnection().export( new TurtleWriter( w ) );
-								}
-								catch ( Exception ioe ) {
-									log.warn( ioe, ioe );
-								}
+							catch ( RepositoryException re ) {
+								log.error( re, re );
 							}
 						}
-						else {
-							throw SemossPermission.newSecEx();
+
+						if ( log.isTraceEnabled() ) {
+							File dumpfile
+							= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
+							try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
+								insightEngine.getRawConnection().export( new TurtleWriter( w ) );
+							}
+							catch ( Exception ioe ) {
+								log.warn( ioe, ioe );
+							}
 						}
 					}
 				};

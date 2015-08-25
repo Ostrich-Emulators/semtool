@@ -8,6 +8,7 @@ import gov.va.semoss.web.io.DbInfo;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
@@ -17,16 +18,10 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,48 +175,42 @@ public class DatabaseController extends SemossControllerBase {
 
 		String realurl = ( "data".equalsIgnoreCase( type )
 				? dbi.getDataUrl() : dbi.getInsightsUrl() );
-		StringBuilder requestUrl = new StringBuilder( realurl ).append( extra );
+		String requestUrl = realurl + extra;
 
 		try ( CloseableHttpClient httpclient = HttpClients.createDefault() ) {
-			HttpRequestBase method = null;
-			
+			RequestBuilder builder = null;
+
 			switch ( request.getMethod() ) {
 				case "POST":
-					HttpPost post = new HttpPost( requestUrl.toString() );
-					post.setEntity( new InputStreamEntity( request.getInputStream() ) );
-					method = post;
+					builder = RequestBuilder.post( requestUrl );
 					break;
 				case "DELETE":
-					HttpDelete delete = new HttpDelete( requestUrl.toString() );
-					method = delete;
+					builder = RequestBuilder.delete( requestUrl );
 					break;
 				case "PUT":
-					HttpPut put = new HttpPut( requestUrl.toString() );
-					put.setEntity( new InputStreamEntity( request.getInputStream() ) );
-					method = put;
+					builder = RequestBuilder.put( requestUrl );
 					break;
 				default: // "GET"
-					if ( null != request.getQueryString() ) {
-						char concatenator = '?';
-						Map<String, String[]> params = request.getParameterMap();
-						for ( Map.Entry<String, String[]> en : params.entrySet() ) {
-							for ( String val : en.getValue() ) {
-								requestUrl.append( concatenator );
-								requestUrl.append( en.getKey() );
-								requestUrl.append( "=" );
-								requestUrl.append( URLEncoder.encode( val, "UTF-8" ) );
-								concatenator = '&';
-							}
-						}
-					}
-
-					method = new HttpGet( requestUrl.toString() );
+					builder = RequestBuilder.get( requestUrl );
 			}
 
-			method.addHeader( HttpHeaders.ACCEPT, request.getHeader( HttpHeaders.ACCEPT ) );
-			method.addHeader( HttpHeaders.CONTENT_TYPE, 
-					request.getHeader( HttpHeaders.CONTENT_TYPE ) );
-			method.addHeader( new BasicHeader( "host", request.getHeader( "host" ) ) );
+			Map<String, String[]> params = request.getParameterMap();
+			for ( Map.Entry<String, String[]> en : params.entrySet() ) {
+				for ( String val : en.getValue() ) {
+					builder.addParameter( en.getKey(), val );
+				}
+			}
+
+			Enumeration<String> headers = request.getHeaderNames();
+			while ( headers.hasMoreElements() ) {
+				String header = headers.nextElement();
+				if ( !HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase( header ) ) {
+					Enumeration<String> valen = request.getHeaders( header );
+					while ( valen.hasMoreElements() ) {
+						builder.addHeader( header, valen.nextElement() );
+					}
+				}
+			}
 
 			// Create a custom response handler
 			ResponseHandler<Void> responseHandler = new ResponseHandler<Void>() {
@@ -239,10 +228,10 @@ public class DatabaseController extends SemossControllerBase {
 					response.addHeader( HttpHeaders.CONTENT_TYPE,
 							ws.getFirstHeader( HttpHeaders.CONTENT_TYPE ).getValue() );
 					response.addHeader( HttpHeaders.VARY, "Accept" );
-					if( entity.isChunked() ){
+					if ( entity.isChunked() ) {
 						response.addHeader( HttpHeaders.TRANSFER_ENCODING, "chunked" );
 					}
-							
+
 					response.addHeader( HttpHeaders.SERVER,
 							ws.getFirstHeader( HttpHeaders.SERVER ).getValue() );
 					response.addHeader( HttpHeaders.DATE,
@@ -274,7 +263,8 @@ public class DatabaseController extends SemossControllerBase {
 				}
 			};
 
-			httpclient.execute( method, responseHandler );
+			HttpUriRequest forwarded = builder.build();
+			httpclient.execute( forwarded, responseHandler );
 		}
 	}
 }

@@ -178,7 +178,7 @@ public class EngineUtil implements Runnable {
 						if ( domount ) {
 							IEngine eng = GuiUtility.loadEngine( entry.getKey() );
 							Security.getSecurity().associateUser( eng, users.get( entry.getKey() ) );
-							
+
 							// avoid a possible ConcurrentModificationException
 							List<EngineOperationListener> lls = new ArrayList<>( listeners );
 							for ( EngineOperationListener eol : lls ) {
@@ -565,7 +565,7 @@ public class EngineUtil implements Runnable {
 
 		IEngine bde = GuiUtility.loadEngine( smssfile.getAbsoluteFile() );
 		Security.getSecurity().associateUser( bde, user );
-		
+
 		List<Statement> vocabs = new ArrayList<>();
 
 		for ( URL url : ecb.getVocabularies() ) {
@@ -625,24 +625,17 @@ public class EngineUtil implements Runnable {
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
 			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
-		if ( Security.getSecurity().getAssociatedUser( engine ).
-				hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-
-			List<Statement> stmts = new ArrayList<>();
-			if ( null != insightsfile ) {
-				stmts.addAll( createInsightStatements( insightsfile ) );
-			}
-
-			for ( URL url : vocabs ) {
-				stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
-			}
-
-			insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
-			notify();
+		List<Statement> stmts = new ArrayList<>();
+		if ( null != insightsfile ) {
+			stmts.addAll( createInsightStatements( insightsfile ) );
 		}
-		else {
-			throw new EngineManagementException( SemossPermission.newSecEx() );
+
+		for ( URL url : vocabs ) {
+			stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
 		}
+
+		insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
+		notify();
 	}
 
 	/**

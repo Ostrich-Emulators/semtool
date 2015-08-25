@@ -468,7 +468,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public void update( UpdateExecutor ue ) throws RepositoryException,
 			MalformedQueryException, UpdateExecutionException {
-		User user = Security.getSecurity().getAssociatedUser( this );
 		if ( isConnected() ) {
 			addUserNamespaces( ue );
 			RepositoryConnection rc = getRawConnection();
