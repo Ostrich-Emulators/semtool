@@ -2,12 +2,12 @@
 ## create structure ##
 ######################
 
-# Create the context entry
-dn: o=semoss
-o: semoss
-objectClass: top
-objectClass: organization
-description: The context entry for suffix o=semoss
+# Create the context entry (giving errors)
+# dn: o=semoss
+# o: semoss
+# objectClass: top
+# objectClass: organization
+# description: The context entry for suffix o=semoss
 
 # Create the group people
 dn: ou=people,o=semoss
@@ -36,7 +36,6 @@ objectClass: groupOfNames
 objectClass: top
 
 dn: cn=users,ou=groups,o=semoss
-#member: uid=user
 member: uid=jmarquiss
 objectClass: groupOfNames
 objectClass: top
