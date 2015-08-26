@@ -15,12 +15,18 @@
 	<beans:bean id="authpop"
 							class="gov.va.semoss.web.security.CustomAuthenticationManager"/>
 	
+	
 	<authentication-manager>
 		<ldap-authentication-provider
-			user-dn-pattern="uid={0},ou=people"
+			user-dn-pattern="${ldap.userdn.pattern}"
+			server-ref="ldap"
 			user-context-mapper-ref="authpop" />
 	</authentication-manager>
-	<ldap-server url="${ldap.url}/${ldap.base}"/>
+	<ldap-server id="ldap"
+							 url="${ldap.url}/${ldap.base}"
+							 manager-dn="${ldap.userDn}"
+							 manager-password="${ldap.password}"/>
+	
 
 	<http auto-config="true">
 		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" />
