@@ -935,15 +935,10 @@ public class EngineUtil implements Runnable {
 	public static String getEngineLabel( IEngine engine ) {
 		String label = engine.getEngineName();
 		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
-		try {
-			engine.query( mq );
-			String str = mq.getString();
-			if ( null != str ) {
-				label = str;
-			}
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// don't care
+		engine.queryNoEx( mq );
+		String str = mq.getString();
+		if ( null != str ) {
+			label = str;
 		}
 		return label;
 	}
