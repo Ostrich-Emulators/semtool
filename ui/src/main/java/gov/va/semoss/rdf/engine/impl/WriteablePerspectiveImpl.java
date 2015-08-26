@@ -38,24 +38,6 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 	  private final Pattern pattern = Pattern.compile( "^(\\w+)(.*)$" );
 	  private static long lngUniqueIdentifier = System.currentTimeMillis();
 		
-	  //These are necessary to make sure that the Insight Manager 
-	  //loads after the left-pane is completely loaded:
-	  //---------------------------------------------------------
-	  private static Object guiUpdateMonitor = new Object();
-	  private static boolean boolLeftPaneUpdated = false;
-	  @Override
-	  public Object getGuiUpdateMonitor(){
-		  return guiUpdateMonitor;
-	  }
-	  @Override
-	  public boolean getLeftPaneUpdated(){
-		  return boolLeftPaneUpdated;
-	  }
-	  @Override
-	  public void setLeftPaneUpdated(boolean boolLeftPaneUpdated){
-		  WriteablePerspectiveImpl.boolLeftPaneUpdated = boolLeftPaneUpdated;
-	  }
-
 	  /**    Class constructor. Sets the WriteableInsightManagerObject (passed in), and
 	   * the raw connection from it.
 	   * 
@@ -114,9 +96,6 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 			         }
 			     }
 		     }
-          }
-          if(boolReturnValue){
-		     boolReturnValue = importInsights();
           }
 		  return boolReturnValue;
 	  }
@@ -342,7 +321,7 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
                 boolReturnValue = true;
 			}
 			catch ( Exception e ) {
-				e.printStackTrace();
+				log.warn( e, e );
 				try {
 					rc.rollback();
 				}
@@ -431,7 +410,7 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
                 boolReturnValue = true;
 			}
 			catch ( Exception e ) {
-				e.printStackTrace();
+				log.warn( e, e );
 				try {
 					rc.rollback();
 				}
@@ -500,7 +479,7 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
                 boolReturnValue = true;
 			}
 			catch ( Exception e ) {
-				e.printStackTrace();
+				log.warn( e, e );
 				try {
 					rc.rollback();
 				}
@@ -511,34 +490,6 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 	    	return boolReturnValue;
 	    }
 	    
-//---------------------------------------------------------------------------------------------------------
-//       I m p o r t   I n - M e m o r y   D a t a   t o   T r i p l e - S t o r e   o n   D i s k		
-//---------------------------------------------------------------------------------------------------------
-	  
-	   /**   Imports all Perspectives, Insights, and Parameters into the database.
-	    * 
-	    * @return importInsights -- (boolean) Whether the import succeeded.
-	    */
-	   @Override
-	   public boolean importInsights(){
-			//Import Insights into the repository:
-			boolean boolReturnValue = EngineUtil.getInstance().importInsights(wim);
-			
-			//This is necessary to make sure that the Insight Manager loads
-			//after the left-pane is completely loaded:
-	        synchronized(guiUpdateMonitor) {
-	        	while(!boolLeftPaneUpdated){
- 	               try {
-	            	   guiUpdateMonitor.wait();
-	            	   
-	               }catch(InterruptedException e){
-	   	        	   boolLeftPaneUpdated = false;
-	               }
-	        	}
-	        	boolLeftPaneUpdated = false;
-	          }
-			return boolReturnValue;
-	   }
 
 //---------------------------------------------------------------------------------------------------------
 //                         I n s i g h t   M a n a g e r   U t i l i t i e s
@@ -558,7 +509,7 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 		public String legalizeQuotes(String quotedString) {
 			String strReturnValue = quotedString;
 	
-			strReturnValue = strReturnValue.replace( "\"", "'" ).replace("\n", "\\n");
+			strReturnValue = strReturnValue.replace( "\"", "'" ).replace("\n", "\\n").replace("\r", "");
 	
 			return strReturnValue;
 		}

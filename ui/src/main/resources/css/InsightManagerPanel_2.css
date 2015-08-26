@@ -56,3 +56,8 @@
     -fx-font-size: 14px;
 }
 
+.separator *.line {
+    -fx-border-style: solid;
+    -fx-border-width: 0 1 0 0; 
+    -fx-border-color: red;
+}

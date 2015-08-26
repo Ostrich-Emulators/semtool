@@ -17,15 +17,16 @@
                   <TreeView fx:id="treevPerspectives" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="55.0" prefHeight="477.0" prefWidth="232.0" />
                   <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="114.0" prefWidth="230.0">
                     <columnConstraints>
-                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="123.0" />
-                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="66.0" />
+                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="130.0" />
+                        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="2.0" minWidth="2.0" prefWidth="2.0" />
+                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="90.0" valignment="CENTER" vgrow="SOMETIMES" />
                         <RowConstraints maxHeight="15.0" minHeight="1.0" prefHeight="15.0" valignment="CENTER" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
+                        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
                            <children>
                               <Button fx:id="btnReload" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" text="Reload">
                                  <VBox.margin>
@@ -42,7 +43,7 @@
                                     <Font name="System Italic" size="15.0" />
                                  </font>
                                  <VBox.margin>
-                                    <Insets />
+                                    <Insets left="4.0" />
                                  </VBox.margin>
                               </Label>
                               <RadioButton fx:id="radioMove" mnemonicParsing="false" selected="true" text="Move Insight">
@@ -50,7 +51,7 @@
                                     <ToggleGroup fx:id="grpCaD" />
                                  </toggleGroup>
                                  <VBox.margin>
-                                    <Insets top="5.0" />
+                                    <Insets left="4.0" top="5.0" />
                                  </VBox.margin>
                                  <font>
                                     <Font name="System Italic" size="15.0" />
@@ -58,15 +59,19 @@
                               </RadioButton>
                               <RadioButton fx:id="radioCopy" mnemonicParsing="false" text="Copy Insight" toggleGroup="$grpCaD">
                                  <VBox.margin>
-                                    <Insets top="5.0" />
+                                    <Insets left="4.0" top="5.0" />
                                  </VBox.margin>
                                  <font>
                                     <Font name="System Italic" size="15.0" />
                                  </font>
                               </RadioButton>
                            </children>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
                         </VBox>
-                        <ProgressBar fx:id="pbSaveReload" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" progress="0.0" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                        <ProgressBar fx:id="pbSaveReload" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" progress="0.0" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                        <Separator orientation="VERTICAL" prefHeight="90.0" prefWidth="30.0" GridPane.columnIndex="1" />
                      </children>
                   </GridPane>
                </children>

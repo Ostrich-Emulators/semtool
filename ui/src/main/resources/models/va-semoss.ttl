@@ -253,7 +253,7 @@ insights:GQ0 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
 	dcterms:description "The need to filter semoss:Relation indicates an error occuring somewhere, possibly in the importer." ;
 	dcterms:modified "2015-05-27T22:02:17.224Z"^^xsd:dateTime .
 
-insights:GQ0-CONSTRUCT sp:text """CONSTRUCT{ ?source ?relation ?target }
+insights:GQ0-CONSTRUCT sp:text """CONSTRUCT{ ?source ?relation ?target .}
 WHERE {
   ?relation a owl:ObjectProperty .
   ?s ?relation ?o .
@@ -289,12 +289,18 @@ insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
 
 
 
-insights:GQ1-Concept-Query sp:text "SELECT ?entity WHERE { ?entity rdfs:subClassOf semoss:Concept }" ;
+insights:GQ1-Concept-Query sp:text "SELECT ?entity
+WHERE {
+    ?entity rdfs:subClassOf semoss:Concept .
+}";
 	a sp:Select .
 
 
 
-insights:GQ1-CONSTRUCT sp:text "SELECT ?instance WHERE { BIND(<@Concept-http://semoss.org/ontologies/Concept@> AS ?entity) BIND(<@Instance-http://semoss.org/ontologies/Concept/Instance@> AS ?instance) }" ;
+insights:GQ1-CONSTRUCT sp:text "SELECT ?entity 
+WHERE { 
+    BIND(?Instance AS ?entity).
+}";
 	a sp:Construct .
 
 
@@ -306,7 +312,10 @@ insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
 	rdfs:label "Instance" .
 
 
-insights:GQ1-Instance-Query sp:text "SELECT ?Instance WHERE { {?Instance a <@Concept@> ;} }" ;
+insights:GQ1-Instance-Query sp:text "SELECT ?entity
+WHERE{
+    ?entity a ?Concept .
+}";
 	a sp:Select .
 
 
@@ -522,7 +531,7 @@ insights:Generic-Perspective-insight-3 dcterms:created "2015-05-27T20:34:46.426Z
 insights:Generic-Perspective-insight-body-1432758886428 sp:text """CONSTRUCT {
    ?entity ?p1 ?o1 .
    ?o2 ?p2 ?entity .
-}WHERE { 
+}WHERE {
    BIND(?Instance AS ?entity) .
    OPTIONAL { ?entity ?p1 ?o1 .}
    OPTIONAL { ?o2 ?p2 ?entity .}
@@ -539,7 +548,7 @@ arg:predicate-1436573135434 rdfs:label "Concept" .
 
 insights:query-1436573135434 sp:text """SELECT ?entity
 WHERE {
-    ?entity rdfs:subClassOf semoss:Concept .
+   ?entity rdfs:subClassOf semoss:Concept .
 }""" .
 
 insights:constraint-1436575564812 sp:query insights:query-1436585575543 ;
@@ -550,8 +559,8 @@ insights:constraint-1436575564812 sp:query insights:query-1436585575543 ;
 
 arg:predicate-1436585575543 rdfs:label "Instance" .
 
-insights:query-1436585575543 sp:text """SELECT ?entity 
-WHERE { 
+insights:query-1436585575543 sp:text """SELECT ?entity
+WHERE {
    ?entity a ?Concept .
 }""" .
 

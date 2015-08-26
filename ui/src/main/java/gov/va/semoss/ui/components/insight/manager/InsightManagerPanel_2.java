@@ -18,9 +18,12 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.log4j.Logger;
+
 public class InsightManagerPanel_2 extends JPanel{
 	private static final long serialVersionUID = -726278913608871202L;
 	private final JFXPanel jfxPanel = new JFXPanel();
+	private static final Logger log = Logger.getLogger(InsightManagerPanel_2.class);
  
     /**   Creates the Scene-graph within the JFXPanel, 
      * and adds the JFXPanel to this JPanel.
@@ -70,7 +73,11 @@ public class InsightManagerPanel_2 extends JPanel{
         			  scene.widthProperty().addListener(new ChangeListener<Number>() {
     				     @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
      				        imController.spaneInsightManager.setPrefWidth((double) newSceneWidth);
-     				        imController.spaneInsightManager.setDividerPositions(0.2);
+     				        double dividerPos = 0.25;
+     				        if(0.25 * ((double) newSceneWidth) < 230){
+     				           dividerPos = 230.0 / ((double) newSceneWidth);     				           
+     				        }
+     				        imController.spaneInsightManager.setDividerPositions(dividerPos);
     				     }
         			  });
         			  scene.heightProperty().addListener(new ChangeListener<Number>() {
@@ -90,7 +97,7 @@ public class InsightManagerPanel_2 extends JPanel{
                 	  jfxPanel.validate();
         		   }
                 }catch(Exception e){
-                	e.printStackTrace();
+                	log.error( e, e );
                 }
             }
         });

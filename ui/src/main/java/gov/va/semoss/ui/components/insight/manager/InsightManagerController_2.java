@@ -54,6 +54,7 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
+import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 
@@ -86,6 +87,11 @@ public class  InsightManagerController_2 implements Initializable{
 	protected ObservableList<PlaySheet> arylPlaySheets;
 	protected ObservableList<ParameterType> arylParameterTypes;
 	private static final Logger log = Logger.getLogger(InsightManagerController_2.class);
+
+	//These are necessary to make sure that the Insight Manager 
+	//loads only after the left-pane is completely loaded:
+	public static Object guiUpdateMonitor = new Object(); 
+	public static boolean boolLeftPaneUpdated = false;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -250,7 +256,6 @@ public class  InsightManagerController_2 implements Initializable{
 	 * All Perspectives and their Insights are loaded into this tree-view,
 	 * so that the data can be used within the Insight Manager.
 	 */
-    private boolean isItemExpanded;
 	protected void populatePerspectiveTreeView(){
         TreeItem<Object> rootItem = new TreeItem<Object>("Perspectives", null);
         rootItem.setExpanded(true);
@@ -279,25 +284,13 @@ public class  InsightManagerController_2 implements Initializable{
         treevPerspectives.setRoot(rootItem);    
         treevPerspectives.setEditable(true);
         
-        //On mouse-pressed, note whether the selected tree-view item
-        //has been expanded or not:
-        treevPerspectives.setOnMousePressed(new EventHandler<MouseEvent>(){
-			@Override
-			public void handle(MouseEvent mouseEvent){
-	           isItemExpanded = treevPerspectives.getSelectionModel().getSelectedItem().isExpanded();
-	           mouseEvent.consume();
-			}
-        });
         //Set double-click handler for the tree-view to display editors
         //for Perspectives, Insights, and Parameters:
         treevPerspectives.setOnMouseClicked(new EventHandler<MouseEvent>(){
            @Override
            public void handle(MouseEvent mouseEvent){    
-              if(mouseEvent.getClickCount() == 2){
-            	 doubleClickTreeItem();
-            	 //Restore selected tree-view item's expanded state to what it was before the
-            	 //first click:
-            	 treevPerspectives.getSelectionModel().getSelectedItem().setExpanded(isItemExpanded); 
+              if(mouseEvent.getClickCount() == 1){
+            	 clickTreeItem();
               }
               mouseEvent.consume();
            }
@@ -623,7 +616,7 @@ public class  InsightManagerController_2 implements Initializable{
         //Select new Perspective and open its editor:
         //-------------------------------------------
         treevPerspectives.getSelectionModel().select(item);
-        doubleClickTreeItem();
+        clickTreeItem();
 	}
 	
 	/**    Removes the selected Perspective from the tree-view if the response to the
@@ -679,7 +672,7 @@ public class  InsightManagerController_2 implements Initializable{
         //Select new Insight and open its editor:
         //---------------------------------------
         treevPerspectives.getSelectionModel().select(item);
-        doubleClickTreeItem();
+        clickTreeItem();
 	}
 	
 	/**    Removes the selected Insight from the tree-view and from its parent Perspective
@@ -743,7 +736,7 @@ public class  InsightManagerController_2 implements Initializable{
         //Select new Parameter and open its editor:
         //-----------------------------------------
         treevPerspectives.getSelectionModel().select(parameterTreeItem);
-        doubleClickTreeItem();
+        clickTreeItem();
 	}//End "addParameter()".
 	
 	
@@ -863,7 +856,7 @@ public class  InsightManagerController_2 implements Initializable{
 	 * the contents of the item clicked. Provides dynamic loading of FXML
 	 * editors with their controllers.
 	 */
-	private void doubleClickTreeItem(){
+	private void clickTreeItem(){
 		PerspectiveEditorController contPerspectiveEditor = null;
 		InsightEditorController contInsightEditor = null;
 		ParameterEditorController contParameterEditor = null;
@@ -909,12 +902,32 @@ public class  InsightManagerController_2 implements Initializable{
 		    protected ObservableValue<Boolean> call() throws Exception {
 		    	ObservableValue<Boolean> oboolReturnValue;
 				oboolReturnValue = new SimpleBooleanProperty(engine.getWriteableInsightManager().getWriteablePerspective().persistenceWrapper(olstPerspectives)).asObject();
-                if(oboolReturnValue.getValue().booleanValue() == false){
+				if(oboolReturnValue.getValue().booleanValue() == false){
 				   updateProgress(-1.0, 1.0);
+				   
+				//Try to import Insights into the database:
                 }else{
- 				   updateProgress(1.0, 1.0);
- 				   Thread.sleep(1000);
-				   loadData();
+                   if(EngineUtil.getInstance().importInsights(engine.getWriteableInsightManager())){
+           			  //This is necessary to make sure that the Insight Manager loads
+           			  //only after the left-pane is completely loaded:
+           	          synchronized(guiUpdateMonitor) {
+           	        	 while(!boolLeftPaneUpdated){
+            	           try {
+           	            	   guiUpdateMonitor.wait();
+           	            	   
+           	               }catch(InterruptedException e){
+           	   	        	   boolLeftPaneUpdated = false;
+           	               }
+           	        	 }
+           	        	 boolLeftPaneUpdated = false;
+           	          }
+ 				      updateProgress(1.0, 1.0);
+ 				      Thread.sleep(1000);
+				      loadData();
+                	 oboolReturnValue = new SimpleBooleanProperty(true).asObject();
+                   }else{
+                	 oboolReturnValue = new SimpleBooleanProperty(false).asObject();
+                   }
                 }
 				return oboolReturnValue;
 		    }
@@ -926,10 +939,10 @@ public class  InsightManagerController_2 implements Initializable{
 	           if(newState == Worker.State.SUCCEEDED){
 				  if(doPersistence.getValue().getValue().booleanValue() == true){
 					 GuiUtility.showMessage("Perspective, Insights, and Parameters saved OK.");
-					 pbSaveReload.setVisible(false);
 				  }else{
 					 GuiUtility.showError("ERROR: Some Perspectives, Insights, and/or Parameters could not be saved.");
 				  }
+				  pbSaveReload.setVisible(false);
 	      	   }    	    
 	        }
 	     });

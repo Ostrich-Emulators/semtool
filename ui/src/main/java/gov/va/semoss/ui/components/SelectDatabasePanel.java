@@ -14,12 +14,13 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.ui.components.insight.manager.InsightManagerController_2;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
-
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
+
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -28,9 +29,9 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
-
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -96,8 +97,8 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					}
 					//This is necessary to make sure that the Insight Manager loads
 					//after the left-pane is completely loaded:
-					Object monitor = eng.getWriteableInsightManager().getWriteablePerspective().getGuiUpdateMonitor();
-					eng.getWriteableInsightManager().getWriteablePerspective().setLeftPaneUpdated(true);
+                    Object monitor = InsightManagerController_2.guiUpdateMonitor;
+                    InsightManagerController_2.boolLeftPaneUpdated = true;
 					synchronized(monitor){
 					    monitor.notifyAll();
 					}
