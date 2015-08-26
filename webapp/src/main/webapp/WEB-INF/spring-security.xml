@@ -1,33 +1,39 @@
 <beans:beans xmlns="http://www.springframework.org/schema/security"
 						 xmlns:beans="http://www.springframework.org/schema/beans" 
 						 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-						 xsi:schemaLocation="http://www.springframework.org/schema/beans
-	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-	http://www.springframework.org/schema/security
-	http://www.springframework.org/schema/security/spring-security-4.0.xsd">
-
-	<beans:bean id="customAuthenticationProvider" class="gov.va.semoss.web.security.CustomAuthenticationManager" />
-
-<authentication-manager>
-    <authentication-provider ref="customAuthenticationProvider"/>
-</authentication-manager>
+						 xmlns:p="http://www.springframework.org/schema/p"
+						 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+								http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd">
 		
+	<!--beans:bean id="contextSource"
+							class="org.springframework.security.ldap.DefaultSpringSecurityContextSource"
+							p:userDn="${ldap.userDn}"
+							p:password="${ldap.password}">
+		<beans:constructor-arg value="${ldap.url}/${ldap.base}"/>
+	</beans:bean-->
 
-	<beans:bean name="csrfmatcher" class="gov.va.semoss.security.CsrfMatcher"/>
+	<beans:bean id="authpop"
+							class="gov.va.semoss.web.security.CustomAuthenticationManager"/>
 	
+	<authentication-manager>
+		<ldap-authentication-provider
+			user-dn-pattern="uid={0},ou=people"
+			user-context-mapper-ref="authpop" />
+	</authentication-manager>
+	<ldap-server url="${ldap.url}/${ldap.base}"/>
+
 	<http auto-config="true">
-		<csrf request-matcher-ref="csrfmatcher"/>
 		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/insight**" access="hasAnyRole('ROLE_INSIGHT_ADMIN','ROLE_ADMIN')" />
 		<intercept-url pattern="/databases**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMIN')" />
 		<intercept-url pattern="/data**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMIN')" />
-		<form-login 
-		    login-page="/login" 
-		    default-target-url="/" 
+		<!--form-login 
+				login-page="/login" 
+				default-target-url="/" 
 			authentication-failure-url="/login?error" 
 			username-parameter="username"
 			password-parameter="password" />
-		<logout logout-success-url="/login?logout" />
+		<logout logout-success-url="/login?logout" /-->
 		<!-- enable csrf protection -->
 		<csrf/>
 	</http>
