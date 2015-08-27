@@ -1,15 +1,12 @@
 package gov.va.semoss.web.security;
 
-import java.util.Collection;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
 
 /**
  * A custom authentication manager that allows access if the user details exist
