@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
@@ -28,6 +29,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,17 +48,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class DatabaseController extends SemossControllerBase {
 
 	private static final Logger log = Logger.getLogger( DatabaseController.class );
-
-	@RequestMapping( "/create" )
-	@ResponseBody
-	public DbInfo creater() throws Exception {
-		DbInfo newone = new DbInfo();
-		newone.setDataUrl( "http://localhost:8280/openrdf-sesame/repositories/va-mem-infer" );
-		newone.setInsightsUrl( "http://localhost:8280/openrdf-sesame/repositories/insights" );
-		newone.setName( "tester" );
-		datastore.create( newone );
-		return newone;
-	}
 
 	@Autowired
 	private DbInfoMapper datastore;
@@ -79,7 +71,8 @@ public class DatabaseController extends SemossControllerBase {
 	@ResponseBody
 	public DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
 			HttpServletResponse response ) {
-		log.debug( "Getting database with ID " + id + "." );
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		log.debug( "Getting database with ID " + id + " (user: " + auth.getName() + ")" );
 		DbInfo test = datastore.getOne( id );
 		if ( null == test ) {
 			throw new UnauthorizedException();
@@ -87,21 +80,13 @@ public class DatabaseController extends SemossControllerBase {
 		return test;
 	}
 
-	@RequestMapping( value = "/list", method = RequestMethod.GET  )
+	@RequestMapping( value = "/list", method = RequestMethod.GET )
 	@ResponseBody
 	public DbInfo[] getAllDatabases( HttpServletRequest req ) {
-		log.debug( "Getting all databases." );
-		boolean testing = true;
-		DbInfo[] testDbs = null;
-		if (testing){
-			DbInfo db1 = new DbInfo("DB1", "localhost/db1", "localhost/data1", "localhost/insights1");
-			DbInfo db2 = new DbInfo("DB2", "localhost/db2", "localhost/data2", "localhost/insights2");
-			DbInfo db3 = new DbInfo("DB3", "localhost/db3", "localhost/data3", "localhost/insights3");
-			testDbs = new DbInfo[]{db1, db2, db3};
-		}
-		else {
-			testDbs = datastore.getAll().toArray( new DbInfo[0] );
-		}
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		log.debug( "Getting all databases (user: " + auth.getName() + ")" );
+		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
+
 		String reqpath = req.getRequestURL().toString() + "/";
 
 		for ( DbInfo dbi : testDbs ) {
@@ -122,14 +107,14 @@ public class DatabaseController extends SemossControllerBase {
 	@RequestMapping( "/{id}/{type}" )
 	public void getRepo( @PathVariable( "id" ) String id,
 			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws IOException {
+			HttpServletResponse response ) throws ServletException, IOException {
 		forward( id, type, "", request, response );
 	}
 
 	@RequestMapping( "/{id}/{type}/statements" )
 	public void getStatements( @PathVariable( "id" ) String id,
 			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws IOException {
+			HttpServletResponse response ) throws ServletException, IOException {
 		forward( id, type, "/statements", request, response );
 	}
 

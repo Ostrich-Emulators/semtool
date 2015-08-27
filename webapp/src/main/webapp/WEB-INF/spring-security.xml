@@ -1,29 +1,58 @@
 <beans:beans xmlns="http://www.springframework.org/schema/security"
 						 xmlns:beans="http://www.springframework.org/schema/beans" 
 						 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-						 xsi:schemaLocation="http://www.springframework.org/schema/beans
-	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-	http://www.springframework.org/schema/security
-	http://www.springframework.org/schema/security/spring-security-4.0.xsd">
-
-	<beans:bean id="customAuthenticationProvider" class="gov.va.semoss.web.security.CustomAuthenticationManager" />
-
-<authentication-manager>
-    <authentication-provider ref="customAuthenticationProvider"/>
-</authentication-manager>
+						 xmlns:p="http://www.springframework.org/schema/p"
+						 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+								http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd">
 		
+	<beans:bean id="contextSource"
+							class="org.springframework.security.ldap.DefaultSpringSecurityContextSource"
+							p:userDn="${ldap.userDn}"
+							p:password="${ldap.password}">
+		<beans:constructor-arg value="${ldap.url}/${ldap.base}"/>
+	</beans:bean>
 
-	<beans:bean name="csrfmatcher" class="gov.va.semoss.security.CsrfMatcher"/>
+	<beans:bean id="userSearch"
+							class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
+		<beans:constructor-arg index="0" value=""/>
+		<beans:constructor-arg index="1" value="(uid={0})"/>
+		<beans:constructor-arg index="2" ref="contextSource" />
+	</beans:bean>
+
+	<!-- 
+		we need to instantiate our ldap provider so we can set our custom AuthoritiesPopulator
+		(even though it doesn't do anything now, I think we'll want to use it soon).
+	-->
+	<beans:bean id="ldapAuthProvider"
+							class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
+		<beans:constructor-arg>
+			<beans:bean class="org.springframework.security.ldap.authentication.BindAuthenticator"
+									p:userSearch-ref="userSearch">
+				<beans:constructor-arg ref="contextSource"/>
+			</beans:bean>
+		</beans:constructor-arg>
+		<beans:constructor-arg>
+			<beans:bean	class="gov.va.semoss.web.security.SemossAuthoritiesPopulator">
+				<beans:constructor-arg ref="contextSource"/>
+				<beans:constructor-arg value="${ldap.search.base.group}"/>
+				<beans:property name="groupRoleAttribute" value="cn"/>
+			</beans:bean>
+		</beans:constructor-arg>
+	</beans:bean>
 	
-	<http auto-config="true">
-		<csrf request-matcher-ref="csrfmatcher"/>
-		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/insight**" access="hasAnyRole('ROLE_INSIGHT_ADMIN','ROLE_ADMIN')" />
-		<intercept-url pattern="/databases**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMIN')" />
-		<intercept-url pattern="/data**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMIN')" />
+	<authentication-manager>
+		<authentication-provider ref="ldapAuthProvider"/>
+	</authentication-manager>
+	
+	<http auto-config="true" access-decision-manager-ref="accessDecisionManager" use-expressions="true">
+		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMINS')" />
+		<intercept-url pattern="/insight**" access="hasAnyRole('ROLE_INSIGHT_ADMIN','ROLE_ADMINS')" />
+		<intercept-url pattern="/databases" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
+		<intercept-url pattern="/databases/**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
+		<intercept-url pattern="/data**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<form-login 
-		    login-page="/login" 
-		    default-target-url="/" 
+				login-page="/login" 
+				default-target-url="/" 
 			authentication-failure-url="/login?error" 
 			username-parameter="username"
 			password-parameter="password" />
@@ -32,6 +61,14 @@
 		<csrf/>
 	</http>
 	
-
+	<beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<beans:constructor-arg>
+			<beans:list>
+				<beans:bean class="org.springframework.security.access.vote.RoleVoter"/>
+				<beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
+				<beans:bean class="org.springframework.security.web.access.expression.WebExpressionVoter"/>
+			</beans:list>
+		</beans:constructor-arg>
+	</beans:bean>
 
 </beans:beans>
