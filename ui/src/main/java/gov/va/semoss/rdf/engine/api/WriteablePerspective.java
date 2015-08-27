@@ -14,18 +14,6 @@ public interface WriteablePerspective {
 	  *    the TreeView.
 	  */
      public boolean persistenceWrapper(ObservableList<TreeItem<Object>> olstPerspectives);
-
-	 /**   Prepares a string for use in a dynamic Sparql query, where " and ' are
-	  * delimiters. The double-quote, ", is changed to ', and existing single-quotes
-	  * are left alone. This utility is also used thoughout the Insight Manager,
-	  * where user-editable RDF strings are persisted.
-	  *
-	  * @param quotedString -- (String) The string containing double and single
-	  * quotes.
-	  *
-	  * @return legalizeQuotes -- (String) The cleaned string, as described above.
-	  */
-	  public String legalizeQuotes(String quotedString);
 	  
 
 }

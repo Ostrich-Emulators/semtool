@@ -256,6 +256,7 @@ public class InsightEditorController implements Initializable{
 	}//End "setData()".
 
 	/**   Updates the "Creator" and "Modified" fields of the Insight.
+	 * Called whenever an Insight screen-field is modified.
 	 * 
 	 * @param insight -- (Insight).
 	 */

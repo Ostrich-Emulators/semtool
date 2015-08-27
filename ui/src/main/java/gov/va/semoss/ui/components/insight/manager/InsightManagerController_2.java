@@ -54,6 +54,7 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
+import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
@@ -233,7 +234,6 @@ public class  InsightManagerController_2 implements Initializable{
 	            	if(arylParameterTypes.size() > 0){
 	            	    //Restore mouse-pointer:
 	            		treevPerspectives.getScene().setCursor(Cursor.DEFAULT);	
-	            		
 		                //Load Insight Manager data if it has not already been loaded:
 	            		if(isDataLoaded == false){
 	            		   loadData();
@@ -901,13 +901,14 @@ public class  InsightManagerController_2 implements Initializable{
 		    @Override 
 		    protected ObservableValue<Boolean> call() throws Exception {
 		    	ObservableValue<Boolean> oboolReturnValue;
-				oboolReturnValue = new SimpleBooleanProperty(engine.getWriteableInsightManager().getWriteablePerspective().persistenceWrapper(olstPerspectives)).asObject();
+		    	WriteableInsightManager wim = engine.getWriteableInsightManager();
+				oboolReturnValue = new SimpleBooleanProperty(wim.getWriteablePerspective().persistenceWrapper(olstPerspectives)).asObject();
 				if(oboolReturnValue.getValue().booleanValue() == false){
 				   updateProgress(-1.0, 1.0);
 				   
 				//Try to import Insights into the database:
                 }else{
-                   if(EngineUtil.getInstance().importInsights(engine.getWriteableInsightManager())){
+                   if(EngineUtil.getInstance().importInsights(wim)){
            			  //This is necessary to make sure that the Insight Manager loads
            			  //only after the left-pane is completely loaded:
            	          synchronized(guiUpdateMonitor) {

@@ -12,12 +12,14 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
 import org.openrdf.repository.RepositoryConnection;
 
 import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
+import gov.va.semoss.model.vocabulary.SEMOSS;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
 import gov.va.semoss.model.vocabulary.SPL;
@@ -29,12 +31,19 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.api.WriteablePerspective;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
+import gov.va.semoss.util.Utility;
 
+/**   Contains methods to handle the persistence of Perspective, their Insights and Parameters
+ * to the Insights database.
+ * 
+ * @author Thomas
+ *
+ */
 public class WriteablePerspectiveImpl implements WriteablePerspective {
 	  private final WriteableInsightManager wim;
 	  private final RepositoryConnection rc;
-	  private static final Logger log = Logger.getLogger( WriteablePerspective.class );
+	  private static final Logger log = Logger.getLogger( WriteablePerspectiveImpl.class );
 	  private final Pattern pattern = Pattern.compile( "^(\\w+)(.*)$" );
 	  private static long lngUniqueIdentifier = System.currentTimeMillis();
 		
@@ -99,9 +108,11 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
           }
 		  return boolReturnValue;
 	  }
+	  
 //---------------------------------------------------------------------------------------------------------
 //   D e l e t i o n   o f   P e r s p e c t i v e s ,   I n s i g h t s ,   a n d   P a r a m e t e r s
 //---------------------------------------------------------------------------------------------------------
+	  
 	  /**   Deletes all Parameters from all Insights in the database.
        * 
        * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded. 
@@ -230,7 +241,6 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 	 	  return boolReturnValue;
 	  }
 	  
-
       /**   Deletes all Perspectives from the database.
        * 
        * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded. 
@@ -276,16 +286,23 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 //  I n s e r t i o n   o f   P e r s p e c t i v e s ,   I n s i g h t s ,   a n d   P a r a m e t e r s
 //---------------------------------------------------------------------------------------------------------
 
-		/**   Saves the passed-in Perspective's Title and Description into the triple-store 
-		 * on disk. 
-		 * 
-		 * NOTE: The Perspective parameter is returned by side-effect, because its
-		 *       URI is used to create Insight slots.
-		 *
-		 * @param perspective -- (Perspective) The Perspective to persist.
-		 *
-		 * @return savePerspective -- (boolean) Whether the save to disk succeeded.
-		 */
+	  private final QueryExecutorAdapter<String> queryer = new QueryExecutorAdapter<String>() {
+		 @Override
+		 public void handleTuple( BindingSet set, ValueFactory fac ) {
+			result = set.getValue( "id" ).stringValue();
+		 }
+	  };
+	  
+	 /**   Saves the passed-in Perspective's Title and Description into the triple-store 
+	  * on disk. 
+	  * 
+      * NOTE: The Perspective parameter is returned by side-effect, because its
+  	  *       URI is used to create Insight slots.
+      *
+	  * @param perspective -- (Perspective) The Perspective to persist.
+	  *
+      * @return savePerspective -- (boolean) Whether the save to disk succeeded.
+      */
 	  private boolean savePerspective(Perspective perspective) {
 			boolean boolReturnValue = false;
 			lngUniqueIdentifier += 1;
@@ -293,27 +310,33 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 			ValueFactory insightVF = rc.getValueFactory();
 			String perspectiveUriName = "perspective-" + strUniqueIdentifier;
 			URI perspectiveURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, perspectiveUriName);
-			String perspectiveURI_String = "<" + perspectiveURI.toString() + ">";
 			//Be sure to set the new Perspective URI, because this Perspective object 
 			//is returned by side-effect, and it's URI is used to create Insight slots:
 			perspective.setUri(perspectiveURI);
-			Literal now = insightVF.createLiteral(new Date());
-			String strCreator = wim.userInfoFromToolPreferences( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
-			Literal creator = insightVF.createLiteral( strCreator );
+			Date now = new Date();
+			String creator = wim.userInfoFromToolPreferences( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 			//Make sure that embedded quotes and new-line characters can be persisted:
-            String label = legalizeQuotes(perspective.getLabel());
-			String strDescription = legalizeQuotes(perspective.getDescription());
+            String label = Utility.legalizeStringForSparql(perspective.getLabel());
+			String description = Utility.legalizeStringForSparql(perspective.getDescription());
 
 			String query = "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
 					+ "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
-					+ "INSERT{ ?uri rdfs:label \"" + label + "\" . "
-					+ "?uri dcterms:description \"" + strDescription + "\" . "
+					+ "INSERT{ ?uri rdfs:label ?label . "
+					+ "?uri dcterms:description ?description . "
 					+ "?uri a vas:Perspective . "
-					+ "?uri dcterms:created " + now + " . "
-					+ "?uri dcterms:modified " + now + " . "
-					+ "?uri dcterms:creator " + creator + " .} "
-					+ "WHERE{ BIND(" + perspectiveURI_String.toString() + " AS ?uri) .}";
+					+ "?uri dcterms:created ?now . "
+					+ "?uri dcterms:modified ?now . "
+					+ "?uri dcterms:creator ?creator .} "
+					+ "WHERE{}";
 			try {
+				queryer.setSparql(query);
+				queryer.bind("uri", perspectiveURI);
+				queryer.bind("label", label, "en");
+				queryer.bind("description", description, "en");
+				queryer.bind("now", now);
+				queryer.bind("creator", creator, "en"); 
+				query = queryer.bindAndGetSparql();
+
 				rc.begin();
 				Update uq = rc.prepareUpdate( QueryLanguage.SPARQL, query );
 				uq.execute();
@@ -346,66 +369,79 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 			lngUniqueIdentifier += 1;
 			String strUniqueIdentifier = String.valueOf(lngUniqueIdentifier);
 			ValueFactory insightVF = rc.getValueFactory();
-			String perspectiveURI_String = "<" + perspective.getUri().toString() + ">";
-		    String insightURI_String = "<" + insight.getIdStr() + ">";
+			URI perspectiveURI = perspective.getUri();
 			//Make sure that embedded quotes and new-line characters can be persisted:
-		    String question = legalizeQuotes(insight.getLabel());
-		    String dataViewOutput = insight.getOutput();
+		    String question = Utility.legalizeStringForSparql(insight.getLabel());
+		    URI dataViewOutputURI = insightVF.createURI("http://va.gov/ontologies/semoss#"+insight.getOutput());
 		    String isLegacy = String.valueOf(insight.isLegacy());
 			//Make sure that embedded quotes and new-line characters can be persisted:
-		    String sparql = legalizeQuotes(insight.getSparql().trim());
-		    String description = legalizeQuotes(insight.getDescription().trim());
+		    String sparql = Utility.legalizeStringForSparql(insight.getSparql().trim());
+		    String description = Utility.legalizeStringForSparql(insight.getDescription().trim());
 			String slotUriName = perspective.getUri().getLocalName() + "-slot-" + strUniqueIdentifier;
-			String slotURI_String = "<" + insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName).toString() + ">";
+			URI slotURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName);
 			Literal order = insightVF.createLiteral(insight.getOrder());
 			String type = "";
 			Matcher matcher = pattern.matcher(sparql);
 			if (matcher.find()) {
 				type = matcher.group(1);
 			}
-			String spinBodyURI_String = "<" + insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, "insight-" + strUniqueIdentifier + "-" + type ).toString() + ">";
+			String spinBodyUriName = "insight-" + strUniqueIdentifier + "-" + type;
+			URI spinBodyURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName);
 			//Insights can only have only SELECT and CONSTRUCT queries:
-			String spinBodyType = "";
+			URI spinBodyTypeURI;
 			if ( "SELECT".equals( type.toUpperCase() ) ) {
-			    spinBodyType = "sp:Select";
+			    spinBodyTypeURI = insightVF.createURI("http://spinrdf.org/spl#Select");
 			}
 			else {
-			    spinBodyType = "sp:Construct";
+			    spinBodyTypeURI = insightVF.createURI("http://spinrdf.org/spl#Construct");
 			}
-				
-		    String query_1 =  "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-                    + "INSERT{ ?perspectiveURI olo:slot " + slotURI_String + " . "
-                    + slotURI_String + "olo:item ?insightURI . "
-                    + slotURI_String + "olo:index " + order + " .} "
-                    + "WHERE{ BIND(" + perspectiveURI_String + " AS ?perspectiveURI) . "
-                    + "BIND(" + insightURI_String + " AS ?insightURI) .}";
-
-			String query_2 = "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
+			String creator = Utility.legalizeStringForSparql(insight.getCreator());	
+			String created = insight.getCreated();
+			String modified = insight.getModified();
+			
+			String query = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
+			        + "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
 					+ "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
 					+ "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 					+ "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
 					+ "PREFIX " + UI.PREFIX + ": <" + UI.NAMESPACE + "> "
-                    + "INSERT{ ?insightURI rdfs:label \"" + question + "\" . "
-	                + "?insightURI ui:dataView vas:" + dataViewOutput + " . "
+                    + "INSERT{ ?perspectiveURI olo:slot ?slotURI . "
+                    + "?slotURI olo:item ?insightURI . "
+                    + "?slotURI olo:index ?order . "
+                    + "?insightURI rdfs:label ?question . "
 	                + "?insightURI rdfs:subclassof vas:InsightProperties . "
-	                + "?insightURI ui:dataView vas:" + dataViewOutput + " . "
-	                + "?insightURI vas:isLegacy " + isLegacy + " . "
+	                + "?insightURI ui:dataView ?dataViewOutputURI . "
+	                + "?insightURI vas:isLegacy ?isLegacy . "
 	                + "?insightURI spin:body ?spinBodyURI . "
-	                + "?spinBodyURI rdf:type " + spinBodyType + " . "
-	                + "?spinBodyURI sp:text \"" + sparql + "\" . "
-	                + "?insightURI dcterms:description \"" + description + "\" . "
-	                + "?insightURI dcterms:creator \"" + insight.getCreator() + "\" . "
-	                + "?insightURI dcterms:created \"" + insight.getCreated() + "\" . "
-	                + "?insightURI dcterms:modified \"" + insight.getModified() + "\" . } "
-	                + "WHERE { BIND(" + insightURI_String + " AS ?insightURI) . "
-	                + "BIND(" + spinBodyURI_String + " AS ?spinBodyURI) .}";	                
+	                + "?spinBodyURI rdf:type ?spinBodyTypeURI . "
+	                + "?spinBodyURI sp:text ?sparql . "
+	                + "?insightURI dcterms:description ?description . "
+	                + "?insightURI dcterms:creator ?creator . "
+	                + "?insightURI dcterms:created ?created . "
+	                + "?insightURI dcterms:modified ?modified . } "
+	                + "WHERE {}";
 
 			try {
+				queryer.setSparql(query);
+				queryer.bind("perspectiveURI", perspectiveURI);			
+				queryer.bind("slotURI", slotURI);
+				queryer.bind("insightURI", insight.getId());
+				queryer.bind("order", order.intValue());
+				queryer.bind("question", question, "en");
+				queryer.bind("dataViewOutputURI", dataViewOutputURI);
+				queryer.bind("isLegacy", isLegacy, "en");
+				queryer.bind("spinBodyURI", spinBodyURI);
+				queryer.bind("spinBodyTypeURI", spinBodyTypeURI);
+				queryer.bind("sparql", sparql, "en");
+				queryer.bind("description", description, "en");
+				queryer.bind("creator", creator, "en"); 
+				queryer.bind("created", created, "en");
+				queryer.bind("modified", modified, "en");
+				query = queryer.bindAndGetSparql();
+				
 				rc.begin();
-				Update uq_1 = rc.prepareUpdate(QueryLanguage.SPARQL, query_1);
-				Update uq_2 = rc.prepareUpdate(QueryLanguage.SPARQL, query_2);
-				uq_1.execute();
-				uq_2.execute();
+				Update uq = rc.prepareUpdate(QueryLanguage.SPARQL, query);
+				uq.execute();
 				rc.commit();
                 boolReturnValue = true;
 			}
@@ -435,45 +471,49 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 			lngUniqueIdentifier += 1;
 			String strUniqueIdentifier = String.valueOf(lngUniqueIdentifier);	   		
 		    ValueFactory insightVF = rc.getValueFactory();
-            String insightURI_String = "<" + insight.getIdStr() + ">";		
-            //We are rebuilding the Constraint URI here, because the designers of VA_MainDB, v20, 
-            //decided to reuse Parameters, and we discourage that. No objects on the tree-view
-            //should be reused. They all should be editable as unique items:
+		    URI insightURI = insight.getId();
+            //We are rebuilding the Constraint and other URIs here, because the designers of 
+            //VA_MainDB, v20, decided to reuse Parameters, and we discourage that. No objects 
+            //on the tree-view should be reused. They all should be editable as unique items:
 			String constraintUriName = "constraint-" + strUniqueIdentifier;
-	        String constraintURI_String = "<"+ insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, constraintUriName).toString() + ">";				
-			String valueTypeUriName = "valueType-" + strUniqueIdentifier;
-			String valueTypeURI_String = "<"+ insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, valueTypeUriName).toString() + ">";
+			URI constraintURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, constraintUriName);
+			String valueTypeUriName = parameter.getParameterType();
+			URI valueTypeURI = insightVF.createURI(valueTypeUriName);
 		    String predicateUriName = "predicate-" + strUniqueIdentifier;
-	        String predicateURI_String = "<" + insightVF.createURI(ARG.NAMESPACE + predicateUriName).toString() + ">";
+		    URI predicateURI = insightVF.createURI(ARG.NAMESPACE + predicateUriName);
 		    String queryUriName = "query-" + strUniqueIdentifier;
-		    String queryURI_String = "<" + insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, queryUriName).toString() + ">";				
+		    URI queryURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, queryUriName);
 			//Make sure that embedded quotes and new-line characters can be persisted:
-		    String label = legalizeQuotes(parameter.getLabel());
-		    String variable = legalizeQuotes(parameter.getVariable());
-	    	String defaultQuery = legalizeQuotes(parameter.getDefaultQuery());
-	    	
-			//Make sure that embedded new-line characters can be persisted:
-			defaultQuery = defaultQuery.replace( "\n", "\\n" );
+		    String label = Utility.legalizeStringForSparql(parameter.getLabel()); 
+		    String variable = Utility.legalizeStringForSparql(parameter.getVariable());
+	    	String defaultQuery = Utility.legalizeStringForSparql(parameter.getDefaultQuery());
 
 		   	String query = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 		   	    + "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
 				+ "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
                 + "INSERT{ ?insightURI spin:constraint ?constraintURI ."   
-		   		+ "?constraintURI rdfs:label \"" + label + "\" . "
+		   		+ "?constraintURI rdfs:label ?label . "
 		   		+ "?constraintURI spl:valueType ?valueTypeURI . "
 		   		+ "?constraintURI spl:predicate ?predicateURI . "
-		   		+ "?predicateURI rdfs:label \"" + variable + "\" . "
+		   		+ "?predicateURI rdfs:label ?variable . "
 		   		+ "?constraintURI sp:query ?queryURI . "
-		   		+ "?queryURI sp:text \"" + defaultQuery + "\" .} "
-		   		+ "WHERE{ BIND(" + insightURI_String + " AS ?insightURI) . "
-		   		+ "BIND(" + constraintURI_String + " AS ?constraintURI) . "
-		   		+ "BIND(" + predicateURI_String + " AS ?predicateURI) . "
-		   		+ "BIND(" + queryURI_String + " AS ?queryURI) . "
-		   		+ "BIND(" + valueTypeURI_String + "AS ?valueTypeURI) .}";
+		   		+ "?queryURI sp:text ?defaultQuery .} "
+		   		+ "WHERE{}";
 
 		   	try {
+		   		queryer.setSparql(query);
+		   		queryer.bind("label", label, "en");
+		   		queryer.bind("variable", variable, "en");
+		   		queryer.bind("defaultQuery", defaultQuery, "en");
+		   		queryer.bind("insightURI", insightURI);
+		   		queryer.bind("constraintURI", constraintURI);
+		   		queryer.bind("predicateURI", predicateURI);
+		   		queryer.bind("queryURI", queryURI);
+		   		queryer.bind("valueTypeURI", valueTypeURI);
+		   		query = queryer.bindAndGetSparql();
+		   		
 				rc.begin();
-				Update uq = rc.prepareUpdate( QueryLanguage.SPARQL, query );
+				Update uq = rc.prepareUpdate(QueryLanguage.SPARQL, query);
 				uq.execute();
 				rc.commit();
                 boolReturnValue = true;
@@ -488,29 +528,5 @@ public class WriteablePerspectiveImpl implements WriteablePerspective {
 				}
 			}	    	
 	    	return boolReturnValue;
-	    }
-	    
-
-//---------------------------------------------------------------------------------------------------------
-//                         I n s i g h t   M a n a g e r   U t i l i t i e s
-//---------------------------------------------------------------------------------------------------------
-
-		/**   Prepares a string for use in a dynamic Sparql query, where " and ' are
-		 * delimiters. The double-quote, ", is changed to ', and existing single-quotes
-		 * are left alone. Also, replaces newline characters, "\n" with "\\n".This utility 
-		 * is used thoughout the Insight Manager, where user-editable RDF strings are persisted.
-		 *
-		 * @param quotedString -- (String) The string containing double and single
-		 * quotes.
-		 *
-		 * @return legalizeQuotes -- (String) The cleaned string, as described above.
-		 */
-	    @Override
-		public String legalizeQuotes(String quotedString) {
-			String strReturnValue = quotedString;
-	
-			strReturnValue = strReturnValue.replace( "\"", "'" ).replace("\n", "\\n").replace("\r", "");
-	
-			return strReturnValue;
-		}
+	    }	    
 }

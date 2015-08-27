@@ -320,7 +320,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		userPrefEmail = ( !userPrefEmail.isEmpty() ? " <" + userPrefEmail + ">" : "" );
 		String userPrefOrg = user.getProperty( UserProperty.USER_ORG );
 
-		if ( !( userPrefName.isEmpty() || userPrefEmail.isEmpty() || userPrefOrg.isEmpty() ) ){
+		if ( !( userPrefName.isEmpty() && userPrefEmail.isEmpty() && userPrefOrg.isEmpty() ) ){
 			if ( userPrefName.isEmpty() || userPrefOrg.isEmpty() ) {
 				userInfo = userPrefName + userPrefEmail + " " + userPrefOrg;
 			}
