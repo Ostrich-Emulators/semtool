@@ -9,7 +9,7 @@
                 <legend>Please Login</legend>
                 #if( $error )
                 <div class="alert alert-error">    
-                    Invalid username and password.
+                    Invalid username and/or password.
                 </div>
                 #end
                 #if( $logout )

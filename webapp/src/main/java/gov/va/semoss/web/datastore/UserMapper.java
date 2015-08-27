@@ -135,7 +135,7 @@ public class UserMapper implements DataMapper<User, String> {
 			String val = stmt.getObject().stringValue();
 
 			if ( FOAF.ACCOUNT.equals( pred ) ) {
-				user.setUsername( val );
+				// user.setUsername( val );
 			}
 			else {
 				for ( Map.Entry<UserProperty, URI> en : PROPMAP.entrySet() ) {

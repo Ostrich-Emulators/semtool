@@ -1,11 +1,13 @@
 package gov.va.semoss.web.controller;
 
+import gov.va.semoss.security.User.UserProperty;
 import gov.va.semoss.web.datastore.DbInfoMapper;
 
 import javax.servlet.http.HttpServletResponse;
 
 import gov.va.semoss.web.io.DbInfo;
 
+import gov.va.semoss.web.security.SemossUser;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -72,7 +74,10 @@ public class DatabaseController extends SemossControllerBase {
 	public DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
 			HttpServletResponse response ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		log.debug( "Getting database with ID " + id + " (user: " + auth.getName() + ")" );
+		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
+		log.debug( "Getting database " + id + " (user: "
+				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
+
 		DbInfo test = datastore.getOne( id );
 		if ( null == test ) {
 			throw new UnauthorizedException();
@@ -84,7 +89,10 @@ public class DatabaseController extends SemossControllerBase {
 	@ResponseBody
 	public DbInfo[] getAllDatabases( HttpServletRequest req ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		log.debug( "Getting all databases (user: " + auth.getName() + ")" );
+		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
+		log.debug( "Getting all databases (user: "
+				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
+
 		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
 
 		String reqpath = req.getRequestURL().toString() + "/";

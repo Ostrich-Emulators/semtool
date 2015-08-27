@@ -369,7 +369,7 @@ public class EngineUtil implements Runnable {
 
 		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
 		GuiUtility.closeEngine( neweng );
-		mount( newsmss, addToRepoList, true, LocalUserImpl.admin() );
+		mount( newsmss, addToRepoList, true, new LocalUserImpl() );
 	}
 
 	/**
@@ -439,7 +439,7 @@ public class EngineUtil implements Runnable {
 
 	public void mount( File smssfile, boolean updateRepoList )
 			throws EngineManagementException {
-		mount( smssfile, updateRepoList, LocalUserImpl.admin() );
+		mount( smssfile, updateRepoList, new LocalUserImpl() );
 	}
 
 	public void mount( File smssfile, boolean updateRepoList, User user )
@@ -560,7 +560,7 @@ public class EngineUtil implements Runnable {
 			f.deleteOnExit();
 		}
 
-		User user = new LocalUserImpl( SemossPermission.ADMIN );
+		User user = new LocalUserImpl();
 		File smssfile = createEngine( ecb, user );
 
 		IEngine bde = GuiUtility.loadEngine( smssfile.getAbsoluteFile() );

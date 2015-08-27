@@ -51,7 +51,6 @@ import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
 import gov.va.semoss.rdf.engine.util.StatementSorter;
 import gov.va.semoss.security.LocalUserImpl;
 import gov.va.semoss.security.Security;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -96,7 +95,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 		}
 		else {
 			// users have full access to local DBs 
-			Security.getSecurity().associateUser( this, LocalUserImpl.admin() );
+			Security.getSecurity().associateUser( this, new LocalUserImpl() );
 
 			// the journal is the file itself
 			journal = new Journal( rws );

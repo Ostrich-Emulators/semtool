@@ -20,8 +20,11 @@
 	</beans:bean>
 
 	<!-- 
-		we need to instantiate our ldap provider so we can set our custom AuthoritiesPopulator
-		(even though it doesn't do anything now, I think we'll want to use it soon).
+		we need to instantiate our ldap provider so we can set our custom DetailsMapper
+		and AuthoritiesPopulator. We don't use the AuthorititesPopulator for anything
+		ATM, but it will be useful for loading additional roles for our own
+		datastore instead of LDAP. The DetailsMapper is used to set additional 
+		attributes on our user after authentication happens		
 	-->
 	<beans:bean id="ldapAuthProvider"
 							class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
@@ -38,6 +41,9 @@
 				<beans:property name="groupRoleAttribute" value="cn"/>
 			</beans:bean>
 		</beans:constructor-arg>
+		<beans:property name="userDetailsContextMapper">
+			<beans:bean class ="gov.va.semoss.web.security.SemossDetailsMapper"/>				
+		</beans:property>
 	</beans:bean>
 	
 	<authentication-manager>
@@ -51,12 +57,12 @@
 		<intercept-url pattern="/databases/**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<intercept-url pattern="/data**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<form-login 
-				login-page="/login" 
-				default-target-url="/" 
+			login-page="/login" 
+			default-target-url="/" 
 			authentication-failure-url="/login?error" 
 			username-parameter="username"
 			password-parameter="password" />
-		<logout logout-success-url="/login?logout" />
+		<logout logout-success-url="/logout" />
 		<!-- enable csrf protection -->
 		<csrf/>
 	</http>

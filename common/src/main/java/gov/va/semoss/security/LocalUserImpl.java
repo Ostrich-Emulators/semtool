@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.security;
 
-import gov.va.semoss.security.permissions.SemossPermission;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -19,18 +17,6 @@ public class LocalUserImpl extends AbstractUser {
 
 	private static final String NAMESPACE_KEY = "USER_NAMESPACES";
 	private final Preferences prefs = Preferences.userNodeForPackage( User.class );
-
-	public static LocalUserImpl admin() {
-		return new LocalUserImpl( SemossPermission.ADMIN );
-	}
-
-	public LocalUserImpl() {
-		this( SemossPermission.NONE );
-	}
-
-	public LocalUserImpl( SemossPermission... perms ) {
-		super( "", Arrays.asList( perms ) );
-	}
 
 	@Override
 	public Map<String, String> getNamespaces() {

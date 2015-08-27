@@ -23,8 +23,6 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
-import gov.va.semoss.security.User;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
@@ -622,21 +620,6 @@ public class PlayPane extends JFrame {
 
 	public FilterPanel getFilterPanel() {
 		return filterPanel;
-	}
-
-	/**
-	 * Resets the interface to account for <code>user</code>'s permissions
-	 *
-	 * @param user
-	 */
-	public void resetForUser( User user ) {
-		iManageItem.setEnabled( user.hasPermission( SemossPermission.INSIGHTWRITER ) );
-		int idx = rightTabs.indexOfComponent( iManagePanel );
-		if ( idx >= 0 ) {
-			if ( !user.hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-				iManageItem.doClick();
-			}
-		}
 	}
 
 	private JTable initJTableAndAddTo( JPanel panel ) {

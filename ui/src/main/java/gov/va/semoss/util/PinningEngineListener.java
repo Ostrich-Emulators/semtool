@@ -54,7 +54,7 @@ public class PinningEngineListener extends AbstractFileWatcher
 			// we care...so load the db
 
 			try {
-				EngineUtil.getInstance().mount( file, true, true, LocalUserImpl.admin() );
+				EngineUtil.getInstance().mount( file, true, true, new LocalUserImpl() );
 			}
 			catch ( EngineManagementException ioe ) {
 				log.error( "could not load db from file: " + file, ioe );

@@ -71,7 +71,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			return;
 		}
 
-		Security.getSecurity().associateUser( this, LocalUserImpl.admin() );
+		Security.getSecurity().associateUser( this, new LocalUserImpl() );
 		ForwardChainingRDFSInferencer inferencer
 				= new ForwardChainingRDFSInferencer( new MemoryStore() );
 		Repository repo = new SailRepository( inferencer );
