@@ -71,7 +71,8 @@ public class DatabaseController extends SemossControllerBase {
 	@ResponseBody
 	public DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
 			HttpServletResponse response ) {
-		log.debug( "Getting database with ID " + id + "." );
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		log.debug( "Getting database with ID " + id + " (user: " + auth.getName() + ")" );
 		DbInfo test = datastore.getOne( id );
 		if ( null == test ) {
 			throw new UnauthorizedException();
