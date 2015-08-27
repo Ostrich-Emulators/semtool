@@ -83,7 +83,7 @@ function start(data) {
 	determineIfStateOrCountyData(dataObject);
 
 	queue()
-		.defer(d3.json, "js/usheatmapdata/us.json")
+		.defer(d3.json, "js/heatmapdata/us-topo-min.json.json")
 		.await(ready);
 };
 
