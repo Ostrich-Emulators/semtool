@@ -39,7 +39,7 @@ public class SesameEngineTest {
 	public void tearDown() {
 	}
 
-	@Test
+	//@Test
 	public void testCreateRc() throws Exception {
 		Properties props = new Properties();
 		
