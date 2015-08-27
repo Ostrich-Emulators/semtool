@@ -26,17 +26,17 @@ ou: groups
 ###################
 
 dn: cn=admins,ou=groups,o=semoss
-member: uid=rbobko
+member: cn=Ryan Bobko,ou=people,o=semoss
 objectClass: groupOfNames
 objectClass: top
 
 dn: cn=insightWriterGroup,ou=groups,o=semoss
-member: uid=wwarren
+member: cn=Wayne Warren,ou=people,o=semoss
 objectClass: groupOfNames
 objectClass: top
 
 dn: cn=users,ou=groups,o=semoss
-member: uid=jmarquiss
+member: cn=John Marquiss,ou=people,o=semoss
 objectClass: groupOfNames
 objectClass: top
 
