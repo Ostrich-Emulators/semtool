@@ -47,7 +47,8 @@
 	<http auto-config="true" access-decision-manager-ref="accessDecisionManager" use-expressions="true">
 		<intercept-url pattern="/admin**" access="hasRole('ROLE_ADMINS')" />
 		<intercept-url pattern="/insight**" access="hasAnyRole('ROLE_INSIGHT_ADMIN','ROLE_ADMINS')" />
-		<intercept-url pattern="/databases**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
+		<intercept-url pattern="/databases" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
+		<intercept-url pattern="/databases/**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<intercept-url pattern="/data**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<form-login 
 				login-page="/login" 
