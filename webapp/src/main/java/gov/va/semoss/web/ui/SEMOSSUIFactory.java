@@ -1,8 +1,5 @@
 package gov.va.semoss.web.ui;
 
-import gov.va.semoss.web.init.ContextBean;
-import gov.va.semoss.web.init.SpringContextHolder;
-
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,7 +18,7 @@ public class SEMOSSUIFactory {
 
 	private static VelocityEngine engine;
 	
-	private Logger log = Logger.getLogger(SEMOSSUIFactory.class);
+	private static final Logger log = Logger.getLogger(SEMOSSUIFactory.class);
 
 	private SEMOSSUIFactory() {
 		//SEMOSSUIFactory.engine = ViewConfiguration.VELOCITY_ENGINE;
