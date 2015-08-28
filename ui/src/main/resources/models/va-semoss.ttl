@@ -227,96 +227,95 @@ vas:reification
   rdfs:label "Reification"^^xsd:string ;
   rdfs:range vas:ReificationModel ;
 .
-insights:Generic-Perspective dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
-	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
-	olo:slot insights:Generic-Perspective-slot-1 , insights:Generic-Perspective-slot-2 , insights:Generic-Perspective-slot-3 ;
-	a vas:Perspective ;
-	rdfs:label "Generic-Perspective" ;
-	dcterms:description "System Provided Generic Perspective" ;
-	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
+#insights:Generic-Perspective dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+#	dcterms:creator "V-CAMP SEMOSS Tool v2015.03" ;
+#	olo:slot insights:Generic-Perspective-slot-1 , insights:Generic-Perspective-slot-2 , insights:Generic-Perspective-slot-3 ;
+#	a vas:Perspective ;
+#	rdfs:label "Generic-Perspective" ;
+#	dcterms:description "System Provided Generic Perspective" ;
+#	dcterms:modified "2015-04-30T21:13:48.141Z"^^xsd:dateTime .
 
-insights:Generic-Perspective-slot-1 olo:index "1"^^xsd:int ;
-	olo:item insights:GQ0 .
+#insights:Generic-Perspective-slot-1 olo:index "1"^^xsd:int ;
+#	olo:item insights:GQ0 .
 
-insights:Generic-Perspective-slot-2 olo:index "2"^^xsd:int ;
-	olo:item insights:GQ1 .
+#insights:Generic-Perspective-slot-2 olo:index "2"^^xsd:int ;
+#	olo:item insights:GQ1 .
 
-insights:GQ0 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
-	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
-	spin:body insights:GQ0-CONSTRUCT ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ;
-	vas:isLegacy "true"^^xsd:boolean ;
-	vas:rendererClass "" ;
-	a spin:MagicProperty ;
-	rdfs:label "View the Database Metamodel" ;
-	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "The need to filter semoss:Relation indicates an error occuring somewhere, possibly in the importer." ;
-	dcterms:modified "2015-05-27T22:02:17.224Z"^^xsd:dateTime .
+#insights:GQ0 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+#	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+#	spin:body insights:GQ0-CONSTRUCT ;
+#	ui:dataView vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ;
+#	vas:isLegacy "false"^^xsd:boolean ;
+#	vas:rendererClass "" ;
+#	a spin:MagicProperty ;
+#	rdfs:label "View the Database Metamodel" ;
+#	rdfs:subClassOf vas:InsightProperties ;
+#	dcterms:description "The need to filter semoss:Relation indicates an error occuring somewhere, possibly in the importer." ;
+#	dcterms:modified "2015-05-27T22:02:17.224Z"^^xsd:dateTime .
 
-insights:GQ0-CONSTRUCT sp:text """CONSTRUCT{ ?source ?relation ?target .}
-WHERE {
-  ?relation a owl:ObjectProperty .
-  ?s ?relation ?o .
-  ?s a ?source . 
-  ?o a ?target . 
-  FILTER( ?source != semoss:Concept && ?source != owl:Class && ?source != rdfs:Resource  && ?source != semoss:Relation )
-  FILTER( ?target != semoss:Concept && ?target != owl:Class && ?target != rdfs:Resource )
-}""" ;
-	a sp:Construct .
-
-
-
-insights:GQ1 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
-	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
-	spin:body insights:GQ1-CONSTRUCT ;
-	spin:constraint insights:GQ1-Concept , insights:GQ1-Instance ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
-	vas:isLegacy "true"^^xsd:boolean ;
-	vas:rendererClass "" ;
-	a spin:MagicProperty ;
-	rdfs:label "Explore an instance of a selected node type" ;
-	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "The legacy mode requires both ?entity and ?instance to be in the WHERE clause." ;
-	dcterms:modified "2015-05-27T20:25:40.600Z"^^xsd:dateTime .
+#insights:GQ0-CONSTRUCT sp:text """CONSTRUCT{ ?source ?relation ?target .}
+#WHERE {
+#  ?relation a owl:ObjectProperty .
+#  ?s ?relation ?o .
+#  ?s a ?source . 
+#  ?o a ?target . 
+#  FILTER( ?source != semoss:Concept && ?source != owl:Class && ?source != rdfs:Resource  && ?source != semoss:Relation )
+#  FILTER( ?target != semoss:Concept && ?target != owl:Class && ?target != rdfs:Resource )
+#}""" ;
+#	a sp:Construct .
 
 
 
-insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
-	spl:predicate arg:Concept ;
-	spl:valueType semoss:Concept ;
-	a spl:Argument ;
-	rdfs:label "Concept" .
+#insights:GQ1 dcterms:created "2015-04-30T21:13:48.141Z"^^xsd:dateTime ;
+#	dcterms:creator "Daniel Mekonnen <dmekonnen.work@gmail.com>, V-CAMP" ;
+#	spin:body insights:GQ1-CONSTRUCT ;
+#	spin:constraint insights:GQ1-Concept , insights:GQ1-Instance-1 ;
+#	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+#	vas:isLegacy "false"^^xsd:boolean ;
+#	vas:rendererClass "" ;
+#	a spin:MagicProperty ;
+#	rdfs:label "Explore an instance of a selected node type" ;
+#	rdfs:subClassOf vas:InsightProperties ;
+#	dcterms:description "The legacy mode requires both ?entity and ?instance to be in the WHERE clause." ;
+#	dcterms:modified "2015-05-27T20:25:40.600Z"^^xsd:dateTime .
 
 
 
-insights:GQ1-Concept-Query sp:text "SELECT ?entity
-WHERE {
-    ?entity rdfs:subClassOf semoss:Concept .
-}";
-	a sp:Select .
+#insights:GQ1-Concept sp:query insights:GQ1-Concept-Query ;
+#	spl:predicate arg:Concept ;
+#	spl:valueType semoss:Concept ;
+#	a spl:Argument ;
+#	rdfs:label "Concept" .
+
+
+#insights:GQ1-Concept-Query sp:text "SELECT ?entity
+#WHERE {
+#    ?entity rdfs:subClassOf semoss:Concept .
+#}";
+#	a sp:Select .
 
 
 
-insights:GQ1-CONSTRUCT sp:text "SELECT ?entity 
-WHERE { 
-    BIND(?Instance AS ?entity).
-}";
-	a sp:Construct .
+#insights:GQ1-CONSTRUCT sp:text "SELECT ?entity 
+#WHERE { 
+#    BIND(?Instance AS ?entity).
+#}";
+#	a sp:Construct .
 
 
 
-insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
-	spl:predicate arg:Instance ;
-	spl:valueType semoss:Concept ;
-	a spl:Argument ;
-	rdfs:label "Instance" .
+#insights:GQ1-Instance sp:query insights:GQ1-Instance-Query ;
+#	spl:predicate arg:Instance ;
+#	spl:valueType semoss:Concept ;
+#	a spl:Argument ;
+#	rdfs:label "Instance" .
 
 
-insights:GQ1-Instance-Query sp:text "SELECT ?entity
-WHERE{
-    ?entity a ?Concept .
-}";
-	a sp:Select .
+#insights:GQ1-Instance-Query sp:text "SELECT ?entity
+#WHERE{
+#    ?entity a ?Concept .
+#}";
+#	a sp:Select .
 
 
 
@@ -515,55 +514,55 @@ vas:W3C-Reification a vas:ReificationModel ;
 
 
 
-insights:Generic-Perspective-insight-3 dcterms:created "2015-05-27T20:34:46.426Z"^^xsd:dateTime ;
-	dcterms:creator "tyom, lagartija" ;
-	spin:body insights:Generic-Perspective-insight-body-1432758886428 ;
-	spin:constraint insights:constraint-1436573056737 , insights:constraint-1436575564812 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
-	vas:isLegacy "false"^^xsd:boolean ;
-	vas:rendererClass "" ;
-	a spin:Function ;
-	rdfs:label "Show One Neighbor Away from Selected Node" ;
-	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "" ;
-	dcterms:modified "2015-07-10T20:03:27.732Z"^^xsd:dateTime .
+#insights:Generic-Perspective-insight-3 dcterms:created "2015-05-27T20:34:46.426Z"^^xsd:dateTime ;
+#	dcterms:creator "tyom, lagartija" ;
+#	spin:body insights:Generic-Perspective-insight-body-1432758886428 ;
+#	spin:constraint insights:constraint-1436573056737 , insights:constraint-1436575564812 ;
+#	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+#	vas:isLegacy "false"^^xsd:boolean ;
+#	vas:rendererClass "" ;
+#	a spin:Function ;
+#	rdfs:label "Show One Neighbor Away from Selected Node" ;
+#	rdfs:subClassOf vas:InsightProperties ;
+#	dcterms:description "" ;
+#	dcterms:modified "2015-07-10T20:03:27.732Z"^^xsd:dateTime .
 
-insights:Generic-Perspective-insight-body-1432758886428 sp:text """CONSTRUCT {
-   ?entity ?p1 ?o1 .
-   ?o2 ?p2 ?entity .
-}WHERE {
-   BIND(?Instance AS ?entity) .
-   OPTIONAL { ?entity ?p1 ?o1 .}
-   OPTIONAL { ?o2 ?p2 ?entity .}
-}""" ;
-	a sp:Select .
+#insights:Generic-Perspective-insight-body-1432758886428 sp:text """CONSTRUCT {
+#   ?entity ?p1 ?o1 .
+#   ?o2 ?p2 ?entity .
+#}WHERE {
+#   BIND(?Instance AS ?entity) .
+#   OPTIONAL { ?entity ?p1 ?o1 .}
+#   OPTIONAL { ?o2 ?p2 ?entity .}
+#}""" ;
+#	a sp:Select .
 
-insights:constraint-1436573056737 sp:query insights:query-1436573135434 ;
-	spl:predicate arg:predicate-1436573135434 ;
-	spl:valueType owl:Nothing ;
-	a spl:Argument ;
-	rdfs:label "Concept" .
+#insights:constraint-1436573056737 sp:query insights:query-1436573135434 ;
+#	spl:predicate arg:predicate-1436573135434 ;
+#	spl:valueType owl:Nothing ;
+#	a spl:Argument ;
+#	rdfs:label "Concept" .
 
-arg:predicate-1436573135434 rdfs:label "Concept" .
+#arg:predicate-1436573135434 rdfs:label "Concept" .
 
-insights:query-1436573135434 sp:text """SELECT ?entity
-WHERE {
-   ?entity rdfs:subClassOf semoss:Concept .
-}""" .
+#insights:query-1436573135434 sp:text """SELECT ?entity
+#WHERE {
+#   ?entity rdfs:subClassOf semoss:Concept .
+#}""" .
 
-insights:constraint-1436575564812 sp:query insights:query-1436585575543 ;
-	spl:predicate arg:predicate-1436585575543 ;
-	spl:valueType owl:Nothing ;
-	a spl:Argument ;
-	rdfs:label "Instance" .
+#insights:constraint-1436575564812 sp:query insights:query-1436585575543 ;
+#	spl:predicate arg:predicate-1436585575543 ;
+#	spl:valueType owl:Nothing ;
+#	a spl:Argument ;
+#	rdfs:label "Instance" .
 
-arg:predicate-1436585575543 rdfs:label "Instance" .
+#arg:predicate-1436585575543 rdfs:label "Instance" .
 
-insights:query-1436585575543 sp:text """SELECT ?entity
-WHERE {
-   ?entity a ?Concept .
-}""" .
+#insights:query-1436585575543 sp:text """SELECT ?entity
+#WHERE {
+#   ?entity a ?Concept .
+#}""" .
 
-insights:Generic-Perspective-slot-3 olo:index "3"^^xsd:int ;
-	olo:item insights:Generic-Perspective-insight-3 .
+#insights:Generic-Perspective-slot-3 olo:index "3"^^xsd:int ;
+#	olo:item insights:Generic-Perspective-insight-3 .
 

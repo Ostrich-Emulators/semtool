@@ -169,8 +169,8 @@ public class InsightManagerImpl implements InsightManager {
 					rc.add( perspectiveURI, DCTERMS.CREATOR, creator );
 
 					//REMOVE THIS Line for Production:
-					rc.add( perspectiveURI, DCTERMS.DESCRIPTION,
-							insightVF.createLiteral( "Test Description: " + perspective ) );
+//					rc.add( perspectiveURI, DCTERMS.DESCRIPTION,
+//							insightVF.createLiteral( "Test Description: " + perspective ) );
 
 					loadQuestions( perspective, perspectiveURI, dreamerProp, now, creator );
 				}
