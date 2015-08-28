@@ -19,7 +19,6 @@ import org.openrdf.repository.RepositoryConnection;
 
 import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
-import gov.va.semoss.model.vocabulary.SEMOSS;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
 import gov.va.semoss.model.vocabulary.SPL;
