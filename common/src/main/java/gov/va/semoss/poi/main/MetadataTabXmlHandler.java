@@ -251,7 +251,12 @@ public class MetadataTabXmlHandler extends DefaultHandler {
 			}
 		}
 		else {
-			if ( !propertyMiddleColumn.isEmpty() ) {
+			if ( null == propName || null == propValue || propertyMiddleColumn.isEmpty() ) {
+				throw new ImportValidationException( ImportValidationException.ErrorType.MISSING_DATA,
+						"Not enough data for a custom triple: " + propName + ","
+						+ propertyMiddleColumn + "," + propValue );
+			}
+			else {
 				triples.add( new String[]{ propName, propertyMiddleColumn, propValue } );
 			}
 		}
