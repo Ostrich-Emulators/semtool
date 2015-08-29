@@ -56,6 +56,7 @@ public class LowMemXlsReader {
 
 	public LowMemXlsReader( File filename ) throws IOException {
 		this( new BufferedInputStream( new FileInputStream( filename ) ) );
+		log.debug( "lo-mem xls reader: " + filename.getAbsolutePath() );
 	}
 
 	public LowMemXlsReader( String filename ) throws IOException {
