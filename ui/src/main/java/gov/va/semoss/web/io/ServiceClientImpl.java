@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.web.io;
 
+import gov.va.semoss.security.RemoteUserImpl;
 import gov.va.semoss.security.User;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,7 @@ public class ServiceClientImpl extends AbstractServiceClient {
 
 	@Override
 	public User getUser( SemossService svc ) throws RestClientException {
-		User user = rest.getForObject( svc.user(), User.class );
+		User user = rest.getForObject( svc.user(), RemoteUserImpl.class );
 		return user;
 	}
 }
