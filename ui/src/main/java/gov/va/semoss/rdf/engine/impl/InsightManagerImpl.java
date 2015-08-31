@@ -571,6 +571,74 @@ public class InsightManagerImpl implements InsightManager {
 		return insight;
 	}
 
+	@Override
+	public Insight getInsight( URI insightURI ) {
+		final Insight insight = new Insight();
+		try {
+
+			Map<String, String> namespaces = new HashMap<>();
+			namespaces.put( UI.PREFIX, UI.NAMESPACE );
+			namespaces.put( SPIN.PREFIX, SPIN.NAMESPACE );
+			namespaces.put( SP.PREFIX, SP.NAMESPACE );
+			namespaces.put( SPL.PREFIX, SPL.NAMESPACE );
+			namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+			namespaces.put( OLO.PREFIX, OLO.NAMESPACE );
+			namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
+			
+			String isp = "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?description ?creator ?created ?modified ?order WHERE { "
+					+ "?insightUriString rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
+					+ "OPTIONAL{ ?insightUriString spin:body [ sp:text ?sparql ] } "
+					+ "OPTIONAL{ ?insightUriString spin:constraint ?parameter . "
+					+ "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] }} "
+					+ "OPTIONAL{ ?insightUriString vas:rendererClass ?rendererClass } "
+					+ "OPTIONAL{ ?insightUriString vas:isLegacy ?isLegacy } "
+					+ "OPTIONAL{ ?insightUriString dcterms:description ?description } "
+					+ "OPTIONAL{ ?insightUriString dcterms:creator ?creator } "
+					+ "OPTIONAL{ ?insightUriString dcterms:created ?created } "
+					+ "OPTIONAL{ ?insightUriString dcterms:modified ?modified } "
+					+ "}";
+			QueryExecutor<Void> qea = new QueryExecutorAdapter<Void>( isp ) {
+
+				@Override
+				public void handleTuple( BindingSet resultSet, ValueFactory fac ) {
+					insight.setId( insightURI );
+					insight.setFromResultSet( resultSet );
+					log.debug( insight );
+				}
+			};
+
+			log.debug( "Insighter... " + isp + " / " + insightURI );
+			qea.bind( "insightUriString", insightURI );
+			qea.setNamespaces( namespaces );
+
+			log.debug( AbstractSesameEngine.processNamespaces( qea.bindAndGetSparql(), namespaces) );
+			
+			AbstractSesameEngine.getSelect( qea, rc, false );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			// TODO Auto-generated catch block
+			log.error( e, e );
+		}
+		
+		if ( null == insight.getId() ) {
+			throw new IllegalArgumentException( "unknown insight: "+insightURI );
+		}
+		return insight;
+	}
+	
+		@Override
+	public Perspective getPerspective( URI perspectiveURI ) {
+		Collection<Perspective> persps = getPerspectives();
+		for( Perspective p : persps ){
+			if( p.getUri().equals( perspectiveURI ) ){
+				return p;
+			}
+		}
+		
+		throw new IllegalArgumentException( "unknown perspective: "+perspectiveURI );
+	}
+
+
 	/**
 	 * Returns a collection of data about the playsheets used to render Insights.
 	 *

@@ -10,9 +10,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.ui.components.DBToLoadingSheetExporterTest;
-import gov.va.semoss.util.GuiUtility;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
@@ -25,6 +23,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
 
 /**
  *
@@ -64,20 +63,16 @@ public class BigDataEngineTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws RepositoryException {
 		extractKb();
 
-		try {
-			eng = GuiUtility.loadEngine( dbfile );
-		}
-		catch ( IOException ioe ) {
-			log.error( ioe, ioe );
-		}
+		eng = new BigDataEngine();
+		eng.openDB( BigDataEngine.generateProperties( dbfile ) );
 	}
 
 	@After
 	public void tearDown() {
-		GuiUtility.closeEngine( eng );
+		eng.closeDB();
 		FileUtils.deleteQuietly( dbfile );
 	}
 
