@@ -22,12 +22,17 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
+import gov.va.semoss.ui.main.Starter;
+import gov.va.semoss.util.DIHelper;
 
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
+import java.io.FileNotFoundException;
 import java.util.Collection;
 
 import java.util.Map;
+import java.util.Properties;
+
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -52,6 +57,22 @@ public class ShapePopup extends JMenu {
 				public void actionPerformed( ActionEvent e ) {
 					for ( SEMOSSVertex v : vertices ) {
 						v.setShape( en.getValue() );
+						try {
+						Properties props = DIHelper.getInstance().getCoreProp();
+					
+						
+						props.setProperty(v.getType().getLocalName()+"_SHAPE", en.getKey());
+						java.net.URL url = Starter.class.getResource("/semoss.properties");
+						java.io.File pout = new java.io.File(url.toURI());
+				        java.io.OutputStream out;
+						out = new java.io.FileOutputStream( pout );
+						props.store(out, "This is an optional header comment string");
+				        out.close();
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
 					}
 				}
 			} );
