@@ -15,6 +15,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
  *
@@ -163,8 +166,10 @@ public class UtilityTest {
 
 	@Test
 	public void testlegalizeStringForSparql() {
-		String valid = "\"Ryan's \"'\"Problematic\"'\" Label\"";
-		String legal = Utility.legalizeStringForSparql( valid );
-		assertEquals( valid, legal );
+		String string = "\"Ryan's \"'\"Problematic\"'\" Label\"";
+
+		String fxstr = Utility.legalizeStringForSparql( string );
+		String vfstr = new LiteralImpl( string ).stringValue();
+		assertEquals( vfstr, fxstr );
 	}
 }
