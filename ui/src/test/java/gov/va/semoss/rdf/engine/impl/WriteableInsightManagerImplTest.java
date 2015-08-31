@@ -115,8 +115,9 @@ public class WriteableInsightManagerImplTest {
 	@Test
 	public void testAdd_Insight2() {
 		Insight ins = new Insight();
+		String desc = "\"Ryan's \"'\"Problematic\"'\" Label\"";
 		ins.setLabel( "Lotsa quotables" );
-		ins.setDescription( "\"Ryan's Problematic Label\"" );
+		ins.setDescription( desc );
 		ins.setSparql( "SELECT ?id WHERE { ?id a <http://foo.bar/model#Horseless_Carriage> }" );
 		URI insightid = wim.add( ins );
 		assertEquals( insightid, ins.getId() );
@@ -126,22 +127,7 @@ public class WriteableInsightManagerImplTest {
 
 		Insight ins2 = wim.getInsight( insightid );
 		assertEquals( insightid, ins2.getId() );
-	}
-
-	@Test
-	public void testAdd_Insight3() {
-		Insight ins = new Insight();
-		ins.setLabel( "Lotsa quotables" );
-		ins.setDescription( "\"Ryan's Other \"'\"Problematic\"'\" Label\"" );
-		ins.setSparql( "SELECT ?id WHERE { ?id a <http://foo.bar/model#Horseless_Carriage> }" );
-		URI insightid = wim.add( ins );
-		assertEquals( insightid, ins.getId() );
-		assertTrue( wim.hasCommittableChanges() );
-
-		wim.commit();
-
-		Insight ins2 = wim.getInsight( insightid );
-		assertEquals( insightid, ins2.getId() );
+		assertEquals( desc, ins2.getDescription() );
 	}
 
 	@Test( expected = IllegalArgumentException.class )
