@@ -7,14 +7,14 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameEngine;
-import gov.va.semoss.security.RemoteUserImpl;
-import gov.va.semoss.security.Security;
 import gov.va.semoss.security.User;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.web.io.DbInfo;
+import gov.va.semoss.web.io.SemossService;
+import gov.va.semoss.web.io.SemossServiceImpl;
 import gov.va.semoss.web.io.ServiceClient;
 import java.net.MalformedURLException;
 import java.util.Properties;
@@ -34,6 +34,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 	private static final Logger log = Logger.getLogger( RemoteDbPanel.class );
 	private final DefaultListModel model = new DefaultListModel();
 	private final LabeledPairRenderer<DbInfo> render = new LabeledPairRenderer<>();
+	private User user;
 
 	/**
 	 * Creates new form RemoteDbPanel
@@ -48,10 +49,10 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 		username.setText( prefs.get( "lastusername", "" ) );
 	}
 
-	public User getConnectedUser(){
-		return new RemoteUserImpl();
+	public User getConnectedUser() {
+		return user;
 	}
-	
+
 	public Properties getConnectionProperties() throws MalformedURLException {
 		DbInfo info = dblist.getSelectedValue();
 		if ( null != info ) {
@@ -195,14 +196,16 @@ public class RemoteDbPanel extends javax.swing.JPanel {
   private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
 		model.clear();
 		render.clearCache();
+		user = null;
 		dblist.setEnabled( false );
-		
+
 		ServiceClient rest = DIHelper.getInstance().getAppCtx().getBean( ServiceClient.class );
 		String url = remoteurl.getText();
-		rest.setAuthentication( url, username.getText(), password.getPassword() );
+		SemossService svc = new SemossServiceImpl( url );
+		rest.setAuthentication( svc, username.getText(), password.getPassword() );
 
 		try {
-			DbInfo dbs[] = rest.getDbs( url );
+			DbInfo dbs[] = rest.getDbs( svc );
 
 			Preferences prefs = Preferences.userNodeForPackage( getClass() );
 			prefs.put( "lastexturl", url );
@@ -213,6 +216,8 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 				model.addElement( i );
 			}
 			dblist.setEnabled( true );
+
+			user = rest.getUser( svc );
 		}
 		catch ( HttpStatusCodeException hse ) {
 			log.error( hse );

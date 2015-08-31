@@ -19,8 +19,8 @@ public abstract class AbstractServiceClient implements ServiceClient {
 	protected BasicAuthRequestFactory authorizer;
 
 	@Override
-	public final void setAuthentication( String url, String username, char[] pass ) {
-		Matcher m = DECOMPOSE.matcher( url );
+	public final void setAuthentication( SemossService svc, String username, char[] pass ) {
+		Matcher m = DECOMPOSE.matcher( svc.root() );
 		if ( m.find() ) {
 			String host = m.group( 2 );
 			String portstr = m.group( 4 );
@@ -31,7 +31,7 @@ public abstract class AbstractServiceClient implements ServiceClient {
 			authorizer.cache( hh, username, pass );
 		}
 		else {
-			log.error( "could not parse url: " + url );
+			log.error( "could not parse url: " + svc.root() );
 		}
 	}
 }

@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.web.io;
 
+import gov.va.semoss.security.User;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -16,18 +17,27 @@ public interface ServiceClient {
 	/**
 	 * Gets the available databases from the given url
 	 *
-	 * @param serviceurl the url to hit
+	 * @param svc the service to hit
 	 * @return a (possibly empty) array of database objects
 	 * @throws RestClientException if there is a network/password problem
 	 */
-	public DbInfo[] getDbs( String serviceurl ) throws RestClientException;
+	public DbInfo[] getDbs( SemossService svc ) throws RestClientException;
 
 	/**
-	 * Sets the username/password pair for authenticating against the given url
+	 * Gets details about the currently-logged-in user from the given url
 	 *
-	 * @param url
+	 * @param svc
+	 * @return
+	 * @throws RestClientException
+	 */
+	public User getUser( SemossService svc ) throws RestClientException;
+
+	/**
+	 * Sets the username/password pair for authenticating against the given service
+	 *
+	 * @param svc
 	 * @param username
 	 * @param pass
 	 */
-	public void setAuthentication( String url, String username, char[] pass );
+	public void setAuthentication( SemossService svc, String username, char[] pass );
 }
