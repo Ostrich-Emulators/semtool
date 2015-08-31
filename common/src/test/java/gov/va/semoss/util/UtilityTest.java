@@ -15,9 +15,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
  *
