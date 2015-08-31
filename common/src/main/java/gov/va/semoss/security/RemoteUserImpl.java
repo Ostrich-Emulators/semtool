@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.security;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  *
  * @author ryan
  */
-public class RemoteUserImpl extends AbstractUser {
+public final class RemoteUserImpl extends AbstractUser {
 
 	private final Map<UserProperty, String> properties = new HashMap<>();
 	private final Map<String, String> namespaces = new HashMap<>();
@@ -22,6 +23,17 @@ public class RemoteUserImpl extends AbstractUser {
 	}
 
 	public RemoteUserImpl() {
+	}
+
+	public RemoteUserImpl( User user ) {
+		super( user.getUsername() );
+		setProperties( user.getProperties() );
+		setNamespaces( user.getNamespaces() );
+	}
+
+	@Override
+	public Map<UserProperty, String> getProperties() {
+		return new EnumMap<>( properties );
 	}
 
 	@Override

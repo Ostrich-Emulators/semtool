@@ -23,5 +23,5 @@ public abstract class AbstractUser implements User {
 	@Override
 	public String getUsername() {
 		return username;
-	}
+	}	
 }

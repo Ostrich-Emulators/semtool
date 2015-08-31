@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.security;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -73,6 +74,19 @@ public class LocalUserImpl extends AbstractUser {
 		for ( Map.Entry<UserProperty, String> en : props.entrySet() ) {
 			prefs.put( en.getKey().toString(), en.getValue() );
 		}
+	}
+
+	@Override
+	public Map<UserProperty, String> getProperties() {
+		Map<UserProperty, String> props = new EnumMap<>( UserProperty.class );
+		for ( UserProperty up : UserProperty.values() ) {
+			String val = getProperty( up );
+			if ( null != val ) {
+				props.put( up, val );
+			}
+		}
+
+		return props;
 	}
 
 	@Override

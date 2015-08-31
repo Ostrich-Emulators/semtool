@@ -8,6 +8,7 @@ package gov.va.semoss.web.security;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,11 @@ public class SemossUser extends LdapUserDetailsImpl implements gov.va.semoss.sec
 	public void setNamespaces( Map<String, String> ns ) {
 		namespaces.clear();
 		namespaces.putAll( ns );
+	}
+
+	@Override
+	public Map<UserProperty, String> getProperties() {
+		return new EnumMap<>( properties );
 	}
 
 	@Override

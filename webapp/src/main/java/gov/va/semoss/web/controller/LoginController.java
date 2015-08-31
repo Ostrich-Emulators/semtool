@@ -2,6 +2,7 @@ package gov.va.semoss.web.controller;
 
 import gov.va.semoss.security.RemoteUserImpl;
 import gov.va.semoss.security.User;
+import gov.va.semoss.web.security.SemossUser;
 import org.apache.log4j.Logger;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
@@ -67,13 +68,19 @@ public class LoginController extends SemossControllerBase {
 		}
 	}
 
-	@RequestMapping( "/whoami" )
+	@RequestMapping( value = "/login", params = "whoami" )
 	@ResponseBody
-	public User getUser() {
+	public User getUser( HttpServletRequest req ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		RemoteUserImpl user = new RemoteUserImpl( auth.getName() );
-		
-		
-		return user;
+
+		if ( hasRole( auth, "ROLE_ANONYMOUS" ) ) {
+			return null;
+		}
+		else {
+			Object principal = auth.getPrincipal();
+			SemossUser ldap = SemossUser.class.cast( principal );
+			RemoteUserImpl user = new RemoteUserImpl( ldap );
+			return user;
+		}
 	}
 }

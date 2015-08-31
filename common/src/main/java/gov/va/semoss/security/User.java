@@ -37,6 +37,7 @@ public interface User {
 
 	public void setProperties( Map<UserProperty, String> props );
 	
+	public Map<UserProperty, String> getProperties();
 	/**
 	 * Is this user authorized remotely, or from the local computer?
 	 * @return 

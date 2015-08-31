@@ -11,6 +11,8 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -63,4 +65,14 @@ public class SemossControllerBase {
 		}
 		return encoded;
 	}
+
+	protected boolean hasRole( Authentication auth, String role ) {
+		for ( GrantedAuthority ga : auth.getAuthorities() ) {
+			if ( ga.getAuthority().equals( role ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
