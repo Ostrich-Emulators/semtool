@@ -89,6 +89,7 @@ import org.openrdf.query.UpdateExecutionException;
 public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private static final Logger log = Logger.getLogger( AbstractSesameEngine.class );
+	private static final Logger provenance = Logger.getLogger( "provenance" );
 	public static final String REMOTE_KEY = "remote";
 	public static final String REPOSITORY_KEY = "repository";
 	public static final String INSIGHTS_KEY = "insights";
