@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.web.security;
+package gov.va.semoss.security;
 
 import java.net.URI;
 

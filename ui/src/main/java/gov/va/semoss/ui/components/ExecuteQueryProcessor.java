@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.RemoteUserImpl;
 import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;

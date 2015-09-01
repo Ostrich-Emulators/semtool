@@ -19,16 +19,17 @@
         $scope.init = function () {
             $scope.loading = true;
             SEMOSS.listDatabases(
-                    function (token) {
-    	                var returnedInstances = JSON.parse(token.data.data);
+                    function (databases) {
+    	                //var returnedInstances = JSON.parse(token.data);
     	                $scope.instances = [];
-    	                for (var i=0; i<returnedInstances.length; i++){
-    	                	var nativeInstance = new SEMOSS.VcampDatabase();
-    	                	nativeInstance.setAttributes(returnedInstances[i]);
+    	                for (var i=0; i<databases.length; i++){
+    	                	var nativeInstance = new SEMOSS.DbInfo();
+    	                	nativeInstance.setAttributes(databases[i]);
     	                	$scope.instances.push(nativeInstance);
     	                }
     	                $scope.loading = false;
     	                vm.dtInstance.rerender();
+    	                $('#semoss_databases_nav').prop('disabled', false);
                     }, true);
         };
         
@@ -39,7 +40,7 @@
         $scope.showEdit = function(id){
        	 	SEMOSS.getDatabase(id, function(token){
        	 		var foreignInstance = JSON.parse(token.data.data);
-       	 		var nativeInstance = new SEMOSS.VcampDatabase();
+       	 		var nativeInstance = new SEMOSS.DbInfo();
        	 		nativeInstance.setAttributes(foreignInstance);
        	 		$scope.activeInstance = nativeInstance;
            	 	$scope.mode = 'edit';
@@ -64,7 +65,7 @@
         $scope.view = function(id){
        	 	SEMOSS.getDatabase(id, function(token){
        	 		var foreignInstance = JSON.parse(token.data.data);
-       	 		var nativeInstance = new SEMOSS.VcampDatabase();
+       	 		var nativeInstance = new SEMOSS.DbInfo();
        	 		nativeInstance.setAttributes(foreignInstance);
        	 		$scope.activeInstance = nativeInstance;
            	 	$scope.mode = 'view';
@@ -74,14 +75,14 @@
         }
         
         $scope.showCreate = function(){
-   	 		var nativeInstance = new SEMOSS.VcampDatabase();
+   	 		var nativeInstance = new SEMOSS.DbInfo();
    	 		$scope.activeInstance = nativeInstance;
        	 	$scope.mode = 'create';
         	$('#semossdb_modal').modal('show');
         }
 
         $scope.create = function(){
-        	SEMOSS.createApplicationDataType($scope.activeInstance, function(token){
+        	SEMOSS.createDatabase($scope.activeInstance, function(token){
         		$scope.activeInstance.id = token.data.id;
         		SEMOSS.processAnyFailures(token, 'Database successfully created.');
         		if (token.result <= 1){
@@ -94,13 +95,12 @@
 
         $scope.listInstances = function () {
             $scope.loading = true;
-            SEMOSS.listApplicationDataTypes(
-                    function (token) {
-    	                var returnedInstances = JSON.parse(token.data.data);
+            SEMOSS.listDatabases(
+                    function (response) {
+    	                var returnedInstances = response;
     	                $scope.instances = [];
     	                for (var i=0; i<returnedInstances.length; i++){
-    	                	var nativeInstance = new SEMOSS.VcampDatabase();
-    	                	alert(returnedInstances[i]);
+    	                	var nativeInstance = new SEMOSS.DbInfo();
     	                	nativeInstance.setAttributes(returnedInstances[i]);
     	                	$scope.instances.push(nativeInstance);
     	                }
@@ -110,7 +110,7 @@
         };
         
         $scope.deleteInstance = function(){
-        	SEMOSS.deleteApplicationDataType($scope.deleteID, function(token){
+        	SEMOSS.deleteDatabase($scope.deleteID, function(token){
         		SEMOSS.processAnyFailures(token, 'Database successfully deleted.');
         		if (token.result <= 1){
         			$scope.instances.splice($scope.currentRow, 1);
@@ -133,5 +133,5 @@
 
     DatabaseManagementController.$inject = ['$scope', '$log'];
     
-    DTAngular.app.controller('DatabaseManagementController', DatabaseManagementController)
+    SEMOSSAngular.app.controller('DatabaseManagementController', DatabaseManagementController)
 

@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.security;
 
-import java.security.Permission;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -17,9 +15,11 @@ public interface User {
 
 	public static enum UserProperty {
 
-		USER_EMAIL, USER_NAME, USER_ORG
+		USER_EMAIL, USER_FULLNAME, USER_ORG
 	};
 
+	public String getUsername();
+	
 	public Map<String, String> getNamespaces();
 
 	public void addNamespace( String prefix, String ns );
@@ -37,7 +37,10 @@ public interface User {
 
 	public void setProperties( Map<UserProperty, String> props );
 	
-	public boolean hasPermission( Permission p );
-
-	public void resetPermissions( Collection<Permission> perms );
+	public Map<UserProperty, String> getProperties();
+	/**
+	 * Is this user authorized remotely, or from the local computer?
+	 * @return 
+	 */
+	public boolean isLocal();
 }

@@ -1,0 +1,33 @@
+Install and start the ldap server, ApacheDS 2.0:
+ - Download ApacheDS 2.0 for your OS: https://directory.apache.org/apacheds/downloads.html
+ - Run Installer for your OS, follow instructions here: https://directory.apache.org/apacheds/basic-ug/1.3-installing-and-starting.html
+
+Install and start the ldap client, Apache Directory Studio:
+ - Download Apache Directory Studio for your OS: https://directory.apache.org/studio/downloads.html
+ - Install and start Apache Directory Studio (on windows, unzip and run the .exe in the base directory)
+
+Connect Studio to your running ApacheDS instance:
+ - in the bottom left hand corner of the screen is the Connections window. Right click in the window and select "New Connection..."
+ - Enter the following information and click Next:
+    "Connection name:" LocalApacheDS  **(or whatever you like)**
+    "Hostname:" localhost
+    "Port:" 10389
+ - Enter the following information and click Finish:
+    "Bind DN or user:" uid=admin,ou=system
+    "Bind password:" secret
+
+Add the semoss partition:
+ - Right click the LocalApacheDS server in the bottom left of the Studio application
+ - select "Open COnfiguration"
+ - Select the "Partitions" tab in the "LocalApacheDS - Configuration" window that just opened
+ - Click the "Add" button
+ - Enter the information as follows:
+    "ID" - semoss
+    "Suffix" - o=semoss
+ - In the upper left of the screen, click the disk icon to save the current configuration
+
+Restart your ApacheDS instance:
+ **These instructions are for windows, for linux please see linux flavor specific instructions here:
+    http://directory.apache.org/apacheds/downloads.html
+ - Open "Control Panel" -> "Administrative Tools" -> "Services"
+ - right click on the "ApacheDS - default" item and select "Restart"

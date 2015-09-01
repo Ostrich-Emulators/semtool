@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.security.UserImpl;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.components.models.LogReadingTableModel;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -36,7 +34,6 @@ import javax.swing.table.TableRowSorter;
 import org.apache.log4j.Logger;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.ui.components.models.LogReadingTableModel.Level;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -138,15 +135,8 @@ public class LoggingPanel extends JPanel {
 	}
 
 	public void refresh() {
-		if ( UserImpl.getUser().hasPermission( SemossPermission.LOGVIEWER ) ) {
-			model.refresh();
-			table.scrollRectToVisible( table.getCellRect( model.getRowCount() - 1, 0, true ) );
-		}
-		else {
-			model.clear();
-			JOptionPane.showMessageDialog( table,
-					"You do not have permission to use this feature" );
-		}
+		model.refresh();
+		table.scrollRectToVisible( table.getCellRect( model.getRowCount() - 1, 0, true ) );
 	}
 
 	private ActionListener setupRowSorter() {

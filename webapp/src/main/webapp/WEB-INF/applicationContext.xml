@@ -19,4 +19,6 @@
 	<bean id="dbinfomapper" class="gov.va.semoss.web.datastore.DbInfoMapper"
 		p:dataStore-ref="datastore"/>
 	
+	<bean id="usermapper" class="gov.va.semoss.web.datastore.UserMapper"
+		p:dataStore-ref="datastore"/>
 </beans>

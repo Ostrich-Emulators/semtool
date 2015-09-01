@@ -1,6 +1,5 @@
 package gov.va.semoss.rdf.engine.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
