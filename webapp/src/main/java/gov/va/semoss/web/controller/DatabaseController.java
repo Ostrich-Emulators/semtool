@@ -2,12 +2,13 @@ package gov.va.semoss.web.controller;
 
 import gov.va.semoss.security.User.UserProperty;
 import gov.va.semoss.web.datastore.DbInfoMapper;
+import gov.va.semoss.web.filters.RemoteDBReverseProxyFilter;
 
 import javax.servlet.http.HttpServletResponse;
 
 import gov.va.semoss.web.io.DbInfo;
-
 import gov.va.semoss.web.security.SemossUser;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -85,12 +86,35 @@ public class DatabaseController extends SemossControllerBase {
 		return test;
 	}
 
-	@RequestMapping( value = "/list", method = RequestMethod.GET )
+	/**
+	 * Used for obtaining a set of "raw" DbInfo records, for use with 
+	 * the admin web console, thus displaying the urls of the databases
+	 * BEHIND the reverse proxy.
+	 * @param req The incoming request
+	 * @return An array of DbInfo objects
+	 */
+	@RequestMapping( value = "/raw", method = RequestMethod.GET )
+	@ResponseBody
+	public DbInfo[] getAllRawDatabases( HttpServletRequest req ) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
+		log.debug( "Getting all databases (user: "
+				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
+		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
+		return testDbs;
+	}
+	
+	/**
+	 * Used to obtain RP-sanitized DBInfo items
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping( value = "/", method = RequestMethod.GET )
 	@ResponseBody
 	public DbInfo[] getAllDatabases( HttpServletRequest req ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
-		log.debug( "Getting all databases (user: "
+		log.debug( "Getting all reverse-proxied databases (user: "
 				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
 
 		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
@@ -99,10 +123,7 @@ public class DatabaseController extends SemossControllerBase {
 
 		for ( DbInfo dbi : testDbs ) {
 			try {
-				String serverpath = reqpath + URLEncoder.encode( dbi.getName(), "UTF-8" );
-				dbi.setServerUrl( serverpath );
-				dbi.setDataUrl( serverpath + "/data" );
-				dbi.setInsightsUrl( serverpath + "/insights" );
+				RemoteDBReverseProxyFilter.convertToRPStyle(dbi);
 			}
 			catch ( Exception e ) {
 				log.error( e, e );
