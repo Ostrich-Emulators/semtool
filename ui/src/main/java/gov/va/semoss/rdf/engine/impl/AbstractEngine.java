@@ -461,31 +461,6 @@ public abstract class AbstractEngine implements IEngine {
 	public abstract boolean supportsSparqlBindings();
 
 	@Override
-	public boolean serverIsRunning() {
-		return false;
-	}
-
-	@Override
-	public boolean isServerSupported() {
-		return false;
-	}
-
-	@Override
-	public void startServer( int port ) {
-		log.error(	"Server mode is not supported. Please check isServerSupported() "
-				+ "before calling startServer(int)" );
-	}
-
-	@Override
-	public void stopServer() {
-	}
-
-	@Override
-	public java.net.URI getServerUri() {
-		return null;
-	}
-
-	@Override
 	public void calculateInferences() throws RepositoryException {
 		// nothing to do
 	}
