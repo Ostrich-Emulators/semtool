@@ -75,6 +75,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.log4j.Level;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.OWL;
@@ -479,6 +480,14 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			addUserNamespaces( ue );
 			RepositoryConnection rc = getRawConnection();
 			doUpdate( ue, rc, supportsSparqlBindings() );
+			logProvenance( ue );
+		}
+	}
+
+	protected void logProvenance( UpdateExecutor ue ) {
+		if ( provenance.isEnabledFor( Level.INFO ) ) {
+			User user = Security.getSecurity().getAssociatedUser( this );
+			provenance.info( user.getUsername() + ": " + ue.bindAndGetSparql() );
 		}
 	}
 
