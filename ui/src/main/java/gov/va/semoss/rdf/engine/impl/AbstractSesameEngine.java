@@ -491,6 +491,15 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
+	protected void logProvenance( Collection<Statement> stmts ) {
+		if ( provenance.isEnabledFor( Level.INFO ) ) {
+			User user = Security.getSecurity().getAssociatedUser( this );
+			for( Statement stmt : stmts ){
+				provenance.info( user.getUsername() + ": " + stmt );
+			}
+		}
+	}
+
 	@Override
 	public Model construct( QueryExecutor<Model> q ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {

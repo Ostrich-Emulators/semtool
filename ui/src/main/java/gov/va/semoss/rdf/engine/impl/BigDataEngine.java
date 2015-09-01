@@ -206,6 +206,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 			repoc.commit();
 			// 4
 			repoc.close();
+			logProvenance( newstmts );
 		}
 		finally {
 			try {
@@ -247,6 +248,8 @@ public class BigDataEngine extends AbstractSesameEngine {
 								src.clear();
 								src.add( stmts );
 								src.commit();
+								
+								logProvenance( stmts );
 							}
 							catch ( RepositoryException re ) {
 								log.error( re, re );
