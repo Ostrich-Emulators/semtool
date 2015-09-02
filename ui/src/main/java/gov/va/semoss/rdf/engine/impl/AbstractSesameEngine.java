@@ -75,7 +75,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.log4j.Level;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.OWL;
@@ -92,7 +91,6 @@ import org.openrdf.query.UpdateExecutionException;
 public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private static final Logger log = Logger.getLogger( AbstractSesameEngine.class );
-	private static final Logger provenance = Logger.getLogger( "provenance" );
 	public static final String REMOTE_KEY = "remote";
 	public static final String REPOSITORY_KEY = "repository";
 	public static final String INSIGHTS_KEY = "insights";
@@ -481,22 +479,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			RepositoryConnection rc = getRawConnection();
 			doUpdate( ue, rc, supportsSparqlBindings() );
 			logProvenance( ue );
-		}
-	}
-
-	protected void logProvenance( UpdateExecutor ue ) {
-		if ( provenance.isEnabledFor( Level.INFO ) ) {
-			User user = Security.getSecurity().getAssociatedUser( this );
-			provenance.info( user.getUsername() + ": " + ue.bindAndGetSparql() );
-		}
-	}
-
-	protected void logProvenance( Collection<Statement> stmts ) {
-		if ( provenance.isEnabledFor( Level.INFO ) ) {
-			User user = Security.getSecurity().getAssociatedUser( this );
-			for( Statement stmt : stmts ){
-				provenance.info( user.getUsername() + ": " + stmt );
-			}
 		}
 	}
 
