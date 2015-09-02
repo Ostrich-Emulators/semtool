@@ -272,7 +272,6 @@ public class GraphToSparql {
 		// we need to use a variable if:
 		// 1) our edge is selected to be returned in the SELECT part
 		// 2) we have other properties to hang on this edge
-		// 3) we only have one value, and it's Constants.ANYNODE
 		// Note: if 1 & 2 aren't true, we can handle multiple values without a variable
 		boolean useLinkVar = ( edge.isSelected( RDF.TYPE ) || otherprops.size() > 1
 				|| vals.isEmpty() || edge.isSelected( RDF.SUBJECT ) || useCustomEdge );
