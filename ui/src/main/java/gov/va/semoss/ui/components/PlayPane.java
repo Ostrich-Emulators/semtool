@@ -268,7 +268,7 @@ public class PlayPane extends JFrame {
 	 *
 	 * @throws java.io.IOException
 	 */
-	public PlayPane() throws IOException {
+	public PlayPane() {
 		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 
 		setApplicationIcons();
