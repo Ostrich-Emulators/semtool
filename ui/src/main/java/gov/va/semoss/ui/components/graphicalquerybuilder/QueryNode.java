@@ -63,4 +63,9 @@ public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex
 			setShape( GraphShapeRepository.instance().getShape( getType() ) );
 		}
 	}
+	
+	@Override
+	public boolean isNode(){
+		return true;
+	}
 }

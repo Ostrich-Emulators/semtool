@@ -178,7 +178,7 @@ public class WeightDropDownButton extends JButton {
 			for ( X nodeOrEdge : entry.getValue() ) {
 				propertiesToAdd.addAll( entry.getKey(), getNumberedProperties( nodeOrEdge ) );
 
-				if ( nodeOrEdge instanceof SEMOSSVertex ) {
+				if ( nodeOrEdge.isNode() ) {
 					// nodes always have degree properties
 					propertiesToAdd.add( entry.getKey(), Constants.IN_EDGE_CNT );
 					propertiesToAdd.add( entry.getKey(), Constants.OUT_EDGE_CNT );

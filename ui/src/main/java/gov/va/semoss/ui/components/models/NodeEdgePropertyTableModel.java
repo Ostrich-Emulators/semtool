@@ -74,7 +74,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	}
 
 	public void setItem( GraphElement item ) {
-		if ( item instanceof SEMOSSVertex ) {
+		if ( item.isNode() ) {
 			setVertex( SEMOSSVertex.class.cast( item ) );
 		}
 		else {

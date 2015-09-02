@@ -76,7 +76,7 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer
 				= (VisualizationViewer<SEMOSSVertex, SEMOSSEdge>) e.getSource();
 
-		SEMOSSVertex clickedVertex = checkIfVertexWasClicked( viewer, e.getX(),
+		SEMOSSVertex clickedVertex = getClickedVertex( viewer, e.getX(),
 				e.getY() );
 
 		if ( clickedVertex != null ) {
@@ -115,19 +115,15 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
 	 * to use to get the vertex
 	 */
-	private SEMOSSVertex checkIfVertexWasClicked(
+	private SEMOSSVertex getClickedVertex (
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer, int x, int y ) {
 
-		GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport = viewer
-				.getPickSupport();
-		Object clickedObject = pickSupport.getVertex( viewer.getGraphLayout(),
+		GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport 
+				= viewer.getPickSupport();
+		SEMOSSVertex clickedObject = pickSupport.getVertex( viewer.getGraphLayout(),
 				x, y );
-		if ( clickedObject instanceof SEMOSSVertex ) {
-			logger.debug( "The user clicked a SEMOSSVertex." );
-			return (SEMOSSVertex) clickedObject;
-		}
-
-		return null;
+		logger.debug( "The user clicked a SEMOSSVertex." );
+		return clickedObject;
 	}
 
 	/*
