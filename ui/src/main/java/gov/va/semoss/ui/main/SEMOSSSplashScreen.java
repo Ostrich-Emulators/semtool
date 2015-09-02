@@ -150,22 +150,8 @@ public class SEMOSSSplashScreen extends Frame {
 	 * @param y The y coordinate of the screen on the screen
 	 */
 	public void displaySplashScreen() {
-		setVisible( true );
-		Graphics graphics = this.getGraphics();
-		if ( graphics == null ) {
-			log.error( "Graphics for splash screen are null" );
-		}
-		while ( percentComplete < 1.0f ) {
-			percentComplete = getPercentageComplete();
-			this.paintComponents( graphics );
-			try {
-				Thread.sleep( 30 );
-			}
-			catch ( InterruptedException e ) {
-				log.error( "Graphics for splash screen are null" );
-			}
-		}
-		setVisible( false );
+		SplashRunner runner = new SplashRunner();
+		runner.start();
 	}
 
 	@Override
@@ -215,5 +201,28 @@ public class SEMOSSSplashScreen extends Frame {
 		graphics.fillRect( 0, splashScreenSize.height - PROGRESS_GUTTER_HEIGHT - MESSAGE_GUTTER_HEIGHT, splashScreenSize.width, PROGRESS_GUTTER_HEIGHT );
 		graphics.setColor( BACKGROUND_COLOR );
 		graphics.fillRect( accomplished, splashScreenSize.height - PROGRESS_GUTTER_HEIGHT - MESSAGE_GUTTER_HEIGHT, remaining, PROGRESS_GUTTER_HEIGHT );
+	}
+	
+	private class SplashRunner extends Thread {
+		
+		@Override
+		public void run(){
+			setVisible( true );
+			Graphics graphics = getGraphics();
+			if ( graphics == null ) {
+				log.error( "Graphics for splash screen are null" );
+			}
+			while ( percentComplete < 1.0f ) {
+				percentComplete = getPercentageComplete();
+				paintComponents( graphics );
+				try {
+					Thread.sleep( 30 );
+				}
+				catch ( InterruptedException e ) {
+					log.error( "Graphics for splash screen are null" );
+				}
+			}
+			setVisible( false );
+		}
 	}
 }
