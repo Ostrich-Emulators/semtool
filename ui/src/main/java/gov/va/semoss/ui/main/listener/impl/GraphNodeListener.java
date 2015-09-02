@@ -72,9 +72,7 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 			return;
 		}
 
-		@SuppressWarnings( "unchecked" )
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer
-				= (VisualizationViewer<SEMOSSVertex, SEMOSSEdge>) e.getSource();
+		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
 
 		SEMOSSVertex clickedVertex = getClickedVertex( viewer, e.getX(),
 				e.getY() );
@@ -122,7 +120,9 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 				= viewer.getPickSupport();
 		SEMOSSVertex clickedObject = pickSupport.getVertex( viewer.getGraphLayout(),
 				x, y );
-		logger.debug( "The user clicked a SEMOSSVertex." );
+		if( null != clickedObject ){
+			logger.debug( "The user clicked a SEMOSSVertex." );
+		}
 		return clickedObject;
 	}
 
