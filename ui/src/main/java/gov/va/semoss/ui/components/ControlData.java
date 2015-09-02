@@ -153,7 +153,7 @@ public class ControlData implements GraphListener {
 	 * @return Vector<String> List of properties.
 	 */
 	public List<URI> getSelectedProperties( GraphElement v ) {
-		return ( v instanceof SEMOSSVertex
+		return ( v.isNode()
 				? vertexCDT.getSelectedProperties( v.getType() )
 				: edgeCDT.getSelectedProperties( v.getType() ) );
 	}

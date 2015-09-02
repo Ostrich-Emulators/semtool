@@ -18,6 +18,6 @@ public interface SEMOSSEdge extends GraphElement {
 	 *
 	 * @return True if all vertices are visible, false otherwise
 	 */
-	public boolean getVerticesVisible();
+	public boolean getVerticesVisible();	
 
 }

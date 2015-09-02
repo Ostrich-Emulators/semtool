@@ -43,12 +43,7 @@ public class RepositoryRenderer extends DefaultListCellRenderer {
 
 		Icon icon;
 		boolean pinned = Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) );
-		if ( eng.serverIsRunning() ) {
-			icon = ( pinned ? pinserver : nopinserver );
-		}
-		else {
-			icon = ( pinned ? pin : nopin );
-		}
+		icon = ( pinned ? pin : nopin );
 
 		setIcon( icon );
 
