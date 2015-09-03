@@ -11,6 +11,7 @@ import gov.va.semoss.ui.components.ExecuteQueryProcessor;
 import gov.va.semoss.ui.components.ParamComboBox;
 import gov.va.semoss.ui.components.ParamPanel;
 import gov.va.semoss.ui.components.SelectDatabasePanel;
+import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
@@ -515,9 +516,16 @@ public class InsightEditorController implements Initializable{
 		}
 
 		@Override
-		protected Class<? extends PlaySheetCentralComponent> getPlaySheetCentralComponent() throws ClassNotFoundException {
+		protected Class<? extends IPlaySheet> getPlaySheet() {
 			String output = insight.getOutput();
-			return (Class<PlaySheetCentralComponent>) Class.forName( output );
+			try{
+				return (Class<IPlaySheet>) Class.forName( output );
+			}
+			catch( ClassNotFoundException n ){
+				log.error( n, n);
+			}
+			
+			return null;
 		}
 
 		@Override
