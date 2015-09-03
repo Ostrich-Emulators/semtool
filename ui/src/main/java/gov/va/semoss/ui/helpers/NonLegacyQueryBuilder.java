@@ -1,6 +1,7 @@
 package gov.va.semoss.ui.helpers;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.ParamComboBox;
@@ -142,7 +143,7 @@ public class NonLegacyQueryBuilder {
 	 * @return getData -- (Map<URI, String>) Described above, where "URI" is a URI
 	 * and "String" may be an "rdfs:label" value, or "".
 	 */
-	private Map<URI, String> getData( IEngine eng, String type ) {
+	public Map<URI, String> getData( IEngine eng, String type ) {
 		logger.debug( "NonLegacyQueryBuilder using engine: " + eng );
 		Map<URI, String> mapReturnValue = new HashMap<>();
 
@@ -161,8 +162,8 @@ public class NonLegacyQueryBuilder {
 				}
 			}
 			else if ( DIHelper.getInstance().getLocalProp( type ) == null ) {
-	      //The the param options have not been explicitly defined and 
-				//the combo box has not been cached, time for the main processing:
+	        //The param options have not been explicitly defined and 
+			//the combo box has not been cached, time for the main processing:
 
 				//Check if URI is used in param filler:
 				if ( type.startsWith( "http://" ) ) {
@@ -174,7 +175,6 @@ public class NonLegacyQueryBuilder {
 					paramTable.put( Constants.ENTITY, type );
 					sparqlQuery = extQuery == null
 							? Utility.fillParam( sparqlQuery, paramTable ) : extQuery;
-
 					Map<URI, String> mapURI_Labels = new HashMap<>();
 					try {
 						List<URI> uris = eng.query( OneVarListQueryAdapter.getUriList( sparqlQuery ) );

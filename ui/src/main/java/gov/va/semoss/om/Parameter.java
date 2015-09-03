@@ -1,5 +1,8 @@
 package gov.va.semoss.om;
 
+import java.io.Serializable;
+
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 
@@ -8,12 +11,14 @@ import org.openrdf.query.BindingSet;
  * @author Thomas
  *
  */
-public class Parameter {
-    private String strLabel;
-    private String strVariable;
-    private String strParameterType;
-    private String strDefaultQuery;
-    private String strParameterURI;
+public class Parameter implements Serializable{
+	private static final long serialVersionUID = 5672795936332918133L;
+    private URI uriId = null;
+	private String strLabel = "";
+    private String strVariable = "";
+    private String strParameterType = "";
+    private String strDefaultQuery = "";
+    private String strParameterURI = "";
     
     public Parameter(){
     }    
@@ -26,6 +31,12 @@ public class Parameter {
     }
 
     //Parameter URI:
+    public URI getParameterId(){
+    	return this.uriId;
+    }
+    public void setParameterId(URI uriId){
+    	this.uriId = uriId;
+    }    
     public String getParameterURI(){
     	return this.strParameterURI;
     }
@@ -74,6 +85,7 @@ public class Parameter {
     	
 		Value ParameterURI_Value = resultSet.getValue("parameter");
 		if(ParameterURI_Value != null){
+			this.uriId = (URI) ParameterURI_Value;
 			this.strParameterURI = ParameterURI_Value.stringValue();
 		}
 		Value labelValue = resultSet.getValue("parameterLabel");

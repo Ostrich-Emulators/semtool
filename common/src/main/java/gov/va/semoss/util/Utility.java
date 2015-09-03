@@ -54,6 +54,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -639,4 +640,5 @@ public class Utility {
 			return l.compareTo( t.l );
 		}
 	}
+
 }
