@@ -99,7 +99,7 @@ function initSlider(sliderId, allValuesSorted, functionToCallOnChange) {
 		functionToCallOnChange();
 	});
 	
-	$('#'+sliderId).trigger('slide');
+	$('#'+sliderId).trigger('slideStop');
 
 	d3.select("#min").append("text")
 		.text("Min: " + roundNumber(allValuesSorted[0]))
@@ -130,24 +130,76 @@ function updateVisualization() {
 	updateHeatmap(domainArray);
 }
 
+var roundNumbers = true;
+function getLegendText() {
+	var domainArray = $('#slider').data('slider').getValue();
+	var quantiles = colorScale.quantiles();
+	var legendText = [];
+
+	roundNumbers = true;
+	for (var i=0; i<quantiles.length; i++) {
+		if (quantiles[i] < 1) {
+			roundNumbers = false;
+		}
+	}
+
+	legendText = legendText.concat([getRoundedVal(domainArray[0])]);
+	for (var i=0; i<quantiles.length-1; i++) {
+		legendText = legendText.concat(getRoundedVal(quantiles[i]));
+	}
+	var lastElementOfLegendText =	getRoundedVal(quantiles[quantiles.length-1]) + " to " + 
+									getRoundedVal(domainArray[1]);
+
+	legendText = legendText.concat([lastElementOfLegendText]);
+	
+	return legendText;
+}
+
+function getRoundedVal(x) {
+	if (roundNumbers)
+		return Math.round(x);
+	return Math.round(x*100)/100.0;
+}
+
 function buildLegend(legendSelector, startingX, startingY, legendElementWidth, legendElementHeight) {
 	d3.select(legendSelector).selectAll(".legend").remove();
 	
+	//trying to account for when we have less than 8 quantiles, removing the extra spaces
+	var legendColorsPrelim = getColors();
+	var legendTextPrelim = getLegendText();
+	
+	var legendColors = [];
+	var legendText = [];
+	
+	var legendTextIndex = 0;
+	for (var i=0; i<legendTextPrelim.length-1; i++) {
+		if (legendTextPrelim[i] != legendTextPrelim[i+1]){
+			legendText[legendTextIndex] = legendTextPrelim[i];
+			legendColors[legendTextIndex] = legendColorsPrelim[i];
+			legendTextIndex++;
+		}
+	}
+	
+	legendText[legendTextIndex] = legendTextPrelim[legendTextPrelim.length-1];
+	legendColors[legendTextIndex] = legendColorsPrelim[legendTextPrelim.length-1];
+
 	var legend = d3.select(legendSelector).selectAll(".legend")
-		.data([0].concat(colorScale.quantiles()), function(d) { return d; })
+		.data(legendText, function(d) { return d; })
 		.enter().append("g")
 		.attr("class", "legend");
 
 	legend.append("rect")
+		.attr("index", function(d, i) { return i; })
 		.attr("x", function(d, i) { return startingX + (legendElementWidth * i); })
 		.attr("y", startingY)
 		.attr("width", legendElementWidth)
 		.attr("height", legendElementHeight)
-		.style("fill", function(d, i) { return getColors()[i]; });
+		.style("fill", function(d, i) { return legendColors[i]; });
 
 	legend.append("text")
+		.attr("index", function(d, i) { return i; })
 		.attr("class", "legend-text")
-		.text(function(d) { return Math.round(d); })
+		.text(function(d) { return d; })
 		.attr("x", function(d, i) { return startingX + (legendElementWidth * i); })
 		.attr("y", startingY + legendElementHeight + 15);
 }
