@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.om;
 
+import gov.va.semoss.ui.helpers.DynamicColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.util.Constants;
 
@@ -39,7 +40,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 	}
 
 	public SEMOSSVertexImpl( URI id, URI type, String label ) {
-		super( id, type, label, GraphColorRepository.instance().getColor( type ) );
+		super( id, type, label, DynamicColorRepository.instance().getColor( type ) );
 		shape = GraphShapeRepository.instance().getShape( type );
 	}
 
@@ -48,7 +49,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 		super.setValue( prop, val );
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
-			setColor( GraphColorRepository.instance().getColor( typeURI ) );
+			setColor( DynamicColorRepository.instance().getColor( typeURI ) );
 			setShape( GraphShapeRepository.instance().getShape( getType() ) );
 		}
 	}

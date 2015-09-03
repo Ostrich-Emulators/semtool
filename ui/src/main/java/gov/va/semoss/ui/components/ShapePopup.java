@@ -24,6 +24,7 @@ import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.main.Starter;
 import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.Utility;
 
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -37,12 +38,15 @@ import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import org.apache.log4j.Logger;
+
 /**
  * This class is used to display information about shapes in a popup menu.
  */
 public class ShapePopup extends JMenu {
 
 	private static final long serialVersionUID = 3874311709020126729L;
+	private static final Logger log = Logger.getLogger( Utility.class );
 
 	public ShapePopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( "Modify Shape" );
@@ -68,9 +72,9 @@ public class ShapePopup extends JMenu {
 						out = new java.io.FileOutputStream( pout );
 						props.store(out, "This is an optional header comment string");
 				        out.close();
-						} catch (Exception e1) {
+						} catch (Exception ex) {
 							// TODO Auto-generated catch block
-							e1.printStackTrace();
+							log.error( ex, ex );
 						}
 						
 					}
