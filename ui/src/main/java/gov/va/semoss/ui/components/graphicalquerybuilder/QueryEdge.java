@@ -18,4 +18,10 @@ public class QueryEdge extends AbstractQueryGraphElement implements QueryGraphEl
 	public QueryEdge( URI _uri ) {
 		super( _uri, Color.DARK_GRAY );
 	}
+	
+	@Override
+	public boolean isNode() {
+		return false;
+	}
+
 }

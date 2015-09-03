@@ -65,7 +65,6 @@ public class RepositoryList extends JList<IEngine> {
 	private static final Logger log = Logger.getLogger( RepositoryList.class );
 	private final RepositoryListModel model;
 	private String copiedsmss;
-	private JLabel add1;
 
 	public RepositoryList() {
 		super( new RepositoryListModel() );
@@ -113,13 +112,6 @@ public class RepositoryList extends JList<IEngine> {
 					sb.append( "<br>" );
 				}
 				sb.append( "Base URI: " ).append( onto );
-			}
-
-			if ( eng.serverIsRunning() ) {
-				if ( sb.length() > 0 ) {
-					sb.append( "<br>" );
-				}
-				sb.append( "Endpoint at: " ).append( eng.getServerUri() );
 			}
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {

@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
 import gov.va.semoss.security.RemoteUserImpl;
 import gov.va.semoss.security.permissions.SemossPermission;
@@ -21,6 +22,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
+
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
@@ -106,6 +108,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
 		String query = getQuery();
+        
 		Class<? extends PlaySheetCentralComponent> klass = null;
 		try {
 			klass = getPlaySheetCentralComponent();

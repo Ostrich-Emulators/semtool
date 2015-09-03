@@ -75,7 +75,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.log4j.Level;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.OWL;
@@ -92,7 +91,6 @@ import org.openrdf.query.UpdateExecutionException;
 public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private static final Logger log = Logger.getLogger( AbstractSesameEngine.class );
-	private static final Logger provenance = Logger.getLogger( "provenance" );
 	public static final String REMOTE_KEY = "remote";
 	public static final String REPOSITORY_KEY = "repository";
 	public static final String INSIGHTS_KEY = "insights";
@@ -484,13 +482,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	protected void logProvenance( UpdateExecutor ue ) {
-		if ( provenance.isEnabledFor( Level.INFO ) ) {
-			User user = Security.getSecurity().getAssociatedUser( this );
-			provenance.info( user.getUsername() + ": " + ue.bindAndGetSparql() );
-		}
-	}
-
 	@Override
 	public Model construct( QueryExecutor<Model> q ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
@@ -715,30 +706,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e );
 		}
 		return new ArrayList<>();
-	}
-
-	/**
-	 * Runs the passed string query against the engine and returns graph query
-	 * results. The query passed must be in the structure of a CONSTRUCT SPARQL
-	 * query. The exact format of the results will be dependent on the type of the
-	 * engine, but regardless the results are able to be graphed.
-	 *
-	 * @param query the string version of the query to be run against the engine
-	 *
-	 * @return the graph query results
-	 */
-	@Override
-	public GraphQueryResult execGraphQuery( String query ) {
-		GraphQueryResult res = null;
-		try {
-			RepositoryConnection rc = getRawConnection();
-			GraphQuery sagq = rc.prepareGraphQuery( QueryLanguage.SPARQL, query );
-			res = sagq.evaluate();
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-		return res;
 	}
 
 	/**

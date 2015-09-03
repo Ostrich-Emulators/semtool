@@ -107,4 +107,9 @@ public class SEMOSSEdgeImpl extends AbstractGraphElement
 	public boolean getVerticesVisible() {
 		return this.verticesVisible;
 	}
+
+	@Override
+	public boolean isNode() {
+		return false;
+	}
 }

@@ -41,8 +41,11 @@ import gov.va.semoss.util.PinningEngineListener;
 import gov.va.semoss.util.Utility;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -51,8 +54,6 @@ import javax.swing.Painter;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * The Starter class is run to start the SEMOSS application. This launches the
@@ -60,11 +61,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class Starter {
 
-	final Object monitor = new Object();
 	/**
 	 * The set of possible image paths which define the Splash screen
 	 */
 	private static final String SPLASH_SCREEN_IMAGE_PATH = "/images/SEMOSS-Splash.png";
+	private static final Logger logger = Logger.getLogger( Starter.class );
 
 	/**
 	 * Method main. Starts the SEMOSS application. read the properties file -
@@ -80,12 +81,12 @@ public class Starter {
 	 * @throws java.lang.Exception
 	 */
 	public static void main( String[] args ) throws Exception {
+		new Starter().startup( SPLASH_SCREEN_IMAGE_PATH, args );
+	}
 
-		final Logger logger = Logger.getLogger( Starter.class );
-
+	public void startup( String splashpath, String[] args ) throws IOException {
 		final String WORKINGDIR = System.getProperty( "user.dir" );
-
-		final File propFile = new File( WORKINGDIR, "RDF_Map.prop" );
+		init();
 
 		final EngineUtil engineutil = EngineUtil.getInstance();
 		new Thread( engineutil ).start();
@@ -124,11 +125,28 @@ public class Starter {
 			logger.warn( e, e );
 		}
 
-		// load order: semoss properties, vcamp properties, RDF_Map prop (if exists)
+
+		// load order: classpath resources, filesystem resources, RDF_Map prop (if exists)
 		Properties props = DIHelper.getInstance().getCoreProp();
+		
+		List<String> resources = getConfigResources();
+		for( String path : resources ){
+			try( InputStream is = Starter.class.getResourceAsStream( path ) ){
+				Properties tempprops = new Properties();
+				tempprops.load( is );
+				Utility.mergeProperties( props, tempprops, false, null );
+			}
+			catch( IOException ioe ){
+				logger.warn( ioe, ioe );
+			}			
+		}
+		
 		props.load( Starter.class.getResourceAsStream( "/semoss.properties" ) );
 
-		File configs[] = { new File( WORKINGDIR, "semoss.properties" ), propFile };
+		File rdfmap = new File( WORKINGDIR, "RDF_Map.prop" );
+		List<File> configs = getConfigs( WORKINGDIR );
+		configs.add( rdfmap );
+
 		for ( File f : configs ) {
 			if ( f.exists() ) {
 				try ( Reader r = new FileReader( f ) ) {
@@ -156,8 +174,8 @@ public class Starter {
 			}
 		}
 
-		final PlayPane frame = new PlayPane();
-		final SEMOSSSplashScreen ss = new SEMOSSSplashScreen( SPLASH_SCREEN_IMAGE_PATH );
+		final PlayPane frame = getPlayPane();
+		final SEMOSSSplashScreen ss = new SEMOSSSplashScreen( splashpath );
 		ss.displaySplashScreen();
 		java.awt.EventQueue.invokeLater( new Runnable() {
 			@Override
@@ -219,5 +237,24 @@ public class Starter {
 			watcherInstance.setExtensions( Arrays.asList( ext.split( ";" ) ) );
 			watcherInstance.loadFirst();
 		}
+	}
+
+	protected List<File> getConfigs( final String WORKINGDIR ) {
+		List<File> configs = new ArrayList<>();
+		configs.add( new File( WORKINGDIR, "semoss.properties" ) );
+		return configs;
+	}
+
+	protected List<String> getConfigResources(){
+		List<String> configs = new ArrayList<>();
+		configs.add( "/semoss.properties" );
+		return configs;
+	}
+	
+	protected PlayPane getPlayPane() {
+		return new PlayPane();
+	}
+
+	protected void init() throws IOException {
 	}
 }

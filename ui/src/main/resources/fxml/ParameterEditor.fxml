@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="509.0" prefWidth="616.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.semoss.ui.components.insight.manager.ParameterEditorController">
+  <columnConstraints>
+    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="43.0" prefWidth="143.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="473.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints maxHeight="89.0" minHeight="30.0" prefHeight="69.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="61.0" minHeight="30.0" prefHeight="41.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="49.0" minHeight="30.0" prefHeight="39.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="55.0" minHeight="30.0" prefHeight="54.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="60.0" minHeight="12.0" prefHeight="41.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="61.0" minHeight="22.0" prefHeight="44.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="1.7976931348623157E308" minHeight="70.0" prefHeight="223.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+   <children>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+         <children>
+            <Label alignment="CENTER" styleClass="Heading" text="Parameter Editor" />
+         </children>
+      </HBox>
+      <Label text="Name:" GridPane.rowIndex="1">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></Label>
+      <Label text="Variable:" GridPane.rowIndex="2">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></Label>
+      <Label text="Parameter Type:" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></Label>
+      <Label text="Parameter Query:" GridPane.rowIndex="5">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></Label>
+      <Button fx:id="btnBuildQuery_Parm" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="34.0" text="Build Query from Type" GridPane.columnIndex="1" GridPane.rowIndex="5">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></Button>
+      <TextField fx:id="txtLabel_parm" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></TextField>
+      <TextField fx:id="txtVariable_parm" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></TextField>
+      <ComboBox fx:id="cboParameterType_parm" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets bottom="10.0" right="10.0" />
+         </GridPane.margin></ComboBox>
+      <TextArea fx:id="txtaDefaultQuery_parm" maxWidth="1.7976931348623157E308" prefHeight="250.0" GridPane.columnSpan="2" GridPane.rowIndex="6">
+         <GridPane.margin>
+            <Insets bottom="10.0" left="10.0" right="10.0" />
+         </GridPane.margin></TextArea>
+      <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="41.0" prefWidth="606.0" text="If the above Variable is used within a SPARQL query, it will be replaced by its dropdown selection on the left pane. " textAlignment="CENTER" textFill="#ff0606" wrapText="true" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
+         <GridPane.margin>
+            <Insets bottom="10.0" left="10.0" />
+         </GridPane.margin>
+      </Label>
+   </children>
+</GridPane>

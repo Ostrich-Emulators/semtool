@@ -18,7 +18,9 @@ import org.openrdf.model.Value;
  * @author ryan
  */
 public interface GraphElement {
-
+	
+	public boolean isNode();
+	
 	public Color getColor();
 
 	public String getLabel();

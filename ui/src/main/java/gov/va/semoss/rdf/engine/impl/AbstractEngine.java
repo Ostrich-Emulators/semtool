@@ -37,10 +37,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import gov.va.semoss.rdf.engine.api.InsightManager;
+import gov.va.semoss.rdf.engine.api.UpdateExecutor;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.security.Security;
+import gov.va.semoss.security.User;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
+import java.util.Collection;
+import org.apache.log4j.Level;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
@@ -51,6 +56,7 @@ import org.openrdf.model.impl.URIImpl;
 public abstract class AbstractEngine implements IEngine {
 
 	private static final Logger log = Logger.getLogger( AbstractEngine.class );
+	private static final Logger provenance = Logger.getLogger( "provenance" );
 
 	private String engineName = null;
 	protected Properties prop = new Properties();
@@ -461,31 +467,6 @@ public abstract class AbstractEngine implements IEngine {
 	public abstract boolean supportsSparqlBindings();
 
 	@Override
-	public boolean serverIsRunning() {
-		return false;
-	}
-
-	@Override
-	public boolean isServerSupported() {
-		return false;
-	}
-
-	@Override
-	public void startServer( int port ) {
-		log.error(	"Server mode is not supported. Please check isServerSupported() "
-				+ "before calling startServer(int)" );
-	}
-
-	@Override
-	public void stopServer() {
-	}
-
-	@Override
-	public java.net.URI getServerUri() {
-		return null;
-	}
-
-	@Override
 	public void calculateInferences() throws RepositoryException {
 		// nothing to do
 	}
@@ -493,5 +474,21 @@ public abstract class AbstractEngine implements IEngine {
 	public static final URI getNewBaseUri() {
 		URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
 		return baseuri;
+	}
+	
+		protected void logProvenance( UpdateExecutor ue ) {
+		if ( provenance.isEnabledFor( Level.INFO ) ) {
+			User user = Security.getSecurity().getAssociatedUser( this );
+			provenance.info( user.getUsername() + ": " + ue.bindAndGetSparql() );
+		}
+	}
+
+	protected void logProvenance( Collection<Statement> stmts ) {
+		if ( provenance.isEnabledFor( Level.INFO ) ) {
+			User user = Security.getSecurity().getAssociatedUser( this );
+			for( Statement stmt : stmts ){
+				provenance.info( user.getUsername() + ": " + stmt );
+			}
+		}
 	}
 }

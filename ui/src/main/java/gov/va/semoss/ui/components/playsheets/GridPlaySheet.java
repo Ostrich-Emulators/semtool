@@ -86,6 +86,7 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 		HeaderActionMediator headerMediator = new HeaderActionMediator(table);
 		header.addMouseListener(headerMediator);
 		table.setCellSelectionEnabled(true);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 	}
 
 	@Override
@@ -187,7 +188,6 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 		 */
 		public HeaderActionMediator(JTable table){
 			header = table.getTableHeader();
-			getTable().getTableHeader().setEnabled(false);
 		}
 		
 		/**
@@ -204,12 +204,6 @@ public class GridPlaySheet extends GridRAWPlaySheet {
             getTable().clearSelection();
             // If we're holding down CTRL, then sort
             if ((event.getModifiers()& ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {
-            	getTable().setColumnSelectionAllowed(false);
-                getTable().setRowSelectionAllowed(true);
-            	sort(col);
-            }
-            // Otherwise, select the column
-            else {
             	ListSelectionModel lsModel = getTable().getSelectionModel();
             	lsModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             	getTable().setColumnSelectionAllowed(true);
@@ -217,6 +211,13 @@ public class GridPlaySheet extends GridRAWPlaySheet {
                 getTable().setColumnSelectionInterval(col, col);
                 int rowCount = getTable().getRowCount();
                 getTable().setRowSelectionInterval(0, rowCount - 1);
+            }
+            // Otherwise, select the column
+            else {
+            	getTable().setColumnSelectionAllowed(false);
+                getTable().setRowSelectionAllowed(true);
+            	sort(col);
+            	super.mouseClicked(event);
             }  
         }   
 
