@@ -3,6 +3,12 @@ var currentColor;
 var decimalsToKeep;
 var valueArray = [];
 
+var heatDataName = "Heat Value";
+var countyData = false;
+var  stateData = false;
+var  worldData = false;
+var rateById = d3.map();
+
 var colorHash = {};
 colorHash["Red"]             = ["#FFFFCC","#FFEDA0","#FED976","#FEB24C","#FD8D3C","#FC4E2A","#E31A1C","#BD0026","#800026"];
 colorHash["Blue"]            = ["#F7FBFF","#DEEBF7","#C6DBEF","#9ECAE1","#6BAED6","#4292C6","#2171B5","#08519C","#08306B"];
@@ -85,7 +91,11 @@ function initSlider(sliderId, allValuesSorted, functionToCallOnChange) {
 		formater: function(value) {
 			return roundNumber(value);
 		}
+	}).on('slideStart', function(){
+		;
 	}).on('slide', function(){
+		;
+	}).on('slideStop', function(){
 		functionToCallOnChange();
 	});
 	
@@ -140,4 +150,74 @@ function buildLegend(legendSelector, startingX, startingY, legendElementWidth, l
 		.text(function(d) { return Math.round(d); })
 		.attr("x", function(d, i) { return startingX + (legendElementWidth * i); })
 		.attr("y", startingY + legendElementHeight + 15);
+}
+
+function HeatLocation(data){
+	this.locationId = data.locationId;
+	this.heatValue = data.heatValue;
+	this.paramMap = data.paramMap;
+
+	var tipString = buildTipLine(heatDataName, this.heatValue);
+	if (this.paramMap != null) {
+		for (var key in this.paramMap) {
+			tipString = tipString + buildTipLine(key, this.paramMap[key]);
+		}
+	}
+	tipString = tipString + buildTipLine("Location ID", this.locationId);
+	this.tip = tipString;
+}
+
+function buildTipLine(name, value) {
+	if (value > 1000)
+		value = numberWithCommas(value);
+	return "<div> <span class='light'>" + name + ": </span>" + value + "</div>";
+}
+
+function numberWithCommas(x) {
+	var parts = x.toString().split(".");
+    return parts[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function getTipForId(id) {
+	id = fixId(id);
+	
+	var location = rateById.get(id);
+	if (location == null)
+		return null;
+	return location.tip;
+}
+
+function getColorForId(id) {
+	id = fixId(id);
+	
+	var location = rateById.get(id);
+	if (location == null)
+		return "WhiteSmoke";
+	return colorScale(location.heatValue);
+}
+
+function getColorForIdsInRange(id, min, max) {
+	id = fixId(id);
+	
+	var location = rateById.get(id);
+	if (location == null || location.heatValue < min || location.heatValue > max)
+		return "WhiteSmoke";
+	return colorScale(location.heatValue);
+}
+
+function fixId(id) {
+	if (id == -99 || id == "-99") {
+		return "";
+	} else if (countyData && id < 10000) {
+		return "0" + id;
+	} else if (stateData && id < 10) {
+		return "0" + id;
+	} else if (worldData && id < 10) {
+		alert("WorldData id " + id + " < 10, prepending 00.");
+		return "00" + id;
+	} else if (worldData && id < 100) {
+		alert("WorldData id " + id + " < 100, prepending 0.");
+		return "0" + id;
+	}
+	return id;
 }
