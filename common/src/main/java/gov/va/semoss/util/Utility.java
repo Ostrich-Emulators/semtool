@@ -54,6 +54,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -624,6 +625,27 @@ public class Utility {
 		return sb.toString();
 	}
 	
+	/**   Prepares a string for use in a dynamic Sparql query, where " is a string
+	* delimiter. The double-quote, ", is changed to ', and existing single-quotes
+	* are left alone. Also, replaces newline characters, "\n" with "\\n", and carriage-
+	* returns, "\r", with "". 
+	* 
+	* Note: This method may be modified to handle other replacements required in strings
+	*       for SPARQL.
+	*
+	* @param quotedString -- (String) The string containing double and single
+	* quotes.
+	*
+	* @return legalizeStringForSparql -- (String) The cleaned string, as described above.
+	*/
+    public static String legalizeStringForSparql(String quotedString) {
+	   String strReturnValue = quotedString;
+	
+	   strReturnValue = strReturnValue.replace( "\"", "'" ).replace("\n", "\\n").replace("\r", "");
+	
+	   return strReturnValue;
+	}
+	
 	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
 
 		public final Resource r;
@@ -639,4 +661,5 @@ public class Utility {
 			return l.compareTo( t.l );
 		}
 	}
+
 }
