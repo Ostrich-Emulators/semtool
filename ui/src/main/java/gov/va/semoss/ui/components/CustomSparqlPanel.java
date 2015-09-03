@@ -1,6 +1,5 @@
 package gov.va.semoss.ui.components;
 
-
 import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -179,6 +178,8 @@ public class CustomSparqlPanel extends JPanel {
 		add( appendSparqlQueryChkBox, gbc_appendSparqlQueryChkBox );
 
 		sparqlArea = new TabbedQueries();
+		sparqlArea.setTagOfSelectedTab( PlaySheetEnum.values()[0].toString() );
+		
 		/**
 		 * Handles the assignment of keyboard shortcuts when changing the tab in
 		 * TabbedQueries .
@@ -190,7 +191,7 @@ public class CustomSparqlPanel extends JPanel {
 				//of the selected query tab:
 				String strPlaySheet = sparqlArea.getTagOfSelectedTab();
 				if ( strPlaySheet != null ) {
-					playSheetComboBox.setSelectedItem( strPlaySheet );
+					playSheetComboBox.setSelectedItem( PlaySheetEnum.valueOf( strPlaySheet ) );
 				}
 				//When the tab changes, check the contents of the displayed tab.
 				//Only enable the "Submit Query" button if characters are shown:
