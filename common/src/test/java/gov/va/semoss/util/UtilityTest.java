@@ -5,10 +5,8 @@
  */
 package gov.va.semoss.util;
 
-import info.aduna.iteration.Iterations;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.log4j.Logger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,15 +15,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.model.Statement;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.sail.memory.MemoryStore;
 
 /**
  *
@@ -170,34 +159,5 @@ public class UtilityTest {
 
 	//@Test
 	public void testGetParamsFromString() {
-	}
-
-	@Test
-	public void testlegalizeStringForSparql() {
-		String string = "\"Ryan's \"'\"Problematic\"'\" Label\"";
-
-		String fxstr = Utility.legalizeStringForSparql( string );
-		String vfstr = new LiteralImpl( string ).stringValue();
-
-		Repository repo = new SailRepository( new MemoryStore() );
-		try {
-			repo.initialize();
-			RepositoryConnection rc = repo.getConnection();
-			// add the string to a repository
-			rc.add( new StatementImpl( Constants.ANYNODE, RDFS.LABEL, new LiteralImpl( string ) ) );
-			// fetch the statements
-			for ( Statement s : Iterations.asList( 
-					rc.getStatements( Constants.ANYNODE, RDFS.LABEL, null, false ) ) ) {
-				assertEquals( string, s.getObject().stringValue() );
-			}
-			rc.close();
-			repo.shutDown();
-		}
-		catch ( RepositoryException e ) {
-			// should never get here
-			Logger.getLogger( getClass() ).error( e,e );
-		}
-
-		//assertEquals( vfstr, fxstr );
 	}
 }

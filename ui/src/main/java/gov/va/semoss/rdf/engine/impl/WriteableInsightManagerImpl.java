@@ -539,8 +539,8 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			Date now = new Date();
 			String creator = userInfoFromToolPreferences( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 			//Make sure that embedded quotes and new-line characters can be persisted:
-			String label = Utility.legalizeStringForSparql(perspective.getLabel());
-            String description = Utility.legalizeStringForSparql(perspective.getDescription());
+			//String label = Utility.legalizeStringForSparql(perspective.getLabel());
+      //      String description = Utility.legalizeStringForSparql(perspective.getDescription());
 
 			String query = "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
 					+ "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
@@ -552,16 +552,13 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 					+ "?uri dcterms:creator ?creator .} "
 					+ "WHERE{}";
 			try {
-				queryer.setSparql(query);
-				queryer.bind("uri", perspectiveURI);
-				queryer.bind("label", label, "en");
-				queryer.bind("description", description, "en");
-				queryer.bind("now", now);
-				queryer.bind("creator", creator, "en"); 
-				query = queryer.bindAndGetSparql();
-
 				rc.begin();
 				Update uq = rc.prepareUpdate( QueryLanguage.SPARQL, query );
+				uq.setBinding("uri", perspectiveURI);
+				uq.setBinding("label", insightVF.createLiteral( perspective.getLabel() ) );
+				uq.setBinding("description", insightVF.createLiteral( perspective.getDescription() ) );
+				uq.setBinding("now", insightVF.createLiteral( now ) );
+				uq.setBinding("creator", insightVF.createLiteral(  creator ) );
 				uq.execute();
 				rc.commit();
                boolReturnValue = true;
@@ -595,12 +592,11 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			ValueFactory insightVF = rc.getValueFactory();
 			URI perspectiveURI = perspective.getUri();
 			//Make sure that embedded quotes and new-line characters can be persisted:
-		    String question = Utility.legalizeStringForSparql(insight.getLabel());
 		    URI dataViewOutputURI = insightVF.createURI("http://va.gov/ontologies/semoss#"+insight.getOutput());
 		    String isLegacy = String.valueOf(insight.isLegacy());
 			//Make sure that embedded quotes and new-line characters can be persisted:
-		    String sparql = Utility.legalizeStringForSparql(insight.getSparql().trim());
-		    String description = Utility.legalizeStringForSparql(insight.getDescription().trim());
+		    String sparql = insight.getSparql().trim();
+		    String description =insight.getDescription().trim();
 			String slotUriName = perspective.getUri().getLocalName() + "-slot-" + strUniqueIdentifier;
 			URI slotURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, slotUriName);
 			Literal order = insightVF.createLiteral(insight.getOrder());
@@ -619,7 +615,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			else {
 			    spinBodyTypeURI = insightVF.createURI("http://spinrdf.org/spl#Construct");
 			}
-			String creator = Utility.legalizeStringForSparql(insight.getCreator());	
+
 			String created = insight.getCreated();
 			String modified = insight.getModified();
 			
@@ -645,26 +641,24 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	                + "?insightURI dcterms:modified ?modified . } "
 	                + "WHERE {}";
 
-			try {
-				queryer.setSparql(query);
-				queryer.bind("perspectiveURI", perspectiveURI);			
-				queryer.bind("slotURI", slotURI);
-				queryer.bind("insightURI", insight.getId());
-				queryer.bind("order", order.intValue());
-				queryer.bind("question", question, "en");
-				queryer.bind("dataViewOutputURI", dataViewOutputURI);
-				queryer.bind("isLegacy", isLegacy, "en");
-				queryer.bind("spinBodyURI", spinBodyURI);
-				queryer.bind("spinBodyTypeURI", spinBodyTypeURI);
-				queryer.bind("sparql", sparql, "en");
-				queryer.bind("description", description, "en");
-				queryer.bind("creator", creator, "en"); 
-				queryer.bind("created", created, "en");
-				queryer.bind("modified", modified, "en");
-				query = queryer.bindAndGetSparql();
-				
+			try {			
 				rc.begin();
 				Update uq = rc.prepareUpdate(QueryLanguage.SPARQL, query);
+				uq.setBinding("perspectiveURI", perspectiveURI);			
+				uq.setBinding("slotURI", slotURI);
+				uq.setBinding("insightURI", insight.getId());
+				uq.setBinding("order", order );
+				uq.setBinding("question", insightVF.createLiteral( insight.getLabel() ) );
+				uq.setBinding("dataViewOutputURI", dataViewOutputURI);
+				uq.setBinding("isLegacy", insightVF.createLiteral(  isLegacy ) );
+				uq.setBinding("spinBodyURI", spinBodyURI);
+				uq.setBinding("spinBodyTypeURI", spinBodyTypeURI);
+				uq.setBinding("sparql", insightVF.createLiteral(sparql ) );
+				uq.setBinding("description", insightVF.createLiteral( description ) );
+				uq.setBinding("creator", insightVF.createLiteral( insight.getCreator() ) );
+				uq.setBinding("created", insightVF.createLiteral( created ) );
+				uq.setBinding("modified", insightVF.createLiteral( modified ) );
+
 				uq.execute();
 				rc.commit();
                boolReturnValue = true;
@@ -708,10 +702,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		    URI predicateURI = insightVF.createURI(ARG.NAMESPACE + predicateUriName);
 		    String queryUriName = "query-" + strUniqueIdentifier;
 		    URI queryURI = insightVF.createURI(MetadataConstants.VA_INSIGHTS_NS, queryUriName);
-			//Make sure that embedded quotes and new-line characters can be persisted:
-		    String label = Utility.legalizeStringForSparql(parameter.getLabel()); 
-		    String variable = Utility.legalizeStringForSparql(parameter.getVariable());
-	    	String defaultQuery = Utility.legalizeStringForSparql(parameter.getDefaultQuery());
 
 		   	String query = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
 		   	    + "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
@@ -726,19 +716,17 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		   		+ "WHERE{}";
 
 		   	try {
-		   		queryer.setSparql(query);
-		   		queryer.bind("label", label, "en");
-		   		queryer.bind("variable", variable, "en");
-		   		queryer.bind("defaultQuery", defaultQuery, "en");
-		   		queryer.bind("insightURI", insightURI);
-		   		queryer.bind("constraintURI", constraintURI);
-		   		queryer.bind("predicateURI", predicateURI);
-		   		queryer.bind("queryURI", queryURI);
-		   		queryer.bind("valueTypeURI", valueTypeURI);
-		   		query = queryer.bindAndGetSparql();
 		   		
 				rc.begin();
 				Update uq = rc.prepareUpdate(QueryLanguage.SPARQL, query);
+				uq.setBinding("label", insightVF.createLiteral( parameter.getLabel() ) );
+				uq.setBinding("variable", insightVF.createLiteral( parameter.getVariable() ) );
+				uq.setBinding("defaultQuery", insightVF.createLiteral( parameter.getDefaultQuery() ) );
+				uq.setBinding("insightURI", insightURI);
+				uq.setBinding("constraintURI", constraintURI);
+				uq.setBinding("predicateURI", predicateURI);
+				uq.setBinding("queryURI", queryURI);
+				uq.setBinding("valueTypeURI", valueTypeURI);
 				uq.execute();
 				rc.commit();
                boolReturnValue = true;
