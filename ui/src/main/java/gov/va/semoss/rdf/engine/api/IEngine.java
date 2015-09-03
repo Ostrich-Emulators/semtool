@@ -80,18 +80,6 @@ public interface IEngine {
 	public void closeDB();
 
 	/**
-	 * Runs the passed string query against the engine and returns graph query
-	 * results. The query passed must be in the structure of a CONSTRUCT SPARQL
-	 * query. The exact format of the results will be dependent on the type of the
-	 * engine, but regardless the results are able to be graphed.
-	 *
-	 * @param query the string version of the query to be run against the engine
-	 *
-	 * @return the graph query results
-	 */
-	public Object execGraphQuery( String query );
-
-	/**
 	 * Runs the passed string query against the engine as a SELECT query. The
 	 * query passed must be in the structure of a SELECT SPARQL query and the
 	 * result format will depend on the engine type.
@@ -278,31 +266,6 @@ public interface IEngine {
 	 * @throws RepositoryException
 	 */
 	public void execute( ModificationExecutor exe ) throws RepositoryException;
-
-	/**
-	 * Does this engine support starting a network server?
-	 *
-	 * @return true, if this engine can be converted to server mode
-	 */
-	public boolean isServerSupported();
-
-	/**
-	 * Is the network server running?
-	 *
-	 * @return
-	 */
-	public boolean serverIsRunning();
-
-	public void startServer( int port );
-
-	public void stopServer();
-
-	/**
-	 * If the server is running, what's its address?
-	 *
-	 * @return the server URI, or null, if the server isn't running
-	 */
-	public URI getServerUri();
 
 	/**
 	 * Gets the base URI for this engine. Usually, this will be set in the

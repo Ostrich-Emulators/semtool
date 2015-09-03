@@ -12,7 +12,6 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<openrdf.version>2.7.15</openrdf.version>
 		<bigdata.version>1.5.2</bigdata.version>
-		<jetty.version>9.2.3.v20140905</jetty.version>
 		<lucene.version>3.6.2</lucene.version>
 		<spring.version>4.1.5.RELEASE</spring.version>
 		<http.version>4.4</http.version>
@@ -362,6 +361,16 @@
 	</ciManagement>
 	
 	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<layout>default</layout>
+			<url>http://repo1.maven.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		
 		<repository>
 			<id>bigdata.releases</id>
 			<url>http://www.systap.com/maven/releases</url>

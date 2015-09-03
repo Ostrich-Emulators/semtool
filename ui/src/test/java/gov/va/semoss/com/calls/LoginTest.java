@@ -1,36 +1,24 @@
 package gov.va.semoss.com.calls;
 
-import static org.junit.Assert.*;
-import gov.va.semoss.com.RestAuthenticator;
-import gov.va.semoss.com.WebServerAPI;
-
-import org.junit.Test;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import gov.va.semoss.security.User;
+import gov.va.semoss.web.io.SemossService;
+import gov.va.semoss.web.io.SemossServiceImpl;
+import gov.va.semoss.web.io.ServiceClient;
+import gov.va.semoss.web.io.ServiceClientImpl;
+import static org.junit.Assert.assertEquals;
 
 public class LoginTest {
 
 	//@Test
-	public void testScreenScrapeLogin() {
-		GenericLoginCall loginCall = new GenericLoginCall("ryan", "123456");
-		WebServerAPI.initialize("localhost", 8080);
-		if (!WebServerAPI.instance().execute(loginCall)){
-			fail("Unable to log in");
-		}
-	}
-	
-	//@Test
 	public void testRestTemplateLogin() {
+		SemossService svc = new SemossServiceImpl( "http://localhost:8080/semoss" );
+		ServiceClient sc = new ServiceClientImpl();
+				
 		String username = "ryan";
-		String password = "123456";
-		String url = "http://localhost:8080/semoss-webserver/admin";
-		RestTemplate restTemplate = new RestTemplate();
-		HttpEntity<String> request = RestAuthenticator.instance().getEntity(username, password);
-		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-		Object object = response.getBody();
-	}
-	
+		char[] password = "1234".toCharArray();
 
+		sc.setAuthentication( svc, username, password );
+		User user = sc.getUser( svc );
+		assertEquals( username, user.getUsername() );
+	}
 }

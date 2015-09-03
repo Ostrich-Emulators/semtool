@@ -33,6 +33,7 @@ import org.openrdf.model.vocabulary.RDF;
  * Variables are transient because this tells the json writer to ignore them
  */
 public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVertex {
+
 	private transient Shape shape;
 
 	public SEMOSSVertexImpl( URI id ) {
@@ -66,5 +67,10 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 	@Override
 	public Shape getShape() {
 		return shape;
+	}
+
+	@Override
+	public boolean isNode() {
+		return true;
 	}
 }

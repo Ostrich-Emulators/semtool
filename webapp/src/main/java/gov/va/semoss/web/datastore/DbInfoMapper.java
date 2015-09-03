@@ -30,7 +30,7 @@ import org.openrdf.repository.RepositoryException;
  */
 public class DbInfoMapper implements DataMapper<DbInfo, String> {
 
-	private static final Logger log = Logger.getLogger(DbInfoMapper.class );
+	private static final Logger log = Logger.getLogger( DbInfoMapper.class );
 	private static final URI DATA_PREDICATE
 			= new URIImpl( WEBDS.NAMESPACE + "dbinfo/dataurl" );
 	private static final URI INSIGHTS_PREDICATE
@@ -38,10 +38,12 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 
 	private DataStore store;
 
+	@Override
 	public DataStore getDataStore() {
 		return store;
 	}
 
+	@Override
 	public void setDataStore( DataStore store ) {
 		this.store = store;
 	}
@@ -73,47 +75,32 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 	}
 
 	@Override
-	public DbInfo create( DbInfo t ) {
+	public DbInfo create( DbInfo t ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 		UriBuilder urib = UriBuilder.getBuilder( WEBDS.NAMESPACE + "dbinfo" );
 
-		try {
-			rc.add( getCreateStatements( urib.uniqueUri(), t, rc.getValueFactory() ) );
-		}
-		catch ( RepositoryException e ) {
-			log.error( e, e );
-		}
+		rc.add( getCreateStatements( urib.uniqueUri(), t, rc.getValueFactory() ) );
 
 		return t;
 	}
 
 	@Override
-	public void remove( DbInfo t ) {
+	public void remove( DbInfo t ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 
-		try {
-			Resource idToRemove = getId( t, rc );
-			if ( null != idToRemove ) {
-				rc.remove( idToRemove, null, null );
-			}
-		}
-		catch ( RepositoryException e ) {
-			log.error( e, e );
+		Resource idToRemove = getId( t, rc );
+		if ( null != idToRemove ) {
+			rc.remove( idToRemove, null, null );
 		}
 	}
 
 	@Override
-	public void update( DbInfo data ) {
+	public void update( DbInfo data ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
-		try {
-			Resource id = getId( data, rc );
-			if ( null != id ) {
-				rc.remove( id, null, null );
-				rc.add( getCreateStatements( id, data, rc.getValueFactory() ) );
-			}
-		}
-		catch ( RepositoryException e ) {
-			log.error( e, e );
+		Resource id = getId( data, rc );
+		if ( null != id ) {
+			rc.remove( id, null, null );
+			rc.add( getCreateStatements( id, data, rc.getValueFactory() ) );
 		}
 	}
 
@@ -123,14 +110,15 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 		DbInfo dbi = new DbInfo();
 		for ( Statement stmt : Iterations.asList( rc.getStatements( id, null, null, false ) ) ) {
 			URI pred = stmt.getPredicate();
+			String val = stmt.getObject().stringValue();
 			if ( DATA_PREDICATE.equals( pred ) ) {
-				dbi.setDataUrl( stmt.getObject().stringValue() );
+				dbi.setDataUrl( val );
 			}
-			if ( INSIGHTS_PREDICATE.equals( pred ) ) {
-				dbi.setInsightsUrl( stmt.getObject().stringValue() );
+			else if ( INSIGHTS_PREDICATE.equals( pred ) ) {
+				dbi.setInsightsUrl( val );
 			}
-			if ( RDFS.LABEL.equals( pred ) ) {
-				dbi.setName( stmt.getObject().stringValue() );
+			else if ( RDFS.LABEL.equals( pred ) ) {
+				dbi.setName( val );
 			}
 		}
 

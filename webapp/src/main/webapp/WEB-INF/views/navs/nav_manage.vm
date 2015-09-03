@@ -1,6 +1,6 @@
 <div id="nav_manage" class="semoss_nav_menu">
 	<ul class="nav nav-pills admin_nav_pills nav-stacked span2" role="tablist">
-		<li id="semoss_organizations_nav" class="active admin_nav_item"><a href="#organizations"  onclick="showPanel('semoss_organizations')"><span class="glyphicon glyphicon-home semoss_glyph"></span>Databases</a></li>
-		<li id="semoss_users_nav" class="admin_nav_item"><a href="#users"  onclick="showPanel('semoss_users')"><span class="glyphicon glyphicon-user semoss_glyph"></span>Users</a></li>
+		<li id="semoss_databases_nav" class="active admin_nav_item"><a href="#databases"  onclick="SEMOSS.showPanel('semoss_databases')" disabled><span class="glyphicon glyphicon-home semoss_glyph"></span>Databases</a></li>
+		<li id="semoss_users_nav" class="admin_nav_item"><a href="#users"  onclick="SEMOSS.showPanel('semoss_users')"><span class="glyphicon glyphicon-user semoss_glyph"></span>Users</a></li>
 	</ul>
 </div>

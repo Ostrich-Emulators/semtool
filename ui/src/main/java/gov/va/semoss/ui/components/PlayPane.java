@@ -23,14 +23,11 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
-import gov.va.semoss.security.User;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
 import gov.va.semoss.ui.actions.CreateDbAction;
 import gov.va.semoss.ui.actions.DbAction;
-import gov.va.semoss.ui.actions.EndpointAction;
 import gov.va.semoss.ui.actions.ExportGraphAction;
 import gov.va.semoss.ui.actions.ExportInsightsAction;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
@@ -195,7 +192,6 @@ public class PlayPane extends JFrame {
 	private final DbAction expSpecRels
 			= new ExportSpecificRelationshipsToLoadingSheetAction( UIPROGRESS, this );
 	private final DbAction unmounter = new UnmountAction( this, "Close DB" );
-	private final EndpointAction sparqler = new EndpointAction( UIPROGRESS, this );
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
 	private final OpenAction importxls = new OpenAction( UIPROGRESS, this );
@@ -272,7 +268,7 @@ public class PlayPane extends JFrame {
 	 *
 	 * @throws java.io.IOException
 	 */
-	public PlayPane() throws IOException {
+	public PlayPane() {
 		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 
 		setApplicationIcons();
@@ -420,13 +416,10 @@ public class PlayPane extends JFrame {
 				DbAction actions[] = {
 					toggler, proper, cloner, clearer, exportttl, exportnt, expgraphml,
 					expgson, exportrdf, exportinsights, expall, exprels, expnodes,
-					expSpecNodes, expSpecRels, unmounter, sparqler, importls, consistencyCheck };
+					expSpecNodes, expSpecRels, unmounter, importls, consistencyCheck };
 				for ( DbAction dba : actions ) {
 					dba.setEngine( engine );
 					dba.setEnabled( null != engine );
-				}
-				if ( null != engine ) {
-					sparqler.setEnabled( engine.isServerSupported() );
 				}
 
 				gQueryBuilderPanel.setEngine( engine );
@@ -622,28 +615,6 @@ public class PlayPane extends JFrame {
 
 	public FilterPanel getFilterPanel() {
 		return filterPanel;
-	}
-
-	/**
-	 * Resets the interface to account for <code>user</code>'s permissions
-	 *
-	 * @param user
-	 */
-	public void resetForUser( User user ) {
-		iManageItem.setEnabled( user.hasPermission( SemossPermission.INSIGHTWRITER ) );
-		int idx = rightTabs.indexOfComponent( iManagePanel );
-		if ( idx >= 0 ) {
-			if ( !user.hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-				iManageItem.doClick();
-			}
-		}
-
-		idx = rightTabs.indexOfComponent( loggingPanel );
-		if ( idx >= 0 ) {
-			if ( !user.hasPermission( SemossPermission.LOGVIEWER ) ) {
-				loggingItem.doClick();
-			}
-		}
 	}
 
 	private JTable initJTableAndAddTo( JPanel panel ) {
@@ -1062,8 +1033,6 @@ public class PlayPane extends JFrame {
 		db.add( cloner );
 		db.add( clearer );
 		db.addSeparator();
-		db.add( sparqler );
-		sparqler.setEnabled( false );
 
 		db.add( proper );
 		db.setEnabled( false );

@@ -28,7 +28,6 @@ import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
 import gov.va.semoss.ui.actions.CreateDbAction;
 import gov.va.semoss.ui.actions.DbAction;
-import gov.va.semoss.ui.actions.EndpointAction;
 import gov.va.semoss.ui.actions.ExportGraphAction;
 import gov.va.semoss.ui.actions.ExportInsightsAction;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
@@ -76,7 +75,6 @@ public class RepoListMouseListener extends MouseAdapter {
 	private final DbAction expgson;
 	private final DbAction expSpecNodes;
 	private final DbAction expSpecRels;
-	private final EndpointAction sparqler;
 	private final JMenu mergeroot;
 	private final ImportInsightsAction resetInsights;
 	private final ImportInsightsAction importInsights;
@@ -96,7 +94,6 @@ public class RepoListMouseListener extends MouseAdapter {
 				ExportTtlAction.Style.NT, frame );
 		exportrdf = new ExportTtlAction( PlayPane.UIPROGRESS,
 				ExportTtlAction.Style.RDF, frame );
-		sparqler = new EndpointAction( PlayPane.UIPROGRESS, frame );
 		expnodes = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
 				true, false );
 		expall = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
@@ -158,11 +155,10 @@ public class RepoListMouseListener extends MouseAdapter {
 		JPopupMenu db = new JPopupMenu();
 
 		if ( null != engine ) {
-			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner,
-				clearer, exportttl, exportnt, exportrdf, exportinsights, importls,
-				sparqler, mounter, expnodes, exprels, expSpecNodes,
-				expSpecRels, expall, creater, resetInsights, importInsights,
-				consistencyCheck, expgraphml, expgson } ) {
+			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner, clearer, 
+				exportttl, exportnt, exportrdf, exportinsights, importls, mounter, 
+				expnodes, exprels, expSpecNodes, expSpecRels, expall, creater, 
+				resetInsights, importInsights, consistencyCheck, expgraphml, expgson } ) {
 				dba.setEngine( opEngine );
 			}
 
@@ -265,8 +261,6 @@ public class RepoListMouseListener extends MouseAdapter {
 			db.add( cloner );
 			db.add( clearer );
 			db.addSeparator();
-			db.add( sparqler );
-			sparqler.setEnabled( false );
 
 			db.add( proper );
 			db.setEnabled( false );

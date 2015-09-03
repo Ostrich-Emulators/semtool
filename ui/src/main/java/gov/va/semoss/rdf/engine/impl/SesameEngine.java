@@ -26,6 +26,7 @@ public class SesameEngine extends AbstractSesameEngine {
 		String url = props.getProperty( REPOSITORY_KEY );
 		String ins = props.getProperty( INSIGHTS_KEY );
 
+		// the caller must have already set permissions for in Security.getSecurity()
 		Repository repo = new HTTPRepository( url );
 		repo.initialize();
 
@@ -42,5 +43,5 @@ public class SesameEngine extends AbstractSesameEngine {
 	protected InsightManager createInsightManager() {
 		InsightManagerImpl imi = new InsightManagerImpl( insights );
 		return imi;
-	}	
+	}
 }

@@ -20,6 +20,7 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.rdf.engine.api.Bindable;
 import info.aduna.iteration.Iterations;
 import java.io.IOException;
 import java.util.Properties;
@@ -62,12 +63,12 @@ import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.engine.api.UpdateExecutor;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.security.UserImpl;
-import gov.va.semoss.security.permissions.SemossPermission;
+import gov.va.semoss.security.Security;
+import gov.va.semoss.security.User;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.HashSet;
@@ -77,6 +78,7 @@ import java.util.regex.Pattern;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.Update;
@@ -220,14 +222,20 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e, e );
 		}
 		return baseuri;
-
 	}
 
 	@Override
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
 
-		setEngineName( EngineUtil.getEngineLabel( this ) );
+		String realname = getEngineName();
+		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
+		queryNoEx( mq );
+		String str = mq.getString();
+		if ( null != str ) {
+			realname = str;
+		}
+		setEngineName( realname );
 
 		RepositoryConnection rc = getRawConnection();
 		rc.begin();
@@ -335,8 +343,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	public static String processNamespaces( String rawsparql,
 			Map<String, String> customNamespaces ) {
-		Map<String, String> namespaces = UserImpl.getUser().getNamespaces();
-		namespaces.putAll( Utility.DEFAULTNAMESPACES );
+		Map<String, String> namespaces = new HashMap<>( Utility.DEFAULTNAMESPACES );
 		namespaces.putAll( customNamespaces );
 
 		Set<String> existingNamespaces = new HashSet<>();
@@ -436,10 +443,16 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		return query.getResults();
 	}
 
+	private void addUserNamespaces( Bindable ab ) {
+		User user = Security.getSecurity().getAssociatedUser( this );
+		ab.addNamespaces( user.getNamespaces() );
+	}
+
 	@Override
 	public <T> T query( QueryExecutor<T> exe )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 		if ( isConnected() ) {
+			addUserNamespaces( exe );
 			RepositoryConnection rc = getRawConnection();
 			return getSelect( exe, rc, supportsSparqlBindings() );
 		}
@@ -450,6 +463,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public <T> T queryNoEx( QueryExecutor<T> exe ) {
 		if ( isConnected() ) {
+			addUserNamespaces( exe );
 			RepositoryConnection rc = getRawConnection();
 			return getSelectNoEx( exe, rc, supportsSparqlBindings() );
 		}
@@ -460,20 +474,18 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public void update( UpdateExecutor ue ) throws RepositoryException,
 			MalformedQueryException, UpdateExecutionException {
-		if ( UserImpl.getUser().hasPermission( SemossPermission.DATAWRITER ) ) {
-			if ( isConnected() ) {
-				RepositoryConnection rc = getRawConnection();
-				doUpdate( ue, rc, supportsSparqlBindings() );
-			}
-		}
-		else {
-			throw SemossPermission.newSecEx();
+		if ( isConnected() ) {
+			addUserNamespaces( ue );
+			RepositoryConnection rc = getRawConnection();
+			doUpdate( ue, rc, supportsSparqlBindings() );
+			logProvenance( ue );
 		}
 	}
 
 	@Override
 	public Model construct( QueryExecutor<Model> q ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
+		addUserNamespaces( q );
 		return getConstruct( q, getRawConnection() );
 	}
 
@@ -694,30 +706,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			log.error( e );
 		}
 		return new ArrayList<>();
-	}
-
-	/**
-	 * Runs the passed string query against the engine and returns graph query
-	 * results. The query passed must be in the structure of a CONSTRUCT SPARQL
-	 * query. The exact format of the results will be dependent on the type of the
-	 * engine, but regardless the results are able to be graphed.
-	 *
-	 * @param query the string version of the query to be run against the engine
-	 *
-	 * @return the graph query results
-	 */
-	@Override
-	public GraphQueryResult execGraphQuery( String query ) {
-		GraphQueryResult res = null;
-		try {
-			RepositoryConnection rc = getRawConnection();
-			GraphQuery sagq = rc.prepareGraphQuery( QueryLanguage.SPARQL, query );
-			res = sagq.evaluate();
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-		return res;
 	}
 
 	/**

@@ -1,0 +1,78 @@
+######################
+## create structure ##
+######################
+
+# Create the context entry (giving errors)
+# dn: o=semoss
+# o: semoss
+# objectClass: top
+# objectClass: organization
+# description: The context entry for suffix o=semoss
+
+# Create the group people
+dn: ou=people,o=semoss
+objectclass: organizationalUnit
+objectclass: top
+ou: people
+
+# Create the group groups
+dn: ou=groups,o=semoss
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+###################
+## create groups ##
+###################
+
+dn: cn=admins,ou=groups,o=semoss
+member: cn=Ryan Bobko,ou=people,o=semoss
+objectClass: groupOfNames
+objectClass: top
+
+dn: cn=insightWriterGroup,ou=groups,o=semoss
+member: cn=Wayne Warren,ou=people,o=semoss
+objectClass: groupOfNames
+objectClass: top
+
+dn: cn=users,ou=groups,o=semoss
+member: cn=John Marquiss,ou=people,o=semoss
+objectClass: groupOfNames
+objectClass: top
+
+##################
+## create users ##
+##################
+
+dn: cn=John Marquiss,ou=people,o=semoss
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+cn: John Marquiss
+uid: jmarquiss
+description: A developer on the semoss team
+sn: Marquiss
+mail: JohnMarquiss@gmail.com
+userpassword: password
+
+dn: cn=Wayne Warren,ou=people,o=semoss
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+cn: Wayne Warren
+uid: wwarren
+description: An ace developer on the semoss team
+sn: Warren
+mail: WayneWarren@notarealemailaddress.com
+userpassword: password
+
+dn: cn=Ryan Bobko,ou=people,o=semoss
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+cn: Ryan Bobko
+uid: rbobko
+description: Lead developer on the semoss team
+sn: Bobko
+mail: ryan@ostrich-emulators.com
+userpassword: password

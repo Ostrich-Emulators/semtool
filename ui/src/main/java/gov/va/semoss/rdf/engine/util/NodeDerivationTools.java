@@ -2,7 +2,6 @@ package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
-import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneValueQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.Constants;
@@ -13,9 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Model;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;

@@ -20,13 +20,16 @@
 package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
@@ -36,46 +39,62 @@ import org.openrdf.model.Value;
  */
 public class WorldHeatMapPlaySheet extends BrowserPlaySheet2 {
 	private static final long serialVersionUID = 5117841017866221965L;
+	private final static String LOCATION_ID = "locationId";
+	private final static String HEAT_VALUE  = "heatValue";
+	private final static String PARAM_MAP  = "paramMap";
 
 	/**
 	 * Constructor for WorldHeatMapPlaySheet.
 	 */
 	public WorldHeatMapPlaySheet() {
-		super( "/html/RDFSemossCharts/app/worldheatmap.html" );
+		super( "/html/RDFSemossCharts/app/heatmapworld.html" );
 	}
 
 	@Override
 	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
-		Set<Map<String, Object>> data = new HashSet<>();
-		String[] var = headers.toArray( new String[0] );
-
-		for ( Value[] listElement : newdata ) {
+		convertUrisToLabels( newdata, getPlaySheetFrame().getEngine() );
+		
+		Set<Map<String, Object>> data = new HashSet<Map<String, Object>>();
+		
+		outsideLoop: for ( Value[] listElement : newdata ) {
+			Literal location  = Literal.class.cast( listElement[0] );
+			Literal heatValue = Literal.class.cast( listElement[1] );
+			if (location == null || heatValue == null)
+				continue outsideLoop;
+			
 			LinkedHashMap<String,Object> elementHash = new LinkedHashMap<String,Object>();
-			for ( int j = 0; j < var.length; j++ ) {
-				String colName = var[j];
-				Literal l = Literal.class.cast( listElement[j] );
-
-				try {
-					elementHash.put( colName, l.doubleValue() );
-				}
-				catch ( Exception ex ) {
-					elementHash.put( colName, l.stringValue() );
-				}
+			
+			try {
+				elementHash.put( HEAT_VALUE, heatValue.doubleValue() );
+			} catch (Exception e) {
+				continue outsideLoop;
 			}
-
-			if ( !( (String) elementHash.get( "Country" ) ).contains( "Ivoire" ) ) {
-				data.add( elementHash );
+			
+			elementHash.put( LOCATION_ID, location.stringValue().toUpperCase() );
+			
+			HashMap<String, String> tooltipParams = new HashMap<String, String>();
+			insideLoop: for (int i=2; i<listElement.length; i++) {
+				Literal thisParam = Literal.class.cast( listElement[i] );
+				if (thisParam == null)
+					continue insideLoop;
+				tooltipParams.put( headers.get(i), thisParam.stringValue() );
 			}
+			elementHash.put( PARAM_MAP, tooltipParams );
+			
+			data.add( elementHash );
 		}
-
+		
 		Map<String, Object> allHash = new HashMap<>();
 		allHash.put( "dataSeries", data );
-
-		allHash.put( "value", var[1] );
-		allHash.put( "locationName", var[0] );
-
+		allHash.put( "heatDataName", headers.get(1) );
 		addDataHash( allHash );
+		
 		createView();
+	}
+
+	@Override
+	protected BufferedImage getExportImage() throws IOException {
+		return getExportImageFromSVGBlock();
 	}
 }

@@ -101,7 +101,9 @@ public class GraphToSparql {
 			URI prop = en.getKey();
 			Set<Value> values = en.getValue();
 
-			values.remove( Constants.ANYNODE );
+			if ( v.isNode() ) {
+				values.remove( Constants.ANYNODE );
+			}
 
 			for ( Value val : new ArrayList<>( values ) ) {
 				if ( val.stringValue().isEmpty() ) {
@@ -227,7 +229,7 @@ public class GraphToSparql {
 				continue;
 			}
 
-			if ( v instanceof QueryNode ) {
+			if ( v.isNode() ) {
 				sb.append( buildOneConstraint( v, prop, props.get( prop ) ) );
 			}
 			else {
@@ -251,7 +253,7 @@ public class GraphToSparql {
 	}
 
 	private String buildEdgeTypeAndEndpoints( QueryGraphElement edge,
-			Set<Value> vals, QueryNode src, QueryNode dst, Set<URI> otherprops ) {
+			Set<Value> tvals, QueryNode src, QueryNode dst, Set<URI> otherprops ) {
 		String fromvar = "?" + src.getQueryId();
 		String linkvar = "?" + edge.getQueryId();
 		String tovar = "?" + dst.getQueryId();
@@ -263,6 +265,10 @@ public class GraphToSparql {
 		specialprops.removeAll( Arrays.asList( RDF.TYPE, RDFS.LABEL ) );
 		boolean useCustomEdge = !specialprops.isEmpty();
 
+		// make sure we don't treat a generic edge as a special VALUES clause
+		Set<Value> vals = new HashSet<>( tvals );
+		vals.remove( Constants.ANYNODE );
+		
 		// we need to use a variable if:
 		// 1) our edge is selected to be returned in the SELECT part
 		// 2) we have other properties to hang on this edge

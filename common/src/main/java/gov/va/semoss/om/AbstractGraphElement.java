@@ -34,7 +34,7 @@ import org.openrdf.model.vocabulary.XMLSchema;
  *
  * @author ryan
  */
-public class AbstractGraphElement implements GraphElement {
+public abstract class AbstractGraphElement implements GraphElement {
 
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();

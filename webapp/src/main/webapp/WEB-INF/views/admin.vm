@@ -1,7 +1,14 @@
 <html>
-<body>
- #parse("/common/header.vt")
- <br>
-	$message
+	#include( "/common/adminHead.vm")
+<body ng-app="semoss" >
+<div class="pages_container">
+	#include( "/common/header.vm")
+</div>
+<div class="pages_container">
+	#parse("/pages/admin_home.vm")
+</div>
+<div class="pages_container ">
+	#include( "/common/copyright.vm")
+</div>
 </body>
 </html>

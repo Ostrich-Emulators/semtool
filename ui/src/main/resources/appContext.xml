@@ -11,7 +11,7 @@
 	<context:annotation-config /> 
 	<context:component-scan base-package="gov.va.semoss.web.io"/>
 
-	<bean id="restAuthFactory" class ="gov.va.semoss.web.security.BasicAuthRequestFactory"/>
+	<bean id="restAuthFactory" class ="gov.va.semoss.security.BasicAuthRequestFactory"/>
 
 	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
 		<constructor-arg ref="restAuthFactory"/>

@@ -56,8 +56,9 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
+import gov.va.semoss.security.LocalUserImpl;
 import gov.va.semoss.security.User;
-import gov.va.semoss.security.UserImpl;
+import gov.va.semoss.security.Security;
 import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
@@ -89,6 +90,7 @@ public class EngineUtil implements Runnable {
 	private static EngineUtil instance;
 
 	private final Map<File, Boolean> toopen = Collections.synchronizedMap( new HashMap<File, Boolean>() );
+	private final Map<File, User> openusers = Collections.synchronizedMap( new HashMap<File, User>() );
 	private final List<IEngine> toclose = Collections.synchronizedList( new ArrayList<IEngine>() );
 	private final List<EngineOperationListener> listeners = new ArrayList<>();
 	private final Map<IEngine, InsightsImportConfig> insightqueue = new HashMap<>();
@@ -152,9 +154,14 @@ public class EngineUtil implements Runnable {
 
 				// avoid concurrent mod exception
 				Map<File, Boolean> todo;
+				Map<File, User> users;
 				synchronized ( toopen ) { // we need an atomic copy and clear operation
 					todo = new HashMap<>( toopen );
 					toopen.clear();
+				}
+				synchronized ( openusers ) { // we need an atomic copy and clear operation
+					users = new HashMap<>( openusers );
+					openusers.clear();
 				}
 
 				for ( Map.Entry<File, Boolean> entry : todo.entrySet() ) {
@@ -170,6 +177,8 @@ public class EngineUtil implements Runnable {
 
 						if ( domount ) {
 							IEngine eng = GuiUtility.loadEngine( entry.getKey() );
+							Security.getSecurity().associateUser( eng, users.get( entry.getKey() ) );
+
 							// avoid a possible ConcurrentModificationException
 							List<EngineOperationListener> lls = new ArrayList<>( listeners );
 							for ( EngineOperationListener eol : lls ) {
@@ -360,7 +369,7 @@ public class EngineUtil implements Runnable {
 
 		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
 		GuiUtility.closeEngine( neweng );
-		mount( newsmss, addToRepoList, true );
+		mount( newsmss, addToRepoList, true, new LocalUserImpl() );
 	}
 
 	/**
@@ -378,7 +387,7 @@ public class EngineUtil implements Runnable {
 	 * @throws EngineManagementException
 	 */
 	public synchronized void mount( File smssfile, boolean updateRepoList,
-			boolean noDupeEx ) throws EngineManagementException {
+			boolean noDupeEx, User user ) throws EngineManagementException {
 		// at this point, we don't know if smssfile is a directory containing the 
 		// smss file, or the file itself, so figure out what we're looking at    
 
@@ -424,12 +433,18 @@ public class EngineUtil implements Runnable {
 		}
 
 		toopen.put( smssfile, updateRepoList );
+		openusers.put( smssfile, user );
 		notify();
 	}
 
 	public void mount( File smssfile, boolean updateRepoList )
 			throws EngineManagementException {
-		mount( smssfile, updateRepoList, false );
+		mount( smssfile, updateRepoList, new LocalUserImpl() );
+	}
+
+	public void mount( File smssfile, boolean updateRepoList, User user )
+			throws EngineManagementException {
+		mount( smssfile, updateRepoList, false, user );
 	}
 
 	public synchronized void unmount( final IEngine engineToClose ) {
@@ -545,8 +560,12 @@ public class EngineUtil implements Runnable {
 			f.deleteOnExit();
 		}
 
-		File smssfile = createEngine( ecb );
+		User user = new LocalUserImpl();
+		File smssfile = createEngine( ecb, user );
+
 		IEngine bde = GuiUtility.loadEngine( smssfile.getAbsoluteFile() );
+		Security.getSecurity().associateUser( bde, user );
+
 		List<Statement> vocabs = new ArrayList<>();
 
 		for ( URL url : ecb.getVocabularies() ) {
@@ -606,23 +625,17 @@ public class EngineUtil implements Runnable {
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
 			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
-		if ( UserImpl.getUser().hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-
-			List<Statement> stmts = new ArrayList<>();
-			if ( null != insightsfile ) {
-				stmts.addAll( createInsightStatements( insightsfile ) );
-			}
-
-			for ( URL url : vocabs ) {
-				stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
-			}
-
-			insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
-			notify();
+		List<Statement> stmts = new ArrayList<>();
+		if ( null != insightsfile ) {
+			stmts.addAll( createInsightStatements( insightsfile ) );
 		}
-		else {
-			throw new EngineManagementException( SemossPermission.newSecEx() );
+
+		for ( URL url : vocabs ) {
+			stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
 		}
+
+		insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
+		notify();
 	}
 
 	/**
@@ -688,7 +701,7 @@ public class EngineUtil implements Runnable {
 		}
 	}
 
-	public static File createEngine( EngineCreateBuilder ecb )
+	private static File createEngine( EngineCreateBuilder ecb, User user )
 			throws IOException, EngineManagementException {
 
 		String dbname = ecb.getEngineName();
@@ -763,8 +776,7 @@ public class EngineUtil implements Runnable {
 			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
 
-			User user = UserImpl.getUser();
-			String username = user.getProperty( User.UserProperty.USER_NAME );
+			String username = user.getProperty( User.UserProperty.USER_FULLNAME );
 			String email = user.getProperty( User.UserProperty.USER_EMAIL );
 			String org = user.getProperty( User.UserProperty.USER_ORG );
 
@@ -923,15 +935,10 @@ public class EngineUtil implements Runnable {
 	public static String getEngineLabel( IEngine engine ) {
 		String label = engine.getEngineName();
 		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
-		try {
-			engine.query( mq );
-			String str = mq.getString();
-			if ( null != str ) {
-				label = str;
-			}
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// don't care
+		engine.queryNoEx( mq );
+		String str = mq.getString();
+		if ( null != str ) {
+			label = str;
 		}
 		return label;
 	}

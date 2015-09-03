@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
-import com.bigdata.journal.IIndexManager;
 import com.bigdata.journal.ITx;
 import com.bigdata.journal.Journal;
 
@@ -31,7 +30,6 @@ import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 import com.bigdata.rdf.sail.CreateKBTask;
-import com.bigdata.rdf.sail.webapp.NanoSparqlServer;
 import com.bigdata.rdf.store.AbstractTripleStore;
 import com.bigdata.rdf.task.AbstractApiTask;
 import gov.va.semoss.rdf.engine.api.InsightManager;
@@ -39,18 +37,15 @@ import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Server;
 import org.openrdf.model.Statement;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
 import gov.va.semoss.rdf.engine.util.StatementSorter;
-import gov.va.semoss.security.UserImpl;
-import gov.va.semoss.security.permissions.SemossPermission;
+import gov.va.semoss.security.LocalUserImpl;
+import gov.va.semoss.security.Security;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -78,8 +73,6 @@ public class BigDataEngine extends AbstractSesameEngine {
 	private BigdataSailRepositoryConnection rc = null;
 	private BigdataSail sail = null;
 	private BigdataSailRepository insightrepo = null;
-	private Server server = null;
-	private java.net.URI serverurl = null;
 	private InsightManagerImpl insightEngine = null;
 
 	@Override
@@ -94,6 +87,9 @@ public class BigDataEngine extends AbstractSesameEngine {
 			throw new UnsupportedOperationException( "Remote Bigdata repositories are not yet supported" );
 		}
 		else {
+			// users have full access to local DBs 
+			Security.getSecurity().associateUser( this, new LocalUserImpl() );
+
 			// the journal is the file itself
 			journal = new Journal( rws );
 
@@ -210,6 +206,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 			repoc.commit();
 			// 4
 			repoc.close();
+			logProvenance( newstmts );
 		}
 		finally {
 			try {
@@ -233,46 +230,44 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 	@Override
 	public WriteableInsightManager getWriteableInsightManager() {
-		return new WriteableInsightManagerImpl( insightEngine ) {
+		return new WriteableInsightManagerImpl( insightEngine,
+				Security.getSecurity().getAssociatedUser( this ) ) {
 
-			@Override
-			public void commit() {
-				if ( UserImpl.getUser().hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-					if ( hasCommittableChanges() ) {
-						try {
-							List<Statement> stmts = new ArrayList<>( getStatements() );
-							Collections.sort( stmts, new StatementSorter() );
+					@Override
+					public void commit() {
+						if ( hasCommittableChanges() ) {
+							try {
+								List<Statement> stmts = new ArrayList<>( getStatements() );
+								Collections.sort( stmts, new StatementSorter() );
 
-							copyInsightsToDisk( stmts ); // from the WriteableInsightManager
+								copyInsightsToDisk( stmts ); // from the WriteableInsightManager
 
-							// refresh the insight engine's KB
-							RepositoryConnection src = insightEngine.getRawConnection();
-							src.begin();
-							src.clear();
-							src.add( stmts );
-							src.commit();
+								// refresh the insight engine's KB
+								RepositoryConnection src = insightEngine.getRawConnection();
+								src.begin();
+								src.clear();
+								src.add( stmts );
+								src.commit();
+								
+								logProvenance( stmts );
+							}
+							catch ( RepositoryException re ) {
+								log.error( re, re );
+							}
 						}
-						catch ( RepositoryException re ) {
-							log.error( re, re );
+
+						if ( log.isTraceEnabled() ) {
+							File dumpfile
+							= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
+							try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
+								insightEngine.getRawConnection().export( new TurtleWriter( w ) );
+							}
+							catch ( Exception ioe ) {
+								log.warn( ioe, ioe );
+							}
 						}
 					}
-
-					if ( log.isTraceEnabled() ) {
-						File dumpfile
-								= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
-						try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
-							insightEngine.getRawConnection().export( new TurtleWriter( w ) );
-						}
-						catch ( Exception ioe ) {
-							log.warn( ioe, ioe );
-						}
-					}
-				}
-				else {
-					throw SemossPermission.newSecEx();
-				}
-			}
-		};
+				};
 	}
 
 	/**
@@ -334,105 +329,5 @@ public class BigDataEngine extends AbstractSesameEngine {
 		}
 
 		return rws;
-	}
-
-	@Override
-	public boolean serverIsRunning() {
-		return ( null != server );
-	}
-
-	@Override
-	public java.net.URI getServerUri() {
-		return serverurl;
-	}
-
-	@Override
-	public boolean isServerSupported() {
-		return true;
-	}
-
-	@Override
-	public void stopServer() {
-		serverurl = null;
-		if ( null == server ) {
-			return;
-		}
-		try {
-			server.stop();
-		}
-		catch ( Exception e ) {
-			log.warn( "could not stop server", e );
-		}
-	}
-
-	@Override
-	public void startServer( int port ) {
-		try {
-			IIndexManager indexmgr = sail.getDatabase().getIndexManager();
-
-			Properties rws = getRWSProperties( prop );
-			Map<String, String> opts = new HashMap<>();
-			for ( String key : rws.stringPropertyNames() ) {
-				opts.put( key, rws.getProperty( key ) );
-			}
-			opts.put( BigdataSail.Options.READ_ONLY, Boolean.toString( true ) );
-
-			EmbeddedServerRunnable run
-					= new EmbeddedServerRunnable( port, indexmgr, opts );
-			serverurl = new java.net.URI( "http://127.0.0.1:" + port + "/bigdata" );
-			new Thread( run ).start();
-		}
-		catch ( Exception ioe ) {
-			log.error( ioe );
-		}
-	}
-
-	/**
-	 * A server thread. Taken almost exclusively from
-	 * http://sourceforge.net/p/bigdata/code/HEAD/tree/branches/BIGDATA_RELEASE_1_3_0/bigdata-sails/src/samples/com/bigdata/samples/NSSEmbeddedExample.java?view=markup#l31
-	 */
-	private class EmbeddedServerRunnable implements Runnable {
-
-		private final int port;
-		private final IIndexManager mgr;
-		private final Map<String, String> opts;
-
-		public EmbeddedServerRunnable( int port, IIndexManager mgr,
-				Map<String, String> opts ) {
-			this.port = port;
-			this.mgr = mgr;
-			this.opts = opts;
-		}
-
-		@Override
-		public void run() {
-			try {
-				log.debug( "starting jetty server on port " + port + "..." );
-				BigDataEngine.this.server = NanoSparqlServer.newInstance( port,
-						mgr, opts );
-				server.setStopAtShutdown( true );
-
-				NanoSparqlServer.awaitServerStart( BigDataEngine.this.server );
-				// Block and wait. The NSS is running.
-				log.debug( "jetty server started" );
-				BigDataEngine.this.server.join();
-			}
-			catch ( Throwable t ) {
-				log.error( t );
-			}
-			finally {
-				if ( BigDataEngine.this.server != null ) {
-					try {
-						BigDataEngine.this.server.stop();
-					}
-					catch ( Exception e ) {
-						log.error( e, e );
-					}
-					server = null;
-					System.gc();
-					log.debug( "jetty stopped" );
-				}
-			}
-		}
 	}
 }

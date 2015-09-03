@@ -1,68 +1,10 @@
 var width  = 960;
 var height = 780;
 var usMapData;
-var countyData;
-var heatDataName = "Heat Value";
 
-var rateById = d3.map();
 var projection = d3.geo.albersUsa()
 	.scale(1280)
 	.translate([width / 2, height / 2]);
-
-function HeatLocation(data){
-	this.locationId = data.locationId;
-	this.heatValue = data.heatValue;
-	this.paramMap = data.paramMap;
-
-	var tipString = buildTipLine(heatDataName, this.heatValue);
-	if (this.paramMap != null) {
-		for (var key in this.paramMap) {
-			tipString = tipString + buildTipLine(key, this.paramMap[key]);
-		}
-	}
-	tipString = tipString + buildTipLine("Location ID", this.locationId);
-	this.tip = tipString;
-}
-
-function buildTipLine(name, value) {
-	return "<div> <span class='light'>" + name + ": </span>" + value + "</div>";
-}
-
-function getTipForId(id) {
-	id = fixId(id);
-	
-	var location = rateById.get(id);
-	if (location == null)
-		return "<div> <span class='light'> --no data for this area-- </span> </div>";
-	return location.tip;
-}
-
-function getColorForId(id) {
-	id = fixId(id);
-	
-	var location = rateById.get(id);
-	if (location == null)
-		return "WhiteSmoke";
-	return colorScale(location.heatValue);
-}
-
-function getColorForIdsInRange(id, min, max) {
-	id = fixId(id);
-	
-	var location = rateById.get(id);
-	if (location == null || location.heatValue < min || location.heatValue > max)
-		return "WhiteSmoke";
-	return colorScale(location.heatValue);
-}
-
-function fixId(id) {
-	if (countyData && id < 10000)
-		return "0" + id;
-	if (!countyData && id < 10)
-		return "0" + id;
-	return id;
-}
-
 var path = d3.geo.path()
 	.projection(projection);
 
@@ -83,7 +25,7 @@ function start(data) {
 	determineIfStateOrCountyData(dataObject);
 
 	queue()
-		.defer(d3.json, "js/usheatmapdata/us.json")
+		.defer(d3.json, "js/heatmapdata/us-topo-min.json")
 		.await(ready);
 };
 
@@ -100,7 +42,7 @@ function determineIfStateOrCountyData(dataObject) {
 	}
 	
 	if (stateCodes > countyCodes)
-		countyData = false;
+		stateData = true;
 	else
 		countyData = true;
 }
@@ -127,7 +69,12 @@ function initVisualization() {
 	var tip = d3.tip()
 		.attr('class', 'd3-tip')
 		.direction('s')
-		.html(function(d) { return getTipForId(d.id); });
+		.html(function(d) {
+			var thisTip = getTipForId(d.id);
+			if (thisTip == null)
+				return "<div> <span class='light'> --no data for this area-- </span> </div>";
+			return thisTip; 
+		});
 
 	d3.select("#heatmap").append("svg")
 		.attr("width", width)
