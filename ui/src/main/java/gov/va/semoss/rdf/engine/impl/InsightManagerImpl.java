@@ -447,16 +447,11 @@ public class InsightManagerImpl implements InsightManager {
 					= AbstractSesameEngine.getSelectNoEx( orderquery, rc, true );
 
 			for ( URI id : insightUris ) {
-				insights.add( getInsight( perspective.getUri(), id ) );
+				insights.add( getInsight( id ) );
 			}
 		}
 
 		return insights;
-	}
-
-	@Override
-	public Insight getInsight( URI perspectivexsURI, URI insightURI ) {
-		return getInsight( insightURI );
 	}
 
 	@Override
