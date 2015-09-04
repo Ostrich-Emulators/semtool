@@ -1,5 +1,8 @@
 package gov.va.semoss.om;
 
+import gov.va.semoss.model.vocabulary.SP;
+import gov.va.semoss.model.vocabulary.UI;
+import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import java.io.Serializable;
@@ -11,13 +14,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 
-public class Insight implements Serializable{
+public class Insight implements Serializable {
+
 	private static final long serialVersionUID = 5192674160082789840L;
 	private static final Logger log = Logger.getLogger( Insight.class );
 	//ID of the question:
@@ -50,7 +57,7 @@ public class Insight implements Serializable{
 	//A URI string of the containing Perspective,
 	//for use in the "toString()" method:
 	private String perspective = "";
-    //This Insight's Order under its Perspective.
+	//This Insight's Order under its Perspective.
 	//(Assuming that an Insight can belong to only one Perspective):
 	private int order = 0;
 
@@ -64,7 +71,7 @@ public class Insight implements Serializable{
 
 	public Insight() {
 	}
-	
+
 	public Insight( String label, String sparql,
 			Class<? extends PlaySheetCentralComponent> output ) {
 		this.label = label;
@@ -197,7 +204,7 @@ public class Insight implements Serializable{
 		return this.defautlValueIsQuery;
 	}
 
-	public void setOrder(int order) {
+	public void setOrder( int order ) {
 		this.order = order;
 	}
 
@@ -308,7 +315,55 @@ public class Insight implements Serializable{
 		Value ordr = resultSet.getValue( "order" );
 		if ( ordr != null ) {
 			perspective = resultSet.getValue( "perspective" ).stringValue();
-			setOrder(Integer.parseInt(ordr.stringValue()));
+			setOrder( Integer.parseInt( ordr.stringValue() ) );
+		}
+	}
+
+	public void setFromStatements( Collection<Statement> stmts ) {
+//		String isp = "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?perspective ?description ?creator ?created ?modified ?order WHERE { "
+//				+ "?insightUriString rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
+//				+ "OPTIONAL{ ?insightUriString spin:body [ sp:text ?sparql ] } "
+//				+ "OPTIONAL{ ?insightUriString spin:constraint ?parameter . "
+//				+ "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] }} "
+//				+ "OPTIONAL{ ?insightUriString vas:rendererClass ?rendererClass } "
+//				+ "OPTIONAL{ ?insightUriString vas:isLegacy ?isLegacy } "
+//				+ "OPTIONAL{ ?insightUriString dcterms:description ?description } "
+//				+ "OPTIONAL{ ?insightUriString dcterms:creator ?creator } "
+//				+ "OPTIONAL{ ?insightUriString dcterms:created ?created } "
+//				+ "OPTIONAL{ ?insightUriString dcterms:modified ?modified } "
+//				+ "OPTIONAL{ ?perspective olo:slot [ olo:item ?insightUriString; olo:index ?order ] } "
+//				+ "}";
+		for ( Statement stmt : stmts ) {
+			URI pred = stmt.getPredicate();
+			Value val = stmt.getObject();
+			if ( val instanceof Literal ) {
+				Literal obj = Literal.class.cast( val );
+
+				if ( RDFS.LABEL.equals( pred ) ) {
+					setLabel( obj.stringValue() );
+				}
+				else if ( VAS.isLegacy.equals( pred ) ) {
+					setLegacy( obj.booleanValue() );
+				}
+				else if ( DCTERMS.CREATOR.equals( pred ) ) {
+					setCreator( obj.stringValue() );
+				}
+				else if ( DCTERMS.CREATED.equals( pred ) ) {
+					setCreated( obj.stringValue() );
+				}
+				else if ( DCTERMS.MODIFIED.equals( pred ) ) {
+					setModified( obj.stringValue() );
+				}
+				else if ( DCTERMS.DESCRIPTION.equals( pred ) ) {
+					setDescription( obj.stringValue() );
+				}
+				else if( SP.text.equals( pred ) ){
+					setSparql( obj.stringValue() );
+				}
+				else if( UI.viewClass.equals( pred ) ){
+					setOutput( obj.stringValue() );
+				}
+			}
 		}
 	}
 

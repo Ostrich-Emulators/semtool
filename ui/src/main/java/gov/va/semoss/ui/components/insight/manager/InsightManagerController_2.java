@@ -150,7 +150,7 @@ public class  InsightManagerController_2 implements Initializable{
 		    		
 		    		for(Insight insight: arylInsights){
 			    		ArrayList<Parameter> arylInsightParameters = new ArrayList<Parameter>();
-			    		arylInsightParameters.addAll(engine.getInsightManager().getInsightParameters(insight.getId()));
+			    		arylInsightParameters.addAll(engine.getInsightManager().getInsightParameters(insight));
 			    		insight.setInsightParameters(arylInsightParameters);
 		    		}
 		    		perspective.setInsights(arylInsights);

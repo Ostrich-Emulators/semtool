@@ -47,7 +47,7 @@ import gov.va.semoss.ui.actions.PropertiesAction;
 import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
-import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel_2;
+import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.main.SemossPreferences;
@@ -145,7 +145,7 @@ public class PlayPane extends JFrame {
 	protected final RepositoryList repoList = new RepositoryList();
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
-	private InsightManagerPanel_2 iManagePanel_2;
+	private InsightManagerPanel iManagePanel_2;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -542,7 +542,7 @@ public class PlayPane extends JFrame {
 		idx = rightView.indexOfComponent( gQueryBuilderPanel );
 		rightView.setTabComponentAt( idx, ct1 );
 		
-		iManagePanel_2 = new InsightManagerPanel_2( repoList );
+		iManagePanel_2 = new InsightManagerPanel();
 		rightView.addTab( "Insight Manager 2", null, iManagePanel_2,
 				"Manage perspectives and insights" );
 		CloseableTab ct2_2 = new PlayPaneCloseableTab( rightView, iManageItem_2,
@@ -1475,7 +1475,7 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					iManagePanel_2.insightManagerPanelWorker();
+					iManagePanel_2.refresh( repoList.getSelectedValue() );
 					rightTabs.addTab( "Insight Manager 2", DbAction.getIcon( "insight_manager_tab1" ), iManagePanel_2,
 							"Manage perspectives and insights" );
 					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, iManageItem_2,

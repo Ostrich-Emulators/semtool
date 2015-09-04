@@ -52,7 +52,7 @@ public interface InsightManager {
 	 *
 	 * @return -- (Collection<Parameter>) Described above.
 	 */
-	public Collection<Parameter> getInsightParameters( URI insightURI );
+	public Collection<Parameter> getInsightParameters( Insight insight );
 
 	/**
 	 * Gets all insight URIs for a given perspective, in order
