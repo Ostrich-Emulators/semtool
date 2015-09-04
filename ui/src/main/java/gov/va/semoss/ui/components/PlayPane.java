@@ -23,7 +23,6 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
@@ -218,7 +217,7 @@ public class PlayPane extends JFrame {
 	private final JCheckBoxMenuItem gQueryBuilderItem
 			= new JCheckBoxMenuItem( "Graphical Query Builder",
 					DbAction.getIcon( "graphic_query" ) );
-	private final JCheckBoxMenuItem iManageItem_2 = new JCheckBoxMenuItem( "Insight Manager 2",
+	private final JCheckBoxMenuItem iManageItem_2 = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 
 	private final JToolBar toolbar;

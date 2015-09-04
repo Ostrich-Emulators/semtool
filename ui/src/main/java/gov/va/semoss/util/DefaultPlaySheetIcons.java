@@ -1,5 +1,6 @@
 package gov.va.semoss.util;
 
+import gov.va.semoss.ui.components.api.IPlaySheet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,5 +112,11 @@ public class DefaultPlaySheetIcons {
 		}
 
 		return null;
-	}	
+	}
+
+	public static ImageIcon getDefaultIcon( PlaySheetEnum pse ) {
+		Class<? extends IPlaySheet> klass = pse.getSheetClass();
+		return ( null == klass
+				? defaultIcons.get( "(Update Query)" ) : getDefaultIcon( klass ) );
+	}
 }

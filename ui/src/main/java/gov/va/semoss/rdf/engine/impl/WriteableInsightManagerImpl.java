@@ -18,18 +18,15 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.security.User;
 import gov.va.semoss.security.User.UserProperty;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
-import gov.va.semoss.util.Utility;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -40,7 +37,6 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
@@ -87,7 +83,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 	@Override
 	public void dispose() {
-		RepositoryConnection rc = getRawConnection();
 		try {
 			rc.begin();
 			rc.clear();
@@ -109,7 +104,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	public URI add( Insight ins ) {
 		haschanges = true;
 		String clean = sanitizer.sanitize( ins.getLabel() );
-		RepositoryConnection rc = getRawConnection();
 
 		ValueFactory vf = rc.getValueFactory();
 		URI newId = vf.createURI( VAS.NAMESPACE, clean );
@@ -148,7 +142,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	@Override
 	public void remove( Insight ins ) {
 		haschanges = true;
-		RepositoryConnection rc = getRawConnection();
 		try {
 			rc.begin();
 			rc.clear( ins.getId(), null, null );
@@ -175,7 +168,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	public URI add( Perspective p ) {
 		haschanges = true;
 		String clean = sanitizer.sanitize( p.getLabel() );
-		RepositoryConnection rc = getRawConnection();
 
 		ValueFactory vf = rc.getValueFactory();
 		URI perspectiveURI = vf.createURI( VAS.NAMESPACE, clean );
@@ -201,7 +193,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	@Override
 	public void remove( Perspective p ) {
 		haschanges = true;
-		RepositoryConnection rc = getRawConnection();
 		try {
 			rc.begin();
 			rc.remove( p.getUri(), null, null );
@@ -221,7 +212,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	@Override
 	public void update( Perspective p ) {
 		haschanges = true;
-		RepositoryConnection rc = getRawConnection();
 
 		ValueFactory vf = rc.getValueFactory();
 		try {
@@ -243,13 +233,8 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 	@Override
 	public void setInsights( Perspective p, List<Insight> insights ) {
+		log.warn( "this function has not yet been implemented.");
 		haschanges = true;
-
-		List<Insight> current = getInsights( p );
-		insights.removeAll( current );
-		if ( insights.isEmpty() ) {
-			return;
-		}
 	}
 
 	//We do not want to release the this object, because the connection will
@@ -263,7 +248,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	@Override
 	public void addRawStatements( Collection<Statement> stmts ) throws RepositoryException {
 		haschanges = true;
-		RepositoryConnection rc = getRawConnection();
 
 		try {
 			rc.begin();
@@ -283,8 +267,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 	@Override
 	public void clear() {
-		RepositoryConnection rc = getRawConnection();
-
 		try {
 			rc.begin();
 			rc.clear();
@@ -382,7 +364,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			boolReturnValue = true;
 
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.error( e, e );
 			try {
 				rc.rollback();
@@ -458,7 +440,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			boolReturnValue = true;
 
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.error( e, e );
 			try {
 				rc.rollback();
@@ -491,7 +473,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 		try {
 			rc.begin();
-
 			Update uq_1 = rc.prepareUpdate( QueryLanguage.SPARQL, query_1 );
 			Update uq_2 = rc.prepareUpdate( QueryLanguage.SPARQL, query_2 );
 
@@ -501,7 +482,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.commit();
 			boolReturnValue = true;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.error( e, e );
 			try {
 				rc.rollback();
@@ -516,13 +497,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 //---------------------------------------------------------------------------------------------------------
 // I n s e r t i o n   o f   P e r s p e c t i v e s ,   I n s i g h t s ,   a n d   P a r a m e t e r s
 //---------------------------------------------------------------------------------------------------------
-	private final QueryExecutorAdapter<String> queryer = new QueryExecutorAdapter<String>() {
-		@Override
-		public void handleTuple( BindingSet set, ValueFactory fac ) {
-			result = set.getValue( "id" ).stringValue();
-		}
-	};
-
 	/**
 	 * Saves the passed-in Perspective's Title and Description into the
 	 * triple-store on disk.
@@ -572,7 +546,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.commit();
 			boolReturnValue = true;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.warn( e, e );
 			try {
 				rc.rollback();
@@ -609,22 +583,14 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		String description = insight.getDescription().trim();
 		String slotUriName = perspective.getUri().getLocalName() + "-slot-" + strUniqueIdentifier;
 		URI slotURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, slotUriName );
-		Literal order = insightVF.createLiteral( insight.getOrder() );
-		String type = "";
-		Matcher matcher = pattern.matcher( sparql );
-		if ( matcher.find() ) {
-			type = matcher.group( 1 );
-		}
-		String spinBodyUriName = "insight-" + strUniqueIdentifier + "-" + type;
-		URI spinBodyURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName );
+		Literal order = insightVF.createLiteral( perspective.indexOf( insight ) );
 		//Insights can only have only SELECT and CONSTRUCT queries:
-		URI spinBodyTypeURI;
-		if ( "SELECT".equals( type.toUpperCase() ) ) {
-			spinBodyTypeURI = insightVF.createURI( "http://spinrdf.org/spl#Select" );
-		}
-		else {
-			spinBodyTypeURI = insightVF.createURI( "http://spinrdf.org/spl#Construct" );
-		}
+		URI spinBodyTypeURI = ( sparql.toUpperCase().startsWith( "SELECT" ) 
+				 ? SP.Select : SP.Construct );
+
+		String spinBodyUriName 
+				= "insight-" + strUniqueIdentifier + "-" + spinBodyTypeURI.getLocalName();
+		URI spinBodyURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName );
 
 		String created = insight.getCreated();
 		String modified = insight.getModified();
@@ -743,7 +709,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.commit();
 			boolReturnValue = true;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.warn( e, e );
 			try {
 				rc.rollback();

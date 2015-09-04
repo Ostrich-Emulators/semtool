@@ -1,8 +1,5 @@
 package gov.va.semoss.om;
 
-import gov.va.semoss.model.vocabulary.SP;
-import gov.va.semoss.model.vocabulary.UI;
-import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import java.io.Serializable;
@@ -15,12 +12,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 
 public class Insight implements Serializable {
@@ -42,8 +35,6 @@ public class Insight implements Serializable {
 	String entityType = "";
 	//The layout used to render this insight:
 	String output = "";
-	//A renderer class for the Insight (if standard playsheets aren't used):
-	String rendererClass = "";
 	//Whether the query uses legacy internal parameter specifications:
 	boolean isLegacy = false;
 	//Description of Insight:
@@ -54,12 +45,6 @@ public class Insight implements Serializable {
 	String created = "";
 	//Date Modified:
 	String modified = "";
-	//A URI string of the containing Perspective,
-	//for use in the "toString()" method:
-	private String perspective = "";
-	//This Insight's Order under its Perspective.
-	//(Assuming that an Insight can belong to only one Perspective):
-	private int order = 0;
 
 	//The default value of this Insight is a Sparql query in most cases.
 	//Some Insights depend upon Java renderer classes, instead of queries.
@@ -87,6 +72,29 @@ public class Insight implements Serializable {
 	public Insight( URI id, String label ) {
 		this.id = id;
 		this.label = label;
+	}
+
+	public Insight( Insight i ) {
+		label = i.getLabel();
+		sparql = i.getSparql();
+
+		output = i.getOutput();
+		created = i.getCreated();
+		modified = i.modified;
+		creator = i.getCreator();
+		description = i.getDescription();
+
+		databaseID = i.getDatabaseID();
+		parameters.putAll( i.parameters );
+
+		entityType = i.entityType;
+		isLegacy = i.isLegacy;
+
+		defautlValueIsQuery = i.defautlValueIsQuery;
+
+		for ( Parameter p : i.colInsightParameters ) {
+			colInsightParameters.add( new Parameter( p ) );
+		}
 	}
 
 	public URI getId() {
@@ -180,14 +188,6 @@ public class Insight implements Serializable {
 		return this.parameters.get( parameterVariableName ).get( "parameterQuery" );
 	}
 
-	public void setRendererClass( String rendererClass ) {
-		this.rendererClass = rendererClass;
-	}
-
-	public String getRendererClass() {
-		return this.rendererClass;
-	}
-
 	public void setLegacy( boolean isLegacy ) {
 		this.isLegacy = isLegacy;
 	}
@@ -202,18 +202,6 @@ public class Insight implements Serializable {
 
 	public boolean getDefaultValueIsQuery() {
 		return this.defautlValueIsQuery;
-	}
-
-	public void setOrder( int order ) {
-		this.order = order;
-	}
-
-	public int getOrder() {
-		return this.order;
-	}
-
-	public String getOrderedLabel() {
-		return this.order + ". " + this.label;
 	}
 
 	//Description of Insight:
@@ -302,81 +290,15 @@ public class Insight implements Serializable {
 			setParameter( parameterVariable, parameterLabel, parameterType, parameterQuery );
 		}
 
-		Value rendererClass = resultSet.getValue( "rendererClass" );
-		if ( rendererClass != null ) {
-			setRendererClass( rendererClass.stringValue() );
-		}
-
 		Value isLegacyValue = resultSet.getValue( "isLegacy" );
 		if ( isLegacyValue != null ) {
 			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
-		}
-
-		Value ordr = resultSet.getValue( "order" );
-		if ( ordr != null ) {
-			perspective = resultSet.getValue( "perspective" ).stringValue();
-			setOrder( Integer.parseInt( ordr.stringValue() ) );
-		}
-	}
-
-	public void setFromStatements( Collection<Statement> stmts ) {
-//		String isp = "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?perspective ?description ?creator ?created ?modified ?order WHERE { "
-//				+ "?insightUriString rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
-//				+ "OPTIONAL{ ?insightUriString spin:body [ sp:text ?sparql ] } "
-//				+ "OPTIONAL{ ?insightUriString spin:constraint ?parameter . "
-//				+ "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] }} "
-//				+ "OPTIONAL{ ?insightUriString vas:rendererClass ?rendererClass } "
-//				+ "OPTIONAL{ ?insightUriString vas:isLegacy ?isLegacy } "
-//				+ "OPTIONAL{ ?insightUriString dcterms:description ?description } "
-//				+ "OPTIONAL{ ?insightUriString dcterms:creator ?creator } "
-//				+ "OPTIONAL{ ?insightUriString dcterms:created ?created } "
-//				+ "OPTIONAL{ ?insightUriString dcterms:modified ?modified } "
-//				+ "OPTIONAL{ ?perspective olo:slot [ olo:item ?insightUriString; olo:index ?order ] } "
-//				+ "}";
-		for ( Statement stmt : stmts ) {
-			URI pred = stmt.getPredicate();
-			Value val = stmt.getObject();
-			if ( val instanceof Literal ) {
-				Literal obj = Literal.class.cast( val );
-
-				if ( RDFS.LABEL.equals( pred ) ) {
-					setLabel( obj.stringValue() );
-				}
-				else if ( VAS.isLegacy.equals( pred ) ) {
-					setLegacy( obj.booleanValue() );
-				}
-				else if ( DCTERMS.CREATOR.equals( pred ) ) {
-					setCreator( obj.stringValue() );
-				}
-				else if ( DCTERMS.CREATED.equals( pred ) ) {
-					setCreated( obj.stringValue() );
-				}
-				else if ( DCTERMS.MODIFIED.equals( pred ) ) {
-					setModified( obj.stringValue() );
-				}
-				else if ( DCTERMS.DESCRIPTION.equals( pred ) ) {
-					setDescription( obj.stringValue() );
-				}
-				else if( SP.text.equals( pred ) ){
-					setSparql( obj.stringValue() );
-				}
-				else if( UI.viewClass.equals( pred ) ){
-					setOutput( obj.stringValue() );
-				}
-			}
 		}
 	}
 
 	@Override
 	public String toString() {
-		String strReturnValue = "";
-		if ( perspective != null && perspective.contains( "Detached-Insight-Perspective" ) ) {
-			strReturnValue = label;
-		}
-		else {
-			strReturnValue = getOrderedLabel();
-		}
-		return strReturnValue;
+		return label;
 	}
 
 	@Override

@@ -71,8 +71,6 @@ public interface InsightManager {
 	 * @throws IllegalArgumentException if an insight with the given id is not
 	 * found
 	 */
-	public Insight getInsight( URI perspectiveURI, URI uri );
-
 	public Insight getInsight( URI id );
 
 	/**
@@ -103,8 +101,4 @@ public interface InsightManager {
 	 * should only be called by {@link IEngine#closeDB() }
 	 */
 	public void release();
-
-	public String getLabel( URI uri );
-
-	public String getOrderedLabel( URI perspactiveURI, URI insightURI );
 }

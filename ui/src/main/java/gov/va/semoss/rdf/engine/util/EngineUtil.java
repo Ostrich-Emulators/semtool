@@ -59,7 +59,6 @@ import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.security.LocalUserImpl;
 import gov.va.semoss.security.User;
 import gov.va.semoss.security.Security;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
@@ -843,7 +842,7 @@ public class EngineUtil implements Runnable {
 			else {
 				InsightManagerImpl iei = new InsightManagerImpl( repo );
 				Properties p = Utility.loadProp( modelquestions );
-				iei.loadAllPerspectives( p );
+				iei.loadLegacyData( p );
 				stmts.addAll( iei.getStatements() );
 				iei.release(); // also shuts down repo
 			}

@@ -1,7 +1,6 @@
 package gov.va.semoss.ui.components;
 
-import gov.va.semoss.ui.components.renderers.PlaySheetRenderer;
-
+import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -35,6 +34,7 @@ import org.apache.log4j.Logger;
 //import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.GuiUtility;
@@ -59,8 +59,10 @@ public class CustomSparqlPanel extends JPanel {
 
 	private static final Logger logger = Logger.getLogger( CustomSparqlPanel.class );
 
-	private JComboBox<String> playSheetComboBox;
-	private JButton btnGetQuestionSparql, btnShowHint, btnSubmitSparqlQuery;
+	private JComboBox<PlaySheetEnum> playSheetComboBox;
+	private final JButton btnGetQuestionSparql;
+	private final JButton btnShowHint;
+	private final JButton btnSubmitSparqlQuery;
 	private final JCheckBox appendSparqlQueryChkBox;
 	private JCheckBox mainTabOverlayChkBox;
 	private JComboBox<Insight> insights;
@@ -73,7 +75,6 @@ public class CustomSparqlPanel extends JPanel {
 //		Style.registerTargetClassName( btnGetQuestionSparql, ".standardButton" );
 //		Style.registerTargetClassName( btnShowHint, ".standardButton" );
 //		Style.registerTargetClassName( btnSubmitSparqlQuery, ".standardButton" );
-
 		JLabel lblSectionCCustomize = new JLabel( "Query Panel" );
 		lblSectionCCustomize.setForeground( Color.DARK_GRAY );
 		lblSectionCCustomize.setFont( new Font( "Tahoma", Font.BOLD, 12 ) );
@@ -89,13 +90,14 @@ public class CustomSparqlPanel extends JPanel {
 		playSheetComboBox.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
-				String strSelectedPlaySheet = (String) ( (JComboBox) ae.getSource() ).getSelectedItem();
+				PlaySheetEnum selectedPlaySheet
+						= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
 				//Store the currently selected playsheet with the currently
 				//selected query tab:
-				sparqlArea.setTagOfSelectedTab( strSelectedPlaySheet );
+				sparqlArea.setTagOfSelectedTab( selectedPlaySheet.toString() );
 			}
 		} );
-		final PlaySheetRenderer pr = new PlaySheetRenderer();
+		final PlaySheetEnumRenderer pr = new PlaySheetEnumRenderer();
 		playSheetComboBox.setRenderer( pr );
 		playSheetComboBox.setToolTipText( "Display response formats for custom query" );
 		playSheetComboBox.setFont( new Font( "Tahoma", Font.PLAIN, 11 ) );
@@ -112,7 +114,7 @@ public class CustomSparqlPanel extends JPanel {
 		gbc_playSheetComboBox.gridy = 2;
 		add( playSheetComboBox, gbc_playSheetComboBox );
 		// set the model each time a question is choosen to include playsheets that are not in PlaySheetEnum
-		playSheetComboBox.setModel( new DefaultComboBoxModel( PlaySheetEnum.getAllSheetNames().toArray() ) );
+		playSheetComboBox.setModel( new DefaultComboBoxModel( PlaySheetEnum.values() ) );
 
 		btnShowHint = new JButton();
 		btnShowHint.setToolTipText( "Display Hint for PlaySheet" );
@@ -176,6 +178,8 @@ public class CustomSparqlPanel extends JPanel {
 		add( appendSparqlQueryChkBox, gbc_appendSparqlQueryChkBox );
 
 		sparqlArea = new TabbedQueries();
+		sparqlArea.setTagOfSelectedTab( PlaySheetEnum.values()[0].toString() );
+		
 		/**
 		 * Handles the assignment of keyboard shortcuts when changing the tab in
 		 * TabbedQueries .
@@ -187,7 +191,7 @@ public class CustomSparqlPanel extends JPanel {
 				//of the selected query tab:
 				String strPlaySheet = sparqlArea.getTagOfSelectedTab();
 				if ( strPlaySheet != null ) {
-					playSheetComboBox.setSelectedItem( strPlaySheet );
+					playSheetComboBox.setSelectedItem( PlaySheetEnum.valueOf( strPlaySheet ) );
 				}
 				//When the tab changes, check the contents of the displayed tab.
 				//Only enable the "Submit Query" button if characters are shown:
@@ -396,9 +400,9 @@ public class CustomSparqlPanel extends JPanel {
 
 		@Override
 		protected void prepare( ActionEvent ae ) {
-			String playSheetString
+			PlaySheetEnum outputtype
 					= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
-			sparqlArea.setTagOfSelectedTab( playSheetString );
+			sparqlArea.setTagOfSelectedTab( outputtype.toString() );
 		}
 
 		@Override
@@ -412,22 +416,11 @@ public class CustomSparqlPanel extends JPanel {
 		}
 
 		@Override
-		protected Class<? extends PlaySheetCentralComponent> getPlaySheetCentralComponent()
-				throws ClassNotFoundException {
-			String playSheetString
+		protected Class<? extends IPlaySheet> getPlaySheet() {
+			PlaySheetEnum outputtype
 					= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
-			if ( "Update Query".equalsIgnoreCase( playSheetString ) ) {
-				return null;
-			}
-			else {
-				String classname = PlaySheetEnum.getClassFromName( playSheetString );
-				Class<?> k = Class.forName( classname );
-
-				if ( !PlaySheetCentralComponent.class.isAssignableFrom( k ) ) {
-					throw new ClassNotFoundException( "This playsheet is not supported/has not been updated" );
-				}
-				return (Class<PlaySheetCentralComponent>) k;
-			}
+			return ( PlaySheetEnum.Update_Query == outputtype
+					? null : outputtype.getSheetClass() );
 		}
 
 		@Override
