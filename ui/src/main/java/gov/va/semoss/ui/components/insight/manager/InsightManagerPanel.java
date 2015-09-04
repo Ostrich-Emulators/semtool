@@ -7,9 +7,7 @@ package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import java.util.Enumeration;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 
 /**
  *
@@ -58,7 +56,6 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     jSplitPane1.setDividerLocation(250);
 
     tree.setModel(model);
-    tree.setRootVisible(false);
     tree.setShowsRootHandles(true);
     jScrollPane1.setViewportView(tree);
 

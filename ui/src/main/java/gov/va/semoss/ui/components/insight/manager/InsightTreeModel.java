@@ -30,11 +30,11 @@ public class InsightTreeModel extends DefaultTreeModel {
 			DefaultMutableTreeNode perspectiveItem = new DefaultMutableTreeNode( p );
 			top.add( perspectiveItem );
 			
-			for( Insight i : wim.getInsights( p  ) ) {
+			for( Insight i : p.getInsights() ) {
 				DefaultMutableTreeNode insightItem = new DefaultMutableTreeNode( i );
 				perspectiveItem.add( insightItem );
 				
-				for( Parameter a : wim.getInsightParameters( i ) ){
+				for( Parameter a : i.getInsightParameters() ){
 					DefaultMutableTreeNode parameterItem = new DefaultMutableTreeNode( a );
 					insightItem.add( parameterItem );			
 				}

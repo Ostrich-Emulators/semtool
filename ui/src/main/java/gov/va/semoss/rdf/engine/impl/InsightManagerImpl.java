@@ -471,6 +471,7 @@ public class InsightManagerImpl implements InsightManager {
 
 				// finally, set the parameters
 				Collection<Parameter> params = getInsightParameters( insight );
+				insight.setParameters( params );
 				for ( Parameter p : params ) {
 					insight.setParameter( p.getVariable(), p.getLabel(), p.getParameterType(),
 							p.getDefaultQuery() );

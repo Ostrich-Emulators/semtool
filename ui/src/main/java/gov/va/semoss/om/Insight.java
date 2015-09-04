@@ -168,6 +168,11 @@ public class Insight implements Serializable {
 		parameters.put( variable, attributes );
 	}
 
+	public void setParameters( Collection<Parameter> params ){
+		colInsightParameters.clear();
+		colInsightParameters.addAll( params );
+	}
+
 	public Map<String, Map<String, String>> getParameters() {
 		return this.parameters;
 	}
