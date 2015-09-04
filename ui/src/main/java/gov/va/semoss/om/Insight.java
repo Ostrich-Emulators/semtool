@@ -35,8 +35,6 @@ public class Insight implements Serializable {
 	String entityType = "";
 	//The layout used to render this insight:
 	String output = "";
-	//A renderer class for the Insight (if standard playsheets aren't used):
-	String rendererClass = "";
 	//Whether the query uses legacy internal parameter specifications:
 	boolean isLegacy = false;
 	//Description of Insight:
@@ -192,14 +190,6 @@ public class Insight implements Serializable {
 
 	public String getParameterQuery( String parameterVariableName ) {
 		return this.parameters.get( parameterVariableName ).get( "parameterQuery" );
-	}
-
-	public void setRendererClass( String rendererClass ) {
-		this.rendererClass = rendererClass;
-	}
-
-	public String getRendererClass() {
-		return this.rendererClass;
 	}
 
 	public void setLegacy( boolean isLegacy ) {
