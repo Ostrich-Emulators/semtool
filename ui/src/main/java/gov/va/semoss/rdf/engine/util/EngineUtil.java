@@ -843,7 +843,7 @@ public class EngineUtil implements Runnable {
 			else {
 				InsightManagerImpl iei = new InsightManagerImpl( repo );
 				Properties p = Utility.loadProp( modelquestions );
-				iei.loadAllPerspectives( p );
+				iei.loadLegacyData( p );
 				stmts.addAll( iei.getStatements() );
 				iei.release(); // also shuts down repo
 			}

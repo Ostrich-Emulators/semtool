@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -132,9 +131,9 @@ public class InsightManagerImpl implements InsightManager {
 		return rc;
 	}
 
-	public final void loadAllPerspectives( Properties dreamerProp ) {
+	public final void loadLegacyData( Properties dreamerProp ) {
 		try {
-			// this should load the properties from the specified as opposed to
+			// this should load the properties from the specified file as opposed to
 			// loading from core prop
 			// lastly the localprop needs to set up so that it can be swapped
 			String persps = dreamerProp.getProperty( Constants.PERSPECTIVE, "" );
@@ -163,9 +162,6 @@ public class InsightManagerImpl implements InsightManager {
 					rc.add( perspectiveURI, DCTERMS.MODIFIED, now );
 					rc.add( perspectiveURI, DCTERMS.CREATOR, creator );
 
-					//REMOVE THIS Line for Production:
-//					rc.add( perspectiveURI, DCTERMS.DESCRIPTION,
-//							insightVF.createLiteral( "Test Description: " + perspective ) );
 					loadQuestions( perspective, perspectiveURI, dreamerProp, now, creator );
 				}
 
@@ -213,10 +209,6 @@ public class InsightManagerImpl implements InsightManager {
 				log.error( ee, ee );
 			}
 		}
-		//This is a private utility method of this class, that is only being run
-		//to remove old PlaySheet triples, left over before changes to the Insight
-		//KB were made on 4 April 2015. This call may be removed in the future:
-//    GuiUtility.showMessage(String.valueOf(deleteInsightData()));    
 	}
 
 	private void loadQuestions( String perspectiveKey, URI perspectiveURI,
@@ -257,37 +249,27 @@ public class InsightManagerImpl implements InsightManager {
 					dataViewName = dataViewName.replaceFirst( "veera", "gov.va.vcamp" );
 					URI dataViewURI = vf.createURI( VAS.NAMESPACE, dataViewName );
 
-					String type = "SELECT";
-					Matcher matcher = pattern.matcher( sparql );
-					if ( matcher.find() ) {
-						type = matcher.group( 1 );
-					}
+					URI type = ( sparql.toUpperCase().startsWith( "SELECT" )
+							? SP.Select : SP.Construct );
 
-					URI spinBody = vf.
-							createURI( MetadataConstants.VA_INSIGHTS_NS, insightKey + "-" + type );
+					URI spinBody = vf.createURI( MetadataConstants.VA_INSIGHTS_NS, 
+							insightKey + "-" + type.getLocalName() );
+					
 					// The *_Questions.properties files have only SELECT and CONSTRUCT queries:
-					if ( "SELECT".equals( type.toUpperCase() ) ) {
-						rc.add( spinBody, RDF.TYPE, SP.Select );
-					}
-					else {
-						rc.add( spinBody, RDF.TYPE, SP.Construct );
-					}
+					rc.add( spinBody, RDF.TYPE, type );
+					
 					// TODO: The following works fine and the query text is correct in RDF (verified via Insights export)
 					// However, following retrieval from the insights-kb, the quotation marks are being stripped away
 					// which then makes the query text invalid.  Trace this down and address.  IO5 is a good example to
 					// work with, change 'M' to "M" for testing.
-					rc.add( spinBody, SP.text, vf.createLiteral( sparql.replaceAll( "\"", "\\\"" ) ) ); // verify this
+					rc.add( spinBody, SP.text, vf.createLiteral( sparql ) ); // verify this
 
 					rc.add( insightURI, RDF.TYPE, SPIN.MagicProperty );
 					rc.add( insightURI, RDFS.SUBCLASSOF, VAS.InsightProperties );
 					rc.add( insightURI, RDFS.LABEL, vf.createLiteral( insightLabel ) );
 					rc.add( insightURI, SPIN.body, spinBody );
 					rc.add( insightURI, UI.dataView, dataViewURI );
-					rc.add( insightURI, VAS.rendererClass, vf.createLiteral( "" ) );
 					rc.add( insightURI, VAS.isLegacy, vf.createLiteral( true ) );
-
-					//REMOVE THIS Line for Production:
-					rc.add( insightURI, DCTERMS.DESCRIPTION, vf.createLiteral( "Test Description: " + insightURI.toString() ) );
 
 					rc.add( insightURI, DCTERMS.CREATED, now );
 					rc.add( insightURI, DCTERMS.MODIFIED, now );
@@ -306,7 +288,8 @@ public class InsightManagerImpl implements InsightManager {
 						rc.add( insightURI, SPIN.constraint, argumentURI );
 
 						rc.add( argumentURI, RDF.TYPE, SPL.Argument );
-						rc.add( argumentURI, RDFS.LABEL, vf.createLiteral( paramKey.replaceAll( "([a-z])([A-Z])", "$1 $2" ) ) );
+						rc.add( argumentURI, RDFS.LABEL, 
+								vf.createLiteral( paramKey.replaceAll( "([a-z])([A-Z])", "$1 $2" ) ) );
 
 						URI parameterURI = vf.createURI( ARG.NAMESPACE, paramKey );
 						rc.add( parameterURI, RDF.TYPE, RDF.PROPERTY );
@@ -317,10 +300,11 @@ public class InsightManagerImpl implements InsightManager {
 						/*
 						 * Add the default query that retrieves parameter options:
 						 */
-						URI paramQuery = vf.
-								createURI( MetadataConstants.VA_INSIGHTS_NS, insightKey + "-" + paramKey + "-Query" );
+						URI paramQuery = vf.createURI( MetadataConstants.VA_INSIGHTS_NS, 
+								insightKey + "-" + paramKey + "-Query" );
 						rc.add( paramQuery, RDF.TYPE, SP.Select );
-						rc.add( paramQuery, SP.text, vf.createLiteral( "SELECT ?" + paramKey + " ?label WHERE{ ?" + paramKey + " a <" + paramType + "> ; rdfs:label ?label }" ) );
+						rc.add( paramQuery, SP.text, 
+								vf.createLiteral( "SELECT ?" + paramKey + " ?label WHERE{ ?" + paramKey + " a <" + paramType + "> ; rdfs:label ?label }" ) );
 						rc.add( argumentURI, SP.query, paramQuery );
 
 						/*
