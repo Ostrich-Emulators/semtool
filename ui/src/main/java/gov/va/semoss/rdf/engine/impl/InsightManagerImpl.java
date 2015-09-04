@@ -384,8 +384,6 @@ public class InsightManagerImpl implements InsightManager {
 			Collection<Statement> paramIds = Iterations.asList( rc.getStatements( insight.getId(),
 					SPIN.constraint, null, false ) );
 			for ( Statement s : paramIds ) {
-				log.debug( s );
-
 				URI paramId = URI.class.cast( s.getObject() );
 				Parameter parameter = new Parameter();
 				parameter.setParameterId( paramId );
@@ -394,8 +392,6 @@ public class InsightManagerImpl implements InsightManager {
 				Collection<Statement> data
 						= Iterations.asList( rc.getStatements( paramId, null, null, false ) );
 				for ( Statement d : data ) {
-					log.debug( "    " + d );
-
 					URI pred = d.getPredicate();
 					Value val = d.getObject();
 
@@ -462,9 +458,10 @@ public class InsightManagerImpl implements InsightManager {
 	public Insight getInsight( URI perspectivexsURI, URI insightURI ) {
 		return getInsight( insightURI );
 	}
-	
+
 	@Override
-	public Insight getInsight( URI insightURI ){
+	public Insight getInsight( URI insightURI ) {
+		Insight insight = null;
 		try {
 			// need a couple things here...the insight data, the query, 
 			// and view data (the playsheet)
@@ -480,6 +477,7 @@ public class InsightManagerImpl implements InsightManager {
 						= Iterations.asList( rc.getStatements( body, SP.text, null, true ) );
 				stmts.addAll( querys );
 			}
+
 			// the data view
 			List<Statement> dvstmts
 					= Iterations.asList( rc.getStatements( insightURI, UI.dataView, null, true ) );
@@ -490,24 +488,26 @@ public class InsightManagerImpl implements InsightManager {
 				stmts.addAll( dvs );
 			}
 
-			// dataview
-			Insight insight = insightFromStatements( stmts );
+			if ( !stmts.isEmpty() ) {
+				insight = insightFromStatements( stmts );
 
-			// finally, set the parameters
-			Collection<Parameter> params = getInsightParameters( insight );
-			for ( Parameter p : params ) {
-				insight.setParameter( p.getVariable(), p.getLabel(), p.getParameterType(),
-						p.getDefaultQuery() );
+				// finally, set the parameters
+				Collection<Parameter> params = getInsightParameters( insight );
+				for ( Parameter p : params ) {
+					insight.setParameter( p.getVariable(), p.getLabel(), p.getParameterType(),
+							p.getDefaultQuery() );
+				}
 			}
-
-			return insight;
 		}
 		catch ( RepositoryException e ) {
 			// TODO Auto-generated catch block
 			log.error( e, e );
 		}
 
-		throw new IllegalArgumentException( "unknown insight: " + insightURI );
+		if ( null == insight ) {
+			throw new IllegalArgumentException( "unknown insight: " + insightURI );
+		}
+		return insight;
 	}
 
 	@Override
