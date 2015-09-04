@@ -153,9 +153,9 @@ public class InsightManagerController_2 implements Initializable {
 					arylInsights.addAll( engine.getInsightManager().getInsights( perspective ) );
 
 					for ( Insight insight : arylInsights ) {
-						List<Parameter> arylInsightParameters = new ArrayList<>();
-						arylInsightParameters.addAll( engine.getInsightManager().getInsightParameters( insight.getId() ) );
-						insight.setInsightParameters( arylInsightParameters );
+						List<Parameter> parameters 
+								= new ArrayList<>( engine.getInsightManager().getInsightParameters( insight ) );
+						insight.setInsightParameters( parameters );
 					}
 					perspective.setInsights( arylInsights );
 				}
@@ -465,7 +465,7 @@ public class InsightManagerController_2 implements Initializable {
 								//Assign unique URIs to Insight Parameters, and add Parameter 
 								//children to the Insight tree item:
 								for ( Parameter parameter : insightCopy.getInsightParameters() ) {
-									parameter.setParameterURI( parameter.getParameterURI() + strUniqueIdentifier );
+									parameter.setParameterId( parameter.getParameterURI() + strUniqueIdentifier );
 									TreeItem<Object> item = new TreeItem<>( parameter );
 									itemDraggedCopy.getChildren().add( item );
 								}
@@ -753,7 +753,7 @@ public class InsightManagerController_2 implements Initializable {
 		ValueFactory insightVF = rc.getValueFactory();
 		URI uriParameter = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS,
 				"Parameter" + strUniqueIdentifier );
-		parameter.setParameterURI( uriParameter.toString() );
+		parameter.setParameterId( uriParameter );
 		parameter.setLabel( "(A New Parameter)" );
 
 		//Add new Parameter to the tree-view:

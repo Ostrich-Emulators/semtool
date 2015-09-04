@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.BindingSet;
 
 /**
@@ -20,14 +21,13 @@ public class Parameter implements Serializable {
 	private String strVariable = "";
 	private String strParameterType = "";
 	private String strDefaultQuery = "";
-	private String strParameterURI = "";
 
 	public Parameter() {
 	}
 
 	public Parameter( String strParameterURI, String strLabel, String strVariable,
 			String strParameterType, String strDefaultQuery ) {
-		this.strParameterURI = strParameterURI;
+		uriId = new URIImpl( strParameterURI );
 		this.strLabel = strLabel;
 		this.strVariable = strVariable;
 		this.strParameterType = strParameterType;
@@ -35,7 +35,7 @@ public class Parameter implements Serializable {
 	}
 
 	public Parameter( Parameter p ) {
-		this( p.strParameterURI, p.strLabel, p.strVariable, p.strParameterType,
+		this( p.getParameterURI(), p.strLabel, p.strVariable, p.strParameterType,
 				p.strDefaultQuery );
 	}
 
@@ -48,12 +48,12 @@ public class Parameter implements Serializable {
 		this.uriId = uriId;
 	}
 
-	public String getParameterURI() {
-		return this.strParameterURI;
+	public void setParameterId( String uriId ) {
+		setParameterId( new URIImpl( uriId ) );
 	}
 
-	public void setParameterURI( String strParameterURI ) {
-		this.strParameterURI = strParameterURI;
+	public String getParameterURI() {
+		return this.uriId.stringValue();
 	}
 
 	//Parameter label:
@@ -100,7 +100,6 @@ public class Parameter implements Serializable {
 	 * Parameter.
 	 */
 	public void setFromResultSet( BindingSet resultSet ) {
-		this.strParameterURI = "";
 		this.strLabel = "";
 		this.strVariable = "";
 		this.strParameterType = "";
@@ -109,7 +108,6 @@ public class Parameter implements Serializable {
 		Value ParameterURI_Value = resultSet.getValue( "parameter" );
 		if ( ParameterURI_Value != null ) {
 			this.uriId = (URI) ParameterURI_Value;
-			this.strParameterURI = ParameterURI_Value.stringValue();
 		}
 		Value labelValue = resultSet.getValue( "parameterLabel" );
 		if ( labelValue != null ) {

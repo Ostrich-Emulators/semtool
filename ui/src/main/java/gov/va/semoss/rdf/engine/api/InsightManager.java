@@ -52,7 +52,7 @@ public interface InsightManager {
 	 *
 	 * @return -- (Collection<Parameter>) Described above.
 	 */
-	public Collection<Parameter> getInsightParameters( URI insightURI );
+	public Collection<Parameter> getInsightParameters( Insight insightURI );
 
 	/**
 	 * Gets all insight URIs for a given perspective, in order
@@ -103,8 +103,4 @@ public interface InsightManager {
 	 * should only be called by {@link IEngine#closeDB() }
 	 */
 	public void release();
-
-	public String getLabel( URI uri );
-
-	public String getOrderedLabel( URI perspactiveURI, URI insightURI );
 }

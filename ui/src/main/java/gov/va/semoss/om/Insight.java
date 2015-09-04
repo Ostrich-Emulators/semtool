@@ -35,6 +35,8 @@ public class Insight implements Serializable {
 	String entityType = "";
 	//The layout used to render this insight:
 	String output = "";
+	//A renderer class for the Insight (if standard playsheets aren't used):
+	String rendererClass = "";
 	//Whether the query uses legacy internal parameter specifications:
 	boolean isLegacy = false;
 	//Description of Insight:
@@ -68,6 +70,15 @@ public class Insight implements Serializable {
 		this.description = "";
 	}
 
+	public Insight( String label ) {
+		this.label = label;
+	}
+
+	public Insight( URI id, String label ) {
+		this.id = id;
+		this.label = label;
+	}
+
 	public Insight( Insight i ) {
 		label = i.getLabel();
 		sparql = i.getSparql();
@@ -90,15 +101,6 @@ public class Insight implements Serializable {
 		for ( Parameter p : i.colInsightParameters ) {
 			colInsightParameters.add( new Parameter( p ) );
 		}
-	}
-
-	public Insight( String label ) {
-		this.label = label;
-	}
-
-	public Insight( URI id, String label ) {
-		this.id = id;
-		this.label = label;
 	}
 
 	public URI getId() {
@@ -190,6 +192,14 @@ public class Insight implements Serializable {
 
 	public String getParameterQuery( String parameterVariableName ) {
 		return this.parameters.get( parameterVariableName ).get( "parameterQuery" );
+	}
+
+	public void setRendererClass( String rendererClass ) {
+		this.rendererClass = rendererClass;
+	}
+
+	public String getRendererClass() {
+		return this.rendererClass;
 	}
 
 	public void setLegacy( boolean isLegacy ) {
@@ -298,6 +308,7 @@ public class Insight implements Serializable {
 		if ( isLegacyValue != null ) {
 			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
 		}
+
 	}
 
 	@Override
