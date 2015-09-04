@@ -413,7 +413,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Perspective persp
 					= perspectiveSelector.getItemAt( perspectiveSelector.getSelectedIndex() );
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			return persp.getLabel() + "-Insight-" + insight.getOrder();
+			return persp.getLabel() + "-Insight-" + persp.indexOf( insight );
 		}
 
 		@Override

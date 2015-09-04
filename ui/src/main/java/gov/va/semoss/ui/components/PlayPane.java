@@ -23,7 +23,6 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.ui.actions.CheckConsistencyAction;
 import gov.va.semoss.ui.actions.ClearAction;
 import gov.va.semoss.ui.actions.CloneAction;
@@ -218,7 +217,7 @@ public class PlayPane extends JFrame {
 	private final JCheckBoxMenuItem gQueryBuilderItem
 			= new JCheckBoxMenuItem( "Graphical Query Builder",
 					DbAction.getIcon( "graphic_query" ) );
-	private final JCheckBoxMenuItem iManageItem_2 = new JCheckBoxMenuItem( "Insight Manager 2",
+	private final JCheckBoxMenuItem iManageItem_2 = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 
 	private final JToolBar toolbar;
@@ -543,7 +542,7 @@ public class PlayPane extends JFrame {
 		rightView.setTabComponentAt( idx, ct1 );
 		
 		iManagePanel_2 = new InsightManagerPanel_2( repoList );
-		rightView.addTab( "Insight Manager 2", null, iManagePanel_2,
+		rightView.addTab( "Insight Manager", null, iManagePanel_2,
 				"Manage perspectives and insights" );
 		CloseableTab ct2_2 = new PlayPaneCloseableTab( rightView, iManageItem_2,
 				DbAction.getIcon( "insight_manager_tab1" ) );
@@ -1476,7 +1475,7 @@ public class PlayPane extends JFrame {
 
 				if ( ischecked ) {
 					iManagePanel_2.insightManagerPanelWorker();
-					rightTabs.addTab( "Insight Manager 2", DbAction.getIcon( "insight_manager_tab1" ), iManagePanel_2,
+					rightTabs.addTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1" ), iManagePanel_2,
 							"Manage perspectives and insights" );
 					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, iManageItem_2,
 							DbAction.getIcon( "insight_manager_tab1" ) );

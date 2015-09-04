@@ -41,7 +41,7 @@ public class PerspectiveEditorController implements Initializable{
 		txtPerspectiveTitle.setText(perspective.getLabel());
 		txtPerspectiveTitle.textProperty().addListener((observable, oldValue, newValue) -> {
 		   perspective.setLabel(newValue);
-		   //Move renamed Perspective to its sorted position on the tree-view:
+		   //Move renamed Perspective to its sorted indexOf on the tree-view:
 		   treevPerspectives.getRoot().getChildren().sort(Comparator.comparing(t->t.toString()));
 		   //Select the renamed Perspective:
 		   treevPerspectives.getSelectionModel().select(itemSelected);

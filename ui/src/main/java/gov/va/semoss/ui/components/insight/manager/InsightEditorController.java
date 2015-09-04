@@ -20,9 +20,9 @@ import gov.va.semoss.util.Utility;
 
 import java.awt.Component;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -107,7 +107,7 @@ public class InsightEditorController implements Initializable{
 		this.treevPerspectives = treevPerspectives;
 		TreeItem<Object> itemSelected = treevPerspectives.getSelectionModel().getSelectedItem();
 		Insight insight = (Insight) itemSelected.getValue();
-		ArrayList<Insight> arylInsights = ((Perspective) itemSelected.getParent().getValue()).getInsights();
+		List<Insight> arylInsights = ((Perspective) itemSelected.getParent().getValue()).getInsights();
 		int indexInsight = arylInsights.indexOf(insight);
 		itemURI = insight.getId();
 		
@@ -491,7 +491,7 @@ public class InsightEditorController implements Initializable{
 
 		@Override
 		protected String getTitle() {
-			return perspective.getLabel() + "-Insight-" + insight.getOrder();
+			return perspective.getLabel() + "-Insight-" + perspective.indexOf( insight );
 		}
 
 		@Override
