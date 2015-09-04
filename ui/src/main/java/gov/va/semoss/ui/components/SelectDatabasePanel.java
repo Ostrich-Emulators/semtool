@@ -14,6 +14,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerController_2;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
@@ -438,11 +439,17 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		}
 
 		@Override
-		protected Class<? extends PlaySheetCentralComponent> getPlaySheetCentralComponent() throws ClassNotFoundException {
+		protected Class<? extends IPlaySheet> getPlaySheet() {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
 			String output = insight.getOutput();
 
-			return (Class<PlaySheetCentralComponent>) Class.forName( output );
+			try{
+				return (Class<PlaySheetCentralComponent>) Class.forName( output );
+			}
+			catch( ClassNotFoundException n ){
+				log.error( n, n);
+			}
+			return null;
 		}
 
 		@Override
