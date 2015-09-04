@@ -34,7 +34,7 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 	private final Map<Insight, Icon> iconCache = new HashMap<>();
 	private final Map<URI, String> nameCache = new HashMap<>();
 	private InsightManager engine;
-	private URI pUri;
+	private Perspective perspective;
 
 	public QuestionRenderer() {
 	}
@@ -46,22 +46,20 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 	}
 
 	public void setPerspective( Perspective p ) {
-		pUri = p.getUri();
+		perspective = p;
 	}
 
 	@Override
 	public Component getListCellRendererComponent( JList<?> list, Object val, int idx,
 			boolean sel, boolean hasfocus ) {
 
-		// TODO: The getOrderedLabel calls must be updated to use the perspective URI as an argument
 		Insight insight = ( null == val ? null : Insight.class.cast( val ) );
-		String text = ( null == insight ? "" : insight.getOrderedLabel() );
+		String text = ( null == insight ? "" : perspective.getOrderedLabel( insight ) );
 
 		super.getListCellRendererComponent( list, text, idx, sel, hasfocus );
 
 		if ( !iconCache.containsKey( insight ) ) {
 			Icon icon = null;
-			String qtext = ( null == insight ? "" : insight.getOrderedLabel() );
 
 			if ( null == engine || null == insight ) {
 				iconCache.put( insight, null == icon ? DefaultPlaySheetIcons.blank
@@ -74,10 +72,10 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 					icon = DefaultPlaySheetIcons.defaultIcons.get( output );
 				}
 				else {
-          // couldn't find the right playsheet class, so see if we can
+					// couldn't find the right playsheet class, so see if we can
 					// figure out the icon based on the question label
 					for ( Map.Entry<String, ImageIcon> e : DefaultPlaySheetIcons.defaultIcons.entrySet() ) {
-						if ( qtext.contains( e.getKey() ) ) {
+						if ( text.contains( e.getKey() ) ) {
 							ImageIcon ii = e.getValue();
 							icon = ii;
 						}
@@ -89,9 +87,10 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 		}
 
 		setIcon( iconCache.get( insight ) );
-		
-		if (insight != null && insight.getLabel() != null)
-			setToolTipText(insight.getLabel());
+
+		if ( insight != null && insight.getLabel() != null ) {
+			setToolTipText( insight.getLabel() );
+		}
 
 		return this;
 	}

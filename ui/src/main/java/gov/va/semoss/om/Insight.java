@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 
-public class Insight implements Serializable{
+public class Insight implements Serializable {
+
 	private static final long serialVersionUID = 5192674160082789840L;
 	private static final Logger log = Logger.getLogger( Insight.class );
 	//ID of the question:
@@ -35,8 +35,6 @@ public class Insight implements Serializable{
 	String entityType = "";
 	//The layout used to render this insight:
 	String output = "";
-	//A renderer class for the Insight (if standard playsheets aren't used):
-	String rendererClass = "";
 	//Whether the query uses legacy internal parameter specifications:
 	boolean isLegacy = false;
 	//Description of Insight:
@@ -50,9 +48,6 @@ public class Insight implements Serializable{
 	//A URI string of the containing Perspective,
 	//for use in the "toString()" method:
 	private String perspective = "";
-    //This Insight's Order under its Perspective.
-	//(Assuming that an Insight can belong to only one Perspective):
-	private int order = 0;
 
 	//The default value of this Insight is a Sparql query in most cases.
 	//Some Insights depend upon Java renderer classes, instead of queries.
@@ -64,13 +59,37 @@ public class Insight implements Serializable{
 
 	public Insight() {
 	}
-	
+
 	public Insight( String label, String sparql,
 			Class<? extends PlaySheetCentralComponent> output ) {
 		this.label = label;
 		this.output = output.getCanonicalName();
 		this.sparql = sparql;
 		this.description = "";
+	}
+
+	public Insight( Insight i ) {
+		label = i.getLabel();
+		sparql = i.getSparql();
+
+		output = i.getOutput();
+		created = i.getCreated();
+		modified = i.modified;
+		creator = i.getCreator();
+		description = i.getDescription();
+
+		databaseID = i.getDatabaseID();
+		parameters.putAll( i.parameters );
+
+		entityType = i.entityType;
+		isLegacy = i.isLegacy;
+		perspective = i.perspective;
+
+		defautlValueIsQuery = i.defautlValueIsQuery;
+
+		for ( Parameter p : i.colInsightParameters ) {
+			colInsightParameters.add( new Parameter( p ) );
+		}
 	}
 
 	public Insight( String label ) {
@@ -173,14 +192,6 @@ public class Insight implements Serializable{
 		return this.parameters.get( parameterVariableName ).get( "parameterQuery" );
 	}
 
-	public void setRendererClass( String rendererClass ) {
-		this.rendererClass = rendererClass;
-	}
-
-	public String getRendererClass() {
-		return this.rendererClass;
-	}
-
 	public void setLegacy( boolean isLegacy ) {
 		this.isLegacy = isLegacy;
 	}
@@ -195,18 +206,6 @@ public class Insight implements Serializable{
 
 	public boolean getDefaultValueIsQuery() {
 		return this.defautlValueIsQuery;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	public int getOrder() {
-		return this.order;
-	}
-
-	public String getOrderedLabel() {
-		return this.order + ". " + this.label;
 	}
 
 	//Description of Insight:
@@ -295,20 +294,9 @@ public class Insight implements Serializable{
 			setParameter( parameterVariable, parameterLabel, parameterType, parameterQuery );
 		}
 
-		Value rendererClass = resultSet.getValue( "rendererClass" );
-		if ( rendererClass != null ) {
-			setRendererClass( rendererClass.stringValue() );
-		}
-
 		Value isLegacyValue = resultSet.getValue( "isLegacy" );
 		if ( isLegacyValue != null ) {
 			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
-		}
-
-		Value ordr = resultSet.getValue( "order" );
-		if ( ordr != null ) {
-			perspective = resultSet.getValue( "perspective" ).stringValue();
-			setOrder(Integer.parseInt(ordr.stringValue()));
 		}
 	}
 
@@ -319,7 +307,7 @@ public class Insight implements Serializable{
 			strReturnValue = label;
 		}
 		else {
-			strReturnValue = getOrderedLabel();
+			strReturnValue = label;
 		}
 		return strReturnValue;
 	}
