@@ -38,8 +38,10 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
+import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -234,12 +236,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	public void setInsights( Perspective p, List<Insight> insights ) {
 		log.warn( "this function has not yet been implemented.");
 		haschanges = true;
-
-		List<Insight> current = getInsights( p );
-		insights.removeAll( current );
-		if ( insights.isEmpty() ) {
-			return;
-		}
 	}
 
 	//We do not want to release the this object, because the connection will
@@ -272,8 +268,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 	@Override
 	public void clear() {
-		RepositoryConnection rc = getRawConnection();
-
 		try {
 			rc.begin();
 			rc.clear();
@@ -371,7 +365,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			boolReturnValue = true;
 
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.error( e, e );
 			try {
 				rc.rollback();
@@ -447,7 +441,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			boolReturnValue = true;
 
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.error( e, e );
 			try {
 				rc.rollback();
@@ -490,7 +484,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.commit();
 			boolReturnValue = true;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.error( e, e );
 			try {
 				rc.rollback();
@@ -554,7 +548,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.commit();
 			boolReturnValue = true;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.warn( e, e );
 			try {
 				rc.rollback();
@@ -592,7 +586,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		String slotUriName = perspective.getUri().getLocalName() + "-slot-" + strUniqueIdentifier;
 		URI slotURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, slotUriName );
 		Literal order = insightVF.createLiteral( perspective.indexOf( insight ) );
-		String type = "";
+		String type = "SELECT";
 		Matcher matcher = pattern.matcher( sparql );
 		if ( matcher.find() ) {
 			type = matcher.group( 1 );
@@ -655,7 +649,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.commit();
 			boolReturnValue = true;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.warn( e, e );
 			try {
 				rc.rollback();
@@ -725,7 +719,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.commit();
 			boolReturnValue = true;
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
 			log.warn( e, e );
 			try {
 				rc.rollback();

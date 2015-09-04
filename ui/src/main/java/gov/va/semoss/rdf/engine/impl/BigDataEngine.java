@@ -223,7 +223,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 	protected void loadLegacyInsights( Properties props ) throws RepositoryException {
 		// this gets called from the startup logic, so we have a RW connection
 		if ( !props.isEmpty() ) {
-			insightEngine.loadAllPerspectives( props );
+			insightEngine.loadLegacyData( props );
 			copyInsightsToDisk( insightEngine.getStatements() );
 		}
 	}

@@ -45,9 +45,6 @@ public class Insight implements Serializable {
 	String created = "";
 	//Date Modified:
 	String modified = "";
-	//A URI string of the containing Perspective,
-	//for use in the "toString()" method:
-	private String perspective = "";
 
 	//The default value of this Insight is a Sparql query in most cases.
 	//Some Insights depend upon Java renderer classes, instead of queries.
@@ -68,6 +65,15 @@ public class Insight implements Serializable {
 		this.description = "";
 	}
 
+	public Insight( String label ) {
+		this.label = label;
+	}
+
+	public Insight( URI id, String label ) {
+		this.id = id;
+		this.label = label;
+	}
+
 	public Insight( Insight i ) {
 		label = i.getLabel();
 		sparql = i.getSparql();
@@ -83,22 +89,12 @@ public class Insight implements Serializable {
 
 		entityType = i.entityType;
 		isLegacy = i.isLegacy;
-		perspective = i.perspective;
 
 		defautlValueIsQuery = i.defautlValueIsQuery;
 
 		for ( Parameter p : i.colInsightParameters ) {
 			colInsightParameters.add( new Parameter( p ) );
 		}
-	}
-
-	public Insight( String label ) {
-		this.label = label;
-	}
-
-	public Insight( URI id, String label ) {
-		this.id = id;
-		this.label = label;
 	}
 
 	public URI getId() {
@@ -298,18 +294,12 @@ public class Insight implements Serializable {
 		if ( isLegacyValue != null ) {
 			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
 		}
+
 	}
 
 	@Override
 	public String toString() {
-		String strReturnValue = "";
-		if ( perspective != null && perspective.contains( "Detached-Insight-Perspective" ) ) {
-			strReturnValue = label;
-		}
-		else {
-			strReturnValue = label;
-		}
-		return strReturnValue;
+		return label;
 	}
 
 	@Override

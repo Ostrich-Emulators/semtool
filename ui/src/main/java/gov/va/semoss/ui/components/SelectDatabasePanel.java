@@ -112,7 +112,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			@Override
 			public void valueChanged( ListSelectionEvent lse ) {
 				IEngine eng = repoList.getSelectedValue();
-				pr.setEngine( eng );
 				qr.setEngine( eng );
 
 				perspectiveSelector.removeAllItems();
