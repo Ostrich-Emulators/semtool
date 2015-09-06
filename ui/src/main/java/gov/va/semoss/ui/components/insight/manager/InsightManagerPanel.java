@@ -5,41 +5,91 @@
  */
 package gov.va.semoss.ui.components.insight.manager;
 
+import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.Parameter;
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
+import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
+import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
+import gov.va.semoss.util.PlaySheetEnum;
+import java.awt.CardLayout;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author ryan
  */
 public class InsightManagerPanel extends javax.swing.JPanel {
+
+	private static final Logger log = Logger.getLogger( InsightManagerPanel.class );
 	private WriteableInsightManager wim;
 	private final InsightTreeModel model = new InsightTreeModel();
-	
+
 	/**
 	 * Creates new form InsightManagerPanel
 	 */
 	public InsightManagerPanel() {
 		initComponents();
+
+		playsheet.setModel( new DefaultComboBoxModel<>( PlaySheetEnum.valuesNoUpdate() ) );
+		playsheet.setRenderer( new PlaySheetEnumRenderer() );
+
+		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
+		tree.setCellRenderer( new PerspectiveTreeCellRenderer() );
+		tree.addTreeSelectionListener( new TreeSelectionListener() {
+
+			@Override
+			public void valueChanged( TreeSelectionEvent e ) {
+				DefaultMutableTreeNode node
+						= DefaultMutableTreeNode.class.cast( tree.getLastSelectedPathComponent() );
+
+				CardLayout layout = CardLayout.class.cast( rightside.getLayout() );
+
+				switch ( e.getNewLeadSelectionPath().getPathCount() ) {
+					case 4:
+						// parameter
+						select( Parameter.class.cast( node.getUserObject() ) );
+						layout.show( rightside, "parameter" );
+						break;
+					case 3:
+						// insight;
+						select( Insight.class.cast( node.getUserObject() ) );
+						layout.show( rightside, "insight" );
+						break;
+					default:
+						// perspective
+						select( Perspective.class.cast( node.getUserObject() ) );
+						layout.show( rightside, "perspective" );
+				}
+			}
+		} );
+
 	}
 
-	public void refresh( IEngine engine ){
-		if( null != wim ){
+	public void refresh( IEngine engine ) {
+		if ( null != wim ) {
 			wim.release();
 		}
-		
+
 		wim = engine.getWriteableInsightManager();
 		model.refresh( wim );
-		
+
 		DefaultMutableTreeNode root
 				= DefaultMutableTreeNode.class.cast( tree.getModel().getRoot() );
-		
+
 		for ( int i = 0; i < tree.getRowCount(); i++ ) {
 			tree.expandRow( i );
 		}
+
+		tree.setSelectionRow( 0 );
 	}
-	
+
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
@@ -52,31 +102,223 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     jSplitPane1 = new javax.swing.JSplitPane();
     jScrollPane1 = new javax.swing.JScrollPane();
     tree = new javax.swing.JTree();
+    rightside = new javax.swing.JPanel();
+    perspectivePanel = new javax.swing.JPanel();
+    jScrollPane2 = new javax.swing.JScrollPane();
+    perspectiveDesc = new javax.swing.JTextArea();
+    jLabel4 = new javax.swing.JLabel();
+    perspectiveName = new javax.swing.JTextField();
+    jLabel1 = new javax.swing.JLabel();
+    insightPanel = new javax.swing.JPanel();
+    jLabel2 = new javax.swing.JLabel();
+    insightName = new javax.swing.JTextField();
+    jLabel3 = new javax.swing.JLabel();
+    playsheet = new javax.swing.JComboBox<PlaySheetEnum>();
+    jLabel5 = new javax.swing.JLabel();
+    jScrollPane3 = new javax.swing.JScrollPane();
+    insightQuery = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
+    jLabel6 = new javax.swing.JLabel();
+    jScrollPane4 = new javax.swing.JScrollPane();
+    insightDesc = new javax.swing.JTextArea();
+    testbtn = new javax.swing.JButton();
+    parameterPanel = new javax.swing.JPanel();
 
     jSplitPane1.setDividerLocation(250);
 
     tree.setModel(model);
+    tree.setRootVisible(false);
     tree.setShowsRootHandles(true);
     jScrollPane1.setViewportView(tree);
 
     jSplitPane1.setLeftComponent(jScrollPane1);
 
+    rightside.setLayout(new java.awt.CardLayout());
+
+    perspectiveDesc.setColumns(20);
+    perspectiveDesc.setLineWrap(true);
+    perspectiveDesc.setRows(5);
+    perspectiveDesc.setWrapStyleWord(true);
+    jScrollPane2.setViewportView(perspectiveDesc);
+
+    jLabel4.setText("Description");
+
+    jLabel1.setText("Perspective Name");
+
+    javax.swing.GroupLayout perspectivePanelLayout = new javax.swing.GroupLayout(perspectivePanel);
+    perspectivePanel.setLayout(perspectivePanelLayout);
+    perspectivePanelLayout.setHorizontalGroup(
+      perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(perspectivePanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(perspectivePanelLayout.createSequentialGroup()
+            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGap(46, 46, 46))
+          .addGroup(perspectivePanelLayout.createSequentialGroup()
+            .addComponent(jLabel1)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(perspectiveName)
+          .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
+        .addContainerGap())
+    );
+    perspectivePanelLayout.setVerticalGroup(
+      perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(perspectivePanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel1)
+          .addComponent(perspectiveName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel4)
+          .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(285, Short.MAX_VALUE))
+    );
+
+    rightside.add(perspectivePanel, "perspective");
+
+    jLabel2.setText("Insight Name");
+
+    jLabel3.setText("Display With");
+
+    playsheet.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+    jLabel5.setText("Query");
+
+    insightQuery.setColumns(20);
+    insightQuery.setRows(5);
+    jScrollPane3.setViewportView(insightQuery);
+
+    jLabel6.setText("Description");
+
+    insightDesc.setColumns(20);
+    insightDesc.setLineWrap(true);
+    insightDesc.setRows(5);
+    insightDesc.setWrapStyleWord(true);
+    jScrollPane4.setViewportView(insightDesc);
+
+    testbtn.setText("Test Query");
+
+    javax.swing.GroupLayout insightPanelLayout = new javax.swing.GroupLayout(insightPanel);
+    insightPanel.setLayout(insightPanelLayout);
+    insightPanelLayout.setHorizontalGroup(
+      insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(insightPanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(insightPanelLayout.createSequentialGroup()
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(testbtn))
+          .addGroup(insightPanelLayout.createSequentialGroup()
+            .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel2)
+              .addComponent(jLabel3)
+              .addComponent(jLabel6)
+              .addComponent(jLabel5))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+              .addComponent(playsheet, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+              .addComponent(jScrollPane4)
+              .addComponent(insightName, javax.swing.GroupLayout.Alignment.TRAILING))))
+        .addContainerGap())
+    );
+    insightPanelLayout.setVerticalGroup(
+      insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(insightPanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel2)
+          .addComponent(insightName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel3)
+          .addComponent(playsheet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel6)
+          .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(insightPanelLayout.createSequentialGroup()
+            .addComponent(jLabel5)
+            .addGap(0, 0, Short.MAX_VALUE))
+          .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(testbtn)
+        .addGap(46, 46, 46))
+    );
+
+    rightside.add(insightPanel, "insight");
+
+    javax.swing.GroupLayout parameterPanelLayout = new javax.swing.GroupLayout(parameterPanel);
+    parameterPanel.setLayout(parameterPanelLayout);
+    parameterPanelLayout.setHorizontalGroup(
+      parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 401, Short.MAX_VALUE)
+    );
+    parameterPanelLayout.setVerticalGroup(
+      parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 436, Short.MAX_VALUE)
+    );
+
+    rightside.add(parameterPanel, "parameter");
+
+    jSplitPane1.setRightComponent(rightside);
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 508, Short.MAX_VALUE)
+      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 662, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
+      .addComponent(jSplitPane1)
     );
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JTextArea insightDesc;
+  private javax.swing.JTextField insightName;
+  private javax.swing.JPanel insightPanel;
+  private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor insightQuery;
+  private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel2;
+  private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel4;
+  private javax.swing.JLabel jLabel5;
+  private javax.swing.JLabel jLabel6;
   private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JScrollPane jScrollPane2;
+  private javax.swing.JScrollPane jScrollPane3;
+  private javax.swing.JScrollPane jScrollPane4;
   private javax.swing.JSplitPane jSplitPane1;
+  private javax.swing.JPanel parameterPanel;
+  private javax.swing.JTextArea perspectiveDesc;
+  private javax.swing.JTextField perspectiveName;
+  private javax.swing.JPanel perspectivePanel;
+  private javax.swing.JComboBox<PlaySheetEnum> playsheet;
+  private javax.swing.JPanel rightside;
+  private javax.swing.JButton testbtn;
   private javax.swing.JTree tree;
   // End of variables declaration//GEN-END:variables
+
+	private void select( Perspective p ) {
+		perspectiveName.setText( p.getLabel() );
+		perspectiveDesc.setText( p.getDescription() );
+	}
+
+	private void select( Insight i ) {
+		insightName.setText( i.getLabel() );
+		insightQuery.setText( i.getSparql() );
+		insightDesc.setText( i.getDescription() );
+		playsheet.setSelectedItem( PlaySheetEnum.valueFor( i ) );
+	}
+
+	private void select( Parameter p ) {
+
+	}
 }

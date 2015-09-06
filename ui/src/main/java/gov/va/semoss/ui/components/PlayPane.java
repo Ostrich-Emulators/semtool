@@ -47,6 +47,7 @@ import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
+import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel_2;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.main.SemossPreferences;
@@ -94,6 +95,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -144,7 +146,7 @@ public class PlayPane extends JFrame {
 	protected final RepositoryList repoList = new RepositoryList();
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
-	private InsightManagerPanel iManagePanel_2;
+	private InsightManagerPanel_2 iManagePanel_2;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -541,7 +543,7 @@ public class PlayPane extends JFrame {
 		idx = rightView.indexOfComponent( gQueryBuilderPanel );
 		rightView.setTabComponentAt( idx, ct1 );
 		
-		iManagePanel_2 = new InsightManagerPanel();
+		iManagePanel_2 = new InsightManagerPanel_2( repoList );
 		rightView.addTab( "Insight Manager 2", null, iManagePanel_2,
 				"Manage perspectives and insights" );
 		CloseableTab ct2_2 = new PlayPaneCloseableTab( rightView, iManageItem_2,
@@ -1474,7 +1476,7 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					iManagePanel_2.refresh( repoList.getSelectedValue() );
+					iManagePanel_2.insightManagerPanelWorker();
 					rightTabs.addTab( "Insight Manager 2", DbAction.getIcon( "insight_manager_tab1" ), iManagePanel_2,
 							"Manage perspectives and insights" );
 					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, iManageItem_2,
@@ -1482,6 +1484,13 @@ public class PlayPane extends JFrame {
 					int idx = rightTabs.indexOfComponent( iManagePanel_2 );
 					rightTabs.setTabComponentAt( idx, ct2_2 );
 					iManageItem_2.setToolTipText( "Disable the Insite Manager Tab" );
+					
+					InsightManagerPanel imp = new InsightManagerPanel();
+					imp.refresh( repoList.getSelectedValue() );
+					JDialog dlg = new JDialog( PlayPane.this, false );
+					dlg.getContentPane().add( imp );
+					dlg.setSize( 800, 500 );
+					dlg.setVisible( true );
 				}
 				else {
 					rightTabs.remove( iManagePanel_2 );

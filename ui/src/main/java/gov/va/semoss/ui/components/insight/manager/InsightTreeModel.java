@@ -40,5 +40,7 @@ public class InsightTreeModel extends DefaultTreeModel {
 				}
 			}
 		}
+		
+		nodeStructureChanged( root );
 	}
 }
