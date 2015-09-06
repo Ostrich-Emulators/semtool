@@ -122,6 +122,12 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     insightDesc = new javax.swing.JTextArea();
     testbtn = new javax.swing.JButton();
     parameterPanel = new javax.swing.JPanel();
+    jLabel7 = new javax.swing.JLabel();
+    parameterName = new javax.swing.JTextField();
+    jScrollPane5 = new javax.swing.JScrollPane();
+    parameterQuery = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
+    jLabel8 = new javax.swing.JLabel();
+    conceptbtn = new javax.swing.JButton();
 
     jSplitPane1.setDividerLocation(250);
 
@@ -252,15 +258,50 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
     rightside.add(insightPanel, "insight");
 
+    jLabel7.setText("Parameter Label");
+
+    parameterQuery.setColumns(20);
+    parameterQuery.setRows(5);
+    jScrollPane5.setViewportView(parameterQuery);
+
+    jLabel8.setText("Query");
+
+    conceptbtn.setText("Build from Concept");
+
     javax.swing.GroupLayout parameterPanelLayout = new javax.swing.GroupLayout(parameterPanel);
     parameterPanel.setLayout(parameterPanelLayout);
     parameterPanelLayout.setHorizontalGroup(
       parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 401, Short.MAX_VALUE)
+      .addGroup(parameterPanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(parameterPanelLayout.createSequentialGroup()
+            .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel7)
+              .addComponent(jLabel8))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(parameterName)
+              .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)))
+          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, parameterPanelLayout.createSequentialGroup()
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(conceptbtn)))
+        .addContainerGap())
     );
     parameterPanelLayout.setVerticalGroup(
       parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 436, Short.MAX_VALUE)
+      .addGroup(parameterPanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel7)
+          .addComponent(parameterName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel8)
+          .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(conceptbtn)
+        .addContainerGap(170, Short.MAX_VALUE))
     );
 
     rightside.add(parameterPanel, "parameter");
@@ -281,6 +322,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton conceptbtn;
   private javax.swing.JTextArea insightDesc;
   private javax.swing.JTextField insightName;
   private javax.swing.JPanel insightPanel;
@@ -291,12 +333,17 @@ public class InsightManagerPanel extends javax.swing.JPanel {
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabel6;
+  private javax.swing.JLabel jLabel7;
+  private javax.swing.JLabel jLabel8;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JScrollPane jScrollPane3;
   private javax.swing.JScrollPane jScrollPane4;
+  private javax.swing.JScrollPane jScrollPane5;
   private javax.swing.JSplitPane jSplitPane1;
+  private javax.swing.JTextField parameterName;
   private javax.swing.JPanel parameterPanel;
+  private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor parameterQuery;
   private javax.swing.JTextArea perspectiveDesc;
   private javax.swing.JTextField perspectiveName;
   private javax.swing.JPanel perspectivePanel;
@@ -319,6 +366,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	}
 
 	private void select( Parameter p ) {
-
+		parameterName.setText( p.getLabel() );
+		parameterQuery.setText( p.getDefaultQuery() );
 	}
 }
