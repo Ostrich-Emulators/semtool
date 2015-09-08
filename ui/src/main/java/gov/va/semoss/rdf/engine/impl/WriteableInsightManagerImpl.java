@@ -24,7 +24,6 @@ import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 
 import info.aduna.iteration.Iterations;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -48,7 +47,6 @@ import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -104,19 +102,12 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	}
 
 	private boolean removeOldData() {
-		try ( FileWriter fw = new FileWriter( "/tmp/outtie-before.nt" ) ) {
-			rc.export( new NTriplesWriter( fw ) );
-		}
-		catch ( Exception io ) {
-			log.error( io, io );
-		}
-
 		try {
 			// remove Perspectives, Insights, and Parameters, 
 			// but also the things they depend on, like slots, constraints, indexes
 			Set<Resource> idsToRemove = new HashSet<>();
 
-			// remove statements that have these objects
+			// remove subjects that have these objects
 			URI objectsToRemove[] = new URI[]{
 				VAS.Perspective,
 				VAS.InsightProperties
@@ -128,6 +119,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 				}
 			}
 
+			// remove subjects that have these predicates
 			URI predsToRemove[] = new URI[]{
 				SPIN.constraint,
 				SPIN.body,
@@ -149,7 +141,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			for ( Resource r : idsToRemove ) {
 				rc.remove( r, null, null );
 			}
-
 			rc.commit();
 		}
 		catch ( RepositoryException e ) {
@@ -161,13 +152,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 				log.warn( x, x );
 			}
 			return false;
-		}
-
-		try ( FileWriter fw = new FileWriter( "/tmp/outtie-after.nt" ) ) {
-			rc.export( new NTriplesWriter( fw ) );
-		}
-		catch ( Exception io ) {
-			log.error( io, io );
 		}
 
 		return true;

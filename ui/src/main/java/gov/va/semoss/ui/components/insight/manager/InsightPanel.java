@@ -6,9 +6,15 @@
 package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.ui.components.OperationsProgress;
+import gov.va.semoss.ui.components.PlayPane;
+import gov.va.semoss.ui.components.PlaySheetFrame;
+import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
+import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import javax.swing.DefaultComboBoxModel;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -24,10 +30,10 @@ public class InsightPanel extends DataPanel<Insight> {
 
 		playsheet.setModel( new DefaultComboBoxModel<>( PlaySheetEnum.valuesNoUpdate() ) );
 		playsheet.setRenderer( new PlaySheetEnumRenderer() );
-		
+
 		listenTo( insightDesc );
 		listenTo( insightName );
-		listenTo( insightQuery );		
+		listenTo( insightQuery );
 	}
 
 	@Override
@@ -80,6 +86,11 @@ public class InsightPanel extends DataPanel<Insight> {
     jScrollPane4.setViewportView(insightDesc);
 
     testbtn.setText("Test Query");
+    testbtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        testbtnActionPerformed(evt);
+      }
+    });
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -131,6 +142,31 @@ public class InsightPanel extends DataPanel<Insight> {
         .addGap(46, 46, 46))
     );
   }// </editor-fold>//GEN-END:initComponents
+
+  private void testbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testbtnActionPerformed
+		PlaySheetEnum pse = playsheet.getItemAt( playsheet.getSelectedIndex() );
+		Insight insight = getElement();
+		insight.setOutput( pse.getSheetClass().getCanonicalName() );
+		insight.setSparql( insightQuery.getText() );
+		insight.setLabel( insightName.getText() );
+		insight.setDescription( insightDesc.getText() );
+
+		if ( !insight.getParameters().isEmpty() ) {
+
+		}
+
+		try {
+			PlaySheetCentralComponent pscc = PlaySheetCentralComponent.class.cast( pse.getSheetClass().newInstance() );
+			PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
+			psf.addTab( "Insight Manager Query Test", pscc );
+			DIHelper.getInstance().getDesktop().add( psf );
+			OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add(
+					psf.getCreateTask( insightQuery.getText() ) );
+		}
+		catch ( InstantiationException | IllegalAccessException e ) {
+			Logger.getLogger( getClass() ).error( e, e );
+		}
+  }//GEN-LAST:event_testbtnActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
