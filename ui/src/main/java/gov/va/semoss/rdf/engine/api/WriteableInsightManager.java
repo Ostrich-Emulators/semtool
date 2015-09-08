@@ -164,4 +164,9 @@ public interface WriteableInsightManager extends InsightManager {
 	     */
 	    public boolean saveParameter(Insight insight, Parameter parameter);	    
 
+			/**
+			 * (Re)Sets the perspectives, insights, and parameters data
+			 * @param newdata 
+			 */
+			public void setData( List<Perspective> newdata );
 }//End "WriteableInsightManager" interface.

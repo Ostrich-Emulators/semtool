@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javafx.collections.ObservableList;
+import javafx.scene.control.TreeItem;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
@@ -74,6 +76,25 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			log.error( re, re );
 		}
 		rc = getRawConnection();
+	}
+
+	@Override
+	public void setData( List<Perspective> perspectives ) {
+		deleteAllParameters();
+		deleteAllInsights();
+		deleteAllPerspectives();
+
+		for ( Perspective p : perspectives ) {
+			savePerspective( p );
+
+			for ( Insight i : p.getInsights() ) {
+				saveInsight( p, i );
+
+				for ( Parameter a : i.getInsightParameters() ) {
+					saveParameter( i, a );
+				}
+			}
+		}
 	}
 
 	@Override
@@ -233,7 +254,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 	@Override
 	public void setInsights( Perspective p, List<Insight> insights ) {
-		log.warn( "this function has not yet been implemented.");
+		log.warn( "this function has not yet been implemented." );
 		haschanges = true;
 	}
 
@@ -516,12 +537,12 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		ValueFactory insightVF = rc.getValueFactory();
 		String perspectiveUriName = "perspective-" + strUniqueIdentifier;
 		URI perspectiveURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, perspectiveUriName );
-			//Be sure to set the new Perspective URI, because this Perspective object 
+		//Be sure to set the new Perspective URI, because this Perspective object 
 		//is returned by side-effect, and it's URI is used to create Insight slots:
 		perspective.setUri( perspectiveURI );
 		Date now = new Date();
 		String creator = userInfoFromToolPreferences( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
-			//Make sure that embedded quotes and new-line characters can be persisted:
+		//Make sure that embedded quotes and new-line characters can be persisted:
 		//String label = Utility.legalizeStringForSparql(perspective.getLabel());
 		//      String description = Utility.legalizeStringForSparql(perspective.getDescription());
 
@@ -585,10 +606,10 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		URI slotURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, slotUriName );
 		Literal order = insightVF.createLiteral( perspective.indexOf( insight ) );
 		//Insights can only have only SELECT and CONSTRUCT queries:
-		URI spinBodyTypeURI = ( sparql.toUpperCase().startsWith( "SELECT" ) 
-				 ? SP.Select : SP.Construct );
+		URI spinBodyTypeURI = ( sparql.toUpperCase().startsWith( "SELECT" )
+				? SP.Select : SP.Construct );
 
-		String spinBodyUriName 
+		String spinBodyUriName
 				= "insight-" + strUniqueIdentifier + "-" + spinBodyTypeURI.getLocalName();
 		URI spinBodyURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName );
 
@@ -669,7 +690,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		String strUniqueIdentifier = String.valueOf( lngUniqueIdentifier );
 		ValueFactory insightVF = rc.getValueFactory();
 		URI insightURI = insight.getId();
-           //We are rebuilding the Constraint and other URIs here, because the designers of 
+		//We are rebuilding the Constraint and other URIs here, because the designers of 
 		//VA_MainDB, v20, decided to reuse Parameters, and we discourage that. No objects 
 		//on the tree-view should be reused. They all should be editable as unique items:
 		String constraintUriName = "constraint-" + strUniqueIdentifier;

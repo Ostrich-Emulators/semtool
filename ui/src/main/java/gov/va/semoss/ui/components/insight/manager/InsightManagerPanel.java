@@ -10,28 +10,23 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
-import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
+import gov.va.semoss.rdf.engine.util.EngineOperationListener;
+import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.ui.components.OperationsProgress;
+import gov.va.semoss.ui.components.PlayPane;
+import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
-import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
-import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.util.PlaySheetEnum;
-import gov.va.semoss.util.Utility;
 import java.awt.CardLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -46,6 +41,8 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	private WriteableInsightManager wim;
 	private final InsightTreeModel model = new InsightTreeModel();
 	private IEngine engine;
+	private DataPanel currentCard;
+	private final PropertyChangeListener propChangeListener;
 
 	/**
 	 * Creates new form InsightManagerPanel
@@ -53,8 +50,18 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	public InsightManagerPanel() {
 		initComponents();
 
-		playsheet.setModel( new DefaultComboBoxModel<>( PlaySheetEnum.valuesNoUpdate() ) );
-		playsheet.setRenderer( new PlaySheetEnumRenderer() );
+		propChangeListener = new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange( PropertyChangeEvent evt ) {
+				if ( null != currentCard ) {
+					applybtn.setEnabled( currentCard.hasChanges() );
+
+					commitbtn.setEnabled( !applybtn.isEnabled() );
+				}
+			}
+		};
+
 		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 		tree.setCellRenderer( new PerspectiveTreeCellRenderer() );
 		tree.addTreeSelectionListener( new TreeSelectionListener() {
@@ -64,31 +71,65 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 				DefaultMutableTreeNode node
 						= DefaultMutableTreeNode.class.cast( tree.getLastSelectedPathComponent() );
 
-				CardLayout layout = CardLayout.class.cast( rightside.getLayout() );
+				CardLayout layout = CardLayout.class.cast( dataArea.getLayout() );
+
+				if ( !e.getNewLeadSelectionPath().equals( e.getOldLeadSelectionPath() )
+						&& null != currentCard ) {
+
+					// don't need to listen to changes from the old panel anymore
+					currentCard.removePropertyChangeListener( DataPanel.CHANGE_PROPERTY,
+							propChangeListener );
+
+					if ( currentCard.hasChanges() ) {
+						int ans = JOptionPane.showConfirmDialog( currentCard,
+								"This data has changed.\nApply changes before leaving?",
+								"Apply Changes?", JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE );
+						if ( JOptionPane.YES_OPTION == ans ) {
+							DefaultMutableTreeNode dmtn
+									= DefaultMutableTreeNode.class.cast( e.getOldLeadSelectionPath().getLastPathComponent() );
+							dmtn.setUserObject( currentCard.applyChanges() );
+							commitbtn.setEnabled( true );
+						}
+					}
+				}
 
 				switch ( e.getNewLeadSelectionPath().getPathCount() ) {
 					case 4:
 						// parameter
-						select( Parameter.class.cast( node.getUserObject() ) );
-						layout.show( rightside, "parameter" );
+						parameterData.setInsight(
+								Insight.class.cast( DefaultMutableTreeNode.class.cast( node.getParent() ).getUserObject() ) );
+						parameterData.setElement( Parameter.class.cast( node.getUserObject() ) );
+						layout.show( dataArea, "parameter" );
+						currentCard = parameterData;
 						break;
 					case 3:
 						// insight;
-						select( Insight.class.cast( node.getUserObject() ) );
-						layout.show( rightside, "insight" );
+						insightData.setElement( Insight.class.cast( node.getUserObject() ) );
+						layout.show( dataArea, "insight" );
+						currentCard = insightData;
 						break;
 					default:
 						// perspective
-						select( Perspective.class.cast( node.getUserObject() ) );
-						layout.show( rightside, "perspective" );
+						perspectiveData.setElement( Perspective.class.cast( node.getUserObject() ) );
+						layout.show( dataArea, "perspective" );
+						currentCard = perspectiveData;
 				}
+
+				applybtn.setEnabled( false );
+				currentCard.addPropertyChangeListener( DataPanel.CHANGE_PROPERTY,
+						propChangeListener );
 			}
 		} );
-
 	}
 
 	public void refresh( IEngine eng ) {
 		engine = eng;
+
+		insightData.setEngine( engine );
+		parameterData.setEngine( engine );
+		perspectiveData.setEngine( engine );
+
 		if ( null != wim ) {
 			wim.release();
 		}
@@ -116,31 +157,13 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     jScrollPane1 = new javax.swing.JScrollPane();
     tree = new javax.swing.JTree();
     rightside = new javax.swing.JPanel();
-    perspectivePanel = new javax.swing.JPanel();
-    jLabel4 = new javax.swing.JLabel();
-    perspectiveName = new javax.swing.JTextField();
-    jLabel1 = new javax.swing.JLabel();
-    jScrollPane6 = new javax.swing.JScrollPane();
-    perspectiveDesc = new javax.swing.JTextArea();
-    insightPanel = new javax.swing.JPanel();
-    jLabel2 = new javax.swing.JLabel();
-    insightName = new javax.swing.JTextField();
-    jLabel3 = new javax.swing.JLabel();
-    playsheet = new javax.swing.JComboBox<PlaySheetEnum>();
-    jLabel5 = new javax.swing.JLabel();
-    jScrollPane3 = new javax.swing.JScrollPane();
-    insightQuery = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
-    jLabel6 = new javax.swing.JLabel();
-    jScrollPane4 = new javax.swing.JScrollPane();
-    insightDesc = new javax.swing.JTextArea();
-    testbtn = new javax.swing.JButton();
-    parameterPanel = new javax.swing.JPanel();
-    jLabel7 = new javax.swing.JLabel();
-    parameterName = new javax.swing.JTextField();
-    jScrollPane5 = new javax.swing.JScrollPane();
-    parameterQuery = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
-    jLabel8 = new javax.swing.JLabel();
-    conceptbtn = new javax.swing.JButton();
+    dataArea = new javax.swing.JPanel();
+    insightData = new gov.va.semoss.ui.components.insight.manager.InsightPanel();
+    parameterData = new gov.va.semoss.ui.components.insight.manager.ParameterPanel();
+    perspectiveData = new gov.va.semoss.ui.components.insight.manager.PerspectivePanel();
+    jPanel1 = new javax.swing.JPanel();
+    applybtn = new javax.swing.JButton();
+    commitbtn = new javax.swing.JButton();
 
     jSplitPane1.setDividerLocation(250);
 
@@ -151,175 +174,54 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
     jSplitPane1.setLeftComponent(jScrollPane1);
 
-    rightside.setLayout(new java.awt.CardLayout());
+    rightside.setLayout(new java.awt.BorderLayout());
 
-    jLabel4.setText("Description");
+    dataArea.setPreferredSize(new java.awt.Dimension(401, 438));
+    dataArea.setLayout(new java.awt.CardLayout());
+    dataArea.add(insightData, "insight");
+    dataArea.add(parameterData, "parameter");
+    dataArea.add(perspectiveData, "perspective");
 
-    jLabel1.setText("Perspective Name");
+    rightside.add(dataArea, java.awt.BorderLayout.CENTER);
 
-    perspectiveDesc.setColumns(20);
-    perspectiveDesc.setLineWrap(true);
-    perspectiveDesc.setRows(5);
-    perspectiveDesc.setWrapStyleWord(true);
-    jScrollPane6.setViewportView(perspectiveDesc);
-
-    javax.swing.GroupLayout perspectivePanelLayout = new javax.swing.GroupLayout(perspectivePanel);
-    perspectivePanel.setLayout(perspectivePanelLayout);
-    perspectivePanelLayout.setHorizontalGroup(
-      perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(perspectivePanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-          .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(perspectiveName)
-          .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 273, Short.MAX_VALUE))
-        .addContainerGap())
-    );
-    perspectivePanelLayout.setVerticalGroup(
-      perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(perspectivePanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(jLabel1)
-          .addComponent(perspectiveName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jLabel4)
-          .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addContainerGap(252, Short.MAX_VALUE))
-    );
-
-    rightside.add(perspectivePanel, "perspective");
-
-    jLabel2.setText("Insight Name");
-
-    jLabel3.setText("Display With");
-
-    playsheet.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-    jLabel5.setText("Query");
-
-    insightQuery.setColumns(20);
-    insightQuery.setRows(5);
-    jScrollPane3.setViewportView(insightQuery);
-
-    jLabel6.setText("Description");
-
-    insightDesc.setColumns(20);
-    insightDesc.setLineWrap(true);
-    insightDesc.setRows(5);
-    insightDesc.setWrapStyleWord(true);
-    jScrollPane4.setViewportView(insightDesc);
-
-    testbtn.setText("Test Query");
-
-    javax.swing.GroupLayout insightPanelLayout = new javax.swing.GroupLayout(insightPanel);
-    insightPanel.setLayout(insightPanelLayout);
-    insightPanelLayout.setHorizontalGroup(
-      insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(insightPanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(insightPanelLayout.createSequentialGroup()
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addComponent(testbtn))
-          .addGroup(insightPanelLayout.createSequentialGroup()
-            .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(jLabel2)
-              .addComponent(jLabel3)
-              .addComponent(jLabel6)
-              .addComponent(jLabel5))
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
-              .addComponent(playsheet, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-              .addComponent(jScrollPane4)
-              .addComponent(insightName, javax.swing.GroupLayout.Alignment.TRAILING))))
-        .addContainerGap())
-    );
-    insightPanelLayout.setVerticalGroup(
-      insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(insightPanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(jLabel2)
-          .addComponent(insightName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(jLabel3)
-          .addComponent(playsheet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jLabel6)
-          .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(insightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(insightPanelLayout.createSequentialGroup()
-            .addComponent(jLabel5)
-            .addGap(0, 0, Short.MAX_VALUE))
-          .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(testbtn)
-        .addGap(46, 46, 46))
-    );
-
-    rightside.add(insightPanel, "insight");
-
-    jLabel7.setText("Parameter Label");
-
-    parameterQuery.setColumns(20);
-    parameterQuery.setRows(5);
-    jScrollPane5.setViewportView(parameterQuery);
-
-    jLabel8.setText("Query");
-
-    conceptbtn.setText("Query Builder");
-    conceptbtn.addActionListener(new java.awt.event.ActionListener() {
+    applybtn.setText("Apply Changes");
+    applybtn.setEnabled(false);
+    applybtn.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        conceptbtnActionPerformed(evt);
+        applybtnActionPerformed(evt);
       }
     });
 
-    javax.swing.GroupLayout parameterPanelLayout = new javax.swing.GroupLayout(parameterPanel);
-    parameterPanel.setLayout(parameterPanelLayout);
-    parameterPanelLayout.setHorizontalGroup(
-      parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(parameterPanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(parameterPanelLayout.createSequentialGroup()
-            .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(jLabel7)
-              .addComponent(jLabel8))
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(parameterName)
-              .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)))
-          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, parameterPanelLayout.createSequentialGroup()
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addComponent(conceptbtn)))
+    commitbtn.setText("Commit to DB");
+    commitbtn.setEnabled(false);
+    commitbtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        commitbtnActionPerformed(evt);
+      }
+    });
+
+    javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+    jPanel1.setLayout(jPanel1Layout);
+    jPanel1Layout.setHorizontalGroup(
+      jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        .addContainerGap(116, Short.MAX_VALUE)
+        .addComponent(commitbtn)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(applybtn)
         .addContainerGap())
     );
-    parameterPanelLayout.setVerticalGroup(
-      parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(parameterPanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(jLabel7)
-          .addComponent(parameterName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(parameterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jLabel8)
-          .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(conceptbtn)
-        .addContainerGap(170, Short.MAX_VALUE))
+    jPanel1Layout.setVerticalGroup(
+      jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        .addGap(0, 0, Short.MAX_VALUE)
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(applybtn)
+          .addComponent(commitbtn))
+        .addContainerGap())
     );
 
-    rightside.add(parameterPanel, "parameter");
+    rightside.add(jPanel1, java.awt.BorderLayout.PAGE_END);
 
     jSplitPane1.setRightComponent(rightside);
 
@@ -331,125 +233,98 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jSplitPane1)
+      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
     );
   }// </editor-fold>//GEN-END:initComponents
 
-  private void conceptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conceptbtnActionPerformed
-		TreePath tp = tree.getLeadSelectionPath();
-		DefaultMutableTreeNode paramNode
-				= DefaultMutableTreeNode.class.cast( tp.getLastPathComponent() );
-		Parameter param = Parameter.class.cast( paramNode.getUserObject() );
+  private void applybtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applybtnActionPerformed
+		DefaultMutableTreeNode dmtn
+				= DefaultMutableTreeNode.class.cast( tree.getLastSelectedPathComponent() );
+		dmtn.setUserObject( currentCard.applyChanges() );
+		applybtn.setEnabled( false );
+		commitbtn.setEnabled( true );
+  }//GEN-LAST:event_applybtnActionPerformed
 
-		DefaultMutableTreeNode insightNode
-				= DefaultMutableTreeNode.class.cast( tp.getParentPath().getLastPathComponent() );
-		Insight insight = Insight.class.cast( insightNode.getUserObject() );
+	private List<Perspective> convertTreeToPerspectives() {
+		List<Perspective> perspectives = new ArrayList<>();
+		DefaultMutableTreeNode root
+				= DefaultMutableTreeNode.class.cast( model.getRoot() );
+		Enumeration<DefaultMutableTreeNode> perspIt = root.children();
 
-		List<URI> uris = NodeDerivationTools.createConceptList( engine );
-		Map<URI, String> labels = GuiUtility.getInstanceLabels( uris, engine );
-		labels = Utility.sortUrisByLabel( labels );
+		while ( perspIt.hasMoreElements() ) {
+			DefaultMutableTreeNode perspnode = perspIt.nextElement();
+			Perspective persp = Perspective.class.cast( perspnode.getUserObject() );
+			perspectives.add( persp );
 
-		uris = new ArrayList<>();
+			List<Insight> insights = new ArrayList<>();
+			Enumeration<DefaultMutableTreeNode> insIt = perspnode.children();
+			while ( insIt.hasMoreElements() ) {
+				DefaultMutableTreeNode insnode = insIt.nextElement();
+				Insight ins = Insight.class.cast( insnode.getUserObject() );
+				insights.add( ins );
 
-		Map<URI, Parameter> parameters = new HashMap<>();
-		// we want the user to be able to select a parent parameter,
-		// but we don't have that functionality yet, so we'll simulate it here
-		for ( Parameter p : insight.getInsightParameters() ) {
-			if ( !p.equals( param ) ) {
-				parameters.put( p.getParameterId(), p );
-				uris.add( p.getParameterId() );
-				labels.put( p.getParameterId(), "Instances of \"" + p.getLabel() + "\"" );
-			}
-		}
-
-		uris.add( Constants.ANYNODE );
-		labels.put( Constants.ANYNODE, "<Any Concept>" );
-
-		uris.addAll( labels.keySet() );
-
-		JComboBox<URI> combo = new JComboBox<>( uris.toArray( new URI[0] ) );
-		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
-		renderer.cache( labels );
-		combo.setRenderer( renderer );
-		String opts[] = { "Ok", "Cancel" };
-		int ans = JOptionPane.showOptionDialog( parameterPanel, combo, "Concept Type",
-				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );
-
-		if ( JOptionPane.YES_OPTION == ans ) {
-			URI type = combo.getItemAt( combo.getSelectedIndex() );
-			if ( Constants.ANYNODE.equals( type ) ) {
-				parameterQuery.setText( "SELECT ?concept\nWHERE {\n  ?concept rdfs:subClassOf <"
-						+ engine.getSchemaBuilder().getConceptUri().build() + ">\n}" );
-			}
-			else if ( parameters.containsKey( type ) ) {
-				Parameter p = parameters.get( type );
-				// get the first variable
-				Pattern pat = Pattern.compile( "^.* (\\?\\w+).*" );
-				String pquery = p.getDefaultQuery().replaceAll(  "\n", " " );
-				Matcher m = pat.matcher( pquery );
-				if ( m.matches() ) {
-					String pvar = m.group( 1 );
-					parameterQuery.setText( "SELECT ?instance WHERE { ?instance a " + pvar + " }" );
+				List<Parameter> params = new ArrayList<>();
+				Enumeration<DefaultMutableTreeNode> parmIt = insnode.children();
+				while ( parmIt.hasMoreElements() ) {
+					DefaultMutableTreeNode parmnode = parmIt.nextElement();
+					Parameter param = Parameter.class.cast( parmnode.getUserObject() );
+					params.add( param );
 				}
+				ins.setParameters( params );
 			}
-			else {
-				String label = type.getLocalName();
-				parameterQuery.setText( "SELECT ?" + label + "\nWHERE {\n  ?" + label
-						+ " a <" + type.toString() + ">\n}" );
-			}
-
-			param.setDefaultQuery( parameterQuery.getText() );
+			persp.setInsights( insights );
 		}
 
-  }//GEN-LAST:event_conceptbtnActionPerformed
+		return perspectives;
+	}
+
+  private void commitbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitbtnActionPerformed
+		// rebuild all the perspectives from our tree nodes and 
+		// write everything back to the database
+		List<Perspective> perspectives = convertTreeToPerspectives();
+
+		ProgressTask pt = new ProgressTask( "Committing Insights", new Runnable() {
+
+			@Override
+			public void run() {
+				EngineOperationListener eol = new EngineOperationListener() {
+
+					@Override
+					public void engineOpened( IEngine eng ) {
+					}
+
+					@Override
+					public void engineClosed( IEngine eng ) {
+					}
+
+					@Override
+					public void insightsModified( IEngine eng, Collection<URI> perspectives,
+							Collection<URI> numinsights ) {
+						commitbtn.setEnabled( false );
+						EngineUtil.getInstance().removeEngineOpListener( this );
+					}
+				};
+
+				wim.setData( perspectives );
+				EngineUtil.getInstance().addEngineOpListener( eol );
+				EngineUtil.getInstance().importInsights( wim );
+			}
+		} );
+		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
+  }//GEN-LAST:event_commitbtnActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton conceptbtn;
-  private javax.swing.JTextArea insightDesc;
-  private javax.swing.JTextField insightName;
-  private javax.swing.JPanel insightPanel;
-  private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor insightQuery;
-  private javax.swing.JLabel jLabel1;
-  private javax.swing.JLabel jLabel2;
-  private javax.swing.JLabel jLabel3;
-  private javax.swing.JLabel jLabel4;
-  private javax.swing.JLabel jLabel5;
-  private javax.swing.JLabel jLabel6;
-  private javax.swing.JLabel jLabel7;
-  private javax.swing.JLabel jLabel8;
+  private javax.swing.JButton applybtn;
+  private javax.swing.JButton commitbtn;
+  private javax.swing.JPanel dataArea;
+  private gov.va.semoss.ui.components.insight.manager.InsightPanel insightData;
+  private javax.swing.JPanel jPanel1;
   private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JScrollPane jScrollPane3;
-  private javax.swing.JScrollPane jScrollPane4;
-  private javax.swing.JScrollPane jScrollPane5;
-  private javax.swing.JScrollPane jScrollPane6;
   private javax.swing.JSplitPane jSplitPane1;
-  private javax.swing.JTextField parameterName;
-  private javax.swing.JPanel parameterPanel;
-  private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor parameterQuery;
-  private javax.swing.JTextArea perspectiveDesc;
-  private javax.swing.JTextField perspectiveName;
-  private javax.swing.JPanel perspectivePanel;
-  private javax.swing.JComboBox<PlaySheetEnum> playsheet;
+  private gov.va.semoss.ui.components.insight.manager.ParameterPanel parameterData;
+  private gov.va.semoss.ui.components.insight.manager.PerspectivePanel perspectiveData;
   private javax.swing.JPanel rightside;
-  private javax.swing.JButton testbtn;
   private javax.swing.JTree tree;
   // End of variables declaration//GEN-END:variables
-
-	private void select( Perspective p ) {
-		perspectiveName.setText( p.getLabel() );
-		perspectiveDesc.setText( p.getDescription() );
-	}
-
-	private void select( Insight i ) {
-		insightName.setText( i.getLabel() );
-		insightQuery.setText( i.getSparql() );
-		insightDesc.setText( i.getDescription() );
-		playsheet.setSelectedItem( PlaySheetEnum.valueFor( i ) );
-	}
-
-	private void select( Parameter p ) {
-		parameterName.setText( p.getLabel() );
-		parameterQuery.setText( p.getDefaultQuery() );
-	}
 }

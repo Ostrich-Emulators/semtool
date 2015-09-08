@@ -657,7 +657,7 @@ public class EngineUtil implements Runnable {
 			return false;
 		}
 	}
-
+	
 	public static void addRepositoryToList( final IEngine eng ) {
 		SwingUtilities.invokeLater( new Runnable() {
 
