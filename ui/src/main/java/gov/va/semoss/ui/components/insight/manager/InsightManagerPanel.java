@@ -17,6 +17,9 @@ import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
 import java.awt.CardLayout;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -24,9 +27,11 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -64,6 +69,12 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 		tree.setCellRenderer( new PerspectiveTreeCellRenderer() );
+
+		setupTreeListeners();
+	}
+
+	private void setupTreeListeners() {
+		tree.addMouseListener( new InsightMenu( tree, model ) );
 		tree.addTreeSelectionListener( new TreeSelectionListener() {
 
 			@Override
