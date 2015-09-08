@@ -375,7 +375,7 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="conceptbtn">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Build from Concept"/>
+                    <Property name="text" type="java.lang.String" value="Query Builder"/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="conceptbtnActionPerformed"/>

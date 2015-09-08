@@ -19,14 +19,19 @@ import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.Utility;
 import java.awt.CardLayout;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -274,7 +279,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
     jLabel8.setText("Query");
 
-    conceptbtn.setText("Build from Concept");
+    conceptbtn.setText("Query Builder");
     conceptbtn.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         conceptbtnActionPerformed(evt);
@@ -334,14 +339,39 @@ public class InsightManagerPanel extends javax.swing.JPanel {
   }// </editor-fold>//GEN-END:initComponents
 
   private void conceptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conceptbtnActionPerformed
+		TreePath tp = tree.getLeadSelectionPath();
+		DefaultMutableTreeNode paramNode
+				= DefaultMutableTreeNode.class.cast( tp.getLastPathComponent() );
+		Parameter param = Parameter.class.cast( paramNode.getUserObject() );
+
+		DefaultMutableTreeNode insightNode
+				= DefaultMutableTreeNode.class.cast( tp.getParentPath().getLastPathComponent() );
+		Insight insight = Insight.class.cast( insightNode.getUserObject() );
+
 		List<URI> uris = NodeDerivationTools.createConceptList( engine );
-		uris.add( Constants.ANYNODE );
 		Map<URI, String> labels = GuiUtility.getInstanceLabels( uris, engine );
-		labels.put( Constants.ANYNODE, "<Any Concept>" );
 		labels = Utility.sortUrisByLabel( labels );
 
-		JComboBox<URI> combo = new JComboBox<>( labels.keySet().toArray( new URI[0] ) );
-		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer( engine );
+		uris = new ArrayList<>();
+
+		Map<URI, Parameter> parameters = new HashMap<>();
+		// we want the user to be able to select a parent parameter,
+		// but we don't have that functionality yet, so we'll simulate it here
+		for ( Parameter p : insight.getInsightParameters() ) {
+			if ( !p.equals( param ) ) {
+				parameters.put( p.getParameterId(), p );
+				uris.add( p.getParameterId() );
+				labels.put( p.getParameterId(), "Instances of \"" + p.getLabel() + "\"" );
+			}
+		}
+
+		uris.add( Constants.ANYNODE );
+		labels.put( Constants.ANYNODE, "<Any Concept>" );
+
+		uris.addAll( labels.keySet() );
+
+		JComboBox<URI> combo = new JComboBox<>( uris.toArray( new URI[0] ) );
+		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
 		renderer.cache( labels );
 		combo.setRenderer( renderer );
 		String opts[] = { "Ok", "Cancel" };
@@ -351,14 +381,27 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		if ( JOptionPane.YES_OPTION == ans ) {
 			URI type = combo.getItemAt( combo.getSelectedIndex() );
 			if ( Constants.ANYNODE.equals( type ) ) {
-				parameterQuery.setText( "SELECT ?concept\nWHERE {\n  ?concept"
-						+ " rdfs:subClassOf <" + engine.getSchemaBuilder().getConceptUri().build() + ">\n}" );
+				parameterQuery.setText( "SELECT ?concept\nWHERE {\n  ?concept rdfs:subClassOf <"
+						+ engine.getSchemaBuilder().getConceptUri().build() + ">\n}" );
+			}
+			else if ( parameters.containsKey( type ) ) {
+				Parameter p = parameters.get( type );
+				// get the first variable
+				Pattern pat = Pattern.compile( "^.* (\\?\\w+).*" );
+				String pquery = p.getDefaultQuery().replaceAll(  "\n", " " );
+				Matcher m = pat.matcher( pquery );
+				if ( m.matches() ) {
+					String pvar = m.group( 1 );
+					parameterQuery.setText( "SELECT ?instance WHERE { ?instance a " + pvar + " }" );
+				}
 			}
 			else {
 				String label = type.getLocalName();
 				parameterQuery.setText( "SELECT ?" + label + "\nWHERE {\n  ?" + label
 						+ " a <" + type.toString() + ">\n}" );
 			}
+
+			param.setDefaultQuery( parameterQuery.getText() );
 		}
 
   }//GEN-LAST:event_conceptbtnActionPerformed
