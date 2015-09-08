@@ -42,7 +42,7 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 		DefaultComboBoxModel<Perspective> model
 				= new DefaultComboBoxModel<>( perps.toArray( new Perspective[0] ) );
 		perspectives.setModel( model );
-		perspectives.setRenderer( new PerspectiveRenderer( engine ) );
+		perspectives.setRenderer( new PerspectiveRenderer() );
 	}
 
 	public static void showDialog( Component frame, IEngine engine, String sparql ) {

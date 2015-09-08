@@ -6,22 +6,22 @@
 package gov.va.semoss.om;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.openrdf.model.URI;
 
 /**
- * A class for managing a collection of {@link Insight}. As is, this class is
- * just a skeleton for later additions
+ * A class for managing a collection of {@link Insight}.
  *
- * @author ryan
+ * @author Thomas
  */
 public class Perspective {
 
-	private URI id;
-	private String label;
-	private String description;
-	private ArrayList<Insight> arylInsights;
+	private URI id = null;
+	private String label = "";
+	private String description = "";
+	private final List<Insight> insights = new ArrayList<>();
 
 	//Constructors:
 	//-------------
@@ -48,6 +48,7 @@ public class Perspective {
 	public URI getUri() {
 		return id;
 	}
+
 	public void setUri( URI u ) {
 		id = u;
 	}
@@ -57,6 +58,7 @@ public class Perspective {
 	public String getLabel() {
 		return label;
 	}
+
 	public void setLabel( String label ) {
 		this.label = label;
 	}
@@ -64,24 +66,35 @@ public class Perspective {
 	//Description getter/setter:
 	//--------------------------
 	public String getDescription() {
-        if(description == null){
-      	   description = "";
-        }
+		if ( description == null ) {
+			description = "";
+		}
 		return description;
 	}
+
 	public void setDescription( String description ) {
 		this.description = description;
 	}
 
 	//Insights getter/setter:
 	//-----------------------
-	public ArrayList<Insight> getInsights(){
-		return arylInsights;
+	public List<Insight> getInsights() {
+		return insights;
 	}
-	public void setInsights(ArrayList<Insight> arylInsights){
-		this.arylInsights = arylInsights;
+
+	public void setInsights( List<Insight> ordered ) {
+		insights.clear();
+		insights.addAll( ordered );
 	}
-	
+
+	public String getOrderedLabel( Insight insight ) {
+		return ( indexOf( insight ) + 1 ) + ". " + insight.getLabel();
+	}
+
+	public int indexOf( Insight ins ) {
+		return insights.indexOf( ins );
+	}
+
 	@Override
 	public String toString() {
 		return label;

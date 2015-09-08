@@ -1,6 +1,8 @@
 package gov.va.semoss.om;
 
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,41 +16,35 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 
-public class Insight {
+public class Insight implements Serializable {
 
+	private static final long serialVersionUID = 5192674160082789840L;
 	private static final Logger log = Logger.getLogger( Insight.class );
 	//ID of the question:
 	URI id = null;
 	//Name of the question:
-	String label = null;
+	String label = "";
 	//Query Parameters:
 	Map<String, Map<String, String>> parameters = new HashMap<>();
 	//Sparql for the question:
-	String sparql = null;
+	String sparql = "";
 	//Database id indicating Insight location.
 	//This may be a URL in memory or a file:
-	String databaseID = null;
+	String databaseID = "";
 	//Type of entity this insight has:
-	String entityType = null;
+	String entityType = "";
 	//The layout used to render this insight:
-	String output = null;
-	//A renderer class for the Insight (if standard playsheets aren't used):
-	String rendererClass = null;
+	String output = "";
 	//Whether the query uses legacy internal parameter specifications:
 	boolean isLegacy = false;
 	//Description of Insight:
-	String description = null;
+	String description = "";
 	//Author of Insight:
-	String creator = null;
+	String creator = "";
 	//Date Created:
-	String created = null;
+	String created = "";
 	//Date Modified:
-	String modified = null;
-	//A URI string of the containing Perspective,
-	//for use in the "toString()" method:
-	private String perspective;
-
-	Map<String, Integer> order = new HashMap<>();
+	String modified = "";
 
 	//The default value of this Insight is a Sparql query in most cases.
 	//Some Insights depend upon Java renderer classes, instead of queries.
@@ -76,6 +72,29 @@ public class Insight {
 	public Insight( URI id, String label ) {
 		this.id = id;
 		this.label = label;
+	}
+
+	public Insight( Insight i ) {
+		label = i.getLabel();
+		sparql = i.getSparql();
+
+		output = i.getOutput();
+		created = i.getCreated();
+		modified = i.modified;
+		creator = i.getCreator();
+		description = i.getDescription();
+
+		databaseID = i.getDatabaseID();
+		parameters.putAll( i.parameters );
+
+		entityType = i.entityType;
+		isLegacy = i.isLegacy;
+
+		defautlValueIsQuery = i.defautlValueIsQuery;
+
+		for ( Parameter p : i.colInsightParameters ) {
+			colInsightParameters.add( new Parameter( p ) );
+		}
 	}
 
 	public URI getId() {
@@ -169,14 +188,6 @@ public class Insight {
 		return this.parameters.get( parameterVariableName ).get( "parameterQuery" );
 	}
 
-	public void setRendererClass( String rendererClass ) {
-		this.rendererClass = rendererClass;
-	}
-
-	public String getRendererClass() {
-		return this.rendererClass;
-	}
-
 	public void setLegacy( boolean isLegacy ) {
 		this.isLegacy = isLegacy;
 	}
@@ -191,30 +202,6 @@ public class Insight {
 
 	public boolean getDefaultValueIsQuery() {
 		return this.defautlValueIsQuery;
-	}
-
-	public void setOrder( String perpsective, int index ) {
-		this.order.put( perpsective, index );
-	}
-
-	public int getOrder( URI perspectiveURI ) {
-		return this.order.get( perspectiveURI.stringValue() );
-	}
-
-	// this works for the general case and will be suitable for the 2015.01 release:
-	public String getOrderedLabel() {
-		if ( this.order.size() > 1 ) {
-			log.warn( "Insight: " + this.label + " belongs to more than one perspective. Order returned may be invalid." );
-		}
-		Set<String> keySet = this.order.keySet();
-		String[] perspectives = keySet.toArray( new String[keySet.size()] );
-
-		// String[] perspectives = (String[]) this.order.keySet().toArray();
-		return this.order.get( perspectives[0] ) + ". " + this.label;
-	}
-
-	public String getOrderedLabel( URI perspectiveURI ) {
-		return getOrder( perspectiveURI ) + ". " + this.label;
 	}
 
 	//Description of Insight:
@@ -303,33 +290,16 @@ public class Insight {
 			setParameter( parameterVariable, parameterLabel, parameterType, parameterQuery );
 		}
 
-		Value rendererClass = resultSet.getValue( "rendererClass" );
-		if ( rendererClass != null ) {
-			setRendererClass( rendererClass.stringValue() );
-		}
-
 		Value isLegacyValue = resultSet.getValue( "isLegacy" );
 		if ( isLegacyValue != null ) {
 			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
 		}
-		// an insight order is always with respect to some perspective
-		Value ordr = resultSet.getValue( "order" );
-		if ( ordr != null ) {
-			perspective = resultSet.getValue( "perspective" ).stringValue();
-			setOrder( perspective, Integer.parseInt( ordr.stringValue() ) );
-		}
+
 	}
 
 	@Override
 	public String toString() {
-		String strReturnValue = "";
-		if ( perspective.contains( "Detached-Insight-Perspective" ) ) {
-			strReturnValue = label;
-		}
-		else {
-			strReturnValue = getOrderedLabel();
-		}
-		return strReturnValue;
+		return label;
 	}
 
 	@Override

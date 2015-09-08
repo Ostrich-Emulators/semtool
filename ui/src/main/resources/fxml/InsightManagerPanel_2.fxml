@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.*?>
+
+<SplitPane fx:id="spaneInsightManager" dividerPositions="0.29797979797979796" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="601.0" prefWidth="795.0" stylesheets="@../css/InsightManagerPanel_2.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.semoss.ui.components.insight.manager.InsightManagerController_2">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+         <children>
+            <VBox alignment="TOP_CENTER" layoutX="66.0" layoutY="71.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <TreeView fx:id="treevPerspectives" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="55.0" prefHeight="477.0" prefWidth="232.0" />
+                  <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="114.0" prefWidth="230.0">
+                    <columnConstraints>
+                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="130.0" />
+                        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="2.0" minWidth="2.0" prefWidth="2.0" />
+                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="90.0" valignment="CENTER" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="15.0" minHeight="1.0" prefHeight="15.0" valignment="CENTER" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+                           <children>
+                              <Button fx:id="btnReload" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" text="Reload">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button fx:id="btnSave" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" text="Save" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <Label styleClass="Heading_2" text="Click and Drag:">
+                                 <font>
+                                    <Font name="System Italic" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="4.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <RadioButton fx:id="radioMove" mnemonicParsing="false" selected="true" text="Move Insight">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="grpCaD" />
+                                 </toggleGroup>
+                                 <VBox.margin>
+                                    <Insets left="4.0" top="5.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Italic" size="15.0" />
+                                 </font>
+                              </RadioButton>
+                              <RadioButton fx:id="radioCopy" mnemonicParsing="false" text="Copy Insight" toggleGroup="$grpCaD">
+                                 <VBox.margin>
+                                    <Insets left="4.0" top="5.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Italic" size="15.0" />
+                                 </font>
+                              </RadioButton>
+                           </children>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                        </VBox>
+                        <ProgressBar fx:id="pbSaveReload" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" progress="0.0" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                        <Separator orientation="VERTICAL" prefHeight="90.0" prefWidth="30.0" GridPane.columnIndex="1" />
+                     </children>
+                  </GridPane>
+               </children>
+            </VBox>
+         </children></AnchorPane>
+    <AnchorPane fx:id="apaneContent" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+  </items>
+</SplitPane>

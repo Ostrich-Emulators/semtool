@@ -7,8 +7,7 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
-import gov.va.semoss.security.RemoteUserImpl;
-import gov.va.semoss.security.permissions.SemossPermission;
+import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
@@ -21,6 +20,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
+
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
@@ -88,8 +88,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 
 	protected abstract String getQuery();
 
-	protected abstract Class<? extends PlaySheetCentralComponent> getPlaySheetCentralComponent()
-			throws ClassNotFoundException;
+	protected abstract Class<? extends IPlaySheet> getPlaySheet();
 
 	protected abstract IEngine getEngine();
 
@@ -106,16 +105,8 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
 		String query = getQuery();
-		Class<? extends PlaySheetCentralComponent> klass = null;
-		try {
-			klass = getPlaySheetCentralComponent();
-		}
-		catch ( ClassNotFoundException ex ) {
-			logger.error( ex, ex );
-			GuiUtility.showError( ex.getLocalizedMessage() );
-			return;
-		}
 
+		Class<? extends IPlaySheet> klass = getPlaySheet();
 		IEngine engine = getEngine();
 
 		ProgressTask pt = null;
@@ -132,7 +123,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			boolean appending = isAppending();
 
 			try {
-				PlaySheetCentralComponent pscc = klass.newInstance();
+				IPlaySheet pscc = klass.newInstance();
 				pscc.setTitle( title );
 				pt = doitNewSkool( pscc, query, engine, pane, getFrameTitle(),
 						appending );
@@ -149,7 +140,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 		}
 	}
 
-	private static ProgressTask doitNewSkool( PlaySheetCentralComponent pscc,
+	private static ProgressTask doitNewSkool( IPlaySheet pscc,
 			String query, IEngine eng, JDesktopPane pane, String frameTitle,
 			boolean appending ) {
 		if ( appending ) {
@@ -158,7 +149,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 		}
 		else {
 			PlaySheetFrame psf = new PlaySheetFrame( eng );
-			psf.addTab( pscc );
+			psf.addTab( PlaySheetCentralComponent.class.cast( pscc ) );
 			psf.setTitle( frameTitle );
 			DIHelper.getInstance().getDesktop().add( psf );
 

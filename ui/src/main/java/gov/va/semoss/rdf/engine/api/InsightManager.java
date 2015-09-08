@@ -24,63 +24,81 @@ import java.util.List;
  *
  * @author ryan
  */
-  public interface InsightManager {
+public interface InsightManager {
 
-  public Repository getRepository();
-	  
-  /**
-   * Gets all perspectives
-   *
-   * @return
-   */
-  public Collection<Perspective> getPerspectives();
-  
-  /**   Gets all Parameter objects under the passed-in Insight URI.
-   * 
-   * @param insightURI -- (URI) An Insight URI.
-   * 
-   * @return -- (Collection<Parameter>) Described above.
-   */
-  public Collection<Parameter> getInsightParameters( URI insightURI );	
-  
-  /**
-   * Gets all insight URIs for a given perspective, in order
-   *
-   * @param perspective
-   *
-   * @return
-   */
-  public List<Insight> getInsights( Perspective perspective );
+	public Repository getRepository();
 
-  public Insight getInsight( URI perspectiveURI, URI uri );
+	/**
+	 * Gets all perspectives
+	 *
+	 * @return
+	 */
+	public Collection<Perspective> getPerspectives();
 
-  /**   Returns a collection of data about the playsheets used to render Insights.
-   * 
-   * @return -- (Collection<PlaySheet>) Described above.
-   */
-  public Collection<PlaySheet> getPlaySheets();
-  
-  /**   Returns a collection of Parameter Types from the main KB, for use in the
-   *  "Parameter Types" combo-box on the "Parameter" tab of the Insight Manager.
-   * 
-   * @return -- (Collection<ParameterType>) Described above.
-   */
-  public Collection<ParameterType> getParameterTypes();
-  
-  /**
-   * Gets the raw statements for the insights
-   * @return all the statements that together comprise the Insight data
-   * @throws RepositoryException 
-   */
-  public Collection<Statement> getStatements() throws RepositoryException;
+	/**
+	 * Retrieves the given perspective from the datastore
+	 *
+	 * @param id
+	 * @return
+	 * @throws IllegalArgumentException if a perspective with the given id is not
+	 * found
+	 */
+	public Perspective getPerspective( URI id );
 
-  /**
-   * Releases any resources needed while this class is running. In general, this
-   * should only be called by {@link IEngine#closeDB() }
-   */
-  public void release();
+	/**
+	 * Gets all Parameter objects under the passed-in Insight URI.
+	 *
+	 * @param insightURI -- (URI) An Insight URI.
+	 *
+	 * @return -- (Collection<Parameter>) Described above.
+	 */
+	public Collection<Parameter> getInsightParameters( Insight insightURI );
 
-  public String getLabel( URI uri );
+	/**
+	 * Gets all insight URIs for a given perspective, in order
+	 *
+	 * @param perspective
+	 *
+	 * @return
+	 */
+	public List<Insight> getInsights( Perspective perspective );
 
-  public String getOrderedLabel( URI perspactiveURI, URI insightURI );
+	/**
+	 * Retrieves the given insight from the datastore
+	 *
+	 * @param id
+	 * @return
+	 * @throws IllegalArgumentException if an insight with the given id is not
+	 * found
+	 */
+	public Insight getInsight( URI id );
+
+	/**
+	 * Returns a collection of data about the playsheets used to render Insights.
+	 *
+	 * @return -- (Collection<PlaySheet>) Described above.
+	 */
+	public Collection<PlaySheet> getPlaySheets();
+
+	/**
+	 * Returns a collection of Parameter Types from the main KB, for use in the
+	 * "Parameter Types" combo-box on the "Parameter" tab of the Insight Manager.
+	 *
+	 * @return -- (Collection<ParameterType>) Described above.
+	 */
+	public Collection<ParameterType> getParameterTypes();
+
+	/**
+	 * Gets the raw statements for the insights
+	 *
+	 * @return all the statements that together comprise the Insight data
+	 * @throws RepositoryException
+	 */
+	public Collection<Statement> getStatements() throws RepositoryException;
+
+	/**
+	 * Releases any resources needed while this class is running. In general, this
+	 * should only be called by {@link IEngine#closeDB() }
+	 */
+	public void release();
 }
