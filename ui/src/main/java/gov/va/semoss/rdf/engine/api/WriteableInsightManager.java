@@ -5,32 +5,15 @@
  */
 package gov.va.semoss.rdf.engine.api;
 
-import gov.va.semoss.model.vocabulary.ARG;
-import gov.va.semoss.model.vocabulary.OLO;
-import gov.va.semoss.model.vocabulary.SP;
-import gov.va.semoss.model.vocabulary.SPIN;
-import gov.va.semoss.model.vocabulary.SPL;
-import gov.va.semoss.model.vocabulary.UI;
-import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
-import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
-import gov.va.semoss.util.Utility;
 
+import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-
-import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.Update;
 import org.openrdf.repository.RepositoryException;
 
 /**

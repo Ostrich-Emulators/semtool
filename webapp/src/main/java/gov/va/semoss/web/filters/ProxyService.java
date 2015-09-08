@@ -9,9 +9,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.AbortableHttpRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
-import org.apache.http.client.utils.URIUtils;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -19,8 +16,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.HeaderGroup;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
@@ -258,10 +253,11 @@ public class ProxyService {
 	}
 
 	/** Copy request headers from the servlet client to the proxy request. */
+	@SuppressWarnings("unchecked")
 	protected void copyRequestHeaders(HttpServletRequest servletRequest,
 			HttpRequest proxyRequest) {
 		// Get an Enumeration of all of the header names sent by the client
-		Enumeration enumerationOfHeaderNames = servletRequest.getHeaderNames();
+		Enumeration<String> enumerationOfHeaderNames = servletRequest.getHeaderNames();
 		while (enumerationOfHeaderNames.hasMoreElements()) {
 			String headerName = (String) enumerationOfHeaderNames.nextElement();
 			// Instead the content-length is effectively set via
@@ -271,7 +267,7 @@ public class ProxyService {
 			if (hopByHopHeaders.containsHeader(headerName))
 				continue;
 
-			Enumeration headers = servletRequest.getHeaders(headerName);
+			Enumeration<String> headers = servletRequest.getHeaders(headerName);
 			while (headers.hasMoreElements()) {// sometimes more than one value
 				String headerValue = (String) headers.nextElement();
 				// In case the proxy host is running multiple virtual servers,
@@ -477,6 +473,7 @@ public class ProxyService {
 	 * @param in
 	 *            example: name=value&foo=bar#fragment
 	 */
+	@SuppressWarnings("resource")
 	protected static CharSequence encodeUriQuery(CharSequence in) {
 		// Note that I can't simply use URI.java to encode because it will
 		// escape pre-existing escaped things.

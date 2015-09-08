@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -53,19 +52,14 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.rdf.engine.api.QueryExecutor;
-import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
+import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 
 import org.openrdf.repository.Repository;
 
@@ -137,9 +131,9 @@ public class InsightManagerImpl implements InsightManager {
 		return rc;
 	}
 
-	public final void loadAllPerspectives( Properties dreamerProp ) {
+	public final void loadLegacyData( Properties dreamerProp ) {
 		try {
-			// this should load the properties from the specified as opposed to
+			// this should load the properties from the specified file as opposed to
 			// loading from core prop
 			// lastly the localprop needs to set up so that it can be swapped
 			String persps = dreamerProp.getProperty( Constants.PERSPECTIVE, "" );
@@ -167,10 +161,6 @@ public class InsightManagerImpl implements InsightManager {
 					rc.add( perspectiveURI, DCTERMS.CREATED, now );
 					rc.add( perspectiveURI, DCTERMS.MODIFIED, now );
 					rc.add( perspectiveURI, DCTERMS.CREATOR, creator );
-
-					//REMOVE THIS Line for Production:
-//					rc.add( perspectiveURI, DCTERMS.DESCRIPTION,
-//							insightVF.createLiteral( "Test Description: " + perspective ) );
 
 					loadQuestions( perspective, perspectiveURI, dreamerProp, now, creator );
 				}
@@ -219,10 +209,6 @@ public class InsightManagerImpl implements InsightManager {
 				log.error( ee, ee );
 			}
 		}
-		//This is a private utility method of this class, that is only being run
-		//to remove old PlaySheet triples, left over before changes to the Insight
-		//KB were made on 4 April 2015. This call may be removed in the future:
-//    GuiUtility.showMessage(String.valueOf(deleteInsightData()));    
 	}
 
 	private void loadQuestions( String perspectiveKey, URI perspectiveURI,
@@ -263,37 +249,27 @@ public class InsightManagerImpl implements InsightManager {
 					dataViewName = dataViewName.replaceFirst( "veera", "gov.va.vcamp" );
 					URI dataViewURI = vf.createURI( VAS.NAMESPACE, dataViewName );
 
-					String type = null;
-					Matcher matcher = pattern.matcher( sparql );
-					if ( matcher.find() ) {
-						type = matcher.group( 1 );
-					}
+					URI type = ( sparql.toUpperCase().startsWith( "SELECT" )
+							? SP.Select : SP.Construct );
 
-					URI spinBody = vf.
-							createURI( MetadataConstants.VA_INSIGHTS_NS, insightKey + "-" + type );
+					URI spinBody = vf.createURI( MetadataConstants.VA_INSIGHTS_NS, 
+							insightKey + "-" + type.getLocalName() );
+					
 					// The *_Questions.properties files have only SELECT and CONSTRUCT queries:
-					if ( "SELECT".equals( type.toUpperCase() ) ) {
-						rc.add( spinBody, RDF.TYPE, SP.Select );
-					}
-					else {
-						rc.add( spinBody, RDF.TYPE, SP.Construct );
-					}
+					rc.add( spinBody, RDF.TYPE, type );
+					
 					// TODO: The following works fine and the query text is correct in RDF (verified via Insights export)
 					// However, following retrieval from the insights-kb, the quotation marks are being stripped away
 					// which then makes the query text invalid.  Trace this down and address.  IO5 is a good example to
 					// work with, change 'M' to "M" for testing.
-					rc.add( spinBody, SP.text, vf.createLiteral( sparql.replaceAll( "\"", "\\\"" ) ) ); // verify this
+					rc.add( spinBody, SP.text, vf.createLiteral( sparql ) ); // verify this
 
 					rc.add( insightURI, RDF.TYPE, SPIN.MagicProperty );
 					rc.add( insightURI, RDFS.SUBCLASSOF, VAS.InsightProperties );
 					rc.add( insightURI, RDFS.LABEL, vf.createLiteral( insightLabel ) );
 					rc.add( insightURI, SPIN.body, spinBody );
 					rc.add( insightURI, UI.dataView, dataViewURI );
-					rc.add( insightURI, VAS.rendererClass, vf.createLiteral( "" ) );
 					rc.add( insightURI, VAS.isLegacy, vf.createLiteral( true ) );
-
-					//REMOVE THIS Line for Production:
-					rc.add( insightURI, DCTERMS.DESCRIPTION, vf.createLiteral( "Test Description: " + insightURI.toString() ) );
 
 					rc.add( insightURI, DCTERMS.CREATED, now );
 					rc.add( insightURI, DCTERMS.MODIFIED, now );
@@ -312,7 +288,8 @@ public class InsightManagerImpl implements InsightManager {
 						rc.add( insightURI, SPIN.constraint, argumentURI );
 
 						rc.add( argumentURI, RDF.TYPE, SPL.Argument );
-						rc.add( argumentURI, RDFS.LABEL, vf.createLiteral( paramKey.replaceAll( "([a-z])([A-Z])", "$1 $2" ) ) );
+						rc.add( argumentURI, RDFS.LABEL, 
+								vf.createLiteral( paramKey.replaceAll( "([a-z])([A-Z])", "$1 $2" ) ) );
 
 						URI parameterURI = vf.createURI( ARG.NAMESPACE, paramKey );
 						rc.add( parameterURI, RDF.TYPE, RDF.PROPERTY );
@@ -323,10 +300,11 @@ public class InsightManagerImpl implements InsightManager {
 						/*
 						 * Add the default query that retrieves parameter options:
 						 */
-						URI paramQuery = vf.
-								createURI( MetadataConstants.VA_INSIGHTS_NS, insightKey + "-" + paramKey + "-Query" );
+						URI paramQuery = vf.createURI( MetadataConstants.VA_INSIGHTS_NS, 
+								insightKey + "-" + paramKey + "-Query" );
 						rc.add( paramQuery, RDF.TYPE, SP.Select );
-						rc.add( paramQuery, SP.text, vf.createLiteral( "SELECT ?" + paramKey + " ?label WHERE{ ?" + paramKey + " a <" + paramType + "> ; rdfs:label ?label }" ) );
+						rc.add( paramQuery, SP.text, 
+								vf.createLiteral( "SELECT ?" + paramKey + " ?label WHERE{ ?" + paramKey + " a <" + paramType + "> ; rdfs:label ?label }" ) );
 						rc.add( argumentURI, SP.query, paramQuery );
 
 						/*
@@ -358,82 +336,20 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	@Override
-	public String getLabel( URI uri ) {
-		String label = uri.toString();
+	public Collection<Perspective> getPerspectives() {
+		List<Perspective> persps = new ArrayList<>();
 		try {
-			List<Statement> stmts
-					= Iterations.asList( rc.getStatements( uri, RDFS.LABEL, null, false ) );
-			if ( !stmts.isEmpty() ) {
-				Value obj = stmts.get( 0 ).getObject();
-				label = obj.stringValue();
+			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
+					RDF.TYPE, VAS.Perspective, true ) );
+			for ( Statement s : stmts ) {
+				persps.add( getPerspective( URI.class.cast( s.getSubject() ) ) );
 			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
 		}
 
-		return label;
-	}
-
-	@Override
-	// presently this method has no callers
-	public String getOrderedLabel( URI perspectiveURI, URI insightURI ) {
-		final StringBuffer label = new StringBuffer( insightURI.toString() );
-		try {
-			String q = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-					+ "SELECT ?label ?order WHERE { "
-					+ "<" + perspectiveURI.toString() + "> olo:slot [ "
-					+ "olo:item ?uri ; olo:order ] . "
-					+ "<" + insightURI.toString() + "> rdfs:label ?label }";
-
-			QueryExecutor<Void> qea = new QueryExecutorAdapter<Void>( q ) {
-				@Override
-				public void handleTuple( BindingSet resultSet, ValueFactory fac ) {
-					label.setLength( 0 ); // flush
-					label.append( resultSet.getBinding( "order" ).getValue().stringValue() );
-					label.append( ". " );
-					label.append( resultSet.getBinding( "label" ).getValue().stringValue() );
-				}
-			};
-			AbstractSesameEngine.getSelect( qea, rc, false );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// TODO Auto-generated catch block
-			log.error( e, e );
-		}
-
-		return label.toString();
-	}
-
-	@Override
-	public Collection<Perspective> getPerspectives() {
-		List<Perspective> uris = new ArrayList<>();
-		try {
-			String q = "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
-					+ "SELECT ?uri ?label ?description WHERE { "
-					+ "?uri a <" + VAS.Perspective + "> . "
-					+ "?uri rdfs:label ?label ."
-					+ "OPTIONAL { ?uri dcterms:description ?description} } ORDER BY UCASE(?label)";
-			ListQueryAdapter<Perspective> lqa = new ListQueryAdapter<Perspective>( q ) {
-
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					String description = "";
-					if ( set.hasBinding( "description" ) ) {
-						description = set.getValue( "description" ).stringValue();
-					}
-					add( new Perspective( URI.class.cast( set.getValue( "uri" ) ),
-							set.getValue( "label" ).stringValue(), description ) );
-				}
-			};
-
-			uris.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-		}
-
-		return uris;
+		return persps;
 	}
 
 	/**
@@ -444,33 +360,53 @@ public class InsightManagerImpl implements InsightManager {
 	 * @return -- (Collection<Parameter>) Described above.
 	 */
 	@Override
-	public Collection<Parameter> getInsightParameters( URI insightURI ) {
+	public Collection<Parameter> getInsightParameters( Insight insight ) {
 		List<Parameter> colInsightParameters = new ArrayList<>();
-		String insightUriString = "<" + insightURI.toString() + ">";
 
 		try {
-			String query = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
-					+ "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
-					+ "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
-					+ "SELECT DISTINCT ?parameter ?parameterLabel ?parameterVariable ?parameterValueType ?parameterQuery WHERE { "
-					+ "BIND(" + insightUriString + " AS ?uri) . "
-					+ "OPTIONAL{ ?uri spin:constraint ?parameter . "
-					+ "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . "
-					+ "OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] } } }";
+			// get this insight's constraints/parameters
+			Collection<Statement> paramIds = Iterations.asList( rc.getStatements( insight.getId(),
+					SPIN.constraint, null, false ) );
+			for ( Statement s : paramIds ) {
+				URI paramId = URI.class.cast( s.getObject() );
+				Parameter parameter = new Parameter();
+				parameter.setParameterId( paramId );
 
-			ListQueryAdapter<Parameter> lqa = new ListQueryAdapter<Parameter>( query ) {
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					Parameter parameter = new Parameter();
-					parameter.setFromResultSet( set );
-					add( parameter );
+				// get data about this parameter
+				Collection<Statement> data
+						= Iterations.asList( rc.getStatements( paramId, null, null, false ) );
+				for ( Statement d : data ) {
+					URI pred = d.getPredicate();
+					Value val = d.getObject();
+
+					if ( RDFS.LABEL.equals( pred ) ) {
+						parameter.setLabel( val.stringValue() );
+					}
+					else if ( SPL.predicate.equals( pred ) ) {
+						List<Statement> preddata
+								= Iterations.asList( rc.getStatements( URI.class.cast( val ),
+												RDFS.LABEL, null, true ) );
+						if ( !preddata.isEmpty() ) {
+							parameter.setVariable( preddata.get( 0 ).getObject().stringValue() );
+						}
+					}
+					else if ( SP.query.equals( pred ) ) {
+						List<Statement> preddata
+								= Iterations.asList( rc.getStatements( URI.class.cast( val ),
+												SP.text, null, true ) );
+						if ( !preddata.isEmpty() ) {
+							parameter.setDefaultQuery( preddata.get( 0 ).getObject().stringValue() );
+						}
+					}
+					else if ( SPL.valueType.equals( pred ) ) {
+						parameter.setParameterType( val.stringValue() );
+					}
 				}
-			};
-			log.debug( "Parameter query... " + query );
-			colInsightParameters.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
 
+				colInsightParameters.add( parameter );
+			}
 		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+		catch ( RepositoryException e ) {
 			log.error( e, e );
 		}
 		return colInsightParameters;
@@ -478,166 +414,109 @@ public class InsightManagerImpl implements InsightManager {
 
 	@Override
 	public List<Insight> getInsights( Perspective perspective ) {
-		List<Insight> uris = new ArrayList<>();
+		List<Insight> insights = new ArrayList<>();
 		if ( perspective != null ) {
-			try {
-				List<Statement> stmts
-						= Iterations.asList( rc.getStatements( perspective.getUri(),
-										OLO.slot, null, true ) );
-				for ( Statement st : stmts ) {
-					URI slot = URI.class.cast( st.getObject() );
-					List<Statement> uriStmts
-							= Iterations.asList( rc.getStatements( slot, OLO.item, null, true ) );
-					for ( Statement uriSt : uriStmts ) {
-						URI uri = URI.class.cast( uriSt.getObject() );
-						uris.add( getInsight( perspective.getUri(), uri ) );
-					}
-				}
+			String query = "SELECT ?item "
+					+ "WHERE {"
+					+ "  ?perspective olo:slot ?slot ."
+					+ "  ?slot olo:item ?item ."
+					+ "  ?slot olo:index ?index . "
+					+ "} ORDER BY ?index";
+			OneVarListQueryAdapter<URI> orderquery
+					= OneVarListQueryAdapter.getUriList( query );
+			orderquery.bind( "perspective", perspective.getUri() );
+			orderquery.addNamespace( OLO.PREFIX, OLO.NAMESPACE );
+
+			List<URI> insightUris
+					= AbstractSesameEngine.getSelectNoEx( orderquery, rc, true );
+
+			for ( URI id : insightUris ) {
+				insights.add( getInsight( id ) );
 			}
-			catch ( RepositoryException e ) {
-				log.error( e, e );
-			}
-
-			final URI perspectiveURI = perspective.getUri();
-			Collections.sort( uris, new Comparator<Insight>() {
-
-				@Override
-				public int compare( Insight t, Insight t1 ) {
-					return t.getOrder() - t1.getOrder();
-				}
-			} );
 		}
-		return uris;
-	}
 
-	@Override
-	public Insight getInsight( URI perspectiveURI, URI insightURI ) {
-		final Insight insight = new Insight();
-		try {
-			insight.setId( insightURI );
-
-			Map<String, String> namespaces = new HashMap<>();
-			namespaces.put( UI.PREFIX, UI.NAMESPACE );
-			namespaces.put( SPIN.PREFIX, SPIN.NAMESPACE );
-			namespaces.put( SP.PREFIX, SP.NAMESPACE );
-			namespaces.put( SPL.PREFIX, SPL.NAMESPACE );
-			namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-			namespaces.put( OLO.PREFIX, OLO.NAMESPACE );
-			namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-			
-			String isp = "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?perspective ?description ?creator ?created ?modified ?order WHERE { "
-					+ "?insightUriString rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
-					+ "OPTIONAL{ ?insightUriString spin:body [ sp:text ?sparql ] } "
-					+ "OPTIONAL{ ?insightUriString spin:constraint ?parameter . "
-					+ "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] }} "
-					+ "OPTIONAL{ ?insightUriString vas:rendererClass ?rendererClass } "
-					+ "OPTIONAL{ ?insightUriString vas:isLegacy ?isLegacy } "
-					+ "OPTIONAL{ ?insightUriString dcterms:description ?description } "
-					+ "OPTIONAL{ ?insightUriString dcterms:creator ?creator } "
-					+ "OPTIONAL{ ?insightUriString dcterms:created ?created } "
-					+ "OPTIONAL{ ?insightUriString dcterms:modified ?modified } "
-					+ "OPTIONAL{ ?perspective olo:slot [ olo:item ?insightUriString; olo:index ?order ] } "
-					+ "}";
-			QueryExecutor<Void> qea = new QueryExecutorAdapter<Void>( isp ) {
-
-				@Override
-				public void handleTuple( BindingSet resultSet, ValueFactory fac ) {
-					insight.setFromResultSet( resultSet );
-					log.debug( insight );
-				}
-			};
-
-			log.debug( "Insighter... " + isp + " / " + insightURI );
-			qea.bind( "insightUriString", insightURI );
-			qea.bind( "perspective", perspectiveURI );
-			qea.setNamespaces( namespaces );
-
-			log.debug( AbstractSesameEngine.processNamespaces( qea.bindAndGetSparql(), namespaces) );
-			
-			AbstractSesameEngine.getSelect( qea, rc, false );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			// TODO Auto-generated catch block
-			log.error( e, e );
-		}
-		if ( null == insight.getId() ) {
-			// didn't set anything from our SparQL
-			insight.setLabel( insightURI.toString() );
-			insight.setOutput( "Unknown" );
-			insight.setId( Constants.ANYNODE ); // error, so we could use any URI here
-			insight.setSparql( "This will not work" );
-			log.debug( "Using Label ID Hash " );
-		}
-		return insight;
+		return insights;
 	}
 
 	@Override
 	public Insight getInsight( URI insightURI ) {
-		final Insight insight = new Insight();
+		Insight insight = null;
 		try {
+			// need a couple things here...the insight data, the query, 
+			// and view data (the playsheet)
+			List<Statement> stmts
+					= Iterations.asList( rc.getStatements( insightURI, null, null, true ) );
 
-			Map<String, String> namespaces = new HashMap<>();
-			namespaces.put( UI.PREFIX, UI.NAMESPACE );
-			namespaces.put( SPIN.PREFIX, SPIN.NAMESPACE );
-			namespaces.put( SP.PREFIX, SP.NAMESPACE );
-			namespaces.put( SPL.PREFIX, SPL.NAMESPACE );
-			namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-			namespaces.put( OLO.PREFIX, OLO.NAMESPACE );
-			namespaces.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-			
-			String isp = "SELECT ?insightLabel ?sparql ?viewClass  ?parameterVariable ?parameterLabel ?parameterValueType ?parameterQuery ?rendererClass ?isLegacy ?description ?creator ?created ?modified ?order WHERE { "
-					+ "?insightUriString rdfs:label ?insightLabel ; ui:dataView [ ui:viewClass ?viewClass ] . "
-					+ "OPTIONAL{ ?insightUriString spin:body [ sp:text ?sparql ] } "
-					+ "OPTIONAL{ ?insightUriString spin:constraint ?parameter . "
-					+ "?parameter spl:valueType ?parameterValueType ; rdfs:label ?parameterLabel ; spl:predicate [ rdfs:label ?parameterVariable ] . OPTIONAL{?parameter sp:query [ sp:text ?parameterQuery ] }} "
-					+ "OPTIONAL{ ?insightUriString vas:rendererClass ?rendererClass } "
-					+ "OPTIONAL{ ?insightUriString vas:isLegacy ?isLegacy } "
-					+ "OPTIONAL{ ?insightUriString dcterms:description ?description } "
-					+ "OPTIONAL{ ?insightUriString dcterms:creator ?creator } "
-					+ "OPTIONAL{ ?insightUriString dcterms:created ?created } "
-					+ "OPTIONAL{ ?insightUriString dcterms:modified ?modified } "
-					+ "}";
-			QueryExecutor<Void> qea = new QueryExecutorAdapter<Void>( isp ) {
+			// the query itself
+			List<Statement> qstmts
+					= Iterations.asList( rc.getStatements( insightURI, SPIN.body, null, true ) );
+			if ( !qstmts.isEmpty() ) {
+				URI body = URI.class.cast( qstmts.get( 0 ).getObject() );
+				List<Statement> querys
+						= Iterations.asList( rc.getStatements( body, SP.text, null, true ) );
+				stmts.addAll( querys );
+			}
 
-				@Override
-				public void handleTuple( BindingSet resultSet, ValueFactory fac ) {
-					insight.setId( insightURI );
-					insight.setFromResultSet( resultSet );
-					log.debug( insight );
+			// the data view
+			List<Statement> dvstmts
+					= Iterations.asList( rc.getStatements( insightURI, UI.dataView, null, true ) );
+			if ( !dvstmts.isEmpty() ) {
+				URI view = URI.class.cast( dvstmts.get( 0 ).getObject() );
+				List<Statement> dvs
+						= Iterations.asList( rc.getStatements( view, UI.viewClass, null, true ) );
+				stmts.addAll( dvs );
+			}
+
+			if ( !stmts.isEmpty() ) {
+				insight = insightFromStatements( stmts );
+
+				// finally, set the parameters
+				Collection<Parameter> params = getInsightParameters( insight );
+				for ( Parameter p : params ) {
+					insight.setParameter( p.getVariable(), p.getLabel(), p.getParameterType(),
+							p.getDefaultQuery() );
 				}
-			};
-
-			log.debug( "Insighter... " + isp + " / " + insightURI );
-			qea.bind( "insightUriString", insightURI );
-			qea.setNamespaces( namespaces );
-
-			log.debug( AbstractSesameEngine.processNamespaces( qea.bindAndGetSparql(), namespaces) );
-			
-			AbstractSesameEngine.getSelect( qea, rc, false );
+			}
 		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+		catch ( RepositoryException e ) {
 			// TODO Auto-generated catch block
 			log.error( e, e );
 		}
-		
-		if ( null == insight.getId() ) {
-			throw new IllegalArgumentException( "unknown insight: "+insightURI );
+
+		if ( null == insight ) {
+			throw new IllegalArgumentException( "unknown insight: " + insightURI );
 		}
 		return insight;
 	}
-	
-		@Override
-	public Perspective getPerspective( URI perspectiveURI ) {
-		Collection<Perspective> persps = getPerspectives();
-		for( Perspective p : persps ){
-			if( p.getUri().equals( perspectiveURI ) ){
-				return p;
-			}
-		}
-		
-		throw new IllegalArgumentException( "unknown perspective: "+perspectiveURI );
-	}
 
+	@Override
+	public Perspective getPerspective( URI perspectiveURI ) {
+		try {
+			Perspective perspective = new Perspective( perspectiveURI );
+			Collection<Statement> stmts
+					= Iterations.asList( rc.getStatements( perspectiveURI, null, null, false ) );
+			for ( Statement s : stmts ) {
+				URI pred = s.getPredicate();
+				Value val = s.getObject();
+
+				if ( val instanceof Literal ) {
+					if ( RDFS.LABEL.equals( pred ) ) {
+						perspective.setLabel( val.stringValue() );
+					}
+					else if ( DCTERMS.DESCRIPTION.equals( pred ) ) {
+						perspective.setDescription( val.stringValue() );
+					}
+				}
+			}
+
+			perspective.setInsights( getInsights( perspective ) );
+			return perspective;
+		}
+		catch ( RepositoryException e ) {
+			log.error( e, e );
+		}
+		throw new IllegalArgumentException( "unknown perspective: " + perspectiveURI );
+	}
 
 	/**
 	 * Returns a collection of data about the playsheets used to render Insights.
@@ -646,7 +525,7 @@ public class InsightManagerImpl implements InsightManager {
 	 */
 	@Override
 	public Collection<PlaySheet> getPlaySheets() {
-		final Collection<PlaySheet> colPlaysheet = new ArrayList<PlaySheet>();
+		final Collection<PlaySheet> colPlaysheet = new ArrayList<>();
 
 		try {
 			String query = "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
@@ -739,5 +618,46 @@ public class InsightManagerImpl implements InsightManager {
 				log.error( "error releasing InsightEngine repository", e );
 			}
 		}
+	}
+
+	protected Insight insightFromStatements( Collection<Statement> stmts ) {
+		Insight insight = new Insight();
+
+		for ( Statement stmt : stmts ) {
+			URI pred = stmt.getPredicate();
+			Value val = stmt.getObject();
+			if ( val instanceof Literal ) {
+				Literal obj = Literal.class.cast( val );
+
+				if ( RDFS.LABEL.equals( pred ) ) {
+					insight.setId( URI.class.cast( stmt.getSubject() ) );
+
+					insight.setLabel( obj.stringValue() );
+				}
+				else if ( VAS.isLegacy.equals( pred ) ) {
+					insight.setLegacy( obj.booleanValue() );
+				}
+				else if ( DCTERMS.CREATOR.equals( pred ) ) {
+					insight.setCreator( obj.stringValue() );
+				}
+				else if ( DCTERMS.CREATED.equals( pred ) ) {
+					insight.setCreated( obj.stringValue() );
+				}
+				else if ( DCTERMS.MODIFIED.equals( pred ) ) {
+					insight.setModified( obj.stringValue() );
+				}
+				else if ( DCTERMS.DESCRIPTION.equals( pred ) ) {
+					insight.setDescription( obj.stringValue() );
+				}
+				else if ( SP.text.equals( pred ) ) {
+					insight.setSparql( obj.stringValue() );
+				}
+				else if ( UI.viewClass.equals( pred ) ) {
+					insight.setOutput( obj.stringValue() );
+				}
+			}
+		}
+
+		return insight;
 	}
 }
