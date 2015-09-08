@@ -136,10 +136,10 @@ public class TabbedQueries extends JTabbedPane {
 	 */
 	private void addNewTab() {
 		SyntaxTextEditor textEditor = new SyntaxTextEditor();
-		Font f = getFont();
+		//Font f = getFont();
 
 		// use a mono-spaced font so indentation works well		
-		textEditor.setFont( new Font( Font.MONOSPACED, f.getStyle(), f.getSize() ) );
+		//textEditor.setFont( new Font( Font.MONOSPACED, f.getStyle(), f.getSize() ) );
 		RTextScrollPane sp = new RTextScrollPane( textEditor );
 		sp.setFoldIndicatorEnabled( false );
 		this.addTab( "*", sp );

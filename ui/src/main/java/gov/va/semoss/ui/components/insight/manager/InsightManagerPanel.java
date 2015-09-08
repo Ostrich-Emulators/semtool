@@ -10,16 +10,26 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
+import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
+import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
 import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
+import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.PlaySheetEnum;
+import gov.va.semoss.util.Utility;
 import java.awt.CardLayout;
+import java.util.List;
+import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 
 /**
  *
@@ -30,6 +40,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	private static final Logger log = Logger.getLogger( InsightManagerPanel.class );
 	private WriteableInsightManager wim;
 	private final InsightTreeModel model = new InsightTreeModel();
+	private IEngine engine;
 
 	/**
 	 * Creates new form InsightManagerPanel
@@ -39,7 +50,6 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 		playsheet.setModel( new DefaultComboBoxModel<>( PlaySheetEnum.valuesNoUpdate() ) );
 		playsheet.setRenderer( new PlaySheetEnumRenderer() );
-
 		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 		tree.setCellRenderer( new PerspectiveTreeCellRenderer() );
 		tree.addTreeSelectionListener( new TreeSelectionListener() {
@@ -72,16 +82,14 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 	}
 
-	public void refresh( IEngine engine ) {
+	public void refresh( IEngine eng ) {
+		engine = eng;
 		if ( null != wim ) {
 			wim.release();
 		}
 
 		wim = engine.getWriteableInsightManager();
 		model.refresh( wim );
-
-		DefaultMutableTreeNode root
-				= DefaultMutableTreeNode.class.cast( tree.getModel().getRoot() );
 
 		for ( int i = 0; i < tree.getRowCount(); i++ ) {
 			tree.expandRow( i );
@@ -267,6 +275,11 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     jLabel8.setText("Query");
 
     conceptbtn.setText("Build from Concept");
+    conceptbtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        conceptbtnActionPerformed(evt);
+      }
+    });
 
     javax.swing.GroupLayout parameterPanelLayout = new javax.swing.GroupLayout(parameterPanel);
     parameterPanel.setLayout(parameterPanelLayout);
@@ -319,6 +332,36 @@ public class InsightManagerPanel extends javax.swing.JPanel {
       .addComponent(jSplitPane1)
     );
   }// </editor-fold>//GEN-END:initComponents
+
+  private void conceptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conceptbtnActionPerformed
+		List<URI> uris = NodeDerivationTools.createConceptList( engine );
+		uris.add( Constants.ANYNODE );
+		Map<URI, String> labels = GuiUtility.getInstanceLabels( uris, engine );
+		labels.put( Constants.ANYNODE, "<Any Concept>" );
+		labels = Utility.sortUrisByLabel( labels );
+
+		JComboBox<URI> combo = new JComboBox<>( labels.keySet().toArray( new URI[0] ) );
+		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer( engine );
+		renderer.cache( labels );
+		combo.setRenderer( renderer );
+		String opts[] = { "Ok", "Cancel" };
+		int ans = JOptionPane.showOptionDialog( parameterPanel, combo, "Concept Type",
+				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );
+
+		if ( JOptionPane.YES_OPTION == ans ) {
+			URI type = combo.getItemAt( combo.getSelectedIndex() );
+			if ( Constants.ANYNODE.equals( type ) ) {
+				parameterQuery.setText( "SELECT ?concept\nWHERE {\n  ?concept"
+						+ " rdfs:subClassOf <" + engine.getSchemaBuilder().getConceptUri().build() + ">\n}" );
+			}
+			else {
+				String label = type.getLocalName();
+				parameterQuery.setText( "SELECT ?" + label + "\nWHERE {\n  ?" + label
+						+ " a <" + type.toString() + ">\n}" );
+			}
+		}
+
+  }//GEN-LAST:event_conceptbtnActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

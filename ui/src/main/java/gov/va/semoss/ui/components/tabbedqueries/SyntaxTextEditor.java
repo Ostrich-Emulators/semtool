@@ -1,5 +1,6 @@
 package gov.va.semoss.ui.components.tabbedqueries;
 
+import java.awt.Font;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
@@ -49,6 +50,10 @@ public class SyntaxTextEditor extends RSyntaxTextArea {
 		setAntiAliasingEnabled( true );
 		setLineWrap( true );
 		setWrapStyleWord( true );
+
+		Font f = getFont();
+		// use a mono-spaced font so indentation works well		
+		setFont( new Font( Font.MONOSPACED, f.getStyle(), f.getSize() ) );
 
 		CompletionProvider provider = createCompletionProvider();
 
