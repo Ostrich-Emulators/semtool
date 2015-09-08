@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.log4j.Logger;
 
 /**
  * Enables a variable to be a set of predefined constants. This class defines
@@ -124,24 +125,34 @@ public enum PlaySheetEnum {
 		return match;
 	}
 
+	/**
+	 * Gets a PlaySheetEnum for the given Insight. If this insight's
+	 * {@link Insight#getOutput()} returns an unknown playsheet, this function
+	 * returns {@link PlaySheetEnum#Grid}
+	 *
+	 *
+	 * @param ins
+	 * @return
+	 */
 	public static PlaySheetEnum valueFor( Insight ins ) {
 		if ( null == ins.getOutput() ) {
 			return PlaySheetEnum.Update_Query;
 		}
 
 		String output = ins.getOutput();
-		for ( PlaySheetEnum pse : valuesNoUpdate() ) {			
+		for ( PlaySheetEnum pse : valuesNoUpdate() ) {
 			if ( output.equals( pse.getSheetClass().getCanonicalName() ) ) {
 				return pse;
 			}
 		}
 
-		throw new IllegalArgumentException( "Unknown PSE for output: " + output );
+		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: " + output );
+		return PlaySheetEnum.Grid;
 	}
-	
-	public static PlaySheetEnum[] valuesNoUpdate(){
+
+	public static PlaySheetEnum[] valuesNoUpdate() {
 		Set<PlaySheetEnum> pses = EnumSet.allOf( PlaySheetEnum.class );
 		pses.remove( PlaySheetEnum.Update_Query );
-		return pses.toArray( new PlaySheetEnum[0] );		
-	}	
+		return pses.toArray( new PlaySheetEnum[0] );
+	}
 }

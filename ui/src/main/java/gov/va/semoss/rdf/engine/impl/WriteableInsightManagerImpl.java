@@ -23,16 +23,18 @@ import gov.va.semoss.security.User.UserProperty;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 
+import info.aduna.iteration.Iterations;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import javafx.collections.ObservableList;
-import javafx.scene.control.TreeItem;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
@@ -46,6 +48,7 @@ import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -62,7 +65,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	private final Collection<Statement> initialStatements = new ArrayList<>();
 	private final User author;
 	private final RepositoryConnection rc;
-	private final Pattern pattern = Pattern.compile( "^(\\w+)(.*)$" );
 	private static long lngUniqueIdentifier = System.currentTimeMillis();
 
 	public WriteableInsightManagerImpl( InsightManager im, User auth ) {
@@ -80,21 +82,95 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 	@Override
 	public void setData( List<Perspective> perspectives ) {
-		deleteAllParameters();
-		deleteAllInsights();
-		deleteAllPerspectives();
+		if ( removeOldData() ) {
+			try {
 
-		for ( Perspective p : perspectives ) {
-			savePerspective( p );
+				for ( Perspective p : perspectives ) {
+					savePerspective( p );
 
-			for ( Insight i : p.getInsights() ) {
-				saveInsight( p, i );
+					for ( Insight i : p.getInsights() ) {
+						saveInsight( p, i );
 
-				for ( Parameter a : i.getInsightParameters() ) {
-					saveParameter( i, a );
+						for ( Parameter a : i.getInsightParameters() ) {
+							saveParameter( i, a );
+						}
+					}
 				}
 			}
+			catch ( Exception e ) {
+				log.error( e, e );
+			}
 		}
+	}
+
+	private boolean removeOldData() {
+		try ( FileWriter fw = new FileWriter( "/tmp/outtie-before.nt" ) ) {
+			rc.export( new NTriplesWriter( fw ) );
+		}
+		catch ( Exception io ) {
+			log.error( io, io );
+		}
+
+		try {
+			// remove Perspectives, Insights, and Parameters, 
+			// but also the things they depend on, like slots, constraints, indexes
+			Set<Resource> idsToRemove = new HashSet<>();
+
+			// remove statements that have these objects
+			URI objectsToRemove[] = new URI[]{
+				VAS.Perspective,
+				VAS.InsightProperties
+			};
+
+			for ( URI obj : objectsToRemove ) {
+				for ( Statement s : Iterations.asList( rc.getStatements( null, null, obj, true ) ) ) {
+					idsToRemove.add( s.getSubject() );
+				}
+			}
+
+			URI predsToRemove[] = new URI[]{
+				SPIN.constraint,
+				SPIN.body,
+				OLO.slot,
+				OLO.index,
+				OLO.item,
+				SPL.predicate,
+				SP.text,
+				SP.query,
+				SP.Construct
+			};
+			for ( URI pred : predsToRemove ) {
+				for ( Statement s : Iterations.asList( rc.getStatements( null, pred, null, true ) ) ) {
+					idsToRemove.add( s.getSubject() );
+				}
+			}
+
+			rc.begin();
+			for ( Resource r : idsToRemove ) {
+				rc.remove( r, null, null );
+			}
+
+			rc.commit();
+		}
+		catch ( RepositoryException e ) {
+			try {
+				log.error( e, e );
+				rc.rollback();
+			}
+			catch ( Exception x ) {
+				log.warn( x, x );
+			}
+			return false;
+		}
+
+		try ( FileWriter fw = new FileWriter( "/tmp/outtie-after.nt" ) ) {
+			rc.export( new NTriplesWriter( fw ) );
+		}
+		catch ( Exception io ) {
+			log.error( io, io );
+		}
+
+		return true;
 	}
 
 	@Override
