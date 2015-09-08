@@ -21,6 +21,11 @@ public class SesameEngine extends AbstractSesameEngine {
 	private Repository insights;
 	private RepositoryConnection data;
 
+	
+	public SesameEngine(Properties initProps){
+		super(initProps);
+	}
+	
 	@Override
 	protected void createRc( Properties props ) throws RepositoryException {
 		String url = props.getProperty( REPOSITORY_KEY );

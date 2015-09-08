@@ -62,7 +62,7 @@ public class JenaEngineTest {
 		Properties props = new Properties();
 		props.setProperty( JenaEngine.FILE_PROP, dbdir.toString() );
 		
-		JenaEngine instance = new JenaEngine();
+		JenaEngine instance = new JenaEngine(props);
 		instance.startLoading( props );
 		
 		OneVarListQueryAdapter<String> lqa
@@ -84,8 +84,7 @@ public class JenaEngineTest {
 		props.setProperty( JenaEngine.FILE_PROP, dbdir.toString() );
 		props.setProperty( JenaEngine.INMEM_PROP, Boolean.toString( false ) );
 		
-		JenaEngine instance = new JenaEngine();
-		instance.openDB( props );
+		JenaEngine instance = new JenaEngine(props);
 		instance.closeDB();
 		assertTrue( !instance.getShadowFile().exists() );
 	}
@@ -95,8 +94,7 @@ public class JenaEngineTest {
 		Properties props = new Properties();
 		props.setProperty( JenaEngine.FILE_PROP, dbdir.toString() );
 		
-		JenaEngine instance = new JenaEngine();
-		instance.openDB( props );
+		JenaEngine instance = new JenaEngine(props);
 		
 		instance.execute( new ModificationExecutorAdapter( true ) {
 			

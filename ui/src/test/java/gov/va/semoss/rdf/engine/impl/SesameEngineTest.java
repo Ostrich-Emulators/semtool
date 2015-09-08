@@ -49,8 +49,7 @@ public class SesameEngineTest {
 		props.setProperty( AbstractSesameEngine.REPOSITORY_KEY,
 				"http://localhost:8080/semoss/databases/tester/data" );
 
-		SesameEngine se = new SesameEngine();
-		se.openDB( props );
+		SesameEngine se = new SesameEngine(props);
 		MetadataQuery mq = new MetadataQuery();
 		se.query( mq );
 		se.closeDB();

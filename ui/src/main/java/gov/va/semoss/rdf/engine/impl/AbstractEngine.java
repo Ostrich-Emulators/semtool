@@ -65,6 +65,10 @@ public abstract class AbstractEngine implements IEngine {
 	private UriBuilder databuilder;
 	private URI baseuri;
 
+	public AbstractEngine(Properties initProps){
+		openDB(initProps);
+	}
+	
 	/**
 	 * Opens the database. This function calls (in this order) {@link #loadAllProperties(java.util.Properties,
 	 * java.lang.String, java.io.File...) }, {@link #setUris(java.lang.String, java.lang.String) },
