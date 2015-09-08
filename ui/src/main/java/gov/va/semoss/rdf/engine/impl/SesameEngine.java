@@ -24,6 +24,7 @@ public class SesameEngine extends AbstractSesameEngine {
 	
 	public SesameEngine(Properties initProps){
 		super(initProps);
+		this.openDB(initProps);
 	}
 	
 	@Override

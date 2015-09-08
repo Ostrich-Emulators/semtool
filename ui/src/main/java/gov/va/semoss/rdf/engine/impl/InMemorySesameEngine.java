@@ -54,16 +54,20 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 
 	public InMemorySesameEngine() {
 		super(new Properties());
-		createRc( new Properties() );
+		Properties initProps = new Properties();
+		createRc( initProps );
+		this.openDB(initProps);
 	}
 
 	public InMemorySesameEngine(Properties initProps, RepositoryConnection rc ) {
 		super(initProps);
 		setRepositoryConnection( rc, false );
+		this.openDB(initProps);
 	}
 
 	public InMemorySesameEngine(Properties initProps, RepositoryConnection rc, boolean takeControl ) {
 		super(initProps);
+		this.openDB(initProps);
 		setRepositoryConnection( rc, takeControl );
 	}
 

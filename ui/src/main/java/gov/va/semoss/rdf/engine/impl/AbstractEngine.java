@@ -66,7 +66,7 @@ public abstract class AbstractEngine implements IEngine {
 	private URI baseuri;
 
 	public AbstractEngine(Properties initProps){
-		openDB(initProps);
+		//openDB(initProps);
 	}
 	
 	/**
@@ -107,7 +107,7 @@ public abstract class AbstractEngine implements IEngine {
 
 			finishLoading( prop );
 		}
-		catch ( IOException | RepositoryException e ) {
+		catch ( Exception e ) {
 			log.error( e );
 		}
 	}

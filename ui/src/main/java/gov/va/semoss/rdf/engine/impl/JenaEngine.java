@@ -59,6 +59,7 @@ public class JenaEngine extends AbstractSesameEngine {
 
 	public JenaEngine(Properties initProps){
 		super(initProps);
+		this.openDB(initProps);
 	}
 	
 	@Override

@@ -42,6 +42,7 @@ public class ClusterEngine extends AbstractSesameEngine {
 
 	public ClusterEngine(Properties initProps){
 		super(initProps);
+		this.openDB(initProps);
 	}
 	
 	@Override

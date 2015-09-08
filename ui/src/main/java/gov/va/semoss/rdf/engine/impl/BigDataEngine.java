@@ -77,6 +77,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 	public BigDataEngine(Properties initProps){
 		super(initProps);
+		this.openDB(initProps);
 	}
 	
 	@Override

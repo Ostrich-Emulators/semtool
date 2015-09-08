@@ -23,6 +23,7 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.AbstractEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
@@ -331,38 +332,27 @@ public class GuiUtility {
 			props = Utility.loadProp( smssfile );
 		}
 
-		AbstractEngine engine = null;
+		IEngine engine = null;
 
 		log.debug( "In Utility file name is " + smssfile );
 		String engineName = props.getProperty( Constants.ENGINE_NAME,
 				FilenameUtils.getBaseName( smssfile.getAbsolutePath() ) );
 
-		try {
 			String smssloc = smssfile.getCanonicalPath();
 			props.setProperty( Constants.SMSS_LOCATION, smssloc );
 
 			String engineClass = props.getProperty( Constants.ENGINE_IMPL );
 			engineClass = engineClass.replaceAll( "prerna", "gov.va.semoss" );
-			
-			Class<AbstractEngine> theClass = (Class<AbstractEngine>)Class.forName( engineClass );
 			try {
-				engine = (AbstractEngine) theClass.getConstructor(Properties.class).newInstance(props);
-			} catch (IllegalArgumentException | InvocationTargetException
-					| NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Class<IEngine> theClass = (Class<IEngine>)Class.forName( engineClass );
+				engine = (IEngine) theClass.getConstructor(Properties.class).newInstance(props);
+				log.info("Engine created.");
+			} catch (Exception e) {
+				log.error( e );
 			}
 			engine.setEngineName( engineName );
-			//if ( props.getProperty( "MAP" ) != null ) {
-			//	engine.setMap( props.getProperty( "MAP" ) );
-			//}
-
-			//engine.openDB(  );
 			DIHelper.getInstance().registerEngine( engine );
-		}
-		catch ( InstantiationException | IllegalAccessException | ClassNotFoundException e ) {
-			log.error( e );
-		}
+		
 		return engine;
 	}
 
