@@ -117,11 +117,11 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     tree = new javax.swing.JTree();
     rightside = new javax.swing.JPanel();
     perspectivePanel = new javax.swing.JPanel();
-    jScrollPane2 = new javax.swing.JScrollPane();
-    perspectiveDesc = new javax.swing.JTextArea();
     jLabel4 = new javax.swing.JLabel();
     perspectiveName = new javax.swing.JTextField();
     jLabel1 = new javax.swing.JLabel();
+    jScrollPane6 = new javax.swing.JScrollPane();
+    perspectiveDesc = new javax.swing.JTextArea();
     insightPanel = new javax.swing.JPanel();
     jLabel2 = new javax.swing.JLabel();
     insightName = new javax.swing.JTextField();
@@ -153,15 +153,15 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
     rightside.setLayout(new java.awt.CardLayout());
 
+    jLabel4.setText("Description");
+
+    jLabel1.setText("Perspective Name");
+
     perspectiveDesc.setColumns(20);
     perspectiveDesc.setLineWrap(true);
     perspectiveDesc.setRows(5);
     perspectiveDesc.setWrapStyleWord(true);
-    jScrollPane2.setViewportView(perspectiveDesc);
-
-    jLabel4.setText("Description");
-
-    jLabel1.setText("Perspective Name");
+    jScrollPane6.setViewportView(perspectiveDesc);
 
     javax.swing.GroupLayout perspectivePanelLayout = new javax.swing.GroupLayout(perspectivePanel);
     perspectivePanel.setLayout(perspectivePanelLayout);
@@ -169,16 +169,13 @@ public class InsightManagerPanel extends javax.swing.JPanel {
       perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(perspectivePanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(perspectivePanelLayout.createSequentialGroup()
-            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGap(46, 46, 46))
-          .addGroup(perspectivePanelLayout.createSequentialGroup()
-            .addComponent(jLabel1)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+          .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(perspectiveName)
-          .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
+          .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 273, Short.MAX_VALUE))
         .addContainerGap())
     );
     perspectivePanelLayout.setVerticalGroup(
@@ -191,8 +188,8 @@ public class InsightManagerPanel extends javax.swing.JPanel {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(perspectivePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(jLabel4)
-          .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addContainerGap(285, Short.MAX_VALUE))
+          .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(252, Short.MAX_VALUE))
     );
 
     rightside.add(perspectivePanel, "perspective");
@@ -422,10 +419,10 @@ public class InsightManagerPanel extends javax.swing.JPanel {
   private javax.swing.JLabel jLabel7;
   private javax.swing.JLabel jLabel8;
   private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JScrollPane jScrollPane3;
   private javax.swing.JScrollPane jScrollPane4;
   private javax.swing.JScrollPane jScrollPane5;
+  private javax.swing.JScrollPane jScrollPane6;
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JTextField parameterName;
   private javax.swing.JPanel parameterPanel;
