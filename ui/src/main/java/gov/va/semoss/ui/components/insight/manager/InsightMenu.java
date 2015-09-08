@@ -8,6 +8,7 @@ package gov.va.semoss.ui.components.insight.manager;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
+import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -41,31 +42,32 @@ public class InsightMenu extends MouseAdapter {
 
 			Point p = e.getPoint();
 			TreePath path = tree.getPathForLocation( e.getX(), e.getY() );
-			DefaultMutableTreeNode dmtn
+			DefaultMutableTreeNode node
 					= DefaultMutableTreeNode.class.cast( path.getLastPathComponent() );
-			Object pia = dmtn.getUserObject();
+			Object pia = node.getUserObject();
 			if ( null == pia ) {
 				return;
 			}
 
 			JPopupMenu menu = new JPopupMenu();
 			if ( pia instanceof Insight ) {
-				init( menu, Insight.class.cast( pia ) );
+				init( menu, Insight.class.cast( pia ), node );
+				menu.addSeparator();
 			}
 			else if ( pia instanceof Parameter ) {
-				init( menu, Parameter.class.cast( pia ) );
+				init( menu, Parameter.class.cast( pia ), node );
 			}
 			else {
 				// perspective
-				init( menu, Perspective.class.cast( pia ) );
+				init( menu, Perspective.class.cast( pia ), node );
+				menu.addSeparator();
 			}
 
-			menu.addSeparator();
-			menu.add( new AbstractAction( "Remove This Node" ) {
+			menu.add( new AbstractAction( "Remove This " + pia.getClass().getSimpleName() ) {
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					model.removeNodeFromParent( dmtn );
+					model.removeNodeFromParent( node );
 				}
 			} );
 
@@ -73,15 +75,40 @@ public class InsightMenu extends MouseAdapter {
 		}
 	}
 
-	private void init( JPopupMenu menu, Insight i ) {
+	private void init( JPopupMenu menu, Insight i, DefaultMutableTreeNode node ) {
+		menu.add( new AbstractAction( "Add Parameter" ) {
 
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Parameter param = new Parameter( "New Parameter" );
+				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( param );
+				model.insertNodeInto( newnode, node, 0 );
+			}
+		} );
 	}
 
-	private void init( JPopupMenu menu, Parameter a ) {
-
+	private void init( JPopupMenu menu, Parameter a, DefaultMutableTreeNode node ) {
 	}
 
-	private void init( JPopupMenu menu, Perspective p ) {
+	private void init( JPopupMenu menu, Perspective p, DefaultMutableTreeNode node ) {
+		menu.add( new AbstractAction( "Create Perspective" ) {
 
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Perspective persp = new Perspective( "New Perspective" );
+				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( persp );
+				model.insertNodeInto( newnode,
+						DefaultMutableTreeNode.class.cast( model.getRoot() ), 0 );
+			}
+		} );
+		menu.add( new AbstractAction( "Add Insight" ) {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Insight insight = new Insight( "New Insight", "", GridPlaySheet.class );
+				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( insight );
+				model.insertNodeInto( newnode, node, 0 );
+			}
+		} );
 	}
 }

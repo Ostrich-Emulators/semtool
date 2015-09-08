@@ -25,6 +25,10 @@ public class Parameter implements Serializable {
 	public Parameter() {
 	}
 
+	public Parameter( String label ) {
+		strLabel = label;
+	}
+
 	public Parameter( String strParameterURI, String strLabel, String strVariable,
 			String strParameterType, String strDefaultQuery ) {
 		uriId = new URIImpl( strParameterURI );
