@@ -7,7 +7,7 @@ package gov.va.semoss.ui.components;
 
 import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.SesameEngine;
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.User;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;

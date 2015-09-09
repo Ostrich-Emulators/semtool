@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.security;
+package gov.va.semoss.user;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.HashMap;

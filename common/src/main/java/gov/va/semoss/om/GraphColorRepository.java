@@ -1,6 +1,6 @@
 package gov.va.semoss.om;
 
-import gov.va.semoss.om.AbstractColorRepository;
+import gov.va.semoss.user.UserImpl;
 import gov.va.semoss.util.Constants;
 import java.awt.Color;
 import java.util.HashMap;
@@ -75,7 +75,16 @@ public class GraphColorRepository extends AbstractColorRepository {
 			color = vertexColorHash.get( typeURI );
 		}
 		else {
-			color = vertexColorGenerator.nextNamedColor();
+			
+			String colorName
+			= UserImpl.getUser().getProperty( typeURI.getLocalName() + "_COLOR" );
+
+			if ( colorName == null ) {
+				//If no color found use the random color generator
+				color = vertexColorGenerator.nextNamedColor();
+			}else{
+				  color = this.colorGenerator.getNamedColor(colorName);
+			}
 			vertexColorHash.put( typeURI, color );
 		}
 		return color;
@@ -116,4 +125,14 @@ public class GraphColorRepository extends AbstractColorRepository {
 		}
 		return null;
 	}
+
+	/**
+	 * 
+	 * @param typeURI
+	 * @param color
+	 */
+	  public void updateColor(URI typeURI, Color color)
+	  {
+		  vertexColorHash.put( typeURI, color );
+	  }
 }

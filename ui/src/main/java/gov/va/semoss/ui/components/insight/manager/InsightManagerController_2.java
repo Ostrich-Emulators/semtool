@@ -992,7 +992,7 @@ public class InsightManagerController_2 implements Initializable {
 			public void changed( ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState ) {
 				if ( newState == Worker.State.SUCCEEDED ) {
 					if ( doPersistence.getValue().getValue().booleanValue() == true ) {
-						GuiUtility.showMessage( "Perspective, Insights, and Parameters saved OK." );
+						GuiUtility.showMessage( "Perspective, Insights, and Parameters saved." );
 					}
 					else {
 						GuiUtility.showError( "ERROR: Some Perspectives, Insights, and/or Parameters could not be saved." );

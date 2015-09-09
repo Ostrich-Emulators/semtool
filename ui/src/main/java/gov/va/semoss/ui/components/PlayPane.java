@@ -232,6 +232,8 @@ public class PlayPane extends JFrame {
 	public JTable labelTable;
 	public JTable tooltipTable;
 
+	public static SelectDatabasePanel selectDatabasePanel;
+	
 	/**
 	 * Launch the application.
 	 *
@@ -565,22 +567,22 @@ public class PlayPane extends JFrame {
 		Font labelFont = new Font( "SansSerif", Font.PLAIN, 10 );
 		Font selectorFont = new Font( "Tahoma", Font.PLAIN, 11 );
 
-		SelectDatabasePanel pnl = new SelectDatabasePanel( true );
-		pnl.setLabelsFont( labelFont );
-		perspectiveSelector = pnl.getPerspectiveSelector();
-		questionSelector = pnl.getInsightSelector();
+		selectDatabasePanel = new SelectDatabasePanel( true );
+		selectDatabasePanel.setLabelsFont( labelFont );
+		perspectiveSelector = selectDatabasePanel.getPerspectiveSelector();
+		questionSelector = selectDatabasePanel.getInsightSelector();
 		perspectiveSelector.setFont( selectorFont );
 		questionSelector.setFont( selectorFont );
 		repoList.setFont( selectorFont );
-		appendChkBox = pnl.getOverlay();
-		JButton submitButton = pnl.getSubmitButton();
+		appendChkBox = selectDatabasePanel.getOverlay();
+		JButton submitButton = selectDatabasePanel.getSubmitButton();
 
-		Action handleQuestionKeys = pnl.getInsightAction();
+		Action handleQuestionKeys = selectDatabasePanel.getInsightAction();
 		submitButton.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getInputMap( JComponent.WHEN_FOCUSED ).put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK ), "handleQuestionKeys" );
 		submitButton.getActionMap().put( "handleQuestionKeys", handleQuestionKeys );
 
-		return pnl;
+		return selectDatabasePanel;
 	}
 
 	private JPanel makeGraphCosmeticsPanel() {

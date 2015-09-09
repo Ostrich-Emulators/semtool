@@ -18,8 +18,8 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.security.User;
-import gov.va.semoss.security.User.UserProperty;
+import gov.va.semoss.user.User;
+import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriSanitizer;
 

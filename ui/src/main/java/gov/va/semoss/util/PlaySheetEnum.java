@@ -128,7 +128,7 @@ public enum PlaySheetEnum {
 	public static String getNameFromClass( String sheetClass ) {
 		String match = "";
 		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getDisplayName().equals( sheetClass ) ) {
+			if ( e.getSheetClass() != null && e.getSheetClass().getName().equals( sheetClass ) ) {
 				match = e.getDisplayName();
 			}
 		}

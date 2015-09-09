@@ -16,7 +16,7 @@ import org.openrdf.sail.memory.MemoryStore;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.security.Security;
+import gov.va.semoss.user.Security;
 import java.util.List;
 import java.util.Properties;
 
@@ -40,6 +40,11 @@ public class ClusterEngine extends AbstractSesameEngine {
 	// database names
 	Map<String, IEngine> engineHash = new HashMap<>();
 
+	public ClusterEngine(Properties initProps){
+		super(initProps);
+		this.openDB(initProps);
+	}
+	
 	@Override
 	protected void createRc( Properties props ) {
 		ForwardChainingRDFSInferencer inferencer

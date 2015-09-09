@@ -67,8 +67,8 @@ import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
-import gov.va.semoss.security.Security;
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.Security;
+import gov.va.semoss.user.User;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.HashSet;
@@ -97,6 +97,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private RepositoryConnection owlRc;
 
+	
+	public AbstractSesameEngine(Properties initProps){
+		super(initProps);
+	}
+	
 	/**
 	 * Loads the metadata information from the given file.
 	 *

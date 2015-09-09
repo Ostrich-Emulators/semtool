@@ -39,8 +39,8 @@ import java.util.regex.Pattern;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.UpdateExecutor;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.security.Security;
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.Security;
+import gov.va.semoss.user.User;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 import java.util.Collection;
@@ -65,6 +65,10 @@ public abstract class AbstractEngine implements IEngine {
 	private UriBuilder databuilder;
 	private URI baseuri;
 
+	public AbstractEngine(Properties initProps){
+		
+	}
+	
 	/**
 	 * Opens the database. This function calls (in this order) {@link #loadAllProperties(java.util.Properties,
 	 * java.lang.String, java.io.File...) }, {@link #setUris(java.lang.String, java.lang.String) },
@@ -103,7 +107,7 @@ public abstract class AbstractEngine implements IEngine {
 
 			finishLoading( prop );
 		}
-		catch ( IOException | RepositoryException e ) {
+		catch ( Exception e ) {
 			log.error( e );
 		}
 	}

@@ -22,6 +22,8 @@ package gov.va.semoss.util;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractEngine;
+import gov.va.semoss.rdf.engine.impl.AbstractSesameEngine;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
@@ -34,6 +36,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collection;
@@ -335,24 +338,21 @@ public class GuiUtility {
 		String engineName = props.getProperty( Constants.ENGINE_NAME,
 				FilenameUtils.getBaseName( smssfile.getAbsolutePath() ) );
 
-		try {
 			String smssloc = smssfile.getCanonicalPath();
 			props.setProperty( Constants.SMSS_LOCATION, smssloc );
 
 			String engineClass = props.getProperty( Constants.ENGINE_IMPL );
 			engineClass = engineClass.replaceAll( "prerna", "gov.va.semoss" );
-			engine = (IEngine) Class.forName( engineClass ).newInstance();
+			try {
+				Class<IEngine> theClass = (Class<IEngine>)Class.forName( engineClass );
+				engine = (IEngine) theClass.getConstructor(Properties.class).newInstance(props);
+				log.info("Engine created.");
+			} catch (Exception e) {
+				log.error( e );
+			}
 			engine.setEngineName( engineName );
-			//if ( props.getProperty( "MAP" ) != null ) {
-			//	engine.setMap( props.getProperty( "MAP" ) );
-			//}
-
-			engine.openDB( props );
 			DIHelper.getInstance().registerEngine( engine );
-		}
-		catch ( InstantiationException | IllegalAccessException | ClassNotFoundException e ) {
-			log.error( e );
-		}
+		
 		return engine;
 	}
 
