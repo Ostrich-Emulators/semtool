@@ -2,6 +2,8 @@ package gov.va.semoss.om;
 
 import java.io.Serializable;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
@@ -21,6 +23,7 @@ public class Parameter implements Serializable {
 	private String strVariable = "";
 	private String strParameterType = "";
 	private String strDefaultQuery = "";
+	private static final Pattern FIRSTVAR = Pattern.compile( "^.*\\?(\\w+).*\\{.*" );
 
 	public Parameter() {
 	}
@@ -36,6 +39,13 @@ public class Parameter implements Serializable {
 		this.strVariable = strVariable;
 		this.strParameterType = strParameterType;
 		this.strDefaultQuery = strDefaultQuery;
+	}
+
+	public Parameter( String label, String query ) {
+		this.strLabel = label;
+		this.strDefaultQuery = query;
+
+		computeVariableFromQuery();
 	}
 
 	public Parameter( Parameter p ) {
@@ -94,6 +104,16 @@ public class Parameter implements Serializable {
 
 	public void setDefaultQuery( String strDefaultQuery ) {
 		this.strDefaultQuery = strDefaultQuery;
+		computeVariableFromQuery();
+	}
+
+	private void computeVariableFromQuery() {
+		// our parameter variable is the first variable returned in the query
+		String nospaces = strDefaultQuery.replaceAll( "\n", " " );
+		Matcher m = FIRSTVAR.matcher( nospaces );
+		if ( m.matches() ) {
+			strVariable = m.group( 1 );
+		}
 	}
 
 	/**

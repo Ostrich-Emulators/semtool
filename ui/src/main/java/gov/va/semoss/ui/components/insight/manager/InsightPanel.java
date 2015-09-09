@@ -7,6 +7,7 @@ package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
+import gov.va.semoss.ui.components.BindingPanel;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.PlaySheetFrame;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -180,7 +182,20 @@ public class InsightPanel extends DataPanel<Insight> {
 		Map<String, Value> bindings = new HashMap<>();
 		if ( !params.isEmpty() ) {
 			insight.setParameters( params );
-			
+			BindingPanel pnl = new BindingPanel();
+			pnl.setParameters( params );
+
+			String opts[] = { "OK", "Cancel" };
+
+			int ans = JOptionPane.showOptionDialog( this, pnl, "Select Parameters",
+					JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );
+			if ( JOptionPane.YES_OPTION != ans ) {
+				return;
+			}
+
+			for ( Map.Entry<Parameter, Value> bind : pnl.getBindings().entrySet() ) {
+				bindings.put( bind.getKey().getVariable(), bind.getValue() );
+			}
 		}
 
 		PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
