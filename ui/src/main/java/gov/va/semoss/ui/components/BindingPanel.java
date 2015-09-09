@@ -259,7 +259,7 @@ public class BindingPanel extends JPanel {
 
 		@Override
 		public void itemStateChanged( ItemEvent e ) {
-			log.debug( "item state changed for "+e.getSource() );
+			log.debug( "item state changed for " + e.getSource() );
 			handleChange( UriComboBox.class.cast( e.getSource() ) );
 		}
 
@@ -278,11 +278,11 @@ public class BindingPanel extends JPanel {
 			// so we need to figure out which combobox it came from
 			Object model = e.getSource();
 			for ( Map.Entry<Parameter, UriComboBox> en : combos.entrySet() ) {
-				if( en.getValue().getUriModel().equals( model ) ){
-					log.debug( "contents changed for "+en.getValue() );
-					handleChange( en.getValue() );					
+				if ( en.getValue().getUriModel().equals( model ) ) {
+					log.debug( "contents changed for " + en.getValue() );
+					handleChange( en.getValue() );
 				}
-			}			
+			}
 		}
 
 		private void handleChange( UriComboBox combo ) {

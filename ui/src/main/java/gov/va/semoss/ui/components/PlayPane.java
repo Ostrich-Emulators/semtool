@@ -1488,10 +1488,21 @@ public class PlayPane extends JFrame {
 					
 					InsightManagerPanel imp = new InsightManagerPanel();
 					imp.refresh( repoList.getSelectedValue() );
-					JDialog dlg = new JDialog( PlayPane.this, false );
-					dlg.getContentPane().add( imp );
-					dlg.setSize( 800, 500 );
-					dlg.setVisible( true );
+					rightTabs.addTab( "Insight Manager", 
+							DbAction.getIcon( "insight_manager_tab1" ), imp,
+							"Manage perspectives and insights" );
+					CloseableTab ct2 = new PlayPaneCloseableTab( rightTabs, null,
+							DbAction.getIcon( "insight_manager_tab1" ) );
+					idx = rightTabs.indexOfComponent( imp );
+					rightTabs.setTabComponentAt( idx, ct2 );
+					iManageItem_2.setToolTipText( "Disable the Insite Manager Tab" );
+					
+					
+					
+//					JDialog dlg = new JDialog( PlayPane.this, false );
+//					dlg.getContentPane().add( imp );
+//					dlg.setSize( 800, 500 );
+//					dlg.setVisible( true );
 				}
 				else {
 					rightTabs.remove( iManagePanel_2 );
@@ -1742,7 +1753,12 @@ public class PlayPane extends JFrame {
 
 		@Override
 		public void actionPerformed( ActionEvent ae ) {
-			item.doClick();
+			if( null == item ){
+				super.actionPerformed( ae );
+			}
+			else {
+				item.doClick();
+			}
 		}
 	}
 }
