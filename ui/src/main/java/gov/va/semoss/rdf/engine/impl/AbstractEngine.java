@@ -66,7 +66,7 @@ public abstract class AbstractEngine implements IEngine {
 	private URI baseuri;
 
 	public AbstractEngine(Properties initProps){
-		//openDB(initProps);
+		
 	}
 	
 	/**
