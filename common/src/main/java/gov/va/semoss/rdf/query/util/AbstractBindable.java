@@ -8,7 +8,7 @@ package gov.va.semoss.rdf.query.util;
 import gov.va.semoss.rdf.engine.api.Bindable;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -32,13 +32,13 @@ import org.openrdf.query.Operation;
 public abstract class AbstractBindable implements Bindable {
 
 	private static final Logger log = Logger.getLogger( AbstractBindable.class );
-	private final Map<String, Double> dmap = new HashMap<>();
-	private final Map<String, Integer> imap = new HashMap<>();
-	private final Map<String, Date> amap = new HashMap<>();
-	private final Map<String, StringPair> smap = new HashMap<>();
-	private final Map<String, Boolean> bmap = new HashMap<>();
-	private final Map<String, Value> vmap = new HashMap<>();
-	private final Map<String, String> namespaces = new HashMap<>();
+	private final Map<String, Double> dmap = new LinkedHashMap<>();
+	private final Map<String, Integer> imap = new LinkedHashMap<>();
+	private final Map<String, Date> amap = new LinkedHashMap<>();
+	private final Map<String, StringPair> smap = new LinkedHashMap<>();
+	private final Map<String, Boolean> bmap = new LinkedHashMap<>();
+	private final Map<String, Value> vmap = new LinkedHashMap<>();
+	private final Map<String, String> namespaces = new LinkedHashMap<>();
 	private String sparql;
 	private boolean infer = false;
 
@@ -113,7 +113,7 @@ public abstract class AbstractBindable implements Bindable {
 			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {" ).
 					append( fac.createLiteral( en.getValue() ).toString() ).append( "}" );
 		}
-		
+
 		for ( Map.Entry<String, Value> en : vmap.entrySet() ) {
 			Value v = en.getValue();
 			binds.append( " VALUES ?" ).append( en.getKey() );
