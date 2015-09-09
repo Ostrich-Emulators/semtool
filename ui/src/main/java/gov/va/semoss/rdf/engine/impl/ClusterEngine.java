@@ -40,6 +40,11 @@ public class ClusterEngine extends AbstractSesameEngine {
 	// database names
 	Map<String, IEngine> engineHash = new HashMap<>();
 
+	public ClusterEngine(Properties initProps){
+		super(initProps);
+		this.openDB(initProps);
+	}
+	
 	@Override
 	protected void createRc( Properties props ) {
 		ForwardChainingRDFSInferencer inferencer

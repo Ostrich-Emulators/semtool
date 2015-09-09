@@ -223,7 +223,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		}
 	}
 
-	private Map<String, String> getParameterValues() {
+	public Map<String, String> getParameterValues() {
 		Map<String, String> paramHash = new HashMap<>();
 		if ( null != currentParamPanel ) {
 			// get all the param field

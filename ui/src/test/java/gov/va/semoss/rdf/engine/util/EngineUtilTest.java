@@ -64,8 +64,7 @@ public class EngineUtilTest {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, "http://junkowl/testfile/one" );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		eng = new BigDataEngine();
-		eng.openDB( props );
+		eng = new BigDataEngine(props);
 	}
 
 	@After
