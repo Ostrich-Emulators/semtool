@@ -139,7 +139,26 @@ function start(dataString) {
 	var tip = d3.tip()
 		.attr('class', 'd3-tip')
 		.html(function(d) { return "<div> <span class='light'>" + value + ":</span> " + roundNumber(d.Value) + "</div>" + "<div><span class='light'>" + xAxisName + ":</span> " + d.xAxisName + "</div>" + "<div> <span class='light'>" + yAxisName + ": </span>" + d.yAxisName + "</div>"; });
-	tip.direction('s')
+	
+	tip.direction(function(d) {
+		var isLeftSide = false;
+		var isTopSide = false;
+
+		if( (this.getBBox().x-margin.left) < (originalWidth/2.0) )
+			isLeftSide = true;
+
+		if( (this.getBBox().y-margin.top) < (height/2.0) )
+			isTopSide = true;
+
+		if ( isLeftSide &&  isTopSide)
+			return "se";
+		if ( isLeftSide && !isTopSide)
+			return "ne";
+		if (!isLeftSide &&  isTopSide)
+			return "sw";
+		if (!isLeftSide && !isTopSide)
+			return "nw";
+	});
 	    
 	heatMap = svg.selectAll(".heat")
 		.data(dataArray)
