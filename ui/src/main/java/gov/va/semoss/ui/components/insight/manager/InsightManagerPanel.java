@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -57,7 +59,6 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 			public void propertyChange( PropertyChangeEvent evt ) {
 				if ( null != currentCard ) {
 					applybtn.setEnabled( currentCard.hasChanges() );
-
 					commitbtn.setEnabled( !applybtn.isEnabled() );
 				}
 			}
@@ -70,7 +71,30 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	}
 
 	private void setupTreeListeners() {
-		tree.setTransferHandler( new TreeTransferHandler( model ) );
+		//tree.setTransferHandler( new TreeTransferHandler( model ) );
+		model.addTreeModelListener( new TreeModelListener() {
+
+			@Override
+			public void treeNodesChanged( TreeModelEvent e ) {
+				commitbtn.setEnabled( true );
+			}
+
+			@Override
+			public void treeNodesInserted( TreeModelEvent e ) {
+				commitbtn.setEnabled( true );
+			}
+
+			@Override
+			public void treeNodesRemoved( TreeModelEvent e ) {
+				commitbtn.setEnabled( true );
+			}
+
+			@Override
+			public void treeStructureChanged( TreeModelEvent e ) {
+				commitbtn.setEnabled( true );
+			}
+		} );
+
 		tree.addMouseListener( new InsightMenu( tree, model ) );
 		tree.addTreeSelectionListener( new TreeSelectionListener() {
 
@@ -81,13 +105,13 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 				CardLayout layout = CardLayout.class.cast( dataArea.getLayout() );
 				TreePath newpath = e.getNewLeadSelectionPath();
-				
-				if( null == newpath ){
+
+				if ( null == newpath ) {
 					return;
 				}
-				
+
 				if ( !( newpath.equals( e.getOldLeadSelectionPath() )
-						|| null == currentCard ) ){
+						|| null == currentCard ) ) {
 
 					// don't need to listen to changes from the old panel anymore
 					currentCard.removePropertyChangeListener( DataPanel.CHANGE_PROPERTY,
@@ -155,6 +179,8 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		}
 
 		tree.setSelectionRow( 0 );
+		commitbtn.setEnabled( false );
+		applybtn.setEnabled( false );
 	}
 
 	/**

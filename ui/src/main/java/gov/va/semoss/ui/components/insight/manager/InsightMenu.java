@@ -10,6 +10,7 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -20,6 +21,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -148,7 +150,11 @@ public class InsightMenu extends MouseAdapter {
 
 			TreePath path = new TreePath( node.getPath() );
 			int row = tree.getRowForPath( path );
-			tree.scrollRowToVisible( row );
+			Rectangle bounds = tree.getPathBounds( path );
+			bounds.setLocation( 0, bounds.y );
+			Logger.getLogger( getClass() ).debug( bounds );
+
+			tree.scrollRectToVisible( bounds );
 			tree.setSelectionRow( row );
 		}
 	}
