@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.web.io;
 
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.User;
 import org.springframework.web.client.RestClientException;
 
 /**

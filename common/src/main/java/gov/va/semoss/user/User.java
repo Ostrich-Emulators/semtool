@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.security;
+package gov.va.semoss.user;
 
+import java.security.Permission;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -36,6 +38,14 @@ public interface User {
 	public String getProperty( UserProperty prop );
 
 	public void setProperties( Map<UserProperty, String> props );
+	
+	public boolean hasPermission( Permission p );
+	
+	public void resetPermissions( Collection<Permission> perms );
+	
+	public String getProperty(String prop);
+	
+	public void setProperty(String prop, String value);
 	
 	public Map<UserProperty, String> getProperties();
 	/**

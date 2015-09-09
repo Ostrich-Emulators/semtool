@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.security;
+package gov.va.semoss.user;
 
+import java.security.Permission;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,4 +95,29 @@ public class LocalUserImpl extends AbstractUser {
 	public boolean isLocal() {
 		return true;
 	}
+
+	@Override
+	public boolean hasPermission(Permission p) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void resetPermissions(Collection<Permission> perms) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getProperty(String prop) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setProperty(String prop, String value) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

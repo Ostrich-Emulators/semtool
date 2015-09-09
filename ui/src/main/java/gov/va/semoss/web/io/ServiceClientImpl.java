@@ -5,8 +5,8 @@
  */
 package gov.va.semoss.web.io;
 
-import gov.va.semoss.security.RemoteUserImpl;
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.RemoteUserImpl;
+import gov.va.semoss.user.User;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;

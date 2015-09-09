@@ -27,8 +27,8 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.helpers.DynamicColorRepository;
 import gov.va.semoss.ui.main.Starter;
+import gov.va.semoss.user.UserImpl;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.om.GraphColorRepository;
@@ -50,7 +50,7 @@ public class ColorPopup extends JMenu {
 	public ColorPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( "Modify Color" );
 
-		DynamicColorRepository gcr = DynamicColorRepository.instance();
+		GraphColorRepository gcr = GraphColorRepository.instance();
 		for( Map.Entry<String, Color> en : gcr.getNamedColorMap().entrySet() ){
 			JMenuItem menuItem = new JMenuItem( en.getKey() );
 			menuItem.addActionListener( new AbstractAction() {
@@ -63,15 +63,10 @@ public class ColorPopup extends JMenu {
 						v.setColor( en.getValue() );
 					
 						try {
-							Properties props = DIHelper.getInstance().getCoreProp();
-							props.setProperty(v.getType().getLocalName()+"_COLOR", en.getKey());
+							//Properties props = DIHelper.getInstance().getCoreProp();
 							gcr.updateColor(v.getType(), en.getValue());
-							java.net.URL url = Starter.class.getResource("/semoss.properties");
-							java.io.File pout = new java.io.File(url.toURI());
-					        java.io.OutputStream out;
-							out = new java.io.FileOutputStream( pout );
-							props.store(out, "This is an optional header comment string");
-					        out.close();
+							UserImpl.getUser().setProperty(v.getType().getLocalName()+"_COLOR", en.getKey());
+							
 							} catch (Exception ex) {
 								// TODO Auto-generated catch block
 								log.error( ex, ex );

@@ -1,6 +1,6 @@
 package gov.va.semoss.com.calls;
 
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.User;
 import gov.va.semoss.web.io.SemossService;
 import gov.va.semoss.web.io.SemossServiceImpl;
 import gov.va.semoss.web.io.ServiceClient;

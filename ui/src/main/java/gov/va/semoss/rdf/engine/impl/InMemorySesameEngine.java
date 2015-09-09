@@ -20,8 +20,8 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.security.LocalUserImpl;
-import gov.va.semoss.security.Security;
+import gov.va.semoss.user.LocalUserImpl;
+import gov.va.semoss.user.Security;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
