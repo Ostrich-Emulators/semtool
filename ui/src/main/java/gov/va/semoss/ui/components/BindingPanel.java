@@ -10,8 +10,9 @@ import edu.uci.ics.jung.graph.Tree;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
-import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
+import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.MultiSetMap;
+import gov.va.semoss.util.Utility;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
@@ -98,7 +99,6 @@ public class BindingPanel extends JPanel {
 				lbl.setMinimumSize( labelsizer );
 
 				UriComboBox cmb = new UriComboBox();
-				cmb.setRenderer( LabeledPairRenderer.getUriPairRenderer( engine ) );
 				cmb.addItemListener( listener );
 				cmb.getUriModel().addListDataListener( listener );
 				combos.put( child, cmb );
@@ -171,7 +171,8 @@ public class BindingPanel extends JPanel {
 		List<URI> vals = engine.queryNoEx( onevar );
 		UriComboBox combo = combos.get( child );
 		combo.removeItemListener( listener );
-		combo.setData( vals );
+		Map<URI, String> labels = GuiUtility.getInstanceLabels( vals, engine );
+		combo.setData( Utility.sortUrisByLabel( labels ) );
 		combo.addItemListener( listener );
 	}
 
