@@ -21,7 +21,7 @@ public interface User {
 	};
 
 	public String getUsername();
-	
+
 	public Map<String, String> getNamespaces();
 
 	public void addNamespace( String prefix, String ns );
@@ -32,25 +32,24 @@ public interface User {
 
 	/**
 	 * Gets this user's property, or the empty string (not null)
+	 *
 	 * @param prop
 	 * @return the value, or the empty string
 	 */
 	public String getProperty( UserProperty prop );
 
 	public void setProperties( Map<UserProperty, String> props );
-	
-	public boolean hasPermission( Permission p );
-	
-	public void resetPermissions( Collection<Permission> perms );
-	
-	public String getProperty(String prop);
-	
-	public void setProperty(String prop, String value);
-	
+
+	public String getProperty( String prop );
+
+	public void setProperty( String prop, String value );
+
 	public Map<UserProperty, String> getProperties();
+
 	/**
 	 * Is this user authorized remotely, or from the local computer?
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean isLocal();
 }

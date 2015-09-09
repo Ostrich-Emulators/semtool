@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.user;
 
-import java.security.Permission;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,29 +76,5 @@ public final class RemoteUserImpl extends AbstractUser {
 	@Override
 	public boolean isLocal() {
 		return false;
-	}
-
-	@Override
-	public boolean hasPermission(Permission p) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void resetPermissions(Collection<Permission> perms) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getProperty(String prop) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setProperty(String prop, String value) {
-		// TODO Auto-generated method stub
-		
 	}
 }

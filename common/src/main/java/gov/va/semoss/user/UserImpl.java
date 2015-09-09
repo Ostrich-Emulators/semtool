@@ -5,13 +5,8 @@
  */
 package gov.va.semoss.user;
 
-import gov.va.semoss.security.permissions.SemossPermission;
-import java.security.Permission;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.prefs.Preferences;
 
 /**
@@ -23,7 +18,6 @@ public class UserImpl implements User {
 	private static User user;
 	private static final String NAMESPACE_KEY = "USER_NAMESPACES";
 	private final Preferences prefs = Preferences.userNodeForPackage( this.getClass() );
-	private final Set<Permission> permissions = new HashSet<>();
 
 	public static User getUser() {
 		if ( null == user ) {
@@ -33,7 +27,6 @@ public class UserImpl implements User {
 	}
 
 	private UserImpl() {
-		permissions.add( SemossPermission.ADMIN );
 	}
 
 	@Override
@@ -87,22 +80,6 @@ public class UserImpl implements User {
 		for ( Map.Entry<UserProperty, String> en : props.entrySet() ) {
 			prefs.put( en.getKey().toString(), en.getValue() );
 		}
-	}
-
-	@Override
-	public boolean hasPermission( Permission theirs ) {
-		for ( Permission mine : permissions ) {
-			if ( mine.implies( theirs ) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public void resetPermissions( Collection<Permission> perms ) {
-		permissions.clear();
-		permissions.addAll( perms );
 	}
 	
 	@Override

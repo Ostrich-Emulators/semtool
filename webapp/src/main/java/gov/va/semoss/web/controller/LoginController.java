@@ -1,7 +1,7 @@
 package gov.va.semoss.web.controller;
 
-import gov.va.semoss.security.RemoteUserImpl;
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.RemoteUserImpl;
+import gov.va.semoss.user.User;
 import gov.va.semoss.web.security.SemossUser;
 import org.apache.log4j.Logger;
 import org.springframework.security.web.csrf.CsrfToken;

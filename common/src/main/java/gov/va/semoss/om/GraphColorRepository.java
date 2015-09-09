@@ -1,6 +1,5 @@
 package gov.va.semoss.om;
 
-import gov.va.semoss.om.AbstractColorRepository;
 import gov.va.semoss.user.UserImpl;
 import gov.va.semoss.util.Constants;
 import java.awt.Color;

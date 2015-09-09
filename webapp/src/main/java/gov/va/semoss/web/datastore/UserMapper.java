@@ -5,9 +5,9 @@
  */
 package gov.va.semoss.web.datastore;
 
-import gov.va.semoss.security.RemoteUserImpl;
-import gov.va.semoss.security.User;
-import gov.va.semoss.security.User.UserProperty;
+import gov.va.semoss.user.RemoteUserImpl;
+import gov.va.semoss.user.User;
+import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.web.datastore.vocabulary.WEBDS;
 import info.aduna.iteration.Iterations;

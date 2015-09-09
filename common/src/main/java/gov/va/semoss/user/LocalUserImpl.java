@@ -97,18 +97,6 @@ public class LocalUserImpl extends AbstractUser {
 	}
 
 	@Override
-	public boolean hasPermission(Permission p) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void resetPermissions(Collection<Permission> perms) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public String getProperty(String prop) {
 		// TODO Auto-generated method stub
 		return null;

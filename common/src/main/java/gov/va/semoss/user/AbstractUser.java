@@ -5,6 +5,9 @@
  */
 package gov.va.semoss.user;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author ryan
@@ -12,6 +15,7 @@ package gov.va.semoss.user;
 public abstract class AbstractUser implements User {
 
 	private String username = null;
+	private final Map<String, String> props = new HashMap<>();
 
 	public AbstractUser() {
 	}
@@ -23,5 +27,15 @@ public abstract class AbstractUser implements User {
 	@Override
 	public String getUsername() {
 		return username;
-	}	
+	}
+
+	@Override
+	public String getProperty( String prop ) {
+		return props.get( prop );
+	}
+
+	@Override
+	public void setProperty( String prop, String value ) {
+		props.put( prop, value );
+	}
 }
