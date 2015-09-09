@@ -97,6 +97,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private RepositoryConnection owlRc;
 
+	
+	public AbstractSesameEngine(Properties initProps){
+		super(initProps);
+	}
+	
 	/**
 	 * Loads the metadata information from the given file.
 	 *

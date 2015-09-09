@@ -66,8 +66,7 @@ public class BigDataEngineTest {
 	public void setUp() throws RepositoryException {
 		extractKb();
 
-		eng = new BigDataEngine();
-		eng.openDB( BigDataEngine.generateProperties( dbfile ) );
+		eng = new BigDataEngine( BigDataEngine.generateProperties( dbfile ));
 	}
 
 	@After

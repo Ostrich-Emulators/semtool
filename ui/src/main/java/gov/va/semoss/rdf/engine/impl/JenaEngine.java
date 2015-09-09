@@ -57,6 +57,11 @@ public class JenaEngine extends AbstractSesameEngine {
 	private File tdbdir;
 	private boolean needsSave = false;
 
+	public JenaEngine(Properties initProps){
+		super(initProps);
+		this.openDB(initProps);
+	}
+	
 	@Override
 	protected void createRc( Properties props ) throws RepositoryException {
 		boolean inmem = Boolean.parseBoolean( props.getProperty( INMEM_PROP,
