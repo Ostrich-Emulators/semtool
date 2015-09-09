@@ -16,11 +16,14 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import org.openrdf.model.Value;
 
 /**
  *
@@ -174,16 +177,17 @@ public class InsightPanel extends DataPanel<Insight> {
 			params.add( Parameter.class.cast( child.getUserObject() ) );
 		}
 
+		Map<String, Value> bindings = new HashMap<>();
 		if ( !params.isEmpty() ) {
 			insight.setParameters( params );
+			
 		}
 
-		// FIXME: this doesn't actually work yet
 		PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
 		psf.setTitle( "Insight Manager Query Test" );
 		DIHelper.getInstance().getDesktop().add( psf );
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add(
-				psf.getCreateTask( insight, getEngine() ) );
+				psf.getCreateTask( insight, bindings ) );
   }//GEN-LAST:event_testbtnActionPerformed
 
 

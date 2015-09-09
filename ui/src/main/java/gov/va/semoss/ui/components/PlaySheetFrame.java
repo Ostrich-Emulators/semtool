@@ -288,17 +288,16 @@ public class PlaySheetFrame extends JInternalFrame {
 		}
 	}
 
-	public ProgressTask getCreateTask( Insight insight, IEngine engine ) {
+	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ){
 		PlaySheetEnum pse = PlaySheetEnum.valueFor( insight );
 		PlaySheetCentralComponent cmp
 				= PlaySheetCentralComponent.class.cast( pse.getSheetInstance() );
 		cmp.setTitle( insight.getLabel() );
+		addTab( cmp );
 
 		String query = insight.getSparql();		
 
 		updateProgress( "Preparing Query", 10 );
-		final ListQueryAdapter<Value[]> lqa
-				= new ListOfValueArraysQueryAdapter( query );
 		final StringBuilder builder = new StringBuilder();
 		final int rows[] = { 0 };
 
@@ -319,14 +318,25 @@ public class PlaySheetFrame extends JInternalFrame {
 						// so assume something good happened
 						dsize = 1;
 					}
-					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
-							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
+					else if ( query.toUpperCase().startsWith( "CONSTRUCT" )
+							|| query.toUpperCase().startsWith( "DESCRIBE" ) ) {
 						updateProgress( "Preparing Display", 80 );
-						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
+						ModelQueryAdapter mqa = new ModelQueryAdapter( query );
+						for( Map.Entry<String, Value> en : bindings.entrySet() ){
+							mqa.bind( en.getKey(), en.getValue() );
+						}						
+						
+						Model model = engine.construct( mqa );
 						cmp.create( model, engine );
 						dsize = model.size();
 					}
 					else {
+						ListQueryAdapter<Value[]> lqa 
+								= new ListOfValueArraysQueryAdapter( query );
+						for( Map.Entry<String, Value> en : bindings.entrySet() ){
+							lqa.bind( en.getKey(), en.getValue() );
+						}						
+						
 						List<Value[]> data = engine.query( lqa );
 						updateProgress( "Preparing Display", 80 );
 						cmp.create( data, lqa.getBindingNames(), engine );
@@ -339,7 +349,6 @@ public class PlaySheetFrame extends JInternalFrame {
 							append( dsize ).append( " Data Row" ).
 							append( 1 == dsize ? "" : "s" ).append( " Fetched" );
 					rows[0] = dsize;
-
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 					log.error( e, e );

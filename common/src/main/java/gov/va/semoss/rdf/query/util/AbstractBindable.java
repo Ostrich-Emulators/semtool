@@ -14,8 +14,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -35,8 +37,7 @@ public abstract class AbstractBindable implements Bindable {
 	private final Map<String, Date> amap = new HashMap<>();
 	private final Map<String, StringPair> smap = new HashMap<>();
 	private final Map<String, Boolean> bmap = new HashMap<>();
-	private final Map<String, URI> umap = new HashMap<>();
-	private final Map<String, Resource> rmap = new HashMap<>();
+	private final Map<String, Value> vmap = new HashMap<>();
 	private final Map<String, String> namespaces = new HashMap<>();
 	private String sparql;
 	private boolean infer = false;
@@ -112,9 +113,16 @@ public abstract class AbstractBindable implements Bindable {
 			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {" ).
 					append( fac.createLiteral( en.getValue() ).toString() ).append( "}" );
 		}
-		for ( Map.Entry<String, Resource> en : rmap.entrySet() ) {
-			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {<" ).
-					append( en.getValue() ).append( ">}" );
+		
+		for ( Map.Entry<String, Value> en : vmap.entrySet() ) {
+			Value v = en.getValue();
+			binds.append( " VALUES ?" ).append( en.getKey() );
+			if ( v instanceof Literal ) {
+				binds.append( " {" ).append( en.getValue() ).append( "}" );
+			}
+			else {
+				binds.append( " {<" ).append( en.getValue() ).append( ">}" );
+			}
 		}
 
 		for ( Map.Entry<String, StringPair> en : smap.entrySet() ) {
@@ -131,11 +139,6 @@ public abstract class AbstractBindable implements Bindable {
 			}
 		}
 
-		for ( Map.Entry<String, URI> en : umap.entrySet() ) {
-			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {<" ).
-					append( en.getValue() ).append( ">}" );
-		}
-
 		String spq = getSparql();
 		// I don't really want to write a Sparql parser, so just replace the last }
 		// with our VALUES statements. This will break on just about any complicated
@@ -149,7 +152,7 @@ public abstract class AbstractBindable implements Bindable {
 	@Override
 	public AbstractBindable bindURI( String var, String uri ) {
 		try {
-			umap.put( var, new URIImpl( uri ) );
+			vmap.put( var, new URIImpl( uri ) );
 		}
 		catch ( Exception e ) {
 			log.error( "Could not parse uri: " + uri, e );
@@ -161,7 +164,7 @@ public abstract class AbstractBindable implements Bindable {
 	public AbstractBindable bindURI( String var, String basename, String localname ) {
 		try {
 			ValueFactory vfac = new ValueFactoryImpl();
-			umap.put( var, vfac.createURI( basename, localname ) );
+			vmap.put( var, vfac.createURI( basename, localname ) );
 		}
 		catch ( Exception e ) {
 			log.error( "Could not parse uri: " + basename + localname, e );
@@ -190,7 +193,7 @@ public abstract class AbstractBindable implements Bindable {
 			XMLGregorianCalendar xcal = getCal( d );
 			tq.setBinding( en.getKey(), fac.createLiteral( xcal ) );
 		}
-		for ( Map.Entry<String, Resource> en : rmap.entrySet() ) {
+		for ( Map.Entry<String, Value> en : vmap.entrySet() ) {
 			tq.setBinding( en.getKey(), en.getValue() );
 		}
 
@@ -205,10 +208,6 @@ public abstract class AbstractBindable implements Bindable {
 				tq.setBinding( en.getKey(), fac.createLiteral( val, lang ) );
 			}
 		}
-
-		for ( Map.Entry<String, URI> en : umap.entrySet() ) {
-			tq.setBinding( en.getKey(), en.getValue() );
-		}
 	}
 
 	@Override
@@ -219,7 +218,7 @@ public abstract class AbstractBindable implements Bindable {
 
 	@Override
 	public AbstractBindable bind( String var, Resource r ) {
-		rmap.put( var, r );
+		vmap.put( var, r );
 		return this;
 	}
 
@@ -255,7 +254,13 @@ public abstract class AbstractBindable implements Bindable {
 
 	@Override
 	public AbstractBindable bind( String var, URI uri ) {
-		umap.put( var, uri );
+		vmap.put( var, uri );
+		return this;
+	}
+
+	@Override
+	public AbstractBindable bind( String var, Value val ) {
+		vmap.put( var, val );
 		return this;
 	}
 
