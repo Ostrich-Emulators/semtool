@@ -110,7 +110,7 @@ public enum PlaySheetEnum {
 	public static String getNameFromClass( String sheetClass ) {
 		String match = "";
 		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getSheetClass().equals( sheetClass ) ) {
+			if ( e.getSheetClass() != null && e.getSheetClass().getName().equals( sheetClass ) ) {
 				match = e.getSheetName();
 			}
 		}
@@ -120,7 +120,7 @@ public enum PlaySheetEnum {
 	public static PlaySheetEnum getEnumFromClass( String sheetClass ) {
 		PlaySheetEnum match = null; //need to initialize as non-null value
 		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getSheetClass().equals( sheetClass ) ) {
+			if (  e.getSheetClass() != null && e.getSheetClass().getName().equals( sheetClass ) ) {
 				match = e;
 			}
 		}

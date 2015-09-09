@@ -1,6 +1,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -31,6 +32,9 @@ import javax.swing.event.InternalFrameListener;
 
 import org.apache.log4j.Logger;
 
+
+
+
 //import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -38,14 +42,19 @@ import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
+import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
+
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -257,10 +266,20 @@ public class CustomSparqlPanel extends JPanel {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
-				sparqlArea.setTextOfSelectedTab( selected.getSparql() );
+				
+				//Add selected Parameters to query:
+                String sparql = Utility.normalizeParam( selected.getSparql() );
+                Map<String, String> paramHash = PlayPane.selectDatabasePanel.getParameterValues();
+                if(selected.isLegacy()){
+	               sparql = Utility.fillParam( sparql, paramHash );
+                }else {
+	               sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
+                }
+				sparqlArea.setTextOfSelectedTab( sparql );
+				
 				//Pre-select the Playsheet of the Insight copied down:
-				String selectedPlaySheet = PlaySheetEnum.getNameFromClass( selected.getOutput() );
-				playSheetComboBox.setSelectedItem( selectedPlaySheet );
+				PlaySheetEnum selectedPlaySheet = PlaySheetEnum.getEnumFromClass( selected.getOutput() );
+	            playSheetComboBox.setSelectedItem(selectedPlaySheet);
 			}
 		} );
 
