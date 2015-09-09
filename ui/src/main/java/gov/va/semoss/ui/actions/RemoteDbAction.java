@@ -7,7 +7,7 @@ package gov.va.semoss.ui.actions;
 
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.User;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.RemoteDbPanel;
 import gov.va.semoss.util.GuiUtility;

@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.ui.components.models;
 
-import gov.va.semoss.security.User;
+import gov.va.semoss.user.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
