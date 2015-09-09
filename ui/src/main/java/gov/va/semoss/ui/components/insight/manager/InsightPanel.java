@@ -182,7 +182,7 @@ public class InsightPanel extends DataPanel<Insight> {
 		Map<String, Value> bindings = new HashMap<>();
 		if ( !params.isEmpty() ) {
 			insight.setParameters( params );
-			BindingPanel pnl = new BindingPanel();
+			BindingPanel pnl = new BindingPanel( getEngine() );
 			pnl.setParameters( params );
 
 			String opts[] = { "OK", "Cancel" };

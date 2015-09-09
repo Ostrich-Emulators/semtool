@@ -8,9 +8,14 @@ package gov.va.semoss.ui.components;
 import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.Tree;
 import gov.va.semoss.om.Parameter;
+import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
+import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.MultiSetMap;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,9 +28,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BoxLayout;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -39,33 +45,47 @@ import org.openrdf.model.Value;
  */
 public class BindingPanel extends JPanel {
 
+	private static final Logger log = Logger.getLogger( BindingPanel.class );
 	private static final Pattern NEEDVARS
 			= Pattern.compile( "^\\s*(?:SELECT\\s*[^\\{]+|CONSTRUCT\\s*\\{.*)\\{(.*)\\}$",
 					Pattern.CASE_INSENSITIVE );
 	private static final Pattern ONEVAR = Pattern.compile( "\\?(\\w+)" );
-	private final Map<Parameter, JComboBox<URI>> combos = new HashMap<>();
+	private final Map<Parameter, UriComboBox> combos = new HashMap<>();
 	private final List<JPanel> panels = new ArrayList<>();
+	private final ParameterValueListener listener = new ParameterValueListener();
+	private Tree<Parameter, Integer> ordered;
+	private IEngine engine;
 
 	public BindingPanel() {
 		setLayout( new BoxLayout( this, BoxLayout.PAGE_AXIS ) );
+	}
 
+	public BindingPanel( IEngine eng ) {
+		this();
+		engine = eng;
+	}
+
+	public void setEngine( IEngine eng ) {
+		engine = eng;
 	}
 
 	public void setParameters( Collection<Parameter> params ) {
 		for ( JPanel pnl : panels ) {
+			for ( UriComboBox c : combos.values() ) {
+				c.removeItemListener( listener );
+			}
 			remove( pnl );
 		}
 
-		Tree<Parameter, Integer> ordered = treeify( params );
-		print( ordered, ordered.getRoot(), 0 );
-		Parameter root = ordered.getRoot();
+		ordered = treeify( params );
+		print( ordered, ordered.getRoot() );
 
 		int height = 0;
 		int width = 300;
 		Dimension labelsizer = new Dimension( 100, 25 );
 
 		Deque<Parameter> todo = new ArrayDeque<>();
-		todo.add( root );
+		todo.add( ordered.getRoot() );
 		while ( !todo.isEmpty() ) {
 			Parameter parent = todo.poll();
 
@@ -77,7 +97,10 @@ public class BindingPanel extends JPanel {
 				lbl.setPreferredSize( labelsizer );
 				lbl.setMinimumSize( labelsizer );
 
-				JComboBox<URI> cmb = new JComboBox<>();
+				UriComboBox cmb = new UriComboBox();
+				cmb.setRenderer( LabeledPairRenderer.getUriPairRenderer( engine ) );
+				cmb.addItemListener( listener );
+				cmb.getUriModel().addListDataListener( listener );
 				combos.put( child, cmb );
 
 				panel.add( lbl, BorderLayout.WEST );
@@ -92,31 +115,64 @@ public class BindingPanel extends JPanel {
 			}
 		}
 
-		this.setPreferredSize( new Dimension( width, height ) );
+		setPreferredSize( new Dimension( width, height ) );
+
+		fillInCombos( ordered );
 	}
 
 	public Map<Parameter, Value> getBindings() {
 		Map<Parameter, Value> map = new HashMap<>();
-		for ( Map.Entry<Parameter, JComboBox<URI>> en : combos.entrySet() ) {
-			JComboBox<URI> cmb = en.getValue();
+		for ( Map.Entry<Parameter, UriComboBox> en : combos.entrySet() ) {
+			UriComboBox cmb = en.getValue();
 			map.put( en.getKey(), cmb.getItemAt( cmb.getSelectedIndex() ) );
 		}
 
 		return map;
 	}
 
-	protected void print( Tree<Parameter, Integer> tree, Parameter node, int depth ) {
-		Logger log = Logger.getLogger( getClass() );
-		StringBuilder sb = new StringBuilder();
-		for ( int i = 0; i < depth; i++ ) {
-			sb.append( "  " );
-		}
-		sb.append( tree.getRoot().equals( node ) ? "<root>" : node );
-		log.debug( sb.toString() );
+	private void fillInCombos( Tree<Parameter, Integer> tree ) {
+		// we only need to run queries for the toplevel parameters, because
+		// everything else is handled by the item listener
 
-		for ( Parameter p : tree.getChildren( node ) ) {
-			print( tree, p, depth + 1 );
+		for ( Parameter p : tree.getChildren( tree.getRoot() ) ) {
+			requery( p );
 		}
+	}
+
+	private static void print( Tree<Parameter, Integer> tree, Parameter node ) {
+		if ( log.isDebugEnabled() ) {
+
+			StringBuilder sb = new StringBuilder( "Parameter Tree:" );
+			int depth = tree.getDepth( node );
+			for ( int i = 0; i < depth; i++ ) {
+				sb.append( "  " );
+			}
+			sb.append( tree.getRoot().equals( node ) ? "<root>" : node );
+			log.debug( sb.toString() );
+
+			for ( Parameter p : tree.getChildren( node ) ) {
+				print( tree, p );
+			}
+		}
+	}
+
+	private void requery( Parameter child ) {
+		log.debug( "requerying for parameter: " + child );
+		OneVarListQueryAdapter<URI> onevar
+				= OneVarListQueryAdapter.getUriList( child.getDefaultQuery() );
+		for ( Parameter ancestor : ordered.getPredecessors( child ) ) {
+			if ( !ancestor.equals( ordered.getRoot() ) ) {
+				UriComboBox cmb = combos.get( ancestor );
+				onevar.bind( ancestor.getVariable(),
+						cmb.getItemAt( cmb.getSelectedIndex() ) );
+			}
+		}
+
+		List<URI> vals = engine.queryNoEx( onevar );
+		UriComboBox combo = combos.get( child );
+		combo.removeItemListener( listener );
+		combo.setData( vals );
+		combo.addItemListener( listener );
 	}
 
 	/**
@@ -196,5 +252,50 @@ public class BindingPanel extends JPanel {
 		}
 
 		return ordered;
+
+	}
+
+	private class ParameterValueListener implements ItemListener, ListDataListener {
+
+		@Override
+		public void itemStateChanged( ItemEvent e ) {
+			log.debug( "item state changed for "+e.getSource() );
+			handleChange( UriComboBox.class.cast( e.getSource() ) );
+		}
+
+		@Override
+		public void intervalAdded( ListDataEvent e ) {
+		}
+
+		@Override
+		public void intervalRemoved( ListDataEvent e ) {
+		}
+
+		@Override
+		public void contentsChanged( ListDataEvent e ) {
+
+			// this is a little ugly, because the model is doing the signalling,
+			// so we need to figure out which combobox it came from
+			Object model = e.getSource();
+			for ( Map.Entry<Parameter, UriComboBox> en : combos.entrySet() ) {
+				if( en.getValue().getUriModel().equals( model ) ){
+					log.debug( "contents changed for "+en.getValue() );
+					handleChange( en.getValue() );					
+				}
+			}			
+		}
+
+		private void handleChange( UriComboBox combo ) {
+			// figure out what parameter we're talking about
+			// so we can decide if it's children need to requery
+			for ( Map.Entry<Parameter, UriComboBox> en : combos.entrySet() ) {
+				if ( en.getValue().equals( combo ) ) {
+					for ( Parameter p : ordered.getChildren( en.getKey() ) ) {
+						log.debug( "new value for parameter: " + en.getKey() );
+						requery( p );
+					}
+				}
+			}
+		}
 	}
 }
