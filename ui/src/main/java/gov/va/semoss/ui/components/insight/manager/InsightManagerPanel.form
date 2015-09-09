@@ -79,7 +79,20 @@
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.DesignCardLayout"/>
               <SubComponents>
+                <Component class="gov.va.semoss.ui.components.insight.manager.PerspectivePanel" name="perspectiveData">
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new gov.va.semoss.ui.components.insight.manager.PerspectivePanel( tree, model )"/>
+                  </AuxValues>
+                  <Constraints>
+                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignCardLayout" value="org.netbeans.modules.form.compat2.layouts.DesignCardLayout$CardConstraintsDescription">
+                      <CardConstraints cardName="perspective"/>
+                    </Constraint>
+                  </Constraints>
+                </Component>
                 <Component class="gov.va.semoss.ui.components.insight.manager.InsightPanel" name="insightData">
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new gov.va.semoss.ui.components.insight.manager.InsightPanel( tree, model )"/>
+                  </AuxValues>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignCardLayout" value="org.netbeans.modules.form.compat2.layouts.DesignCardLayout$CardConstraintsDescription">
                       <CardConstraints cardName="insight"/>
@@ -87,16 +100,12 @@
                   </Constraints>
                 </Component>
                 <Component class="gov.va.semoss.ui.components.insight.manager.ParameterPanel" name="parameterData">
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new gov.va.semoss.ui.components.insight.manager.ParameterPanel( tree, model )"/>
+                  </AuxValues>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignCardLayout" value="org.netbeans.modules.form.compat2.layouts.DesignCardLayout$CardConstraintsDescription">
                       <CardConstraints cardName="parameter"/>
-                    </Constraint>
-                  </Constraints>
-                </Component>
-                <Component class="gov.va.semoss.ui.components.insight.manager.PerspectivePanel" name="perspectiveData">
-                  <Constraints>
-                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignCardLayout" value="org.netbeans.modules.form.compat2.layouts.DesignCardLayout$CardConstraintsDescription">
-                      <CardConstraints cardName="perspective"/>
                     </Constraint>
                   </Constraints>
                 </Component>

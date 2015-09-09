@@ -20,6 +20,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import org.openrdf.model.URI;
 
 /**
@@ -29,19 +32,24 @@ import org.openrdf.model.URI;
 public class ParameterPanel extends DataPanel<Parameter> {
 
 	private Insight insight;
+	private final JTree tree;
+	private final DefaultTreeModel model;
 
-	/**
-	 * Creates new form ParameterPanel
-	 */
-	public ParameterPanel() {
+	public ParameterPanel( JTree tree, DefaultTreeModel model ) {
+		this.tree = tree;
+		this.model = model;
 		initComponents();
 
 		listenTo( parameterName );
 		listenTo( parameterQuery );
 	}
 
+	public ParameterPanel() {
+		this( null, null );
+	}
+
 	@Override
-	public void isetElement( Parameter p ) {
+	protected void isetElement( Parameter p, DefaultMutableTreeNode node ) {
 		parameterName.setText( p.getLabel() );
 		parameterQuery.setText( p.getDefaultQuery() );
 	}

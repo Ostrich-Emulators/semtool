@@ -5,7 +5,24 @@
  */
 package gov.va.semoss.ui.components.insight.manager;
 
+import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Enumeration;
+import javax.swing.AbstractAction;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.JTree;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -13,20 +30,79 @@ import gov.va.semoss.om.Perspective;
  */
 public class PerspectivePanel extends DataPanel<Perspective> {
 
+	private static final Logger log = Logger.getLogger( PerspectivePanel.class );
+	private final JTree tree;
+	private final DefaultTreeModel model;
+	private final DefaultListModel<Insight> insightmodel = new DefaultListModel<>();
+
 	/**
 	 * Creates new form PerspectivePanel
 	 */
-	public PerspectivePanel() {
+	public PerspectivePanel( JTree tre, DefaultTreeModel mod ) {
 		initComponents();
-		
+		tree = tre;
+		model = mod;
 		listenTo( perspectiveDesc );
-		listenTo( perspectiveName );		
+		listenTo( perspectiveName );
+		
+		insightslabel.setVisible( false );
+		insightspanel.setVisible( false );
+
+		insightlist.addListSelectionListener( new ListSelectionListener() {
+
+			@Override
+			public void valueChanged( ListSelectionEvent e ) {
+				if ( !e.getValueIsAdjusting() ) {
+
+					int idx = insightlist.getSelectedIndex();
+					moveup.setEnabled( idx > 0 );
+					movedown.setEnabled( idx < insightmodel.size() - 1 );
+				}
+			}
+		} );
+
+		insightlist.addMouseListener( new MouseAdapter() {
+
+			@Override
+			public void mouseClicked( MouseEvent e ) {
+				if ( e.getClickCount() > 1 ) {
+					int row = insightlist.locationToIndex( e.getPoint() );
+					if ( row > -1 ) {
+						DefaultMutableTreeNode dmtn 
+								= DefaultMutableTreeNode.class.cast( model.getChild( getNode(), row ) );
+						TreePath path = new TreePath( dmtn.getPath() );
+						int treerow = tree.getRowForPath( path );
+						tree.scrollRowToVisible( treerow );
+						tree.setSelectionRow( treerow );
+					}
+				}
+			}
+
+		} );
+
+		moveup.setAction( new MoveButtonAction( true ) );
+		movedown.setAction( new MoveButtonAction( false ) );
+
+		insightlist.setCellRenderer( new ListRenderer() );
+	}
+
+	public PerspectivePanel() {
+		this( null, null );
 	}
 
 	@Override
-	public void isetElement( Perspective p ) {
+	protected void isetElement( Perspective p, DefaultMutableTreeNode node ) {
 		perspectiveName.setText( p.getLabel() );
 		perspectiveDesc.setText( p.getDescription() );
+
+		insightmodel.clear();
+
+		Enumeration<DefaultMutableTreeNode> en = node.children();
+		while ( en.hasMoreElements() ) {
+			DefaultMutableTreeNode insightnode = en.nextElement();
+			Insight ins = Insight.class.cast( insightnode.getUserObject() );
+			insightmodel.addElement( ins );
+		}
 	}
 
 	/**
@@ -43,6 +119,13 @@ public class PerspectivePanel extends DataPanel<Perspective> {
     jLabel4 = new javax.swing.JLabel();
     jScrollPane6 = new javax.swing.JScrollPane();
     perspectiveDesc = new javax.swing.JTextArea();
+    insightslabel = new javax.swing.JLabel();
+    insightspanel = new javax.swing.JPanel();
+    jScrollPane1 = new javax.swing.JScrollPane();
+    insightlist = new javax.swing.JList<Insight>();
+    buttonpanel = new javax.swing.JPanel();
+    moveup = new javax.swing.JButton();
+    movedown = new javax.swing.JButton();
 
     jLabel1.setText("Perspective Name");
 
@@ -54,6 +137,42 @@ public class PerspectivePanel extends DataPanel<Perspective> {
     perspectiveDesc.setWrapStyleWord(true);
     jScrollPane6.setViewportView(perspectiveDesc);
 
+    insightslabel.setText("Insights");
+
+    insightspanel.setLayout(new java.awt.BorderLayout());
+
+    insightlist.setModel(insightmodel);
+    insightlist.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    jScrollPane1.setViewportView(insightlist);
+
+    insightspanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+    moveup.setText("Move Up");
+    moveup.setEnabled(false);
+
+    movedown.setText("Move Down");
+
+    javax.swing.GroupLayout buttonpanelLayout = new javax.swing.GroupLayout(buttonpanel);
+    buttonpanel.setLayout(buttonpanelLayout);
+    buttonpanelLayout.setHorizontalGroup(
+      buttonpanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(buttonpanelLayout.createSequentialGroup()
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addGroup(buttonpanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+          .addComponent(movedown, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(moveup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+    );
+    buttonpanelLayout.setVerticalGroup(
+      buttonpanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(buttonpanelLayout.createSequentialGroup()
+        .addComponent(moveup)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(movedown)
+        .addGap(0, 83, Short.MAX_VALUE))
+    );
+
+    insightspanel.add(buttonpanel, java.awt.BorderLayout.EAST);
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -62,11 +181,13 @@ public class PerspectivePanel extends DataPanel<Perspective> {
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
           .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(insightslabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(perspectiveName)
-          .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE))
+          .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+          .addComponent(insightspanel, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE))
         .addContainerGap())
     );
     layout.setVerticalGroup(
@@ -79,23 +200,74 @@ public class PerspectivePanel extends DataPanel<Perspective> {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(jLabel4)
-          .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addContainerGap(116, Short.MAX_VALUE))
+          .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(layout.createSequentialGroup()
+            .addGap(11, 11, 11)
+            .addComponent(insightslabel)
+            .addContainerGap(131, Short.MAX_VALUE))
+          .addGroup(layout.createSequentialGroup()
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(insightspanel, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addContainerGap())))
     );
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JPanel buttonpanel;
+  private javax.swing.JList<Insight> insightlist;
+  private javax.swing.JLabel insightslabel;
+  private javax.swing.JPanel insightspanel;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel4;
+  private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JScrollPane jScrollPane6;
+  private javax.swing.JButton movedown;
+  private javax.swing.JButton moveup;
   private javax.swing.JTextArea perspectiveDesc;
   private javax.swing.JTextField perspectiveName;
   // End of variables declaration//GEN-END:variables
 
 	@Override
-	public void updateElement( Perspective p ){
+	public void updateElement( Perspective p ) {
 		p.setLabel( perspectiveName.getText() );
 		p.setDescription( perspectiveDesc.getText() );
+	}
+
+	private class MoveButtonAction extends AbstractAction {
+
+		private final int delta;
+
+		public MoveButtonAction( boolean up ) {
+			super( up ? "Move Up" : "Move Down" );
+			delta = ( up ? -1 : 1 );
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			int idx = insightlist.getSelectedIndex();
+			Insight insight = insightmodel.remove( idx );
+			insightmodel.add( idx + delta, insight );
+			insightlist.setSelectedIndex( idx + delta );
+			insightlist.ensureIndexIsVisible( idx + delta );
+
+			DefaultMutableTreeNode idxnode
+					= DefaultMutableTreeNode.class.cast( model.getChild( getNode(), idx ) );
+			model.removeNodeFromParent( idxnode );
+			model.insertNodeInto( idxnode, getNode(), idx + delta );
+			TreePath tp = new TreePath( idxnode.getPath() );
+			tree.scrollPathToVisible( tp );
+		}
+	}
+
+	private class ListRenderer extends DefaultListCellRenderer {
+
+		@Override
+		public Component getListCellRendererComponent( JList<?> list, Object value,
+				int index, boolean sel, boolean focus ) {
+			String text = ( index + 1 ) + ". " + Insight.class.cast( value ).getLabel();
+			return super.getListCellRendererComponent( list, text, index, sel, focus );
+		}
 	}
 }

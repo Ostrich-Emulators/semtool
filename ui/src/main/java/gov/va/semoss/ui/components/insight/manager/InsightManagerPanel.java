@@ -17,9 +17,6 @@ import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
 import java.awt.CardLayout;
-import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -27,7 +24,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -74,6 +70,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	}
 
 	private void setupTreeListeners() {
+		tree.setTransferHandler( new TreeTransferHandler( model ) );
 		tree.addMouseListener( new InsightMenu( tree, model ) );
 		tree.addTreeSelectionListener( new TreeSelectionListener() {
 
@@ -83,9 +80,14 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 						= DefaultMutableTreeNode.class.cast( tree.getLastSelectedPathComponent() );
 
 				CardLayout layout = CardLayout.class.cast( dataArea.getLayout() );
-
-				if ( !e.getNewLeadSelectionPath().equals( e.getOldLeadSelectionPath() )
-						&& null != currentCard ) {
+				TreePath newpath = e.getNewLeadSelectionPath();
+				
+				if( null == newpath ){
+					return;
+				}
+				
+				if ( !( newpath.equals( e.getOldLeadSelectionPath() )
+						|| null == currentCard ) ){
 
 					// don't need to listen to changes from the old panel anymore
 					currentCard.removePropertyChangeListener( DataPanel.CHANGE_PROPERTY,
@@ -110,19 +112,19 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 						// parameter
 						parameterData.setInsight(
 								Insight.class.cast( DefaultMutableTreeNode.class.cast( node.getParent() ).getUserObject() ) );
-						parameterData.setElement( Parameter.class.cast( node.getUserObject() ) );
+						parameterData.setElement( Parameter.class.cast( node.getUserObject() ), node );
 						layout.show( dataArea, "parameter" );
 						currentCard = parameterData;
 						break;
 					case 3:
 						// insight;
-						insightData.setElement( Insight.class.cast( node.getUserObject() ) );
+						insightData.setElement( Insight.class.cast( node.getUserObject() ), node );
 						layout.show( dataArea, "insight" );
 						currentCard = insightData;
 						break;
 					default:
 						// perspective
-						perspectiveData.setElement( Perspective.class.cast( node.getUserObject() ) );
+						perspectiveData.setElement( Perspective.class.cast( node.getUserObject() ), node );
 						layout.show( dataArea, "perspective" );
 						currentCard = perspectiveData;
 				}
@@ -169,9 +171,9 @@ public class InsightManagerPanel extends javax.swing.JPanel {
     tree = new javax.swing.JTree();
     rightside = new javax.swing.JPanel();
     dataArea = new javax.swing.JPanel();
-    insightData = new gov.va.semoss.ui.components.insight.manager.InsightPanel();
-    parameterData = new gov.va.semoss.ui.components.insight.manager.ParameterPanel();
-    perspectiveData = new gov.va.semoss.ui.components.insight.manager.PerspectivePanel();
+    perspectiveData = new gov.va.semoss.ui.components.insight.manager.PerspectivePanel( tree, model );
+    insightData = new gov.va.semoss.ui.components.insight.manager.InsightPanel( tree, model );
+    parameterData = new gov.va.semoss.ui.components.insight.manager.ParameterPanel( tree, model );
     jPanel1 = new javax.swing.JPanel();
     applybtn = new javax.swing.JButton();
     commitbtn = new javax.swing.JButton();
@@ -189,9 +191,9 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
     dataArea.setPreferredSize(new java.awt.Dimension(401, 438));
     dataArea.setLayout(new java.awt.CardLayout());
+    dataArea.add(perspectiveData, "perspective");
     dataArea.add(insightData, "insight");
     dataArea.add(parameterData, "parameter");
-    dataArea.add(perspectiveData, "perspective");
 
     rightside.add(dataArea, java.awt.BorderLayout.CENTER);
 

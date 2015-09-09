@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
@@ -16,6 +17,7 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
 
 import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.PlaySheetEnum;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -284,6 +286,83 @@ public class PlaySheetFrame extends JInternalFrame {
 		else {
 			setTitle( current.replaceAll( "^\\" + SAVE_MNEMONIC, "" ) );
 		}
+	}
+
+	public ProgressTask getCreateTask( Insight insight, IEngine engine ) {
+		PlaySheetEnum pse = PlaySheetEnum.valueFor( insight );
+		PlaySheetCentralComponent cmp
+				= PlaySheetCentralComponent.class.cast( pse.getSheetInstance() );
+		cmp.setTitle( insight.getLabel() );
+
+		String query = insight.getSparql();		
+
+		updateProgress( "Preparing Query", 10 );
+		final ListQueryAdapter<Value[]> lqa
+				= new ListOfValueArraysQueryAdapter( query );
+		final StringBuilder builder = new StringBuilder();
+		final int rows[] = { 0 };
+
+		ProgressTask pt = new DisappearingProgressBarTask( cmp, new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					updateProgress( "Executing Query", 40 );
+
+					int dsize = 0;
+					if ( null == query || "NULL".equals( query.toUpperCase() ) ) {
+						// uh oh...no sparql given
+						// assume the pscc knows what to do with empty data
+						dsize = 0;
+						cmp.create( null, null, engine );
+						// we have no way of determining what data got produced,
+						// so assume something good happened
+						dsize = 1;
+					}
+					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
+							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
+						updateProgress( "Preparing Display", 80 );
+						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
+						cmp.create( model, engine );
+						dsize = model.size();
+					}
+					else {
+						List<Value[]> data = engine.query( lqa );
+						updateProgress( "Preparing Display", 80 );
+						cmp.create( data, lqa.getBindingNames(), engine );
+						dsize = data.size();
+					}
+
+					updateProgress( "Execution Complete", 90 );
+
+					builder.append( cmp.getTitle() ).append( " " ).
+							append( dsize ).append( " Data Row" ).
+							append( 1 == dsize ? "" : "s" ).append( " Fetched" );
+					rows[0] = dsize;
+
+				}
+				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+					log.error( e, e );
+					GuiUtility.showError( e.getLocalizedMessage() );
+				}
+			}
+		} ) {
+			@Override
+			public void done() {
+				setLabel( builder.toString() );
+				setFinishLabel( getLabel() );
+
+				if ( 0 == rows[0] ) {
+					// let the user know we're done, but no data was returned
+					JOptionPane.showMessageDialog( rootPane, "No data returned", "No Data",
+							JOptionPane.INFORMATION_MESSAGE );
+				}
+
+				super.done();
+			}
+		};
+
+		return pt;
 	}
 
 	public ProgressTask getCreateTask( final String query ) {

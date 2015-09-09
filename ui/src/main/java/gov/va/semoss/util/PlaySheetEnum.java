@@ -81,6 +81,16 @@ public enum PlaySheetEnum {
 		return this.sheetClass;
 	}
 
+	public IPlaySheet getSheetInstance() {
+		try {
+			return getSheetClass().newInstance();
+		}
+		catch ( InstantiationException | IllegalAccessException e ) {
+			Logger.getLogger( getClass() ).warn( "cannot instantiate playsheet class", e );
+			return new GridPlaySheet();
+		}
+	}
+
 	public String getDisplayName() {
 		return this.sheetName;
 	}

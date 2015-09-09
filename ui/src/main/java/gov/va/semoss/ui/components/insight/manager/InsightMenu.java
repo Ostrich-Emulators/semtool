@@ -44,12 +44,21 @@ public class InsightMenu extends MouseAdapter {
 			TreePath path = tree.getPathForLocation( e.getX(), e.getY() );
 			DefaultMutableTreeNode node
 					= DefaultMutableTreeNode.class.cast( path.getLastPathComponent() );
+
 			Object pia = node.getUserObject();
 			if ( null == pia ) {
 				return;
 			}
 
+			DefaultMutableTreeNode parent
+					= DefaultMutableTreeNode.class.cast( path.getParentPath().getLastPathComponent() );
+
 			JPopupMenu menu = new JPopupMenu();
+			NodeMover up = new NodeMover( node, parent, true );
+			NodeMover down = new NodeMover( node, parent, false );
+			menu.add( up );
+			menu.add( down );
+
 			if ( pia instanceof Insight ) {
 				init( menu, Insight.class.cast( pia ), node );
 				menu.addSeparator();
@@ -83,6 +92,7 @@ public class InsightMenu extends MouseAdapter {
 				Parameter param = new Parameter( "New Parameter" );
 				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( param );
 				model.insertNodeInto( newnode, node, 0 );
+				tree.setSelectionPath( new TreePath( newnode.getPath() ) );
 			}
 		} );
 	}
@@ -108,7 +118,38 @@ public class InsightMenu extends MouseAdapter {
 				Insight insight = new Insight( "New Insight", "", GridPlaySheet.class );
 				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( insight );
 				model.insertNodeInto( newnode, node, 0 );
+				tree.setSelectionPath( new TreePath( newnode.getPath() ) );
 			}
 		} );
+	}
+
+	private class NodeMover extends AbstractAction {
+
+		private final int delta;
+		private final int idx;
+		private final DefaultMutableTreeNode node;
+		private final DefaultMutableTreeNode parent;
+
+		public NodeMover( DefaultMutableTreeNode node, DefaultMutableTreeNode parent,
+				boolean up ) {
+			super( up ? "Move Up" : "Move Down" );
+			delta = ( up ? -1 : 1 );
+			this.node = node;
+			this.parent = parent;
+
+			idx = model.getIndexOfChild( parent, node );
+			setEnabled( up ? idx > 0 : idx < model.getChildCount( parent ) - 1 );
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			model.removeNodeFromParent( node );
+			model.insertNodeInto( node, parent, idx + delta );
+
+			TreePath path = new TreePath( node.getPath() );
+			int row = tree.getRowForPath( path );
+			tree.scrollRowToVisible( row );
+			tree.setSelectionRow( row );
+		}
 	}
 }

@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.Parameter;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.PlaySheetFrame;
@@ -13,8 +14,13 @@ import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import javax.swing.DefaultComboBoxModel;
-import org.apache.log4j.Logger;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  *
@@ -22,10 +28,15 @@ import org.apache.log4j.Logger;
  */
 public class InsightPanel extends DataPanel<Insight> {
 
+	private final JTree tree;
+	private final DefaultTreeModel model;
+
 	/**
 	 * Creates new form InsightPanel
 	 */
-	public InsightPanel() {
+	public InsightPanel( JTree tree, DefaultTreeModel model ) {
+		this.tree = tree;
+		this.model = model;
 		initComponents();
 
 		playsheet.setModel( new DefaultComboBoxModel<>( PlaySheetEnum.valuesNoUpdate() ) );
@@ -36,8 +47,12 @@ public class InsightPanel extends DataPanel<Insight> {
 		listenTo( insightQuery );
 	}
 
+	public InsightPanel() {
+		this( null, null );
+	}
+
 	@Override
-	public void isetElement( Insight i ) {
+	protected void isetElement( Insight i, DefaultMutableTreeNode node ) {
 		insightName.setText( i.getLabel() );
 		insightQuery.setText( i.getSparql() );
 		insightDesc.setText( i.getDescription() );
@@ -145,27 +160,30 @@ public class InsightPanel extends DataPanel<Insight> {
 
   private void testbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testbtnActionPerformed
 		PlaySheetEnum pse = playsheet.getItemAt( playsheet.getSelectedIndex() );
-		Insight insight = getElement();
-		insight.setOutput( pse.getSheetClass().getCanonicalName() );
-		insight.setSparql( insightQuery.getText() );
-		insight.setLabel( insightName.getText() );
+
+		Insight insight
+				= new Insight( insightName.getText(), insightQuery.getText(),
+						(Class<? extends PlaySheetCentralComponent>) ( pse.getSheetClass() ) );
 		insight.setDescription( insightDesc.getText() );
 
-		if ( !insight.getParameters().isEmpty() ) {
-
+		List<Parameter> params = new ArrayList<>();
+		DefaultMutableTreeNode node = getNode();
+		Enumeration<DefaultMutableTreeNode> en = node.children();
+		while ( en.hasMoreElements() ) {
+			DefaultMutableTreeNode child = en.nextElement();
+			params.add( Parameter.class.cast( child.getUserObject() ) );
 		}
 
-		try {
-			PlaySheetCentralComponent pscc = PlaySheetCentralComponent.class.cast( pse.getSheetClass().newInstance() );
-			PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
-			psf.addTab( "Insight Manager Query Test", pscc );
-			DIHelper.getInstance().getDesktop().add( psf );
-			OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add(
-					psf.getCreateTask( insightQuery.getText() ) );
+		if ( !params.isEmpty() ) {
+			insight.setParameters( params );
 		}
-		catch ( InstantiationException | IllegalAccessException e ) {
-			Logger.getLogger( getClass() ).error( e, e );
-		}
+
+		// FIXME: this doesn't actually work yet
+		PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
+		psf.setTitle( "Insight Manager Query Test" );
+		DIHelper.getInstance().getDesktop().add( psf );
+		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add(
+				psf.getCreateTask( insight, getEngine() ) );
   }//GEN-LAST:event_testbtnActionPerformed
 
 

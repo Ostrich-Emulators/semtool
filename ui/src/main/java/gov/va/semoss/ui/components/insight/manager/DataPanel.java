@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  *
@@ -21,6 +22,7 @@ public abstract class DataPanel<T> extends JPanel implements DocumentListener {
 	private IEngine engine;
 	private T element;
 	private boolean hasChanges = false;
+	private DefaultMutableTreeNode node;
 
 	public void setEngine( IEngine engine ) {
 		this.engine = engine;
@@ -31,17 +33,18 @@ public abstract class DataPanel<T> extends JPanel implements DocumentListener {
 		return engine;
 	}
 
-	public final void setElement( T ele ) {
+	public final void setElement( T ele, DefaultMutableTreeNode nod ) {
 		element = ele;
-		isetElement( ele );
-		setChanges( false );
+		node = nod;
+		isetElement( ele, nod );
+		setChanges( false );		
 	}
 
 	protected T getElement() {
 		return element;
 	}
 
-	protected abstract void isetElement( T ele );
+	protected abstract void isetElement( T ele, DefaultMutableTreeNode node );
 
 	public T applyChanges() {
 		if ( hasChanges() ) {
@@ -89,4 +92,11 @@ public abstract class DataPanel<T> extends JPanel implements DocumentListener {
 		a.getDocument().addDocumentListener( this );
 	}
 
+	public void setNode( DefaultMutableTreeNode node ) {
+		this.node = node;
+	}
+	
+	protected DefaultMutableTreeNode getNode(){
+		return node;
+	}
 }
