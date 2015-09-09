@@ -99,43 +99,6 @@ public enum PlaySheetEnum {
 		return this.sheetHint;
 	}
 
-	public static List<String> getAllSheetNames() {
-		List<String> list = new ArrayList<>();
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			list.add( e.getDisplayName() );
-		}
-		return list;
-	}
-
-	public static List<Class<? extends IPlaySheet>> getAllSheetClasses() {
-		List<Class<? extends IPlaySheet>> list = new ArrayList<>();
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			list.add( e.getSheetClass() );
-		}
-		return list;
-	}
-
-	public static String getHintFromName( String sheetName ) {
-		String match = "";
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getDisplayName().equals( sheetName ) ) {
-				match = e.getSheetHint();
-			}
-		}
-		return match;
-	}
-
-	public static String getNameFromClass( String sheetClass ) {
-		String match = "";
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getSheetClass() != null
-					&& e.getSheetClass().getName().equals( sheetClass ) ) {
-				match = e.getDisplayName();
-			}
-		}
-		return match;
-	}
-
 	/**
 	 * Gets a PlaySheetEnum for the given Insight. If this insight's
 	 * {@link Insight#getOutput()} returns an unknown playsheet, this function
@@ -157,8 +120,8 @@ public enum PlaySheetEnum {
 			}
 		}
 
-		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: " 
-				+ output+ " (using Grid instead)" );
+		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: "
+				+ output + " (using Grid instead)" );
 		return PlaySheetEnum.Grid;
 	}
 
