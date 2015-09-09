@@ -128,7 +128,8 @@ public enum PlaySheetEnum {
 	public static String getNameFromClass( String sheetClass ) {
 		String match = "";
 		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getSheetClass() != null && e.getSheetClass().getName().equals( sheetClass ) ) {
+			if ( e.getSheetClass() != null
+					&& e.getSheetClass().getName().equals( sheetClass ) ) {
 				match = e.getDisplayName();
 			}
 		}
@@ -156,7 +157,8 @@ public enum PlaySheetEnum {
 			}
 		}
 
-		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: " + output );
+		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: " 
+				+ output+ " (using Grid instead)" );
 		return PlaySheetEnum.Grid;
 	}
 
