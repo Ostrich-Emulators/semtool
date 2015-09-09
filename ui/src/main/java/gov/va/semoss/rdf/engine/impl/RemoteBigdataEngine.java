@@ -56,6 +56,10 @@ public class RemoteBigdataEngine extends BigDataEngine {
 	RepositoryConnection rc = null;
 	ValueFactory vf = null;
 
+	public RemoteBigdataEngine (Properties initProps){
+		super(initProps);
+	}
+	
 	@Override
 	public void finishLoading( Properties prop ) throws RepositoryException {
 		try {

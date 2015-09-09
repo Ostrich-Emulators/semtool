@@ -61,8 +61,7 @@ public class WriteableInsightManagerImplTest {
 	public void setUp() throws RepositoryException {
 		extractKb();
 
-		eng = new BigDataEngine();
-		eng.openDB( BigDataEngine.generateProperties( dbfile ) );
+		eng = new BigDataEngine(BigDataEngine.generateProperties( dbfile ));
 		wim = eng.getWriteableInsightManager();
 	}
 

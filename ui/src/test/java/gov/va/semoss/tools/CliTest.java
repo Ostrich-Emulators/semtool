@@ -126,18 +126,7 @@ public class CliTest {
 		CLI mossy = new CLI( args );
 		mossy.execute();
 
-		/*
-		 OneVarListQueryAdapter<URI> o
-		 = OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o }", "uri" );
-    
-		 BigDataEngine engine = new BigDataEngine();
-		 List<URI> oldlist = engine.query( o );
-
-		 EngineUtil.loadToEngine( engine, Arrays.asList( LEGACY ), true, true, true, false );
-		 assertEquals( oldlist, engine.query( o ) );
-		 */
 		Files.deleteIfExists( Paths.get( mossy.getOption( "out" ) ) );
 		assertEquals( "hi", "hi" );
 	}
-
 }
