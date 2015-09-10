@@ -178,11 +178,11 @@ public class InsightPanel extends DataPanel<Insight> {
           .addGroup(layout.createSequentialGroup()
             .addComponent(jLabel5)
             .addGap(0, 0, Short.MAX_VALUE))
-          .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE))
+          .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(testbtn)
-          .addComponent(paramLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+          .addComponent(paramLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addGap(46, 46, 46))
     );
   }// </editor-fold>//GEN-END:initComponents
