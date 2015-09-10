@@ -374,26 +374,16 @@ public class UriBuilder {
 			String sanitized = raw;
 			if ( !RDFDatatypeTools.isValidUriChars( raw ) ) {
 				// Attempt a simple sanitizing:
-				String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
+
+				String rawWithUnderscores
+						= raw.trim().replaceAll( "(\\p{Punct}|\\s)", "_" );
 
 				if ( RDFDatatypeTools.isValidUriChars( rawWithUnderscores ) ) {
 					sanitized = rawWithUnderscores;
 				}
 				else {
-					// Still not clean enough, sanitize as per full-blown XML rules:
-					StringBuilder sb = new StringBuilder();
-					for ( int i = 0; i < rawWithUnderscores.length(); i++ ) {
-						char c = rawWithUnderscores.charAt( i );
-						// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
-						// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
-						if ( XMLChar.isNCName( c ) ) {
-							sb.append( c );
-						}
-						else if ( PUNCTUATION.matcher( Character.toString( c ) ).matches() ) {
-							sb.append( '-' );
-						}
-						sanitized = sb.toString();
-					}
+					// Still not clean enough, just use a random URI (below)
+					sanitized = "";
 				}
 			}
 
@@ -402,8 +392,8 @@ public class UriBuilder {
 			// we hit the max length limit, we graph a UUID since we are otherwise unable to check for uniqueness
 			// at this stage.
 			//
-			return ( sanitized.length() > localPartMaxLength ) ? getUUIDLocalName()
-					: sanitized;
+			return ( sanitized.length() > localPartMaxLength || sanitized.isEmpty() )
+					? getUUIDLocalName() : sanitized;
 		}
 	}
 }
