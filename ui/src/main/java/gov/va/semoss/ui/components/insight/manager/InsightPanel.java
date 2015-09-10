@@ -20,9 +20,13 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import org.openrdf.model.Value;
@@ -50,6 +54,23 @@ public class InsightPanel extends DataPanel<Insight> {
 		listenTo( insightDesc );
 		listenTo( insightName );
 		listenTo( insightQuery );
+
+		insightQuery.getDocument().addDocumentListener( new DocumentListener() {
+			@Override
+			public void insertUpdate( DocumentEvent e ) {
+				setParameterHelper();
+			}
+
+			@Override
+			public void removeUpdate( DocumentEvent e ) {
+				setParameterHelper();
+			}
+
+			@Override
+			public void changedUpdate( DocumentEvent e ) {
+				setParameterHelper();
+			}
+		} );
 	}
 
 	public InsightPanel() {
@@ -62,6 +83,7 @@ public class InsightPanel extends DataPanel<Insight> {
 		insightQuery.setText( i.getSparql() );
 		insightDesc.setText( i.getDescription() );
 		playsheet.setSelectedItem( PlaySheetEnum.valueFor( i ) );
+		setParameterHelper();
 	}
 
 	/**
@@ -84,6 +106,7 @@ public class InsightPanel extends DataPanel<Insight> {
     jScrollPane4 = new javax.swing.JScrollPane();
     insightDesc = new javax.swing.JTextArea();
     testbtn = new javax.swing.JButton();
+    paramLabel = new javax.swing.JLabel();
 
     jLabel2.setText("Insight Name");
 
@@ -119,21 +142,20 @@ public class InsightPanel extends DataPanel<Insight> {
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel2)
+          .addComponent(jLabel3)
+          .addComponent(jLabel6)
+          .addComponent(jLabel5))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(layout.createSequentialGroup()
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addComponent(testbtn))
-          .addGroup(layout.createSequentialGroup()
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(jLabel2)
-              .addComponent(jLabel3)
-              .addComponent(jLabel6)
-              .addComponent(jLabel5))
+            .addComponent(paramLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(jScrollPane3)
-              .addComponent(playsheet, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-              .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
-              .addComponent(insightName, javax.swing.GroupLayout.Alignment.TRAILING))))
+            .addComponent(testbtn))
+          .addComponent(jScrollPane3)
+          .addComponent(playsheet, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
+          .addComponent(insightName, javax.swing.GroupLayout.Alignment.TRAILING))
         .addContainerGap())
     );
     layout.setVerticalGroup(
@@ -158,7 +180,9 @@ public class InsightPanel extends DataPanel<Insight> {
             .addGap(0, 0, Short.MAX_VALUE))
           .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(testbtn)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(testbtn)
+          .addComponent(paramLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addGap(46, 46, 46))
     );
   }// </editor-fold>//GEN-END:initComponents
@@ -216,6 +240,7 @@ public class InsightPanel extends DataPanel<Insight> {
   private javax.swing.JLabel jLabel6;
   private javax.swing.JScrollPane jScrollPane3;
   private javax.swing.JScrollPane jScrollPane4;
+  private javax.swing.JLabel paramLabel;
   private javax.swing.JComboBox<PlaySheetEnum> playsheet;
   private javax.swing.JButton testbtn;
   // End of variables declaration//GEN-END:variables
@@ -227,5 +252,35 @@ public class InsightPanel extends DataPanel<Insight> {
 		i.setSparql( insightQuery.getText() );
 		i.setOutput( playsheet.getItemAt( playsheet.getSelectedIndex() ).
 				getSheetClass().getCanonicalName() );
+	}
+
+	public void setParameterHelper() {
+		Map<String, Parameter> map = new HashMap<>();
+		Enumeration<DefaultMutableTreeNode> en = getNode().children();
+		while ( en.hasMoreElements() ) {
+			DefaultMutableTreeNode n = en.nextElement();
+			Parameter p = Parameter.class.cast( n.getUserObject() );
+			map.put( p.getVariable(), p );
+		}
+
+		StringBuilder sb = new StringBuilder();
+		String txt = insightQuery.getText();
+		for ( Map.Entry<String, Parameter> it : map.entrySet() ) {
+			Pattern pat = Pattern.compile( "\\?" + it.getKey() + "(\\b|$)" );
+			Matcher m = pat.matcher( txt );
+			if ( m.find() ) {
+				if ( 0 == sb.length() ) {
+					sb.append( "<html>" );
+				}
+				else {
+					sb.append( "<br/>" );
+				}
+				sb.append( "<strong>?" ).append( it.getKey() ).append( "</strong> value from \"" ).
+						append( it.getValue().getLabel() ).append( "\" Parameter" );
+			}
+
+		}
+		paramLabel.setText( sb.toString() );
+
 	}
 }
