@@ -81,17 +81,16 @@ public interface WriteableInsightManager extends InsightManager {
 	 * @param p the perspective
 	 * @param insights the insights, in order, to set for this perspective
 	 */
-	public void setInsights( Perspective p, List<Insight> insights );
+	public void setInsights( Perspective p, List<Insight> insights ) throws RepositoryException;
 
 	public void addRawStatements( Collection<Statement> stmts ) throws RepositoryException;
 
+	/**
+	 * Removes all perspectives and insights
+	 */
+	public void clear();
 
-  /**
-   * Removes all perspectives and insights
-   */
-  public void clear();
-  
-   /**
+	/**
 	 * Extracts from V-CAMP/SEMOSS preferences the user's name, email, and
 	 * organization, and returns a string of user-info for saving with Insights,
 	 * based upon these. If these preferences have not been set, then the passe-in
@@ -101,72 +100,72 @@ public interface WriteableInsightManager extends InsightManager {
 	 * database fetch.
 	 *
 	 * @return userInfoFromToolPreferences -- (String) Described above.
-	 */  
+	 */
 	public String userInfoFromToolPreferences( String strOldUserInfo );
 
 //---------------------------------------------------------------------------------------------------------
 //  D e l e t i o n   o f   P e r s p e c t i v e s ,   I n s i g h t s ,   a n d   P a r a m e t e r s
 //---------------------------------------------------------------------------------------------------------
-	  
-	  /**   Deletes all Parameters from all Insights in the database.
-      * 
-      * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded. 
-      */
-	  public boolean deleteAllParameters();
-	  
-	  /**   Deletes all Insights from all Perspectives in the database.
-       * 
-       * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded. 
-	   */
-	  public boolean deleteAllInsights();	  
-	  
-      /**   Deletes all Perspectives from the database.
-       * 
-       * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded. 
-	   */
-	  public boolean deleteAllPerspectives();
+	/**
+	 * Deletes all Parameters from all Insights in the database.
+	 *
+	 * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded.
+	 */
+	public boolean deleteAllParameters();
+
+	/**
+	 * Deletes all Insights from all Perspectives in the database.
+	 *
+	 * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded.
+	 */
+	public boolean deleteAllInsights();
+
+	/**
+	 * Deletes all Perspectives from the database.
+	 *
+	 * @return deleteAllPerspectives -- (boolean) Whether the deletion succeeded.
+	 */
+	public boolean deleteAllPerspectives();
 
 //---------------------------------------------------------------------------------------------------------
 // I n s e r t i o n   o f   P e r s p e c t i v e s ,   I n s i g h t s ,   a n d   P a r a m e t e r s
 //---------------------------------------------------------------------------------------------------------
-	  
-	  /**   Saves the passed-in Perspective's Title and Description into the triple-store 
-	   * on disk. 
-	   * 
-       * NOTE: The Perspective parameter is returned by side-effect, because its
- 	   *       URI is used to create Insight slots.
-       *
-	   * @param perspective -- (Perspective) The Perspective to persist.
-	   *
-       * @return savePerspective -- (boolean) Whether the save to disk succeeded.
-       */
-	  public boolean savePerspective(Perspective perspective);	  
-	  
-	    /**    Saves the various Insight fields to the triple-store on disk.
-	     * 
-	     * @param perspective -- (Perspective) A Perspective, extracted from the tree-view
-	     *    of the Insight Manager.
-	     * 
-	     * @param insight -- (Insight) An Insight, belonging to the above Perspective.
-	     *    
-	     * @return saveInsight -- (boolean) Whether the save succeeded.
-	     */	  
-	    public boolean saveInsight(Perspective perspective, Insight insight);
-	    
-	    /**    Saves the various Parameter fields to the triple-store on disk.
-	     * 
-	     * @param insight -- (Insight) An Insight, extracted from the tree-view
-	     *    of the Insight Manager.
-	     * 
-	     * @param parameter -- (Parameter) A Parameter, belonging to the above Insight.
-	     *    
-	     * @return saveParameter -- (boolean) Whether the save succeeded.
-	     */
-	    public boolean saveParameter(Insight insight, Parameter parameter);	    
+	/**
+	 * Saves the passed-in Perspective's Title and Description into the
+	 * triple-store on disk.
+	 *
+	 * NOTE: The Perspective parameter is returned by side-effect, because its URI
+	 * is used to create Insight slots.
+	 *
+	 * @param perspective -- (Perspective) The Perspective to persist.
+	 */
+	public void savePerspective( Perspective perspective ) throws RepositoryException;
 
-			/**
-			 * (Re)Sets the perspectives, insights, and parameters data
-			 * @param newdata 
-			 */
-			public void setData( List<Perspective> newdata );
+	/**
+	 * Saves the various Insight fields to the triple-store on disk.
+	 *
+	 * @param perspective -- (Perspective) A Perspective, extracted from the
+	 * tree-view of the Insight Manager.
+	 *
+	 * @param insight -- (Insight) An Insight, belonging to the above Perspective.
+	 */
+	public void saveInsight( Perspective perspective, Insight insight ) throws RepositoryException;
+
+	/**
+	 * Saves the various Parameter fields to the triple-store on disk.
+	 *
+	 * @param insight -- (Insight) An Insight, extracted from the tree-view of the
+	 * Insight Manager.
+	 *
+	 * @param parameter -- (Parameter) A Parameter, belonging to the above
+	 * Insight.
+	 */
+	public void saveParameter( Insight insight, Parameter parameter ) throws RepositoryException;
+
+	/**
+	 * (Re)Sets the perspectives, insights, and parameters data
+	 *
+	 * @param newdata
+	 */
+	public void setData( List<Perspective> newdata );
 }//End "WriteableInsightManager" interface.

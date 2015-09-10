@@ -41,47 +41,58 @@ public class InsightMenu extends MouseAdapter {
 	public void mouseReleased( MouseEvent e ) {
 		if ( SwingUtilities.isRightMouseButton( e ) ) {
 			e.consume();
+			JPopupMenu menu = new JPopupMenu();
 
 			Point p = e.getPoint();
 			TreePath path = tree.getPathForLocation( e.getX(), e.getY() );
-			DefaultMutableTreeNode node
-					= DefaultMutableTreeNode.class.cast( path.getLastPathComponent() );
+			if ( null == path ) {
+				menu.add( new AbstractAction( "Create Perspective" ) {
 
-			Object pia = node.getUserObject();
-			if ( null == pia ) {
-				return;
-			}
-
-			DefaultMutableTreeNode parent
-					= DefaultMutableTreeNode.class.cast( path.getParentPath().getLastPathComponent() );
-
-			JPopupMenu menu = new JPopupMenu();
-			NodeMover up = new NodeMover( node, parent, true );
-			NodeMover down = new NodeMover( node, parent, false );
-			menu.add( up );
-			menu.add( down );
-
-			if ( pia instanceof Insight ) {
-				init( menu, Insight.class.cast( pia ), node );
-				menu.addSeparator();
-			}
-			else if ( pia instanceof Parameter ) {
-				init( menu, Parameter.class.cast( pia ), node );
+					@Override
+					public void actionPerformed( ActionEvent e ) {
+						Perspective persp = new Perspective( "New Perspective" );
+						DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( persp );
+						model.insertNodeInto( newnode,
+								DefaultMutableTreeNode.class.cast( model.getRoot() ), 0 );
+						tree.scrollRowToVisible( 0 );
+						tree.setSelectionRow( 0 );
+					}
+				} );
 			}
 			else {
-				// perspective
-				init( menu, Perspective.class.cast( pia ), node );
-				menu.addSeparator();
-			}
+				DefaultMutableTreeNode node
+						= DefaultMutableTreeNode.class.cast( path.getLastPathComponent() );
+				DefaultMutableTreeNode parent
+						= DefaultMutableTreeNode.class.cast( path.getParentPath().getLastPathComponent() );
 
-			menu.add( new AbstractAction( "Remove This " + pia.getClass().getSimpleName() ) {
+				Object pia = node.getUserObject();
 
-				@Override
-				public void actionPerformed( ActionEvent e ) {
-					model.removeNodeFromParent( node );
+				NodeMover up = new NodeMover( node, parent, true );
+				NodeMover down = new NodeMover( node, parent, false );
+				menu.add( up );
+				menu.add( down );
+
+				if ( pia instanceof Insight ) {
+					init( menu, Insight.class.cast( pia ), node );
+					menu.addSeparator();
 				}
-			} );
+				else if ( pia instanceof Parameter ) {
+					init( menu, Parameter.class.cast( pia ), node );
+				}
+				else {
+					// perspective
+					init( menu, Perspective.class.cast( pia ), node );
+					menu.addSeparator();
+				}
 
+				menu.add( new AbstractAction( "Remove This " + pia.getClass().getSimpleName() ) {
+
+					@Override
+					public void actionPerformed( ActionEvent e ) {
+						model.removeNodeFromParent( node );
+					}
+				} );
+			}
 			menu.show( tree, p.x, p.y );
 		}
 	}
@@ -111,6 +122,8 @@ public class InsightMenu extends MouseAdapter {
 				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( persp );
 				model.insertNodeInto( newnode,
 						DefaultMutableTreeNode.class.cast( model.getRoot() ), 0 );
+				tree.scrollRowToVisible( 0 );
+				tree.setSelectionRow( 0 );
 			}
 		} );
 		menu.add( new AbstractAction( "Add Insight" ) {

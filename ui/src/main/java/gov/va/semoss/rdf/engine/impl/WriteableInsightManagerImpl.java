@@ -5,7 +5,6 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
-import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
@@ -21,6 +20,7 @@ import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.user.User;
 import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.util.DeterministicSanitizer;
+import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.UriSanitizer;
 
 import info.aduna.iteration.Iterations;
@@ -32,11 +32,11 @@ import java.util.List;
 
 import java.util.Set;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -80,81 +80,76 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 
 	@Override
 	public void setData( List<Perspective> perspectives ) {
-		if ( removeOldData() ) {
-			try {
+		try {
+			rc.begin();
+			removeOldData();
 
-				for ( Perspective p : perspectives ) {
-					savePerspective( p );
+			for ( Perspective p : perspectives ) {
+				savePerspective( p );
 
-					for ( Insight i : p.getInsights() ) {
-						saveInsight( p, i );
+				for ( Insight i : p.getInsights() ) {
+					saveInsight( p, i );
 
-						for ( Parameter a : i.getInsightParameters() ) {
-							saveParameter( i, a );
-						}
+					for ( Parameter a : i.getInsightParameters() ) {
+						saveParameter( i, a );
+
+						rc.add( i.getId(), SPIN.constraint, a.getParameterId() );
 					}
 				}
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
-		}
-	}
 
-	private boolean removeOldData() {
-		try {
-			// remove Perspectives, Insights, and Parameters, 
-			// but also the things they depend on, like slots, constraints, indexes
-			Set<Resource> idsToRemove = new HashSet<>();
-
-			// remove subjects that have these objects
-			URI objectsToRemove[] = new URI[]{
-				VAS.Perspective,
-				VAS.InsightProperties
-			};
-
-			for ( URI obj : objectsToRemove ) {
-				for ( Statement s : Iterations.asList( rc.getStatements( null, null, obj, true ) ) ) {
-					idsToRemove.add( s.getSubject() );
-				}
-			}
-
-			// remove subjects that have these predicates
-			URI predsToRemove[] = new URI[]{
-				SPIN.constraint,
-				SPIN.body,
-				OLO.slot,
-				OLO.index,
-				OLO.item,
-				SPL.predicate,
-				SP.text,
-				SP.query,
-				SP.Construct
-			};
-			for ( URI pred : predsToRemove ) {
-				for ( Statement s : Iterations.asList( rc.getStatements( null, pred, null, true ) ) ) {
-					idsToRemove.add( s.getSubject() );
-				}
-			}
-
-			rc.begin();
-			for ( Resource r : idsToRemove ) {
-				rc.remove( r, null, null );
+				setInsights( p, p.getInsights() );
 			}
 			rc.commit();
 		}
-		catch ( RepositoryException e ) {
+		catch ( Exception e ) {
+			log.error( e, e );
 			try {
-				log.error( e, e );
 				rc.rollback();
 			}
 			catch ( Exception x ) {
 				log.warn( x, x );
 			}
-			return false;
+		}
+	}
+
+	private void removeOldData() throws RepositoryException {
+		// remove Perspectives, Insights, and Parameters, 
+		// but also the things they depend on, like slots, constraints, indexes
+		Set<Resource> idsToRemove = new HashSet<>();
+
+		// remove subjects that have these objects
+		URI objectsToRemove[] = new URI[]{
+			VAS.Perspective,
+			VAS.InsightProperties
+		};
+
+		for ( URI obj : objectsToRemove ) {
+			for ( Statement s : Iterations.asList( rc.getStatements( null, null, obj, true ) ) ) {
+				idsToRemove.add( s.getSubject() );
+			}
 		}
 
-		return true;
+		// remove subjects that have these predicates
+		URI predsToRemove[] = new URI[]{
+			SPIN.constraint,
+			SPIN.body,
+			OLO.slot,
+			OLO.index,
+			OLO.item,
+			SPL.predicate,
+			SP.text,
+			SP.query,
+			SP.Construct
+		};
+		for ( URI pred : predsToRemove ) {
+			for ( Statement s : Iterations.asList( rc.getStatements( null, pred, null, true ) ) ) {
+				idsToRemove.add( s.getSubject() );
+			}
+		}
+
+		for ( Resource r : idsToRemove ) {
+			rc.remove( r, null, null );
+		}
 	}
 
 	@Override
@@ -313,8 +308,16 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	}
 
 	@Override
-	public void setInsights( Perspective p, List<Insight> insights ) {
-		log.warn( "this function has not yet been implemented." );
+	public void setInsights( Perspective p, List<Insight> insights ) throws RepositoryException {
+		ValueFactory vf = rc.getValueFactory();
+		UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+		int idx = 0;
+		for ( Insight i : insights ) {
+			URI slot = urib.build( "slot-" + Integer.toString( ++idx ) );
+			rc.add( new StatementImpl( p.getUri(), OLO.slot, slot ) );
+			rc.add( new StatementImpl( slot, OLO.index, vf.createLiteral( idx ) ) );
+			rc.add( new StatementImpl( slot, OLO.item, i.getId() ) );
+		}
 		haschanges = true;
 	}
 
@@ -590,53 +593,30 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	 * @return savePerspective -- (boolean) Whether the save to disk succeeded.
 	 */
 	@Override
-	public boolean savePerspective( Perspective perspective ) {
-		boolean boolReturnValue = false;
-		lngUniqueIdentifier += 1;
-		String strUniqueIdentifier = String.valueOf( lngUniqueIdentifier );
+	public void savePerspective( Perspective perspective ) throws RepositoryException {
+		UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+
 		ValueFactory insightVF = rc.getValueFactory();
-		String perspectiveUriName = "perspective-" + strUniqueIdentifier;
-		URI perspectiveURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, perspectiveUriName );
+		URI pid = urib.build( perspective.getLabel() );
+		Date now = new Date();
+		String creator = userInfoFromToolPreferences( "Created By Insight Manager, "
+				+ System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
+
+		rc.add( new StatementImpl( pid, RDF.TYPE, VAS.Perspective ) );
+		rc.add( new StatementImpl( pid, RDFS.LABEL,
+				insightVF.createLiteral( perspective.getLabel() ) ) );
+		rc.add( new StatementImpl( pid, DCTERMS.DESCRIPTION,
+				insightVF.createLiteral( perspective.getDescription() ) ) );
+		rc.add( new StatementImpl( pid, DCTERMS.CREATED,
+				insightVF.createLiteral( now ) ) );
+		rc.add( new StatementImpl( pid, DCTERMS.MODIFIED,
+				insightVF.createLiteral( now ) ) );
+		rc.add( new StatementImpl( pid, DCTERMS.CREATOR,
+				insightVF.createLiteral( creator ) ) );
+
 		//Be sure to set the new Perspective URI, because this Perspective object 
 		//is returned by side-effect, and it's URI is used to create Insight slots:
-		perspective.setUri( perspectiveURI );
-		Date now = new Date();
-		String creator = userInfoFromToolPreferences( "Created By Insight Manager, " + System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
-		//Make sure that embedded quotes and new-line characters can be persisted:
-		//String label = Utility.legalizeStringForSparql(perspective.getLabel());
-		//      String description = Utility.legalizeStringForSparql(perspective.getDescription());
-
-		String query = "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
-				+ "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
-				+ "INSERT{ ?uri rdfs:label ?label . "
-				+ "?uri dcterms:description ?description . "
-				+ "?uri a vas:Perspective . "
-				+ "?uri dcterms:created ?now . "
-				+ "?uri dcterms:modified ?now . "
-				+ "?uri dcterms:creator ?creator .} "
-				+ "WHERE{}";
-		try {
-			rc.begin();
-			Update uq = rc.prepareUpdate( QueryLanguage.SPARQL, query );
-			uq.setBinding( "uri", perspectiveURI );
-			uq.setBinding( "label", insightVF.createLiteral( perspective.getLabel() ) );
-			uq.setBinding( "description", insightVF.createLiteral( perspective.getDescription() ) );
-			uq.setBinding( "now", insightVF.createLiteral( now ) );
-			uq.setBinding( "creator", insightVF.createLiteral( creator ) );
-			uq.execute();
-			rc.commit();
-			boolReturnValue = true;
-		}
-		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
-			log.warn( e, e );
-			try {
-				rc.rollback();
-			}
-			catch ( Exception ee ) {
-				log.warn( ee, ee );
-			}
-		}
-		return boolReturnValue;
+		perspective.setUri( pid );
 	}
 
 	/**
@@ -650,86 +630,47 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	 * @return saveInsight -- (boolean) Whether the save succeeded.
 	 */
 	@Override
-	public boolean saveInsight( Perspective perspective, Insight insight ) {
-		boolean boolReturnValue = false;
-		lngUniqueIdentifier += 1;
-		String strUniqueIdentifier = String.valueOf( lngUniqueIdentifier );
-		ValueFactory insightVF = rc.getValueFactory();
-		URI perspectiveURI = perspective.getUri();
-		//Make sure that embedded quotes and new-line characters can be persisted:
-		URI dataViewOutputURI = insightVF.createURI( "http://va.gov/ontologies/semoss#" + insight.getOutput() );
-		String isLegacy = String.valueOf( insight.isLegacy() );
-		//Make sure that embedded quotes and new-line characters can be persisted:
-		String sparql = insight.getSparql().trim();
-		String description = insight.getDescription().trim();
-		String slotUriName = perspective.getUri().getLocalName() + "-slot-" + strUniqueIdentifier;
-		URI slotURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, slotUriName );
-		Literal order = insightVF.createLiteral( perspective.indexOf( insight ) );
-		//Insights can only have only SELECT and CONSTRUCT queries:
-		URI spinBodyTypeURI = ( sparql.toUpperCase().startsWith( "SELECT" )
-				? SP.Select : SP.Construct );
+	public void saveInsight( Perspective perspective, Insight insight ) throws RepositoryException {
+		UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+		ValueFactory vf = rc.getValueFactory();
+		URI iid = urib.build( insight.getLabel() );
 
-		String spinBodyUriName
-				= "insight-" + strUniqueIdentifier + "-" + spinBodyTypeURI.getLocalName();
-		URI spinBodyURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, spinBodyUriName );
+		rc.add( new StatementImpl( iid, RDF.TYPE, SPIN.MagicProperty ) );
+		rc.add( new StatementImpl( iid, RDFS.LABEL,
+				vf.createLiteral( insight.getLabel() ) ) );
+		rc.add( new StatementImpl( iid, DCTERMS.DESCRIPTION,
+				vf.createLiteral( insight.getDescription() ) ) );
+		rc.add( new StatementImpl( iid, RDFS.SUBCLASSOF, VAS.InsightProperties ) );
+		rc.add( new StatementImpl( iid, DCTERMS.CREATED,
+				vf.createLiteral( insight.getCreated() ) ) );
+		rc.add( new StatementImpl( iid, DCTERMS.MODIFIED,
+				vf.createLiteral( new Date() ) ) );
+		rc.add( new StatementImpl( iid, UI.dataView,
+				vf.createURI( "http://va.gov/ontologies/semoss#" + insight.getOutput() ) ) );
+		rc.add( new StatementImpl( iid, VAS.isLegacy,
+				vf.createLiteral( insight.isLegacy() ) ) );
 
-		String created = insight.getCreated();
-		String modified = insight.getModified();
+		String sparql = insight.getSparql();
 
-		String query = "PREFIX " + OLO.PREFIX + ": <" + OLO.NAMESPACE + "> "
-				+ "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + "> "
-				+ "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
-				+ "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
-				+ "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
-				+ "PREFIX " + UI.PREFIX + ": <" + UI.NAMESPACE + "> "
-				+ "INSERT{ ?perspectiveURI olo:slot ?slotURI . "
-				+ "?slotURI olo:item ?insightURI . "
-				+ "?slotURI olo:index ?order . "
-				+ "?insightURI rdfs:label ?question . "
-				+ "?insightURI rdfs:subclassof vas:InsightProperties . "
-				+ "?insightURI ui:dataView ?dataViewOutputURI . "
-				+ "?insightURI vas:isLegacy ?isLegacy . "
-				+ "?insightURI spin:body ?spinBodyURI . "
-				+ "?spinBodyURI rdf:type ?spinBodyTypeURI . "
-				+ "?spinBodyURI sp:text ?sparql . "
-				+ "?insightURI dcterms:description ?description . "
-				+ "?insightURI dcterms:creator ?creator . "
-				+ "?insightURI dcterms:created ?created . "
-				+ "?insightURI dcterms:modified ?modified . } "
-				+ "WHERE {}";
+		URI spinid = urib.build( insight.getLabel() + "-query" );
+		rc.add( new StatementImpl( iid, SPIN.body, spinid ) );
+		rc.add( new StatementImpl( spinid, SP.text,
+				vf.createLiteral( sparql ) ) );
 
-		try {
-			rc.begin();
-			Update uq = rc.prepareUpdate( QueryLanguage.SPARQL, query );
-			uq.setBinding( "perspectiveURI", perspectiveURI );
-			uq.setBinding( "slotURI", slotURI );
-			uq.setBinding( "insightURI", insight.getId() );
-			uq.setBinding( "order", order );
-			uq.setBinding( "question", insightVF.createLiteral( insight.getLabel() ) );
-			uq.setBinding( "dataViewOutputURI", dataViewOutputURI );
-			uq.setBinding( "isLegacy", insightVF.createLiteral( isLegacy ) );
-			uq.setBinding( "spinBodyURI", spinBodyURI );
-			uq.setBinding( "spinBodyTypeURI", spinBodyTypeURI );
-			uq.setBinding( "sparql", insightVF.createLiteral( sparql ) );
-			uq.setBinding( "description", insightVF.createLiteral( description ) );
-			uq.setBinding( "creator", insightVF.createLiteral( insight.getCreator() ) );
-			uq.setBinding( "created", insightVF.createLiteral( created ) );
-			uq.setBinding( "modified", insightVF.createLiteral( modified ) );
-
-			uq.execute();
-			rc.commit();
-			boolReturnValue = true;
+		// Insights can only have SELECT, CONSTRUCT, or DESCRIBE queries:
+		URI bodytype;
+		if ( sparql.toUpperCase().startsWith( "DESCRIBE" ) ) {
+			bodytype = SP.Describe;
 		}
-		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
-			log.warn( e, e );
-			try {
-				rc.rollback();
-			}
-			catch ( Exception ee ) {
-				log.warn( ee, ee );
-			}
+		else if ( sparql.toUpperCase().startsWith( "CONSTRUCT" ) ) {
+			bodytype = SP.Construct;
 		}
-		return boolReturnValue;
+		else {
+			bodytype = SP.Select;
+		}
+		rc.add( new StatementImpl( spinid, RDF.TYPE, bodytype ) );
+
+		insight.setId( iid );
 	}
 
 	/**
@@ -744,62 +685,24 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	 * @return saveParameter -- (boolean) Whether the save succeeded.
 	 */
 	@Override
-	public boolean saveParameter( Insight insight, Parameter parameter ) {
-		boolean boolReturnValue = false;
-		lngUniqueIdentifier += 1;
-		String strUniqueIdentifier = String.valueOf( lngUniqueIdentifier );
-		ValueFactory insightVF = rc.getValueFactory();
-		URI insightURI = insight.getId();
-		//We are rebuilding the Constraint and other URIs here, because the designers of 
-		//VA_MainDB, v20, decided to reuse Parameters, and we discourage that. No objects 
-		//on the tree-view should be reused. They all should be editable as unique items:
-		String constraintUriName = "constraint-" + strUniqueIdentifier;
-		URI constraintURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, constraintUriName );
-		String valueTypeUriName = parameter.getParameterType();
-		URI valueTypeURI = insightVF.createURI( valueTypeUriName );
-		String predicateUriName = "predicate-" + strUniqueIdentifier;
-		URI predicateURI = insightVF.createURI( ARG.NAMESPACE + predicateUriName );
-		String queryUriName = "query-" + strUniqueIdentifier;
-		URI queryURI = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS, queryUriName );
+	public void saveParameter( Insight insight, Parameter parameter ) throws RepositoryException {
+		UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+		ValueFactory vf = rc.getValueFactory();
+		URI pid = urib.build( insight.getLabel() + "-" + parameter.getLabel() );
 
-		String query = "PREFIX " + SPIN.PREFIX + ": <" + SPIN.NAMESPACE + "> "
-				+ "PREFIX " + SPL.PREFIX + ": <" + SPL.NAMESPACE + "> "
-				+ "PREFIX " + SP.PREFIX + ": <" + SP.NAMESPACE + "> "
-				+ "INSERT{ ?insightURI spin:constraint ?constraintURI ."
-				+ "?constraintURI rdfs:label ?label . "
-				+ "?constraintURI spl:valueType ?valueTypeURI . "
-				+ "?constraintURI spl:predicate ?predicateURI . "
-				+ "?predicateURI rdfs:label ?variable . "
-				+ "?constraintURI sp:query ?queryURI . "
-				+ "?queryURI sp:text ?defaultQuery .} "
-				+ "WHERE{}";
+		URI preduri = urib.build( insight.getLabel() + "-"
+				+ parameter.getLabel() + "-pred" );
+		URI quri = urib.build( insight.getLabel() + "-" + parameter.getLabel() + "-query" );
 
-		try {
+		rc.add( new StatementImpl( pid, RDFS.LABEL,
+				vf.createLiteral( parameter.getLabel() ) ) );
 
-			rc.begin();
-			Update uq = rc.prepareUpdate( QueryLanguage.SPARQL, query );
-			uq.setBinding( "label", insightVF.createLiteral( parameter.getLabel() ) );
-			uq.setBinding( "variable", insightVF.createLiteral( parameter.getVariable() ) );
-			uq.setBinding( "defaultQuery", insightVF.createLiteral( parameter.getDefaultQuery() ) );
-			uq.setBinding( "insightURI", insightURI );
-			uq.setBinding( "constraintURI", constraintURI );
-			uq.setBinding( "predicateURI", predicateURI );
-			uq.setBinding( "queryURI", queryURI );
-			uq.setBinding( "valueTypeURI", valueTypeURI );
-			uq.execute();
-			rc.commit();
-			boolReturnValue = true;
-		}
-		catch ( RepositoryException | MalformedQueryException | UpdateExecutionException e ) {
-			log.warn( e, e );
-			try {
-				rc.rollback();
-			}
-			catch ( Exception ee ) {
-				log.warn( ee, ee );
-			}
-		}
-		return boolReturnValue;
+		rc.add( new StatementImpl( pid, SPL.predicate, preduri ) );
+		rc.add( new StatementImpl( pid, SP.query, quri ) );
+
+		rc.add( preduri, RDFS.LABEL, vf.createLiteral( parameter.getLabel() ) );
+		rc.add( quri, SP.text, vf.createLiteral( parameter.getDefaultQuery() ) );
+
+		parameter.setParameterId( pid );
 	}
-
 }//End WriteableInsightManager class.

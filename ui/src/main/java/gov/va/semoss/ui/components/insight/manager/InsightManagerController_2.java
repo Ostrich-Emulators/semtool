@@ -144,12 +144,12 @@ public class InsightManagerController_2 implements Initializable {
 		treevPerspectives.getScene().setCursor( Cursor.WAIT );
 
 		//Define a Task to fetch an ArrayList of Perspectives/Insights:
-		Task<ObservableList<Perspective>> getInsightManagerData = new Task<ObservableList<Perspective>>(){
-		    @Override 
-		    protected ObservableList<Perspective> call() throws Exception {
-		    	arylPerspectives = FXCollections.observableArrayList(engine.getInsightManager().getPerspectives());
-	        return arylPerspectives;
-		    }
+		Task<ObservableList<Perspective>> getInsightManagerData = new Task<ObservableList<Perspective>>() {
+			@Override
+			protected ObservableList<Perspective> call() throws Exception {
+				arylPerspectives = FXCollections.observableArrayList( engine.getInsightManager().getPerspectives() );
+				return arylPerspectives;
+			}
 		};
 		//Define a listener to set the return value when the  Task completes:
 		getInsightManagerData.stateProperty().addListener( new ChangeListener<Worker.State>() {
@@ -1038,40 +1038,30 @@ public class InsightManagerController_2 implements Initializable {
 
 		}
 		else {
-			for ( TreeItem<Object> treeItem : olstPerspectives ) {
-				Perspective perspective = (Perspective) treeItem.getValue();
-				if ( !wim.savePerspective( perspective ) ) {
-					boolReturnValue = false;
-					break;
-				}
+			try {
+				for ( TreeItem<Object> treeItem : olstPerspectives ) {
+					Perspective perspective = (Perspective) treeItem.getValue();
+					wim.savePerspective( perspective );
 
-				ObservableList<TreeItem<Object>> insightItems = treeItem.getChildren();
-				if ( !insightItems.isEmpty() ) {
-					for ( TreeItem<Object> iitem : insightItems ) {
-						Insight insight = Insight.class.cast( iitem.getValue() );
-						if ( !wim.saveInsight( perspective, insight ) ) {
-							boolReturnValue = false;
-							break;
-						}
+					ObservableList<TreeItem<Object>> insightItems = treeItem.getChildren();
+					if ( !insightItems.isEmpty() ) {
+						for ( TreeItem<Object> iitem : insightItems ) {
+							Insight insight = Insight.class.cast( iitem.getValue() );
+							wim.saveInsight( perspective, insight );
 
-						ObservableList<TreeItem<Object>> paramItems = iitem.getChildren();
-						if ( !paramItems.isEmpty() ) {
-							for ( TreeItem<Object> pitem : paramItems ) {
-								Parameter parameter = Parameter.class.cast( pitem.getValue() );
-								if ( !wim.saveParameter( insight, parameter ) ) {
-									boolReturnValue = false;
-									break;
+							ObservableList<TreeItem<Object>> paramItems = iitem.getChildren();
+							if ( !paramItems.isEmpty() ) {
+								for ( TreeItem<Object> pitem : paramItems ) {
+									Parameter parameter = Parameter.class.cast( pitem.getValue() );
+									wim.saveParameter( insight, parameter );
 								}
 							}
-							if ( !boolReturnValue ) {
-								break;
-							}
 						}
 					}
-					if ( !boolReturnValue ) {
-						break;
-					}
 				}
+			}
+			catch ( Exception e ) {
+				boolReturnValue = false;
 			}
 		}
 		return boolReturnValue;

@@ -168,7 +168,7 @@ public class Insight implements Serializable {
 		parameters.put( variable, attributes );
 	}
 
-	public void setParameters( Collection<Parameter> params ){
+	public void setParameters( Collection<Parameter> params ) {
 		colInsightParameters.clear();
 		colInsightParameters.addAll( params );
 	}
@@ -186,7 +186,16 @@ public class Insight implements Serializable {
 	}
 
 	public String getParameterType( String parameterVariableName ) {
-		return this.parameters.get( parameterVariableName ).get( "parameterValueType" );
+		if ( parameters.containsKey( parameterVariableName ) ) {
+			return this.parameters.get( parameterVariableName ).get( "parameterValueType" );
+		}
+
+		for ( Parameter p : colInsightParameters ) {
+			if ( p.getLabel().equals( parameterVariableName ) ) {
+				return p.getParameterType();
+			}
+		}
+		return null;
 	}
 
 	public String getParameterQuery( String parameterVariableName ) {

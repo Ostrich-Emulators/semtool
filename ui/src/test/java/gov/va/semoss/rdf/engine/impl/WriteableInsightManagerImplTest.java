@@ -191,7 +191,7 @@ public class WriteableInsightManagerImplTest {
 	}
 
 	//@Test
-	public void testSetInsights() {
+	public void testSetInsights() throws Exception {
 		Insight ins = new Insight();
 		ins.setLabel( "Get All Carriages" );
 		ins.setSparql( "SELECT ?id WHERE { ?id a <http://foo.bar/model#Horseless_Carriage> }" );

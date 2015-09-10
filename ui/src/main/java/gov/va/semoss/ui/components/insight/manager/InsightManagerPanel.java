@@ -126,6 +126,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 							DefaultMutableTreeNode dmtn
 									= DefaultMutableTreeNode.class.cast( e.getOldLeadSelectionPath().getLastPathComponent() );
 							dmtn.setUserObject( currentCard.applyChanges() );
+							model.nodeChanged( dmtn );
 							commitbtn.setEnabled( true );
 						}
 					}
@@ -280,6 +281,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		DefaultMutableTreeNode dmtn
 				= DefaultMutableTreeNode.class.cast( tree.getLastSelectedPathComponent() );
 		dmtn.setUserObject( currentCard.applyChanges() );
+		model.nodeChanged( dmtn );
 		applybtn.setEnabled( false );
 		commitbtn.setEnabled( true );
   }//GEN-LAST:event_applybtnActionPerformed

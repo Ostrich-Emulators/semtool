@@ -45,7 +45,7 @@ public class Parameter implements Serializable {
 		this.strLabel = label;
 		this.strDefaultQuery = query;
 
-		computeVariableFromQuery();
+		computeVariableAndTypeFromQuery();
 	}
 
 	public Parameter( Parameter p ) {
@@ -104,15 +104,21 @@ public class Parameter implements Serializable {
 
 	public void setDefaultQuery( String strDefaultQuery ) {
 		this.strDefaultQuery = strDefaultQuery;
-		computeVariableFromQuery();
+		computeVariableAndTypeFromQuery();
 	}
 
-	private void computeVariableFromQuery() {
+	private void computeVariableAndTypeFromQuery() {
 		// our parameter variable is the first variable returned in the query
 		String nospaces = strDefaultQuery.replaceAll( "\n", " " );
 		Matcher m = FIRSTVAR.matcher( nospaces );
 		if ( m.matches() ) {
 			strVariable = m.group( 1 );
+			Pattern TYPER = Pattern.compile( "\\?" + strVariable
+					+ "\\s+(?:a|RDF:TYPE|RDFS:SUBCLASSOF)\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE );
+			Matcher t = TYPER.matcher( nospaces );
+			if( t.find() ){
+				strParameterType = t.group( 1 ).replaceAll( "(<|>)", "" );
+			}
 		}
 	}
 

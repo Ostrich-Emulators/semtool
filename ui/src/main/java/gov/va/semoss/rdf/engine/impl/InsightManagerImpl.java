@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -61,6 +60,9 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.Utility;
 
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openrdf.repository.Repository;
 
 /**
@@ -70,9 +72,10 @@ import org.openrdf.repository.Repository;
 public class InsightManagerImpl implements InsightManager {
 
 	private static final Logger log = Logger.getLogger( InsightManagerImpl.class );
+	private static final Pattern LEGACYPAT
+			= Pattern.compile( "((BIND\\s*\\(\\s*)?<@(\\w+)((?:-)([^@]+))?@>(\\s*AS\\s+\\?(\\w+)\\s*\\)\\s*\\.?\\s*)?)" );
 	private RepositoryConnection rc;
 	private Repository repo = null;
-	private final Pattern pattern = Pattern.compile( "^(\\w+)(.*)$" );
 	private boolean closeRcOnRelease = false;
 
 	public InsightManagerImpl( Repository _repo ) {
@@ -252,12 +255,12 @@ public class InsightManagerImpl implements InsightManager {
 					URI type = ( sparql.toUpperCase().startsWith( "SELECT" )
 							? SP.Select : SP.Construct );
 
-					URI spinBody = vf.createURI( MetadataConstants.VA_INSIGHTS_NS, 
+					URI spinBody = vf.createURI( MetadataConstants.VA_INSIGHTS_NS,
 							insightKey + "-" + type.getLocalName() );
-					
+
 					// The *_Questions.properties files have only SELECT and CONSTRUCT queries:
 					rc.add( spinBody, RDF.TYPE, type );
-					
+
 					// TODO: The following works fine and the query text is correct in RDF (verified via Insights export)
 					// However, following retrieval from the insights-kb, the quotation marks are being stripped away
 					// which then makes the query text invalid.  Trace this down and address.  IO5 is a good example to
@@ -288,7 +291,7 @@ public class InsightManagerImpl implements InsightManager {
 						rc.add( insightURI, SPIN.constraint, argumentURI );
 
 						rc.add( argumentURI, RDF.TYPE, SPL.Argument );
-						rc.add( argumentURI, RDFS.LABEL, 
+						rc.add( argumentURI, RDFS.LABEL,
 								vf.createLiteral( paramKey.replaceAll( "([a-z])([A-Z])", "$1 $2" ) ) );
 
 						URI parameterURI = vf.createURI( ARG.NAMESPACE, paramKey );
@@ -300,10 +303,10 @@ public class InsightManagerImpl implements InsightManager {
 						/*
 						 * Add the default query that retrieves parameter options:
 						 */
-						URI paramQuery = vf.createURI( MetadataConstants.VA_INSIGHTS_NS, 
+						URI paramQuery = vf.createURI( MetadataConstants.VA_INSIGHTS_NS,
 								insightKey + "-" + paramKey + "-Query" );
 						rc.add( paramQuery, RDF.TYPE, SP.Select );
-						rc.add( paramQuery, SP.text, 
+						rc.add( paramQuery, SP.text,
 								vf.createLiteral( "SELECT ?" + paramKey + " ?label WHERE{ ?" + paramKey + " a <" + paramType + "> ; rdfs:label ?label }" ) );
 						rc.add( argumentURI, SP.query, paramQuery );
 
@@ -472,6 +475,7 @@ public class InsightManagerImpl implements InsightManager {
 				// finally, set the parameters
 				Collection<Parameter> params = getInsightParameters( insight );
 				insight.setParameters( params );
+				upgradeIfLegacy( insight );
 				for ( Parameter p : params ) {
 					insight.setParameter( p.getVariable(), p.getLabel(), p.getParameterType(),
 							p.getDefaultQuery() );
@@ -634,9 +638,6 @@ public class InsightManagerImpl implements InsightManager {
 
 					insight.setLabel( obj.stringValue() );
 				}
-				else if ( VAS.isLegacy.equals( pred ) ) {
-					insight.setLegacy( obj.booleanValue() );
-				}
 				else if ( DCTERMS.CREATOR.equals( pred ) ) {
 					insight.setCreator( obj.stringValue() );
 				}
@@ -659,5 +660,96 @@ public class InsightManagerImpl implements InsightManager {
 		}
 
 		return insight;
+	}
+
+	private static void upgradeIfLegacy( Insight insight ) {
+		// there are two styles of legacy queries...
+		// 1) <@X@> where X is {parameter name}-{URI}
+		// 2) <@Y@> where Y is {parameter name}
+		// in the first case, this insight has a parameter
+		// in the second, the query is dependent on another parameter
+
+		// since there's a bit of processing, we'll process the groups twice
+		// once to see if we need to do it at all, and once to do the upgrade
+		// (we can check all the sparql at once by concatenating them)
+		StringBuilder legacychecker = new StringBuilder( insight.getSparql() );
+		Collection<Parameter> oldparams = insight.getInsightParameters();
+
+		for ( Parameter p : oldparams ) {
+			legacychecker.append( p.getDefaultQuery() );
+		}
+
+		String oneline = legacychecker.toString().replaceAll( "\n", " " );
+		Matcher m = LEGACYPAT.matcher( oneline );
+		boolean islegacy = m.find();
+		if ( islegacy ) {
+			String legacySparql = insight.getSparql().replaceAll( "\n", " " );
+			String newsparql = upgradeLegacySparql( legacySparql );
+			insight.setSparql( newsparql );
+			// some legacy insights specify parameters, but
+			// some to rely on the legacy mappings instead
+			Map<String, Parameter> pnames = new HashMap<>();
+			for ( Parameter old : oldparams ) {
+				pnames.put( old.getLabel(), old );
+			}
+
+			List<Parameter> newparams = new ArrayList<>();
+			m.reset( legacySparql );
+			while ( m.find() ) {
+				String var = m.group( 3 );
+				String type = m.group( 5 ); // can be null
+
+				if ( null != type ) {
+					// we have a type, so we can construct a sane Parameter if we don't
+					// already have this variable covered					
+					if ( pnames.containsKey( var ) ) {
+						newparams.add( pnames.get( var ) );
+					}
+					else {
+						Parameter p = new Parameter( var, "SELECT ?" + var
+								+ " WHERE { ?" + var + " a <" + type + "> }" );
+						newparams.add( p );
+					}
+				}
+			}
+
+			for ( Parameter p : newparams ) {
+				m.reset( p.getDefaultQuery().replaceAll( "\n", " " ) );
+				if ( m.find() ) {
+					p.setDefaultQuery( upgradeLegacySparql( p.getDefaultQuery() ) );
+				}
+			}
+
+			insight.setParameters( newparams );
+		}
+	}
+
+	private static String upgradeLegacySparql( String oldsparql ) {
+		Matcher m = LEGACYPAT.matcher( oldsparql.replaceAll( "\n", " " ) );
+		// Matcher only supports StringBuffers, not StringBuilders
+		StringBuffer insightSparql = new StringBuffer();
+		while ( m.find() ) {
+			boolean isbinding = ( null != m.group( 2 ) );
+			String bindvar = ( m.group( 7 ) ); // can be null
+			String var = m.group( 3 );
+
+			if ( isbinding ) {
+				if ( !var.equals( bindvar ) ) {
+					m.appendReplacement( insightSparql, "BIND( ?" + var
+							+ " AS ?" + bindvar + " )" );
+				}
+				else {
+					// skip it...we'll use the parameter to do the binding
+					m.appendReplacement( insightSparql, "" );
+				}
+			}
+			else {
+				m.appendReplacement( insightSparql, "?" + var );
+			}
+		}
+
+		m.appendTail( insightSparql );
+
+		return insightSparql.toString();
 	}
 }
