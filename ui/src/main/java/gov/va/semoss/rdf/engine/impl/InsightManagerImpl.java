@@ -714,8 +714,11 @@ public class InsightManagerImpl implements InsightManager {
 		statements.add( new StatementImpl( pid, RDF.TYPE, VAS.Perspective ) );
 		statements.add( new StatementImpl( pid, RDFS.LABEL,
 				vf.createLiteral( p.getLabel() ) ) );
-		statements.add( new StatementImpl( pid, DCTERMS.DESCRIPTION,
-				vf.createLiteral( p.getDescription() ) ) );
+		if ( null != p.getDescription() ) {
+			statements.add( new StatementImpl( pid, DCTERMS.DESCRIPTION,
+					vf.createLiteral( p.getDescription() ) ) );
+		}
+
 		statements.add( new StatementImpl( pid, DCTERMS.CREATED,
 				vf.createLiteral( now ) ) );
 		statements.add( new StatementImpl( pid, DCTERMS.MODIFIED,
@@ -735,8 +738,11 @@ public class InsightManagerImpl implements InsightManager {
 		statements.add( new StatementImpl( iid, RDF.TYPE, SPIN.MagicProperty ) );
 		statements.add( new StatementImpl( iid, RDFS.LABEL,
 				vf.createLiteral( insight.getLabel() ) ) );
-		statements.add( new StatementImpl( iid, DCTERMS.DESCRIPTION,
-				vf.createLiteral( insight.getDescription() ) ) );
+		if ( null != insight.getDescription() ) {
+			statements.add( new StatementImpl( iid, DCTERMS.DESCRIPTION,
+					vf.createLiteral( insight.getDescription() ) ) );
+		}
+
 		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, VAS.InsightProperties ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATED,
 				vf.createLiteral( insight.getCreated() ) ) );
