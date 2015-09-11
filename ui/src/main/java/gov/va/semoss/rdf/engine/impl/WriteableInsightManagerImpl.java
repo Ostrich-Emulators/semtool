@@ -280,8 +280,10 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		ValueFactory vf = rc.getValueFactory();
 		try {
 			rc.begin();
-			rc.remove( p.getId(), RDFS.LABEL, null );
-			rc.add( p.getId(), RDFS.LABEL, vf.createLiteral( p.getLabel() ) );
+			rc.remove( p.getId(), null, null );
+			rc.add( getPerspectiveStatements( p, vf,
+					UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS ), 
+					author ) );
 			rc.commit();
 		}
 		catch ( Exception e ) {
@@ -581,7 +583,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		ValueFactory vf = rc.getValueFactory();
 		URI pid = urib.build( perspective.getLabel() );
 		perspective.setId( pid );
-		rc.add( getPerspectiveStatements( perspective, vf, urib, author.getAuthorInfo() ) );
+		rc.add( getPerspectiveStatements( perspective, vf, urib, author ) );
 
 	}
 
@@ -602,7 +604,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		URI iid = urib.build( insight.getLabel() );
 		insight.setId( iid );
 
-		rc.add( getInsightStatements( insight, vf, urib, author.getAuthorInfo() ) );
+		rc.add( getInsightStatements( insight, vf, urib, author ) );
 	}
 
 	/**
@@ -632,7 +634,7 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		URI queryUri = urib.build( pianame + "-query" );
 
 		rc.add( getParameterStatements( parameter, predicateUri, queryUri, vf, urib,
-				author.getAuthorInfo() ) );
+				author ) );
 		rc.add( getConstraintStatements( insight, Arrays.asList( parameter ) ) );
 	}
 }//End WriteableInsightManager class.

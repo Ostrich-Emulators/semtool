@@ -55,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.Repository;
 
 /**
@@ -532,10 +533,16 @@ public class InsightManagerImpl implements InsightManager {
 					insight.setCreator( obj.stringValue() );
 				}
 				else if ( DCTERMS.CREATED.equals( pred ) ) {
-					insight.setCreated( getDate( Literal.class.cast( obj ).calendarValue() ) );
+					URI uri = obj.getDatatype();
+					if ( XMLSchema.DATE.equals( uri ) || XMLSchema.DATETIME.equals( uri ) ) {
+						insight.setCreated( getDate( Literal.class.cast( obj ).calendarValue() ) );
+					}
 				}
 				else if ( DCTERMS.MODIFIED.equals( pred ) ) {
-					insight.setModified( getDate( Literal.class.cast( obj ).calendarValue() ) );
+					URI uri = obj.getDatatype();
+					if ( XMLSchema.DATE.equals( uri ) || XMLSchema.DATETIME.equals( uri ) ) {
+						insight.setModified( getDate( Literal.class.cast( obj ).calendarValue() ) );
+					}
 				}
 				else if ( DCTERMS.DESCRIPTION.equals( pred ) ) {
 					insight.setDescription( obj.stringValue() );
@@ -662,14 +669,10 @@ public class InsightManagerImpl implements InsightManager {
 
 		ValueFactory vf = new ValueFactoryImpl();
 
-		String auth = ( null == user ? "Created By Insight Manager, "
-				+ System.getProperty( "release.nameVersion", "VA SEMOSS" )
-				: user.getAuthorInfo() );
-
 		if ( null == p.getId() ) {
 			p.setId( urib.build( p.getLabel() ) );
 		}
-		statements.addAll( getPerspectiveStatements( p, vf, urib, auth ) );
+		statements.addAll( getPerspectiveStatements( p, vf, urib, user ) );
 
 		for ( Insight i : p.getInsights() ) {
 			final String piname = p.getLabel() + "-" + i.getLabel();
@@ -677,7 +680,7 @@ public class InsightManagerImpl implements InsightManager {
 			if ( null == i.getId() ) {
 				i.setId( urib.build( piname ) );
 			}
-			statements.addAll( getInsightStatements( i, vf, urib, auth ) );
+			statements.addAll( getInsightStatements( i, vf, urib, user ) );
 
 			for ( Parameter a : i.getInsightParameters() ) {
 				final String pianame = piname + "-" + a.getLabel();
@@ -690,9 +693,9 @@ public class InsightManagerImpl implements InsightManager {
 				}
 
 				statements.addAll( getParameterStatements( a, predicateUri, queryUri,
-						vf, urib, auth ) );
+						vf, urib, user ) );
 			}
-			
+
 			statements.addAll( getConstraintStatements( i, i.getInsightParameters() ) );
 		}
 
@@ -702,7 +705,7 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	protected static Collection<Statement> getPerspectiveStatements( Perspective p,
-			ValueFactory vf, UriBuilder urib, String authorinfo ) {
+			ValueFactory vf, UriBuilder urib, User user ) {
 
 		List<Statement> statements = new ArrayList<>();
 		URI pid = p.getId();
@@ -718,13 +721,13 @@ public class InsightManagerImpl implements InsightManager {
 		statements.add( new StatementImpl( pid, DCTERMS.MODIFIED,
 				vf.createLiteral( now ) ) );
 		statements.add( new StatementImpl( pid, DCTERMS.CREATOR,
-				vf.createLiteral( authorinfo ) ) );
+				vf.createLiteral( getAuthorInfo( user ) ) ) );
 
 		return statements;
 	}
 
 	protected static Collection<Statement> getInsightStatements( Insight insight,
-			ValueFactory vf, UriBuilder urib, String authorinfo ) {
+			ValueFactory vf, UriBuilder urib, User user ) {
 
 		List<Statement> statements = new ArrayList<>();
 		URI iid = insight.getId();
@@ -740,7 +743,7 @@ public class InsightManagerImpl implements InsightManager {
 		statements.add( new StatementImpl( iid, DCTERMS.MODIFIED,
 				vf.createLiteral( new Date() ) ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATOR,
-				vf.createLiteral( authorinfo ) ) );
+				vf.createLiteral( getAuthorInfo( user ) ) ) );
 		statements.add( new StatementImpl( iid, UI.dataView,
 				vf.createURI( "http://va.gov/ontologies/semoss#" + insight.getOutput() ) ) );
 		String sparql = insight.getSparql();
@@ -768,7 +771,7 @@ public class InsightManagerImpl implements InsightManager {
 
 	protected static Collection<Statement> getParameterStatements( Parameter parameter,
 			URI predicateUri, URI queryUri, ValueFactory vf, UriBuilder urib,
-			String authorinfo ) {
+			User user ) {
 
 		List<Statement> statements = new ArrayList<>();
 
@@ -780,7 +783,7 @@ public class InsightManagerImpl implements InsightManager {
 		statements.add( new StatementImpl( pid, SPL.predicate, predicateUri ) );
 		statements.add( new StatementImpl( pid, SP.query, queryUri ) );
 
-		statements.add( new StatementImpl( predicateUri, RDFS.LABEL, 
+		statements.add( new StatementImpl( predicateUri, RDFS.LABEL,
 				vf.createLiteral( parameter.getLabel() ) ) );
 		statements.add( new StatementImpl( queryUri, SP.text,
 				vf.createLiteral( parameter.getDefaultQuery() ) ) );
@@ -809,5 +812,11 @@ public class InsightManagerImpl implements InsightManager {
 			statements.add( new StatementImpl( ins.getId(), SPIN.constraint, p.getId() ) );
 		}
 		return statements;
+	}
+
+	protected static String getAuthorInfo( User user ) {
+		return ( null == user ? "Created By Insight Manager, "
+				+ System.getProperty( "release.nameVersion", "VA SEMOSS" )
+				: user.getAuthorInfo() );
 	}
 }
