@@ -54,16 +54,16 @@ public class Parameter implements Serializable {
 	}
 
 	//Parameter URI:
-	public URI getParameterId() {
+	public URI getId() {
 		return this.uriId;
 	}
 
-	public void setParameterId( URI uriId ) {
+	public void setId( URI uriId ) {
 		this.uriId = uriId;
 	}
 
 	public void setParameterId( String uriId ) {
-		setParameterId( new URIImpl( uriId ) );
+		setId( new URIImpl( uriId ) );
 	}
 
 	public String getParameterURI() {

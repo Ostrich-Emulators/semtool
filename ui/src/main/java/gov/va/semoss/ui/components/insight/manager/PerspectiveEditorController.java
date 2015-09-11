@@ -34,7 +34,7 @@ public class PerspectiveEditorController implements Initializable{
 	public void setData(TreeView<Object> treevPerspectives){
 		TreeItem<Object> itemSelected = treevPerspectives.getSelectionModel().getSelectedItem();
 		Perspective perspective = (Perspective) itemSelected.getValue();
-		itemURI = perspective.getUri();
+		itemURI = perspective.getId();
 		
 		//Perspective Title:
 		//------------------

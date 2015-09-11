@@ -628,7 +628,7 @@ public class InsightManagerController_2 implements Initializable {
 		ValueFactory insightVF = rc.getValueFactory();
 		URI uriPerspective = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS,
 				"Perspective-" + strUniqueIdentifier );
-		perspective.setUri( uriPerspective );
+		perspective.setId( uriPerspective );
 		perspective.setLabel( "(A New Perspective)" );
 
 		//Add new Perspective to the tree-view:
@@ -742,7 +742,7 @@ public class InsightManagerController_2 implements Initializable {
 		ValueFactory insightVF = rc.getValueFactory();
 		URI uriParameter = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS,
 				"Parameter" + strUniqueIdentifier );
-		parameter.setParameterId( uriParameter );
+		parameter.setId( uriParameter );
 		parameter.setLabel( "(A New Parameter)" );
 
 		//Add new Parameter to the tree-view:
@@ -811,13 +811,13 @@ public class InsightManagerController_2 implements Initializable {
 		//Get the URI of the object (Parameter, Insight, or Perspective)
 		//behind the TreeItem passed in:
 		if ( objTreeItem instanceof Perspective ) {
-			uriTreeItem = ( (Perspective) objTreeItem ).getUri();
+			uriTreeItem = ( (Perspective) objTreeItem ).getId();
 		}
 		else if ( objTreeItem instanceof Insight ) {
 			uriTreeItem = ( (Insight) objTreeItem ).getId();
 		}
 		else if ( objTreeItem instanceof Parameter ) {
-			uriTreeItem = ( (Parameter) objTreeItem ).getParameterId();
+			uriTreeItem = ( (Parameter) objTreeItem ).getId();
 		}
 
 		//Get the URI of the object (Parameter, Insight, or Perspective)
@@ -1045,18 +1045,22 @@ public class InsightManagerController_2 implements Initializable {
 
 					ObservableList<TreeItem<Object>> insightItems = treeItem.getChildren();
 					if ( !insightItems.isEmpty() ) {
+						List<Insight> insights = new ArrayList<>();
 						for ( TreeItem<Object> iitem : insightItems ) {
 							Insight insight = Insight.class.cast( iitem.getValue() );
 							wim.saveInsight( perspective, insight );
+							insights.add( insight );
 
 							ObservableList<TreeItem<Object>> paramItems = iitem.getChildren();
 							if ( !paramItems.isEmpty() ) {
 								for ( TreeItem<Object> pitem : paramItems ) {
 									Parameter parameter = Parameter.class.cast( pitem.getValue() );
-									wim.saveParameter( insight, parameter );
+									wim.saveParameter( perspective, insight, parameter );
 								}
 							}
 						}
+						
+						wim.setInsights( perspective, insights );
 					}
 				}
 			}

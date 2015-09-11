@@ -142,9 +142,9 @@ public class ParameterPanel extends DataPanel<Parameter> {
 		// but we don't have that functionality yet, so we'll simulate it here
 		for ( Parameter p : insight.getInsightParameters() ) {
 			if ( !p.equals( parameter ) ) {
-				parameters.put( p.getParameterId(), p );
-				uris.add( p.getParameterId() );
-				labels.put( p.getParameterId(), "Instances of \"" + p.getLabel() + "\"" );
+				parameters.put( p.getId(), p );
+				uris.add( p.getId() );
+				labels.put( p.getId(), "Instances of \"" + p.getLabel() + "\"" );
 			}
 		}
 

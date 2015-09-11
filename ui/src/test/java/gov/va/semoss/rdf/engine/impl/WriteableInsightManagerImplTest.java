@@ -160,7 +160,7 @@ public class WriteableInsightManagerImplTest {
 		wim.commit();
 
 		Perspective newPer = wim.getPerspective( id );
-		assertEquals( id, newPer.getUri() );
+		assertEquals( id, newPer.getId() );
 		assertEquals( label, newPer.getLabel() );
 		assertEquals( "Blah", newPer.getDescription() );
 	}
@@ -185,7 +185,7 @@ public class WriteableInsightManagerImplTest {
 		wim.commit();
 
 		Perspective newPer = wim.getPerspective( id );
-		assertEquals( id, newPer.getUri() );
+		assertEquals( id, newPer.getId() );
 		assertEquals( label, newPer.getLabel() );
 		assertEquals( "Blah", newPer.getDescription() );
 	}

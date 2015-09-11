@@ -65,7 +65,7 @@ public class ParameterEditorController implements Initializable {
 		indexInsight = arylInsights.indexOf( insight );
 		parameter = (Parameter) itemSelected.getValue();
 		indexParameter = ( (ArrayList<Parameter>) insight.getInsightParameters() ).indexOf( parameter );
-		itemURI = parameter.getParameterId();
+		itemURI = parameter.getId();
 
 		//Parameter Name:
 		//---------------

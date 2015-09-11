@@ -160,7 +160,8 @@ public interface WriteableInsightManager extends InsightManager {
 	 * @param parameter -- (Parameter) A Parameter, belonging to the above
 	 * Insight.
 	 */
-	public void saveParameter( Insight insight, Parameter parameter ) throws RepositoryException;
+	public void saveParameter( Perspective p, Insight insight, Parameter parameter ) 
+			throws RepositoryException;
 
 	/**
 	 * (Re)Sets the perspectives, insights, and parameters data

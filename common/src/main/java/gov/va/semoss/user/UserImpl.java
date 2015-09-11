@@ -110,4 +110,9 @@ public class UserImpl implements User {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public String getAuthorInfo() {
+		return AbstractUser.getAuthorInformation( this );
+	}
 }
