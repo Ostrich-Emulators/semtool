@@ -281,9 +281,13 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		try {
 			rc.begin();
 			rc.remove( p.getId(), null, null );
-			rc.add( getPerspectiveStatements( p, vf,
+			
+			Collection<Statement> stmts = getPerspectiveStatements( p, vf, 
 					UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS ), 
-					author ) );
+					author );
+			
+			rc.add( stmts );
+					
 			rc.commit();
 		}
 		catch ( Exception e ) {

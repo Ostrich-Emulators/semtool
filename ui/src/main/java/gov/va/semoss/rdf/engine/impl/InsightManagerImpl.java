@@ -821,7 +821,8 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	protected static String getAuthorInfo( User user ) {
-		return ( null == user ? "Created By Insight Manager, "
+		return ( null == user || null == user.getAuthorInfo()
+				? "Created By Insight Manager, "
 				+ System.getProperty( "release.nameVersion", "VA SEMOSS" )
 				: user.getAuthorInfo() );
 	}
