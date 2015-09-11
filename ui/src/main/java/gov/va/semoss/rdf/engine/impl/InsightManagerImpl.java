@@ -7,11 +7,6 @@ package gov.va.semoss.rdf.engine.impl;
 
 import info.aduna.iteration.Iterations;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -19,14 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.DCTERMS;
@@ -35,10 +28,6 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.turtle.TurtleWriter;
-
-import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
@@ -180,36 +169,6 @@ public class InsightManagerImpl implements InsightManager {
 			}
 
 			statements.commit();
-
-			if ( log.isTraceEnabled() ) {
-				File dumpfile
-						= new File( FileUtils.getTempDirectory(), "semoss-outsights-dump.ttl" );
-				try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
-					w.write(
-							"# baseURI: http://va.gov/vcamp/data/insights/dump\n# imports: http://va.gov/vcamp/semoss/tool\n" );
-					ValueFactory vf = statements.getValueFactory();
-					URI base = vf.createURI( "http://va.gov/vcamp/data/insights/dump" );
-					statements.add( base, RDF.TYPE, OWL.ONTOLOGY );
-					statements.add( base, OWL.IMPORTS,
-							vf.createURI( "http://va.gov/vcamp/semoss/tool" ) );
-					TurtleWriter tw = new TurtleWriter( w );
-					tw.handleNamespace( "insights", "http://va.gov/vcamp/data/insights#" );
-					tw.handleNamespace( VAS.PREFIX, VAS.NAMESPACE );
-					tw.handleNamespace( OWL.PREFIX, OWL.NAMESPACE );
-					tw.handleNamespace( RDF.PREFIX, RDF.NAMESPACE );
-					tw.handleNamespace( RDFS.PREFIX, RDFS.NAMESPACE );
-					tw.handleNamespace( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
-					tw.handleNamespace( SP.PREFIX, SP.NAMESPACE );
-					tw.handleNamespace( SPL.PREFIX, SPL.NAMESPACE );
-					tw.handleNamespace( SPIN.PREFIX, SPIN.NAMESPACE );
-					tw.handleNamespace( ARG.PREFIX, ARG.NAMESPACE );
-					statements.export( tw );
-				}
-				catch ( RDFHandlerException | IOException ioe ) {
-					log.trace( "could not write insights dump", ioe );
-				}
-			}
-
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
@@ -820,8 +779,10 @@ public class InsightManagerImpl implements InsightManager {
 		statements.add( new StatementImpl( pid, SPL.predicate, predicateUri ) );
 		statements.add( new StatementImpl( pid, SP.query, queryUri ) );
 
-		statements.add( new StatementImpl( predicateUri, RDFS.LABEL, vf.createLiteral( parameter.getLabel() ) ) );
-		statements.add( new StatementImpl( queryUri, SP.text, vf.createLiteral( parameter.getDefaultQuery() ) ) );
+		statements.add( new StatementImpl( predicateUri, RDFS.LABEL, 
+				vf.createLiteral( parameter.getLabel() ) ) );
+		statements.add( new StatementImpl( queryUri, SP.text,
+				vf.createLiteral( parameter.getDefaultQuery() ) ) );
 
 		return statements;
 	}

@@ -23,7 +23,7 @@ public class Parameter implements Serializable {
 	private String strVariable = "";
 	private String strParameterType = "";
 	private String strDefaultQuery = "";
-	private static final Pattern FIRSTVAR = Pattern.compile( "^.*\\?(\\w+).*\\{.*" );
+	private static final Pattern FIRSTVAR = Pattern.compile( "^[^?]+\\?(\\w+).*\\{.*" );
 
 	public Parameter() {
 	}
@@ -110,16 +110,27 @@ public class Parameter implements Serializable {
 	private void computeVariableAndTypeFromQuery() {
 		// our parameter variable is the first variable returned in the query
 		String nospaces = strDefaultQuery.replaceAll( "\n", " " );
-		Matcher m = FIRSTVAR.matcher( nospaces );
-		if ( m.matches() ) {
-			strVariable = m.group( 1 );
+		strVariable = getVariableFromSparql( nospaces );
+		if ( null != strVariable ) {
 			Pattern TYPER = Pattern.compile( "\\?" + strVariable
 					+ "\\s+(?:a|RDF:TYPE|RDFS:SUBCLASSOF)\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE );
 			Matcher t = TYPER.matcher( nospaces );
-			if( t.find() ){
+			if ( t.find() ) {
 				strParameterType = t.group( 1 ).replaceAll( "(<|>)", "" );
 			}
 		}
+	}
+
+	/**
+	 * Gets the first variable from this sparql (the parameter variable)
+	 *
+	 * @param query
+	 * @return
+	 */
+	public static String getVariableFromSparql( String query ) {
+		String nospaces = query.replaceAll( "\n", " " );
+		Matcher m = FIRSTVAR.matcher( nospaces );
+		return ( m.matches() ? m.group( 1 ) : null );
 	}
 
 	/**

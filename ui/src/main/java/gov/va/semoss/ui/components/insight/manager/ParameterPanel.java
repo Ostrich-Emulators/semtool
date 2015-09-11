@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import org.openrdf.model.URI;
@@ -42,6 +44,24 @@ public class ParameterPanel extends DataPanel<Parameter> {
 
 		listenTo( parameterName );
 		listenTo( parameterQuery );
+
+		parameterQuery.getDocument().addDocumentListener( new DocumentListener() {
+			@Override
+			public void insertUpdate( DocumentEvent e ) {
+				setVariableLabel();
+			}
+
+			@Override
+			public void removeUpdate( DocumentEvent e ) {
+				setVariableLabel();
+			}
+
+			@Override
+			public void changedUpdate( DocumentEvent e ) {
+				setVariableLabel();
+			}
+		} );
+
 	}
 
 	public ParameterPanel() {
@@ -73,6 +93,8 @@ public class ParameterPanel extends DataPanel<Parameter> {
     parameterQuery = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
     jLabel8 = new javax.swing.JLabel();
     conceptbtn = new javax.swing.JButton();
+    jLabel1 = new javax.swing.JLabel();
+    vartext = new javax.swing.JTextField();
 
     jLabel7.setText("Parameter Label");
 
@@ -89,6 +111,12 @@ public class ParameterPanel extends DataPanel<Parameter> {
       }
     });
 
+    jLabel1.setText("Variable Name");
+
+    vartext.setEditable(false);
+    vartext.setToolTipText("Use this variable in the Insight Sparql");
+    vartext.setEnabled(false);
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -96,17 +124,19 @@ public class ParameterPanel extends DataPanel<Parameter> {
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(conceptbtn))
           .addGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(jLabel7)
-              .addComponent(jLabel8))
+              .addComponent(jLabel8)
+              .addComponent(jLabel1))
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(parameterName)
-              .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)))
-          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addComponent(conceptbtn)))
+              .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
+              .addComponent(vartext))))
         .addContainerGap())
     );
     layout.setVerticalGroup(
@@ -117,11 +147,15 @@ public class ParameterPanel extends DataPanel<Parameter> {
           .addComponent(jLabel7)
           .addComponent(parameterName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jLabel1)
+          .addComponent(vartext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)
           .addGroup(layout.createSequentialGroup()
             .addComponent(jLabel8)
-            .addGap(0, 0, Short.MAX_VALUE))
-          .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE))
+            .addGap(0, 0, Short.MAX_VALUE)))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(conceptbtn)
         .addContainerGap())
@@ -188,16 +222,22 @@ public class ParameterPanel extends DataPanel<Parameter> {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton conceptbtn;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel7;
   private javax.swing.JLabel jLabel8;
   private javax.swing.JScrollPane jScrollPane5;
   private javax.swing.JTextField parameterName;
   private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor parameterQuery;
+  private javax.swing.JTextField vartext;
   // End of variables declaration//GEN-END:variables
 
 	@Override
 	protected void updateElement( Parameter p ) {
 		p.setLabel( parameterName.getText() );
 		p.setDefaultQuery( parameterQuery.getText() );
+	}
+
+	private void setVariableLabel() {
+		vartext.setText( "?" + Parameter.getVariableFromSparql( parameterQuery.getText() ) );
 	}
 }

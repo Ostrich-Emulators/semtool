@@ -14,6 +14,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Enumeration;
 import javax.swing.AbstractAction;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
@@ -98,6 +99,36 @@ public class InsightMenu extends MouseAdapter {
 	}
 
 	private void init( JPopupMenu menu, Insight i, DefaultMutableTreeNode node ) {
+		menu.add( new AbstractAction( "Clone this Insight" ) {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Insight insight = new Insight( "Clone of " + i.getLabel() );
+				insight.setSparql( i.getSparql() );
+				insight.setOutput( i.getOutput() );
+
+				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( insight );
+				DefaultMutableTreeNode parent
+						= DefaultMutableTreeNode.class.cast( node.getParent() );
+
+				int idx = 0;
+				Enumeration<DefaultMutableTreeNode> en = node.children();
+				while ( en.hasMoreElements() ) {
+					DefaultMutableTreeNode childnode = en.nextElement();
+					Parameter oldp = Parameter.class.cast( childnode.getUserObject() );
+					Parameter pchild = new Parameter( oldp.getLabel() );
+					pchild.setDefaultQuery( oldp.getDefaultQuery() );
+
+					model.insertNodeInto( new DefaultMutableTreeNode( pchild ),
+							newnode, idx++ );
+				}
+
+				model.insertNodeInto( newnode, parent, parent.getIndex( node ) );
+				tree.expandPath( new TreePath( newnode.getPath() ) );
+				tree.setSelectionPath( new TreePath( newnode.getPath() ) );
+			}
+		} );
+
 		menu.add( new AbstractAction( "Add Parameter" ) {
 
 			@Override
