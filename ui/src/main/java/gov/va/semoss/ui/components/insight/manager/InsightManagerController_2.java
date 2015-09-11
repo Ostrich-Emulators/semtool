@@ -676,7 +676,7 @@ public class InsightManagerController_2 implements Initializable {
 		ValueFactory insightVF = rc.getValueFactory();
 		URI uriInsight = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS,
 				"Insight-" + strUniqueIdentifier );
-		String now = new Date().toString();
+		Date now = new Date();
 
 		insight.setId( uriInsight );
 		insight.setLabel( "(A New Insight)" );

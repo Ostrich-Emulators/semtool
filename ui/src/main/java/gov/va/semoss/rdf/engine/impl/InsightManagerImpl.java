@@ -44,6 +44,7 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
+import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.user.User;
@@ -140,7 +141,7 @@ public class InsightManagerImpl implements InsightManager {
 		if ( !persps.isEmpty() ) {
 			ValueFactory insightVF = statements.getValueFactory();
 
-			Literal now = insightVF.createLiteral( new Date() );
+			Date now = new Date();
 			Literal creator = insightVF.createLiteral( "Imported By "
 					+ System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 
@@ -182,7 +183,7 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	private List<Insight> loadLegacyQuestions( String insightList, String pname,
-			Properties dreamerProp, Literal now, Literal creator, UriBuilder urib ) {
+			Properties dreamerProp, Date now, Literal creator, UriBuilder urib ) {
 		List<Insight> insights = new ArrayList<>();
 
 		// questions
@@ -202,8 +203,8 @@ public class InsightManagerImpl implements InsightManager {
 				URI insightURI = urib.build( pname + "-" + insightKey );
 				Insight ins = new Insight( insightURI, insightLabel );
 				ins.setSparql( sparql );
-				ins.setCreated( now.stringValue() );
-				ins.setModified( now.stringValue() );
+				ins.setCreated( now );
+				ins.setModified( now );
 				ins.setOutput( legacyDataViewName );
 				ins.setCreator( creator.stringValue() );
 
@@ -531,10 +532,10 @@ public class InsightManagerImpl implements InsightManager {
 					insight.setCreator( obj.stringValue() );
 				}
 				else if ( DCTERMS.CREATED.equals( pred ) ) {
-					insight.setCreated( obj.stringValue() );
+					insight.setCreated( getDate( Literal.class.cast( obj ).calendarValue() ) );
 				}
 				else if ( DCTERMS.MODIFIED.equals( pred ) ) {
-					insight.setModified( obj.stringValue() );
+					insight.setModified( getDate( Literal.class.cast( obj ).calendarValue() ) );
 				}
 				else if ( DCTERMS.DESCRIPTION.equals( pred ) ) {
 					insight.setDescription( obj.stringValue() );

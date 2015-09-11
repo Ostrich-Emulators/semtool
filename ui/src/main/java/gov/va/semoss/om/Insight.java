@@ -1,10 +1,12 @@
 package gov.va.semoss.om;
 
+import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
@@ -28,9 +31,6 @@ public class Insight implements Serializable {
 	Map<String, Map<String, String>> parameters = new HashMap<>();
 	//Sparql for the question:
 	String sparql = "";
-	//Database id indicating Insight location.
-	//This may be a URL in memory or a file:
-	String databaseID = "";
 	//Type of entity this insight has:
 	String entityType = "";
 	//The layout used to render this insight:
@@ -42,9 +42,9 @@ public class Insight implements Serializable {
 	//Author of Insight:
 	String creator = "";
 	//Date Created:
-	String created = "";
+	private Date created;
 	//Date Modified:
-	String modified = "";
+	private Date modified;
 
 	//The default value of this Insight is a Sparql query in most cases.
 	//Some Insights depend upon Java renderer classes, instead of queries.
@@ -84,7 +84,6 @@ public class Insight implements Serializable {
 		creator = i.getCreator();
 		description = i.getDescription();
 
-		databaseID = i.getDatabaseID();
 		parameters.putAll( i.parameters );
 
 		entityType = i.entityType;
@@ -139,14 +138,6 @@ public class Insight implements Serializable {
 
 	public void setSparql( String sparql ) {
 		this.sparql = sparql;
-	}
-
-	public String getDatabaseID() {
-		return databaseID;
-	}
-
-	public void setDatabaseID( String databaseID ) {
-		this.databaseID = databaseID;
 	}
 
 	//Collection of InsightParameters for this Insight:
@@ -237,20 +228,20 @@ public class Insight implements Serializable {
 	}
 
 	//Date Created:
-	public String getCreated() {
+	public Date getCreated() {
 		return created;
 	}
 
-	public void setCreated( String created ) {
+	public void setCreated( Date created ) {
 		this.created = created;
 	}
 
 	//Date Modified:
-	public String getModified() {
+	public Date getModified() {
 		return modified;
 	}
 
-	public void setModified( String modified ) {
+	public void setModified( Date modified ) {
 		this.modified = modified;
 	}
 
@@ -277,11 +268,11 @@ public class Insight implements Serializable {
 		}
 		Value createdValue = resultSet.getValue( "created" );
 		if ( createdValue != null ) {
-			setCreated( createdValue.stringValue() );
+			setCreated( getDate( Literal.class.cast( createdValue ).calendarValue() ) );
 		}
 		Value modifiedValue = resultSet.getValue( "modified" );
 		if ( modifiedValue != null ) {
-			setModified( modifiedValue.stringValue() );
+			setModified( getDate( Literal.class.cast(  modifiedValue ).calendarValue() ) );
 		}
 
 		if ( resultSet.getValue( "parameterVariable" ) != null ) {
