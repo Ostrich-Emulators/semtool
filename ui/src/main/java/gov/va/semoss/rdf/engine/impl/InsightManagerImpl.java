@@ -67,7 +67,7 @@ public class InsightManagerImpl implements InsightManager {
 	private static final Logger log = Logger.getLogger( InsightManagerImpl.class );
 	private static final Pattern LEGACYPAT
 			= Pattern.compile( "((BIND\\s*\\(\\s*)?<@(\\w+)((?:-)([^@]+))?@>(\\s*AS\\s+\\?(\\w+)\\s*\\)\\s*\\.?\\s*)?)" );
-	private RepositoryConnection statements;
+	private RepositoryConnection rc;
 	private Repository repo = null;
 	private boolean closeRcOnRelease = false;
 
@@ -81,7 +81,7 @@ public class InsightManagerImpl implements InsightManager {
 					repo.initialize();
 				}
 
-				statements = repo.getConnection();
+				rc = repo.getConnection();
 				closeRcOnRelease = true;
 			}
 			catch ( RepositoryException re ) {
@@ -119,12 +119,12 @@ public class InsightManagerImpl implements InsightManager {
 			}
 		}
 
-		this.statements = rc;
+		this.rc = rc;
 		closeRcOnRelease = closeable;
 	}
 
 	protected RepositoryConnection getRawConnection() {
-		return statements;
+		return rc;
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class InsightManagerImpl implements InsightManager {
 
 		log.debug( "Legacy Perspectives: " + persps );
 		if ( !persps.isEmpty() ) {
-			ValueFactory insightVF = statements.getValueFactory();
+			ValueFactory insightVF = rc.getValueFactory();
 
 			Date now = new Date();
 			Literal creator = insightVF.createLiteral( "Imported By "
@@ -162,20 +162,20 @@ public class InsightManagerImpl implements InsightManager {
 		}
 
 		try {
-			statements.begin();
+			rc.begin();
 			// tag this data as an Insights dataset
-			statements.add( MetadataConstants.VA_INSIGHTS, RDF.TYPE,
+			rc.add( MetadataConstants.VA_INSIGHTS, RDF.TYPE,
 					MetadataConstants.INSIGHT_CORE_TYPE );
 			for ( Perspective p : perspectives ) {
-				statements.add( getStatements( p, null ) );
+				rc.add( getStatements( p, null ) );
 			}
 
-			statements.commit();
+			rc.commit();
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
 			try {
-				statements.rollback();
+				rc.rollback();
 			}
 			catch ( Exception ee ) {
 				log.error( ee, ee );
@@ -233,7 +233,7 @@ public class InsightManagerImpl implements InsightManager {
 	public Collection<Perspective> getPerspectives() {
 		List<Perspective> persps = new ArrayList<>();
 		try {
-			List<Statement> stmts = Iterations.asList( statements.getStatements( null,
+			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
 					RDF.TYPE, VAS.Perspective, true ) );
 			for ( Statement s : stmts ) {
 				persps.add( getPerspective( URI.class.cast( s.getSubject() ) ) );
@@ -259,7 +259,7 @@ public class InsightManagerImpl implements InsightManager {
 
 		try {
 			// get this insight's constraints/parameters
-			Collection<Statement> paramIds = Iterations.asList( statements.getStatements( insight.getId(),
+			Collection<Statement> paramIds = Iterations.asList( rc.getStatements( insight.getId(),
 					SPIN.constraint, null, false ) );
 			for ( Statement s : paramIds ) {
 				URI paramId = URI.class.cast( s.getObject() );
@@ -268,7 +268,7 @@ public class InsightManagerImpl implements InsightManager {
 
 				// get data about this parameter
 				Collection<Statement> data
-						= Iterations.asList( statements.getStatements( paramId, null, null, false ) );
+						= Iterations.asList( rc.getStatements( paramId, null, null, false ) );
 				for ( Statement d : data ) {
 					URI pred = d.getPredicate();
 					Value val = d.getObject();
@@ -278,7 +278,7 @@ public class InsightManagerImpl implements InsightManager {
 					}
 					else if ( SPL.predicate.equals( pred ) ) {
 						List<Statement> preddata
-								= Iterations.asList( statements.getStatements( URI.class.cast( val ),
+								= Iterations.asList( rc.getStatements( URI.class.cast( val ),
 												RDFS.LABEL, null, true ) );
 						if ( !preddata.isEmpty() ) {
 							parameter.setVariable( preddata.get( 0 ).getObject().stringValue() );
@@ -286,7 +286,7 @@ public class InsightManagerImpl implements InsightManager {
 					}
 					else if ( SP.query.equals( pred ) ) {
 						List<Statement> preddata
-								= Iterations.asList( statements.getStatements( URI.class.cast( val ),
+								= Iterations.asList( rc.getStatements( URI.class.cast( val ),
 												SP.text, null, true ) );
 						if ( !preddata.isEmpty() ) {
 							parameter.setDefaultQuery( preddata.get( 0 ).getObject().stringValue() );
@@ -322,7 +322,7 @@ public class InsightManagerImpl implements InsightManager {
 			orderquery.addNamespace( OLO.PREFIX, OLO.NAMESPACE );
 
 			List<URI> insightUris
-					= AbstractSesameEngine.getSelectNoEx( orderquery, statements, true );
+					= AbstractSesameEngine.getSelectNoEx( orderquery, rc, true );
 
 			for ( URI id : insightUris ) {
 				insights.add( getInsight( id ) );
@@ -339,24 +339,24 @@ public class InsightManagerImpl implements InsightManager {
 			// need a couple things here...the insight data, the query, 
 			// and view data (the playsheet)
 			List<Statement> stmts
-					= Iterations.asList( statements.getStatements( insightURI, null, null, true ) );
+					= Iterations.asList( rc.getStatements( insightURI, null, null, true ) );
 
 			// the query itself
 			List<Statement> qstmts
-					= Iterations.asList( statements.getStatements( insightURI, SPIN.body, null, true ) );
+					= Iterations.asList( rc.getStatements( insightURI, SPIN.body, null, true ) );
 			if ( !qstmts.isEmpty() ) {
 				URI body = URI.class.cast( qstmts.get( 0 ).getObject() );
 				List<Statement> querys
-						= Iterations.asList( statements.getStatements( body, SP.text, null, true ) );
+						= Iterations.asList( rc.getStatements( body, SP.text, null, true ) );
 				stmts.addAll( querys );
 			}
 			// the data view
 			List<Statement> dvstmts
-					= Iterations.asList( statements.getStatements( insightURI, UI.dataView, null, true ) );
+					= Iterations.asList( rc.getStatements( insightURI, UI.dataView, null, true ) );
 			if ( !dvstmts.isEmpty() ) {
 				URI view = URI.class.cast( dvstmts.get( 0 ).getObject() );
 				List<Statement> dvs
-						= Iterations.asList( statements.getStatements( view, UI.viewClass, null, true ) );
+						= Iterations.asList( rc.getStatements( view, UI.viewClass, null, true ) );
 				stmts.addAll( dvs );
 			}
 
@@ -389,7 +389,7 @@ public class InsightManagerImpl implements InsightManager {
 		try {
 			Perspective perspective = new Perspective( perspectiveURI );
 			Collection<Statement> stmts
-					= Iterations.asList( statements.getStatements( perspectiveURI, null, null, false ) );
+					= Iterations.asList( rc.getStatements( perspectiveURI, null, null, false ) );
 			for ( Statement s : stmts ) {
 				URI pred = s.getPredicate();
 				Value val = s.getObject();
@@ -442,7 +442,7 @@ public class InsightManagerImpl implements InsightManager {
 				}
 			};
 			log.debug( "Playsheet Query... " + query );
-			colPlaysheet.addAll( AbstractSesameEngine.getSelect( lqa, statements, true ) );
+			colPlaysheet.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
@@ -493,14 +493,14 @@ public class InsightManagerImpl implements InsightManager {
 
 	@Override
 	public Collection<Statement> getStatements() throws RepositoryException {
-		return Iterations.asList( statements.getStatements( null, null, null, false ) );
+		return Iterations.asList( rc.getStatements( null, null, null, false ) );
 	}
 
 	@Override
 	public void release() {
 		if ( closeRcOnRelease ) {
 			try {
-				statements.close();
+				rc.close();
 			}
 			catch ( Exception e ) {
 				log.error( "error releasing InsightEngine connection", e );
