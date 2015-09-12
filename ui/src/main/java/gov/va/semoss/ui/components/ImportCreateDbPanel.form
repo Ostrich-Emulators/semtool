@@ -4,6 +4,8 @@
   <NonVisualComponents>
     <Component class="javax.swing.ButtonGroup" name="edgegroup">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="stagegroup">
+    </Component>
   </NonVisualComponents>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -192,12 +194,18 @@
       <SubComponents>
         <Component class="javax.swing.JRadioButton" name="diskStaging">
           <Properties>
+            <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+              <ComponentRef name="stagegroup"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="On Disk"/>
             <Property name="toolTipText" type="java.lang.String" value="Loading on disk can be slower, but uses less memory"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JRadioButton" name="memoryStaging">
           <Properties>
+            <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+              <ComponentRef name="stagegroup"/>
+            </Property>
             <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="In Memory"/>
             <Property name="toolTipText" type="java.lang.String" value="Loading in memory can be faster, but uses more memory"/>

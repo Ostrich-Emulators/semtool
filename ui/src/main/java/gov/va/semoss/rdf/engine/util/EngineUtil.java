@@ -59,7 +59,6 @@ import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
 import gov.va.semoss.user.LocalUserImpl;
 import gov.va.semoss.user.User;
 import gov.va.semoss.user.Security;
-import gov.va.semoss.security.permissions.SemossPermission;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;

@@ -54,6 +54,7 @@ public class RDFDatatypeTools {
 	 * classes as values
 	 */
 	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
+	private static final Map<Class<?>, URI> REVTYPELOOKUP = new HashMap<>();
 
 	/**
 	 * Default constructor
@@ -68,6 +69,13 @@ public class RDFDatatypeTools {
 		TYPELOOKUP.put( XMLSchema.DATE, Date.class );
 		TYPELOOKUP.put( XMLSchema.DATETIME, Date.class );
 		TYPELOOKUP.put( XMLSchema.BOOLEAN, Boolean.class );
+
+		REVTYPELOOKUP.put( Integer.class, XMLSchema.INT );
+		REVTYPELOOKUP.put( Double.class, XMLSchema.DOUBLE );
+		REVTYPELOOKUP.put( Float.class, XMLSchema.FLOAT );
+		REVTYPELOOKUP.put( String.class, XMLSchema.STRING );
+		REVTYPELOOKUP.put( Date.class, XMLSchema.DATETIME );
+		REVTYPELOOKUP.put( Boolean.class, XMLSchema.BOOLEAN );
 	}
 
 	public static RDFDatatypeTools instance() {
@@ -232,6 +240,23 @@ public class RDFDatatypeTools {
 			return XMLDatatypeUtil.parseCalendar( dataPiece );
 		}
 		return removeExtraneousDoubleQuotes( input );
+	}
+
+	public static URI getDatatype( Object val ) {
+		if ( null == val ) {
+			return null;
+		}
+
+		if ( val instanceof URI ) {
+			return XMLSchema.ANYURI;
+		}
+		else if ( val instanceof Literal ) {
+			Literal l = Literal.class.cast( val );			
+			return ( null == l.getDatatype() ? XMLSchema.STRING : l.getDatatype() );
+		}
+
+		Class<?> theClass = val.getClass();
+		return REVTYPELOOKUP.getOrDefault( theClass, XMLSchema.STRING );
 	}
 
 	/**

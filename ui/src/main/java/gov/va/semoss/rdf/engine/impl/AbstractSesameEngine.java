@@ -419,8 +419,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected abstract RepositoryConnection getRawConnection();
 
 	public static final <T> T getSelectNoEx( QueryExecutor<T> query,
-			RepositoryConnection rc,
-			boolean dobindings ) {
+			RepositoryConnection rc, boolean dobindings ) {
 		try {
 			return getSelect( query, rc, dobindings );
 		}
@@ -430,14 +429,18 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	public static Model getConstruct( QueryExecutor<Model> query, RepositoryConnection rc )
+	public static Model getConstruct( QueryExecutor<Model> query, 
+			RepositoryConnection rc, boolean dobindings )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 
-		String sparql
-				= processNamespaces( query.bindAndGetSparql(), query.getNamespaces() );
+		String sparql	= processNamespaces( dobindings ? query.getSparql()
+				: query.bindAndGetSparql(), query.getNamespaces() );
 
 		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql );
 		tq.setIncludeInferred( query.usesInferred() );
+		if( dobindings ){
+			query.setBindings( tq, rc.getValueFactory() );
+		}
 
 		GraphQueryResult gqr = tq.evaluate();
 		while ( gqr.hasNext() ) {
@@ -491,7 +494,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	public Model construct( QueryExecutor<Model> q ) throws RepositoryException,
 			MalformedQueryException, QueryEvaluationException {
 		addUserNamespaces( q );
-		return getConstruct( q, getRawConnection() );
+		return getConstruct( q, getRawConnection(), supportsSparqlBindings() );
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Map;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.Operation;
 
@@ -57,6 +58,8 @@ public interface Bindable {
 	public Bindable bind( String var, Date d );
 
 	public Bindable bind( String var, boolean d );
+
+	public Bindable bind( String var, Value v );
 
 	public void useInferred( boolean b );
 

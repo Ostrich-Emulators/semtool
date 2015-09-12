@@ -160,7 +160,7 @@ public class WriteableInsightManagerImplTest {
 		wim.commit();
 
 		Perspective newPer = wim.getPerspective( id );
-		assertEquals( id, newPer.getUri() );
+		assertEquals( id, newPer.getId() );
 		assertEquals( label, newPer.getLabel() );
 		assertEquals( "Blah", newPer.getDescription() );
 	}
@@ -185,13 +185,13 @@ public class WriteableInsightManagerImplTest {
 		wim.commit();
 
 		Perspective newPer = wim.getPerspective( id );
-		assertEquals( id, newPer.getUri() );
+		assertEquals( id, newPer.getId() );
 		assertEquals( label, newPer.getLabel() );
 		assertEquals( "Blah", newPer.getDescription() );
 	}
 
 	//@Test
-	public void testSetInsights() {
+	public void testSetInsights() throws Exception {
 		Insight ins = new Insight();
 		ins.setLabel( "Get All Carriages" );
 		ins.setSparql( "SELECT ?id WHERE { ?id a <http://foo.bar/model#Horseless_Carriage> }" );

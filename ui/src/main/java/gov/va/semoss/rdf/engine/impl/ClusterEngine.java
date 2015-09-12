@@ -40,11 +40,11 @@ public class ClusterEngine extends AbstractSesameEngine {
 	// database names
 	Map<String, IEngine> engineHash = new HashMap<>();
 
-	public ClusterEngine(Properties initProps){
-		super(initProps);
-		this.openDB(initProps);
+	public ClusterEngine( Properties initProps ) {
+		super( initProps );
+		this.openDB( initProps );
 	}
-	
+
 	@Override
 	protected void createRc( Properties props ) {
 		ForwardChainingRDFSInferencer inferencer
@@ -91,7 +91,12 @@ public class ClusterEngine extends AbstractSesameEngine {
 			for ( Perspective p : ie.getPerspectives() ) {
 				insights.add( p );
 				List<Insight> ins = ie.getInsights( p );
-				insights.setInsights( p, ins );
+				try {
+					insights.setInsights( p, ins );
+				}
+				catch ( Exception e ) {
+					log.error( e, e );
+				}
 			}
 			insights.commit();
 		}
@@ -100,12 +105,12 @@ public class ClusterEngine extends AbstractSesameEngine {
 	public void initializeInsightBase() {
 		if ( null == insights ) {
 			insights = new WriteableInsightManagerImpl( getInsightManager(),
-			Security.getSecurity().getAssociatedUser( this )) {
-				@Override
-				public void commit() {
-					log.warn( "commit means nothing here" );
-				}
-			};
+					Security.getSecurity().getAssociatedUser( this ) ) {
+						@Override
+						public void commit() {
+							log.warn( "commit means nothing here" );
+						}
+					};
 			setInsightManager( insights );
 		}
 	}

@@ -21,6 +21,7 @@ import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
+import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -88,6 +89,8 @@ public class DefaultPlaySheetIcons {
 		setDefaultIcon( USHeatMapPlaySheet.class, "icons16/questions_us_heat_map1_16.png" );
 
 		setDefaultIcon( "(Update Query)", "icons16/questions_update2_16.png" );
+		
+		setDefaultIcon( DupeHeatMapSheet.class, "icons16/questions_heat_map3_16.png" );
 	}
 
 	public static void setDefaultIcon( Class<?> k, String imgloc ) {

@@ -31,6 +31,7 @@ import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.util.Utility;
 import org.openrdf.model.impl.URIImpl;
 
@@ -96,6 +97,8 @@ public class GraphDataModel {
 	 */
 	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
 		try {
+			Map<Value, URI> nonUriIds = new HashMap<>();
+
 			Set<URI> needProps = new HashSet<>();
 			for ( Resource r : model.subjects() ) {
 				needProps.add( URI.class.cast( r ) );
@@ -116,9 +119,12 @@ public class GraphDataModel {
 					dst = createOrRetrieveVertex( URI.class.cast( obj ), overlayLevel );
 				}
 				else {
-					URI uri = UriBuilder.getBuilder( Constants.ANYNODE ).uniqueUri();
+					URI uri = UriBuilder.getBuilder( Constants.ANYNODE + "/" ).uniqueUri();
 					dst = createOrRetrieveVertex( uri, overlayLevel );
 					dst.setLabel( obj.stringValue() );
+					URI type = RDFDatatypeTools.getDatatype( obj );
+					dst.setType( type );
+					nonUriIds.put( obj, uri );
 				}
 
 				vizgraph.addVertex( src );
@@ -137,10 +143,15 @@ public class GraphDataModel {
 			Map<URI, String> edgelabels
 					= GuiUtility.getInstanceLabels( model.predicates(), engine );
 			for ( Statement s : model ) {
+
 				String edgekey = s.getPredicate().stringValue()
-						+ s.getSubject().stringValue() + s.getObject().stringValue();
+						+ s.getSubject().stringValue()
+						+ ( nonUriIds.containsKey( s.getObject() )
+								? nonUriIds.get( s.getObject() )
+								: s.getObject() ).stringValue();
 				SEMOSSEdge edge = edgeStore.get( edgekey );
-				edge.setLabel( edgelabels.get( s.getPredicate() ) );
+				String elabel = edgelabels.get( s.getPredicate() );
+				edge.setLabel( elabel );
 			}
 
 			fetchProperties( needProps, model.predicates(), engine, overlayLevel );
@@ -215,6 +226,8 @@ public class GraphDataModel {
 	/**
 	 * Is this node present at the given level (is it's level <= the given level?)
 	 * @param check
+	 *
+	 *
 	 *
 	 *
 	 *
