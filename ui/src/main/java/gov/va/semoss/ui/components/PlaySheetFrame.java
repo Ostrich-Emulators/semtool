@@ -367,7 +367,7 @@ public class PlaySheetFrame extends JInternalFrame {
 							JOptionPane.INFORMATION_MESSAGE );
 				}
 
-				super.done();
+				super.done();				
 			}
 		};
 

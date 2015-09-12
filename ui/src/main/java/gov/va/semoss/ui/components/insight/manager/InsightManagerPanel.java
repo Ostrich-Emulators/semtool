@@ -161,7 +161,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		} );
 	}
 
-	public void refresh( IEngine eng ) {
+	public void setEngine( IEngine eng ) {
 		engine = eng;
 
 		insightData.setEngine( engine );

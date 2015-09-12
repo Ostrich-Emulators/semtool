@@ -47,7 +47,6 @@ import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
-import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel_2;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.main.SemossPreferences;
@@ -145,7 +144,7 @@ public class PlayPane extends JFrame {
 	protected final RepositoryList repoList = new RepositoryList();
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
-	private InsightManagerPanel_2 iManagePanel_2;
+	private InsightManagerPanel insightManager;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -218,7 +217,7 @@ public class PlayPane extends JFrame {
 	private final JCheckBoxMenuItem gQueryBuilderItem
 			= new JCheckBoxMenuItem( "Graphical Query Builder",
 					DbAction.getIcon( "graphic_query" ) );
-	private final JCheckBoxMenuItem iManageItem_2 = new JCheckBoxMenuItem( "Insight Manager",
+	private final JCheckBoxMenuItem insightManagerItem = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 
 	private final JToolBar toolbar;
@@ -426,6 +425,7 @@ public class PlayPane extends JFrame {
 				}
 
 				gQueryBuilderPanel.setEngine( engine );
+				insightManager.setEngine(engine );
 				filterPanel.setEngine( engine );
 			}
 		} );
@@ -466,7 +466,7 @@ public class PlayPane extends JFrame {
 
 		boolean ipref_2 = prefs.getBoolean( IMANAGE_2, false );
 		if ( !ipref_2 ) {
-			rightTabs.remove( iManagePanel_2 );
+			rightTabs.remove( insightManager );
 		}
 	}
 
@@ -544,12 +544,12 @@ public class PlayPane extends JFrame {
 		idx = rightView.indexOfComponent( gQueryBuilderPanel );
 		rightView.setTabComponentAt( idx, ct1 );
 		
-		iManagePanel_2 = new InsightManagerPanel_2( repoList );
-		rightView.addTab( "Insight Manager 2", null, iManagePanel_2,
+		insightManager = new InsightManagerPanel();
+		rightView.addTab( "Insight Manager", null, insightManager,
 				"Manage perspectives and insights" );
-		CloseableTab ct2_2 = new PlayPaneCloseableTab( rightView, iManageItem_2,
+		CloseableTab ct2_2 = new PlayPaneCloseableTab( rightView, insightManagerItem,
 				DbAction.getIcon( "insight_manager_tab1" ) );
-		idx = rightView.indexOfComponent( iManagePanel_2 );
+		idx = rightView.indexOfComponent( insightManager );
 		rightView.setTabComponentAt( idx, ct2_2 );
 		
 		return rightView;
@@ -936,7 +936,7 @@ public class PlayPane extends JFrame {
 		tools.getAccessibleContext().setAccessibleDescription( "Additional data tools" );
 		tools.add( loggingItem );
 		tools.add( gQueryBuilderItem );
-		tools.add( iManageItem_2 );
+		tools.add( insightManagerItem );
 		return tools;
 	}
 
@@ -1460,53 +1460,34 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		iManageItem_2.setSelected( getProp( prefs, IMANAGE_2 ) );
+		insightManagerItem.setSelected( getProp( prefs, IMANAGE_2 ) );
 		if ( getProp( prefs, IMANAGE_2 ) == true ) {
-			iManageItem_2.setToolTipText( "Disable the Insite Manager Tab" );
+			insightManagerItem.setToolTipText( "Disable the Insite Manager Tab" );
 		}
 		else {
-			iManageItem_2.setToolTipText( "Enable the Insite Manager Tab" );
+			insightManagerItem.setToolTipText( "Enable the Insite Manager Tab" );
 		}
 
-		iManageItem_2.addActionListener( new ActionListener() {
+		insightManagerItem.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				boolean ischecked = iManageItem_2.isSelected();
+				boolean ischecked = insightManagerItem.isSelected();
 				prefs.putBoolean( IMANAGE_2, ischecked );
 				DIHelper.getInstance().getCoreProp().setProperty( IMANAGE_2,
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					iManagePanel_2.insightManagerPanelWorker();
-					rightTabs.addTab( "Insight Manager 2", DbAction.getIcon( "insight_manager_tab1" ), iManagePanel_2,
+					rightTabs.addTab( "Insight Manager", DbAction.getIcon( "insight_manager_tab1" ), insightManager,
 							"Manage perspectives and insights" );
-					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, iManageItem_2,
+					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, insightManagerItem,
 							DbAction.getIcon( "insight_manager_tab1" ) );
-					int idx = rightTabs.indexOfComponent( iManagePanel_2 );
+					int idx = rightTabs.indexOfComponent( insightManager );
 					rightTabs.setTabComponentAt( idx, ct2_2 );
-					iManageItem_2.setToolTipText( "Disable the Insite Manager Tab" );
-					
-					InsightManagerPanel imp = new InsightManagerPanel();
-					imp.refresh( repoList.getSelectedValue() );
-					rightTabs.addTab( "Insight Manager", 
-							DbAction.getIcon( "insight_manager_tab1" ), imp,
-							"Manage perspectives and insights" );
-					CloseableTab ct2 = new PlayPaneCloseableTab( rightTabs, null,
-							DbAction.getIcon( "insight_manager_tab1" ) );
-					idx = rightTabs.indexOfComponent( imp );
-					rightTabs.setTabComponentAt( idx, ct2 );
-					iManageItem_2.setToolTipText( "Disable the Insite Manager Tab" );
-					
-					
-					
-//					JDialog dlg = new JDialog( PlayPane.this, false );
-//					dlg.getContentPane().add( imp );
-//					dlg.setSize( 800, 500 );
-//					dlg.setVisible( true );
+					insightManagerItem.setToolTipText( "Disable the Insite Manager Tab" );					
 				}
 				else {
-					rightTabs.remove( iManagePanel_2 );
-					iManageItem_2.setToolTipText( "Enable the Insite Manager Tab" );
+					rightTabs.remove( insightManager );
+					insightManagerItem.setToolTipText( "Enable the Insite Manager Tab" );
 				}
 			}
 		} );
@@ -1524,8 +1505,8 @@ public class PlayPane extends JFrame {
 		gflab.setMnemonic( KeyEvent.VK_G );
 		view.add( gQueryBuilderItem );
 		gQueryBuilderItem.setMnemonic( KeyEvent.VK_B );
-		view.add( iManageItem_2 );
-		iManageItem_2.setMnemonic( KeyEvent.VK_U );
+		view.add( insightManagerItem );
+		insightManagerItem.setMnemonic( KeyEvent.VK_U );
 		view.add( splithider );
 		splithider.setMnemonic( KeyEvent.VK_L );
 		view.add( loggingItem );

@@ -227,6 +227,7 @@ public class InsightPanel extends DataPanel<Insight> {
 		DIHelper.getInstance().getDesktop().add( psf );
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add(
 				psf.getCreateTask( insight, bindings ) );
+		DIHelper.getInstance().getPlayPane().showDesktop();
   }//GEN-LAST:event_testbtnActionPerformed
 
 
