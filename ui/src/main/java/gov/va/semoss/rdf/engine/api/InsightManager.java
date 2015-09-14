@@ -97,6 +97,15 @@ public interface InsightManager {
 	public Collection<Statement> getStatements() throws RepositoryException;
 
 	/**
+	 * Gets the generic perspective for a particular IEngine
+	 *
+	 * @param eng the engine
+	 * @return a fully-instantiated perspective with the "Generic-Perspective"
+	 * Insights
+	 */
+	public Perspective getSystemPerspective( IEngine eng );
+
+	/**
 	 * Releases any resources needed while this class is running. In general, this
 	 * should only be called by {@link IEngine#closeDB() }
 	 */

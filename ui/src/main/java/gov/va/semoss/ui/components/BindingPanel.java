@@ -13,12 +13,13 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.MultiSetMap;
 import gov.va.semoss.util.Utility;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ListDataEvent;
@@ -52,13 +52,17 @@ public class BindingPanel extends JPanel {
 					Pattern.CASE_INSENSITIVE );
 	private static final Pattern ONEVAR = Pattern.compile( "\\?(\\w+)" );
 	private final Map<Parameter, UriComboBox> combos = new HashMap<>();
-	private final List<JPanel> panels = new ArrayList<>();
 	private final ParameterValueListener listener = new ParameterValueListener();
 	private Tree<Parameter, Integer> ordered;
 	private IEngine engine;
 
 	public BindingPanel() {
-		setLayout( new BoxLayout( this, BoxLayout.PAGE_AXIS ) );
+		GridBagLayout layout = new GridBagLayout();
+		setLayout( layout );
+		layout.columnWidths = new int[]{ 0, 0 };
+		layout.rowHeights = new int[]{ 0, 0, 0 };
+		layout.columnWeights = new double[]{ 0.0, 1.0 };
+		layout.rowWeights = new double[]{ 0.0, 0.0 };
 	}
 
 	public BindingPanel( IEngine eng ) {
@@ -71,53 +75,57 @@ public class BindingPanel extends JPanel {
 	}
 
 	public void setParameters( Collection<Parameter> params ) {
-		for ( JPanel pnl : panels ) {
-			for ( UriComboBox c : combos.values() ) {
-				c.removeItemListener( listener );
-			}
-			remove( pnl );
-		}
-
 		ordered = treeify( params );
-		print( ordered, ordered.getRoot() );
 
-		int height = 0;
-		int width = 300;
-		Dimension labelsizer = new Dimension( 100, 25 );
+		for ( UriComboBox c : combos.values() ) {
+			c.removeItemListener( listener );
+		}
+		removeAll();
+		print( ordered, ordered.getRoot() );
 
 		Deque<Parameter> todo = new ArrayDeque<>();
 		todo.add( ordered.getRoot() );
+		GridBagLayout layout = GridBagLayout.class.cast( getLayout() );
+
+		int pcount = -1;
 		while ( !todo.isEmpty() ) {
 			Parameter parent = todo.poll();
 
 			Collection<Parameter> children = ordered.getChildren( parent );
+
 			for ( Parameter child : children ) {
-				JPanel panel = new JPanel( new BorderLayout() );
+				pcount++;
 				JLabel lbl = new JLabel( child.getLabel() );
-				lbl.setSize( labelsizer );
-				lbl.setPreferredSize( labelsizer );
-				lbl.setMinimumSize( labelsizer );
+				lbl.setBackground( getBackground() );
 
 				UriComboBox cmb = new UriComboBox();
+				cmb.setBackground( getBackground() );
 				cmb.addItemListener( listener );
 				cmb.getUriModel().addListDataListener( listener );
 				combos.put( child, cmb );
 
-				panel.add( lbl, BorderLayout.WEST );
-				panel.add( cmb, BorderLayout.CENTER );
+				GridBagConstraints labelconstraints = new GridBagConstraints();
+				labelconstraints.anchor = GridBagConstraints.WEST;
+				labelconstraints.insets = new Insets( 0, 5, 5, 5 );
+				labelconstraints.gridx = 0;
+				labelconstraints.gridy = pcount;
 
-				add( panel );
-				panels.add( panel );
-
-				height += labelsizer.height;
+				GridBagConstraints comboconstraints = new GridBagConstraints();
+				comboconstraints.anchor = GridBagConstraints.NORTH;
+				comboconstraints.fill = GridBagConstraints.HORIZONTAL;
+				comboconstraints.insets = new Insets( 0, 5, 5, 0 );
+				comboconstraints.gridx = 1;
+				comboconstraints.gridy = pcount;
+				
+				add( lbl, labelconstraints );
+				add( cmb, comboconstraints );
 
 				todo.add( child );
 			}
 		}
 
-		setPreferredSize( new Dimension( width, height ) );
-
 		fillInCombos( ordered );
+		repaint();
 	}
 
 	public Map<Parameter, Value> getBindings() {
@@ -173,6 +181,10 @@ public class BindingPanel extends JPanel {
 		combo.removeItemListener( listener );
 		Map<URI, String> labels = GuiUtility.getInstanceLabels( vals, engine );
 		combo.setData( Utility.sortUrisByLabel( labels ) );
+		//combo.setMaximumSize( new Dimension( 100, 25  ) );
+		//combo.setPreferredSize( new Dimension( 100, 25  ) );
+		combo.setMinimumSize( new Dimension( 10, 25  ) );
+		
 		combo.addItemListener( listener );
 	}
 

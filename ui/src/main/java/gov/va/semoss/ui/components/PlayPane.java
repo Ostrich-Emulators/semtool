@@ -231,7 +231,7 @@ public class PlayPane extends JFrame {
 	public JTable labelTable;
 	public JTable tooltipTable;
 
-	public static SelectDatabasePanel selectDatabasePanel;
+	private SelectDatabasePanel selectDatabasePanel;
 	
 	/**
 	 * Launch the application.
@@ -392,6 +392,10 @@ public class PlayPane extends JFrame {
 		return repoList;
 	}
 
+	public SelectDatabasePanel getDatabasePanel(){
+		return selectDatabasePanel;
+	}
+	
 	protected void initMenuItems() {
 		// already initialized at instance creation
 	}

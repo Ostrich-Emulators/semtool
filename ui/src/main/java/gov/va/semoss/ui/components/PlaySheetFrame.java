@@ -374,6 +374,73 @@ public class PlaySheetFrame extends JInternalFrame {
 		return pt;
 	}
 
+	public ProgressTask getOverlayTask( Insight insight, Map<String, Value> bindings, 
+			String tabTitleIfNeeded ) {
+		return null;
+//		String q = query;
+//		final PlaySheetCentralComponent overlayee = getActivePlaySheet();
+//		final ListQueryAdapter<Value[]> lqa
+//				= new ListOfValueArraysQueryAdapter( q );
+//
+//		ProgressTask pt = new DisappearingProgressBarTask( overlayee, new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				try {
+//
+//					updateProgress( "Executing Query", 40 );
+//
+//					if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
+//							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
+//						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
+//						updateProgress( "Preparing Display", 80 );
+//
+//						if ( overlayee.canAcceptModelData() ) {
+//							overlayee.overlay( model, engine );
+//						}
+//						else {
+//							try {
+//								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
+//								pscc.setTitle( tabTitleIfNeeded );
+//								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
+//								pscc.create( model, engine );
+//							}
+//							catch ( InstantiationException | IllegalAccessException e ) {
+//								log.error( e, e );
+//							}
+//						}
+//					}
+//					else {
+//						List<Value[]> data = engine.query( lqa );
+//						List<String> headers = lqa.getBindingNames();
+//
+//						updateProgress( "Preparing Display", 80 );
+//						if ( overlayee.canAcceptDataWithHeaders( headers ) ) {
+//							overlayee.overlay( data, headers, engine );
+//						}
+//						else {
+//							try {
+//								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
+//								pscc.setTitle( tabTitleIfNeeded );
+//								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
+//								pscc.create( data, headers, engine );
+//							}
+//							catch ( InstantiationException | IllegalAccessException e ) {
+//								log.error( e, e );
+//							}
+//						}
+//					}
+//					updateProgress( "Execution Complete", 90 );
+//				}
+//				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+//					log.error( e, e );
+//				}
+//			}
+//		} );
+//
+//		return pt;
+	}
+
 	public ProgressTask getCreateTask( final String query ) {
 		final PlaySheetCentralComponent cmp = getActivePlaySheet();
 		//String q = query.replaceAll( "(?i)^CONSTRUCT[\\s]*\\{([^\\.]+)[\\.][\\s]*\\}", "SELECT $1" );		

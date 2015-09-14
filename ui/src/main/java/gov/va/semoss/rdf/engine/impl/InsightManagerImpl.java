@@ -47,9 +47,11 @@ import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.user.User;
 import gov.va.semoss.util.UriBuilder;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -246,6 +248,58 @@ public class InsightManagerImpl implements InsightManager {
 		return persps;
 	}
 
+	@Override
+	public Perspective getSystemPerspective( IEngine eng ) {
+		Perspective persps = new Perspective( "Generic Perspective" );
+		URI conceptUri = eng.getSchemaBuilder().getConceptUri().build();
+		URI relUri = eng.getSchemaBuilder().getRelationUri().build();
+
+		String mmspql = "CONSTRUCT{ ?source ?relation ?target } WHERE {"
+				+ "  ?relation a owl:ObjectProperty ."
+				+ "  ?s ?relation ?o ."
+				+ "  ?s a ?source ."
+				+ "  ?o a ?target ."
+				+ "  FILTER( ?source != <" + conceptUri + ">"
+				+ "    && ?source != owl:Class"
+				+ "    && ?source != rdfs:Resource"
+				+ "    && ?source != <" + relUri + "> )"
+				+ "  FILTER( ?target != <" + conceptUri + ">"
+				+ "    && ?target != owl:Class"
+				+ "    && ?target != rdfs:Resource )"
+				+ "}";
+		Insight metamodel = new Insight( "View the Database Metamodel", mmspql,
+				GraphPlaySheet.class );
+
+		Insight explore = new Insight( "Explore an instance of a selected node type",
+				"DESCRIBE ?instance", GraphPlaySheet.class );
+		Parameter concept = new Parameter( "Concept",
+				"SELECT ?concept WHERE { ?concept rdfs:subClassOf <" + conceptUri + ">} " );
+		Parameter instance = new Parameter( "Instance", "SELECT ?instance WHERE { ?instance a ?concept }" );
+		explore.setParameters( Arrays.asList( concept, instance ) );
+
+		String nespql = "CONSTRUCT { "
+				+ "   ?instance ?p1 ?o1 ."
+				+ "   ?o2 ?p2 ?instance ."
+				+ "}"
+				+ "WHERE {"
+				+ "   OPTIONAL {"
+				+ "     ?instance ?p1 ?o1 ."
+				+ "   	?o1 rdfs:subClassOf <" + conceptUri + "> ."
+				+ "   }"
+				+ "   OPTIONAL {"
+				+ "     ?o2 ?p2 ?instance ."
+				+ "   	?o2 rdfs:subClassOf <" + conceptUri + "> ."
+				+ "   }"
+				+ "}";
+
+		Insight neighbor = new Insight( "Show One Neighbor Away from Selected Node",
+				nespql, GraphPlaySheet.class );
+		neighbor.setParameters( Arrays.asList( concept, instance ) );
+
+		persps.setInsights( Arrays.asList( metamodel, explore, neighbor ) );
+		return persps;
+	}
+
 	/**
 	 * Gets all Parameter objects under the passed-in Insight URI.
 	 *
@@ -367,10 +421,6 @@ public class InsightManagerImpl implements InsightManager {
 				Collection<Parameter> params = getParameters( insight );
 				insight.setParameters( params );
 				upgradeIfLegacy( insight );
-				for ( Parameter p : params ) {
-					insight.setParameter( p.getVariable(), p.getLabel(), p.getParameterType(),
-							p.getDefaultQuery() );
-				}
 			}
 		}
 		catch ( RepositoryException e ) {
