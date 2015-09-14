@@ -32,9 +32,6 @@ import javax.swing.event.InternalFrameListener;
 
 import org.apache.log4j.Logger;
 
-
-
-
 //import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -188,7 +185,7 @@ public class CustomSparqlPanel extends JPanel {
 
 		sparqlArea = new TabbedQueries();
 		sparqlArea.setTagOfSelectedTab( PlaySheetEnum.values()[0].toString() );
-		
+
 		/**
 		 * Handles the assignment of keyboard shortcuts when changing the tab in
 		 * TabbedQueries .
@@ -266,20 +263,21 @@ public class CustomSparqlPanel extends JPanel {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
-				
+
 				//Add selected Parameters to query:
-                String sparql = Utility.normalizeParam( selected.getSparql() );
-                Map<String, String> paramHash = PlayPane.selectDatabasePanel.getParameterValues();
-                if(selected.isLegacy()){
-	               sparql = Utility.fillParam( sparql, paramHash );
-                }else {
-	               sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
-                }
+				String sparql = Utility.normalizeParam( selected.getSparql() );
+				Map<String, String> paramHash = PlayPane.selectDatabasePanel.getParameterValues();
+				if ( selected.isLegacy() ) {
+					sparql = Utility.fillParam( sparql, paramHash );
+				}
+				else {
+					sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
+				}
 				sparqlArea.setTextOfSelectedTab( sparql );
-				
+
 				//Pre-select the Playsheet of the Insight copied down:
-				PlaySheetEnum selectedPlaySheet = PlaySheetEnum.getEnumFromClass( selected.getOutput() );
-	            playSheetComboBox.setSelectedItem(selectedPlaySheet);
+				PlaySheetEnum selectedPlaySheet = PlaySheetEnum.valueFor( selected );
+				playSheetComboBox.setSelectedItem( selectedPlaySheet );
 			}
 		} );
 
@@ -287,7 +285,9 @@ public class CustomSparqlPanel extends JPanel {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				String selectedPlaySheet = (String) playSheetComboBox.getSelectedItem();
+				PlaySheetEnum pse 
+						= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
+				String selectedPlaySheet = pse.getDisplayName();
 
 				// playsheet starting with "*" are those that are not included in predefined
 				// list in util.PlaySheetEnum
@@ -303,7 +303,7 @@ public class CustomSparqlPanel extends JPanel {
 					if ( sparqlArea.getTabCount() == 1 ) {
 						sparqlArea.setSelectedIndex( 0 );
 					}
-					sparqlArea.setTextOfSelectedTab( PlaySheetEnum.getHintFromName( selectedPlaySheet ) );
+					sparqlArea.setTextOfSelectedTab( pse.getSheetHint() );
 				}
 			}
 		} );

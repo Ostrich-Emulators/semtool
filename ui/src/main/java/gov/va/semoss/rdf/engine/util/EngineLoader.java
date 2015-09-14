@@ -58,6 +58,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.ListIterator;
 import java.util.Set;
 
 import org.openrdf.model.BNode;
@@ -214,6 +215,17 @@ public class EngineLoader {
 		return mmstmts;
 	}
 
+	/**
+	 * Loads the given data to the engine.
+	 *
+	 * @param data The data to load. The data is consumed during the load, so this
+	 * object is unusable once this function completes.
+	 * @param engine
+	 * @param conformanceErrors
+	 * @throws RepositoryException
+	 * @throws IOException
+	 * @throws ImportValidationException
+	 */
 	public void loadToEngine( ImportData data, IEngine engine,
 			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
 		qaer.loadCaches( engine );
@@ -372,13 +384,19 @@ public class EngineLoader {
 		EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 
 		if ( sheet.isRel() ) {
-			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
+			ListIterator<LoadingNodeAndPropertyValues> lit = sheet.getData().listIterator();
+			while ( lit.hasNext() ) {
+				LoadingNodeAndPropertyValues nap = lit.next();
 				modeler.addRel( nap, namespaces, sheet, metas, myrc );
+				lit.remove();
 			}
 		}
 		else {
-			for ( LoadingNodeAndPropertyValues nap : sheet.getData() ) {
+			ListIterator<LoadingNodeAndPropertyValues> lit = sheet.getData().listIterator();
+			while ( lit.hasNext() ) {
+				LoadingNodeAndPropertyValues nap = lit.next();
 				modeler.addNode( nap, namespaces, sheet, metas, myrc );
+				lit.remove();
 			}
 		}
 	}

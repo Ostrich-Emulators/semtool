@@ -36,7 +36,7 @@ public class PlaySheetEnumRenderer extends DefaultListCellRenderer {
 			boolean sel, boolean hasfocus ) {
 		PlaySheetEnum  pse = PlaySheetEnum.valueOf( val.toString() );
 
-		super.getListCellRendererComponent( list, pse.getSheetName(), idx, sel, hasfocus );
+		super.getListCellRendererComponent( list, pse.getDisplayName(), idx, sel, hasfocus );
 
 		Class<? extends IPlaySheet> klass = pse.getSheetClass();
 		Icon icon = DefaultPlaySheetIcons.getDefaultIcon( pse );

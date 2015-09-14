@@ -45,11 +45,11 @@ public class Perspective {
 
 	//URI getter/setter:
 	//------------------
-	public URI getUri() {
+	public URI getId() {
 		return id;
 	}
 
-	public void setUri( URI u ) {
+	public void setId( URI u ) {
 		id = u;
 	}
 

@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.user;
 
-import java.security.Permission;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -52,4 +50,12 @@ public interface User {
 	 * @return
 	 */
 	public boolean isLocal();
+
+	/**
+	 * Gets information in a consistent manner for keeping track of provenance
+	 * items. This should be: <code>FullName &lt;email&gt;, organization</code>
+	 *
+	 * @return 
+	 */
+	public String getAuthorInfo();
 }

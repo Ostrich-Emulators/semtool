@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.web.security;
 
-import java.security.Permission;
+import gov.va.semoss.user.AbstractUser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -91,6 +91,11 @@ public class SemossUser extends LdapUserDetailsImpl implements gov.va.semoss.use
 	@Override
 	public void setProperty( String prop, String value ) {
 		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public String getAuthorInfo() {
+		return AbstractUser.getAuthorInformation( this );
 	}
 
 	public static class SemossEssence extends LdapUserDetailsImpl.Essence {
