@@ -54,42 +54,42 @@ import org.openrdf.model.Value;
  * @author ryan
  */
 public class SelectDatabasePanel extends javax.swing.JPanel {
-	
+
 	private static final long serialVersionUID = 5868154574694278392L;
 	private static final Logger log = Logger.getLogger( SelectDatabasePanel.class );
 	private final ExecuteQueryProcessor insightAction = new InsightAction();
-	
+
 	public SelectDatabasePanel() {
 		this( false );
 	}
-	
+
 	public SelectDatabasePanel( boolean neverEmpty ) {
 		initComponents();
-		
+
 		if ( neverEmpty ) {
 			JViewport vp = reposcroller.getViewport();
 			vp.remove( repoList );
 			vp.add( repoList.getNeverEmptyLayer() );
 		}
-		
+
 		paramLabel.setVisible( false );
 		repoList.setCellRenderer( new RepositoryRenderer() );
-		
+
 		final PerspectiveRenderer pr = new PerspectiveRenderer();
 		perspectiveSelector.setRenderer( pr );
 		perspectiveSelector.setToolTipText( "Select the point-of-view of the question you want to ask" );
 		perspectiveSelector.setBackground( new Color( 119, 136, 153 ) );
-		
+
 		final QuestionRenderer qr = new QuestionRenderer();
 		questionSelector.setRenderer( qr );
 		questionSelector.setToolTipText( "Select the specific question you want to ask" );
 		questionSelector.setBackground( new Color( 119, 136, 153 ) );
-		
+
 		submitButton.setBackground( new Color( 0x51a351 ) );
 		bindingPanel.setBackground( Color.WHITE );
-		
+
 		EngineOperationListener eol = new EngineOperationAdapter() {
-			
+
 			@Override
 			public void insightsModified( IEngine eng, Collection<URI> perspectives,
 					Collection<URI> insights ) {
@@ -98,7 +98,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					InsightManager im = eng.getInsightManager();
 					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
 					persps.add( im.getSystemPerspective( eng ) );
-					
+
 					for ( Perspective uri : persps ) {
 						perspectiveSelector.addItem( uri );
 					}
@@ -106,57 +106,47 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			}
 		};
 		EngineUtil.getInstance().addEngineOpListener( eol );
-		
+
 		repoList.addListSelectionListener( new ListSelectionListener() {
 			@Override
 			public void valueChanged( ListSelectionEvent lse ) {
 				IEngine eng = repoList.getSelectedValue();
 				qr.setEngine( eng );
 				bindingPanel.setEngine( eng );
-				
+
 				perspectiveSelector.removeAllItems();
 				if ( null != eng ) {
 					InsightManager im = eng.getInsightManager();
 					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
 					Perspective system = im.getSystemPerspective( eng );
 					persps.add( system );
-					
+
 					for ( Perspective uri : persps ) {
 						perspectiveSelector.addItem( uri );
 					}
 				}
 			}
 		} );
-		
+
 		questionSelector.addActionListener( new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
 				Insight ii = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
 				if ( null != ii && ii.hasParameters() ) {
 					paramLabel.setVisible( true );
 					bindingPanel.setVisible( true );
-
-					//Determine whether to enable/disable the "Overlay" CheckBox, based upon
-					//how the renderer of the selected visualization compares with that of the 
-					//currently selected question:
-					JDesktopPane pane = DIHelper.getInstance().getDesktop();
-					PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
-					
-					PlaySheetCentralComponent pscc = ( null == psf ? null
-							: psf.getActivePlaySheet() );
-					String psccClass = ( null == pscc ? ""
-							: pscc.getClass().getCanonicalName() );
-					appendChkBox.setEnabled( ii.getOutput().equals( psccClass ) );
-					bindingPanel.setParameters( ii.getInsightParameters() );					
+					bindingPanel.setParameters( ii.getInsightParameters() );
 				}
 				else {
 					paramLabel.setVisible( false );
 					bindingPanel.setVisible( false );
 				}
+
+				enableDisableOverlay();
 			}
 		} );
-		
+
 		perspectiveSelector.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
@@ -175,42 +165,66 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 				}
 			}
 		} );
-		
+
 		submitButton.setToolTipText( "Execute SPARQL query for selected question and display results in Display Pane" );
 		Image insightIcon = GuiUtility.loadImage( "icons16/insight_16.png" );
 		submitButton.setIcon( new ImageIcon( insightIcon ) );
 		submitButton.setAction( insightAction );
 		submitButton.setForeground( Color.WHITE );
-		
+
 		appendChkBox.setToolTipText( "Display the question results graph on top of graph in the foreground window" );
 	}
-	
+
 	public JCheckBox getOverlay() {
 		return appendChkBox;
 	}
-	
+
+	private void enableDisableOverlay() {
+		Insight ii = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
+		if ( null == ii ) {
+			appendChkBox.setEnabled( false );
+		}
+		else {
+			//Determine whether to enable/disable the "Overlay" CheckBox, based upon
+			//how the renderer of the selected visualization compares with that of the 
+			//currently selected question:
+			JDesktopPane pane = DIHelper.getInstance().getDesktop();
+			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
+
+			PlaySheetCentralComponent pscc = ( null == psf ? null
+					: psf.getActivePlaySheet() );
+			String psccClass = ( null == pscc ? ""
+					: pscc.getClass().getCanonicalName() );
+			appendChkBox.setEnabled( ii.getOutput().equals( psccClass ) );
+		}
+
+		if ( !appendChkBox.isEnabled() ) {
+			appendChkBox.setSelected( false );
+		}
+	}
+
 	public JComboBox<Perspective> getPerspectiveSelector() {
 		return perspectiveSelector;
 	}
-	
+
 	public JComboBox<Insight> getInsightSelector() {
 		return questionSelector;
 	}
-	
+
 	public JButton getSubmitButton() {
 		return submitButton;
 	}
-	
+
 	public RepositoryList getRepoList() {
 		return repoList;
 	}
-	
+
 	public void setLabelsFont( Font f ) {
 		for ( JLabel l : new JLabel[]{ oneLabel, twoLabel, threeLabel, paramLabel } ) {
 			l.setFont( f );
 		}
 	}
-	
+
 	public Map<String, Value> getBindings() {
 		Map<String, Value> map = new HashMap<>();
 		for ( Map.Entry<Parameter, Value> en : bindingPanel.getBindings().entrySet() ) {
@@ -218,7 +232,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		}
 		return map;
 	}
-	
+
 	public Action getInsightAction() {
 		return insightAction;
 	}
@@ -371,13 +385,13 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
   // End of variables declaration//GEN-END:variables
 
 	private class InsightAction extends ExecuteQueryProcessor {
-		
+
 		private static final long serialVersionUID = -5360951711543979184L;
-		
+
 		public InsightAction() {
 			super( "Create Insight!" );
 		}
-		
+
 		@Override
 		protected String getTitle() {
 			Perspective persp
@@ -385,32 +399,32 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
 			return persp.getLabel() + "-Insight-" + ( 1 + persp.indexOf( insight ) );
 		}
-		
+
 		@Override
 		protected String getFrameTitle() {
 			return questionSelector.
 					getItemAt( questionSelector.getSelectedIndex() ).getLabel();
 		}
-		
+
 		@Override
 		protected QueryExecutor<?> getQuery() {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			
+
 			ListOfValueArraysQueryAdapter qa
 					= new ListOfValueArraysQueryAdapter( insight.getSparql() );
 			Map<Parameter, Value> bindings = bindingPanel.getBindings();
 			for ( Map.Entry<Parameter, Value> en : bindings.entrySet() ) {
 				qa.bind( en.getKey().getVariable(), en.getValue() );
 			}
-			
+
 			return qa;
 		}
-		
+
 		@Override
 		protected Class<? extends IPlaySheet> getPlaySheet() {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
 			String output = insight.getOutput();
-			
+
 			try {
 				return (Class<PlaySheetCentralComponent>) Class.forName( output );
 			}
@@ -419,15 +433,21 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected IEngine getEngine() {
 			return repoList.getSelectedValue();
 		}
-		
+
 		@Override
 		protected boolean isAppending() {
 			return appendChkBox.isSelected();
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent ae ) {
+			super.actionPerformed( ae );
+			enableDisableOverlay();
 		}
 	}
 }

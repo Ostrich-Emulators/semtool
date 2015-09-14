@@ -1,6 +1,5 @@
 package gov.va.semoss.ui.components;
 
-
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.Insight;
