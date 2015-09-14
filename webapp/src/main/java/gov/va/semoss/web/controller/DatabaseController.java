@@ -42,12 +42,11 @@ public class DatabaseController extends SemossControllerBase {
 	@Autowired
 	private DbInfoMapper datastore;
 
-	@RequestMapping( params = "names" )
+	@RequestMapping("/list" )
 	@ResponseBody
 	public String[] getAllDatabaseIDs() {
 		log.debug( "Getting all database IDs." );
 		Collection<DbInfo> testDbs = datastore.getAll();
-
 		int i = 0;
 		String[] testDbIDs = new String[testDbs.size()];
 		for ( DbInfo dbi : testDbs ) {
