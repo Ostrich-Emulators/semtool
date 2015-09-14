@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -24,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * This RP Service intercepts all commands, searching for calls to remote databases
@@ -66,7 +69,10 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 * access */
 	private final ServerACL serverACL = new ServerACL();
 	
-	@Autowired
+	private ServletContext servletContext = null;
+	
+	private ApplicationContext applicationContext = null;
+
 	private DbInfoMapper datastore;
 	
     @Override
@@ -163,15 +169,12 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 * and indexing the remote DBs by name.
 	 */
 	@Override
-	public void init(FilterConfig arg0) throws ServletException {
+	public void init(FilterConfig filterConfig) throws ServletException {
 		PROXIED_PATHS.add("remoteDatabase");
-		// Eventually, we'll want to add 
-		Collection<DbInfo> items = this.datastore.getAll();
-		Iterator<DbInfo> iterator = items.iterator();
-		while (iterator.hasNext()){
-			DbInfo item = iterator.next();
-			remoteDatabases.put(item.getName(), item);
-		}
+		servletContext = filterConfig.getServletContext();
+		applicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+		this.datastore = (DbInfoMapper) applicationContext.getBean("dbinfomapper");
+		System.out.println("Got the bean");
 	}
 	
 	/**
