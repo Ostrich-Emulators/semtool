@@ -158,6 +158,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private void initComponents() {
 
     edgegroup = new javax.swing.ButtonGroup();
+    stagegroup = new javax.swing.ButtonGroup();
     jLabel2 = new javax.swing.JLabel();
     file = new gov.va.semoss.ui.components.FileBrowsePanel();
     urilbl = new javax.swing.JLabel();
@@ -175,7 +176,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     conformer = new javax.swing.JCheckBox();
     baseuri = new javax.swing.JComboBox<String>();
     edgemodelPanel = new javax.swing.JPanel();
-    vocabPanel = new gov.va.semoss.ui.components.VocabularyDBPanel();
+    vocabPanel = new gov.va.semoss.ui.components.VocabularyPanel();
 
     jLabel2.setLabelFor(file);
     jLabel2.setText("Select File(s) to Import");
@@ -195,9 +196,11 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "Load Intermediate Data", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
     jPanel1.setToolTipText("Where should the raw data be loaded before importing?");
 
+    stagegroup.add(diskStaging);
     diskStaging.setText("On Disk");
     diskStaging.setToolTipText("Loading on disk can be slower, but uses less memory");
 
+    stagegroup.add(memoryStaging);
     memoryStaging.setSelected(true);
     memoryStaging.setText("In Memory");
     memoryStaging.setToolTipText("Loading in memory can be faster, but uses more memory");
@@ -233,6 +236,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     edgemodelPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), "Reification Model", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
     edgemodelPanel.setLayout(new javax.swing.BoxLayout(edgemodelPanel, javax.swing.BoxLayout.PAGE_AXIS));
 
+    vocabPanel.setLayout(new javax.swing.BoxLayout(vocabPanel, javax.swing.BoxLayout.PAGE_AXIS));
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -252,7 +257,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(file, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
               .addComponent(dbname)
-              .addComponent(dbdir, javax.swing.GroupLayout.DEFAULT_SIZE, 429, Short.MAX_VALUE)
+              .addComponent(dbdir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
               .addComponent(questionfile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
               .addComponent(baseuri, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
           .addGroup(layout.createSequentialGroup()
@@ -472,8 +477,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private javax.swing.JCheckBox metamodel;
   private gov.va.semoss.ui.components.FileBrowsePanel questionfile;
   private javax.swing.JLabel questionlbl;
+  private javax.swing.ButtonGroup stagegroup;
   private javax.swing.JLabel urilbl;
-  private gov.va.semoss.ui.components.VocabularyDBPanel vocabPanel;
+  private gov.va.semoss.ui.components.VocabularyPanel vocabPanel;
   // End of variables declaration//GEN-END:variables
 
 	/**

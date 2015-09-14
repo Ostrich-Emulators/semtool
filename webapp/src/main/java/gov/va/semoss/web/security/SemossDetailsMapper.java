@@ -1,6 +1,6 @@
 package gov.va.semoss.web.security;
 
-import gov.va.semoss.security.User.UserProperty;
+import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.web.security.SemossUser.SemossEssence;
 import java.util.Collection;
 import org.apache.log4j.Logger;

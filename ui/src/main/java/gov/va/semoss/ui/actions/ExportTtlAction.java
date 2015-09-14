@@ -29,7 +29,7 @@ import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
-import gov.va.semoss.security.Security;
+import gov.va.semoss.user.Security;
 import java.util.Map;
 
 import javax.swing.JOptionPane;

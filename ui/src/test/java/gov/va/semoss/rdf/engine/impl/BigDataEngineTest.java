@@ -86,7 +86,7 @@ public class BigDataEngineTest {
 		String pname = "test perspective";
 		Perspective p = new Perspective( pname );
 		URI uri = wim.add( p );
-		assertEquals( uri, p.getUri() );
+		assertEquals( uri, p.getId() );
 
 		wim.commit();
 

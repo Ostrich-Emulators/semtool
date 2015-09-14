@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.web.security;
 
+import gov.va.semoss.user.AbstractUser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,7 +24,7 @@ import org.springframework.util.Assert;
  *
  * @author ryan
  */
-public class SemossUser extends LdapUserDetailsImpl implements gov.va.semoss.security.User {
+public class SemossUser extends LdapUserDetailsImpl implements gov.va.semoss.user.User {
 
 	private Collection<GrantedAuthority> authorities = AuthorityUtils.NO_AUTHORITIES;
 
@@ -80,6 +81,21 @@ public class SemossUser extends LdapUserDetailsImpl implements gov.va.semoss.sec
 	@Override
 	public Collection<GrantedAuthority> getAuthorities() {
 		return authorities;
+	}
+
+	@Override
+	public String getProperty( String prop ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void setProperty( String prop, String value ) {
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public String getAuthorInfo() {
+		return AbstractUser.getAuthorInformation( this );
 	}
 
 	public static class SemossEssence extends LdapUserDetailsImpl.Essence {

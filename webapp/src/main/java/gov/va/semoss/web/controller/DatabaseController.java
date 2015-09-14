@@ -1,6 +1,6 @@
 package gov.va.semoss.web.controller;
 
-import gov.va.semoss.security.User.UserProperty;
+import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.web.datastore.DbInfoMapper;
 import gov.va.semoss.web.filters.RemoteDBReverseProxyFilter;
 

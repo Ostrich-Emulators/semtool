@@ -19,7 +19,9 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.om.Insight;
 import gov.va.semoss.ui.components.api.IPlaySheet;
+import gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet;
 import gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet;
 import gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
@@ -33,8 +35,12 @@ import gov.va.semoss.ui.components.playsheets.PieChartPlaySheet;
 import gov.va.semoss.ui.components.playsheets.SankeyPlaySheet;
 import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet;
+import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
+import org.apache.log4j.Logger;
 
 /**
  * Enables a variable to be a set of predefined constants. This class defines
@@ -56,15 +62,17 @@ public enum PlaySheetEnum {
 	US_Heat_Map( "US Heat Map", USHeatMapPlaySheet.class, "USHeatMapPlaySheet Hint: SELECT ?state ?numericHeatValue WHERE{ ... }" ),
 	World_Heat_Map( "World Heat Map", WorldHeatMapPlaySheet.class, "WorldHeatMapPlaySheet Hint: SELECT ?country ?numericHeatValue WHERE{ ... }" ),
 	Metamodel_Graph( "Metamodel Graph", MetamodelGraphPlaySheet.class, "MetamodelGraphPlaySheet Hint: SELECT DISTINCT ?source ?relation ?target WHERE{ ... }" ),
+	AppDupeHeatMap( "Application Duplication Heat Map", AppDupeHeatMapSheet.class, "AppDupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
+	DupeHeatMap( "Duplication Heat Map", DupeHeatMapSheet.class, "DupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
 	Update_Query( "Update Query", null, "UpdateQuery Hint: Try a SPARQL query that INSERTs data, DELETEs data, or does both." );
 
 	private final String sheetName;
 	private final Class<? extends IPlaySheet> sheetClass;
 	private final String sheetHint;
 
-	PlaySheetEnum( String playSheetName, Class<? extends IPlaySheet> playSheetClass,
+	PlaySheetEnum( String displayName, Class<? extends IPlaySheet> playSheetClass,
 			String playSheetHint ) {
-		this.sheetName = playSheetName;
+		this.sheetName = displayName;
 		this.sheetClass = playSheetClass;
 		this.sheetHint = playSheetHint;
 	}
@@ -73,7 +81,17 @@ public enum PlaySheetEnum {
 		return this.sheetClass;
 	}
 
-	public String getSheetName() {
+	public IPlaySheet getSheetInstance() {
+		try {
+			return getSheetClass().newInstance();
+		}
+		catch ( InstantiationException | IllegalAccessException e ) {
+			Logger.getLogger( getClass() ).warn( "cannot instantiate playsheet class", e );
+			return new GridPlaySheet();
+		}
+	}
+
+	public String getDisplayName() {
 		return this.sheetName;
 	}
 
@@ -81,49 +99,35 @@ public enum PlaySheetEnum {
 		return this.sheetHint;
 	}
 
-	public static List<String> getAllSheetNames() {
-		List<String> list = new ArrayList<>();
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			list.add( e.getSheetName() );
+	/**
+	 * Gets a PlaySheetEnum for the given Insight. If this insight's
+	 * {@link Insight#getOutput()} returns an unknown playsheet, this function
+	 * returns {@link PlaySheetEnum#Grid}
+	 *
+	 *
+	 * @param ins
+	 * @return
+	 */
+	public static PlaySheetEnum valueFor( Insight ins ) {
+		if ( null == ins.getOutput() ) {
+			return PlaySheetEnum.Update_Query;
 		}
-		return list;
-	}
 
-	public static List<Class<? extends IPlaySheet>> getAllSheetClasses() {
-		List<Class<? extends IPlaySheet>> list = new ArrayList<>();
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			list.add( e.getSheetClass() );
-		}
-		return list;
-	}
-
-	public static String getHintFromName( String sheetName ) {
-		String match = "";
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getSheetName().equals( sheetName ) ) {
-				match = e.getSheetHint();
+		String output = ins.getOutput();
+		for ( PlaySheetEnum pse : valuesNoUpdate() ) {
+			if ( output.equals( pse.getSheetClass().getCanonicalName() ) ) {
+				return pse;
 			}
 		}
-		return match;
+
+		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: "
+				+ output + " (using Grid instead)" );
+		return PlaySheetEnum.Grid;
 	}
 
-	public static String getNameFromClass( String sheetClass ) {
-		String match = "";
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if ( e.getSheetClass() != null && e.getSheetClass().getName().equals( sheetClass ) ) {
-				match = e.getSheetName();
-			}
-		}
-		return match;
-	}
-
-	public static PlaySheetEnum getEnumFromClass( String sheetClass ) {
-		PlaySheetEnum match = null; //need to initialize as non-null value
-		for ( PlaySheetEnum e : PlaySheetEnum.values() ) {
-			if (  e.getSheetClass() != null && e.getSheetClass().getName().equals( sheetClass ) ) {
-				match = e;
-			}
-		}
-		return match;
+	public static PlaySheetEnum[] valuesNoUpdate() {
+		Set<PlaySheetEnum> pses = EnumSet.allOf( PlaySheetEnum.class );
+		pses.remove( PlaySheetEnum.Update_Query );
+		return pses.toArray( new PlaySheetEnum[0] );
 	}
 }

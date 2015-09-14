@@ -62,7 +62,7 @@ public class NodeDerivationTools {
 	 * @param engine The RDF knowledgbase
 	 * @return A list of concepts in URI form
 	 */
-	public List<URI> createConceptList( IEngine engine ) {
+	public static List<URI> createConceptList( IEngine engine ) {
 		final List<URI> conceptList = new ArrayList<>();
 		String query = "SELECT ?entity WHERE "
 				+ "{ ?entity rdfs:subClassOf+ ?concept . FILTER( ?entity != ?concept ) }";

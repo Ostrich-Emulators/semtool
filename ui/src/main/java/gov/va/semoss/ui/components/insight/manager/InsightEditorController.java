@@ -20,6 +20,8 @@ import gov.va.semoss.util.Utility;
 
 import java.awt.Component;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -262,11 +264,12 @@ public class InsightEditorController implements Initializable {
 
 		//Date Created (read-only):
 		//-------------------------
-		txtCreated_Inst.setText( insight.getCreated() );
+		SimpleDateFormat sdf = new SimpleDateFormat( "MM/dd/yy hh:mm" );
+		txtCreated_Inst.setText( sdf.format( insight.getCreated() ) );
 
 		//Last Updated (read-only):
 		//-------------------------
-		txtModified_Inst.setText( insight.getModified() );
+		txtModified_Inst.setText( sdf.format( insight.getModified() ) );
 
 	}//End "setData()".
 
@@ -278,9 +281,8 @@ public class InsightEditorController implements Initializable {
 	 */
 	private void setCreatorModifiedFields( Insight insight ) {
 		IEngine engine = DIHelper.getInstance().getRdfEngine();
-		String now = new Date().toString();
 		insight.setCreator( engine.getWriteableInsightManager().userInfoFromToolPreferences( insight.getCreator() ) );
-		insight.setModified( now );
+		insight.setModified( new Date() );
 	}
 
 	/**

@@ -23,14 +23,20 @@ import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import org.apache.log4j.Logger;
+
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-
+import gov.va.semoss.ui.main.Starter;
+import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.Utility;
 import gov.va.semoss.om.GraphColorRepository;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * This class sets the visualization viewer for a popup menu.
@@ -38,6 +44,8 @@ import java.util.Map;
 public class ColorPopup extends JMenu {
 
 	private static final long serialVersionUID = -4784260297860900414L;
+	private static final Logger log = Logger.getLogger( Utility.class );
+
 
 	public ColorPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( "Modify Color" );
@@ -51,7 +59,19 @@ public class ColorPopup extends JMenu {
 				@Override
 				public void actionPerformed( ActionEvent e ) {
 					for( SEMOSSVertex v : vertices ){
+						
 						v.setColor( en.getValue() );
+					
+						try {
+							//Properties props = DIHelper.getInstance().getCoreProp();
+							gcr.updateColor(v.getType(), en.getValue());
+							UserImpl.getUser().setProperty(v.getType().getLocalName()+"_COLOR", en.getKey());
+							
+							} catch (Exception ex) {
+								// TODO Auto-generated catch block
+								log.error( ex, ex );
+							}
+						
 					}					
 				}
 			} );

@@ -81,6 +81,12 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 	}
 
 	@Override
+	public void startDocument() throws SAXException {
+		log.debug( "Processing sheet " + loadingsheet.getName() );
+		super.startDocument();
+	}
+
+	@Override
 	public void startElement( String uri, String localName, String name,
 			Attributes attributes ) throws SAXException {
 		if ( null != name ) {

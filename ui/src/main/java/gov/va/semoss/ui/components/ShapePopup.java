@@ -22,15 +22,24 @@ package gov.va.semoss.ui.components;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
+import gov.va.semoss.ui.main.Starter;
+import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.util.DIHelper;
+import gov.va.semoss.util.Utility;
 
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
+import java.io.FileNotFoundException;
 import java.util.Collection;
 
 import java.util.Map;
+import java.util.Properties;
+
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import org.apache.log4j.Logger;
 
 /**
  * This class is used to display information about shapes in a popup menu.
@@ -38,6 +47,7 @@ import javax.swing.JMenuItem;
 public class ShapePopup extends JMenu {
 
 	private static final long serialVersionUID = 3874311709020126729L;
+	private static final Logger log = Logger.getLogger( Utility.class );
 
 	public ShapePopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( "Modify Shape" );
@@ -52,6 +62,15 @@ public class ShapePopup extends JMenu {
 				public void actionPerformed( ActionEvent e ) {
 					for ( SEMOSSVertex v : vertices ) {
 						v.setShape( en.getValue() );
+						try {
+						//Properties props = DIHelper.getInstance().getCoreProp();
+						UserImpl.getUser().setProperty(v.getType().getLocalName()+"_SHAPE", en.getKey());
+						
+						} catch (Exception ex) {
+							// TODO Auto-generated catch block
+							log.error( ex, ex );
+						}
+						
 					}
 				}
 			} );

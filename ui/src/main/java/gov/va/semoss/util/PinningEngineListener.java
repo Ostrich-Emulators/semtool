@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
-import gov.va.semoss.security.LocalUserImpl;
+import gov.va.semoss.user.LocalUserImpl;
 import gov.va.semoss.ui.main.SemossPreferences;
 import org.openrdf.model.URI;
 

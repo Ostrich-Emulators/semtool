@@ -148,17 +148,6 @@ public class InsightManagerController_2 implements Initializable {
 			@Override
 			protected ObservableList<Perspective> call() throws Exception {
 				arylPerspectives = FXCollections.observableArrayList( engine.getInsightManager().getPerspectives() );
-				for ( Perspective perspective : arylPerspectives ) {
-					List<Insight> arylInsights = new ArrayList<>();
-					arylInsights.addAll( engine.getInsightManager().getInsights( perspective ) );
-
-					for ( Insight insight : arylInsights ) {
-						List<Parameter> parameters 
-								= new ArrayList<>( engine.getInsightManager().getInsightParameters( insight ) );
-						insight.setInsightParameters( parameters );
-					}
-					perspective.setInsights( arylInsights );
-				}
 				return arylPerspectives;
 			}
 		};
@@ -639,7 +628,7 @@ public class InsightManagerController_2 implements Initializable {
 		ValueFactory insightVF = rc.getValueFactory();
 		URI uriPerspective = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS,
 				"Perspective-" + strUniqueIdentifier );
-		perspective.setUri( uriPerspective );
+		perspective.setId( uriPerspective );
 		perspective.setLabel( "(A New Perspective)" );
 
 		//Add new Perspective to the tree-view:
@@ -687,7 +676,7 @@ public class InsightManagerController_2 implements Initializable {
 		ValueFactory insightVF = rc.getValueFactory();
 		URI uriInsight = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS,
 				"Insight-" + strUniqueIdentifier );
-		String now = new Date().toString();
+		Date now = new Date();
 
 		insight.setId( uriInsight );
 		insight.setLabel( "(A New Insight)" );
@@ -753,7 +742,7 @@ public class InsightManagerController_2 implements Initializable {
 		ValueFactory insightVF = rc.getValueFactory();
 		URI uriParameter = insightVF.createURI( MetadataConstants.VA_INSIGHTS_NS,
 				"Parameter" + strUniqueIdentifier );
-		parameter.setParameterId( uriParameter );
+		parameter.setId( uriParameter );
 		parameter.setLabel( "(A New Parameter)" );
 
 		//Add new Parameter to the tree-view:
@@ -822,13 +811,13 @@ public class InsightManagerController_2 implements Initializable {
 		//Get the URI of the object (Parameter, Insight, or Perspective)
 		//behind the TreeItem passed in:
 		if ( objTreeItem instanceof Perspective ) {
-			uriTreeItem = ( (Perspective) objTreeItem ).getUri();
+			uriTreeItem = ( (Perspective) objTreeItem ).getId();
 		}
 		else if ( objTreeItem instanceof Insight ) {
 			uriTreeItem = ( (Insight) objTreeItem ).getId();
 		}
 		else if ( objTreeItem instanceof Parameter ) {
-			uriTreeItem = ( (Parameter) objTreeItem ).getParameterId();
+			uriTreeItem = ( (Parameter) objTreeItem ).getId();
 		}
 
 		//Get the URI of the object (Parameter, Insight, or Perspective)
@@ -1049,40 +1038,34 @@ public class InsightManagerController_2 implements Initializable {
 
 		}
 		else {
-			for ( TreeItem<Object> treeItem : olstPerspectives ) {
-				Perspective perspective = (Perspective) treeItem.getValue();
-				if ( !wim.savePerspective( perspective ) ) {
-					boolReturnValue = false;
-					break;
-				}
+			try {
+				for ( TreeItem<Object> treeItem : olstPerspectives ) {
+					Perspective perspective = (Perspective) treeItem.getValue();
+					wim.savePerspective( perspective );
 
-				ObservableList<TreeItem<Object>> insightItems = treeItem.getChildren();
-				if ( !insightItems.isEmpty() ) {
-					for ( TreeItem<Object> iitem : insightItems ) {
-						Insight insight = Insight.class.cast( iitem.getValue() );
-						if ( !wim.saveInsight( perspective, insight ) ) {
-							boolReturnValue = false;
-							break;
-						}
+					ObservableList<TreeItem<Object>> insightItems = treeItem.getChildren();
+					if ( !insightItems.isEmpty() ) {
+						List<Insight> insights = new ArrayList<>();
+						for ( TreeItem<Object> iitem : insightItems ) {
+							Insight insight = Insight.class.cast( iitem.getValue() );
+							wim.saveInsight( perspective, insight );
+							insights.add( insight );
 
-						ObservableList<TreeItem<Object>> paramItems = iitem.getChildren();
-						if ( !paramItems.isEmpty() ) {
-							for ( TreeItem<Object> pitem : paramItems ) {
-								Parameter parameter = Parameter.class.cast( pitem.getValue() );
-								if ( !wim.saveParameter( insight, parameter ) ) {
-									boolReturnValue = false;
-									break;
+							ObservableList<TreeItem<Object>> paramItems = iitem.getChildren();
+							if ( !paramItems.isEmpty() ) {
+								for ( TreeItem<Object> pitem : paramItems ) {
+									Parameter parameter = Parameter.class.cast( pitem.getValue() );
+									wim.saveParameter( perspective, insight, parameter );
 								}
 							}
-							if ( !boolReturnValue ) {
-								break;
-							}
 						}
-					}
-					if ( !boolReturnValue ) {
-						break;
+						
+						wim.setInsights( perspective, insights );
 					}
 				}
+			}
+			catch ( Exception e ) {
+				boolReturnValue = false;
 			}
 		}
 		return boolReturnValue;
