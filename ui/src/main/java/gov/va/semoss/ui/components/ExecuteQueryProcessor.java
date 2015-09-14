@@ -127,7 +127,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			public void run() {
 				try {
 					UpdateExecutorAdapter uea = new UpdateExecutorAdapter( query.getSparql() );
-					uea.copyBindings( query );
+					uea.addBindings( query.getBindingMap() );
 					engine.update( uea );
 				}
 				catch ( RepositoryException | MalformedQueryException | UpdateExecutionException | SecurityException ex ) {

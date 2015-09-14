@@ -8,7 +8,6 @@ package gov.va.semoss.rdf.engine.api;
 import java.util.Date;
 import java.util.Map;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.Operation;
@@ -113,11 +112,18 @@ public interface Bindable {
 	public void removeNamespace( String prefix );
 
 	/**
-	 * Copies all the bindings from the given Bindable into this one
+	 * Resets all the bindings to the given map
 	 *
 	 * @param source the source of the bindings
 	 */
-	public void copyBindings( Bindable source );
+	public void setBindings( Map<String, Value> vals );
+
+	/**
+	 * Copies all the bindings from the given map into this one
+	 *
+	 * @param source the source of the bindings
+	 */
+	public void addBindings( Map<String, Value> vals );
 
 	/**
 	 * Gets a mapping of variables to values

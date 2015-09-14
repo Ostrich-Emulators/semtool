@@ -192,13 +192,19 @@ public abstract class AbstractBindable implements Bindable {
 	}
 
 	@Override
-	public void copyBindings( Bindable source ) {
-		vmap.putAll( source.getBindingMap() );
+	public Map<String, Value> getBindingMap() {
+		return new LinkedHashMap<>( vmap );
 	}
 
 	@Override
-	public Map<String, Value> getBindingMap() {
-		return new LinkedHashMap<>( vmap );
+	public void setBindings( Map<String, Value> vals ) {
+		vmap.clear();
+		addBindings( vals );
+	}
+
+	@Override
+	public void addBindings( Map<String, Value> map ) {
+		vmap.putAll( map );
 	}
 
 	@Override

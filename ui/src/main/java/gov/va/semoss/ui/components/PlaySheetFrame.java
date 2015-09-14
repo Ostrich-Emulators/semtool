@@ -288,14 +288,14 @@ public class PlaySheetFrame extends JInternalFrame {
 		}
 	}
 
-	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ){
+	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ) {
 		PlaySheetEnum pse = PlaySheetEnum.valueFor( insight );
 		PlaySheetCentralComponent cmp
 				= PlaySheetCentralComponent.class.cast( pse.getSheetInstance() );
 		cmp.setTitle( insight.getLabel() );
 		addTab( cmp );
 
-		String query = insight.getSparql();		
+		String query = insight.getSparql();
 
 		updateProgress( "Preparing Query", 10 );
 		final StringBuilder builder = new StringBuilder();
@@ -322,21 +322,17 @@ public class PlaySheetFrame extends JInternalFrame {
 							|| query.toUpperCase().startsWith( "DESCRIBE" ) ) {
 						updateProgress( "Preparing Display", 80 );
 						ModelQueryAdapter mqa = new ModelQueryAdapter( query );
-						for( Map.Entry<String, Value> en : bindings.entrySet() ){
-							mqa.bind( en.getKey(), en.getValue() );
-						}						
-						
+						mqa.setBindings( bindings );
+
 						Model model = engine.construct( mqa );
 						cmp.create( model, engine );
 						dsize = model.size();
 					}
 					else {
-						ListQueryAdapter<Value[]> lqa 
+						ListQueryAdapter<Value[]> lqa
 								= new ListOfValueArraysQueryAdapter( query );
-						for( Map.Entry<String, Value> en : bindings.entrySet() ){
-							lqa.bind( en.getKey(), en.getValue() );
-						}						
-						
+						lqa.setBindings( bindings );
+
 						List<Value[]> data = engine.query( lqa );
 						updateProgress( "Preparing Display", 80 );
 						cmp.create( data, lqa.getBindingNames(), engine );
@@ -367,147 +363,6 @@ public class PlaySheetFrame extends JInternalFrame {
 							JOptionPane.INFORMATION_MESSAGE );
 				}
 
-				super.done();				
-			}
-		};
-
-		return pt;
-	}
-
-	public ProgressTask getOverlayTask( Insight insight, Map<String, Value> bindings, 
-			String tabTitleIfNeeded ) {
-		return null;
-//		String q = query;
-//		final PlaySheetCentralComponent overlayee = getActivePlaySheet();
-//		final ListQueryAdapter<Value[]> lqa
-//				= new ListOfValueArraysQueryAdapter( q );
-//
-//		ProgressTask pt = new DisappearingProgressBarTask( overlayee, new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				try {
-//
-//					updateProgress( "Executing Query", 40 );
-//
-//					if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
-//							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
-//						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
-//						updateProgress( "Preparing Display", 80 );
-//
-//						if ( overlayee.canAcceptModelData() ) {
-//							overlayee.overlay( model, engine );
-//						}
-//						else {
-//							try {
-//								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
-//								pscc.setTitle( tabTitleIfNeeded );
-//								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
-//								pscc.create( model, engine );
-//							}
-//							catch ( InstantiationException | IllegalAccessException e ) {
-//								log.error( e, e );
-//							}
-//						}
-//					}
-//					else {
-//						List<Value[]> data = engine.query( lqa );
-//						List<String> headers = lqa.getBindingNames();
-//
-//						updateProgress( "Preparing Display", 80 );
-//						if ( overlayee.canAcceptDataWithHeaders( headers ) ) {
-//							overlayee.overlay( data, headers, engine );
-//						}
-//						else {
-//							try {
-//								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
-//								pscc.setTitle( tabTitleIfNeeded );
-//								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
-//								pscc.create( data, headers, engine );
-//							}
-//							catch ( InstantiationException | IllegalAccessException e ) {
-//								log.error( e, e );
-//							}
-//						}
-//					}
-//					updateProgress( "Execution Complete", 90 );
-//				}
-//				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-//					log.error( e, e );
-//				}
-//			}
-//		} );
-//
-//		return pt;
-	}
-
-	public ProgressTask getCreateTask( final String query ) {
-		final PlaySheetCentralComponent cmp = getActivePlaySheet();
-		//String q = query.replaceAll( "(?i)^CONSTRUCT[\\s]*\\{([^\\.]+)[\\.][\\s]*\\}", "SELECT $1" );		
-		String q = query;
-
-		updateProgress( "Preparing Query", 10 );
-		final ListQueryAdapter<Value[]> lqa
-				= new ListOfValueArraysQueryAdapter( q );
-		final StringBuilder builder = new StringBuilder();
-		final int rows[] = { 0 };
-
-		ProgressTask pt = new DisappearingProgressBarTask( cmp, new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					updateProgress( "Executing Query", 40 );
-
-					int dsize = 0;
-					if ( null == query || "NULL".equals( query.toUpperCase() ) ) {
-						// uh oh...no sparql given
-						// assume the pscc knows what to do with empty data
-						dsize = 0;
-						cmp.create( null, null, getEngine() );
-						// we have no way of determining what data got produced,
-						// so assume something good happened
-						dsize = 1;
-					}
-					else if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
-							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
-						updateProgress( "Preparing Display", 80 );
-						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
-						cmp.create( model, engine );
-						dsize = model.size();
-					}
-					else {
-						List<Value[]> data = engine.query( lqa );
-						updateProgress( "Preparing Display", 80 );
-						cmp.create( data, lqa.getBindingNames(), getEngine() );
-						dsize = data.size();
-					}
-
-					updateProgress( "Execution Complete", 90 );
-
-					builder.append( cmp.getTitle() ).append( " " ).
-							append( dsize ).append( " Data Row" ).
-							append( 1 == dsize ? "" : "s" ).append( " Fetched" );
-					rows[0] = dsize;
-
-				}
-				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-					log.error( e, e );
-					GuiUtility.showError( e.getLocalizedMessage() );
-				}
-			}
-		} ) {
-			@Override
-			public void done() {
-				setLabel( builder.toString() );
-				setFinishLabel( getLabel() );
-
-				if ( 0 == rows[0] ) {
-					// let the user know we're done, but no data was returned
-					JOptionPane.showMessageDialog( rootPane, "No data returned", "No Data",
-							JOptionPane.INFORMATION_MESSAGE );
-				}
-
 				super.done();
 			}
 		};
@@ -515,12 +370,11 @@ public class PlaySheetFrame extends JInternalFrame {
 		return pt;
 	}
 
-	public ProgressTask getOverlayTask( String query, IEngine engine,
+	public ProgressTask getOverlayTask( Insight insight, Map<String, Value> bindings,
 			String tabTitleIfNeeded ) {
-		String q = query;
+
+		String sparql = insight.getSparql();
 		final PlaySheetCentralComponent overlayee = getActivePlaySheet();
-		final ListQueryAdapter<Value[]> lqa
-				= new ListOfValueArraysQueryAdapter( q );
 
 		ProgressTask pt = new DisappearingProgressBarTask( overlayee, new Runnable() {
 
@@ -530,9 +384,13 @@ public class PlaySheetFrame extends JInternalFrame {
 
 					updateProgress( "Executing Query", 40 );
 
-					if ( lqa.getSparql().toUpperCase().startsWith( "CONSTRUCT" )
-							|| lqa.getSparql().toUpperCase().startsWith( "DESCRIBE" ) ) {
-						Model model = engine.construct( new ModelQueryAdapter( lqa.getSparql() ) );
+					if ( sparql.toUpperCase().startsWith( "CONSTRUCT" )
+							|| sparql.toUpperCase().startsWith( "DESCRIBE" ) ) {
+						ModelQueryAdapter mqa = new ModelQueryAdapter( sparql );
+						mqa.addBindings( bindings );
+
+						Model model = engine.construct( mqa );
+
 						updateProgress( "Preparing Display", 80 );
 
 						if ( overlayee.canAcceptModelData() ) {
@@ -551,6 +409,10 @@ public class PlaySheetFrame extends JInternalFrame {
 						}
 					}
 					else {
+						final ListQueryAdapter<Value[]> lqa
+								= new ListOfValueArraysQueryAdapter( insight.getSparql() );
+						lqa.setBindings( bindings );
+
 						List<Value[]> data = engine.query( lqa );
 						List<String> headers = lqa.getBindingNames();
 

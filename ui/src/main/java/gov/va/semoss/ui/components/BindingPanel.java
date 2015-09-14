@@ -81,11 +81,11 @@ public class BindingPanel extends JPanel {
 			c.removeItemListener( listener );
 		}
 		removeAll();
+		combos.clear();
 		print( ordered, ordered.getRoot() );
 
 		Deque<Parameter> todo = new ArrayDeque<>();
 		todo.add( ordered.getRoot() );
-		GridBagLayout layout = GridBagLayout.class.cast( getLayout() );
 
 		int pcount = -1;
 		while ( !todo.isEmpty() ) {
