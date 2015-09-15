@@ -1,4 +1,5 @@
 var heatmap;
+mapSel = "#heatmap";
 
 function start(data) {
 	var dataObject = jQuery.parseJSON( data );
@@ -27,7 +28,7 @@ function start(data) {
 
 	initSlider('slider', valueArray, updateVisualization);
 //	$("#slider").slider("disable");
-	initColorChooserAndAddToEndOfHtmlElementWithId("nav", updateVisualization, true);
+	initColorChooserAndAddToEndOfHtmlElementWithId("putColorChooserHere", updateVisualization, true);
 
 	updateVisualization();
 };
@@ -47,6 +48,8 @@ function initVisualization() {
 			}
 		}
 	});
+	
+	pan(0, 65, mapSel);
 };
 
 function updateHeatmap(domainArray) {
@@ -58,7 +61,7 @@ function updateHeatmap(domainArray) {
 	
 	heatmap.updateChoropleth(updatedColors);
 
-	buildLegend("#heatmap svg g", 200, 550, 60, 20);
+	buildLegend("#legend", 100, 50, 60, 20);
 };
 
 function runOutsideApp() {

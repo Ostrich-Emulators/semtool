@@ -5,6 +5,28 @@ body {
 	margin-top: 0px;
 }
 
+.panzoom.compass{
+	fill: #FFFFFF;
+	stroke: #000000;
+	stroke-width: 1.5;
+}
+
+.panzoom.button{
+    fill: #225EA8;
+	stroke: #0C2C84;
+	stroke-miterlimit: 6;
+	stroke-linecap: round;
+}
+
+.panzoom.button:hover{
+	stroke-width: 2;
+}
+
+.panzoom.plus-minus{
+	fill: #FFFFFF;
+	pointer-events: none;
+}
+
 .statesAndCounties {
 	fill: WhiteSmoke;
 	stroke: Grey;
