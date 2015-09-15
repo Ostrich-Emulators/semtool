@@ -250,7 +250,9 @@ public class InsightManagerImpl implements InsightManager {
 
 	@Override
 	public Perspective getSystemPerspective( IEngine eng ) {
-		Perspective persps = new Perspective( "Generic Perspective" );
+		UriBuilder urib = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
+		Perspective persps = new Perspective( urib.uniqueUri(), "Generic Perspective",
+				"System Generated Generic Perspective" );
 		URI conceptUri = eng.getSchemaBuilder().getConceptUri().build();
 		URI relUri = eng.getSchemaBuilder().getRelationUri().build();
 
@@ -272,9 +274,15 @@ public class InsightManagerImpl implements InsightManager {
 
 		Insight explore = new Insight( "Explore an instance of a selected node type",
 				"DESCRIBE ?instance", GraphPlaySheet.class );
+		explore.setId( urib.uniqueUri() );
+
 		Parameter concept = new Parameter( "Concept",
 				"SELECT ?concept WHERE { ?concept rdfs:subClassOf <" + conceptUri + ">} " );
+		concept.setId( urib.uniqueUri() );
+
 		Parameter instance = new Parameter( "Instance", "SELECT ?instance WHERE { ?instance a ?concept }" );
+		instance.setId( urib.uniqueUri() );
+
 		explore.setParameters( Arrays.asList( concept, instance ) );
 
 		String nespql = "CONSTRUCT { "
@@ -294,6 +302,7 @@ public class InsightManagerImpl implements InsightManager {
 
 		Insight neighbor = new Insight( "Show One Neighbor Away from Selected Node",
 				nespql, GraphPlaySheet.class );
+		neighbor.setId( urib.uniqueUri() );
 		neighbor.setParameters( Arrays.asList( concept, instance ) );
 
 		persps.setInsights( Arrays.asList( metamodel, explore, neighbor ) );

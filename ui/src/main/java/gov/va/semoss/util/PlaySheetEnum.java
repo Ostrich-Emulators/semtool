@@ -111,7 +111,7 @@ public enum PlaySheetEnum {
 	 * @return
 	 */
 	public static PlaySheetEnum valueFor( Insight ins ) {
-		if ( null == ins.getOutput() ) {
+		if ( null == ins || null == ins.getOutput() ) {
 			return PlaySheetEnum.Update_Query;
 		}
 

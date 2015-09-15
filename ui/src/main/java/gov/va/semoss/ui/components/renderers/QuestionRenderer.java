@@ -52,15 +52,16 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 			boolean sel, boolean hasfocus ) {
 
 		Insight insight = ( null == val ? null : Insight.class.cast( val ) );
-		String text = ( null == insight ? "" : perspective.getOrderedLabel( insight ) );
+		String text = ( null == insight ? ""
+				: perspective.getOrderedLabel( insight ) );
 
 		super.getListCellRendererComponent( list, text, idx, sel, hasfocus );
 
-		Icon icon = DefaultPlaySheetIcons.getDefaultIcon( PlaySheetEnum.valueFor( insight) );
-		if( null == icon ){
+		Icon icon = DefaultPlaySheetIcons.getDefaultIcon( PlaySheetEnum.valueFor( insight ) );
+		if ( null == icon ) {
 			setIcon( null );
 		}
-		else{
+		else {
 			setIcon( icon );
 		}
 

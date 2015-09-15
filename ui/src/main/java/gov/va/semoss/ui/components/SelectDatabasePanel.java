@@ -97,7 +97,8 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					perspectiveSelector.removeAllItems();
 					InsightManager im = eng.getInsightManager();
 					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
-					persps.add( im.getSystemPerspective( eng ) );
+					Perspective systemp = im.getSystemPerspective( eng );
+					persps.add( systemp );
 
 					for ( Perspective uri : persps ) {
 						perspectiveSelector.addItem( uri );

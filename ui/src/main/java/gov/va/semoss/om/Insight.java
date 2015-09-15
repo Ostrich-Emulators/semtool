@@ -207,6 +207,9 @@ public class Insight implements Serializable {
 		if ( !Objects.equals( this.id, other.id ) ) {
 			return false;
 		}
+		if ( !Objects.equals( this.label, other.label ) ) {
+			return false;
+		}
 		return true;
 	}
 }
