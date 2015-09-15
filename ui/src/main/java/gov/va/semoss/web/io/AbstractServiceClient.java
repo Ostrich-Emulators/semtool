@@ -18,6 +18,11 @@ public abstract class AbstractServiceClient implements ServiceClient {
 	@Autowired
 	protected BasicAuthRequestFactory authorizer;
 
+	public void setRestTemplate( RestTemplate rt ){
+		rest = rt;
+		authorizer = BasicAuthRequestFactory.class.cast( rest.getRequestFactory() );
+	}
+			
 	@Override
 	public final void setAuthentication( SemossService svc, String username, char[] pass ) {
 		Matcher m = DECOMPOSE.matcher( svc.root() );

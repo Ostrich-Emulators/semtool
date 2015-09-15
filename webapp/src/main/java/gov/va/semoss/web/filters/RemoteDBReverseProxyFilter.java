@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
@@ -78,7 +79,7 @@ public class RemoteDBReverseProxyFilter implements Filter {
 					ProxyCall call = new ProxyCall(dbi, path);
         	String destinationURL = call.getDestinationURL();
         	if (doProxy){
-        		proxyRequest(destinationURL, req, res, chain);
+        		proxyRequest(destinationURL, request, response, chain);
         	}
         	else {
         		response.sendRedirect(destinationURL);
@@ -96,15 +97,18 @@ public class RemoteDBReverseProxyFilter implements Filter {
      * @param res The servlet response
      * @param chain The filter chain of this application context
      */
-    private void proxyRequest(String destinationURL, ServletRequest req,
-			ServletResponse res, FilterChain chain) {
-    	HttpServletRequest request = (HttpServletRequest) req;
-    	HttpServletResponse response = (HttpServletResponse) res;
+    private void proxyRequest(String destinationURL, HttpServletRequest request,
+			HttpServletResponse response, FilterChain chain) {
     	try {
 				URI uri = new URI( destinationURL );
 				HttpHost host = new HttpHost( uri.getHost(), uri.getPort(), uri.getScheme() );
 				request.setAttribute( ProxyService.ATTR_TARGET_HOST, host );
-    		proxyService.proxyRequest(destinationURL, request, response);
+				
+				CsrfToken token = CsrfToken.class.cast( request.getAttribute("_csrf") );
+				response.setHeader("X-CSRF-HEADER", token.getHeaderName());
+        response.setHeader("X-CSRF-PARAM", token.getParameterName());
+        response.setHeader("X-CSRF-TOKEN", token.getToken());
+    		proxyService.proxyRequest(destinationURL, request, response);				
 		} catch (URISyntaxException | ServletException | IOException e) {
 			log.error("Error handling proxy request.", e);
 		}
@@ -114,7 +118,7 @@ public class RemoteDBReverseProxyFilter implements Filter {
 			final String path = req.getServletPath();
 			
 			for ( DbInfo dbi : datastore.getAll() ) {	
-				if ( path.startsWith( "/databases/" + dbi.getName() + "/" ) ) {
+				if ( path.startsWith( "/databases/" + dbi.getName() + "/repositories/" ) ) {
 					dbi.setServerUrl( getServerUrl( dbi, req ) );
 					return dbi;
 				}
@@ -133,14 +137,14 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 */
 	private boolean shouldProxyRequest( String path ) {
 		for ( DbInfo dbi : datastore.getAll() ) {
-			String datapath = "/databases/" + dbi.getName() + "/" + DATA_URL;
+			String datapath = "/databases/" + dbi.getName() + "/repositories/" + DATA_URL;
 			log.debug( "checking " + path + " against: " + datapath );
 			if( path.startsWith( datapath ) ){
 				log.debug( "match!");
 				return true;
 			}
 			
-			String insightpath = "/databases/" + dbi.getName() + "/" + INSIGHT_URL;
+			String insightpath = "/databases/" + dbi.getName() + "/repositories/" + INSIGHT_URL;
 			
 			log.debug( "checking " + path + " against: " + insightpath );
 			if( path.startsWith( insightpath ) ){
@@ -183,8 +187,8 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	public static DbInfo convertToRPStyle(DbInfo info, HttpServletRequest req ){		
 		String serverurl = getServerUrl( info, req );
 		info.setServerUrl( serverurl );
-		info.setDataUrl( serverurl+ "/" + DATA_URL );
-		info.setInsightsUrl( serverurl + "/" + INSIGHT_URL );
+		info.setDataUrl( serverurl+ "/repositories/" + DATA_URL );
+		info.setInsightsUrl( serverurl + "/repositories/" + INSIGHT_URL );
 		return info;
 	}
 	
@@ -216,7 +220,8 @@ public class RemoteDBReverseProxyFilter implements Filter {
 		 */
 		public ProxyCall( DbInfo dbi, String requestPath ){
 			info = dbi;
-			Pattern pat = Pattern.compile( "^/databases/" + dbi.getName() + "/(data|insight)" );
+			Pattern pat = Pattern.compile( "^/databases/" + dbi.getName()
+					+ "/repositories/(data|insight)" );
 			Matcher m = pat.matcher( requestPath );
 			m.find(); // we better know that this works!
 			serviceNeeded = m.group( 1 );			

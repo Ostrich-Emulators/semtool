@@ -10,6 +10,7 @@ import gov.va.semoss.user.User;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  *
@@ -20,6 +21,14 @@ public class ServiceClientImpl extends AbstractServiceClient {
 
 	private static final Logger log = Logger.getLogger( ServiceClient.class );
 
+	public ServiceClientImpl(){
+		
+	}
+	
+	public ServiceClientImpl( RestTemplate rt ){
+		setRestTemplate( rt );
+	}
+	
 	@Override
 	public DbInfo[] getDbs( SemossService svc ) throws RestClientException {
 		DbInfo[] dbs = rest.getForObject( svc.databases(), DbInfo[].class );
