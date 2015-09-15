@@ -234,7 +234,7 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 */
 	private static String getProxyDestination( DbInfo raw, HttpServletRequest req ) {
 		Pattern pat = Pattern.compile( "^/databases/" + raw.getName()
-				+ "/repositories/(data|insight)" );
+				+ "/repositories/(data|insights)" );
 		String reqpath = req.getServletPath();		
 		
 		Matcher m = pat.matcher( reqpath );
