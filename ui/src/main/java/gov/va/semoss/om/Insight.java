@@ -1,23 +1,16 @@
 package gov.va.semoss.om;
 
-import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
 
 public class Insight implements Serializable {
 
@@ -27,16 +20,12 @@ public class Insight implements Serializable {
 	URI id = null;
 	//Name of the question:
 	String label = "";
-	//Query Parameters:
-	Map<String, Map<String, String>> parameters = new HashMap<>();
 	//Sparql for the question:
 	String sparql = "";
 	//Type of entity this insight has:
 	String entityType = "";
 	//The layout used to render this insight:
 	String output = "";
-	//Whether the query uses legacy internal parameter specifications:
-	boolean isLegacy = false;
 	//Description of Insight:
 	String description = "";
 	//Author of Insight:
@@ -52,7 +41,7 @@ public class Insight implements Serializable {
 	boolean defautlValueIsQuery = true;
 
 	//InsightParameters:
-	List<Parameter> colInsightParameters = new ArrayList<>();
+	List<Parameter> parameters = new ArrayList<>();
 
 	public Insight() {
 	}
@@ -84,15 +73,12 @@ public class Insight implements Serializable {
 		creator = i.getCreator();
 		description = i.getDescription();
 
-		parameters.putAll( i.parameters );
-
 		entityType = i.entityType;
-		isLegacy = i.isLegacy;
 
 		defautlValueIsQuery = i.defautlValueIsQuery;
 
-		for ( Parameter p : i.colInsightParameters ) {
-			colInsightParameters.add( new Parameter( p ) );
+		for ( Parameter p : i.parameters ) {
+			parameters.add( new Parameter( p ) );
 		}
 	}
 
@@ -140,67 +126,19 @@ public class Insight implements Serializable {
 		this.sparql = sparql;
 	}
 
-	//Collection of InsightParameters for this Insight:
-	public void setInsightParameters( Collection<Parameter> colInsightParameters ) {
-		this.colInsightParameters.addAll( colInsightParameters );
-	}
-
 	public Collection<Parameter> getInsightParameters() {
-		return this.colInsightParameters;
-	}
-
-	public void setParameter( String variable, String label, String type, String defaultQuery ) {
-		Map<String, String> attributes = new HashMap<>();
-		attributes.put( "parameterLabel", label );
-		attributes.put( "parameterValueType", type );
-		if ( defaultQuery != null ) {
-			attributes.put( "parameterQuery", defaultQuery );
-		}
-		parameters.put( variable, attributes );
-	}
-
-	public void setParameters( Collection<Parameter> params ) {
-		colInsightParameters.clear();
-		colInsightParameters.addAll( params );
-	}
-
-	public Map<String, Map<String, String>> getParameters() {
 		return this.parameters;
 	}
 
-	public Set<String> getParametersKeySet() {
-		return this.parameters.keySet();
+	public void setParameters( Collection<Parameter> params ) {
+		parameters.clear();
+		parameters.addAll( params );
 	}
 
-	public String getParameterLabel( String parameterVariableName ) {
-		return this.parameters.get( parameterVariableName ).get( "parameterLabel" );
+	public boolean hasParameters(){
+		return !parameters.isEmpty();
 	}
-
-	public String getParameterType( String parameterVariableName ) {
-		if ( parameters.containsKey( parameterVariableName ) ) {
-			return this.parameters.get( parameterVariableName ).get( "parameterValueType" );
-		}
-
-		for ( Parameter p : colInsightParameters ) {
-			if ( p.getLabel().equals( parameterVariableName ) ) {
-				return p.getParameterType();
-			}
-		}
-		return null;
-	}
-
-	public String getParameterQuery( String parameterVariableName ) {
-		return this.parameters.get( parameterVariableName ).get( "parameterQuery" );
-	}
-
-	public void setLegacy( boolean isLegacy ) {
-		this.isLegacy = isLegacy;
-	}
-
-	public boolean isLegacy() {
-		return this.isLegacy;
-	}
-
+	
 	public void setDefaultValueIsQuery( boolean defaultValueIsQuery ) {
 		this.defautlValueIsQuery = defaultValueIsQuery;
 	}
@@ -245,62 +183,6 @@ public class Insight implements Serializable {
 		this.modified = modified;
 	}
 
-	public void setFromResultSet( BindingSet resultSet ) {
-		Value insightLabelValue = resultSet.getValue( "insightLabel" );
-		if ( insightLabelValue != null ) {
-			setLabel( insightLabelValue.stringValue() );
-		}
-		Value sparqlValue = resultSet.getValue( "sparql" );
-		if ( sparqlValue != null ) {
-			setSparql( sparqlValue.stringValue().replace( "\"", "" ) );
-		}
-		Value viewClassValue = resultSet.getValue( "viewClass" );
-		if ( viewClassValue != null ) {
-			setOutput( viewClassValue.stringValue() );
-		}
-		Value descriptionValue = resultSet.getValue( "description" );
-		if ( descriptionValue != null ) {
-			setDescription( descriptionValue.stringValue() );
-		}
-		Value creatorValue = resultSet.getValue( "creator" );
-		if ( creatorValue != null ) {
-			setCreator( creatorValue.stringValue() );
-		}
-		Value createdValue = resultSet.getValue( "created" );
-		if ( createdValue != null ) {
-			setCreated( getDate( Literal.class.cast( createdValue ).calendarValue() ) );
-		}
-		Value modifiedValue = resultSet.getValue( "modified" );
-		if ( modifiedValue != null ) {
-			setModified( getDate( Literal.class.cast(  modifiedValue ).calendarValue() ) );
-		}
-
-		if ( resultSet.getValue( "parameterVariable" ) != null ) {
-			String parameterVariable = resultSet.getValue( "parameterVariable" ).stringValue();
-			String parameterLabel;
-			if ( resultSet.getValue( "parameterLabel" ) != null ) {
-				parameterLabel = resultSet.getValue( "parameterLabel" ).stringValue();
-			}
-			else {
-				parameterLabel = parameterVariable;
-			}
-			String parameterType = resultSet.getValue( "parameterValueType" ).stringValue();
-			String parameterQuery;
-			if ( resultSet.getValue( "parameterQuery" ) != null ) {
-				parameterQuery = resultSet.getValue( "parameterQuery" ).stringValue();
-			}
-			else {
-				parameterQuery = "";
-			}
-			setParameter( parameterVariable, parameterLabel, parameterType, parameterQuery );
-		}
-
-		Value isLegacyValue = resultSet.getValue( "isLegacy" );
-		if ( isLegacyValue != null ) {
-			setLegacy( Boolean.parseBoolean( isLegacyValue.stringValue() ) );
-		}
-	}
-
 	@Override
 	public String toString() {
 		return label;
@@ -325,7 +207,9 @@ public class Insight implements Serializable {
 		if ( !Objects.equals( this.id, other.id ) ) {
 			return false;
 		}
+		if ( !Objects.equals( this.label, other.label ) ) {
+			return false;
+		}
 		return true;
 	}
-
 }

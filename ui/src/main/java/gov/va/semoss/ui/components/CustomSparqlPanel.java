@@ -35,24 +35,26 @@ import org.apache.log4j.Logger;
 //import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.QueryExecutor;
+import gov.va.semoss.rdf.query.util.AbstractBindable;
+import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapter;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.util.Utility;
 import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
-import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
+import java.util.Map;
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
 
 import org.apache.commons.io.FileUtils;
+import org.openrdf.model.Value;
 
 /**
  * Class to move the "Custom Sparql Query" window and related controls out of
@@ -264,15 +266,12 @@ public class CustomSparqlPanel extends JPanel {
 			public void actionPerformed( ActionEvent e ) {
 				Insight selected = insights.getItemAt( insights.getSelectedIndex() );
 
-				//Add selected Parameters to query:
-				String sparql = Utility.normalizeParam( selected.getSparql() );
-				Map<String, String> paramHash = PlayPane.selectDatabasePanel.getParameterValues();
-				if ( selected.isLegacy() ) {
-					sparql = Utility.fillParam( sparql, paramHash );
-				}
-				else {
-					sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
-				}
+				SelectDatabasePanel sdp
+						= DIHelper.getInstance().getPlayPane().getDatabasePanel();
+
+				Map<String, Value> binds = sdp.getBindings();
+				String sparql = AbstractBindable.getBoundSparql( selected.getSparql(),
+						binds );
 				sparqlArea.setTextOfSelectedTab( sparql );
 
 				//Pre-select the Playsheet of the Insight copied down:
@@ -285,7 +284,7 @@ public class CustomSparqlPanel extends JPanel {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				PlaySheetEnum pse 
+				PlaySheetEnum pse
 						= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
 				String selectedPlaySheet = pse.getDisplayName();
 
@@ -430,8 +429,8 @@ public class CustomSparqlPanel extends JPanel {
 		}
 
 		@Override
-		protected String getQuery() {
-			return sparqlArea.getTextOfSelectedTab();
+		protected QueryExecutor<?> getQuery() {
+			return new ListOfValueArraysQueryAdapter( sparqlArea.getTextOfSelectedTab() );
 		}
 
 		@Override

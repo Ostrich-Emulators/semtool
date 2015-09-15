@@ -34,6 +34,7 @@ public class PerspectiveRenderer extends DefaultListCellRenderer {
     }
 
     Perspective p = Perspective.class.cast( val );
+		setToolTipText( p.getDescription() );
     return super.getListCellRendererComponent( list, p.getLabel(), idx, sel, hasfocus );
   }
 }

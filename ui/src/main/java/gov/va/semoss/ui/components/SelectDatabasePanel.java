@@ -9,28 +9,29 @@ import gov.va.semoss.ui.components.renderers.QuestionRenderer;
 import gov.va.semoss.ui.components.renderers.PerspectiveRenderer;
 import gov.va.semoss.ui.components.renderers.RepositoryRenderer;
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.InsightManager;
+import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapter;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.components.insight.manager.InsightManagerController_2;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.util.Utility;
 
-import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.Action;
@@ -40,23 +41,23 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDesktopPane;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JViewport;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  *
  * @author ryan
  */
 public class SelectDatabasePanel extends javax.swing.JPanel {
+
 	private static final long serialVersionUID = 5868154574694278392L;
 	private static final Logger log = Logger.getLogger( SelectDatabasePanel.class );
 	private final ExecuteQueryProcessor insightAction = new InsightAction();
-	private ParamPanel currentParamPanel = null;
 
 	public SelectDatabasePanel() {
 		this( false );
@@ -85,6 +86,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		questionSelector.setBackground( new Color( 119, 136, 153 ) );
 
 		submitButton.setBackground( new Color( 0x51a351 ) );
+		bindingPanel.setBackground( Color.WHITE );
 
 		EngineOperationListener eol = new EngineOperationAdapter() {
 
@@ -93,15 +95,13 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					Collection<URI> insights ) {
 				if ( repoList.getSelectedValue().equals( eng ) ) {
 					perspectiveSelector.removeAllItems();
-					for ( Perspective uri : eng.getInsightManager().getPerspectives() ) {
+					InsightManager im = eng.getInsightManager();
+					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
+					Perspective systemp = im.getSystemPerspective( eng );
+					persps.add( systemp );
+
+					for ( Perspective uri : persps ) {
 						perspectiveSelector.addItem( uri );
-					}
-					//This is necessary to make sure that the Insight Manager loads
-					//after the left-pane is completely loaded:
-                    Object monitor = InsightManagerController_2.guiUpdateMonitor;
-                    InsightManagerController_2.boolLeftPaneUpdated = true;
-					synchronized(monitor){
-					    monitor.notifyAll();
 					}
 				}
 			}
@@ -113,10 +113,16 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			public void valueChanged( ListSelectionEvent lse ) {
 				IEngine eng = repoList.getSelectedValue();
 				qr.setEngine( eng );
+				bindingPanel.setEngine( eng );
 
 				perspectiveSelector.removeAllItems();
 				if ( null != eng ) {
-					for ( Perspective uri : eng.getInsightManager().getPerspectives() ) {
+					InsightManager im = eng.getInsightManager();
+					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
+					Perspective system = im.getSystemPerspective( eng );
+					persps.add( system );
+
+					for ( Perspective uri : persps ) {
 						perspectiveSelector.addItem( uri );
 					}
 				}
@@ -128,21 +134,17 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
 				Insight ii = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-				if ( null != ii ) {
-					paramLabel.setVisible( !ii.getParametersKeySet().isEmpty() );
-					//Determine whether to enable/disable the "Overlay" CheckBox, based upon
-					//how the renderer of the selected visualization compares with that of the 
-					//currently selected question:
-					JDesktopPane pane = DIHelper.getInstance().getDesktop();
-					PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
-
-					PlaySheetCentralComponent pscc = ( null == psf ? null
-							: psf.getActivePlaySheet() );
-					String psccClass = ( null == pscc ? ""
-							: pscc.getClass().getCanonicalName() );
-					appendChkBox.setEnabled( ii.getOutput().equals( psccClass ) );
-					setupForInsight( ii );
+				if ( null != ii && ii.hasParameters() ) {
+					paramLabel.setVisible( true );
+					bindingPanel.setVisible( true );
+					bindingPanel.setParameters( ii.getInsightParameters() );
 				}
+				else {
+					paramLabel.setVisible( false );
+					bindingPanel.setVisible( false );
+				}
+
+				enableDisableOverlay();
 			}
 		} );
 
@@ -158,7 +160,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 				questionSelector.removeAllItems();
 				IEngine eng = repoList.getSelectedValue();
 				if ( !( null == eng || null == persp ) ) {
-					for ( Insight insight : eng.getInsightManager().getInsights( persp ) ) {
+					for ( Insight insight : persp.getInsights() ) {
 						questionSelector.addItem( insight );
 					}
 				}
@@ -178,6 +180,30 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		return appendChkBox;
 	}
 
+	private void enableDisableOverlay() {
+		Insight ii = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
+		if ( null == ii ) {
+			appendChkBox.setEnabled( false );
+		}
+		else {
+			//Determine whether to enable/disable the "Overlay" CheckBox, based upon
+			//how the renderer of the selected visualization compares with that of the 
+			//currently selected question:
+			JDesktopPane pane = DIHelper.getInstance().getDesktop();
+			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
+
+			PlaySheetCentralComponent pscc = ( null == psf ? null
+					: psf.getActivePlaySheet() );
+			String psccClass = ( null == pscc ? ""
+					: pscc.getClass().getCanonicalName() );
+			appendChkBox.setEnabled( ii.getOutput().equals( psccClass ) );
+		}
+
+		if ( !appendChkBox.isEnabled() ) {
+			appendChkBox.setSelected( false );
+		}
+	}
+
 	public JComboBox<Perspective> getPerspectiveSelector() {
 		return perspectiveSelector;
 	}
@@ -190,10 +216,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		return submitButton;
 	}
 
-	public JPanel getParamPanel() {
-		return paramPanel;
-	}
-
 	public RepositoryList getRepoList() {
 		return repoList;
 	}
@@ -204,46 +226,12 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		}
 	}
 
-	private void setupForInsight( Insight question ) {
-		if ( question != null ) {
-			String sparql = question.getSparql();
-			log.debug( "Sparql is " + sparql );
-
-			currentParamPanel = new ParamPanel();
-			currentParamPanel.setInsight( question );
-			currentParamPanel.paintParam();
-
-			// finally add the param to the core panel
-			// confused about how to add this need to revisit
-			JPanel env = new JPanel();
-			env.add( currentParamPanel );
-			paramPanel.add( currentParamPanel, question + "_1" ); // mark it to the question index
-			CardLayout layout = (CardLayout) paramPanel.getLayout();
-			layout.show( paramPanel, question + "_1" );
+	public Map<String, Value> getBindings() {
+		Map<String, Value> map = new HashMap<>();
+		for ( Map.Entry<Parameter, Value> en : bindingPanel.getBindings().entrySet() ) {
+			map.put( en.getKey().getVariable(), en.getValue() );
 		}
-	}
-
-	public Map<String, String> getParameterValues() {
-		Map<String, String> paramHash = new HashMap<>();
-		if ( null != currentParamPanel ) {
-			// get all the param field
-			Component[] fields = currentParamPanel.getComponents();
-
-			for ( Component field : fields ) {
-				if ( field instanceof ParamComboBox ) {
-					String fieldName = ( (ParamComboBox) field ).getParamName();
-					String fieldValue = ( (ParamComboBox) field ).getSelectedItem() + "";
-					String uriFill = ( (ParamComboBox) field ).getURI( fieldValue );
-					if ( uriFill == null ) {
-						uriFill = fieldValue;
-					}
-					paramHash.put( fieldName, uriFill );
-				}
-			}
-
-		}
-
-		return paramHash;
+		return map;
 	}
 
 	public Action getInsightAction() {
@@ -268,9 +256,9 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
     perspectiveSelector = new javax.swing.JComboBox<Perspective>();
     threeLabel = new javax.swing.JLabel();
     questionSelector = new javax.swing.JComboBox<Insight>();
-    paramPanel = new javax.swing.JPanel();
     submitButton = new javax.swing.JButton();
     appendChkBox = new javax.swing.JCheckBox();
+    bindingPanel = new gov.va.semoss.ui.components.BindingPanel();
     javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
 
     setBackground(java.awt.Color.white);
@@ -306,9 +294,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 
     paramLabel.setText("4. Select available parameters:");
 
-    paramPanel.setBackground(java.awt.Color.gray);
-    paramPanel.setLayout(new java.awt.CardLayout());
-
     submitButton.setText("Get Insight!");
 
     appendChkBox.setText("Overlay");
@@ -320,16 +305,16 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
     insightsPanel.setLayout(insightsPanelLayout);
     insightsPanelLayout.setHorizontalGroup(
       insightsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(insightsPanelLayout.createSequentialGroup()
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, insightsPanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(insightsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(paramPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(perspectiveSelector, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(twoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-          .addComponent(questionSelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(threeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(paramLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, insightsPanelLayout.createSequentialGroup()
+        .addGroup(insightsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+          .addComponent(bindingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(perspectiveSelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(twoLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+          .addComponent(questionSelector, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(threeLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(paramLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+          .addGroup(javax.swing.GroupLayout.Alignment.LEADING, insightsPanelLayout.createSequentialGroup()
             .addGap(0, 0, Short.MAX_VALUE)
             .addGroup(insightsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(appendChkBox, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -350,12 +335,12 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(paramLabel)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(paramPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addComponent(bindingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(18, 18, 18)
         .addComponent(submitButton)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(appendChkBox)
-        .addGap(0, 0, Short.MAX_VALUE))
+        .addGap(0, 70, Short.MAX_VALUE))
     );
 
     jSplitPane1.setRightComponent(insightsPanel);
@@ -387,9 +372,9 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox appendChkBox;
+  private gov.va.semoss.ui.components.BindingPanel bindingPanel;
   private javax.swing.JLabel oneLabel;
   private final javax.swing.JLabel paramLabel = new javax.swing.JLabel();
-  private javax.swing.JPanel paramPanel;
   javax.swing.JComboBox<Perspective> perspectiveSelector;
   javax.swing.JComboBox<Insight> questionSelector;
   private gov.va.semoss.ui.components.RepositoryList repoList;
@@ -401,7 +386,8 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
   // End of variables declaration//GEN-END:variables
 
 	private class InsightAction extends ExecuteQueryProcessor {
-	    private static final long serialVersionUID = -5360951711543979184L;
+
+		private static final long serialVersionUID = -5360951711543979184L;
 
 		public InsightAction() {
 			super( "Create Insight!" );
@@ -412,7 +398,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Perspective persp
 					= perspectiveSelector.getItemAt( perspectiveSelector.getSelectedIndex() );
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			return persp.getLabel() + "-Insight-" + persp.indexOf( insight );
+			return persp.getLabel() + "-Insight-" + ( 1 + persp.indexOf( insight ) );
 		}
 
 		@Override
@@ -422,20 +408,17 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		}
 
 		@Override
-		protected String getQuery() {
+		protected QueryExecutor<?> getQuery() {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			String sparql = Utility.normalizeParam( insight.getSparql() );
 
-			Map<String, String> paramHash = getParameterValues();
+			ListOfValueArraysQueryAdapter qa
+					= new ListOfValueArraysQueryAdapter( insight.getSparql() );
+			Map<Parameter, Value> bindings = bindingPanel.getBindings();
+			for ( Map.Entry<Parameter, Value> en : bindings.entrySet() ) {
+				qa.bind( en.getKey().getVariable(), en.getValue() );
+			}
 
-			log.debug( "SPARQL " + sparql );
-			if ( insight.isLegacy() ) {
-				sparql = Utility.fillParam( sparql, paramHash );
-			}
-			else {
-				sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( sparql, paramHash );
-			}
-			return sparql;
+			return qa;
 		}
 
 		@Override
@@ -443,11 +426,11 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
 			String output = insight.getOutput();
 
-			try{
+			try {
 				return (Class<PlaySheetCentralComponent>) Class.forName( output );
 			}
-			catch( ClassNotFoundException n ){
-				log.error( n, n);
+			catch ( ClassNotFoundException n ) {
+				log.error( n, n );
 			}
 			return null;
 		}
@@ -460,6 +443,12 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		@Override
 		protected boolean isAppending() {
 			return appendChkBox.isSelected();
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent ae ) {
+			super.actionPerformed( ae );
+			enableDisableOverlay();
 		}
 	}
 }
