@@ -106,12 +106,7 @@ public class DatabaseController extends SemossControllerBase {
 		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
 
 		for ( DbInfo dbi : testDbs ) {
-			try {
-				RemoteDBReverseProxyFilter.convertToRPStyle(dbi);
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
+			RemoteDBReverseProxyFilter.convertToRPStyle(dbi, req );
 		}
 
 		return testDbs;
