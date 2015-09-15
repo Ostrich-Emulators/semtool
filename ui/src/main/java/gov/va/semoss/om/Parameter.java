@@ -5,9 +5,7 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.BindingSet;
 
 /**
  * Holds a Parameter data for one Parameter of an Insight.
@@ -20,7 +18,6 @@ public class Parameter implements Serializable {
 	private static final long serialVersionUID = 5672795936332918133L;
 	private URI uriId = null;
 	private String strLabel = "";
-	private String strVariable = "";
 	private String strParameterType = "";
 	private String strDefaultQuery = "";
 	private static final Pattern FIRSTVAR = Pattern.compile( "^[^?]+\\?(\\w+).*\\{.*" );
@@ -32,11 +29,10 @@ public class Parameter implements Serializable {
 		strLabel = label;
 	}
 
-	public Parameter( String strParameterURI, String strLabel, String strVariable,
+	public Parameter( String strParameterURI, String strLabel, 
 			String strParameterType, String strDefaultQuery ) {
 		uriId = new URIImpl( strParameterURI );
 		this.strLabel = strLabel;
-		this.strVariable = strVariable;
 		this.strParameterType = strParameterType;
 		this.strDefaultQuery = strDefaultQuery;
 	}
@@ -49,8 +45,7 @@ public class Parameter implements Serializable {
 	}
 
 	public Parameter( Parameter p ) {
-		this( p.getParameterURI(), p.strLabel, p.strVariable, p.strParameterType,
-				p.strDefaultQuery );
+		this( p.getParameterURI(), p.strLabel, p.strParameterType, p.strDefaultQuery );
 	}
 
 	//Parameter URI:
@@ -81,11 +76,7 @@ public class Parameter implements Serializable {
 
 	//Parameter variable:
 	public String getVariable() {
-		return this.strVariable;
-	}
-
-	public void setVariable( String strVariable ) {
-		this.strVariable = strVariable;
+		return getVariableFromSparql( strDefaultQuery.replaceAll( "\n", " " ) );
 	}
 
 	//Parameter type:
@@ -110,7 +101,7 @@ public class Parameter implements Serializable {
 	private void computeVariableAndTypeFromQuery() {
 		// our parameter variable is the first variable returned in the query
 		String nospaces = strDefaultQuery.replaceAll( "\n", " " );
-		strVariable = getVariableFromSparql( nospaces );
+		String strVariable = getVariableFromSparql( nospaces );
 		if ( null != strVariable ) {
 			Pattern TYPER = Pattern.compile( "\\?" + strVariable
 					+ "\\s+(?:a|RDF:TYPE|RDFS:SUBCLASSOF)\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE );
@@ -133,52 +124,8 @@ public class Parameter implements Serializable {
 		return ( m.matches() ? m.group( 1 ) : null );
 	}
 
-	/**
-	 * Populates Parameter instance variables from the results of a database
-	 * fetch.
-	 *
-	 * @param resultSet -- (BindingSet) A row of data corresponding to one
-	 * Parameter.
-	 */
-	public void setFromResultSet( BindingSet resultSet ) {
-		this.strLabel = "";
-		this.strVariable = "";
-		this.strParameterType = "";
-		this.strDefaultQuery = "";
-
-		Value ParameterURI_Value = resultSet.getValue( "parameter" );
-		if ( ParameterURI_Value != null ) {
-			this.uriId = (URI) ParameterURI_Value;
-		}
-		Value labelValue = resultSet.getValue( "parameterLabel" );
-		if ( labelValue != null ) {
-			this.strLabel = labelValue.stringValue();
-		}
-		Value variableValue = resultSet.getValue( "parameterVariable" );
-		if ( variableValue != null ) {
-			//A complete URI is loaded for the variable name. We only want the 
-			//user to modify the actual name, so only that should be displayed:
-			String[] aryVariable = variableValue.stringValue().split( "\\#" );
-			if ( aryVariable.length > 1 ) {
-				this.strVariable = aryVariable[1];
-			}
-			else {
-				this.strVariable = aryVariable[0];
-			}
-		}
-		Value parameterTypeValue = resultSet.getValue( "parameterValueType" );
-		if ( parameterTypeValue != null ) {
-			this.strParameterType = parameterTypeValue.stringValue();
-		}
-		Value defaultQueryValue = resultSet.getValue( "parameterQuery" );
-		if ( defaultQueryValue != null ) {
-			this.strDefaultQuery = defaultQueryValue.stringValue();
-		}
-	}
-
 	@Override
 	public String toString() {
 		return strLabel;
 	}
-
 }//End "Parameter" class.

@@ -49,10 +49,12 @@ import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.Map;
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
 
 import org.apache.commons.io.FileUtils;
+import org.openrdf.model.Value;
 
 /**
  * Class to move the "Custom Sparql Query" window and related controls out of
@@ -267,8 +269,9 @@ public class CustomSparqlPanel extends JPanel {
 				SelectDatabasePanel sdp
 						= DIHelper.getInstance().getPlayPane().getDatabasePanel();
 
+				Map<String, Value> binds = sdp.getBindings();
 				String sparql = AbstractBindable.getBoundSparql( selected.getSparql(),
-						sdp.getBindings() );
+						binds );
 				sparqlArea.setTextOfSelectedTab( sparql );
 
 				//Pre-select the Playsheet of the Insight copied down:

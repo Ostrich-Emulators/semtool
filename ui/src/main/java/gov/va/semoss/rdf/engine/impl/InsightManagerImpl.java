@@ -344,7 +344,7 @@ public class InsightManagerImpl implements InsightManager {
 								= Iterations.asList( rc.getStatements( URI.class.cast( val ),
 												RDFS.LABEL, null, true ) );
 						if ( !preddata.isEmpty() ) {
-							parameter.setVariable( preddata.get( 0 ).getObject().stringValue() );
+							// parameter.setVariable( preddata.get( 0 ).getObject().stringValue() );
 						}
 					}
 					else if ( SP.query.equals( pred ) ) {
