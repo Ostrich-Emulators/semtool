@@ -1,5 +1,5 @@
 var heatmap;
-mapSel = "#heatmap";
+mapSel = "#heatmap svg g";
 
 function start(data) {
 	var dataObject = jQuery.parseJSON( data );

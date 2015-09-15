@@ -306,8 +306,9 @@ function zoom(scale, sel) {
 	if (sel == null)
 		sel = mapSel;
 	
-	var width  = d3.select(sel).style("width" ).split("px")[0] * 1.0;
-	var height = d3.select(sel).style("height").split("px")[0] * 1.0;
+	var firstElInSel = sel.split(" ")[0];
+	var width  = d3.select(firstElInSel).style("width" ).split("px")[0] * 1.0;
+	var height = d3.select(firstElInSel).style("height").split("px")[0] * 1.0;
 	
 	var matrixForThisSel = getMatrixForSel(sel);
 	for (var i=0; i<matrixForThisSel.length; i++) {
@@ -322,5 +323,5 @@ function zoom(scale, sel) {
 }
 
 function applyTransformation(sel, matrix) {
-	$(sel + " svg g").attr("transform", "matrix(" +  matrix.join(' ') + ")");
+	$(sel).attr("transform", "matrix(" +  matrix.join(' ') + ")");
 }
