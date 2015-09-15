@@ -16,6 +16,7 @@ import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.CardLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -39,7 +40,7 @@ import org.openrdf.model.URI;
  * @author ryan
  */
 public class InsightManagerPanel extends javax.swing.JPanel {
-
+	
 	private static final Logger log = Logger.getLogger( InsightManagerPanel.class );
 	private WriteableInsightManager wim;
 	private final InsightTreeModel model = new InsightTreeModel();
@@ -52,9 +53,9 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	 */
 	public InsightManagerPanel() {
 		initComponents();
-
+		
 		propChangeListener = new PropertyChangeListener() {
-
+			
 			@Override
 			public void propertyChange( PropertyChangeEvent evt ) {
 				if ( null != currentCard ) {
@@ -63,60 +64,60 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 				}
 			}
 		};
-
+		
 		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
 		tree.setCellRenderer( new PerspectiveTreeCellRenderer() );
-
+		
 		setupTreeListeners();
 	}
-
+	
 	private void setupTreeListeners() {
 		//tree.setTransferHandler( new TreeTransferHandler( model ) );
 		model.addTreeModelListener( new TreeModelListener() {
-
+			
 			@Override
 			public void treeNodesChanged( TreeModelEvent e ) {
 				commitbtn.setEnabled( true );
 			}
-
+			
 			@Override
 			public void treeNodesInserted( TreeModelEvent e ) {
 				commitbtn.setEnabled( true );
 			}
-
+			
 			@Override
 			public void treeNodesRemoved( TreeModelEvent e ) {
 				commitbtn.setEnabled( true );
 			}
-
+			
 			@Override
 			public void treeStructureChanged( TreeModelEvent e ) {
 				commitbtn.setEnabled( true );
 			}
 		} );
-
+		
 		tree.addMouseListener( new InsightMenu( tree, model ) );
 		tree.addTreeSelectionListener( new TreeSelectionListener() {
-
+			
 			@Override
 			public void valueChanged( TreeSelectionEvent e ) {
 				DefaultMutableTreeNode node
 						= DefaultMutableTreeNode.class.cast( tree.getLastSelectedPathComponent() );
-
+				
 				CardLayout layout = CardLayout.class.cast( dataArea.getLayout() );
 				TreePath newpath = e.getNewLeadSelectionPath();
-
+				
 				if ( null == newpath ) {
 					return;
 				}
-
+				
 				if ( !( newpath.equals( e.getOldLeadSelectionPath() )
 						|| null == currentCard ) ) {
 
 					// don't need to listen to changes from the old panel anymore
 					currentCard.removePropertyChangeListener( DataPanel.CHANGE_PROPERTY,
 							propChangeListener );
-
+					
 					if ( currentCard.hasChanges() ) {
 						int ans = JOptionPane.showConfirmDialog( currentCard,
 								"This data has changed.\nApply changes before leaving?",
@@ -131,7 +132,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 						}
 					}
 				}
-
+				
 				switch ( e.getNewLeadSelectionPath().getPathCount() ) {
 					case 4:
 						// parameter
@@ -153,32 +154,32 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 						layout.show( dataArea, "perspective" );
 						currentCard = perspectiveData;
 				}
-
+				
 				applybtn.setEnabled( false );
 				currentCard.addPropertyChangeListener( DataPanel.CHANGE_PROPERTY,
 						propChangeListener );
 			}
 		} );
 	}
-
+	
 	public void setEngine( IEngine eng ) {
 		engine = eng;
-
+		
 		insightData.setEngine( engine );
 		parameterData.setEngine( engine );
 		perspectiveData.setEngine( engine );
-
+		
 		if ( null != wim ) {
 			wim.release();
 		}
 		
 		wim = ( null == eng ? null : engine.getWriteableInsightManager() );
 		model.refresh( wim );
-
+		
 		for ( int i = 0; i < tree.getRowCount(); i++ ) {
 			tree.expandRow( i );
 		}
-
+		
 		tree.setSelectionRow( 0 );
 		commitbtn.setEnabled( false );
 		applybtn.setEnabled( false );
@@ -285,25 +286,25 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		applybtn.setEnabled( false );
 		commitbtn.setEnabled( true );
   }//GEN-LAST:event_applybtnActionPerformed
-
+	
 	private List<Perspective> convertTreeToPerspectives() {
 		List<Perspective> perspectives = new ArrayList<>();
 		DefaultMutableTreeNode root
 				= DefaultMutableTreeNode.class.cast( model.getRoot() );
 		Enumeration<DefaultMutableTreeNode> perspIt = root.children();
-
+		
 		while ( perspIt.hasMoreElements() ) {
 			DefaultMutableTreeNode perspnode = perspIt.nextElement();
 			Perspective persp = Perspective.class.cast( perspnode.getUserObject() );
 			perspectives.add( persp );
-
+			
 			List<Insight> insights = new ArrayList<>();
 			Enumeration<DefaultMutableTreeNode> insIt = perspnode.children();
 			while ( insIt.hasMoreElements() ) {
 				DefaultMutableTreeNode insnode = insIt.nextElement();
 				Insight ins = Insight.class.cast( insnode.getUserObject() );
 				insights.add( ins );
-
+				
 				List<Parameter> params = new ArrayList<>();
 				Enumeration<DefaultMutableTreeNode> parmIt = insnode.children();
 				while ( parmIt.hasMoreElements() ) {
@@ -315,7 +316,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 			}
 			persp.setInsights( insights );
 		}
-
+		
 		return perspectives;
 	}
 
@@ -323,29 +324,30 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		// rebuild all the perspectives from our tree nodes and 
 		// write everything back to the database
 		List<Perspective> perspectives = convertTreeToPerspectives();
-
+		
 		ProgressTask pt = new ProgressTask( "Committing Insights", new Runnable() {
-
+			
 			@Override
 			public void run() {
 				EngineOperationListener eol = new EngineOperationListener() {
-
+					
 					@Override
 					public void engineOpened( IEngine eng ) {
 					}
-
+					
 					@Override
 					public void engineClosed( IEngine eng ) {
 					}
-
+					
 					@Override
 					public void insightsModified( IEngine eng, Collection<URI> perspectives,
 							Collection<URI> numinsights ) {
 						commitbtn.setEnabled( false );
 						EngineUtil.getInstance().removeEngineOpListener( this );
+						GuiUtility.showMessage( "Perspectives Saved" );
 					}
 				};
-
+				
 				wim.setData( perspectives );
 				EngineUtil.getInstance().addEngineOpListener( eol );
 				EngineUtil.getInstance().importInsights( wim );
