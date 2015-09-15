@@ -472,44 +472,6 @@ public class InsightManagerImpl implements InsightManager {
 		throw new IllegalArgumentException( "unknown perspective: " + perspectiveURI );
 	}
 
-	/**
-	 * Returns a collection of data about the playsheets used to render Insights.
-	 *
-	 * @return -- (Collection<PlaySheet>) Described above.
-	 */
-	@Override
-	public Collection<PlaySheet> getPlaySheets() {
-		final Collection<PlaySheet> colPlaysheet = new ArrayList<>();
-
-		try {
-			String query = "PREFIX " + VAS.PREFIX + ": <" + VAS.NAMESPACE + "> "
-					+ "PREFIX " + UI.PREFIX + ": <" + UI.NAMESPACE + "> "
-					+ "SELECT DISTINCT ?viewClass ?icon ?label ?description "
-					+ "WHERE{ ?dataView a vas:DataView . "
-					+ "?dataView ui:viewClass ?viewClass . "
-					+ "OPTIONAL{ ?dataView vas:icon ?icon } "
-					+ "OPTIONAL{ ?dataView rdfs:label ?label } "
-					+ "OPTIONAL{ ?dataView <http://va.gov/ontologies/core#description> ?description } } "
-					+ "ORDER BY ASC(?label)";
-
-			ListQueryAdapter<PlaySheet> lqa = new ListQueryAdapter<PlaySheet>( query ) {
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					PlaySheet playsheet = new PlaySheet();
-					playsheet.setFromResultSet( set );
-					add( playsheet );
-				}
-			};
-			log.debug( "Playsheet Query... " + query );
-			colPlaysheet.addAll( AbstractSesameEngine.getSelect( lqa, rc, true ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-		}
-
-		return colPlaysheet;
-	}
-
 	@Override
 	public Collection<Statement> getStatements() throws RepositoryException {
 		return Iterations.asList( rc.getStatements( null, null, null, false ) );

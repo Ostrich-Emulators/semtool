@@ -74,13 +74,6 @@ public interface InsightManager {
 	public Insight getInsight( URI id );
 
 	/**
-	 * Returns a collection of data about the playsheets used to render Insights.
-	 *
-	 * @return -- (Collection<PlaySheet>) Described above.
-	 */
-	public Collection<PlaySheet> getPlaySheets();
-
-	/**
 	 * Gets the raw statements for the insights
 	 *
 	 * @return all the statements that together comprise the Insight data
