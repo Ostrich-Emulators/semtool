@@ -21,26 +21,28 @@ public class InsightTreeModel extends DefaultTreeModel {
 	public InsightTreeModel() {
 		super( new DefaultMutableTreeNode() );
 	}
-	
-	public void refresh( WriteableInsightManager wim ){
+
+	public void refresh( WriteableInsightManager wim ) {
 		DefaultMutableTreeNode top = DefaultMutableTreeNode.class.cast( getRoot() );
 		top.removeAllChildren();
-		
-		for( Perspective p : wim.getPerspectives() ){
-			DefaultMutableTreeNode perspectiveItem = new DefaultMutableTreeNode( p );
-			top.add( perspectiveItem );
-			
-			for( Insight i : p.getInsights() ) {
-				DefaultMutableTreeNode insightItem = new DefaultMutableTreeNode( i );
-				perspectiveItem.add( insightItem );
-				
-				for( Parameter a : i.getInsightParameters() ){
-					DefaultMutableTreeNode parameterItem = new DefaultMutableTreeNode( a );
-					insightItem.add( parameterItem );			
+
+		if ( null != wim ) {
+
+			for ( Perspective p : wim.getPerspectives() ) {
+				DefaultMutableTreeNode perspectiveItem = new DefaultMutableTreeNode( p );
+				top.add( perspectiveItem );
+
+				for ( Insight i : p.getInsights() ) {
+					DefaultMutableTreeNode insightItem = new DefaultMutableTreeNode( i );
+					perspectiveItem.add( insightItem );
+
+					for ( Parameter a : i.getInsightParameters() ) {
+						DefaultMutableTreeNode parameterItem = new DefaultMutableTreeNode( a );
+						insightItem.add( parameterItem );
+					}
 				}
 			}
 		}
-		
 		nodeStructureChanged( root );
 	}
 }

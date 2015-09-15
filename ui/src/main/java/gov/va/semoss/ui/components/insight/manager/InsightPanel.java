@@ -15,6 +15,9 @@ import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.PlaySheetEnumRenderer;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.PlaySheetEnum;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -36,7 +39,7 @@ import org.openrdf.model.Value;
  * @author ryan
  */
 public class InsightPanel extends DataPanel<Insight> {
-
+	
 	private final JTree tree;
 	private final DefaultTreeModel model;
 
@@ -47,36 +50,58 @@ public class InsightPanel extends DataPanel<Insight> {
 		this.tree = tree;
 		this.model = model;
 		initComponents();
-
+		
 		playsheet.setModel( new DefaultComboBoxModel<>( PlaySheetEnum.valuesNoUpdate() ) );
 		playsheet.setRenderer( new PlaySheetEnumRenderer() );
-
+		
 		listenTo( insightDesc );
 		listenTo( insightName );
 		listenTo( insightQuery );
-
+		
 		insightQuery.getDocument().addDocumentListener( new DocumentListener() {
 			@Override
 			public void insertUpdate( DocumentEvent e ) {
 				setParameterHelper();
 			}
-
+			
 			@Override
 			public void removeUpdate( DocumentEvent e ) {
 				setParameterHelper();
 			}
-
+			
 			@Override
 			public void changedUpdate( DocumentEvent e ) {
 				setParameterHelper();
 			}
 		} );
+		
+		playsheet.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				PlaySheetEnum pse = playsheet.getItemAt( playsheet.getSelectedIndex() );
+				if ( pse.needsSparql() ) {
+					insightQuery.setEditable( true );
+					insightQuery.setBackground( Color.WHITE );
+					InsightPanel.this.testbtn.setEnabled( true );
+				}
+				else{
+					insightQuery.setEditable( false );
+					insightQuery.setText( null );
+					insightQuery.setBackground( Color.LIGHT_GRAY );
+					InsightPanel.this.testbtn.setEnabled( false );
+				}
+				setChanges( true );				
+			}
+			
+		} );
+		
 	}
-
+	
 	public InsightPanel() {
 		this( null, null );
 	}
-
+	
 	@Override
 	protected void isetElement( Insight i, DefaultMutableTreeNode node ) {
 		insightName.setText( i.getLabel() );
@@ -189,12 +214,12 @@ public class InsightPanel extends DataPanel<Insight> {
 
   private void testbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testbtnActionPerformed
 		PlaySheetEnum pse = playsheet.getItemAt( playsheet.getSelectedIndex() );
-
+		
 		Insight insight
 				= new Insight( insightName.getText(), insightQuery.getText(),
 						(Class<? extends PlaySheetCentralComponent>) ( pse.getSheetClass() ) );
 		insight.setDescription( insightDesc.getText() );
-
+		
 		List<Parameter> params = new ArrayList<>();
 		DefaultMutableTreeNode node = getNode();
 		Enumeration<DefaultMutableTreeNode> en = node.children();
@@ -202,26 +227,26 @@ public class InsightPanel extends DataPanel<Insight> {
 			DefaultMutableTreeNode child = en.nextElement();
 			params.add( Parameter.class.cast( child.getUserObject() ) );
 		}
-
+		
 		Map<String, Value> bindings = new HashMap<>();
 		if ( !params.isEmpty() ) {
 			insight.setParameters( params );
 			BindingPanel pnl = new BindingPanel( getEngine() );
 			pnl.setParameters( params );
-
+			
 			String opts[] = { "OK", "Cancel" };
-
+			
 			int ans = JOptionPane.showOptionDialog( this, pnl, "Select Parameters",
 					JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );
 			if ( JOptionPane.YES_OPTION != ans ) {
 				return;
 			}
-
+			
 			for ( Map.Entry<Parameter, Value> bind : pnl.getBindings().entrySet() ) {
 				bindings.put( bind.getKey().getVariable(), bind.getValue() );
 			}
 		}
-
+		
 		PlaySheetFrame psf = new PlaySheetFrame( getEngine() );
 		psf.setTitle( "Insight Manager Query Test" );
 		DIHelper.getInstance().getDesktop().add( psf );
@@ -254,7 +279,7 @@ public class InsightPanel extends DataPanel<Insight> {
 		i.setOutput( playsheet.getItemAt( playsheet.getSelectedIndex() ).
 				getSheetClass().getCanonicalName() );
 	}
-
+	
 	public void setParameterHelper() {
 		Map<String, Parameter> map = new HashMap<>();
 		Enumeration<DefaultMutableTreeNode> en = getNode().children();
@@ -263,7 +288,7 @@ public class InsightPanel extends DataPanel<Insight> {
 			Parameter p = Parameter.class.cast( n.getUserObject() );
 			map.put( p.getVariable(), p );
 		}
-
+		
 		StringBuilder sb = new StringBuilder();
 		String txt = insightQuery.getText();
 		for ( Map.Entry<String, Parameter> it : map.entrySet() ) {
@@ -279,9 +304,9 @@ public class InsightPanel extends DataPanel<Insight> {
 				sb.append( "<strong>?" ).append( it.getKey() ).append( "</strong> value from \"" ).
 						append( it.getValue().getLabel() ).append( "\" Parameter" );
 			}
-
+			
 		}
 		paramLabel.setText( sb.toString() );
-
+		
 	}
 }

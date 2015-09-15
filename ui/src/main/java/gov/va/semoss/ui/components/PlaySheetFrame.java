@@ -309,7 +309,7 @@ public class PlaySheetFrame extends JInternalFrame {
 					updateProgress( "Executing Query", 40 );
 
 					int dsize = 0;
-					if ( null == query || "NULL".equals( query.toUpperCase() ) ) {
+					if ( null == query || query.isEmpty() || "NULL".equals( query.toUpperCase() ) ) {
 						// uh oh...no sparql given
 						// assume the pscc knows what to do with empty data
 						dsize = 0;

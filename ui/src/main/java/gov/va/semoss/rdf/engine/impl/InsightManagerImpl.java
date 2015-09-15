@@ -34,14 +34,12 @@ import gov.va.semoss.model.vocabulary.SPIN;
 import gov.va.semoss.model.vocabulary.SPL;
 import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
@@ -49,6 +47,8 @@ import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.user.User;
+import gov.va.semoss.util.DefaultPlaySheetIcons;
+import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.UriBuilder;
 
 import java.util.Arrays;
@@ -501,46 +501,6 @@ public class InsightManagerImpl implements InsightManager {
 		return colPlaysheet;
 	}
 
-	/**
-	 * Returns a collection of Parameter Types from the main KB, for use in the
-	 * "Parameter Types" combo-box on the "Parameter" tab of the Insight Manager.
-	 *
-	 * @return -- (Collection<ParameterType>) Described above.
-	 */
-	@Override
-	public Collection<ParameterType> getParameterTypes() {
-		final Collection<ParameterType> colParameterType = new ArrayList<>();
-		IEngine engine = DIHelper.getInstance().getRdfEngine();
-		SesameJenaSelectWrapper wrapper = new SesameJenaSelectWrapper();
-
-		wrapper.setEngine( engine );
-
-		String query = "SELECT DISTINCT ?parameterClass ?parameterLabel WHERE { {"
-				+ "?parameterClass rdfs:subClassOf <http://semoss.org/ontologies/Concept> . "
-				+ "?parameterClass rdfs:label ?parameterLabel "
-				+ "FILTER( ?parameterClass != <http://semoss.org/ontologies/Concept> && "
-				+ "?parameterClass != <http://www.w3.org/2004/02/skos/core#Concept>) } "
-				+ "UNION { BIND(owl:Nothing AS ?parameterClass) . "
-				+ "BIND(\"(Unselected)\" AS ?parameterLabel) } "
-				+ "UNION{ BIND(<http://semoss.org/ontologies/Concept> AS ?parameterClass) . "
-				+ "BIND(\"*Concept\" AS ?parameterLabel) } } ORDER BY ?parameterLabel";
-
-		wrapper.setQuery( query );
-		wrapper.executeQuery();
-		engine.commit();
-		String[] vars = wrapper.getVariables();
-		while ( wrapper.hasNext() ) {
-			SesameJenaSelectStatement stmt = wrapper.next();
-			String parameterClass = stmt.getRawVar( vars[0] ) + "";
-			String parameterLabel = stmt.getVar( vars[1] ).toString();
-			ParameterType parameterType = new ParameterType( parameterLabel, parameterClass );
-			colParameterType.add( parameterType );
-		}
-		log.debug( "ParameterType Query... " + query );
-
-		return colParameterType;
-	}
-
 	@Override
 	public Collection<Statement> getStatements() throws RepositoryException {
 		return Iterations.asList( rc.getStatements( null, null, null, false ) );
@@ -795,13 +755,26 @@ public class InsightManagerImpl implements InsightManager {
 
 		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, VAS.InsightProperties ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATED,
-				vf.createLiteral( insight.getCreated() ) ) );
+				vf.createLiteral( null == insight.getCreated() ? new Date()
+								: insight.getCreated() ) ) );
 		statements.add( new StatementImpl( iid, DCTERMS.MODIFIED,
 				vf.createLiteral( new Date() ) ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATOR,
 				vf.createLiteral( getAuthorInfo( user ) ) ) );
-		statements.add( new StatementImpl( iid, UI.dataView,
-				vf.createURI( "http://va.gov/ontologies/semoss#" + insight.getOutput() ) ) );
+		URI outputuri = vf.createURI( VAS.NAMESPACE, insight.getOutput() );
+		statements.add( new StatementImpl( iid, UI.dataView, outputuri ) );
+
+		// add the dataview objects, too (these'll be added multiple times, but
+		// all the values will be identical)
+		PlaySheetEnum pse = PlaySheetEnum.valueFor( insight );
+		statements.add( new StatementImpl( outputuri, RDF.TYPE, UI.dataView ) );
+		statements.add( new StatementImpl( outputuri, UI.viewClass,
+				vf.createLiteral( insight.getOutput() ) ) );
+		statements.add( new StatementImpl( outputuri, VAS.icon,
+				vf.createLiteral( DefaultPlaySheetIcons.getDefaultIconName( pse ) ) ) );
+		statements.add( new StatementImpl( outputuri, RDFS.LABEL,
+				vf.createLiteral( pse.getDisplayName() ) ) );
+
 		String sparql = insight.getSparql();
 
 		URI spinid = urib.build( insight.getLabel() + "-query" );

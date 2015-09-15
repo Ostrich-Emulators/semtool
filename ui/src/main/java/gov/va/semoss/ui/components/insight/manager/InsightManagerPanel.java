@@ -171,8 +171,8 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		if ( null != wim ) {
 			wim.release();
 		}
-
-		wim = engine.getWriteableInsightManager();
+		
+		wim = ( null == eng ? null : engine.getWriteableInsightManager() );
 		model.refresh( wim );
 
 		for ( int i = 0; i < tree.getRowCount(); i++ ) {

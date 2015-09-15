@@ -81,14 +81,6 @@ public interface InsightManager {
 	public Collection<PlaySheet> getPlaySheets();
 
 	/**
-	 * Returns a collection of Parameter Types from the main KB, for use in the
-	 * "Parameter Types" combo-box on the "Parameter" tab of the Insight Manager.
-	 *
-	 * @return -- (Collection<ParameterType>) Described above.
-	 */
-	public Collection<ParameterType> getParameterTypes();
-
-	/**
 	 * Gets the raw statements for the insights
 	 *
 	 * @return all the statements that together comprise the Insight data

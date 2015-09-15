@@ -36,9 +36,7 @@ import gov.va.semoss.ui.components.playsheets.SankeyPlaySheet;
 import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
 
@@ -97,6 +95,10 @@ public enum PlaySheetEnum {
 
 	public String getSheetHint() {
 		return this.sheetHint;
+	}
+
+	public boolean needsSparql() {
+		return !AppDupeHeatMapSheet.class.equals( sheetClass );
 	}
 
 	/**

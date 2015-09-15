@@ -11,7 +11,6 @@ import java.util.Map;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JList;
 
 import org.apache.log4j.Logger;
@@ -22,6 +21,7 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.util.DefaultPlaySheetIcons;
+import gov.va.semoss.util.PlaySheetEnum;
 
 /**
  *
@@ -31,7 +31,6 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = Logger.getLogger( QuestionRenderer.class );
-	private final Map<Insight, Icon> iconCache = new HashMap<>();
 	private final Map<URI, String> nameCache = new HashMap<>();
 	private InsightManager engine;
 	private Perspective perspective;
@@ -41,7 +40,6 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 
 	public void setEngine( IEngine eng ) {
 		engine = ( null == eng ? null : eng.getInsightManager() );
-		iconCache.clear();
 		nameCache.clear();
 	}
 
@@ -58,35 +56,13 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 
 		super.getListCellRendererComponent( list, text, idx, sel, hasfocus );
 
-		if ( !iconCache.containsKey( insight ) ) {
-			Icon icon = null;
-
-			if ( null == engine || null == insight ) {
-				iconCache.put( insight, null == icon ? DefaultPlaySheetIcons.blank
-						: icon );
-			}
-			else {
-				String output = insight.getOutput();
-				// if we recognize the playsheet class, use the specified icon
-				if ( DefaultPlaySheetIcons.defaultIcons.containsKey( output ) ) {
-					icon = DefaultPlaySheetIcons.defaultIcons.get( output );
-				}
-				else {
-					// couldn't find the right playsheet class, so see if we can
-					// figure out the icon based on the question label
-					for ( Map.Entry<String, ImageIcon> e : DefaultPlaySheetIcons.defaultIcons.entrySet() ) {
-						if ( text.contains( e.getKey() ) ) {
-							ImageIcon ii = e.getValue();
-							icon = ii;
-						}
-					}
-				}
-			}
-
-			iconCache.put( insight, null == icon ? DefaultPlaySheetIcons.blank : icon );
+		Icon icon = DefaultPlaySheetIcons.getDefaultIcon( PlaySheetEnum.valueFor( insight) );
+		if( null == icon ){
+			setIcon( null );
 		}
-
-		setIcon( iconCache.get( insight ) );
+		else{
+			setIcon( icon );
+		}
 
 		if ( insight != null && insight.getLabel() != null ) {
 			setToolTipText( insight.getLabel() );
