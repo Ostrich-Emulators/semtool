@@ -39,8 +39,10 @@ import java.io.FileWriter;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Namespace;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -119,7 +121,8 @@ public class ExportInsightsAction extends DbAction {
 							rc.setNamespace( SPL.PREFIX, SPL.NAMESPACE );
 							rc.setNamespace( OLO.PREFIX, OLO.NAMESPACE );
 							rc.setNamespace( UI.PREFIX, UI.NAMESPACE );
-							rc.setNamespace( MetadataConstants.VA_INSIGHTS_PREFIX, MetadataConstants.VA_INSIGHTS_NS );
+							rc.setNamespace( MetadataConstants.VA_INSIGHTS_PREFIX, 
+									MetadataConstants.VA_INSIGHTS_NS );
 					    rc.setNamespace( ARG.PREFIX, ARG.NAMESPACE );
 
 							getEngine().execute( new ModificationExecutorAdapter() {
@@ -133,9 +136,11 @@ public class ExportInsightsAction extends DbAction {
 							} );
 
 							try ( FileWriter fw = new FileWriter( exportfile ) ) {
+								String expname = exportfile.getName().toLowerCase();
 								fw.write( "# imports: " + SPIN.BASE_URI + "\r\n" );
 								fw.write( "# imports: " + SP.BASE_URI + "\r\n" );
-								rc.export( new TurtleWriter( fw ) );
+								rc.export( "nt".equals( FilenameUtils.getExtension( expname ) )
+										? new NTriplesWriter( fw ) : new TurtleWriter( fw ) );
 							}
 							catch ( Exception ioe ) {
 								// we'll catch this below, in the outer catch

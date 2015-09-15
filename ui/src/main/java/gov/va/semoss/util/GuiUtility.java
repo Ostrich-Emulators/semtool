@@ -355,7 +355,6 @@ public class GuiUtility {
 		}
 		
 		DIHelper.getInstance().registerEngine( engine );
-
 		return engine;
 	}
 

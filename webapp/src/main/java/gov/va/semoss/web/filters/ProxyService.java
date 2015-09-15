@@ -424,7 +424,7 @@ public class ProxyService {
 			uri.append('?');
 			uri.append(encodeUriQuery(queryString));
 		}
-		boolean sendFragement = true;
+		boolean sendFragement = ( null != fragment );
 		if (sendFragement) {
 			uri.append('#');
 			uri.append(encodeUriQuery(fragment));

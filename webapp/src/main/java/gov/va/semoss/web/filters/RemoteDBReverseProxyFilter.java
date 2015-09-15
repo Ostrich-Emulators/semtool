@@ -1,20 +1,17 @@
 package gov.va.semoss.web.filters;
 
-
 import gov.va.semoss.web.datastore.DbInfoMapper;
 import gov.va.semoss.web.io.DbInfo;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
+import java.net.URISyntaxException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -22,241 +19,231 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
- * This RP Service intercepts all commands, searching for calls to remote databases
- * and if found, proceeds to functions as a Reverse Proxy (RP) for those databases.
+ * This RP Service intercepts all commands, searching for calls to remote
+ * databases and if found, proceeds to functions as a Reverse Proxy (RP) for
+ * those databases.
+ *
  * @author Wayne Warren
  *
  */
-@WebFilter("/*") 
+@WebFilter( "/*" )
 public class RemoteDBReverseProxyFilter implements Filter {
-	/** The primary path nodes handled (proxied) by this filter */
-	private static final Set<String> PROXIED_PATHS = new HashSet<String>();
-	/** The Object's logger */
+
+	/**
+	 * The Object's logger
+	 */
 	private static final Logger log = Logger.getLogger( RemoteDBReverseProxyFilter.class );
-	/** The Service that will use the httpClient to actually make the proxied call */
+	/**
+	 * The Service that will use the httpClient to actually make the proxied call
+	 */
 	private static final ProxyService proxyService = new ProxyService();
-	/** Set to true if you want this filter to initiate a proxy to the DBs, false if you
-	 * simply want a redirect */
+	/**
+	 * Set to true if you want this filter to initiate a proxy to the DBs, false
+	 * if you simply want a redirect
+	 */
 	private static final boolean doProxy = true;
-	/** A lookup table which contains a remote database names as keys, and the DbInfo as the value */
-	private static final HashMap<String, DbInfo> remoteDatabases = new HashMap<String, DbInfo>();
-	/** The address of this web server (i.e. 'http://semoss.va.gov/') */
-	private static final String SERVER_ADDRESS = "localhost";
-	/** The application context of this servlet instance (i.e. 'semoss') */
-	private static final String SERVLET_CONTEXT = "semoss";
-	/** The port of this servlet instance (i.e. '8080'), set to -1 if you'd like to leave the port 
-	 * out of the address */
-	private static final int SERVER_PORT = 8080;
-	/** The store of remote DBInfo, managed by Spring */
-	
-	/** The static flag signifying the 'server' service or URL */
+
+	/**
+	 * The static flag signifying the 'server' service or URL
+	 */
 	public static final String SERVER_URL = "server";
-	/** The static flag signifying the 'data' service or URL */
+	/**
+	 * The static flag signifying the 'data' service or URL
+	 */
 	public static final String DATA_URL = "data";
-	/** The static flag signifying the 'insight' service or URL */
+	/**
+	 * The static flag signifying the 'insight' service or URL
+	 */
 	public static final String INSIGHT_URL = "insights";
-	/** The Access Control List security implementation for Predicate 
-	 * reading and writing */
+	/**
+	 * The Access Control List security implementation for Predicate reading and
+	 * writing
+	 */
 	private final PredicateACL predicateACL = new PredicateACL();
-	/** The Access Control List security implementation for Server 
-	 * access */
+	/**
+	 * The Access Control List security implementation for Server access
+	 */
 	private final ServerACL serverACL = new ServerACL();
-	
-	@Autowired
+
+	private ServletContext servletContext = null;
+
+	private ApplicationContext applicationContext = null;
+
 	private DbInfoMapper datastore;
-	
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-        throws IOException, ServletException {
-    	
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
-        String requestUrl = request.getRequestURL().toString();
-        String path = getPath(requestUrl);
-        if (handleCall(path)) {
-        	log.warn("Current URL request is a candidate for RP-Handling: " + path);
-        	ProxyCall call = new ProxyCall(path);
-        	String destinationURL = call.getDestinationURL();
-        	if (doProxy){
-        		proxyRequest(destinationURL, req, res, chain);
-        	}
-        	else {
-        		response.sendRedirect(destinationURL);
-        	}
-        } else {
-        	// If not caught, process in the usual manner
-            chain.doFilter(req, res);
-        }
-    }
-    
-    /**
-     * Proxy a given request to a remote database
-     * @param destinationURL The destination URL that is to handle the proxy
-     * @param req The servlet request
-     * @param res The servlet response
-     * @param chain The filter chain of this application context
-     */
-    private void proxyRequest(String destinationURL, ServletRequest req,
-			ServletResponse res, FilterChain chain) {
-    	HttpServletRequest request = (HttpServletRequest) req;
-    	HttpServletResponse response = (HttpServletResponse) res;
-    	try {
-    		proxyService.proxyRequest(destinationURL, request, response);
-		} catch (IOException | ServletException e) {
-			log.error("Error handling proxy request.", e);
+
+	public RemoteDBReverseProxyFilter() {
+		proxyService.initialize();
+	}
+
+	@Override
+	public void doFilter( ServletRequest req, ServletResponse res, FilterChain chain )
+			throws IOException, ServletException {
+
+		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) res;
+		String path = request.getServletPath();
+
+		if ( shouldProxyRequest( path ) ) {
+			log.warn( "Current URL request is a candidate for RP-Handling: " + path );
+			DbInfo dbi = getRawDbInfoFromRequest( request );
+			String destinationURL = getProxyDestination( dbi, request );
+			if ( doProxy ) {
+				proxyRequest( destinationURL, request, response, chain );
+			}
+			else {
+				response.sendRedirect( destinationURL );
+			}
+		}
+		else {
+			// If not caught, process in the usual manner
+			chain.doFilter( req, res );
 		}
 	}
 
-    /**
-     * Get the path of a url call for subsequent processing
-     * @param requestURL The full request URL, including the protocol prefix
-     * @return The query path, without the application context
-     */
-	private String getPath(String requestURL){
-    	int endOfProtocolIndex = requestURL.indexOf("//");
-    	int endOfDomainIndex = requestURL.indexOf("/", endOfProtocolIndex + 2);
-    	int pathStartIndex = requestURL.indexOf("/", endOfDomainIndex + 5);
-    	String requestPath = requestURL.substring(pathStartIndex + 1); 
-    	return requestPath;
-    }
+	/**
+	 * Proxy a given request to a remote database
+	 *
+	 * @param destinationURL The destination URL that is to handle the proxy
+	 * @param req The servlet request
+	 * @param res The servlet response
+	 * @param chain The filter chain of this application context
+	 */
+	private void proxyRequest( String destinationURL, HttpServletRequest request,
+			HttpServletResponse response, FilterChain chain ) {
+		try {
+			URI uri = new URI( destinationURL );
+			HttpHost host = new HttpHost( uri.getHost(), uri.getPort(), uri.getScheme() );
+			request.setAttribute( ProxyService.ATTR_TARGET_HOST, host );
+
+			CsrfToken token = CsrfToken.class.cast( request.getAttribute( "_csrf" ) );
+			proxyService.proxyRequest( destinationURL, request, response );
+			if( null != token ){
+				response.setHeader( "X-CSRF-HEADER", token.getHeaderName() );
+				response.setHeader( "X-CSRF-PARAM", token.getParameterName() );
+				response.setHeader( "X-CSRF-TOKEN", token.getToken() );
+			}
+		}
+		catch ( URISyntaxException | ServletException | IOException e ) {
+			log.error( "Error handling proxy request.", e );
+		}
+	}
+
+	private DbInfo getRawDbInfoFromRequest( HttpServletRequest req ) {
+		final String path = req.getServletPath();
+
+		for ( DbInfo dbi : datastore.getAll() ) {
+			if ( path.startsWith( "/databases/" + dbi.getName() + "/repositories/" ) ) {
+				dbi.setServerUrl( getServerUrl( dbi, req ) );
+				return dbi;
+			}
+		}
+
+		throw new IllegalArgumentException( "unknown db info path: " + path );
+	}
 
 	/**
-	 * Decide whether or not the RP is to handle this call, since ALL
-	 * calls will pass through this RP filter
+	 * Decides whether or not the RP is to handle this call, since ALL calls will
+	 * pass through this RP filter
+	 *
 	 * @param path The query path of the call
-	 * @return True if this Filter is to step in and handle the call, false otherwise
+	 * @return True if this Filter is to step in and handle the call, false
+	 * otherwise
 	 */
-    private boolean handleCall(String path) {
-    	// Get the first path node in the path
-    	if (path.contains("/")){
-    		path = path.substring(0,path.indexOf("/"));
-    	}
-    	if (path.contains("?")){
-    		path = path.substring(0,path.indexOf("?"));
-    	}
-    	if (path.contains("#")){
-    		path = path.substring(0,path.indexOf("#"));
-    	}
-    	// Validate the first path node against those that are valid
-    	if (PROXIED_PATHS.contains(path)){
-    		return true;
-    	}
-    	else {
-    		return false;
-    	}
-    }
+	private boolean shouldProxyRequest( String path ) {
+		for ( DbInfo dbi : datastore.getAll() ) {
+			String datapath = "/databases/" + dbi.getName() + "/repositories/" + DATA_URL;
+			log.debug( "checking " + path + " against: " + datapath );
+			if ( path.startsWith( datapath ) ) {
+				log.debug( "match!" );
+				return true;
+			}
 
-    /**
-     * Release resources used by the http client
-     */
+			String insightpath = "/databases/" + dbi.getName() + "/repositories/" + INSIGHT_URL;
+
+			log.debug( "checking " + path + " against: " + insightpath );
+			if ( path.startsWith( insightpath ) ) {
+				log.debug( "match!" );
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Release resources used by the http client
+	 */
 	@Override
 	public void destroy() {
 		proxyService.tearDown();
 	}
 
 	/**
-	 * Initialize this instance by populating the proxied paths
-	 * and indexing the remote DBs by name.
+	 * Initialize this instance by populating the proxied paths and indexing the
+	 * remote DBs by name.
 	 */
 	@Override
-	public void init(FilterConfig arg0) throws ServletException {
-		PROXIED_PATHS.add("remoteDatabase");
-		// Eventually, we'll want to add 
-		Collection<DbInfo> items = this.datastore.getAll();
-		Iterator<DbInfo> iterator = items.iterator();
-		while (iterator.hasNext()){
-			DbInfo item = iterator.next();
-			remoteDatabases.put(item.getName(), item);
-		}
+	public void init( FilterConfig filterConfig ) throws ServletException {
+		servletContext = filterConfig.getServletContext();
+		applicationContext = WebApplicationContextUtils.getWebApplicationContext( servletContext );
+		this.datastore = applicationContext.getBean( DbInfoMapper.class );
+		log.debug( "got the dbmapper bean" );
 	}
-	
+
 	/**
-	 * Converts a Database Info record's url to a form compatible with
-	 * the Reverse Proxy functions of this filter.  For example, a DbInfo
-	 * with a server URL of http://someServer.org/sesame-openRDF named 
-	 * remoteSesame1 will become http://semossServer.org/semoss/remoteDatabase/remoteSesame1/server 
+	 * Converts a Database Info record's url to a form compatible with the Reverse
+	 * Proxy functions of this filter. For example, a DbInfo with a server URL of
+	 * http://someServer.org/sesame-openRDF named remoteSesame1 will become
+	 * http://semossServer.org/semoss/remoteDatabase/remoteSesame1/server
+	 *
 	 * @param info The Database Info object seeking conversion
 	 * @return A DbInfo object that has appropriate URLs for this RP
 	 */
-	public static DbInfo convertToRPStyle(DbInfo info){
-		StringBuilder urlBuilder = new StringBuilder();
-		urlBuilder.append(SERVER_ADDRESS);
-		urlBuilder.append(":" + SERVER_PORT);
-		urlBuilder.append("/" + SERVLET_CONTEXT + "/");
-		String proxyServerURL = urlBuilder.toString();
-		try {
-			URI serverURI = new URI(info.getServerUrl());
-			String serverPath = serverURI.getRawPath();
-			String serverQuery = serverURI.getRawQuery();
-			info.setServerUrl(proxyServerURL + serverPath + "?" + serverQuery);
-			URI dataURI = new URI(info.getDataUrl());
-			String dataPath = dataURI.getRawPath();
-			String dataQuery = dataURI.getRawQuery();
-			info.setDataUrl(proxyServerURL + dataPath + "?" + dataQuery);
-			URI insightsURI = new URI(info.getInsightsUrl());
-			String insightsPath = insightsURI.getRawPath();
-			String insightsQuery = insightsURI.getRawQuery();
-			info.setDataUrl(proxyServerURL + insightsPath + "?" + insightsQuery);
-			return info;
-		}
-		catch(Exception e){
-			log.error("Error converting URL to RP-Style: " + info.getName(), e);
-			return null;
-		}
+	public static DbInfo convertToRPStyle( DbInfo info, HttpServletRequest req ) {
+		String serverurl = getServerUrl( info, req );
+		info.setServerUrl( serverurl );
+		info.setDataUrl( serverurl + "/repositories/" + DATA_URL );
+		info.setInsightsUrl( serverurl + "/repositories/" + INSIGHT_URL );
+		return info;
 	}
-	
+
+	private static String getServerUrl( DbInfo raw, HttpServletRequest req ) {
+		StringBuilder urlBuilder = new StringBuilder( req.getScheme() ).append( "://" ).
+				append( req.getServerName() );
+		if ( 80 != req.getServerPort() ) {
+			urlBuilder.append( ":" ).append( req.getServerPort() );
+		}
+		urlBuilder.append( req.getContextPath() ).append( "/databases/" ).
+				append( raw.getName() );
+		return urlBuilder.toString();
+	}
+
 	/**
-	 * A convenience class providing functionality and attributes showing
-	 * what a call is asking for, and where it should be directed.
-	 * @author Wayne Warren
+	 * Converts the incoming request to it's location behind the proxy
 	 *
+	 * @param raw
+	 * @param req
+	 * @return
 	 */
-	private class ProxyCall {
-		/** The name of the server to which the call is destined */
-		public final String serverName;
-		/** The type of service needed:  Server, Data, or Insight */
-		public final String serviceNeeded;
+	private static String getProxyDestination( DbInfo raw, HttpServletRequest req ) {
+		Pattern pat = Pattern.compile( "^/databases/" + raw.getName()
+				+ "/repositories/(data|insights)" );
+		String reqpath = req.getServletPath();		
 		
-		/**
-		 * 
-		 * @param requestPath
-		 */
-		public ProxyCall(String requestPath){
-			// Get the first "Node" in the call, which should be the server name
-			int firstDivider = requestPath.indexOf("/"); 
-			serverName = requestPath.substring(0, firstDivider);
-			// Get the second "Node" in the call, which should be the service needed
-			int secondDivider = requestPath.indexOf("/", firstDivider + 1);	
-			serviceNeeded= requestPath.substring(firstDivider + 1, secondDivider);
-		}
+		Matcher m = pat.matcher( reqpath );
+		m.find(); // we better know that this works!
+		String serviceNeeded = m.group( 1 );
 		
-		public String getDestinationURL(){
-	    	DbInfo info = remoteDatabases.get(serverName);
-	    	if (info != null && serviceNeeded != null){
-	    		if (serviceNeeded.equals(SERVER_URL)){
-	    			return info.getServerUrl();
-	    		}
-	    		else if (serviceNeeded.equals(DATA_URL)){
-	    			return info.getDataUrl();
-	    		}
-	    		else if (serviceNeeded.equals(INSIGHT_URL)){
-	    			return info.getInsightsUrl();
-	    		}
-	    		else {
-	    			log.error("Unable to establish proper proxy handling for request, server name = " + 
-	    					serverName + ", service needed = " + serviceNeeded);
-	    			return null;
-	    		}
-	    	}
-	    	else {
-	    		log.error("Unable to execute proper proxy lookup for request, server name = " + 
-    					serverName + ", service needed = " + serviceNeeded);
-	    		return null;
-	    	}
-		}
+		m.reset();
+		String proxyloc = m.replaceAll( serviceNeeded.equals( DATA_URL )
+					? raw.getDataUrl() : raw.getInsightsUrl() );
+		return proxyloc;
 	}
 }

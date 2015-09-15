@@ -19,6 +19,8 @@
 		<beans:constructor-arg index="2" ref="contextSource" />
 	</beans:bean>
 
+	<beans:bean id="csrfer" class="gov.va.semoss.web.security.SemossCsrfMatcher"/>
+
 	<!-- 
 		we need to instantiate our ldap provider so we can set our custom DetailsMapper
 		and AuthoritiesPopulator. We don't use the AuthorititesPopulator for anything
@@ -64,7 +66,7 @@
 			password-parameter="password" />
 		<logout logout-success-url="/logout" />
 		<!-- enable csrf protection -->
-		<csrf/>
+		<csrf request-matcher-ref="csrfer"/>
 	</http>
 	
 	<beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">

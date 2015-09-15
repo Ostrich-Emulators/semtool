@@ -42,12 +42,11 @@ public class DatabaseController extends SemossControllerBase {
 	@Autowired
 	private DbInfoMapper datastore;
 
-	@RequestMapping( params = "names" )
+	@RequestMapping("/list" )
 	@ResponseBody
 	public String[] getAllDatabaseIDs() {
 		log.debug( "Getting all database IDs." );
 		Collection<DbInfo> testDbs = datastore.getAll();
-
 		int i = 0;
 		String[] testDbIDs = new String[testDbs.size()];
 		for ( DbInfo dbi : testDbs ) {
@@ -107,78 +106,73 @@ public class DatabaseController extends SemossControllerBase {
 		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
 
 		for ( DbInfo dbi : testDbs ) {
-			try {
-				RemoteDBReverseProxyFilter.convertToRPStyle(dbi);
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
+			RemoteDBReverseProxyFilter.convertToRPStyle(dbi, req );
 		}
 
 		return testDbs;
 	}
 
-	@RequestMapping( "/{id}/{type}" )
-	public void getRepo( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws ServletException, IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/statements" )
-	public void getStatements( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws ServletException, IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/contexts" )
-	public void getContexts( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/size" )
-	public void getSize( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/rdf-graphs" )
-	public void getGraphs( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/rdf-graphs/service" )
-	public void getGraphsService( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/rdf-graphs/{name}" )
-	public void getGraph( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, @PathVariable String name,
-			HttpServletRequest request, HttpServletResponse response ) throws IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/namespaces" )
-	public void getNamespaces( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, HttpServletRequest request,
-			HttpServletResponse response ) throws IOException {
-		
-	}
-
-	@RequestMapping( "/{id}/{type}/namespaces/{prefix}" )
-	public void getNamespace( @PathVariable( "id" ) String id,
-			@PathVariable( "type" ) String type, @PathVariable String prefix,
-			HttpServletRequest request, HttpServletResponse response ) throws IOException {
-		
-	}
+//	@RequestMapping( "/{id}/{type}" )
+//	public void getRepo( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, HttpServletRequest request,
+//			HttpServletResponse response ) throws ServletException, IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/statements" )
+//	public void getStatements( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, HttpServletRequest request,
+//			HttpServletResponse response ) throws ServletException, IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/contexts" )
+//	public void getContexts( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, HttpServletRequest request,
+//			HttpServletResponse response ) throws IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/size" )
+//	public void getSize( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, HttpServletRequest request,
+//			HttpServletResponse response ) throws IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/rdf-graphs" )
+//	public void getGraphs( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, HttpServletRequest request,
+//			HttpServletResponse response ) throws IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/rdf-graphs/service" )
+//	public void getGraphsService( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, HttpServletRequest request,
+//			HttpServletResponse response ) throws IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/rdf-graphs/{name}" )
+//	public void getGraph( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, @PathVariable String name,
+//			HttpServletRequest request, HttpServletResponse response ) throws IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/namespaces" )
+//	public void getNamespaces( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, HttpServletRequest request,
+//			HttpServletResponse response ) throws IOException {
+//		
+//	}
+//
+//	@RequestMapping( "/{id}/{type}/namespaces/{prefix}" )
+//	public void getNamespace( @PathVariable( "id" ) String id,
+//			@PathVariable( "type" ) String type, @PathVariable String prefix,
+//			HttpServletRequest request, HttpServletResponse response ) throws IOException {
+//		
+//	}
 
 }
