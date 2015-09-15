@@ -1,19 +1,16 @@
 package gov.va.semoss.ui.components;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-import gov.va.semoss.ui.helpers.NonLegacyQueryBuilder;
 import gov.va.semoss.util.DIHelper;
 
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -41,30 +38,6 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	}
 
 	/**
-	 * Returns the Insight's Sparql with the selected parameters applied to
-	 * various internal variables. If the Insight is legacy, then the
-	 * ideosyncratic strings (e.g.: "<@...@>") must first be removed.
-	 *
-	 * @param insight -- (Insight) The current Insight value object.
-	 *
-	 * @param paramHash -- (Map<String, String>) The selected parameters to build
-	 * into the Insight query.
-	 *
-	 * @return getSparql -- (String) Described above.
-	 */
-	public static String getSparql( Insight insight, Map<String, String> paramHash ) {
-		String sparql = Utility.normalizeParam( insight.getSparql() );
-		logger.debug( "SPARQL " + sparql );
-		if ( insight.isLegacy() == true ) {
-			sparql = Utility.fillParam( sparql, paramHash );
-		}
-		else {
-			sparql = NonLegacyQueryBuilder.buildNonLegacyQuery( insight.getSparql(), paramHash );
-		}
-		return sparql;
-	}
-
-	/**
 	 * Displays a warning dialog to the user, indicating that the attempted
 	 * database-update query cannot be undone by a simple keystroke, and offers an
 	 * option to cancel out.
@@ -86,7 +59,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 		return getTitle();
 	}
 
-	protected abstract String getQuery();
+	protected abstract QueryExecutor getQuery();
 
 	protected abstract Class<? extends IPlaySheet> getPlaySheet();
 
@@ -104,7 +77,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
-		String query = getQuery();
+		QueryExecutor query = getQuery();
 
 		Class<? extends IPlaySheet> klass = getPlaySheet();
 		IEngine engine = getEngine();
@@ -116,22 +89,26 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			}
 		}
 		else {
-			// run a regular query
+			// run a regular query		
 			JDesktopPane pane = DIHelper.getInstance().getDesktop();
 			DIHelper.getInstance().getPlayPane().showDesktop();
 			String title = getTitle();
 			boolean appending = isAppending();
 
-			try {
-				IPlaySheet pscc = klass.newInstance();
-				pscc.setTitle( title );
-				pt = doitNewSkool( pscc, query, engine, pane, getFrameTitle(),
-						appending );
+			Insight insight = new Insight( title, query.getSparql(),
+					(Class<PlaySheetCentralComponent>) klass );
+
+			if ( appending ) {
+				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
+				pt = psf.getOverlayTask( insight, query.getBindingMap(), title );
 			}
-			catch ( InstantiationException | IllegalAccessException e ) {
-				logger.error( e, e );
-				GuiUtility.showError( e.getLocalizedMessage() );
+			else {
+				PlaySheetFrame psf = new PlaySheetFrame( engine, getFrameTitle() );
+				DIHelper.getInstance().getDesktop().add( psf );
+				pt = psf.getCreateTask( insight, query.getBindingMap() );
 			}
+
+			DIHelper.getInstance().getPlayPane().showDesktop();
 		}
 
 		if ( null != pt ) {
@@ -140,24 +117,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 		}
 	}
 
-	private static ProgressTask doitNewSkool( IPlaySheet pscc,
-			String query, IEngine eng, JDesktopPane pane, String frameTitle,
-			boolean appending ) {
-		if ( appending ) {
-			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
-			return psf.getOverlayTask( query, eng, pscc.getTitle() );
-		}
-		else {
-			PlaySheetFrame psf = new PlaySheetFrame( eng );
-			psf.addTab( PlaySheetCentralComponent.class.cast( pscc ) );
-			psf.setTitle( frameTitle );
-			DIHelper.getInstance().getDesktop().add( psf );
-
-			return psf.getCreateTask( query );
-		}
-	}
-
-	private static ProgressTask makeUpdateTask( String query, IEngine engine ) {
+	private static ProgressTask makeUpdateTask( QueryExecutor query, IEngine engine ) {
 		final Exception ok[] = { null };
 		// this is an update query
 		return new ProgressTask( "Executing Update", new Runnable() {
@@ -165,7 +125,9 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			@Override
 			public void run() {
 				try {
-					engine.update( new UpdateExecutorAdapter( query ) );
+					UpdateExecutorAdapter uea = new UpdateExecutorAdapter( query.getSparql() );
+					uea.addBindings( query.getBindingMap() );
+					engine.update( uea );
 				}
 				catch ( RepositoryException | MalformedQueryException | UpdateExecutionException | SecurityException ex ) {
 					logger.error( ex, ex );

@@ -234,6 +234,13 @@ public class PerspectivePanel extends DataPanel<Perspective> {
 		p.setLabel( perspectiveName.getText() );
 		p.setDescription( perspectiveDesc.getText() );
 	}
+	
+	@Override
+	protected void clear(){
+		perspectiveName.setText( null );
+		perspectiveDesc.setText( null );
+	}
+
 
 	private class MoveButtonAction extends AbstractAction {
 

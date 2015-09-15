@@ -24,6 +24,7 @@ import gov.va.semoss.ui.components.playsheets.LoadingPlaySheetBase;
 import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * Provides a HashMap of icons representing the various playsheets available.
@@ -35,6 +36,7 @@ public class DefaultPlaySheetIcons {
 
 	private static final Set<Class<?>> knownClasses = new LinkedHashSet<>();
 	public static final Map<String, ImageIcon> defaultIcons = new HashMap<>();
+	public static final Map<ImageIcon, String> defaultIconNames = new HashMap<>();
 	public static final Icon blank;
 
 	private DefaultPlaySheetIcons() {
@@ -89,7 +91,7 @@ public class DefaultPlaySheetIcons {
 		setDefaultIcon( USHeatMapPlaySheet.class, "icons16/questions_us_heat_map1_16.png" );
 
 		setDefaultIcon( "(Update Query)", "icons16/questions_update2_16.png" );
-		
+
 		setDefaultIcon( DupeHeatMapSheet.class, "icons16/questions_heat_map3_16.png" );
 	}
 
@@ -99,7 +101,9 @@ public class DefaultPlaySheetIcons {
 	}
 
 	public static void setDefaultIcon( String key, String imgloc ) {
-		defaultIcons.put( key, GuiUtility.loadImageIcon( imgloc ) );
+		ImageIcon ii = GuiUtility.loadImageIcon( imgloc );
+		defaultIcons.put( key, ii );
+		defaultIconNames.put( ii, FilenameUtils.getName( imgloc ) );
 	}
 
 	public static ImageIcon getDefaultIcon( Class<?> klass ) {
@@ -121,5 +125,10 @@ public class DefaultPlaySheetIcons {
 		Class<? extends IPlaySheet> klass = pse.getSheetClass();
 		return ( null == klass
 				? defaultIcons.get( "(Update Query)" ) : getDefaultIcon( klass ) );
+	}
+
+	public static String getDefaultIconName( PlaySheetEnum pse ) {
+		ImageIcon ii = getDefaultIcon( pse );
+		return defaultIconNames.get( ii );
 	}
 }

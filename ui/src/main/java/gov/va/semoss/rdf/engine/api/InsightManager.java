@@ -74,27 +74,21 @@ public interface InsightManager {
 	public Insight getInsight( URI id );
 
 	/**
-	 * Returns a collection of data about the playsheets used to render Insights.
-	 *
-	 * @return -- (Collection<PlaySheet>) Described above.
-	 */
-	public Collection<PlaySheet> getPlaySheets();
-
-	/**
-	 * Returns a collection of Parameter Types from the main KB, for use in the
-	 * "Parameter Types" combo-box on the "Parameter" tab of the Insight Manager.
-	 *
-	 * @return -- (Collection<ParameterType>) Described above.
-	 */
-	public Collection<ParameterType> getParameterTypes();
-
-	/**
 	 * Gets the raw statements for the insights
 	 *
 	 * @return all the statements that together comprise the Insight data
 	 * @throws RepositoryException
 	 */
 	public Collection<Statement> getStatements() throws RepositoryException;
+
+	/**
+	 * Gets the generic perspective for a particular IEngine
+	 *
+	 * @param eng the engine
+	 * @return a fully-instantiated perspective with the "Generic-Perspective"
+	 * Insights
+	 */
+	public Perspective getSystemPerspective( IEngine eng );
 
 	/**
 	 * Releases any resources needed while this class is running. In general, this

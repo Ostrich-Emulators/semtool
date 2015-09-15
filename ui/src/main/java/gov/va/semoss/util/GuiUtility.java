@@ -345,11 +345,15 @@ public class GuiUtility {
 			Class<IEngine> theClass = (Class<IEngine>) Class.forName( engineClass );
 			engine = (IEngine) theClass.getConstructor( Properties.class ).newInstance( props );
 			log.info( "Engine created." );
+
+			if( null == engine.getEngineName() ){
+				engine.setEngineName( engineName );
+			}
 		}
 		catch ( ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
 			log.error( e );
 		}
-		engine.setEngineName( engineName );
+		
 		DIHelper.getInstance().registerEngine( engine );
 
 		return engine;

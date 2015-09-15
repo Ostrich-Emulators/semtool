@@ -10,13 +10,14 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
@@ -32,13 +33,9 @@ import org.openrdf.query.Operation;
 public abstract class AbstractBindable implements Bindable {
 
 	private static final Logger log = Logger.getLogger( AbstractBindable.class );
-	private final Map<String, Double> dmap = new LinkedHashMap<>();
-	private final Map<String, Integer> imap = new LinkedHashMap<>();
-	private final Map<String, Date> amap = new LinkedHashMap<>();
-	private final Map<String, StringPair> smap = new LinkedHashMap<>();
-	private final Map<String, Boolean> bmap = new LinkedHashMap<>();
 	private final Map<String, Value> vmap = new LinkedHashMap<>();
 	private final Map<String, String> namespaces = new LinkedHashMap<>();
+	private final ValueFactory vf = new ValueFactoryImpl();
 	private String sparql;
 	private boolean infer = false;
 
@@ -94,59 +91,7 @@ public abstract class AbstractBindable implements Bindable {
 
 	@Override
 	public String bindAndGetSparql() {
-		ValueFactory fac = new ValueFactoryImpl();
-
-		StringBuilder binds = new StringBuilder();
-		for ( Map.Entry<String, Integer> en : imap.entrySet() ) {
-			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {" ).
-					append( fac.createLiteral( en.getValue() ).toString() ).append( "}" );
-		}
-		for ( Map.Entry<String, Double> en : dmap.entrySet() ) {
-			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {" ).
-					append( fac.createLiteral( en.getValue() ) ).append( "}" );
-		}
-		for ( Map.Entry<String, Boolean> en : bmap.entrySet() ) {
-			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {" ).
-					append( fac.createLiteral( en.getValue() ).toString() ).append( "}" );
-		}
-		for ( Map.Entry<String, Date> en : amap.entrySet() ) {
-			binds.append( " VALUES ?" ).append( en.getKey() ).append( " {" ).
-					append( fac.createLiteral( en.getValue() ).toString() ).append( "}" );
-		}
-
-		for ( Map.Entry<String, Value> en : vmap.entrySet() ) {
-			Value v = en.getValue();
-			binds.append( " VALUES ?" ).append( en.getKey() );
-			if ( v instanceof Literal ) {
-				binds.append( " {" ).append( en.getValue() ).append( "}" );
-			}
-			else {
-				binds.append( " {<" ).append( en.getValue() ).append( ">}" );
-			}
-		}
-
-		for ( Map.Entry<String, StringPair> en : smap.entrySet() ) {
-			String val = en.getValue().val;
-			String lang = en.getValue().lang;
-
-			if ( null == lang ) {
-				binds.append( " VALUES ?" ).append( en.getKey() ).append( " {\"" ).
-						append( fac.createLiteral( val ) ).append( "\"}" );
-			}
-			else {
-				binds.append( " VALUES ?" ).append( en.getKey() ).append( " {" ).
-						append( fac.createLiteral( val, lang ) ).append( "}" );
-			}
-		}
-
-		String spq = getSparql();
-		// I don't really want to write a Sparql parser, so just replace the last }
-		// with our VALUES statements. This will break on just about any complicated
-		// Sparql
-		int last = spq.lastIndexOf( '}' );
-		String select = spq.substring( 0, last );
-		String end = spq.substring( last );
-		return select + binds.toString() + end;
+		return getBoundSparql( sparql, vmap );
 	}
 
 	@Override
@@ -179,40 +124,14 @@ public abstract class AbstractBindable implements Bindable {
 
 	@Override
 	public void setBindings( Operation tq, ValueFactory fac ) {
-		for ( Map.Entry<String, Integer> en : imap.entrySet() ) {
-			tq.setBinding( en.getKey(), fac.createLiteral( en.getValue() ) );
-		}
-		for ( Map.Entry<String, Double> en : dmap.entrySet() ) {
-			tq.setBinding( en.getKey(), fac.createLiteral( en.getValue() ) );
-		}
-		for ( Map.Entry<String, Boolean> en : bmap.entrySet() ) {
-			tq.setBinding( en.getKey(), fac.createLiteral( en.getValue() ) );
-		}
-		for ( Map.Entry<String, Date> en : amap.entrySet() ) {
-			Date d = en.getValue();
-			XMLGregorianCalendar xcal = getCal( d );
-			tq.setBinding( en.getKey(), fac.createLiteral( xcal ) );
-		}
 		for ( Map.Entry<String, Value> en : vmap.entrySet() ) {
 			tq.setBinding( en.getKey(), en.getValue() );
-		}
-
-		for ( Map.Entry<String, StringPair> en : smap.entrySet() ) {
-			String val = en.getValue().val;
-			String lang = en.getValue().lang;
-
-			if ( null == lang ) {
-				tq.setBinding( en.getKey(), fac.createLiteral( val ) );
-			}
-			else {
-				tq.setBinding( en.getKey(), fac.createLiteral( val, lang ) );
-			}
 		}
 	}
 
 	@Override
 	public AbstractBindable bind( String var, String s ) {
-		smap.put( var, new StringPair( s ) );
+		vmap.put( var, vf.createLiteral( s ) );
 		return this;
 	}
 
@@ -224,37 +143,31 @@ public abstract class AbstractBindable implements Bindable {
 
 	@Override
 	public AbstractBindable bind( String var, String s, String lang ) {
-		smap.put( var, new StringPair( s, lang ) );
+		vmap.put( var, vf.createLiteral( s, lang ) );
 		return this;
 	}
 
 	@Override
 	public AbstractBindable bind( String var, double d ) {
-		dmap.put( var, d );
+		vmap.put( var, vf.createLiteral( d ) );
 		return this;
 	}
 
 	@Override
 	public AbstractBindable bind( String var, int d ) {
-		imap.put( var, d );
+		vmap.put( var, vf.createLiteral( d ) );
 		return this;
 	}
 
 	@Override
 	public AbstractBindable bind( String var, Date d ) {
-		amap.put( var, d );
+		vmap.put( var, vf.createLiteral( getCal( d ) ) );
 		return this;
 	}
 
 	@Override
 	public AbstractBindable bind( String var, boolean d ) {
-		bmap.put( var, d );
-		return this;
-	}
-
-	@Override
-	public AbstractBindable bind( String var, URI uri ) {
-		vmap.put( var, uri );
+		vmap.put( var, vf.createLiteral( d ) );
 		return this;
 	}
 
@@ -278,6 +191,67 @@ public abstract class AbstractBindable implements Bindable {
 	public void done() {
 	}
 
+	@Override
+	public Map<String, Value> getBindingMap() {
+		return new LinkedHashMap<>( vmap );
+	}
+
+	@Override
+	public void setBindings( Map<String, Value> vals ) {
+		vmap.clear();
+		addBindings( vals );
+	}
+
+	@Override
+	public void addBindings( Map<String, Value> map ) {
+		vmap.putAll( map );
+	}
+
+	@Override
+	public String toString() {
+		return getSparql();
+	}
+
+	/**
+	 * Gets the given sparql with VALUES clauses appended for the given bindings.
+	 * This function does not cover all possible SPARQL, so please use with care
+	 *
+	 * @param sparql
+	 * @param bindings
+	 * @return
+	 */
+	public static String getBoundSparql( String sparql, Map<String, Value> bindings ) {
+		StringBuilder binds = new StringBuilder();
+
+		for ( Map.Entry<String, Value> en : bindings.entrySet() ) {
+			String var = en.getKey();
+
+			//Skip making a "VALUES" clause if the variable isn't in the query
+			Pattern pattern = Pattern.compile( "\\?" + var + "\\b" );
+			Matcher matcher = pattern.matcher( sparql );
+			if ( !matcher.find() ) {
+				continue;
+			}
+
+			Value v = en.getValue();
+			binds.append( " VALUES ?" ).append( var );
+			if ( v instanceof Literal ) {
+				binds.append( " {" ).append( en.getValue() ).append( "}" );
+			}
+			else {
+				binds.append( " {<" ).append( en.getValue() ).append( ">}" );
+			}
+		}
+
+		// I don't really want to write a Sparql parser, so just replace the last }
+		// with our VALUES statements. This will break on just about any complicated
+		// Sparql
+		int last = sparql.lastIndexOf( '}' );
+		String select = sparql.substring( 0, last );
+		String end = sparql.substring( last );
+		return select + binds.toString() + end;
+	}
+
 	public static XMLGregorianCalendar getCal( Date date ) {
 		GregorianCalendar gCalendar = new GregorianCalendar();
 		gCalendar.setTime( date );
@@ -293,25 +267,5 @@ public abstract class AbstractBindable implements Bindable {
 
 	public static Date getDate( XMLGregorianCalendar cal ) {
 		return cal.toGregorianCalendar().getTime();
-	}
-
-	private class StringPair {
-
-		String val;
-		String lang;
-
-		public StringPair( String v ) {
-			this( v, null );
-		}
-
-		public StringPair( String v, String l ) {
-			val = v;
-			lang = l;
-		}
-	}
-
-	@Override
-	public String toString() {
-		return getSparql();
 	}
 }

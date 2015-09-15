@@ -15,7 +15,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
 
 /**
  * A class that handles all the housekeeping of the QueryExecutor interface
@@ -59,11 +58,6 @@ public abstract class QueryExecutorAdapter<T> extends AbstractBindable
 
 	@Override
 	public void done() {
-	}
-
-	@Override
-	public QueryExecutorAdapter<T> bind( String var, URI uri ) {
-		return (QueryExecutorAdapter<T>) super.bind( var, uri );
 	}
 
 	@Override

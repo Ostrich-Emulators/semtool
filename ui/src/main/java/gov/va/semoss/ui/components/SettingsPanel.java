@@ -23,7 +23,6 @@ import gov.va.semoss.ui.components.models.NamespaceTableModel;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.user.User;
 import gov.va.semoss.user.User.UserProperty;
-import gov.va.semoss.user.RemoteUserImpl;
 import gov.va.semoss.user.Security;
 
 /**
@@ -227,7 +226,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 		if ( JOptionPane.YES_OPTION == ok ) {
 			Class<?> classesToClear[] = { DbAction.class, FileBrowsePanel.class,
 				PlayPane.class, SemossPreferences.class, FileBrowseListener.class,
-				ParamPanel.class
+				BindingPanel.class
 			};
 
 			for ( Class<?> c : classesToClear ) {
