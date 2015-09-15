@@ -240,4 +240,11 @@ public class ParameterPanel extends DataPanel<Parameter> {
 	private void setVariableLabel() {
 		vartext.setText( "?" + Parameter.getVariableFromSparql( parameterQuery.getText() ) );
 	}
+
+	@Override
+	protected void clear(){
+		vartext.setText( null );
+		parameterQuery.setText( null );
+		parameterQuery.setText( null );
+	}
 }

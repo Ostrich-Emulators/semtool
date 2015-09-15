@@ -282,6 +282,10 @@ public class InsightPanel extends DataPanel<Insight> {
 	
 	public void setParameterHelper() {
 		Map<String, Parameter> map = new HashMap<>();
+		if( null == getNode() ){
+			return;
+		}
+		
 		Enumeration<DefaultMutableTreeNode> en = getNode().children();
 		while ( en.hasMoreElements() ) {
 			DefaultMutableTreeNode n = en.nextElement();
@@ -306,7 +310,14 @@ public class InsightPanel extends DataPanel<Insight> {
 			}
 			
 		}
-		paramLabel.setText( sb.toString() );
-		
+		paramLabel.setText( sb.toString() );		
+	}
+	
+	@Override
+	protected void clear(){
+		insightName.setText( null );
+		insightDesc.setText( null );
+		insightQuery.setText( null );		
+		setParameterHelper();
 	}
 }

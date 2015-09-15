@@ -26,6 +26,7 @@ public abstract class DataPanel<T> extends JPanel implements DocumentListener {
 
 	public void setEngine( IEngine engine ) {
 		this.engine = engine;
+		clear();
 		hasChanges = false;
 	}
 
@@ -37,12 +38,17 @@ public abstract class DataPanel<T> extends JPanel implements DocumentListener {
 		element = ele;
 		node = nod;
 		isetElement( ele, nod );
-		setChanges( false );		
+		setChanges( false );
 	}
 
 	protected T getElement() {
 		return element;
 	}
+
+	/**
+	 * Clears out the data elements
+	 */
+	protected abstract void clear();
 
 	protected abstract void isetElement( T ele, DefaultMutableTreeNode node );
 
@@ -95,8 +101,8 @@ public abstract class DataPanel<T> extends JPanel implements DocumentListener {
 	public void setNode( DefaultMutableTreeNode node ) {
 		this.node = node;
 	}
-	
-	protected DefaultMutableTreeNode getNode(){
+
+	protected DefaultMutableTreeNode getNode() {
 		return node;
 	}
 }
