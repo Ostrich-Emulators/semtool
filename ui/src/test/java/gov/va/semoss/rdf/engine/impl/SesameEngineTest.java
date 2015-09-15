@@ -69,7 +69,7 @@ public class SesameEngineTest {
 		se.query( mq );
 		se.closeDB();
 
-		assertEquals( 5, mq.asStrings().size() );
+		assertEquals( 11, mq.asStrings().size() );
 	}
 
 	@Test

@@ -62,7 +62,9 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 			props.setProperty( SesameEngine.REPOSITORY_KEY, info.getDataUrl() );
 			props.setProperty( SesameEngine.INSIGHTS_KEY, info.getInsightsUrl() );
 			props.setProperty( AbstractSesameEngine.REMOTE_KEY, "true" );
-
+			props.setProperty( "username", user.getUsername() );
+			props.setProperty( "password", new String( password.getPassword() ) );
+			
 			return props;
 		}
 		return null;

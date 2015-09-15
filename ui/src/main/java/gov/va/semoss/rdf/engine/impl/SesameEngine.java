@@ -20,16 +20,16 @@ import org.openrdf.repository.http.HTTPRepository;
  * @author ryan
  */
 public class SesameEngine extends AbstractSesameEngine {
-	private static final Logger log = Logger.getLogger( SesameEngine.class);
+
+	private static final Logger log = Logger.getLogger( SesameEngine.class );
 	private Repository insights;
 	private RepositoryConnection data;
 
-	
-	public SesameEngine(Properties initProps){
-		super(initProps);
-		this.openDB(initProps);
+	public SesameEngine( Properties initProps ) {
+		super( initProps );
+		this.openDB( initProps );
 	}
-	
+
 	@Override
 	protected void createRc( Properties props ) throws RepositoryException {
 		String url = props.getProperty( REPOSITORY_KEY );
@@ -37,24 +37,32 @@ public class SesameEngine extends AbstractSesameEngine {
 
 		Pattern pat = Pattern.compile( "^(.*)/repositories/(.*)" );
 		Matcher m = pat.matcher( url );
-		if( m.find( ) ){
-			for( int i =0; i < m.groupCount(); i++ ){
+		if ( m.find() ) {
+			for ( int i = 0; i < m.groupCount(); i++ ) {
 				log.debug( m.group( i ) );
 			}
 		}
-		
-		
-		HTTPRepository repo =( m.find() ? new HTTPRepository( m.group( 1 ), m.group( 2 ))
+
+		String username = props.getProperty( "username", "" );
+		String password = props.getProperty( "password", "" );
+
+		HTTPRepository repo = ( m.find()
+				? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
 				: new HTTPRepository( url ) );
-		repo.setUsernameAndPassword( "ryan", "1234" );
+		if ( !username.isEmpty() ) {
+			repo.setUsernameAndPassword( username, password );
+		}
 		repo.initialize();
 
 		data = repo.getConnection();
-		
+
 		m.reset( ins );
-		HTTPRepository tmp = ( m.find() ? new HTTPRepository( m.group( 1 ), m.group( 2 ))
+		HTTPRepository tmp = ( m.find()
+				? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
 				: new HTTPRepository( url ) );
-		tmp.setUsernameAndPassword( "ryan", "1234" );
+		if ( !username.isEmpty() ) {
+			tmp.setUsernameAndPassword( username, password );
+		}
 		insights = tmp;
 	}
 

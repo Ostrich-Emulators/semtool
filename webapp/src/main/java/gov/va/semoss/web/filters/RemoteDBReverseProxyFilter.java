@@ -123,10 +123,12 @@ public class RemoteDBReverseProxyFilter implements Filter {
 			request.setAttribute( ProxyService.ATTR_TARGET_HOST, host );
 
 			CsrfToken token = CsrfToken.class.cast( request.getAttribute( "_csrf" ) );
-			response.setHeader( "X-CSRF-HEADER", token.getHeaderName() );
-			response.setHeader( "X-CSRF-PARAM", token.getParameterName() );
-			response.setHeader( "X-CSRF-TOKEN", token.getToken() );
 			proxyService.proxyRequest( destinationURL, request, response );
+			if( null != token ){
+				response.setHeader( "X-CSRF-HEADER", token.getHeaderName() );
+				response.setHeader( "X-CSRF-PARAM", token.getParameterName() );
+				response.setHeader( "X-CSRF-TOKEN", token.getToken() );
+			}
 		}
 		catch ( URISyntaxException | ServletException | IOException e ) {
 			log.error( "Error handling proxy request.", e );

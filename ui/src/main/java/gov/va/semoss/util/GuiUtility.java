@@ -349,7 +349,9 @@ public class GuiUtility {
 		catch ( ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
 			log.error( e );
 		}
-		engine.setEngineName( engineName );
+		if( null == engine.getEngineName() ){
+			engine.setEngineName( engineName );
+		}
 		DIHelper.getInstance().registerEngine( engine );
 
 		return engine;

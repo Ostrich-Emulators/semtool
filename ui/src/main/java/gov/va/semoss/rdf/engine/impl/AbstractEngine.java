@@ -107,7 +107,7 @@ public abstract class AbstractEngine implements IEngine {
 
 			finishLoading( prop );
 		}
-		catch ( Exception e ) {
+		catch ( IOException | RepositoryException e ) {
 			log.error( e );
 		}
 	}
