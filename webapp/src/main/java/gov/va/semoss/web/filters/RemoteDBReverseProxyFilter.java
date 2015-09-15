@@ -246,38 +246,4 @@ public class RemoteDBReverseProxyFilter implements Filter {
 					? raw.getDataUrl() : raw.getInsightsUrl() );
 		return proxyloc;
 	}
-
-	/**
-	 * A convenience class providing functionality and attributes showing what a
-	 * call is asking for, and where it should be directed.
-	 *
-	 * @author Wayne Warren
-	 *
-	 */
-	private class ProxyCall {
-
-		/**
-		 * The type of service needed: Server, Data, or Insight
-		 */
-		public final String serviceNeeded;
-		public final DbInfo info;
-
-		/**
-		 *
-		 * @param requestPath
-		 */
-		public ProxyCall( DbInfo dbi, String requestPath ) {
-			info = dbi;
-			Pattern pat = Pattern.compile( "^/databases/" + dbi.getName()
-					+ "/repositories/(data|insight)" );
-			Matcher m = pat.matcher( requestPath );
-			m.find(); // we better know that this works!
-			serviceNeeded = m.group( 1 );
-		}
-
-		public String getDestinationURL() {
-			return ( serviceNeeded.equals( DATA_URL )
-					? info.getDataUrl() : info.getInsightsUrl() );
-		}
-	}
 }

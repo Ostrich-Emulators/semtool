@@ -7,7 +7,6 @@ package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.security.BasicAuthRequestFactory;
-import gov.va.semoss.web.io.DbInfo;
 import gov.va.semoss.web.io.SemossService;
 import gov.va.semoss.web.io.SemossServiceImpl;
 import gov.va.semoss.web.io.ServiceClient;
