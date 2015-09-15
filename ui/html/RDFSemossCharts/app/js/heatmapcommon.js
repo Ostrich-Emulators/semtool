@@ -2,6 +2,8 @@ var colorScale;
 var currentColor;
 var decimalsToKeep;
 var valueArray = [];
+var mapSel = "";
+var matricesBySel = {};
 
 var heatDataName = "Heat Value";
 var countyData = false;
@@ -194,11 +196,12 @@ function buildLegend(legendSelector, startingX, startingY, legendElementWidth, l
 		.attr("y", startingY)
 		.attr("width", legendElementWidth)
 		.attr("height", legendElementHeight)
+		.attr("class", "legend")
 		.style("fill", function(d, i) { return legendColors[i]; });
 
 	legend.append("text")
 		.attr("index", function(d, i) { return i; })
-		.attr("class", "legend-text")
+		.attr("class", "legend legend-text")
 		.text(function(d) { return d; })
 		.attr("x", function(d, i) { return startingX + (legendElementWidth * i); })
 		.attr("y", startingY + legendElementHeight + 15);
@@ -272,4 +275,53 @@ function fixId(id) {
 		return "0" + id;
 	}
 	return id;
+}
+
+function getMatrixForSel(sel) {
+	var thisMatrix = matricesBySel[sel];
+	if (thisMatrix == null) {
+		matricesBySel[sel] = [1,0,0,1,0,0];
+	}
+	
+	return matricesBySel[sel];
+}
+
+function setMatrixForSel(sel, matrix) {
+	matricesBySel[sel] = matrix;
+}
+
+function pan(dx, dy, sel) {
+	if (sel == null)
+		sel = mapSel;
+	
+	var matrixForThisSel = getMatrixForSel(sel);
+	matrixForThisSel[4] += dx;
+	matrixForThisSel[5] += dy;
+	setMatrixForSel(sel, matrixForThisSel);
+	
+	applyTransformation(sel, matrixForThisSel);
+}
+
+function zoom(scale, sel) {
+	if (sel == null)
+		sel = mapSel;
+	
+	var firstElInSel = sel.split(" ")[0];
+	var width  = d3.select(firstElInSel).style("width" ).split("px")[0] * 1.0;
+	var height = d3.select(firstElInSel).style("height").split("px")[0] * 1.0;
+	
+	var matrixForThisSel = getMatrixForSel(sel);
+	for (var i=0; i<matrixForThisSel.length; i++) {
+		matrixForThisSel[i] *= scale;
+	}
+
+	matrixForThisSel[4] += (1-scale)*width/2;
+	matrixForThisSel[5] += (1-scale)*height/2;
+	setMatrixForSel(sel, matrixForThisSel);
+
+	applyTransformation(sel, matrixForThisSel);
+}
+
+function applyTransformation(sel, matrix) {
+	$(sel).attr("transform", "matrix(" +  matrix.join(' ') + ")");
 }

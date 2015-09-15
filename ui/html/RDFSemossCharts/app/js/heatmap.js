@@ -31,10 +31,16 @@ function start(dataString) {
 	for (var key in data) {
 	    xAxisArray.push(data[key][xAxisName]);
 	    yAxisArray.push(data[key][yAxisName]);
-	    var round = (Math.round(data[key][value] * 100) / 100);
+
 	    //This array stores the values as numbers
 		valueArray.push(data[key][value]);
-	    dataArray.push({yAxis: data[key][yAxisName], Value: round, xAxis: data[key][xAxisName], xAxisName: data[key][xAxisName], yAxisName: data[key][yAxisName]});
+	    dataArray.push({
+	    	yAxis: data[key][yAxisName], 
+	    	Value: (Math.round(data[key][value] * 100) / 100), 
+	    	xAxis: data[key][xAxisName], 
+	    	xAxisName: data[key][xAxisName], 
+	    	yAxisName: data[key][yAxisName]
+	    });
 	};
 	  
 	var uniqueX = _.uniq(xAxisArray);
@@ -133,12 +139,18 @@ function start(dataString) {
 		.attr("x", 6)
 		.attr("y", 7)
 		.attr("class", "xAxis")
-		.attr("transform", function(d, i) { return "translate(" + i * gridSize + ", -6)rotate(-45)" });
+		.attr("transform", function(d, i) { 
+			return "translate(" + i * gridSize + ", -6)rotate(-45)";
+		});
 	    
 	/* Initialize tooltip */
 	var tip = d3.tip()
 		.attr('class', 'd3-tip')
-		.html(function(d) { return "<div> <span class='light'>" + value + ":</span> " + roundNumber(d.Value) + "</div>" + "<div><span class='light'>" + xAxisName + ":</span> " + d.xAxisName + "</div>" + "<div> <span class='light'>" + yAxisName + ": </span>" + d.yAxisName + "</div>"; });
+		.html(function(d) { 
+			return	"<div> <span class='light'>" + value     + ": </span> " + roundNumber(d.Value) + "</div>" + 
+					"<div> <span class='light'>" + xAxisName + ": </span> " + d.xAxisName          + "</div>" + 
+					"<div> <span class='light'>" + yAxisName + ": </span> " + d.yAxisName          + "</div>"; 
+		});
 	
 	tip.direction(function(d) {
 		var isLeftSide = false;
