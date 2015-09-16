@@ -3,38 +3,36 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.poi.main;
+package gov.va.semoss.poi.main.xlsxml;
 
+import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
-import java.util.ArrayList;
+import gov.va.semoss.poi.main.SheetType;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * An XML parser that handles the Loading Sheet's "Loader" tab
  *
  * @author ryan
  */
-public class LoaderTabXmlHandler extends DefaultHandler {
+public class LoaderTabXmlHandler extends XlsXmlBase {
 
 	private static final Logger log = Logger.getLogger( LoaderTabXmlHandler.class );
 	private final Map<String, SheetType> sheettypes = new HashMap<>();
-	private final ArrayList<String> sst;
 	private final Map<String, String> rawdata = new LinkedHashMap<>();
-	private String lastContents;
 	private int rownum;
 	private int colnum;
 	private String colA;
-	private boolean reading = false;
 	private boolean isstring = false;
 
-	public LoaderTabXmlHandler( ArrayList<String> sst ) {
-		this.sst = sst;
+	public LoaderTabXmlHandler( List<String> sst ) {
+		super( sst );
 	}
 
 	public Map<String, SheetType> getSheetTypes() {
@@ -90,8 +88,8 @@ public class LoaderTabXmlHandler extends DefaultHandler {
 				break;
 
 			case "v": // new value for a cell
-				reading = isstring;
-				lastContents = "";
+				setReading( isstring );
+				resetContents();
 				break;
 		}
 
@@ -100,8 +98,8 @@ public class LoaderTabXmlHandler extends DefaultHandler {
 	@Override
 	public void endElement( String uri, String localName, String name )
 			throws SAXException {
-		if ( reading ) {
-			String val = sst.get( Integer.parseInt( lastContents ) );
+		if ( isReading() ) {
+			String val = getStringFromContentsInt();
 			if ( 0 == colnum ) {
 				colA = val;
 				rawdata.put( val, null );
@@ -114,15 +112,7 @@ public class LoaderTabXmlHandler extends DefaultHandler {
 						"Too much data in row " + rownum );
 			}
 
-			reading = false;
-		}
-	}
-
-	@Override
-	public void characters( char[] ch, int start, int length )
-			throws SAXException {
-		if ( reading ) {
-			lastContents += new String( ch, start, length );
+			setReading( false );
 		}
 	}
 

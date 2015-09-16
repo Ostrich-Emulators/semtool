@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.poi.main;
+package gov.va.semoss.poi.main.xlsxml;
 
+import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import java.util.ArrayList;
@@ -23,13 +24,12 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
  * @author ryan
  */
-public class LoadingSheetXmlHandler extends DefaultHandler {
+public class LoadingSheetXmlHandler extends XlsXmlBase {
 
 	private static final Logger log = Logger.getLogger( LoadingSheetXmlHandler.class );
 	private static final Map<String, Integer> formats = new HashMap<>();
@@ -39,10 +39,7 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 	private final Map<Integer, String> proplkp = new HashMap<>();
 	private final Map<String, String> namespaces;
 	private final LoadingSheetData loadingsheet;
-	private final ArrayList<String> sst;
 	private final StylesTable styles;
-	private String lastContents;
-	private boolean reading = false;
 	private boolean isdate = false;
 	private int rownum;
 	private int colnum;
@@ -66,14 +63,14 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 		return sum - 1;
 	}
 
-	public LoadingSheetXmlHandler( ArrayList<String> sst, StylesTable styles,
+	public LoadingSheetXmlHandler( List<String> sst, StylesTable styles,
 			String sheetname, Map<String, String> ns ) {
-		this.sst = sst;
+		super( sst );
 		this.styles = styles;
 		namespaces = ns;
 
-		// we'll reset this to relationship if needed
-		loadingsheet = LoadingSheetData.nodesheet( sheetname, "" );
+		// this will automatically convert to a relationship sheet if needed
+		loadingsheet = LoadingSheetData.nodesheet( sheetname, "", true );
 	}
 
 	public LoadingSheetData getSheet() {
@@ -119,8 +116,8 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 							colname.lastIndexOf( Integer.toString( rownum + 1 ) ) ) );
 					break;
 				case "v": // new value for a cell
-					reading = true;
-					lastContents = "";
+					setReading( true );
+					resetContents();
 					break;
 			}
 		}
@@ -160,11 +157,11 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 			fillInRow( currentrowdata, loadingsheet, proplkp );
 		}
 
-		if ( reading ) {
+		if ( isReading() ) {
 			// If we've fully read the data, add it to our row mapping
 			switch ( celltype ) {
 				case Cell.CELL_TYPE_STRING:
-					String strval = sst.get( Integer.parseInt( lastContents ) );
+					String strval = this.getStringFromContentsInt();
 					if ( !strval.isEmpty() ) {
 						currentrowdata.put( colnum, getRDFStringValue( strval, namespaces, vf ) );
 					}
@@ -173,15 +170,15 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 					break;
 				case Cell.CELL_TYPE_BOOLEAN:
 					currentrowdata.put( colnum,
-							vf.createLiteral( "1".equals( lastContents ) ) );
+							vf.createLiteral( "1".equals( getContents() ) ) );
 					break;
 				case Cell.CELL_TYPE_NUMERIC:
 					if ( isdate ) {
 						currentrowdata.put( colnum,
-								vf.createLiteral( DateUtil.getJavaDate( Double.parseDouble( lastContents ) ) ) );
+								vf.createLiteral( DateUtil.getJavaDate( Double.parseDouble( getContents() ) ) ) );
 					}
 					else {
-						currentrowdata.put( colnum, vf.createLiteral( Double.parseDouble( lastContents ) ) );
+						currentrowdata.put( colnum, vf.createLiteral( Double.parseDouble( getContents() ) ) );
 					}
 					break;
 				case Cell.CELL_TYPE_ERROR:
@@ -198,15 +195,7 @@ public class LoadingSheetXmlHandler extends DefaultHandler {
 //				log.debug( sheet.getSheetName() + "(" + currentrow.getRowNum() + ","
 //						+ currentcell.getColumnIndex() + ") " + currentcell.getStringCellValue() );
 //			}
-			reading = false;
-		}
-	}
-
-	@Override
-	public void characters( char[] ch, int start, int length )
-			throws SAXException {
-		if ( reading ) {
-			lastContents += new String( ch, start, length );
+			setReading( false );
 		}
 	}
 

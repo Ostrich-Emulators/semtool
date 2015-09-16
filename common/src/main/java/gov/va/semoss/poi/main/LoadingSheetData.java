@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.poi.main;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,15 +16,18 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.DBMaker.Maker;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
- * A class to encapsulate relationship loading sheet information. This class is
- * not currently used.
+ * A class to encapsulate relationship loading sheet information.
  *
  * @author ryan
  */
@@ -46,33 +50,35 @@ public class LoadingSheetData {
 	private final List<LoadingNodeAndPropertyValues> data = new ArrayList<>();
 	private final String tabname;
 
-	protected LoadingSheetData( String tabtitle, String type ) {
-		this( tabtitle, type, new HashMap<>() );
+	protected LoadingSheetData( String tabtitle, String type, boolean inMemOnly ) {
+		this( tabtitle, type, new HashMap<>(), inMemOnly );
 	}
 
-	protected LoadingSheetData( String tabtitle, String type, Collection<String> props ) {
-		this( tabtitle, type, null, null, props );
+	protected LoadingSheetData( String tabtitle, String type, Collection<String> props,
+			boolean inMemOnly ) {
+		this( tabtitle, type, null, null, props, inMemOnly );
 	}
 
-	protected LoadingSheetData( String tabtitle, String type, Map<String, URI> props ) {
-		this( tabtitle, type, null, null, props );
-	}
-
-	protected LoadingSheetData( String tabtitle, String sType, String oType,
-			String relname ) {
-		this( tabtitle, sType, oType, relname, new HashMap<>() );
+	protected LoadingSheetData( String tabtitle, String type, Map<String, URI> props,
+			boolean inMemOnly ) {
+		this( tabtitle, type, null, null, props, inMemOnly );
 	}
 
 	protected LoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Collection<String> props ) {
-		this( tabtitle, sType, oType, relname );
+			String relname, boolean inMemOnly ) {
+		this( tabtitle, sType, oType, relname, new HashMap<>(), inMemOnly );
+	}
+
+	protected LoadingSheetData( String tabtitle, String sType, String oType,
+			String relname, Collection<String> props, boolean inMemOnly ) {
+		this( tabtitle, sType, oType, relname, inMemOnly );
 		for ( String p : props ) {
 			propcache.put( p, null );
 		}
 	}
 
 	protected LoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Map<String, URI> props ) {
+			String relname, Map<String, URI> props, boolean inMemOnly ) {
 		subjectType = sType;
 		tabname = tabtitle;
 		this.objectType = oType;
@@ -195,6 +201,24 @@ public class LoadingSheetData {
 	public final void addProperties( Collection<String> props ) {
 		for ( String s : props ) {
 			addProperty( s );
+		}
+	}
+
+	/**
+	 * Releases any resources used by this class. Technically, this function must
+	 * only be called when {@link #isMemOnly() } returns false, but it's good
+	 * practice to always call it
+	 */
+	public void release() {
+	}
+
+	/**
+	 * Clears any stored loading data
+	 */
+	public void clear() {
+		data.clear();
+		propcache.clear();
+		if ( !isMemOnly() ) {
 		}
 	}
 
@@ -366,15 +390,20 @@ public class LoadingSheetData {
 		return proplink.contains( propname );
 	}
 
+	public boolean isMemOnly() {
+		return true;
+	}
+
 	public static LoadingSheetData copyHeadersOf( LoadingSheetData model ) {
 		LoadingSheetData lsd;
 		if ( model.isRel() ) {
 			lsd = new LoadingSheetData( model.getName(), model.getSubjectType(),
-					model.getObjectType(), model.getRelname(), model.getPropertiesAndDataTypes() );
+					model.getObjectType(), model.getRelname(), model.getPropertiesAndDataTypes(),
+					model.isMemOnly() );
 		}
 		else {
 			lsd = new LoadingSheetData( model.getName(), model.getSubjectType(),
-					model.getPropertiesAndDataTypes() );
+					model.getPropertiesAndDataTypes(), model.isMemOnly() );
 		}
 
 		if ( model.hasModelErrors() ) {
@@ -394,19 +423,34 @@ public class LoadingSheetData {
 	}
 
 	public static LoadingSheetData nodesheet( String tabname, String subject ) {
-		return new LoadingSheetData( tabname, subject );
+		return nodesheet( tabname, subject, true );
+	}
+
+	public static LoadingSheetData nodesheet( String tabname, String subject,
+			boolean inMemOnly ) {
+		return new LoadingSheetData( tabname, subject, inMemOnly );
 	}
 
 	public static LoadingSheetData relsheet( String subject, String object,
 			String relname ) {
+		return relsheet( subject, object, relname, true );
+	}
+
+	public static LoadingSheetData relsheet( String subject, String object,
+			String relname, boolean inMemOnly ) {
 		StringBuilder sb = new StringBuilder( subject ).append( "-" );
 		sb.append( relname ).append( "-" ).append( object );
-		return relsheet( sb.toString(), subject, object, relname );
+		return relsheet( sb.toString(), subject, object, relname, inMemOnly );
 	}
 
 	public static LoadingSheetData relsheet( String tabname, String subject,
 			String object, String relname ) {
-		return new LoadingSheetData( tabname, subject, object, relname );
+		return relsheet( tabname, subject, object, relname, true );
+	}
+
+	public static LoadingSheetData relsheet( String tabname, String subject,
+			String object, String relname, boolean inMemOnly ) {
+		return new LoadingSheetData( tabname, subject, object, relname, inMemOnly );
 	}
 
 	public class LoadingNodeAndPropertyValues extends HashMap<String, Value> {

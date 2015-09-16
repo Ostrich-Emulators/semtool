@@ -41,14 +41,14 @@ public class POIReader implements ImportFileReader {
 
 	private static final Logger logger = Logger.getLogger( POIReader.class );
 
-	public ImportData readNonloadingSheet( File file ) throws IOException {
+	public static ImportData readNonloadingSheet( File file ) throws IOException {
 		ImportData d
 				= readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
 		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
 		return d;
 	}
 
-	public ImportData readNonloadingSheet( Workbook workbook ) {
+	public static ImportData readNonloadingSheet( Workbook workbook ) {
 		ImportData id = new ImportData();
 
 		int sheets = workbook.getNumberOfSheets();
@@ -75,7 +75,7 @@ public class POIReader implements ImportFileReader {
 			}
 
 			// second, make "properties" for each column
-			LoadingSheetData nlsd = new LoadingSheetData( sheetname, "A" );
+			LoadingSheetData nlsd = new LoadingSheetData( sheetname, "A", false );
 			for ( int c = 1; c < maxcols; c++ ) {
 				nlsd.addProperty( Integer.toString( c ) );
 			}
@@ -109,22 +109,37 @@ public class POIReader implements ImportFileReader {
 	@Override
 	public ImportMetadata getMetadata( File file ) throws IOException, ImportValidationException {
 		logger.debug( "getting metadata from file: " + file );
-		final LowMemXlsReader reader
-				= new LowMemXlsReader( new FileInputStream( file ) );
-		ImportMetadata data = reader.getMetadata();
-		data.setSourceOfData( new URIImpl( file.toURI().toString() ) );
-		reader.release();
-		return data;
+		LowMemXlsReader reader = null;
+		try {
+			reader = new LowMemXlsReader( file );
+			ImportMetadata data = reader.getMetadata();
+			data.setSourceOfData( new URIImpl( file.toURI().toString() ) );
+			return data;
+		}
+		finally {
+			if ( null != reader ) {
+				reader.release();
+			}
+		}
 	}
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
-		LowMemXlsReader rdr = new LowMemXlsReader( file );
-		ImportData d = rdr.getData();
+		logger.debug( "loading data from file: " + file );
+		LowMemXlsReader rdr = null;
+		try {
+			rdr = new LowMemXlsReader( file );
+			ImportData d = rdr.getData();
 
-		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
-		rdr.release();
-		return d;
+			d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+			logger.debug( "finished reading file: " + file );
+			return d;
+		}
+		finally {
+			if ( null != rdr ) {
+				rdr.release();
+			}
+		}
 	}
 
 	/**
@@ -149,5 +164,4 @@ public class POIReader implements ImportFileReader {
 				return cell.getStringCellValue();
 		}
 	}
-
 }

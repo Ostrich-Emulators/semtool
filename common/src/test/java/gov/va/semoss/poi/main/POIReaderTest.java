@@ -68,6 +68,7 @@ public class POIReaderTest {
 	public void testImportModern() throws Exception {
 		POIReader rdr = new POIReader();
 		ImportData id = rdr.readOneFile( CUSTOM );
+		
 		assertTrue( !id.isEmpty() );
 	}
 

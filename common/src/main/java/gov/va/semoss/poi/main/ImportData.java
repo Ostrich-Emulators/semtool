@@ -28,7 +28,14 @@ public final class ImportData {
 		setMetadata( md );
 	}
 
-	public void clear() {
+	/**
+	 * Releases any resources used by this object
+	 */
+	public void release() {
+		for ( LoadingSheetData lsd : sheets ) {
+			lsd.release();
+		}
+
 		sheets.clear();
 		metadata.clear();
 	}

@@ -207,6 +207,7 @@ public class EngineLoader {
 				ImportMetadata im = data.getMetadata();
 				im.setAutocreateMetamodel( createmetamodel );
 				loadIntermediateData( data, engine, conformanceErrors );
+				data.release();
 			}
 
 			mmstmts.addAll( moveLoadingRcToEngine( engine, createmetamodel ) );
@@ -231,6 +232,7 @@ public class EngineLoader {
 		qaer.loadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
 		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
+		data.release();
 	}
 
 	private void loadIntermediateData( ImportData data, IEngine engine,
@@ -388,6 +390,7 @@ public class EngineLoader {
 			while ( lit.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = lit.next();
 				modeler.addRel( nap, namespaces, sheet, metas, myrc );
+				nap.clear();
 				lit.remove();
 			}
 		}
@@ -396,9 +399,11 @@ public class EngineLoader {
 			while ( lit.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = lit.next();
 				modeler.addNode( nap, namespaces, sheet, metas, myrc );
+				nap.clear();
 				lit.remove();
 			}
 		}
+		sheet.clear();
 	}
 
 	/**

@@ -5,12 +5,19 @@
  */
 package gov.va.semoss.poi.main;
 
+import gov.va.semoss.poi.main.xlsxml.LoadingSheetXmlHandler;
+import gov.va.semoss.poi.main.xlsxml.SheetTypeXmlHandler;
+import gov.va.semoss.poi.main.xlsxml.LoaderTabXmlHandler;
+import gov.va.semoss.poi.main.xlsxml.MetadataTabXmlHandler;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
+import gov.va.semoss.poi.main.xlsxml.XlsXmlBase;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,8 +25,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -36,7 +46,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
@@ -49,14 +58,15 @@ public class LowMemXlsReader {
 	private static final Logger log = Logger.getLogger( LowMemXlsReader.class );
 
 	private final LinkedHashMap<String, String> sheetNameIdLkp;
-	private final ArrayList<String> sharedStrings;
+	private final List<String> sharedStrings;
 	private final XSSFReader reader;
 	private final OPCPackage pkg;
 	private final StylesTable styles;
+	private final String cachename;
 
 	public LowMemXlsReader( File filename ) throws IOException {
-		this( new BufferedInputStream( new FileInputStream( filename ) ) );
-		log.debug( "lo-mem xls reader: " + filename.getAbsolutePath() );
+		this( new BufferedInputStream( new FileInputStream( filename ) ),
+				DigestUtils.md5Hex( filename.getAbsolutePath() )+ ".sscache" );
 	}
 
 	public LowMemXlsReader( String filename ) throws IOException {
@@ -64,6 +74,13 @@ public class LowMemXlsReader {
 	}
 
 	public LowMemXlsReader( InputStream stream ) throws IOException {
+		this( stream, null );
+	}
+
+	public LowMemXlsReader( InputStream stream, String cachenamer ) throws IOException {
+		log.debug( "reading with lo-mem xls reader" );
+		sharedStrings = new ArrayList<>();
+		cachename = cachenamer;
 		try {
 			pkg = OPCPackage.open( stream );
 			reader = new XSSFReader( pkg );
@@ -71,7 +88,35 @@ public class LowMemXlsReader {
 			styles = reader.getStylesTable();
 
 			sheetNameIdLkp = readSheetInfo( reader );
-			sharedStrings = readSharedStrings( reader );
+
+			if ( null == cachename ) {
+				// no cache file, so populate anew
+				populateSharedStrings( reader );
+			}
+			else {
+				File cachefile = new File( FileUtils.getTempDirectory(), cachenamer );
+				if ( cachefile.exists() ) {
+					// we have a cache file, so just load from the cache
+					log.debug( "reading cached shared strings from: " + cachefile );
+					sharedStrings.addAll( FileUtils.readLines( cachefile ) );
+				}
+				else {
+					// no cache, but we can make one
+					populateSharedStrings( reader );
+					log.debug( "caching shared strings to: " + cachefile );
+					try ( BufferedWriter w = new BufferedWriter( new FileWriter( cachefile ) ) ) {
+						for ( String s : sharedStrings ) {
+							w.write( s );
+							w.newLine();
+						}
+					}
+					catch ( IOException ioe ) {
+						log.warn( ioe, ioe );
+					}
+
+					cachefile.deleteOnExit();
+				}
+			}
 		}
 		catch ( OpenXML4JException e ) {
 			throw new IOException( "unexpected error" + e.getLocalizedMessage(), e );
@@ -310,33 +355,39 @@ public class LowMemXlsReader {
 		return map;
 	}
 
-	private ArrayList<String> readSharedStrings( XSSFReader r ) {
-		ArrayList<String> map = new ArrayList<>();
+	private void populateSharedStrings( XSSFReader r ) {
 
 		try ( InputStream is = r.getSharedStringsData() ) {
 			XMLReader parser = XMLReaderFactory.createXMLReader();
-			ContentHandler handler = new DefaultHandler() {
-				String content;
-				boolean reading = false;
+			ContentHandler handler = new XlsXmlBase( new ArrayList<>() ) {
+				int count = 0;
 
 				@Override
-				public void startElement( String uri, String localName, String qName, Attributes atts ) throws SAXException {
-					reading = ( "t".equals( localName ) );
-					content = "";
+				public void startDocument() throws SAXException {
+					super.startDocument();
+					count = 0;
 				}
 
 				@Override
-				public void endElement( String uri, String localName, String qName ) throws SAXException {
-					if ( reading ) {
-						map.add( content );
-						reading = false;
-					}
+				public void endDocument() throws SAXException {
+					super.endDocument();
+					log.debug( count + " strings cached" );
 				}
 
 				@Override
-				public void characters( char[] ch, int start, int length ) throws SAXException {
-					if ( reading ) {
-						content += new String( ch, start, length );
+				public void startElement( String uri, String localName, String qName,
+						Attributes atts ) throws SAXException {
+					setReading( "t".equals( localName ) );
+					resetContents();
+				}
+
+				@Override
+				public void endElement( String uri, String localName, String qName )
+						throws SAXException {
+					if ( isReading() ) {
+						sharedStrings.add( getContents() );
+						setReading( false );
+						count++;
 					}
 				}
 			};
@@ -346,7 +397,5 @@ public class LowMemXlsReader {
 		catch ( Exception e ) {
 			log.error( e, e );
 		}
-
-		return map;
 	}
 }

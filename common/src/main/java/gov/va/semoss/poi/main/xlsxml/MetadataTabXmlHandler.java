@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.poi.main;
+package gov.va.semoss.poi.main.xlsxml;
 
+import gov.va.semoss.poi.main.ImportMetadata;
+import gov.va.semoss.poi.main.ImportValidationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,25 +17,21 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.openrdf.model.impl.URIImpl;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
  * @author ryan
  */
-public class MetadataTabXmlHandler extends DefaultHandler {
+public class MetadataTabXmlHandler extends XlsXmlBase {
 
 	private static final Logger log = Logger.getLogger( MetadataTabXmlHandler.class );
 	private static final Map<String, Integer> formats = new HashMap<>();
 
 	private final Map<Integer, String> currentrowdata = new LinkedHashMap<>();
 	private final ImportMetadata metas;
-	private final ArrayList<String> sst;
 	private final List<String[]> triples = new ArrayList<>();
 	private final Map<String, String> namespaces;
 
-	private String lastContents;
-	private boolean reading = false;
 	private int rownum;
 	private int colnum;
 	private int celltype;
@@ -47,8 +45,8 @@ public class MetadataTabXmlHandler extends DefaultHandler {
 		formats.put( "b", Cell.CELL_TYPE_BOOLEAN );
 	}
 
-	public MetadataTabXmlHandler( ArrayList<String> sst, ImportMetadata metadata ) {
-		this.sst = sst;
+	public MetadataTabXmlHandler( List<String> sst, ImportMetadata metadata ) {
+		super( sst );
 		metas = metadata;
 		namespaces = metas.getNamespaces();
 	}
@@ -76,8 +74,8 @@ public class MetadataTabXmlHandler extends DefaultHandler {
 							colname.lastIndexOf( Integer.toString( rownum + 1 ) ) ) );
 					break;
 				case "v": // new value for a cell
-					reading = true;
-					lastContents = "";
+					setReading( true );
+					resetContents();
 					break;
 			}
 		}
@@ -92,27 +90,19 @@ public class MetadataTabXmlHandler extends DefaultHandler {
 			fillInMetadata( currentrowdata );
 		}
 
-		if ( reading ) {
+		if ( isReading() ) {
 			// If we've fully read the data, add it to our row mapping
 			if ( Cell.CELL_TYPE_STRING == celltype ) {
-				String strval = sst.get( Integer.parseInt( lastContents ) );
+				String strval = getStringFromContentsInt();
 				if ( !strval.isEmpty() ) {
 					currentrowdata.put( colnum, strval );
 				}
 			}
 			else {
-				currentrowdata.put( colnum, lastContents );
+				currentrowdata.put( colnum, getContents() );
 			}
 
-			reading = false;
-		}
-	}
-
-	@Override
-	public void characters( char[] ch, int start, int length )
-			throws SAXException {
-		if ( reading ) {
-			lastContents += new String( ch, start, length );
+			setReading( false );
 		}
 	}
 

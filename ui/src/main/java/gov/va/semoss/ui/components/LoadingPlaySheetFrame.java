@@ -411,6 +411,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			if ( importdata.isEmpty() ) {
 				JOptionPane.showMessageDialog( rootPane, "No data to load",
 						"Nothing to Do", JOptionPane.INFORMATION_MESSAGE );
+				importdata.release();
 				return;
 			}
 
@@ -458,6 +459,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 								engine.calculateInferences();
 							}
 
+							importdata.release();
 							LoadingPlaySheetFrame.this.dispose();
 						}
 						catch ( RepositoryException | IOException | ImportValidationException e ) {
