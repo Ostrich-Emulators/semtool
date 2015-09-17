@@ -34,6 +34,7 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -54,7 +55,6 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.openrdf.model.BNode;
@@ -415,7 +415,7 @@ public class EngineLoader {
 		try {
 			myrc.begin();
 			if ( sheet.isRel() ) {
-				Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
+				DataIterator lit = sheet.iterator();
 				while ( lit.hasNext() ) {
 					LoadingNodeAndPropertyValues nap = lit.next();
 					modeler.addRel( nap, namespaces, sheet, metas, myrc );
@@ -424,7 +424,7 @@ public class EngineLoader {
 				}
 			}
 			else {
-				Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
+				DataIterator lit = sheet.iterator();
 				while ( lit.hasNext() ) {
 					LoadingNodeAndPropertyValues nap = lit.next();
 					modeler.addNode( nap, namespaces, sheet, metas, myrc );

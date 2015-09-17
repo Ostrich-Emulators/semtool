@@ -113,8 +113,8 @@ public class LoadingSheetData {
 		data.removeAll( naps );
 	}
 
-	public Iterator<LoadingNodeAndPropertyValues> getDataIterator() {
-		return data.iterator();
+	public DataIterator iterator() {
+		return new DataIteratorImpl();
 	}
 
 	public boolean hasSubjectTypeError() {
@@ -683,6 +683,31 @@ public class LoadingSheetData {
 			}
 
 			return sb.toString();
+		}
+	}
+
+	public interface DataIterator extends Iterator<LoadingNodeAndPropertyValues> {
+
+		public void release();
+	}
+
+	public class DataIteratorImpl implements DataIterator {
+
+		private Iterator<LoadingNodeAndPropertyValues> iter = data.iterator();
+
+		@Override
+		public void release() {
+			// does nothing by default
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iter.hasNext();
+		}
+
+		@Override
+		public LoadingNodeAndPropertyValues next() {
+			return iter.next();
 		}
 	}
 }

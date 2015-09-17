@@ -85,7 +85,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		this( model.getName(), model.getSubjectType(), model.getObjectType(),
 				model.getRelname(), model.getPropertiesAndDataTypes() );
 
-		Iterator<LoadingNodeAndPropertyValues> it = model.getDataIterator();
+		Iterator<LoadingNodeAndPropertyValues> it = model.iterator();
 		while ( it.hasNext() ) {
 			add( it.next() );
 		}
@@ -138,7 +138,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		// flush everything to our backing file
 		try ( BufferedWriter writer
 				= new BufferedWriter( new FileWriter( backingfile, true ) ) ) {
-			Iterator<LoadingNodeAndPropertyValues> it = super.getDataIterator();
+			Iterator<LoadingNodeAndPropertyValues> it = super.iterator();
 			while ( it.hasNext() ) {
 				writer.write( oxm.writeValueAsString( it.next() ) );
 				writer.newLine();
@@ -153,20 +153,20 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	}
 
 	@Override
-	public Iterator<LoadingNodeAndPropertyValues> getDataIterator() {
+	public DataIterator iterator() {
 		try {
 			return new CacheIterator();
 		}
 		catch ( IOException ioe ) {
 			log.warn( "cannot access backing file in iterator", ioe );
 		}
-		return super.getDataIterator();
+		return super.iterator();
 	}
 
 	@Override
 	public List<LoadingNodeAndPropertyValues> getData() {
 		List<LoadingNodeAndPropertyValues> list = new ArrayList<>();
-		Iterator<LoadingNodeAndPropertyValues> it = getDataIterator();
+		Iterator<LoadingNodeAndPropertyValues> it = iterator();
 		while ( it.hasNext() ) {
 			list.add( it.next() );
 		}
@@ -291,7 +291,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	 * An iterator that iterates over the backing store first, then over the
 	 * in-memory naps
 	 */
-	private class CacheIterator implements Iterator<LoadingNodeAndPropertyValues> {
+	private class CacheIterator extends DataIteratorImpl {
 
 		private final BufferedReader reader;
 		private final Deque<LoadingNodeAndPropertyValues> readcache = new ArrayDeque<>();
@@ -334,7 +334,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 						}
 
 						// our backing file is exhausted, so switch to our in-memory data
-						memoryiter = DiskBackedLoadingSheetData.super.getDataIterator();
+						memoryiter = DiskBackedLoadingSheetData.super.iterator();
 						hasnext = memoryiter.hasNext();
 					}
 				}
@@ -383,6 +383,17 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 			}
 			else {
 				memoryiter.remove();
+			}
+		}
+
+		@Override
+		public void release() {
+			readcache.clear();
+			try {
+				reader.close();
+			}
+			catch ( IOException ioe ) {
+				// don't really care
 			}
 		}
 	}
