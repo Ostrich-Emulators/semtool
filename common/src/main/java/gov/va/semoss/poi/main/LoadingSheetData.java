@@ -688,6 +688,11 @@ public class LoadingSheetData {
 
 	public interface DataIterator extends Iterator<LoadingNodeAndPropertyValues> {
 
+		/**
+		 * Releases any unused resources. This method will be called automatically
+		 * if the iterator is exhausted, but must be called manually if the iterator
+		 * is discarded before the iteration is complete
+		 */
 		public void release();
 	}
 

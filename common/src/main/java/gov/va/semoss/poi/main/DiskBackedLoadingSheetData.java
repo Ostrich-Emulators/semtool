@@ -345,6 +345,11 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 				}
 			}
 
+			// if we're totally empty, release anything we're still holding onto
+			if ( !hasnext ) {
+				release();
+			}
+
 			return hasnext;
 		}
 
