@@ -714,5 +714,10 @@ public class LoadingSheetData {
 		public LoadingNodeAndPropertyValues next() {
 			return iter.next();
 		}
+		
+		@Override
+		public void remove(){
+			iter.remove();
+		}
 	}
 }

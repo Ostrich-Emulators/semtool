@@ -138,7 +138,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		// flush everything to our backing file
 		try ( BufferedWriter writer
 				= new BufferedWriter( new FileWriter( backingfile, true ) ) ) {
-			Iterator<LoadingNodeAndPropertyValues> it = super.iterator();
+			DataIterator it = super.iterator();
 			while ( it.hasNext() ) {
 				writer.write( oxm.writeValueAsString( it.next() ) );
 				writer.newLine();
