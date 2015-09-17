@@ -97,14 +97,12 @@ public class QaChecker {
 					errors.add( errdata );
 
 					Set<LoadingSheetData.LoadingNodeAndPropertyValues> errvals = new HashSet<>();
-					List<LoadingSheetData.LoadingNodeAndPropertyValues> reldata = d.getData();
-
 					for ( LoadingSheetData.LoadingNodeAndPropertyValues nap : errs ) {
 						errvals.add( nap );
 						errdata.add( nap );
 					}
 
-					reldata.removeAll( errvals );
+					d.removeAll( errvals );
 				}
 			}
 		}

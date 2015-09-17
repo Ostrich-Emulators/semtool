@@ -14,10 +14,8 @@ import gov.va.semoss.poi.main.xlsxml.XlsXmlBase;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,8 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -62,11 +58,10 @@ public class LowMemXlsReader {
 	private final XSSFReader reader;
 	private final OPCPackage pkg;
 	private final StylesTable styles;
-	private final String cachename;
+	private boolean lsInMem = false;
 
 	public LowMemXlsReader( File filename ) throws IOException {
-		this( new BufferedInputStream( new FileInputStream( filename ) ),
-				DigestUtils.md5Hex( filename.getAbsolutePath() )+ ".sscache" );
+		this( new BufferedInputStream( new FileInputStream( filename ) ) );
 	}
 
 	public LowMemXlsReader( String filename ) throws IOException {
@@ -74,13 +69,8 @@ public class LowMemXlsReader {
 	}
 
 	public LowMemXlsReader( InputStream stream ) throws IOException {
-		this( stream, null );
-	}
-
-	public LowMemXlsReader( InputStream stream, String cachenamer ) throws IOException {
 		log.debug( "reading with lo-mem xls reader" );
 		sharedStrings = new ArrayList<>();
-		cachename = cachenamer;
 		try {
 			pkg = OPCPackage.open( stream );
 			reader = new XSSFReader( pkg );
@@ -88,39 +78,15 @@ public class LowMemXlsReader {
 			styles = reader.getStylesTable();
 
 			sheetNameIdLkp = readSheetInfo( reader );
-
-			if ( null == cachename ) {
-				// no cache file, so populate anew
-				populateSharedStrings( reader );
-			}
-			else {
-				File cachefile = new File( FileUtils.getTempDirectory(), cachenamer );
-				if ( cachefile.exists() ) {
-					// we have a cache file, so just load from the cache
-					log.debug( "reading cached shared strings from: " + cachefile );
-					sharedStrings.addAll( FileUtils.readLines( cachefile ) );
-				}
-				else {
-					// no cache, but we can make one
-					populateSharedStrings( reader );
-					log.debug( "caching shared strings to: " + cachefile );
-					try ( BufferedWriter w = new BufferedWriter( new FileWriter( cachefile ) ) ) {
-						for ( String s : sharedStrings ) {
-							w.write( s );
-							w.newLine();
-						}
-					}
-					catch ( IOException ioe ) {
-						log.warn( ioe, ioe );
-					}
-
-					cachefile.deleteOnExit();
-				}
-			}
+			populateSharedStrings( reader );
 		}
 		catch ( OpenXML4JException e ) {
 			throw new IOException( "unexpected error" + e.getLocalizedMessage(), e );
 		}
+	}
+
+	public void keepSheetDataInMemory( boolean b ) {
+		lsInMem = b;
 	}
 
 	/**
@@ -292,7 +258,7 @@ public class LowMemXlsReader {
 					if ( SheetType.NODE == sheettype || SheetType.RELATION == sheettype ) {
 						LoadingSheetXmlHandler handler
 								= new LoadingSheetXmlHandler( sharedStrings, styles, sheetname,
-										id.getMetadata().getNamespaces() );
+										id.getMetadata().getNamespaces(), lsInMem );
 						parser.setContentHandler( handler );
 
 						InputSource sheetSource = new InputSource( is );

@@ -95,6 +95,24 @@ public class LoadingSheetData {
 		return false;
 	}
 
+	/**
+	 * Removes a single node from the list. This may be an expensive operation.
+	 *
+	 * @param nap
+	 */
+	public void remove( LoadingNodeAndPropertyValues nap ) {
+		data.remove( nap );
+	}
+
+	/**
+	 * Removes nodes from the list. This may be an expensive operation.
+	 *
+	 * @param nap
+	 */
+	public void removeAll( Collection<LoadingNodeAndPropertyValues> naps ) {
+		data.removeAll( naps );
+	}
+
 	public Iterator<LoadingNodeAndPropertyValues> getDataIterator() {
 		return data.iterator();
 	}
@@ -260,8 +278,8 @@ public class LoadingSheetData {
 	public List<LoadingNodeAndPropertyValues> getData() {
 		return new ArrayList<>( data );
 	}
-	
-	protected List<LoadingNodeAndPropertyValues> getDataRef(){
+
+	protected List<LoadingNodeAndPropertyValues> getDataRef() {
 		return data;
 	}
 
@@ -625,9 +643,10 @@ public class LoadingSheetData {
 
 		@Override
 		public int hashCode() {
-			int hash = super.hashCode();
-			hash = 19 * hash + Objects.hashCode( this.subject );
-			hash = 19 * hash + Objects.hashCode( this.object );
+			int hash = 7;
+			hash = 31 * hash + Objects.hashCode( this.subject );
+			hash = 31 * hash + Objects.hashCode( this.object );
+			hash = 31 * hash + Objects.hashCode( this.keySet() );
 			return hash;
 		}
 

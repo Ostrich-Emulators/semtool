@@ -61,15 +61,15 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 
 		return sum - 1;
 	}
-
+	
 	public LoadingSheetXmlHandler( List<String> sst, StylesTable styles,
-			String sheetname, Map<String, String> ns ) {
+			String sheetname, Map<String, String> ns, boolean lsInMem ) {
 		super( sst );
 		this.styles = styles;
 		namespaces = ns;
 
 		// this will automatically convert to a relationship sheet if needed
-		loadingsheet = LoadingSheetData.nodesheet( sheetname, "", false );
+		loadingsheet = LoadingSheetData.nodesheet( sheetname, "", lsInMem );
 	}
 
 	public LoadingSheetData getSheet() {

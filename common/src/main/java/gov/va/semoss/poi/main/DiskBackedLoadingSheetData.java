@@ -27,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -47,10 +49,12 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 	private static final Logger log = Logger.getLogger( DiskBackedLoadingSheetData.class );
 	private static final long COMMITLIMIT = 100000;
+	private static final long READCACHELIMIT = 10000;
 
 	private File backingfile;
 	private long opsSinceLastCommit = 0;
 	private int datacount = 0;
+	private final Set<LoadingNodeAndPropertyValues> removedNodes = new HashSet<>();
 	private final ObjectMapper oxm = new ObjectMapper();
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String type ) throws IOException {
@@ -77,11 +81,21 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		this( tabtitle, sType, oType, relname );
 	}
 
+	public DiskBackedLoadingSheetData( LoadingSheetData model ) throws IOException {
+		this( model.getName(), model.getSubjectType(), model.getObjectType(),
+				model.getRelname(), model.getPropertiesAndDataTypes() );
+
+		Iterator<LoadingNodeAndPropertyValues> it = model.getDataIterator();
+		while ( it.hasNext() ) {
+			add( it.next() );
+		}
+	}
+
 	protected DiskBackedLoadingSheetData( String tabtitle, String sType, String oType,
 			String relname, Map<String, URI> props ) throws IOException {
 		super( tabtitle, sType, oType, relname, props );
 
-		backingfile = File.createTempFile( tabtitle + "-", ".lsdcache" );
+		backingfile = File.createTempFile( tabtitle + "-", ".lsdata" );
 		log.debug( "backing file is: " + backingfile );
 		SimpleModule sm = new SimpleModule();
 		sm.addSerializer( LoadingNodeAndPropertyValues.class, new NapSerializer() );
@@ -100,6 +114,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	@Override
 	public void release() {
 		super.clear();
+		removedNodes.clear();
 		FileUtils.deleteQuietly( backingfile );
 	}
 
@@ -181,6 +196,18 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		}
 	}
 
+	@Override
+	public void removeAll( Collection<LoadingNodeAndPropertyValues> naps ) {
+		super.removeAll( naps );
+		removedNodes.addAll( naps );
+	}
+
+	@Override
+	public void remove( LoadingNodeAndPropertyValues nap ) {
+		super.remove( nap );
+		removedNodes.add( nap );
+	}
+
 	private static class NapSerializer extends JsonSerializer<LoadingNodeAndPropertyValues> {
 
 		@Override
@@ -194,9 +221,22 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 			jgen.writeBooleanField( "objectIsError", value.isObjectError() );
 			jgen.writeArrayFieldStart( "properties" );
 			for ( Map.Entry<String, Value> en : value.entrySet() ) {
+				Value val = en.getValue();
 				jgen.writeStartObject();
 				jgen.writeStringField( "prop", en.getKey() );
-				jgen.writeStringField( "value", en.getValue().stringValue() );
+				jgen.writeStringField( "value", val.stringValue() );
+				if ( val instanceof Literal ) {
+					Literal l = Literal.class.cast( val );
+					if ( null == l.getLanguage() ) {
+						URI dt = l.getDatatype();
+						if ( null != dt ) {
+							jgen.writeStringField( "dt", dt.stringValue() );
+						}
+					}
+					else {
+						jgen.writeStringField( "lang", l.getLanguage() );
+					}
+				}
 				jgen.writeEndObject();
 			}
 			jgen.writeEndArray();
@@ -226,7 +266,21 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 				JsonNode propval = propit.next();
 				String prop = propval.get( "prop" ).asText();
 				String valstr = propval.get( "value" ).asText();
-				nap.put( prop, RDFDatatypeTools.getRDFStringValue( valstr, null, vf ) );
+				JsonNode lang = propval.get( "lang" );
+				if ( null == lang || lang.isNull() ) {
+					// no language, so check for datatype
+					JsonNode dt = propval.get( "dt" );
+					if ( null == dt || dt.isNull() ) {
+						// just do the best we can
+						nap.put( prop, RDFDatatypeTools.getRDFStringValue( valstr, null, vf ) );
+					}
+					else {
+						nap.put( prop, vf.createLiteral( valstr, vf.createURI( dt.asText() ) ) );
+					}
+				}
+				else {
+					nap.put( prop, vf.createLiteral( valstr, lang.asText() ) );
+				}
 			}
 
 			return nap;
@@ -242,6 +296,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		private final BufferedReader reader;
 		private final Deque<LoadingNodeAndPropertyValues> readcache = new ArrayDeque<>();
 		private Iterator<LoadingNodeAndPropertyValues> memoryiter = null;
+		private LoadingNodeAndPropertyValues current;
 
 		public CacheIterator() throws IOException {
 			if ( backingfile.exists() ) {
@@ -297,9 +352,13 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 			int rowsread = 0;
 			try {
 				String json = null;
-				while ( rowsread < COMMITLIMIT && null != ( json = reader.readLine() ) ) {
-					rowsread++;
-					readcache.add( oxm.readValue( json, LoadingNodeAndPropertyValues.class ) );
+				while ( rowsread < READCACHELIMIT && null != ( json = reader.readLine() ) ) {
+					LoadingNodeAndPropertyValues nap
+							= oxm.readValue( json, LoadingNodeAndPropertyValues.class );
+					if ( !removedNodes.contains( nap ) ) {
+						rowsread++;
+						readcache.add( nap );
+					}
 				}
 			}
 			catch ( IOException ioe ) {
@@ -311,12 +370,18 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 		@Override
 		public LoadingNodeAndPropertyValues next() {
-			return ( null == memoryiter ? readcache.poll() : memoryiter.next() );
+			current = ( null == memoryiter ? readcache.poll() : memoryiter.next() );
+			return current;
 		}
 
 		@Override
 		public void remove() {
-			if ( null != memoryiter ) {
+			// if we're working off the backing store, just make a note of the 
+			// removed node. else actually remove it from the in-memory list
+			if ( null == memoryiter ) {
+				removedNodes.add( current );
+			}
+			else {
 				memoryiter.remove();
 			}
 		}

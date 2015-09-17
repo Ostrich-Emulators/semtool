@@ -69,12 +69,18 @@ public class CSVReader implements ImportFileReader {
 	private final List<String> relPropArrayList = new ArrayList<>();
 	private File propFile;
 	private final Properties rdfMap = new Properties();
+	private boolean lsInMem = false;
 
 	public CSVReader() {
 	}
 
 	public CSVReader( File control ) {
 		propFile = control;
+	}
+
+	@Override
+	public void keepLoadInMemory( boolean b ) {
+		lsInMem = b;
 	}
 
 	/**
@@ -260,7 +266,7 @@ public class CSVReader implements ImportFileReader {
 
 				// String name, String sType, String oType,String relname
 				LoadingSheetData rlsd = LoadingSheetData.relsheet( relation, subjectLabel,
-						objectLabel, predicate );
+						objectLabel, predicate, lsInMem );
 				data.add( rlsd );
 				rels.put( relation, rlsd );
 			}

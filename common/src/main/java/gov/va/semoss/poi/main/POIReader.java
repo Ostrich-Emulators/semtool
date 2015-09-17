@@ -42,6 +42,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 public class POIReader implements ImportFileReader {
 
 	private static final Logger logger = Logger.getLogger( POIReader.class );
+	private boolean keepLoadInMemory = false;
 
 	public static ImportData readNonloadingSheet( File file ) throws IOException {
 		ImportData d
@@ -88,7 +89,6 @@ public class POIReader implements ImportFileReader {
 				Row row = sheet.getRow( r );
 				if ( null != row ) {
 					Map<String, Value> propmap = new HashMap<>();
-					
 
 					int lastpropcol = row.getLastCellNum();
 					for ( int c = 1; c <= lastpropcol; c++ ) {
@@ -97,7 +97,7 @@ public class POIReader implements ImportFileReader {
 							propmap.put( Integer.toString( c ), vf.createLiteral( val ) );
 						}
 					}
-					
+
 					nlsd.add( getString( row.getCell( 0 ) ), propmap );
 				}
 			}
@@ -133,6 +133,7 @@ public class POIReader implements ImportFileReader {
 		LowMemXlsReader rdr = null;
 		try {
 			rdr = new LowMemXlsReader( file );
+			rdr.keepSheetDataInMemory( keepLoadInMemory );
 			ImportData d = rdr.getData();
 
 			d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
@@ -144,6 +145,11 @@ public class POIReader implements ImportFileReader {
 				rdr.release();
 			}
 		}
+	}
+
+	@Override
+	public void keepLoadInMemory( boolean b ) {
+		keepLoadInMemory = b;
 	}
 
 	/**

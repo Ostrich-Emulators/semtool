@@ -23,7 +23,7 @@ public interface ImportFileReader {
 	 * @throws gov.va.semoss.poi.main.ImportValidationException If the file can be
 	 * opened, but some other problem prevents it from being parsed
 	 */
-	public abstract ImportData readOneFile( File f ) throws IOException, ImportValidationException;
+	public ImportData readOneFile( File f ) throws IOException, ImportValidationException;
 
 	/**
 	 * Reads the file as little as possible to return the metadata. This function
@@ -35,5 +35,7 @@ public interface ImportFileReader {
 	 * @throws IOException
 	 * @throws gov.va.semoss.poi.main.ImportValidationException
 	 */
-	public abstract ImportMetadata getMetadata( File f ) throws IOException, ImportValidationException;
+	public ImportMetadata getMetadata( File f ) throws IOException, ImportValidationException;
+	
+	public void keepLoadInMemory( boolean b );
 }

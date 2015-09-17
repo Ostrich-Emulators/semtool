@@ -8,6 +8,7 @@ package gov.va.semoss.poi.main.xlsxml;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.SheetType;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -82,8 +83,9 @@ public class SheetTypeXmlHandler extends XlsXmlBase {
 			skipping = true;
 
 			boolean ok = false;
+			String contents = getStringFromContentsInt();
+			String val = decomment( contents );
 			try {
-				String val = decomment( getStringFromContentsInt() );
 				sheettype = SheetType.valueOf( val.toUpperCase() );
 				ok = ( SheetType.METADATA == sheettype || SheetType.NODE == sheettype
 						|| SheetType.RELATION == sheettype );
@@ -94,7 +96,8 @@ public class SheetTypeXmlHandler extends XlsXmlBase {
 
 			if ( !ok ) {
 				throw new ImportValidationException( ImportValidationException.ErrorType.INVALID_TYPE,
-						"Cell A1 must be one of: \"Relation\", \"Node\", or \"Metadata\"" );
+						"Cell A1 must be one of: \"Relation\", \"Node\", or \"Metadata\" (was:"
+						+ val + ")" );
 
 			}
 		}

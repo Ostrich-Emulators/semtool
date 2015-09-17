@@ -27,6 +27,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.poi.main.CSVReader;
+import gov.va.semoss.poi.main.DiskBackedLoadingSheetData;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.ImportData;
@@ -80,14 +81,15 @@ public class EngineLoader {
 	private static final Logger log = Logger.getLogger( EngineLoader.class );
 	private static final Map<String, ImportFileReader> defaultExtReaderLkp
 			= new HashMap<>();
-	private final boolean stageInMemory;
 	private final List<Statement> owls = new ArrayList<>();
-	private RepositoryConnection myrc;
-	private File stagingdir;
 	private final ValueFactory vf;
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
-	private URI defaultBaseUri;
+	private final boolean stageInMemory;
+	private final boolean lsInMemory;
 	private boolean forceBaseUri;
+	private RepositoryConnection myrc;
+	private File stagingdir;
+	private URI defaultBaseUri;
 	private QaChecker qaer = new QaChecker();
 
 	static {
@@ -98,8 +100,9 @@ public class EngineLoader {
 		defaultExtReaderLkp.put( "csv", csv );
 	}
 
-	public EngineLoader( boolean inmem ) {
-		stageInMemory = inmem;
+	public EngineLoader( boolean stageInMem, boolean keepLoadingSheetsInMemory ) {
+		stageInMemory = stageInMem;
+		lsInMemory = keepLoadingSheetsInMemory;
 		try {
 			myrc = initForLoad();
 		}
@@ -108,6 +111,10 @@ public class EngineLoader {
 		}
 
 		vf = myrc.getValueFactory();
+	}
+
+	public EngineLoader( boolean inmem ) {
+		this( inmem, false );
 	}
 
 	public EngineLoader() {
@@ -198,6 +205,7 @@ public class EngineLoader {
 				}
 			}
 			else {
+				reader.keepLoadInMemory( lsInMemory );
 				ImportData data = reader.readOneFile( fileToLoad );
 				data.findPropertyLinks();
 				ImportMetadata im = data.getMetadata();
@@ -232,7 +240,7 @@ public class EngineLoader {
 	}
 
 	private void loadIntermediateData( ImportData data, IEngine engine,
-			ImportData conformanceErrors ) throws ImportValidationException {
+			ImportData conformanceErrors ) throws ImportValidationException, IOException {
 
 		ImportMetadata im = data.getMetadata();
 		// fill in anything not already set. In legacy mode, nothing is set,
@@ -256,7 +264,7 @@ public class EngineLoader {
 
 		// we want to search all namespaces, but use the metadata's first
 		Map<String, String> namespaces = engine.getNamespaces();
-		namespaces.putAll( data.getMetadata().getNamespaces() );
+		namespaces.putAll( im.getNamespaces() );
 
 		try {
 			List<Statement> stmts = new ArrayList<>();
@@ -282,25 +290,37 @@ public class EngineLoader {
 			EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 			modeler.createMetamodel( data, namespaces, myrc );
 
+			// we need to keep a copy of the import data because the addToEngine
+			// call consumes it
+			ImportData datacopy = cacheOnDisk( data );
 			for ( LoadingSheetData n : data.getNodes() ) {
-				addToEngine( n, engine, data );
+				addToStaging( n, engine, data );
 			}
 
-			qaer.separateConformanceErrors( data, conformanceErrors, engine );
+			qaer.separateConformanceErrors( datacopy, conformanceErrors, engine );
+			datacopy.release();
 
 			for ( LoadingSheetData r : data.getRels() ) {
-				addToEngine( r, engine, data );
+				addToStaging( r, engine, data );
 			}
 
+			myrc.begin();
 			URI ebase = engine.getBaseUri();
-			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
-			myrc.add( ebase, OWL.IMPORTS, data.getMetadata().getBase() );
+			myrc.add( ebase, MetadataConstants.VOID_SUBSET, im.getBase() );
+			myrc.add( ebase, OWL.IMPORTS, im.getBase() );
 
-			myrc.add( data.getMetadata().getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
-			myrc.add( data.getMetadata().getBase(), RDF.TYPE, OWL.ONTOLOGY );
+			myrc.add( im.getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
+			myrc.add( im.getBase(), RDF.TYPE, OWL.ONTOLOGY );
+			myrc.commit();
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
+			try {
+				myrc.rollback();
+			}
+			catch ( RepositoryException rr ) {
+				log.warn( rr, rr );
+			}
 		}
 	}
 
@@ -372,7 +392,18 @@ public class EngineLoader {
 		FileUtils.deleteQuietly( stagingdir );
 	}
 
-	private void addToEngine( LoadingSheetData sheet, IEngine engine,
+	/**
+	 * Adds the given loading sheet data to the staging repository while consuming
+	 * the input. That is, this function
+	 * {@link LoadingSheetData#release() releases} the input data.
+	 *
+	 * @param sheet
+	 * @param engine
+	 * @param alldata
+	 * @throws ImportValidationException
+	 * @throws RepositoryException
+	 */
+	private void addToStaging( LoadingSheetData sheet, IEngine engine,
 			ImportData alldata ) throws ImportValidationException, RepositoryException {
 		log.debug( "loading " + sheet.getName() + " to staging repository" );
 		// we want to search all namespaces, but use the metadata's first
@@ -563,5 +594,14 @@ public class EngineLoader {
 		}
 
 		return modeler;
+	}
+
+	private static ImportData cacheOnDisk( ImportData data ) throws IOException {
+		ImportData copy = new ImportData( data.getMetadata() );
+		for ( LoadingSheetData lsd : data.getSheets() ) {
+			copy.add( new DiskBackedLoadingSheetData( lsd ) );
+		}
+
+		return copy;
 	}
 }

@@ -1,37 +1,45 @@
-<http://semoss.va.gov/database/Ed9fc58a6-4822-47ee-b7af-8a2f0ec66251> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
-<http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
-<http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
+<http://semoss.va.gov/database/lfb55b1aa-aeb4-4fc1-a4f7-e999b74051d8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
 <http://sales.data/purchases/2015> <http://www.w3.org/2000/01/rdf-schema#label> "\"Purchase Dataset\"" .
-<http://sales.data/purchases#Concept/the_whole_shebang> <http://sales.data/schema#First_Name> "a." .
-<http://sales.data/purchases#Concept/the_whole_shebang> <http://sales.data/schema#Last_Name> "_ ~!@#$%^&*()[]{}/\\:\u201D'<>|;:+=-_" .
-<http://sales.data/purchases#Concept/the_whole_shebang> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
-<http://sales.data/purchases#Concept/the_whole_shebang> <http://www.w3.org/2000/01/rdf-schema#label> "the whole shebang" .
-<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://sales.data/schema#First_Name> "one~two" .
-<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://sales.data/schema#Last_Name> "three:four" .
-<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
-<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://www.w3.org/2000/01/rdf-schema#label> "one~two" .
-<http://sales.data/purchases#Concept/Yuri_G> <http://sales.data/schema#First_Name> "Yuri" .
-<http://sales.data/purchases#Concept/Yuri_G> <http://sales.data/schema#Last_Name> "Gag arin" .
-<http://sales.data/purchases#Concept/Yuri_G> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
-<http://sales.data/purchases#Concept/Yuri_G> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri G" .
-<http://sales.data/purchases#Concept/Yuri2> <http://sales.data/schema#First_Name> "Yuri2" .
-<http://sales.data/purchases#Concept/Yuri2> <http://sales.data/schema#Last_Name> "Line1\nLine2" .
-<http://sales.data/purchases#Concept/Yuri2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
-<http://sales.data/purchases#Concept/Yuri2> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri2" .
+<http://sales.data/schema#Human_Being> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sales.data/schema#Human_Being> <http://www.w3.org/2000/01/rdf-schema#label> "Human Being" .
+<http://sales.data/schema#Human_Being> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sales.data/schema#Concept> .
 <http://sales.data/schema#Concept> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://sales.data/schema#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
+<http://sales.data/schema#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#label> "Price" .
+<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
+<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
 <http://sales.data/schema#Date> <http://www.w3.org/2000/01/rdf-schema#label> "Date" .
 <http://sales.data/schema#Date> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
 <http://sales.data/schema#Date> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
 <http://sales.data/schema#First_Name> <http://www.w3.org/2000/01/rdf-schema#label> "First Name" .
 <http://sales.data/schema#First_Name> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
 <http://sales.data/schema#First_Name> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
-<http://sales.data/schema#Human_Being> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://sales.data/schema#Human_Being> <http://www.w3.org/2000/01/rdf-schema#label> "Human Being" .
-<http://sales.data/schema#Human_Being> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sales.data/schema#Concept> .
-<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#label> "Price" .
-<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
-<http://sales.data/schema#Price> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
-<http://sales.data/schema#Relation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
-<http://sales.data/schema#Relation/Contains> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
-<http://semoss.va.gov/database/Ed9fc58a6-4822-47ee-b7af-8a2f0ec66251> <http://www.w3.org/2002/07/owl#imports> <http://sales.data/purchases/2015> .
-<http://semoss.va.gov/database/Ed9fc58a6-4822-47ee-b7af-8a2f0ec66251> <http://rdfs.org/ns/void#subset> <http://sales.data/purchases/2015> .
+<http://sales.data/purchases#Concept/Yuri_G> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
+<http://sales.data/purchases#Concept/Yuri_G> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri G" .
+<http://sales.data/purchases#Concept/Yuri_G> <http://sales.data/schema#First_Name> "Yuri" .
+<http://sales.data/purchases#Concept/Yuri_G> <http://sales.data/schema#Last_Name> "Gag arin" .
+<http://sales.data/purchases#Concept/Yuri2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
+<http://sales.data/purchases#Concept/Yuri2> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri2" .
+<http://sales.data/purchases#Concept/Yuri2> <http://sales.data/schema#First_Name> "Yuri2" .
+<http://sales.data/purchases#Concept/Yuri2> <http://sales.data/schema#Last_Name> "Line1\nLine2" .
+<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
+<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://www.w3.org/2000/01/rdf-schema#label> "one~two" .
+<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://sales.data/schema#First_Name> "one~two" .
+<http://sales.data/purchases#Concept/Y46405313e56a610942c87d4786abcbba> <http://sales.data/schema#Last_Name> "three:four" .
+<http://sales.data/purchases#Concept/the_whole_shebang> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
+<http://sales.data/purchases#Concept/the_whole_shebang> <http://www.w3.org/2000/01/rdf-schema#label> "the whole shebang" .
+<http://sales.data/purchases#Concept/the_whole_shebang> <http://sales.data/schema#First_Name> "a." .
+<http://sales.data/purchases#Concept/the_whole_shebang> <http://sales.data/schema#Last_Name> "_ ~!@#$%^&*()[]{}/\\:\u201D'<>|;:+=-_" .
+<http://sales.data/purchases#Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Human_Being> .
+<http://sales.data/purchases#Concept/Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sales.data/schema#Car> .
+<http://sales.data/purchases#Concept/Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Yugo" .
+<http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Purchased> .
+<http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://www.w3.org/2000/01/rdf-schema#label> "<http://sales.data/purchases#Yuri> <http://sales.data/schema#Purchased> Yugo" .
+<http://sales.data/purchases#Yuri> <http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://sales.data/purchases#Concept/Yugo> .
+<http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://sales.data/schema#Price> "3000 USD" .
+<http://sales.data/purchases#Relation/T18e62f4e7630e461c7cb2e03f5c5fac9> <http://sales.data/schema#Date> "2014-11-09T00:00:00.000-05:00" .
+<http://semoss.va.gov/database/lfb55b1aa-aeb4-4fc1-a4f7-e999b74051d8> <http://rdfs.org/ns/void#subset> <http://sales.data/purchases/2015> .
+<http://semoss.va.gov/database/lfb55b1aa-aeb4-4fc1-a4f7-e999b74051d8> <http://www.w3.org/2002/07/owl#imports> <http://sales.data/purchases/2015> .
+<http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
+<http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
