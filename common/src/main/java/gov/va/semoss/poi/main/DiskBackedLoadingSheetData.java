@@ -16,18 +16,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import gov.va.semoss.util.RDFDatatypeTools;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import jdbm.PrimaryStoreMap;
-import jdbm.RecordManager;
-import jdbm.RecordManagerFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
@@ -46,10 +48,9 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	private static final Logger log = Logger.getLogger( DiskBackedLoadingSheetData.class );
 	private static final long COMMITLIMIT = 100000;
 
-	private final PrimaryStoreMap<Long, String> data;
-	private RecordManager recman;
-	private File cachedir;
+	private File backingfile;
 	private long opsSinceLastCommit = 0;
+	private int datacount = 0;
 	private final ObjectMapper oxm = new ObjectMapper();
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String type ) throws IOException {
@@ -80,40 +81,17 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 			String relname, Map<String, URI> props ) throws IOException {
 		super( tabtitle, sType, oType, relname, props );
 
-		try {
-			File tmpdir = new File( FileUtils.getTempDirectory(), "loading-cache" );
-			cachedir = new File( tmpdir, tabtitle + "-"
-					+ RandomStringUtils.randomAlphanumeric( 6 ) );
-			cachedir.mkdirs();
-			String filenamer = new File( cachedir, "cache" ).getPath();
-			recman = RecordManagerFactory.createRecordManager( filenamer );
-		}
-		catch ( IOException x ) {
-			log.error( x, x );
-			if ( null != recman ) {
-				try {
-					recman.close();
-				}
-				catch ( IOException xx ) {
-					log.warn( xx, xx );
-				}
-			}
-			FileUtils.deleteQuietly( cachedir );
-
-			throw x;
-		}
-
+		backingfile = File.createTempFile( tabtitle + "-", ".lsdcache" );
+		log.debug( "backing file is: " + backingfile );
 		SimpleModule sm = new SimpleModule();
 		sm.addSerializer( LoadingNodeAndPropertyValues.class, new NapSerializer() );
 		sm.addDeserializer( LoadingNodeAndPropertyValues.class, new NapDeserializer() );
 		oxm.registerModule( sm );
-
-		data = recman.storeMap( tabtitle );
 	}
 
 	@Override
 	public boolean isMemOnly() {
-		return true;
+		return false;
 	}
 
 	/**
@@ -121,29 +99,13 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	 */
 	@Override
 	public void release() {
-		try {
-			recman.close();
-		}
-		catch ( IOException ioe ) {
-			log.warn( "problem releasing cache", ioe );
-		}
-
-		try {
-			FileUtils.deleteDirectory( cachedir );
-		}
-		catch ( IOException ioe ) {
-			log.warn( "problem cleaning up tmp cache", ioe );
-		}
+		super.clear();
+		FileUtils.deleteQuietly( backingfile );
 	}
 
 	@Override
 	public void finishLoading() {
-		try {
-			recman.clearCache();
-		}
-		catch ( IOException ioe ) {
-			log.warn( "could not clear cache", ioe );
-		}
+		commit();
 	}
 
 	/**
@@ -152,20 +114,22 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	@Override
 	public void clear() {
 		super.clear();
-		data.clear();
+		datacount = 0;
 		commit();
 	}
 
 	@Override
-	public boolean isEmpty() {
-		return data.isEmpty();
-	}
-
-	@Override
 	protected void commit() {
-		try {
-			recman.commit();
-			recman.clearCache(); // mostly during loads, we don't need a cache
+		// flush everything to our backing file
+		try ( BufferedWriter writer
+				= new BufferedWriter( new FileWriter( backingfile, true ) ) ) {
+			Iterator<LoadingNodeAndPropertyValues> it = super.getDataIterator();
+			while ( it.hasNext() ) {
+				writer.write( oxm.writeValueAsString( it.next() ) );
+				writer.newLine();
+				it.remove();
+			}
+
 			opsSinceLastCommit = 0;
 		}
 		catch ( IOException ioe ) {
@@ -175,37 +139,39 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 	@Override
 	public Iterator<LoadingNodeAndPropertyValues> getDataIterator() {
-		return new CacheIterator();
+		try {
+			return new CacheIterator();
+		}
+		catch ( IOException ioe ) {
+			log.warn( "cannot access backing file in iterator", ioe );
+		}
+		return super.getDataIterator();
 	}
 
 	@Override
 	public List<LoadingNodeAndPropertyValues> getData() {
 		List<LoadingNodeAndPropertyValues> list = new ArrayList<>();
-		try {
-			for ( Map.Entry<Long, String> en : data.entrySet() ) {
-				list.add( oxm.readValue( en.getValue(), LoadingNodeAndPropertyValues.class ) );
-			}
-		}
-		catch ( IOException ioe ) {
-			log.error( ioe, ioe );
+		Iterator<LoadingNodeAndPropertyValues> it = getDataIterator();
+		while ( it.hasNext() ) {
+			list.add( it.next() );
 		}
 		return list;
 	}
 
 	@Override
 	public int rows() {
-		return data.size();
+		return datacount;
 	}
 
 	@Override
-	protected void iadd( LoadingNodeAndPropertyValues nap ) {
-		try {
-			data.putValue( oxm.writeValueAsString( nap ) );
-			tryCommit();
-		}
-		catch ( Throwable t ) {
-			log.error( t, t );
-		}
+	public boolean isEmpty() {
+		return ( 0 == datacount );
+	}
+
+	@Override
+	protected void added( LoadingNodeAndPropertyValues nap ) {
+		datacount++;
+		tryCommit();
 	}
 
 	private void tryCommit() {
@@ -267,45 +233,92 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		}
 	}
 
+	/**
+	 * An iterator that iterates over the backing store first, then over the
+	 * in-memory naps
+	 */
 	private class CacheIterator implements Iterator<LoadingNodeAndPropertyValues> {
 
-		private final Iterator<Long> keyiter = new ArrayList<>( data.keySet() ).iterator();
-		private long current;
+		private final BufferedReader reader;
+		private final Deque<LoadingNodeAndPropertyValues> readcache = new ArrayDeque<>();
+		private Iterator<LoadingNodeAndPropertyValues> memoryiter = null;
 
-		public CacheIterator() {
-
+		public CacheIterator() throws IOException {
+			if ( backingfile.exists() ) {
+				reader = new BufferedReader( new FileReader( backingfile ) );
+			}
+			else {
+				reader = null;
+			}
 		}
 
 		@Override
 		public boolean hasNext() {
-			boolean nexter =  keyiter.hasNext();
-			if( !nexter ){
-				commit();
+			// we need to iterate over data from three places (in this order)
+			// 1) our readcache, until it is empty
+			// 2) our backing file, until it is empty
+			// 3) our in-memory data
+			// we'll populate our readcache by periodically filling it with data from 
+			// our backing file
+
+			boolean hasnext = !readcache.isEmpty();
+
+			// our read cache is empty
+			if ( !hasnext ) {
+				// we haven't exhausted our backing file yet, so check there
+				if ( null == memoryiter ) {
+					hasnext = cacheMoreFromStore();
+
+					if ( !hasnext ) {
+						// close our file reader, since the file is empty
+						try {
+							reader.close();
+						}
+						catch ( IOException ioe ) {
+							log.warn( "problem closing file cache reader", ioe );
+						}
+
+						// our backing file is exhausted, so switch to our in-memory data
+						memoryiter = DiskBackedLoadingSheetData.super.getDataIterator();
+						hasnext = memoryiter.hasNext();
+					}
+				}
+				else {
+					// we've already exhausted our backing file, so we're just reading
+					// from memory until we're out of data
+					hasnext = memoryiter.hasNext();
+				}
 			}
-			return nexter;
+
+			return hasnext;
+		}
+
+		private boolean cacheMoreFromStore() {
+			int rowsread = 0;
+			try {
+				String json = null;
+				while ( rowsread < COMMITLIMIT && null != ( json = reader.readLine() ) ) {
+					rowsread++;
+					readcache.add( oxm.readValue( json, LoadingNodeAndPropertyValues.class ) );
+				}
+			}
+			catch ( IOException ioe ) {
+				log.warn( "problem reading from cache", ioe );
+			}
+
+			return !readcache.isEmpty();
 		}
 
 		@Override
 		public LoadingNodeAndPropertyValues next() {
-			current = keyiter.next();
-			String valstr = data.get( current );
-			if ( null != valstr ) {
-
-				try {
-					recman.clearCache();
-					return oxm.readValue( valstr, LoadingNodeAndPropertyValues.class );
-				}
-				catch ( IOException ioe ) {
-					log.error( ioe, ioe );
-				}
-			}
-			
-			throw new ConcurrentModificationException( "missing rowid? impossible!" );
+			return ( null == memoryiter ? readcache.poll() : memoryiter.next() );
 		}
 
 		@Override
 		public void remove() {
-			keyiter.remove();
+			if ( null != memoryiter ) {
+				memoryiter.remove();
+			}
 		}
 	}
 }

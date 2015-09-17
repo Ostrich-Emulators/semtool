@@ -403,7 +403,8 @@ public class EngineLoader {
 				lit.remove();
 			}
 		}
-		sheet.clear();
+		
+		sheet.release();
 	}
 
 	/**

@@ -44,7 +44,7 @@ public class LoadingSheetData {
 	private final Map<String, URI> propcache = new LinkedHashMap<>();
 	private final Set<String> proplink = new HashSet<>();
 	private final Set<String> napcache = new HashSet<>();
-	private Map<Long, LoadingNodeAndPropertyValues> data;
+	private final List<LoadingNodeAndPropertyValues> data = new ArrayList<>();
 	private final String tabname;
 
 	protected LoadingSheetData( String tabtitle, String type ) {
@@ -79,7 +79,6 @@ public class LoadingSheetData {
 		this.objectType = oType;
 		this.relname = relname;
 		propcache.putAll( props );
-		data = new HashMap<>();
 	}
 
 	public int rows() {
@@ -97,7 +96,7 @@ public class LoadingSheetData {
 	}
 
 	public Iterator<LoadingNodeAndPropertyValues> getDataIterator() {
-		return data.values().iterator();
+		return data.iterator();
 	}
 
 	public boolean hasSubjectTypeError() {
@@ -259,7 +258,11 @@ public class LoadingSheetData {
 	 * @return the internal data
 	 */
 	public List<LoadingNodeAndPropertyValues> getData() {
-		return new ArrayList<>( data.values() );
+		return new ArrayList<>( data );
+	}
+	
+	protected List<LoadingNodeAndPropertyValues> getDataRef(){
+		return data;
 	}
 
 	/**
@@ -278,13 +281,12 @@ public class LoadingSheetData {
 	protected void commit() {
 	}
 
-	protected void iadd( LoadingNodeAndPropertyValues nap ) {
-		long lng = data.size();
-		data.put( lng++, nap );
+	protected void added( LoadingNodeAndPropertyValues nap ) {
 	}
 
 	public void add( LoadingNodeAndPropertyValues nap ) {
-		iadd( nap );
+		data.add( nap );
+		added( nap );
 
 		// add this NAP's label to our cache, if we have it (we should)
 		cacheNapLabel( nap.getSubject() );
