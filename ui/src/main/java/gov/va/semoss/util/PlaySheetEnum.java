@@ -82,10 +82,18 @@ public enum PlaySheetEnum {
 		this.sheetHint = playSheetHint;
 	}
 
+	/**   Returns the playsheet class of the current PlaySheetEnum.
+	 * 
+	 * @return getSheetClass -- (Class<? extends IPlaySheet>)
+	 */
 	public Class<? extends IPlaySheet> getSheetClass() {
 		return this.sheetClass;
 	}
 
+	/**   Returns an instance of the playsheet class from the current PlaySheetEnum.
+	 * 
+	 * @return getSheetInstance -- (IPlaySheet)
+	 */
 	public IPlaySheet getSheetInstance() {
 		try {
 			return getSheetClass().newInstance();
@@ -96,10 +104,19 @@ public enum PlaySheetEnum {
 		}
 	}
 
+	/**   Returns the sheet name of the current PlaySheetEnum.
+	 * 
+	 * @return getDisplayName -- (String)
+	 */
 	public String getDisplayName() {
 		return this.sheetName;
 	}
 	
+	/**   Returns the filename of the icon (minus any path information) from the
+	 * current PlaySheetEnum.
+	 * 
+	 * @return getSheetIconName -- (String)
+	 */
 	public String getSheetIconName(){
 		String strReturnValue = "";
 		
@@ -111,6 +128,10 @@ public enum PlaySheetEnum {
 	    return strReturnValue;
 	}
 
+	/**   Returns the playsheet icon of the current PlaySheetEnum.
+	 * 
+	 * @return getSheetIcon -- (ImageIcon)
+	 */
 	public ImageIcon getSheetIcon(){
 		ImageIcon imgReturnValue = null;
 	    if(this.sheetIconLocation == null || this.sheetIconLocation.equals("")){
@@ -121,10 +142,20 @@ public enum PlaySheetEnum {
 	    return imgReturnValue;
 	}
 	
+	/**   Returns the playsheet "hint" (for the Custom Sparql Query Window) from
+	 * the current PlaySheetEnum.
+	 * 
+	 * @return getSheetHint -- (String)
+	 */
 	public String getSheetHint() {
 		return this.sheetHint;
 	}
 
+	/**   Currently returns true for all playsheets, except for the "AppDupeHeatMapSheet",
+	 * which returns false.
+	 * 
+	 * @return needsSparql -- (boolean)
+	 */
 	public boolean needsSparql() {
 		return !AppDupeHeatMapSheet.class.equals( sheetClass );
 	}
