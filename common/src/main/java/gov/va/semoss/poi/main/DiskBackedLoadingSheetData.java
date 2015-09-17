@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,8 +49,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	private final PrimaryStoreMap<Long, String> data;
 	private RecordManager recman;
 	private File cachedir;
-	private long datacount = 0;
-	private long lastcommit = 0;
+	private long opsSinceLastCommit = 0;
 	private final ObjectMapper oxm = new ObjectMapper();
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String type ) throws IOException {
@@ -166,11 +166,16 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		try {
 			recman.commit();
 			recman.clearCache(); // mostly during loads, we don't need a cache
-			lastcommit = data.size();
+			opsSinceLastCommit = 0;
 		}
 		catch ( IOException ioe ) {
 			log.warn( "loading sheet internal commit failed", ioe );
 		}
+	}
+
+	@Override
+	public Iterator<LoadingNodeAndPropertyValues> getDataIterator() {
+		return new CacheIterator();
 	}
 
 	@Override
@@ -196,13 +201,16 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	protected void iadd( LoadingNodeAndPropertyValues nap ) {
 		try {
 			data.putValue( oxm.writeValueAsString( nap ) );
-			datacount++;
+			tryCommit();
 		}
 		catch ( Throwable t ) {
 			log.error( t, t );
 		}
+	}
 
-		if ( ( datacount - lastcommit ) >= COMMITLIMIT ) {
+	private void tryCommit() {
+		opsSinceLastCommit++;
+		if ( opsSinceLastCommit >= COMMITLIMIT ) {
 			commit();
 		}
 	}
@@ -256,6 +264,48 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 			}
 
 			return nap;
+		}
+	}
+
+	private class CacheIterator implements Iterator<LoadingNodeAndPropertyValues> {
+
+		private final Iterator<Long> keyiter = new ArrayList<>( data.keySet() ).iterator();
+		private long current;
+
+		public CacheIterator() {
+
+		}
+
+		@Override
+		public boolean hasNext() {
+			boolean nexter =  keyiter.hasNext();
+			if( !nexter ){
+				commit();
+			}
+			return nexter;
+		}
+
+		@Override
+		public LoadingNodeAndPropertyValues next() {
+			current = keyiter.next();
+			String valstr = data.get( current );
+			if ( null != valstr ) {
+
+				try {
+					recman.clearCache();
+					return oxm.readValue( valstr, LoadingNodeAndPropertyValues.class );
+				}
+				catch ( IOException ioe ) {
+					log.error( ioe, ioe );
+				}
+			}
+			
+			throw new ConcurrentModificationException( "missing rowid? impossible!" );
+		}
+
+		@Override
+		public void remove() {
+			keyiter.remove();
 		}
 	}
 }

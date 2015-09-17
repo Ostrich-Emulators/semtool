@@ -58,7 +58,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.ListIterator;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.openrdf.model.BNode;
@@ -378,7 +378,7 @@ public class EngineLoader {
 
 	private void addToEngine( LoadingSheetData sheet, IEngine engine,
 			ImportData alldata ) throws ImportValidationException, RepositoryException {
-
+		log.debug( "loading " + sheet.getName() + " to staging repository" );
 		// we want to search all namespaces, but use the metadata's first
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
@@ -386,7 +386,7 @@ public class EngineLoader {
 		EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 
 		if ( sheet.isRel() ) {
-			ListIterator<LoadingNodeAndPropertyValues> lit = sheet.getData().listIterator();
+			Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
 			while ( lit.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = lit.next();
 				modeler.addRel( nap, namespaces, sheet, metas, myrc );
@@ -395,7 +395,7 @@ public class EngineLoader {
 			}
 		}
 		else {
-			ListIterator<LoadingNodeAndPropertyValues> lit = sheet.getData().listIterator();
+			Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
 			while ( lit.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = lit.next();
 				modeler.addNode( nap, namespaces, sheet, metas, myrc );
@@ -420,6 +420,7 @@ public class EngineLoader {
 	private Collection<Statement> moveLoadingRcToEngine( IEngine engine,
 			boolean copyowls ) throws RepositoryException {
 		myrc.commit();
+		log.debug( "moving staging data to engine" );
 		Set<Statement> owlstmts = new HashSet<>();
 		final List<Statement> stmts
 				= Iterations.asList( myrc.getStatements( null, null, null, false ) );

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -93,6 +94,10 @@ public class LoadingSheetData {
 		}
 
 		return false;
+	}
+
+	public Iterator<LoadingNodeAndPropertyValues> getDataIterator() {
+		return data.values().iterator();
 	}
 
 	public boolean hasSubjectTypeError() {
@@ -211,9 +216,9 @@ public class LoadingSheetData {
 	public void release() {
 	}
 
-	public void finishLoading(){
+	public void finishLoading() {
 	}
-	
+
 	/**
 	 * Clears any stored loading data
 	 */
@@ -308,10 +313,11 @@ public class LoadingSheetData {
 
 	/**
 	 * Adds a new nap to the list. This is the preferred way to construct the nap
+	 *
 	 * @param slabel
 	 * @param olabel
 	 * @param props
-	 * @return 
+	 * @return
 	 */
 	public LoadingNodeAndPropertyValues add( String slabel, String olabel,
 			Map<String, Value> props ) {

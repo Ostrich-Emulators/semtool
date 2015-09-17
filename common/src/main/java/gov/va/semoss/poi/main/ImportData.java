@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
  * @author ryan
  */
 public final class ImportData {
-
+	private static final Logger log = Logger.getLogger( ImportData.class );
 	private final List<LoadingSheetData> sheets = new ArrayList<>();
 	private ImportMetadata metadata;
 
@@ -132,7 +132,6 @@ public final class ImportData {
 	 * @see LoadingSheetData#findPropertyLinks(java.util.Collection)
 	 */
 	public void findPropertyLinks() {
-		Logger.getLogger( getClass() ).debug( "looking for property links" );
 		for ( LoadingSheetData sheet : sheets ) {
 			if ( sheet.hasProperties() ) {
 				Set<LoadingSheetData> sheetset = new HashSet<>( sheets );
@@ -140,5 +139,6 @@ public final class ImportData {
 				sheet.findPropertyLinks( sheetset );
 			}
 		}
+		log.debug( "property links resolved" );
 	}
 }
