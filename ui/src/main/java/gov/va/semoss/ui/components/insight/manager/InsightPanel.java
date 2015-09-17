@@ -107,7 +107,7 @@ public class InsightPanel extends DataPanel<Insight> {
 		insightName.setText( i.getLabel() );
 		insightQuery.setText( i.getSparql() );
 		insightDesc.setText( i.getDescription() );
-		playsheet.setSelectedItem( PlaySheetEnum.valueFor( i ) );
+		playsheet.setSelectedItem( PlaySheetEnum.valueForInsight( i ) );
 		setParameterHelper();
 	}
 

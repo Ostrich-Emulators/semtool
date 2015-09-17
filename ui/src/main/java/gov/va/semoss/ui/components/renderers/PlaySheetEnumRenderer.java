@@ -5,16 +5,13 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
-import gov.va.semoss.ui.components.api.IPlaySheet;
 import java.awt.Component;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.Icon;
 import javax.swing.JList;
 
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.util.DefaultPlaySheetIcons;
 import gov.va.semoss.util.PlaySheetEnum;
 
 /**
@@ -38,13 +35,8 @@ public class PlaySheetEnumRenderer extends DefaultListCellRenderer {
 
 		super.getListCellRendererComponent( list, pse.getDisplayName(), idx, sel, hasfocus );
 
-		Class<? extends IPlaySheet> klass = pse.getSheetClass();
-		Icon icon = DefaultPlaySheetIcons.getDefaultIcon( pse );
-		if ( icon == null ) {
-			icon = DefaultPlaySheetIcons.blank;
-		}
-		setIcon( icon );
-
+		setIcon(pse.getSheetIcon());
+		
 		return this;
 	}
 }

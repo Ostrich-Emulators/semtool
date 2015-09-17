@@ -36,8 +36,13 @@ import gov.va.semoss.ui.components.playsheets.SankeyPlaySheet;
 import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
+
 import java.util.EnumSet;
 import java.util.Set;
+
+import javax.swing.ImageIcon;
+
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -47,31 +52,33 @@ import org.apache.log4j.Logger;
  */
 public enum PlaySheetEnum {
 
-	Grid( "Grid", GridPlaySheet.class, "GridPlaySheet Hint: SELECT ?x1 ?x2 ?x3 WHERE{ ... }" ),
-	Raw_Grid( "Raw Grid", GridRAWPlaySheet.class, "GridRAWPlaySheet Hint: SELECT ?x1 ?x2 ?x3 WHERE{ ... }" ),
-	Column_Chart( "Column Chart", ColumnChartPlaySheet.class, "ColumnChartPlaySheet Hint: SELECT ?xAxis ?yAxis1 (OPTIONAL) ?yAxis2 ?yAxis3 ... (where all yAxis values are numbers) WHERE { ... }" ),
-	Dendrogram( "Dendrogram", DendrogramPlaySheet.class, "DendrogramPlaySheet Hint: SELECT DISTINCT ?var-1 ?var-2 ?var-3 ... (where ?var-2 contains children of ?var-1, ?var-3 of ?var-2, etc.) WHERE { ... }" ),
-	Graph( "Graph", GraphPlaySheet.class, "GraphPlaySheet Hint: CONSTRUCT {?subject ?predicate ?object} WHERE{ ... }" ),
-	Grid_Scatter( "Grid Scatter", GridScatterSheet.class, "GridScatterSheet Hint: SELECT ?elementName ?xAxisValues ?yAxisValues (OPTIONAL)?zAxisValues WHERE{ ... }" ),
-	Heat_Map( "Heat Map", HeatMapPlaySheet.class, "HeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
-	Parallel_Coordinates( "Parallel Coordinates", ParallelCoordinatesPlaySheet.class, "ParallelCoordinatesPlaySheet Hint: SELECT ?axis1 ?axis2 ?axis3 WHERE{ ... }" ),
-	Pie_Chart( "Pie Chart", PieChartPlaySheet.class, "PieChartPlaySheet Hint: SELECT ?wedgeName ?wedgeValue WHERE { ... }" ),
-	Sankey_Diagram( "Sankey Diagram", SankeyPlaySheet.class, "SankeyPlaySheet Hint: SELECT ?source ?target ?value ?target2 ?value2 ?target3 ?value3...etc  Note: ?target is the source for ?target2 and ?target2 is the source for ?target3...etc WHERE{ ... }" ),
-	US_Heat_Map( "US Heat Map", USHeatMapPlaySheet.class, "USHeatMapPlaySheet Hint: SELECT ?state ?numericHeatValue WHERE{ ... }" ),
-	World_Heat_Map( "World Heat Map", WorldHeatMapPlaySheet.class, "WorldHeatMapPlaySheet Hint: SELECT ?country ?numericHeatValue WHERE{ ... }" ),
-	Metamodel_Graph( "Metamodel Graph", MetamodelGraphPlaySheet.class, "MetamodelGraphPlaySheet Hint: SELECT DISTINCT ?source ?relation ?target WHERE{ ... }" ),
-	AppDupeHeatMap( "Application Duplication Heat Map", AppDupeHeatMapSheet.class, "AppDupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
-	DupeHeatMap( "Duplication Heat Map", DupeHeatMapSheet.class, "DupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
-	Update_Query( "Update Query", null, "UpdateQuery Hint: Try a SPARQL query that INSERTs data, DELETEs data, or does both." );
+	Grid( "Grid", GridPlaySheet.class, "icons16/questions_grid2_16.png", "GridPlaySheet Hint: SELECT ?x1 ?x2 ?x3 WHERE{ ... }" ),
+	Raw_Grid( "Raw Grid", GridRAWPlaySheet.class, "icons16/questions_raw_grid2_16.png", "GridRAWPlaySheet Hint: SELECT ?x1 ?x2 ?x3 WHERE{ ... }" ),
+	Column_Chart( "Column Chart", ColumnChartPlaySheet.class, "icons16/questions_bar_chart1_16.png", "ColumnChartPlaySheet Hint: SELECT ?xAxis ?yAxis1 (OPTIONAL) ?yAxis2 ?yAxis3 ... (where all yAxis values are numbers) WHERE { ... }" ),
+	Dendrogram( "Dendrogram", DendrogramPlaySheet.class, "icons16/questions_dendrogram1_16.png", "DendrogramPlaySheet Hint: SELECT DISTINCT ?var-1 ?var-2 ?var-3 ... (where ?var-2 contains children of ?var-1, ?var-3 of ?var-2, etc.) WHERE { ... }" ),
+	Graph( "Graph", GraphPlaySheet.class, "icons16/questions_graph_16.png", "GraphPlaySheet Hint: CONSTRUCT {?subject ?predicate ?object} WHERE{ ... }" ),
+	Grid_Scatter( "Grid Scatter", GridScatterSheet.class, "icons16/questions_grid_scatter1_16.png", "GridScatterSheet Hint: SELECT ?elementName ?xAxisValues ?yAxisValues (OPTIONAL)?zAxisValues WHERE{ ... }" ),
+	Heat_Map( "Heat Map", HeatMapPlaySheet.class, "icons16/questions_heat_map3_16.png", "HeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
+	Parallel_Coordinates( "Parallel Coordinates", ParallelCoordinatesPlaySheet.class, "icons16/questions_parcoords6_16.png", "ParallelCoordinatesPlaySheet Hint: SELECT ?axis1 ?axis2 ?axis3 WHERE{ ... }" ),
+	Pie_Chart( "Pie Chart", PieChartPlaySheet.class, "icons16/questions_pie_chart1_16.png", "PieChartPlaySheet Hint: SELECT ?wedgeName ?wedgeValue WHERE { ... }" ),
+	Sankey_Diagram( "Sankey Diagram", SankeyPlaySheet.class, "icons16/questions_sankey2_16.png", "SankeyPlaySheet Hint: SELECT ?source ?target ?value ?target2 ?value2 ?target3 ?value3...etc  Note: ?target is the source for ?target2 and ?target2 is the source for ?target3...etc WHERE{ ... }" ),
+	US_Heat_Map( "US Heat Map", USHeatMapPlaySheet.class, "icons16/questions_us_heat_map1_16.png", "USHeatMapPlaySheet Hint: SELECT ?state ?numericHeatValue WHERE{ ... }" ),
+	World_Heat_Map( "World Heat Map", WorldHeatMapPlaySheet.class, "icons16/questions_world_heat_map3_16.png", "WorldHeatMapPlaySheet Hint: SELECT ?country ?numericHeatValue WHERE{ ... }" ),
+	Metamodel_Graph( "Metamodel Graph", MetamodelGraphPlaySheet.class, "icons16/questions_metamodel1_16.png", "MetamodelGraphPlaySheet Hint: SELECT DISTINCT ?source ?relation ?target WHERE{ ... }" ),
+	AppDupeHeatMap( "Application Duplication Heat Map", AppDupeHeatMapSheet.class, "icons16/questions_heat_map3_16.png", "AppDupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
+	Update_Query( "Update Query", null, "icons16/questions_update2_16.png", "UpdateQuery Hint: Try a SPARQL query that INSERTs data, DELETEs data, or does both." ),
+	Blank("", null, "icons16/blank_16.png", "");
 
 	private final String sheetName;
 	private final Class<? extends IPlaySheet> sheetClass;
+	private final String sheetIconLocation;
 	private final String sheetHint;
 
 	PlaySheetEnum( String displayName, Class<? extends IPlaySheet> playSheetClass,
-			String playSheetHint ) {
+			String sheetIconLocation, String playSheetHint ) {
 		this.sheetName = displayName;
 		this.sheetClass = playSheetClass;
+		this.sheetIconLocation = sheetIconLocation;
 		this.sheetHint = playSheetHint;
 	}
 
@@ -92,7 +99,28 @@ public enum PlaySheetEnum {
 	public String getDisplayName() {
 		return this.sheetName;
 	}
+	
+	public String getSheetIconName(){
+		String strReturnValue = "";
+		
+	    if(this.sheetIconLocation == null || this.sheetIconLocation.equals("")){
+	    	strReturnValue = FilenameUtils.getName(Blank.sheetIconLocation);
+	    }else{
+	    	strReturnValue = FilenameUtils.getName(this.sheetIconLocation);
+	    }
+	    return strReturnValue;
+	}
 
+	public ImageIcon getSheetIcon(){
+		ImageIcon imgReturnValue = null;
+	    if(this.sheetIconLocation == null || this.sheetIconLocation.equals("")){
+	    	imgReturnValue = GuiUtility.loadImageIcon(Blank.sheetIconLocation);
+	    }else{
+	    	imgReturnValue = GuiUtility.loadImageIcon(this.sheetIconLocation);
+	    }
+	    return imgReturnValue;
+	}
+	
 	public String getSheetHint() {
 		return this.sheetHint;
 	}
@@ -101,8 +129,7 @@ public enum PlaySheetEnum {
 		return !AppDupeHeatMapSheet.class.equals( sheetClass );
 	}
 
-	/**
-	 * Gets a PlaySheetEnum for the given Insight. If this insight's
+	/**   Gets a PlaySheetEnum for the given Insight. If this insight's
 	 * {@link Insight#getOutput()} returns an unknown playsheet, this function
 	 * returns {@link PlaySheetEnum#Grid}
 	 *
@@ -110,7 +137,7 @@ public enum PlaySheetEnum {
 	 * @param ins
 	 * @return
 	 */
-	public static PlaySheetEnum valueFor( Insight ins ) {
+	public static PlaySheetEnum valueForInsight( Insight ins ) {
 		if ( null == ins || null == ins.getOutput() ) {
 			return PlaySheetEnum.Update_Query;
 		}
@@ -126,7 +153,33 @@ public enum PlaySheetEnum {
 				+ output + " (using Grid instead)" );
 		return PlaySheetEnum.Grid;
 	}
+	
+	/**   Gets a PlaySheetEnum for the passed-in playsheet class.
+	 * 
+	 * @param playSheetClass -- (Class<? extends IPlaySheet>) Class of a playsheet.
+	 * 
+	 * @return valueForClass -- (PlaySheetEnum) Described above.
+	 */
+	public static PlaySheetEnum valueForClass(Class<? extends IPlaySheet> playSheetClass){
+		if(null == playSheetClass){
+		   return PlaySheetEnum.Update_Query;
+		}
+		for ( PlaySheetEnum pse : valuesNoUpdate() ) {
+			if (playSheetClass.equals(pse.getSheetClass())){
+				return pse;
+			}
+		}
+		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: "
+				+ playSheetClass.getCanonicalName() + " (using Grid instead)" );
+		return PlaySheetEnum.Grid;
+		
+	}
 
+	/**   Returns an array of all PlaySheetEnum objects (not designed to update
+	 * the Enum.
+	 * 
+	 * @return valuesNoUpdate -- (PlaySheetEnum[]) Described above.
+	 */
 	public static PlaySheetEnum[] valuesNoUpdate() {
 		Set<PlaySheetEnum> pses = EnumSet.allOf( PlaySheetEnum.class );
 		pses.remove( PlaySheetEnum.Update_Query );

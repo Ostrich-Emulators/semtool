@@ -8,8 +8,9 @@ package gov.va.semoss.ui.components.playsheets;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-
 import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.PlaySheetEnum;
+
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
@@ -55,7 +56,15 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 		defaultIcons.clear();
 		defaultIcons.putAll( icons );
 	}
-	
+
+	/**   Sets the default icons for all playsheets from the PlaySheetEnum.
+	 */
+	public static void setDefaultIcons(){
+		defaultIcons.clear();
+		for(PlaySheetEnum pse: PlaySheetEnum.valuesNoUpdate()){
+			defaultIcons.put(pse.getSheetIconName(), pse.getSheetIcon());
+		}
+	}
 
 	public void setFrame( PlaySheetFrame f ) {
 		playframe = f;
