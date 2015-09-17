@@ -24,7 +24,13 @@ function start(data) {
 	setColorScale(valueArray);
 	
 	determineIfStateOrCountyData(dataObject);
-
+	
+	$('#resetPanZoomBtn').click( function() {
+		var originalMatrix = [1,0,0,1,0,0];
+		setMatrixForSel(mapSel, originalMatrix);
+		pan(0, 30, mapSel);
+	});
+	
 	queue()
 		.defer(d3.json, "js/heatmapdata/us-topo-min.json")
 		.await(ready);
