@@ -5,7 +5,7 @@
  */
 package gov.va.semoss.poi.main;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,11 +16,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.DBMaker.Maker;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -47,43 +43,46 @@ public class LoadingSheetData {
 	private final Map<String, URI> propcache = new LinkedHashMap<>();
 	private final Set<String> proplink = new HashSet<>();
 	private final Set<String> napcache = new HashSet<>();
-	private final List<LoadingNodeAndPropertyValues> data = new ArrayList<>();
+	private Map<Long, LoadingNodeAndPropertyValues> data;
 	private final String tabname;
 
-	protected LoadingSheetData( String tabtitle, String type, boolean inMemOnly ) {
-		this( tabtitle, type, new HashMap<>(), inMemOnly );
+	protected LoadingSheetData( String tabtitle, String type ) {
+		this( tabtitle, type, new HashMap<>() );
 	}
 
-	protected LoadingSheetData( String tabtitle, String type, Collection<String> props,
-			boolean inMemOnly ) {
-		this( tabtitle, type, null, null, props, inMemOnly );
+	protected LoadingSheetData( String tabtitle, String type, Collection<String> props ) {
+		this( tabtitle, type, null, null, props );
 	}
 
-	protected LoadingSheetData( String tabtitle, String type, Map<String, URI> props,
-			boolean inMemOnly ) {
-		this( tabtitle, type, null, null, props, inMemOnly );
-	}
-
-	protected LoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, boolean inMemOnly ) {
-		this( tabtitle, sType, oType, relname, new HashMap<>(), inMemOnly );
+	protected LoadingSheetData( String tabtitle, String type, Map<String, URI> props ) {
+		this( tabtitle, type, null, null, props );
 	}
 
 	protected LoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Collection<String> props, boolean inMemOnly ) {
-		this( tabtitle, sType, oType, relname, inMemOnly );
+			String relname ) {
+		this( tabtitle, sType, oType, relname, new HashMap<>() );
+	}
+
+	protected LoadingSheetData( String tabtitle, String sType, String oType,
+			String relname, Collection<String> props ) {
+		this( tabtitle, sType, oType, relname );
 		for ( String p : props ) {
 			propcache.put( p, null );
 		}
 	}
 
 	protected LoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Map<String, URI> props, boolean inMemOnly ) {
+			String relname, Map<String, URI> props ) {
 		subjectType = sType;
 		tabname = tabtitle;
 		this.objectType = oType;
 		this.relname = relname;
 		propcache.putAll( props );
+		data = new HashMap<>();
+	}
+
+	public int rows() {
+		return data.size();
 	}
 
 	public boolean hasErrors() {
@@ -212,14 +211,15 @@ public class LoadingSheetData {
 	public void release() {
 	}
 
+	public void finishLoading(){
+	}
+	
 	/**
 	 * Clears any stored loading data
 	 */
 	public void clear() {
 		data.clear();
 		propcache.clear();
-		if ( !isMemOnly() ) {
-		}
 	}
 
 	public void setProperties( Map<String, URI> props ) {
@@ -248,13 +248,13 @@ public class LoadingSheetData {
 	}
 
 	/**
-	 * Gets a reference to this instance's node and property data. Changes made to
-	 * the returned collection are propagated to the internal copy
+	 * Gets this instance's node and property data. Changes made to the returned
+	 * collection are NOT propagated to the internal copy
 	 *
 	 * @return the internal data
 	 */
 	public List<LoadingNodeAndPropertyValues> getData() {
-		return data;
+		return new ArrayList<>( data.values() );
 	}
 
 	/**
@@ -264,21 +264,30 @@ public class LoadingSheetData {
 	 */
 	public void setData( Collection<LoadingNodeAndPropertyValues> newdata ) {
 		data.clear();
-		data.addAll( newdata );
+		for ( LoadingNodeAndPropertyValues nap : newdata ) {
+			add( nap );
+		}
+		commit();
+	}
+
+	protected void commit() {
+	}
+
+	protected void iadd( LoadingNodeAndPropertyValues nap ) {
+		long lng = data.size();
+		data.put( lng++, nap );
 	}
 
 	public void add( LoadingNodeAndPropertyValues nap ) {
-		data.add( nap );
+		iadd( nap );
 
 		// add this NAP's label to our cache, if we have it (we should)
-		if ( nap.containsKey( nap.getSubject() ) ) {
-			napcache.add( nap.getSubject() );
-		}
+		cacheNapLabel( nap.getSubject() );
 	}
 
 	public LoadingNodeAndPropertyValues add( String slabel ) {
 		LoadingNodeAndPropertyValues nap = new LoadingNodeAndPropertyValues( slabel );
-		data.add( nap );
+		add( nap );
 		return nap;
 	}
 
@@ -289,19 +298,26 @@ public class LoadingSheetData {
 	}
 
 	public LoadingNodeAndPropertyValues add( String slabel, String olabel ) {
-		cacheNapLabel( slabel );
-		cacheNapLabel( olabel );
 
 		LoadingNodeAndPropertyValues nap
 				= new LoadingNodeAndPropertyValues( slabel, olabel );
+		cacheNapLabel( olabel );
 		add( nap );
 		return nap;
 	}
 
+	/**
+	 * Adds a new nap to the list. This is the preferred way to construct the nap
+	 * @param slabel
+	 * @param olabel
+	 * @param props
+	 * @return 
+	 */
 	public LoadingNodeAndPropertyValues add( String slabel, String olabel,
 			Map<String, Value> props ) {
-		LoadingNodeAndPropertyValues nap = add( slabel, olabel );
-		nap.putAll( props );
+		LoadingNodeAndPropertyValues nap
+				= new LoadingNodeAndPropertyValues( slabel, olabel, props );
+		add( nap );
 		return nap;
 	}
 
@@ -398,12 +414,11 @@ public class LoadingSheetData {
 		LoadingSheetData lsd;
 		if ( model.isRel() ) {
 			lsd = new LoadingSheetData( model.getName(), model.getSubjectType(),
-					model.getObjectType(), model.getRelname(), model.getPropertiesAndDataTypes(),
-					model.isMemOnly() );
+					model.getObjectType(), model.getRelname(), model.getPropertiesAndDataTypes() );
 		}
 		else {
 			lsd = new LoadingSheetData( model.getName(), model.getSubjectType(),
-					model.getPropertiesAndDataTypes(), model.isMemOnly() );
+					model.getPropertiesAndDataTypes() );
 		}
 
 		if ( model.hasModelErrors() ) {
@@ -428,7 +443,17 @@ public class LoadingSheetData {
 
 	public static LoadingSheetData nodesheet( String tabname, String subject,
 			boolean inMemOnly ) {
-		return new LoadingSheetData( tabname, subject, inMemOnly );
+		if ( !inMemOnly ) {
+			try {
+				return new DiskBackedLoadingSheetData( tabname, subject );
+			}
+			catch ( IOException ioe ) {
+				log.warn( "could not create file-based loading sheet", ioe );
+				// just fall through
+			}
+		}
+
+		return new LoadingSheetData( tabname, subject );
 	}
 
 	public static LoadingSheetData relsheet( String subject, String object,
@@ -450,7 +475,19 @@ public class LoadingSheetData {
 
 	public static LoadingSheetData relsheet( String tabname, String subject,
 			String object, String relname, boolean inMemOnly ) {
-		return new LoadingSheetData( tabname, subject, object, relname, inMemOnly );
+
+		if ( !inMemOnly ) {
+			try {
+				return new DiskBackedLoadingSheetData( tabname, subject, object, relname );
+			}
+
+			catch ( IOException ioe ) {
+				log.warn( "could not create file-based loading sheet", ioe );
+				// just fall through
+			}
+		}
+
+		return new LoadingSheetData( tabname, subject, object, relname );
 	}
 
 	public class LoadingNodeAndPropertyValues extends HashMap<String, Value> {
@@ -461,12 +498,30 @@ public class LoadingSheetData {
 		private boolean objectIsError = false;
 
 		public LoadingNodeAndPropertyValues( String subj ) {
-			this( subj, null );
+			this( subj, new HashMap<>() );
 		}
 
 		public LoadingNodeAndPropertyValues( String subject, String object ) {
 			this.subject = subject;
 			this.object = object;
+		}
+
+		/**
+		 * If at all possible, this is the ctor to use
+		 *
+		 * @param subject
+		 * @param object
+		 * @param props
+		 */
+		public LoadingNodeAndPropertyValues( String subject, String object,
+				Map<String, Value> props ) {
+			super( props );
+			this.subject = subject;
+			this.object = object;
+		}
+
+		public LoadingNodeAndPropertyValues( String subject, Map<String, Value> props ) {
+			this( subject, null, props );
 		}
 
 		public String getSubject() {

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -131,6 +132,7 @@ public final class ImportData {
 	 * @see LoadingSheetData#findPropertyLinks(java.util.Collection)
 	 */
 	public void findPropertyLinks() {
+		Logger.getLogger( getClass() ).debug( "looking for property links" );
 		for ( LoadingSheetData sheet : sheets ) {
 			if ( sheet.hasProperties() ) {
 				Set<LoadingSheetData> sheetset = new HashSet<>( sheets );

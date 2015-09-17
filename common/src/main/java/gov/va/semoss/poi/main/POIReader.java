@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openrdf.model.ValueFactory;
@@ -31,6 +33,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -75,7 +78,7 @@ public class POIReader implements ImportFileReader {
 			}
 
 			// second, make "properties" for each column
-			LoadingSheetData nlsd = new LoadingSheetData( sheetname, "A", false );
+			LoadingSheetData nlsd = new LoadingSheetData( sheetname, "A" );
 			for ( int c = 1; c < maxcols; c++ ) {
 				nlsd.addProperty( Integer.toString( c ) );
 			}
@@ -85,16 +88,18 @@ public class POIReader implements ImportFileReader {
 			for ( int r = 0; r <= rows; r++ ) {
 				Row row = sheet.getRow( r );
 				if ( null != row ) {
-					LoadingNodeAndPropertyValues nap
-							= nlsd.add( getString( row.getCell( 0 ) ) );
+					Map<String, Value> propmap = new HashMap<>();
+					
 
 					int lastpropcol = row.getLastCellNum();
 					for ( int c = 1; c <= lastpropcol; c++ ) {
 						String val = getString( row.getCell( c ) );
 						if ( !val.isEmpty() ) {
-							nap.put( Integer.toString( c ), vf.createLiteral( val ) );
+							propmap.put( Integer.toString( c ), vf.createLiteral( val ) );
 						}
 					}
+					
+					nlsd.add( getString( row.getCell( 0 ) ), propmap );
 				}
 			}
 

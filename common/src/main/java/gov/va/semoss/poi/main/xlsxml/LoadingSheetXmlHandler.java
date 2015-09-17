@@ -6,7 +6,6 @@
 package gov.va.semoss.poi.main.xlsxml;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
-import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +69,7 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 		namespaces = ns;
 
 		// this will automatically convert to a relationship sheet if needed
-		loadingsheet = LoadingSheetData.nodesheet( sheetname, "", true );
+		loadingsheet = LoadingSheetData.nodesheet( sheetname, "", false );
 	}
 
 	public LoadingSheetData getSheet() {
@@ -207,16 +206,18 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 		}
 
 		rowdata.remove( 0 );
-		LoadingNodeAndPropertyValues nap = sheet.add( rowdata.remove( 1 ).stringValue() );
-
+		String slabel = rowdata.remove( 1 ).stringValue();
+		String olabel = null;
 		if ( sheet.isRel() && rowdata.containsKey( 2 ) ) {
-			String obj = rowdata.remove( 2 ).stringValue();
-			nap.setObject( obj );
+			olabel = rowdata.remove( 2 ).stringValue();
 		}
 
+		Map<String, Value> props = new HashMap<>();
 		for ( Map.Entry<Integer, Value> en : rowdata.entrySet() ) {
-			nap.put( proplkp.get( en.getKey() ), en.getValue() );
+			props.put( proplkp.get( en.getKey() ), en.getValue() );
 		}
+
+		sheet.add( slabel, olabel, props );
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 			if ( col > commentcol ) {
 				removers.add( col );
 			}
-			
+
 			if ( val.startsWith( "#" ) ) {
 				commentcol = col;
 				removers.add( col );
@@ -251,12 +252,13 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 	@Override
 	public void endDocument() throws SAXException {
 		super.endDocument();
+		loadingsheet.finishLoading();
 
 		if ( log.isDebugEnabled() ) {
 			log.debug( "Loading sheet " + loadingsheet.getName()
 					+ " processed. properties: "
 					+ Arrays.toString( loadingsheet.getProperties().toArray() ) );
-			log.debug( "Created " + loadingsheet.getData().size()
+			log.debug( "Created " + loadingsheet.rows()
 					+ ( loadingsheet.isRel() ? " relationships" : " entities" ) );
 		}
 	}
