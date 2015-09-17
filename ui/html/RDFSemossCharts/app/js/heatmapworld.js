@@ -24,6 +24,12 @@ function start(data) {
 	valueArray.sort(function(a, b) { return a - b; });
 	setColorScale(valueArray);
 	
+	$('#resetPanZoomBtn').click( function() {
+		var originalMatrix = [1,0,0,1,0,0];
+		setMatrixForSel(mapSel, originalMatrix);
+		pan(0, 65, mapSel);
+	});
+	
 	initVisualization();
 
 	initSlider('slider', valueArray, updateVisualization);
