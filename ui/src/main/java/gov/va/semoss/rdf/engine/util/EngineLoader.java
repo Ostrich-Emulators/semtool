@@ -6,10 +6,6 @@
 package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.rdf.engine.edgemodelers.EdgeModeler;
-import com.bigdata.rdf.sail.BigdataSail;
-import com.bigdata.rdf.sail.remote.BigdataSailFactory;
-import com.bigdata.rdf.sail.BigdataSailRepository;
-import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -65,10 +60,15 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.openrdf.sail.helpers.NotifyingSailBase;
+import org.openrdf.sail.memory.MemoryStore;
+import org.openrdf.sail.nativerdf.NativeStore;
 
 /**
  * A class to handle loading files to an existing engine
@@ -133,27 +133,23 @@ public class EngineLoader {
 	private RepositoryConnection initForLoad()
 			throws RepositoryException, IOException {
 
-		BigdataSailRepository repo;
-		Properties props = new Properties();
-		props.setProperty( BigdataSail.Options.BUFFER_CAPACITY, "50000" );
-		props.setProperty( BigdataSail.Options.INITIAL_EXTENT, "10485760" );
+		Repository repo = null;
+
+		NotifyingSailBase store = null;
 		if ( stageInMemory ) {
-			repo = BigdataSailFactory.createRepository( props,
-					(BigdataSailFactory.Option) null );
+			store = new MemoryStore();
 		}
 		else {
 			stagingdir = File.createTempFile( "semoss-staging-", "" );
 			stagingdir.delete(); // get rid of the file, and make it a directory
 			stagingdir.mkdirs();
 			log.debug( "staging load in: " + stagingdir );
-
-			String jnl = new File( stagingdir, "stage.jnl" ).getAbsolutePath();
-			repo = BigdataSailFactory.createRepository( props, jnl,
-					(BigdataSailFactory.Option) null );
+			store = new NativeStore( stagingdir, "spoc" );
 		}
 
+		repo = new SailRepository( store );
 		repo.initialize();
-		BigdataSailRepositoryConnection rc = repo.getConnection();
+		RepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
 		return rc;
 	}
@@ -385,23 +381,38 @@ public class EngineLoader {
 		namespaces.putAll( metas.getNamespaces() );
 		EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 
-		if ( sheet.isRel() ) {
-			Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
-			while ( lit.hasNext() ) {
-				LoadingNodeAndPropertyValues nap = lit.next();
-				modeler.addRel( nap, namespaces, sheet, metas, myrc );
-				nap.clear();
-				lit.remove();
+		try {
+			myrc.begin();
+			if ( sheet.isRel() ) {
+				Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
+				while ( lit.hasNext() ) {
+					LoadingNodeAndPropertyValues nap = lit.next();
+					modeler.addRel( nap, namespaces, sheet, metas, myrc );
+					nap.clear();
+					lit.remove();
+				}
 			}
+			else {
+				Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
+				while ( lit.hasNext() ) {
+					LoadingNodeAndPropertyValues nap = lit.next();
+					modeler.addNode( nap, namespaces, sheet, metas, myrc );
+					nap.clear();
+					lit.remove();
+				}
+			}
+			myrc.commit();
+
 		}
-		else {
-			Iterator<LoadingNodeAndPropertyValues> lit = sheet.getDataIterator();
-			while ( lit.hasNext() ) {
-				LoadingNodeAndPropertyValues nap = lit.next();
-				modeler.addNode( nap, namespaces, sheet, metas, myrc );
-				nap.clear();
-				lit.remove();
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+			try {
+				myrc.rollback();
 			}
+			catch ( RepositoryException rex ) {
+				log.warn( rex, rex );
+			}
+			throw re;
 		}
 
 		sheet.release();
