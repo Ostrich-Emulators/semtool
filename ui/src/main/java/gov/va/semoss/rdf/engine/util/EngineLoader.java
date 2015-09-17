@@ -82,7 +82,7 @@ public class EngineLoader {
 			= new HashMap<>();
 	private final boolean stageInMemory;
 	private final List<Statement> owls = new ArrayList<>();
-	private BigdataSailRepositoryConnection myrc;
+	private RepositoryConnection myrc;
 	private File stagingdir;
 	private final ValueFactory vf;
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
@@ -130,12 +130,12 @@ public class EngineLoader {
 		extReaderLkp.put( extension, rdr );
 	}
 
-	private BigdataSailRepositoryConnection initForLoad()
+	private RepositoryConnection initForLoad()
 			throws RepositoryException, IOException {
 
 		BigdataSailRepository repo;
 		Properties props = new Properties();
-		props.setProperty( BigdataSail.Options.BUFFER_CAPACITY, "100000" );
+		props.setProperty( BigdataSail.Options.BUFFER_CAPACITY, "50000" );
 		props.setProperty( BigdataSail.Options.INITIAL_EXTENT, "10485760" );
 		if ( stageInMemory ) {
 			repo = BigdataSailFactory.createRepository( props,
@@ -403,7 +403,7 @@ public class EngineLoader {
 				lit.remove();
 			}
 		}
-		
+
 		sheet.release();
 	}
 
