@@ -17,6 +17,7 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.ui.helpers.StatementsSizeGuesser;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
@@ -39,6 +40,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
@@ -131,9 +133,40 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				checkOk();
 			}
 		};
+		DocumentListener dl2 = new DocumentListener() {
+
+			@Override
+			public void insertUpdate( DocumentEvent e ) {
+				check();
+			}
+
+			@Override
+			public void removeUpdate( DocumentEvent e ) {
+				check();
+			}
+
+			@Override
+			public void changedUpdate( DocumentEvent e ) {
+				check();
+			}
+
+			private void check() {
+				if ( StatementsSizeGuesser.shouldUseDisk( file.getFiles() ) ) {
+					diskStaging.setSelected( true );
+				}
+
+				File firstfile = file.getFirstFile();
+				String dbnamer = ( null == dbname.getText() ? "" : dbname.getText() );
+				if ( null != firstfile && dbnamer.isEmpty() ) {
+					dbname.setText( FilenameUtils.getBaseName( firstfile.getName() ) );
+				}
+
+			}
+		};
 
 		dbname.getDocument().addDocumentListener( dl );
 		dbdir.addDocumentListener( dl );
+		file.addDocumentListener( dl2 );
 
 		SemossPreferences vc = SemossPreferences.getInstance();
 		calcInfers.setSelected( PlayPane.

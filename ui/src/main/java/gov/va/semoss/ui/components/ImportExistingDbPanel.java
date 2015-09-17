@@ -30,6 +30,7 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.ui.actions.OpenAction.FileHandling;
+import gov.va.semoss.ui.helpers.StatementsSizeGuesser;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.MultiMap;
@@ -37,6 +38,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -71,6 +74,33 @@ public class ImportExistingDbPanel extends JPanel {
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "N3 Files", "n3" ) );
 		chsr.setFileFilter( FileBrowsePanel.getAllImportTypesFilter() );
 
+		
+				DocumentListener dl = new DocumentListener() {
+
+			@Override
+			public void insertUpdate( DocumentEvent e ) {
+				check();
+			}
+
+			@Override
+			public void removeUpdate( DocumentEvent e ) {
+				check();
+			}
+
+			@Override
+			public void changedUpdate( DocumentEvent e ) {
+				check();
+			}
+
+			private void check() {
+				if ( StatementsSizeGuesser.shouldUseDisk( file.getFiles() ) ) {
+					diskStaging.setSelected( true );
+				}
+			}
+		};
+
+		file.addDocumentListener( dl );
+		
 		setEngine( eng );
 
 		SemossPreferences vc = SemossPreferences.getInstance();
