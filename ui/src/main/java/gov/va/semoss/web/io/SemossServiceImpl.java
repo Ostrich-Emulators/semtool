@@ -24,7 +24,7 @@ public class SemossServiceImpl implements SemossService {
 
 	@Override
 	public String databases() {
-		return root + "/databases";
+		return root + "/databases/";
 	}
 
 	@Override

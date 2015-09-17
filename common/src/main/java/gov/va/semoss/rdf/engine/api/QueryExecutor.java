@@ -11,7 +11,7 @@ import org.openrdf.query.BindingSet;
  * @author ryan
  * @param <T> what gets returned after the execution of the query
  */
-public interface QueryExecutor<T> extends Bindable{
+public interface QueryExecutor<T> extends Bindable {
 
 	/**
 	 * Handles one tuple during the query execution. Generally, this will be the

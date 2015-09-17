@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
+import gov.va.semoss.model.vocabulary.ARG;
 import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
@@ -23,7 +24,7 @@ import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.UriSanitizer;
 
-import info.aduna.iteration.Iterations;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,7 +47,9 @@ import org.openrdf.query.Update;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -87,6 +90,13 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 				rc.add( InsightManagerImpl.getStatements( p, author ) );
 			}
 
+			try ( FileWriter fw = new FileWriter( "/tmp/y.nt" ) ) {
+				rc.export( new NTriplesWriter( fw ) );
+			}
+			catch ( Exception e ) {
+				log.error( e, e );
+			}
+
 			rc.commit();
 		}
 		catch ( Exception e ) {
@@ -101,43 +111,30 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	}
 
 	private void removeOldData() throws RepositoryException {
-		// remove Perspectives, Insights, and Parameters, 
-		// but also the things they depend on, like slots, constraints, indexes
-		Set<Resource> idsToRemove = new HashSet<>();
-
-		// remove subjects that have these objects
-		URI objectsToRemove[] = new URI[]{
-			VAS.Perspective,
-			VAS.InsightProperties
-		};
-
-		for ( URI obj : objectsToRemove ) {
-			for ( Statement s : Iterations.asList( rc.getStatements( null, null, obj, true ) ) ) {
-				idsToRemove.add( s.getSubject() );
+		// basically, anything in the insights or arg namespaces is insight data
+		Set<String> namespacesToRemove
+				= new HashSet<>( Arrays.asList( MetadataConstants.VA_INSIGHTS_NS, ARG.NAMESPACE ) );
+		RepositoryResult<Statement> it = rc.getStatements( null, null, null, false );
+		List<Statement> removers = new ArrayList<>();
+		while ( it.hasNext() ) {
+			Statement s = it.next();
+			Resource rsr = s.getSubject();
+			if ( rsr instanceof URI ) {
+				if ( namespacesToRemove.contains( URI.class.cast( rsr ).getNamespace() ) ) {
+					removers.add( s );
+				}
 			}
 		}
 
-		// remove subjects that have these predicates
-		URI predsToRemove[] = new URI[]{
-			SPIN.constraint,
-			SPIN.body,
-			OLO.slot,
-			OLO.index,
-			OLO.item,
-			SPL.predicate,
-			SP.text,
-			SP.query,
-			SP.Construct
-		};
-		for ( URI pred : predsToRemove ) {
-			for ( Statement s : Iterations.asList( rc.getStatements( null, pred, null, true ) ) ) {
-				idsToRemove.add( s.getSubject() );
-			}
+		rc.remove( removers );
+
+		try ( FileWriter fw = new FileWriter( "/tmp/x.nt" ) ) {
+			rc.export( new NTriplesWriter( fw ) );
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
 		}
 
-		for ( Resource r : idsToRemove ) {
-			rc.remove( r, null, null );
-		}
 	}
 
 	@Override
@@ -281,13 +278,13 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		try {
 			rc.begin();
 			rc.remove( p.getId(), null, null );
-			
-			Collection<Statement> stmts = getPerspectiveStatements( p, vf, 
-					UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS ), 
+
+			Collection<Statement> stmts = getPerspectiveStatements( p, vf,
+					UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS ),
 					author );
-			
+
 			rc.add( stmts );
-					
+
 			rc.commit();
 		}
 		catch ( Exception e ) {

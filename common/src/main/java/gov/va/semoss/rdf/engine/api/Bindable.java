@@ -8,7 +8,6 @@ package gov.va.semoss.rdf.engine.api;
 import java.util.Date;
 import java.util.Map;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.Operation;
@@ -18,6 +17,7 @@ import org.openrdf.query.Operation;
  * @author ryan
  */
 public interface Bindable {
+
 	public void setSparql( String sparql );
 
 	/**
@@ -36,8 +36,6 @@ public interface Bindable {
 	 * @param localname a string representation of the URI localname
 	 */
 	public Bindable bindURI( String var, String basename, String localname );
-
-	public Bindable bind( String var, URI uri );
 
 	/**
 	 * Binds a string literal to a variable, without a language tag
@@ -113,4 +111,24 @@ public interface Bindable {
 
 	public void removeNamespace( String prefix );
 
+	/**
+	 * Resets all the bindings to the given map
+	 *
+	 * @param source the source of the bindings
+	 */
+	public void setBindings( Map<String, Value> vals );
+
+	/**
+	 * Copies all the bindings from the given map into this one
+	 *
+	 * @param source the source of the bindings
+	 */
+	public void addBindings( Map<String, Value> vals );
+
+	/**
+	 * Gets a mapping of variables to values
+	 *
+	 * @return the mapping
+	 */
+	public Map<String, Value> getBindingMap();
 }

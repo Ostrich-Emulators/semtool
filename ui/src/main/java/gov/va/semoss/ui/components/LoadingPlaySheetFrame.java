@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.components;
 
+import gov.va.semoss.om.Insight;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
@@ -188,12 +189,13 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 	}
 
 	@Override
-	public ProgressTask getCreateTask( String s ) {
+	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ) {
 		return getLoadingTask();
 	}
 
 	@Override
-	public ProgressTask getOverlayTask( String query, IEngine engine, String titleIfNeeded ) {
+	public ProgressTask getOverlayTask( Insight insight, Map<String, Value> bindings,
+			String tabTitleIfNeeded ) {
 		return getLoadingTask();
 	}
 

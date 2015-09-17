@@ -36,9 +36,7 @@ import gov.va.semoss.ui.components.playsheets.SankeyPlaySheet;
 import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
 
@@ -99,6 +97,10 @@ public enum PlaySheetEnum {
 		return this.sheetHint;
 	}
 
+	public boolean needsSparql() {
+		return !AppDupeHeatMapSheet.class.equals( sheetClass );
+	}
+
 	/**
 	 * Gets a PlaySheetEnum for the given Insight. If this insight's
 	 * {@link Insight#getOutput()} returns an unknown playsheet, this function
@@ -109,7 +111,7 @@ public enum PlaySheetEnum {
 	 * @return
 	 */
 	public static PlaySheetEnum valueFor( Insight ins ) {
-		if ( null == ins.getOutput() ) {
+		if ( null == ins || null == ins.getOutput() ) {
 			return PlaySheetEnum.Update_Query;
 		}
 

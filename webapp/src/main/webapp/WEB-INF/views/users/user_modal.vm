@@ -1,0 +1,53 @@
+<div id="semoss_user_modal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">User Detail</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="semossInstanceUserName">User Name</label> 
+					<input ng-model="activeInstance.username"
+						type="text" class="form-control instance_field string_field" id="semossInstanceUserName"
+						placeholder="The user id for SEMOSS">
+				</div>
+				<div class="form-group">
+					<label for="semossInstanceEmail">Email</label> 
+					<input  ng-model="activeInstance.email"
+						type="text" class="instance_field string_field form-control" id="semossInstanceEmail"
+						placeholder="john@va.gov">
+				</div>
+				
+				<div class="form-group">
+					<label for="semossInstanceRoleName">Role</label> 
+					<input ng-model="activeInstance.roleName"
+						type="text" class="form-control instance_field string_field" id="semossInstanceRoleName"
+						placeholder="The Role of the User">
+				</div>
+				<div class="form-group">
+					<input  ng-model="activeInstance.role"
+						type="text" class="instance_field string_field form-control" id="semossInstanceRole">
+				</div>
+						
+				<div class="form-group">
+					<label for="semossInstanceDisplayName">Display Name</label> 
+					<input  ng-model="activeInstance.displayName"
+						type="text" class="instance_field string_field form-control" id="semossInstanceDisplayName"
+						placeholder="The Display Name for the User">
+				</div>				
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button ng-if="mode=='edit'" type="button" class="btn btn-primary update_instance_button" ng-click="update()" >Save changes</button>
+				<button ng-if="mode=='create'" type="button" class="btn btn-primary create_instance_button" ng-click="create()" >Create</button>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
