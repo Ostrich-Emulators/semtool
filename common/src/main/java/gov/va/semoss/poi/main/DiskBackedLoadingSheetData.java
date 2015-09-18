@@ -157,11 +157,13 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 	@Override
 	public DataIterator iterator() {
-		try {
-			return new CacheIterator();
-		}
-		catch ( IOException ioe ) {
-			log.warn( "cannot access backing file in iterator", ioe );
+		if ( backingfile.exists() ) {
+			try {
+				return new CacheIterator();
+			}
+			catch ( IOException ioe ) {
+				log.warn( "cannot access backing file in iterator", ioe );
+			}
 		}
 		return super.iterator();
 	}
@@ -302,12 +304,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		private LoadingNodeAndPropertyValues current;
 
 		public CacheIterator() throws IOException {
-			if ( backingfile.exists() ) {
-				reader = new BufferedReader( new FileReader( backingfile ) );
-			}
-			else {
-				reader = null;
-			}
+			reader = new BufferedReader( new FileReader( backingfile ) );
 		}
 
 		@Override
