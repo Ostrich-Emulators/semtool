@@ -137,19 +137,21 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	@Override
 	protected void commit() {
 		// flush everything to our backing file
-		try ( BufferedWriter writer
-				= new BufferedWriter( new FileWriter( backingfile, true ) ) ) {
-			DataIterator it = super.iterator();
-			while ( it.hasNext() ) {
-				writer.write( oxm.writeValueAsString( it.next() ) );
-				writer.newLine();
-				it.remove();
-			}
+		if ( opsSinceLastCommit > 0 ) {
+			try ( BufferedWriter writer
+					= new BufferedWriter( new FileWriter( backingfile, true ) ) ) {
+				DataIterator it = super.iterator();
+				while ( it.hasNext() ) {
+					writer.write( oxm.writeValueAsString( it.next() ) );
+					writer.newLine();
+					it.remove();
+				}
 
-			opsSinceLastCommit = 0;
-		}
-		catch ( IOException ioe ) {
-			log.warn( "loading sheet internal commit failed", ioe );
+				opsSinceLastCommit = 0;
+			}
+			catch ( IOException ioe ) {
+				log.warn( "loading sheet internal commit failed", ioe );
+			}
 		}
 	}
 
@@ -344,11 +346,6 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 					// from memory until we're out of data
 					hasnext = memoryiter.hasNext();
 				}
-			}
-
-			// if we're totally empty, release anything we're still holding onto
-			if ( !hasnext ) {
-				release();
 			}
 
 			return hasnext;

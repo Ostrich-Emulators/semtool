@@ -698,7 +698,7 @@ public class LoadingSheetData {
 
 	public class DataIteratorImpl implements DataIterator {
 
-		private Iterator<LoadingNodeAndPropertyValues> iter = data.iterator();
+		private final Iterator<LoadingNodeAndPropertyValues> iter = data.iterator();
 
 		@Override
 		public void release() {
@@ -707,16 +707,23 @@ public class LoadingSheetData {
 
 		@Override
 		public boolean hasNext() {
-			return iter.hasNext();
+			boolean hasnext = iter.hasNext();
+			
+			// if we're totally empty, release anything we're still holding onto
+			if ( !hasnext ) {
+				release();
+			}
+			
+			return hasnext;
 		}
 
 		@Override
 		public LoadingNodeAndPropertyValues next() {
 			return iter.next();
 		}
-		
+
 		@Override
-		public void remove(){
+		public void remove() {
 			iter.remove();
 		}
 	}
