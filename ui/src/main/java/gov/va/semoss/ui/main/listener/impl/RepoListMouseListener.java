@@ -41,6 +41,7 @@ import gov.va.semoss.ui.actions.MergeAction;
 import gov.va.semoss.ui.actions.MountAction;
 import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
+import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.PlayPane;
 import static gov.va.semoss.ui.components.PlayPane.UIPROGRESS;
 import java.awt.event.KeyEvent;
@@ -54,6 +55,7 @@ public class RepoListMouseListener extends MouseAdapter {
 	private static final Logger log = Logger.getLogger(
 			RepoListMouseListener.class );
 
+	private final DbAction unmounter;
 	private final RepositoryList repoList;
 	private IEngine opEngine;
 	private final ImportLoadingSheetAction importls;
@@ -79,6 +81,7 @@ public class RepoListMouseListener extends MouseAdapter {
 	private final ImportInsightsAction resetInsights;
 	private final ImportInsightsAction importInsights;
 	private final CheckConsistencyAction consistencyCheck;
+	
 
 	public RepoListMouseListener( RepositoryList repos ) {
 		repoList = repos;
@@ -116,7 +119,7 @@ public class RepoListMouseListener extends MouseAdapter {
 		importInsights = new ImportInsightsAction( UIPROGRESS, false, frame );
 
 		consistencyCheck = new CheckConsistencyAction( UIPROGRESS, frame );
-
+		unmounter = new  UnmountAction(  frame, "Close DB"  );
 		mergeroot = new JMenu( MERGE );
 	}
 
@@ -155,7 +158,7 @@ public class RepoListMouseListener extends MouseAdapter {
 		JPopupMenu db = new JPopupMenu();
 
 		if ( null != engine ) {
-			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner, clearer, 
+			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner, clearer, unmounter,
 				exportttl, exportnt, exportrdf, exportinsights, importls, mounter, 
 				expnodes, exprels, expSpecNodes, expSpecRels, expall, creater, 
 				resetInsights, importInsights, consistencyCheck, expgraphml, expgson } ) {
@@ -218,7 +221,7 @@ public class RepoListMouseListener extends MouseAdapter {
 			loadingsheets.add( expall );
 			exptop.add( exportinsights );
 			
-			JMenu gexp = new JMenu( "Graph" );
+			JMenu gexp = new JMenu( "Graph 234" );
 			gexp.add( expgraphml );
 			gexp.add( expgson );
 			
@@ -260,6 +263,9 @@ public class RepoListMouseListener extends MouseAdapter {
 
 			db.add( cloner );
 			db.add( clearer );
+
+			
+			db.add( unmounter );
 			db.addSeparator();
 
 			db.add( proper );

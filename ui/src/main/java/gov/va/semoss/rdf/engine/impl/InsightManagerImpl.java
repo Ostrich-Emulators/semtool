@@ -23,9 +23,6 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.model.vocabulary.OLO;
@@ -36,18 +33,15 @@ import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
-import gov.va.semoss.om.PlaySheet;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
-import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.user.User;
-import gov.va.semoss.util.DefaultPlaySheetIcons;
 import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.UriBuilder;
 
@@ -737,12 +731,12 @@ public class InsightManagerImpl implements InsightManager {
 
 		// add the dataview objects, too (these'll be added multiple times, but
 		// all the values will be identical)
-		PlaySheetEnum pse = PlaySheetEnum.valueFor( insight );
+		PlaySheetEnum pse = PlaySheetEnum.valueForInsight( insight );
 		statements.add( new StatementImpl( outputuri, RDF.TYPE, UI.dataView ) );
 		statements.add( new StatementImpl( outputuri, UI.viewClass,
 				vf.createLiteral( insight.getOutput() ) ) );
 		statements.add( new StatementImpl( outputuri, VAS.icon,
-				vf.createLiteral( DefaultPlaySheetIcons.getDefaultIconName( pse ) ) ) );
+				vf.createLiteral( pse.getSheetIconName() ) ) );
 		statements.add( new StatementImpl( outputuri, RDFS.LABEL,
 				vf.createLiteral( pse.getDisplayName() ) ) );
 
