@@ -53,7 +53,6 @@ import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.DefaultPlaySheetIcons;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -289,8 +288,8 @@ public class PlayPane extends JFrame {
 		VocabularyRegistry.registerVocabulary( "va-semoss",
 				getClass().getResource( "/models/va-semoss.ttl" ), true );
 
-		PlaySheetCentralComponent.setDefaultIcons( DefaultPlaySheetIcons.defaultIcons );
-
+		PlaySheetCentralComponent.setDefaultIcons();
+		
 		setSize( new Dimension( 1024, 768 ) );
 		if ( "".equals( wloc ) ) {
 			setExtendedState( Frame.MAXIMIZED_BOTH );
