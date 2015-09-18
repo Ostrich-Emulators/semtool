@@ -96,6 +96,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		super( tabtitle, sType, oType, relname, props );
 
 		backingfile = File.createTempFile( tabtitle + "-", ".lsdata" );
+		backingfile.delete(); // don't keep a file hanging around until we need to
 		log.debug( "backing file is: " + backingfile );
 		SimpleModule sm = new SimpleModule();
 		sm.addSerializer( LoadingNodeAndPropertyValues.class, new NapSerializer() );
