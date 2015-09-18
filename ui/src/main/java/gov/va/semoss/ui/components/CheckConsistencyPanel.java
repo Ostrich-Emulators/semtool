@@ -66,8 +66,6 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
 	}
 
 	public void setEngine( IEngine eng ) {
-		final DBToLoadingSheetExporter exporter = new DBToLoadingSheetExporter( eng );
-
 		QaChecker checker = new QaChecker( eng );
 		
 		conceptmodellist.clear();
@@ -81,6 +79,8 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
 
 		Map<URI, String> rs = MultiMap.lossyflip( checker.getCache( CacheType.RELATIONCLASS ) );
 		rs = Utility.sortUrisByLabel( rs );
+		
+		checker.release();
 
 		conceptmodellist.addAll( cs.keySet() );
 		relationmodellist.addAll( rs.keySet() );

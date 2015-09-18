@@ -3,33 +3,32 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.poi.main;
+package gov.va.semoss.poi.main.xlsxml;
 
-import java.util.ArrayList;
+import gov.va.semoss.poi.main.ImportValidationException;
+import gov.va.semoss.poi.main.SheetType;
+import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * An XML parser that tries to figure out a sheet's type
  *
  * @author ryan
  */
-public class SheetTypeXmlHandler extends DefaultHandler {
+public class SheetTypeXmlHandler extends XlsXmlBase {
 
 	private static final Logger log = Logger.getLogger( SheetTypeXmlHandler.class );
-	private final ArrayList<String> sst;
-	private String lastContents;
 	private int rownum;
 	private int colnum;
 	private SheetType sheettype = null;
-	private boolean reading = false;
 	private boolean isstring = false;
 	private boolean skipping = false;
 
-	public SheetTypeXmlHandler( ArrayList<String> sst ) {
-		this.sst = sst;
+	public SheetTypeXmlHandler( List<String> sst ) {
+		super( sst );
 	}
 
 	public SheetType getSheetType() {
@@ -65,8 +64,8 @@ public class SheetTypeXmlHandler extends DefaultHandler {
 				break;
 
 			case "v": // new value for a cell
-				reading = ( isstring && 0 == colnum );
-				lastContents = "";
+				setReading( isstring && 0 == colnum );
+				resetContents();
 				break;
 		}
 
@@ -79,13 +78,14 @@ public class SheetTypeXmlHandler extends DefaultHandler {
 			return;
 		}
 
-		if ( reading ) {
-			reading = false;
+		if ( isReading() ) {
+			setReading( false );
 			skipping = true;
 
 			boolean ok = false;
+			String contents = getStringFromContentsInt();
+			String val = decomment( contents );
 			try {
-				String val = decomment( sst.get( Integer.parseInt( lastContents ) ) );
 				sheettype = SheetType.valueOf( val.toUpperCase() );
 				ok = ( SheetType.METADATA == sheettype || SheetType.NODE == sheettype
 						|| SheetType.RELATION == sheettype );
@@ -96,17 +96,10 @@ public class SheetTypeXmlHandler extends DefaultHandler {
 
 			if ( !ok ) {
 				throw new ImportValidationException( ImportValidationException.ErrorType.INVALID_TYPE,
-						"Cell A1 must be one of: \"Relation\", \"Node\", or \"Metadata\"" );
+						"Cell A1 must be one of: \"Relation\", \"Node\", or \"Metadata\" (was:"
+						+ val + ")" );
 
 			}
-		}
-	}
-
-	@Override
-	public void characters( char[] ch, int start, int length )
-			throws SAXException {
-		if ( reading ) {
-			lastContents += new String( ch, start, length );
 		}
 	}
 

@@ -340,6 +340,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		return errors;
 	}
 
+	@Override
+	protected void onFrameClose() {
+		realtimer.release();
+		super.onFrameClose();
+	}
+
 	private IEngine askForEngine( String title ) {
 
 		RepositoryList repos = new RepositoryList();
@@ -411,6 +417,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			if ( importdata.isEmpty() ) {
 				JOptionPane.showMessageDialog( rootPane, "No data to load",
 						"Nothing to Do", JOptionPane.INFORMATION_MESSAGE );
+				importdata.release();
 				return;
 			}
 
@@ -458,6 +465,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 								engine.calculateInferences();
 							}
 
+							importdata.release();
 							LoadingPlaySheetFrame.this.dispose();
 						}
 						catch ( RepositoryException | IOException | ImportValidationException e ) {

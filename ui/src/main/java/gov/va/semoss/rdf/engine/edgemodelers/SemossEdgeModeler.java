@@ -28,9 +28,6 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 	private static final Logger log = Logger.getLogger( SemossEdgeModeler.class );
 
-	public SemossEdgeModeler() {
-	}
-
 	public SemossEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}

@@ -130,6 +130,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 				baseuri = getNewBaseUri();
 				//rc.begin();
 				rc.add( baseuri, RDF.TYPE, VAS.Database );
+				//rc.add(  baseuri, VAS.ReificationModel, VAS.VASEMOSS_Reification );
 				//rc.commit();
 			}
 

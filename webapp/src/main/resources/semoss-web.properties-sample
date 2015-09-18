@@ -7,6 +7,9 @@
 #     or   rdfstore=:memory:./database (in-memory database, persisted at ./database)
 # for testing, the :memory:/tmp/x1 style is probably easiest. For production, 
 # a remote database is the most reliable.
+#
+# NOTE: if you use the :memory: options, the database will get created 
+# inside the directory you specify for rdfstore
 rdfstore=:memory:/home/ryan/devl/semoss-database
 ldap.url=ldap://127.0.0.1:10389
 ldap.userDn=uid=admin,ou=system

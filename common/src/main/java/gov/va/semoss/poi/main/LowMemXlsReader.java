@@ -5,7 +5,12 @@
  */
 package gov.va.semoss.poi.main;
 
+import gov.va.semoss.poi.main.xlsxml.LoadingSheetXmlHandler;
+import gov.va.semoss.poi.main.xlsxml.SheetTypeXmlHandler;
+import gov.va.semoss.poi.main.xlsxml.LoaderTabXmlHandler;
+import gov.va.semoss.poi.main.xlsxml.MetadataTabXmlHandler;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
+import gov.va.semoss.poi.main.xlsxml.XlsXmlBase;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedInputStream;
@@ -18,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
@@ -36,7 +42,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
@@ -49,14 +54,14 @@ public class LowMemXlsReader {
 	private static final Logger log = Logger.getLogger( LowMemXlsReader.class );
 
 	private final LinkedHashMap<String, String> sheetNameIdLkp;
-	private final ArrayList<String> sharedStrings;
+	private final List<String> sharedStrings;
 	private final XSSFReader reader;
 	private final OPCPackage pkg;
 	private final StylesTable styles;
+	private boolean lsInMem = false;
 
 	public LowMemXlsReader( File filename ) throws IOException {
 		this( new BufferedInputStream( new FileInputStream( filename ) ) );
-		log.debug( "lo-mem xls reader: " + filename.getAbsolutePath() );
 	}
 
 	public LowMemXlsReader( String filename ) throws IOException {
@@ -64,6 +69,8 @@ public class LowMemXlsReader {
 	}
 
 	public LowMemXlsReader( InputStream stream ) throws IOException {
+		log.debug( "reading with lo-mem xls reader" );
+		sharedStrings = new ArrayList<>();
 		try {
 			pkg = OPCPackage.open( stream );
 			reader = new XSSFReader( pkg );
@@ -71,11 +78,15 @@ public class LowMemXlsReader {
 			styles = reader.getStylesTable();
 
 			sheetNameIdLkp = readSheetInfo( reader );
-			sharedStrings = readSharedStrings( reader );
+			populateSharedStrings( reader );
 		}
 		catch ( OpenXML4JException e ) {
 			throw new IOException( "unexpected error" + e.getLocalizedMessage(), e );
 		}
+	}
+
+	public void keepSheetDataInMemory( boolean b ) {
+		lsInMem = b;
 	}
 
 	/**
@@ -247,7 +258,7 @@ public class LowMemXlsReader {
 					if ( SheetType.NODE == sheettype || SheetType.RELATION == sheettype ) {
 						LoadingSheetXmlHandler handler
 								= new LoadingSheetXmlHandler( sharedStrings, styles, sheetname,
-										id.getMetadata().getNamespaces() );
+										id.getMetadata().getNamespaces(), lsInMem );
 						parser.setContentHandler( handler );
 
 						InputSource sheetSource = new InputSource( is );
@@ -310,33 +321,39 @@ public class LowMemXlsReader {
 		return map;
 	}
 
-	private ArrayList<String> readSharedStrings( XSSFReader r ) {
-		ArrayList<String> map = new ArrayList<>();
+	private void populateSharedStrings( XSSFReader r ) {
 
 		try ( InputStream is = r.getSharedStringsData() ) {
 			XMLReader parser = XMLReaderFactory.createXMLReader();
-			ContentHandler handler = new DefaultHandler() {
-				String content;
-				boolean reading = false;
+			ContentHandler handler = new XlsXmlBase( new ArrayList<>() ) {
+				int count = 0;
 
 				@Override
-				public void startElement( String uri, String localName, String qName, Attributes atts ) throws SAXException {
-					reading = ( "t".equals( localName ) );
-					content = "";
+				public void startDocument() throws SAXException {
+					super.startDocument();
+					count = 0;
 				}
 
 				@Override
-				public void endElement( String uri, String localName, String qName ) throws SAXException {
-					if ( reading ) {
-						map.add( content );
-						reading = false;
-					}
+				public void endDocument() throws SAXException {
+					super.endDocument();
+					log.debug( count + " strings cached" );
 				}
 
 				@Override
-				public void characters( char[] ch, int start, int length ) throws SAXException {
-					if ( reading ) {
-						content += new String( ch, start, length );
+				public void startElement( String uri, String localName, String qName,
+						Attributes atts ) throws SAXException {
+					setReading( "t".equals( localName ) );
+					resetContents();
+				}
+
+				@Override
+				public void endElement( String uri, String localName, String qName )
+						throws SAXException {
+					if ( isReading() ) {
+						sharedStrings.add( getContents() );
+						setReading( false );
+						count++;
 					}
 				}
 			};
@@ -346,7 +363,5 @@ public class LowMemXlsReader {
 		catch ( Exception e ) {
 			log.error( e, e );
 		}
-
-		return map;
 	}
 }

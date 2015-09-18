@@ -17,6 +17,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
+import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DeterministicSanitizer;
@@ -37,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
@@ -157,7 +159,7 @@ public class EngineLoaderTest {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		BigDataEngine eng = new BigDataEngine(props);
+		BigDataEngine eng = new BigDataEngine( props );
 		eng.setDataBuilder( data );
 		eng.setSchemaBuilder( schema );
 		return eng;
@@ -181,6 +183,20 @@ public class EngineLoaderTest {
 	@Before
 	public void setUp() throws Exception {
 		engine = new InMemorySesameEngine();
+		engine.setEngineName( "engine loader tester" );
+
+		try( FileWriter fw = new FileWriter("/tmp/gw.nt" )){
+			engine.getRawConnection().export( new NTriplesWriter( fw ) );
+		}
+		
+		MetadataQuery mq = new MetadataQuery();
+		engine.query( mq );
+		for ( Map.Entry<URI, Value> en : mq.getResults().entrySet() ) {
+			log.debug( en.getKey() + "-->" + en.getValue() );
+		}
+
+		log.debug( EngineUtil.getReificationStyle( engine ) );
+
 	}
 
 	@After
@@ -823,10 +839,8 @@ public class EngineLoaderTest {
 
 			@Override
 			public boolean accept( File pathname ) {
-				if ( pathname.isDirectory() && pathname.getName().startsWith( "semoss-staging-" ) ) {
-					return new File( pathname, "stage.jnl" ).exists();
-				}
-				return false;
+				return ( pathname.isDirectory()
+						&& pathname.getName().startsWith( "semoss-staging-" ) );
 			}
 		};
 

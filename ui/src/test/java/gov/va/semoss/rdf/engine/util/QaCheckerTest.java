@@ -211,6 +211,7 @@ public class QaCheckerTest {
 		test.add( lsd );
 
 		LoadingSheetData errs = el.checkModelConformance( lsd );
+		el.release();
 
 		assertTrue( errs.hasModelErrors() );
 		assertTrue( errs.hasSubjectTypeError() );
@@ -238,6 +239,7 @@ public class QaCheckerTest {
 
 		ImportData errs = new ImportData();
 		el.separateConformanceErrors( test, errs, engine );
+		el.release();
 
 		LoadingSheetData errlsd = errs.getSheet( "Category" );
 		LoadingSheetData oklsd = test.getSheet( "Category" );

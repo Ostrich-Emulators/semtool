@@ -40,10 +40,6 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	private final Set<URI> duplicates;
 	private QaChecker qaer;
 
-	public AbstractEdgeModeler() {
-		this( new QaChecker() );
-	}
-
 	public AbstractEdgeModeler( QaChecker qa ) {
 		qaer = qa;
 		duplicates = qaer.getKnownUris();

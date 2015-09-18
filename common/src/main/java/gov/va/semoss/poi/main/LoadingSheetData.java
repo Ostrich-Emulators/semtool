@@ -5,10 +5,12 @@
  */
 package gov.va.semoss.poi.main;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -22,8 +24,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
- * A class to encapsulate relationship loading sheet information. This class is
- * not currently used.
+ * A class to encapsulate relationship loading sheet information.
  *
  * @author ryan
  */
@@ -80,6 +81,10 @@ public class LoadingSheetData {
 		propcache.putAll( props );
 	}
 
+	public int rows() {
+		return data.size();
+	}
+
 	public boolean hasErrors() {
 		for ( LoadingNodeAndPropertyValues nap : getData() ) {
 			if ( nap.hasError() ) {
@@ -88,6 +93,28 @@ public class LoadingSheetData {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Removes a single node from the list. This may be an expensive operation.
+	 *
+	 * @param nap
+	 */
+	public void remove( LoadingNodeAndPropertyValues nap ) {
+		data.remove( nap );
+	}
+
+	/**
+	 * Removes nodes from the list. This may be an expensive operation.
+	 *
+	 * @param nap
+	 */
+	public void removeAll( Collection<LoadingNodeAndPropertyValues> naps ) {
+		data.removeAll( naps );
+	}
+
+	public DataIterator iterator() {
+		return new DataIteratorImpl();
 	}
 
 	public boolean hasSubjectTypeError() {
@@ -198,6 +225,25 @@ public class LoadingSheetData {
 		}
 	}
 
+	/**
+	 * Releases any resources used by this class. Technically, this function must
+	 * only be called when {@link #isMemOnly() } returns false, but it's good
+	 * practice to always call it
+	 */
+	public void release() {
+	}
+
+	public void finishLoading() {
+	}
+
+	/**
+	 * Clears any stored loading data
+	 */
+	public void clear() {
+		data.clear();
+		propcache.clear();
+	}
+
 	public void setProperties( Map<String, URI> props ) {
 		propcache.clear();
 		propcache.putAll( props );
@@ -224,12 +270,16 @@ public class LoadingSheetData {
 	}
 
 	/**
-	 * Gets a reference to this instance's node and property data. Changes made to
-	 * the returned collection are propagated to the internal copy
+	 * Gets this instance's node and property data. Changes made to the returned
+	 * collection are NOT propagated to the internal copy
 	 *
 	 * @return the internal data
 	 */
 	public List<LoadingNodeAndPropertyValues> getData() {
+		return new ArrayList<>( data );
+	}
+
+	protected List<LoadingNodeAndPropertyValues> getDataRef() {
 		return data;
 	}
 
@@ -240,21 +290,29 @@ public class LoadingSheetData {
 	 */
 	public void setData( Collection<LoadingNodeAndPropertyValues> newdata ) {
 		data.clear();
-		data.addAll( newdata );
+		for ( LoadingNodeAndPropertyValues nap : newdata ) {
+			add( nap );
+		}
+		commit();
+	}
+
+	protected void commit() {
+	}
+
+	protected void added( LoadingNodeAndPropertyValues nap ) {
 	}
 
 	public void add( LoadingNodeAndPropertyValues nap ) {
 		data.add( nap );
+		added( nap );
 
 		// add this NAP's label to our cache, if we have it (we should)
-		if ( nap.containsKey( nap.getSubject() ) ) {
-			napcache.add( nap.getSubject() );
-		}
+		cacheNapLabel( nap.getSubject() );
 	}
 
 	public LoadingNodeAndPropertyValues add( String slabel ) {
 		LoadingNodeAndPropertyValues nap = new LoadingNodeAndPropertyValues( slabel );
-		data.add( nap );
+		add( nap );
 		return nap;
 	}
 
@@ -265,19 +323,27 @@ public class LoadingSheetData {
 	}
 
 	public LoadingNodeAndPropertyValues add( String slabel, String olabel ) {
-		cacheNapLabel( slabel );
-		cacheNapLabel( olabel );
 
 		LoadingNodeAndPropertyValues nap
 				= new LoadingNodeAndPropertyValues( slabel, olabel );
+		cacheNapLabel( olabel );
 		add( nap );
 		return nap;
 	}
 
+	/**
+	 * Adds a new nap to the list. This is the preferred way to construct the nap
+	 *
+	 * @param slabel
+	 * @param olabel
+	 * @param props
+	 * @return
+	 */
 	public LoadingNodeAndPropertyValues add( String slabel, String olabel,
 			Map<String, Value> props ) {
-		LoadingNodeAndPropertyValues nap = add( slabel, olabel );
-		nap.putAll( props );
+		LoadingNodeAndPropertyValues nap
+				= new LoadingNodeAndPropertyValues( slabel, olabel, props );
+		add( nap );
 		return nap;
 	}
 
@@ -366,6 +432,10 @@ public class LoadingSheetData {
 		return proplink.contains( propname );
 	}
 
+	public boolean isMemOnly() {
+		return true;
+	}
+
 	public static LoadingSheetData copyHeadersOf( LoadingSheetData model ) {
 		LoadingSheetData lsd;
 		if ( model.isRel() ) {
@@ -394,18 +464,55 @@ public class LoadingSheetData {
 	}
 
 	public static LoadingSheetData nodesheet( String tabname, String subject ) {
+		return nodesheet( tabname, subject, true );
+	}
+
+	public static LoadingSheetData nodesheet( String tabname, String subject,
+			boolean inMemOnly ) {
+		if ( !inMemOnly ) {
+			try {
+				return new DiskBackedLoadingSheetData( tabname, subject );
+			}
+			catch ( IOException ioe ) {
+				log.warn( "could not create file-based loading sheet", ioe );
+				// just fall through
+			}
+		}
+
 		return new LoadingSheetData( tabname, subject );
 	}
 
 	public static LoadingSheetData relsheet( String subject, String object,
 			String relname ) {
+		return relsheet( subject, object, relname, true );
+	}
+
+	public static LoadingSheetData relsheet( String subject, String object,
+			String relname, boolean inMemOnly ) {
 		StringBuilder sb = new StringBuilder( subject ).append( "-" );
 		sb.append( relname ).append( "-" ).append( object );
-		return relsheet( sb.toString(), subject, object, relname );
+		return relsheet( sb.toString(), subject, object, relname, inMemOnly );
 	}
 
 	public static LoadingSheetData relsheet( String tabname, String subject,
 			String object, String relname ) {
+		return relsheet( tabname, subject, object, relname, true );
+	}
+
+	public static LoadingSheetData relsheet( String tabname, String subject,
+			String object, String relname, boolean inMemOnly ) {
+
+		if ( !inMemOnly ) {
+			try {
+				return new DiskBackedLoadingSheetData( tabname, subject, object, relname );
+			}
+
+			catch ( IOException ioe ) {
+				log.warn( "could not create file-based loading sheet", ioe );
+				// just fall through
+			}
+		}
+
 		return new LoadingSheetData( tabname, subject, object, relname );
 	}
 
@@ -417,12 +524,30 @@ public class LoadingSheetData {
 		private boolean objectIsError = false;
 
 		public LoadingNodeAndPropertyValues( String subj ) {
-			this( subj, null );
+			this( subj, new HashMap<>() );
 		}
 
 		public LoadingNodeAndPropertyValues( String subject, String object ) {
 			this.subject = subject;
 			this.object = object;
+		}
+
+		/**
+		 * If at all possible, this is the ctor to use
+		 *
+		 * @param subject
+		 * @param object
+		 * @param props
+		 */
+		public LoadingNodeAndPropertyValues( String subject, String object,
+				Map<String, Value> props ) {
+			super( props );
+			this.subject = subject;
+			this.object = object;
+		}
+
+		public LoadingNodeAndPropertyValues( String subject, Map<String, Value> props ) {
+			this( subject, null, props );
 		}
 
 		public String getSubject() {
@@ -518,9 +643,10 @@ public class LoadingSheetData {
 
 		@Override
 		public int hashCode() {
-			int hash = super.hashCode();
-			hash = 19 * hash + Objects.hashCode( this.subject );
-			hash = 19 * hash + Objects.hashCode( this.object );
+			int hash = 7;
+			hash = 31 * hash + Objects.hashCode( this.subject );
+			hash = 31 * hash + Objects.hashCode( this.object );
+			hash = 31 * hash + Objects.hashCode( this.keySet() );
 			return hash;
 		}
 
@@ -557,6 +683,41 @@ public class LoadingSheetData {
 			}
 
 			return sb.toString();
+		}
+	}
+
+	public interface DataIterator extends Iterator<LoadingNodeAndPropertyValues> {
+
+		/**
+		 * Releases any unused resources. This method will be called automatically
+		 * if the iterator is exhausted, but must be called manually if the iterator
+		 * is discarded before the iteration is complete
+		 */
+		public void release();
+	}
+
+	public class DataIteratorImpl implements DataIterator {
+
+		private Iterator<LoadingNodeAndPropertyValues> iter = data.iterator();
+
+		@Override
+		public void release() {
+			// does nothing by default
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iter.hasNext();
+		}
+
+		@Override
+		public LoadingNodeAndPropertyValues next() {
+			return iter.next();
+		}
+		
+		@Override
+		public void remove(){
+			iter.remove();
 		}
 	}
 }
