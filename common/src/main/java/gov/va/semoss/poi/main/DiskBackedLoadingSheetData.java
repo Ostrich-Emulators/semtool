@@ -96,6 +96,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		super( tabtitle, sType, oType, relname, props );
 
 		backingfile = File.createTempFile( tabtitle + "-", ".lsdata" );
+		backingfile.delete(); // don't keep a file hanging around until we need to
 		log.debug( "backing file is: " + backingfile );
 		SimpleModule sm = new SimpleModule();
 		sm.addSerializer( LoadingNodeAndPropertyValues.class, new NapSerializer() );
@@ -136,29 +137,33 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	@Override
 	protected void commit() {
 		// flush everything to our backing file
-		try ( BufferedWriter writer
-				= new BufferedWriter( new FileWriter( backingfile, true ) ) ) {
-			DataIterator it = super.iterator();
-			while ( it.hasNext() ) {
-				writer.write( oxm.writeValueAsString( it.next() ) );
-				writer.newLine();
-				it.remove();
-			}
+		if ( opsSinceLastCommit > 0 ) {
+			try ( BufferedWriter writer
+					= new BufferedWriter( new FileWriter( backingfile, true ) ) ) {
+				DataIterator it = super.iterator();
+				while ( it.hasNext() ) {
+					writer.write( oxm.writeValueAsString( it.next() ) );
+					writer.newLine();
+					it.remove();
+				}
 
-			opsSinceLastCommit = 0;
-		}
-		catch ( IOException ioe ) {
-			log.warn( "loading sheet internal commit failed", ioe );
+				opsSinceLastCommit = 0;
+			}
+			catch ( IOException ioe ) {
+				log.warn( "loading sheet internal commit failed", ioe );
+			}
 		}
 	}
 
 	@Override
 	public DataIterator iterator() {
-		try {
-			return new CacheIterator();
-		}
-		catch ( IOException ioe ) {
-			log.warn( "cannot access backing file in iterator", ioe );
+		if ( backingfile.exists() ) {
+			try {
+				return new CacheIterator();
+			}
+			catch ( IOException ioe ) {
+				log.warn( "cannot access backing file in iterator", ioe );
+			}
 		}
 		return super.iterator();
 	}
@@ -299,12 +304,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		private LoadingNodeAndPropertyValues current;
 
 		public CacheIterator() throws IOException {
-			if ( backingfile.exists() ) {
-				reader = new BufferedReader( new FileReader( backingfile ) );
-			}
-			else {
-				reader = null;
-			}
+			reader = new BufferedReader( new FileReader( backingfile ) );
 		}
 
 		@Override
@@ -343,11 +343,6 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 					// from memory until we're out of data
 					hasnext = memoryiter.hasNext();
 				}
-			}
-
-			// if we're totally empty, release anything we're still holding onto
-			if ( !hasnext ) {
-				release();
 			}
 
 			return hasnext;

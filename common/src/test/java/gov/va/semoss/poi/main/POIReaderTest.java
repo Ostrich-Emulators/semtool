@@ -38,6 +38,8 @@ public class POIReaderTest {
 	private static final File TEST13 = new File( "src/test/resources/test13.xlsx" );
 	private static final File TEST16 = new File( "src/test/resources/test16.xlsx" );
 
+	private ImportData data = null;
+
 	public POIReaderTest() {
 	}
 
@@ -55,28 +57,30 @@ public class POIReaderTest {
 
 	@After
 	public void tearDown() {
+		if ( null != data ) {
+			data.release();
+		}
 	}
 
 	@Test
 	public void testImportLegacy() throws Exception {
 		POIReader rdr = new POIReader();
-		ImportData id = rdr.readOneFile( LEGACY );
-		assertTrue( !id.isEmpty() );
+		data = rdr.readOneFile( LEGACY );
+		assertTrue( !data.isEmpty() );
 	}
 
 	@Test
 	public void testImportModern() throws Exception {
 		POIReader rdr = new POIReader();
-		ImportData id = rdr.readOneFile( CUSTOM );
-		
-		assertTrue( !id.isEmpty() );
+		data = rdr.readOneFile( CUSTOM );
+		assertTrue( !data.isEmpty() );
 	}
 
 	@Test( expected = ImportValidationException.class )
 	public void testFailLoadingSheet1() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL1 );
+			data = rdr.readOneFile( FAIL1 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.MISSING_DATA == e.error ) {
@@ -89,7 +93,7 @@ public class POIReaderTest {
 	public void testFailLoadingSheet2() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL2 );
+			data = rdr.readOneFile( FAIL2 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.TOO_MUCH_DATA == e.error ) {
@@ -102,7 +106,7 @@ public class POIReaderTest {
 	public void testFailLoadingSheet3() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL3 );
+			data = rdr.readOneFile( FAIL3 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.MISSING_DATA == e.error ) {
@@ -115,7 +119,7 @@ public class POIReaderTest {
 	public void testFailLoadingSheet4() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL4 );
+			data = rdr.readOneFile( FAIL4 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.TOO_MUCH_DATA == e.error ) {
@@ -127,7 +131,7 @@ public class POIReaderTest {
 	@Test
 	public void testFailLoadingSheet5() throws Exception {
 		POIReader rdr = new POIReader();
-		ImportData data = rdr.readOneFile( FAIL5 );
+		data = rdr.readOneFile( FAIL5 );
 		assertEquals( 2, data.getSheets().size() );
 	}
 
@@ -135,12 +139,12 @@ public class POIReaderTest {
 	public void testFailLoadingSheet6() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL6 );
+			data = rdr.readOneFile( FAIL6 );
 		}
-		catch( ImportValidationException e ){
+		catch ( ImportValidationException e ) {
 			if ( ErrorType.NOT_A_LOADING_SHEET == e.error ) {
 				throw e;
-			}			
+			}
 		}
 	}
 
@@ -148,7 +152,7 @@ public class POIReaderTest {
 	public void testFailLoadingSheet7() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL7 );
+			data = rdr.readOneFile( FAIL7 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.MISSING_DATA == e.error ) {
@@ -161,7 +165,7 @@ public class POIReaderTest {
 	public void testFailLoadingSheet8() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL8 );
+			data = rdr.readOneFile( FAIL8 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.INVALID_TYPE == e.error ) {
@@ -174,7 +178,7 @@ public class POIReaderTest {
 	public void testFailLoadingSheet9() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( FAIL9 );
+			data = rdr.readOneFile( FAIL9 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.WRONG_TABTYPE == e.error ) {
@@ -186,7 +190,7 @@ public class POIReaderTest {
 	@Test
 	public void testLoadingSheet11() throws Exception {
 		POIReader rdr = new POIReader();
-		ImportData data = rdr.readOneFile( TEST11 );
+		data = rdr.readOneFile( TEST11 );
 		assertEquals( 1, data.getSheet( "Humans" ).getData().size() );
 		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
 		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
@@ -196,7 +200,7 @@ public class POIReaderTest {
 	@Test
 	public void testLoadingSheet12() throws Exception {
 		POIReader rdr = new POIReader();
-		ImportData data = rdr.readOneFile( TEST12 );
+		data = rdr.readOneFile( TEST12 );
 		assertEquals( 1, data.getSheet( "Humans" ).getData().size() );
 		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
 		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
@@ -207,7 +211,7 @@ public class POIReaderTest {
 	public void testLoadingSheet13() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( TEST13 );
+			data = rdr.readOneFile( TEST13 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.MISSING_DATA == e.error ) {
@@ -220,7 +224,7 @@ public class POIReaderTest {
 	public void testLoadingSheet16() throws Exception {
 		POIReader rdr = new POIReader();
 		try {
-			rdr.readOneFile( TEST16 );
+			data = rdr.readOneFile( TEST16 );
 		}
 		catch ( ImportValidationException e ) {
 			if ( ErrorType.MISSING_DATA == e.error ) {

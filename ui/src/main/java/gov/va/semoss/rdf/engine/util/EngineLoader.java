@@ -283,12 +283,16 @@ public class EngineLoader {
 			}
 
 			if ( !stmts.isEmpty() ) {
+				myrc.begin();
 				myrc.add( stmts );
+				myrc.commit();
 			}
 
 			// create all metamodel triples, even if we don't add them to the repository
 			EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
+			myrc.begin();
 			modeler.createMetamodel( data, namespaces, myrc );
+			myrc.commit();
 
 			for ( LoadingSheetData n : data.getNodes() ) {
 				addToStaging( n, engine, data );

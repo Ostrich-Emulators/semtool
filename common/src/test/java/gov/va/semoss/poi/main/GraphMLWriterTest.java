@@ -66,6 +66,7 @@ public class GraphMLWriterTest {
 		GraphMLWriter writer = new GraphMLWriter();
 		StringWriter strings = new StringWriter();
 		writer.write( data, strings );
+		data.release();
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();

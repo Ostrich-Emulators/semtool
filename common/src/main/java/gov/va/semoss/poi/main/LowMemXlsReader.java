@@ -266,6 +266,7 @@ public class LowMemXlsReader {
 
 						LoadingSheetData lsd = handler.getSheet();
 						if ( lsd.isEmpty() ) {
+							lsd.release();
 							throw new ImportValidationException( ErrorType.NOT_A_LOADING_SHEET,
 									"Sheet " + sheetname + " contains no loadable data" );
 						}
@@ -279,6 +280,7 @@ public class LowMemXlsReader {
 		}
 
 		if ( id.isEmpty() ) {
+			id.release();
 			throw new ImportValidationException( ErrorType.MISSING_DATA,
 					"No data to process" );
 		}
