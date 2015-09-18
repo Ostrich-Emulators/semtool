@@ -48,7 +48,6 @@ import gov.va.semoss.util.UriBuilder;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import static gov.va.semoss.util.RDFDatatypeTools.getUriFromRawString;
 import gov.va.semoss.util.Utility;
-import info.aduna.iteration.Iterations;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -62,6 +61,7 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -374,7 +374,7 @@ public class EngineLoader {
 	public void release() {
 		clear();
 		qaer.release();
-		
+
 		try {
 			myrc.close();
 		}
@@ -457,8 +457,9 @@ public class EngineLoader {
 		myrc.commit();
 		log.debug( "moving staging data to engine" );
 		Set<Statement> owlstmts = new HashSet<>();
-		final List<Statement> stmts
-				= Iterations.asList( myrc.getStatements( null, null, null, false ) );
+		final RepositoryResult<Statement> stmts
+				= myrc.getStatements( null, null, null, false );
+		UriBuilder schema = engine.getSchemaBuilder();
 
 		// we're done importing the files, so add all the statements to our engine
 		ModificationExecutor mea = new ModificationExecutorAdapter() {
@@ -467,8 +468,13 @@ public class EngineLoader {
 				initNamespaces( conn );
 
 				conn.begin();
-				for ( Statement s : stmts ) {
-					conn.add( cleanStatement( s, vf ) );
+				while ( stmts.hasNext() ) {
+					Statement s = stmts.next();
+					conn.add( s );
+
+					if ( copyowls && schema.contains( s.getSubject() ) ) {
+						owlstmts.add( s );
+					}
 				}
 
 				// NOTE: no commit here
@@ -489,13 +495,6 @@ public class EngineLoader {
 		}
 
 		if ( copyowls ) {
-			UriBuilder schema = engine.getSchemaBuilder();
-			for ( Statement stmt : stmts ) {
-				if ( schema.contains( stmt.getSubject() ) ) {
-					owlstmts.add( cleanStatement( stmt, vf ) );
-				}
-			}
-
 			owls.addAll( owlstmts );
 			engine.addOwlData( owlstmts );
 		}
