@@ -90,13 +90,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 				rc.add( InsightManagerImpl.getStatements( p, author ) );
 			}
 
-			try ( FileWriter fw = new FileWriter( "/tmp/y.nt" ) ) {
-				rc.export( new NTriplesWriter( fw ) );
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
-
 			rc.commit();
 		}
 		catch ( Exception e ) {
@@ -127,14 +120,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		}
 
 		rc.remove( removers );
-
-		try ( FileWriter fw = new FileWriter( "/tmp/x.nt" ) ) {
-			rc.export( new NTriplesWriter( fw ) );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-
 	}
 
 	@Override

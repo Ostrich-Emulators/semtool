@@ -184,19 +184,6 @@ public class EngineLoaderTest {
 	public void setUp() throws Exception {
 		engine = new InMemorySesameEngine();
 		engine.setEngineName( "engine loader tester" );
-
-		try( FileWriter fw = new FileWriter("/tmp/gw.nt" )){
-			engine.getRawConnection().export( new NTriplesWriter( fw ) );
-		}
-		
-		MetadataQuery mq = new MetadataQuery();
-		engine.query( mq );
-		for ( Map.Entry<URI, Value> en : mq.getResults().entrySet() ) {
-			log.debug( en.getKey() + "-->" + en.getValue() );
-		}
-
-		log.debug( EngineUtil.getReificationStyle( engine ) );
-
 	}
 
 	@After
