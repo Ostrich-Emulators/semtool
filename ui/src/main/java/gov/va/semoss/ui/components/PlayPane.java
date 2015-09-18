@@ -936,9 +936,12 @@ public class PlayPane extends JFrame {
 		tools.setToolTipText( "Additional data tools" );
 		tools.getAccessibleContext().setAccessibleName( "Additional data tools" );
 		tools.getAccessibleContext().setAccessibleDescription( "Additional data tools" );
+		
 		tools.add( loggingItem );
 		tools.add( gQueryBuilderItem );
 		tools.add( insightManagerItem );
+		tools.add( semanticExplorerItem );
+
 		return tools;
 	}
 
