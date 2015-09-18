@@ -49,6 +49,7 @@ import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
+import gov.va.semoss.ui.components.semanticexplorer.SemanticExplorerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
 import gov.va.semoss.util.Constants;
@@ -128,6 +129,7 @@ public class PlayPane extends JFrame {
 	private static final Logger logger = Logger.getLogger( PlayPane.class );
 
 	private final String GQUERYBUILDER = "qQueryBuilderPanel";
+	private final String SEMANTICEXPLORER = "semanticExplorer";
 	private final String IMANAGE_2 = "iManagePanel_2";
 	private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
@@ -145,6 +147,7 @@ public class PlayPane extends JFrame {
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
 	private InsightManagerPanel insightManager;
+	private SemanticExplorerPanel semanticExplorer;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -219,6 +222,8 @@ public class PlayPane extends JFrame {
 					DbAction.getIcon( "graphic_query" ) );
 	private final JCheckBoxMenuItem insightManagerItem = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
+	private final JCheckBoxMenuItem semanticExplorerItem = new JCheckBoxMenuItem( "Semantic Explorer",
+			DbAction.getIcon( "graphic_query" ) );
 
 	private final JToolBar toolbar;
 	private final JToolBar playsheetToolbar;
@@ -232,6 +237,8 @@ public class PlayPane extends JFrame {
 	public JTable tooltipTable;
 
 	private SelectDatabasePanel selectDatabasePanel;
+	private final Preferences prefs = Preferences.userNodeForPackage( getClass() );
+
 	
 	/**
 	 * Launch the application.
@@ -279,7 +286,6 @@ public class PlayPane extends JFrame {
 		windowSelector.setMnemonic( KeyEvent.VK_W );
 		windowSelector.setToolTipText( "Manage Opened Windows" );
 
-		final Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		String wloc = prefs.get( "windowLocation", "" );
 
 		initPreferenceValues( prefs );
@@ -436,42 +442,27 @@ public class PlayPane extends JFrame {
 	}
 
 	protected void syncUIWithMenuBar() {
-		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		toolbar.setVisible( prefs.getBoolean( "showToolBar", true ) );
 		statusbar.setVisible( prefs.getBoolean( "showStatus", true ) );
-		if ( !getProp( prefs, QUERYPANEL ) ) {
+		
+		if ( !getProp( prefs, QUERYPANEL ) )
 			customSparqlPanel.setVisible( false );
-		}
 
-		boolean cospref = prefs.getBoolean( GCOSMETICS, false );
-		if ( !cospref ) {
+		if ( !getPref( GCOSMETICS ) )
 			leftTabs.remove( cosmeticsPanel );
-		}
-
-		boolean fpref = prefs.getBoolean( GFILTER, false );
-		if ( !fpref ) {
+		if ( !getPref( GFILTER ) )
 			leftTabs.remove( filterPanel );
-		}
-		//Label
-		boolean flabel = prefs.getBoolean( GFLABEL, false );
-		if ( !flabel ) {
+		if ( !getPref( GFLABEL ) )
 			leftTabs.remove( outputPanel );
-		}
-
-		boolean lpref = prefs.getBoolean( LOGGING, false );
-		if ( !lpref ) {
+		
+		if ( !getPref( LOGGING ) )
 			rightTabs.remove( loggingPanel );
-		}
-
-		boolean gpref = prefs.getBoolean( GQUERYBUILDER, false );
-		if ( !gpref ) {
+		if ( !getPref( GQUERYBUILDER ) )
 			rightTabs.remove( gQueryBuilderPanel );
-		}
-
-		boolean ipref_2 = prefs.getBoolean( IMANAGE_2, false );
-		if ( !ipref_2 ) {
+		if ( !getPref( SEMANTICEXPLORER ) )
+			rightTabs.remove( semanticExplorer );
+		if ( !getPref( IMANAGE_2 ) )
 			rightTabs.remove( insightManager );
-		}
 	}
 
 	protected JTabbedPane makeLeftPane() {
@@ -506,6 +497,7 @@ public class PlayPane extends JFrame {
 
 	protected JTabbedPane makeRightPane() {
 		final JTabbedPane rightView = new JTabbedPane( JTabbedPane.TOP );
+		
 		JComponent graphPanel = makeGraphTab();
 		rightView.addTab( "Display Pane", DbAction.getIcon( "display_tab1" ), graphPanel,
 				"Display response to questions (queries)" );
@@ -515,19 +507,41 @@ public class PlayPane extends JFrame {
 		dislbl.setIconTextGap( 5 );
 		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
 		rightView.setTabComponentAt( 0, dislbl );
-		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS );
-		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
-
+		
 		loggingPanel = new LoggingPanel();
-		CloseableTab ct = new PlayPaneCloseableTab( rightView, loggingItem,
-				DbAction.getIcon( "log_tab1" ) );
-
 		rightView.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 				"This tab keeps a log of SEMOSS warnings and error messges for use by the SEMOSS development team" );
-		int idx = rightView.indexOfComponent( loggingPanel );
-		rightView.setTabComponentAt( idx, ct );
-		rightView.addChangeListener( new ChangeListener() {
+		rightView.setTabComponentAt( 
+				rightView.indexOfComponent( loggingPanel ), 
+				new PlayPaneCloseableTab( rightView, loggingItem, DbAction.getIcon( "log_tab1" ) )
+		);
 
+		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS );
+		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
+		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
+				"Build queries graphically and generate Sparql" );
+		rightView.setTabComponentAt( 
+				rightView.indexOfComponent( gQueryBuilderPanel ), 
+				new PlayPaneCloseableTab( rightView, gQueryBuilderItem, DbAction.getIcon( "graphic_query" ) ) 
+		);
+		
+		insightManager = new InsightManagerPanel();
+		rightView.addTab( "Insight Manager", null, insightManager,
+				"Manage perspectives and insights" );
+		rightView.setTabComponentAt( 
+				rightView.indexOfComponent( insightManager ), 
+				new PlayPaneCloseableTab( rightView, insightManagerItem, DbAction.getIcon( "insight_manager_tab1" ) ) 
+		);
+		
+		semanticExplorer = new SemanticExplorerPanel();
+		rightView.addTab( "Semantic Explorer", null, semanticExplorer,
+				"Explore the classes and instances" );
+		rightView.setTabComponentAt( 
+				rightView.indexOfComponent( semanticExplorer ), 
+				new PlayPaneCloseableTab( rightView, semanticExplorerItem, DbAction.getIcon( "graphic_query" ) ) 
+		);
+		
+		rightView.addChangeListener( new ChangeListener() {
 			@Override
 			public void stateChanged( ChangeEvent e ) {
 				if ( rightView.getSelectedComponent().equals( loggingPanel ) ) {
@@ -541,21 +555,6 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
-				"Build queries graphically and generate Sparql" );
-		CloseableTab ct1 = new PlayPaneCloseableTab( rightView, gQueryBuilderItem,
-				DbAction.getIcon( "graphic_query" ) );
-		idx = rightView.indexOfComponent( gQueryBuilderPanel );
-		rightView.setTabComponentAt( idx, ct1 );
-		
-		insightManager = new InsightManagerPanel();
-		rightView.addTab( "Insight Manager", null, insightManager,
-				"Manage perspectives and insights" );
-		CloseableTab ct2_2 = new PlayPaneCloseableTab( rightView, insightManagerItem,
-				DbAction.getIcon( "insight_manager_tab1" ) );
-		idx = rightView.indexOfComponent( insightManager );
-		rightView.setTabComponentAt( idx, ct2_2 );
-		
 		return rightView;
 	}
 
@@ -1135,8 +1134,6 @@ public class PlayPane extends JFrame {
 
 	//Added 508 compliance code
 	protected JMenu buildViewMenu() {
-		final Preferences prefs = Preferences.userNodeForPackage( getClass() );
-
 		final Map<String, JPanel> preflistenermap = new HashMap<>();
 		preflistenermap.put( GCOSMETICS, cosmeticsPanel );
 		preflistenermap.put( GFILTER, filterPanel );
@@ -1233,7 +1230,6 @@ public class PlayPane extends JFrame {
 							item.setToolTipText( "Enable the Graph Cosmetics Tab" );
 							item.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab " );
 							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
-
 						}
 						else {
 							item.setToolTipText( "Enable " + cmd );
@@ -1495,6 +1491,37 @@ public class PlayPane extends JFrame {
 				}
 			}
 		} );
+		
+		semanticExplorerItem.setSelected( getProp( SEMANTICEXPLORER ) );
+		if ( getProp(SEMANTICEXPLORER) ) {
+			semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
+		} else {
+			semanticExplorerItem.setToolTipText(  "Enable the Semantic Explorer Tab" );
+		}
+
+		semanticExplorerItem.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				boolean ischecked = semanticExplorerItem.isSelected();
+				prefs.putBoolean( SEMANTICEXPLORER, ischecked );
+				DIHelper.getInstance().getCoreProp().setProperty( SEMANTICEXPLORER,
+						Boolean.toString( ischecked ) );
+
+				if ( ischecked ) {
+					rightTabs.addTab( "Semantic Explorer", DbAction.getIcon( "graphic_query" ), semanticExplorer,
+							"Explore the classes and instances" );
+					rightTabs.setTabComponentAt( 
+							rightTabs.indexOfComponent( semanticExplorer ), 
+							new PlayPaneCloseableTab( rightTabs, semanticExplorerItem, DbAction.getIcon( "graphic_query" ) ) 
+					);
+					semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );					
+				}
+				else {
+					rightTabs.remove( semanticExplorer );
+					semanticExplorerItem.setToolTipText( "Enable the Semantic Explorer Tab" );
+				}
+			}
+		} );
 
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
@@ -1693,6 +1720,23 @@ public class PlayPane extends JFrame {
 
 	public void showDesktop() {
 		rightTabs.setSelectedIndex( 0 );
+	}
+
+	public boolean getPref( String propstr ) {
+		return prefs.getBoolean( propstr, false );
+	}
+
+	public boolean getProp( String propstr ) {
+		String prop = prefs.get( propstr, null );
+		if ( null == prop ) {
+			prop = DIHelper.getInstance().getProperty( propstr );
+		}
+
+		if ( null == prop ) {
+			prop = Boolean.toString( false );
+		}
+
+		return Boolean.parseBoolean( prop );
 	}
 
 	public static boolean getProp( Preferences prefs, String propstr ) {
