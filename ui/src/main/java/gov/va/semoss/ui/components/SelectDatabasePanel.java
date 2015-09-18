@@ -134,10 +134,10 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
 				Insight ii = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-				bindingPanel.setParameters( ii.getInsightParameters() );
-				if ( null != ii && ii.hasParameters() ) {
-					paramLabel.setVisible( true );
-					bindingPanel.setVisible( true );
+				if ( null != ii ) {
+					bindingPanel.setParameters( ii.getInsightParameters() );
+					paramLabel.setVisible( ii.hasParameters() );
+					bindingPanel.setVisible( ii.hasParameters() );
 				}
 				else {
 					paramLabel.setVisible( false );
