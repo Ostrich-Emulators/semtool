@@ -211,17 +211,18 @@ public class EngineLoader {
 				ImportMetadata im = data.getMetadata();
 				im.setAutocreateMetamodel( createmetamodel );
 				loadIntermediateData( data, engine, conformanceErrors );
-				data.release();
 			}
 
-			mmstmts.addAll( moveLoadingRcToEngine( engine, createmetamodel ) );
+			mmstmts.addAll( moveStagingToEngine( engine, createmetamodel ) );
 		}
 
 		return mmstmts;
 	}
 
 	/**
-	 * Loads the given data to the engine.
+	 * Loads the given data to the engine. The input data is
+	 * {@link ImportData#release() released} during the load, and is unusable
+	 * afterwards
 	 *
 	 * @param data The data to load. The data is consumed during the load, so this
 	 * object is unusable once this function completes.
@@ -235,8 +236,7 @@ public class EngineLoader {
 			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
 		qaer.loadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
-		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
-		data.release();
+		moveStagingToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
 	}
 
 	private void loadIntermediateData( ImportData data, IEngine engine,
@@ -290,19 +290,17 @@ public class EngineLoader {
 			EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 			modeler.createMetamodel( data, namespaces, myrc );
 
-			// we need to keep a copy of the import data because the addToEngine
-			// call consumes it
-			ImportData datacopy = cacheOnDisk( data );
 			for ( LoadingSheetData n : data.getNodes() ) {
 				addToStaging( n, engine, data );
 			}
 
-			qaer.separateConformanceErrors( datacopy, conformanceErrors, engine );
-			datacopy.release();
+			qaer.separateConformanceErrors( data, conformanceErrors, engine );
 
 			for ( LoadingSheetData r : data.getRels() ) {
 				addToStaging( r, engine, data );
 			}
+
+			data.release();
 
 			myrc.begin();
 			URI ebase = engine.getBaseUri();
@@ -375,7 +373,8 @@ public class EngineLoader {
 
 	public void release() {
 		clear();
-
+		qaer.release();
+		
 		try {
 			myrc.close();
 		}
@@ -393,9 +392,7 @@ public class EngineLoader {
 	}
 
 	/**
-	 * Adds the given loading sheet data to the staging repository while consuming
-	 * the input. That is, this function
-	 * {@link LoadingSheetData#release() releases} the input data.
+	 * Adds the given loading sheet data to the staging repository
 	 *
 	 * @param sheet
 	 * @param engine
@@ -419,8 +416,6 @@ public class EngineLoader {
 				while ( lit.hasNext() ) {
 					LoadingNodeAndPropertyValues nap = lit.next();
 					modeler.addRel( nap, namespaces, sheet, metas, myrc );
-					nap.clear();
-					lit.remove();
 				}
 			}
 			else {
@@ -428,12 +423,11 @@ public class EngineLoader {
 				while ( lit.hasNext() ) {
 					LoadingNodeAndPropertyValues nap = lit.next();
 					modeler.addNode( nap, namespaces, sheet, metas, myrc );
-					nap.clear();
-					lit.remove();
 				}
 			}
 			myrc.commit();
-
+			// myrc.close();
+			// myrc = myrc.getRepository().getConnection();
 		}
 		catch ( RepositoryException re ) {
 			log.error( re, re );
@@ -445,8 +439,6 @@ public class EngineLoader {
 			}
 			throw re;
 		}
-
-		sheet.release();
 	}
 
 	/**
@@ -460,7 +452,7 @@ public class EngineLoader {
 	 * <code>copyowls</code> is false
 	 * @throws RepositoryException
 	 */
-	private Collection<Statement> moveLoadingRcToEngine( IEngine engine,
+	private Collection<Statement> moveStagingToEngine( IEngine engine,
 			boolean copyowls ) throws RepositoryException {
 		myrc.commit();
 		log.debug( "moving staging data to engine" );

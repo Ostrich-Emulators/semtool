@@ -38,9 +38,6 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 	private static final Logger log = Logger.getLogger( LegacyEdgeModeler.class );
 
-	public LegacyEdgeModeler() {
-	}
-
 	public LegacyEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}

@@ -6,9 +6,6 @@
 package gov.va.semoss.rdf.engine.edgemodelers;
 
 import gov.va.semoss.model.vocabulary.VAS;
-import gov.va.semoss.poi.main.ImportData;
-import gov.va.semoss.poi.main.ImportMetadata;
-import gov.va.semoss.poi.main.LoadingSheetData;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import static gov.va.semoss.util.RDFDatatypeTools.getUriFromRawString;
 import java.util.HashMap;
@@ -21,12 +18,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 /**
  *
@@ -137,28 +131,4 @@ public class AbstractEdgeModelerTest {
 		Value val = getUriFromRawString( "foobar", namespaces );
 		assertNull( val );
 	}
-
-	public class AbstractEdgeModelerImpl extends AbstractEdgeModeler {
-
-		@Override
-		public URI addRel( LoadingSheetData.LoadingNodeAndPropertyValues nap, Map<String, String> namespaces, LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException {
-			throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-		}
-
-		@Override
-		public URI addNode( LoadingSheetData.LoadingNodeAndPropertyValues nap, Map<String, String> namespaces, LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException {
-			throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-		}
-
-		@Override
-		public void addProperties( URI subject, Map<String, Value> properties, Map<String, String> namespaces, LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException {
-			throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-		}
-
-		@Override
-		public void createMetamodel( ImportData alldata, Map<String, String> namespaces, RepositoryConnection rc ) throws RepositoryException {
-			throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-		}
-	}
-
 }

@@ -340,6 +340,12 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 		return errors;
 	}
 
+	@Override
+	protected void onFrameClose() {
+		realtimer.release();
+		super.onFrameClose();
+	}
+
 	private IEngine askForEngine( String title ) {
 
 		RepositoryList repos = new RepositoryList();
