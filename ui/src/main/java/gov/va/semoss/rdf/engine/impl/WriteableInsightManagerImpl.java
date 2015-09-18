@@ -24,7 +24,6 @@ import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.UriSanitizer;
 
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,7 +48,6 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -90,13 +88,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 				rc.add( InsightManagerImpl.getStatements( p, author ) );
 			}
 
-			try ( FileWriter fw = new FileWriter( "/tmp/y.nt" ) ) {
-				rc.export( new NTriplesWriter( fw ) );
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
-
 			rc.commit();
 		}
 		catch ( Exception e ) {
@@ -127,14 +118,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		}
 
 		rc.remove( removers );
-
-		try ( FileWriter fw = new FileWriter( "/tmp/x.nt" ) ) {
-			rc.export( new NTriplesWriter( fw ) );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-
 	}
 
 	@Override
