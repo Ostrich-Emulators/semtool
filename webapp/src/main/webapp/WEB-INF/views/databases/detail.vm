@@ -41,6 +41,13 @@
 				<button ng-if="mode=='create'" type="button" class="btn btn-primary create_instance_button" ng-click="create()" >Create</button>
 			</div>
 		</div>
+		<div>
+		<form method="POST" action="databases/import" enctype="multipart/form-data" >
+			<label for="jnlFile">JNL Data File:</label>
+			<input name="jnlFile" type="file"/>
+			<input type="Submit" value="Submit"/>
+		</form>
+		</div>
 		<!-- /.modal-content -->
 	</div>
 	<!-- /.modal-dialog -->

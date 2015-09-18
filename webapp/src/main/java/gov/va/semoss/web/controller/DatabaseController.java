@@ -9,14 +9,22 @@ import javax.servlet.http.HttpServletResponse;
 import gov.va.semoss.web.io.DbInfo;
 import gov.va.semoss.web.security.SemossUser;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 
 
+
+
+
+
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -25,7 +33,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * This controller serves pages secured by Spring Security
@@ -41,6 +51,9 @@ public class DatabaseController extends SemossControllerBase {
 
 	@Autowired
 	private DbInfoMapper datastore;
+	
+	@Autowired
+	ServletContext servletContext;
 
 	@RequestMapping("/list" )
 	@ResponseBody
@@ -111,6 +124,37 @@ public class DatabaseController extends SemossControllerBase {
 
 		return testDbs;
 	}
+	
+	
+	@RequestMapping(value = "/import", method = RequestMethod.POST)
+	public String importDatabaseViaFile(HttpServletRequest req, @RequestParam(value = "jnlFile", required = true) MultipartFile jnlFile) {
+		if (!jnlFile.isEmpty()) {
+			try {
+				validate(jnlFile);
+				
+			} catch (RuntimeException re) {
+				return "";
+			}
+		}
+		return "";
+	}
+	
+	private final boolean validate(MultipartFile file){
+		return true;
+	}
+	
+	private void saveJNLFile(String filename, MultipartFile image)
+			throws RuntimeException, IOException {
+				try {
+					File file = new File(servletContext.getRealPath("/") + "/"
+							+ filename);					 
+					FileUtils.writeByteArrayToFile(file, image.getBytes());
+				} 
+				catch (IOException e) {
+					throw e;
+				}
+			}
+	}
 
 //	@RequestMapping( "/{id}/{type}" )
 //	public void getRepo( @PathVariable( "id" ) String id,
@@ -175,4 +219,3 @@ public class DatabaseController extends SemossControllerBase {
 //		
 //	}
 
-}
