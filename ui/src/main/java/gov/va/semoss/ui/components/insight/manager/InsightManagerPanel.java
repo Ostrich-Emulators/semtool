@@ -181,7 +181,9 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 								"Remove this " + obj.getClass().getSimpleName(), "Confirm Delete",
 								JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 						if ( JOptionPane.YES_OPTION == ans ) {
+							int treerow = tree.getRowForPath( selected );
 							model.removeNodeFromParent( node );
+							tree.setSelectionRow( treerow );
 						}
 					}
 				}
