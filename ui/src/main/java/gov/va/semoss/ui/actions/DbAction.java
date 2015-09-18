@@ -27,7 +27,7 @@ public abstract class DbAction extends AbstractAction {
   public static final String MOUNT = "Attach DB";
   public static final String CREATE = "Create DB";
   public static final String IMPORTRTM = "RTM Loading Sheet Generator";
-  public static final String UNMOUNT = "Detach ";
+  public static final String UNMOUNT = "Close ";
   public static final String PIN = "Pin ";
   public static final String CLEAR = "Clear";
   public static final String IMPORTLS = "External File(s)";
@@ -40,7 +40,7 @@ public abstract class DbAction extends AbstractAction {
   public static final String EXPORTLSRELS = "All Relationships";
   public static final String EXPORTLSSOMERELS = "Specific Relationships";
   public static final String ENDPOINT = "Start SparQL Endpoint";
-	public static final String CONSISTENCYCHECK = "Quality Checks";
+  public static final String CONSISTENCYCHECK = "Quality Checks";
 
   public final String opprogName;
   private IEngine engine;
