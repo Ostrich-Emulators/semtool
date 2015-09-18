@@ -47,7 +47,6 @@ import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
-import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.components.semanticexplorer.SemanticExplorerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
@@ -294,8 +293,6 @@ public class PlayPane extends JFrame {
 		VocabularyRegistry.registerVocabulary( "va-semoss",
 				getClass().getResource( "/models/va-semoss.ttl" ), true );
 
-		PlaySheetCentralComponent.setDefaultIcons();
-		
 		setSize( new Dimension( 1024, 768 ) );
 		if ( "".equals( wloc ) ) {
 			setExtendedState( Frame.MAXIMIZED_BOTH );

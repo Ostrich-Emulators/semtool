@@ -35,7 +35,6 @@ import gov.va.semoss.ui.components.playsheets.PieChartPlaySheet;
 import gov.va.semoss.ui.components.playsheets.SankeyPlaySheet;
 import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet;
-import gov.va.semoss.ui.components.playsheets.helpers.DupeHeatMapSheet;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -66,8 +65,9 @@ public enum PlaySheetEnum {
 	World_Heat_Map( "World Heat Map", WorldHeatMapPlaySheet.class, "icons16/questions_world_heat_map3_16.png", "WorldHeatMapPlaySheet Hint: SELECT ?country ?numericHeatValue WHERE{ ... }" ),
 	Metamodel_Graph( "Metamodel Graph", MetamodelGraphPlaySheet.class, "icons16/questions_metamodel1_16.png", "MetamodelGraphPlaySheet Hint: SELECT DISTINCT ?source ?relation ?target WHERE{ ... }" ),
 	AppDupeHeatMap( "Application Duplication Heat Map", AppDupeHeatMapSheet.class, "icons16/questions_heat_map3_16.png", "AppDupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" ),
-	Update_Query( "Update Query", null, "icons16/questions_update2_16.png", "UpdateQuery Hint: Try a SPARQL query that INSERTs data, DELETEs data, or does both." ),
-	Blank("", null, "icons16/blank_16.png", "");
+	Update_Query( "Update Query", null, "icons16/questions_update2_16.png", "UpdateQuery Hint: Try a SPARQL query that INSERTs data, DELETEs data, or does both." );
+	//Blank( "", null, "icons16/blank_16.png", "" );
+	private static final String BLANKIMGLOC = "icons16/blank_16.png";
 
 	private final String sheetName;
 	private final Class<? extends IPlaySheet> sheetClass;
@@ -82,16 +82,18 @@ public enum PlaySheetEnum {
 		this.sheetHint = playSheetHint;
 	}
 
-	/**   Returns the playsheet class of the current PlaySheetEnum.
-	 * 
+	/**
+	 * Returns the playsheet class of the current PlaySheetEnum.
+	 *
 	 * @return getSheetClass -- (Class<? extends IPlaySheet>)
 	 */
 	public Class<? extends IPlaySheet> getSheetClass() {
 		return this.sheetClass;
 	}
 
-	/**   Returns an instance of the playsheet class from the current PlaySheetEnum.
-	 * 
+	/**
+	 * Returns an instance of the playsheet class from the current PlaySheetEnum.
+	 *
 	 * @return getSheetInstance -- (IPlaySheet)
 	 */
 	public IPlaySheet getSheetInstance() {
@@ -104,63 +106,71 @@ public enum PlaySheetEnum {
 		}
 	}
 
-	/**   Returns the sheet name of the current PlaySheetEnum.
-	 * 
+	/**
+	 * Returns the sheet name of the current PlaySheetEnum.
+	 *
 	 * @return getDisplayName -- (String)
 	 */
 	public String getDisplayName() {
 		return this.sheetName;
 	}
-	
-	/**   Returns the filename of the icon (minus any path information) from the
+
+	/**
+	 * Returns the filename of the icon (minus any path information) from the
 	 * current PlaySheetEnum.
-	 * 
+	 *
 	 * @return getSheetIconName -- (String)
 	 */
-	public String getSheetIconName(){
+	public String getSheetIconName() {
 		String strReturnValue = "";
-		
-	    if(this.sheetIconLocation == null || this.sheetIconLocation.equals("")){
-	    	strReturnValue = FilenameUtils.getName(Blank.sheetIconLocation);
-	    }else{
-	    	strReturnValue = FilenameUtils.getName(this.sheetIconLocation);
-	    }
-	    return strReturnValue;
+
+		if ( this.sheetIconLocation == null || this.sheetIconLocation.isEmpty() ) {
+			strReturnValue = BLANKIMGLOC;
+		}
+		else {
+			strReturnValue = FilenameUtils.getName( this.sheetIconLocation );
+		}
+		return strReturnValue;
 	}
 
-	/**   Returns the playsheet icon of the current PlaySheetEnum.
-	 * 
+	/**
+	 * Returns the playsheet icon of the current PlaySheetEnum.
+	 *
 	 * @return getSheetIcon -- (ImageIcon)
 	 */
-	public ImageIcon getSheetIcon(){
+	public ImageIcon getSheetIcon() {
 		ImageIcon imgReturnValue = null;
-	    if(this.sheetIconLocation == null || this.sheetIconLocation.equals("")){
-	    	imgReturnValue = GuiUtility.loadImageIcon(Blank.sheetIconLocation);
-	    }else{
-	    	imgReturnValue = GuiUtility.loadImageIcon(this.sheetIconLocation);
-	    }
-	    return imgReturnValue;
+		if ( this.sheetIconLocation == null || this.sheetIconLocation.isEmpty() ) {
+			imgReturnValue = GuiUtility.loadImageIcon( BLANKIMGLOC );
+		}
+		else {
+			imgReturnValue = GuiUtility.loadImageIcon( this.sheetIconLocation );
+		}
+		return imgReturnValue;
 	}
-	
-	/**   Returns the playsheet "hint" (for the Custom Sparql Query Window) from
-	 * the current PlaySheetEnum.
-	 * 
+
+	/**
+	 * Returns the playsheet "hint" (for the Custom Sparql Query Window) from the
+	 * current PlaySheetEnum.
+	 *
 	 * @return getSheetHint -- (String)
 	 */
 	public String getSheetHint() {
 		return this.sheetHint;
 	}
 
-	/**   Currently returns true for all playsheets, except for the "AppDupeHeatMapSheet",
-	 * which returns false.
-	 * 
+	/**
+	 * Currently returns true for all playsheets, except for the
+	 * "AppDupeHeatMapSheet", which returns false.
+	 *
 	 * @return needsSparql -- (boolean)
 	 */
 	public boolean needsSparql() {
 		return !AppDupeHeatMapSheet.class.equals( sheetClass );
 	}
 
-	/**   Gets a PlaySheetEnum for the given Insight. If this insight's
+	/**
+	 * Gets a PlaySheetEnum for the given Insight. If this insight's
 	 * {@link Insight#getOutput()} returns an unknown playsheet, this function
 	 * returns {@link PlaySheetEnum#Grid}
 	 *
@@ -174,41 +184,47 @@ public enum PlaySheetEnum {
 		}
 
 		String output = ins.getOutput();
-		for ( PlaySheetEnum pse : valuesNoUpdate() ) {
-			if ( output.equals( pse.getSheetClass().getCanonicalName() ) ) {
-				return pse;
+		if ( null != output ) {
+			for ( PlaySheetEnum pse : valuesNoUpdate() ) {
+				Class<? extends IPlaySheet> k = pse.getSheetClass();
+				if ( output.equals( k.getCanonicalName() ) ) {
+					return pse;
+				}
 			}
 		}
 
-		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: "
-				+ output + " (using Grid instead)" );
+		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for insight: "
+				+ output + " (using Grid instead) insight: " + ins.getId() );
 		return PlaySheetEnum.Grid;
 	}
-	
-	/**   Gets a PlaySheetEnum for the passed-in playsheet class.
-	 * 
-	 * @param playSheetClass -- (Class<? extends IPlaySheet>) Class of a playsheet.
-	 * 
+
+	/**
+	 * Gets a PlaySheetEnum for the passed-in playsheet class.
+	 *
+	 * @param playSheetClass -- (Class<? extends IPlaySheet>) Class of a
+	 * playsheet.
+	 *
 	 * @return valueForClass -- (PlaySheetEnum) Described above.
 	 */
-	public static PlaySheetEnum valueForClass(Class<? extends IPlaySheet> playSheetClass){
-		if(null == playSheetClass){
-		   return PlaySheetEnum.Update_Query;
+	public static PlaySheetEnum valueForClass( Class<? extends IPlaySheet> playSheetClass ) {
+		if ( null == playSheetClass ) {
+			return PlaySheetEnum.Update_Query;
 		}
 		for ( PlaySheetEnum pse : valuesNoUpdate() ) {
-			if (playSheetClass.equals(pse.getSheetClass())){
+			if ( playSheetClass.equals( pse.getSheetClass() ) ) {
 				return pse;
 			}
 		}
 		Logger.getLogger( PlaySheetEnum.class ).warn( "Unknown PSE for output: "
 				+ playSheetClass.getCanonicalName() + " (using Grid instead)" );
 		return PlaySheetEnum.Grid;
-		
+
 	}
 
-	/**   Returns an array of all PlaySheetEnum objects (not designed to update
-	 * the Enum.
-	 * 
+	/**
+	 * Returns an array of all PlaySheetEnum objects (not designed to update the
+	 * Enum.
+	 *
 	 * @return valuesNoUpdate -- (PlaySheetEnum[]) Described above.
 	 */
 	public static PlaySheetEnum[] valuesNoUpdate() {

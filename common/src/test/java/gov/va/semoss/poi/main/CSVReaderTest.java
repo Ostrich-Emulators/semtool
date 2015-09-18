@@ -24,6 +24,7 @@ public class CSVReaderTest {
 	private static final Logger log = Logger.getLogger( CSVReaderTest.class );
 	private static final File LOADER = new File( "src/test/resources/airplanes.txt" );
 	private static final File DATA = new File( "src/test/resources/airplanes.csv" );
+	private ImportData data = null;
 
 	public CSVReaderTest() {
 	}
@@ -42,21 +43,24 @@ public class CSVReaderTest {
 
 	@After
 	public void tearDown() {
+		if ( null != data ) {
+			data.release();
+		}
 	}
 
 	@Test
 	public void testImportWithControl() throws Exception {
 		CSVReader rdr = new CSVReader( LOADER );
-		ImportData id = rdr.readOneFile( DATA );
-		assertTrue( !id.isEmpty() );
+		data = rdr.readOneFile( DATA );
+		assertTrue( !data.isEmpty() );
 	}
 
 	@Test( expected = IOException.class )
 	public void testImportWithoutControl() throws Exception {
 		CSVReader rdr = new CSVReader();
 
-		ImportData id = rdr.readOneFile( DATA );
+		data = rdr.readOneFile( DATA );
 		// we should never get here (missing propfile exception should be thrown first)
-		assertTrue( id.isEmpty() );
+		assertTrue( data.isEmpty() );
 	}
 }

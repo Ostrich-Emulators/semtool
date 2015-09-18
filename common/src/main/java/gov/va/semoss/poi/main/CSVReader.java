@@ -203,7 +203,7 @@ public class CSVReader implements ImportFileReader {
 
 				Map<String, Value> props = new HashMap<>();
 				for ( String propValColumn : valuesForProp ) {
-					Value v = createObject( propValColumn, jcrMap, data );
+					Value v = createObject( propValColumn, jcrMap );
 					if ( null != v ) {
 						props.put( propValColumn, v );
 					}
@@ -426,8 +426,7 @@ public class CSVReader implements ImportFileReader {
 		return retString;
 	}
 
-	private Value createObject( String object, Map<String, String> jcrMap,
-			ImportData data ) {
+	private Value createObject( String object, Map<String, String> jcrMap ) {
 		ValueFactory vf = new ValueFactoryImpl();
 
 		// need to do the class vs. object magic
