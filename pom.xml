@@ -29,7 +29,6 @@
 	</scm>
     
 	<dependencies>
-
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
@@ -152,7 +151,7 @@
 			<artifactId>jet-regression</artifactId>
 			<version>1.0-beta-4</version>
 		</dependency>
-
+	 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -224,7 +223,11 @@
 			<artifactId>httpclient-cache</artifactId>
 			<version>${http.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.mapdb</groupId>
+			<artifactId>mapdb</artifactId>
+			<version>1.0.8</version>
+		</dependency>	
 	</dependencies>    
     
 	<profiles>

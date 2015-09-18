@@ -19,11 +19,12 @@
  */
 package gov.va.semoss.poi.main;
 
-import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openrdf.model.ValueFactory;
@@ -31,6 +32,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -40,15 +42,16 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 public class POIReader implements ImportFileReader {
 
 	private static final Logger logger = Logger.getLogger( POIReader.class );
+	private boolean keepLoadInMemory = false;
 
-	public ImportData readNonloadingSheet( File file ) throws IOException {
+	public static ImportData readNonloadingSheet( File file ) throws IOException {
 		ImportData d
 				= readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
 		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
 		return d;
 	}
 
-	public ImportData readNonloadingSheet( Workbook workbook ) {
+	public static ImportData readNonloadingSheet( Workbook workbook ) {
 		ImportData id = new ImportData();
 
 		int sheets = workbook.getNumberOfSheets();
@@ -85,16 +88,17 @@ public class POIReader implements ImportFileReader {
 			for ( int r = 0; r <= rows; r++ ) {
 				Row row = sheet.getRow( r );
 				if ( null != row ) {
-					LoadingNodeAndPropertyValues nap
-							= nlsd.add( getString( row.getCell( 0 ) ) );
+					Map<String, Value> propmap = new HashMap<>();
 
 					int lastpropcol = row.getLastCellNum();
 					for ( int c = 1; c <= lastpropcol; c++ ) {
 						String val = getString( row.getCell( c ) );
 						if ( !val.isEmpty() ) {
-							nap.put( Integer.toString( c ), vf.createLiteral( val ) );
+							propmap.put( Integer.toString( c ), vf.createLiteral( val ) );
 						}
 					}
+
+					nlsd.add( getString( row.getCell( 0 ) ), propmap );
 				}
 			}
 
@@ -109,22 +113,43 @@ public class POIReader implements ImportFileReader {
 	@Override
 	public ImportMetadata getMetadata( File file ) throws IOException, ImportValidationException {
 		logger.debug( "getting metadata from file: " + file );
-		final LowMemXlsReader reader
-				= new LowMemXlsReader( new FileInputStream( file ) );
-		ImportMetadata data = reader.getMetadata();
-		data.setSourceOfData( new URIImpl( file.toURI().toString() ) );
-		reader.release();
-		return data;
+		LowMemXlsReader reader = null;
+		try {
+			reader = new LowMemXlsReader( file );
+			ImportMetadata data = reader.getMetadata();
+			data.setSourceOfData( new URIImpl( file.toURI().toString() ) );
+			return data;
+		}
+		finally {
+			if ( null != reader ) {
+				reader.release();
+			}
+		}
 	}
 
 	@Override
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
-		LowMemXlsReader rdr = new LowMemXlsReader( file );
-		ImportData d = rdr.getData();
+		logger.debug( "loading data from file: " + file );
+		LowMemXlsReader rdr = null;
+		try {
+			rdr = new LowMemXlsReader( file );
+			rdr.keepSheetDataInMemory( keepLoadInMemory );
+			ImportData d = rdr.getData();
 
-		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
-		rdr.release();
-		return d;
+			d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+			logger.debug( "finished reading file: " + file );
+			return d;
+		}
+		finally {
+			if ( null != rdr ) {
+				rdr.release();
+			}
+		}
+	}
+
+	@Override
+	public void keepLoadInMemory( boolean b ) {
+		keepLoadInMemory = b;
 	}
 
 	/**
@@ -149,5 +174,4 @@ public class POIReader implements ImportFileReader {
 				return cell.getStringCellValue();
 		}
 	}
-
 }

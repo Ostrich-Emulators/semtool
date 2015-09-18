@@ -36,7 +36,7 @@ public class UnmountAction extends DbAction {
 	public UnmountAction( Frame frame ) {
 		super( null, UNMOUNT, "rmdb" );
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Disconnect the selected database" );
-		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_D );
 		dynamicTitle = true;
 	}
 
@@ -50,7 +50,7 @@ public class UnmountAction extends DbAction {
 		super( null, UNMOUNT, "rmdb" );
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Disconnect the selected database" );
 		putValue( AbstractAction.NAME, title );
-		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_C );
+		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_D );
 		dynamicTitle = false;
 	}
 
@@ -66,7 +66,7 @@ public class UnmountAction extends DbAction {
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		if ( null != getEngine() ) {
-			int val = JOptionPane.showConfirmDialog( frame, "Really detach "
+			int val = JOptionPane.showConfirmDialog( frame, "Really close "
 					+ getEngineName() + "?", "Confirm Detach", JOptionPane.YES_NO_OPTION );
 			if ( JOptionPane.YES_OPTION == val ) {
 				EngineUtil.getInstance().unmount( getEngine() );

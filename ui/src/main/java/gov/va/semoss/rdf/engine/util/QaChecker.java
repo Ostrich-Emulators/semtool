@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import static com.hp.hpl.jena.tdb.sys.FileRef.file;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
@@ -15,6 +16,9 @@ import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.GuiUtility;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.OWL;
@@ -44,12 +51,13 @@ import org.openrdf.repository.RepositoryException;
 public class QaChecker {
 
 	private static final Logger log = Logger.getLogger( QaChecker.class );
-	private final Map<ConceptInstanceCacheKey, URI> dataNodes = new HashMap<>();
-	private final Map<String, URI> instanceClassCache = new HashMap<>();
-	//private final Map<RelationClassCacheKey, URI> propertiedRelationClassCache = new HashMap<>();
-	private final Map<String, URI> relationBaseClassCache = new HashMap<>();
-	private final Map<RelationCacheKey, URI> relationCache = new HashMap<>();
-	private final Map<String, URI> propertyClassCache = new HashMap<>();
+	private final Map<ConceptInstanceCacheKey, URI> dataNodes;
+	private final Map<String, URI> instanceClassCache;
+	private final Map<String, URI> relationBaseClassCache;
+	private final Map<RelationCacheKey, URI> relationCache;
+	private final Map<String, URI> propertyClassCache;
+	private final File backingfile;
+	private final DB db;
 
 	public static enum CacheType {
 
@@ -57,10 +65,48 @@ public class QaChecker {
 	};
 
 	public QaChecker() {
+		File f = null;
+		try {
+			f = File.createTempFile( "qachecker-", ".maps" );
+		}
+		catch ( IOException ioe ) {
+			log.error( "cannot make backing store...will use in-memory caches", ioe );
+		}
+		if ( null == f ) {
+			db = null;
+			backingfile = null;
+			dataNodes = new HashMap<>();
+			relationCache = new HashMap<>();
+			instanceClassCache = new HashMap<>();
+			relationBaseClassCache = new HashMap<>();
+			propertyClassCache = new HashMap<>();
+		}
+		else {
+			backingfile = f;
+			log.debug( "QA backing file is: " + backingfile );
+			db = DBMaker.newFileDB( f ).
+					deleteFilesAfterClose().
+					mmapFileEnable().
+					transactionDisable().
+					make();
+			dataNodes = db.createTreeMap( "datanodes" ).make();
+			relationCache = db.createTreeMap( "relations" ).make();
+			instanceClassCache = db.createTreeMap( "instances" ).makeStringMap();
+			relationBaseClassCache = db.createTreeMap( "relationclasses" ).makeStringMap();
+			propertyClassCache = db.createTreeMap( "propclasses" ).makeStringMap();
+		}
 	}
 
 	public QaChecker( IEngine eng ) {
+		this();
 		loadCaches( eng );
+	}
+
+	public void release() {
+		if ( null != db ) {
+			db.close();
+			FileUtils.deleteQuietly( backingfile );
+		}
 	}
 
 	public Set<URI> getKnownUris() {
@@ -97,14 +143,12 @@ public class QaChecker {
 					errors.add( errdata );
 
 					Set<LoadingSheetData.LoadingNodeAndPropertyValues> errvals = new HashSet<>();
-					List<LoadingSheetData.LoadingNodeAndPropertyValues> reldata = d.getData();
-
 					for ( LoadingSheetData.LoadingNodeAndPropertyValues nap : errs ) {
 						errvals.add( nap );
 						errdata.add( nap );
 					}
 
-					reldata.removeAll( errvals );
+					d.removeAll( errvals );
 				}
 			}
 		}
@@ -253,7 +297,6 @@ public class QaChecker {
 		instanceClassCache.clear();
 		dataNodes.clear();
 		relationBaseClassCache.clear();
-		// propertiedRelationClassCache.clear();
 		relationCache.clear();
 		propertyClassCache.clear();
 	}
@@ -483,36 +526,6 @@ public class QaChecker {
 			engine.query( vqa );
 			cacheUris( CacheType.CONCEPTCLASS, map );
 
-//			// getting relationships to cache is harder, because we need the labels
-//			// of all the parts involved.
-//			String relq = "SELECT DISTINCT ?reltype ?stypelabel ?otypelabel ?relname WHERE {"
-//					+ "?sub ?reltype ?obj ."
-//					+ "?reltype a owl:ObjectProperty ."
-//					//+ "?sub rdfs:label ?slabel ."
-//					//+ "?obj rdfs:label ?olabel ."
-//					+ "?reltype rdfs:label ?relname ."
-//					+ "?sub a ?subtype ."
-//					+ "?subtype rdfs:subClassOf ?concept ."
-//					+ "?subtype rdfs:label ?stypelabel ."
-//					+ "?obj a ?objtype ."
-//					+ "?objtype rdfs:subClassOf ?concept ."
-//					+ "?objtype rdfs:label ?otypelabel"
-//					+ "}";
-//			VoidQueryAdapter vqa2 = new VoidQueryAdapter( relq ) {
-//
-//				@Override
-//				public void handleTuple( BindingSet set, ValueFactory fac ) {
-//					QaChecker.this.cacheRelationClass(
-//							URI.class.cast( set.getValue( "reltype" ) ),
-//							set.getValue( "stypelabel" ).stringValue(),
-//							set.getValue( "otypelabel" ).stringValue(),
-//							set.getValue( "relname" ).stringValue() );
-//				}
-//
-//			};
-//			vqa2.useInferred( true );
-//			vqa2.bind( "concept", owlb.getConceptUri().build() );
-//			engine.query( vqa2 );
 			String instq = "SELECT DISTINCT ?sub ?rawlabel ?typelabel WHERE {"
 					+ "?sub a ?type ."
 					+ "?sub rdfs:label ?rawlabel ."
@@ -575,7 +588,8 @@ public class QaChecker {
 
 	}
 
-	public static class ConceptInstanceCacheKey {
+	public static class ConceptInstanceCacheKey implements Serializable,
+			Comparable<ConceptInstanceCacheKey> {
 
 		private final String typelabel;
 		private final String rawlabel;
@@ -620,9 +634,19 @@ public class QaChecker {
 			}
 			return ( Objects.equals( this.rawlabel, other.rawlabel ) );
 		}
+
+		@Override
+		public int compareTo( ConceptInstanceCacheKey o ) {
+			int diff = typelabel.compareTo( o.typelabel );
+			if ( 0 == diff ) {
+				return rawlabel.compareTo( o.rawlabel );
+			}
+			return diff;
+		}
 	}
 
-	public static class RelationCacheKey {
+	public static class RelationCacheKey implements Serializable,
+			Comparable<RelationCacheKey> {
 
 		private final String s;
 		private final String o;
@@ -677,5 +701,11 @@ public class QaChecker {
 			return true;
 		}
 
+		@Override
+		public int compareTo( RelationCacheKey other ) {
+			String me = stype + otype + s + o + relname;
+			String them = other.stype + other.otype + other.s + other.o + other.relname;
+			return me.compareTo( them );
+		}
 	}
 }

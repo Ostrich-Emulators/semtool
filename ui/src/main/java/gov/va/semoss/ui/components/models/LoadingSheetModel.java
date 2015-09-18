@@ -68,10 +68,12 @@ public class LoadingSheetModel extends ValueTableModel {
 		lsd.addProperties( list );
 
 		for ( Value[] val : valdata ) {
-			LoadingNodeAndPropertyValues nap = lsd.add( val[0].stringValue() );
+			Map<String, Value> propmap = new HashMap<>();
 			for ( int i = 1; i < val.length; i++ ) {
-				nap.put( props[i], val[i] );
+				propmap.put( props[i], val[i] );
 			}
+			
+			LoadingNodeAndPropertyValues nap = lsd.add( val[0].stringValue(), propmap );
 		}
 
 		return new LoadingSheetModel( lsd );

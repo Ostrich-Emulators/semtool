@@ -6,10 +6,6 @@
 package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.rdf.engine.edgemodelers.EdgeModeler;
-import com.bigdata.rdf.sail.BigdataSail;
-import com.bigdata.rdf.sail.remote.BigdataSailFactory;
-import com.bigdata.rdf.sail.BigdataSailRepository;
-import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -32,12 +27,14 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.poi.main.CSVReader;
+import gov.va.semoss.poi.main.DiskBackedLoadingSheetData;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -51,24 +48,28 @@ import gov.va.semoss.util.UriBuilder;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import static gov.va.semoss.util.RDFDatatypeTools.getUriFromRawString;
 import gov.va.semoss.util.Utility;
-import info.aduna.iteration.Iterations;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.ListIterator;
 import java.util.Set;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryResult;
+import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.openrdf.sail.helpers.NotifyingSailBase;
+import org.openrdf.sail.memory.MemoryStore;
+import org.openrdf.sail.nativerdf.NativeStore;
 
 /**
  * A class to handle loading files to an existing engine
@@ -80,14 +81,15 @@ public class EngineLoader {
 	private static final Logger log = Logger.getLogger( EngineLoader.class );
 	private static final Map<String, ImportFileReader> defaultExtReaderLkp
 			= new HashMap<>();
-	private final boolean stageInMemory;
 	private final List<Statement> owls = new ArrayList<>();
-	private BigdataSailRepositoryConnection myrc;
-	private File stagingdir;
 	private final ValueFactory vf;
 	private final Map<String, ImportFileReader> extReaderLkp = new HashMap<>();
-	private URI defaultBaseUri;
+	private final boolean stageInMemory;
+	private final boolean lsInMemory;
 	private boolean forceBaseUri;
+	private RepositoryConnection myrc;
+	private File stagingdir;
+	private URI defaultBaseUri;
 	private QaChecker qaer = new QaChecker();
 
 	static {
@@ -98,8 +100,9 @@ public class EngineLoader {
 		defaultExtReaderLkp.put( "csv", csv );
 	}
 
-	public EngineLoader( boolean inmem ) {
-		stageInMemory = inmem;
+	public EngineLoader( boolean stageInMem, boolean keepLoadingSheetsInMemory ) {
+		stageInMemory = stageInMem;
+		lsInMemory = keepLoadingSheetsInMemory;
 		try {
 			myrc = initForLoad();
 		}
@@ -108,6 +111,10 @@ public class EngineLoader {
 		}
 
 		vf = myrc.getValueFactory();
+	}
+
+	public EngineLoader( boolean inmem ) {
+		this( inmem, false );
 	}
 
 	public EngineLoader() {
@@ -130,30 +137,26 @@ public class EngineLoader {
 		extReaderLkp.put( extension, rdr );
 	}
 
-	private BigdataSailRepositoryConnection initForLoad()
+	private RepositoryConnection initForLoad()
 			throws RepositoryException, IOException {
 
-		BigdataSailRepository repo;
-		Properties props = new Properties();
-		props.setProperty( BigdataSail.Options.BUFFER_CAPACITY, "100000" );
-		props.setProperty( BigdataSail.Options.INITIAL_EXTENT, "10485760" );
+		Repository repo = null;
+
+		NotifyingSailBase store = null;
 		if ( stageInMemory ) {
-			repo = BigdataSailFactory.createRepository( props,
-					(BigdataSailFactory.Option) null );
+			store = new MemoryStore();
 		}
 		else {
 			stagingdir = File.createTempFile( "semoss-staging-", "" );
 			stagingdir.delete(); // get rid of the file, and make it a directory
 			stagingdir.mkdirs();
 			log.debug( "staging load in: " + stagingdir );
-
-			String jnl = new File( stagingdir, "stage.jnl" ).getAbsolutePath();
-			repo = BigdataSailFactory.createRepository( props, jnl,
-					(BigdataSailFactory.Option) null );
+			store = new NativeStore( stagingdir, "spoc" );
 		}
 
+		repo = new SailRepository( store );
 		repo.initialize();
-		BigdataSailRepositoryConnection rc = repo.getConnection();
+		RepositoryConnection rc = repo.getConnection();
 		initNamespaces( rc );
 		return rc;
 	}
@@ -202,6 +205,7 @@ public class EngineLoader {
 				}
 			}
 			else {
+				reader.keepLoadInMemory( lsInMemory );
 				ImportData data = reader.readOneFile( fileToLoad );
 				data.findPropertyLinks();
 				ImportMetadata im = data.getMetadata();
@@ -209,14 +213,16 @@ public class EngineLoader {
 				loadIntermediateData( data, engine, conformanceErrors );
 			}
 
-			mmstmts.addAll( moveLoadingRcToEngine( engine, createmetamodel ) );
+			mmstmts.addAll( moveStagingToEngine( engine, createmetamodel ) );
 		}
 
 		return mmstmts;
 	}
 
 	/**
-	 * Loads the given data to the engine.
+	 * Loads the given data to the engine. The input data is
+	 * {@link ImportData#release() released} during the load, and is unusable
+	 * afterwards
 	 *
 	 * @param data The data to load. The data is consumed during the load, so this
 	 * object is unusable once this function completes.
@@ -230,11 +236,11 @@ public class EngineLoader {
 			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
 		qaer.loadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
-		moveLoadingRcToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
+		moveStagingToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
 	}
 
 	private void loadIntermediateData( ImportData data, IEngine engine,
-			ImportData conformanceErrors ) throws ImportValidationException {
+			ImportData conformanceErrors ) throws ImportValidationException, IOException {
 
 		ImportMetadata im = data.getMetadata();
 		// fill in anything not already set. In legacy mode, nothing is set,
@@ -258,7 +264,7 @@ public class EngineLoader {
 
 		// we want to search all namespaces, but use the metadata's first
 		Map<String, String> namespaces = engine.getNamespaces();
-		namespaces.putAll( data.getMetadata().getNamespaces() );
+		namespaces.putAll( im.getNamespaces() );
 
 		try {
 			List<Statement> stmts = new ArrayList<>();
@@ -285,24 +291,34 @@ public class EngineLoader {
 			modeler.createMetamodel( data, namespaces, myrc );
 
 			for ( LoadingSheetData n : data.getNodes() ) {
-				addToEngine( n, engine, data );
+				addToStaging( n, engine, data );
 			}
 
 			qaer.separateConformanceErrors( data, conformanceErrors, engine );
 
 			for ( LoadingSheetData r : data.getRels() ) {
-				addToEngine( r, engine, data );
+				addToStaging( r, engine, data );
 			}
 
-			URI ebase = engine.getBaseUri();
-			myrc.add( ebase, MetadataConstants.VOID_SUBSET, data.getMetadata().getBase() );
-			myrc.add( ebase, OWL.IMPORTS, data.getMetadata().getBase() );
+			data.release();
 
-			myrc.add( data.getMetadata().getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
-			myrc.add( data.getMetadata().getBase(), RDF.TYPE, OWL.ONTOLOGY );
+			myrc.begin();
+			URI ebase = engine.getBaseUri();
+			myrc.add( ebase, MetadataConstants.VOID_SUBSET, im.getBase() );
+			myrc.add( ebase, OWL.IMPORTS, im.getBase() );
+
+			myrc.add( im.getBase(), RDF.TYPE, MetadataConstants.VOID_DS );
+			myrc.add( im.getBase(), RDF.TYPE, OWL.ONTOLOGY );
+			myrc.commit();
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
+			try {
+				myrc.rollback();
+			}
+			catch ( RepositoryException rr ) {
+				log.warn( rr, rr );
+			}
 		}
 	}
 
@@ -357,6 +373,7 @@ public class EngineLoader {
 
 	public void release() {
 		clear();
+		qaer.release();
 
 		try {
 			myrc.close();
@@ -374,30 +391,53 @@ public class EngineLoader {
 		FileUtils.deleteQuietly( stagingdir );
 	}
 
-	private void addToEngine( LoadingSheetData sheet, IEngine engine,
+	/**
+	 * Adds the given loading sheet data to the staging repository
+	 *
+	 * @param sheet
+	 * @param engine
+	 * @param alldata
+	 * @throws ImportValidationException
+	 * @throws RepositoryException
+	 */
+	private void addToStaging( LoadingSheetData sheet, IEngine engine,
 			ImportData alldata ) throws ImportValidationException, RepositoryException {
-
+		log.debug( "loading " + sheet.getName() + " to staging repository" );
 		// we want to search all namespaces, but use the metadata's first
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
 		EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
 
-		if ( sheet.isRel() ) {
-			ListIterator<LoadingNodeAndPropertyValues> lit = sheet.getData().listIterator();
-			while ( lit.hasNext() ) {
-				LoadingNodeAndPropertyValues nap = lit.next();
-				modeler.addRel( nap, namespaces, sheet, metas, myrc );
-				lit.remove();
+		try {
+			myrc.begin();
+			if ( sheet.isRel() ) {
+				DataIterator lit = sheet.iterator();
+				while ( lit.hasNext() ) {
+					LoadingNodeAndPropertyValues nap = lit.next();
+					modeler.addRel( nap, namespaces, sheet, metas, myrc );
+				}
 			}
+			else {
+				DataIterator lit = sheet.iterator();
+				while ( lit.hasNext() ) {
+					LoadingNodeAndPropertyValues nap = lit.next();
+					modeler.addNode( nap, namespaces, sheet, metas, myrc );
+				}
+			}
+			myrc.commit();
+			// myrc.close();
+			// myrc = myrc.getRepository().getConnection();
 		}
-		else {
-			ListIterator<LoadingNodeAndPropertyValues> lit = sheet.getData().listIterator();
-			while ( lit.hasNext() ) {
-				LoadingNodeAndPropertyValues nap = lit.next();
-				modeler.addNode( nap, namespaces, sheet, metas, myrc );
-				lit.remove();
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+			try {
+				myrc.rollback();
 			}
+			catch ( RepositoryException rex ) {
+				log.warn( rex, rex );
+			}
+			throw re;
 		}
 	}
 
@@ -412,12 +452,14 @@ public class EngineLoader {
 	 * <code>copyowls</code> is false
 	 * @throws RepositoryException
 	 */
-	private Collection<Statement> moveLoadingRcToEngine( IEngine engine,
+	private Collection<Statement> moveStagingToEngine( IEngine engine,
 			boolean copyowls ) throws RepositoryException {
 		myrc.commit();
+		log.debug( "moving staging data to engine" );
 		Set<Statement> owlstmts = new HashSet<>();
-		final List<Statement> stmts
-				= Iterations.asList( myrc.getStatements( null, null, null, false ) );
+		final RepositoryResult<Statement> stmts
+				= myrc.getStatements( null, null, null, false );
+		UriBuilder schema = engine.getSchemaBuilder();
 
 		// we're done importing the files, so add all the statements to our engine
 		ModificationExecutor mea = new ModificationExecutorAdapter() {
@@ -426,8 +468,13 @@ public class EngineLoader {
 				initNamespaces( conn );
 
 				conn.begin();
-				for ( Statement s : stmts ) {
-					conn.add( cleanStatement( s, vf ) );
+				while ( stmts.hasNext() ) {
+					Statement s = stmts.next();
+					conn.add( s );
+
+					if ( copyowls && schema.contains( s.getSubject() ) ) {
+						owlstmts.add( s );
+					}
 				}
 
 				// NOTE: no commit here
@@ -448,13 +495,6 @@ public class EngineLoader {
 		}
 
 		if ( copyowls ) {
-			UriBuilder schema = engine.getSchemaBuilder();
-			for ( Statement stmt : stmts ) {
-				if ( schema.contains( stmt.getSubject() ) ) {
-					owlstmts.add( cleanStatement( stmt, vf ) );
-				}
-			}
-
 			owls.addAll( owlstmts );
 			engine.addOwlData( owlstmts );
 		}
@@ -545,5 +585,14 @@ public class EngineLoader {
 		}
 
 		return modeler;
+	}
+
+	private static ImportData cacheOnDisk( ImportData data ) throws IOException {
+		ImportData copy = new ImportData( data.getMetadata() );
+		for ( LoadingSheetData lsd : data.getSheets() ) {
+			copy.add( new DiskBackedLoadingSheetData( lsd ) );
+		}
+
+		return copy;
 	}
 }

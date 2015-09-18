@@ -10,13 +10,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author ryan
  */
 public final class ImportData {
-
+	private static final Logger log = Logger.getLogger( ImportData.class );
 	private final List<LoadingSheetData> sheets = new ArrayList<>();
 	private ImportMetadata metadata;
 
@@ -28,7 +29,14 @@ public final class ImportData {
 		setMetadata( md );
 	}
 
-	public void clear() {
+	/**
+	 * Releases any resources used by this object
+	 */
+	public void release() {
+		for ( LoadingSheetData lsd : sheets ) {
+			lsd.release();
+		}
+
 		sheets.clear();
 		metadata.clear();
 	}
@@ -131,5 +139,6 @@ public final class ImportData {
 				sheet.findPropertyLinks( sheetset );
 			}
 		}
+		log.debug( "property links resolved" );
 	}
 }

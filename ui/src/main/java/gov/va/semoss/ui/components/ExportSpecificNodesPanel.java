@@ -118,7 +118,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 	}
 
 	private URI[] getAllNodes() {
-		List<URI> uriconcepts = NodeDerivationTools.instance().createConceptList( engine );
+		List<URI> uriconcepts = NodeDerivationTools.createConceptList( engine );
 		Map<URI, String> labels = GuiUtility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 

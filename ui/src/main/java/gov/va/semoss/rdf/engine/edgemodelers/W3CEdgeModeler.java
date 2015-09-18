@@ -26,9 +26,6 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 
 	private static final Logger log = Logger.getLogger( W3CEdgeModeler.class );
 
-	public W3CEdgeModeler() {
-	}
-
 	public W3CEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}

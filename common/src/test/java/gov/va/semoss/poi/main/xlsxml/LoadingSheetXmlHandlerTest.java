@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gov.va.semoss.poi.main;
+package gov.va.semoss.poi.main.xlsxml;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
