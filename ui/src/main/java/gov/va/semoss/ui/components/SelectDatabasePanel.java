@@ -134,10 +134,10 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
 				Insight ii = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
+				bindingPanel.setParameters( ii.getInsightParameters() );
 				if ( null != ii && ii.hasParameters() ) {
 					paramLabel.setVisible( true );
 					bindingPanel.setVisible( true );
-					bindingPanel.setParameters( ii.getInsightParameters() );
 				}
 				else {
 					paramLabel.setVisible( false );
@@ -398,7 +398,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Perspective persp
 					= perspectiveSelector.getItemAt( perspectiveSelector.getSelectedIndex() );
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			return persp.getLabel() + "-Insight-" + ( 1 + persp.indexOf( insight ) );
+			return insight.getLabel();
 		}
 
 		@Override
