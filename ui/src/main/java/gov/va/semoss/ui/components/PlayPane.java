@@ -1062,6 +1062,7 @@ public class PlayPane extends JFrame {
 
 		db.add( cloner );
 		db.add( clearer );
+		//db.add( unmounter) ;
 		db.addSeparator();
 
 		db.add( proper );
