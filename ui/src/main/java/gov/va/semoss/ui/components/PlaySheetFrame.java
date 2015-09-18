@@ -14,7 +14,6 @@ import gov.va.semoss.ui.actions.DbAction;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.DefaultPlaySheetIcons;
 
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.PlaySheetEnum;
@@ -213,7 +212,8 @@ public class PlaySheetFrame extends JInternalFrame {
 		tabs.add( title, c );
 
 		if ( 1 == tabs.getTabCount() ) {
-			ImageIcon icon = DefaultPlaySheetIcons.getDefaultIcon( c.getClass() );
+			PlaySheetEnum pse = PlaySheetEnum.valueForClass(c.getClass());
+			ImageIcon icon = pse.getSheetIcon();
 			if ( null != icon ) {
 				setFrameIcon( icon );
 			}
@@ -289,7 +289,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	}
 
 	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ) {
-		PlaySheetEnum pse = PlaySheetEnum.valueFor( insight );
+		PlaySheetEnum pse = PlaySheetEnum.valueForInsight( insight );
 		PlaySheetCentralComponent cmp
 				= PlaySheetCentralComponent.class.cast( pse.getSheetInstance() );
 		cmp.setTitle( insight.getLabel() );

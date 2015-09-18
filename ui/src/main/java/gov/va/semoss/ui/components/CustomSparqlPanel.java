@@ -275,7 +275,7 @@ public class CustomSparqlPanel extends JPanel {
 				sparqlArea.setTextOfSelectedTab( sparql );
 
 				//Pre-select the Playsheet of the Insight copied down:
-				PlaySheetEnum selectedPlaySheet = PlaySheetEnum.valueFor( selected );
+				PlaySheetEnum selectedPlaySheet = PlaySheetEnum.valueForInsight( selected );
 				playSheetComboBox.setSelectedItem( selectedPlaySheet );
 			}
 		} );

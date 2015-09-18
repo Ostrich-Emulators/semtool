@@ -20,7 +20,6 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.util.DefaultPlaySheetIcons;
 import gov.va.semoss.util.PlaySheetEnum;
 
 /**
@@ -57,7 +56,7 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 
 		super.getListCellRendererComponent( list, text, idx, sel, hasfocus );
 
-		Icon icon = DefaultPlaySheetIcons.getDefaultIcon( PlaySheetEnum.valueFor( insight ) );
+		Icon icon = PlaySheetEnum.valueForInsight( insight ).getSheetIcon();
 		if ( null == icon ) {
 			setIcon( null );
 		}
