@@ -7,13 +7,19 @@ package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
@@ -65,36 +71,9 @@ public class LoadingSheetDataTest {
 	}
 
 	@Test
-	public void testIterator() {
-	}
-
-	@Test
-	public void testHasSubjectTypeError() {
-	}
-
-	@Test
-	public void testSetSubjectTypeIsError() {
-	}
-
-	@Test
-	public void testHasObjectTypeError() {
-	}
-
-	@Test
-	public void testSetObjectTypeIsError() {
-	}
-
-	@Test
-	public void testHasRelationError() {
-	}
-
-	@Test
-	public void testSetRelationIsError() {
-	}
-
-	@Test
 	public void testSetPropertyIsError() {
-		LoadingSheetData lsd = LoadingSheetData.relsheet( "sbj", "obj", "relname" );
+		LoadingSheetData lsd
+				= LoadingSheetData.relsheet( "tabname", "sbj", "obj", "relname" );
 		lsd.addProperty( "xx" );
 		lsd.setPropertyIsError( "xx", false );
 		assertFalse( lsd.propertyIsError( "xx" ) );
@@ -105,23 +84,29 @@ public class LoadingSheetDataTest {
 	}
 
 	@Test
-	public void testSetSubjectType() {
-	}
-
-	@Test
-	public void testSetObjectType() {
-	}
-
-	@Test
-	public void testSetRelname() {
-	}
-
-	@Test
-	public void testPropertyIsError() {
-	}
-
-	@Test
 	public void testHasModelErrors() {
+		LoadingSheetData lsd
+				= LoadingSheetData.relsheet( "tabname", "sbj", "obj", "relname" );
+		lsd.addProperty( "xx" );
+		lsd.setPropertyIsError( "xx", true );
+		assertTrue( lsd.hasModelErrors() );
+	}
+
+	@Test
+	public void testHasModelErrors2() {
+		LoadingSheetData lsd
+				= LoadingSheetData.relsheet( "tabname", "sbj", "obj", "relname" );
+		assertFalse( lsd.hasModelErrors() );
+	}
+
+	@Test
+	public void testHasModelErrors3() {
+		LoadingSheetData lsd
+				= LoadingSheetData.relsheet( "tabname", "sbj", "obj", "relname" );
+		lsd.addProperty( "xx" );
+		lsd.setPropertyIsError( "xx", false );
+		lsd.setSubjectTypeIsError( true );
+		assertTrue( lsd.hasModelErrors() );
 	}
 
 	@Test
@@ -135,115 +120,79 @@ public class LoadingSheetDataTest {
 	}
 
 	@Test
-	public void testGetPropertyDataType() {
-	}
-
-	@Test
-	public void testGetObjectType() {
-	}
-
-	@Test
-	public void testGetRelname() {
-	}
-
-	@Test
-	public void testGetName() {
-	}
-
-	@Test
 	public void testAddProperty_String() {
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "tabname", "sbj" );
+		lsd.addProperty( "xx" );
+		lsd.addProperty( "yy" );
+		Map<String, Value> props = new HashMap<>();
+		ValueFactory vf = new ValueFactoryImpl();
+		props.put( "xx", vf.createLiteral( "testval" ) );
+		LoadingNodeAndPropertyValues naps = lsd.add( "instance", props );
+
+		Value expected[] = { vf.createLiteral( "instance" ),
+			vf.createLiteral( "testval" ), null };
+
+		Value[] vals = naps.convertToValueArray( vf );
+		assertArrayEquals( expected, vals );
 	}
 
 	@Test
-	public void testAddProperty_String_URI() {
+	public void testAddProperty_String2() {
+		LoadingSheetData lsd = LoadingSheetData.relsheet( "tabname", "sbj", "obj", "relname" );
+		lsd.addProperty( "xx" );
+		Map<String, Value> props = new HashMap<>();
+		ValueFactory vf = new ValueFactoryImpl();
+		props.put( "xx", vf.createLiteral( "testval" ) );
+		LoadingNodeAndPropertyValues naps = lsd.add( "instance", "object", props );
+
+		Value expected[] = { vf.createLiteral( "instance" ),
+			vf.createLiteral( "object" ), vf.createLiteral( "testval" ) };
+
+		Value[] vals = naps.convertToValueArray( vf );
+		assertArrayEquals( expected, vals );
 	}
 
 	@Test
-	public void testGetProperties() {
+	public void testHasProp() {
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "sbj" );
+		lsd.addProperty( "xx:label" );
+		Map<String, Value> props = new HashMap<>();
+		ValueFactory vf = new ValueFactoryImpl();
+		props.put( "xx:label", vf.createLiteral( "my label" ) );
+		LoadingNodeAndPropertyValues nap = lsd.add( "instance", "object", props );
+
+		Map<String, String> nsmap = new HashMap<>();
+		nsmap.put( "xx", RDFS.NAMESPACE );
+		assertTrue( nap.hasProperty( RDFS.LABEL, nsmap ) );
 	}
 
 	@Test
-	public void testHasProperties() {
+	public void testHasProp2() {
+		LoadingSheetData lsd = LoadingSheetData.nodesheet( "sbj" );
+		lsd.addProperties( Arrays.asList( "xx:label", "yy", "yy:junk" ) );
+		Map<String, Value> props = new HashMap<>();
+		ValueFactory vf = new ValueFactoryImpl();
+		props.put( "xx:label", vf.createLiteral( "my label" ) );
+		props.put( "yy", vf.createLiteral( "my y val" ) );
+		props.put( "yy:junk", vf.createLiteral( "my junk val" ) );
+		LoadingNodeAndPropertyValues nap = lsd.add( "instance", "object", props );
+
+		Map<String, String> nsmap = new HashMap<>();
+		nsmap.put( RDFS.PREFIX, RDFS.NAMESPACE );
+		nsmap.put( "xx", "http://google.com/" );
+		assertFalse( nap.hasProperty( RDFS.LABEL, nsmap ) );
 	}
 
 	@Test
-	public void testAddProperties() {
-	}
-
-	@Test
-	public void testRelease() {
-	}
-
-	@Test
-	public void testFinishLoading() {
-	}
-
-	@Test
-	public void testClear() {
-	}
-
-	@Test
-	public void testSetProperties() {
-	}
-
-	@Test
-	public void testGetPropertiesAndDataTypes() {
-	}
-
-	@Test
-	public void testGetSubjectType() {
-	}
-
-	@Test
-	public void testCacheNapLabel() {
-	}
-
-	@Test
-	public void testIsNapLabelCached() {
-	}
-
-	@Test
-	public void testIsPropLabelCached() {
-	}
-
-	@Test
-	public void testGetData() {
-	}
-
-	@Test
-	public void testGetDataRef() {
-	}
-
-	@Test
-	public void testSetData() {
-	}
-
-	@Test
-	public void testCommit() {
-	}
-
-	@Test
-	public void testAdded() {
-	}
-
-	@Test
-	public void testAdd_LoadingSheetDataLoadingNodeAndPropertyValues() {
-	}
-
-	@Test
-	public void testAdd_String() {
-	}
-
-	@Test
-	public void testAdd_String_Map() {
-	}
-
-	@Test
-	public void testAdd_String_String() {
-	}
-
-	@Test
-	public void testAdd_3args() {
+	public void testNapString() {
+		LoadingSheetData lsd
+				= LoadingSheetData.relsheet( "tabname", "sbj", "obj",	"relname" );
+		lsd.addProperty( "xx" );
+		LoadingNodeAndPropertyValues nap = lsd.add( "instance", "target" );
+		nap.setSubjectIsError( true );
+		nap.setObjectIsError( true );
+		
+		assertEquals( "instance<e>;target<e>; relname", nap.toString() );
 	}
 
 	@Test
@@ -337,10 +286,6 @@ public class LoadingSheetDataTest {
 	}
 
 	@Test
-	public void testIsLink() {
-	}
-
-	@Test
 	public void testCopyHeadersOf() {
 		LoadingSheetData lsd = LoadingSheetData.relsheet( "sbj", "obj", "relname" );
 		lsd.addProperty( "xx" );
@@ -353,6 +298,7 @@ public class LoadingSheetDataTest {
 		assertFalse( newdata.hasObjectTypeError() );
 		assertTrue( newdata.isRel() );
 	}
+
 	@Test
 	public void testCopyHeadersOf2() {
 		LoadingSheetData lsd = LoadingSheetData.nodesheet( "sbj" );
