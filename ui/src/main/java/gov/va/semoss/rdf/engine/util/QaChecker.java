@@ -5,9 +5,9 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
-import static com.hp.hpl.jena.tdb.sys.FileRef.file;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
@@ -214,7 +214,9 @@ public class QaChecker {
 		String stype = data.getSubjectType();
 		String otype = data.getObjectType();
 
-		for ( LoadingNodeAndPropertyValues nap : data.getData() ) {
+		DataIterator di = data.iterator();
+		while( di.hasNext() ){
+			LoadingNodeAndPropertyValues nap = di.next();
 			// check that the subject and object are in our instance cache
 			ConceptInstanceCacheKey skey
 					= new ConceptInstanceCacheKey( stype, nap.getSubject() );

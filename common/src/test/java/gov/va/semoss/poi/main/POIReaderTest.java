@@ -6,6 +6,7 @@
 package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
+import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.io.File;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -191,20 +192,20 @@ public class POIReaderTest {
 	public void testLoadingSheet11() throws Exception {
 		POIReader rdr = new POIReader();
 		data = rdr.readOneFile( TEST11 );
-		assertEquals( 1, data.getSheet( "Humans" ).getData().size() );
-		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
-		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
-		assertEquals( "Yugo", data.getSheet( "Purchases" ).getData().get( 0 ).getObject() );
+		assertEquals( 1, data.getSheet( "Humans" ).rows() );
+		assertEquals( "Yuri", data.getSheet( "Humans" ).iterator().next().getSubject() );
+		assertEquals( 1, data.getSheet( "Purchases" ).rows() );
+		assertEquals( "Yugo", data.getSheet( "Purchases" ).iterator().next().getObject() );
 	}
 
 	@Test
 	public void testLoadingSheet12() throws Exception {
 		POIReader rdr = new POIReader();
 		data = rdr.readOneFile( TEST12 );
-		assertEquals( 1, data.getSheet( "Humans" ).getData().size() );
-		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
-		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
-		assertEquals( "Yugo", data.getSheet( "Purchases" ).getData().get( 0 ).getObject() );
+		assertEquals( 1, data.getSheet( "Humans" ).rows() );
+		assertEquals( "Yuri", data.getSheet( "Humans" ).iterator().next().getSubject() );
+		assertEquals( 1, data.getSheet( "Purchases" ).rows() );
+		assertEquals( "Yugo", data.getSheet( "Purchases" ).iterator().next().getObject() );
 	}
 
 	@Test( expected = ImportValidationException.class )

@@ -51,7 +51,6 @@ public class GraphMLWriter implements GraphWriter {
 		}
 	}
 
-	
 	@Override
 	public void write( ImportData data, OutputStream output ) throws IOException {
 		Graph graph = getGraph( data );
@@ -70,7 +69,9 @@ public class GraphMLWriter implements GraphWriter {
 		Map<String, Vertex> nodes = new HashMap<>();
 		Map<String, Edge> edges = new HashMap<>();
 		for ( LoadingSheetData lsd : data.getNodes() ) {
-			for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+			LoadingSheetData.DataIterator di = lsd.iterator();
+			while ( di.hasNext() ) {
+				LoadingNodeAndPropertyValues nap = di.next();
 				Vertex v = graph.addVertex( null );
 				v.setProperty( "label", nap.getSubject() );
 				v.setProperty( "type", nap.getSubjectType() );
@@ -83,7 +84,9 @@ public class GraphMLWriter implements GraphWriter {
 		}
 
 		for ( LoadingSheetData lsd : data.getRels() ) {
-			for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+			LoadingSheetData.DataIterator di = lsd.iterator();
+			while ( di.hasNext() ) {
+				LoadingNodeAndPropertyValues nap = di.next();
 				String sid = nap.getSubjectType() + nap.getSubject();
 				String oid = nap.getObjectType() + nap.getObject();
 
@@ -103,7 +106,7 @@ public class GraphMLWriter implements GraphWriter {
 				Edge edge = graph.addEdge( null, nodes.get( sid ), nodes.get( oid ),
 						nap.getRelname() );
 				edges.put( edgeid( nap ), edge );
-				
+
 				for ( Map.Entry<String, Value> en : nap.entrySet() ) {
 					edge.setProperty( en.getKey(), en.getValue().stringValue() );
 				}
