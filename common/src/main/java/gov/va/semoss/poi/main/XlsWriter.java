@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.poi.main;
 
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -117,7 +118,9 @@ public class XlsWriter implements GraphWriter {
 			String[] row = new String[2 + props.size()];
 			CellStyle[] fmts = new CellStyle[2 + props.size()];
 
-			for ( LoadingNodeAndPropertyValues nap : nodes.getData() ) {
+			DataIterator di = nodes.iterator();
+			while( di.hasNext() ){
+				LoadingNodeAndPropertyValues nap = di.next();
 				row[1] = nap.getSubject();
 				fmts[1] = ( nap.isSubjectError() ? errorstyle : null );
 
@@ -139,12 +142,14 @@ public class XlsWriter implements GraphWriter {
 			String[] row = new String[3 + props.size()];
 			CellStyle[] fmts = new CellStyle[3 + props.size()];
 
-			if ( rels.getData().isEmpty() ) {
+			if ( rels.isEmpty() ) {
 				// no rows to add, but still add the relationship name field
 				row[0] = rels.getRelname();
 			}
 
-			for ( LoadingNodeAndPropertyValues nap : rels.getData() ) {
+			DataIterator di = rels.iterator();
+			while( di.hasNext() ){
+				LoadingNodeAndPropertyValues nap = di.next();
 				if ( rels.hasErrors() ) {
 					currentsheet.setTabColor( IndexedColors.ROSE.getIndex() );
 				}
@@ -366,7 +371,7 @@ public class XlsWriter implements GraphWriter {
 
 			// if we have too many rows for one tab, we have
 			// to separate this sheet data into multiple tabs
-			while ( count < lsd.getData().size() ) {
+			while ( count < lsd.rows() ) {
 				String tname = generateSheetName( lsd.getName(), sheetnames );
 				tabnames.add( tname );
 				count += maxtabrows;

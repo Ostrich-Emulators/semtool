@@ -24,6 +24,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.io.IOException;
 import org.apache.log4j.Logger;
@@ -68,7 +69,9 @@ public class GsonWriter implements GraphWriter {
 		Map<String, Vertex> nodes = new HashMap<>();
 		Map<String, Edge> edges = new HashMap<>();
 		for ( LoadingSheetData lsd : data.getNodes() ) {
-			for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+			DataIterator di = lsd.iterator();
+			while( di.hasNext() ){
+				LoadingNodeAndPropertyValues nap = di.next();
 				Vertex v = graph.addVertex( null );
 				v.setProperty( "label", nap.getSubject() );
 				v.setProperty( "type", nap.getSubjectType() );
@@ -81,7 +84,9 @@ public class GsonWriter implements GraphWriter {
 		}
 
 		for ( LoadingSheetData lsd : data.getRels() ) {
-			for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+			DataIterator di = lsd.iterator();
+			while( di.hasNext() ){
+				LoadingNodeAndPropertyValues nap = di.next();
 				String sid = nap.getSubjectType() + nap.getSubject();
 				String oid = nap.getObjectType() + nap.getObject();
 

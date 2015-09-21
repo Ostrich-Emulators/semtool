@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components.models;
 
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class LoadingSheetModel extends ValueTableModel {
 			for ( int i = 1; i < val.length; i++ ) {
 				propmap.put( props[i], val[i] );
 			}
-			
+
 			LoadingNodeAndPropertyValues nap = lsd.add( val[0].stringValue(), propmap );
 		}
 
@@ -91,7 +92,10 @@ public class LoadingSheetModel extends ValueTableModel {
 	public void checkForErrors() {
 		if ( null == realtimer ) {
 			// no error checking, so reset all errors
-			for ( LoadingNodeAndPropertyValues nap : sheetdata.getData() ) {
+			DataIterator di = sheetdata.iterator();
+			while ( di.hasNext() ) {
+				LoadingNodeAndPropertyValues nap = di.next();
+
 				nap.setSubjectIsError( false );
 				nap.setObjectIsError( false );
 			}
@@ -230,7 +234,9 @@ public class LoadingSheetModel extends ValueTableModel {
 			hash.put( nap, problem );
 		}
 
-		for ( LoadingNodeAndPropertyValues nap : sheetdata.getData() ) {
+		DataIterator di = sheetdata.iterator();
+		while ( di.hasNext() ) {
+			LoadingNodeAndPropertyValues nap = di.next();
 			if ( hash.containsKey( nap ) ) {
 				Integer problem = hash.get( nap );
 				if ( null == problem ) {
@@ -332,7 +338,10 @@ public class LoadingSheetModel extends ValueTableModel {
 		ValueFactory vf = new ValueFactoryImpl();
 		List<String> heads = naps.getHeaders();
 		List<Value[]> valdata = new ArrayList<>();
-		for ( LoadingSheetData.LoadingNodeAndPropertyValues node : naps.getData() ) {
+		
+		DataIterator di = naps.iterator();
+		while( di.hasNext() ){
+			LoadingNodeAndPropertyValues node = di.next();
 			valdata.add( node.convertToValueArray( vf ) );
 			if ( node.hasError() ) {
 				errorcount++;
@@ -343,7 +352,7 @@ public class LoadingSheetModel extends ValueTableModel {
 	}
 
 	public LoadingNodeAndPropertyValues getNap( int row ) {
-		if ( row < sheetdata.getData().size() ) {
+		if ( row < sheetdata.rows() ) {
 			return sheetdata.getData().get( row );
 		}
 		return null;
@@ -370,13 +379,15 @@ public class LoadingSheetModel extends ValueTableModel {
 		int cols = getColumnCount();
 		boolean hasprops = ( cols > firstprop );
 
+		DataIterator di = sheetdata.iterator();
 		for ( int r = 0; r < rows; r++ ) {
 			String sbj = getValueAt( r, 0 ).toString();
 			LoadingSheetData.LoadingNodeAndPropertyValues nap = ( sheetdata.isRel()
 					? lsd.add( sbj, getValueAt( r, 1 ).toString() ) : lsd.add( sbj ) );
 
-			nap.setSubjectIsError( sheetdata.getData().get( r ).isSubjectError() );
-			nap.setObjectIsError( sheetdata.getData().get( r ).isObjectError() );
+			LoadingNodeAndPropertyValues oldnap = di.next();
+			nap.setSubjectIsError( oldnap.isSubjectError() );
+			nap.setObjectIsError( oldnap.isObjectError() );
 
 			if ( hasprops ) {
 				for ( int p = 0; p < heads.size(); p++ ) {

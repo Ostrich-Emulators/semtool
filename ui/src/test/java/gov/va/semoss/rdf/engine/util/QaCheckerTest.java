@@ -243,11 +243,11 @@ public class QaCheckerTest {
 
 		LoadingSheetData errlsd = errs.getSheet( "Category" );
 		LoadingSheetData oklsd = test.getSheet( "Category" );
-		assertEquals( wrong, errlsd.getData().get( 0 ) );
-		assertEquals( 1, errlsd.getData().size() );
+		assertEquals( wrong, errlsd.iterator().next() );
+		assertEquals( 1, errlsd.rows() );
 
-		assertEquals( right, oklsd.getData().get( 0 ) );
-		assertEquals( 1, oklsd.getData().size() );
+		assertEquals( right, oklsd.iterator().next() );
+		assertEquals( 1, oklsd.rows() );
 
 		assertNotEquals( errlsd, oklsd );
 	}

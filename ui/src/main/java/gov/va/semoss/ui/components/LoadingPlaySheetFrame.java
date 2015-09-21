@@ -11,6 +11,7 @@ import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -448,7 +449,9 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 							if ( !( null == errs || errs.isEmpty() ) ) {
 								for ( LoadingSheetData lsd : errs.getSheets() ) {
-									for ( LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+									DataIterator di = lsd.iterator();
+									while( di.hasNext() ){
+										LoadingNodeAndPropertyValues nap = di.next();
 										if ( nap.hasError() ) {
 											ok[0]++;
 										}
@@ -704,7 +707,9 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					LoadingSheetData newrels = LoadingSheetData.copyHeadersOf( rlsd );
 					newrels.setProperties( rlsd.getPropertiesAndDataTypes() );
 
-					for ( LoadingNodeAndPropertyValues node : rlsd.getData() ) {
+					DataIterator di = rlsd.iterator();
+					while( di.hasNext() ){
+						LoadingNodeAndPropertyValues node = di.next();
 						if ( node.hasError() && dobads ) {
 							newrels.add( node );
 						}
