@@ -86,7 +86,9 @@ public class LoadingSheetData {
 	}
 
 	public boolean hasErrors() {
-		for ( LoadingNodeAndPropertyValues nap : getData() ) {
+		DataIterator di = iterator();
+		while ( di.hasNext() ) {
+			LoadingNodeAndPropertyValues nap = di.next();
 			if ( nap.hasError() ) {
 				return true;
 			}
@@ -279,10 +281,6 @@ public class LoadingSheetData {
 		return new ArrayList<>( data );
 	}
 
-	protected List<LoadingNodeAndPropertyValues> getDataRef() {
-		return data;
-	}
-
 	/**
 	 * Sets the internal data to a copy of the given data.
 	 *
@@ -358,6 +356,14 @@ public class LoadingSheetData {
 		return heads;
 	}
 
+	/**
+	 * Sets the headers of this loading sheet, including subject, object, and all
+	 * properties. Note that the relation name cannot be changed with this
+	 * function, nor can the type of loading sheet it is. The actual number of
+	 * headers cannot be changed, either, but if attempted, will silently fail.
+	 *
+	 * @param newheads The new headers.
+	 */
 	public void setHeaders( List<String> newheads ) {
 		if ( newheads.size() != getHeaders().size() ) {
 			log.error( "cannot change header size" );
@@ -408,7 +414,8 @@ public class LoadingSheetData {
 
 	@Override
 	public String toString() {
-		return getName() + ( isRel() ? "(rel)" : "(node)" ) + " with " + getData().size() + " naps";
+		return getName() + ( isRel() ? "(rel)" : "(node)" ) + " with "
+				+ rows() + " naps";
 	}
 
 	/**
@@ -708,12 +715,12 @@ public class LoadingSheetData {
 		@Override
 		public boolean hasNext() {
 			boolean hasnext = iter.hasNext();
-			
+
 			// if we're totally empty, release anything we're still holding onto
 			if ( !hasnext ) {
 				release();
 			}
-			
+
 			return hasnext;
 		}
 
