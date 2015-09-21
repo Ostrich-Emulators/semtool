@@ -17,19 +17,19 @@ public class Insight implements Serializable {
 	private static final long serialVersionUID = 5192674160082789840L;
 	private static final Logger log = Logger.getLogger( Insight.class );
 	//ID of the question:
-	URI id = null;
+	private URI id = null;
 	//Name of the question:
-	String label = "";
+	private String label = "";
 	//Sparql for the question:
-	String sparql = "";
+	private String sparql = "";
 	//Type of entity this insight has:
-	String entityType = "";
+	private String entityType = "";
 	//The layout used to render this insight:
-	String output = "";
+	private String output = "";
 	//Description of Insight:
-	String description = "";
+	private String description = "";
 	//Author of Insight:
-	String creator = "";
+	private String creator = "";
 	//Date Created:
 	private Date created;
 	//Date Modified:
@@ -38,10 +38,11 @@ public class Insight implements Serializable {
 	//The default value of this Insight is a Sparql query in most cases.
 	//Some Insights depend upon Java renderer classes, instead of queries.
 	//For these cases, this value may be altered from within the InsightManager:
-	boolean defautlValueIsQuery = true;
+	private boolean defautlValueIsQuery = true;
 
 	//InsightParameters:
-	List<Parameter> parameters = new ArrayList<>();
+	private final List<Parameter> parameters = new ArrayList<>();
+	private InsightOutputType type;
 
 	public Insight() {
 	}
@@ -92,6 +93,14 @@ public class Insight implements Serializable {
 
 	public void setId( URI id ) {
 		this.id = id;
+	}
+
+	public InsightOutputType getOutputType() {
+		return type;
+	}
+
+	public void setOutputType( InsightOutputType type ) {
+		this.type = type;
 	}
 
 	public String getEntityType() {
