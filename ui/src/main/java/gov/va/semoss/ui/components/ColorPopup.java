@@ -27,16 +27,13 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
-import gov.va.semoss.ui.main.Starter;
-import gov.va.semoss.user.UserImpl;
-import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.Utility;
 import gov.va.semoss.om.GraphColorRepository;
+import gov.va.semoss.user.LocalUserImpl;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * This class sets the visualization viewer for a popup menu.
@@ -65,7 +62,7 @@ public class ColorPopup extends JMenu {
 						try {
 							//Properties props = DIHelper.getInstance().getCoreProp();
 							gcr.updateColor(v.getType(), en.getValue());
-							UserImpl.getUser().setProperty(v.getType().getLocalName()+"_COLOR", en.getKey());
+							LocalUserImpl.getLocalUser().setProperty(v.getType().getLocalName()+"_COLOR", en.getKey());
 							
 							} catch (Exception ex) {
 								// TODO Auto-generated catch block

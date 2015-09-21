@@ -5,8 +5,6 @@
  */
 package gov.va.semoss.user;
 
-import java.security.Permission;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +18,20 @@ public class LocalUserImpl extends AbstractUser {
 
 	private static final String NAMESPACE_KEY = "USER_NAMESPACES";
 	private final Preferences prefs = Preferences.userNodeForPackage( User.class );
+private static User user;
 
+
+	public LocalUserImpl(){
+		super( System.getProperty( "user.name" ) );
+	}
+
+	public static User getLocalUser() {
+		if ( null == user ) {
+			user = new LocalUserImpl();
+		}
+		return user;
+	}
+		
 	@Override
 	public Map<String, String> getNamespaces() {
 		Map<String, String> namespaces = new HashMap<>();
@@ -97,15 +108,13 @@ public class LocalUserImpl extends AbstractUser {
 	}
 
 	@Override
-	public String getProperty(String prop) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setProperty(String prop, String value) {
-		// TODO Auto-generated method stub
+	public void setProperty( String prop, String value ) {
+		prefs.put( prop, value.trim() );
 		
 	}
 
+	@Override
+	public String getProperty( String prop ) {
+		return prefs.get( prop, null );
+	}
 }
