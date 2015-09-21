@@ -15,7 +15,6 @@ import java.util.prefs.Preferences;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
-import gov.va.semoss.ui.main.listener.impl.FileBrowseListener;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.ui.actions.DbAction;
@@ -225,8 +224,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 				"Confirm Reset", JOptionPane.WARNING_MESSAGE );
 		if ( JOptionPane.YES_OPTION == ok ) {
 			Class<?> classesToClear[] = { DbAction.class, FileBrowsePanel.class,
-				PlayPane.class, SemossPreferences.class, FileBrowseListener.class,
-				BindingPanel.class
+				PlayPane.class, SemossPreferences.class, BindingPanel.class
 			};
 
 			for ( Class<?> c : classesToClear ) {
