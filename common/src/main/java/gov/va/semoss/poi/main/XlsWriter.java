@@ -119,7 +119,7 @@ public class XlsWriter implements GraphWriter {
 			CellStyle[] fmts = new CellStyle[2 + props.size()];
 
 			DataIterator di = nodes.iterator();
-			while( di.hasNext() ){
+			while ( di.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = di.next();
 				row[1] = nap.getSubject();
 				fmts[1] = ( nap.isSubjectError() ? errorstyle : null );
@@ -148,7 +148,7 @@ public class XlsWriter implements GraphWriter {
 			}
 
 			DataIterator di = rels.iterator();
-			while( di.hasNext() ){
+			while ( di.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = di.next();
 				if ( rels.hasErrors() ) {
 					currentsheet.setTabColor( IndexedColors.ROSE.getIndex() );
@@ -342,23 +342,26 @@ public class XlsWriter implements GraphWriter {
 
 		List<String[]> mddata = new ArrayList<>();
 		if ( null != data.getSchemaBuilder() ) {
-			mddata.add( new String[]{ "@schema-namespace", null, data.getSchemaBuilder().toString() } );
+			mddata.add( new String[]{ "@prefix", ":schema",
+				"<" + data.getSchemaBuilder().toString() + ">" } );
 		}
 
 		if ( null != data.getDataBuilder() ) {
-			mddata.add( new String[]{ "@data-namespace", null, data.getDataBuilder().toString() } );
+			mddata.add( new String[]{ "@prefix", ":data",
+				"<" + data.getDataBuilder().toString() + ">" } );
 		}
 
 		if ( null != data.getBase() ) {
-			mddata.add( new String[]{ "@data", null, data.getBase().toString() } );
+			mddata.add( new String[]{ "@prefix", ":",
+				"<" + data.getBase().toString() + ">" } );
 		}
 
 		for ( Map.Entry<String, String> en : data.getNamespaces().entrySet() ) {
-			mddata.add( new String[]{ "@prefix", en.getKey(), en.getValue() } );
+			mddata.add( new String[]{ "@prefix", en.getKey(), "<" + en.getValue() + ">" } );
 		}
 
 		for ( String[] stmt : data.getStatements() ) {
-			mddata.add( new String[]{ "@triple", stmt[0], stmt[1], stmt[2] } );
+			mddata.add( new String[]{ stmt[0], stmt[1], stmt[2] } );
 		}
 
 		createWorkbook();
@@ -385,8 +388,15 @@ public class XlsWriter implements GraphWriter {
 
 		if ( !mddata.isEmpty() ) {
 			XlsWriter.this.createTab( metaSheetName );
+			boolean first = true;
 			for ( String[] row : mddata ) {
-				addRow( row );
+				String actuals[] = new String[4];
+				System.arraycopy( row, 0, actuals, 1, row.length );
+				if ( first ) {
+					actuals[0] = "Metadata";
+					first = false;
+				}
+				addRow( actuals );
 			}
 		}
 	}

@@ -305,6 +305,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 		public CacheIterator() throws IOException {
 			reader = new BufferedReader( new FileReader( backingfile ) );
+			cacheMoreFromStore();
 		}
 
 		@Override
