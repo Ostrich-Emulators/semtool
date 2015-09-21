@@ -62,11 +62,6 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	}
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String type,
-			Collection<String> props ) throws IOException {
-		this( tabtitle, type, null, null, props );
-	}
-
-	protected DiskBackedLoadingSheetData( String tabtitle, String type,
 			Map<String, URI> props ) throws IOException {
 		this( tabtitle, type, null, null, props );
 	}
@@ -74,11 +69,6 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	protected DiskBackedLoadingSheetData( String tabtitle, String sType, String oType,
 			String relname ) throws IOException {
 		this( tabtitle, sType, oType, relname, new HashMap<>() );
-	}
-
-	protected DiskBackedLoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Collection<String> props ) throws IOException {
-		this( tabtitle, sType, oType, relname );
 	}
 
 	public DiskBackedLoadingSheetData( LoadingSheetData model ) throws IOException {
