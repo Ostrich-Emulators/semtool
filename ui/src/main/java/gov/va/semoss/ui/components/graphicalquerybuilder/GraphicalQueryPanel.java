@@ -12,7 +12,6 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.ObservableGraph;
 import edu.uci.ics.jung.graph.event.GraphEvent;
-import edu.uci.ics.jung.graph.event.GraphEvent.Type;
 import edu.uci.ics.jung.graph.event.GraphEventListener;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
@@ -48,7 +47,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -179,7 +181,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private void buildTypeSelector() {
 
 		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
+			SwingUtilities.invokeAndWait( new Runnable() {
 
 				@Override
 				public void run() {
@@ -190,7 +192,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						typearea.removeAll();
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
 
-						List<URI> concepts = NodeDerivationTools.instance().createConceptList( engine );
+						List<URI> concepts = NodeDerivationTools.createConceptList( engine );
 						Map<URI, String> conceptlabels = GuiUtility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );
@@ -331,14 +333,14 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		if ( null != sparqlarea ) {
 			String sparql = ( 0 == graph.getVertexCount()
 					? ""
-					: new GraphToSparql( getEngine().getNamespaces() ).select( graph, 
+					: new GraphToSparql( getEngine().getNamespaces() ).select( graph,
 							getQueryOrdering() ) );
 			sparqlarea.setText( sparql );
 		}
 	}
 
 	private String createQueryId( QueryGraphElement v,
-			List<QueryGraphElement> nodesAndEdges ) {
+			Collection<QueryGraphElement> nodesAndEdges ) {
 		// this is a two-step process
 		// 1) figure out what names have been used
 		// 2) come up with a name based on my first type
@@ -347,7 +349,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		Set<String> used = new HashSet<>();
 		int maxid = -1;
 		String base = ( Constants.ANYNODE.equals( v.getType() )
-				? ( v instanceof QueryNode ? "node" : "link" )
+				? ( v.isNode() ? "node" : "link" )
 				: v.getType().getLocalName() );
 
 		Pattern pat = Pattern.compile( base + "([0-9]+)$" );
@@ -380,7 +382,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	}
 
 	private String createVariableId( QueryGraphElement v, URI type,
-			List<QueryGraphElement> nodesAndEdges ) {
+			Collection<QueryGraphElement> nodesAndEdges ) {
 		// just like createQueryId, but for objects
 		Set<String> used = new HashSet<>();
 		int maxid = -1;
@@ -419,9 +421,19 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	 * Assigns new configs to nodes in the graph after first removing old configs.
 	 */
 	private void updateSparqlConfigs() {
-		List<QueryGraphElement> todo = new ArrayList<>();
+		Set<QueryGraphElement> todo = new LinkedHashSet<>();
 		todo.addAll( graph.getVertices() );
 		todo.addAll( graph.getEdges() );
+
+		// remove any ordering information for non-existant elements
+		Iterator<QueryOrder> it = ordering.iterator();
+		while ( it.hasNext() ) {
+			QueryOrder qo = it.next();
+			
+			if ( !todo.contains( qo.base ) ) {
+				it.remove();
+			}
+		}
 
 		for ( QueryGraphElement v : todo ) {
 			if ( null == v.getQueryId() ) {
@@ -443,11 +455,6 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			@Override
 			public void handleGraphEvent( GraphEvent evt ) {
 				updateSparql();
-
-				if ( Type.VERTEX_ADDED == evt.getType()
-						|| Type.VERTEX_ADDED == evt.getType() ) {
-
-				}
 			}
 		} );
 	}

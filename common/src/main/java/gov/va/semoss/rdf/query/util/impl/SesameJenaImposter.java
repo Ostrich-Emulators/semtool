@@ -7,7 +7,6 @@ package gov.va.semoss.rdf.query.util.impl;
 
 
 import gov.va.semoss.util.RDFDatatypeTools;
-import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -49,7 +48,7 @@ public class SesameJenaImposter extends ListQueryAdapter<Object[]> {
 
 		if ( v instanceof Literal ) {
 			Literal l = Literal.class.cast( v );
-			return RDFDatatypeTools.instance().getObjectFromValue( l );
+			return RDFDatatypeTools.getObjectFromValue( l );
 		}
 		return v;
 	}
