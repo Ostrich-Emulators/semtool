@@ -104,8 +104,8 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			}
 			else {
 				PlaySheetFrame psf = new PlaySheetFrame( engine, getFrameTitle() );
-				DIHelper.getInstance().getDesktop().add( psf );
 				pt = psf.getCreateTask( insight, query.getBindingMap() );
+				DIHelper.getInstance().getDesktop().add( psf );
 			}
 
 			DIHelper.getInstance().getPlayPane().showDesktop();
