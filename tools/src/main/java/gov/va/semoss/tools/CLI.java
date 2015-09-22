@@ -19,6 +19,14 @@
  */
 package gov.va.semoss.tools;
 
+import com.bigdata.journal.IIndexManager;
+import com.bigdata.journal.ITx;
+import com.bigdata.journal.Journal;
+import com.bigdata.rdf.sail.BigdataSail;
+import com.bigdata.rdf.sail.CreateKBTask;
+import com.bigdata.rdf.sail.webapp.NanoSparqlServer;
+import com.bigdata.rdf.store.AbstractTripleStore;
+import com.bigdata.rdf.task.AbstractApiTask;
 import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,14 +39,15 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
-import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
+import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +55,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
@@ -56,6 +67,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.jetty.server.Server;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -63,14 +75,13 @@ import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 public class CLI {
 
-	private static final Logger logger = Logger.getLogger( CLI.class );
+	private static final Logger log = Logger.getLogger( CLI.class );
 	private static final String TRIALS[] = { "create", "update", "replace",
 		"export", "server" };
 
@@ -361,7 +372,10 @@ public class CLI {
 		OptionBuilder.withDescription( "Export data to a file." );
 		Option export = OptionBuilder.create( "export" );
 
-		Option server = new Option( "server", "Start a Sparql Endpoint" );
+		OptionBuilder.withArgName( "old.jnl" );
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription( "Start a Sparql Endpoint." );
+		Option server = OptionBuilder.create( "server" );
 
 		OptionGroup modes = new OptionGroup();
 		modes.addOption( create );
@@ -450,7 +464,7 @@ public class CLI {
 		}
 		else {
 			if ( replace ) {
-				logger.warn( "creating new database instead of replacing: " + dbfile );
+				log.warn( "creating new database instead of replacing: " + dbfile );
 			}
 
 			EngineCreateBuilder ecb = new EngineCreateBuilder( dbdir,
@@ -491,7 +505,7 @@ public class CLI {
 				engine.commit();
 			}
 			catch ( Exception e ) {
-				logger.error( e, e );
+				log.error( e, e );
 			}
 		}
 
@@ -540,8 +554,63 @@ public class CLI {
 		engine = new BigDataEngine( BigDataEngine.generateProperties( dbfile ) );
 	}
 
-	public void serve( CommandLine cmd ) {
+	public void serve( CommandLine cmd ) throws IOException, RepositoryException {
+		if ( !dbfile.exists() ) {
+			throw new FileNotFoundException( dbfile.getAbsolutePath() );
+		}
 
+		try {
+			// the journal is the file itself
+			Properties dbprops = BigDataEngine.generateProperties( dbfile );
+			Journal journal = new Journal( dbprops );
+
+			// the main KB
+			dbprops.setProperty( BigdataSail.Options.NAMESPACE, "kb" );
+			CreateKBTask ctor = new CreateKBTask( "kb", dbprops );
+			try {
+				AbstractApiTask.submitApiTask( journal, ctor ).get();
+				AbstractTripleStore triples
+						= AbstractTripleStore.class.cast( journal.getResourceLocator().
+								locate( "kb", ITx.UNISOLATED ) );
+
+				IIndexManager indexmgr = triples.getIndexManager();
+
+				Map<String, String> opts = new HashMap<>();
+				for ( String key : dbprops.stringPropertyNames() ) {
+					opts.put( key, dbprops.getProperty( key ) );
+				}
+				opts.put( BigdataSail.Options.READ_ONLY, Boolean.toString( true ) );
+
+				// find an open port
+				int port = 0;
+				for ( int i = 1024; i < 65536; i++ ) {
+					ServerSocket ss = null;
+					try {
+						ss = new ServerSocket( i );
+						port = i;
+						break;
+					}
+					catch ( Exception e ) {
+						// don't care; just go to the next port
+					}
+					finally {
+						if ( null != ss ) {
+							ss.close();
+						}
+					}
+				}
+
+				EmbeddedServerRunnable run
+						= new EmbeddedServerRunnable( port, indexmgr, opts );
+				new Thread( run ).start();
+			}
+			catch ( InterruptedException | ExecutionException | IOException ioe ) {
+				log.error( ioe );
+			}
+		}
+		catch ( Exception x ) {
+
+		}
 	}
 
 	private static List<File> getFileList( CommandLine cmd, String option )
@@ -586,5 +655,52 @@ public class CLI {
 	}
 
 	public static class ShowHelpException extends Exception {
+	}
+
+	private class EmbeddedServerRunnable implements Runnable {
+
+		private final int port;
+		private final IIndexManager mgr;
+		private final Map<String, String> opts;
+
+		public EmbeddedServerRunnable( int port, IIndexManager mgr,
+				Map<String, String> opts ) {
+			this.port = port;
+			this.mgr = mgr;
+			this.opts = opts;
+		}
+
+		@Override
+		public void run() {
+			Server server = null;
+
+			try {
+				log.info( "starting jetty server on port: " + port + "..." );
+				server = NanoSparqlServer.newInstance( port,
+						mgr, opts );
+				server.setStopAtShutdown( true );
+
+				NanoSparqlServer.awaitServerStart( server );
+				// Block and wait. The NSS is running.
+				log.debug( "jetty server started at http://localhost:" + port + "/bigdata" );
+				server.join();
+			}
+			catch ( Throwable t ) {
+				log.error( t );
+			}
+			finally {
+				if ( server != null ) {
+					try {
+						server.stop();
+					}
+					catch ( Exception e ) {
+						log.error( e, e );
+					}
+					server = null;
+					System.gc();
+					log.debug( "jetty stopped" );
+				}
+			}
+		}
 	}
 }
