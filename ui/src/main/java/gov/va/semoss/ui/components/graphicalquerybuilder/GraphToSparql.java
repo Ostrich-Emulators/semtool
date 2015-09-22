@@ -240,8 +240,10 @@ public class GraphToSparql {
 					// handle endpoints and types a little differently
 					QueryNode src = graph.getSource( edge );
 					QueryNode dst = graph.getDest( edge );
-					sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
-							src, dst, props.keySet() ) );
+					if ( !( null == src || null == dst ) ) {
+						sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
+								src, dst, props.keySet() ) );
+					}
 				}
 				else {
 					sb.append( buildOneConstraint( edge, prop, edgevals ) );
@@ -268,7 +270,7 @@ public class GraphToSparql {
 		// make sure we don't treat a generic edge as a special VALUES clause
 		Set<Value> vals = new HashSet<>( tvals );
 		vals.remove( Constants.ANYNODE );
-		
+
 		// we need to use a variable if:
 		// 1) our edge is selected to be returned in the SELECT part
 		// 2) we have other properties to hang on this edge
