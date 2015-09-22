@@ -460,6 +460,7 @@ public class CLI {
 			}
 			else {
 				ImportDataProcessor.clearEngine( engine, data );
+				load( engine, data );
 			}
 		}
 		else {
@@ -508,8 +509,6 @@ public class CLI {
 				log.error( e, e );
 			}
 		}
-
-		load( engine, data );
 	}
 
 	public void update( CommandLine cmd ) throws IOException, RepositoryException,
