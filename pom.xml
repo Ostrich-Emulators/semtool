@@ -21,6 +21,7 @@
 		<module>ui</module>
 		<module>common</module>
 		<module>webapp</module>
+	 <module>tools</module>
 	</modules>
   
 	<scm>
