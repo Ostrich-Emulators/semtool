@@ -183,7 +183,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 
 	@Override
 	public Object getProperty( URI prop ) {
-		return RDFDatatypeTools.instance().getObjectFromValue( getValue( prop ) );
+		return RDFDatatypeTools.getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override
@@ -195,7 +195,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 	public Map<URI, Object> getProperties() {
 		Map<URI, Object> map = new HashMap<>();
 		for ( Map.Entry<URI, Value> en : properties.entrySet() ) {
-			map.put( en.getKey(), RDFDatatypeTools.instance().getObjectFromValue( en.getValue() ) );
+			map.put( en.getKey(), RDFDatatypeTools.getObjectFromValue( en.getValue() ) );
 		}
 		return map;
 	}

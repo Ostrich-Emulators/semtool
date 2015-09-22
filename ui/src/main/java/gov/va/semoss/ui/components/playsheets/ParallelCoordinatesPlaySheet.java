@@ -21,11 +21,8 @@ package gov.va.semoss.ui.components.playsheets;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.RDFDatatypeTools;
-import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.Constants;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -60,7 +57,7 @@ public class ParallelCoordinatesPlaySheet extends BrowserPlaySheet2 {
 			Map<String, Object> elementHash = new LinkedHashMap<>();
 			for ( int i = 0; i < varValuesArray.length; i++ ) {
 				Value v = varValuesArray[i];
-				Class<?> k = RDFDatatypeTools.instance().getClassForValue( v );
+				Class<?> k = RDFDatatypeTools.getClassForValue( v );
 				if ( String.class.equals( k ) ) {
 					elementHash.put( heads.get( i ), cleanText( v.stringValue() ) );
 				}

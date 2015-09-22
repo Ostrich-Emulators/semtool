@@ -65,7 +65,7 @@ public class CONUSMapPlaySheet extends BrowserPlaySheet2 {
 			for ( int j = 0; j < headers.size(); j++ ) {
 				Value v = listElement[j];
 				colName = headers.get( j );
-				Class<?> k = RDFDatatypeTools.instance().getClassForValue( v );
+				Class<?> k = RDFDatatypeTools.getClassForValue( v );
 				
 				elementHash.put( "size", 1000000 );
 				if ( k.equals( String.class ) ){
