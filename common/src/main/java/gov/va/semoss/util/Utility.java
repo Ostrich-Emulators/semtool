@@ -24,20 +24,15 @@ import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 
-import java.awt.Desktop;
-import java.awt.Frame;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,8 +46,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -93,34 +86,6 @@ public class Utility {
 	}
 
 	/**
-	 * Gets the param hash and replaces certain queries
-	 *
-	 * @param query
-	 * @param paramHash
-	 *
-	 * @return If applicable, returns the replaced query
-	 */
-	public static String fillParam( String query, Map<String, String> paramHash ) {
-		// Hashtable is of pattern <String to be replaced> <replacement>
-		// key will be surrounded with @ just to be in sync
-		log.debug( "fillparam raw query is: " + query );
-		log.debug( "param hash is " + paramHash );
-
-		Map<String, String> map = new HashMap<>( paramHash );
-		for ( Map.Entry<String, String> e : map.entrySet() ) {
-			String key = e.getKey();
-			String value = e.getValue();
-			log.debug( "Replacing " + key + "<<>>" + value + query.indexOf(
-					"@" + key + "@" ) );
-			if ( !value.equalsIgnoreCase( Constants.EMPTY ) ) {
-				query = query.replace( "@" + key + "@", value );
-			}
-		}
-
-		return query;
-	}
-
-	/**
 	 * A convenience for {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) }, but returns a sorted map with
 	 * consistent iteration pattern
@@ -146,28 +111,6 @@ public class Utility {
 		}
 
 		return (Map<X, String>) ret;
-	}
-
-	public static void showExportMessage( Frame frame, String message, String title,
-			File exportloc ) {
-		if ( Desktop.isDesktopSupported() ) {
-			String options[] = { "Open Location", "Close" };
-			int opt = JOptionPane.showOptionDialog( frame, message, title,
-					JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-					null, options, options[0] );
-
-			if ( 0 == opt ) {
-				try {
-					Desktop.getDesktop().open( exportloc.getParentFile() );
-				}
-				catch ( Exception e ) {
-					log.error( e, e );
-				}
-			}
-		}
-		else {
-			JOptionPane.showMessageDialog( frame, message );
-		}
 	}
 
 	/**
@@ -302,26 +245,12 @@ public class Utility {
 				+ ( extension.startsWith( "." ) ? extension.substring( 1 ) : extension );
 	}
 
-	public static void extractHTML() throws IOException {
-		// check for html directory
-		// extract
-
-		// this should look for an "html" folder under the current working (execution) directory of the tool:
-		Path localHtmlPath = Paths.get( "html" );
-		if ( Files.exists( localHtmlPath ) ) {
-			return;
-		}
-
-		try ( InputStream htmlIs = Utility.class.getResourceAsStream( "/html.zip" ) ) {
-			unzip( new ZipInputStream( htmlIs ), new File( "html" ) );
-		}
-	}
-
 	public static void unzip( String zipFilePath, String destDir ) throws IOException {
 		try ( ZipInputStream zips
-				= new ZipInputStream( new FileInputStream( new File( zipFilePath ) ) ) ) {
-			unzip( zips, new File( destDir ) );
-		}
+				= new ZipInputStream( new BufferedInputStream(
+								new FileInputStream( new File( zipFilePath ) ) ) ) ) {
+							unzip( zips, new File( destDir ) );
+						}
 	}
 
 	public static void unzip( ZipInputStream zis, File destDir ) throws IOException {
