@@ -19,14 +19,6 @@
  */
 package gov.va.semoss.tools;
 
-import com.bigdata.journal.IIndexManager;
-import com.bigdata.journal.ITx;
-import com.bigdata.journal.Journal;
-import com.bigdata.rdf.sail.BigdataSail;
-import com.bigdata.rdf.sail.CreateKBTask;
-import com.bigdata.rdf.sail.webapp.NanoSparqlServer;
-import com.bigdata.rdf.store.AbstractTripleStore;
-import com.bigdata.rdf.task.AbstractApiTask;
 import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,7 +39,10 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
-import java.net.ServerSocket;
+import gov.va.semoss.util.Utility;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,8 +50,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
@@ -67,7 +60,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.eclipse.jetty.server.Server;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -76,14 +69,18 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.http.HTTPRepository;
+import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.RDFHandlerException;
 
 public class CLI {
 
 	private static final Logger log = Logger.getLogger( CLI.class );
 	private static final String TRIALS[] = { "create", "update", "replace",
-		"export", "server" };
+		"export", "server", "copy" };
 
 	private IEngine engine;
 	private File dbfile;
@@ -122,134 +119,12 @@ public class CLI {
 			case 4:
 				serve( cmd );
 				break;
+			case 5:
+				copy( cmd );
+				break;
 		}
 	}
 
-//	public void execute() throws IOException, EngineManagementException {
-//		// get a DB handle:
-//		// Engine engine = null;
-//		CommandLine cmd = null;
-//		Collection<File> loads = new ArrayList<>();
-//		if ( cmd.hasOption( "load" ) ) {
-//			String[] loadArgs = cmd.getOptionValues( "load" );
-//			// split load by space
-//
-//			for ( String load : loadArgs ) {
-//				File loadFile = new File( load );
-//				if ( !loadFile.exists() ) {
-//					throw new FileNotFoundException( "Could not find: " + load );
-//				}
-//				loads.add( loadFile );
-//			}
-//		}
-//
-//		Collection<URL> vocabs = new ArrayList<>();
-//		if ( cmd.hasOption( "vocab" ) ) {
-//			String[] vos = cmd.getOptionValues( "vocab" );
-//			// split load by space
-//
-//			for ( String load : vos ) {
-//				File loadFile = new File( load );
-//				if ( !loadFile.exists() ) {
-//					throw new FileNotFoundException( "Could not find: " + load );
-//				}
-//				vocabs.add( loadFile.toURI().toURL() );
-//			}
-//		}
-//
-//		// we need parameters for the following:
-//		stageInMemory = !cmd.hasOption( "stage-on-disk" );
-//		closure = cmd.hasOption( "closure" ); // calculate inferences
-//		conformance = cmd.hasOption( "conformance" ); // perform conformance tests
-//		createMetamodel = !cmd.hasOption( "no-metamodel" ); // create metamodel
-//		errors = ( conformance ? new ImportData() : null );
-//
-//		File smss = null;
-//
-//		String baseURI = ( cmd.hasOption( "baseuri" )
-//				? cmd.getOptionValue( "baseuri" ) : "http://semoss.test/database" );
-//
-//		if ( cmd.hasOption( "out" ) ) {
-//			File db = new File( cmd.getOptionValue( "out" ) ).getAbsoluteFile();
-//			File dbdir = db.getParentFile();
-//			if ( !dbdir.exists() ) {
-//				if ( !dbdir.mkdirs() ) {
-//					throw new FileNotFoundException( "Could not create output directory/file" );
-//				}
-//			}
-//
-//			EngineCreateBuilder ecb = new EngineCreateBuilder( dbdir,
-//					FilenameUtils.getBaseName( db.getName() ) )
-//					.setDefaultBaseUri( new URIImpl( baseURI ), false )
-//					.setReificationModel( ReificationStyle.SEMOSS )
-//					.setFiles( loads )
-//					.setVocabularies( vocabs )
-//					.setBooleans( stageInMemory, closure, createMetamodel );
-//
-//			if ( cmd.hasOption( "insights" ) ) {
-//				ecb.setDefaultsFiles( null, null, cmd.getOptionValue( "insights" ) );
-//			}
-//
-//			smss = EngineUtil.createNew( ecb, errors );
-//
-//			// set the metadata on the just-created database
-//			final Map<URI, String> metadatas = getMetadata( cmd );
-//
-//			if ( !metadatas.isEmpty() ) {
-//				// set the metadata on the just-created database
-//				IEngine engine = GuiUtility.loadEngine( smss );
-//				try {
-//					engine.execute( new ModificationExecutorAdapter() {
-//
-//						@Override
-//						public void exec( RepositoryConnection conn ) throws RepositoryException {
-//							ValueFactory vf = conn.getValueFactory();
-//							for ( Map.Entry<URI, String> en : metadatas.entrySet() ) {
-//								Value val = getRDFStringValue( en.getValue(),
-//										engine.getNamespaces(), vf );
-//								conn.add( engine.getBaseUri(), en.getKey(), val );
-//							}
-//						}
-//					} );
-//
-//					engine.commit();
-//					GuiUtility.closeEngine( engine );
-//				}
-//				catch ( Exception e ) {
-//					logger.error( e, e );
-//				}
-//			}
-//		}
-//		else if ( cmd.hasOption( "update" ) ) {
-//			String update = cmd.getOptionValue( "update" );
-//			boolean replace = cmd.hasOption( "replace" );
-//
-//			smss = new File( update );
-//			if ( null == update || !smss.exists() ) {
-//				throw new FileNotFoundException( "Journal not found:  " + update );
-//			}
-//
-//			IEngine engine = GuiUtility.loadEngine( smss );
-//			if ( replace ) {
-//				ImportDataProcessor.clearEngine( engine, loads );
-//			}
-//
-//			try {
-//				EngineLoader el = new EngineLoader( stageInMemory );
-//				el.loadToEngine( loads, engine, createMetamodel, errors );
-//				el.release();
-//				// if we get here, no exceptions have been thrown, so we're good
-//			}
-//			catch ( ImportValidationException | RepositoryException | IOException ioe ) {
-//				logger.error( ioe, ioe );
-//			}
-//		}
-//
-//		if ( cmd.hasOption( "sparql" ) ) {
-//			String sparql = cmd.getOptionValue( "sparql" );
-//			// run an update , save updated db
-//		}
-//	}
 	private Map<URI, String> getMetadata( CommandLine cmd ) {
 		Map<URI, String> map = new HashMap<>();
 
@@ -319,8 +194,8 @@ public class CLI {
 		OptionBuilder.withDescription( "Set the Base URI for loads" );
 		Option baseuri = OptionBuilder.create( "baseuri" );
 
-		OptionBuilder.withArgName( "insights.ttl+" );
-		OptionBuilder.hasArgs( 10 );
+		OptionBuilder.withArgName( "insights.ttl" );
+		OptionBuilder.hasArgs();
 		OptionBuilder.withDescription( "Insights to import." );
 		Option insights = OptionBuilder.create( "insights" );
 
@@ -367,10 +242,15 @@ public class CLI {
 		OptionBuilder.withDescription( "Add POC metadata to database." );
 		Option publisher = OptionBuilder.create( "poc" );
 
-		OptionBuilder.withArgName( "file.[ttl|rdf|nt]" );
-		OptionBuilder.hasArg();
+		OptionBuilder.withArgName( "old.jnl> <file.[ttl|rdf|nt]" );
+		OptionBuilder.hasArgs( 2 );
 		OptionBuilder.withDescription( "Export data to a file." );
 		Option export = OptionBuilder.create( "export" );
+
+		OptionBuilder.withArgName( "old.jnl> <Sesame URL" );
+		OptionBuilder.hasArgs( 2 );
+		OptionBuilder.withDescription( "Copy the BigData DB to a Sesame endpoint." );
+		Option copy = OptionBuilder.create( "copy" );
 
 		OptionBuilder.withArgName( "old.jnl" );
 		OptionBuilder.hasArg();
@@ -383,6 +263,7 @@ public class CLI {
 		modes.addOption( replace );
 		modes.addOption( server );
 		modes.addOption( export );
+		modes.addOption( copy );
 
 		options.addOption( help );
 		options.addOption( load );
@@ -410,7 +291,10 @@ public class CLI {
 	public int setDatabaseFile( CommandLine cmd ) {
 		for ( int i = 0; i < TRIALS.length; i++ ) {
 			if ( cmd.hasOption( TRIALS[i] ) ) {
-				String val = cmd.getOptionValue( TRIALS[i] );
+				// the export command needs two options
+				// values, so only look at the first one
+				String vals[] = cmd.getOptionValues( TRIALS[i] );
+				String val = vals[0];
 				dbfile = new File( val );
 
 				return i;
@@ -450,7 +334,7 @@ public class CLI {
 		}
 
 		if ( replace && dbfile.exists() ) {
-			engine = new BigDataEngine( BigDataEngine.generateProperties( dbfile ) );
+			engine = new BigDataEngine( dbfile );
 
 			if ( cmd.hasOption( "insightsdb" ) ) {
 				EngineUtil.getInstance().importInsights( engine, insights.get( 0 ),
@@ -519,7 +403,7 @@ public class CLI {
 			throw new FileNotFoundException( dbfile.getAbsolutePath() );
 		}
 
-		engine = new BigDataEngine( BigDataEngine.generateProperties( dbfile ) );
+		engine = new BigDataEngine( dbfile );
 
 		if ( cmd.hasOption( "insightsdb" ) ) {
 			List<File> vocabfiles = getFileList( cmd, "vocab" );
@@ -550,7 +434,49 @@ public class CLI {
 			throw new FileNotFoundException( dbfile.getAbsolutePath() );
 		}
 
-		engine = new BigDataEngine( BigDataEngine.generateProperties( dbfile ) );
+		String exportnames[] = cmd.getOptionValues( "export" );
+		File exportfile = null;
+		if ( 2 == exportnames.length ) {
+			exportfile = new File( exportnames[1] );
+			File parentdir = exportfile.getAbsoluteFile().getParentFile();
+			if ( !( parentdir.exists() || parentdir.mkdirs() ) ) {
+				throw new FileNotFoundException( "Could not create export file directory" );
+			}
+		}
+
+		engine = new BigDataEngine( dbfile );
+		try ( BufferedWriter w = new BufferedWriter( null == exportfile
+				? new OutputStreamWriter( System.out ) : new FileWriter( exportfile ) ) ) {
+			RDFHandler handler = Utility.getExporterFor( null == exportfile
+					? "" : exportfile.getName(), w );
+
+			if ( cmd.hasOption( "insightsdb" ) ) {
+				try {
+					handler.startRDF();
+					for ( Statement s : engine.getInsightManager().getStatements() ) {
+						handler.handleStatement( s );
+					}
+					handler.endRDF();
+				}
+				catch ( RDFHandlerException re ) {
+					log.error( re, re );
+				}
+			}
+			else {
+				engine.execute( new ModificationExecutorAdapter() {
+
+					@Override
+					public void exec( RepositoryConnection conn ) throws RepositoryException {
+						try {
+							conn.export( handler );
+						}
+						catch ( RDFHandlerException re ) {
+							log.error( re, re );
+						}
+					}
+				} );
+			}
+		}
 	}
 
 	public void serve( CommandLine cmd ) throws IOException, RepositoryException {
@@ -559,56 +485,85 @@ public class CLI {
 		}
 
 		try {
-			// the journal is the file itself
-			Properties dbprops = BigDataEngine.generateProperties( dbfile );
-			Journal journal = new Journal( dbprops );
+			new Thread( new EmbeddedServerRunnable( dbfile ) ).start();
+		}
+		catch ( IOException ioe ) {
+			log.error( ioe );
+		}
+	}
 
-			// the main KB
-			dbprops.setProperty( BigdataSail.Options.NAMESPACE, "kb" );
-			CreateKBTask ctor = new CreateKBTask( "kb", dbprops );
-			try {
-				AbstractApiTask.submitApiTask( journal, ctor ).get();
-				AbstractTripleStore triples
-						= AbstractTripleStore.class.cast( journal.getResourceLocator().
-								locate( "kb", ITx.UNISOLATED ) );
+	public void copy( CommandLine cmd ) throws IOException, RepositoryException {
+		if ( !dbfile.exists() ) {
+			throw new FileNotFoundException( dbfile.getAbsolutePath() );
+		}
 
-				IIndexManager indexmgr = triples.getIndexManager();
+		String args[] = cmd.getOptionValues( "copy" );
+		if ( args.length < 2 ) {
+			throw new IOException( "No Sesame endpoint given" );
+		}
+		String url = args[1];
 
-				Map<String, String> opts = new HashMap<>();
-				for ( String key : dbprops.stringPropertyNames() ) {
-					opts.put( key, dbprops.getProperty( key ) );
+		Repository sesame = null;
+		RepositoryConnection tmpconn = null;
+
+		try {
+			sesame = new HTTPRepository( url );
+			sesame.initialize();
+			tmpconn = sesame.getConnection();
+			final RepositoryConnection sesameconn = tmpconn;
+
+			engine = new BigDataEngine( dbfile );
+
+			if ( cmd.hasOption( "insightsdb" ) ) {
+				try {
+					sesameconn.begin();
+					sesameconn.add( engine.getInsightManager().getStatements() );
+					sesameconn.commit();
 				}
-				opts.put( BigdataSail.Options.READ_ONLY, Boolean.toString( true ) );
+				catch ( RepositoryException re ) {
+					log.error( re, re );
 
-				// find an open port
-				int port = 0;
-				for ( int i = 1024; i < 65536; i++ ) {
-					ServerSocket ss = null;
 					try {
-						ss = new ServerSocket( i );
-						port = i;
-						break;
+						sesameconn.rollback();
 					}
-					catch ( Exception e ) {
-						// don't care; just go to the next port
-					}
-					finally {
-						if ( null != ss ) {
-							ss.close();
-						}
+					catch ( RepositoryException re2 ) {
+						log.error( re2, re2 );
 					}
 				}
-
-				EmbeddedServerRunnable run
-						= new EmbeddedServerRunnable( port, indexmgr, opts );
-				new Thread( run ).start();
 			}
-			catch ( InterruptedException | ExecutionException | IOException ioe ) {
-				log.error( ioe );
+			else {
+				engine.execute( new ModificationExecutorAdapter() {
+
+					@Override
+					public void exec( RepositoryConnection conn ) throws RepositoryException {
+						sesameconn.begin();
+						sesameconn.add( conn.getStatements( null, null, null, false ) );
+						sesameconn.commit();
+					}
+				} );
 			}
 		}
 		catch ( Exception x ) {
+			log.fatal( x, x );
+		}
+		finally {
+			if ( null != tmpconn ) {
+				try {
+					tmpconn.close();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
 
+			if ( null != sesame ) {
+				try {
+					sesame.shutDown();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
 		}
 	}
 
@@ -654,52 +609,5 @@ public class CLI {
 	}
 
 	public static class ShowHelpException extends Exception {
-	}
-
-	private class EmbeddedServerRunnable implements Runnable {
-
-		private final int port;
-		private final IIndexManager mgr;
-		private final Map<String, String> opts;
-
-		public EmbeddedServerRunnable( int port, IIndexManager mgr,
-				Map<String, String> opts ) {
-			this.port = port;
-			this.mgr = mgr;
-			this.opts = opts;
-		}
-
-		@Override
-		public void run() {
-			Server server = null;
-
-			try {
-				log.info( "starting jetty server on port: " + port + "..." );
-				server = NanoSparqlServer.newInstance( port,
-						mgr, opts );
-				server.setStopAtShutdown( true );
-
-				NanoSparqlServer.awaitServerStart( server );
-				// Block and wait. The NSS is running.
-				log.debug( "jetty server started at http://localhost:" + port + "/bigdata" );
-				server.join();
-			}
-			catch ( Throwable t ) {
-				log.error( t );
-			}
-			finally {
-				if ( server != null ) {
-					try {
-						server.stop();
-					}
-					catch ( Exception e ) {
-						log.error( e, e );
-					}
-					server = null;
-					System.gc();
-					log.debug( "jetty stopped" );
-				}
-			}
-		}
 	}
 }
