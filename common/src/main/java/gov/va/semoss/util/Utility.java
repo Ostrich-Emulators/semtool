@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,22 +49,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
+import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.openrdf.rio.turtle.TurtleWriter;
 
 /**
  * The GuiUtility class contains a variety of miscellaneous functions
@@ -87,117 +90,6 @@ public class Utility {
 		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
 		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
 		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
-	}
-
-	/**
-	 * Matches the given query against a specified pattern. While the next
-	 * substring of the query matches a part of the pattern, set substring as the
-	 * key with EMPTY constants (@@) as the value
-	 *
-	 * @param query.
-	 *
-	 * @return map of queries to be replaced
-	 */
-	public static Map<String, String> getParams( String query ) {
-		Map<String, String> paramHash = new HashMap<>();
-		Pattern pattern = Pattern.compile( "[@]{1}\\w+[-]*[\\w/.:]+[@]" );
-
-		Matcher matcher = pattern.matcher( query );
-		while ( matcher.find() ) {
-			String data = matcher.group();
-			data = data.substring( 1, data.length() - 1 );
-			log.debug( "get params matched: " + data );
-			// put something to strip the @
-			paramHash.put( data, Constants.EMPTY );
-		}
-
-		return paramHash;
-	}
-
-	/**
-	 * Matches the given query against a specified pattern. While the next
-	 * substring of the query matches a part of the pattern, set substring as the
-	 * key with EMPTY constants (@@) as the value
-	 *
-	 * @param query.
-	 *
-	 * @return Hashtable of queries to be replaced
-	 */
-	public static Map<String, String> getParamTypeHash( String query ) {
-		Map<String, String> paramHash = new HashMap<>();
-		Pattern pattern = Pattern.compile( "[@]{1}\\w+[-]*[\\w/.:]+[@]" );
-
-		Matcher matcher = pattern.matcher( query );
-		while ( matcher.find() ) {
-			String data = matcher.group();
-			data = data.substring( 1, data.length() - 1 );
-			String paramName = data.substring( 0, data.indexOf( "-" ) );
-			String paramValue = data.substring( data.indexOf( "-" ) + 1 );
-
-			log.debug( "paramtypehash data: " + data );
-			// put something to strip the @
-			paramHash.put( paramName, paramValue );
-		}
-
-		return paramHash;
-	}
-
-	/**
-	 * Extracts parameter bindings from the passed-in query of the form,
-	 * "<@name-http:value@>", into a hash of variable names, types, and parameter
-	 * queries (created from types), suitable for Insight parameter drop-downs on
-	 * the left-pane of the tool.
-	 *
-	 * @param query -- (String) The Insight's Sparql query.
-	 *
-	 * @return -- (Map<String, Map<String, String>>) The hash described above.
-	 */
-	public static Map<String, Map<String, String>> getParamTypeQueryHash( String query ) {
-		Map<String, Map<String, String>> paramQueryHash = new HashMap<>();
-		Pattern pattern = Pattern.compile( "[@]{1}\\w+[-]*[\\w/.:]+[@]" );
-
-		Matcher matcher = pattern.matcher( query );
-		while ( matcher.find() ) {
-			String data = matcher.group();
-			data = data.substring( 1, data.length() - 1 );
-			String paramVariable = data.substring( 0, data.indexOf( "-" ) );
-			String paramType = data.substring( data.indexOf( "-" ) + 1 );
-			String paramQuery = "SELECT ?entity WHERE{ ?entity a <" + paramType + "> .}";
-
-			log.debug( "paramTypeQueryhash row: " + paramVariable + ", " + paramType + ", " + paramQuery );
-			Map<String, String> paramElement = new HashMap<>();
-			paramElement.put( "parameterValueType", paramType );
-			paramElement.put( "parameterQuery", paramQuery );
-			paramQueryHash.put( paramVariable, paramElement );
-		}
-		return paramQueryHash;
-	}
-
-	/**
-	 * Matches the given query against a specified pattern. While the next
-	 * substring of the query matches a part of the pattern, set substring as the
-	 * key with EMPTY constants (@@) as the value
-	 *
-	 * @param query the query to fix (?)
-	 *
-	 * @return Hashtable of queries to be replaced
-	 */
-	public static String normalizeParam( String query ) {
-		Map<String, String> paramHash = new HashMap<>();
-		Pattern pattern = Pattern.compile( "[@]{1}\\w+[-]*[\\w/.:]+[@]" );
-
-		Matcher matcher = pattern.matcher( query );
-		while ( matcher.find() ) {
-			String data = matcher.group();
-			data = data.substring( 1, data.length() - 1 );
-			String paramName = data.substring( 0, data.indexOf( "-" ) );
-
-			log.debug( "normalizeparam data: " + data );
-			// put something to strip the @
-			paramHash.put( data, "@" + paramName + "@" );
-		}
-
-		return fillParam( query, paramHash );
 	}
 
 	/**
@@ -229,32 +121,6 @@ public class Utility {
 	}
 
 	/**
-	 * Splits up a string URI into tokens based on "/" character, and uses logic
-	 * to return the instance name. If the input string is not a URI, then it is
-	 * returned unmodified.
-	 *
-	 * @param uri -- (String) to be split into tokens.
-	 *
-	 * @return getInstanceName -- (String) Described above.
-	 */
-	public static String getInstanceName( String uri ) {
-		try {
-			//If the string is really a URI, then return its right end:
-			new ValueFactoryImpl().createURI( uri );
-			//This code block will only continue if the passed-in value
-			//can be converted into an absolute URI:
-
-			String uris[] = uri.split( "/" );
-			return uris[uris.length - 1];
-		}
-		catch ( IllegalArgumentException e ) {
-		}
-
-		//Otherwise, simply return the input string:
-		return uri;
-	}
-
-	/**
 	 * A convenience for {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) }, but returns a sorted map with
 	 * consistent iteration pattern
@@ -280,76 +146,6 @@ public class Utility {
 		}
 
 		return (Map<X, String>) ret;
-	}
-
-	/**
-	 * Splits up a URI into tokens based on "/" delimiter and uses logic to return
-	 * the class name.
-	 *
-	 * @param uri
-	 *
-	 * @return Name of class.
-	 */
-	public static String getClassName( String uri ) {
-		String[] strs = uri.split( "/" );
-		if ( strs.length > 1 ) {
-			return strs[strs.length - 2];
-		}
-		return null;
-	}
-
-	/**
-	 * Gets the instance and class names for a specified URI and creates the
-	 * qualified class name.
-	 *
-	 * @param uri.
-	 *
-	 * @return Qualified URI.
-	 */
-	public static String getQualifiedClassName( String uri ) {
-		// there are three patterns
-		// one is the /
-		// the other is the #
-		// need to have a check upfront to see 
-
-		String instanceName = getInstanceName( uri );
-
-		String className = getClassName( uri );
-		String qualUri;
-		if ( uri.contains( "/" ) ) {
-			instanceName = "/" + instanceName;
-		}
-
-		// remove this in the end
-		if ( className == null ) {
-			qualUri = uri.replace( instanceName, "" );
-		}
-		else {
-			qualUri = uri.replace( className + instanceName, className );
-		}
-
-		return qualUri;
-	}
-
-	/**
-	 * Checks to see if a string contains a particular pattern. Used when adding
-	 * relations.
-	 *
-	 * @param pattern
-	 * @param string to compare to the pattern
-	 *
-	 * @return True if the next token is greater than or equal to zero.
-	 */
-	public static boolean checkPatternInString( String pattern, String string ) {
-		// ok.. before you think that this is so stupid why wont you use the regular java.lang methods.. consider the fact that this could be a ; delimited pattern
-		if ( null != pattern ) {
-			for ( String str : string.split( ";" ) ) {
-				if ( str.contains( pattern ) ) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	public static void showExportMessage( Frame frame, String message, String title,
@@ -464,37 +260,6 @@ public class Utility {
 		return to;
 	}
 
-	public static Map<String, Object> getParamsFromString( String params ) {
-		Map<String, Object> paramHash = new HashMap<>();
-		if ( params != null ) {
-			for ( String thisToken : params.split( "~" ) ) {
-				int index = thisToken.indexOf( "$" );
-				String key = thisToken.substring( 0, index );
-				String value = thisToken.substring( index + 1 );
-				// attempt to see if 
-				boolean found = false;
-				try {
-					double dub = Double.parseDouble( value );
-					paramHash.put( key, dub );
-					found = true;
-				}
-				catch ( Exception ignored ) {
-				}
-				if ( !found ) {
-					try {
-						int dub = Integer.parseInt( value );
-						paramHash.put( key, dub );
-					}
-					catch ( Exception ignored ) {
-					}
-				}
-				//if(!found)
-				paramHash.put( key, value );
-			}
-		}
-		return paramHash;
-	}
-
 	/**
 	 * Creates a formatted time string of the difference between the input
 	 * parameters, "startTime" and "stopTime", appropriate for display in the
@@ -593,8 +358,6 @@ public class Utility {
 		}
 	}
 
-
-
 	/**
 	 * Implodes the given collection, appending <code>start</code> before each
 	 * element, and <code>stop</code> after each one, and <code>sep</code> in
@@ -624,7 +387,31 @@ public class Utility {
 
 		return sb.toString();
 	}
-	
+
+	/**
+	 * Gets the appropriate exporter for the given filename. "Appropriate" means
+	 * the file's suffix determines exporter. If no appropriate handler can be
+	 * found, an NTriples one is returned. Handled suffixes (case insensitive):
+	 * <li>nt</li>
+	 * <li>rdf</li>
+	 * <li>ttl</li>
+	 *
+	 * @param file the filename to determine the handler to use
+	 * @param out the output writer to use to create the handler
+	 * @return a handler (always)
+	 */
+	public static RDFHandler getExporterFor( String filename, Writer out ) {
+		String suffix = FilenameUtils.getExtension( filename ).toLowerCase();
+		switch ( suffix ) {
+			case "rdf":
+				return new RDFXMLWriter( out );
+			case "ttl":
+				return new TurtleWriter( out );
+			default:
+				return new NTriplesWriter( out );
+		}
+	}
+
 	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
 
 		public final Resource r;
