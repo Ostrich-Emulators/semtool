@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.util;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +15,6 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.apache.xerces.util.XMLChar;
 
 /**
  * A class that helps to build URIs.
@@ -358,6 +358,25 @@ public class UriBuilder {
 
 	public UriSanitizer getSanitizer() {
 		return sanitizer;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 29 * hash + Objects.hashCode( this.content );
+		return hash;
+	}
+
+	@Override
+	public boolean equals( Object obj ) {
+		if ( obj == null ) {
+			return false;
+		}
+		if ( getClass() != obj.getClass() ) {
+			return false;
+		}
+		final UriBuilder other = (UriBuilder) obj;
+		return content.toString().equals( other.content.toString() );
 	}
 
 	public static class DefaultSanitizer implements UriSanitizer {

@@ -23,7 +23,6 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
@@ -473,15 +472,6 @@ public class GuiUtility {
 			metas = new ImportMetadata( eng.getBaseUri(), eng.getSchemaBuilder(),
 					eng.getDataBuilder() );
 			metas.setNamespaces( eng.getNamespaces() );
-
-			try {
-				MetadataQuery mq = new MetadataQuery();
-				eng.query( mq );
-				metas.setExtras( mq.asStrings() );
-			}
-			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-				log.error( e, e );
-			}
 		}
 
 		return new ImportData( metas );
