@@ -69,8 +69,10 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFHandlerException;
 
@@ -78,7 +80,7 @@ public class CLI {
 
 	private static final Logger log = Logger.getLogger( CLI.class );
 	private static final String TRIALS[] = { "create", "update", "replace",
-		"export", "server" };
+		"export", "server", "copy" };
 
 	private IEngine engine;
 	private File dbfile;
@@ -117,6 +119,8 @@ public class CLI {
 			case 4:
 				serve( cmd );
 				break;
+			case 5:
+				copy( cmd );
 		}
 	}
 
@@ -237,10 +241,15 @@ public class CLI {
 		OptionBuilder.withDescription( "Add POC metadata to database." );
 		Option publisher = OptionBuilder.create( "poc" );
 
-		OptionBuilder.withArgName( "old.jnl file.[ttl|rdf|nt]" );
+		OptionBuilder.withArgName( "old.jnl> <file.[ttl|rdf|nt]" );
 		OptionBuilder.hasArgs( 2 );
 		OptionBuilder.withDescription( "Export data to a file." );
 		Option export = OptionBuilder.create( "export" );
+
+		OptionBuilder.withArgName( "old.jnl> <Sesame URL" );
+		OptionBuilder.hasArgs( 2 );
+		OptionBuilder.withDescription( "Copy the BigData DB to a Sesame endpoint." );
+		Option copy = OptionBuilder.create( "copy" );
 
 		OptionBuilder.withArgName( "old.jnl" );
 		OptionBuilder.hasArg();
@@ -253,6 +262,7 @@ public class CLI {
 		modes.addOption( replace );
 		modes.addOption( server );
 		modes.addOption( export );
+		modes.addOption( copy );
 
 		options.addOption( help );
 		options.addOption( load );
@@ -478,6 +488,81 @@ public class CLI {
 		}
 		catch ( IOException ioe ) {
 			log.error( ioe );
+		}
+	}
+
+	public void copy( CommandLine cmd ) throws IOException, RepositoryException {
+		if ( !dbfile.exists() ) {
+			throw new FileNotFoundException( dbfile.getAbsolutePath() );
+		}
+
+		String args[] = cmd.getOptionValues( "copy" );
+		if ( args.length < 2 ) {
+			throw new IOException( "No Sesame endpoint given" );
+		}
+		String url = args[1];
+
+		Repository sesame = null;
+		RepositoryConnection tmpconn = null;
+
+		try {
+			sesame = new HTTPRepository( url );
+			sesame.initialize();
+			tmpconn = sesame.getConnection();
+			final RepositoryConnection sesameconn = tmpconn;
+
+			engine = new BigDataEngine( dbfile );
+
+			if ( cmd.hasOption( "insightsdb" ) ) {
+				try {
+					sesameconn.begin();
+					sesameconn.add( engine.getInsightManager().getStatements() );
+					sesameconn.commit();
+				}
+				catch ( RepositoryException re ) {
+					log.error( re, re );
+
+					try {
+						sesameconn.rollback();
+					}
+					catch ( RepositoryException re2 ) {
+						log.error( re2, re2 );
+					}
+				}
+			}
+			else {
+				engine.execute( new ModificationExecutorAdapter() {
+
+					@Override
+					public void exec( RepositoryConnection conn ) throws RepositoryException {
+						sesameconn.begin();
+						sesameconn.add( conn.getStatements( null, null, null, false ) );
+						sesameconn.commit();
+					}
+				} );
+			}
+		}
+		catch ( Exception x ) {
+			log.fatal( x, x );
+		}
+		finally {
+			if ( null != tmpconn ) {
+				try {
+					tmpconn.close();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
+
+			if ( null != sesame ) {
+				try {
+					sesame.shutDown();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
 		}
 	}
 
