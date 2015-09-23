@@ -121,6 +121,7 @@ public class CLI {
 				break;
 			case 5:
 				copy( cmd );
+				break;
 		}
 	}
 
