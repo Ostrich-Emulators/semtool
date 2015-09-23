@@ -6,6 +6,7 @@
 package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
+import gov.va.semoss.poi.main.XlsWriter.SheetRowCol;
 import gov.va.semoss.util.Utility;
 import java.io.File;
 import java.util.Arrays;
@@ -17,6 +18,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -218,4 +221,31 @@ public class XlsWriterTest {
 		assertEquals( "test", XlsWriter.generateSheetName( "test", names ) );
 	}
 
+	@Test
+	public void testSheetRowCol1() {
+		SheetRowCol src1 = new SheetRowCol( "x", 1, 1 );
+		SheetRowCol src2 = new SheetRowCol( "x", 1, 2 );
+		assertNotEquals( src1, src2 );
+	}
+
+	@Test
+	public void testSheetRowCol2() {
+		SheetRowCol src1 = new SheetRowCol( "x", 1, 1 );
+		SheetRowCol src2 = new SheetRowCol( "x", 1, 1 );
+		assertEquals( src1, src2 );
+	}
+
+	@Test
+	public void testSheetRowCol3() {
+		Set<SheetRowCol> set = new HashSet<>();
+		SheetRowCol src1 = new SheetRowCol( "x", 1, 1 );
+		set.add( src1 );
+		assertTrue( set.contains( src1 ) );
+	}
+
+	@Test
+	public void testSheetRowCol4() {
+		SheetRowCol src1 = new SheetRowCol( "x", 1, 1 );
+		assertEquals( "x (1,1)", src1.toString() );
+	}
 }
