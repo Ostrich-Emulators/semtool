@@ -24,7 +24,7 @@ import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PaintLabel;
 import gov.va.semoss.ui.components.ProgressTask;
-import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
+import gov.va.semoss.ui.components.tabbedqueries.SparqlTextArea;
 import gov.va.semoss.om.GraphColorRepository;
 import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.transformer.ArrowPaintTransformer;
@@ -90,7 +90,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private final List<QueryOrder> ordering = new ArrayList<>();
 	private GqbLabelTransformer<QueryNode> vlt;
 	private GqbLabelTransformer<QueryEdge> elt;
-	private SyntaxTextEditor sparqlarea;
+	private SparqlTextArea sparqlarea;
 	private EditingModalGraphMouse mouse;
 	private ButtonGroup buttongroup;
 
@@ -116,7 +116,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		addGraphListener();
 	}
 
-	public void setSparqlArea( SyntaxTextEditor ste ) {
+	public void setSparqlArea( SparqlTextArea ste ) {
 		sparqlarea = ste;
 	}
 

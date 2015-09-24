@@ -126,7 +126,7 @@ public class InsightPanel extends DataPanel<Insight> {
     playsheet = new javax.swing.JComboBox<PlaySheetEnum>();
     jLabel5 = new javax.swing.JLabel();
     jScrollPane3 = new javax.swing.JScrollPane();
-    insightQuery = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
+    insightQuery = new gov.va.semoss.ui.components.tabbedqueries.SparqlTextArea();
     jLabel6 = new javax.swing.JLabel();
     jScrollPane4 = new javax.swing.JScrollPane();
     insightDesc = new javax.swing.JTextArea();
@@ -259,7 +259,7 @@ public class InsightPanel extends DataPanel<Insight> {
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JTextArea insightDesc;
   private javax.swing.JTextField insightName;
-  private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor insightQuery;
+  private gov.va.semoss.ui.components.tabbedqueries.SparqlTextArea insightQuery;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel5;
