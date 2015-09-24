@@ -201,6 +201,7 @@ public class UriComboBox extends JComboBox<URI> {
   class UriComboBoxKeySelectionManager implements KeySelectionManager, Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@Override
 	public int selectionForKey(char aKey,ComboBoxModel aModel) {
           int i,c;
           int currentSelection = -1;

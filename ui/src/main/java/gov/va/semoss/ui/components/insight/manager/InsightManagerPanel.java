@@ -90,11 +90,18 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 			@Override
 			public void treeNodesRemoved( TreeModelEvent e ) {
 				commitbtn.setEnabled( true );
+				int rc = DefaultMutableTreeNode.class.cast( model.getRoot() ).getChildCount();
+				if ( 0 == rc ) {
+					perspectiveData.setElement( null, null );
+				}
 			}
 
 			@Override
 			public void treeStructureChanged( TreeModelEvent e ) {
 				commitbtn.setEnabled( true );
+				if ( 0 == tree.getRowCount() ) {
+					perspectiveData.setElement( null, null );
+				}
 			}
 		} );
 
@@ -206,10 +213,9 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		wim = ( null == eng ? null : engine.getWriteableInsightManager() );
 		model.refresh( wim );
 
-		for ( int i = 0; i < tree.getRowCount(); i++ ) {
-			tree.expandRow( i );
-		}
-
+//		for ( int i = 0; i < tree.getRowCount(); i++ ) {
+//			tree.expandRow( i );
+//		}
 		tree.setSelectionRow( 0 );
 		commitbtn.setEnabled( false );
 		applybtn.setEnabled( false );
@@ -380,7 +386,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 				wim.setData( perspectives );
 				EngineUtil.getInstance().addEngineOpListener( eol );
-				EngineUtil.getInstance().importInsights( wim );
+				EngineUtil.getInstance().importInsights( engine, wim );
 			}
 		} );
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );

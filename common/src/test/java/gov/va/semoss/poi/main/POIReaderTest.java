@@ -6,8 +6,8 @@
 package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
-import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import java.io.File;
+import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -232,5 +232,28 @@ public class POIReaderTest {
 				throw e;
 			}
 		}
+	}
+
+	@Test
+	public void testNonLoadingSheet() throws Exception {
+		data = POIReader.readNonloadingSheet( CUSTOM );
+
+		assertEquals( 4, data.getSheetNames().size() );
+	}
+
+	@Test
+	public void testMetadata() throws Exception {
+		POIReader rdr = new POIReader();
+		rdr.keepLoadInMemory( true );
+		ImportMetadata im = rdr.getMetadata( CUSTOM );
+
+		assertEquals( "http://purl.org/dc/terms/", im.getNamespaces().get( "dct" ) );
+	}
+
+	@Test( expected = IOException.class )
+	public void testMetadata2() throws Exception {
+		POIReader rdr = new POIReader();
+		rdr.keepLoadInMemory( true );
+		rdr.getMetadata( new File( "non-existing; file\\" ) );
 	}
 }

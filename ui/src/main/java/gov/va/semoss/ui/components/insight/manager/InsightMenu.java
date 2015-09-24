@@ -86,11 +86,26 @@ public class InsightMenu extends MouseAdapter {
 					menu.addSeparator();
 				}
 
-				menu.add( new AbstractAction( "Remove This " + pia.getClass().getSimpleName() ) {
+				menu.add( new AbstractAction( "Remove this " + pia.getClass().getSimpleName() ) {
 
 					@Override
 					public void actionPerformed( ActionEvent e ) {
+						TreePath selected = tree.getSelectionPath();
+						boolean fixSelection
+								= ( path.equals( selected ) || path.isDescendant( selected ) );
+						int pathrow = tree.getRowForPath( path );
+
 						model.removeNodeFromParent( node );
+
+						if ( fixSelection ) {
+							int rowcount = tree.getRowCount();
+							if ( pathrow < rowcount ) {
+								tree.setSelectionRow( pathrow );
+							}
+							else {
+								tree.setSelectionRow( pathrow - 1 );
+							}
+						}
 					}
 				} );
 			}
@@ -106,6 +121,7 @@ public class InsightMenu extends MouseAdapter {
 				Insight insight = new Insight( "Clone of " + i.getLabel() );
 				insight.setSparql( i.getSparql() );
 				insight.setOutput( i.getOutput() );
+				insight.setDescription( i.getDescription() );
 
 				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( insight );
 				DefaultMutableTreeNode parent

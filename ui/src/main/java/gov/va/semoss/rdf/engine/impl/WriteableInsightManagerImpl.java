@@ -84,8 +84,11 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.begin();
 			removeOldData();
 
+			ValueFactory vf = rc.getValueFactory();
+			int idx = 0;
 			for ( Perspective p : perspectives ) {
 				rc.add( InsightManagerImpl.getStatements( p, author ) );
+				rc.add( p.getId(), OLO.index, vf.createLiteral( ++idx ) );
 			}
 
 			rc.commit();
@@ -290,13 +293,14 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		haschanges = true;
 	}
 
-	/**   Release heavy-weight database objects.
+	/**
+	 * Release heavy-weight database objects.
 	 */
 	@Override
 	public void release() {
-       dispose();
-       super.release();
-   }
+		dispose();
+		super.release();
+	}
 
 	@Override
 	public void addRawStatements( Collection<Statement> stmts ) throws RepositoryException {
