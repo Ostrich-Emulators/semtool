@@ -87,7 +87,7 @@ public class GsonWriterTest {
 	}
 
 	@Test
-	public void testGetGraph2() {
+	public void testGetGraphRelsOnly() {
 		LoadingSheetData rels
 				= LoadingSheetData.relsheet( "Human Being", "Car", "Purchased" );
 		rels.addProperties( Arrays.asList( "Price", "Date" ) );
