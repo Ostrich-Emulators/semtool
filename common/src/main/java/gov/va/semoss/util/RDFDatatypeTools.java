@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.apache.xerces.util.XMLChar;
+import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -235,6 +236,16 @@ public class RDFDatatypeTools {
 		return removeExtraneousDoubleQuotes( input );
 	}
 
+	/**
+	 * Gets the datatype of the given val. If val is null, returns null. It
+	 * returns {@link XMLSchema#ANYURI} for a URI, {@link XMLSchema#ENTITY} for a
+	 * BNode, and {@link Literal#getDatatype()} if it's a literal. If it's not a
+	 * {@link Value}, then it is converted to a Value first, and reprocessed.
+	 * If we have a literal, but a null datatype, returns {@link XMLSchema#STRING}
+	 *
+	 * @param val
+	 * @return
+	 */
 	public static URI getDatatype( Object val ) {
 		if ( null == val ) {
 			return null;
@@ -246,6 +257,9 @@ public class RDFDatatypeTools {
 		else if ( val instanceof Literal ) {
 			Literal l = Literal.class.cast( val );
 			return ( null == l.getDatatype() ? XMLSchema.STRING : l.getDatatype() );
+		}
+		else if ( val instanceof BNode ) {
+			return XMLSchema.ENTITY;
 		}
 
 		Class<?> theClass = val.getClass();
