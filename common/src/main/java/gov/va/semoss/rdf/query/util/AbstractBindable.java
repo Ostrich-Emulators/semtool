@@ -247,9 +247,15 @@ public abstract class AbstractBindable implements Bindable {
 		// with our VALUES statements. This will break on just about any complicated
 		// Sparql
 		int last = sparql.lastIndexOf( '}' );
-		String select = sparql.substring( 0, last );
-		String end = sparql.substring( last );
-		return select + binds.toString() + end;
+		if( last > -1 ){
+			String select = sparql.substring( 0, last );
+			String end = sparql.substring( last );
+			return select + binds.toString() + end;
+		}
+		else{
+			// no }, so just append the bindings (is this even valid?)
+			return sparql + binds.toString();
+		}
 	}
 
 	public static XMLGregorianCalendar getCal( Date date ) {

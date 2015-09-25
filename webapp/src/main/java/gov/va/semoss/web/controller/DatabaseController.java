@@ -9,14 +9,25 @@ import javax.servlet.http.HttpServletResponse;
 import gov.va.semoss.web.io.DbInfo;
 import gov.va.semoss.web.security.SemossUser;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 
 
+
+
+
+
+
+
+import javax.ws.rs.POST;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -25,7 +36,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * This controller serves pages secured by Spring Security
@@ -41,35 +54,37 @@ public class DatabaseController extends SemossControllerBase {
 
 	@Autowired
 	private DbInfoMapper datastore;
+	
+	@Autowired
+	ServletContext servletContext;
 
 	@RequestMapping("/list" )
 	@ResponseBody
-	public String[] getAllDatabaseIDs() {
+	public DbInfo[] getAllDatabases() {
 		log.debug( "Getting all database IDs." );
 		Collection<DbInfo> testDbs = datastore.getAll();
 		int i = 0;
-		String[] testDbIDs = new String[testDbs.size()];
+		DbInfo[] testDbIDs = new DbInfo[testDbs.size()];
 		for ( DbInfo dbi : testDbs ) {
-			testDbIDs[i++] = dbi.getName();
+			testDbIDs[i++] = dbi;
 		}
-
 		return testDbIDs;
 	}
 
-	@RequestMapping( "/{id}" )
+	@RequestMapping( value="/get/{name}")
 	@ResponseBody
-	public DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
+	public DbInfo getOneDatabaseWithID( @PathVariable( "name" ) String name,
 			HttpServletResponse response ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
-		log.debug( "Getting database " + id + " (user: "
+		log.debug( "Getting database " + name + " (user: "
 				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
 
-		DbInfo test = datastore.getOne( id );
-		if ( null == test ) {
+		DbInfo dbi = datastore.getOne( name );
+		if ( null == dbi ) {
 			throw new UnauthorizedException();
 		}
-		return test;
+		return dbi;
 	}
 
 	/**
@@ -111,6 +126,43 @@ public class DatabaseController extends SemossControllerBase {
 
 		return testDbs;
 	}
+	
+	
+	@RequestMapping(value = "/import", method = RequestMethod.POST)
+	@ResponseBody
+	public String importDatabaseViaFile(HttpServletRequest req, @RequestParam(value = "jnlFile", required = true) MultipartFile jnlFile) {
+		if (!jnlFile.isEmpty()) {
+			try {
+				validate(jnlFile);
+				saveJNLFile(jnlFile.getName(), jnlFile);
+				// TODO Save the file and do something with it
+				
+			} catch (Exception re) {
+				// TODO Log this
+				return "Failed to save file";
+			}
+		}
+		return "Success";
+	}
+	
+	private final boolean validate(MultipartFile file){
+		return true;
+	}
+	
+	private void saveJNLFile(String filename, MultipartFile jnlFile)
+			throws RuntimeException, IOException {
+				try {
+					File file = new File(servletContext.getRealPath("/") + "/"
+							+ filename);					 
+					FileUtils.writeByteArrayToFile(file, jnlFile.getBytes());
+				} 
+				catch (IOException e) {
+					throw e;
+				}
+			}
+
+
+}
 
 //	@RequestMapping( "/{id}/{type}" )
 //	public void getRepo( @PathVariable( "id" ) String id,
@@ -175,4 +227,3 @@ public class DatabaseController extends SemossControllerBase {
 //		
 //	}
 
-}

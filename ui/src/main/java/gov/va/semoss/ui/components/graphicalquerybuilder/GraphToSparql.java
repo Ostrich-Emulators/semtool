@@ -17,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -240,8 +241,13 @@ public class GraphToSparql {
 					// handle endpoints and types a little differently
 					QueryNode src = graph.getSource( edge );
 					QueryNode dst = graph.getDest( edge );
-					sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
-							src, dst, props.keySet() ) );
+					if ( !( null == src || null == dst ) ) {
+						sb.append( buildEdgeTypeAndEndpoints( edge, props.getNN( RDF.TYPE ),
+								src, dst, props.keySet() ) );
+					}
+					else {
+						Logger.getLogger( getClass() ).warn( "BUG: how did we get here?" );
+					}
 				}
 				else {
 					sb.append( buildOneConstraint( edge, prop, edgevals ) );
@@ -268,7 +274,7 @@ public class GraphToSparql {
 		// make sure we don't treat a generic edge as a special VALUES clause
 		Set<Value> vals = new HashSet<>( tvals );
 		vals.remove( Constants.ANYNODE );
-		
+
 		// we need to use a variable if:
 		// 1) our edge is selected to be returned in the SELECT part
 		// 2) we have other properties to hang on this edge

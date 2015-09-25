@@ -21,3 +21,12 @@ ui/nbactions.xml
 /webapp/src/main/resources/semoss-web.properties
 /webapp/nb-configuration.xml
 /webapp/src/main/resources/ldap.properties
+tools/nb-configuration.xml
+tools/nbactions*
+tools/*.log
+tools/*.log.*
+tools/target
+tools/.classpath
+tools/.project
+tools/.settings
+tools/.settings/*

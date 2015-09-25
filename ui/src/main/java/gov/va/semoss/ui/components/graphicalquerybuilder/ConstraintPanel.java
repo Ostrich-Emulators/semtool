@@ -279,7 +279,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 		else {
 			Enumeration<AbstractButton> radios = typegroup.getElements();
-			Class<?> typeclass = RDFDatatypeTools.instance().getClassForValue( o );
+			Class<?> typeclass = RDFDatatypeTools.getClassForValue( o );
 
 			while ( radios.hasMoreElements() ) {
 				AbstractButton radio = radios.nextElement();

@@ -75,11 +75,15 @@ public class BigDataEngine extends AbstractSesameEngine {
 	private BigdataSailRepository insightrepo = null;
 	private InsightManagerImpl insightEngine = null;
 
-	public BigDataEngine(Properties initProps){
-		super(initProps);
-		this.openDB(initProps);
+	public BigDataEngine( Properties initProps ) {
+		super( initProps );
+		this.openDB( initProps );
 	}
-	
+
+	public BigDataEngine( File jnl ) {
+		this( generateProperties( jnl ) );
+	}
+
 	@Override
 	protected void createRc( Properties props ) throws RepositoryException {
 		Properties rws = getRWSProperties( props );
@@ -253,7 +257,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 								src.clear();
 								src.add( stmts );
 								src.commit();
-								
+
 								logProvenance( stmts );
 							}
 							catch ( RepositoryException re ) {

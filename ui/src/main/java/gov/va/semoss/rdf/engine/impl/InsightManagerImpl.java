@@ -47,6 +47,7 @@ import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.UriBuilder;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -266,9 +267,30 @@ public class InsightManagerImpl implements InsightManager {
 		try {
 			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
 					RDF.TYPE, VAS.Perspective, true ) );
+			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
-				persps.add( getPerspective( URI.class.cast( s.getSubject() ) ) );
+				Perspective p = getPerspective( URI.class.cast( s.getSubject() ) );
+
+				List<Statement> slotstmts = Iterations.asList(
+						rc.getStatements( p.getId(), OLO.index, null, false ) );
+				if ( !slotstmts.isEmpty() ) {
+					Literal slotval = Literal.class.cast( slotstmts.get( 0 ).getObject() );
+					ordering.put( p, slotval.intValue() );
+				}
+
+				persps.add( p );
 			}
+
+			persps.sort( new Comparator<Perspective>() {
+
+				@Override
+				public int compare( Perspective o1, Perspective o2 ) {
+					int o1slot = ordering.getOrDefault( o1, Integer.MAX_VALUE );
+					int o2slot = ordering.getOrDefault( o2, Integer.MAX_VALUE );
+					return o1slot - o2slot;
+				}
+			} );
+
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
