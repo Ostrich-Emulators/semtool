@@ -8,8 +8,7 @@
 					SEMOSS.DbInfo.prototype.dataUrl = null;
 					SEMOSS.DbInfo.prototype.insightsUrl = null;
 					
-					SEMOSS.DbInfo.prototype.setAttributes = function(json){
-						var object = JSON.parse(json);
+					SEMOSS.DbInfo.prototype.setAttributes = function(object){
 						this.name = object['name'];
 						this.serverUrl = object['serverUrl'];
 						this.dataUrl = object['dataUrl'];

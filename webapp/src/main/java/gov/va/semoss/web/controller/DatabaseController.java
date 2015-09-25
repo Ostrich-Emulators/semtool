@@ -60,20 +60,20 @@ public class DatabaseController extends SemossControllerBase {
 
 	@RequestMapping("/list" )
 	@ResponseBody
-	public String[] getAllDatabases() {
+	public DbInfo[] getAllDatabases() {
 		log.debug( "Getting all database IDs." );
 		Collection<DbInfo> testDbs = datastore.getAll();
 		int i = 0;
-		String[] testDbIDs = new String[testDbs.size()];
+		DbInfo[] testDbIDs = new DbInfo[testDbs.size()];
 		for ( DbInfo dbi : testDbs ) {
-			testDbIDs[i++] = stringify(dbi);
+			testDbIDs[i++] = dbi;
 		}
 		return testDbIDs;
 	}
 
 	@RequestMapping( value="/get/{name}")
 	@ResponseBody
-	public String getOneDatabaseWithID( @PathVariable( "name" ) String name,
+	public DbInfo getOneDatabaseWithID( @PathVariable( "name" ) String name,
 			HttpServletResponse response ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
@@ -84,7 +84,7 @@ public class DatabaseController extends SemossControllerBase {
 		if ( null == dbi ) {
 			throw new UnauthorizedException();
 		}
-		return stringify(dbi);
+		return dbi;
 	}
 
 	/**
@@ -161,13 +161,7 @@ public class DatabaseController extends SemossControllerBase {
 				}
 			}
 
-	private String stringify(DbInfo dbi){
-		return "{\"name\":\"" + dbi.getName() + "\"," +
-				"\"serverUrl\":\"" + dbi.getServerUrl() + "\"," +
-				"\"dataUrl\":\"" + dbi.getDataUrl() + "\"," +
-				"\"insightsUrl\":\"" + dbi.getInsightsUrl() + "\"" +
-				"}";
-	}
+
 }
 
 //	@RequestMapping( "/{id}/{type}" )
