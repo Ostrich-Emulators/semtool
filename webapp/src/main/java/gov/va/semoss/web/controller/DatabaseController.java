@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 
 
 
+
+import javax.ws.rs.POST;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,32 +60,31 @@ public class DatabaseController extends SemossControllerBase {
 
 	@RequestMapping("/list" )
 	@ResponseBody
-	public String[] getAllDatabaseIDs() {
+	public String[] getAllDatabases() {
 		log.debug( "Getting all database IDs." );
 		Collection<DbInfo> testDbs = datastore.getAll();
 		int i = 0;
 		String[] testDbIDs = new String[testDbs.size()];
 		for ( DbInfo dbi : testDbs ) {
-			testDbIDs[i++] = dbi.getName();
+			testDbIDs[i++] = stringify(dbi);
 		}
-
 		return testDbIDs;
 	}
 
-	@RequestMapping( "/{id}" )
+	@RequestMapping( value="/get/{name}")
 	@ResponseBody
-	public DbInfo getOneDatabaseWithID( @PathVariable( "id" ) String id,
+	public String getOneDatabaseWithID( @PathVariable( "name" ) String name,
 			HttpServletResponse response ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
-		log.debug( "Getting database " + id + " (user: "
+		log.debug( "Getting database " + name + " (user: "
 				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
 
-		DbInfo test = datastore.getOne( id );
-		if ( null == test ) {
+		DbInfo dbi = datastore.getOne( name );
+		if ( null == dbi ) {
 			throw new UnauthorizedException();
 		}
-		return test;
+		return stringify(dbi);
 	}
 
 	/**
@@ -127,34 +129,46 @@ public class DatabaseController extends SemossControllerBase {
 	
 	
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
+	@ResponseBody
 	public String importDatabaseViaFile(HttpServletRequest req, @RequestParam(value = "jnlFile", required = true) MultipartFile jnlFile) {
 		if (!jnlFile.isEmpty()) {
 			try {
 				validate(jnlFile);
+				saveJNLFile(jnlFile.getName(), jnlFile);
+				// TODO Save the file and do something with it
 				
-			} catch (RuntimeException re) {
-				return "";
+			} catch (Exception re) {
+				// TODO Log this
+				return "Failed to save file";
 			}
 		}
-		return "";
+		return "Success";
 	}
 	
 	private final boolean validate(MultipartFile file){
 		return true;
 	}
 	
-	private void saveJNLFile(String filename, MultipartFile image)
+	private void saveJNLFile(String filename, MultipartFile jnlFile)
 			throws RuntimeException, IOException {
 				try {
 					File file = new File(servletContext.getRealPath("/") + "/"
 							+ filename);					 
-					FileUtils.writeByteArrayToFile(file, image.getBytes());
+					FileUtils.writeByteArrayToFile(file, jnlFile.getBytes());
 				} 
 				catch (IOException e) {
 					throw e;
 				}
 			}
+
+	private String stringify(DbInfo dbi){
+		return "{\"name\":\"" + dbi.getName() + "\"," +
+				"\"serverUrl\":\"" + dbi.getServerUrl() + "\"," +
+				"\"dataUrl\":\"" + dbi.getDataUrl() + "\"," +
+				"\"insightsUrl\":\"" + dbi.getInsightsUrl() + "\"" +
+				"}";
 	}
+}
 
 //	@RequestMapping( "/{id}/{type}" )
 //	public void getRepo( @PathVariable( "id" ) String id,

@@ -38,10 +38,10 @@
         }
         
         $scope.showEdit = function(id){
-       	 	SEMOSS.getDatabase(id, function(token){
-       	 		var foreignInstance = JSON.parse(token.data.data);
+        	$scope.create = false;
+       	 	SEMOSS.getDatabase(id, function(json){
        	 		var nativeInstance = new SEMOSS.DbInfo();
-       	 		nativeInstance.setAttributes(foreignInstance);
+       	 		nativeInstance.setAttributes(json);
        	 		$scope.activeInstance = nativeInstance;
            	 	$scope.mode = 'edit';
            	 	$scope.$apply();
@@ -63,10 +63,10 @@
         }
         
         $scope.view = function(id){
-       	 	SEMOSS.getDatabase(id, function(token){
-       	 		var foreignInstance = JSON.parse(token.data.data);
+        	$scope.create = false;
+       	 	SEMOSS.getDatabase(id, function(json){
        	 		var nativeInstance = new SEMOSS.DbInfo();
-       	 		nativeInstance.setAttributes(foreignInstance);
+       	 		nativeInstance.setAttributes(json);
        	 		$scope.activeInstance = nativeInstance;
            	 	$scope.mode = 'view';
            	 	$scope.$apply();
@@ -75,6 +75,7 @@
         }
         
         $scope.showCreate = function(){
+        	$scope.create = true;
    	 		var nativeInstance = new SEMOSS.DbInfo();
    	 		$scope.activeInstance = nativeInstance;
        	 	$scope.mode = 'create';

@@ -8,11 +8,12 @@
 					SEMOSS.DbInfo.prototype.dataUrl = null;
 					SEMOSS.DbInfo.prototype.insightsUrl = null;
 					
-					SEMOSS.DbInfo.prototype.setAttributes = function(object){
-						this.name = object.name;
-						this.serverUrl = object.serverUrl;
-						this.dataUrl = object.dataUrl;
-						this.insightsUrl = object.insightsUrl;
+					SEMOSS.DbInfo.prototype.setAttributes = function(json){
+						var object = JSON.parse(json);
+						this.name = object['name'];
+						this.serverUrl = object['serverUrl'];
+						this.dataUrl = object['dataUrl'];
+						this.insightsUrl = object['insightsUrl'];
 					}
 
 					SEMOSS.createDatabase = function (knowledgebase, callBackFunction, asynchronous){
@@ -64,16 +65,15 @@
 					}
 					
 					SEMOSS.getDatabase = function (id, callBackFunction, asynchronous){
-						var url = 'databases/' + id;
+						var url = 'databases/get/' + id;
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
 						$.ajax({
-							type : "POST",
+							type : "GET",
 							url : url,
 							success : function(response) {
-								var token = SEMOSS.processResponse(response);
-								callBackFunction(token);
+								callBackFunction(response);
 							}
 						});
 					}
@@ -87,11 +87,11 @@
 							type : "GET",
 							beforeSend: function (request)
 				            {
-								var username = "ryan";
-								var password = "123456";
-								var plainCreds = username + ":" + password;
-								var encodedCreds = Base64.encode(plainCreds);
-								request.setRequestHeader("Authorization", "Basic " + encodedCreds);
+								//var username = "rbobko";
+								//var password = "password";
+								//var plainCreds = username + ":" + password;
+								//var encodedCreds = Base64.encode(plainCreds);
+								//request.setRequestHeader("Authorization", "Basic " + encodedCreds);
 				            },
 							url : url,
 							success : function(response) {
