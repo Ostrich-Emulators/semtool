@@ -1,7 +1,7 @@
 <div id="semoss_databases" class="main_div" ng-controller="DatabaseManagementController as databaseManager">
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h2 class="panel-title table_title">Knowledgebase Inventory&nbsp&nbsp<button id="load_applications_button" class="btn btn-primary" ng-click="init()"><span class="glyphicon glyphicon glyphicon-download-alt table_refresh_button" aria-hidden="true" ></span></button></h2>
+    <h2 class="panel-title table_title">Knowledgebase Inventory&nbsp&nbsp</h2>
   </div>
   <div class="panel-body" >
     #include("/databases/table.vm")
