@@ -12,11 +12,9 @@ import org.openrdf.model.URI;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 
-import gov.va.semoss.om.ParameterType;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
-import gov.va.semoss.om.PlaySheet;
 
 import java.util.List;
 
