@@ -223,6 +223,11 @@ public class XlsWriter implements GraphWriter {
 		currentheader.clear();
 		desiredtabname = tabname;
 		String realname = generateSheetName( tabname, currentnames );
+		
+		if( null == currentwb ){
+			createWorkbook();
+		}
+		
 		currentsheet = currentwb.createSheet( realname );
 		rowcount = 0;
 

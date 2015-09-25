@@ -8,13 +8,16 @@ package gov.va.semoss.poi.main;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.XlsWriter.SheetRowCol;
 import gov.va.semoss.util.Utility;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -171,15 +174,14 @@ public class XlsWriterTest {
 	}
 
 	@Test
-	public void testAddRow_StringArr() {
-	}
+	public void testAddRow_ObjectArr() throws IOException {
+		XlsWriter writer = new XlsWriter();
+		writer.createTab( "test" );
+		writer.addRow( new Object[]{ "one row" }, new CellStyle[]{} );
+		ByteArrayOutputStream aos = new ByteArrayOutputStream();
+		writer.write( aos );
 
-	@Test
-	public void testAddRow_StringArr_CellStyleArr() {
-	}
-
-	@Test
-	public void testAddRow_ObjectArr() {
+		assertEquals( 3273, aos.size() );
 	}
 
 	@Test
