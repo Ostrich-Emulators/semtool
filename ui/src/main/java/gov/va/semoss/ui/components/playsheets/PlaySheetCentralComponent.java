@@ -9,7 +9,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.util.PlaySheetEnum;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 
@@ -50,21 +48,6 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	private PlaySheetFrame playframe;
 	private String title;
 	private final List<String> headers = new ArrayList<>();
-	
-	private static final Map<String, ImageIcon> defaultIcons = new HashMap<>();
-	public static void setDefaultIcons( Map<String, ImageIcon> icons ) {
-		defaultIcons.clear();
-		defaultIcons.putAll( icons );
-	}
-
-	/**   Sets the default icons for all playsheets from the PlaySheetEnum.
-	 */
-	public static void setDefaultIcons(){
-		defaultIcons.clear();
-		for(PlaySheetEnum pse: PlaySheetEnum.valuesNoUpdate()){
-			defaultIcons.put(pse.getSheetIconName(), pse.getSheetIcon());
-		}
-	}
 
 	public void setFrame( PlaySheetFrame f ) {
 		playframe = f;
@@ -268,15 +251,16 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	public boolean prefersTabs() {
 		return false;
 	}
-	
-	/**   Returns whether or not the playsheet requires a user-defined
-	 * query. This would normally be true, but for those cases where
-	 * a custom playsheet has been written that defines its requiere 
-	 * queries, this function can be overridden to return false.
-	 * 
+
+	/**
+	 * Returns whether or not the playsheet requires a user-defined query. This
+	 * would normally be true, but for those cases where a custom playsheet has
+	 * been written that defines its requiere queries, this function can be
+	 * overridden to return false.
+	 *
 	 * @return
 	 */
-	public boolean requiresQuery(){
+	public boolean requiresQuery() {
 		return true;
 	}
 }

@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -121,7 +120,6 @@ public class CSVReader implements ImportFileReader {
 			createProcessors();
 			processConceptRelationURIs( data );
 			processNodePropURIs( data );
-			// processRelationPropURIs( data );
 			processRelationships( data );
 		}
 		finally {
@@ -203,7 +201,7 @@ public class CSVReader implements ImportFileReader {
 
 				Map<String, Value> props = new HashMap<>();
 				for ( String propValColumn : valuesForProp ) {
-					Value v = createObject( propValColumn, jcrMap, data );
+					Value v = createObject( propValColumn, jcrMap );
 					if ( null != v ) {
 						props.put( propValColumn, v );
 					}
@@ -315,48 +313,6 @@ public class CSVReader implements ImportFileReader {
 		}
 	}
 
-	public void processRelationPropURIs( ImportData data ) {
-		if ( rdfMap.getProperty( RELATION_PROP ) == null ) {
-			return;
-		}
-
-		logger.error( "this function doesn't do anything" );
-
-		String propNames = rdfMap.getProperty( RELATION_PROP );
-		StringTokenizer propTokens = new StringTokenizer( propNames, ";" );
-		relPropArrayList.clear();
-
-		while ( propTokens.hasMoreElements() ) {
-			String relation = propTokens.nextToken();
-			//just in case the end of the prop string is empty string or spaces
-			if ( !relation.contains( "%" ) ) {
-				break;
-			}
-
-			relPropArrayList.add( relation );
-
-			logger.debug( "Loading relation prop " + relation );
-			// get the subject (index 0) and all objects for triple
-			// loop through all properties on the relationship
-			String[] strSplit = relation.split( "%" );
-
-			for ( int i = 1; i < strSplit.length; i++ ) {
-				String prop = strSplit[i];
-
-				// see if property node URI exists in prop file
-				String property = prop;
-				if ( rdfMap.containsKey( prop ) ) {
-					String userProp = rdfMap.getProperty( prop );
-					property = userProp.substring( userProp.lastIndexOf( "/" ) + 1 );
-				}
-				else if ( prop.contains( "+" ) ) {
-					// if no user specified URI, use generic URI
-					property = processAutoConcat( prop );
-				}
-			}
-		}
-	}
-
 	/**
 	 * Change the name of nodes that are concatenations of multiple CSV columns
 	 * Example: changes the string "Cat+Dog" into "CatDog"
@@ -426,8 +382,7 @@ public class CSVReader implements ImportFileReader {
 		return retString;
 	}
 
-	private Value createObject( String object, Map<String, String> jcrMap,
-			ImportData data ) {
+	private Value createObject( String object, Map<String, String> jcrMap ) {
 		ValueFactory vf = new ValueFactoryImpl();
 
 		// need to do the class vs. object magic

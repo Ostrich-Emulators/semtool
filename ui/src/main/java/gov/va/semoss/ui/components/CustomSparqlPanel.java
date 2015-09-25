@@ -44,8 +44,8 @@ import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
-import gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor;
 
+import gov.va.semoss.ui.components.tabbedqueries.SparqlTextArea;
 import java.io.File;
 import java.io.IOException;
 
@@ -339,7 +339,7 @@ public class CustomSparqlPanel extends JPanel {
 		appendSparqlQueryChkBox.setEnabled( bb );
 	}
 
-	public SyntaxTextEditor getOpenEditor() {
+	public SparqlTextArea getOpenEditor() {
 		return sparqlArea.getEditorOfSelectedTab();
 	}
 

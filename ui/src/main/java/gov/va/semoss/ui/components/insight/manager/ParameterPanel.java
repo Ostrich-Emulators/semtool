@@ -8,11 +8,13 @@ package gov.va.semoss.ui.components.insight.manager;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
+import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +92,7 @@ public class ParameterPanel extends DataPanel<Parameter> {
     jLabel7 = new javax.swing.JLabel();
     parameterName = new javax.swing.JTextField();
     jScrollPane5 = new javax.swing.JScrollPane();
-    parameterQuery = new gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor();
+    parameterQuery = new gov.va.semoss.ui.components.tabbedqueries.SparqlTextArea();
     jLabel8 = new javax.swing.JLabel();
     conceptbtn = new javax.swing.JButton();
     jLabel1 = new javax.swing.JLabel();
@@ -168,13 +170,19 @@ public class ParameterPanel extends DataPanel<Parameter> {
 		Map<URI, String> labels = GuiUtility.getInstanceLabels( uris, getEngine() );
 		labels = Utility.sortUrisByLabel( labels );
 
-		uris = new ArrayList<>();
-
 		Parameter parameter = getElement();
 		Map<URI, Parameter> parameters = new HashMap<>();
 		// we want the user to be able to select a parent parameter,
 		// but we don't have that functionality yet, so we'll simulate it here
-		for ( Parameter p : insight.getInsightParameters() ) {
+				
+		List<Parameter> currentparams = new ArrayList<>();
+		Enumeration<DefaultMutableTreeNode> en = getNode().children();
+		while( en.hasMoreElements() ){
+			DefaultMutableTreeNode child = en.nextElement();
+			currentparams.add( Parameter.class.cast( child.getUserObject() ) );
+		}
+		
+		for ( Parameter p : currentparams ) {
 			if ( !p.equals( parameter ) ) {
 				parameters.put( p.getId(), p );
 				uris.add( p.getId() );
@@ -182,12 +190,13 @@ public class ParameterPanel extends DataPanel<Parameter> {
 			}
 		}
 
+		uris.clear();
 		uris.add( Constants.ANYNODE );
-		labels.put( Constants.ANYNODE, "<Any Concept>" );
-
 		uris.addAll( labels.keySet() );
 
-		JComboBox<URI> combo = new JComboBox<>( uris.toArray( new URI[0] ) );
+		labels.put( Constants.ANYNODE, "<Any Concept>" );
+
+		JComboBox<URI> combo = new UriComboBox( uris );
 		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
 		renderer.cache( labels );
 		combo.setRenderer( renderer );
@@ -227,7 +236,7 @@ public class ParameterPanel extends DataPanel<Parameter> {
   private javax.swing.JLabel jLabel8;
   private javax.swing.JScrollPane jScrollPane5;
   private javax.swing.JTextField parameterName;
-  private gov.va.semoss.ui.components.tabbedqueries.SyntaxTextEditor parameterQuery;
+  private gov.va.semoss.ui.components.tabbedqueries.SparqlTextArea parameterQuery;
   private javax.swing.JTextField vartext;
   // End of variables declaration//GEN-END:variables
 

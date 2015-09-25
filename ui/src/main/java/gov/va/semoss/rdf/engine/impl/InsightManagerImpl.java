@@ -32,6 +32,7 @@ import gov.va.semoss.model.vocabulary.SPL;
 import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
@@ -46,6 +47,7 @@ import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.UriBuilder;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,6 +68,40 @@ public class InsightManagerImpl implements InsightManager {
 	private RepositoryConnection rc;
 	private Repository repo = null;
 	private boolean closeRcOnRelease = false;
+
+	// strictly for upgrading old insights
+	private static final Map<String, InsightOutputType> UPGRADETYPEMAP = new HashMap<>();
+
+	static {
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet",
+				InsightOutputType.COLUMN_CHART );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet",
+				InsightOutputType.DENDROGRAM );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.GraphPlaySheet",
+				InsightOutputType.GRAPH );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.GridPlaySheet",
+				InsightOutputType.GRID );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet",
+				InsightOutputType.GRID_RAW );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.GridScatterSheet",
+				InsightOutputType.GRID_SCATTER );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet",
+				InsightOutputType.HEATMAP );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet",
+				InsightOutputType.GRAPH );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet",
+				InsightOutputType.PARALLEL_COORDS );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet",
+				InsightOutputType.PIE_CHART );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet",
+				InsightOutputType.SANKEY );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet",
+				InsightOutputType.HEATMAP_US );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet",
+				InsightOutputType.HEATMAP_WORLD );
+		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet",
+				InsightOutputType.HEATMAP_APPDUPE );
+	}
 
 	public InsightManagerImpl( Repository _repo ) {
 		repo = _repo;
@@ -231,9 +267,30 @@ public class InsightManagerImpl implements InsightManager {
 		try {
 			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
 					RDF.TYPE, VAS.Perspective, true ) );
+			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
-				persps.add( getPerspective( URI.class.cast( s.getSubject() ) ) );
+				Perspective p = getPerspective( URI.class.cast( s.getSubject() ) );
+
+				List<Statement> slotstmts = Iterations.asList(
+						rc.getStatements( p.getId(), OLO.index, null, false ) );
+				if ( !slotstmts.isEmpty() ) {
+					Literal slotval = Literal.class.cast( slotstmts.get( 0 ).getObject() );
+					ordering.put( p, slotval.intValue() );
+				}
+
+				persps.add( p );
 			}
+
+			persps.sort( new Comparator<Perspective>() {
+
+				@Override
+				public int compare( Perspective o1, Perspective o2 ) {
+					int o1slot = ordering.getOrDefault( o1, Integer.MAX_VALUE );
+					int o2slot = ordering.getOrDefault( o2, Integer.MAX_VALUE );
+					return o1slot - o2slot;
+				}
+			} );
+
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
@@ -504,6 +561,16 @@ public class InsightManagerImpl implements InsightManager {
 
 					insight.setLabel( obj.stringValue() );
 				}
+				else if ( VAS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
+					try {
+						insight.setOutputType( InsightOutputType.valueOf( obj.stringValue() ) );
+					}
+					catch ( IllegalArgumentException iae ) {
+						log.warn( "unknown insight output type: " + obj.stringValue()
+								+ "(using grid instead)" );
+						insight.setOutputType( InsightOutputType.GRID );
+					}
+				}
 				else if ( DCTERMS.CREATOR.equals( pred ) ) {
 					insight.setCreator( obj.stringValue() );
 				}
@@ -540,6 +607,14 @@ public class InsightManagerImpl implements InsightManager {
 		legacyoutput = legacyoutput.replaceFirst( "prerna", "gov.va.semoss" );
 		insight.setOutput( legacyoutput.replaceFirst( "veera", "gov.va.vcamp" ) );
 
+		// second, make sure our InsightOutputType matches our "Output" string
+		// (use grid for a default [but how we'd ever have to use it is a mystery])
+		if ( null == insight.getOutputType() ) {
+			insight.setOutputType( UPGRADETYPEMAP.getOrDefault( insight.getOutput(),
+					InsightOutputType.GRID ) );
+		}
+
+		// finally, see if we have super-legacy query data to worry about
 		// there are two styles of legacy queries...
 		// 1) <@X@> where X is {parameter name}-{URI}
 		// 2) <@Y@> where Y is {parameter name}
@@ -717,6 +792,9 @@ public class InsightManagerImpl implements InsightManager {
 			statements.add( new StatementImpl( iid, DCTERMS.DESCRIPTION,
 					vf.createLiteral( insight.getDescription() ) ) );
 		}
+
+		statements.add( new StatementImpl( iid, VAS.INSIGHT_OUTPUT_TYPE,
+				vf.createLiteral( insight.getOutputType().toString() ) ) );
 
 		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, VAS.InsightProperties ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATED,

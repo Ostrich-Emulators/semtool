@@ -1,22 +1,16 @@
 package gov.va.semoss.ui.components.tabbedqueries;
 
-import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.components.CloseableTab;
-import gov.va.semoss.ui.components.FileBrowsePanel;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
@@ -24,9 +18,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -36,7 +27,6 @@ public class TabbedQueries extends JTabbedPane {
 	private static final long serialVersionUID = -490582079689204119L;
 
 	private final TabRenameAction renamer = new TabRenameAction();
-	private final QuerySavingAction saver = new QuerySavingAction();
 
 	public TabbedQueries() {
 		/**
@@ -77,7 +67,7 @@ public class TabbedQueries extends JTabbedPane {
 	 * preselect the playsheet dropdown
 	 *
 	 * @return getTagOfSelectedTab The tag of the currently displayed
-	 * SyntaxTextEditor.
+ SparqlTextArea.
 	 */
 	public String getTagOfSelectedTab() {
 		return getEditorOfSelectedTab().getTag();
@@ -100,7 +90,7 @@ public class TabbedQueries extends JTabbedPane {
 	 * display queries.
 	 *
 	 * @return getTextOfSelectedTab The contents of the currently displayed
-	 * SyntaxTextEditor.
+ SparqlTextArea.
 	 */
 	public String getTextOfSelectedTab() {
 		return getEditorOfSelectedTab().getText();
@@ -112,62 +102,54 @@ public class TabbedQueries extends JTabbedPane {
 	 * display queries.
 	 *
 	 * @param strText A string of text to display in the currently selected
-	 * SyntaxTextEditor.
+ SparqlTextArea.
 	 */
 	public void setTextOfSelectedTab( String strText ) {
 		getEditorOfSelectedTab().setText( strText );
 	}
 
 	/**
-	 * Exposes the SyntaxTextEditor of the selected tab as a public property, to
-	 * be used for keyboard and mouse-click handlers:
+	 * Exposes the SparqlTextArea of the selected tab as a public property, to
+ be used for keyboard and mouse-click handlers:
 	 *
-	 * @return getEditorOfSelectedTab The currently displayed SyntaxTextEditor.
+	 * @return getEditorOfSelectedTab The currently displayed SparqlTextArea.
 	 */
-	public SyntaxTextEditor getEditorOfSelectedTab() {
+	public SparqlTextArea getEditorOfSelectedTab() {
 		RTextScrollPane sp = RTextScrollPane.class.cast( getSelectedComponent() );
-		return SyntaxTextEditor.class.cast( sp.getViewport().getView() );
+		return SparqlTextArea.class.cast( sp.getViewport().getView() );
 	}
 
 	/**
-	 * Adds a tab labeled "*" to the TabbedPane. Also, adds a SyntaxTextEditor to
-	 * the tab, and modifies the text-area's pop-up menu to show a "Rename Tab"
-	 * option and removes the code-folding option.
+	 * Adds a tab labeled "*" to the TabbedPane. Also, adds a SparqlTextArea to
+ the tab, and modifies the text-area's pop-up menu to show a "Rename Tab"
+ option and removes the code-folding option.
 	 */
 	private void addNewTab() {
-		SyntaxTextEditor textEditor = new SyntaxTextEditor();
-		//Font f = getFont();
+		SparqlTextArea textEditor = new SparqlTextArea();
 
-		// use a mono-spaced font so indentation works well		
-		//textEditor.setFont( new Font( Font.MONOSPACED, f.getStyle(), f.getSize() ) );
 		RTextScrollPane sp = new RTextScrollPane( textEditor );
 		sp.setFoldIndicatorEnabled( false );
 		this.addTab( "*", sp );
 		this.setToolTipTextAt( this.getTabCount() - 1, "Add New Tab" );
 		//If nothing is set to the text editor, when it is opened in V-CAMP/SEMOSS,
 		//it may not respond to programmatic assignment, and the tool may hang:
-		textEditor.setText( " " );
+		//textEditor.setText( "" );
 
 		//Add an item to the context-popup menu that allows one to rename the current tab:
 		JPopupMenu popup = textEditor.getPopupMenu();
-		popup.addSeparator();
-		popup.add( saver );
 		popup.add( renamer );
-		//Remove the code-folding component and it's separator from the popup menu:
-		popup.remove( popup.getComponent( 10 ) ); // the item
-		popup.remove( popup.getComponent( 10 ) ); // the separator
 
 		//Place a black 1px border around the top component in TabbedQueries:
 		sp.setBorder( BorderFactory.createMatteBorder( 0, 1, 1, 1, Color.BLACK ) );
 
 		// Fix to make sure that bracket match highlighting follows component resize
 		// (really small windows can make it ugly)
-		textEditor.addComponentListener( new ComponentAdapter() {
+		textEditor.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized( ComponentEvent e ) {
-				int caratPosistion = ( (SyntaxTextEditor) e.getSource() ).getCaretPosition();
-				( (SyntaxTextEditor) e.getSource() ).setCaretPosition( 0 );
-				( (SyntaxTextEditor) e.getSource() ).setCaretPosition( caratPosistion );
+				int caratPosistion = ( (SparqlTextArea) e.getSource() ).getCaretPosition();
+				( (SparqlTextArea) e.getSource() ).setCaretPosition( 0 );
+				( (SparqlTextArea) e.getSource() ).setCaretPosition( caratPosistion );
 			}
 		} );
 	}
@@ -213,7 +195,7 @@ public class TabbedQueries extends JTabbedPane {
 					e.consume();
 					if ( SwingUtilities.isRightMouseButton( e ) ) {
 						JPopupMenu popup = new JPopupMenu();
-						popup.add( saver );
+						//popup.add( saver );
 						popup.add( renamer );
 						popup.show( e.getComponent(), e.getX(), e.getY() );
 					}
@@ -251,8 +233,8 @@ public class TabbedQueries extends JTabbedPane {
 	}
 
 	/**
-	 * Specifies a "Rename Tab" option on the SyntaxTextEditor's context menu, and
-	 * provides a listener for that option's selection.
+	 * Specifies a "Rename Tab" option on the SparqlTextArea's context menu, and
+ provides a listener for that option's selection.
 	 */
 	private class TabRenameAction extends AbstractAction {
 
@@ -278,28 +260,4 @@ public class TabbedQueries extends JTabbedPane {
 			}
 		}
 	}
-
-	private class QuerySavingAction extends AbstractSavingAction {
-
-		public QuerySavingAction() {
-			super( "Save Query" );
-			super.setAppendDate( true );
-			super.setDefaultFileName( "Query" );
-		}
-
-		@Override
-		protected void saveTo( File exploc ) throws IOException {
-			FileUtils.write( exploc, TabbedQueries.this.getTextOfSelectedTab() );
-		}
-
-		@Override
-		protected void finishFileChooser( JFileChooser chsr ) {
-			super.finishFileChooser( chsr );
-			FileFilter spqFilter
-					= new FileNameExtensionFilter( "SPARQL Files (*.spq, *.sparql)",
-							"spq", "sparql" );
-			chsr.setFileFilter( spqFilter );
-			chsr.setAcceptAllFileFilterUsed( true );
-		}
-	};
 }

@@ -23,19 +23,23 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
-import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
+import static gov.va.semoss.util.Utility.unzip;
 import java.awt.Desktop;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,6 +48,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -102,6 +107,21 @@ public class GuiUtility {
 
 		//Otherwise, simply return the input string:
 		return uri;
+	}
+	
+	public static void extractHTML() throws IOException {
+		// check for html directory
+		// extract
+
+		// this should look for an "html" folder under the current working (execution) directory of the tool:
+		Path localHtmlPath = Paths.get( "html" );
+		if ( Files.exists( localHtmlPath ) ) {
+			return;
+		}
+
+		try ( InputStream htmlIs = Utility.class.getResourceAsStream( "/html.zip" ) ) {
+			unzip( new ZipInputStream( htmlIs ), new File( "html" ) );
+		}
 	}
 
 	/**
@@ -452,15 +472,6 @@ public class GuiUtility {
 			metas = new ImportMetadata( eng.getBaseUri(), eng.getSchemaBuilder(),
 					eng.getDataBuilder() );
 			metas.setNamespaces( eng.getNamespaces() );
-
-			try {
-				MetadataQuery mq = new MetadataQuery();
-				eng.query( mq );
-				metas.setExtras( mq.asStrings() );
-			}
-			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-				log.error( e, e );
-			}
 		}
 
 		return new ImportData( metas );

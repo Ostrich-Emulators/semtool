@@ -24,7 +24,6 @@ import gov.va.semoss.util.DeterministicSanitizer;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.util.UriSanitizer;
 
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,7 +48,6 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -86,15 +84,11 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.begin();
 			removeOldData();
 
+			ValueFactory vf = rc.getValueFactory();
+			int idx = 0;
 			for ( Perspective p : perspectives ) {
 				rc.add( InsightManagerImpl.getStatements( p, author ) );
-			}
-
-			try ( FileWriter fw = new FileWriter( "/tmp/y.nt" ) ) {
-				rc.export( new NTriplesWriter( fw ) );
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
+				rc.add( p.getId(), OLO.index, vf.createLiteral( ++idx ) );
 			}
 
 			rc.commit();
@@ -127,14 +121,6 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		}
 
 		rc.remove( removers );
-
-		try ( FileWriter fw = new FileWriter( "/tmp/x.nt" ) ) {
-			rc.export( new NTriplesWriter( fw ) );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-
 	}
 
 	@Override
@@ -307,12 +293,13 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		haschanges = true;
 	}
 
-	//We do not want to release the this object, because the connection will
-	//be closed to the main database.--TKC, 16 Mar 2015.
+	/**
+	 * Release heavy-weight database objects.
+	 */
 	@Override
 	public void release() {
-//    dispose();
-//    super.release();
+		dispose();
+		super.release();
 	}
 
 	@Override

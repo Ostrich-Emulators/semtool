@@ -79,7 +79,7 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 					insightlist.add( insight );
 					try {
 						wim.setInsights( persp, insightlist );
-						EngineUtil.getInstance().importInsights( wim );
+						EngineUtil.getInstance().importInsights( engine, wim );
 					}
 					catch ( Exception e ) {
 						Logger.getLogger( SaveAsInsightPanel.class ).error( e, e );

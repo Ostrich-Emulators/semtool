@@ -134,14 +134,14 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
 				Insight ii = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-				if ( null != ii && ii.hasParameters() ) {
-					paramLabel.setVisible( true );
-					bindingPanel.setVisible( true );
-					bindingPanel.setParameters( ii.getInsightParameters() );
-				}
-				else {
+				if ( null == ii ) {
 					paramLabel.setVisible( false );
 					bindingPanel.setVisible( false );
+				}
+				else{
+					bindingPanel.setParameters( ii.getInsightParameters() );
+					paramLabel.setVisible( ii.hasParameters() );
+					bindingPanel.setVisible( ii.hasParameters() );
 				}
 
 				enableDisableOverlay();
@@ -398,7 +398,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Perspective persp
 					= perspectiveSelector.getItemAt( perspectiveSelector.getSelectedIndex() );
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			return persp.getLabel() + "-Insight-" + ( 1 + persp.indexOf( insight ) );
+			return insight.getLabel();
 		}
 
 		@Override
