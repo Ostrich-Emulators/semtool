@@ -181,7 +181,8 @@ public class XlsWriterTest {
 		ByteArrayOutputStream aos = new ByteArrayOutputStream();
 		writer.write( aos );
 
-		assertEquals( 3273, aos.size() );
+		// we get slightly different sizes per builds
+		assertTrue( aos.size() > 3270 && aos.size() < 3275 );
 	}
 
 	@Test
