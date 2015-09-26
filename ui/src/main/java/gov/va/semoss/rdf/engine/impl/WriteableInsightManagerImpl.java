@@ -10,7 +10,6 @@ import gov.va.semoss.model.vocabulary.OLO;
 import gov.va.semoss.model.vocabulary.SP;
 import gov.va.semoss.model.vocabulary.SPIN;
 import gov.va.semoss.model.vocabulary.SPL;
-import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
@@ -27,7 +26,6 @@ import gov.va.semoss.util.UriSanitizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -37,7 +35,7 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
@@ -150,28 +148,14 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 	@Override
 	public URI add( Insight ins ) {
 		haschanges = true;
-		String clean = sanitizer.sanitize( ins.getLabel() );
+		UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+			
+		ins.setId( urib.uniqueUri() );
 
-		ValueFactory vf = rc.getValueFactory();
-		URI newId = vf.createURI( VAS.NAMESPACE, clean );
-		URI bodyId = vf.createURI( VAS.NAMESPACE, clean + "-" + ( new Date().getTime() ) );
-		ins.setId( newId );
 		try {
 			rc.begin();
-			rc.add( newId, RDF.TYPE, VAS.insight );
-			rc.add( newId, RDFS.LABEL, vf.createLiteral( ins.getLabel() ) );
-			rc.add( newId, UI.dataView, vf.createURI( "vas:", ins.getOutput() ) );
-
-			rc.add( newId, DCTERMS.CREATED, vf.createLiteral( new Date() ) );
-			rc.add( newId, DCTERMS.MODIFIED, vf.createLiteral( new Date() ) );
-			rc.add( newId, DCTERMS.CREATOR,
-					vf.createLiteral( userInfoFromToolPreferences( "" ) ) );
-			rc.add( newId, SPIN.body, bodyId );
-
-			String sparql = ins.getSparql();
-			rc.add( bodyId, SP.text, vf.createLiteral( sparql ) );
-			rc.add( bodyId, RDF.TYPE, SP.Select );
-
+			rc.add( InsightManagerImpl.getInsightStatements( ins, new ValueFactoryImpl(),
+					urib, author ) );
 			rc.commit();
 		}
 		catch ( Exception e ) {
@@ -183,7 +167,8 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 				log.warn( ee, ee );
 			}
 		}
-		return newId;
+		
+		return ins.getId();
 	}
 
 	@Override

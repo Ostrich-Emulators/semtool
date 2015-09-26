@@ -793,8 +793,10 @@ public class InsightManagerImpl implements InsightManager {
 					vf.createLiteral( insight.getDescription() ) ) );
 		}
 
-		statements.add( new StatementImpl( iid, VAS.INSIGHT_OUTPUT_TYPE,
-				vf.createLiteral( insight.getOutputType().toString() ) ) );
+		if ( null != insight.getOutputType() ) {
+			statements.add( new StatementImpl( iid, VAS.INSIGHT_OUTPUT_TYPE,
+					vf.createLiteral( insight.getOutputType().toString() ) ) );
+		}
 
 		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, VAS.InsightProperties ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATED,

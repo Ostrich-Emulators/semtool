@@ -7,9 +7,10 @@ package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
-import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.ui.components.DBToLoadingSheetExporterTest;
+import gov.va.semoss.user.LocalUserImpl;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -24,7 +25,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.sail.memory.MemoryStore;
 
 /**
  *
@@ -34,23 +38,26 @@ public class WriteableInsightManagerImplTest {
 
 	private static final Logger log
 			= Logger.getLogger( DBToLoadingSheetExporterTest.class );
-	private static final File JNL = new File( "src/test/resources/insmgr.jnl" );
+	private static final File DBSTORE = new File( "src/test/resources/insmgr.data" );
 	private static final URI PERSP
 			= new URIImpl( "http://va.gov/dataset/insights#perspective-1441046366490" );
 	private static final URI INS
 			= new URIImpl( "http://va.gov/dataset/insights#Insight-1441046475366" );
-	private File dbfile;
-	private IEngine eng;
+	private File dbdir;
+	private InsightManager im;
 	private WriteableInsightManager wim;
 
 	private void extractKb() {
-		if ( null != dbfile ) {
-			FileUtils.deleteQuietly( dbfile );
+		if ( null != dbdir ) {
+			FileUtils.deleteQuietly( dbdir );
 		}
 
 		try {
-			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
-			Files.copy( JNL.toPath(), dbfile.toPath(), StandardCopyOption.REPLACE_EXISTING );
+			dbdir = File.createTempFile( "semoss-test-wim-", ".data" );
+			dbdir.delete();
+			dbdir.mkdirs();
+			Files.copy( DBSTORE.toPath(), new File( dbdir, "memorystore.data" ).toPath(),
+					StandardCopyOption.REPLACE_EXISTING );
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
@@ -61,15 +68,27 @@ public class WriteableInsightManagerImplTest {
 	public void setUp() throws RepositoryException {
 		extractKb();
 
-		eng = new BigDataEngine(BigDataEngine.generateProperties( dbfile ));
-		wim = eng.getWriteableInsightManager();
+		Repository repo = new SailRepository( new MemoryStore( dbdir ) );
+		im = new InsightManagerImpl( repo );
+		wim = new WriteableInsightManagerImpl( im, new LocalUserImpl() ) {
+
+			@Override
+			public void commit() {
+				try {
+					super.getRawConnection().commit();
+				}
+				catch ( Exception x ) {
+					log.error( x, x );
+				}
+			}
+		};
 	}
 
 	@After
 	public void tearDown() {
 		wim.release();
-		eng.closeDB();
-		FileUtils.deleteQuietly( dbfile );
+		im.release();
+		FileUtils.deleteQuietly( dbdir );
 	}
 
 	@Test( expected = IllegalArgumentException.class )
@@ -88,7 +107,7 @@ public class WriteableInsightManagerImplTest {
 	public void testDispose2() {
 		Perspective p = wim.getPerspective( PERSP );
 		String olddescription = p.getDescription();
-		p.setLabel( "a regrettable change");
+		p.setLabel( "a regrettable change" );
 		wim.update( p );
 		wim.dispose();
 
@@ -111,7 +130,7 @@ public class WriteableInsightManagerImplTest {
 		assertEquals( insightid, ins2.getId() );
 	}
 
-	//@Test
+	// @Test
 	public void testAdd_Insight2() {
 		Insight ins = new Insight();
 		String desc = "\"Ryan's \"'\"Problematic\"'\" Label\"";
