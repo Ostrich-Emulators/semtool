@@ -28,6 +28,7 @@ import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout;
 import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.ui.components.OutputTypeRegistry;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.RepositoryList;
 
@@ -88,6 +89,7 @@ public class DIHelper {
 	private JDesktopPane desktop;
 	private PlayPane playpane;
 	private ApplicationContext appctx;
+	private final OutputTypeRegistry registry = new OutputTypeRegistry();
 
 	/**
 	 * Constructor for DIHelper.
@@ -96,6 +98,10 @@ public class DIHelper {
 		// do nothing
 	}
 
+	public OutputTypeRegistry getOutputTypeRegistry(){
+		return registry;
+	}
+	
 	/**
 	 * Set up shapes, colors, and layouts. Put properties for each in a hashtable
 	 * of local properties.

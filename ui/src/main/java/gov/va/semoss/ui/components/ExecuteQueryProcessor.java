@@ -3,11 +3,10 @@ package gov.va.semoss.ui.components;
 import org.apache.log4j.Logger;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
-import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 import gov.va.semoss.util.DIHelper;
 
 import gov.va.semoss.util.GuiUtility;
@@ -61,7 +60,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 
 	protected abstract QueryExecutor getQuery();
 
-	protected abstract Class<? extends IPlaySheet> getPlaySheet();
+	protected abstract InsightOutputType getOutputType();
 
 	protected abstract IEngine getEngine();
 
@@ -79,11 +78,11 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 	public void actionPerformed( ActionEvent ae ) {
 		QueryExecutor query = getQuery();
 
-		Class<? extends IPlaySheet> klass = getPlaySheet();
+		InsightOutputType type = getOutputType();
 		IEngine engine = getEngine();
 
 		ProgressTask pt = null;
-		if ( null == klass ) {
+		if ( null == type ) {
 			if ( okToUpdate() ) {
 				pt = makeUpdateTask( query, engine );
 			}
@@ -95,8 +94,7 @@ public abstract class ExecuteQueryProcessor extends AbstractAction {
 			String title = getTitle();
 			boolean appending = isAppending();
 
-			Insight insight = new Insight( title, query.getSparql(),
-					(Class<PlaySheetCentralComponent>) klass );
+			Insight insight = new Insight( title, query.getSparql(), type );
 
 			if ( appending ) {
 				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );

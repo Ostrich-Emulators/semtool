@@ -17,6 +17,7 @@ import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
+import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import java.awt.CardLayout;
 import java.awt.event.KeyAdapter;
@@ -68,7 +69,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		};
 
 		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
-		tree.setCellRenderer( new PerspectiveTreeCellRenderer() );
+		tree.setCellRenderer( new PerspectiveTreeCellRenderer( DIHelper.getInstance().getOutputTypeRegistry() ) );
 
 		setupTreeListeners();
 	}

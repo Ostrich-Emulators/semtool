@@ -25,7 +25,17 @@ package gov.va.semoss.om;
  */
 public enum InsightOutputType {
 
-	GRID, GRID_RAW, GRID_SCATTER, COLUMN_CHART, DENDROGRAM, GRAPH,
+	GRID, GRID_RAW, GRID_SCATTER, COLUMN_CHART, DENDROGRAM, GRAPH, GRAPH_METAMODEL,
 	PARALLEL_COORDS, PIE_CHART, SANKEY, HEATMAP, HEATMAP_US, HEATMAP_WORLD,
-	HEATMAP_APPDUPE
+	HEATMAP_APPDUPE( false );
+
+	public final boolean needsSparql;
+
+	InsightOutputType() {
+		this( true );
+	}
+
+	InsightOutputType( boolean needsSparql ) {
+		this.needsSparql = needsSparql;
+	}
 }

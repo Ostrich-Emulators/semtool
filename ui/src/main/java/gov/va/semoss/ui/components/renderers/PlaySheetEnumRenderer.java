@@ -5,14 +5,16 @@
  */
 package gov.va.semoss.ui.components.renderers;
 
+import gov.va.semoss.om.InsightOutputType;
+import gov.va.semoss.ui.components.OutputTypeRegistry;
+import gov.va.semoss.util.GuiUtility;
 import java.awt.Component;
 
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
 import javax.swing.JList;
 
 import org.apache.log4j.Logger;
-
-import gov.va.semoss.util.PlaySheetEnum;
 
 /**
  * Renders icon + text for items in the Playsheet ComboBox, of the "Custom
@@ -24,19 +26,28 @@ public class PlaySheetEnumRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = Logger.getLogger( PlaySheetEnumRenderer.class );
+	private final OutputTypeRegistry registry;
 
-	public PlaySheetEnumRenderer() {
+	public PlaySheetEnumRenderer( OutputTypeRegistry reg ) {
+		registry = reg;
 	}
 
 	@Override
 	public Component getListCellRendererComponent( JList<?> list, Object val, int idx,
 			boolean sel, boolean hasfocus ) {
-		PlaySheetEnum  pse = PlaySheetEnum.valueOf( val.toString() );
 
-		super.getListCellRendererComponent( list, pse.getDisplayName(), idx, sel, hasfocus );
-
-		setIcon(pse.getSheetIcon());
-		
+		if ( null == val ) {
+			ImageIcon icon = GuiUtility.loadImageIcon( "icons16/questions_update2_16.png" );
+			super.getListCellRendererComponent( list, "Update Query", idx,
+					sel, hasfocus );
+			setIcon( icon );
+		}
+		else {
+			InsightOutputType pse = InsightOutputType.valueOf( val.toString() );
+			super.getListCellRendererComponent( list, registry.getSheetName( pse ), idx,
+					sel, hasfocus );
+			setIcon( registry.getSheetIcon( pse ) );
+		}
 		return this;
 	}
 }

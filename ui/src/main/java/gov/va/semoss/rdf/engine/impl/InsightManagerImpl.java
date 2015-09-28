@@ -41,9 +41,7 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import static gov.va.semoss.rdf.query.util.QueryExecutorAdapter.getDate;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
-import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.user.User;
-import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.UriBuilder;
 
 import java.util.Arrays;
@@ -208,7 +206,8 @@ public class InsightManagerImpl implements InsightManager {
 				ins.setSparql( sparql );
 				ins.setCreated( now );
 				ins.setModified( now );
-				ins.setOutput( legacyDataViewName );
+
+				ins.setOutput( upgradeOutput( legacyDataViewName ) );
 				ins.setCreator( creator.stringValue() );
 
 				Matcher m = LEGACYPAT.matcher( sparql );
@@ -310,10 +309,10 @@ public class InsightManagerImpl implements InsightManager {
 				+ "    && ?target != rdfs:Resource )"
 				+ "}";
 		Insight metamodel = new Insight( "View the Database Metamodel", mmspql,
-				GraphPlaySheet.class );
+				InsightOutputType.GRAPH );
 
 		Insight explore = new Insight( "Explore an instance of a selected node type",
-				"DESCRIBE ?instance", GraphPlaySheet.class );
+				"DESCRIBE ?instance", InsightOutputType.GRAPH );
 		explore.setId( urib.uniqueUri() );
 
 		Parameter concept = new Parameter( "Concept",
@@ -341,7 +340,7 @@ public class InsightManagerImpl implements InsightManager {
 				+ "}";
 
 		Insight neighbor = new Insight( "Show One Neighbor Away from Selected Node",
-				nespql, GraphPlaySheet.class );
+				nespql, InsightOutputType.GRAPH );
 		neighbor.setId( urib.uniqueUri() );
 		neighbor.setParameters( Arrays.asList( concept, instance ) );
 
@@ -627,8 +626,8 @@ public class InsightManagerImpl implements InsightManager {
 				else if ( SP.text.equals( pred ) ) {
 					insight.setSparql( obj.stringValue() );
 				}
-				else if ( UI.viewClass.equals( pred ) ) {
-					insight.setOutput( obj.stringValue() );
+				else if ( VAS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
+					insight.setOutput( InsightOutputType.valueOf( obj.stringValue() ) );
 				}
 			}
 		}
@@ -636,18 +635,18 @@ public class InsightManagerImpl implements InsightManager {
 		return insight;
 	}
 
-	private static void upgradeIfLegacy( Insight insight, UriBuilder urib ) {
+	private static InsightOutputType upgradeOutput( String legacyoutput ){
 		// first, make sure we reference the current package names
-		String legacyoutput = insight.getOutput();
-		legacyoutput = legacyoutput.replaceFirst( "prerna", "gov.va.semoss" );
-		insight.setOutput( legacyoutput.replaceFirst( "veera", "gov.va.vcamp" ) );
 
+		legacyoutput = legacyoutput.replaceFirst( "prerna", "gov.va.semoss" );
+		legacyoutput = legacyoutput.replaceFirst( "veera", "gov.va.vcamp" );
+		
 		// second, make sure our InsightOutputType matches our "Output" string
-		// (use grid for a default [but how we'd ever have to use it is a mystery])
-		if ( null == insight.getOutputType() ) {
-			insight.setOutputType( UPGRADETYPEMAP.getOrDefault( insight.getOutput(),
-					InsightOutputType.GRID ) );
-		}
+		// (use grid for a default)
+		return UPGRADETYPEMAP.getOrDefault( legacyoutput, InsightOutputType.GRID );
+	}
+	
+	private static void upgradeIfLegacy( Insight insight, UriBuilder urib ) {
 
 		// finally, see if we have super-legacy query data to worry about
 		// there are two styles of legacy queries...
@@ -859,19 +858,6 @@ public class InsightManagerImpl implements InsightManager {
 				vf.createLiteral( new Date() ) ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATOR,
 				vf.createLiteral( getAuthorInfo( user ) ) ) );
-		URI outputuri = vf.createURI( VAS.NAMESPACE, insight.getOutput() );
-		statements.add( new StatementImpl( iid, UI.dataView, outputuri ) );
-
-		// add the dataview objects, too (these'll be added multiple times, but
-		// all the values will be identical)
-		PlaySheetEnum pse = PlaySheetEnum.valueForInsight( insight );
-		statements.add( new StatementImpl( outputuri, RDF.TYPE, UI.dataView ) );
-		statements.add( new StatementImpl( outputuri, UI.viewClass,
-				vf.createLiteral( insight.getOutput() ) ) );
-		statements.add( new StatementImpl( outputuri, VAS.icon,
-				vf.createLiteral( pse.getSheetIconName() ) ) );
-		statements.add( new StatementImpl( outputuri, RDFS.LABEL,
-				vf.createLiteral( pse.getDisplayName() ) ) );
 
 		String sparql = insight.getSparql();
 

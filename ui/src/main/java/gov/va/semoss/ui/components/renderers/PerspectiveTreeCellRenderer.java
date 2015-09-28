@@ -8,7 +8,7 @@ package gov.va.semoss.ui.components.renderers;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
-import gov.va.semoss.util.PlaySheetEnum;
+import gov.va.semoss.ui.components.OutputTypeRegistry;
 import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JTree;
@@ -20,6 +20,12 @@ import javax.swing.tree.DefaultTreeCellRenderer;
  * @author ryan
  */
 public class PerspectiveTreeCellRenderer extends DefaultTreeCellRenderer {
+
+	private final OutputTypeRegistry registry;
+
+	public PerspectiveTreeCellRenderer( OutputTypeRegistry reg ) {
+		registry = reg;
+	}
 
 	@Override
 	public Component getTreeCellRendererComponent( JTree tree, Object tvalue,
@@ -44,8 +50,7 @@ public class PerspectiveTreeCellRenderer extends DefaultTreeCellRenderer {
 			Insight ins = Insight.class.cast( value );
 			text = ins.getLabel();
 			ttip = ins.getDescription();
-			PlaySheetEnum pse = PlaySheetEnum.valueForInsight( ins );
-			icon = pse.getSheetIcon();
+			icon = registry.getSheetIcon( ins.getOutputType() );
 		}
 		else if ( value instanceof Perspective ) {
 			Perspective p = Perspective.class.cast( value );
