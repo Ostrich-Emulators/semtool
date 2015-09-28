@@ -5,24 +5,17 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
-import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.ui.components.DBToLoadingSheetExporterTest;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
 
 /**
