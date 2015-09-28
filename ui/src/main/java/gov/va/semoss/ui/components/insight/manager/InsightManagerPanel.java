@@ -10,8 +10,9 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter;
+import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter.ShotOp;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -364,20 +365,10 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 			@Override
 			public void run() {
-				EngineOperationAdapter eol = new EngineOperationAdapter() {
-
+				OneShotEngineAdapter eol = new OneShotEngineAdapter( engine, ShotOp.INSIGHTS ) {
 					@Override
-					public void engineOpened( IEngine eng ) {
-					}
-
-					@Override
-					public void engineClosed( IEngine eng ) {
-					}
-
-					@Override
-					public void insightsModified( IEngine eng, Collection<Perspective> perspectives ){
+					public void doInsightsModified( IEngine eng, Collection<Perspective> perspectives ){
 						commitbtn.setEnabled( false );
-						EngineUtil.getInstance().removeEngineOpListener( this );
 						GuiUtility.showMessage( "Perspectives Saved" );
 					}
 				};

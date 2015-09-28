@@ -15,15 +15,15 @@ import java.util.Collection;
  */
 public abstract class EngineOperationAdapter implements EngineOperationListener {
 
-  @Override
-  public void engineClosed( IEngine eng ) {
-  }
+	@Override
+	public void engineClosed( IEngine eng ) {
+	}
 
-  @Override
-  public void engineOpened( IEngine eng ) {
-  }
+	@Override
+	public void engineOpened( IEngine eng ) {
+	}
 
-  @Override
-  public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
-  }
+	@Override
+	public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
+	}
 }
