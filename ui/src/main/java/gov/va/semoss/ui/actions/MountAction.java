@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.Logger;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;

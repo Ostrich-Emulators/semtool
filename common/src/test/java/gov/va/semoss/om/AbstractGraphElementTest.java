@@ -5,16 +5,20 @@
  */
 package gov.va.semoss.om;
 
+import java.awt.Color;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  *
@@ -50,27 +54,16 @@ public class AbstractGraphElementTest {
 	}
 
 	@Test
-	public void testSetColor() {
+	public void testSetColor1() {
+		TestNode tn = new TestNode();
+		tn.setColor( Color.yellow );
+		assertEquals( Color.yellow, tn.getColor() );
+		tn.setColor( null );
+		assertEquals( new Color( 255, 255, 255, 0 ), tn.getColor() );
 	}
 
 	@Test
 	public void testGetPropertyChangeListeners() {
-	}
-
-	@Test
-	public void testFireIfPropertyChanged() {
-	}
-
-	@Test
-	public void testGetColor() {
-	}
-
-	@Test
-	public void testSetVisible() {
-	}
-
-	@Test
-	public void testIsVisible() {
 	}
 
 	@Test
@@ -86,15 +79,7 @@ public class AbstractGraphElementTest {
 	}
 
 	@Test
-	public void testGetLabel() {
-	}
-
-	@Test
 	public void testSetProperty_URI_Object() {
-	}
-
-	@Test
-	public void testSetValue() {
 	}
 
 	@Test
@@ -115,6 +100,10 @@ public class AbstractGraphElementTest {
 
 	@Test
 	public void testGetProperties() {
+		TestNode tn = new TestNode();
+		String expected = "a comment";
+		tn.setProperty( RDFS.COMMENT, expected );
+		assertEquals( expected, tn.getProperties().get( RDFS.COMMENT ) );
 	}
 
 	@Test
@@ -146,11 +135,31 @@ public class AbstractGraphElementTest {
 	}
 
 	@Test
-	public void testGetDataType() {
+	public void testCtors() {
+		TestNode tn = new TestNode( RDFS.LABEL, RDFS.DOMAIN, "label" );
+		tn.setProperty( RDFS.COMMENT, "test comment" );
+		Color c = new Color( 255, 255, 255, 0 );
+		assertEquals( c, tn.getColor() );
 	}
 
 	@Test
-	public void testMark() {
+	public void testGetDataType() {
+		TestNode tn = new TestNode();
+		tn.setProperty( RDFS.COMMENT, "test comment" );
+		assertEquals( XMLSchema.STRING, tn.getDataType( RDFS.COMMENT ) );
+	}
+
+	@Test
+	public void testGetDataType1() {
+		TestNode tn = new TestNode();
+		assertNull( tn.getDataType( RDFS.CONTAINER ) );
+	}
+
+	@Test
+	public void testGetDataType2() {
+		TestNode tn = new TestNode();
+		tn.setProperty( RDFS.COMMENT, RDFS.DOMAIN );
+		assertEquals( XMLSchema.ANYURI, tn.getDataType( RDFS.COMMENT ) );
 	}
 
 	@Test
@@ -185,6 +194,14 @@ public class AbstractGraphElementTest {
 
 		public TestNode() {
 			super( new URIImpl( "http://va.gov/test" ) );
+		}
+
+		public TestNode( URI id, URI type, String label ) {
+			super( id, type, label );
+		}
+
+		public TestNode( URI id, URI type, String label, Color col ) {
+			super( id, type, label, col );
 		}
 
 		@Override

@@ -1,6 +1,5 @@
 package gov.va.semoss.rdf.engine.impl;
 
-import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,9 +14,6 @@ import org.openrdf.sail.memory.MemoryStore;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.user.Security;
-import java.util.List;
 import java.util.Properties;
 
 public class ClusterEngine extends AbstractSesameEngine {
@@ -35,7 +31,7 @@ public class ClusterEngine extends AbstractSesameEngine {
 
 	// keeps an in memory store which would be utilized for traverse freely
 	RepositoryConnection rc = null;
-	private WriteableInsightManager insights;
+	private InsightManagerImpl insights;
 
 	// database names
 	Map<String, IEngine> engineHash = new HashMap<>();
@@ -90,27 +86,13 @@ public class ClusterEngine extends AbstractSesameEngine {
 		if ( ie != null ) {
 			for ( Perspective p : ie.getPerspectives() ) {
 				insights.add( p );
-				List<Insight> ins = ie.getInsights( p );
-				try {
-					insights.setInsights( p, ins );
-				}
-				catch ( Exception e ) {
-					log.error( e, e );
-				}
 			}
-			insights.commit();
 		}
 	}
 
 	public void initializeInsightBase() {
 		if ( null == insights ) {
-			insights = new WriteableInsightManagerImpl( getInsightManager(),
-					Security.getSecurity().getAssociatedUser( this ) ) {
-						@Override
-						public void commit() {
-							log.warn( "commit means nothing here" );
-						}
-					};
+			insights = new InsightManagerImpl();
 			setInsightManager( insights );
 		}
 	}

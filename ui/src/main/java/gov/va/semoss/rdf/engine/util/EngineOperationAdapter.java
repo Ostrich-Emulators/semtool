@@ -5,9 +5,9 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.Collection;
-import org.openrdf.model.URI;
 
 /**
  *
@@ -15,16 +15,15 @@ import org.openrdf.model.URI;
  */
 public abstract class EngineOperationAdapter implements EngineOperationListener {
 
-  @Override
-  public void engineClosed( IEngine eng ) {
-  }
+	@Override
+	public void engineClosed( IEngine eng ) {
+	}
 
-  @Override
-  public void engineOpened( IEngine eng ) {
-  }
+	@Override
+	public void engineOpened( IEngine eng ) {
+	}
 
-  @Override
-  public void insightsModified( IEngine eng, Collection<URI> perspectives,
-      Collection<URI> insights ) {
-  }
+	@Override
+	public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
+	}
 }

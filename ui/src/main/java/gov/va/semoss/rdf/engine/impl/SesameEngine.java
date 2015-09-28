@@ -73,7 +73,6 @@ public class SesameEngine extends AbstractSesameEngine {
 
 	@Override
 	protected InsightManager createInsightManager() {
-		InsightManagerImpl imi = new InsightManagerImpl( insights );
-		return imi;
+		return InsightManagerImpl.createFromRepository( insights );
 	}
 }

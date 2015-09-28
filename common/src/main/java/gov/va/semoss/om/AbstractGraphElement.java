@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.openrdf.model.BNode;
-import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LiteralImpl;
@@ -246,13 +244,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 	public URI getDataType( URI prop ) {
 		if ( properties.containsKey( prop ) ) {
 			Value data = properties.get( prop );
-			if ( data instanceof URI ) {
-				return XMLSchema.ANYURI;
-			}
-			else if ( data instanceof BNode ) {
-				return XMLSchema.ENTITY;
-			}
-			return Literal.class.cast( data ).getDatatype();
+			return RDFDatatypeTools.getDatatype( data );
 		}
 		return null;
 	}

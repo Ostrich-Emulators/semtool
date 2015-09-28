@@ -46,10 +46,8 @@ public class QaCheckerTest {
 	private static final File LEGACY = new File( "src/test/resources/legacy.xlsx" );
 	private static final File LEGACY_EXP = new File( "src/test/resources/legacy-mm.nt" );
 
-	public QaCheckerTest() {
-	}
-
 	private InMemorySesameEngine engine;
+	private QaChecker el;
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -64,10 +62,12 @@ public class QaCheckerTest {
 	@Before
 	public void setUp() throws Exception {
 		engine = new InMemorySesameEngine();
+		el = new QaChecker();
 	}
 
 	@After
 	public void tearDown() {
+		el.release();
 		if ( null != engine ) {
 			engine.closeDB();
 		}
@@ -77,7 +77,6 @@ public class QaCheckerTest {
 	public void testInstanceExists() {
 		String type = "test";
 		String label = "label";
-		QaChecker el = new QaChecker();
 		Map<String, URI> types = new HashMap<>();
 		types.put( label, BASEURI );
 		el.cacheConceptInstances( types, type );
@@ -87,7 +86,6 @@ public class QaCheckerTest {
 
 	@Test( expected = IllegalArgumentException.class )
 	public void testCacheUris() throws Exception {
-		QaChecker el = new QaChecker();
 		el.cacheUris( null, new HashMap<>() );
 	}
 
@@ -159,7 +157,6 @@ public class QaCheckerTest {
 
 		rc.commit();
 
-		QaChecker el = new QaChecker();
 		el.loadCaches( engine );
 
 		assertTrue( el.hasCachedPropertyClass( "Description" ) );
@@ -186,7 +183,6 @@ public class QaCheckerTest {
 
 		rc.commit();
 
-		QaChecker el = new QaChecker();
 		el.loadCaches( engine );
 
 		assertTrue( el.hasCachedPropertyClass( "Description" ) );
@@ -200,7 +196,8 @@ public class QaCheckerTest {
 
 		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
 
-		QaChecker el = new QaChecker( engine );
+		el.release(); // release the checker from setup
+		el = new QaChecker( engine );
 		ImportData test = new ImportData();
 		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
 		test.getMetadata().setSchemaBuilder( engine.getSchemaBuilder().toString() );
@@ -211,7 +208,6 @@ public class QaCheckerTest {
 		test.add( lsd );
 
 		LoadingSheetData errs = el.checkModelConformance( lsd );
-		el.release();
 
 		assertTrue( errs.hasModelErrors() );
 		assertTrue( errs.hasSubjectTypeError() );
@@ -226,7 +222,8 @@ public class QaCheckerTest {
 
 		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
 
-		QaChecker el = new QaChecker( engine );
+		el.release(); // release the checker from setup
+		el = new QaChecker( engine );
 
 		ImportData test = new ImportData();
 		test.getMetadata().setDataBuilder( engine.getDataBuilder().toString() );
@@ -239,7 +236,6 @@ public class QaCheckerTest {
 
 		ImportData errs = new ImportData();
 		el.separateConformanceErrors( test, errs, engine );
-		el.release();
 
 		LoadingSheetData errlsd = errs.getSheet( "Category" );
 		LoadingSheetData oklsd = test.getSheet( "Category" );
@@ -254,7 +250,6 @@ public class QaCheckerTest {
 
 	@Test
 	public void testClear() {
-		QaChecker el = new QaChecker();
 		Map<String, URI> types = new HashMap<>();
 		types.put( "rawlabel", BASEURI );
 		el.cacheConceptInstances( types, "testType" );

@@ -28,8 +28,10 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
+import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
 import gov.va.semoss.ui.components.ImportDataProcessor;
@@ -38,6 +40,7 @@ import gov.va.semoss.rdf.engine.util.EngineUtil;
 
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
+import gov.va.semoss.user.LocalUserImpl;
 import static gov.va.semoss.util.RDFDatatypeTools.getRDFStringValue;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedWriter;
@@ -453,7 +456,8 @@ public class CLI {
 			if ( cmd.hasOption( "insightsdb" ) ) {
 				try {
 					handler.startRDF();
-					for ( Statement s : engine.getInsightManager().getStatements() ) {
+					InsightManager im = engine.getInsightManager();
+					for ( Statement s : InsightManagerImpl.getStatements( im, new LocalUserImpl() ) ) {
 						handler.handleStatement( s );
 					}
 					handler.endRDF();
@@ -517,7 +521,8 @@ public class CLI {
 			if ( cmd.hasOption( "insightsdb" ) ) {
 				try {
 					sesameconn.begin();
-					sesameconn.add( engine.getInsightManager().getStatements() );
+					InsightManager im = engine.getInsightManager();
+					sesameconn.add( InsightManagerImpl.getStatements( im, new LocalUserImpl() ) );
 					sesameconn.commit();
 				}
 				catch ( RepositoryException re ) {

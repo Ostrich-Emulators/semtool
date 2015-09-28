@@ -5,9 +5,9 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.Collection;
-import org.openrdf.model.URI;
 
 /**
  *
@@ -19,6 +19,5 @@ public interface EngineOperationListener {
 
   public void engineClosed( IEngine eng );
   
-  public void insightsModified( IEngine eng, Collection<URI> perspectives,
-      Collection<URI> numinsights );
+  public void insightsModified( IEngine eng, Collection<Perspective> perspectives );
 }

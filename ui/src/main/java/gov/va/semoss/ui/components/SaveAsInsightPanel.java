@@ -56,9 +56,10 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 					JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices,
 					choices[0] );
 			if ( 0 == ans ) {
+				InsightManager im = engine.getInsightManager();
 				Perspective persp
 						= p.perspectives.getItemAt( p.perspectives.getSelectedIndex() );
-				List<Insight> insightlist = engine.getInsightManager().getInsights( persp );
+				List<Insight> insightlist = im.getInsights( persp );
 
 				boolean seenit = false;
 				for ( Insight i : insightlist ) {
@@ -73,19 +74,14 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 					Insight insight = new Insight( p.insightname.getText(), sparql,
 							GridRAWPlaySheet.class );
 
-					WriteableInsightManager wim = engine.getWriteableInsightManager();
-					wim.add( insight );
+					im.add( insight );
 
-					insightlist.add( insight );
 					try {
-						wim.setInsights( persp, insightlist );
-						EngineUtil.getInstance().importInsights( engine, wim );
+						im.addInsight( persp, insight, -1 );
+						EngineUtil.getInstance().importInsights( engine, im );
 					}
 					catch ( Exception e ) {
 						Logger.getLogger( SaveAsInsightPanel.class ).error( e, e );
-					}
-					finally {
-						wim.dispose();
 					}
 				}
 			}
