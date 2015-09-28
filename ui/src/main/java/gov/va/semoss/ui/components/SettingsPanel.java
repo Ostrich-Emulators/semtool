@@ -112,6 +112,7 @@ public class SettingsPanel extends javax.swing.JPanel {
     jPanel2 = new javax.swing.JPanel();
     jScrollPane2 = new javax.swing.JScrollPane();
     namespaces = new javax.swing.JTable();
+    semexUseLabels = new javax.swing.JCheckBox();
 
     calcInfers.setText("Compute dependent relationships following load");
 
@@ -187,17 +188,20 @@ public class SettingsPanel extends javax.swing.JPanel {
         .addGap(276, 276, 276))
     );
 
+    semexUseLabels.setText("Semantic Explorer tree uses labels");
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+      .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(semexUseLabels)
               .addComponent(calcInfers)
               .addComponent(jButton1))
             .addGap(0, 0, Short.MAX_VALUE)))
@@ -208,6 +212,8 @@ public class SettingsPanel extends javax.swing.JPanel {
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addComponent(calcInfers)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(semexUseLabels)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(jButton1)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -253,5 +259,6 @@ public class SettingsPanel extends javax.swing.JPanel {
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JTable namespaces;
   private javax.swing.JTextField organization;
+  private javax.swing.JCheckBox semexUseLabels;
   // End of variables declaration//GEN-END:variables
 }
