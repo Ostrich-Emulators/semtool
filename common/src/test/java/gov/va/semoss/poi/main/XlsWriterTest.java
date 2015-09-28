@@ -182,7 +182,7 @@ public class XlsWriterTest {
 		writer.write( aos );
 
 		// we get slightly different sizes per builds
-		assertTrue( aos.size() > 3270 && aos.size() < 3275 );
+		assertTrue( aos.size() > 3270 && aos.size() < 3285 );
 	}
 
 	@Test
