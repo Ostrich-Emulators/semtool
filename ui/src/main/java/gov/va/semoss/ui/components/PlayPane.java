@@ -433,6 +433,7 @@ public class PlayPane extends JFrame {
 				gQueryBuilderPanel.setEngine( engine );
 				insightManager.setEngine(engine );
 				filterPanel.setEngine( engine );
+				semanticExplorer.setEngine( engine );
 			}
 		} );
 	}
