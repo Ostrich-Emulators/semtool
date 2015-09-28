@@ -1,8 +1,16 @@
 package gov.va.semoss.ui.components.tabbedqueries;
 
+import gov.va.semoss.ui.actions.AbstractSavingAction;
+import java.awt.Component;
 import java.awt.Font;
+import java.io.File;
 import java.io.IOException;
 
+import javax.swing.JFileChooser;
+import javax.swing.JPopupMenu;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.BasicCompletion;
@@ -26,13 +34,15 @@ import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
  * Project Home: http://fifesoft.com/rsyntaxtextarea<br>
  * Downloads: https://sourceforge.net/projects/rsyntaxtextarea
  */
-public class SyntaxTextEditor extends RSyntaxTextArea {
+public class SparqlTextArea extends RSyntaxTextArea {
 
 	private static final long serialVersionUID = 1L;
 	private final CodeTemplateManager ctm;
+	private final QuerySavingAction saver = new QuerySavingAction();
+
 	private String strTag;
 
-	public SyntaxTextEditor() {
+	public SparqlTextArea() {
 		// Whether templates are enabled is a global property affecting all
 		// RSyntaxTextAreas, so this method is static.
 		RSyntaxTextArea.setTemplatesEnabled( true );
@@ -61,6 +71,13 @@ public class SyntaxTextEditor extends RSyntaxTextArea {
 		ac.install( this );
 
 		setBracketMatchingEnabled( true );
+
+		// Remove the code-folding component and it's separator from the popup menu:
+		JPopupMenu popup = getPopupMenu();
+		popup.remove( popup.getComponent( 9 ) ); // the separator
+		popup.remove( popup.getComponent( 9 ) ); // the item
+		popup.addSeparator();
+		popup.add( saver );
 	}
 
 	/**
@@ -219,5 +236,29 @@ public class SyntaxTextEditor extends RSyntaxTextArea {
 
 		return provider;
 	}
+
+	private class QuerySavingAction extends AbstractSavingAction {
+
+		public QuerySavingAction() {
+			super( "Save Query" );
+			super.setAppendDate( true );
+			super.setDefaultFileName( "Query" );
+		}
+
+		@Override
+		protected void saveTo( File exploc ) throws IOException {
+			FileUtils.write(exploc, SparqlTextArea.this.getText() );
+		}
+
+		@Override
+		protected void finishFileChooser( JFileChooser chsr ) {
+			super.finishFileChooser( chsr );
+			FileFilter spqFilter
+					= new FileNameExtensionFilter( "SPARQL Files (*.spq, *.sparql)",
+							"spq", "sparql" );
+			chsr.setFileFilter( spqFilter );
+			chsr.setAcceptAllFileFilterUsed( true );
+		}
+	};
 
 }

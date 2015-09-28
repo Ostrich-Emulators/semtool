@@ -48,22 +48,19 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 	private static final Logger log = Logger.getLogger( DiskBackedLoadingSheetData.class );
-	private static final long COMMITLIMIT = 100000;
-	private static final long READCACHELIMIT = 10000;
+	private static final int COMMITLIMIT = 100000;
+	private static final int READCACHELIMIT = 10000;
 
 	private File backingfile;
 	private long opsSinceLastCommit = 0;
 	private int datacount = 0;
 	private final Set<LoadingNodeAndPropertyValues> removedNodes = new HashSet<>();
 	private final ObjectMapper oxm = new ObjectMapper();
+	private int commitlimit = COMMITLIMIT;
+	private int readcachelimit = commitlimit / 10;
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String type ) throws IOException {
 		this( tabtitle, type, new HashMap<>() );
-	}
-
-	protected DiskBackedLoadingSheetData( String tabtitle, String type,
-			Collection<String> props ) throws IOException {
-		this( tabtitle, type, null, null, props );
 	}
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String type,
@@ -74,11 +71,6 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	protected DiskBackedLoadingSheetData( String tabtitle, String sType, String oType,
 			String relname ) throws IOException {
 		this( tabtitle, sType, oType, relname, new HashMap<>() );
-	}
-
-	protected DiskBackedLoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Collection<String> props ) throws IOException {
-		this( tabtitle, sType, oType, relname );
 	}
 
 	public DiskBackedLoadingSheetData( LoadingSheetData model ) throws IOException {
@@ -102,6 +94,13 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 		sm.addSerializer( LoadingNodeAndPropertyValues.class, new NapSerializer() );
 		sm.addDeserializer( LoadingNodeAndPropertyValues.class, new NapDeserializer() );
 		oxm.registerModule( sm );
+	}
+
+	public void setMaxElementsInMemory( int max ) {
+		if ( max > 0 ) {
+			commitlimit = max;
+			readcachelimit = max / 10;
+		}
 	}
 
 	@Override
@@ -196,7 +195,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 	private void tryCommit() {
 		opsSinceLastCommit++;
-		if ( opsSinceLastCommit >= COMMITLIMIT ) {
+		if ( opsSinceLastCommit >= commitlimit ) {
 			commit();
 		}
 	}
@@ -305,6 +304,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 		public CacheIterator() throws IOException {
 			reader = new BufferedReader( new FileReader( backingfile ) );
+			cacheMoreFromStore();
 		}
 
 		@Override

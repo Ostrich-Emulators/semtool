@@ -1,6 +1,6 @@
 package gov.va.semoss.om;
 
-import gov.va.semoss.user.UserImpl;
+import gov.va.semoss.user.LocalUserImpl;
 import gov.va.semoss.util.Constants;
 import java.awt.Color;
 import java.util.HashMap;
@@ -77,7 +77,7 @@ public class GraphColorRepository extends AbstractColorRepository {
 		else {
 			
 			String colorName
-			= UserImpl.getUser().getProperty( typeURI.getLocalName() + "_COLOR" );
+			= LocalUserImpl.getLocalUser().getProperty( typeURI.getLocalName() + "_COLOR" );
 
 			if ( colorName == null ) {
 				//If no color found use the random color generator

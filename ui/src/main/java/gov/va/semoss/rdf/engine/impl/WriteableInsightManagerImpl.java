@@ -84,8 +84,11 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 			rc.begin();
 			removeOldData();
 
+			ValueFactory vf = rc.getValueFactory();
+			int idx = 0;
 			for ( Perspective p : perspectives ) {
 				rc.add( InsightManagerImpl.getStatements( p, author ) );
+				rc.add( p.getId(), OLO.index, vf.createLiteral( ++idx ) );
 			}
 
 			rc.commit();
@@ -290,12 +293,13 @@ public abstract class WriteableInsightManagerImpl extends InsightManagerImpl
 		haschanges = true;
 	}
 
-	//We do not want to release the this object, because the connection will
-	//be closed to the main database.--TKC, 16 Mar 2015.
+	/**
+	 * Release heavy-weight database objects.
+	 */
 	@Override
 	public void release() {
-//    dispose();
-//    super.release();
+		dispose();
+		super.release();
 	}
 
 	@Override

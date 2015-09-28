@@ -44,7 +44,7 @@ public class PerspectivePanel extends DataPanel<Perspective> {
 		model = mod;
 		listenTo( perspectiveDesc );
 		listenTo( perspectiveName );
-		
+
 		insightslabel.setVisible( false );
 		insightspanel.setVisible( false );
 
@@ -68,7 +68,7 @@ public class PerspectivePanel extends DataPanel<Perspective> {
 				if ( e.getClickCount() > 1 ) {
 					int row = insightlist.locationToIndex( e.getPoint() );
 					if ( row > -1 ) {
-						DefaultMutableTreeNode dmtn 
+						DefaultMutableTreeNode dmtn
 								= DefaultMutableTreeNode.class.cast( model.getChild( getNode(), row ) );
 						TreePath path = new TreePath( dmtn.getPath() );
 						int treerow = tree.getRowForPath( path );
@@ -92,10 +92,16 @@ public class PerspectivePanel extends DataPanel<Perspective> {
 
 	@Override
 	protected void isetElement( Perspective p, DefaultMutableTreeNode node ) {
+		insightmodel.clear();
+
+		if ( null == p ) {
+			perspectiveName.setText( null );
+			perspectiveDesc.setText( null );
+			return;
+		}
+
 		perspectiveName.setText( p.getLabel() );
 		perspectiveDesc.setText( p.getDescription() );
-
-		insightmodel.clear();
 
 		Enumeration<DefaultMutableTreeNode> en = node.children();
 		while ( en.hasMoreElements() ) {
@@ -234,13 +240,12 @@ public class PerspectivePanel extends DataPanel<Perspective> {
 		p.setLabel( perspectiveName.getText() );
 		p.setDescription( perspectiveDesc.getText() );
 	}
-	
+
 	@Override
-	protected void clear(){
+	protected void clear() {
 		perspectiveName.setText( null );
 		perspectiveDesc.setText( null );
 	}
-
 
 	private class MoveButtonAction extends AbstractAction {
 

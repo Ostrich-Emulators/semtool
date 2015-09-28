@@ -9,14 +9,10 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
-
-import static org.junit.Assert.assertEquals;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,21 +24,21 @@ import org.junit.Test;
 public class CliTest {
 
 	private static final Logger log = Logger.getLogger( CliTest.class );
-	private static final File LEGACY = new File( "src/test/resources/legacy.xlsx" );
-	private static final File CUSTOM = new File( "src/test/resources/custom.xlsx" );
+	private static final File LEGACY = new File( "../ui/src/test/resources/legacy.xlsx" );
+	private static final File CUSTOM = new File( "../ui/src/test/resources/custom.xlsx" );
 
 	protected IEngine engine;
 
 	// Simulated command line arguments:
 	private static final String[] commandLines = {
 		//  0: must fail gracefully, the output file should not be created:
-		"-load doesNotExist.xlsx -out doNotCreate.jnl",
+		"-create legacy.jnl -data doesNotExist.xlsx",
 		//  1: must fail gracefully, the output path does not exist:
-		"-load src/test/resources/legacy.xlsx -out non/exitent/path/legacy.jnl",
+		"-create non/exitent/path/legacy.jnl -data ../ui/src/test/resources/legacy.xlsx",
 		//  2: must fail gracefully, the required output journal does does not exist:
-		"-load src/test/resources/legacy.xlsx -update legacy.jnl -replace",
+		"-update legacy.jnl -data src/test/resources/legacy.xlsx",
 		//  3: basic journal creation with single excel file:
-		"-load src/test/resources/legacy.xlsx -out legacy.jnl",
+		"-create legacy.jnl ../ui/src/test/resources/legacy.xlsx",
 		//  4: basic journal creation with two excel files:
 		"-load src/test/resources/legacy.xlsx src/test/resources/otherfile.xlsx -out two-file.jnl",
 		//  5: basic journal creation with two excel files, one turtle file:
@@ -100,33 +96,51 @@ public class CliTest {
 
 	@After
 	public void tearDown() {
-		for ( String file : new String[]{ "legacy.jnl", "custom-onto-small.jnl",
-			"custom-onto-small-stage-on-disk.jnl", } ) {
-			FileUtils.deleteQuietly( new File( file ) );
-		}
 	}
 
 	@Test( expected = FileNotFoundException.class )
 	public void testCreateFromNonExistentLoadingSheet() throws Exception {
-		String[] args = makeArgs( commandLines[0] );
+		File f = File.createTempFile( "cli-test-", ".jnl" );
+		String[] args = makeArgs( commandLines[0].replaceAll( " legacy.jnl ",
+				" " + f.getAbsolutePath() + " " ) );
 		CLI mossy = new CLI( args );
-		mossy.execute();
+		try {
+			mossy.execute();
+		}
+		finally {
+			mossy.release();
+			FileUtils.deleteQuietly( f );
+		}
 	}
 
 	@Test( expected = FileNotFoundException.class )
 	public void testUpdateToNonExistentPath() throws Exception {
-		String[] args = makeArgs( commandLines[2] );
+		File f = File.createTempFile( "cli-test-", ".jnl" );
+		String[] args = makeArgs( commandLines[2].replaceAll( " legacy.jnl ",
+				" " + f.getAbsolutePath() + " " ) );
 		CLI mossy = new CLI( args );
-		mossy.execute();
+		try {
+			mossy.execute();
+		}
+		finally {
+			mossy.release();
+			FileUtils.deleteQuietly( f );
+		}
 	}
 
 	@Test
 	public void testJournalFromOneLoadingSheet() throws Exception {
-		String[] args = makeArgs( commandLines[3] );
+		File f = File.createTempFile( "cli-test-", ".jnl" );
+		String[] args = makeArgs( commandLines[3].replaceAll( " legacy.jnl ",
+				" " + f.getAbsolutePath() + " " ) );
+		f.delete();
 		CLI mossy = new CLI( args );
-		mossy.execute();
-
-		Files.deleteIfExists( Paths.get( mossy.getOption( "out" ) ) );
-		assertEquals( "hi", "hi" );
+		try {
+			mossy.execute();
+		}
+		finally {
+			mossy.release();
+			FileUtils.deleteQuietly( f );
+		}
 	}
 }

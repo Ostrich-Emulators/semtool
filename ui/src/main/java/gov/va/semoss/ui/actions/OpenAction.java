@@ -9,6 +9,8 @@ import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.poi.main.ImportFileReader;
 import gov.va.semoss.poi.main.ImportValidationException;
 import gov.va.semoss.poi.main.LoadingSheetData;
+import gov.va.semoss.poi.main.LoadingSheetData.DataIterator;
+import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.POIReader;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
@@ -342,7 +344,7 @@ public class OpenAction extends DbAction {
 			try {
 				psf.setTitle( fileToLoad.getName() );
 				ValueFactory vf = new ValueFactoryImpl();
-				ImportData data = xlsreader.readNonloadingSheet( fileToLoad );
+				ImportData data = POIReader.readNonloadingSheet( fileToLoad );
 				for ( LoadingSheetData lsd : data.getSheets() ) {
 					ValueTableModel vtm = new ValueTableModel();
 					vtm.setAllowInsertsInPlace( true );
@@ -350,7 +352,9 @@ public class OpenAction extends DbAction {
 					GridRAWPlaySheet grid = new GridRAWPlaySheet( vtm );
 
 					List<Value[]> vals = new ArrayList<>();
-					for ( LoadingSheetData.LoadingNodeAndPropertyValues nap : lsd.getData() ) {
+					DataIterator di = lsd.iterator();
+					while( di.hasNext() ){
+						LoadingNodeAndPropertyValues nap = di.next();
 						vals.add( nap.convertToValueArray( vf ) );
 					}
 					grid.create( vals, lsd.getHeaders(), engine );

@@ -56,10 +56,7 @@ public class RDFDatatypeTools {
 	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
 	private static final Map<Class<?>, URI> REVTYPELOOKUP = new HashMap<>();
 
-	/**
-	 * Default constructor
-	 */
-	private RDFDatatypeTools() {
+	static {
 		TYPELOOKUP.put( XMLSchema.INT, Integer.class );
 		TYPELOOKUP.put( XMLSchema.INTEGER, Integer.class );
 		TYPELOOKUP.put( XMLSchema.DOUBLE, Double.class );
@@ -78,11 +75,7 @@ public class RDFDatatypeTools {
 		REVTYPELOOKUP.put( Boolean.class, XMLSchema.BOOLEAN );
 	}
 
-	public static RDFDatatypeTools instance() {
-		if ( instance == null ) {
-			instance = new RDFDatatypeTools();
-		}
-		return instance;
+	private RDFDatatypeTools() {
 	}
 
 	/**
@@ -94,7 +87,7 @@ public class RDFDatatypeTools {
 	 * @return A list (ordinal) of the classes describing the data types of the
 	 * columns
 	 */
-	public List<Class<?>> figureColumnClassesFromData( List<Value[]> newdata,
+	public static List<Class<?>> figureColumnClassesFromData( List<Value[]> newdata,
 			int columns ) {
 		List<Class<?>> columnClasses = new ArrayList<>();
 		if ( newdata.isEmpty() ) {
@@ -208,7 +201,7 @@ public class RDFDatatypeTools {
 	 * @param input The XML entity, in string form
 	 * @return The entity instance, properly classed
 	 */
-	public Object parseXMLDatatype( String input ) {
+	public static Object parseXMLDatatype( String input ) {
 		if ( input == null ) {
 			return null;
 		}
@@ -251,7 +244,7 @@ public class RDFDatatypeTools {
 			return XMLSchema.ANYURI;
 		}
 		else if ( val instanceof Literal ) {
-			Literal l = Literal.class.cast( val );			
+			Literal l = Literal.class.cast( val );
 			return ( null == l.getDatatype() ? XMLSchema.STRING : l.getDatatype() );
 		}
 
@@ -265,7 +258,7 @@ public class RDFDatatypeTools {
 	 * @param value The RDF Value
 	 * @return A proper native object
 	 */
-	public Object getObjectFromValue( Value value ) {
+	public static Object getObjectFromValue( Value value ) {
 		if ( value == null ) {
 			return null;
 		}
@@ -357,7 +350,7 @@ public class RDFDatatypeTools {
 	 * @param input The input containing potentially unnecessary quote chars
 	 * @return The string content without the unnecessary quotes
 	 */
-	private String removeExtraneousDoubleQuotes( String input ) {
+	private static String removeExtraneousDoubleQuotes( String input ) {
 		while ( input != null && input.length() > 2
 				&& input.charAt( 0 ) == '\"'
 				&& input.charAt( input.length() - 1 ) == '\"' ) {

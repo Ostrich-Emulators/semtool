@@ -57,69 +57,12 @@ public class UtilityTest {
 	public void testFillParam() {
 	}
 
-	@Test
-	public void testGetInstanceName() {
-		Map<String, String> tests = new HashMap<>();
-		tests.put( "http://www.google.com/name/one", "one" );
-		tests.put( "http://www.google.com/name#two", "name#two" );
-		tests.put( "http://www.google.com/name/one/", "one" );
-		tests.put( "http://www.google.com/name/one#", "one#" );
-		tests.put( "something strange", "something strange" );
-
-		for ( Map.Entry<String, String> e : tests.entrySet() ) {
-			String rslt = Utility.getInstanceName( e.getKey() );
-			assertEquals( "failed to parse: " + e.getKey(), e.getValue(), rslt );
-		}
-	}
-
 	//@Test
 	public void testGetConceptType() {
 	}
 
-	@Test
-	public void testGetClassName() {
-		Map<String, String> tests = new HashMap<>();
-		tests.put( "http://www.google.com/name/one", "name" );
-		tests.put( "http://www.google.com/name#two", "www.google.com" );
-		tests.put( "http://www.google.com/name/one/", "name" );
-		tests.put( "http://www.google.com/name/one#", "name" );
-		tests.put( "something strange", null );
-
-		for ( Map.Entry<String, String> e : tests.entrySet() ) {
-			String rslt = Utility.getClassName( e.getKey() );
-			assertEquals( "failed to parse: " + e.getKey(), e.getValue(), rslt );
-		}
-	}
-
 	//@Test
 	public void testGetQualifiedClassName() {
-	}
-
-	@Test
-	public void testCheckPatternInString() {
-		Map<String, String> trues = new HashMap<>();
-		trues.put( "http://www.google.com/name/one", "oog" );
-		trues.put( "http://www.google.com/name#two; three", "three" );
-		trues.put( "one, two, three; four; five; six ; seven eight nine", "seven e" );
-
-		Map<String, String> falses = new HashMap<>();
-		falses.put( "http://www.google.com/name/one", "oog1" );
-		falses.put( "http://www.google.com/name#two; three", "?two" );
-		falses.put( "one, two, three; four; five; six ; seven eight nine", "seven E" );
-
-		for ( Map.Entry<String, String> e : trues.entrySet() ) {
-			assertTrue( "error finding: " + e.getValue() + " in " + e.getKey(),
-					Utility.checkPatternInString( e.getValue(), e.getKey() ) );
-		}
-
-		for ( Map.Entry<String, String> e : falses.entrySet() ) {
-			assertFalse( "mysteriously found: " + e.getValue() + " in " + e.getKey(),
-					Utility.checkPatternInString( e.getValue(), e.getKey() ) );
-		}
-	}
-
-	//@Test
-	public void testRunCheck() {
 	}
 
 	@Test

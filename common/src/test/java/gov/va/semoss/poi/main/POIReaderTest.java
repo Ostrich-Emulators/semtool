@@ -7,6 +7,7 @@ package gov.va.semoss.poi.main;
 
 import gov.va.semoss.poi.main.ImportValidationException.ErrorType;
 import java.io.File;
+import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -191,20 +192,20 @@ public class POIReaderTest {
 	public void testLoadingSheet11() throws Exception {
 		POIReader rdr = new POIReader();
 		data = rdr.readOneFile( TEST11 );
-		assertEquals( 1, data.getSheet( "Humans" ).getData().size() );
-		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
-		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
-		assertEquals( "Yugo", data.getSheet( "Purchases" ).getData().get( 0 ).getObject() );
+		assertEquals( 1, data.getSheet( "Humans" ).rows() );
+		assertEquals( "Yuri", data.getSheet( "Humans" ).iterator().next().getSubject() );
+		assertEquals( 1, data.getSheet( "Purchases" ).rows() );
+		assertEquals( "Yugo", data.getSheet( "Purchases" ).iterator().next().getObject() );
 	}
 
 	@Test
 	public void testLoadingSheet12() throws Exception {
 		POIReader rdr = new POIReader();
 		data = rdr.readOneFile( TEST12 );
-		assertEquals( 1, data.getSheet( "Humans" ).getData().size() );
-		assertEquals( "Yuri", data.getSheet( "Humans" ).getData().get( 0 ).getSubject() );
-		assertEquals( 1, data.getSheet( "Purchases" ).getData().size() );
-		assertEquals( "Yugo", data.getSheet( "Purchases" ).getData().get( 0 ).getObject() );
+		assertEquals( 1, data.getSheet( "Humans" ).rows() );
+		assertEquals( "Yuri", data.getSheet( "Humans" ).iterator().next().getSubject() );
+		assertEquals( 1, data.getSheet( "Purchases" ).rows() );
+		assertEquals( "Yugo", data.getSheet( "Purchases" ).iterator().next().getObject() );
 	}
 
 	@Test( expected = ImportValidationException.class )
@@ -231,5 +232,28 @@ public class POIReaderTest {
 				throw e;
 			}
 		}
+	}
+
+	@Test
+	public void testNonLoadingSheet() throws Exception {
+		data = POIReader.readNonloadingSheet( CUSTOM );
+
+		assertEquals( 4, data.getSheetNames().size() );
+	}
+
+	@Test
+	public void testMetadata() throws Exception {
+		POIReader rdr = new POIReader();
+		rdr.keepLoadInMemory( true );
+		ImportMetadata im = rdr.getMetadata( CUSTOM );
+
+		assertEquals( "http://purl.org/dc/terms/", im.getNamespaces().get( "dct" ) );
+	}
+
+	@Test( expected = IOException.class )
+	public void testMetadata2() throws Exception {
+		POIReader rdr = new POIReader();
+		rdr.keepLoadInMemory( true );
+		rdr.getMetadata( new File( "non-existing; file\\" ) );
 	}
 }

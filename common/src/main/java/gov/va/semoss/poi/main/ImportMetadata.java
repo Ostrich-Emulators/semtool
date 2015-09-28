@@ -23,7 +23,6 @@ public final class ImportMetadata {
 
 	private static final Logger log = Logger.getLogger( ImportMetadata.class );
 	private final Map<String, String> namespaces = new HashMap<>();
-	private final Map<URI, String> extras = new HashMap<>();
 	private final List<String[]> statements = new ArrayList<>();
 	private URI base;
 	private UriBuilder databuilder;
@@ -57,7 +56,6 @@ public final class ImportMetadata {
 	public void clear() {
 		namespaces.clear();
 		statements.clear();
-		extras.clear();
 	}
 
 	public void setAll( ImportMetadata im ) {
@@ -67,16 +65,6 @@ public final class ImportMetadata {
 		databuilder = im.getDataBuilder();
 		schemabuilder = im.getSchemaBuilder();
 		autocreateModel = im.isAutocreateMetamodel();
-	}
-
-	public void setExtras( Map<URI, String> exs ) {
-		extras.clear();
-		for ( Map.Entry<URI, String> en : exs.entrySet() ) {
-			// don't write the void#dataset value, because it's the same for every KB
-			if ( !en.getKey().equals( VAS.Database ) ) {
-				extras.put( en.getKey(), en.getValue() );
-			}
-		}
 	}
 
 	public boolean isLegacyMode() {

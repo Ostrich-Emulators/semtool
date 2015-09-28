@@ -170,7 +170,7 @@ public class ValueTableModel extends AbstractTableModel {
 		headers.clear();
 		headers.addAll( heads );
 		columnClasses.clear();
-		columnClasses.addAll( RDFDatatypeTools.instance().figureColumnClassesFromData( newdata, headers.size() ) );
+		columnClasses.addAll( RDFDatatypeTools.figureColumnClassesFromData( newdata, headers.size() ) );
 
 		data.clear();
 		data.addAll( convertValuesToClassedData( newdata, columnClasses, useraw ) );

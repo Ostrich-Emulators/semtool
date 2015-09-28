@@ -645,9 +645,8 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @return -- (boolean) Whether the import succeeded.
 	 */
-	public synchronized boolean importInsights( WriteableInsightManager wim ) {
+	public synchronized boolean importInsights( IEngine engine, WriteableInsightManager wim ) {
 		try {
-			IEngine engine = DIHelper.getInstance().getRdfEngine();
 			insightqueue.put( engine, new InsightsImportConfig( wim.getStatements(), true ) );
 			notify();
 			return true;

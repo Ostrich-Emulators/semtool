@@ -89,6 +89,8 @@ public abstract class AbstractQueryGraphElement extends AbstractGraphElement
 
 	@Override
 	public void removeProperty( URI prop ) {
+		setOptional( prop, false );
+		setSelected( prop, false );
 		properties.remove( prop );
 	}
 
@@ -111,7 +113,7 @@ public abstract class AbstractQueryGraphElement extends AbstractGraphElement
 			}
 
 			map.put( en.getKey(),
-					RDFDatatypeTools.instance().getObjectFromValue( en.getValue().iterator().next() ) );
+					RDFDatatypeTools.getObjectFromValue( en.getValue().iterator().next() ) );
 		}
 		return map;
 	}
@@ -127,13 +129,13 @@ public abstract class AbstractQueryGraphElement extends AbstractGraphElement
 
 	@Override
 	public Object getProperty( URI prop ) {
-		return RDFDatatypeTools.instance().getObjectFromValue( getValue( prop ) );
+		return RDFDatatypeTools.getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override
 	public void setProperty( URI prop, Object propValue ) {
 		properties.remove( prop );
-		setProperty( prop, RDFDatatypeTools.instance().getValueFromObject( propValue ), true );
+		setProperty( prop, RDFDatatypeTools.getValueFromObject( propValue ), true );
 	}
 
 	@Override
