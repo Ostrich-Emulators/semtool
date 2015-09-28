@@ -46,6 +46,8 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	private static final String[] columnNames = { "Property Name", "XML Datatype", "Value" };
 	private static final Class<?>[] classNames = {URI.class, URI.class, Value.class };
 	private ArrayList<PropertyEditorRow> rows;
+	
+	@SuppressWarnings("unused")
 	private final IEngine engine;
 	private final Set<URI> uneditableProps = new HashSet<>();
 	
@@ -64,7 +66,7 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		populateRows(propertyList);
 	}
 
-	public void populateRows(List<Value[]> propertyList) {
+	private void populateRows(List<Value[]> propertyList) {
 		rows = new ArrayList<>();
 		URI datatypeURI = null;
 		
@@ -102,13 +104,11 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		PropertyEditorRow pRow = rows.get(row);
 		switch ( column ) {
 			case 0: {
-//				return pRow.getName().stringValue();
-//				return new URIImpl( pRow.getName().stringValue() ).getLocalName();
 				return pRow.getName().getLocalName();
 			} case 1: { 
 				return pRow.getDatatype().getLocalName();
 			} case 2: {
-				return pRow.getValue();
+				return pRow.getValueAsDisplayString();
 			} default:
 				return null;
 		}
@@ -213,7 +213,7 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		return column == 2 && !XMLSchema.ANYURI.equals( rows.get(row).getDatatype() );
 	}
 
-	public class PropertyEditorRow {
+	class PropertyEditorRow {
 		private final URI name;
 		private final URI datatype;
 		private Value value;
@@ -239,6 +239,36 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		
 		public Value getValue() {
 			return value;
+		}
+
+		public String getValueAsDisplayString() {
+			if ( sameDatatype(datatype, XMLSchema.DOUBLE) ) {
+				Literal l = Literal.class.cast( value );
+				return l.doubleValue() + "";
+			} else if ( sameDatatype(datatype, XMLSchema.FLOAT) ) {
+				Literal l = Literal.class.cast( value );
+				return l.floatValue() + "";
+			} else if ( sameDatatype(datatype, XMLSchema.INTEGER) || sameDatatype(datatype, XMLSchema.INT) ) {
+				Literal l = Literal.class.cast( value );
+				return l.intValue() + "";
+			} else if ( sameDatatype(datatype, XMLSchema.BOOLEAN) ) {
+				Literal l = Literal.class.cast( value );
+				return l.booleanValue() + "";
+			} else if ( sameDatatype(datatype, XMLSchema.DATE) ) {
+				Literal l = Literal.class.cast( value );
+				return l.calendarValue().toGregorianCalendar().getTime() + "";
+			} else if ( sameDatatype(datatype, XMLSchema.ANYURI) ) {
+				return new URIImpl( value.stringValue() ).getLocalName();
+			} else if ( sameDatatype(datatype, XMLSchema.STRING) ) {
+				return value.stringValue();
+			} else {
+				log.warn("We need to handle the case for datatype: " + datatype);
+				return value.stringValue();
+			}
+		}
+		
+		private boolean sameDatatype(URI uri1, URI uri2) {
+			return (uri1.stringValue().equals( uri2.stringValue() ));
 		}
 	}
 }

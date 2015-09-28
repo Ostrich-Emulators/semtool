@@ -9,8 +9,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -42,7 +40,7 @@ import org.openrdf.repository.RepositoryException;
 public class SemanticExplorerPanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = -9040079407021692942L;
 	private static final Logger log = Logger.getLogger( SemanticExplorerPanel.class );
-	private JTree nodeClassesAndInstances;
+	private JTree nodeClassesAndInstances = new JTree();
 	private IEngine engine;
 	private DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "Please wait while classes and instances populate..." );
 	
@@ -58,7 +56,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 		nodeClassesAndInstances.setSelectionModel( getDeselectableTreeSelectionModel() );
 		nodeClassesAndInstances.addTreeSelectionListener( getTreeSelectionListener() );
 		nodeClassesAndInstances.setModel( new DefaultTreeModel( invisibleRoot ) );
-
+		
 		leftSide = new JScrollPane();
 		leftSide.setViewportView(nodeClassesAndInstances);
 	    
@@ -84,24 +82,8 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addComponent(jSplitPane, GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
 		);
-
-		addComponentListener(new SemanticExplorerComponentListener());
 	}
-	
-	/*
 
-SELECT DISTINCT ?concepts ?instances 
-WHERE {
-  ?concepts a owl:Class .
-  ?instances rdf:type ?concepts .
-  ?instances ?p ?o .
-}
-ORDER BY DESC(?concepts)
-
-We have ~20,000 instances of class <http://semoss.org/ontologies/DataElement>
-
-	 */
-	
 	private List<URI> runConceptsQuery() {
 		String conceptsQuery
 				= "SELECT DISTINCT ?returnVariable  WHERE {"
@@ -200,12 +182,12 @@ We have ~20,000 instances of class <http://semoss.org/ontologies/DataElement>
 				TreePath path = e.getPath();
 				
 				if ( path.getPathCount() == 1 ) {
-//					This shouldn't be possible
+					;//This shouldn't be possible
 				} else if ( path.getPathCount() == 2 ) {
-//					We have no action here.
-//					DefaultMutableTreeNode conceptNode = DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
-//					URI concept = URI.class.cast( conceptNode.getUserObject() );
+					;//We have no action here.
 				} else if ( path.getPathCount() == 3 ) {
+					//DefaultMutableTreeNode conceptNode = DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
+					//URI concept = URI.class.cast( conceptNode.getUserObject() );
 					DefaultMutableTreeNode dmtn = DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
 					URI instance = URI.class.cast( dmtn.getUserObject() );
 					
@@ -216,7 +198,9 @@ We have ~20,000 instances of class <http://semoss.org/ontologies/DataElement>
 		};
 	}
 	
-	public void populateDataForThisDB() {
+	private void populateDataForThisDB() {
+		invisibleRoot.removeAllChildren();
+		
 		List<URI> concepts = runConceptsQuery();
 		for (URI concept:concepts) {
 			URITreeNode node = new URITreeNode( concept );
@@ -228,15 +212,17 @@ We have ~20,000 instances of class <http://semoss.org/ontologies/DataElement>
 			}
 		}
 		
-		nodeClassesAndInstances.expandRow( 0 );
+		nodeClassesAndInstances.setModel( new DefaultTreeModel( invisibleRoot ) );
 		nodeClassesAndInstances.setRootVisible( false );
+		nodeClassesAndInstances.repaint();
 	}
 
 	public void setEngine(IEngine engine) {
 		this.engine = engine;
+		populateDataForThisDB();
 	}
 	
-	public class URITreeNode extends DefaultMutableTreeNode {
+	class URITreeNode extends DefaultMutableTreeNode {
 		private static final long serialVersionUID = 2744084727914202969L;
 
 		public URITreeNode(URI userObject) {
@@ -251,29 +237,6 @@ We have ~20,000 instances of class <http://semoss.org/ontologies/DataElement>
 	        	URI thisURI = (URI) userObject;
 	            return thisURI.getLocalName();
 	        }
-		}
-	}
-	
-	public class SemanticExplorerComponentListener implements ComponentListener {
-		@Override
-	    public void componentShown(ComponentEvent e) {
-	        log.debug(e.getComponent().getClass().getName() + " --- Shown");
-			populateDataForThisDB();
-	    }
-
-		@Override
-		public void componentResized(ComponentEvent e) {
-	        log.debug(e.getComponent().getClass().getName() + " --- Resized");
-		}
-
-		@Override
-		public void componentMoved(ComponentEvent e) {
-	        log.debug(e.getComponent().getClass().getName() + " --- Moved");
-		}
-
-		@Override
-		public void componentHidden(ComponentEvent e) {
-	        log.debug(e.getComponent().getClass().getName() + " --- Hidden");
 		}
 	}
 }
