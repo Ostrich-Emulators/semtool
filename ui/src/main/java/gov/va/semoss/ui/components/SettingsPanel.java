@@ -55,6 +55,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 
 		Map<JCheckBox, String> map = new HashMap<>();
 		map.put( calcInfers, Constants.CALC_INFERENCES_PREF );
+		map.put( semexUseLabels, Constants.SEMEX_USE_LABELS_PREF );
 
 		for ( Map.Entry<JCheckBox, String> e : map.entrySet() ) {
 			JCheckBox c = e.getKey();

@@ -19,7 +19,7 @@
 package gov.va.semoss.ui.components.semanticexplorer;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,7 +32,6 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.XMLSchema;
 
@@ -51,6 +50,8 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	private final IEngine engine;
 	private final Set<URI> uneditableProps = new HashSet<>();
 	
+	private LabeledPairRenderer<URI> renderer;
+	
 	/**
 	 * Constructor for InstancePropertyTableModel.
 	 * 
@@ -62,6 +63,9 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		
 		uneditableProps.add(RDF.SUBJECT);
 		uneditableProps.add(RDF.TYPE);
+		
+		renderer = LabeledPairRenderer.getUriPairRenderer();
+		renderer.cache(XMLSchema.ANYURI, "URI");
 		
 		populateRows(propertyList);
 	}
@@ -105,7 +109,9 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		switch ( column ) {
 			case 0: {
 				return pRow.getName().getLocalName();
-			} case 1: { 
+			} case 1: {
+				if (pRow.getDatatype() == XMLSchema.ANYURI)
+					return "URI";
 				return pRow.getDatatype().getLocalName();
 			} case 2: {
 				return pRow.getValueAsDisplayString();
@@ -126,26 +132,7 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public void setValueAt(Object val, int row, int column) {
-		if (column != 2)
-			return;
-		
-		PropertyEditorRow pRow = rows.get(row);
-//		Value oldValue = pRow.getValue();
-		
-		if ( !pRow.setValue(val) ) {
-			GuiUtility.showError("This value is invalid for this datatype, or this datatype is not yet supported.");
-			return;
-		}
-
-		/*
-		StatementPersistenceUtility.updateNodeOrEdgePropertyValue(
-				engine, 
-				vertex, 
-				pRow.getName(), 
-				oldValue, 
-				pRow.getValue());
-		*/
-		fireTableDataChanged();
+		return;
 	}
 
 	/**
@@ -206,69 +193,6 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public boolean isCellEditable(int row, int column) {
-		for (URI name:uneditableProps)
-			if (name == rows.get(row).getName())
-				return false;
-
-		return column == 2 && !XMLSchema.ANYURI.equals( rows.get(row).getDatatype() );
-	}
-
-	class PropertyEditorRow {
-		private final URI name;
-		private final URI datatype;
-		private Value value;
-
-		public PropertyEditorRow( Value name, URI datatype, Value value ) throws Exception {
-			this.name = new URIImpl( name.stringValue() );
-			this.datatype = datatype;
-			this.value = value;
-		}
-
-		public boolean setValue(Object val) {
-			value = Value.class.cast( val );
-			return true;
-		}
-
-		public URI getName() {
-			return name;
-		}
-		
-		public URI getDatatype() {
-			return datatype;
-		}
-		
-		public Value getValue() {
-			return value;
-		}
-
-		public String getValueAsDisplayString() {
-			if ( sameDatatype(datatype, XMLSchema.DOUBLE) ) {
-				Literal l = Literal.class.cast( value );
-				return l.doubleValue() + "";
-			} else if ( sameDatatype(datatype, XMLSchema.FLOAT) ) {
-				Literal l = Literal.class.cast( value );
-				return l.floatValue() + "";
-			} else if ( sameDatatype(datatype, XMLSchema.INTEGER) || sameDatatype(datatype, XMLSchema.INT) ) {
-				Literal l = Literal.class.cast( value );
-				return l.intValue() + "";
-			} else if ( sameDatatype(datatype, XMLSchema.BOOLEAN) ) {
-				Literal l = Literal.class.cast( value );
-				return l.booleanValue() + "";
-			} else if ( sameDatatype(datatype, XMLSchema.DATE) ) {
-				Literal l = Literal.class.cast( value );
-				return l.calendarValue().toGregorianCalendar().getTime() + "";
-			} else if ( sameDatatype(datatype, XMLSchema.ANYURI) ) {
-				return new URIImpl( value.stringValue() ).getLocalName();
-			} else if ( sameDatatype(datatype, XMLSchema.STRING) ) {
-				return value.stringValue();
-			} else {
-				log.warn("We need to handle the case for datatype: " + datatype);
-				return value.stringValue();
-			}
-		}
-		
-		private boolean sameDatatype(URI uri1, URI uri2) {
-			return (uri1.stringValue().equals( uri2.stringValue() ));
-		}
+		return false;
 	}
 }

@@ -8,8 +8,13 @@ package gov.va.semoss.ui.components.semanticexplorer;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
+import gov.va.semoss.ui.main.SemossPreferences;
+import gov.va.semoss.util.Constants;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.GroupLayout;
 import javax.swing.JScrollPane;
@@ -40,13 +45,15 @@ import org.openrdf.repository.RepositoryException;
 public class SemanticExplorerPanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = -9040079407021692942L;
 	private static final Logger log = Logger.getLogger( SemanticExplorerPanel.class );
-	private JTree nodeClassesAndInstances = new JTree();
+	private JTree nodeClassesAndInstances;
 	private IEngine engine;
 	private DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "Please wait while classes and instances populate..." );
 	
 	private JScrollPane leftSide, rightSide;
 	private JSplitPane jSplitPane;
 	private JTable propertyTable;
+	
+	private boolean useLabels = false;
 
 	/**
 	 * Creates new SemanticExplorerPanel
@@ -61,6 +68,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 		leftSide.setViewportView(nodeClassesAndInstances);
 	    
 		propertyTable = new JTable();
+		propertyTable.setAutoCreateRowSorter(true);
 
 		rightSide = new JScrollPane();
 		rightSide.setViewportView( propertyTable );
@@ -86,7 +94,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 	private List<URI> runConceptsQuery() {
 		String conceptsQuery
-				= "SELECT DISTINCT ?returnVariable  WHERE {"
+				= "SELECT DISTINCT ?returnVariable WHERE {"
 				+ "  ?returnVariable a owl:Class . "
 				+ "} ORDER BY ?returnVariable";
 		
@@ -102,25 +110,34 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 		}
 	}
 	
-	private List<URI> runInstancesQuery(URI concept) {
-		String conceptsQuery
-				= "SELECT DISTINCT ?returnVariable WHERE {"
-				+ "  ?returnVariable rdf:type ?concept . "
-				+ "  BIND( <" + concept + "> AS ?concept)"
-				+ "} ORDER BY ?returnVariable";
-		
-		OneVarListQueryAdapter<URI> queryer
-				= OneVarListQueryAdapter.getUriList( conceptsQuery, "returnVariable" );
-		
+	private List<Value[]> runInstancesAndLabelsQuery(URI concept) {
+		String instancesQuery
+				= "SELECT DISTINCT ?instance ?label WHERE {"
+				+ "  ?instance rdf:type ?concept . "
+				+ "  OPTIONAL { ?instance rdfs:label ?label . }"
+				+ "} ORDER BY ?instance";
+
+		ListQueryAdapter<Value[]> instancesQA = new ListQueryAdapter<Value[]>( instancesQuery ) {
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				Value values[] = {
+						Value.class.cast( set.getValue( "instance" ) ),
+						Value.class.cast( set.getValue( "label" ) )
+				};
+				add( values );
+			}
+		};
+		instancesQA.bind( "concept", concept );
+
 		try {
-			return engine.query( queryer );
+			return engine.query( instancesQA );
 		} catch (RepositoryException | MalformedQueryException
 				| QueryEvaluationException e) {
 			log.error("Could not query concepts: " + e, e);
 			return null;
 		}
 	}
-	
+		
 	private List<Value[]> runPropertiesQuery(URI instance) {
 		String propertiesQuery
 				= "SELECT DISTINCT ?predicate ?object WHERE {"
@@ -199,19 +216,34 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 	}
 	
 	private void populateDataForThisDB() {
+		Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
+		useLabels = prefs.getBoolean(Constants.SEMEX_USE_LABELS_PREF, false);
+
 		invisibleRoot.removeAllChildren();
 		
+		ArrayList<URITreeNode> conceptListURITreeNodes = new ArrayList<URITreeNode>();
 		List<URI> concepts = runConceptsQuery();
 		for (URI concept:concepts) {
-			URITreeNode node = new URITreeNode( concept );
-			invisibleRoot.add( node );
+			URITreeNode conceptNode = new URITreeNode( concept, useLabels );
+			conceptListURITreeNodes.add( conceptNode );
+
+			ArrayList<URITreeNode> instanceListURITreeNodes = new ArrayList<URITreeNode>();
+			List<Value[]> instancesAndTheirLabels = runInstancesAndLabelsQuery(concept);
+			for (Value[] values:instancesAndTheirLabels) {
+				instanceListURITreeNodes.add( new URITreeNode(values[0], values[1], useLabels) );
+			}
 			
-			List<URI> instances = runInstancesQuery(concept);
-			for (URI instance:instances) {
-				node.add( new URITreeNode(instance) );
+			Collections.sort(instanceListURITreeNodes);
+			for (URITreeNode instanceNode:instanceListURITreeNodes) {
+				conceptNode.add(instanceNode);
 			}
 		}
 		
+		Collections.sort(conceptListURITreeNodes);
+		for (URITreeNode conceptNode:conceptListURITreeNodes) {
+			invisibleRoot.add(conceptNode);
+		}
+
 		nodeClassesAndInstances.setModel( new DefaultTreeModel( invisibleRoot ) );
 		nodeClassesAndInstances.setRootVisible( false );
 		nodeClassesAndInstances.repaint();
@@ -220,23 +252,5 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 	public void setEngine(IEngine engine) {
 		this.engine = engine;
 		populateDataForThisDB();
-	}
-	
-	class URITreeNode extends DefaultMutableTreeNode {
-		private static final long serialVersionUID = 2744084727914202969L;
-
-		public URITreeNode(URI userObject) {
-	        super(userObject, true);
-	    }
-	    
-	    @Override
-		public String toString() {
-	        if (userObject == null || !(userObject instanceof URI)) {
-	            return "";
-	        } else {
-	        	URI thisURI = (URI) userObject;
-	            return thisURI.getLocalName();
-	        }
-		}
 	}
 }
