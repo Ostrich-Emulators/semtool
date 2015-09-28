@@ -200,44 +200,38 @@ We have ~20,000 instances of class <http://semoss.org/ontologies/DataElement>
 				TreePath path = e.getPath();
 				
 				if ( path.getPathCount() == 1 ) {
-					log.debug("Somehow you clicked the root node.");
-					return;
-				}
-				
-				if ( path.getPathCount() == 2 ) {
-					DefaultMutableTreeNode conceptNode = DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
-					URI concept = URI.class.cast( conceptNode.getUserObject() );
-					
-					log.debug("Click on a class: " + concept);
-					/*
-
-					List<URI> instances = runInstancesQuery(concept);
-					for (URI instance:instances) {
-						conceptNode.add( new URITreeNode(instance) );
-					}
-					*/
-					
-					return;
-				}
-
-				if ( path.getPathCount() == 3 ) {
+//					This shouldn't be possible
+				} else if ( path.getPathCount() == 2 ) {
+//					We have no action here.
+//					DefaultMutableTreeNode conceptNode = DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
+//					URI concept = URI.class.cast( conceptNode.getUserObject() );
+				} else if ( path.getPathCount() == 3 ) {
 					DefaultMutableTreeNode dmtn = DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
 					URI instance = URI.class.cast( dmtn.getUserObject() );
 					
 					List<Value[]> propertyList = runPropertiesQuery(instance);
-					
 					propertyTable.setModel( new InstancePropertyTableModel(propertyList, engine) );
-
-					for (Value[] properties:propertyList) {
-						log.debug("  ###  " + instance + "  ###  " + properties[0] + "  ###  " + properties[1]);
-					}
-					
-					return;
 				}
 			}
 		};
 	}
 	
+	public void populateDataForThisDB() {
+		List<URI> concepts = runConceptsQuery();
+		for (URI concept:concepts) {
+			URITreeNode node = new URITreeNode( concept );
+			invisibleRoot.add( node );
+			
+			List<URI> instances = runInstancesQuery(concept);
+			for (URI instance:instances) {
+				node.add( new URITreeNode(instance) );
+			}
+		}
+		
+		nodeClassesAndInstances.expandRow( 0 );
+		nodeClassesAndInstances.setRootVisible( false );
+	}
+
 	public void setEngine(IEngine engine) {
 		this.engine = engine;
 	}
@@ -264,20 +258,7 @@ We have ~20,000 instances of class <http://semoss.org/ontologies/DataElement>
 		@Override
 	    public void componentShown(ComponentEvent e) {
 	        log.debug(e.getComponent().getClass().getName() + " --- Shown");
-	        
-			List<URI> concepts = runConceptsQuery();
-			for (URI concept:concepts) {
-				URITreeNode node = new URITreeNode( concept );
-				invisibleRoot.add( node );
-				
-				List<URI> instances = runInstancesQuery(concept);
-				for (URI instance:instances) {
-					node.add( new URITreeNode(instance) );
-				}
-			}
-			
-			nodeClassesAndInstances.expandRow( 0 );
-			nodeClassesAndInstances.setRootVisible( false );
+			populateDataForThisDB();
 	    }
 
 		@Override

@@ -66,24 +66,23 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 
 	public void populateRows(List<Value[]> propertyList) {
 		rows = new ArrayList<>();
-		URI datatypeURI;
+		URI datatypeURI = null;
 		
 		for ( Value[] values : propertyList ) {
-			// don't edit the SUBJECT field (it's just an ID for the vertex)
 			if ( values[1] instanceof Literal ) {
-				Literal literal = (Literal) values[1];
-				if ( literal.getDatatype() == null ) {
+				datatypeURI = ((Literal)values[1]).getDatatype();
+				if ( datatypeURI == null ) {
 					datatypeURI = XMLSchema.STRING;
 				}
-				else {
-					datatypeURI = literal.getDatatype();
-				}
-				rows.add( new PropertyEditorRow( values[0], datatypeURI,
-						values[1] ) );
 			}
 			else if ( values[1] instanceof URI ) {
-				rows.add( new PropertyEditorRow( values[0], XMLSchema.ANYURI,
-						values[1] ) );
+				datatypeURI = XMLSchema.ANYURI;
+			}
+			
+			try {
+				rows.add( new PropertyEditorRow( values[0], datatypeURI, values[1] ) );
+			} catch (Exception e) {
+				log.debug("Could not parse out PropertyEditorRow: " + e, e);
 			}
 		}
 	}
@@ -104,7 +103,8 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		switch ( column ) {
 			case 0: {
 //				return pRow.getName().stringValue();
-				return new URIImpl( pRow.getName().stringValue() ).getLocalName();
+//				return new URIImpl( pRow.getName().stringValue() ).getLocalName();
+				return pRow.getName().getLocalName();
 			} case 1: { 
 				return pRow.getDatatype().getLocalName();
 			} case 2: {
@@ -130,7 +130,7 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 			return;
 		
 		PropertyEditorRow pRow = rows.get(row);
-		Value oldValue = pRow.getValue();
+//		Value oldValue = pRow.getValue();
 		
 		if ( !pRow.setValue(val) ) {
 			GuiUtility.showError("This value is invalid for this datatype, or this datatype is not yet supported.");
@@ -214,12 +214,12 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	}
 
 	public class PropertyEditorRow {
-		private final Value name;
+		private final URI name;
 		private final URI datatype;
 		private Value value;
 
-		public PropertyEditorRow( Value name, URI datatype, Value value ) {
-			this.name = name;
+		public PropertyEditorRow( Value name, URI datatype, Value value ) throws Exception {
+			this.name = new URIImpl( name.stringValue() );
 			this.datatype = datatype;
 			this.value = value;
 		}
@@ -229,7 +229,7 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 			return true;
 		}
 
-		public Value getName() {
+		public URI getName() {
 			return name;
 		}
 		
