@@ -26,20 +26,17 @@ public class InsightTreeModel extends DefaultTreeModel {
 		DefaultMutableTreeNode top = DefaultMutableTreeNode.class.cast( getRoot() );
 		top.removeAllChildren();
 
-		if ( null != wim ) {
+		for ( Perspective p : wim.getPerspectives() ) {
+			DefaultMutableTreeNode perspectiveItem = new DefaultMutableTreeNode( p );
+			top.add( perspectiveItem );
 
-			for ( Perspective p : wim.getPerspectives() ) {
-				DefaultMutableTreeNode perspectiveItem = new DefaultMutableTreeNode( p );
-				top.add( perspectiveItem );
+			for ( Insight i : p.getInsights() ) {
+				DefaultMutableTreeNode insightItem = new DefaultMutableTreeNode( i );
+				perspectiveItem.add( insightItem );
 
-				for ( Insight i : p.getInsights() ) {
-					DefaultMutableTreeNode insightItem = new DefaultMutableTreeNode( i );
-					perspectiveItem.add( insightItem );
-
-					for ( Parameter a : i.getInsightParameters() ) {
-						DefaultMutableTreeNode parameterItem = new DefaultMutableTreeNode( a );
-						insightItem.add( parameterItem );
-					}
+				for ( Parameter a : i.getInsightParameters() ) {
+					DefaultMutableTreeNode parameterItem = new DefaultMutableTreeNode( a );
+					insightItem.add( parameterItem );
 				}
 			}
 		}

@@ -577,10 +577,6 @@ public class InsightManagerImpl implements InsightManager {
 		throw new IllegalArgumentException( "unknown perspective: " + perspectiveURI );
 	}
 
-	@Override
-	public void release() {
-	}
-
 	protected Insight insightFromStatements( Collection<Statement> stmts ) {
 		Insight insight = new Insight();
 
@@ -632,6 +628,11 @@ public class InsightManagerImpl implements InsightManager {
 			}
 		}
 
+		// make sure every insight has an output type
+		if( null == insight.getOutput() ){
+			insight.setOutput( InsightOutputType.GRID );
+		}
+		
 		return insight;
 	}
 

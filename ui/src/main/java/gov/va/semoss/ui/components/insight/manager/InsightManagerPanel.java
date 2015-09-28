@@ -10,6 +10,7 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
+import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter;
 import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter.ShotOp;
@@ -207,11 +208,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		parameterData.setEngine( engine );
 		perspectiveData.setEngine( engine );
 
-		if ( null != wim ) {
-			wim.release();
-		}
-
-		wim = ( null == eng ? null : engine.getInsightManager() );
+		wim = ( null == eng ? new InsightManagerImpl() : engine.getInsightManager() );
 		model.refresh( wim );
 
 //		for ( int i = 0; i < tree.getRowCount(); i++ ) {

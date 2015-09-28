@@ -281,13 +281,6 @@ public abstract class AbstractEngine implements IEngine {
 	 */
 	protected abstract URI setUris( String data, String schema );
 
-	@Override
-	public void closeDB() {
-		if ( null != insightEngine ) {
-			insightEngine.release();
-		}
-	}
-
 	/**
 	 * Update the "last modified" date of the dataset. This operation should fail
 	 * silently if necessary

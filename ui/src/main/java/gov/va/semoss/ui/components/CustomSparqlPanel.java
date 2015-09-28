@@ -327,7 +327,9 @@ public class CustomSparqlPanel extends JPanel {
 					
 					//If a question has no Sparql associated with it (as pulled from an external source),
 					//then disable the Copy-Down button, in the "Custom Sparql Query" window:
-					btnGetQuestionSparql.setEnabled( selected.getOutput().needsSparql );
+					InsightOutputType type = ( null == selected.getOutput() 
+							? InsightOutputType.GRID : selected.getOutput() );
+					btnGetQuestionSparql.setEnabled( type.needsSparql );
 				}
 				else {
 					btnGetQuestionSparql.setEnabled( false );
