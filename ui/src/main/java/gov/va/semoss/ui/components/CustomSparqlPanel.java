@@ -277,7 +277,7 @@ public class CustomSparqlPanel extends JPanel {
 				sparqlArea.setTextOfSelectedTab( sparql );
 
 				//Pre-select the Playsheet of the Insight copied down:
-				playSheetComboBox.setSelectedItem( selected.getOutputType() );
+				playSheetComboBox.setSelectedItem( selected.getOutput() );
 			}
 		} );
 
@@ -327,7 +327,7 @@ public class CustomSparqlPanel extends JPanel {
 					
 					//If a question has no Sparql associated with it (as pulled from an external source),
 					//then disable the Copy-Down button, in the "Custom Sparql Query" window:
-					btnGetQuestionSparql.setEnabled( selected.getOutputType().needsSparql );
+					btnGetQuestionSparql.setEnabled( selected.getOutput().needsSparql );
 				}
 				else {
 					btnGetQuestionSparql.setEnabled( false );
@@ -391,7 +391,7 @@ public class CustomSparqlPanel extends JPanel {
 				JDesktopPane pane = DIHelper.getInstance().getDesktop();
 				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
 
-				InsightOutputType output = insight.getOutputType();
+				InsightOutputType output = insight.getOutput();
 
 				// the frame will be activated before there's a playsheet attached to it
 				// make sure we have a playsheet before continuing

@@ -21,8 +21,6 @@ public class Insight implements Serializable {
 	private String label = "";
 	//Sparql for the question:
 	private String sparql = "";
-	//Type of entity this insight has:
-	private String entityType = "";
 	//The layout used to render this insight:
 	private InsightOutputType output;
 	//Description of Insight:
@@ -41,7 +39,6 @@ public class Insight implements Serializable {
 
 	//InsightParameters:
 	private final List<Parameter> parameters = new ArrayList<>();
-	private InsightOutputType type;
 
 	public Insight() {
 	}
@@ -73,8 +70,6 @@ public class Insight implements Serializable {
 		creator = i.getCreator();
 		description = i.getDescription();
 
-		entityType = i.entityType;
-
 		defautlValueIsQuery = i.defautlValueIsQuery;
 
 		for ( Parameter p : i.parameters ) {
@@ -92,22 +87,6 @@ public class Insight implements Serializable {
 
 	public void setId( URI id ) {
 		this.id = id;
-	}
-
-	public InsightOutputType getOutputType() {
-		return type;
-	}
-
-	public void setOutputType( InsightOutputType type ) {
-		this.type = type;
-	}
-
-	public String getEntityType() {
-		return entityType;
-	}
-
-	public void setEntityType( String entityType ) {
-		this.entityType = entityType;
 	}
 
 	public InsightOutputType getOutput() {

@@ -291,7 +291,7 @@ public class PlaySheetFrame extends JInternalFrame {
 
 	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ) {
 		OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
-		InsightOutputType type = insight.getOutputType();
+		InsightOutputType type = insight.getOutput();
 			
 		PlaySheetCentralComponent cmp
 				= PlaySheetCentralComponent.class.cast( registry.getSheetInstance( type ) );

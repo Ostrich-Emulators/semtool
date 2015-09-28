@@ -597,12 +597,12 @@ public class InsightManagerImpl implements InsightManager {
 				}
 				else if ( VAS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
 					try {
-						insight.setOutputType( InsightOutputType.valueOf( obj.stringValue() ) );
+						insight.setOutput( InsightOutputType.valueOf( obj.stringValue() ) );
 					}
 					catch ( IllegalArgumentException iae ) {
 						log.warn( "unknown insight output type: " + obj.stringValue()
 								+ "(using grid instead)" );
-						insight.setOutputType( InsightOutputType.GRID );
+						insight.setOutput( InsightOutputType.GRID );
 					}
 				}
 				else if ( DCTERMS.CREATOR.equals( pred ) ) {
@@ -845,9 +845,9 @@ public class InsightManagerImpl implements InsightManager {
 					vf.createLiteral( insight.getDescription() ) ) );
 		}
 
-		if ( null != insight.getOutputType() ) {
+		if ( null != insight.getOutput() ) {
 			statements.add( new StatementImpl( iid, VAS.INSIGHT_OUTPUT_TYPE,
-					vf.createLiteral( insight.getOutputType().toString() ) ) );
+					vf.createLiteral( insight.getOutput().toString() ) ) );
 		}
 
 		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, VAS.InsightProperties ) );

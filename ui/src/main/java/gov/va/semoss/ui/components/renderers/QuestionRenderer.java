@@ -50,7 +50,7 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 
 		super.getListCellRendererComponent( list, text, idx, sel, hasfocus );
 
-		InsightOutputType type =( null == insight ? null : insight.getOutputType() );
+		InsightOutputType type = ( null == insight ? null : insight.getOutput() );
 		setIcon( registry.getSheetIcon( type ) );
 
 		if ( insight != null && insight.getLabel() != null ) {

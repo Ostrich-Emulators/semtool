@@ -50,7 +50,7 @@ public class PerspectiveTreeCellRenderer extends DefaultTreeCellRenderer {
 			Insight ins = Insight.class.cast( value );
 			text = ins.getLabel();
 			ttip = ins.getDescription();
-			icon = registry.getSheetIcon( ins.getOutputType() );
+			icon = registry.getSheetIcon( ins.getOutput() );
 		}
 		else if ( value instanceof Perspective ) {
 			Perspective p = Perspective.class.cast( value );

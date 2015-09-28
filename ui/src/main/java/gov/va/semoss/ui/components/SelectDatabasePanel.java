@@ -196,7 +196,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					: psf.getActivePlaySheet() );
 			Class<? extends IPlaySheet> psccClass
 					= ( null == pscc ? null : pscc.getClass() );
-			final InsightOutputType type = ii.getOutputType();
+			final InsightOutputType type = ii.getOutput();
 			appendChkBox.setEnabled( null == type 
 					? false : type.equals( registry.getTypeFromClass( psccClass ) ) );
 		}
@@ -426,7 +426,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		@Override
 		protected InsightOutputType getOutputType() {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			return insight.getOutputType();
+			return insight.getOutput();
 		}
 
 		@Override
