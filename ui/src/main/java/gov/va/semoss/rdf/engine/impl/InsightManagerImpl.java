@@ -740,6 +740,19 @@ public class InsightManagerImpl implements InsightManager {
 		return insightSparql.toString();
 	}
 
+	public static Collection<Statement> getStatements( InsightManager im, User user ) {
+		List<Statement> statements = new ArrayList<>();
+		int idx = 0;
+		ValueFactory vf = new ValueFactoryImpl();
+		for ( Perspective p : im.getPerspectives() ) {
+			statements.addAll( getStatements( p, user ) );
+			statements.add( new StatementImpl( p.getId(), OLO.index,
+					vf.createLiteral( idx++ ) ) );
+		}
+
+		return statements;
+	}
+
 	/**
 	 * Converts the Perspective, its Insights and Parameters (and ordering!) to
 	 * Statements for adding to a Repository. If any Perspective, Insight, or

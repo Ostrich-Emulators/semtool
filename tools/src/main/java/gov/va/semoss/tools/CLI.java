@@ -19,7 +19,6 @@
  */
 package gov.va.semoss.tools;
 
-import gov.va.semoss.om.Perspective;
 import gov.va.semoss.poi.main.ImportValidationException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -458,11 +457,8 @@ public class CLI {
 				try {
 					handler.startRDF();
 					InsightManager im = engine.getInsightManager();
-					for ( Perspective p : im.getPerspectives() ) {
-						for ( Statement s : InsightManagerImpl.getStatements( p,
-								new LocalUserImpl() ) ) {
-							handler.handleStatement( s );
-						}
+					for ( Statement s : InsightManagerImpl.getStatements( im, new LocalUserImpl() ) ) {
+						handler.handleStatement( s );
 					}
 					handler.endRDF();
 				}
@@ -526,9 +522,7 @@ public class CLI {
 				try {
 					sesameconn.begin();
 					InsightManager im = engine.getInsightManager();
-					for( Perspective p : im.getPerspectives() ){
-						sesameconn.add( InsightManagerImpl.getStatements( p, new LocalUserImpl() ) );
-					}
+					sesameconn.add( InsightManagerImpl.getStatements( im, new LocalUserImpl() ) );
 					sesameconn.commit();
 				}
 				catch ( RepositoryException re ) {

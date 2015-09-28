@@ -32,7 +32,6 @@ import com.bigdata.rdf.sail.BigdataSailRepositoryConnection;
 import com.bigdata.rdf.sail.CreateKBTask;
 import com.bigdata.rdf.store.AbstractTripleStore;
 import com.bigdata.rdf.task.AbstractApiTask;
-import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import java.io.File;
 import java.io.IOException;
@@ -178,9 +177,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 		List<Statement> stmts = new ArrayList<>();
 		User user = Security.getSecurity().getAssociatedUser( this );
-		for( Perspective p : im.getPerspectives() ){
-			stmts.addAll( InsightManagerImpl.getStatements( p, user ) );
-		}		
+		stmts.addAll( InsightManagerImpl.getStatements( im, user ) );
 		Collections.sort( stmts, new StatementSorter() );
 
 		try {

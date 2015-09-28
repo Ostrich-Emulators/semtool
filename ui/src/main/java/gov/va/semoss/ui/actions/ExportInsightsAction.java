@@ -121,9 +121,7 @@ public class ExportInsightsAction extends DbAction {
 							repo.initialize();
 							final RepositoryConnection rc = repo.getConnection();
 							InsightManager im = getEngine().getInsightManager();
-							for( Perspective p : im.getPerspectives() ){
-								rc.add( InsightManagerImpl.getStatements( p, user ) );
-							}
+							rc.add( InsightManagerImpl.getStatements( im, user ) );
 							rc.setNamespace( VAS.PREFIX, VAS.NAMESPACE );
 							rc.setNamespace( SPIN.PREFIX, SPIN.NAMESPACE );
 							rc.setNamespace( SP.PREFIX, SP.NAMESPACE );
