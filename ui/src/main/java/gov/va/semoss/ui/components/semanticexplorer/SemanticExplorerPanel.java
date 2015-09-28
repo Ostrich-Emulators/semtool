@@ -182,7 +182,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				TreePath path = e.getPath();
 				
 				if ( path.getPathCount() == 1 ) {
-					;//This shouldn't be possible
+					;//This shouldn't be possible because the root node is invisible.
 				} else if ( path.getPathCount() == 2 ) {
 					;//We have no action here.
 				} else if ( path.getPathCount() == 3 ) {
