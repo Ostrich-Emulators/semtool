@@ -12,7 +12,10 @@ import gov.va.semoss.model.vocabulary.SPIN;
 import gov.va.semoss.model.vocabulary.SPL;
 import gov.va.semoss.model.vocabulary.UI;
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.om.Perspective;
+import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
+import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 
 import java.awt.Frame;
@@ -32,6 +35,8 @@ import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.SemossFileView;
+import gov.va.semoss.user.Security;
+import gov.va.semoss.user.User;
 import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 
@@ -111,10 +116,14 @@ public class ExportInsightsAction extends DbAction {
 						try {
 							// we're going to put the statements into a
 							//  Repo, so we can convert namespaces nicely
+							User user = Security.getSecurity().getAssociatedUser( getEngine() );
 							SailRepository repo = new SailRepository( new MemoryStore() );
 							repo.initialize();
 							final RepositoryConnection rc = repo.getConnection();
-							rc.add( getEngine().getInsightManager().getStatements() );
+							InsightManager im = getEngine().getInsightManager();
+							for( Perspective p : im.getPerspectives() ){
+								rc.add( InsightManagerImpl.getStatements( p, user ) );
+							}
 							rc.setNamespace( VAS.PREFIX, VAS.NAMESPACE );
 							rc.setNamespace( SPIN.PREFIX, SPIN.NAMESPACE );
 							rc.setNamespace( SP.PREFIX, SP.NAMESPACE );

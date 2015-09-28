@@ -5,9 +5,9 @@
  */
 package gov.va.semoss.rdf.engine.util;
 
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import java.util.Collection;
-import org.openrdf.model.URI;
 
 /**
  *
@@ -24,7 +24,6 @@ public abstract class EngineOperationAdapter implements EngineOperationListener 
   }
 
   @Override
-  public void insightsModified( IEngine eng, Collection<URI> perspectives,
-      Collection<URI> insights ) {
+  public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
   }
 }

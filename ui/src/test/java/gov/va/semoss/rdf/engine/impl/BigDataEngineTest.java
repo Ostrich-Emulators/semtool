@@ -74,28 +74,4 @@ public class BigDataEngineTest {
 		eng.closeDB();
 		FileUtils.deleteQuietly( dbfile );
 	}
-
-	@Test
-	public void testGetWriteableInsightManager() {
-		InsightManager im = eng.getInsightManager();
-		WriteableInsightManager wim = eng.getWriteableInsightManager();
-		Collection<Perspective> oldps = im.getPerspectives();
-		Collection<Perspective> newps = wim.getPerspectives();
-		assertEquals( "wim not the same as im", oldps.size(), newps.size() );
-
-		String pname = "test perspective";
-		Perspective p = new Perspective( pname );
-		URI uri = wim.add( p );
-		assertEquals( uri, p.getId() );
-
-		wim.commit();
-
-		Collection<Perspective> imps = im.getPerspectives();
-		Collection<Perspective> wimps = wim.getPerspectives();
-		im.release();
-		wim.release();
-
-		assertEquals( "perspective not added", oldps.size() + 1, imps.size() );
-		assertEquals( "commit failed", imps.size(), wimps.size() );
-	}
 }

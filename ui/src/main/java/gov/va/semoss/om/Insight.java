@@ -65,6 +65,7 @@ public class Insight implements Serializable {
 	}
 
 	public Insight( Insight i ) {
+		id = i.getId();
 		label = i.getLabel();
 		sparql = i.getSparql();
 

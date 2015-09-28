@@ -7,13 +7,9 @@ package gov.va.semoss.rdf.engine.api;
 
 import java.util.Collection;
 
-import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.om.Insight;
-import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 
 import java.util.List;
@@ -24,7 +20,17 @@ import java.util.List;
  */
 public interface InsightManager {
 
-	public Repository getRepository();
+	public void setInsightNamespace( String ns );
+
+	public String getInsightNamespace();
+
+	/**
+	 * Adds the given perspectives to this IM's data tree
+	 *
+	 * @param newdata
+	 * @param clearfirst
+	 */
+	public void addAll( Collection<Perspective> newdata, boolean clearfirst );
 
 	/**
 	 * Gets all perspectives
@@ -42,15 +48,6 @@ public interface InsightManager {
 	 * found
 	 */
 	public Perspective getPerspective( URI id );
-
-	/**
-	 * Gets all Parameter objects under the passed-in Insight URI.
-	 *
-	 * @param insightURI -- (URI) An Insight URI.
-	 *
-	 * @return -- (Collection<Parameter>) Described above.
-	 */
-	public Collection<Parameter> getParameters( Insight insight );
 
 	/**
 	 * Gets all insight URIs for a given perspective, in order
@@ -72,12 +69,41 @@ public interface InsightManager {
 	public Insight getInsight( URI id );
 
 	/**
-	 * Gets the raw statements for the insights
+	 * Adds a completely-new Insights
 	 *
-	 * @return all the statements that together comprise the Insight data
-	 * @throws RepositoryException
+	 * @param ins the insight to add
+	 *
+	 * @return the URI of the new insight
 	 */
-	public Collection<Statement> getStatements() throws RepositoryException;
+	public URI add( Insight ins );
+
+	public void remove( Insight ins );
+
+	public void update( Insight ins );
+
+	/**
+	 * Adds a completely-new Perspective
+	 *
+	 * @param p the perspective to add
+	 *
+	 * @return the URI of the new perspective
+	 */
+	public URI add( Perspective p );
+
+	public void remove( Perspective p );
+
+	public void update( Perspective p );
+
+	/**
+	 * Adds the given insight to the given perspective at the given position
+	 *
+	 * @param p the perspective
+	 * @param i the insight to add. This insight must already exist in the db
+	 * (created with {@link #add(gov.va.semoss.om.Insight) }
+	 * @param pos where to add the insight. Numbers &lt; 0 will prepend the
+	 * insight
+	 */
+	public void addInsight( Perspective p, Insight i, int pos );
 
 	/**
 	 * Gets the generic perspective for a particular IEngine

@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.UpdateExecutor;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.user.Security;
 import gov.va.semoss.user.User;
 import gov.va.semoss.util.UriBuilder;
@@ -343,16 +342,8 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public WriteableInsightManager getWriteableInsightManager() {
-		log.warn( "getting a non-committing WriteableInsightManager (this isn't what you want)" );
-		return new WriteableInsightManagerImpl( insightEngine,
-				Security.getSecurity().getAssociatedUser( this ) ) {
-
-					@Override
-					public void commit() {
-						log.warn( "this WriteableInsightManager doesn't write" );
-					}
-				};
+	public void updateInsights( InsightManager im ){
+		log.warn( "updateInsights not yet implemented. This call does nothing." );
 	}
 
 	@Override

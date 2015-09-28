@@ -20,7 +20,6 @@
 package gov.va.semoss.rdf.engine.api;
 
 import gov.va.semoss.util.Constants;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Properties;
 import org.openrdf.model.Statement;
@@ -32,6 +31,7 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.util.UriBuilder;
 import java.util.Map;
 import org.openrdf.model.Model;
+import org.openrdf.model.URI;
 
 /**
  * This interface standardizes the functionality of the engines to be used. All
@@ -44,18 +44,6 @@ import org.openrdf.model.Model;
  * @version $Revision: 1.0 $
  */
 public interface IEngine {
-
-	/**
-	 * This specifies the type of the engine and determines what API should be
-	 * used when processing the engine.
-	 *
-	 * @author karverma
-	 * @version $Revision: 1.0 $
-	 */
-	public enum ENGINE_TYPE {
-
-		JENA, SESAME
-	};
 
 	/**
 	 * Opens a database as defined by these properties. What is included in the
@@ -78,36 +66,6 @@ public interface IEngine {
 	 * transactions and closes the engine.
 	 */
 	public void closeDB();
-
-	/**
-	 * Runs the passed string query against the engine as a SELECT query. The
-	 * query passed must be in the structure of a SELECT SPARQL query and the
-	 * result format will depend on the engine type.
-	 *
-	 * @param query the string version of the SELECT query to be run against the
-	 * engine
-	 *
-	 * @return triple query results that can be displayed as a grid
-	 */
-	public Object execSelectQuery( String query );
-
-	/**
-	 * Gets the type of the engine. The engine type is often used to determine
-	 * what API to use while running queries against the engine.
-	 *
-	 * @return the type of the engine
-	 */
-	public ENGINE_TYPE getEngineType();
-
-	/**
-	 * Processes a SELECT query just like {@link #execSelectQuery(String)}, but
-	 * returns a collection of URIs instead of an Object
-	 *
-	 * @param sparqlQuery the SELECT SPARQL query to be run against the engine
-	 *
-	 * @return the uris that satisfy the query
-	 */
-	public Collection<org.openrdf.model.URI> getEntityOfType( String sparqlQuery );
 
 	/**
 	 * Returns whether or not an engine is currently connected to the data store.
@@ -273,10 +231,14 @@ public interface IEngine {
 	 *
 	 * @return the base uri for this engine, or null, if one has not been set
 	 */
-	public org.openrdf.model.URI getBaseUri();
+	public URI getBaseUri();
 
-	public WriteableInsightManager getWriteableInsightManager();
-
+	/**
+	 * Updates to disk the Insights for this engine
+	 * @param insmgr 
+	 */
+	public void updateInsights( InsightManager insmgr );	
+	
 	// gets the insight database
 	public InsightManager getInsightManager();
 

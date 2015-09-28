@@ -9,8 +9,8 @@ import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
-import gov.va.semoss.rdf.engine.util.EngineOperationListener;
+import gov.va.semoss.rdf.engine.api.InsightManager;
+import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
@@ -35,7 +35,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
 
 /**
  *
@@ -44,7 +43,7 @@ import org.openrdf.model.URI;
 public class InsightManagerPanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger( InsightManagerPanel.class );
-	private WriteableInsightManager wim;
+	private InsightManager wim;
 	private final InsightTreeModel model = new InsightTreeModel();
 	private IEngine engine;
 	private DataPanel currentCard;
@@ -210,7 +209,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 			wim.release();
 		}
 
-		wim = ( null == eng ? null : engine.getWriteableInsightManager() );
+		wim = ( null == eng ? null : engine.getInsightManager() );
 		model.refresh( wim );
 
 //		for ( int i = 0; i < tree.getRowCount(); i++ ) {
@@ -365,7 +364,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 			@Override
 			public void run() {
-				EngineOperationListener eol = new EngineOperationListener() {
+				EngineOperationAdapter eol = new EngineOperationAdapter() {
 
 					@Override
 					public void engineOpened( IEngine eng ) {
@@ -376,15 +375,14 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 					}
 
 					@Override
-					public void insightsModified( IEngine eng, Collection<URI> perspectives,
-							Collection<URI> numinsights ) {
+					public void insightsModified( IEngine eng, Collection<Perspective> perspectives ){
 						commitbtn.setEnabled( false );
 						EngineUtil.getInstance().removeEngineOpListener( this );
 						GuiUtility.showMessage( "Perspectives Saved" );
 					}
 				};
 
-				wim.setData( perspectives );
+				wim.addAll( perspectives, true );
 				EngineUtil.getInstance().addEngineOpListener( eol );
 				EngineUtil.getInstance().importInsights( engine, wim );
 			}

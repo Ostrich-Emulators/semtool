@@ -49,6 +49,7 @@ import gov.va.semoss.util.UriBuilder;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openrdf.model.impl.StatementImpl;
@@ -65,12 +66,11 @@ public class InsightManagerImpl implements InsightManager {
 	private static final Logger log = Logger.getLogger( InsightManagerImpl.class );
 	private static final Pattern LEGACYPAT
 			= Pattern.compile( "((BIND\\s*\\(\\s*)?<@(\\w+)((?:-)([^@]+))?@>(\\s*AS\\s+\\?(\\w+)\\s*\\)\\s*\\.?\\s*)?)" );
-	private RepositoryConnection rc;
-	private Repository repo = null;
-	private boolean closeRcOnRelease = false;
-
 	// strictly for upgrading old insights
 	private static final Map<String, InsightOutputType> UPGRADETYPEMAP = new HashMap<>();
+	private UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+	private final Map<URI, Insight> insights = new HashMap<>();
+	private final List<Perspective> perspectives = new ArrayList<>();
 
 	static {
 		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet",
@@ -103,60 +103,48 @@ public class InsightManagerImpl implements InsightManager {
 				InsightOutputType.HEATMAP_APPDUPE );
 	}
 
-	public InsightManagerImpl( Repository _repo ) {
-		repo = _repo;
+	public InsightManagerImpl() {
 
-		if ( null != repo ) {
-			try {
+	}
 
-				if ( !repo.isInitialized() ) {
-					repo.initialize();
-				}
+	public InsightManagerImpl( InsightManager im ) {
+		urib = UriBuilder.getBuilder( im.getInsightNamespace() );
+		perspectives.addAll( deepcopy( im.getPerspectives() ) );
 
-				rc = repo.getConnection();
-				closeRcOnRelease = true;
-			}
-			catch ( RepositoryException re ) {
-				log.error( re, re );
+		for ( Perspective p : perspectives ) {
+			for ( Insight i : p.getInsights() ) {
+				insights.put( i.getId(), i );
 			}
 		}
 	}
 
-	/**
-	 * Gets the current repository.
-	 *
-	 */
 	@Override
-	public Repository getRepository() {
-		return this.repo;
+	public void setInsightNamespace( String ns ) {
+		urib = UriBuilder.getBuilder( ns );
 	}
 
-	/**
-	 * Sets the connection and whether or not the insight manager should take
-	 * responsibility for closing this it. If the previous connection was set with
-	 * <code>closeable = TRUE</code>, then it is closed. If not, nothing happens
-	 * to it and someone else is responsible for closing it
-	 *
-	 * @param rc the new connection
-	 * @param closeable should this instance take responsibility for closing the
-	 * connection later
-	 */
-	public void setConnection( RepositoryConnection rc, boolean closeable ) {
-		if ( null != rc && closeRcOnRelease ) {
-			try {
-				rc.close();
-			}
-			catch ( RepositoryException re ) {
-				log.warn( re, re );
-			}
+	@Override
+	public String getInsightNamespace() {
+		return urib.toString();
+	}
+
+	@Override
+	public void addAll( Collection<Perspective> newdata, boolean clearfirst ) {
+		if ( newdata.equals( perspectives ) ) {
+			return; // nothing to copy
 		}
 
-		this.rc = rc;
-		closeRcOnRelease = closeable;
-	}
+		if ( clearfirst ) {
+			perspectives.clear();
+			insights.clear();
+		}
 
-	protected RepositoryConnection getRawConnection() {
-		return rc;
+		perspectives.addAll( deepcopy( newdata ) );
+		for ( Perspective p : perspectives ) {
+			for ( Insight i : p.getInsights() ) {
+				insights.put( i.getId(), i );
+			}
+		}
 	}
 
 	/**
@@ -168,60 +156,42 @@ public class InsightManagerImpl implements InsightManager {
 	public final void loadLegacyData( Properties dreamerProp ) {
 		String persps = dreamerProp.getProperty( Constants.PERSPECTIVE, "" );
 
-		List<Perspective> perspectives = new ArrayList<>();
+		perspectives.clear();
 
 		log.debug( "Legacy Perspectives: " + persps );
 		if ( !persps.isEmpty() ) {
-			ValueFactory insightVF = rc.getValueFactory();
+			ValueFactory insightVF = new ValueFactoryImpl();
 
 			Date now = new Date();
 			Literal creator = insightVF.createLiteral( "Imported By "
 					+ System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
 
-			UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
 			for ( String pname : persps.split( ";" ) ) {
 				Perspective p = new Perspective( pname );
+				p.setId( urib.build( pname ) );
 
-				List<Insight> insights = loadLegacyQuestions( dreamerProp.getProperty( pname ),
+				List<Insight> insightlist = loadLegacyQuestions( dreamerProp.getProperty( pname ),
 						pname, dreamerProp, now, creator, urib );
+				for ( Insight i : insightlist ) {
+					insights.put( i.getId(), i );
+				}
 
-				p.setInsights( insights );
+				p.setInsights( insightlist );
 
 				perspectives.add( p );
 			}
 
 			dreamerProp.remove( Constants.PERSPECTIVE );
 		}
-
-		try {
-			rc.begin();
-			// tag this data as an Insights dataset
-			rc.add( MetadataConstants.VA_INSIGHTS, RDF.TYPE,
-					MetadataConstants.INSIGHT_CORE_TYPE );
-			for ( Perspective p : perspectives ) {
-				rc.add( getStatements( p, null ) );
-			}
-
-			rc.commit();
-		}
-		catch ( RepositoryException e ) {
-			log.error( e, e );
-			try {
-				rc.rollback();
-			}
-			catch ( Exception ee ) {
-				log.error( ee, ee );
-			}
-		}
 	}
 
-	private List<Insight> loadLegacyQuestions( String insightList, String pname,
+	private List<Insight> loadLegacyQuestions( String insightnames, String pname,
 			Properties dreamerProp, Date now, Literal creator, UriBuilder urib ) {
-		List<Insight> insights = new ArrayList<>();
+		List<Insight> list = new ArrayList<>();
 
 		// questions
-		if ( insightList != null ) {
-			for ( String insightKey : insightList.split( ";" ) ) {
+		if ( insightnames != null ) {
+			for ( String insightKey : insightnames.split( ";" ) ) {
 
 				String insightLabel = dreamerProp.getProperty( insightKey );
 				String legacyDataViewName
@@ -248,28 +218,48 @@ public class InsightManagerImpl implements InsightManager {
 							= dreamerProp.getProperty( insightKey + "_" + var + "_Query", "" );
 					if ( !psql.isEmpty() ) {
 						Parameter p = new Parameter( var );
+						p.setId( urib.build( pname + "-" + insightKey + "-" + var ) );
 						p.setDefaultQuery( psql );
 						ins.getInsightParameters().add( p );
 					}
 				}
 
-				upgradeIfLegacy( ins );
+				upgradeIfLegacy( ins, urib );
 
-				insights.add( ins );
+				list.add( ins );
 			}
 		}
-		return insights;
+		return list;
 	}
 
 	@Override
 	public Collection<Perspective> getPerspectives() {
+		return new ArrayList<>( perspectives );
+	}
+
+	public static InsightManager createFromRepository( Repository repo ) {
+		InsightManagerImpl imi = new InsightManagerImpl();
+		try {
+			if ( !repo.isInitialized() ) {
+				repo.initialize();
+			}
+			RepositoryConnection rc = repo.getConnection();
+			imi.loadFromRepository( rc );
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+		}
+		return imi;
+	}
+
+	public void loadFromRepository( RepositoryConnection rc ) {
 		List<Perspective> persps = new ArrayList<>();
 		try {
 			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
 					RDF.TYPE, VAS.Perspective, true ) );
 			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
-				Perspective p = getPerspective( URI.class.cast( s.getSubject() ) );
+				Perspective p = loadPerspective( URI.class.cast( s.getSubject() ), rc );
 
 				List<Statement> slotstmts = Iterations.asList(
 						rc.getStatements( p.getId(), OLO.index, null, false ) );
@@ -296,12 +286,11 @@ public class InsightManagerImpl implements InsightManager {
 			log.error( e, e );
 		}
 
-		return persps;
+		perspectives.addAll( persps );
 	}
 
 	@Override
 	public Perspective getSystemPerspective( IEngine eng ) {
-		UriBuilder urib = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
 		Perspective persps = new Perspective( urib.uniqueUri(), "Generic Perspective",
 				"System Generated Generic Perspective" );
 		URI conceptUri = eng.getSchemaBuilder().getConceptUri().build();
@@ -367,8 +356,7 @@ public class InsightManagerImpl implements InsightManager {
 	 *
 	 * @return -- (Collection<Parameter>) Described above.
 	 */
-	@Override
-	public Collection<Parameter> getParameters( Insight insight ) {
+	private Collection<Parameter> loadParameters( Insight insight, RepositoryConnection rc ) {
 		List<Parameter> colInsightParameters = new ArrayList<>();
 
 		try {
@@ -422,7 +410,11 @@ public class InsightManagerImpl implements InsightManager {
 
 	@Override
 	public List<Insight> getInsights( Perspective perspective ) {
-		List<Insight> insights = new ArrayList<>();
+		return new ArrayList<>();
+	}
+
+	public List<Insight> loadInsights( Perspective perspective, RepositoryConnection rc ) {
+		List<Insight> list = new ArrayList<>();
 		if ( perspective != null ) {
 			String query = "SELECT ?item "
 					+ "WHERE {"
@@ -439,15 +431,20 @@ public class InsightManagerImpl implements InsightManager {
 					= AbstractSesameEngine.getSelectNoEx( orderquery, rc, true );
 
 			for ( URI id : insightUris ) {
-				insights.add( getInsight( id ) );
+				list.add( loadInsight( id, rc ) );
 			}
 		}
 
-		return insights;
+		return list;
 	}
 
 	@Override
 	public Insight getInsight( URI insightURI ) {
+		return insights.get( insightURI );
+	}
+
+	public Insight loadInsight( URI insightURI, RepositoryConnection rc ) {
+
 		Insight insight = null;
 		try {
 			// need a couple things here...the insight data, the query, 
@@ -478,9 +475,9 @@ public class InsightManagerImpl implements InsightManager {
 				insight = insightFromStatements( stmts );
 
 				// finally, set the parameters
-				Collection<Parameter> params = getParameters( insight );
+				Collection<Parameter> params = loadParameters( insight, rc );
 				insight.setParameters( params );
-				upgradeIfLegacy( insight );
+				upgradeIfLegacy( insight, urib );
 			}
 		}
 		catch ( RepositoryException e ) {
@@ -496,6 +493,64 @@ public class InsightManagerImpl implements InsightManager {
 
 	@Override
 	public Perspective getPerspective( URI perspectiveURI ) {
+		ListIterator<Perspective> lit = perspectives.listIterator();
+		while ( lit.hasNext() ) {
+			Perspective old = lit.next();
+			if ( old.getId().equals( perspectiveURI ) ) {
+				return old;
+			}
+		}
+
+		throw new IllegalArgumentException( "unknown perspective: " + perspectiveURI );
+	}
+
+	@Override
+	public URI add( Perspective p ) {
+		p.setId( urib.uniqueUri() );
+		perspectives.add( p );
+		return p.getId();
+	}
+
+	@Override
+	public void update( Perspective p ) {
+		ListIterator<Perspective> lit = perspectives.listIterator();
+		while ( lit.hasNext() ) {
+			Perspective old = lit.next();
+			if ( old.getId().equals( p.getId() ) ) {
+				lit.set( p );
+			}
+		}
+	}
+
+	@Override
+	public void addInsight( Perspective p, Insight i, int pos ) {
+		insights.put( i.getId(), i );
+		p.getInsights().add( pos, i );
+	}
+
+	@Override
+	public void remove( Perspective p ) {
+		perspectives.remove( p );
+	}
+
+	@Override
+	public URI add( Insight p ) {
+		p.setId( urib.uniqueUri() );
+		insights.put( p.getId(), p );
+		return p.getId();
+	}
+
+	@Override
+	public void update( Insight p ) {
+		insights.put( p.getId(), p );
+	}
+
+	@Override
+	public void remove( Insight p ) {
+		insights.remove( p.getId() );
+	}
+
+	public Perspective loadPerspective( URI perspectiveURI, RepositoryConnection rc ) {
 		try {
 			Perspective perspective = new Perspective( perspectiveURI );
 			Collection<Statement> stmts
@@ -514,7 +569,7 @@ public class InsightManagerImpl implements InsightManager {
 				}
 			}
 
-			perspective.setInsights( getInsights( perspective ) );
+			perspective.setInsights( loadInsights( perspective, rc ) );
 			return perspective;
 		}
 		catch ( RepositoryException e ) {
@@ -524,27 +579,7 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	@Override
-	public Collection<Statement> getStatements() throws RepositoryException {
-		return Iterations.asList( rc.getStatements( null, null, null, false ) );
-	}
-
-	@Override
 	public void release() {
-		if ( closeRcOnRelease ) {
-			try {
-				rc.close();
-			}
-			catch ( Exception e ) {
-				log.error( "error releasing InsightEngine connection", e );
-			}
-
-			try {
-				repo.shutDown();
-			}
-			catch ( Exception e ) {
-				log.error( "error releasing InsightEngine repository", e );
-			}
-		}
 	}
 
 	protected Insight insightFromStatements( Collection<Statement> stmts ) {
@@ -601,7 +636,7 @@ public class InsightManagerImpl implements InsightManager {
 		return insight;
 	}
 
-	private static void upgradeIfLegacy( Insight insight ) {
+	private static void upgradeIfLegacy( Insight insight, UriBuilder urib ) {
 		// first, make sure we reference the current package names
 		String legacyoutput = insight.getOutput();
 		legacyoutput = legacyoutput.replaceFirst( "prerna", "gov.va.semoss" );
@@ -659,6 +694,7 @@ public class InsightManagerImpl implements InsightManager {
 					else {
 						Parameter p = new Parameter( var, "SELECT ?" + var
 								+ " WHERE { ?" + var + " a <" + type + "> }" );
+						p.setId( urib.build( insight.getLabel() + "-" + var ) );
 						newparams.add( p );
 					}
 				}
@@ -716,6 +752,10 @@ public class InsightManagerImpl implements InsightManager {
 	public static Collection<Statement> getStatements( Perspective p, User user ) {
 		List<Statement> statements = new ArrayList<>();
 		UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+
+		// if we're creating statements, mark our repository as an insights db
+		statements.add( new StatementImpl( MetadataConstants.VA_INSIGHTS, RDF.TYPE,
+				MetadataConstants.INSIGHT_CORE_TYPE ) );
 
 		ValueFactory vf = new ValueFactoryImpl();
 
@@ -893,5 +933,23 @@ public class InsightManagerImpl implements InsightManager {
 				? "Created By Insight Manager, "
 				+ System.getProperty( "release.nameVersion", "VA SEMOSS" )
 				: user.getAuthorInfo() );
+	}
+
+	public static Collection<Perspective> deepcopy( Collection<Perspective> oldps ) {
+		List<Perspective> perspectives = new ArrayList<>();
+		for ( Perspective oldp : oldps ) {
+			Perspective newp
+					= new Perspective( oldp.getId(), oldp.getLabel(), oldp.getDescription() );
+			List<Insight> newpInsights = new ArrayList<>();
+			for ( Insight oldi : oldp.getInsights() ) {
+				Insight newi = new Insight( oldi );
+				newpInsights.add( newi );
+			}
+			newp.setInsights( newpInsights );
+
+			perspectives.add( newp );
+		}
+
+		return perspectives;
 	}
 }

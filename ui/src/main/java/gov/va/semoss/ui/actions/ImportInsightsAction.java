@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.ui.actions;
 
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
@@ -30,7 +31,6 @@ import gov.va.semoss.ui.components.ProgressTask;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.openrdf.model.URI;
 
 /**
  *
@@ -90,8 +90,7 @@ public class ImportInsightsAction extends DbAction {
 						try {
 							EngineOperationListener eol = new EngineOperationAdapter() {
 								@Override
-								public void insightsModified( IEngine eng, Collection<URI> ps,
-										Collection<URI> is ) {
+								public void insightsModified( IEngine eng, Collection<Perspective> ps ){
 									if ( eng.equals( getEngine() ) ) {
 										EngineUtil.getInstance().removeEngineOpListener( this );
 										int numPs = ps.size();

@@ -41,10 +41,10 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import gov.va.semoss.poi.main.ImportData;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 import gov.va.semoss.rdf.engine.api.ModificationExecutor;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.impl.AbstractEngine;
 import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
@@ -64,10 +64,8 @@ import info.aduna.iteration.Iterations;
 import java.io.InputStream;
 import java.net.URL;
 import org.apache.commons.io.FilenameUtils;
-import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
@@ -202,38 +200,14 @@ public class EngineUtil implements Runnable {
 			for ( Map.Entry<IEngine, InsightsImportConfig> imps : iq.entrySet() ) {
 				IEngine eng = imps.getKey();
 				InsightsImportConfig iic = imps.getValue();
+				InsightManager oldim = eng.getInsightManager();
 
-				WriteableInsightManager wim = eng.getWriteableInsightManager();
-
-				if ( iic.clearfirst ) {
-					wim.clear();
-				}
-
-				try {
-					Model m = new LinkedHashModel( iic.stmts );
-					List<URI> persps = new ArrayList<>();
-					List<URI> ins = new ArrayList<>();
-					for ( Resource r : m.filter( null, RDF.TYPE, VAS.Perspective ).subjects() ) {
-						persps.add( URI.class.cast( r ) );
-					}
-					for ( Value v : m.filter( null, VAS.insight, null ).objects() ) {
-						ins.add( URI.class.cast( v ) );
-					}
-
-					wim.addRawStatements( iic.stmts );
-					wim.commit();
-
-					List<EngineOperationListener> lls = new ArrayList<>( listeners );
-
-					for ( EngineOperationListener eol : lls ) {
-						eol.insightsModified( eng, persps, ins );
-					}
-				}
-				catch ( RepositoryException e ) {
-					log.error( e, e );
-				}
-				finally {
-					wim.release();
+				oldim.addAll( iic.im.getPerspectives(), iic.clearfirst );
+				eng.updateInsights( oldim );
+				
+				List<EngineOperationListener> lls = new ArrayList<>( listeners );
+				for ( EngineOperationListener eol : lls ) {
+					eol.insightsModified( eng, oldim.getPerspectives() );
 				}
 			}
 			insightqueue.clear();
@@ -360,10 +334,7 @@ public class EngineUtil implements Runnable {
 
 		// copy insights
 		if ( metadata.isInsights() ) {
-			WriteableInsightManager wim = neweng.getWriteableInsightManager();
-			Collection<Statement> stmts = from.getInsightManager().getStatements();
-			wim.addRawStatements( stmts );
-			wim.commit();
+			neweng.updateInsights( from.getInsightManager() );
 		}
 
 		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
@@ -515,8 +486,7 @@ public class EngineUtil implements Runnable {
 
 		if ( doInsights ) {
 			insightqueue.put( to,
-					new InsightsImportConfig( from.getInsightManager().getStatements(),
-							false ) );
+					new InsightsImportConfig( from.getInsightManager(), false ) );
 			notify();
 		}
 
@@ -565,25 +535,10 @@ public class EngineUtil implements Runnable {
 		IEngine bde = GuiUtility.loadEngine( smssfile.getAbsoluteFile() );
 		Security.getSecurity().associateUser( bde, user );
 
-		List<Statement> vocabs = new ArrayList<>();
-
-		for ( URL url : ecb.getVocabularies() ) {
-			vocabs.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
-		}
-
-		try {
-			WriteableInsightManager wim = bde.getWriteableInsightManager();
-
-			if ( null != ecb.getQuestions() ) {
-				vocabs.addAll( createInsightStatements( ecb.getQuestions() ) );
-			}
-			wim.addRawStatements( vocabs );
-			wim.commit();
-			wim.release();
-		}
-		catch ( RepositoryException re ) {
-			throw new EngineManagementException( EngineManagementException.ErrorCode.UNKNOWN,
-					re );
+		if ( null != ecb.getQuestions() ) {
+			InsightManagerImpl imi = new InsightManagerImpl();
+			createInsightStatements( ecb.getQuestions(), imi );
+			bde.updateInsights( imi );
 		}
 
 		EngineLoader el = new EngineLoader( ecb.isStageInMemory() );
@@ -625,15 +580,12 @@ public class EngineUtil implements Runnable {
 	public synchronized void importInsights( IEngine engine, File insightsfile,
 			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
 		List<Statement> stmts = new ArrayList<>();
+		InsightManagerImpl imi = new InsightManagerImpl();
 		if ( null != insightsfile ) {
-			stmts.addAll( createInsightStatements( insightsfile ) );
+			createInsightStatements( insightsfile, imi );
 		}
 
-		for ( URL url : vocabs ) {
-			stmts.addAll( getStatementsFromResource( url, RDFFormat.TURTLE ) );
-		}
-
-		insightqueue.put( engine, new InsightsImportConfig( stmts, clearfirst ) );
+		insightqueue.put( engine, new InsightsImportConfig( imi, clearfirst ) );
 		notify();
 	}
 
@@ -645,9 +597,9 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @return -- (boolean) Whether the import succeeded.
 	 */
-	public synchronized boolean importInsights( IEngine engine, WriteableInsightManager wim ) {
+	public synchronized boolean importInsights( IEngine engine, InsightManager wim ) {
 		try {
-			insightqueue.put( engine, new InsightsImportConfig( wim.getStatements(), true ) );
+			insightqueue.put( engine, new InsightsImportConfig( wim, true ) );
 			notify();
 			return true;
 		}
@@ -811,11 +763,11 @@ public class EngineUtil implements Runnable {
 		return jnl;
 	}
 
-	public static Collection<Statement> createInsightStatements( File modelquestions )
-			throws IOException, EngineManagementException {
-		LinkedHashModel model = new LinkedHashModel();
+	private static void createInsightStatements( File modelquestions,
+			InsightManagerImpl imi ) throws IOException, EngineManagementException {
+
 		if ( null == modelquestions || !modelquestions.exists() ) {
-			return model;
+			return;
 		}
 
 		Map<String, RDFFormat> extfmt = new HashMap<>();
@@ -825,42 +777,39 @@ public class EngineUtil implements Runnable {
 		extfmt.put( "n3", RDFFormat.N3 );
 		extfmt.put( "nt", RDFFormat.NTRIPLES );
 
-		List<Statement> stmts = new ArrayList<>();
-		Repository repo = new SailRepository( new MemoryStore() );
+		// we need to check that we actually loaded SOME perspectives, so we'll load
+		// a temporary InsightManager first
+		InsightManagerImpl loader = new InsightManagerImpl();
 
 		try {
+			Repository repo = new SailRepository( new MemoryStore() );
 			repo.initialize();
 			if ( FilenameUtils.isExtension( modelquestions.toString(), extfmt.keySet() ) ) {
 				RepositoryConnection rc = repo.getConnection();
 				rc.add( modelquestions, "",
 						extfmt.get( FilenameUtils.getExtension( modelquestions.toString() ) ) );
-				stmts.addAll( Iterations.asList( rc.getStatements( null, null, null, false ) ) );
+				loader.loadFromRepository( rc );
 				rc.close();
 				repo.shutDown();
 			}
 			else {
-				InsightManagerImpl iei = new InsightManagerImpl( repo );
 				Properties p = Utility.loadProp( modelquestions );
-				iei.loadLegacyData( p );
-				stmts.addAll( iei.getStatements() );
-				iei.release(); // also shuts down repo
+				loader.loadLegacyData( p );
 			}
 		}
 		catch ( RepositoryException | RDFParseException e ) {
-			throw new EngineManagementException( EngineManagementException.ErrorCode.FILE_ERROR,
+			throw new EngineManagementException( ErrorCode.FILE_ERROR,
 					e );
 		}
 
-		model.addAll( stmts );
-		boolean ok = model.contains( null, RDF.TYPE, VAS.Perspective );
+		boolean ok = !loader.getPerspectives().isEmpty();
 
 		if ( !ok ) {
-			model.clear();
-			throw new EngineManagementException( EngineManagementException.ErrorCode.MISSING_REQUIRED_TUPLE,
+			throw new EngineManagementException( ErrorCode.MISSING_REQUIRED_TUPLE,
 					modelquestions + " does not contain any Perspectives" );
 		}
 
-		return stmts;
+		imi.addAll( loader.getPerspectives(), false );
 	}
 
 	public static void clear( IEngine engine ) throws RepositoryException {
@@ -1005,11 +954,11 @@ public class EngineUtil implements Runnable {
 
 	private static class InsightsImportConfig {
 
-		final Collection<Statement> stmts;
-		final boolean clearfirst;
+		public final InsightManager im;
+		public final boolean clearfirst;
 
-		public InsightsImportConfig( Collection<Statement> s, boolean clear ) {
-			stmts = s;
+		public InsightsImportConfig( InsightManager im, boolean clear ) {
+			this.im = im;
 			clearfirst = clear;
 		}
 	}

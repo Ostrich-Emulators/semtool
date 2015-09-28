@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import java.io.File;
 import java.util.Collection;
@@ -19,7 +20,6 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.user.LocalUserImpl;
 import gov.va.semoss.ui.main.SemossPreferences;
-import org.openrdf.model.URI;
 
 /**
  *
@@ -28,7 +28,7 @@ import org.openrdf.model.URI;
 public class PinningEngineListener extends AbstractFileWatcher
 		implements FileAlterationListener, EngineOperationListener {
 
-	private static final Logger log = Logger.getLogger(PinningEngineListener.class );
+	private static final Logger log = Logger.getLogger( PinningEngineListener.class );
 	private final Set<String> pinWhenOpen = new HashSet<>();
 
 	@Override
@@ -132,7 +132,6 @@ public class PinningEngineListener extends AbstractFileWatcher
 	}
 
 	@Override
-	public void insightsModified( IEngine eng, Collection<URI> perspectives,
-			Collection<URI> numinsights ) {
+	public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
 	}
 }
