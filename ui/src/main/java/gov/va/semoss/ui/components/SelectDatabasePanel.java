@@ -46,7 +46,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
 /**
@@ -91,8 +90,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		EngineOperationListener eol = new EngineOperationAdapter() {
 
 			@Override
-			public void insightsModified( IEngine eng, Collection<URI> perspectives,
-					Collection<URI> insights ) {
+			public void insightsModified( IEngine eng, Collection<Perspective> perspectives ){
 				if ( repoList.getSelectedValue().equals( eng ) ) {
 					perspectiveSelector.removeAllItems();
 					InsightManager im = eng.getInsightManager();
@@ -100,8 +98,8 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					Perspective systemp = im.getSystemPerspective( eng );
 					persps.add( systemp );
 
-					for ( Perspective uri : persps ) {
-						perspectiveSelector.addItem( uri );
+					for ( Perspective perspective : persps ) {
+						perspectiveSelector.addItem( perspective );
 					}
 				}
 			}

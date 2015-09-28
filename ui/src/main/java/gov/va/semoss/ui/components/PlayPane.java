@@ -1578,7 +1578,7 @@ public class PlayPane extends JFrame {
 		openmenu.setIcon( DbAction.getIcon( "open-file3" ) );
 		fileMenu.add( openmenu );
 
-		jmi = openmenu.add( importxls );
+		jmi = openmenu.add( mounter );
 		jmi.setText( "Local DB" );
 		jmi.setToolTipText( "Open Local Files to Import" );
 		jmi.getAccessibleContext().setAccessibleName( "Open Local Files to Import" );

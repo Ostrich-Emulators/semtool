@@ -5,11 +5,13 @@
  */
 package gov.va.semoss.ui.actions;
 
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
-import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter;
+import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter.ShotOp;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 
 import java.awt.Frame;
@@ -30,7 +32,6 @@ import gov.va.semoss.ui.components.ProgressTask;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.openrdf.model.URI;
 
 /**
  *
@@ -88,12 +89,10 @@ public class ImportInsightsAction extends DbAction {
 					@Override
 					public void run() {
 						try {
-							EngineOperationListener eol = new EngineOperationAdapter() {
+							EngineOperationListener eol = new OneShotEngineAdapter( getEngine(), ShotOp.INSIGHTS ) {
 								@Override
-								public void insightsModified( IEngine eng, Collection<URI> ps,
-										Collection<URI> is ) {
-									if ( eng.equals( getEngine() ) ) {
-										EngineUtil.getInstance().removeEngineOpListener( this );
+								public void doInsightsModified( IEngine eng, Collection<Perspective> ps ){
+									if ( isMyEngine( eng ) ){
 										int numPs = ps.size();
 										GuiUtility.showMessage( "Imported " + numPs + " perspective"
 												+ ( numPs > 1 ? "s" : "" ) + " to " + getEngineName() );

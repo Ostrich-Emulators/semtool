@@ -8,7 +8,7 @@ package gov.va.semoss.ui.components.insight.manager;
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
+import gov.va.semoss.rdf.engine.api.InsightManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
@@ -22,7 +22,7 @@ public class InsightTreeModel extends DefaultTreeModel {
 		super( new DefaultMutableTreeNode() );
 	}
 
-	public void refresh( WriteableInsightManager wim ) {
+	public void refresh( InsightManager wim ) {
 		DefaultMutableTreeNode top = DefaultMutableTreeNode.class.cast( getRoot() );
 		top.removeAllChildren();
 

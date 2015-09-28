@@ -33,19 +33,17 @@ import com.bigdata.rdf.sail.CreateKBTask;
 import com.bigdata.rdf.store.AbstractTripleStore;
 import com.bigdata.rdf.task.AbstractApiTask;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
 import gov.va.semoss.rdf.engine.util.StatementSorter;
 import gov.va.semoss.user.LocalUserImpl;
 import gov.va.semoss.user.Security;
+import gov.va.semoss.user.User;
 import gov.va.semoss.util.Utility;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -55,10 +53,7 @@ import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
-import org.openrdf.sail.memory.MemoryStore;
 
 /**
  * Big data engine serves to connect the .jnl files, which contain the RDF
@@ -166,32 +161,25 @@ public class BigDataEngine extends AbstractSesameEngine {
 		// KB to it
 
 		BigdataSailRepositoryConnection insightrc = insightrepo.getReadOnlyConnection();
-
-		ForwardChainingRDFSInferencer inferer
-				= new ForwardChainingRDFSInferencer( new MemoryStore() );
-		SailRepository sailor = new SailRepository( inferer );
-		insightEngine = new InsightManagerImpl( sailor );
-		RepositoryConnection src = insightEngine.getRawConnection();
-		// copy statements from disk to memory
-		List<Statement> stmts
-				= Iterations.asList( insightrc.getStatements( null, null, null, false ) );
-		log.debug( "loading on-disk insights stmts: " + stmts.size() );
-		src.begin();
-		src.add( stmts );
-		src.commit();
-		//src.close();
-		insightrc.close();
-
+		insightEngine = new InsightManagerImpl();
+		log.debug( "loading on-disk insights stmts: " + insightrc.size() );
+		insightEngine.loadFromRepository( insightrc );
 		return insightEngine;
 	}
 
-	private void copyInsightsToDisk( Collection<Statement> newstmts ) throws RepositoryException {
+	private void copyInsightsToDisk( InsightManager im ) throws RepositoryException {
 		// this function is a bit tricky...we want to:
 		// 1) commit then close this engine's write-handle on the main KB
 		// 2) open it on the Insights KB
 		// 3) rewrite everything to the Insights KB
 		// 4) close the Insights write handle
 		// 5) re-open the write handle to the main KB
+
+		List<Statement> stmts = new ArrayList<>();
+		User user = Security.getSecurity().getAssociatedUser( this );
+		stmts.addAll( InsightManagerImpl.getStatements( im, user ) );
+		Collections.sort( stmts, new StatementSorter() );
+
 		try {
 			// 1
 			rc.commit();
@@ -206,16 +194,16 @@ public class BigDataEngine extends AbstractSesameEngine {
 			// 2
 			BigdataSailRepositoryConnection repoc = insightrepo.getConnection();
 			// 3
-			log.debug( "writing " + newstmts.size() + " statements to on-disk insight kb" );
+			log.debug( "writing " + stmts.size() + " statements to on-disk insight kb" );
 			// sort the statements so a later export looks nice (totally unnecessary,
 			// but troubleshooting is easier)
 			repoc.begin();
 			repoc.clear();
-			repoc.add( newstmts );
+			repoc.add( stmts );
 			repoc.commit();
 			// 4
 			repoc.close();
-			logProvenance( newstmts );
+			logProvenance( stmts );
 		}
 		finally {
 			try {
@@ -226,57 +214,40 @@ public class BigDataEngine extends AbstractSesameEngine {
 				log.error( e, e );
 			}
 		}
+		
+		if ( log.isTraceEnabled() ) {
+			File dumpfile
+					= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
+			try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
+				TurtleWriter tw = new TurtleWriter( w );
+				for( Statement s : stmts ){
+					tw.handleStatement( s );
+				}
+			}
+			catch ( Exception ioe ) {
+				log.warn( ioe, ioe );
+			}
+		}		
 	}
 
 	@Override
 	protected void loadLegacyInsights( Properties props ) throws RepositoryException {
-		// this gets called from the startup logic, so we have a RW connection
+		// this gets called from the startup logic
 		if ( !props.isEmpty() ) {
 			insightEngine.loadLegacyData( props );
-			copyInsightsToDisk( insightEngine.getStatements() );
+			copyInsightsToDisk( insightEngine );
 		}
 	}
 
 	@Override
-	public WriteableInsightManager getWriteableInsightManager() {
-		return new WriteableInsightManagerImpl( insightEngine,
-				Security.getSecurity().getAssociatedUser( this ) ) {
-
-					@Override
-					public void commit() {
-						if ( hasCommittableChanges() ) {
-							try {
-								List<Statement> stmts = new ArrayList<>( getStatements() );
-								Collections.sort( stmts, new StatementSorter() );
-
-								copyInsightsToDisk( stmts ); // from the WriteableInsightManager
-
-								// refresh the insight engine's KB
-								RepositoryConnection src = insightEngine.getRawConnection();
-								src.begin();
-								src.clear();
-								src.add( stmts );
-								src.commit();
-
-								logProvenance( stmts );
-							}
-							catch ( RepositoryException re ) {
-								log.error( re, re );
-							}
-						}
-
-						if ( log.isTraceEnabled() ) {
-							File dumpfile
-							= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
-							try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
-								insightEngine.getRawConnection().export( new TurtleWriter( w ) );
-							}
-							catch ( Exception ioe ) {
-								log.warn( ioe, ioe );
-							}
-						}
-					}
-				};
+	public void updateInsights( InsightManager im ) {
+		try {
+			copyInsightsToDisk( im );
+			insightEngine.addAll( im.getPerspectives(), true );
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+		}
 	}
 
 	/**

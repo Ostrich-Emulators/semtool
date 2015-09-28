@@ -40,7 +40,7 @@ public class VocabularyRegistry {
 	public static Map<String, URL> getVocabularies( boolean enabled ) {
 		Map<String, URL> ret = new HashMap<>();
 		for ( Map.Entry<String, Boolean> en : vocabCheck.entrySet() ) {
-			if ( en.getValue() ) {
+			if ( en.getValue() == enabled ) {
 				ret.put( en.getKey(), vocabs.get( en.getKey() ) );
 			}
 		}

@@ -97,11 +97,10 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private RepositoryConnection owlRc;
 
-	
-	public AbstractSesameEngine(Properties initProps){
-		super(initProps);
+	public AbstractSesameEngine( Properties initProps ) {
+		super( initProps );
 	}
-	
+
 	/**
 	 * Loads the metadata information from the given file.
 	 *
@@ -280,11 +279,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	protected InsightManager createInsightManager() throws RepositoryException {
 		log.debug( "creating default (in-memory) insight repository" );
-		ForwardChainingRDFSInferencer inferer
-				= new ForwardChainingRDFSInferencer( new MemoryStore() );
-		InsightManagerImpl imi
-				= new InsightManagerImpl( new SailRepository( inferer ) );
-		return imi;
+		return new InsightManagerImpl();
 	}
 
 	@Override
@@ -429,16 +424,16 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	public static Model getConstruct( QueryExecutor<Model> query, 
+	public static Model getConstruct( QueryExecutor<Model> query,
 			RepositoryConnection rc, boolean dobindings )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
 
-		String sparql	= processNamespaces( dobindings ? query.getSparql()
+		String sparql = processNamespaces( dobindings ? query.getSparql()
 				: query.bindAndGetSparql(), query.getNamespaces() );
 
 		GraphQuery tq = rc.prepareGraphQuery( QueryLanguage.SPARQL, sparql );
 		tq.setIncludeInferred( query.usesInferred() );
-		if( dobindings ){
+		if ( dobindings ) {
 			query.setBindings( tq, rc.getValueFactory() );
 		}
 
@@ -686,66 +681,5 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void updateLastModifiedDate() {
 		RepositoryConnection rc = getRawConnection();
 		updateLastModifiedDate( rc, getBaseUri() );
-	}
-
-	/**
-	 * Processes a SELECT query just like {@link #execSelectQuery(String)} but
-	 * then parses the results to get only their instance names. These instance
-	 * names are then returned as the Vector of Strings.
-	 *
-	 * @param sparqlQuery the SELECT SPARQL query to be run against the engine
-	 *
-	 * @return the Vector of Strings representing the instance names of all of the
-	 * query results
-	 */
-	@Override
-	public Collection<URI> getEntityOfType( String sparqlQuery ) {
-		try {
-			if ( sparqlQuery != null ) {
-				RepositoryConnection rc = getRawConnection();
-
-				OneVarListQueryAdapter<URI> qea
-						= OneVarListQueryAdapter.getUriList( sparqlQuery, Constants.ENTITY );
-				qea.useInferred( true );
-				return getSelect( qea, rc, supportsSparqlBindings() );
-			}
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-		return new ArrayList<>();
-	}
-
-	/**
-	 * Runs the passed string query against the engine as a SELECT query. The
-	 * query passed must be in the structure of a SELECT SPARQL query and the
-	 * result format will depend on the engine type.
-	 *
-	 * @param query the string version of the SELECT query to be run against the
-	 * engine
-	 *
-	 * @return triple query results that can be displayed as a grid
-	 */
-	@Override
-	public TupleQueryResult execSelectQuery( String query ) {
-
-		TupleQueryResult sparqlResults = null;
-
-		try {
-			RepositoryConnection rc = getRawConnection();
-			TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, query );
-			log.debug( "SPARQL: " + query );
-			tq.setIncludeInferred( true );
-			sparqlResults = tq.evaluate();
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e );
-		}
-		return sparqlResults;
-	}
-
-	@Override
-	public ENGINE_TYPE getEngineType() {
-		return ENGINE_TYPE.SESAME;
 	}
 }
