@@ -312,7 +312,7 @@ public class InsightManagerImpl implements InsightManager {
 				InsightOutputType.GRAPH_METAMODEL );
 
 		Insight explore = new Insight( "Explore an instance of a selected node type",
-				"DESCRIBE ?instance", InsightOutputType.GRAPH );
+				"DESCRIBE ?instance", InsightOutputType.GRAPH_METAMODEL );
 		explore.setId( urib.uniqueUri() );
 
 		Parameter concept = new Parameter( "Concept",
