@@ -7,15 +7,11 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.util.Constants;
 
 import gov.va.semoss.util.Utility;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 /**
  * This class is responsible for providing a number of utility methods for the
@@ -47,19 +43,14 @@ public class NodeDerivationTools {
 	 * @return A list of concepts in URI form
 	 */
 	public static List<URI> createConceptList( IEngine engine ) {
-		final List<URI> conceptList = new ArrayList<>();
+		
 		String query = "SELECT ?entity WHERE "
 				+ "{ ?entity rdfs:subClassOf+ ?concept . FILTER( ?entity != ?concept ) }";
 		OneVarListQueryAdapter<URI> qe
 				= OneVarListQueryAdapter.getUriList( query, "entity" );
 		qe.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 
-		try {
-			conceptList.addAll( engine.query( qe ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( e, e );
-		}
+		final List<URI> conceptList = engine.queryNoEx( qe );
 		return conceptList;
 	}
 
@@ -102,14 +93,7 @@ public class NodeDerivationTools {
 	 */
 	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
 			IEngine engine ) {
-		List<URI> values;
-		try {
-			values = engine.query( getPredicatesBetween( subjectNodeType, objectNodeType ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			values = new ArrayList<>();
-		}
-
+		List<URI> values = engine.queryNoEx( getPredicatesBetween( subjectNodeType, objectNodeType ) );
 		return values;
 	}
 

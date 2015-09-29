@@ -284,6 +284,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 	public static Properties generateProperties( File jnl ) {
 		Properties props = new Properties();
+		props.setProperty( Constants.SMSS_LOCATION, jnl.toString() );
 		props.setProperty( BigdataSail.Options.FILE, jnl.toString() );
 		props.setProperty( Constants.ENGINE_IMPL,
 				BigDataEngine.class.getCanonicalName() );
