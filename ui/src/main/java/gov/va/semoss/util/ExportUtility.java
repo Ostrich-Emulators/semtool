@@ -102,9 +102,8 @@ public class ExportUtility {
 		}
 	}
 
-	public static File getSuggestedFilename( Component component, String suffix ) {
+	public static File getSuggestedFilename( String title, String suffix ) {
 		try {
-			String title = ( (IPlaySheet) component ).getTitle();
 			title = title.replaceAll( "[^A-Za-z0-9 ()]", "" );
 			if ( title.length() > 100 ) {
 				title = title.substring( 0, 100 );
@@ -113,9 +112,13 @@ public class ExportUtility {
 			return new File( title + suffix );
 		}
 		catch ( Exception e ) {
-			log.debug( "Couldn't create a suggested filename from component: " + component + "\n" + e, e );
+			log.warn( "Couldn't create a suggested filename from title: " + title + e, e );
 			return new File( "SemossExport" + suffix );
-		}
+		}		
+	}
+
+	public static File getSuggestedFilename( Component component, String suffix ) {
+		return getSuggestedFilename( ((IPlaySheet) component ).getTitle(), suffix );
 	}
 
 	public static void exportAsPdf( BufferedImage img, File pdf )
