@@ -139,7 +139,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 			@Override
 			protected Action makeTypeItem( QueryNode v, GraphicalQueryPanel pnl ) {
 				Map<URI, String> labels = GuiUtility.getInstanceLabels(
-						NodeDerivationTools.instance().createConceptList( pnl.getEngine() ), pnl.getEngine() );
+						NodeDerivationTools.createConceptList( pnl.getEngine() ), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Vertex", "New Type", 
@@ -173,7 +173,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 				URI endtype = graph.getDest( v ).getType();
 
 				ListQueryAdapter<URI> links
-						= NodeDerivationTools.instance().getPredicatesBetween( starttype, endtype );
+						= NodeDerivationTools.getPredicatesBetween( starttype, endtype );
 
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Edge", "New Type", links );

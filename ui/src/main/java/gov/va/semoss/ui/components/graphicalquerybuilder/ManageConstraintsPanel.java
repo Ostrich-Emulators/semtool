@@ -232,7 +232,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 						URI starttype = verts.getFirst().getType();
 						URI endtype = verts.getSecond().getType();
 
-						List<URI> links = NodeDerivationTools.instance().getPredicatesBetween( starttype,
+						List<URI> links = NodeDerivationTools.getPredicatesBetween( starttype,
 								endtype, engine );
 						Map<URI, String> labels = GuiUtility.getInstanceLabels( links, engine );
 						labels.put( Constants.ANYNODE, "<Any>" );

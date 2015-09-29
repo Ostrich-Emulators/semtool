@@ -118,7 +118,7 @@ public class DBToLoadingSheetExporterTest {
 			}
 		} );
 
-		List<URI> concepts = NodeDerivationTools.instance().createConceptList( eng );
+		List<URI> concepts = NodeDerivationTools.createConceptList( eng );
 		Collections.sort( concepts, new Comparator<URI>() {
 
 			@Override
