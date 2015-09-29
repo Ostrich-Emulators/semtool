@@ -1,0 +1,39 @@
+# baseURI: http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660> <http://purl.org/dc/terms/created> "2015-09-29T00:43:31.241Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660> <http://va.gov/ontologies/core#softwareAgent> "unknown" .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660> <http://va.gov/ontologies/semoss#ReificationModel> <http://va.gov/ontologies/semoss#VASEMOSS-Reification> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660> <http://www.w3.org/2002/07/owl#imports> <http://test.gov/ontologies/> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660> <http://purl.org/dc/terms/modified> "2015-09-29T00:43:31.241Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660> <http://rdfs.org/ns/void#subset> <http://test.gov/ontologies/> .
+<http://semoss.org/ontologies/Car> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://semoss.org/ontologies/Car> <http://www.w3.org/2000/01/rdf-schema#label> "Car" .
+<http://semoss.org/ontologies/Car> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://semoss.org/ontologies/Concept> .
+<http://semoss.org/ontologies/Date> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://semoss.org/ontologies/Date> <http://www.w3.org/2000/01/rdf-schema#label> "Date" .
+<http://semoss.org/ontologies/First_Name> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://semoss.org/ontologies/First_Name> <http://www.w3.org/2000/01/rdf-schema#label> "First Name" .
+<http://semoss.org/ontologies/Human_Being> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://semoss.org/ontologies/Human_Being> <http://www.w3.org/2000/01/rdf-schema#label> "Human Being" .
+<http://semoss.org/ontologies/Human_Being> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://semoss.org/ontologies/Concept> .
+<http://semoss.org/ontologies/Last_Name> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://semoss.org/ontologies/Last_Name> <http://www.w3.org/2000/01/rdf-schema#label> "Last Name" .
+<http://semoss.org/ontologies/Price> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://semoss.org/ontologies/Price> <http://www.w3.org/2000/01/rdf-schema#label> "Price" .
+<http://semoss.org/ontologies/Purchased> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://semoss.org/ontologies/Purchased> <http://www.w3.org/2000/01/rdf-schema#label> "Purchased" .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://semoss.org/ontologies/Car> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Yugo" .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri> <http://semoss.org/ontologies/First_Name> "Yuri" .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri> <http://semoss.org/ontologies/Last_Name> "Gargarin" .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri> <http://semoss.org/ontologies/Purchased> <http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri> <http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri_Purchased_Yugo> <http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://semoss.org/ontologies/Human_Being> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri" .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri_Purchased_Yugo> <http://semoss.org/ontologies/Date> "2014-11-09T05:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri_Purchased_Yugo> <http://semoss.org/ontologies/Price> "3000 USD" .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri_Purchased_Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> <http://semoss.org/ontologies/Purchased> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri_Purchased_Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://semoss.org/ontologies/Relation> .
+<http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri_Purchased_Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri Purchased Yugo" .
+<http://test.gov/ontologies/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://test.gov/ontologies/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .

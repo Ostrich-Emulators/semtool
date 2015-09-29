@@ -16,16 +16,11 @@
 	</scm>
     
 	<dependencies>
-		<dependency>
-			<groupId>com.bigdata</groupId>
-			<artifactId>bigdata</artifactId>
-			<version>${bigdata.version}</version>
-		</dependency>
-		<dependency>
+		<!--dependency>
 			<groupId>com.bigdata</groupId>
 			<artifactId>bigdata-ganglia</artifactId>
 			<version>1.0.4</version>
-		</dependency>
+		</dependency-->
     
 		<dependency>
 			<groupId>com.fifesoft</groupId>

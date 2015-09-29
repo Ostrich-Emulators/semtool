@@ -6,7 +6,6 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.ui.components.DBToLoadingSheetExporterTest;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -24,8 +23,7 @@ import org.openrdf.repository.RepositoryException;
  */
 public class BigDataEngineTest {
 
-	private static final Logger log
-			= Logger.getLogger( DBToLoadingSheetExporterTest.class );
+	private static final Logger log = Logger.getLogger( BigDataEngineTest.class );
 	private File dbfile;
 	private IEngine eng;
 
@@ -59,7 +57,7 @@ public class BigDataEngineTest {
 	public void setUp() throws RepositoryException {
 		extractKb();
 
-		eng = new BigDataEngine( BigDataEngine.generateProperties( dbfile ));
+		eng = new BigDataEngine( BigDataEngine.generateProperties( dbfile ) );
 	}
 
 	@After
