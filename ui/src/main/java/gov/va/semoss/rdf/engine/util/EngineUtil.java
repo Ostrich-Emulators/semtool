@@ -204,7 +204,7 @@ public class EngineUtil implements Runnable {
 
 				oldim.addAll( iic.im.getPerspectives(), iic.clearfirst );
 				eng.updateInsights( oldim );
-				
+
 				List<EngineOperationListener> lls = new ArrayList<>( listeners );
 				for ( EngineOperationListener eol : lls ) {
 					eol.insightsModified( eng, oldim.getPerspectives() );
@@ -817,7 +817,7 @@ public class EngineUtil implements Runnable {
 			final Map<URI, Value> metas = engine.query( new MetadataQuery() );
 			metas.remove( VAS.Database );
 
-			engine.execute( new ModificationExecutorAdapter() {
+			engine.execute( new ModificationExecutorAdapter( true ) {
 
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {

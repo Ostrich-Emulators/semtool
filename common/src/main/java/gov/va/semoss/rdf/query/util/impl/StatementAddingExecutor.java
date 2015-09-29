@@ -24,14 +24,19 @@ public class StatementAddingExecutor implements ModificationExecutor {
   private final List<Statement> stmts = new ArrayList<>();
 
   public StatementAddingExecutor() {
-    trans = true;
+    this( true );
   }
 
   public StatementAddingExecutor( boolean usetrans ) {
     trans = usetrans;
   }
 
-  public void resetStatements( Collection<Statement> todo ) {
+  public StatementAddingExecutor( Collection<Statement> todo, boolean intrans ) {
+		stmts.addAll( todo );
+    trans = intrans;
+  }
+
+	public void resetStatements( Collection<Statement> todo ) {
     stmts.clear();
     stmts.addAll( todo );
   }
