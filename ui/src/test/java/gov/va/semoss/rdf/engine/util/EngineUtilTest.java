@@ -8,6 +8,7 @@ package gov.va.semoss.rdf.engine.util;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
+import gov.va.semoss.rdf.engine.util.EngineUtil.DbCloneMetadata;
 import gov.va.semoss.util.Constants;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,7 +66,7 @@ public class EngineUtilTest {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, "http://junkowl/testfile/one" );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		eng = new BigDataEngine(props);
+		eng = new BigDataEngine( props );
 	}
 
 	@After
@@ -78,17 +80,75 @@ public class EngineUtilTest {
 		File topdir = File.createTempFile( "eutest-", "" );
 		topdir.delete();
 		topdir.mkdirs();
+		File smss = null;
 
 		try {
-			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb")
+			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.setBooleans( true, true, true );
-			EngineUtil.createNew( ecb, null );
+			smss = EngineUtil.createNew( ecb, null );
+			assertTrue( smss.exists() );
 		}
 		finally {
 			FileUtils.deleteQuietly( topdir );
+			FileUtils.deleteQuietly( smss );
+		}
+	}
+
+	@Test
+	public void createNew2() throws IOException, EngineManagementException {
+		File topdir = File.createTempFile( "eutest-", "" );
+		topdir.delete();
+		topdir.mkdirs();
+		File smss = null;
+
+		try {
+			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
+					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
+					.setReificationModel( ReificationStyle.LEGACY )
+					.setDefaultsFiles( new File( "src/java/resources/defaultdb/Default.properties" ),
+							null, new File( "src/java/resources/defaultdb/Default_Questions.properties" ) )
+					.setFiles( Arrays.asList( LEGACY ) )
+					.setBooleans( true, true, true );
+			smss = EngineUtil.createNew( ecb, null );
+			assertTrue( smss.exists() );
+		}
+		finally {
+			FileUtils.deleteQuietly( topdir );
+			FileUtils.deleteQuietly( smss );
+		}
+	}
+
+	@Test
+	public void testClone1() throws Exception {
+		File clonedir = File.createTempFile( "eutest-clone1", "" );
+		clonedir.delete();
+
+		try {
+			EngineUtil.getInstance().clone( eng, new DbCloneMetadata( clonedir,
+					"testdb", "Test Database", true, true ), false );
+			assertTrue( clonedir.exists() );
+		}
+		finally {
+			FileUtils.deleteQuietly( clonedir );
+		}
+	}
+
+	// @Test 
+	// RPB: this function needs GUI elements, so even if
+	// it works on a dev machine, it'll fail on the server
+	public void testClone2() throws Exception {
+		File clonedir = File.createTempFile( "eutest-clone2", "" );
+		clonedir.delete();
+
+		try {
+			EngineUtil.getInstance().clone( eng.getProperty( Constants.SMSS_LOCATION ) );
+			assertTrue( clonedir.exists() );
+		}
+		finally {
+			FileUtils.deleteQuietly( clonedir );
 		}
 	}
 }
