@@ -33,6 +33,9 @@ public class PinningEngineListenerTest {
 
 	@After
 	public void tearDown() throws Exception {
+		if (file.exists()){
+			file.delete();
+		}
 	}
 
 	@Test
