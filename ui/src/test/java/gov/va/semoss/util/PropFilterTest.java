@@ -8,17 +8,17 @@ public class PropFilterTest {
 
 	private final PropFilter filter = new PropFilter();
 	
-	private final File dir = new File(System.getProperty("user.home"));
+	private final File dir = new File("~/");
 	
 	@Test
 	public void positiveTest() {
-		boolean accept = filter.accept(dir, "someName.ext");
+		boolean accept = filter.accept(dir, "someNameExt");
 		assert(accept);
 	}
 	
 	@Test
 	public void negativeTest() {
-		boolean accept = filter.accept(dir, "someName.exo");
+		boolean accept = filter.accept(dir, "someNameExo");
 		assert(!accept);
 	}
 
