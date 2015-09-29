@@ -6,9 +6,9 @@
 package gov.va.semoss.ui.components.insight.manager;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
-import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -177,7 +177,7 @@ public class InsightMenu extends MouseAdapter {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				Insight insight = new Insight( "New Insight", "", GridPlaySheet.class );
+				Insight insight = new Insight( "New Insight", "", InsightOutputType.GRID );
 				DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( insight );
 				model.insertNodeInto( newnode, node, 0 );
 				tree.setSelectionPath( new TreePath( newnode.getPath() ) );

@@ -1,6 +1,5 @@
 package gov.va.semoss.om;
 
-import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,10 +21,8 @@ public class Insight implements Serializable {
 	private String label = "";
 	//Sparql for the question:
 	private String sparql = "";
-	//Type of entity this insight has:
-	private String entityType = "";
 	//The layout used to render this insight:
-	private String output = "";
+	private InsightOutputType output;
 	//Description of Insight:
 	private String description = "";
 	//Author of Insight:
@@ -42,15 +39,13 @@ public class Insight implements Serializable {
 
 	//InsightParameters:
 	private final List<Parameter> parameters = new ArrayList<>();
-	private InsightOutputType type;
 
 	public Insight() {
 	}
 
-	public Insight( String label, String sparql,
-			Class<? extends PlaySheetCentralComponent> output ) {
+	public Insight( String label, String sparql, InsightOutputType output ) {
 		this.label = label;
-		this.output = output.getCanonicalName();
+		this.output = output;
 		this.sparql = sparql;
 		this.description = "";
 	}
@@ -75,8 +70,6 @@ public class Insight implements Serializable {
 		creator = i.getCreator();
 		description = i.getDescription();
 
-		entityType = i.entityType;
-
 		defautlValueIsQuery = i.defautlValueIsQuery;
 
 		for ( Parameter p : i.parameters ) {
@@ -96,27 +89,11 @@ public class Insight implements Serializable {
 		this.id = id;
 	}
 
-	public InsightOutputType getOutputType() {
-		return type;
-	}
-
-	public void setOutputType( InsightOutputType type ) {
-		this.type = type;
-	}
-
-	public String getEntityType() {
-		return entityType;
-	}
-
-	public void setEntityType( String entityType ) {
-		this.entityType = entityType;
-	}
-
-	public String getOutput() {
+	public InsightOutputType getOutput() {
 		return output;
 	}
 
-	public void setOutput( String output ) {
+	public void setOutput( InsightOutputType output ) {
 		this.output = output;
 	}
 

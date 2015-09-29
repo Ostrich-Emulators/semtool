@@ -27,7 +27,6 @@ import org.openrdf.repository.RepositoryException;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.DIHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -84,11 +83,9 @@ public abstract class AbstractEngine implements IEngine {
 			startLoading( prop );
 
 			String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
-			String owlstarter = prop.getProperty( Constants.SEMOSS_URI,
-					DIHelper.getInstance().getProperty( Constants.SEMOSS_URI ) );
+			String owlstarter = prop.getProperty( Constants.SEMOSS_URI, null );
 			if ( null == owlstarter ) {
-				log.warn( "no schema URI set anywhere...using "
-						+ Constants.DEFAULT_SEMOSS_URI );
+				log.warn( "no schema URI set...using " + Constants.DEFAULT_SEMOSS_URI );
 				owlstarter = Constants.DEFAULT_SEMOSS_URI;
 			}
 			baseuri = new URIImpl( setUris( baseuristr, owlstarter ).stringValue() );
@@ -198,8 +195,7 @@ public abstract class AbstractEngine implements IEngine {
 					= ( null == engineName ? propdir
 							: new File( propdir, this.engineName ) );
 
-			String basefolder
-					= DIHelper.getInstance().getProperty( Constants.BASE_FOLDER );
+			String basefolder = System.getProperty( "user.dir" );
 			final File BASEDIR = new File( basefolder );
 			searchpath.add( dbdir );
 			searchpath.add( BASEDIR );
@@ -280,13 +276,6 @@ public abstract class AbstractEngine implements IEngine {
 	 * @return this database's unique id. this will include some sort of UUID
 	 */
 	protected abstract URI setUris( String data, String schema );
-
-	@Override
-	public void closeDB() {
-		if ( null != insightEngine ) {
-			insightEngine.release();
-		}
-	}
 
 	/**
 	 * Update the "last modified" date of the dataset. This operation should fail

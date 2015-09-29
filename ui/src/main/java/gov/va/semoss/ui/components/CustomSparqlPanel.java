@@ -34,21 +34,24 @@ import org.apache.log4j.Logger;
 
 //import aurelienribon.ui.css.Style;
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.QueryExecutor;
 import gov.va.semoss.rdf.query.util.AbstractBindable;
 import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapter;
 import gov.va.semoss.ui.components.api.IPlaySheet;
 import gov.va.semoss.util.DIHelper;
-import gov.va.semoss.util.PlaySheetEnum;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.tabbedqueries.TabbedQueries;
 import gov.va.semoss.ui.components.playsheets.PlaySheetCentralComponent;
 
 import gov.va.semoss.ui.components.tabbedqueries.SparqlTextArea;
+import gov.va.semoss.util.MultiMap;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
@@ -67,7 +70,7 @@ public class CustomSparqlPanel extends JPanel {
 
 	private static final Logger logger = Logger.getLogger( CustomSparqlPanel.class );
 
-	private JComboBox<PlaySheetEnum> playSheetComboBox;
+	private JComboBox<InsightOutputType> playSheetComboBox;
 	private final JButton btnGetQuestionSparql;
 	private final JButton btnShowHint;
 	private final JButton btnSubmitSparqlQuery;
@@ -98,14 +101,16 @@ public class CustomSparqlPanel extends JPanel {
 		playSheetComboBox.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
-				PlaySheetEnum selectedPlaySheet
+				InsightOutputType type
 						= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
 				//Store the currently selected playsheet with the currently
 				//selected query tab:
-				sparqlArea.setTagOfSelectedTab( selectedPlaySheet.toString() );
+				sparqlArea.setTagOfSelectedTab( null == type 
+						? "Update Query" : type.toString() );
 			}
 		} );
-		final PlaySheetEnumRenderer pr = new PlaySheetEnumRenderer();
+		final PlaySheetEnumRenderer pr
+				= new PlaySheetEnumRenderer( DIHelper.getInstance().getOutputTypeRegistry() );
 		playSheetComboBox.setRenderer( pr );
 		playSheetComboBox.setToolTipText( "Display response formats for custom query" );
 		playSheetComboBox.setFont( new Font( "Tahoma", Font.PLAIN, 11 ) );
@@ -121,8 +126,6 @@ public class CustomSparqlPanel extends JPanel {
 		gbc_playSheetComboBox.gridx = 0;
 		gbc_playSheetComboBox.gridy = 2;
 		add( playSheetComboBox, gbc_playSheetComboBox );
-		// set the model each time a question is choosen to include playsheets that are not in PlaySheetEnum
-		playSheetComboBox.setModel( new DefaultComboBoxModel( PlaySheetEnum.values() ) );
 
 		btnShowHint = new JButton();
 		btnShowHint.setToolTipText( "Display Hint for PlaySheet" );
@@ -186,7 +189,7 @@ public class CustomSparqlPanel extends JPanel {
 		add( appendSparqlQueryChkBox, gbc_appendSparqlQueryChkBox );
 
 		sparqlArea = new TabbedQueries();
-		sparqlArea.setTagOfSelectedTab( PlaySheetEnum.values()[0].toString() );
+		sparqlArea.setTagOfSelectedTab( InsightOutputType.GRID.toString() );
 
 		/**
 		 * Handles the assignment of keyboard shortcuts when changing the tab in
@@ -199,16 +202,15 @@ public class CustomSparqlPanel extends JPanel {
 				//of the selected query tab:
 				String strPlaySheet = sparqlArea.getTagOfSelectedTab();
 				if ( strPlaySheet != null ) {
-					playSheetComboBox.setSelectedItem( PlaySheetEnum.valueOf( strPlaySheet ) );
+					
+					playSheetComboBox.setSelectedItem( "Update Query".equals( strPlaySheet ) 
+							? null : InsightOutputType.valueOf( strPlaySheet ) );
 				}
+				
 				//When the tab changes, check the contents of the displayed tab.
 				//Only enable the "Submit Query" button if characters are shown:
-				if ( sparqlArea.getTextOfSelectedTab().length() > 0 ) {
-					btnSubmitSparqlQuery.setEnabled( true );
-				}
-				else {
-					btnSubmitSparqlQuery.setEnabled( false );
-				}
+				btnSubmitSparqlQuery.setEnabled( !sparqlArea.getTextOfSelectedTab().isEmpty() );
+
 				//Submit Sparql query via the keystrokes <Ctrl><Enter>, from any selected component in the tool,
 				//and show status in the status-bar:
 				try {
@@ -275,8 +277,7 @@ public class CustomSparqlPanel extends JPanel {
 				sparqlArea.setTextOfSelectedTab( sparql );
 
 				//Pre-select the Playsheet of the Insight copied down:
-				PlaySheetEnum selectedPlaySheet = PlaySheetEnum.valueForInsight( selected );
-				playSheetComboBox.setSelectedItem( selectedPlaySheet );
+				playSheetComboBox.setSelectedItem( selected.getOutput() );
 			}
 		} );
 
@@ -284,29 +285,28 @@ public class CustomSparqlPanel extends JPanel {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				PlaySheetEnum pse
+				InsightOutputType pse
 						= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
-				String selectedPlaySheet = pse.getDisplayName();
+				OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
+				String hint = ( null == pse
+						? "UpdateQuery Hint: Try a SPARQL query that INSERTs data, DELETEs data, or does both."
+						: registry.getSheetHint( pse ) );
 
-				// playsheet starting with "*" are those that are not included in predefined
-				// list in util.PlaySheetEnum
-				if ( selectedPlaySheet.startsWith( "*" ) ) {
-					//Set the sparql area with no hint:
-					if ( sparqlArea.getTabCount() == 1 ) {
-						sparqlArea.setSelectedIndex( 0 );
-					}
-					sparqlArea.setTextOfSelectedTab( "Hint: not available" );
+				//Set the sparql area with the hint:
+				if ( sparqlArea.getTabCount() == 1 ) {
+					sparqlArea.setSelectedIndex( 0 );
 				}
-				else {
-					//Set the sparql area with the hint:
-					if ( sparqlArea.getTabCount() == 1 ) {
-						sparqlArea.setSelectedIndex( 0 );
-					}
-					sparqlArea.setTextOfSelectedTab( pse.getSheetHint() );
-				}
+				sparqlArea.setTextOfSelectedTab( hint );
 			}
 		} );
+	}
 
+	public void setOutputTypeRegistry( OutputTypeRegistry reg ) {
+		List<InsightOutputType> types = new ArrayList<>( reg.getRegisterKeys() );
+		
+		
+		types.add( null );
+		playSheetComboBox.setModel( new DefaultComboBoxModel( types.toArray() ) );
 	}
 
 	public void setOverlayCheckBox( JCheckBox box ) {
@@ -324,9 +324,12 @@ public class CustomSparqlPanel extends JPanel {
 				int idx = insights.getSelectedIndex();
 				if ( idx >= 0 ) {
 					Insight selected = insights.getItemAt( insights.getSelectedIndex() );
+					
 					//If a question has no Sparql associated with it (as pulled from an external source),
 					//then disable the Copy-Down button, in the "Custom Sparql Query" window:
-					btnGetQuestionSparql.setEnabled( !"NULL".equals( selected.getSparql() ) );
+					InsightOutputType type = ( null == selected.getOutput() 
+							? InsightOutputType.GRID : selected.getOutput() );
+					btnGetQuestionSparql.setEnabled( type.needsSparql );
 				}
 				else {
 					btnGetQuestionSparql.setEnabled( false );
@@ -390,12 +393,16 @@ public class CustomSparqlPanel extends JPanel {
 				JDesktopPane pane = DIHelper.getInstance().getDesktop();
 				PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
 
-				String output = insight.getOutput();
+				InsightOutputType output = insight.getOutput();
 
 				// the frame will be activated before there's a playsheet attached to it
 				// make sure we have a playsheet before continuing
 				PlaySheetCentralComponent pscc = psf.getActivePlaySheet();
-				if ( null != pscc && output.equals( pscc.getClass().getCanonicalName() ) ) {
+				OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
+				Map<Class<? extends IPlaySheet>, InsightOutputType> psccMap
+						= MultiMap.lossyflip( registry.getPlaySheetMap() );
+
+				if ( null != pscc && output == psccMap.get( pscc.getClass() ) ) {
 					mainTabOverlayChkBox.setEnabled( true );
 				}
 				else {
@@ -418,7 +425,7 @@ public class CustomSparqlPanel extends JPanel {
 
 		@Override
 		protected void prepare( ActionEvent ae ) {
-			PlaySheetEnum outputtype
+			InsightOutputType outputtype
 					= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
 			sparqlArea.setTagOfSelectedTab( outputtype.toString() );
 		}
@@ -434,11 +441,10 @@ public class CustomSparqlPanel extends JPanel {
 		}
 
 		@Override
-		protected Class<? extends IPlaySheet> getPlaySheet() {
-			PlaySheetEnum outputtype
+		protected InsightOutputType getOutputType() {
+			InsightOutputType outputtype
 					= playSheetComboBox.getItemAt( playSheetComboBox.getSelectedIndex() );
-			return ( PlaySheetEnum.Update_Query == outputtype
-					? null : outputtype.getSheetClass() );
+			return outputtype;
 		}
 
 		@Override

@@ -31,28 +31,12 @@ public class NodeDerivationTools {
 	 * The logger for this class
 	 */
 	private static final Logger logger = Logger.getLogger( NodeDerivationTools.class );
-	/**
-	 * The singleton instance
-	 */
-	private static NodeDerivationTools instance;
 
 	/**
 	 * Private singleton default constructor
 	 */
 	private NodeDerivationTools() {
 
-	}
-
-	/**
-	 * The singleton access method
-	 *
-	 * @return The singleton instance
-	 */
-	public static NodeDerivationTools instance() {
-		if ( instance == null ) {
-			instance = new NodeDerivationTools();
-		}
-		return instance;
 	}
 
 	/**
@@ -88,7 +72,7 @@ public class NodeDerivationTools {
 	 * @return A proper query adapter capable of querying a knowledgebase for the
 	 * desired predicates
 	 */
-	public ListQueryAdapter<URI> getPredicatesBetween( URI subjectNodeType,
+	public static ListQueryAdapter<URI> getPredicatesBetween( URI subjectNodeType,
 			URI objectNodeType ) {
 		String q
 				= "SELECT DISTINCT ?relationship WHERE {"
@@ -116,7 +100,7 @@ public class NodeDerivationTools {
 	 * node types
 	 * @return A list of predicates, in URI
 	 */
-	public List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
+	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
 			IEngine engine ) {
 		List<URI> values;
 		try {

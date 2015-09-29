@@ -6,12 +6,11 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
-import gov.va.semoss.rdf.engine.api.WriteableInsightManager;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
 import gov.va.semoss.ui.components.renderers.PerspectiveRenderer;
 import java.awt.Component;
 import java.util.Collection;
@@ -72,7 +71,7 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 
 				if ( !seenit ) {
 					Insight insight = new Insight( p.insightname.getText(), sparql,
-							GridRAWPlaySheet.class );
+							InsightOutputType.GRID );
 
 					im.add( insight );
 

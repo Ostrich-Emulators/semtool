@@ -483,7 +483,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		UriComboBox relCB = relationComboBoxes.get( index );
 		UriComboBox objectCB = objectComboBoxes.get( index );
 
-		List<URI> values = NodeDerivationTools.instance().getPredicatesBetween( subjectCB.getSelectedUri(),
+		List<URI> values = NodeDerivationTools.getPredicatesBetween( subjectCB.getSelectedUri(),
 				objectCB.getSelectedUri(), getEngine() );
 		if( values.isEmpty() ){
 			values.add( Constants.ANYNODE );

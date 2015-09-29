@@ -10,6 +10,7 @@ import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
+import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter;
 import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter.ShotOp;
@@ -17,6 +18,7 @@ import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.renderers.PerspectiveTreeCellRenderer;
+import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import java.awt.CardLayout;
 import java.awt.event.KeyAdapter;
@@ -68,7 +70,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		};
 
 		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
-		tree.setCellRenderer( new PerspectiveTreeCellRenderer() );
+		tree.setCellRenderer( new PerspectiveTreeCellRenderer( DIHelper.getInstance().getOutputTypeRegistry() ) );
 
 		setupTreeListeners();
 	}
@@ -206,11 +208,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 		parameterData.setEngine( engine );
 		perspectiveData.setEngine( engine );
 
-		if ( null != wim ) {
-			wim.release();
-		}
-
-		wim = ( null == eng ? null : engine.getInsightManager() );
+		wim = ( null == eng ? new InsightManagerImpl() : engine.getInsightManager() );
 		model.refresh( wim );
 
 //		for ( int i = 0; i < tree.getRowCount(); i++ ) {

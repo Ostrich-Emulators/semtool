@@ -540,7 +540,7 @@ public class QaChecker {
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
 					QaChecker.this.cacheInstance(
-							URI.class.cast( set.getValue( "reltype" ) ),
+							URI.class.cast( set.getValue( "sub" ) ),
 							set.getValue( "typelabel" ).stringValue(),
 							set.getValue( "rawlabel" ).stringValue() );
 				}

@@ -6,6 +6,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListOfValueArraysQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
@@ -16,7 +17,6 @@ import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.util.PlaySheetEnum;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -212,8 +212,9 @@ public class PlaySheetFrame extends JInternalFrame {
 		tabs.add( title, c );
 
 		if ( 1 == tabs.getTabCount() ) {
-			PlaySheetEnum pse = PlaySheetEnum.valueForClass(c.getClass());
-			ImageIcon icon = pse.getSheetIcon();
+			OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
+			InsightOutputType type = registry.getTypeFromClass( c.getClass() );
+			ImageIcon icon = registry.getSheetIcon( type );
 			if ( null != icon ) {
 				setFrameIcon( icon );
 			}
@@ -289,9 +290,11 @@ public class PlaySheetFrame extends JInternalFrame {
 	}
 
 	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ) {
-		PlaySheetEnum pse = PlaySheetEnum.valueForInsight( insight );
+		OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
+		InsightOutputType type = insight.getOutput();
+			
 		PlaySheetCentralComponent cmp
-				= PlaySheetCentralComponent.class.cast( pse.getSheetInstance() );
+				= PlaySheetCentralComponent.class.cast( registry.getSheetInstance( type ) );
 		cmp.setTitle( insight.getLabel() );
 		addTab( cmp );
 
