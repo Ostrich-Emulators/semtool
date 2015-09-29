@@ -132,6 +132,7 @@ public class SemossEdgeModelerTest {
 	public void tearDown() {
 		engine.closeDB();
 		loader.release();
+		qaer.release();
 	}
 
 	private static Model getExpectedGraph( File rdf ) {
