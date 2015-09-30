@@ -26,7 +26,6 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
 
 import java.awt.HeadlessException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +155,7 @@ public class CheckConsistencyAction extends DbAction {
 					}
 					checker.release();
 				}
-				catch ( IOException | HeadlessException e ) {
+				catch ( HeadlessException e ) {
 					log.error( e, e );
 				}
 			}
