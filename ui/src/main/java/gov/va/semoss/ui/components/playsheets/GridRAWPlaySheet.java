@@ -336,8 +336,8 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 			gps.setTitle( "Node Explorer" );
 			List<Value[]> vals = new ArrayList<>();
 			vals.add( new Value[]{ uri } );
-			gps.create( vals, Arrays.asList( "Subject" ), getEngine() );
 			addSibling( gps );
+			gps.create( vals, Arrays.asList( "Subject" ), getEngine() );
 		}
 	}
 
