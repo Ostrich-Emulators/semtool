@@ -616,6 +616,9 @@ public class InsightManagerImpl implements InsightManager {
 				else if ( VAS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
 					insight.setOutput( InsightOutputType.valueOf( obj.stringValue() ) );
 				}
+				else if( UI.viewClass.equals( pred ) && null == insight.getOutput() ){
+					insight.setOutput( upgradeOutput( obj.stringValue() ) );
+				}
 			}
 		}
 
