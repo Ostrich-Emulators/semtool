@@ -86,7 +86,7 @@ public class InsightManagerImpl implements InsightManager {
 		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet",
 				InsightOutputType.HEATMAP );
 		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet",
-				InsightOutputType.GRAPH );
+				InsightOutputType.GRAPH_METAMODEL );
 		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet",
 				InsightOutputType.PARALLEL_COORDS );
 		UPGRADETYPEMAP.put( "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet",
@@ -312,7 +312,8 @@ public class InsightManagerImpl implements InsightManager {
 				InsightOutputType.GRAPH_METAMODEL );
 
 		Insight explore = new Insight( "Explore an instance of a selected node type",
-				"DESCRIBE ?instance", InsightOutputType.GRAPH_METAMODEL );
+				"SELECT DISTINCT ?instance WHERE { ?instance ?s ?o }",
+				InsightOutputType.GRAPH );
 		explore.setId( urib.uniqueUri() );
 
 		Parameter concept = new Parameter( "Concept",
@@ -324,21 +325,11 @@ public class InsightManagerImpl implements InsightManager {
 
 		explore.setParameters( Arrays.asList( concept, instance ) );
 
-		String nespql = "CONSTRUCT { "
-				+ "   ?instance ?p1 ?o1 ."
-				+ "   ?o2 ?p2 ?instance ."
-				+ "}"
-				+ "WHERE {"
-				+ "   OPTIONAL {"
-				+ "     ?instance ?p1 ?o1 ."
-				+ "   	?o1 rdfs:subClassOf <" + conceptUri + "> ."
-				+ "   }"
-				+ "   OPTIONAL {"
-				+ "     ?o2 ?p2 ?instance ."
-				+ "   	?o2 rdfs:subClassOf <" + conceptUri + "> ."
-				+ "   }"
+		String nespql = "CONSTRUCT { ?instance ?step ?neighbor } WHERE {"
+				+ "  ?instance ?step ?neighbor ."
+				+ "  ?step a ?stepType ."
+				+ "  FILTER ( ?stepType = owl:ObjectProperty )"
 				+ "}";
-
 		Insight neighbor = new Insight( "Show One Neighbor Away from Selected Node",
 				nespql, InsightOutputType.GRAPH );
 		neighbor.setId( urib.uniqueUri() );
@@ -629,24 +620,24 @@ public class InsightManagerImpl implements InsightManager {
 		}
 
 		// make sure every insight has an output type
-		if( null == insight.getOutput() ){
+		if ( null == insight.getOutput() ) {
 			insight.setOutput( InsightOutputType.GRID );
 		}
-		
+
 		return insight;
 	}
 
-	private static InsightOutputType upgradeOutput( String legacyoutput ){
+	private static InsightOutputType upgradeOutput( String legacyoutput ) {
 		// first, make sure we reference the current package names
 
 		legacyoutput = legacyoutput.replaceFirst( "prerna", "gov.va.semoss" );
 		legacyoutput = legacyoutput.replaceFirst( "veera", "gov.va.vcamp" );
-		
+
 		// second, make sure our InsightOutputType matches our "Output" string
 		// (use grid for a default)
 		return UPGRADETYPEMAP.getOrDefault( legacyoutput, InsightOutputType.GRID );
 	}
-	
+
 	private static void upgradeIfLegacy( Insight insight, UriBuilder urib ) {
 
 		// finally, see if we have super-legacy query data to worry about

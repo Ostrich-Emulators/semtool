@@ -10,15 +10,12 @@ import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.util.UriBuilder;
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.rio.RDFFormat;
 
 /**
@@ -28,12 +25,6 @@ import org.openrdf.rio.RDFFormat;
 public class DBToLoadingSheetExporterTest {
 
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
-	private static final URI HUMAN = new URIImpl( "http://semoss.org/ontologies/Human_Being" );
-	private static final URI CAR = new URIImpl( "http://semoss.org/ontologies/Car" );
-	private static final URI YUGO
-			= new URIImpl( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo" );
-	private static final URI YURI
-			= new URIImpl( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri" );
 	private static InMemorySesameEngine engine;
 
 	public DBToLoadingSheetExporterTest() {
