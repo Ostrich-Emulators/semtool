@@ -233,15 +233,10 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 			public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 				super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
-				log.debug("just before...");
-			        
 				DefaultMutableTreeNode dmtNode = (DefaultMutableTreeNode) value;
 				if ((dmtNode.getUserObject() instanceof URI) && (dmtNode.getChildCount() > 0)) {
-					URI theUri = (URI) dmtNode.getUserObject();
-					
-					Color color = DynamicColorRepository.instance().getColor( theUri );
-					Shape shape = GraphShapeRepository.instance().getShape( theUri );
-					log.debug("Class " + theUri + " has (color, shape): (" + color + ", " + shape + ")");
+					Color color = DynamicColorRepository.instance().getColor( (URI) dmtNode.getUserObject() );
+					Shape shape =   GraphShapeRepository.instance().getShape( (URI) dmtNode.getUserObject() );
 	
 					setIcon( PaintLabel.makeShapeIcon( color, shape, new Dimension( 12, 12 ) ) );
 				} else {
