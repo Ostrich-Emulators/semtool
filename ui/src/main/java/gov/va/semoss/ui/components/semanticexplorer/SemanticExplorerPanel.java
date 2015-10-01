@@ -8,9 +8,16 @@ package gov.va.semoss.ui.components.semanticexplorer;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
+import gov.va.semoss.ui.components.PaintLabel;
+import gov.va.semoss.ui.helpers.DynamicColorRepository;
+import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.util.Constants;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,8 +31,10 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -63,6 +72,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 		nodeClassesAndInstances.setSelectionModel( getDeselectableTreeSelectionModel() );
 		nodeClassesAndInstances.addTreeSelectionListener( getTreeSelectionListener() );
 		nodeClassesAndInstances.setModel( new DefaultTreeModel( invisibleRoot ) );
+		nodeClassesAndInstances.setCellRenderer( getTreeCellRenderer() );
 		
 		leftSide = new JScrollPane();
 		leftSide.setViewportView(nodeClassesAndInstances);
@@ -211,6 +221,34 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 					List<Value[]> propertyList = runPropertiesQuery(instance);
 					propertyTable.setModel( new InstancePropertyTableModel(propertyList, engine) );
 				}
+			}
+		};
+	}
+	
+	private TreeCellRenderer getTreeCellRenderer() {
+		return new DefaultTreeCellRenderer() {
+			private static final long serialVersionUID = 4433791433874526433L;
+
+			@Override
+			public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+				super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+
+				log.debug("just before...");
+			        
+				DefaultMutableTreeNode dmtNode = (DefaultMutableTreeNode) value;
+				if ((dmtNode.getUserObject() instanceof URI) && (dmtNode.getChildCount() > 0)) {
+					URI theUri = (URI) dmtNode.getUserObject();
+					
+					Color color = DynamicColorRepository.instance().getColor( theUri );
+					Shape shape = GraphShapeRepository.instance().getShape( theUri );
+					log.debug("Class " + theUri + " has (color, shape): (" + color + ", " + shape + ")");
+	
+					setIcon( PaintLabel.makeShapeIcon( color, shape, new Dimension( 12, 12 ) ) );
+				} else {
+					//setIcon( null );
+				}
+				
+				return this;
 			}
 		};
 	}
