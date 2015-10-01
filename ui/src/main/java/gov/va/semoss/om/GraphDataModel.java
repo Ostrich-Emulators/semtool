@@ -44,7 +44,6 @@ public class GraphDataModel {
 
 	private static final Logger log = Logger.getLogger( GraphDataModel.class );
 
-	private final Set<String> baseFilterSet = new HashSet<>();
 	private final Map<GraphElement, Integer> level = new HashMap<>();
 	protected Map<Resource, String> labelcache = new HashMap<>();
 
@@ -240,6 +239,7 @@ public class GraphDataModel {
 	 *
 	 *
 	 *
+	 *
 	 * @
 	 * param level
 	 * @return
@@ -283,10 +283,6 @@ public class GraphDataModel {
 		edge.setType( uri );
 		return edge;
 
-	}
-
-	public Set<String> getBaseFilterSet() {
-		return baseFilterSet;
 	}
 
 	private void fetchProperties( Collection<URI> concepts, Collection<URI> preds,

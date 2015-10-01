@@ -9,7 +9,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.MultiMap;
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,68 +32,63 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 /**
- * Checks the values from a Loading Sheet against the values in an existing engine.
- * This is a string-based checking, based on a particular sound algorithm
+ * Checks the values from a Loading Sheet against the values in an existing
+ * engine. This is a string-based checking, based on a particular sound
+ * algorithm
+ *
  * @author ryan
  */
 public class EngineConsistencyChecker {
-	
+
 	private static final Logger log = Logger.getLogger( EngineConsistencyChecker.class );
-	
+
 	public static enum Type {
-		
+
 		CONCEPT, RELATIONSHIP
 	};
-	
+
 	private final IEngine engine;
 	private final boolean across;
 	private final StringDistance strdist;
 	private final Map<URI, String> labels = new HashMap<>();
 	private final Map<URI, URI> uriToTypeLkp = new HashMap<>();
 	private final MultiMap<URI, URI> typeLkp = new MultiMap<>();
-	
-	public EngineConsistencyChecker( IEngine eng, boolean across,
-			StringDistance dist ) throws IOException {
+
+	public EngineConsistencyChecker( IEngine eng, boolean across, StringDistance dist ) {
 		this.engine = eng;
 		this.across = across;
 		this.strdist = dist;
 	}
-	
+
 	public void release() {
+		labels.clear();
+		uriToTypeLkp.clear();
+		typeLkp.clear();
 	}
 
 	/**
 	 * Adds the given uris as the specified type
 	 *
-	 * @param uris
+	 * @param uris A collection of concept classes (not instances)
 	 * @param type
 	 */
 	public void add( Collection<URI> uris, Type type ) {
-		try {
-			if ( Type.CONCEPT == type ) {
-				for ( URI uri : uris ) {
-					makeConceptDocuments( uri );
-				}
-			}
-			else {
-				for ( URI uri : uris ) {
-					makeRelationDocuments( uri );
-				}
+		if ( Type.CONCEPT == type ) {
+			for ( URI uri : uris ) {
+				makeConceptDocuments( uri );
 			}
 		}
-		catch ( RepositoryException | QueryEvaluationException | MalformedQueryException e ) {
-			log.error( e, e );
+		else {
+			for ( URI uri : uris ) {
+				makeRelationDocuments( uri );
+			}
 		}
 	}
-	
-	private void makeConceptDocuments( URI concept )
-			throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-		
+
+	private void makeConceptDocuments( URI concept ) {
+
 		String query = "SELECT ?s ?type ?slabel WHERE {"
 				+ " ?s ?rdftype ?concept . "
 				+ " ?s ?label ?slabel . "
@@ -104,7 +98,7 @@ public class EngineConsistencyChecker {
 			URI lastS = null;
 			Document currentDoc = null;
 			Set<String> seenLabels = new HashSet<>();
-			
+
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				URI s = URI.class.cast( set.getValue( "s" ) );
@@ -114,7 +108,7 @@ public class EngineConsistencyChecker {
 					uriToTypeLkp.put( s, concept );
 					lastS = s;
 				}
-				
+
 				String label = set.getValue( "slabel" ).stringValue();
 				// don't add multiple copies of the same label
 				if ( !seenLabels.contains( label ) ) {
@@ -123,26 +117,24 @@ public class EngineConsistencyChecker {
 				}
 			}
 		};
-		
+
 		vqa.bind( "rdftype", RDF.TYPE );
 		vqa.bind( "concept", concept );
 		vqa.bind( "label", RDFS.LABEL );
 		vqa.bind( "rsr", RDFS.RESOURCE );
-		engine.query( vqa );
+		engine.queryNoEx( vqa );
 	}
-	
-	private void makeRelationDocuments( URI rel )
-			throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-		String query = "SELECT ?s ?type ?slabel WHERE {"
-				+ " ?s ?rdftype ?concept . "
-				+ " ?s ?label ?slabel . "
-				+ " ?s ?rdftype ?type . "
-				+ " FILTER ( ?type != ?rsr ) . FILTER ( ?s != ?type ) "
+
+	private void makeRelationDocuments( URI rel ) {
+		String query = "SELECT ?s ?slabel WHERE {"
+				+ " ?s rdf:predicate ?rel . "
+				+ " ?s rdfs:label ?slabel . "
+				+ " FILTER ( ?rel != rdfs:resource ) . FILTER ( ?s != ?rel ) "
 				+ "} ORDER BY ?s";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
 			URI lastS = null;
 			Set<String> seenLabels = new HashSet<>();
-			
+
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				URI s = URI.class.cast( set.getValue( "s" ) );
@@ -154,7 +146,7 @@ public class EngineConsistencyChecker {
 					uriToTypeLkp.put( s, rel );
 					lastS = s;
 				}
-				
+
 				String label = set.getValue( "slabel" ).stringValue();
 				// don't add multiple copies of the same label
 				if ( !seenLabels.contains( label ) ) {
@@ -163,16 +155,13 @@ public class EngineConsistencyChecker {
 				}
 			}
 		};
-		
-		vqa.bind( "rdftype", RDFS.SUBPROPERTYOF );
+
 		vqa.bind( "concept", rel );
-		vqa.bind( "label", RDFS.LABEL );
-		vqa.bind( "rsr", RDFS.RESOURCE );
-		engine.query( vqa );
+		engine.queryNoEx( vqa );
 	}
-	
+
 	public int getItemsForType( URI uri ) {
-		return typeLkp.get( uri ).size();
+		return typeLkp.getNN( uri ).size();
 	}
 
 	/**
@@ -180,7 +169,7 @@ public class EngineConsistencyChecker {
 	 * {@link #across} is <code>true</code>, each element will be compared to all
 	 * elements of all types.
 	 *
-	 * @param uri the concept/relation to resolve
+	 * @param uri the concept/relation class (not instance) to resolve
 	 * @param minDistance the minimum allowable similarity
 	 * @return map of uri-to-hits
 	 */
@@ -189,28 +178,25 @@ public class EngineConsistencyChecker {
 
 		// get our universe of possible hits
 		Map<URI, String> possibles = getHitUniverse( uri );
-		MultiMap<String, URI> revpos = new MultiMap<>();
-		for ( Map.Entry<URI, String> en : possibles.entrySet() ) {
-			revpos.add( en.getValue(), en.getKey() );
-		}
-		
+		MultiMap<String, URI> revpos = MultiMap.flip( possibles );
+
 		Directory ramdir = new RAMDirectory();
 		StandardAnalyzer analyzer = null;
 		SpellChecker speller = null;
-		
+
 		List<URI> errors = new ArrayList<>();
 		try {
 			analyzer = new StandardAnalyzer( Version.LUCENE_36 );
 			IndexWriterConfig config = new IndexWriterConfig( Version.LUCENE_36, analyzer );
 			speller = new SpellChecker( ramdir, strdist );
-			
+
 			StringBuilder names = new StringBuilder();
 			for ( String s : possibles.values() ) {
 				names.append( s ).append( "\n" );
 			}
 			PlainTextDictionary ptd = new PlainTextDictionary( new StringReader( names.toString() ) );
 			speller.indexDictionary( ptd, config, true );
-			
+
 			List<URI> needles = typeLkp.get( uri );
 			for ( URI needle : needles ) {
 				String needlelabel = labels.get( needle );
@@ -219,7 +205,7 @@ public class EngineConsistencyChecker {
 					for ( String s : suggestions ) {
 						// found a match, so figure out what we actually matched
 						float distance = strdist.getDistance( needlelabel, s );
-						
+
 						for ( URI match : revpos.get( s ) ) {
 							hits.add( needle,
 									new Hit( match, s, uriToTypeLkp.get( match ), distance ) );
@@ -247,11 +233,11 @@ public class EngineConsistencyChecker {
 				}
 			}
 		}
-		
+
 		if ( !errors.isEmpty() ) {
 			fallbackResolve( errors, possibles, hits, strdist, minDistance );
 		}
-		
+
 		return hits;
 	}
 
@@ -268,14 +254,14 @@ public class EngineConsistencyChecker {
 	private void fallbackResolve( Collection<URI> needles, Map<URI, String> possibles,
 			MultiMap<URI, Hit> hits, StringDistance levy, float minDistance ) {
 		log.debug( "falling back to resolve " + needles.size() + " items" );
-		
+
 		for ( URI needle : needles ) {
 			String needlelabel = labels.get( needle );
-			
+
 			for ( Map.Entry<URI, String> en : possibles.entrySet() ) {
 				URI match = en.getKey();
 				String matchlabel = en.getValue();
-				
+
 				float distance = levy.getDistance( needlelabel, matchlabel );
 				if ( distance >= minDistance && !match.equals( needle ) ) {
 					hits.add( needle,
@@ -284,51 +270,51 @@ public class EngineConsistencyChecker {
 			}
 		}
 	}
-	
+
 	private Map<URI, String> getHitUniverse( URI type ) {
 		Map<URI, String> possibles = new HashMap<>();
 		if ( across ) {
 			possibles.putAll( labels );
 		}
 		else {
-			for ( URI key : typeLkp.get( type ) ) {
+			for ( URI key : typeLkp.getNN( type ) ) {
 				possibles.put( key, labels.get( key ) );
 			}
 		}
-		
+
 		return possibles;
 	}
-	
+
 	public class Hit {
-		
+
 		private final URI match;
 		private final String matchLabel;
 		private final URI matchType;
 		private final float score;
-		
+
 		public Hit( URI match, String matchLabel, URI matchType, float score ) {
 			this.match = match;
 			this.matchLabel = matchLabel;
 			this.matchType = matchType;
 			this.score = score;
 		}
-		
+
 		public URI getMatch() {
 			return match;
 		}
-		
+
 		public String getMatchLabel() {
 			return matchLabel;
 		}
-		
+
 		public URI getMatchType() {
 			return matchType;
 		}
-		
+
 		public float getScore() {
 			return score;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "Hit (" + score + ": " + matchLabel + "," + match + " ->" + matchType + ")";

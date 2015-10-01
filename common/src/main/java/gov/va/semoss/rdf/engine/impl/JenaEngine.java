@@ -57,11 +57,23 @@ public class JenaEngine extends AbstractSesameEngine {
 	private File tdbdir;
 	private boolean needsSave = false;
 
-	public JenaEngine(Properties initProps){
-		super(initProps);
-		this.openDB(initProps);
+	public JenaEngine( Properties initProps ) {
+		super( initProps );
+		openDB( initProps );
 	}
-	
+
+	public JenaEngine( Dataset dataset ) {
+		super( new Properties() );
+		openDB( new Properties() );
+		tdbdir = null;
+		try {
+			copyFromTdb( dataset );
+		}
+		catch ( Exception e ) {
+			log.fatal( e, e );
+		}
+	}
+
 	@Override
 	protected void createRc( Properties props ) throws RepositoryException {
 		boolean inmem = Boolean.parseBoolean( props.getProperty( INMEM_PROP,
@@ -98,15 +110,18 @@ public class JenaEngine extends AbstractSesameEngine {
 			}
 		}
 
-		copyFromTdb( props.getProperty( FILE_PROP ) );
+		if ( props.containsKey( FILE_PROP ) ) {
+			copyFromTdb( props.getProperty( FILE_PROP ) );
+		}
 	}
 
-	private void copyFromTdb( String file ) throws RepositoryException {
-		tdbdir = new File( file );
+	private void copyFromTdb( Dataset dataset ) throws RepositoryException {
 		ValueFactory vf = rc.getValueFactory();
 
-		Dataset dataset = TDBFactory.createDataset( file );
-		dataset.begin( ReadWrite.READ );
+		if ( dataset.supportsTransactions() ) {
+			dataset.begin( ReadWrite.READ );
+		}
+
 		// Get model inside the transaction
 		Model model = dataset.getDefaultModel();
 		StmtIterator si = model.listStatements();
@@ -161,13 +176,26 @@ public class JenaEngine extends AbstractSesameEngine {
 			throw re;
 		}
 		finally {
-			dataset.end();
+			if ( dataset.supportsTransactions() ) {
+				dataset.end();
+			}
+		}
+	}
+
+	private void copyFromTdb( String file ) throws RepositoryException {
+		tdbdir = new File( file );
+
+		Dataset dataset = TDBFactory.createDataset( file );
+		try {
+			copyFromTdb( dataset );
+		}
+		finally {
 			dataset.close();
 		}
 	}
 
 	private void copyToTdb() throws RepositoryException {
-		if ( !needsSave ) {
+		if ( !needsSave || null == tdbdir ) {
 			return;
 		}
 

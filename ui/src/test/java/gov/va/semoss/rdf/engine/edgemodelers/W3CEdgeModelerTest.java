@@ -130,6 +130,7 @@ public class W3CEdgeModelerTest {
 	public void tearDown() {
 		engine.closeDB();
 		loader.release();
+		qaer.release();
 	}
 
 	private static Model getExpectedGraph( File rdf ) {

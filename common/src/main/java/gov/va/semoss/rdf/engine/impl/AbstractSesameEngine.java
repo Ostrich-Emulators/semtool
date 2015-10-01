@@ -319,8 +319,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 				}
 			}
 		}
-
-		super.closeDB();
 	}
 
 	/**

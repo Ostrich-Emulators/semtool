@@ -20,6 +20,7 @@
 package gov.va.semoss.ui.components;
 
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
@@ -47,6 +48,19 @@ import gov.va.semoss.ui.actions.RemoteDbAction;
 import gov.va.semoss.ui.actions.UnmountAction;
 import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import gov.va.semoss.ui.components.insight.manager.InsightManagerPanel;
+import gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet;
+import gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet;
+import gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet;
+import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
+import gov.va.semoss.ui.components.playsheets.GridPlaySheet;
+import gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet;
+import gov.va.semoss.ui.components.playsheets.GridScatterSheet;
+import gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet;
+import gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet;
+import gov.va.semoss.ui.components.playsheets.PieChartPlaySheet;
+import gov.va.semoss.ui.components.playsheets.SankeyPlaySheet;
+import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
+import gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.components.semanticexplorer.SemanticExplorerPanel;
 import gov.va.semoss.ui.main.SemossPreferences;
@@ -54,6 +68,7 @@ import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
+import gov.va.semoss.util.GuiUtility;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -237,7 +252,6 @@ public class PlayPane extends JFrame {
 	private SelectDatabasePanel selectDatabasePanel;
 	private final Preferences prefs = Preferences.userNodeForPackage( getClass() );
 
-	
 	/**
 	 * Launch the application.
 	 *
@@ -279,6 +293,10 @@ public class PlayPane extends JFrame {
 		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 
 		setApplicationIcons();
+		OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
+		registerPlaySheets( registry );
+		customSparqlPanel.setOutputTypeRegistry( registry );
+		
 		setTitle( "SEMOSS - Analytics Environment" );
 		windowSelector.setEnabled( false );
 		windowSelector.setMnemonic( KeyEvent.VK_W );
@@ -394,10 +412,10 @@ public class PlayPane extends JFrame {
 		return repoList;
 	}
 
-	public SelectDatabasePanel getDatabasePanel(){
+	public SelectDatabasePanel getDatabasePanel() {
 		return selectDatabasePanel;
 	}
-	
+
 	protected void initMenuItems() {
 		// already initialized at instance creation
 	}
@@ -431,7 +449,7 @@ public class PlayPane extends JFrame {
 				}
 
 				gQueryBuilderPanel.setEngine( engine );
-				insightManager.setEngine(engine );
+				insightManager.setEngine( engine );
 				filterPanel.setEngine( engine );
 				semanticExplorer.setEngine( engine );
 			}
@@ -624,25 +642,16 @@ public class PlayPane extends JFrame {
 	/**
 	 * Resets the interface to account for <code>user</code>'s permissions
 	 *
-	 * @param user
-	public void resetForUser( User user ) {
-		iManageItem_2.setEnabled( user.hasPermission( SemossPermission.INSIGHTWRITER ) );
-		int idx = rightTabs.indexOfComponent( iManagePanel_2 );
-		if ( idx >= 0 ) {
-			if ( !user.hasPermission( SemossPermission.INSIGHTWRITER ) ) {
-				iManageItem_2.doClick();
-			}
-		}
-
-		idx = rightTabs.indexOfComponent( loggingPanel );
-		if ( idx >= 0 ) {
-			if ( !user.hasPermission( SemossPermission.LOGVIEWER ) ) {
-				loggingItem.doClick();
-			}
-		}
-	}
+	 * @param user public void resetForUser( User user ) {
+	 * iManageItem_2.setEnabled( user.hasPermission(
+	 * SemossPermission.INSIGHTWRITER ) ); int idx = rightTabs.indexOfComponent(
+	 * iManagePanel_2 ); if ( idx >= 0 ) { if ( !user.hasPermission(
+	 * SemossPermission.INSIGHTWRITER ) ) { iManageItem_2.doClick(); } }
+	 *
+	 * idx = rightTabs.indexOfComponent( loggingPanel ); if ( idx >= 0 ) { if (
+	 * !user.hasPermission( SemossPermission.LOGVIEWER ) ) {
+	 * loggingItem.doClick(); } } }
 	 */
-
 	private JTable initJTableAndAddTo( JPanel panel ) {
 		JTable table = new JTable();
 		table.setShowGrid( true );
@@ -1484,7 +1493,7 @@ public class PlayPane extends JFrame {
 							DbAction.getIcon( "insight_manager_tab1" ) );
 					int idx = rightTabs.indexOfComponent( insightManager );
 					rightTabs.setTabComponentAt( idx, ct2_2 );
-					insightManagerItem.setToolTipText( "Disable the Insite Manager Tab" );					
+					insightManagerItem.setToolTipText( "Disable the Insite Manager Tab" );
 				}
 				else {
 					rightTabs.remove( insightManager );
@@ -1769,6 +1778,65 @@ public class PlayPane extends JFrame {
 	protected void initPreferenceValues( Preferences p ) {
 	}
 
+	protected void registerPlaySheets( OutputTypeRegistry reg ) {
+
+		reg.register( InsightOutputType.GRID, GridPlaySheet.class, "Grid",
+				GuiUtility.loadImageIcon( "icons16/questions_grid2_16.png" ),
+				"GridPlaySheet Hint: SELECT ?x1 ?x2 ?x3 WHERE{ ... }" );
+
+		reg.register( InsightOutputType.GRID_RAW, GridRAWPlaySheet.class, "Raw Grid",
+				GuiUtility.loadImageIcon( "icons16/questions_raw_grid2_16.png" ),
+				"GridRAWPlaySheet Hint: SELECT ?x1 ?x2 ?x3 WHERE{ ... }" );
+
+		reg.register( InsightOutputType.COLUMN_CHART, ColumnChartPlaySheet.class,
+				"Column Chart", GuiUtility.loadImageIcon( "icons16/questions_bar_chart1_16.png" ),
+				"ColumnChartPlaySheet Hint: SELECT ?xAxis ?yAxis1 (OPTIONAL) ?yAxis2 ?yAxis3 ... (where all yAxis values are numbers) WHERE { ... }" );
+
+		reg.register( InsightOutputType.GRAPH, GraphPlaySheet.class, "Graph",
+				GuiUtility.loadImageIcon( "icons16/questions_graph_16.png" ),
+				"GraphPlaySheet Hint: CONSTRUCT {?subject ?predicate ?object} WHERE{ ... }" );
+
+		reg.register( InsightOutputType.DENDROGRAM, DendrogramPlaySheet.class,
+				"Dendrogram", GuiUtility.loadImageIcon( "icons16/questions_dendrogram1_16.png" ),
+				"DendrogramPlaySheet Hint: SELECT DISTINCT ?var-1 ?var-2 ?var-3 ... (where ?var-2 contains children of ?var-1, ?var-3 of ?var-2, etc.) WHERE { ... }" );
+
+		reg.register( InsightOutputType.GRID_SCATTER, GridScatterSheet.class, "Grid Scatter",
+				GuiUtility.loadImageIcon( "icons16/questions_grid_scatter1_16.png" ),
+				"GridScatterSheet Hint: SELECT ?elementName ?xAxisValues ?yAxisValues (OPTIONAL)?zAxisValues WHERE{ ... }" );
+		reg.register( InsightOutputType.HEATMAP, HeatMapPlaySheet.class, "Heat Map",
+				GuiUtility.loadImageIcon( "icons16/questions_heat_map3_16.png" ),
+				"HeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" );
+
+		reg.register( InsightOutputType.PARALLEL_COORDS, ParallelCoordinatesPlaySheet.class,
+				"Parallel Coordinates", GuiUtility.loadImageIcon( "icons16/questions_parcoords6_16.png" ),
+				"ParallelCoordinatesPlaySheet Hint: SELECT ?axis1 ?axis2 ?axis3 WHERE{ ... }" );
+
+		reg.register( InsightOutputType.PIE_CHART, PieChartPlaySheet.class, "Pie Chart",
+				GuiUtility.loadImageIcon( "icons16/questions_pie_chart1_16.png" ),
+				"PieChartPlaySheet Hint: SELECT ?wedgeName ?wedgeValue WHERE { ... }" );
+
+		reg.register( InsightOutputType.SANKEY, SankeyPlaySheet.class, "Sankey Diagram",
+				GuiUtility.loadImageIcon( "icons16/questions_sankey2_16.png" ),
+				"SankeyPlaySheet Hint: SELECT ?source ?target ?value ?target2 ?value2 ?target3 ?value3...etc  Note: ?target is the source for ?target2 and ?target2 is the source for ?target3...etc WHERE{ ... }" );
+
+		reg.register( InsightOutputType.HEATMAP_US, USHeatMapPlaySheet.class, "US Heat Map",
+				GuiUtility.loadImageIcon( "icons16/questions_us_heat_map1_16.png" ),
+				"USHeatMapPlaySheet Hint: SELECT ?state ?numericHeatValue WHERE{ ... }" );
+
+		reg.register( InsightOutputType.HEATMAP_WORLD, WorldHeatMapPlaySheet.class, "World Heat Map",
+				GuiUtility.loadImageIcon( "icons16/questions_world_heat_map3_16.png" ),
+				"WorldHeatMapPlaySheet Hint: SELECT ?country ?numericHeatValue WHERE{ ... }" );
+		
+		reg.register( InsightOutputType.HEATMAP_APPDUPE, AppDupeHeatMapSheet.class,
+				"Application Duplication Heat Map",
+				GuiUtility.loadImageIcon( "icons16/questions_heat_map3_16.png" ),
+				"AppDupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" );
+
+		reg.register( InsightOutputType.GRAPH_METAMODEL, GraphPlaySheet.class, "Metamodel Graph",
+				GuiUtility.loadImageIcon( "icons16/questions_metamodel1_16.png" ),
+				"MetamodelGraphPlaySheet Hint: SELECT DISTINCT ?source ?relation ?target WHERE{ ... }" );
+	}
+
 	protected class PlayPaneCloseableTab extends CloseableTab {
 
 		private static final long serialVersionUID = -1674137465659730374L;
@@ -1783,7 +1851,7 @@ public class PlayPane extends JFrame {
 
 		@Override
 		public void actionPerformed( ActionEvent ae ) {
-			if( null == item ){
+			if ( null == item ) {
 				super.actionPerformed( ae );
 			}
 			else {

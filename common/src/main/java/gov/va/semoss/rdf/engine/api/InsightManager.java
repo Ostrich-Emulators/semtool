@@ -113,10 +113,4 @@ public interface InsightManager {
 	 * Insights
 	 */
 	public Perspective getSystemPerspective( IEngine eng );
-
-	/**
-	 * Releases any resources needed while this class is running. In general, this
-	 * should only be called by {@link IEngine#closeDB() }
-	 */
-	public void release();
 }

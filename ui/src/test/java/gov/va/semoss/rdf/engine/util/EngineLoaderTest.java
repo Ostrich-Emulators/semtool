@@ -651,6 +651,7 @@ public class EngineLoaderTest {
 		engine.getRawConnection().setNamespace( "testdata", id.getMetadata().getDataBuilder().toString() );
 		engine.getRawConnection().setNamespace( "testowl", id.getMetadata().getSchemaBuilder().toString() );
 		trace( TEST10_EXP2 );
+		el.release();
 
 		compare( engine, TEST10_EXP2, true );
 	}

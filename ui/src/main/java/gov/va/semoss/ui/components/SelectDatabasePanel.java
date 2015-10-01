@@ -9,6 +9,7 @@ import gov.va.semoss.ui.components.renderers.QuestionRenderer;
 import gov.va.semoss.ui.components.renderers.PerspectiveRenderer;
 import gov.va.semoss.ui.components.renderers.RepositoryRenderer;
 import gov.va.semoss.om.Insight;
+import gov.va.semoss.om.InsightOutputType;
 import gov.va.semoss.om.Parameter;
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
@@ -79,7 +80,8 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		perspectiveSelector.setToolTipText( "Select the point-of-view of the question you want to ask" );
 		perspectiveSelector.setBackground( new Color( 119, 136, 153 ) );
 
-		final QuestionRenderer qr = new QuestionRenderer();
+		final QuestionRenderer qr
+				= new QuestionRenderer( DIHelper.getInstance().getOutputTypeRegistry() );
 		questionSelector.setRenderer( qr );
 		questionSelector.setToolTipText( "Select the specific question you want to ask" );
 		questionSelector.setBackground( new Color( 119, 136, 153 ) );
@@ -90,7 +92,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		EngineOperationListener eol = new EngineOperationAdapter() {
 
 			@Override
-			public void insightsModified( IEngine eng, Collection<Perspective> perspectives ){
+			public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
 				if ( repoList.getSelectedValue().equals( eng ) ) {
 					perspectiveSelector.removeAllItems();
 					InsightManager im = eng.getInsightManager();
@@ -110,7 +112,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			@Override
 			public void valueChanged( ListSelectionEvent lse ) {
 				IEngine eng = repoList.getSelectedValue();
-				qr.setEngine( eng );
 				bindingPanel.setEngine( eng );
 
 				perspectiveSelector.removeAllItems();
@@ -136,7 +137,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					paramLabel.setVisible( false );
 					bindingPanel.setVisible( false );
 				}
-				else{
+				else {
 					bindingPanel.setParameters( ii.getInsightParameters() );
 					paramLabel.setVisible( ii.hasParameters() );
 					bindingPanel.setVisible( ii.hasParameters() );
@@ -188,13 +189,16 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			//how the renderer of the selected visualization compares with that of the 
 			//currently selected question:
 			JDesktopPane pane = DIHelper.getInstance().getDesktop();
+			OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
 			PlaySheetFrame psf = PlaySheetFrame.class.cast( pane.getSelectedFrame() );
 
 			PlaySheetCentralComponent pscc = ( null == psf ? null
 					: psf.getActivePlaySheet() );
-			String psccClass = ( null == pscc ? ""
-					: pscc.getClass().getCanonicalName() );
-			appendChkBox.setEnabled( ii.getOutput().equals( psccClass ) );
+			Class<? extends IPlaySheet> psccClass
+					= ( null == pscc ? null : pscc.getClass() );
+			final InsightOutputType type = ii.getOutput();
+			appendChkBox.setEnabled( null == type 
+					? false : type.equals( registry.getTypeFromClass( psccClass ) ) );
 		}
 
 		if ( !appendChkBox.isEnabled() ) {
@@ -420,17 +424,9 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		}
 
 		@Override
-		protected Class<? extends IPlaySheet> getPlaySheet() {
+		protected InsightOutputType getOutputType() {
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
-			String output = insight.getOutput();
-
-			try {
-				return (Class<PlaySheetCentralComponent>) Class.forName( output );
-			}
-			catch ( ClassNotFoundException n ) {
-				log.error( n, n );
-			}
-			return null;
+			return insight.getOutput();
 		}
 
 		@Override
