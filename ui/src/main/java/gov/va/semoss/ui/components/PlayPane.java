@@ -236,7 +236,7 @@ public class PlayPane extends JFrame {
 	private final JCheckBoxMenuItem insightManagerItem = new JCheckBoxMenuItem( "Insight Manager",
 			DbAction.getIcon( "insight_manager_tab1" ) );
 	private final JCheckBoxMenuItem semanticExplorerItem = new JCheckBoxMenuItem( "Semantic Explorer",
-			DbAction.getIcon( "graphic_query" ) );
+			DbAction.getIcon( "semantic_dataset2" ) );
 
 	private final JToolBar toolbar;
 	private final JToolBar playsheetToolbar;
@@ -553,7 +553,7 @@ public class PlayPane extends JFrame {
 				"Explore the classes and instances" );
 		rightView.setTabComponentAt( 
 				rightView.indexOfComponent( semanticExplorer ), 
-				new PlayPaneCloseableTab( rightView, semanticExplorerItem, DbAction.getIcon( "graphic_query" ) ) 
+				new PlayPaneCloseableTab( rightView, semanticExplorerItem, DbAction.getIcon( "semantic_dataset2" ) ) 
 		);
 		
 		rightView.addChangeListener( new ChangeListener() {
