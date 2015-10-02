@@ -43,7 +43,7 @@ public class PropertyEditorRowTest {
 		Literal value = factory.createLiteral(36.0d);
 		
 		PropertyEditorRow per = new PropertyEditorRow(name, XMLSchema.DOUBLE, value);
-		assertEquals( per.getValueAsDisplayString(), "36.0" );
+		assertEquals("36.0", per.getValueAsDisplayString() );
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class PropertyEditorRowTest {
 		Literal value = factory.createLiteral(36.0f);
 		
 		PropertyEditorRow per = new PropertyEditorRow(name, XMLSchema.FLOAT, value);
-		assertEquals( per.getValueAsDisplayString(), "36.0" );
+		assertEquals( "36.0", per.getValueAsDisplayString() );
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class PropertyEditorRowTest {
 		Literal value = factory.createLiteral(36);
 		
 		PropertyEditorRow per = new PropertyEditorRow(name, XMLSchema.INTEGER, value);
-		assertEquals( per.getValueAsDisplayString(), "36" );
+		assertEquals( "36", per.getValueAsDisplayString() );
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class PropertyEditorRowTest {
 		Literal value = factory.createLiteral(true);
 		
 		PropertyEditorRow per = new PropertyEditorRow(name, XMLSchema.BOOLEAN, value);
-		assertEquals( per.getValueAsDisplayString(), "true" );
+		assertEquals( "true", per.getValueAsDisplayString() );
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class PropertyEditorRowTest {
 		URI name = factory.createURI("http://va.gov/ontologies/vcamp#Check-In_Patient");
 
 		PropertyEditorRow per = new PropertyEditorRow(name, XMLSchema.ANYURI, name);
-		assertEquals( per.getValueAsDisplayString(), "Check-In_Patient" );
+		assertEquals( "Check-In_Patient", per.getValueAsDisplayString() );
 	}
 
 	@Test
@@ -87,6 +87,6 @@ public class PropertyEditorRowTest {
 		Literal value = factory.createLiteral("A test String.");
 		
 		PropertyEditorRow per = new PropertyEditorRow(name, XMLSchema.STRING, value);
-		assertEquals( per.getValueAsDisplayString(), "A test String." );
+		assertEquals( "A test String.", per.getValueAsDisplayString() );
 	}
 }

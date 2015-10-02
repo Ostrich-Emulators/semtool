@@ -41,7 +41,7 @@ public class URITreeNodeTest {
 		Literal labelValue = factory.createLiteral("Check In Patient");
 
 		URITreeNode utn = new URITreeNode(userObject, labelValue, true);
-		assertEquals( utn.toString(), "Check In Patient" );
+		assertEquals( "Check In Patient", utn.toString() );
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class URITreeNodeTest {
 		URI userObject = new URIImpl("http://va.gov/ontologies/vcamp#Check-In_Patient");
 
 		URITreeNode utn = new URITreeNode(userObject, false);
-		assertEquals( utn.toString(), "Check-In_Patient" );
+		assertEquals( "Check-In_Patient", utn.toString() );
 	}
 
 	@Test
@@ -57,6 +57,6 @@ public class URITreeNodeTest {
 		Literal value = factory.createLiteral("Check In Patient");
 
 		URITreeNode utn = new URITreeNode(value, value, false);
-		assertEquals( utn.toString(), "Check In Patient" );
+		assertEquals( "Check In Patient", utn.toString() );
 	}
 }

@@ -55,7 +55,7 @@ public class InstancePropertyTableModelTest {
 		properties.add(testValues);
 
 		InstancePropertyTableModel utn = new InstancePropertyTableModel(properties, null);
-		assertEquals( utn.getValueAt(0,0), "Check-In_Patient" );
+		assertEquals( "Check-In_Patient", utn.getValueAt(0,0) );
 	}
 	
 	@Test
@@ -68,7 +68,7 @@ public class InstancePropertyTableModelTest {
 		properties.add(testValues);
 
 		InstancePropertyTableModel utn = new InstancePropertyTableModel(properties, null);
-		assertEquals( utn.getValueAt(0,1), "float" );
+		assertEquals( "float", utn.getValueAt(0,1) );
 	}
 	
 	@Test
@@ -81,6 +81,6 @@ public class InstancePropertyTableModelTest {
 		properties.add(testValues);
 
 		InstancePropertyTableModel utn = new InstancePropertyTableModel(properties, null);
-		assertEquals( utn.getValueAt(0,2), "36.0" );
+		assertEquals( "36.0", utn.getValueAt(0,2) );
 	}
 }
