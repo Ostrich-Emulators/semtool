@@ -153,7 +153,8 @@ public class Constants {
 	public static final String BASEURI_KEY = "baseuri";
 	public static final String PIN_KEY = "pinned";
 	public static final String DEFAULTUI_KEY = "DefaultUI";
-
+	
 	public static final String CALC_INFERENCES_PREF = "calculateInferences";
+	public static final String SEMEX_USE_LABELS_PREF = "semexUseLabels";
 	public static final String INSIGHTKB = "insights";
 }
