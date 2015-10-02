@@ -6,6 +6,8 @@
 package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.poi.main.ImportData;
+import gov.va.semoss.poi.main.ImportMetadata;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -96,5 +98,19 @@ public class EngineUtil2 {
 		}
 
 		return ReificationStyle.fromUri( reif );
+	}
+
+	public static ImportData createImportData( IEngine eng ) {
+		ImportMetadata metas = null;
+		if ( null == eng ) {
+			metas = new ImportMetadata();
+		}
+		else {
+			metas = new ImportMetadata( eng.getBaseUri(), eng.getSchemaBuilder(),
+					eng.getDataBuilder() );
+			metas.setNamespaces( eng.getNamespaces() );
+		}
+
+		return new ImportData( metas );
 	}
 }

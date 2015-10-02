@@ -66,10 +66,7 @@ public class Perspective {
 	//Description getter/setter:
 	//--------------------------
 	public String getDescription() {
-		if ( description == null ) {
-			description = "";
-		}
-		return description;
+		return ( null == description ? "" : description );
 	}
 
 	public void setDescription( String description ) {

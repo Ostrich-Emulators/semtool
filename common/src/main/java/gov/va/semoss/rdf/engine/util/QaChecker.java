@@ -31,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.OWL;
@@ -91,9 +92,9 @@ public class QaChecker {
 					make();
 			dataNodes = db.treeMapCreate( "datanodes" ).make();
 			relationCache = db.treeMapCreate( "relations" ).make();
-			instanceClassCache = db.treeMapCreate( "instances" ).makeStringMap();
-			relationBaseClassCache = db.treeMapCreate( "relationclasses" ).makeStringMap();
-			propertyClassCache = db.treeMapCreate( "propclasses" ).makeStringMap();
+			instanceClassCache = db.treeMapCreate( "instances" ).keySerializer( Serializer.STRING ).make();
+			relationBaseClassCache = db.treeMapCreate( "relationclasses" ).keySerializer( Serializer.STRING ).make();
+			propertyClassCache = db.treeMapCreate( "propclasses" ).keySerializer( Serializer.STRING ).make();
 		}
 	}
 
@@ -215,7 +216,7 @@ public class QaChecker {
 		String otype = data.getObjectType();
 
 		DataIterator di = data.iterator();
-		while( di.hasNext() ){
+		while ( di.hasNext() ) {
 			LoadingNodeAndPropertyValues nap = di.next();
 			// check that the subject and object are in our instance cache
 			ConceptInstanceCacheKey skey

@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -493,8 +494,7 @@ public class Utility {
 
 		return (Map<X, String>) retHash;
 	}
-
-
+	
 	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
 
 		public final Resource r;

@@ -11,9 +11,9 @@ import gov.va.semoss.poi.main.LoadingSheetData;
 import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.util.DeterministicSanitizer;
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
@@ -123,7 +123,7 @@ public class SemossEdgeModelerTest {
 		nodes = LoadingSheetData.nodesheet( "Human Being" );
 		nodes.addProperties( Arrays.asList( "First Name", "Last Name" ) );
 
-		data = GuiUtility.createImportData( engine );
+		data = EngineUtil2.createImportData( engine );
 		data.add( rels );
 		data.add( nodes );
 	}
@@ -283,7 +283,7 @@ public class SemossEdgeModelerTest {
 		LoadingSheetData oranges = LoadingSheetData.relsheet( "Person", "Orange", "hates" );
 		LoadingNodeAndPropertyValues orange = oranges.add( "John", "Golden Delicious" );
 
-		ImportData id = GuiUtility.createImportData( engine );
+		ImportData id = EngineUtil2.createImportData( engine );
 		id.add( apples );
 		id.add( oranges );
 

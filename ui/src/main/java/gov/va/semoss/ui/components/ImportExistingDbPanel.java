@@ -401,7 +401,7 @@ public class ImportExistingDbPanel extends JPanel {
 							ImportDataProcessor.clearEngine( engine, file.getFiles() );
 						}
 						try {
-							ImportData errs = ( conformance ? GuiUtility.createImportData( eng )
+							ImportData errs = ( conformance ? EngineUtil2.createImportData( eng )
 									: null );
 							EngineLoader el = new EngineLoader( stageInMemory );
 							el.setDefaultBaseUri( defaultBaseUri,

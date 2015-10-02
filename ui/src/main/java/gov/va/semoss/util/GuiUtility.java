@@ -304,18 +304,4 @@ public class GuiUtility {
 		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
 		log.debug( "Resetting the " + tableKey + " table model." );
 	}
-
-	public static ImportData createImportData( IEngine eng ) {
-		ImportMetadata metas = null;
-		if ( null == eng ) {
-			metas = new ImportMetadata();
-		}
-		else {
-			metas = new ImportMetadata( eng.getBaseUri(), eng.getSchemaBuilder(),
-					eng.getDataBuilder() );
-			metas.setNamespaces( eng.getNamespaces() );
-		}
-
-		return new ImportData( metas );
-	}
 }

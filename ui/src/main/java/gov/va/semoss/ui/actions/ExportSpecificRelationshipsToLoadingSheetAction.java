@@ -34,6 +34,7 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.util.Constants;
@@ -297,7 +298,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 			@Override
 			public void run() {
 				DBToLoadingSheetExporter exper = new DBToLoadingSheetExporter( getEngine() );
-				ImportData data = GuiUtility.createImportData( getEngine() );
+				ImportData data = EngineUtil2.createImportData( getEngine() );
 				exper.exportTheseRelationships( selectedTriples, data );
 
 				if ( togrid.isSelected() ) {

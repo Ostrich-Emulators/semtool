@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import org.openrdf.model.URI;
 
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.ui.components.UriComboBox.UriLabelPair;
 import gov.va.semoss.util.GuiUtility;
@@ -199,7 +200,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 			@Override
 			public void run() {
 				DBToLoadingSheetExporter exper = new DBToLoadingSheetExporter( engine );
-				ImportData data = GuiUtility.createImportData( engine );
+				ImportData data = EngineUtil2.createImportData( engine );
 				exper.exportNodes( selectedNodes, data );
 
 				if ( dorels.isSelected() ) {

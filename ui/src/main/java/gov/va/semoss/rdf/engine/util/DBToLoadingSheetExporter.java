@@ -32,7 +32,6 @@ import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
 
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,7 +64,7 @@ public class DBToLoadingSheetExporter {
 	public ImportData runExport( boolean runNodeExport, boolean runRelationshipExport ) {
 		List<URI> nodes = NodeDerivationTools.createConceptList( getEngine() );
 
-		ImportData data = GuiUtility.createImportData( engine );
+		ImportData data = EngineUtil2.createImportData( engine );
 
 		if ( runNodeExport ) {
 			exportNodes( nodes, data );
