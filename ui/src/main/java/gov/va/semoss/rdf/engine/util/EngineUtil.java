@@ -64,7 +64,6 @@ import info.aduna.iteration.Iterations;
 import java.io.InputStream;
 import java.net.URL;
 import org.apache.commons.io.FilenameUtils;
-import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.Repository;
@@ -812,32 +811,6 @@ public class EngineUtil implements Runnable {
 		imi.addAll( loader.getPerspectives(), false );
 	}
 
-	public static void clear( IEngine engine ) throws RepositoryException {
-		try {
-			final Map<URI, Value> metas = engine.query( new MetadataQuery() );
-			metas.remove( VAS.Database );
-
-			engine.execute( new ModificationExecutorAdapter( true ) {
-
-				@Override
-				public void exec( RepositoryConnection conn ) throws RepositoryException {
-					conn.remove( (Resource) null, null, null );
-					ValueFactory vf = conn.getValueFactory();
-
-					// re-add the metadata
-					for ( Map.Entry<URI, Value> en : metas.entrySet() ) {
-						conn.add( engine.getBaseUri(),
-								URI.class.cast( EngineLoader.cleanValue( en.getKey(), vf ) ),
-								EngineLoader.cleanValue( en.getValue(), vf ) );
-					}
-				}
-			} );
-		}
-		catch ( MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-		}
-	}
-
 	private static List<Statement> getStatementsFromResource( URL resource,
 			RDFFormat fmt ) {
 		List<Statement> stmts = new ArrayList<>();
@@ -877,41 +850,6 @@ public class EngineUtil implements Runnable {
 		}
 
 		return stmts;
-	}
-
-	public static String getEngineLabel( IEngine engine ) {
-		String label = engine.getEngineName();
-		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
-		engine.queryNoEx( mq );
-		String str = mq.getString();
-		if ( null != str ) {
-			label = str;
-		}
-		return label;
-	}
-
-	/**
-	 * Gets the reification model URI from the given engine
-	 *
-	 * @param engine
-	 * @return return the reification model, or {@link Constants#NONODE} if none
-	 * is defined
-	 */
-	public static ReificationStyle getReificationStyle( IEngine engine ) {
-		URI reif = Constants.NONODE;
-		if ( null != engine ) {
-			MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
-			try {
-				engine.query( mq );
-				Value str = mq.getOne();
-				reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
-			}
-			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-				// don't care
-			}
-		}
-
-		return ReificationStyle.fromUri( reif );
 	}
 
 	public static class DbCloneMetadata {

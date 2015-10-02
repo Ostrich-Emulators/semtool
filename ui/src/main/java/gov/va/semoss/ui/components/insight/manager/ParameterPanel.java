@@ -11,7 +11,6 @@ import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -167,7 +166,7 @@ public class ParameterPanel extends DataPanel<Parameter> {
   private void conceptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conceptbtnActionPerformed
 
 		List<URI> uris = NodeDerivationTools.createConceptList( getEngine() );
-		Map<URI, String> labels = GuiUtility.getInstanceLabels( uris, getEngine() );
+		Map<URI, String> labels = Utility.getInstanceLabels( uris, getEngine() );
 		labels = Utility.sortUrisByLabel( labels );
 
 		Parameter parameter = getElement();

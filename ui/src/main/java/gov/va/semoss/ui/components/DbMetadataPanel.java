@@ -40,6 +40,7 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.UriBuilder;
 
 import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.HeadlessException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -225,7 +226,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 			if ( metadata.containsKey( VAS.ReificationModel ) ) {
 				URI reif = URI.class.cast( metadata.get( VAS.ReificationModel ) );
 				metadata.put(VAS.ReificationModel,
-						new LiteralImpl( GuiUtility.getInstanceLabel( reif, eng ) ) );
+						new LiteralImpl( Utility.getInstanceLabel( reif, eng ) ) );
 			}
 
 			for ( Map.Entry<URI, String> en : mq.asStrings().entrySet() ) {

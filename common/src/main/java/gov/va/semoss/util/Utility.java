@@ -22,8 +22,10 @@ package gov.va.semoss.util;
 import gov.va.semoss.model.vocabulary.SEMOSS;
 import gov.va.semoss.model.vocabulary.VAC;
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.MetadataConstants;
 
+import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,29 +35,41 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.openrdf.model.BNode;
 import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
@@ -340,7 +354,147 @@ public class Utility {
 				return new NTriplesWriter( out );
 		}
 	}
+	
+		/**
+	 * Overload on the above method, to get the URI's label from the passed-in uri
+	 * string. If the passed-in value is not a URI, then the above method is
+	 * called to extract the ending word, after the last "/".
+	 *
+	 * This method calls "String getInstanceLabel(URI uri, IEngine eng)" and
+	 * "String getInstanceName(String uri)".
+	 *
+	 * @param uri -- (String) A string URI.
+	 * @param eng -- (IEngine) The active query engine.
+	 *
+	 * @return getInstanceName -- (String) Described above.
+	 */
+	public static String getInstanceName( String uri, IEngine eng ) {
+		String strReturnValue;
 
+		//If the string is really a URI, then return its label:
+		try {
+			ValueFactory vf = new ValueFactoryImpl();
+			URI uriURI = vf.createURI( uri );
+			strReturnValue = getInstanceLabel( uriURI, eng );
+
+			//If the previous method call returned nothing,
+			//then extract the ending word of the URI's string:
+			if ( null == strReturnValue || strReturnValue.equals( "" ) ) {
+				strReturnValue = getInstanceName( uri );
+			}
+			//Otherwise, simply return the input string:
+		}
+		catch ( IllegalArgumentException e ) {
+			strReturnValue = uri;
+		}
+		return strReturnValue;
+	}
+
+		/**
+	 * Splits up a string URI into tokens based on "/" character, and uses logic
+	 * to return the instance name. If the input string is not a URI, then it is
+	 * returned unmodified.
+	 *
+	 * @param uri -- (String) to be split into tokens.
+	 *
+	 * @return getInstanceName -- (String) Described above.
+	 */
+	public static String getInstanceName( String uri ) {
+		try {
+			//If the string is really a URI, then return its right end:
+			new ValueFactoryImpl().createURI( uri );
+			//This code block will only continue if the passed-in value
+			//can be converted into an absolute URI:
+
+			String uris[] = uri.split( "/" );
+			return uris[uris.length - 1];
+		}
+		catch ( IllegalArgumentException e ) {
+		}
+
+		//Otherwise, simply return the input string:
+		return uri;
+	}
+	
+	/**
+	 * A convenience function to {@link #getInstanceLabels(java.util.Collection,
+	 * gov.va.semoss.rdf.engine.api.IEngine) } when you only have a single URI. If
+	 * you have more than one URI, {@link #getInstanceLabels(java.util.Collection,
+	 * gov.va.semoss.rdf.engine.api.IEngine) } is much more performant.
+	 *
+	 * @param eng where to get the label from
+	 * @param uri the uri we need a label for
+	 *
+	 * @return the label, or the localname if no label is in the engine
+	 */
+	public static <X extends Resource> String getInstanceLabel( X uri, IEngine eng ) {
+		return getInstanceLabels( Arrays.asList( uri ), eng ).get( uri );
+	}
+
+	/**
+	 * Gets labels for the given uris from the given engine. If the engine doesn't
+	 * contain a {@link RDFS#LABEL} element, just use a
+	 * {@link URLDecoder#decode(java.lang.String, java.lang.String) URLDecoded}
+	 * version of the local name
+	 *
+	 * @param uris the URIs to retrieve the labels from
+	 * @param eng the engine to search for labels
+	 *
+	 * @return a map of URI=&gt;label
+	 */
+	public static <X extends Resource> Map<X, String>
+			getInstanceLabels( final Collection<X> uris, IEngine eng ) {
+		if ( uris.isEmpty() ) {
+			return new HashMap<>();
+		}
+
+		final Map<Resource, String> retHash = new HashMap<>();
+
+		StringBuilder sb
+				= new StringBuilder( "SELECT ?s ?label WHERE { ?s rdfs:label ?label }" );
+		sb.append( " VALUES ?s {" );
+		for ( Resource uri : uris ) {
+			if ( null == uri ) {
+				log.warn( "trying to find the label of a null Resource? (probably a bug)" );
+			}
+			else {
+				sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+			}
+		}
+		sb.append( "}" );
+
+		VoidQueryAdapter vqa = new VoidQueryAdapter( sb.toString() ) {
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				String lbl = set.getValue( "label" ).stringValue();
+				retHash.put( fac.createURI( set.getValue( "s" ).stringValue() ), lbl );
+			}
+		};
+		try {
+			eng.query( vqa );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			log.warn( sb, e );
+		}
+
+		// add any URIs that don't have a label, but were in the argument collection
+		Set<Resource> todo = new HashSet<>( uris );
+		todo.removeAll( retHash.keySet() );
+		for ( Resource u : todo ) {
+			if ( u instanceof URI ) {
+				retHash.put( u, URI.class.cast( u ).getLocalName() );
+			}
+			else if ( u instanceof BNode ) {
+				retHash.put( u, BNode.class.cast( u ).getID() );
+			}
+			else {
+				retHash.put( u, u.stringValue() );
+			}
+		}
+
+		return (Map<X, String>) retHash;
+	}
+	
 	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
 
 		public final Resource r;

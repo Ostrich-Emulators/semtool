@@ -289,7 +289,7 @@ public class EngineLoader {
 			}
 
 			// create all metamodel triples, even if we don't add them to the repository
-			EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
+			EdgeModeler modeler = getEdgeModeler( EngineUtil2.getReificationStyle( engine ) );
 			myrc.begin();
 			modeler.createMetamodel( data, namespaces, myrc );
 			myrc.commit();
@@ -411,7 +411,7 @@ public class EngineLoader {
 		ImportMetadata metas = alldata.getMetadata();
 		Map<String, String> namespaces = engine.getNamespaces();
 		namespaces.putAll( metas.getNamespaces() );
-		EdgeModeler modeler = getEdgeModeler( EngineUtil.getReificationStyle( engine ) );
+		EdgeModeler modeler = getEdgeModeler( EngineUtil2.getReificationStyle( engine ) );
 
 		try {
 			myrc.begin();

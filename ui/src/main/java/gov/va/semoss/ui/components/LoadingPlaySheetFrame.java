@@ -16,7 +16,7 @@ import gov.va.semoss.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import gov.va.semoss.poi.main.XlsWriter;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.rdf.engine.util.QaChecker;
 import gov.va.semoss.ui.actions.AbstractSavingAction;
 import gov.va.semoss.ui.actions.DbAction;
@@ -202,7 +202,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 
 	public ProgressTask getLoadingTask() {
 		String t = "Loading data" + ( isLoadable() ? " to "
-				+ EngineUtil.getEngineLabel( getEngine() ) : "" );
+				+ EngineUtil2.getEngineLabel( getEngine() ) : "" );
 		final String error[] = new String[1];
 		ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
 			@Override
@@ -374,7 +374,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			super( "Import Data", DbAction.getIcon( "importdb" ) );
 			if ( isLoadable() ) {
 				putValue( Action.SHORT_DESCRIPTION, "Commit this data to "
-						+ EngineUtil.getEngineLabel( getEngine() ) );
+						+ EngineUtil2.getEngineLabel( getEngine() ) );
 			}
 			else {
 				putValue( Action.SHORT_DESCRIPTION, "Commit this data to a DB" );
@@ -401,7 +401,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
-			final ImportData importdata = GuiUtility.createImportData( engine );
+			final ImportData importdata = EngineUtil2.createImportData( engine );
 
 			final int progressPerTab = 100 / sheets.size();
 			for ( LoadingPlaySheetBase c : sheets ) {
@@ -433,11 +433,11 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 						updateProgress( "Preparing data", 0 );
 
 						try {
-							String ename = EngineUtil.getEngineLabel( engine );
+							String ename = EngineUtil2.getEngineLabel( engine );
 
 							if ( doreplace ) {
 								updateProgress( "Clearing " + ename, 15 );
-								EngineUtil.clear( engine );
+								EngineUtil2.clear( engine );
 							}
 
 							updateProgress( "Loading data to " + ename, 50 );
@@ -503,7 +503,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			JPanel questions = new JPanel();
 			questions.setLayout( new BoxLayout( questions, BoxLayout.PAGE_AXIS ) );
 			top.add( new JLabel( "Commit this data to "
-					+ EngineUtil.getEngineLabel( engine ) + "?" ),
+					+ EngineUtil2.getEngineLabel( engine ) + "?" ),
 					BorderLayout.NORTH );
 			top.add( questions, BorderLayout.CENTER );
 
@@ -586,7 +586,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 			showerrs.setVisible( true );
 
 			final String t
-					= "Checking Conformance against " + EngineUtil.getEngineLabel( eng );
+					= "Checking Conformance against " + EngineUtil2.getEngineLabel( eng );
 			int progressPerTab = 100 / sheets.size();
 			boolean ok[] = { true };
 			ProgressTask pt = new DisappearingProgressBarTask( t, new Runnable() {
@@ -683,7 +683,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 				}
 			}
 
-			ImportData data = GuiUtility.createImportData( getEngine() );
+			ImportData data = EngineUtil2.createImportData( getEngine() );
 			fillImportData( data, dogoods, dobads );
 
 			for ( LoadingSheetData lsd : data.getSheets() ) {

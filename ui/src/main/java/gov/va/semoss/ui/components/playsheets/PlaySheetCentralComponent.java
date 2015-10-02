@@ -8,8 +8,8 @@ package gov.va.semoss.ui.components.playsheets;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.api.IPlaySheet;
-import gov.va.semoss.util.GuiUtility;
 
+import gov.va.semoss.util.Utility;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
@@ -180,7 +180,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 			}
 		}
 
-		Map<URI, String> labels = GuiUtility.getInstanceLabels( needLabels, eng );
+		Map<URI, String> labels = Utility.getInstanceLabels( needLabels, eng );
 		ListIterator<Value[]> valit = data.listIterator();
 		while ( valit.hasNext() ) {
 			Value[] valarr = valit.next();

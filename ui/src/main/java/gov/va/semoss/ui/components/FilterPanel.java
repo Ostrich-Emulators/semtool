@@ -15,7 +15,7 @@ import gov.va.semoss.ui.components.models.VertexFilterTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
 import gov.va.semoss.util.Constants;
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.Component;
 import java.util.Arrays;
 import javax.swing.JTable;
@@ -210,7 +210,7 @@ public class FilterPanel extends javax.swing.JPanel {
 			if ( val instanceof URI ) {
 				URI uri = URI.class.cast( val );
 				ret = ( null == engine ? uri.getLocalName()
-						: GuiUtility.getInstanceLabel( Resource.class.cast( val ), engine ) );
+						: Utility.getInstanceLabel( Resource.class.cast( val ), engine ) );
 				cache( val, ret );
 			}
 			else if ( val instanceof Literal ) {

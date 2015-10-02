@@ -15,7 +15,7 @@ import static gov.va.semoss.rdf.engine.util.EngineLoader.cleanValue;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -31,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.OWL;
@@ -84,16 +85,16 @@ public class QaChecker {
 		else {
 			backingfile = f;
 			log.debug( "QA backing file is: " + backingfile );
-			db = DBMaker.newFileDB( f ).
+			db = DBMaker.fileDB( f ).
 					deleteFilesAfterClose().
-					mmapFileEnable().
+					fileMmapEnable().
 					transactionDisable().
 					make();
-			dataNodes = db.createTreeMap( "datanodes" ).make();
-			relationCache = db.createTreeMap( "relations" ).make();
-			instanceClassCache = db.createTreeMap( "instances" ).makeStringMap();
-			relationBaseClassCache = db.createTreeMap( "relationclasses" ).makeStringMap();
-			propertyClassCache = db.createTreeMap( "propclasses" ).makeStringMap();
+			dataNodes = db.treeMapCreate( "datanodes" ).make();
+			relationCache = db.treeMapCreate( "relations" ).make();
+			instanceClassCache = db.treeMapCreate( "instances" ).keySerializer( Serializer.STRING ).make();
+			relationBaseClassCache = db.treeMapCreate( "relationclasses" ).keySerializer( Serializer.STRING ).make();
+			propertyClassCache = db.treeMapCreate( "propclasses" ).keySerializer( Serializer.STRING ).make();
 		}
 	}
 
@@ -182,7 +183,7 @@ public class QaChecker {
 			log.error( "this engine does not have a schema or data URI defined" );
 		}
 
-		if ( ReificationStyle.LEGACY == EngineUtil.getReificationStyle( engine ) ) {
+		if ( ReificationStyle.LEGACY == EngineUtil2.getReificationStyle( engine ) ) {
 			loadLegacy( engine );
 		}
 		else {
@@ -215,7 +216,7 @@ public class QaChecker {
 		String otype = data.getObjectType();
 
 		DataIterator di = data.iterator();
-		while( di.hasNext() ){
+		while ( di.hasNext() ) {
 			LoadingNodeAndPropertyValues nap = di.next();
 			// check that the subject and object are in our instance cache
 			ConceptInstanceCacheKey skey
@@ -480,7 +481,7 @@ public class QaChecker {
 
 			vqa2.useInferred( false );
 			List<URI[]> data = engine.query( vqa2 );
-			Map<URI, String> labels = GuiUtility.getInstanceLabels( needlabels, engine );
+			Map<URI, String> labels = Utility.getInstanceLabels( needlabels, engine );
 			for ( URI[] uris : data ) {
 				cacheRelationNode( uris[5], labels.get( uris[0] ),
 						labels.get( uris[1] ), labels.get( uris[2] ),

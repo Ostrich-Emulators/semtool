@@ -25,7 +25,7 @@ import gov.va.semoss.ui.transformer.LabelTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.PropComparator;
 
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -153,7 +153,7 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 
 		props.removeAll( labels.keySet() );
 		if ( !( props.isEmpty() || null == engine ) ) {
-			labels.putAll(GuiUtility.getInstanceLabels( props, engine ) );
+			labels.putAll( Utility.getInstanceLabels( props, engine ) );
 		}
 	}
 }

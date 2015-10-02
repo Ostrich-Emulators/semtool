@@ -30,7 +30,7 @@ import gov.va.semoss.ui.helpers.GraphShapeRepository;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
 
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.event.MouseAdapter;
@@ -79,7 +79,7 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		}
 
 		IEngine eng = DIHelper.getInstance().getRdfEngine();
-		Map<URI, String> labels = GuiUtility.getInstanceLabels( shapes.keySet(), eng );
+		Map<URI, String> labels = Utility.getInstanceLabels( shapes.keySet(), eng );
 
 		removeAll();
 		selVs.clear();

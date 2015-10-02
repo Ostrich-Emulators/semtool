@@ -30,7 +30,7 @@ import gov.va.semoss.ui.components.api.GraphListener;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,7 +134,7 @@ public class ControlData implements GraphListener {
 	public String getLabel( URI uri ) {
 		if ( !labelcache.containsKey( uri ) ) {
 			String l = ( null == engine ? uri.getLocalName()
-					: GuiUtility.getInstanceLabel( uri, engine ) );
+					: Utility.getInstanceLabel( uri, engine ) );
 			labelcache.put( uri, l );
 		}
 		return labelcache.get( uri );

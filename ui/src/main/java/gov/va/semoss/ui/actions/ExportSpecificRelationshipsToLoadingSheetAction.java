@@ -34,6 +34,7 @@ import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.engine.util.DBToLoadingSheetExporter;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.ui.components.UriComboBox;
 import gov.va.semoss.util.Constants;
@@ -45,6 +46,7 @@ import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.ProgressTask;
 
+import gov.va.semoss.util.Utility;
 import java.io.IOException;
 
 import javax.swing.JCheckBox;
@@ -296,7 +298,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 			@Override
 			public void run() {
 				DBToLoadingSheetExporter exper = new DBToLoadingSheetExporter( getEngine() );
-				ImportData data = GuiUtility.createImportData( getEngine() );
+				ImportData data = EngineUtil2.createImportData( getEngine() );
 				exper.exportTheseRelationships( selectedTriples, data );
 
 				if ( togrid.isSelected() ) {
@@ -444,7 +446,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		Map<URI, String> labels = new HashMap<>();
 		try {
 			List<URI> uris = getEngine().query( query );
-			labels.putAll(GuiUtility.getInstanceLabels( uris, getEngine() ) );
+			labels.putAll( Utility.getInstanceLabels( uris, getEngine() ) );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
@@ -490,7 +492,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		}
 		
 		relCB.setEditable( false );
-		relCB.setData(GuiUtility.getInstanceLabels( values, getEngine() ) );
+		relCB.setData( Utility.getInstanceLabels( values, getEngine() ) );
 
 		dialog.pack();
 	}
@@ -515,7 +517,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 			int index = getIndexNumber( evt );
 
 			UriComboBox objs = objectComboBoxes.get( index );
-			objs.setData(GuiUtility.getInstanceLabels( results, getEngine() ) );
+			objs.setData( Utility.getInstanceLabels( results, getEngine() ) );
 			objs.setEditable( false );
 
 			if ( objs.getSelectedItem() != null ) {

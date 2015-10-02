@@ -38,7 +38,7 @@ public abstract class ListOfMapsQueryAdapter<T> extends ListQueryAdapter<Map<Str
   protected abstract T convertValue( String variable, Value v, ValueFactory fac );
 
   public static ListOfMapsQueryAdapter<String> forStrings( String sparql ) {
-    ListOfMapsQueryAdapter<String> q = new ListOfMapsQueryAdapter<String>() {
+    ListOfMapsQueryAdapter<String> q = new ListOfMapsQueryAdapter<String>( sparql ) {
 
       @Override
       protected String convertValue( String variable, Value v, ValueFactory fac ) {

@@ -13,7 +13,7 @@ import gov.va.semoss.rdf.engine.util.EngineConsistencyChecker;
 import gov.va.semoss.rdf.engine.util.EngineConsistencyChecker.Hit;
 import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.util.MultiMap;
-import gov.va.semoss.util.GuiUtility;
+import gov.va.semoss.util.Utility;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -36,7 +36,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.BadLocationException;
@@ -93,7 +92,7 @@ public class ConsistencyPlaySheet extends GridRAWPlaySheet {
 			}
 		}
 
-		labels.putAll(GuiUtility.getInstanceLabels( needlabels, engine ) );
+		labels.putAll( Utility.getInstanceLabels( needlabels, engine ) );
 
 		float min = Float.MAX_VALUE;
 		float max = -Float.MAX_VALUE;
