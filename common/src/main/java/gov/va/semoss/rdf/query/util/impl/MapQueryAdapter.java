@@ -6,28 +6,28 @@
 package gov.va.semoss.rdf.query.util.impl;
 
 import gov.va.semoss.rdf.query.util.QueryExecutorAdapter;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  *
  * @author John Marquiss
  */
-public abstract class MapQueryAdapter<T> extends QueryExecutorAdapter<Map<String,String>> {
+public abstract class MapQueryAdapter<T,V> extends QueryExecutorAdapter<Map<T, V>> {
   public MapQueryAdapter() {
-    result = new TreeMap<String,String>();
+    result = new HashMap<>();
   }
 
   public MapQueryAdapter( String sparq ) {
     super( sparq );
-    result = new TreeMap<String,String>();
+    result = new HashMap<>();
   }
 
   public void clear() {
     result.clear();
   }
   
-  public void add( String k, String v ){
+  public void add( T k, V v ){
     result.put( k, v );
   }
 }

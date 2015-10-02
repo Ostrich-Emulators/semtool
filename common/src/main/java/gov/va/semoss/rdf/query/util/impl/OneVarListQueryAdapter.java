@@ -9,7 +9,6 @@ import java.util.List;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 
 /**
@@ -96,9 +95,8 @@ public abstract class OneVarListQueryAdapter<T> extends ListQueryAdapter<T> {
 
 	public static OneVarListQueryAdapter<String> getLabels( URI subject ) {
 		OneVarListQueryAdapter<String> query
-				= getStringList( "SELECT ?label WHERE { ?s ?labelpred ?label }", "label" );
+				= getStringList( "SELECT ?label WHERE { ?s rdfs:label ?label }" );
 		query.bind( "s", subject );
-		query.bind( "labelpred", RDFS.LABEL );
 		return query;
 	}
 }
