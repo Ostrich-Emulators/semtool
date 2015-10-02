@@ -13,7 +13,6 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.ui.components.renderers.LabeledPairRenderer;
 import gov.va.semoss.util.Constants;
 
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -138,7 +137,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 
 			@Override
 			protected Action makeTypeItem( QueryNode v, GraphicalQueryPanel pnl ) {
-				Map<URI, String> labels = GuiUtility.getInstanceLabels(
+				Map<URI, String> labels = Utility.getInstanceLabels(
 						NodeDerivationTools.createConceptList( pnl.getEngine() ), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
@@ -151,7 +150,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 				Collection<URI> props
 						= getAllPossibleProperties( v.getType(), pnl.getEngine() );
 
-				Map<URI, String> propmap = GuiUtility.getInstanceLabels( props, pnl.getEngine() );
+				Map<URI, String> propmap = Utility.getInstanceLabels( props, pnl.getEngine() );
 				propmap.put( Constants.ANYNODE, "<Any>" );
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
 						"Add a constraint to this Vertex", "New Value", propmap ) );
@@ -212,7 +211,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 			props.remove( RDF.TYPE );
 			JList<URI> cons = new JList<>( props.toArray( new URI[0] ) );
 			LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
-			renderer.cache(GuiUtility.getInstanceLabels( props, pnl.getEngine() ) );
+			renderer.cache( Utility.getInstanceLabels( props, pnl.getEngine() ) );
 			cons.setCellRenderer( renderer );
 
 			String[] choices = { "OK", "Cancel" };

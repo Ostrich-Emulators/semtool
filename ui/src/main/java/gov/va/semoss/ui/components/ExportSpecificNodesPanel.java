@@ -31,6 +31,7 @@ import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.actions.ExportLoadingSheetAction;
 import gov.va.semoss.util.DIHelper;
 
+import gov.va.semoss.util.Utility;
 import java.awt.Desktop;
 import java.util.Map;
 
@@ -119,7 +120,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 
 	private URI[] getAllNodes() {
 		List<URI> uriconcepts = NodeDerivationTools.createConceptList( engine );
-		Map<URI, String> labels = GuiUtility.getInstanceLabels( uriconcepts, engine );
+		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 
 		List<UriLabelPair> pairs = new ArrayList<>();

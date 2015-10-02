@@ -250,7 +250,8 @@ public class SearchController implements KeyListener, FocusListener,
 					needLabels.addAll( e.getProperties().keySet() );
 				}
 
-				Map<Resource, String> labels = GuiUtility.getInstanceLabels( needLabels, engine );
+				Map<Resource, String> labels 
+						= Utility.getInstanceLabels( needLabels, engine );
 				RepositoryIndexer ri = new RepositoryIndexer( labels );
 
 				for ( SEMOSSEdge e : graph.getEdges() ) {

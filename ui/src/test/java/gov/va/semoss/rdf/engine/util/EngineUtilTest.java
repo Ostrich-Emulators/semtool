@@ -192,58 +192,6 @@ public class EngineUtilTest {
 		}
 	}
 
-	@Test
-	public void testClear() throws Exception {
-		StatementAddingExecutor sae = new StatementAddingExecutor();
-		sae.addStatement( new StatementImpl( RDFS.DATATYPE, RDFS.LABEL,
-				new LiteralImpl( "test label" ) ) );
-		eng.execute( sae );
-
-		ListQueryAdapter<URI> q
-				= OneVarListQueryAdapter.getUriList( "SELECT ?s WHERE { ?s rdfs:label ?o }" );
-
-		List<URI> addeduris = new ArrayList<>( eng.queryNoEx( q ) );
-		q.clear();
-
-		EngineUtil.clear( eng );
-		List<URI> newuris = eng.queryNoEx( q );
-
-		assertNotEquals( addeduris, newuris );
-		assertTrue( newuris.isEmpty() );
-	}
-
-	@Test
-	public void testGetLabel() throws Exception {
-
-		assertEquals( eng.getEngineName(), EngineUtil.getEngineLabel( eng ) );
-
-		String expected = "TEST LABEL";
-		StatementAddingExecutor sae = new StatementAddingExecutor();
-		sae.addStatement( new StatementImpl( eng.getBaseUri(), RDFS.LABEL,
-				new LiteralImpl( expected ) ) );
-
-		eng.execute( sae );
-
-		String label = EngineUtil.getEngineLabel( eng );
-		assertEquals( expected, label );
-	}
-
-	@Test
-	public void testReifStyle() throws Exception {
-		assertEquals( ReificationStyle.LEGACY, EngineUtil.getReificationStyle( eng ) );
-
-		assertEquals( ReificationStyle.LEGACY, EngineUtil.getReificationStyle( null ) );
-
-		StatementAddingExecutor sae = new StatementAddingExecutor();
-		sae.addStatement( new StatementImpl( eng.getBaseUri(), VAS.ReificationModel,
-				VAS.W3C_Reification ) );
-
-		eng.execute( sae );
-
-		ReificationStyle reif = EngineUtil.getReificationStyle( eng );
-		assertEquals( ReificationStyle.W3C, reif );
-	}
-
 	// @Test
 	// RPB: this function needs GUI elements, so even if
 	// it works on a dev machine, it'll fail on the server

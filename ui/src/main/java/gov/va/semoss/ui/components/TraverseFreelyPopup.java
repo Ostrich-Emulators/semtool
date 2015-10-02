@@ -32,7 +32,6 @@ import gov.va.semoss.rdf.engine.util.NodeDerivationTools;
 import gov.va.semoss.rdf.query.util.impl.ModelQueryAdapter;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.ui.transformer.LabelTransformer;
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.Utility;
 import java.util.Arrays;
@@ -64,8 +63,8 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 			GraphPlaySheet ps, Collection<SEMOSSVertex> picked, boolean instance ) {
 		super( "Traverse Freely: "
 				+ ( instance
-						? LabelTransformer.chop( GuiUtility.getInstanceLabel( vertex.getURI(), e ), 30 )
-						: "All " + GuiUtility.getInstanceLabel( vertex.getType(), e ) + "(s) " ) );
+						? LabelTransformer.chop( Utility.getInstanceLabel( vertex.getURI(), e ), 30 )
+						: "All " + Utility.getInstanceLabel( vertex.getType(), e ) + "(s) " ) );
 		this.isInstance = instance;
 		this.gps = ps;
 		this.engine = e;
@@ -123,8 +122,7 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 		neighborTypes.removeAll( Arrays.asList( RDFS.RESOURCE, RDFS.CLASS,
 				OWL.NOTHING, OWL.THING, OWL.CLASS ) );
 
-		Map<URI, String> labelmap
-				= GuiUtility.getInstanceLabels( neighborTypes, engine );
+		Map<URI, String> labelmap	= Utility.getInstanceLabels( neighborTypes, engine );
 		labelmap = Utility.sortUrisByLabel( labelmap );
 
 		if ( !labelmap.isEmpty() ) {

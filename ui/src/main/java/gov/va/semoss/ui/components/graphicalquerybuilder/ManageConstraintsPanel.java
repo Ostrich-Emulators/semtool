@@ -13,7 +13,6 @@ import gov.va.semoss.ui.components.graphicalquerybuilder.GraphicalQueryPanel.Que
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.Constants;
 
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +65,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 		LabeledPairTableCellRenderer renderer
 				= LabeledPairTableCellRenderer.getUriPairRenderer();
 		Set<URI> labels = getAllProperties( elements );
-		renderer.cache( GuiUtility.getInstanceLabels( labels, engine ) );
+		renderer.cache( Utility.getInstanceLabels( labels, engine ) );
 
 		LabeledPairTableCellRenderer trenderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( engine );
@@ -197,7 +196,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 			super();
 			concepts = NodeDerivationTools.createConceptList( eng );
 			conceptmap
-					= Utility.sortUrisByLabel( GuiUtility.getInstanceLabels( concepts, eng ) );
+					= Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, eng ) );
 			engine = eng;
 			graph = gr;
 		}
@@ -234,7 +233,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 
 						List<URI> links = NodeDerivationTools.getPredicatesBetween( starttype,
 								endtype, engine );
-						Map<URI, String> labels = GuiUtility.getInstanceLabels( links, engine );
+						Map<URI, String> labels = Utility.getInstanceLabels( links, engine );
 						labels.put( Constants.ANYNODE, "<Any>" );
 						types.setChoices( Utility.sortUrisByLabel( labels ) );
 					}

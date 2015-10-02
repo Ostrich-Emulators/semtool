@@ -36,7 +36,6 @@ import gov.va.semoss.ui.transformer.VertexStrokeTransformer;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
 
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -193,7 +192,8 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
 
 						List<URI> concepts = NodeDerivationTools.createConceptList( engine );
-						Map<URI, String> conceptlabels = GuiUtility.getInstanceLabels( concepts, engine );
+						Map<URI, String> conceptlabels 
+								= Utility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );
 

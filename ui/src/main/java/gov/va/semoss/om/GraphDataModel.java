@@ -140,7 +140,7 @@ public class GraphDataModel {
 			}
 
 			Map<URI, String> edgelabels
-					= GuiUtility.getInstanceLabels( model.predicates(), engine );
+					= Utility.getInstanceLabels( model.predicates(), engine );
 			for ( Statement s : model ) {
 
 				String edgekey = s.getPredicate().stringValue()

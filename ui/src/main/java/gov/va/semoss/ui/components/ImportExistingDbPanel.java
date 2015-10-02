@@ -25,7 +25,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.actions.OpenAction;
@@ -125,7 +125,7 @@ public class ImportExistingDbPanel extends JPanel {
 		ImportExistingDbPanel iedp = new ImportExistingDbPanel( eng );
 		iedp.setFiles( files );
 
-		String ename = EngineUtil.getEngineLabel( eng );
+		String ename = EngineUtil2.getEngineLabel( eng );
 		Object options[] = { "Import to " + ename, "Cancel" };
 
 		int opt = JOptionPane.showOptionDialog( frame, iedp,

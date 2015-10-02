@@ -19,12 +19,12 @@ import org.apache.log4j.Logger;
 
 import gov.va.semoss.ui.components.CheckConsistencyPanel;
 import gov.va.semoss.ui.components.PlaySheetFrame;
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.ui.components.ProgressTask;
 import gov.va.semoss.ui.components.playsheets.ConsistencyPlaySheet;
 import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.MultiMap;
 
+import gov.va.semoss.util.Utility;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +111,7 @@ public class CheckConsistencyAction extends DbAction {
 
 					PlaySheetFrame psf = null;
 
-					Map<URI, String> labels = GuiUtility.getInstanceLabels( nodes, getEngine() );
+					Map<URI, String> labels = Utility.getInstanceLabels( nodes, getEngine() );
 					int progressPer = 100 / nodes.size();
 					int hiddenProgress = 0;
 					for ( URI concept : nodes ) {

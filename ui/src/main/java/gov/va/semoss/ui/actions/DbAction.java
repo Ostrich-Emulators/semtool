@@ -10,7 +10,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.ProgressTask;
 
@@ -73,7 +73,7 @@ public abstract class DbAction extends AbstractAction {
   }
 
   public String getEngineName() {
-    return ( null == engine ? "" : EngineUtil.getEngineLabel( engine ) );
+    return ( null == engine ? "" : EngineUtil2.getEngineLabel( engine ) );
   }
 
   @Override
