@@ -34,23 +34,28 @@ public class SettingsPanel extends javax.swing.JPanel {
 
 	private final NamespaceTableModel namespacemodel = new NamespaceTableModel(
 			Security.getSecurity().getAssociatedUser( DIHelper.getInstance().getRdfEngine() ).isLocal() );
+	private Preferences prefs;
 
 	protected SettingsPanel( Class<?> preferenceRoot ) {
 		initComponents();
 
-		final Preferences prefs = Preferences.userNodeForPackage( preferenceRoot );
+		prefs = Preferences.userNodeForPackage( preferenceRoot );
 
 		ActionListener preflistener = new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				JCheckBox item = JCheckBox.class.cast( e.getSource() );
 				boolean ischecked = item.isSelected();
-				String cmd = e.getActionCommand();
+				String actionCommandString = e.getActionCommand();
 
-				prefs.putBoolean( cmd, ischecked );
+				prefs.putBoolean( actionCommandString, ischecked );
 
 				DIHelper.getInstance().getCoreProp()
-						.setProperty( cmd, Boolean.toString( ischecked ) );
+						.setProperty( actionCommandString, Boolean.toString( ischecked ) );
+				
+				if (Constants.SEMEX_USE_LABELS_PREF.equals(actionCommandString)) {
+					PlayPane.getSemanticExplorerPanel().populateDataForThisDB();
+				}
 			}
 		};
 
@@ -64,10 +69,10 @@ public class SettingsPanel extends javax.swing.JPanel {
 			
 			checkbox.setActionCommand( actionCommandString );
 			checkbox.addActionListener( preflistener );
-			checkbox.setSelected( PlayPane.getProp( actionCommandString ) );
+			checkbox.setSelected( prefs.getBoolean( actionCommandString, false ) );
 			
 			if (Constants.SEMEX_USE_LABELS_PREF.equals(actionCommandString)) {
-				checkbox.setSelected( PlayPane.getProp( actionCommandString, true ) );
+				checkbox.setSelected( prefs.getBoolean( actionCommandString, true ) );
 			}
 		}
 
@@ -80,7 +85,6 @@ public class SettingsPanel extends javax.swing.JPanel {
 		fullname.setEditable( user.isLocal() );
 		email.setEditable( user.isLocal() );
 		organization.setEditable( user.isLocal() );
-
 	}
 
 	public static void showDialog( Frame frame ) {

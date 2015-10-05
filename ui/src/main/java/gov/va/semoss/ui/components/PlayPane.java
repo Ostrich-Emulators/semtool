@@ -159,7 +159,7 @@ public class PlayPane extends JFrame {
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
 	private InsightManagerPanel insightManager;
-	private SemanticExplorerPanel semanticExplorer;
+	private static SemanticExplorerPanel semanticExplorer;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -1844,5 +1844,9 @@ public class PlayPane extends JFrame {
 				item.doClick();
 			}
 		}
+	}
+	
+	public static SemanticExplorerPanel getSemanticExplorerPanel() {
+		return semanticExplorer;
 	}
 }

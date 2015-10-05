@@ -273,17 +273,14 @@ public class DIHelper {
 		}
 
 		String retName = coreProp.getProperty( name );
+		if (retName != null)
+			return retName;
 
-		if ( null == retName && null != repolist ) {
-			// get the selected repository
-			IEngine engine = getRdfEngine();
-			if ( null != engine ) {
-				retName = engine.getProperty( name );
-			}
+		if ( repolist != null && getRdfEngine() != null) {
+			return getRdfEngine().getProperty( name );
 		}
 
-		//logger.debug("Engine Local Prop" + engineLocalProp);
-		return retName;
+		return null;
 	}
 
 	/**
