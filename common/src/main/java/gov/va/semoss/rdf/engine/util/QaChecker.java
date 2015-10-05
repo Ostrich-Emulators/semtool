@@ -89,12 +89,13 @@ public class QaChecker {
 					deleteFilesAfterClose().
 					fileMmapEnable().
 					transactionDisable().
+					asyncWriteEnable().
 					make();
-			dataNodes = db.treeMapCreate( "datanodes" ).make();
-			relationCache = db.treeMapCreate( "relations" ).make();
-			instanceClassCache = db.treeMapCreate( "instances" ).keySerializer( Serializer.STRING ).make();
-			relationBaseClassCache = db.treeMapCreate( "relationclasses" ).keySerializer( Serializer.STRING ).make();
-			propertyClassCache = db.treeMapCreate( "propclasses" ).keySerializer( Serializer.STRING ).make();
+			dataNodes = db.treeMapCreate( "datanodes" ).counterEnable().make();
+			relationCache = db.treeMapCreate( "relations" ).counterEnable().make();
+			instanceClassCache = db.treeMapCreate( "instances" ).keySerializer( Serializer.STRING ).counterEnable().make();
+			relationBaseClassCache = db.treeMapCreate( "relationclasses" ).keySerializer( Serializer.STRING ).counterEnable().make();
+			propertyClassCache = db.treeMapCreate( "propclasses" ).keySerializer( Serializer.STRING ).counterEnable().make();
 		}
 	}
 
@@ -514,80 +515,74 @@ public class QaChecker {
 		vqa.useInferred( true );
 		UriBuilder owlb = engine.getSchemaBuilder();
 
-		try {
-			vqa.bind( "type", OWL.DATATYPEPROPERTY );
-			engine.query( vqa );
-			cacheUris( CacheType.PROPERTYCLASS, map );
+		vqa.bind( "type", OWL.DATATYPEPROPERTY );
+		engine.queryNoEx( vqa );
+		cacheUris( CacheType.PROPERTYCLASS, map );
 
-			vqa.bind( "type", OWL.OBJECTPROPERTY );
-			engine.query( vqa );
-			cacheUris( CacheType.RELATIONCLASS, map );
+		vqa.bind( "type", OWL.OBJECTPROPERTY );
+		engine.queryNoEx( vqa );
+		cacheUris( CacheType.RELATIONCLASS, map );
 
-			String subpropq2 = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . "
-					+ "?uri rdfs:subClassOf+ owl:Thing }";
-			vqa.setSparql( subpropq2 );
-			engine.query( vqa );
-			cacheUris( CacheType.CONCEPTCLASS, map );
+		String subpropq2 = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . "
+				+ "?uri rdfs:subClassOf+ owl:Thing }";
+		vqa.setSparql( subpropq2 );
+		engine.queryNoEx( vqa );
+		cacheUris( CacheType.CONCEPTCLASS, map );
 
-			String instq = "SELECT DISTINCT ?sub ?rawlabel ?typelabel WHERE {"
-					+ "?sub a ?type ."
-					+ "?sub rdfs:label ?rawlabel ."
-					+ "?type a owl:Class ."
-					+ "?type rdfs:subClassOf ?concept ."
-					+ "?type rdfs:label ?typelabel"
-					+ "}";
-			VoidQueryAdapter vqa3 = new VoidQueryAdapter( instq ) {
+		String instq = "SELECT DISTINCT ?sub ?rawlabel ?typelabel WHERE {"
+				+ "?sub a ?type ."
+				+ "?sub rdfs:label ?rawlabel ."
+				+ "?type a owl:Class ."
+				+ "?type rdfs:subClassOf ?concept ."
+				+ "?type rdfs:label ?typelabel"
+				+ "}";
+		VoidQueryAdapter vqa3 = new VoidQueryAdapter( instq ) {
 
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					QaChecker.this.cacheInstance(
-							URI.class.cast( set.getValue( "sub" ) ),
-							set.getValue( "typelabel" ).stringValue(),
-							set.getValue( "rawlabel" ).stringValue() );
-				}
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				QaChecker.this.cacheInstance(
+						URI.class.cast( set.getValue( "sub" ) ),
+						set.getValue( "typelabel" ).stringValue(),
+						set.getValue( "rawlabel" ).stringValue() );
+			}
 
-			};
-			vqa3.useInferred( true );
-			vqa3.bind( "concept", owlb.getConceptUri().build() );
-			engine.query( vqa3 );
+		};
+		vqa3.useInferred( true );
+		vqa3.bind( "concept", owlb.getConceptUri().build() );
+		engine.queryNoEx( vqa3 );
 
-			String relq2 = "SELECT DISTINCT ?specrel ?stypelabel ?otypelabel ?slabel ?olabel ?relname "
-					+ "WHERE {"
-					+ "  ?specrel a ?semossrel ."
-					+ "  ?specrel rdf:predicate ?superrel ."
-					+ "  ?sub ?specrel ?obj ."
-					+ "  ?sub a ?stype ."
-					+ "  ?obj a ?otype ."
-					+ "  ?sub rdfs:label ?slabel ."
-					+ "  ?obj rdfs:label ?olabel ."
-					+ "  ?stype rdfs:label ?stypelabel ."
-					+ "  ?otype rdfs:label ?otypelabel ."
-					+ "  ?superrel rdfs:label ?relname"
-					+ "}";
-			VoidQueryAdapter vqa4 = new VoidQueryAdapter( relq2 ) {
+		String relq2 = "SELECT DISTINCT ?specrel ?stypelabel ?otypelabel ?slabel ?olabel ?relname "
+				+ "WHERE {"
+				+ "  ?specrel a ?semossrel ."
+				+ "  ?specrel rdf:predicate ?superrel ."
+				+ "  ?sub ?specrel ?obj ."
+				+ "  ?sub a ?stype ."
+				+ "  ?obj a ?otype ."
+				+ "  ?sub rdfs:label ?slabel ."
+				+ "  ?obj rdfs:label ?olabel ."
+				+ "  ?stype rdfs:label ?stypelabel ."
+				+ "  ?otype rdfs:label ?otypelabel ."
+				+ "  ?superrel rdfs:label ?relname"
+				+ "}";
+		VoidQueryAdapter vqa4 = new VoidQueryAdapter( relq2 ) {
 
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					RelationCacheKey rck = new RelationCacheKey(
-							set.getValue( "stypelabel" ).stringValue(),
-							set.getValue( "otypelabel" ).stringValue(),
-							set.getValue( "relname" ).stringValue(),
-							set.getValue( "slabel" ).stringValue(),
-							set.getValue( "olabel" ).stringValue() );
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				RelationCacheKey rck = new RelationCacheKey(
+						set.getValue( "stypelabel" ).stringValue(),
+						set.getValue( "otypelabel" ).stringValue(),
+						set.getValue( "relname" ).stringValue(),
+						set.getValue( "slabel" ).stringValue(),
+						set.getValue( "olabel" ).stringValue() );
 
-					QaChecker.this.cacheRelationNode(
-							URI.class.cast( set.getValue( "specrel" ) ), rck );
-				}
+				QaChecker.this.cacheRelationNode(
+						URI.class.cast( set.getValue( "specrel" ) ), rck );
+			}
 
-			};
-			vqa4.useInferred( true );
-			vqa4.bind( "semossrel", owlb.getRelationUri().build() );
-			engine.query( vqa4 );
-
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( e, e );
-		}
+		};
+		vqa4.useInferred( true );
+		vqa4.bind( "semossrel", owlb.getRelationUri().build() );
+		engine.queryNoEx( vqa4 );
 
 	}
 

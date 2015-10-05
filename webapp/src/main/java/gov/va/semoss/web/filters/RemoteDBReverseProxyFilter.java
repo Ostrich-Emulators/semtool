@@ -3,6 +3,7 @@ package gov.va.semoss.web.filters;
 import gov.va.semoss.web.datastore.DbInfoMapper;
 import gov.va.semoss.web.io.DbInfo;
 
+import gov.va.semoss.web.security.SemossUser;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,6 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -40,6 +44,12 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 * The Object's logger
 	 */
 	private static final Logger log = Logger.getLogger( RemoteDBReverseProxyFilter.class );
+
+	private static enum Access {
+
+		NONE, READ, WRITE
+	};
+
 	/**
 	 * The Service that will use the httpClient to actually make the proxied call
 	 */
@@ -92,10 +102,11 @@ public class RemoteDBReverseProxyFilter implements Filter {
 
 		if ( shouldProxyRequest( path ) ) {
 			log.warn( "Current URL request is a candidate for RP-Handling: " + path );
-			DbInfo dbi = getRawDbInfoFromRequest( request );
-			String destinationURL = getProxyDestination( dbi, request );
+			CachingServletRequest caching = new CachingServletRequest( request );
+			DbInfo dbi = getRawDbInfoFromRequest( caching );
+			String destinationURL = getProxyDestination( dbi, caching );
 			if ( doProxy ) {
-				proxyRequest( destinationURL, request, response, chain );
+				proxyRequest( dbi, destinationURL, caching, response, chain );
 			}
 			else {
 				response.sendRedirect( destinationURL );
@@ -110,13 +121,22 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	/**
 	 * Proxy a given request to a remote database
 	 *
+	 * @param dbi the database locator
 	 * @param destinationURL The destination URL that is to handle the proxy
 	 * @param req The servlet request
 	 * @param res The servlet response
 	 * @param chain The filter chain of this application context
 	 */
-	private void proxyRequest( String destinationURL, HttpServletRequest request,
-			HttpServletResponse response, FilterChain chain ) {
+	private void proxyRequest( DbInfo dbi, String destinationURL,
+			CachingServletRequest request, HttpServletResponse response, FilterChain chain )
+			throws IOException {
+		boolean isinsights = isInsightUrl( dbi, destinationURL );
+
+		if ( shouldDenyRequest( dbi, request, isinsights ) ) {
+			createFailedRequest( request, response );
+			return;
+		}
+
 		try {
 			URI uri = new URI( destinationURL );
 			HttpHost host = new HttpHost( uri.getHost(), uri.getPort(), uri.getScheme() );
@@ -124,7 +144,7 @@ public class RemoteDBReverseProxyFilter implements Filter {
 
 			CsrfToken token = CsrfToken.class.cast( request.getAttribute( "_csrf" ) );
 			proxyService.proxyRequest( destinationURL, request, response );
-			if( null != token ){
+			if ( null != token ) {
 				response.setHeader( "X-CSRF-HEADER", token.getHeaderName() );
 				response.setHeader( "X-CSRF-PARAM", token.getParameterName() );
 				response.setHeader( "X-CSRF-TOKEN", token.getToken() );
@@ -235,15 +255,72 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	private static String getProxyDestination( DbInfo raw, HttpServletRequest req ) {
 		Pattern pat = Pattern.compile( "^/databases/" + raw.getName()
 				+ "/repositories/(data|insights)" );
-		String reqpath = req.getServletPath();		
-		
+		String reqpath = req.getServletPath();
+
 		Matcher m = pat.matcher( reqpath );
 		m.find(); // we better know that this works!
 		String serviceNeeded = m.group( 1 );
-		
+
 		m.reset();
 		String proxyloc = m.replaceAll( serviceNeeded.equals( DATA_URL )
-					? raw.getDataUrl() : raw.getInsightsUrl() );
+				? raw.getDataUrl() : raw.getInsightsUrl() );
 		return proxyloc;
+	}
+
+	private static boolean isInsightUrl( DbInfo raw, String url ) {
+		return url.contains( raw.getInsightsUrl() );
+	}
+
+	private Access getAccess( DbInfo dbi, SemossUser user, boolean forInsightsDb ) {
+		return ( forInsightsDb ? Access.READ : Access.WRITE );
+	}
+
+	private void createFailedRequest( HttpServletRequest request,
+			HttpServletResponse response ) throws IOException {
+		response.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+	}
+
+	private boolean shouldDenyRequest( DbInfo dbi, CachingServletRequest request,
+			boolean isinsights ) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		SemossUser smu = SemossUser.class.cast( auth.getPrincipal() );
+		Access access = getAccess( dbi, smu, isinsights );
+
+		if ( Access.WRITE == access ) {
+			return false;
+		}
+
+		if ( Access.NONE == access ) {
+			return true;
+		}
+
+		// we know we have read access at this point...all GETs are ok
+		if ( HttpMethod.GET == HttpMethod.valueOf( request.getMethod() ) ) {
+			return false;
+		}
+
+		// if we get here, we need to figure out what the user is asking
+		// before we can decide if they should get access. The Sesame API
+		// uses POSTs sometimes instead of GETs.
+		boolean fail = true;
+
+		String query = request.getParameter( "query" );
+		if ( null == query ) {
+			String reqq = request.asString();
+			log.debug( reqq );
+			for ( String bad : new String[]{ "<transaction>", "<add>", "<clear>",
+				"<delete>", "<update>" } ) {
+				if ( reqq.contains( bad ) ) {
+					fail = true;
+					break;
+				}
+			}
+		}
+		else {
+			query = query.toUpperCase();
+			fail = !( query.contains( "SELECT" ) || query.contains( "DESCRIBE" )
+					|| query.contains( "CONSTRUCT" ) );
+		}
+		return fail;
 	}
 }
