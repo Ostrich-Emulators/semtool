@@ -6,10 +6,20 @@
 package gov.va.semoss.rdf.engine.impl;
 
 import gov.va.semoss.rdf.engine.api.InsightManager;
+import gov.va.semoss.rdf.engine.util.EngineManagementException;
+import gov.va.semoss.rdf.engine.util.EngineManagementException.ErrorCode;
+import gov.va.semoss.rdf.engine.util.StatementSorter;
+import gov.va.semoss.user.Security;
+import gov.va.semoss.user.User;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
+import org.openrdf.http.protocol.UnauthorizedException;
+import org.openrdf.model.Statement;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -74,5 +84,47 @@ public class SesameEngine extends AbstractSesameEngine {
 	@Override
 	protected InsightManager createInsightManager() {
 		return InsightManagerImpl.createFromRepository( insights );
+	}
+
+	@Override
+	public void updateInsights( InsightManager im ) throws EngineManagementException {
+		List<Statement> stmts = new ArrayList<>();
+		User user = Security.getSecurity().getAssociatedUser( this );
+		stmts.addAll( InsightManagerImpl.getStatements( im, user ) );
+		Collections.sort( stmts, new StatementSorter() );
+
+		RepositoryConnection rc = null;
+		try {
+			rc = insights.getConnection();
+			rc.begin();
+			rc.clear();
+			rc.add( stmts );
+			rc.commit();
+		}
+		catch( UnauthorizedException ue ){
+			throw new EngineManagementException( ErrorCode.ACCESS_DENIED, ue );
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+			if ( null != rc ) {
+				try {
+					rc.rollback();
+				}
+				catch ( RepositoryException re2 ) {
+					log.error( re2, re2 );
+				}
+			}
+			throw new EngineManagementException( ErrorCode.UNKNOWN, re );
+		}
+		finally {
+			if ( null != rc ) {
+				try {
+					rc.close();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
+		}
 	}
 }

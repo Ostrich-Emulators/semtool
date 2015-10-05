@@ -19,6 +19,7 @@
  */
 package gov.va.semoss.rdf.engine.api;
 
+import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.util.Constants;
 import java.util.Collection;
 import java.util.Properties;
@@ -237,7 +238,7 @@ public interface IEngine {
 	 * Updates to disk the Insights for this engine
 	 * @param insmgr 
 	 */
-	public void updateInsights( InsightManager insmgr );	
+	public void updateInsights( InsightManager insmgr ) throws EngineManagementException;
 	
 	// gets the insight database
 	public InsightManager getInsightManager();

@@ -202,11 +202,20 @@ public class EngineUtil implements Runnable {
 				InsightManager oldim = eng.getInsightManager();
 
 				oldim.addAll( iic.im.getPerspectives(), iic.clearfirst );
-				eng.updateInsights( oldim );
-
-				List<EngineOperationListener> lls = new ArrayList<>( listeners );
-				for ( EngineOperationListener eol : lls ) {
-					eol.insightsModified( eng, oldim.getPerspectives() );
+				try {
+					eng.updateInsights( oldim );
+					List<EngineOperationListener> lls = new ArrayList<>( listeners );
+					for ( EngineOperationListener eol : lls ) {
+						eol.insightsModified( eng, oldim.getPerspectives() );
+					}
+				}
+				catch ( EngineManagementException eme ) {
+					if ( ErrorCode.ACCESS_DENIED == eme.getCode() ) {
+						GuiUtility.showError( "Access to this feature is denied" );
+					}
+					else {
+						GuiUtility.showError( eme.getLocalizedMessage() );
+					}
 				}
 			}
 			insightqueue.clear();

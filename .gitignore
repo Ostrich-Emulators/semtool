@@ -17,10 +17,11 @@ ui/.project
 ui/.settings
 ui/.settings/*
 ui/src/main/resources/html.zip
-ui/nbactions.xml
-/webapp/src/main/resources/semoss-web.properties
-/webapp/nb-configuration.xml
-/webapp/src/main/resources/ldap.properties
+ui/nbactions*
+webapp/src/main/resources/semoss-web.properties
+webapp/nb-configuration.xml
+webapp/src/main/resources/ldap.properties
+webapp/nbactions*
 tools/nb-configuration.xml
 tools/nbactions*
 tools/*.log

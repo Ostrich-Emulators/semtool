@@ -14,18 +14,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-
-
-
-
-
-
-
-
-
-import javax.ws.rs.POST;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -130,14 +119,15 @@ public class DatabaseController extends SemossControllerBase {
 	
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
 	@ResponseBody
-	public String importDatabaseViaFile(HttpServletRequest req, @RequestParam(value = "jnlFile", required = true) MultipartFile jnlFile) {
+	public String importDatabaseViaFile(HttpServletRequest req,
+			@RequestParam(value = "jnlFile", required = true) MultipartFile jnlFile) {
 		if (!jnlFile.isEmpty()) {
 			try {
 				validate(jnlFile);
 				saveJNLFile(jnlFile.getName(), jnlFile);
 				// TODO Save the file and do something with it
 				
-			} catch (Exception re) {
+			} catch (RuntimeException | IOException re) {
 				// TODO Log this
 				return "Failed to save file";
 			}
@@ -145,7 +135,7 @@ public class DatabaseController extends SemossControllerBase {
 		return "Success";
 	}
 	
-	private final boolean validate(MultipartFile file){
+	private boolean validate(MultipartFile file){
 		return true;
 	}
 	

@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.api.UpdateExecutor;
+import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.user.Security;
 import gov.va.semoss.user.User;
 import gov.va.semoss.util.UriBuilder;
@@ -63,10 +64,10 @@ public abstract class AbstractEngine implements IEngine {
 	private UriBuilder databuilder;
 	private URI baseuri;
 
-	public AbstractEngine(Properties initProps){
-		
+	public AbstractEngine( Properties initProps ) {
+
 	}
-	
+
 	/**
 	 * Opens the database. This function calls (in this order) {@link #loadAllProperties(java.util.Properties,
 	 * java.lang.String, java.io.File...) }, {@link #setUris(java.lang.String, java.lang.String) },
@@ -331,7 +332,7 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public void updateInsights( InsightManager im ){
+	public void updateInsights( InsightManager im ) throws EngineManagementException {
 		log.warn( "updateInsights not yet implemented. This call does nothing." );
 	}
 
@@ -459,8 +460,8 @@ public abstract class AbstractEngine implements IEngine {
 		URI baseuri = UriBuilder.getBuilder( "http://semoss.va.gov/database/" ).uniqueUri();
 		return baseuri;
 	}
-	
-		protected void logProvenance( UpdateExecutor ue ) {
+
+	protected void logProvenance( UpdateExecutor ue ) {
 		if ( provenance.isEnabledFor( Level.INFO ) ) {
 			User user = Security.getSecurity().getAssociatedUser( this );
 			provenance.info( user.getUsername() + ": " + ue.bindAndGetSparql() );
@@ -470,7 +471,7 @@ public abstract class AbstractEngine implements IEngine {
 	protected void logProvenance( Collection<Statement> stmts ) {
 		if ( provenance.isEnabledFor( Level.INFO ) ) {
 			User user = Security.getSecurity().getAssociatedUser( this );
-			for( Statement stmt : stmts ){
+			for ( Statement stmt : stmts ) {
 				provenance.info( user.getUsername() + ": " + stmt );
 			}
 		}
