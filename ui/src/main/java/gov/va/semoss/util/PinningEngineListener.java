@@ -134,4 +134,8 @@ public class PinningEngineListener extends AbstractFileWatcher
 	@Override
 	public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
 	}
+
+	@Override
+	public void handleError( IEngine eng, EngineManagementException eme ) {
+	}
 }

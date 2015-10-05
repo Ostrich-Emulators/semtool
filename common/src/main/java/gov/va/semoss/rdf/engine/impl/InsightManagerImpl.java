@@ -238,15 +238,27 @@ public class InsightManagerImpl implements InsightManager {
 
 	public static InsightManager createFromRepository( Repository repo ) {
 		InsightManagerImpl imi = new InsightManagerImpl();
+		RepositoryConnection rc = null;
 		try {
 			if ( !repo.isInitialized() ) {
 				repo.initialize();
 			}
-			RepositoryConnection rc = repo.getConnection();
+			rc = repo.getConnection();
 			imi.loadFromRepository( rc );
 		}
 		catch ( RepositoryException re ) {
 			log.error( re, re );
+		}
+		finally {
+			if ( null != rc ) {
+				try {
+					rc.close();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
+
 		}
 		return imi;
 	}
@@ -616,7 +628,7 @@ public class InsightManagerImpl implements InsightManager {
 				else if ( VAS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
 					insight.setOutput( InsightOutputType.valueOf( obj.stringValue() ) );
 				}
-				else if( UI.viewClass.equals( pred ) && null == insight.getOutput() ){
+				else if ( UI.viewClass.equals( pred ) && null == insight.getOutput() ) {
 					insight.setOutput( upgradeOutput( obj.stringValue() ) );
 				}
 			}

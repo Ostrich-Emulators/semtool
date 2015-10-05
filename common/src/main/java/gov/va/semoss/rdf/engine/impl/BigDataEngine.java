@@ -40,6 +40,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
 import static gov.va.semoss.rdf.engine.impl.AbstractEngine.searchFor;
+import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.StatementSorter;
 import gov.va.semoss.user.LocalUserImpl;
 import gov.va.semoss.user.Security;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
+import org.openrdf.http.protocol.UnauthorizedException;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.turtle.TurtleWriter;
 
@@ -214,20 +216,20 @@ public class BigDataEngine extends AbstractSesameEngine {
 				log.error( e, e );
 			}
 		}
-		
+
 		if ( log.isTraceEnabled() ) {
 			File dumpfile
 					= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
 			try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
 				TurtleWriter tw = new TurtleWriter( w );
-				for( Statement s : stmts ){
+				for ( Statement s : stmts ) {
 					tw.handleStatement( s );
 				}
 			}
 			catch ( Exception ioe ) {
 				log.warn( ioe, ioe );
 			}
-		}		
+		}
 	}
 
 	@Override
@@ -240,13 +242,18 @@ public class BigDataEngine extends AbstractSesameEngine {
 	}
 
 	@Override
-	public void updateInsights( InsightManager im ) {
+	public void updateInsights( InsightManager im ) throws EngineManagementException {
 		try {
 			copyInsightsToDisk( im );
 			insightEngine.addAll( im.getPerspectives(), true );
 		}
+		catch ( UnauthorizedException ue ) {
+			throw new EngineManagementException(
+					EngineManagementException.ErrorCode.ACCESS_DENIED, ue );
+		}
 		catch ( RepositoryException re ) {
-			log.error( re, re );
+			throw new EngineManagementException(
+					EngineManagementException.ErrorCode.UNKNOWN, re );
 		}
 	}
 

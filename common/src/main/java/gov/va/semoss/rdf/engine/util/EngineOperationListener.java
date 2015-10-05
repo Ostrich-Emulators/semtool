@@ -13,17 +13,13 @@ import java.util.Collection;
  *
  * @author ryan
  */
-public abstract class EngineOperationAdapter implements EngineOperationListener {
+public interface EngineOperationListener {
 
-	@Override
-	public void engineClosed( IEngine eng ) {
-	}
+  public void engineOpened( IEngine eng );
 
-	@Override
-	public void engineOpened( IEngine eng ) {
-	}
+  public void engineClosed( IEngine eng );
+  
+  public void insightsModified( IEngine eng, Collection<Perspective> perspectives );
 
-	@Override
-	public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
-	}
+	public void handleError( IEngine eng, EngineManagementException eme );
 }
