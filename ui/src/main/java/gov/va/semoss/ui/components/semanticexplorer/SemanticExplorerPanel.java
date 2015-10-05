@@ -249,6 +249,10 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 	}
 	
 	private void populateDataForThisDB() {
+		if (engine == null) {
+			return;
+		}
+		
 		Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
 		useLabels = prefs.getBoolean(Constants.SEMEX_USE_LABELS_PREF, false);
 
