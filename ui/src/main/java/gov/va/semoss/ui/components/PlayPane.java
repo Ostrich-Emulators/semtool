@@ -40,7 +40,6 @@ import gov.va.semoss.ui.actions.ImportLoadingSheetAction;
 import gov.va.semoss.ui.actions.MergeAction;
 import gov.va.semoss.ui.actions.MountAction;
 import gov.va.semoss.ui.actions.NewLoadingSheetAction;
-import gov.va.semoss.ui.actions.OpenAction;
 import gov.va.semoss.ui.actions.OpenSparqlAction;
 import gov.va.semoss.ui.actions.PinAction;
 import gov.va.semoss.ui.actions.PropertiesAction;
@@ -67,8 +66,8 @@ import gov.va.semoss.ui.main.SemossPreferences;
 import gov.va.semoss.ui.swing.custom.CustomDesktopPane;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.DIHelper;
-
 import gov.va.semoss.util.GuiUtility;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -160,7 +159,7 @@ public class PlayPane extends JFrame {
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
 	private InsightManagerPanel insightManager;
-	private SemanticExplorerPanel semanticExplorer;
+	private static SemanticExplorerPanel semanticExplorer;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -210,7 +209,7 @@ public class PlayPane extends JFrame {
 	private final DbAction unmounter = new UnmountAction( this, "Close DB" );
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
-	private final OpenAction importxls = new OpenAction( UIPROGRESS, this );
+//	private final OpenAction importxls = new OpenAction( UIPROGRESS, this );
 	private final RemoteDbAction remoteDb = new RemoteDbAction( UIPROGRESS, this );
 	private final NewLoadingSheetAction newls
 			= new NewLoadingSheetAction( UIPROGRESS, this );
@@ -250,7 +249,7 @@ public class PlayPane extends JFrame {
 	public JTable tooltipTable;
 
 	private SelectDatabasePanel selectDatabasePanel;
-	private final Preferences prefs = Preferences.userNodeForPackage( getClass() );
+	private final static Preferences prefs = Preferences.userNodeForPackage( PlayPane.class );
 
 	/**
 	 * Launch the application.
@@ -460,23 +459,23 @@ public class PlayPane extends JFrame {
 		toolbar.setVisible( prefs.getBoolean( "showToolBar", true ) );
 		statusbar.setVisible( prefs.getBoolean( "showStatus", true ) );
 		
-		if ( !getProp( prefs, QUERYPANEL ) )
+		if ( !getProp( QUERYPANEL ) )
 			customSparqlPanel.setVisible( false );
 
-		if ( !getPref( GCOSMETICS ) )
+		if ( !getProp( GCOSMETICS ) )
 			leftTabs.remove( cosmeticsPanel );
-		if ( !getPref( GFILTER ) )
+		if ( !getProp( GFILTER ) )
 			leftTabs.remove( filterPanel );
-		if ( !getPref( GFLABEL ) )
+		if ( !getProp( GFLABEL ) )
 			leftTabs.remove( outputPanel );
 		
-		if ( !getPref( LOGGING ) )
+		if ( !getProp( LOGGING ) )
 			rightTabs.remove( loggingPanel );
-		if ( !getPref( GQUERYBUILDER ) )
+		if ( !getProp( GQUERYBUILDER ) )
 			rightTabs.remove( gQueryBuilderPanel );
-		if ( !getPref( SEMANTICEXPLORER ) )
+		if ( !getProp( SEMANTICEXPLORER ) )
 			rightTabs.remove( semanticExplorer );
-		if ( !getPref( IMANAGE_2 ) )
+		if ( !getProp( IMANAGE_2 ) )
 			rightTabs.remove( insightManager );
 	}
 
@@ -1292,12 +1291,12 @@ public class PlayPane extends JFrame {
 		} );
 
 		final JCheckBoxMenuItem gcos = new JCheckBoxMenuItem( "Graph Cosmetics tab",
-				getProp( prefs, GCOSMETICS ) );
+				getProp( GCOSMETICS ) );
 		gcos.setActionCommand( GCOSMETICS );
 		gcos.addActionListener( preflistener );
 		//	gcos.setToolTipText( "Enables/Disables graph cosmetics tab" );
 
-		if ( getProp( prefs, GCOSMETICS ) == true ) {
+		if ( getProp( GCOSMETICS ) == true ) {
 			gcos.setToolTipText( "Disable the Graph Cosmetics Tab" );
 			gcos.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab" );
 			gcos.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab" );
@@ -1309,12 +1308,12 @@ public class PlayPane extends JFrame {
 		}
 
 		final JCheckBoxMenuItem gfilt = new JCheckBoxMenuItem( "Graph Filter tab",
-				getProp( prefs, GFILTER ) );
+				getProp( GFILTER ) );
 		gfilt.setActionCommand( GFILTER );
 		gfilt.addActionListener( preflistener );
 		//	gfilt.setToolTipText( "Enables/Disables graph filter tab" );
 
-		if ( getProp( prefs, GFILTER ) == true ) {
+		if ( getProp( GFILTER ) == true ) {
 			gfilt.setToolTipText( "Disable the Graph Filter Tab" );
 			gfilt.getAccessibleContext().setAccessibleName( "Disable the Graph Filter Tab" );
 			gfilt.getAccessibleContext().setAccessibleDescription( "Disable the Graph Filter Tab" );
@@ -1327,16 +1326,16 @@ public class PlayPane extends JFrame {
 
 		//Graph Labels tab
 		final JCheckBoxMenuItem gflab = new JCheckBoxMenuItem( "Graph Label tab",
-				getProp( prefs, GFLABEL ) );
+				getProp( GFLABEL ) );
 		gflab.setActionCommand( GFLABEL );
 		gflab.addActionListener( preflistener );
 
-		loggingItem.setSelected( getProp( prefs, LOGGING ) );
+		loggingItem.setSelected( getProp( LOGGING ) );
 		loggingItem.setActionCommand( LOGGING );
 		loggingItem.addActionListener( preflistener );
 		//logging.setToolTipText( "Enables/Disables logging tab" );
 
-		if ( getProp( prefs, LOGGING ) == true ) {
+		if ( getProp( LOGGING ) == true ) {
 			loggingItem.setToolTipText( "Disable the Logging Tab" );
 			loggingItem.getAccessibleContext().setAccessibleName( "Disable the Logging Tab" );
 			loggingItem.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab" );
@@ -1407,9 +1406,9 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		hidecsp = new JCheckBoxMenuItem( "Query Panel", getProp( prefs, QUERYPANEL ) );
+		hidecsp = new JCheckBoxMenuItem( "Query Panel", getProp( QUERYPANEL ) );
 
-		if ( getProp( prefs, QUERYPANEL ) ) {
+		if ( getProp( QUERYPANEL ) ) {
 			hidecsp.setToolTipText( "Disable the Query Panel" );
 			hidecsp.getAccessibleContext().setAccessibleName( "Disable the Query Panel" );
 			hidecsp.getAccessibleContext().setAccessibleDescription( "Disable the Query Panel" );
@@ -1438,8 +1437,8 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		gQueryBuilderItem.setSelected( getProp( prefs, GQUERYBUILDER ) );
-		if ( getProp( prefs, GQUERYBUILDER ) == true ) {
+		gQueryBuilderItem.setSelected( getProp( GQUERYBUILDER ) );
+		if ( getProp( GQUERYBUILDER ) == true ) {
 			gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );
 		}
 		else {
@@ -1470,8 +1469,8 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		insightManagerItem.setSelected( getProp( prefs, IMANAGE_2 ) );
-		if ( getProp( prefs, IMANAGE_2 ) == true ) {
+		insightManagerItem.setSelected( getProp( IMANAGE_2 ) );
+		if ( getProp( IMANAGE_2 ) == true ) {
 			insightManagerItem.setToolTipText( "Disable the Insite Manager Tab" );
 		}
 		else {
@@ -1732,31 +1731,18 @@ public class PlayPane extends JFrame {
 		rightTabs.setSelectedIndex( 0 );
 	}
 
-	public boolean getPref( String propstr ) {
-		return prefs.getBoolean( propstr, false );
+	public static boolean getProp( String propstr ) {
+		return getProp(propstr, false);
 	}
 
-	public boolean getProp( String propstr ) {
+	public static boolean getProp( String propstr, boolean defaultValue ) {
 		String prop = prefs.get( propstr, null );
 		if ( null == prop ) {
 			prop = DIHelper.getInstance().getProperty( propstr );
 		}
 
 		if ( null == prop ) {
-			prop = Boolean.toString( false );
-		}
-
-		return Boolean.parseBoolean( prop );
-	}
-
-	public static boolean getProp( Preferences prefs, String propstr ) {
-		String prop = prefs.get( propstr, null );
-		if ( null == prop ) {
-			prop = DIHelper.getInstance().getProperty( propstr );
-		}
-
-		if ( null == prop ) {
-			prop = Boolean.toString( false );
+			prop = Boolean.toString( defaultValue );
 		}
 
 		return Boolean.parseBoolean( prop );
@@ -1858,5 +1844,9 @@ public class PlayPane extends JFrame {
 				item.doClick();
 			}
 		}
+	}
+	
+	public static SemanticExplorerPanel getSemanticExplorerPanel() {
+		return semanticExplorer;
 	}
 }
