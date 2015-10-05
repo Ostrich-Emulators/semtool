@@ -7,6 +7,7 @@ package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.util.GuiUtility;
 import java.util.Collection;
 
 /**
@@ -62,13 +63,18 @@ public class OneShotEngineAdapter extends EngineOperationAdapter {
 	public void doInsightsModified( IEngine eng, Collection<Perspective> perspectives ) {
 	}
 
-	public void removeIfOp( IEngine eng, ShotOp op ) {
+	private void removeIfOp( IEngine eng, ShotOp op ) {
 		if ( isMyEngine( eng ) && op == shotop ) {
 			EngineUtil.getInstance().removeEngineOpListener( this );
 		}
 	}
 
-	public boolean isMyEngine( IEngine eng ) {
+	protected boolean isMyEngine( IEngine eng ) {
 		return engine.equals( eng );
+	}
+
+	@Override
+	public void handleError( IEngine eng, EngineManagementException eme ) {
+		GuiUtility.showError( eme.getLocalizedMessage() );
 	}
 }

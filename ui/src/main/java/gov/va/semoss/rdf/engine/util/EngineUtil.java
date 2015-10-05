@@ -63,7 +63,10 @@ import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.Repository;
@@ -210,11 +213,9 @@ public class EngineUtil implements Runnable {
 					}
 				}
 				catch ( EngineManagementException eme ) {
-					if ( ErrorCode.ACCESS_DENIED == eme.getCode() ) {
-						GuiUtility.showError( "Access to this feature is denied" );
-					}
-					else {
-						GuiUtility.showError( eme.getLocalizedMessage() );
+					List<EngineOperationListener> lls = new ArrayList<>( listeners );
+					for ( EngineOperationListener eol : lls ) {
+						eol.handleError( eng, eme );
 					}
 				}
 			}
@@ -553,6 +554,7 @@ public class EngineUtil implements Runnable {
 		el.setDefaultBaseUri( ecb.getDefaultBaseUri(), ecb.isDefaultBaseOverridesFiles() );
 
 		try {
+			EngineUtil2.logAllDataStatements( bde );
 			el.loadToEngine( ecb.getFiles(), bde, ecb.isDoMetamodel(), conformanceErrors );
 			if ( ecb.isCalcInfers() ) {
 				bde.calculateInferences();
@@ -587,7 +589,6 @@ public class EngineUtil implements Runnable {
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
 			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
-		List<Statement> stmts = new ArrayList<>();
 		InsightManagerImpl imi = new InsightManagerImpl();
 		if ( null != insightsfile ) {
 			createInsightStatements( insightsfile, imi );
@@ -856,6 +857,15 @@ public class EngineUtil implements Runnable {
 					log.warn( "could not remove temp rc" );
 				}
 			}
+		}
+
+		log.debug( "subjects from resource: " + resource );
+		Set<Resource> uris = new HashSet<>();
+		for ( Statement s : stmts ) {
+			uris.add( s.getSubject() );
+		}
+		for ( Resource u : uris ) {
+			log.debug( u );
 		}
 
 		return stmts;

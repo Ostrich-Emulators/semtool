@@ -21,9 +21,11 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
+import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
+import org.openrdf.query.BindingSet;
 
 /**
  * A class to centralize Engine operations. This class is thread-safe, and if
@@ -112,5 +114,23 @@ public class EngineUtil2 {
 		}
 
 		return new ImportData( metas );
+	}
+
+	/**
+	 * Prints all statements in the main database to the log's DEBUG output. This
+	 * only works in if the logger prints debug output.
+	 *
+	 * @param eng
+	 */
+	public static void logAllDataStatements( IEngine eng ) {
+		if ( log.isDebugEnabled() ) {
+			eng.queryNoEx( new VoidQueryAdapter( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }" ) {
+				@Override
+				public void handleTuple( BindingSet set, ValueFactory fac ) {
+					log.debug( "pre-engine: " + set.getValue( "s" ) + " "
+							+ set.getValue( "p" ) + " " + set.getValue( "o" ) );
+				}
+			} );
+		}
 	}
 }
