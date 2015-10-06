@@ -19,10 +19,8 @@
  */
 package gov.va.semoss.util;
 
-import gov.va.semoss.poi.main.ImportData;
-import gov.va.semoss.poi.main.ImportMetadata;
 import gov.va.semoss.rdf.engine.api.IEngine;
-import gov.va.semoss.rdf.engine.impl.BigDataEngine;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.ui.components.PlaySheetFrame;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 
@@ -34,11 +32,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 
 import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
@@ -51,7 +47,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -183,46 +178,14 @@ public class GuiUtility {
 	 * @throws java.io.IOException
 	 */
 	public static IEngine loadEngine( File smssfile ) throws IOException {
-		Properties props;
-		if ( smssfile.getName().toLowerCase().endsWith( "jnl" ) ) {
-			// we're loading a BigData journal file, so make up our properties
-			props = BigDataEngine.generateProperties( smssfile );
-		}
-		else {
-			props = Utility.loadProp( smssfile );
-		}
-
-		IEngine engine = null;
-
-		log.debug( "In Utility file name is " + smssfile );
-		String engineName = props.getProperty( Constants.ENGINE_NAME,
-				FilenameUtils.getBaseName( smssfile.getAbsolutePath() ) );
-
-		String smssloc = smssfile.getCanonicalPath();
-		props.setProperty( Constants.SMSS_LOCATION, smssloc );
-
-		String engineClass = props.getProperty( Constants.ENGINE_IMPL );
-		engineClass = engineClass.replaceAll( "prerna", "gov.va.semoss" );
-		try {
-			Class<IEngine> theClass = (Class<IEngine>) Class.forName( engineClass );
-			engine = (IEngine) theClass.getConstructor( Properties.class ).newInstance( props );
-			log.info( "Engine created." );
-
-			if( null == engine.getEngineName() ){
-				engine.setEngineName( engineName );
-			}
-		}
-		catch ( ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-			log.error( e );
-		}
-		
+		IEngine engine = EngineUtil2.loadEngine( smssfile );
 		DIHelper.getInstance().registerEngine( engine );
 		return engine;
 	}
 
-	public static void closeEngine( IEngine eng ) {
-		eng.closeDB();
-		DIHelper.getInstance().unregisterEngine( eng );
+	public static void closeEngine( IEngine engine ) {
+		EngineUtil2.closeEngine( engine );
+		DIHelper.getInstance().unregisterEngine( engine );
 	}
 
 	/**
