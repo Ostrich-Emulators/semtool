@@ -58,7 +58,7 @@ public class SaveAsInsightPanel extends javax.swing.JPanel {
 				InsightManager im = engine.getInsightManager();
 				Perspective persp
 						= p.perspectives.getItemAt( p.perspectives.getSelectedIndex() );
-				List<Insight> insightlist = im.getInsights( persp );
+				List<Insight> insightlist = persp.getInsights();
 
 				boolean seenit = false;
 				for ( Insight i : insightlist ) {

@@ -1,0 +1,454 @@
+#
+# $Id: VA_MainDBv14.0_Questions.properties 1531 2015-01-29 17:25:46Z daniel.mekonnen $
+#
+PERSPECTIVE	Activity-Perspective;Application-Perspective;BusinessProcess-Perspective;Capability-Perspective;Data-Perspective;Enterprise-Perspective;Generic-Perspective;Requirement-Perspective
+
+Generic-Perspective	GQ0;GQ1
+Application-Perspective	AP1;AP2;AP3;AP4;AP5;AP6;AP7;AP11;AP12;AP13;AP14;AP15;AP16;AP17;AP18;AP19;AP20;AP21;AP22
+Data-Perspective	IO1;IO2;IO3;IO4;IO5;IO6;IO7;IO8;IO9
+Capability-Perspective	CP1;CP2;CP3;CP4;CP5;CP7;CP8;CP9
+Requirement-Perspective	RP1;RP2;RP3;RP4;RP5;RP6;RP7;RP8;RP9;RP10;RP11;RP12;RP13;RP14;RP15
+BusinessProcess-Perspective BP1;BP3;BP4;BP7;BP8
+#Functional-Validation FV1
+Activity-Perspective ActP1;ActP2;ActP3;ActP4;ActP5;ActP6;ActP7;ActP8;ActP9;ActP10;ActP11;ActP12;ActP13
+Enterprise-Perspective	EP1;EP2;EP3;EP4;EP5;EP6;EP7;EP8;EP10
+
+GQ0	View the Database Metamodel
+GQ1	Explore an instance of a selected node type
+# GQ2	Generic CONSTRUCT Query
+# GQ3	Select Query Raw
+# GQ4	Select Query Rendered as a Grid
+# GQ5	Select Distinct Subjects
+
+AP1	Show list of ApplicationModules and descriptions?
+AP2	What Data does this Application Create, Modify or Read?
+AP3	What BLUs does this Application provide?
+AP4	What Requirements does this Application fulfill?
+AP5	What BusinessRules does this Application implement?
+AP6	What UseCases does this Application fulfill?
+AP7	What are the levels of duplication between Applications?
+AP8	Which Application best supports each Business Process?
+AP11	What are the Data Objects for all Applications
+AP12	What are the Business Logic Units for all Applications?
+AP13	What are the DataObjects for all Applications?
+AP14	How Many ICDs are there between each Application?
+AP15	Which downstream Applications are consuming information from this Application? 
+AP16	Which upstream Applications are sending information to this Application? 
+AP17	Which downstream Applications are consuming information from this Application?
+AP18	Which upstream Applications are sending information to this Application?
+AP19	What is the difference between EA Mapping and VCAMP Mapping?
+AP20	What Data Elements does this Application Create?
+AP21	What Data Elements does this Application Modify?
+AP22	What Data Elements does this Application Read?
+
+ActP1	What is the crosswalk from iBRM v1 to v2?
+ActP2	What is the iBRM v2 activities for this v1 activity?
+ActP3	Show Pharmacy specific Activities for selected BusinessProcess
+ActP4	Show Laboratory specific Activities for selected BusinessProcess
+ActP5	Show Imaging specific mappings for selected BusinessProcess
+ActP6	Show Immunization specific mappings for selected BusinessProcess
+ActP7	Show CPRS specific mappings for selected BusinessProcess
+ActP8	Show Activity to Activity mappings
+ActP9	Pick ActivityLevel and show graph of Activities
+ActP10	Show Count of Activities by Level
+ActP11	Show PC of Activity requirements for Data, BLU and Human Logic
+ActP12	Show Direct/Indirect Designation for Activities
+ActP13  Show Direct Designation for Activities
+
+IO1	What Applications Create, Modify or Read this Data?
+IO2	What Interface Control Documents exchange this Data?
+IO3	What number of ICDs carry each DataObject?
+IO4	What data elements do data objects consist of? (Files and Fields included)
+IO5	How many Applications are modifying each Data Object?
+IO6	What are the Interfaces for this Data Object? 
+IO7	What are the Interface Elements for this Data Object?
+IO8	What is the network of Systems for the selected DataObject
+IO9	What are the DataObjects and their Descriptions
+
+CP1	What Business Processeses are relevant to this Capability?
+CP2	What Requirements are applicable to this Capability?
+CP3	What Data Objects are required for this Capability?
+CP4	What BLU is required for this Capability?
+CP5	How many times does each Capability require each Data Object?
+CP6	How significant is each Data Object to each Capability?
+CP7	What are the five most frequently used Data Objects within this Capability?
+CP8	Pick a Capability and show heatmap of BusinessProcesses to Activities clinical relevance scores.
+CP9	Pick a Capability and show Parallel Coordinates of BusinessProcesses to their activites and clinical relevance scores
+
+RP1	What Applications are applicable to this Requirement? 
+RP2	What Activities are applicable to this Requirement? 
+RP3	What Requirements are applicable to this Activity? 
+RP4	What is the relationship between Requirement and Application (Data)?
+RP5	What is the relationship between Requirement and Application (BLU)?
+RP6	What application should implemement the 50 IOC requirements (Data)?
+RP7	What application should implemement the 50 IOC requirements (BLU)?
+RP8	What application should implement the 50 IOC requirements (Data + BLU)?
+RP9	What changes will be needed to implemement the IOC business rules? (Data)?
+RP10	What changes will be needed to implemement the IOC business rules? (BLU)?
+RP11	What changes will be needed to implement the IOC business rules (Data + BLU)?
+RP12	What are the Business Rules for this Application? 
+RP13	What Requirements are applicable to this Activity?
+RP14	Which Application best fullfills each Requirement?
+RP15	Application Requirement-Business Rules Matrix 
+
+BP1	What data objects and BLUs fulfill each Business Process
+BP2	Pick a BP and show pie chart of clinical relevance scores for the activities under selected BP
+BP3	Pick BP & show Pharmacy specific mappings
+BP4	Pick BP & show Laboratory specific mappings
+BP5	Pick BP & show Imaging specific mappings
+BP6	Pick BP & show Immunization specific mappings
+BP7	Pick BP & show CPRS specific mappings
+BP8	Pick BP & show ENTERPRISE level mappings
+
+EP1	Pick Capability and expose graph of clinical side of Enterprise
+EP2	Expose graph of technical side of enterprise Capabilities
+EP3	Pick BP and show PC of associated Capabilities, Activities and EnterpriseWeights
+EP4	Show PC of All Capabilities and their associated Applications and BusinessProcesses
+EP5	Pick a BP and show pie chart of clinical relevance scores for the activities under selected BP
+EP6	Show pie chart of ApplicationModule Enterprise scores
+EP7	Pick Capability and show pie chart of selected capability ApplicationModule Capability Specific scores (only for CPRS)
+EP8	Pick Capability and show Heatmap for BP to Activity Enterprise Weight
+EP9	Pick Capability and show heatmap for CPRS BP to Activity Weight (only for CPRS)
+EP10	Compare all Enterprise ApplicationScores
+
+#FV1	What are the activities, tasks, and data objects for this application (Dendogram)?
+
+GQ0_LAYOUT	prerna.ui.components.playsheets.MetamodelGraphPlaySheet
+GQ0_QUERY	SELECT DISTINCT ?source ?relation ?target WHERE { ?relation a owl:ObjectProperty . ?s ?relation ?o . ?s a ?source . ?o a ?target . FILTER( ?source != <http://semoss.org/ontologies/Concept> && ?source != owl:Class && ?source != rdfs:Resource ) FILTER( ?target != <http://semoss.org/ontologies/Concept> && ?target != owl:Class && ?target != rdfs:Resource ) }
+
+# the following form is namespace specific and runs slightly slower:
+#
+# GQ0_QUERY	SELECT DISTINCT ?source ?relation ?target WHERE { ?relation a owl:ObjectProperty . ?s ?relation ?o . ?s a ?source . ?o a ?target . FILTER(STRSTARTS(STR(?source), 'http://semoss.org/ontologies/')) FILTER(STRSTARTS(STR(?target), 'http://semoss.org/ontologies/')) }
+
+
+GQ1_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+GQ1_QUERY	CONSTRUCT {?instance ?instance ?instance} WHERE { BIND(<@Concept-http://semoss.org/ontologies/Concept@> AS ?entity) BIND(<@Instance-http://semoss.org/ontologies/Concept/Instance@> AS ?instance) {?instance a ?entity ;} }
+GQ1_Concept_QUERY	SELECT ?entity WHERE { {?entity rdfs:subClassOf <http://semoss.org/ontologies/Concept> ;} }
+GQ1_Instance_QUERY	SELECT ?entity WHERE { {?entity a <@Concept@> ;} }
+
+#
+# These queries select the full database are not particularly useful.
+# They might be useful if any of the ?subject, ?predicate or ?object were parameterized.
+# Revisit these queries in February/March with parameters.
+#
+# GQ2_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+# GQ2_QUERY	CONSTRUCT {?subject ?predicate ?object} WHERE {{?subject ?predicate ?object.}}
+
+# GQ3_LAYOUT	prerna.ui.components.playsheets.GridRAWPlaySheet
+# GQ3_QUERY	SELECT ?subject ?predicate ?object WHERE {{?subject ?predicate ?object.}}
+
+# GQ4_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+# GQ4_QUERY	SELECT ?subject ?predicate ?object WHERE {{?subject ?predicate ?object.}}
+
+# GQ5_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+# GQ5_QUERY	SELECT DISTINCT ?subject WHERE {{?subject ?predicate ?object.}}
+
+
+#What applications are applicable to this requirement?
+RP1_LAYOUT prerna.ui.components.playsheets.GridPlaySheet
+RP1_QUERY	SELECT DISTINCT ?Requirement ?ApplicationModule WHERE {BIND(<@Requirement-http://semoss.org/ontologies/Requirement@> AS ?Requirement){?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?ApplicationModule ?Fulfills ?Requirement}}
+
+RP2_LAYOUT prerna.ui.components.playsheets.GridPlaySheet
+RP2_QUERY	SELECT DISTINCT ?Requirement ?Activity WHERE{BIND(<@Requirement-http://semoss.org/ontologies/Requirement@> AS ?Requirement){?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Activity a <http://semoss.org/ontologies/Activity>;}{?Needs rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>;}{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Requirement ?Fulfills ?DataObject}{?Activity ?Needs ?DataObject}}
+
+RP3_LAYOUT prerna.ui.components.playsheets.GridPlaySheet
+RP3_QUERY	SELECT DISTINCT ?Activity ?Requirement WHERE{{?Requirement a <http://semoss.org/ontologies/Requirement>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?DataObject a <http://semoss.org/ontologies/DataObject>;}BIND(<@Activity-http://semoss.org/ontologies/Activity@> AS ?Activity){?Needs rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>;}{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Requirement ?Fulfills ?DataObject}{?Activity ?Needs ?DataObject}}
+
+RP4_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+RP4_QUERY	SELECT DISTINCT ?Requirement ?DataObject ?ApplicationModule WHERE {BIND(<@Requirement-http://semoss.org/ontologies/Requirement@> AS ?Requirement){?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?DataObject a <http://semoss.org/ontologies/DataObject> ;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Requirement ?Fulfills ?DataObject}{?ApplicationModule ?Provides ?DataObject}}
+
+RP5_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+RP5_QUERY	SELECT DISTINCT ?Requirement ?BusinessLogicUnit ?ApplicationModule WHERE {BIND(<@Requirement-http://semoss.org/ontologies/Requirement@> AS ?Requirement){?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?BusinessLogicUnit a <http://semoss.org/ontologies/BusinessLogicUnit> ;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Requirement ?Fulfills ?BusinessLogicUnit}{?ApplicationModule ?Provides ?BusinessLogicUnit}}
+
+RP6_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+RP6_QUERY	SELECT DISTINCT ?ApplicationModule ?Requirement ((COUNT(DISTINCT(?DataObject)) / COUNT(DISTINCT(?DataObject1)))*100*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) AS ?ctd) WHERE {{?Requirement a <http://semoss.org/ontologies/Requirement>;}{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills ?DataObject} {?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?Provides <http://semoss.org/ontologies/CMR> ?aCMR;}{?ApplicationModule ?Provides ?DataObject}{?DataObject1 a <http://semoss.org/ontologies/DataObject>;}{?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Fulfills1 <http://semoss.org/ontologies/CMR> ?rCMR;}{?Requirement ?Fulfills1 ?DataObject1} } GROUP BY ?ApplicationModule ?Requirement
+
+RP7_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+RP7_QUERY	SELECT DISTINCT ?ApplicationModule ?Requirement ((COUNT(DISTINCT(?BusinessLogicUnit)) / COUNT(DISTINCT(?BusinessLogicUnit1)))*100 AS ?ctd) WHERE {{?Requirement a <http://semoss.org/ontologies/Requirement>;}{?BusinessLogicUnit a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills ?BusinessLogicUnit}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?ApplicationModule ?Provides ?BusinessLogicUnit}{?BusinessLogicUnit1 a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills1 ?BusinessLogicUnit1}} GROUP BY ?ApplicationModule ?Requirement
+
+RP8_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+RP8_QUERY	SELECT DISTINCT ?ApplicationModule ?Requirement (COALESCE(((COUNT(DISTINCT(?DataObject))*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) + COUNT(DISTINCT(?BusinessLogicUnit)))/(COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1))))*100,((COUNT(DISTINCT(?BusinessLogicUnit))/((COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1)))))*100)) AS ?Ratio)WHERE {{?Requirement a <http://semoss.org/ontologies/Requirement>;}{{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills ?DataObject}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?Provides <http://semoss.org/ontologies/CMR> ?aCMR;}{?ApplicationModule ?Provides ?DataObject}} UNION{{?BusinessLogicUnit a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?FulfillsB rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?FulfillsB ?BusinessLogicUnit}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?ApplicationModule ?Provides1 ?BusinessLogicUnit}}{{?DataObject1 a <http://semoss.org/ontologies/DataObject>;}{?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Fulfills1 <http://semoss.org/ontologies/CMR> ?rCMR;}{?Requirement ?Fulfills1 ?DataObject1} } UNION { {?BusinessLogicUnit1 a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Fulfills1B rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills1B ?BusinessLogicUnit1} } } GROUP BY ?ApplicationModule ?Requirement
+
+RP9_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+RP9_QUERY	SELECT DISTINCT ?ApplicationModule ?BusinessRule ((COUNT(DISTINCT(?DataObject)) / COUNT(DISTINCT(?DataObject1)))*100*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) AS ?ctd) WHERE {{?Requirement a <http://semoss.org/ontologies/Requirement>;}{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills ?DataObject} {?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?Provides <http://semoss.org/ontologies/CMR> ?aCMR;}{?ApplicationModule ?Provides ?DataObject}{?DataObject1 a <http://semoss.org/ontologies/DataObject>;}{?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Fulfills1 <http://semoss.org/ontologies/CMR> ?rCMR;}{?Requirement ?Fulfills1 ?DataObject1} {?BusinessRule a <http://semoss.org/ontologies/BusinessRule>;}{?TypeOf rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/TypeOf>;}{?BusinessRule ?TypeOf ?Requirement} } GROUP BY ?ApplicationModule ?BusinessRule
+
+RP10_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+RP10_QUERY	SELECT DISTINCT ?ApplicationModule ?BusinessRule ((COUNT(DISTINCT(?BusinessLogicUnit)) / COUNT(DISTINCT(?BusinessLogicUnit1)))*100 AS ?ctd) WHERE {{?Requirement a <http://semoss.org/ontologies/Requirement>;}{?BusinessLogicUnit a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills ?BusinessLogicUnit} {?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?ApplicationModule ?Provides ?BusinessLogicUnit} {?BusinessLogicUnit1 a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills1 ?BusinessLogicUnit1}{?BusinessRule a <http://semoss.org/ontologies/BusinessRule>;}{?TypeOf rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/TypeOf>;}{?BusinessRule ?TypeOf ?Requirement} } GROUP BY ?ApplicationModule ?BusinessRule
+
+RP11_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+RP11_QUERY	SELECT DISTINCT ?ApplicationModule ?BusinessRule (((COUNT(DISTINCT(?DataObject))*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) + (COUNT(DISTINCT(?BusinessLogicUnit))))/(COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1))))*100 AS ?Ratio)WHERE {{?Requirement a <http://semoss.org/ontologies/Requirement>;}{{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills ?DataObject}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?Provides <http://semoss.org/ontologies/CMR> ?aCMR;}{?ApplicationModule ?Provides ?DataObject}{?TypeOf rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/TypeOf>;}{?BusinessRule a <http://semoss.org/ontologies/BusinessRule>;}{?BusinessRule ?TypeOf ?Requirement}} UNION{{?BusinessLogicUnit a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?FulfillsB rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?FulfillsB ?BusinessLogicUnit}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?ApplicationModule ?Provides1 ?BusinessLogicUnit}}{{?DataObject1 a <http://semoss.org/ontologies/DataObject>;}{?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Fulfills1 <http://semoss.org/ontologies/CMR> ?rCMR;}{?Requirement ?Fulfills1 ?DataObject1} } UNION { {?BusinessLogicUnit1 a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Fulfills1B rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills1B ?BusinessLogicUnit1} } } GROUP BY ?ApplicationModule ?BusinessRule
+
+RP12_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+RP12_QUERY	SELECT DISTINCT ?ApplicationModule ?BusinessRule WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) . ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?Implements rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Implements> . ?BusinessRule a <http://semoss.org/ontologies/BusinessRule> . ?ApplicationModule ?Implements ?BusinessRule .}
+
+RP13_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+RP13_QUERY SELECT DISTINCT ?Activity ?Requirement WHERE { BIND(<@Activity-http://semoss.org/ontologies/Activity@> AS ?Activity) . ?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills> . ?Requirement a <http://semoss.org/ontologies/Requirement> . ?Activity a <http://semoss.org/ontologies/Activity> . ?Supports rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Supports> . ?ApplicationModule ?Fulfills ?Requirement . ?ApplicationModule ?Supports ?Activity .}
+
+RP14_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+RP14_QUERY	SELECT DISTINCT ?ApplicationModule ?Requirement (COALESCE(((COUNT(DISTINCT(?DataObject))*IF(sample(?rCMR)='C', IF(sample(?aCMR)='C', 1, 0), IF(sample(?rCMR)='M', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,0)), IF(sample(?rCMR)='R', IF(sample(?aCMR)='C', 1, IF(sample(?aCMR)='M',1,IF(sample(?aCMR)='R',1,0))), 0) )) + COUNT(DISTINCT(?BusinessLogicUnit)))/(COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1))))*100,((COUNT(DISTINCT(?BusinessLogicUnit))/((COUNT(DISTINCT(?DataObject1)) + COUNT(DISTINCT(?BusinessLogicUnit1)))))*100)) AS ?Ratio) WHERE { {?Requirement a <http://semoss.org/ontologies/Requirement>;}{{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills ?DataObject}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?Provides <http://semoss.org/ontologies/CMR> ?aCMR;}{?ApplicationModule ?Provides ?DataObject}} UNION{{?BusinessLogicUnit a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?FulfillsB rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?FulfillsB ?BusinessLogicUnit}{?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule>;}{?Provides1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?ApplicationModule ?Provides1 ?BusinessLogicUnit}}{{?DataObject1 a <http://semoss.org/ontologies/DataObject>;}{?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Fulfills1 <http://semoss.org/ontologies/CMR> ?rCMR;}{?Requirement ?Fulfills1 ?DataObject1} } UNION { {?BusinessLogicUnit1 a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Fulfills1B rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills>;}{?Requirement ?Fulfills1B ?BusinessLogicUnit1} } } GROUP BY ?ApplicationModule ?Requirement
+
+RP15_LAYOUT prerna.ui.components.playsheets.HeatMapPlaySheet
+RP15_QUERY SELECT DISTINCT ?BusinessRule ?Requirement (1 AS ?Ct) WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) . ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills> . ?Requirement a <http://semoss.org/ontologies/Requirement> . ?ApplicationModule ?Fulfills ?Requirement . OPTIONAL {?Implements rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Implements> . ?BusinessRule a <http://semoss.org/ontologies/BusinessRule> . ?ApplicationModule ?Implements ?BusinessRule . ?Fulfills1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills> . ?Requirement ?Fulfills1 ?BusinessRule .} }
+
+AP1_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP1_QUERY	SELECT DISTINCT ?Application ?ApplicationFullName ?Description WHERE { ?Application a <http://semoss.org/ontologies/ApplicationModule> ; <http://semoss.org/ontologies/Name> ?ApplicationFullName . ?Application <http://semoss.org/ontologies/ApplicationModule_Description> ?Description . } ORDER BY ?Application
+
+AP2_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP2_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationFullName ?Data ?CMR WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?DataURI a <http://semoss.org/ontologies/DataObject> . ?Provides <http://semoss.org/ontologies/CMR> ?CMR . ?ApplicationModule ?Provides ?DataURI . ?ApplicationModule <http://semoss.org/ontologies/Name> ?ApplicationFullName . ?DataURI rdfs:label ?Data }
+
+AP3_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP3_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationFullName ?BLU WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?BLU_URI a <http://semoss.org/ontologies/BusinessLogicUnit> . ?ApplicationModule ?Provides ?BLU_URI . ?ApplicationModule <http://semoss.org/ontologies/Name> ?ApplicationFullName . ?BLU_URI rdfs:label ?BLU . }
+
+AP4_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP4_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationFullName ?Requirement ?RequirementID WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills> . ?ApplicationModule ?Fulfills ?RequirementURI . ?RequirementURI a <http://semoss.org/ontologies/Requirement> ; rdfs:label ?Requirement . ?ApplicationModule <http://semoss.org/ontologies/Name> ?ApplicationFullName . OPTIONAL { ?RequirementURI <http://semoss.org/ontologies/ID> ?RequirementID } }
+
+AP5_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP5_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationFullName ?BusinessRule ?BusinessRuleID WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?Implements rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Implements> . ?ApplicationModule ?Implements ?BusinessRuleURI . ?BusinessRuleURI a <http://semoss.org/ontologies/BusinessRule> . ?BusinessRuleURI rdfs:label ?BusinessRule . ?ApplicationModule <http://semoss.org/ontologies/Name> ?ApplicationFullName . OPTIONAL{ ?BusinessRuleURI <http://semoss.org/ontologies/ID> ?BusinessRuleID } }
+
+AP6_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP6_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationFullName ?UseCase ?UseCaseID WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills> . ?ApplicationModule ?Fulfills ?UseCaseURI . ?UseCaseURI a <http://semoss.org/ontologies/UseCase> ; rdfs:label ?UseCase. ?ApplicationModule <http://semoss.org/ontologies/Name> ?ApplicationFullName . OPTIONAL{ ?UseCaseURI <http://semoss.org/ontologies/ID> ?UseCaseID } }
+
+AP7_LAYOUT veera.ui.components.playsheets.AppDupeHeatMapSheet
+AP7_QUERY NULL
+
+# This query no longer produces a useful result and has been diabled.  See comments under: http://104.130.3.174/trac/ticket/244
+#
+AP8_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+AP8_QUERY	SELECT DISTINCT ?ApplicationModule ?BusinessProcess ?Application_Business_Process_Count WITH{ SELECT DISTINCT ?ApplicationModule (xsd:double(COUNT(DISTINCT ?BusinessProcess_2)) AS ?Application_Business_Process_Count) WHERE { ?Activity_2 a <http://semoss.org/ontologies/Activity> . ?consists_2 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?BusinessProcess_2 a <http://semoss.org/ontologies/BusinessProcess> . ?BusinessProcess_2 ?consists_2 ?Activity_2 . ?DataObject_2 a <http://semoss.org/ontologies/DataObject> . ?needs_2 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>. ?Activity_2 ?needs_2 ?DataObject_2 . ?provides_2 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?provides_2 <http://semoss.org/ontologies/CMR> ?aCMR_2 . ?ApplicationModule ?provides_2 ?DataObject_2 . } GROUP BY ?ApplicationModule } AS %subQuery WHERE{ ?Activity a <http://semoss.org/ontologies/Activity> . ?consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?BusinessProcess ?consists ?Activity . ?DataObject a <http://semoss.org/ontologies/DataObject> . ?needs rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>. ?Activity ?needs ?DataObject . ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?provides <http://semoss.org/ontologies/CMR> ?aCMR . ?ApplicationModule ?provides ?DataObject . INCLUDE %subQuery . } 
+
+
+#
+# This graph pattern is no longer found in the data and the query has been disabled.
+#
+# Simplified form: 
+# CONSTRUCT {?ApplicationModule ?Supports ?Activity. ?Activity ?MapsTo ?Activity_iBRMv2. } WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?Activity a <http://semoss.org/ontologies/Activity> . ?ApplicationModule ?Supports ?Activity . ?Supports rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Supports> . ?Activity_iBRMv2 a <http://semoss.org/ontologies/Activity_iBRMv2> . ?Activity ?MapsTo ?Activity_iBRMv2 . ?MapsTo rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/MapsTo> . }
+#
+
+
+AP11_LAYOUT	prerna.ui.components.playsheets.ParallelCoordinatesPlaySheet
+AP11_QUERY 	SELECT DISTINCT ?DataObject ?ApplicationModule ?DO_ApplicationCounts WHERE { ?ApplicationModuleURI a <http://semoss.org/ontologies/ApplicationModule> ; <http://semoss.org/ontologies/Relation/Provides> ?DataObjectURI ; rdfs:label ?ApplicationModule . ?DataObjectURI a <http://semoss.org/ontologies/DataObject> ; rdfs:label ?DataObject . { SELECT ?DataObjectURI (xsd:double(COUNT(?DataObjectURI)) AS ?DO_ApplicationCounts) WHERE{ ?ApplicationModuleURI <http://semoss.org/ontologies/Relation/Provides> ?DataObjectURI . } GROUP BY ?DataObjectURI } }
+
+AP12_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+AP12_QUERY	SELECT ?DataObject ?ApplicationModule ?DO_ApplicationCounts WHERE { ?ApplicationModuleURI a <http://semoss.org/ontologies/ApplicationModule> ; <http://semoss.org/ontologies/Relation/Provides> ?DataObjectURI ; rdfs:label ?ApplicationModule . ?DataObjectURI a <http://semoss.org/ontologies/DataObject> ; rdfs:label ?DataObject . { SELECT ?DataObjectURI (xsd:double(COUNT(?DataObjectURI)) AS ?DO_ApplicationCounts) WHERE{ ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?ApplicationModule <http://semoss.org/ontologies/Relation/Provides> ?DataObjectURI . } GROUP BY ?DataObjectURI } } 
+
+AP13_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+AP13_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationList (xsd:double(COUNT(?ICD)) AS ?CTD) WHERE { ?ApplicationModuleURI a <http://semoss.org/ontologies/ApplicationModule> . ?ApplicationModuleURI <http://semoss.org/ontologies/Relation/Provides> ?ICD . ?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> . ?ICD <http://semoss.org/ontologies/Relation/Consumes> ?ApplicationListURI . ?ApplicationListURI a <http://semoss.org/ontologies/ApplicationModule> . ?ApplicationModuleURI rdfs:label ?ApplicationModule . ?ApplicationListURI rdfs:label ?ApplicationList . } GROUP BY ?ApplicationModule ?ApplicationList
+
+AP14_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+AP14_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationList (xsd:double(COUNT(?ICD)) AS ?ctd) WHERE { ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?ApplicationList a <http://semoss.org/ontologies/ApplicationModule> . ?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?Consumes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consumes> . ?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> . ?ApplicationModule ?Provides ?ICD . ?ICD ?Consumes ?ApplicationList .} GROUP BY ?ApplicationModule ?ApplicationList
+
+AP15_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP15_QUERY	SELECT DISTINCT ?ApplicationDownstream ?ApplicationFullName ?ApplicationUpstream ?ICD ?DBIA ?DataObject WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationUpstream).  ?ApplicationUpstream <http://semoss.org/ontologies/Relation/Provides> ?ICD .  ?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> .  ?ICD <http://semoss.org/ontologies/Relation/Consumes> ?ApplicationDownstream .  OPTIONAL{ ?ApplicationDownstream <http://semoss.org/ontologies/Name> ?ApplicationFullName . } ?ICD <http://semoss.org/ontologies/Relation/UsedBy> ?DataObject .  ?DataObject a <http://semoss.org/ontologies/DataObject> .  ?ICD <http://semoss.org/ontologies/Relation/Consists> ?ICDElem .  ?ICDElem a <http://semoss.org/ontologies/InterfaceElement> .  OPTIONAL { ?ICDElem <http://semoss.org/ontologies/DBIANumber> ?DBIA .} }
+
+AP16_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP16_QUERY	SELECT DISTINCT ?ApplicationUpstream ?ApplicationFullName ?ApplicationDownstream ?ICD ?DBIA ?DataObject WHERE {BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationDownstream) .  ?ICD <http://semoss.org/ontologies/Relation/Consumes> ?ApplicationDownstream .  ?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> .  ?ApplicationUpstream <http://semoss.org/ontologies/Relation/Provides> ?ICD .  OPTIONAL{ ?ApplicationUpstream <http://semoss.org/ontologies/Name> ?ApplicationFullName . } ?ICD <http://semoss.org/ontologies/Relation/UsedBy> ?DataObject .  ?DataObject a <http://semoss.org/ontologies/DataObject> .  ?ICD <http://semoss.org/ontologies/Relation/Consists> ?ICDElem .  ?ICDElem a <http://semoss.org/ontologies/InterfaceElement> .  OPTIONAL { ?ICDElem <http://semoss.org/ontologies/DBIANumber> ?DBIA .} }
+
+AP17_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+AP17_QUERY	CONSTRUCT {?ApplicationUpstream ?Provides ?ICD . ?ICD ?Consumes ?ApplicationDownstream . ?ICD ?UsedBy ?DataObject . ?ICD ?Consists ?ICDElem . ?ICDElem ?contains ?DBIA .} WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationUpstream) . ?ApplicationUpstream <http://semoss.org/ontologies/Relation/Provides> ?ICD . ?ICD <http://semoss.org/ontologies/Relation/Consumes> ?ApplicationDownstream . OPTIONAL{ ?ApplicationDownstream <http://semoss.org/ontologies/Name> ?ApplicationFullName . } ?ICD ?Consumes ?ApplicationDownstream . ?Consumes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consumes> . ?ICD <http://semoss.org/ontologies/Relation/UsedBy> ?DataObject . ?DataObject a <http://semoss.org/ontologies/DataObject> . ?ICD ?UsedBy ?DataObject . ?UsedBy rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/UsedBy> . ?ICD <http://semoss.org/ontologies/Relation/Consists> ?ICDElem . ?ICDElem a <http://semoss.org/ontologies/InterfaceElement> . ?ICD ?Consists ?ICDElem . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . OPTIONAL{ ?ICDElem ?Contains ?DBIA . ?Contains rdfs:subPropertyOf <http://semoss.org/ontologies> . } }
+
+AP18_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+AP18_QUERY	CONSTRUCT {?ApplicationUpstream ?Provides ?ICD . ?ICD ?Consumes ?ApplicationDownstream. ?ICD ?UsedBy ?DataObject . ?ICD ?Consists ?ICDElem . ?ICDElem ?contains ?DBIA .} WHERE {BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationDownstream) ?ICD <http://semoss.org/ontologies/Relation/Consumes> ?ApplicationDownstream .  ?ApplicationUpstream <http://semoss.org/ontologies/Relation/Provides> ?ICD .  OPTIONAL{ ?ApplicationUpstream <http://semoss.org/ontologies/Name> ?ApplicationFullName . } ?ICD ?Consumes ?ApplicationDownstream .  ?Consumes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consumes> .  ?ICD <http://semoss.org/ontologies/Relation/UsedBy> ?DataObject .  ?DataObject a <http://semoss.org/ontologies/DataObject> .  ?ICD ?UsedBy ?DataObject .  ?UsedBy rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/UsedBy> .  ?ICD <http://semoss.org/ontologies/Relation/Consists> ?ICDElem .  ?ICDElem a <http://semoss.org/ontologies/InterfaceElement> .  ?ICD ?Consists ?ICDElem .  ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> .  OPTIONAL{ ?ICDElem ?Contains ?DBIA . ?Contains rdfs:subPropertyOf <http://semoss.org/ontologies> . } }
+
+#
+#  This query is probably useless, the ?VCAMPMapping variable is never bound.
+#
+AP19_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP19_QUERY	SELECT DISTINCT ?ApplicationModule ?ApplicationFullName ?BFFActivity (IF(BOUND(?Activity),'X',' ') AS ?VCAMPMapping) (IF(BOUND(?BFFActivity),'X',' ') AS ?EAMapping) WHERE { BIND(<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?ApplicationModule <http://semoss.org/ontologies/Name> ?ApplicationFullName . { ?Activity a <http://semoss.org/ontologies/Activity> . ?Supports rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Supports> . ?ApplicationModule ?Supports ?Activity . ?BFFActivity a <http://semoss.org/ontologies/BFF25Activity> . ?Activity ?MapsTo ?BFFActivity . ?MapsTo rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/MapsTo> . } UNION { ?Supports rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Supports> . ?BFFActivity a <http://semoss.org/ontologies/BFF25Activity> . ?ApplicationModule ?Supports ?BFFActivity . } }
+
+AP20_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP20_QUERY	SELECT DISTINCT (<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?ApplicationFullName ?DataElement WHERE { ?ApplicationModule <http://semoss.org/ontologies/Relation/Creates> ?DataElementURI ; <http://semoss.org/ontologies/Name> ?ApplicationFullName . ?DataElementURI rdfs:label ?DataElement }
+
+AP21_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP21_QUERY	SELECT DISTINCT (<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?ApplicationFullName ?DataElement WHERE { ?ApplicationModule <http://semoss.org/ontologies/Relation/Modifies> ?DataElementURI ; <http://semoss.org/ontologies/Name> ?ApplicationFullName . ?DataElementURI rdfs:label ?DataElement }
+
+AP22_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+AP22_QUERY	SELECT DISTINCT (<@ApplicationModule-http://semoss.org/ontologies/ApplicationModule@> AS ?ApplicationModule) ?ApplicationFullName ?DataElement WHERE { ?ApplicationModule <http://semoss.org/ontologies/Relation/Reads> ?DataElementURI ; <http://semoss.org/ontologies/Name> ?ApplicationFullName . ?DataElementURI rdfs:label ?DataElement }
+
+
+ActP1_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+ActP1_QUERY	SELECT DISTINCT ?Activity ?Activity_iBRMv2 ?iBRM_v1_Level ?iBRM_v1_Num ?iBRM_v2_Num WHERE { ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?Activity_iBRMv2URI a <http://semoss.org/ontologies/Activity_iBRMv2> . ?ActivityURI <http://semoss.org/ontologies/Relation/MapsTo> ?Activity_iBRMv2URI . ?iBRM_v1_Level a <http://semoss.org/ontologies/ActivityLevel> . ?ActivityURI <http://semoss.org/ontologies/Relation/Has> ?iBRM_v1_Level . ?ActivityURI <http://semoss.org/ontologies/Number> ?iBRM_v1_Num . ?Activity_iBRMv2URI <http://semoss.org/ontologies/iBRM_v2_Num> ?iBRM_v2_Num . ?ActivityURI rdfs:label ?Activity . ?Activity_iBRMv2URI rdfs:label ?Activity_iBRMv2 . } ORDER BY ?Activity
+
+ActP2_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP2_QUERY	CONSTRUCT {?Activity ?MapsTo ?Activity_iBRMv2} WHERE{ BIND(<@Activity-http://semoss.org/ontologies/Activity@> AS ?Activity) ?Activity_iBRMv2 a <http://semoss.org/ontologies/Activity_iBRMv2> . ?Activity ?MapsTo ?Activity_iBRMv2 . ?MapsTo rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/MapsTo> }
+
+ActP3_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP3_QUERY	CONSTRUCT {?BusinessProcess ?Consists ?Activity .} WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?Activity a <http://semoss.org/ontologies/Activity> . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/PharmacyWeight> ?PharmacyWeight . ?BusinessProcess ?Consists ?Activity .}
+
+ActP4_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP4_QUERY	CONSTRUCT {?BusinessProcess ?Consists ?Activity .} WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?Activity a <http://semoss.org/ontologies/Activity> . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/LabsWeight> ?LabsWeight . ?BusinessProcess ?Consists ?Activity .}
+
+ActP5_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP5_QUERY	CONSTRUCT {?BusinessProcess ?Consists ?Activity .} WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?Activity a <http://semoss.org/ontologies/Activity> . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/ImagingWeight> ?ImagingWeight . ?BusinessProcess ?Consists ?Activity .}
+
+ActP6_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP6_QUERY	CONSTRUCT {?BusinessProcess ?Consists ?Activity .} WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?Activity a <http://semoss.org/ontologies/Activity> . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/ImmunizationWeight> ?ImmunizationWeight . ?BusinessProcess ?Consists ?Activity .}
+
+ActP7_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP7_QUERY	CONSTRUCT {?BusinessProcess ?Consists ?Activity .} WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?Activity a <http://semoss.org/ontologies/Activity> . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/CPRSWeight> ?CPRSWeight . ?BusinessProcess ?Consists ?Activity .}
+
+ActP8_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP8_QUERY	CONSTRUCT {?Activity ?Consists ?Activity2 .} WHERE {?Activity a <http://semoss.org/ontologies/Activity> . ?Activity2 a <http://semoss.org/ontologies/Activity> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Activity ?Consists ?Activity2 .}
+
+ActP9_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+ActP9_QUERY	CONSTRUCT {?Activity ?Has ?ActivityLevel .} WHERE {BIND(<@ActivityLevel-http://semoss.org/ontologies/ActivityLevel@> AS ?ActivityLevel) . ?Activity a <http://semoss.org/ontologies/Activity> . ?Has rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Has> . ?Activity ?Has ?ActivityLevel .}
+
+ActP10_LAYOUT	prerna.ui.components.playsheets.ColumnChartPlaySheet
+ActP10_QUERY	SELECT DISTINCT ?ActivityLevel (xsd:double(COUNT(DISTINCT(?Activity))) AS ?ActivityCount) WHERE {?ActivityLevel a <http://semoss.org/ontologies/ActivityLevel> . ?Activity a <http://semoss.org/ontologies/Activity> . ?Has rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Has> . ?Activity ?Has ?ActivityLevel .} GROUP BY ?ActivityLevel
+
+ActP11_LAYOUT	prerna.ui.components.playsheets.ParallelCoordinatesPlaySheet
+ActP11_QUERY	SELECT DISTINCT ?Activity ?DataPercent ?BLUPercent ?HumanLogicPercent WHERE { ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?ActivityURI rdfs:label ?Activity . ?ActivityURI <http://semoss.org/ontologies/Data> ?DataPercent . ?ActivityURI <http://semoss.org/ontologies/Business_Logic> ?BLUPercent . ?ActivityURI <http://semoss.org/ontologies/Human_Logic> ?HumanLogicPercent . }
+
+ActP12_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+ActP12_QUERY	SELECT DISTINCT ?Activity ?Direct_Indirect_Designation WHERE { ?ActivityURI a <http://semoss.org/ontologies/Activity> ; rdfs:label ?Activity ; <http://semoss.org/ontologies/Direct_Indirect> ?Direct_Indirect_Designation . }
+
+ActP13_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+ActP13_QUERY	SELECT DISTINCT ?Activity ?Direct_Designation WHERE { ?ActivityURI a <http://semoss.org/ontologies/Activity> ; rdfs:label ?Activity ; <http://semoss.org/ontologies/Direct> ?Direct_Designation . }
+
+IO1_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+IO1_QUERY	SELECT DISTINCT ?DataObject ?ApplicationModule ?CMR WHERE {BIND(<@DataObject-http://semoss.org/ontologies/DataObject@> AS ?DataObjectURI) ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?Provides <http://semoss.org/ontologies/CMR> ?CMR . ?ApplicationModule ?Provides ?DataObjectURI . ?DataObjectURI rdfs:label ?DataObject }
+
+IO2_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+IO2_QUERY CONSTRUCT {?Interface ?carries ?Data} WHERE { {?Interface a <http://semoss.org/ontologies/InterfaceControlDocument> ;} {?carries rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/UsedBy>;} BIND(<@Data-http://semoss.org/ontologies/DataObject@> AS ?Data){?Interface ?carries ?Data;} }
+
+IO3_LAYOUT	prerna.ui.components.playsheets.ColumnChartPlaySheet
+IO3_QUERY	SELECT ?Data (xsd:double(COUNT(?icd)) AS ?ICDcount) WHERE { ?icd a <http://semoss.org/ontologies/InterfaceControlDocument> . ?icd <http://semoss.org/ontologies/Relation/UsedBy> ?DataURI . ?DataURI a <http://semoss.org/ontologies/DataObject> . ?DataURI rdfs:label ?Data . } GROUP BY ?Data
+
+IO4_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+IO4_QUERY	SELECT DISTINCT ?DataObject ?DataElement ?File ?FileNumber ?Field ?FieldNumber ?FieldDescription WHERE { BIND(<@DataObject-http://semoss.org/ontologies/DataObject@> AS ?DataObjectURI) . ?DataObjectURI a <http://semoss.org/ontologies/DataObject> . ?DataObjectURI <http://semoss.org/ontologies/Relation/Consists> ?DataElementURI . ?DataElementURI a <http://semoss.org/ontologies/DataElement> . OPTIONAL{ ?DataElementURI <http://semoss.org/ontologies/File> ?File . ?DataElementURI <http://semoss.org/ontologies/FileNumber> ?FileNumber . ?DataElementURI <http://semoss.org/ontologies/Field> ?Field . ?DataElementURI <http://semoss.org/ontologies/FieldNumber> ?FieldNumber . ?DataElementURI <http://semoss.org/ontologies/FieldDescription> ?FieldDescription . } ?DataObjectURI rdfs:label ?DataObject . ?DataElementURI rdfs:label ?DataElement . }
+
+#
+# "M" is desirable here but quotations marks are presently being stripped away following retrieval of the query from the insights kb.
+# This issue is address in trac ticket 454.
+#
+IO5_LAYOUT	prerna.ui.components.playsheets.ColumnChartPlaySheet
+IO5_QUERY	SELECT DISTINCT ?DataObject (xsd:double(COUNT(?Application)) AS ?Number_of_Applications_making_modifications) WHERE { ?Application a <http://semoss.org/ontologies/ApplicationModule> . ?Provides <http://semoss.org/ontologies/CMR> 'M'. ?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?Application ?Provides ?DataObject . ?DataObject a <http://semoss.org/ontologies/DataObject> . } GROUP BY ?DataObject ORDER BY DESC (?Number_of_Applications_making_modifications)
+
+IO6_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+IO6_QUERY	SELECT DISTINCT ?ApplicationUpstream ?ApplicationDownstream ?ICD ?DataObject ?DBIA WHERE { BIND(<@DataObject-http://semoss.org/ontologies/DataObject@> AS ?DataObjectURI) ?ICD_URI <http://semoss.org/ontologies/Relation/UsedBy> ?DataObjectURI . ?ICD_URI a <http://semoss.org/ontologies/InterfaceControlDocument> . ?ApplicationUpstreamURI <http://semoss.org/ontologies/Relation/Provides> ?ICD_URI . ?ApplicationUpstreamURI a <http://semoss.org/ontologies/ApplicationModule> . ?ICD_URI <http://semoss.org/ontologies/Relation/Consumes> ?ApplicationDownstreamURI . ?ApplicationDownstreamURI a <http://semoss.org/ontologies/ApplicationModule> . ?ICD_URI <http://semoss.org/ontologies/Relation/Consists> ?ICDElem . ?ICDElem a <http://semoss.org/ontologies/InterfaceElement> . OPTIONAL{ ?ICDElem <http://semoss.org/ontologies/DBIANumber> ?DBIA .} ?DataObjectURI rdfs:label ?DataObject . ?ApplicationUpstreamURI rdfs:label ?ApplicationUpstream . ?ApplicationDownstreamURI rdfs:label ?ApplicationDownstream . ?ICD_URI rdfs:label ?ICD . }
+
+IO7_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+IO7_QUERY	SELECT DISTINCT ?ApplicationUpstream ?ApplicationDownstream ?ICD ?DataObject ?DBIA ?File ?Field WHERE { BIND(<@DataObject-http://semoss.org/ontologies/DataObject@> AS ?DataObject) . ?ApplicationUpstream a <http://semoss.org/ontologies/ApplicationModule> . ?ApplicationDownstream a <http://semoss.org/ontologies/ApplicationModule> . ?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> . ?ICDElem a <http://semoss.org/ontologies/InterfaceElement> . ?DataElem a <http://semoss.org/ontologies/DataElement> . ?DataObject a <http://semoss.org/ontologies/DataObject> . ?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?Consumes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consumes> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Contains rdfs:subPropertyOf <http://semoss.org/ontologies> . ?UsedBy rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/UsedBy> . ?ICD ?UsedBy ?DataObject . ?ApplicationUpstream ?Provides ?ICD . ?ICD ?Consumes ?ApplicationDownstream . ?ICD ?Consists ?ICDElem . ?ICDElem ?Contains ?DataElem . OPTIONAL{?ICDElem <http://semoss.org/ontologies/DBIANumber> ?DBIA . ?DataElem <http://semoss.org/ontologies/FileNumber> ?FileNumber . ?DataElem <http://semoss.org/ontologies/FieldNumber> ?FieldNumber . ?DataElem <http://semoss.org/ontologies/File> ?File . ?DataElem <http://semoss.org/ontologies/Field> ?Field .}}
+
+IO8_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+IO8_QUERY	CONSTRUCT {?ICD ?consumes ?ApplicationModule_1 . ?ApplicationModule_2 ?provides ?ICD .} WITH {SELECT ?ICD ?ApplicationModule_1 ?ApplicationModule_2 ?consumes ?provides WHERE {?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> .{?ApplicationModule_1 a <http://semoss.org/ontologies/ApplicationModule> . ?consumes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consumes> . ?ICD ?consumes ?ApplicationModule_1 .} UNION {?ApplicationModule_2 a <http://semoss.org/ontologies/ApplicationModule> . ?provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>. ?ApplicationModule_2 ?provides ?ICD .}}} AS %subQuery WHERE {BIND(<@DataObject-http://semoss.org/ontologies/DataObject@> AS ?DataObject) . ?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> . ?usedBy rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/UsedBy> . ?ICD ?usedBy ?DataObject . INCLUDE %subQuery}
+
+IO9_LAYOUT prerna.ui.components.playsheets.GridPlaySheet
+IO9_QUERY SELECT DISTINCT ?DataObject ?Description WHERE { ?DataObject a <http://semoss.org/ontologies/DataObject> . OPTIONAL { ?DataObject <http://semoss.org/ontologies/Description> ?Description . }}
+
+#
+#  Investigate whey the Graph Play Sheet can't use an arbitrary predicate in the visualization of a CONSTRUCT graph. E.G.
+#  CONSTRUCT { ?Capability <http://semoss.org/ontologies/foo> ?BusinessProcess }
+#  When possible, the query can then take the following simplified form:
+#
+# CONSTRUCT {?Capability <http://semoss.org/ontologies/Relation/Realizes> ?BusinessProcess} WHERE{ BIND(<http://va.gov/ontologies/Capability/CPRS> AS ?Capability) . ?Capability <http://semoss.org/ontologies/Relation/Realizes> ?BusinessProcess . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . }
+#
+CP1_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+CP1_QUERY	CONSTRUCT {?Capability ?Realizes ?BusinessProcess} WHERE{ BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?Capability ?Realizes ?BusinessProcess . ?Realizes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Realizes> }
+
+#
+# DM: some labels look truncated here, check if the importer and Grid Play Sheet have an issue here. multiline lables?
+#
+CP2_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+CP2_QUERY	SELECT DISTINCT ?Capability ?Requirement WHERE{ BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?CapabilityURI) ?CapabilityURI ?Consists ?ApplicationModuleURI . ?CapabilityURI a <http://semoss.org/ontologies/Capability> . ?ApplicationModuleURI a <http://semoss.org/ontologies/ApplicationModule> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?ApplicationModuleURI ?Fulfills ?RequirementURI . ?RequirementURI a <http://semoss.org/ontologies/Requirement> . ?Fulfills rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Fulfills> . ?ApplicationModuleURI rdfs:label ?ApplicationModule . ?RequirementURI rdfs:label ?Requirement . ?CapabilityURI rdfs:label ?Capability . }
+
+CP3_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+CP3_QUERY	SELECT DISTINCT ?Capability ?DataObject WHERE { BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?CapabilityURI) ?CapabilityURI <http://semoss.org/ontologies/Relation/Consists> ?ApplicationModule . ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?ApplicationModule <http://semoss.org/ontologies/Relation/Provides> ?DataObjectURI . ?DataObjectURI a <http://semoss.org/ontologies/DataObject> . ?CapabilityURI rdfs:label ?Capability . ?DataObjectURI rdfs:label ?DataObject . }
+
+CP4_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+CP4_QUERY	SELECT DISTINCT ?Capability ?BLU WHERE { BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?CapabilityURI) ?CapabilityURI <http://semoss.org/ontologies/Relation/Consists> ?ApplicationModule . ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?ApplicationModule <http://semoss.org/ontologies/Relation/Provides> ?BLU_URI . ?BLU_URI a <http://semoss.org/ontologies/BusinessLogicUnit> . ?CapabilityURI rdfs:label ?Capability . ?BLU_URI rdfs:label ?BLU } ORDER BY ?BLU
+
+CP5_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+CP5_QUERY	SELECT DISTINCT ?Capability ?DataObject (xsd:double(COUNT(?DataObject)/8) as ?DataCount) WHERE { ?CapabilityURI a <http://semoss.org/ontologies/Capability> . ?CapabilityURI <http://semoss.org/ontologies/Relation/Realizes> ?BusinessProcess . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?BusinessProcess <http://semoss.org/ontologies/Relation/Consists> ?Activity . ?Activity a <http://semoss.org/ontologies/Activity> . ?Activity <http://semoss.org/ontologies/Relation/Needs> ?DataObjectURI . ?DataObjectURI a <http://semoss.org/ontologies/DataObject> . ?CapabilityURI rdfs:label ?Capability . ?DataObjectURI rdfs:label ?DataObject } GROUP BY ?Capability ?DataObject
+
+
+#
+# This query can return no results, the predicate <http://semoss.org/ontologies/weight> (or /Weight) is not found in the database.
+# Also the ?Realizes variable is selected but never used.
+#
+# CP6_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+# CP6_QUERY	SELECT DISTINCT ?Capability ?data (SUM(?supWeight * ?conWeight * ?needsWeight)*100 as ?DataCount) WHERE {{?Capability a <http://semoss.org/ontologies/Capability> ;} {?Realizes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Realizes>;} {?support <http://semoss.org/ontologies/weight> ?supWeight;} {?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess>;}{?activity a <http://semoss.org/ontologies/Activity>;}{?data a <http://semoss.org/ontologies/DataObject>;}{?consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists>;} {?consists <http://semoss.org/ontologies/weight> ?conWeight;} {?needs rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>;} {?needs <http://semoss.org/ontologies/weight> ?needsWeight;} {?Capability ?support ?BusinessProcess;} {?BusinessProcess ?consists ?activity;} {?activity ?needs ?data;} } GROUP BY ?Capability ?data
+
+CP7_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+CP7_QUERY	SELECT ?DataObject (COUNT(?DataObject) AS ?NumberOfICDsContainingThisData) WHERE { BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) . ?Capability <http://semoss.org/ontologies/Relation/Realizes> ?BusinessProcess . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?BusinessProcess <http://semoss.org/ontologies/Relation/Consists> ?Activity . ?Activity a <http://semoss.org/ontologies/Activity> . ?Activity <http://semoss.org/ontologies/Relation/Needs> ?DataObjectURI . ?Activity <http://semoss.org/ontologies/Relation/Needs> ?DataObjectURI . ?DataObjectURI a <http://semoss.org/ontologies/DataObject> . ?ICD <http://semoss.org/ontologies/Relation/UsedBy> ?DataObjectURI . ?ICD a <http://semoss.org/ontologies/InterfaceControlDocument> . ?DataObjectURI rdfs:label ?DataObject . } GROUP BY ?DataObject ORDER BY DESC(?NumberOfICDsContainingThisData) LIMIT 5
+
+CP8_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+CP8_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity ?EnterpriseWeight WHERE { BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) . ?Capability a <http://semoss.org/ontologies/Capability> . ?Capability <http://semoss.org/ontologies/Relation/Realizes> ?BusinessProcess . ?BusinessProcess ?Consists ?Activity . ?Activity a <http://semoss.org/ontologies/Activity> . ?Consists <http://semoss.org/ontologies/EnterpriseWeight> ?EnterpriseWeight . }
+
+#
+# This query is impacted by the issue reported in ticket #422: http://104.130.3.174/trac/ticket/422
+#
+CP9_LAYOUT	prerna.ui.components.playsheets.ParallelCoordinatesPlaySheet
+CP9_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity ?EnterpriseWeight WHERE { BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) ?Capability <http://semoss.org/ontologies/Relation/Realizes> ?BusinessProcessURI . ?BusinessURI a <http://semoss.org/ontologies/BusinessProcess> . ?Consists <http://semoss.org/ontologies/EnterpriseWeight> ?EnterpriseWeight . ?BusinessProcessURI ?Consists ?ActivityURI . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?BusinessProcessURI rdfs:label ?BusinessProcess . ?ActivityURI rdfs:label ?Activity . }
+
+
+# Dendrogram
+BP1_LAYOUT	prerna.ui.components.playsheets.DendrogramPlaySheet
+BP1_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity (COALESCE(?DataObject, ?BLU) AS ?DataBLU) WHERE { BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcessURI) ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?BusinessProcessURI <http://semoss.org/ontologies/Relation/Consists> ?ActivityURI . { ?DataObjectURI a <http://semoss.org/ontologies/DataObject> ; rdfs:label ?DataObject . ?ActivityURI <http://semoss.org/ontologies/Relation/Needs> ?DataObjectURI } UNION { ?BLU_URI a <http://semoss.org/ontologies/BusinessLogicUnit> ; rdfs:label ?BLU . ?ActivityURI <http://semoss.org/ontologies/Relation/Needs> ?BLU_URI . } ?BusinessProcessURI rdfs:label ?BusinessProcess . ?ActivityURI rdfs:label ?Activity . } ORDER BY ?BusinessProcess ?Activity ?DataBLU
+
+
+#
+#
+# This query can return no results, the predicate <http://semoss.org/ontologies/Weight> is not found in the database.
+#
+BP2_LAYOUT	prerna.ui.components.playsheets.PieChartPlaySheet
+BP2_QUERY	SELECT DISTINCT ?Activity ?Weight WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) {?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess>;}{?Activity a <http://semoss.org/ontologies/Activity>;}{?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists>;}{?Consists <http://semoss.org/ontologies/Weight> ?Weight}{?BusinessProcess ?Consists ?Activity}}
+
+BP3_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+BP3_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity WHERE { BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?BusinessProcess ?Consists ?ActivityURI . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/PharmacyWeight> ?PharmacyWeight . ?ActivityURI rdfs:label ?Activity . }
+
+BP4_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+BP4_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity WHERE { BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?BusinessProcess ?Consists ?ActivityURI . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/LabsWeight> ?LabsWeight . ?ActivityURI rdfs:label ?Activity . }
+
+#
+# This query can return no results, the predicate <http://semoss.org/ontologies/VISTAImagingWeight> is not found in the database.
+#
+BP5_LAYOUT prerna.ui.components.playsheets.GridPlaySheet
+BP5_QUERY SELECT DISTINCT ?BusinessProcess ?Activity WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?Activity a <http://semoss.org/ontologies/Activity> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/ImagingWeight> ?ImagingWeight . ?BusinessProcess ?Consists ?Activity .}
+
+#
+# This query can return no results, the predicate <http://semoss.org/ontologies/ImmunizationWeight> is not found in the database.
+#
+BP6_LAYOUT prerna.ui.components.playsheets.GridPlaySheet
+BP6_QUERY SELECT DISTINCT ?BusinessProcess ?Activity WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?Activity a <http://semoss.org/ontologies/Activity> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/ImmunizationWeight> ?ImmunizationWeight . ?BusinessProcess ?Consists ?Activity .}
+
+BP7_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+BP7_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Consists <http://semoss.org/ontologies/CPRSWeight> ?CPRSWeight . ?BusinessProcess ?Consists ?ActivityURI . ?ActivityURI rdfs:label ?Activity . }
+
+BP8_LAYOUT	prerna.ui.components.playsheets.GridPlaySheet
+BP8_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity WHERE {BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?BusinessProcess ?Consists ?ActivityURI . ?ActivityURI rdfs:label ?Activity . }
+
+FV1_LAYOUT	prerna.ui.components.playsheets.DendrogramPlaySheet
+FV1_QUERY	SELECT DISTINCT ?Activity ?Task ?DataObject WHERE {BIND(<@Application-http://semoss.org/ontologies/ApplicationModule@> AS ?Application){?Application a <http://semoss.org/ontologies/ApplicationModule>;}{?Needs rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>;}{?Task a <http://semoss.org/ontologies/Task>;}{?Application ?Needs ?Task}{?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists>;}{?Activity a <http://semoss.org/ontologies/Activity>;}{?Activity ?Consists ?Task} {{?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?DataObject a <http://semoss.org/ontologies/DataObject>;}{?Application ?Provides ?DataObject}{?Needs1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>;}{?Task ?Needs1 ?DataObject} {?Provides <http://semoss.org/ontologies/CMR> ?CMR;}} UNION {{?Provides1 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides>;}{?BusinessLogicUnit a <http://semoss.org/ontologies/BusinessLogicUnit>;}{?Application ?Provides1 ?BusinessLogicUnit}{?Needs2 rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Needs>;}{?Task ?Needs2 ?BusinessLogicUnit}}}
+
+EP1_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+EP1_QUERY	CONSTRUCT { ?Capability ?Realizes ?BusinessProcess . ?BusinessProcess ?Consists ?Activity . } WHERE { BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) ?Realizes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Realizes> . ?Capability ?Realizes ?BusinessProcess . ?BusinessProcess a <http://semoss.org/ontologies/BusinessProcess> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?BusinessProcess ?Consists ?Activity . ?Activity a <http://semoss.org/ontologies/Activity> . }
+
+EP2_LAYOUT	prerna.ui.components.playsheets.GraphPlaySheet
+EP2_QUERY	CONSTRUCT { ?Capability ?Consists ?ApplicationModule . ?ApplicationModule ?Provides ?DataObject } WHERE { ?Capability a <http://semoss.org/ontologies/Capability> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?Provides rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Provides> . ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?DataObject a <http://semoss.org/ontologies/DataObject> . ?Capability ?Consists ?ApplicationModule . ?ApplicationModule ?Provides ?DataObject . }
+
+EP3_LAYOUT	prerna.ui.components.playsheets.ParallelCoordinatesPlaySheet
+EP3_QUERY	SELECT DISTINCT ?Capability ?BusinessProcess ?EnterpriseWeight ?Activity WHERE{ BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcessURI) ?Capability a <http://semoss.org/ontologies/Capability> . ?Realizes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Realizes> . ?Capability ?Realizes ?BusinessProcessURI . ?Consists <http://semoss.org/ontologies/EnterpriseWeight> ?EnterpriseWeight . ?BusinessProcessURI ?Consists ?ActivityURI . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?BusinessProcessURI rdfs:label ?BusinessProcess . ?ActivityURI rdfs:label ?Activity . }
+
+EP4_LAYOUT	prerna.ui.components.playsheets.ParallelCoordinatesPlaySheet
+EP4_QUERY	SELECT DISTINCT ?AppScore ?ApplicationModule ?Capability ?BusinessProcess WHERE{ ?ApplicationModuleURI <http://semoss.org/ontologies/ApplicationBPValue> ?AppScore . ?CapabilityURI ?Consists ?ApplicationModuleURI . ?CapabilityURI a <http://semoss.org/ontologies/Capability> . ?Consists rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Consists> . ?CapabilityURI ?Realizes ?BusinessProcessURI . ?BusinessProcessURI a <http://semoss.org/ontologies/BusinessProcess> . ?Realizes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Realizes> . ?ApplicationModuleURI rdfs:label ?ApplicationModule . ?BusinessProcessURI rdfs:label ?BusinessProcess . ?CapabilityURI rdfs:label ?Capability . }
+
+EP5_LAYOUT	prerna.ui.components.playsheets.PieChartPlaySheet
+EP5_QUERY	SELECT DISTINCT ?Activity ?EnterpriseWeight WHERE { BIND(<@BusinessProcess-http://semoss.org/ontologies/BusinessProcess@> AS ?BusinessProcess) ?Consists <http://semoss.org/ontologies/EnterpriseWeight> ?EnterpriseWeight . ?BusinessProcess ?Consists ?ActivityURI . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?ActivityURI rdfs:label ?Activity . }
+
+EP6_LAYOUT	prerna.ui.components.playsheets.PieChartPlaySheet
+EP6_QUERY	SELECT DISTINCT ?ApplicationModule ?EnterpriseAppScore WHERE{ ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?Capability a <http://semoss.org/ontologies/Capability> . ?ApplicationModule <http://semoss.org/ontologies/ApplicationBPValue> ?EnterpriseAppScore . ?Capability <http://semoss.org/ontologies/Relation/Consists> ?ApplicationModule . }
+
+
+EP7_LAYOUT	prerna.ui.components.playsheets.PieChartPlaySheet
+EP7_QUERY	SELECT DISTINCT ?ApplicationModule ?CPRSScore WHERE{ BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) ?ApplicationModule a <http://semoss.org/ontologies/ApplicationModule> . ?Capability a <http://semoss.org/ontologies/Capability> . ?ApplicationModule <http://semoss.org/ontologies/CPRSValue> ?CPRSScore . ?Capability <http://semoss.org/ontologies/Relation/Consists> ?ApplicationModule . }
+
+EP8_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+EP8_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity ?EnterpriseWeight WHERE{ BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) ?BusinessProcessURI a <http://semoss.org/ontologies/BusinessProcess> . ?Capability ?Realizes ?BusinessProcessURI . ?Realizes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Realizes> . ?Consists <http://semoss.org/ontologies/EnterpriseWeight> ?EnterpriseWeight . ?BusinessProcessURI ?Consists ?ActivityURI . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?BusinessProcessURI rdfs:label ?BusinessProcess . ?ActivityURI rdfs:label ?Activity . }
+
+#This question has been taken out of the list.
+EP9_LAYOUT	prerna.ui.components.playsheets.HeatMapPlaySheet
+EP9_QUERY	SELECT DISTINCT ?BusinessProcess ?Activity ?CPRSWeight WHERE{ BIND(<http://va.gov/ontologies/Capability/CPRS> AS ?Capability) BIND(<@Capability-http://semoss.org/ontologies/Capability@> AS ?Capability) ?BusinessProcessURI a <http://semoss.org/ontologies/BusinessProcess> . ?Capability ?Realizes ?BusinessProcessURI . ?Realizes rdfs:subPropertyOf <http://semoss.org/ontologies/Relation/Realizes> . ?Consists <http://semoss.org/ontologies/CPRSWeight> ?CPRSWeight . ?BusinessProcessURI ?Consists ?ActivityURI . ?ActivityURI a <http://semoss.org/ontologies/Activity> . ?BusinessProcessURI rdfs:label ?BusinessProcess . ?ActivityURI rdfs:label ?Activity }
+
+EP10_LAYOUT	prerna.ui.components.playsheets.ColumnChartPlaySheet
+EP10_QUERY	SELECT DISTINCT ?Application ?AppScore WHERE{ [] a <http://semoss.org/ontologies/ApplicationModule> ; <http://semoss.org/ontologies/ApplicationBPValue> ?AppScore ; rdfs:label ?Application . }
+

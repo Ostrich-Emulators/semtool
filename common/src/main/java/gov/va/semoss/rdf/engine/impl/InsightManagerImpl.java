@@ -270,7 +270,7 @@ public class InsightManagerImpl implements InsightManager {
 					RDF.TYPE, VAS.Perspective, true ) );
 			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
-				Perspective p = loadPerspective( URI.class.cast( s.getSubject() ), rc );
+				Perspective p = loadPerspective( URI.class.cast( s.getSubject() ), rc, urib );
 
 				List<Statement> slotstmts = Iterations.asList(
 						rc.getStatements( p.getId(), OLO.index, null, false ) );
@@ -358,7 +358,8 @@ public class InsightManagerImpl implements InsightManager {
 	 *
 	 * @return -- (Collection<Parameter>) Described above.
 	 */
-	private Collection<Parameter> loadParameters( Insight insight, RepositoryConnection rc ) {
+	private static Collection<Parameter> loadParameters( Insight insight,
+			RepositoryConnection rc ) {
 		List<Parameter> colInsightParameters = new ArrayList<>();
 
 		try {
@@ -410,12 +411,8 @@ public class InsightManagerImpl implements InsightManager {
 		return colInsightParameters;
 	}
 
-	@Override
-	public List<Insight> getInsights( Perspective perspective ) {
-		return new ArrayList<>();
-	}
-
-	public List<Insight> loadInsights( Perspective perspective, RepositoryConnection rc ) {
+	private static List<Insight> loadInsights( Perspective perspective,
+			RepositoryConnection rc, UriBuilder urib ) {
 		List<Insight> list = new ArrayList<>();
 		if ( perspective != null ) {
 			String query = "SELECT ?item "
@@ -433,7 +430,7 @@ public class InsightManagerImpl implements InsightManager {
 					= AbstractSesameEngine.getSelectNoEx( orderquery, rc, true );
 
 			for ( URI id : insightUris ) {
-				list.add( loadInsight( id, rc ) );
+				list.add( loadInsight( id, rc, urib ) );
 			}
 		}
 
@@ -445,7 +442,8 @@ public class InsightManagerImpl implements InsightManager {
 		return insights.get( insightURI );
 	}
 
-	public Insight loadInsight( URI insightURI, RepositoryConnection rc ) {
+	private static Insight loadInsight( URI insightURI, RepositoryConnection rc,
+			UriBuilder urib ) {
 
 		Insight insight = null;
 		try {
@@ -552,7 +550,8 @@ public class InsightManagerImpl implements InsightManager {
 		insights.remove( p.getId() );
 	}
 
-	public Perspective loadPerspective( URI perspectiveURI, RepositoryConnection rc ) {
+	private static Perspective loadPerspective( URI perspectiveURI, RepositoryConnection rc,
+			UriBuilder urib ) {
 		try {
 			Perspective perspective = new Perspective( perspectiveURI );
 			Collection<Statement> stmts
@@ -571,7 +570,7 @@ public class InsightManagerImpl implements InsightManager {
 				}
 			}
 
-			perspective.setInsights( loadInsights( perspective, rc ) );
+			perspective.setInsights( loadInsights( perspective, rc, urib ) );
 			return perspective;
 		}
 		catch ( RepositoryException e ) {
@@ -580,7 +579,7 @@ public class InsightManagerImpl implements InsightManager {
 		throw new IllegalArgumentException( "unknown perspective: " + perspectiveURI );
 	}
 
-	protected Insight insightFromStatements( Collection<Statement> stmts ) {
+	private static Insight insightFromStatements( Collection<Statement> stmts ) {
 		Insight insight = new Insight();
 
 		for ( Statement stmt : stmts ) {
