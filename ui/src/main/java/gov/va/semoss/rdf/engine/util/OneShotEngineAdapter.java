@@ -7,7 +7,9 @@ package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.GuiUtility;
+import java.io.File;
 import java.util.Collection;
 
 /**
@@ -21,8 +23,8 @@ public class OneShotEngineAdapter extends EngineOperationAdapter {
 		OPENED, CLOSED, INSIGHTS
 	};
 
-	private final IEngine engine;
 	private final ShotOp shotop;
+	private final String smssloc;
 
 	/**
 	 * Creates a new EngineAdapter that automatically closes itself when the given
@@ -31,9 +33,17 @@ public class OneShotEngineAdapter extends EngineOperationAdapter {
 	 * @param eng
 	 * @param op
 	 */
-	public OneShotEngineAdapter( IEngine eng, ShotOp op ) {
-		engine = eng;
+	public OneShotEngineAdapter( String smss, ShotOp op ) {
+		smssloc = smss;
 		shotop = op;
+	}
+
+	public OneShotEngineAdapter( IEngine eng, ShotOp op ) {
+		this( eng.getProperty( Constants.SMSS_LOCATION ), op );
+	}
+
+	public OneShotEngineAdapter( File smss, ShotOp op ) {
+		this( smss.getPath(), op );
 	}
 
 	@Override
@@ -70,7 +80,7 @@ public class OneShotEngineAdapter extends EngineOperationAdapter {
 	}
 
 	protected boolean isMyEngine( IEngine eng ) {
-		return engine.equals( eng );
+		return smssloc.equals( eng.getProperty( Constants.SMSS_LOCATION ) );
 	}
 
 	@Override

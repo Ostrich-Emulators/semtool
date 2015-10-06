@@ -191,6 +191,11 @@ public class EngineUtil2 {
 		return engine;
 	}
 
+	/**
+	 * Pair for {@link #loadEngine(java.io.File) }. Implementation simply calls
+	 * {@link IEngine#closeDB() }
+	 * @param eng
+	 */
 	public static void closeEngine( IEngine eng ) {
 		eng.closeDB();
 	}
