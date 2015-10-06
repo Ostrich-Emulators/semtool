@@ -19,10 +19,17 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
+import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.query.util.MetadataQuery;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
+import gov.va.semoss.util.Utility;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
+import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
@@ -127,10 +134,69 @@ public class EngineUtil2 {
 			eng.queryNoEx( new VoidQueryAdapter( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }" ) {
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					log.debug( "pre-engine: " + set.getValue( "s" ) + " "
-							+ set.getValue( "p" ) + " " + set.getValue( "o" ) );
+					log.debug( set.getValue( "s" ) + " " + set.getValue( "p" ) + " "
+							+ set.getValue( "o" ) );
 				}
 			} );
 		}
+	}
+
+	/**
+	 * Factory method for loading an engine.
+	 *
+	 * @param smssfile
+	 *
+	 * @return Loaded engine.
+	 *
+	 * @throws java.io.IOException
+	 */
+	public static IEngine loadEngine( File smssfile ) throws IOException {
+		log.debug( "In Utility file name is " + smssfile );
+		String smssloc = smssfile.getCanonicalPath();
+		IEngine engine = null;
+		String engineName = FilenameUtils.getBaseName( smssloc );
+
+		if ( "jnl".equalsIgnoreCase(
+				FilenameUtils.getExtension( smssfile.getName() ).toLowerCase() ) ) {
+			// we're loading a BigData journal file, so jump straight to its ctor
+			engine = new BigDataEngine( smssfile );
+		}
+		else {
+			Properties props = Utility.loadProp( smssfile );
+			engineName = props.getProperty( Constants.ENGINE_NAME, engineName );
+
+			String engineClass = props.getProperty( Constants.ENGINE_IMPL );
+			engineClass = engineClass.replaceAll( "prerna", "gov.va.semoss" );
+
+			try {
+				Class<IEngine> theClass = (Class<IEngine>) Class.forName( engineClass );
+				engine = (IEngine) theClass.getConstructor( Properties.class ).newInstance( props );
+
+			}
+			catch ( ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+				log.error( e );
+			}
+		}
+
+		if ( null == engine ) {
+			throw new IOException( "Could not create engine" );
+		}
+
+		if ( null == engine.getEngineName() && null != engineName ) {
+			engine.setEngineName( engineName );
+		}
+
+		engine.setProperty( Constants.SMSS_LOCATION, smssloc );
+
+		return engine;
+	}
+
+	/**
+	 * Pair for {@link #loadEngine(java.io.File) }. Implementation simply calls
+	 * {@link IEngine#closeDB() }
+	 * @param eng
+	 */
+	public static void closeEngine( IEngine eng ) {
+		eng.closeDB();
 	}
 }

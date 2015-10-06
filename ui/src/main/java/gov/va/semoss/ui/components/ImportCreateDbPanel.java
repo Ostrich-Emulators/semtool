@@ -431,64 +431,65 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		}
 
 		final URI defaultBaseUri = defaultBase;
+		String title = "Creating Database from " + ( file.getFilePaths().length > 1
+				? "multiple files" : file.getDelimitedPaths() );
 
-		ProgressTask pt = new ProgressTask( "Creating Database from "
-				+ file.getDelimitedPaths(), new Runnable() {
+		ProgressTask pt = new ProgressTask( title, new Runnable() {
+			@Override
+			public void run() {
+				final File smss[] = { null };
+				ImportData errors = ( conformance ? new ImportData() : null );
+				final EngineUtil eutil = EngineUtil.getInstance();
+
+				EngineOperationListener eol = new EngineOperationAdapter() {
+
 					@Override
-					public void run() {
-						final File smss[] = { null };
-						ImportData errors = ( conformance ? new ImportData() : null );
-						final EngineUtil eutil = EngineUtil.getInstance();
-
-						EngineOperationListener eol = new EngineOperationAdapter() {
-
-							@Override
-							public void engineOpened( IEngine eng ) {
-								String smssloc = eng.getProperty( Constants.SMSS_LOCATION );
-								if ( null != smss[0]
+					public void engineOpened( IEngine eng ) {
+						String smssloc = eng.getProperty( Constants.SMSS_LOCATION );
+						if ( null != smss[0]
 								&& smssloc.equals( smss[0].getAbsolutePath() ) ) {
-									eutil.removeEngineOpListener( this );
-									GuiUtility.showMessage(
-											"Your database has been successfully created!" );
+							eutil.removeEngineOpListener( this );
+							GuiUtility.showMessage(
+									"Your database has been successfully created!" );
 
-									if ( conformance && !errors.isEmpty() ) {
-										LoadingPlaySheetFrame psf
+							if ( conformance && !errors.isEmpty() ) {
+								LoadingPlaySheetFrame psf
 										= new LoadingPlaySheetFrame( eng, errors );
-										psf.setTitle( "Conformance Check Errors" );
-										DIHelper.getInstance().getDesktop().add( psf );
-									}
-								}
+								psf.setTitle( "Conformance Check Errors" );
+								DIHelper.getInstance().getDesktop().add( psf );
 							}
-						};
+						}
+					}
+				};
 
-						eutil.addEngineOpListener( eol );
+				eutil.addEngineOpListener( eol );
 
-						try {
-							EngineCreateBuilder ecb
+				try {
+					EngineCreateBuilder ecb
 							= new EngineCreateBuilder( dbdir.getFirstFile(), dbname.getText() );
 
-							//If no question file is entered, then use "va-semoss.ttl":
-							File fileQuestions = questionfile.getFirstFile();
-							fileQuestions = ( fileQuestions != null ) ? fileQuestions
-									: new File( "/models/va-semoss.ttl" );
+					//If no question file is entered, then use "va-semoss.ttl":
+					File fileQuestions = questionfile.getFirstFile();
+					fileQuestions = ( fileQuestions != null ) ? fileQuestions
+							: new File( "/models/va-semoss.ttl" );
 
-							ecb.setDefaultBaseUri( defaultBaseUri,
-									defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ) )
+					ecb.setDefaultBaseUri( defaultBaseUri,
+							defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ) )
 							.setReificationModel( reif )
 							.setDefaultsFiles( null, null, fileQuestions )
 							.setFiles( files )
 							.setBooleans( stageInMemory, calc, dometamodel )
 							.setVocabularies( vocabPanel.getSelectedVocabularies() );
 
-							smss[0] = EngineUtil.createNew( ecb, errors );
-							EngineUtil.getInstance().mount( smss[0], true );
-						}
-						catch ( IOException | EngineManagementException ioe ) {
-							log.error( ioe, ioe );
-							GuiUtility.showError( ioe.getMessage() );
-						}
-					}
-				} );
+					smss[0] = EngineUtil.createNew( ecb, errors );
+					EngineUtil.getInstance().mount( smss[0], true );
+				}
+				catch ( IOException | EngineManagementException ioe ) {
+					log.error( ioe, ioe );
+					GuiUtility.showError( ioe.getMessage() );
+				}
+			}
+		} );
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
 	}
 

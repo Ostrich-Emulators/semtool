@@ -63,10 +63,7 @@ import gov.va.semoss.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
-import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.Repository;
@@ -523,25 +520,10 @@ public class EngineUtil implements Runnable {
 		File dbtopdir = ecb.getEngineDir();
 		dbtopdir.mkdirs();
 
-		File modelmap = ecb.getMap();
-		File modelsmss = ecb.getSmss();
-
-		File modelquestions = ecb.getQuestions();
-		if ( null == modelquestions ) {
-			String ddreamer = "/defaultdb/"
-					+ AbstractEngine.getDefaultName( Constants.DREAMER, "Default" );
-			File f = File.createTempFile( "semoss-tmp-dreamer-", "prop" );
-			FileUtils.copyInputStreamToFile( EngineUtil.class
-					.getResourceAsStream( ddreamer ), f );
-			modelquestions = f;
-			ecb.setDefaultsFiles( modelsmss, modelmap, modelquestions );
-			f.deleteOnExit();
-		}
-
 		User user = new LocalUserImpl();
 		File smssfile = createEngine( ecb, user );
 
-		IEngine bde = GuiUtility.loadEngine( smssfile.getAbsoluteFile() );
+		IEngine bde = EngineUtil2.loadEngine( smssfile.getAbsoluteFile() );
 		Security.getSecurity().associateUser( bde, user );
 
 		if ( null != ecb.getQuestions() ) {
@@ -554,7 +536,6 @@ public class EngineUtil implements Runnable {
 		el.setDefaultBaseUri( ecb.getDefaultBaseUri(), ecb.isDefaultBaseOverridesFiles() );
 
 		try {
-			EngineUtil2.logAllDataStatements( bde );
 			el.loadToEngine( ecb.getFiles(), bde, ecb.isDoMetamodel(), conformanceErrors );
 			if ( ecb.isCalcInfers() ) {
 				bde.calculateInferences();
@@ -565,7 +546,6 @@ public class EngineUtil implements Runnable {
 		}
 		finally {
 			el.release();
-			DIHelper.getInstance().unregisterEngine( bde );
 			bde.closeDB();
 		}
 
@@ -846,7 +826,7 @@ public class EngineUtil implements Runnable {
 					rc.close();
 				}
 				catch ( Exception e ) {
-					log.warn( "could not remove temp rc" );
+					log.warn( "could not remove temp rc", e );
 				}
 			}
 			if ( null != repo ) {
@@ -854,19 +834,19 @@ public class EngineUtil implements Runnable {
 					repo.shutDown();
 				}
 				catch ( Exception e ) {
-					log.warn( "could not remove temp rc" );
+					log.warn( "could not remove temp rc" , e );
 				}
 			}
 		}
 
-		log.debug( "subjects from resource: " + resource );
-		Set<Resource> uris = new HashSet<>();
-		for ( Statement s : stmts ) {
-			uris.add( s.getSubject() );
-		}
-		for ( Resource u : uris ) {
-			log.debug( u );
-		}
+//		log.debug( "subjects from resource: " + resource );
+//		Set<Resource> uris = new HashSet<>();
+//		for ( Statement s : stmts ) {
+//			uris.add( s.getSubject() );
+//		}
+//		for ( Resource u : uris ) {
+//			log.debug( u );
+//		}
 
 		return stmts;
 	}

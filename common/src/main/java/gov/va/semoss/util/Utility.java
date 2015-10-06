@@ -67,9 +67,6 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
@@ -354,8 +351,8 @@ public class Utility {
 				return new NTriplesWriter( out );
 		}
 	}
-	
-		/**
+
+	/**
 	 * Overload on the above method, to get the URI's label from the passed-in uri
 	 * string. If the passed-in value is not a URI, then the above method is
 	 * called to extract the ending word, after the last "/".
@@ -390,7 +387,7 @@ public class Utility {
 		return strReturnValue;
 	}
 
-		/**
+	/**
 	 * Splits up a string URI into tokens based on "/" character, and uses logic
 	 * to return the instance name. If the input string is not a URI, then it is
 	 * returned unmodified.
@@ -415,7 +412,7 @@ public class Utility {
 		//Otherwise, simply return the input string:
 		return uri;
 	}
-	
+
 	/**
 	 * A convenience function to {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) } when you only have a single URI. If
@@ -444,7 +441,8 @@ public class Utility {
 	 */
 	public static <X extends Resource> Map<X, String>
 			getInstanceLabels( final Collection<X> uris, IEngine eng ) {
-		if ( uris.isEmpty() ) {
+
+		if ( null == uris || uris.isEmpty() ) {
 			return new HashMap<>();
 		}
 
@@ -470,11 +468,12 @@ public class Utility {
 				retHash.put( fac.createURI( set.getValue( "s" ).stringValue() ), lbl );
 			}
 		};
-		try {
-			eng.query( vqa );
+
+		if ( null == eng ) {
+			log.warn( "querying null engine in getInstanceLabels not likely to work" );
 		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( sb, e );
+		else {
+			eng.queryNoEx( vqa );
 		}
 
 		// add any URIs that don't have a label, but were in the argument collection
@@ -494,7 +493,7 @@ public class Utility {
 
 		return (Map<X, String>) retHash;
 	}
-	
+
 	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {
 
 		public final Resource r;
