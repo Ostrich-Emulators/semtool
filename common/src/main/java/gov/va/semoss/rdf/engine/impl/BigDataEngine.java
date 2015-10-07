@@ -235,8 +235,8 @@ public class BigDataEngine extends AbstractSesameEngine {
 	@Override
 	protected void loadLegacyInsights( Properties props ) throws RepositoryException {
 		// this gets called from the startup logic
+		super.loadLegacyInsights( props );
 		if ( !props.isEmpty() ) {
-			insightEngine.loadLegacyData( props );
 			copyInsightsToDisk( insightEngine );
 		}
 	}
