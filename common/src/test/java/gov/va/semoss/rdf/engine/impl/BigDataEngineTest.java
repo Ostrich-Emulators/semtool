@@ -5,17 +5,15 @@
  */
 package gov.va.semoss.rdf.engine.impl;
 
-import gov.va.semoss.rdf.engine.api.IEngine;
+import gov.va.semoss.util.Utility;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.openrdf.repository.RepositoryException;
+import org.junit.Test;
 
 /**
  *
@@ -23,9 +21,10 @@ import org.openrdf.repository.RepositoryException;
  */
 public class BigDataEngineTest {
 
-	private static final Logger log = Logger.getLogger( BigDataEngineTest.class );
-	private File dbfile;
-	private IEngine eng;
+	private static final File JNL = new File( "src/test/resources/test.jnl" );
+	private static final File PROPS = new File( "src/test/resources/questions.prop" );
+	private BigDataEngine eng;
+	private File jnl;
 
 	public BigDataEngineTest() {
 	}
@@ -38,31 +37,28 @@ public class BigDataEngineTest {
 	public static void tearDownClass() {
 	}
 
-	private void extractKb() {
-		if ( null != dbfile ) {
-			FileUtils.deleteQuietly( dbfile );
-		}
-
-		try {
-			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
-			Files.copy( new File( "src/test/resources/test.jnl" ).toPath(),
-					dbfile.toPath(), StandardCopyOption.REPLACE_EXISTING );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
 	@Before
-	public void setUp() throws RepositoryException {
-		extractKb();
-
-		eng = new BigDataEngine( BigDataEngine.generateProperties( dbfile ) );
+	public void setUp() throws Exception {
+		jnl = File.createTempFile( "bde-test", ".jnl" );
+		FileUtils.copyFile( JNL, jnl );
+		eng = new BigDataEngine( jnl );
 	}
 
 	@After
 	public void tearDown() {
 		eng.closeDB();
-		FileUtils.deleteQuietly( dbfile );
+		FileUtils.deleteQuietly( jnl );
+	}
+
+	@Test
+	public void testUpdateInsights() throws Exception {
+		InsightManagerImpl im = new InsightManagerImpl();
+		im.loadLegacyData( Utility.loadProp( PROPS ) );
+
+		assertEquals( 1, eng.getInsightManager().getPerspectives().size() );
+		eng.updateInsights( im );
+		eng.closeDB();
+		eng = new BigDataEngine( jnl );
+		assertEquals( im.getPerspectives(), eng.getInsightManager().getPerspectives() );
 	}
 }

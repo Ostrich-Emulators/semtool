@@ -14,6 +14,8 @@ import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.StatementAddingExecutor;
 import gov.va.semoss.util.Constants;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -40,7 +43,7 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class EngineUtil2Test {
 
-	private static final Logger log = Logger.getLogger(EngineUtil2Test.class );
+	private static final Logger log = Logger.getLogger( EngineUtil2Test.class );
 	private static final File LEGACY = new File( "src/test/resources/legacy.xlsx" );
 	private File dbfile;
 	private IEngine eng;
@@ -133,5 +136,38 @@ public class EngineUtil2Test {
 
 		ReificationStyle reif = EngineUtil2.getReificationStyle( eng );
 		assertEquals( ReificationStyle.W3C, reif );
+	}
+
+	@Test
+	public void testLoadEngine1() throws Exception {
+		eng.closeDB();
+		assertFalse( eng.isConnected() );
+		eng = EngineUtil2.loadEngine( dbfile );
+		assertTrue( eng.isConnected() );
+		assertEquals( dbfile.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
+	}
+
+	@Test
+	public void testLoadEngine2() throws Exception {
+		eng.closeDB();
+		assertFalse( eng.isConnected() );
+		Properties props = BigDataEngine.generateProperties( dbfile );
+		File tmp = File.createTempFile( "eu-test2-", ".properties" );
+		try ( Writer w = new FileWriter( tmp ) ) {
+			props.store( w, null );
+		}
+
+		eng = EngineUtil2.loadEngine( tmp );
+		FileUtils.deleteQuietly( tmp );
+
+		assertTrue( eng.isConnected() );
+		assertEquals( tmp.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
+	}
+
+	@Test
+	public void testCloseEngine() {
+		assertTrue( eng.isConnected() );
+		EngineUtil2.closeEngine( eng );
+		assertFalse( eng.isConnected() );
 	}
 }

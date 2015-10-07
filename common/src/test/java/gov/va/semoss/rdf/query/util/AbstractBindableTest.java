@@ -92,7 +92,7 @@ public class AbstractBindableTest {
 	}
 
 	@Test
-	public void testBindURI_String_String() {
+	public void testBind_String_String() {
 		Impl impl = new Impl( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }" );
 		impl.bind( "o", "test", "en" );
 		assertEquals( "SELECT ?s ?p ?o WHERE { ?s ?p ?o  VALUES ?o {\"test\"@en}}",
@@ -104,6 +104,24 @@ public class AbstractBindableTest {
 		Impl impl = new Impl( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }" );
 		impl.bindURI( "p", RDFS.LABEL.stringValue() );
 		assertEquals( "SELECT ?s ?p ?o WHERE { ?s ?p ?o  VALUES ?p {<http://www.w3.org/2000/01/rdf-schema#label>}}",
+				impl.bindAndGetSparql() );
+	}
+
+	@Test
+	public void testBindURI_String_String3() {
+		Impl impl = new Impl( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }" );
+		impl.bindURI( "o", "httptest", "en" );
+		// the binding should fail, so no VALUES fragment
+		assertEquals( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }",
+				impl.bindAndGetSparql() );
+	}
+
+	@Test
+	public void testBindURI_String_String4() {
+		Impl impl = new Impl( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }" );
+		impl.bindURI( "o", "httptest" );
+		// the binding should fail, so no VALUES fragment
+		assertEquals( "SELECT ?s ?p ?o WHERE { ?s ?p ?o }",
 				impl.bindAndGetSparql() );
 	}
 

@@ -51,23 +51,42 @@ public abstract class AbstractUser implements User {
 	}
 
 	public static String getAuthorInformation( User author ) {
-		String userInfo = "";
 
 		String userPrefName = author.getProperty( UserProperty.USER_FULLNAME );
 		String userPrefEmail = author.getProperty( UserProperty.USER_EMAIL );
-		userPrefEmail = ( !userPrefEmail.isEmpty() ? " <" + userPrefEmail + ">" : "" );
 		String userPrefOrg = author.getProperty( UserProperty.USER_ORG );
 
-		if ( !( userPrefName.isEmpty() && userPrefEmail.isEmpty() && userPrefOrg.isEmpty() ) ) {
-			if ( userPrefName.isEmpty() || userPrefOrg.isEmpty() ) {
-				userInfo = userPrefName + userPrefEmail + " " + userPrefOrg;
-			}
-			else {
-				userInfo = userPrefName + userPrefEmail + ", " + userPrefOrg;
-			}
-			return userInfo;
+		if ( userPrefName.isEmpty() && userPrefEmail.isEmpty() && userPrefOrg.isEmpty() ) {
+			return author.getUsername();
 		}
 
-		return author.getUsername();
+		boolean hasNameAndEmail
+				= !( userPrefName.isEmpty() || userPrefEmail.isEmpty() );
+
+		StringBuilder sb = new StringBuilder();
+		if ( !userPrefName.isEmpty() ) {
+			sb.append( userPrefName );
+
+			if ( hasNameAndEmail ){
+				sb.append( " " );
+			}
+		}
+
+		if ( !userPrefEmail.isEmpty() ) {
+			sb.append( "<" ).append( userPrefEmail ).append( ">" );
+		}
+
+		if( !userPrefOrg.isEmpty() ){
+			if( hasNameAndEmail || !userPrefName.isEmpty() ){
+				sb.append( ", " );
+			}
+			else if( !userPrefEmail.isEmpty() ){
+				sb.append( " " );
+			}
+
+			sb.append( userPrefOrg );
+		}
+
+		return sb.toString();
 	}
 }

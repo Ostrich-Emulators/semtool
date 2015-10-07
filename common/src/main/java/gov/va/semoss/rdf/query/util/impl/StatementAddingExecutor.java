@@ -20,54 +20,54 @@ import gov.va.semoss.rdf.engine.api.ModificationExecutor;
  */
 public class StatementAddingExecutor implements ModificationExecutor {
 
-  private boolean trans;
-  private final List<Statement> stmts = new ArrayList<>();
+	private boolean trans;
+	private final List<Statement> stmts = new ArrayList<>();
 
-  public StatementAddingExecutor() {
-    this( true );
-  }
+	public StatementAddingExecutor() {
+		this( true );
+	}
 
-  public StatementAddingExecutor( boolean usetrans ) {
-    trans = usetrans;
-  }
+	public StatementAddingExecutor( boolean usetrans ) {
+		trans = usetrans;
+	}
 
-  public StatementAddingExecutor( Collection<Statement> todo, boolean intrans ) {
+	public StatementAddingExecutor( Collection<Statement> todo, boolean intrans ) {
 		stmts.addAll( todo );
-    trans = intrans;
-  }
+		trans = intrans;
+	}
 
 	public void resetStatements( Collection<Statement> todo ) {
-    stmts.clear();
-    stmts.addAll( todo );
-  }
+		clear();
+		stmts.addAll( todo );
+	}
 
-  public void resetStatements( Statement... stmts ) {
-    resetStatements( Arrays.asList( stmts ) );
-  }
+	public void resetStatements( Statement... stmts ) {
+		resetStatements( Arrays.asList( stmts ) );
+	}
 
-  public void addStatement( Statement stmt ) {
-    stmts.add( stmt );
-  }
+	public void addStatement( Statement stmt ) {
+		stmts.add( stmt );
+	}
 
-  public void clear() {
-    stmts.clear();
-  }
+	public void clear() {
+		stmts.clear();
+	}
 
-  public void useTransaction( boolean usetran ) {
-    trans = usetran;
-  }
+	public void useTransaction( boolean usetran ) {
+		trans = usetran;
+	}
 
-  public void useTransaction() {
-    useTransaction( true );
-  }
+	public void useTransaction() {
+		useTransaction( true );
+	}
 
-  @Override
-  public boolean execInTransaction() {
-    return trans;
-  }
+	@Override
+	public boolean execInTransaction() {
+		return trans;
+	}
 
-  @Override
-  public void exec( RepositoryConnection conn ) throws RepositoryException {
-    conn.add( stmts );
-  }
+	@Override
+	public void exec( RepositoryConnection conn ) throws RepositoryException {
+		conn.add( stmts );
+	}
 }

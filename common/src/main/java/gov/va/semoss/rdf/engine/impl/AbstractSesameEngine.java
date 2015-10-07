@@ -479,6 +479,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			addUserNamespaces( ue );
 			RepositoryConnection rc = getRawConnection();
 			doUpdate( ue, rc, supportsSparqlBindings() );
+			updateLastModifiedDate( rc, getBaseUri() );
 			logProvenance( ue );
 		}
 	}
@@ -607,6 +608,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	public void commit() {
 		try {
 			RepositoryConnection rc = getRawConnection();
+			// updateLastModifiedDate();
 			rc.commit();
 		}
 		catch ( Exception e ) {

@@ -111,13 +111,17 @@ public abstract class AbstractEngine implements IEngine {
 
 	/**
 	 * Loads the insights (questions and perspectives) from the given properties.
-	 * The default behavior is to do nothing
 	 *
 	 * @param props the insights
 	 * @throws org.openrdf.repository.RepositoryException
 	 */
 	protected void loadLegacyInsights( Properties props ) throws RepositoryException {
-		log.warn( "this engine type does load legacy insights" );
+		log.warn( "this engine type does not persist its insights" );
+		if ( !props.isEmpty() ) {
+			InsightManagerImpl imi = new InsightManagerImpl();
+			imi.loadLegacyData( props );
+			insightEngine.addAll( imi.getPerspectives(), true );
+		}
 	}
 
 	/**
