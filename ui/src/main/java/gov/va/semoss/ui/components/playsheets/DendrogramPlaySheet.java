@@ -34,7 +34,6 @@ import org.openrdf.model.Value;
 
 /**
  * The Play Sheet for creating a Dendrogram diagram using names and children.
- * This thing seriously needs to be refactored!
  */
 public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 
@@ -121,7 +120,7 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 				buildTree( child, data, nodestart, nodeend, col + 1 );
 
 				lastval = nodename;
-				nodestart = row + 1;
+				nodestart = row;
 				nodeend = endrow;
 			}
 		}
