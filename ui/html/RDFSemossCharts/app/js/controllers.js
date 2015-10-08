@@ -966,6 +966,8 @@ function chartitCtrl($scope, $http) {
 function SingleChartCtrl($scope, $http) {
 	alert("in SingleChartCtrl");
     
+	$scope.data = [];
+	
     //creates object that holds all graph option values
     var graphOptions = {
         xAxis: '',
@@ -993,10 +995,10 @@ function SingleChartCtrl($scope, $http) {
 
     //function used to interact with the inline javascript
     $scope.setJSONData = function (data) {
+    	$scope.data = data;
         $scope.$apply(function () {
             graphOptions.series = [];
             var jsonData = jQuery.parseJSON(data);
-
             setChartData(jsonData);
         });
     };
@@ -1192,6 +1194,8 @@ function SingleChartCtrl($scope, $http) {
             }
         }
 
+        $scope.columnsRemoved = 0;
+        $scope.indexRemoved = 9999;
         //creating the chart
         jQuery('#visualization').highcharts({
             chart: {
@@ -1211,7 +1215,56 @@ function SingleChartCtrl($scope, $http) {
                 },
 				column: {
                 stacking: graphOptions.stackType
-				}
+				},
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function (event) {
+                            	// Get a handle to the chart
+                            	var chart = $('#visualization').highcharts();
+                            	// Get the series index that was just selected
+                            	var index = event.target.point.series.columnIndex;
+                            	// Adjust the selected index for previously removed data - which will
+                            	// inevitably throw the indices off
+                            	if (index >= ($scope.indexRemoved)){
+                            		index = index - 1;
+                            	}
+                            	$scope.columnsRemoved++;
+                            	// Set the lowest "removed" index, if appropriate
+                            	if (index < $scope.indexRemoved){
+                            		$scope.indexRemoved = index;
+                            	}
+                            	// Hide the column that was clicked
+                            	var selectedData = chart.series[index];
+                            	selectedData.data[0].graphic.hide();
+                            	// Remove the data from the model, sitting behind the selected column
+                            	chart.series.splice(index, 1);
+                            	
+                            	// Figure out what is the highest value in the dataset now
+                            	var yAxis = chart.get('columnYAxis');
+                            	var highestYValue = -99999;
+                            	for (var i=0; i<chart.series.length; i++){
+                            		var currentYValue = chart.series[i].data[0].y;
+                            		if (currentYValue > highestYValue){
+                            			highestYValue = currentYValue;
+                            		}
+                            	}
+                            	// Set the extremes (min, max) on the y-axis
+                            	var minY = yAxis.getExtremes()[0];
+                            	yAxis.max = highestYValue;
+                            	yAxis.setExtremes(minY, highestYValue);
+                            	// Now, redraw the chart
+                            	chart.redraw();
+                            },
+							legendItemClick: function (event){
+								
+								alert('Legend clicked.');
+							}
+                        },
+						showInLegend: true
+                    }
+                }
             },
             xAxis: {
                 gridLineWidth: getxGridLineWidth(),
@@ -1232,6 +1285,7 @@ function SingleChartCtrl($scope, $http) {
                 plotLines: getXAxisPlotLines()
             },
             yAxis: {
+            	id: 'columnYAxis',
                 gridLineWidth: getyGridLineWidth(),
                 max: graphOptions.yMax,
                 min: graphOptions.yMin,
@@ -1436,20 +1490,24 @@ SEMOSS.randomizeColor = function(rgbArray){
 	var numberOfChannelsToChange = Math.floor((Math.random() * 3) + 1);
 	var channels = [0,1,2];
 	var randomChannels = SEMOSS.shuffleArray(channels);
-	for (var i=0; i<numberOfChannelsToChange; i++){
-		var channelToChange = randomChannels[i];
-		if (channelToChange == 0){
-			var redChannelValue = SEMOSS.nextChannelValue(SEMOSS.redsUsed, SEMOSS.redColorSets);
-			rgbArray[0] = redChannelValue;
+	var totalScore = 765;
+	while (totalScore > 760){
+		for (var i=0; i<numberOfChannelsToChange; i++){
+			var channelToChange = randomChannels[i];
+			if (channelToChange == 0){
+				var redChannelValue = SEMOSS.nextChannelValue(SEMOSS.redsUsed, SEMOSS.redColorSets);
+				rgbArray[0] = redChannelValue;
+			}
+			else if (channelToChange == 1){
+				var greenChannelValue = SEMOSS.nextChannelValue(SEMOSS.greensUsed, SEMOSS.greenColorSets);
+				rgbArray[1] = greenChannelValue;
+			}
+			else if (channelToChange == 2){
+				var blueChannelValue = SEMOSS.nextChannelValue(SEMOSS.bluesUsed, SEMOSS.greenColorSets);
+				rgbArray[2] = blueChannelValue;
+			}
 		}
-		else if (channelToChange == 1){
-			var greenChannelValue = SEMOSS.nextChannelValue(SEMOSS.greensUsed, SEMOSS.greenColorSets);
-			rgbArray[1] = greenChannelValue;
-		}
-		else if (channelToChange == 2){
-			var blueChannelValue = SEMOSS.nextChannelValue(SEMOSS.bluesUsed, SEMOSS.greenColorSets);
-			rgbArray[2] = blueChannelValue;
-		}
+		totalScore = rgbArray[0] + rgbArray[1] + rgbArray[2];
 	}
 	return rgbArray;
 }
