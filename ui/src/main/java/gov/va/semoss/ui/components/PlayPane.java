@@ -1810,9 +1810,9 @@ public class PlayPane extends JFrame {
 				GuiUtility.loadImageIcon( "icons16/questions_pie_chart1_16.png" ),
 				"PieChartPlaySheet Hint: SELECT ?wedgeName ?wedgeValue WHERE { ... }" );
 
-		reg.register( InsightOutputType.SANKEY, SankeyPlaySheet.class, "Sankey Diagram",
-				GuiUtility.loadImageIcon( "icons16/questions_sankey2_16.png" ),
-				"SankeyPlaySheet Hint: SELECT ?source ?target ?value ?target2 ?value2 ?target3 ?value3...etc  Note: ?target is the source for ?target2 and ?target2 is the source for ?target3...etc WHERE{ ... }" );
+//		reg.register( InsightOutputType.SANKEY, SankeyPlaySheet.class, "Sankey Diagram",
+//				GuiUtility.loadImageIcon( "icons16/questions_sankey2_16.png" ),
+//				"SankeyPlaySheet Hint: SELECT ?source ?target ?value ?target2 ?value2 ?target3 ?value3...etc  Note: ?target is the source for ?target2 and ?target2 is the source for ?target3...etc WHERE{ ... }" );
 
 		reg.register( InsightOutputType.HEATMAP_US, USHeatMapPlaySheet.class, "US Heat Map",
 				GuiUtility.loadImageIcon( "icons16/questions_us_heat_map1_16.png" ),
