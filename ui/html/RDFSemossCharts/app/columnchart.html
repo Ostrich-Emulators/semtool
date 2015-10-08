@@ -1,3 +1,4 @@
+
 <html class="no-js" ng-app="rdfgraph">
 <head>
     <link rel="stylesheet" href="css/bootstrap.css"/> 
@@ -19,7 +20,7 @@
 	<script src="js/controllers.js"></script>
 	
 	<!-- Highcharts.com -->
-    <script src="lib/highcharts/highcharts.js"></script>
+    <script src="lib/highcharts/highcharts4.0.4.js"></script>
     <script src="lib/highcharts/highcharts-more.js"></script>
 
     <!-- semoss lib -->
@@ -28,6 +29,7 @@
     <script>
         function start(data) {
             var ctrlScope = angular.element(jQuery('#thecontroller')).scope();
+            //angular.element(this).scope().setJSONData(data);
             ctrlScope.setJSONData(data);
         };
 
@@ -35,6 +37,12 @@
             var dataHC = '{"dataSeries":{"Level_2":[48.0],"Level_1":[8.0],"Level_4":[215.0],"Level_3":[203.0],"Level_6":[19.0],"Level_5":[15.0]},"xAxis":["ActivityCount"],"type":"column","title":"Show Count of Activities by Level"}';
             start(dataHC);
         }
+        
+       	$(document).ready( function(){
+       		alert('ready');
+        	var dataHC = '{"dataSeries":{"Level_2":[48.0],"Level_1":[8.0],"Level_4":[215.0],"Level_3":[203.0],"Level_6":[19.0],"Level_5":[15.0]},"xAxis":["ActivityCount"],"type":"column","title":"Show Count of Activities by Level"}';
+        	start(dataHC);
+       	});
     </script>
     
 </head>
