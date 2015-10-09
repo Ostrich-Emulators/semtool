@@ -168,7 +168,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 	public void setValue( URI prop, Value val ) {
 		Value oldval = properties.get( prop );
 		properties.put( prop, val );
-		fireIfPropertyChanged( prop.getLocalName(), oldval, val );
+		fireIfPropertyChanged( prop.toString(), oldval, val );
 	}
 
 	public void setPropHash( Map<String, Object> _propHash ) {
