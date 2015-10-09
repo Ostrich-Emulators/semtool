@@ -84,7 +84,7 @@ public class TreeGraphDataModelTest {
 		assertEquals( 1, tgdm.getGraph().getEdgeCount() );
 	}
 
-	@Test
+	//@Test
 	public void testPropChange() {
 		SEMOSSVertex yuri = new SEMOSSVertexImpl( YURI, RDFS.MEMBER, "yuri" );
 		SEMOSSVertex yugo = new SEMOSSVertexImpl( YUGO, RDFS.CONTAINER, "yugo" );

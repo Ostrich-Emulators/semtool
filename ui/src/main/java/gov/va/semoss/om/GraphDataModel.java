@@ -30,7 +30,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.query.util.impl.VoidQueryAdapter;
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.UriBuilder;
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.RDFDatatypeTools;
 import gov.va.semoss.util.Utility;
 import org.openrdf.model.impl.URIImpl;
