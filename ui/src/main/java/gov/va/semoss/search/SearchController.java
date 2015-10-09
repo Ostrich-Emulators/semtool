@@ -27,7 +27,6 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import gov.va.semoss.util.Constants;
 
-import gov.va.semoss.util.GuiUtility;
 import gov.va.semoss.util.Utility;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -242,6 +241,7 @@ public class SearchController implements KeyListener, FocusListener,
 			protected Void doInBackground() throws Exception {
 				log.debug( "indexing graph for searchbar" );
 				indexing = true;
+				vertStore.clear();
 				Set<Resource> needLabels = new HashSet<>();
 				for ( SEMOSSEdge e : graph.getEdges() ) {
 					needLabels.addAll( e.getProperties().keySet() );
