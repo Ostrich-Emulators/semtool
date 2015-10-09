@@ -39,7 +39,6 @@ public class GraphDataModelTest {
 	private static final File DATAFILE = new File( "src/test/resources/test12.nt" );
 	private static final UriBuilder datab = UriBuilder.getBuilder( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/" );
 	private static final UriBuilder owlb = UriBuilder.getBuilder( "http://semoss.org/ontologies/" );
-	private static final URI PURCHASE = owlb.build( "Purchased" );
 	private static final URI PRICE = owlb.build( "Price" );
 	private static final URI YUGO = datab.build( "Yugo" );
 	private static final URI YURI = datab.build( "Yuri" );
