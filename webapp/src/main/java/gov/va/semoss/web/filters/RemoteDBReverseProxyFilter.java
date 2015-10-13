@@ -3,6 +3,7 @@ package gov.va.semoss.web.filters;
 import gov.va.semoss.web.datastore.DbInfoMapper;
 import gov.va.semoss.web.io.DbInfo;
 
+import gov.va.semoss.web.security.DbAccess;
 import gov.va.semoss.web.security.SemossUser;
 import java.io.IOException;
 import java.net.URI;
@@ -44,11 +45,6 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 * The Object's logger
 	 */
 	private static final Logger log = Logger.getLogger( RemoteDBReverseProxyFilter.class );
-
-	private static enum Access {
-
-		NONE, READ, WRITE
-	};
 
 	/**
 	 * The Service that will use the httpClient to actually make the proxied call
@@ -271,8 +267,8 @@ public class RemoteDBReverseProxyFilter implements Filter {
 		return url.contains( raw.getInsightsUrl() );
 	}
 
-	private Access getAccess( DbInfo dbi, SemossUser user, boolean forInsightsDb ) {
-		return ( forInsightsDb ? Access.READ : Access.WRITE );
+	private DbAccess getAccess( DbInfo dbi, SemossUser user, boolean forInsightsDb ) {
+		return ( forInsightsDb ? DbAccess.READ : DbAccess.WRITE );
 	}
 
 	private void createFailedRequest( HttpServletRequest request,
@@ -284,13 +280,13 @@ public class RemoteDBReverseProxyFilter implements Filter {
 			boolean isinsights ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		SemossUser smu = SemossUser.class.cast( auth.getPrincipal() );
-		Access access = getAccess( dbi, smu, isinsights );
+		DbAccess access = getAccess( dbi, smu, isinsights );
 
-		if ( Access.WRITE == access ) {
+		if ( DbAccess.WRITE == access ) {
 			return false;
 		}
 
-		if ( Access.NONE == access ) {
+		if ( DbAccess.NONE == access ) {
 			return true;
 		}
 

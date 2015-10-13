@@ -10,6 +10,8 @@ import gov.va.semoss.user.User;
 import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.web.datastore.vocabulary.WEBDS;
+import gov.va.semoss.web.io.DbInfo;
+import gov.va.semoss.web.security.DbAccess;
 import info.aduna.iteration.Iterations;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +24,7 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.RepositoryConnection;
@@ -35,6 +38,8 @@ public class UserMapper implements DataMapper<User, String> {
 
 	private static final Logger log = Logger.getLogger( UserMapper.class );
 	private static final Map<UserProperty, URI> PROPMAP = new HashMap<>();
+	private static final URI ACL_READ = new URIImpl( WEBDS.NAMESPACE + "acl/readonly" );
+	private static final URI ACL_WRITE = new URIImpl( WEBDS.NAMESPACE + "acl/write" );
 
 	static {
 		PROPMAP.put( UserProperty.USER_ORG, FOAF.ORGANIZATION );
@@ -111,17 +116,105 @@ public class UserMapper implements DataMapper<User, String> {
 	}
 
 	@Override
-	public void update( User data ) throws Exception {
+	public void update( User user ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 		try {
-			Resource id = getId( data, rc );
+			Map<DbInfo, DbAccess> accesses = getAccesses( user );
+
+			Resource id = getId( user, rc );
 			if ( null != id ) {
+				rc.begin();
 				rc.remove( id, null, null );
-				rc.add( getCreateStatements( id, data, rc.getValueFactory() ) );
+				rc.add( getCreateStatements( id, user, rc.getValueFactory() ) );
+
+				addAccesses( id, accesses, rc );
+				rc.commit();
 			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception x ) {
+				log.warn( x, x );
+			}
+		}
+	}
+
+	public Map<DbInfo, DbAccess> getAccesses( User user ) {
+		Map<DbInfo, DbAccess> accesses = new HashMap<>();
+
+		RepositoryConnection rc = store.getConnection();
+		try {
+			Resource id = getId( user, rc );
+			List<Statement> readstmts
+					= Iterations.asList( rc.getStatements( id, ACL_READ, null, false ) );
+			List<Statement> writestmts
+					= Iterations.asList( rc.getStatements( id, ACL_WRITE, null, false ) );
+
+			for ( Statement s : readstmts ) {
+				accesses.put( DbInfoMapper.getDbInfo( URI.class.cast( s.getObject() ), rc ),
+						DbAccess.READ );
+			}
+			for ( Statement s : writestmts ) {
+				accesses.put( DbInfoMapper.getDbInfo( URI.class.cast( s.getObject() ), rc ),
+						DbAccess.WRITE );
+			}
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+		}
+
+		return accesses;
+	}
+
+	public void setAccess( User user, DbInfo db, DbAccess access ) {
+		Map<DbInfo, DbAccess> map = new HashMap<>();
+		map.put( db, access );
+		setAccesses( user, map );
+	}
+
+	/**
+	 * Sets the access level from the given map. To remove access from a DB, user
+	 * {@link DbAccess#NONE}.
+	 *
+	 * @param user
+	 * @param access
+	 */
+	public void setAccesses( User user, Map<DbInfo, DbAccess> access ) {
+		RepositoryConnection rc = store.getConnection();
+
+		try {
+			rc.begin();
+			Resource id = getId( user, rc );
+			addAccesses( id, access, rc );
+			rc.commit();
+		}
+		catch ( RepositoryException e ) {
+			log.error( e, e );
+			try {
+				rc.rollback();
+			}
+			catch ( Exception x ) {
+				log.warn( x, x );
+			}
+		}
+	}
+
+	private static void addAccesses( Resource userid, Map<DbInfo, DbAccess> accesses,
+			RepositoryConnection rc ) throws RepositoryException {
+
+		for ( Map.Entry<DbInfo, DbAccess> en : accesses.entrySet() ) {
+			Resource dbid = DbInfoMapper.getId( en.getKey(), rc );
+			if ( DbAccess.NONE == en.getValue() ) {
+				rc.remove( userid, ACL_READ, dbid );
+				rc.remove( userid, ACL_WRITE, dbid );
+			}
+			else {
+				URI uri = ( DbAccess.READ == en.getValue() ? ACL_READ : ACL_WRITE );
+				rc.add( new StatementImpl( userid, uri, dbid ) );
+			}
 		}
 	}
 
@@ -185,4 +278,5 @@ public class UserMapper implements DataMapper<User, String> {
 
 		return stmts;
 	}
+
 }
