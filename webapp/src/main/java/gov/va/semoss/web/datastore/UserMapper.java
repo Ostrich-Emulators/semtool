@@ -119,7 +119,7 @@ public class UserMapper implements DataMapper<User, String> {
 	public void update( User user ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 		try {
-			Map<DbInfo, DbAccess> accesses = getAccesses( user );
+			Map<URI, DbAccess> accesses = getAccesses( user );
 
 			Resource id = getId( user, rc );
 			if ( null != id ) {
@@ -142,8 +142,8 @@ public class UserMapper implements DataMapper<User, String> {
 		}
 	}
 
-	public Map<DbInfo, DbAccess> getAccesses( User user ) {
-		Map<DbInfo, DbAccess> accesses = new HashMap<>();
+	public Map<URI, DbAccess> getAccesses( User user ) {
+		Map<URI, DbAccess> accesses = new HashMap<>();
 
 		RepositoryConnection rc = store.getConnection();
 		try {
@@ -154,12 +154,10 @@ public class UserMapper implements DataMapper<User, String> {
 					= Iterations.asList( rc.getStatements( id, ACL_WRITE, null, false ) );
 
 			for ( Statement s : readstmts ) {
-				accesses.put( DbInfoMapper.getDbInfo( URI.class.cast( s.getObject() ), rc ),
-						DbAccess.READ );
+				accesses.put( URI.class.cast( s.getObject() ), DbAccess.READ );
 			}
 			for ( Statement s : writestmts ) {
-				accesses.put( DbInfoMapper.getDbInfo( URI.class.cast( s.getObject() ), rc ),
-						DbAccess.WRITE );
+				accesses.put( URI.class.cast( s.getObject() ), DbAccess.WRITE );
 			}
 		}
 		catch ( RepositoryException re ) {
@@ -169,9 +167,10 @@ public class UserMapper implements DataMapper<User, String> {
 		return accesses;
 	}
 
-	public void setAccess( User user, DbInfo db, DbAccess access ) {
-		Map<DbInfo, DbAccess> map = new HashMap<>();
-		map.put( db, access );
+	public void setAccess( User user, DbInfo db, DbAccess dbaccess, DbAccess insaccess ) {
+		Map<URI, DbAccess> map = new HashMap<>();
+		map.put( new URIImpl( db.getDataUrl() ), dbaccess );
+		map.put( new URIImpl( db.getInsightsUrl() ), dbaccess );
 		setAccesses( user, map );
 	}
 
@@ -180,9 +179,10 @@ public class UserMapper implements DataMapper<User, String> {
 	 * {@link DbAccess#NONE}.
 	 *
 	 * @param user
-	 * @param access
+	 * @param access a mapping of URIs (either {@link DbInfo#getDataUrl()} or
+	 * {@link DbInfo#getInsightsUrl()}) and the access given
 	 */
-	public void setAccesses( User user, Map<DbInfo, DbAccess> access ) {
+	public void setAccesses( User user, Map<URI, DbAccess> access ) {
 		RepositoryConnection rc = store.getConnection();
 
 		try {
@@ -202,11 +202,11 @@ public class UserMapper implements DataMapper<User, String> {
 		}
 	}
 
-	private static void addAccesses( Resource userid, Map<DbInfo, DbAccess> accesses,
+	private static void addAccesses( Resource userid, Map<URI, DbAccess> accesses,
 			RepositoryConnection rc ) throws RepositoryException {
 
-		for ( Map.Entry<DbInfo, DbAccess> en : accesses.entrySet() ) {
-			Resource dbid = DbInfoMapper.getId( en.getKey(), rc );
+		for ( Map.Entry<URI, DbAccess> en : accesses.entrySet() ) {
+			URI dbid = en.getKey();
 			if ( DbAccess.NONE == en.getValue() ) {
 				rc.remove( userid, ACL_READ, dbid );
 				rc.remove( userid, ACL_WRITE, dbid );
