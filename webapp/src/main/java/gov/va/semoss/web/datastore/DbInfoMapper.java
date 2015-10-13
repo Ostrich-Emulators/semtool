@@ -104,7 +104,7 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 		}
 	}
 
-	private static DbInfo getDbInfo( Resource id, RepositoryConnection rc )
+	public static DbInfo getDbInfo( Resource id, RepositoryConnection rc )
 			throws RepositoryException {
 
 		DbInfo dbi = new DbInfo();
@@ -125,7 +125,7 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 		return dbi;
 	}
 
-	private static Resource getId( DbInfo t, RepositoryConnection rc )
+	public static Resource getId( DbInfo t, RepositoryConnection rc )
 			throws RepositoryException {
 		List<Statement> stmts = Iterations.asList( rc.getStatements( null, RDF.TYPE,
 				WEBDS.DBINFO, false ) );

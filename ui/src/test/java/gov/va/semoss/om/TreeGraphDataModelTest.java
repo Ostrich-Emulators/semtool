@@ -10,6 +10,8 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
 import gov.va.semoss.util.UriBuilder;
+import java.awt.Color;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Arrays;
@@ -84,7 +86,7 @@ public class TreeGraphDataModelTest {
 		assertEquals( 1, tgdm.getGraph().getEdgeCount() );
 	}
 
-	//@Test
+	@Test
 	public void testPropChange() {
 		SEMOSSVertex yuri = new SEMOSSVertexImpl( YURI, RDFS.MEMBER, "yuri" );
 		SEMOSSVertex yugo = new SEMOSSVertexImpl( YUGO, RDFS.CONTAINER, "yugo" );
@@ -96,19 +98,25 @@ public class TreeGraphDataModelTest {
 		graph.addEdge( edge, yuri, yugo, EdgeType.DIRECTED );
 
 		int val[] = { 0 };
-		TreeGraphDataModel tgdm
-				= new TreeGraphDataModel( graph, Arrays.asList( yuri ) ) {
+		new TreeGraphDataModel( graph, Arrays.asList( yuri ) ) {
 
-					@Override
-					public void propertyChange( PropertyChangeEvent evt ) {
-						super.propertyChange( evt );
-						val[0] = 1;
-					}
-				};
+			@Override
+			public void propertyChange( PropertyChangeEvent evt ) {
+				super.propertyChange( evt );
+				val[0]++;
+			}
+		};
 
 		yuri.setLabel( "Yuri" );
-		
-		assertEquals( 1, val[0] );
+		yuri.setColor( Color.BLUE );
+		yuri.setShape( new Rectangle( 6, 1000 ) );
+		yuri.setVisible( false );
+
+		edge.setLabel( "edge label" );
+		edge.setColor( Color.BLUE );
+		edge.setVisible( false );
+
+		assertEquals( 7, val[0] );
 	}
 
 }

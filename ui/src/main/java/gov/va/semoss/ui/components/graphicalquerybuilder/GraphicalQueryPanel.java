@@ -126,7 +126,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	public void setEngine( IEngine eng ) {
 		engine = eng;
 
-		ProgressTask pt = new ProgressTask( "Initializing Graphical Query Builder",
+		ProgressTask pt = new ProgressTask( "Setting engine for Graphical Query Builder",
 				new Runnable() {
 
 					@Override

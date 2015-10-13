@@ -30,9 +30,6 @@ public class WEBDS {
 	 */
 	public static final Namespace NS = new NamespaceImpl( PREFIX, NAMESPACE );
 
-	/**
-	 * http://semoss.org/ontologies/Relation
-	 */
 	public final static URI DBINFO;
 
 	static {

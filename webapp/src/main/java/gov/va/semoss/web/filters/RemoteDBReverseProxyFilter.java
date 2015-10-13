@@ -1,12 +1,15 @@
 package gov.va.semoss.web.filters;
 
 import gov.va.semoss.web.datastore.DbInfoMapper;
+import gov.va.semoss.web.datastore.UserMapper;
 import gov.va.semoss.web.io.DbInfo;
 
+import gov.va.semoss.web.security.DbAccess;
 import gov.va.semoss.web.security.SemossUser;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.Filter;
@@ -22,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
+import org.openrdf.model.impl.URIImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
@@ -44,11 +48,6 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 * The Object's logger
 	 */
 	private static final Logger log = Logger.getLogger( RemoteDBReverseProxyFilter.class );
-
-	private static enum Access {
-
-		NONE, READ, WRITE
-	};
 
 	/**
 	 * The Service that will use the httpClient to actually make the proxied call
@@ -86,7 +85,8 @@ public class RemoteDBReverseProxyFilter implements Filter {
 
 	private ApplicationContext applicationContext = null;
 
-	private DbInfoMapper datastore;
+	private DbInfoMapper dbmapper;
+	private UserMapper usermapper;
 
 	public RemoteDBReverseProxyFilter() {
 		proxyService.initialize();
@@ -158,7 +158,7 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	private DbInfo getRawDbInfoFromRequest( HttpServletRequest req ) {
 		final String path = req.getServletPath();
 
-		for ( DbInfo dbi : datastore.getAll() ) {
+		for ( DbInfo dbi : dbmapper.getAll() ) {
 			if ( path.startsWith( "/databases/" + dbi.getName() + "/repositories/" ) ) {
 				dbi.setServerUrl( getServerUrl( dbi, req ) );
 				return dbi;
@@ -177,7 +177,7 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	 * otherwise
 	 */
 	private boolean shouldProxyRequest( String path ) {
-		for ( DbInfo dbi : datastore.getAll() ) {
+		for ( DbInfo dbi : dbmapper.getAll() ) {
 			String datapath = "/databases/" + dbi.getName() + "/repositories/" + DATA_URL;
 			log.debug( "checking " + path + " against: " + datapath );
 			if ( path.startsWith( datapath ) ) {
@@ -213,7 +213,7 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	public void init( FilterConfig filterConfig ) throws ServletException {
 		servletContext = filterConfig.getServletContext();
 		applicationContext = WebApplicationContextUtils.getWebApplicationContext( servletContext );
-		this.datastore = applicationContext.getBean( DbInfoMapper.class );
+		this.dbmapper = applicationContext.getBean( DbInfoMapper.class );
 		log.debug( "got the dbmapper bean" );
 	}
 
@@ -271,8 +271,22 @@ public class RemoteDBReverseProxyFilter implements Filter {
 		return url.contains( raw.getInsightsUrl() );
 	}
 
-	private Access getAccess( DbInfo dbi, SemossUser user, boolean forInsightsDb ) {
-		return ( forInsightsDb ? Access.READ : Access.WRITE );
+	private DbAccess getAccess( DbInfo dbi, SemossUser user, boolean forInsightsDb ) {
+		Map<org.openrdf.model.URI, DbAccess> accesses = usermapper.getAccesses( user );
+		org.openrdf.model.URI insuri = new URIImpl( dbi.getInsightsUrl() );
+		org.openrdf.model.URI dburi = new URIImpl( dbi.getDataUrl() );
+
+		if ( forInsightsDb ) {
+			if ( accesses.containsKey( insuri ) ) {
+				return accesses.get( insuri );
+			}
+
+			// if we don't have specific access to the insights db, we must have
+			// read access on it if we can read the database itself
+			return ( accesses.containsKey( dburi ) ? DbAccess.READ : DbAccess.NONE );
+		}
+
+		return accesses.getOrDefault( dburi, DbAccess.NONE );
 	}
 
 	private void createFailedRequest( HttpServletRequest request,
@@ -284,13 +298,13 @@ public class RemoteDBReverseProxyFilter implements Filter {
 			boolean isinsights ) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		SemossUser smu = SemossUser.class.cast( auth.getPrincipal() );
-		Access access = getAccess( dbi, smu, isinsights );
+		DbAccess access = getAccess( dbi, smu, isinsights );
 
-		if ( Access.WRITE == access ) {
+		if ( DbAccess.WRITE == access ) {
 			return false;
 		}
 
-		if ( Access.NONE == access ) {
+		if ( DbAccess.NONE == access ) {
 			return true;
 		}
 
