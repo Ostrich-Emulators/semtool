@@ -87,7 +87,6 @@ public class Constants {
 	public static final String QUERY = "QUERY";
 
 	public static final String ENGINE_NAME = "ENGINE";
-	public static final String ENGINES = "ENGINES";
 	public static final String ENGINE_PROPERTIES_FILE = "ENGINE_PROP";
 	public static final String ENGINE_IMPL = "ENGINE_TYPE";
 	public static final String DATASERIES = "dataSeries";
