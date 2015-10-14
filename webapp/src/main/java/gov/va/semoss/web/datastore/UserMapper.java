@@ -76,17 +76,17 @@ public class UserMapper implements DataMapper<User, String> {
 	@Override
 	public Collection<User> getAll() {
 		RepositoryConnection rc = store.getConnection();
-		List<User> databases = new ArrayList<>();
+		List<User> users = new ArrayList<>();
 		try {
 			for ( Statement stmt : Iterations.asList( rc.getStatements( null, RDF.TYPE,
 					FOAF.PERSON, false ) ) ) {
-				databases.add( getUser( stmt.getSubject(), rc ) );
+				users.add( getUser( stmt.getSubject(), rc ) );
 			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
 		}
-		return databases;
+		return users;
 	}
 
 	@Override

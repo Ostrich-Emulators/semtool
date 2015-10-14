@@ -4,23 +4,27 @@ import gov.va.semoss.user.User;
 import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.web.datastore.UserMapper;
 
+import gov.va.semoss.web.security.DbAccess;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletContext;
 
-import gov.va.semoss.web.security.DbAccess;
-
 import java.util.Collection;
-import java.util.Map;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -43,7 +47,7 @@ public class UserController extends SemossControllerBase {
 	@Autowired
 	private UserMapper datastore;
 	
-	@RequestMapping("/" )
+	@RequestMapping( "/" )
 	@ResponseBody
 	public User[] getAllUsers() {
 		log.debug( "Getting all Users." );
@@ -53,7 +57,7 @@ public class UserController extends SemossControllerBase {
 		return userArray;
 	}
 
-	@RequestMapping( value="/{id}")
+	@RequestMapping( value = "/{id}" )
 	@ResponseBody
 	public User getOneUserWithUsername( @PathVariable( "id" ) String id,
 			HttpServletResponse response ) {
@@ -66,24 +70,32 @@ public class UserController extends SemossControllerBase {
 		return user;
 	}
 
-	@RequestMapping( value="/{username}/accesses", method=RequestMethod.PUT)
+	@RequestMapping( value = "/{username}/accesses", method = RequestMethod.PUT )
 	@ResponseBody
 	public User updateUser( @PathVariable( "username" ) String username,
-			@RequestParam Map<URI, DbAccess> accessMap, HttpServletResponse response ) {
-		User user = datastore.getOne(username);
+			@RequestBody String accessMap, HttpServletResponse response ) throws JSONException {
+		User user = datastore.getOne( username );
+
 		if ( user == null ) {
 			throw new NotFoundException();
 		}
 
-		datastore.setAccesses(user, accessMap);
-		log.debug( "Updating user " + username + " (user: "
+		// ugh: why doens't Jackson automatically handle this for us?
+		JSONObject json = new JSONObject( accessMap );
+		Map<URI, DbAccess> accesses = new HashMap<>();
+		Iterator<String> keyit = json.keys();
+		while( keyit.hasNext() ){
+			String key = keyit.next();
+			accesses.put( new URIImpl( key ),
+					DbAccess.valueOf( json.getString( key ) ) );
+		}
+
+		datastore.setAccesses( user, accesses );
+		log.debug( "Updating accesses for user " + username + " (user: "
 				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
 		if ( user == null ) {
 			throw new NotFoundException();
 		}
 		return user;
 	}
-
-	
-
 }
