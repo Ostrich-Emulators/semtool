@@ -9,20 +9,18 @@ import javax.servlet.ServletContext;
 
 import gov.va.semoss.web.security.DbAccess;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openrdf.model.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -45,7 +43,7 @@ public class UserController extends SemossControllerBase {
 	@Autowired
 	private UserMapper datastore;
 	
-	@RequestMapping("/list" )
+	@RequestMapping("/" )
 	@ResponseBody
 	public User[] getAllUsers() {
 		log.debug( "Getting all Users." );
@@ -55,7 +53,7 @@ public class UserController extends SemossControllerBase {
 		return userArray;
 	}
 
-	@RequestMapping( value="/get/{id}")
+	@RequestMapping( value="/{id}")
 	@ResponseBody
 	public User getOneUserWithUsername( @PathVariable( "id" ) String id,
 			HttpServletResponse response ) {
@@ -68,24 +66,15 @@ public class UserController extends SemossControllerBase {
 		return user;
 	}
 
-	@RequestMapping( value="/setAccesses/{username}/{mapEncoding}")
+	@RequestMapping( value="/{username}/accesses", method=RequestMethod.PUT)
 	@ResponseBody
 	public User updateUser( @PathVariable( "username" ) String username,
-			@PathVariable( "mapEncoding" ) String mapEncoding, HttpServletResponse response ) {
+			@RequestParam Map<URI, DbAccess> accessMap, HttpServletResponse response ) {
 		User user = datastore.getOne(username);
-		Map<URI, DbAccess> accessMap = null;
-		try {
-			accessMap = mapper.readValue(mapEncoding, HashMap.class);
-		} catch (JsonParseException e) {
-			log.error("JSON Parse Exception encountered during set-accesses", e);
-		} catch (JsonMappingException e) {
-			log.error("Json Mapping Exception encountered during set-accesses", e);
-		} catch (IOException e) {
-			log.error("IO Exception encountered during set-accesses", e);
-		}
 		if ( user == null ) {
 			throw new NotFoundException();
 		}
+
 		datastore.setAccesses(user, accessMap);
 		log.debug( "Updating user " + username + " (user: "
 				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );

@@ -18,7 +18,7 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
  */
 public class SemossDetailsMapper extends LdapUserDetailsMapper {
 
-	protected static Logger logger = Logger.getLogger( SemossDetailsMapper.class );
+	private static final Logger log = Logger.getLogger( SemossDetailsMapper.class );
 
 	@Override
 	public UserDetails mapUserFromContext( DirContextOperations ctx, String username,
