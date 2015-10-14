@@ -8,6 +8,7 @@
 	
 	<script src="js/angularControllers/main/controller.js"></script>
 	<script src="js/angularControllers/databases/controller.js"></script>
+	<script src="js/angularControllers/users/controller.js"></script>
 	<script src="js/lib/jquery/jquery.ba-hashchange.js"></script>
 		
 	<script src="js/semoss_functions.js"></script>

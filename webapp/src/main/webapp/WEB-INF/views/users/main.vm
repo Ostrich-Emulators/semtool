@@ -1,17 +1,16 @@
 <div id="semoss_users" class="main_div" ng-controller="UserManagementController as instanceManager">
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h2 class="panel-title table_title">Users&nbsp&nbsp<button class="btn btn-primary" ng-click="init()"><span class="glyphicon glyphicon-refresh table_refresh_button" aria-hidden="true" ></span></button></h2>
+    <h2 class="panel-title table_title">Users</h2>
   </div>
   <div class="panel-body" >
-    #parse("/users/table.html")
-	#parse("/users/detail.html")
+    #parse("/users/table.vm")
   </div>
   <button class="btn btn-success btn-lg instance_create_button" ng-click="showCreate()"><span class="glyphicon glyphicon-plus instance_creation_glyphicon"></span></button>
 </div>
 <script>
 	$('#users_table').DataTable();
 </script>
-	#parse("/users/delete_confirm.html")
-	#parse("/users/user_modal.html")
+	#parse("/users/delete_confirm.vm")
+	#parse("/users/user_modal.vm")
 </div>

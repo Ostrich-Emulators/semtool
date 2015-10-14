@@ -19,16 +19,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -47,7 +51,17 @@ public class UserMapper implements DataMapper<User, String> {
 		PROPMAP.put( UserProperty.USER_FULLNAME, FOAF.NAME );
 	}
 
+	@Autowired
 	private DataStore store;
+
+	/**
+	 * Default constructor used for testing situations
+	 */
+	public UserMapper() {
+		// TODO To support testing, will populate with a 
+		// series of pre-populated users
+
+	}
 
 	@Override
 	public DataStore getDataStore() {
@@ -62,17 +76,17 @@ public class UserMapper implements DataMapper<User, String> {
 	@Override
 	public Collection<User> getAll() {
 		RepositoryConnection rc = store.getConnection();
-		List<User> databases = new ArrayList<>();
+		List<User> users = new ArrayList<>();
 		try {
 			for ( Statement stmt : Iterations.asList( rc.getStatements( null, RDF.TYPE,
 					FOAF.PERSON, false ) ) ) {
-				databases.add( getUser( stmt.getSubject(), rc ) );
+				users.add( getUser( stmt.getSubject(), rc ) );
 			}
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
 		}
-		return databases;
+		return users;
 	}
 
 	@Override
@@ -98,6 +112,20 @@ public class UserMapper implements DataMapper<User, String> {
 		}
 
 		return t;
+	}
+
+	public boolean exists( String username ) {
+		RepositoryConnection rc = store.getConnection();
+
+		try {
+			return rc.hasStatement( null, FOAF.ACCOUNT,
+					new LiteralImpl( username ), false );
+		}
+		catch ( RepositoryException e ) {
+			log.error( e, e );
+		}
+
+		return false;
 	}
 
 	@Override
@@ -221,20 +249,19 @@ public class UserMapper implements DataMapper<User, String> {
 	private static User getUser( Resource id, RepositoryConnection rc )
 			throws RepositoryException {
 
-		RemoteUserImpl user = new RemoteUserImpl();
+		LinkedHashModel model = new LinkedHashModel( Iterations.asList(
+				rc.getStatements( id, null, null, false ) ) );
+		org.openrdf.model.Model namer = model.filter( id, FOAF.ACCOUNT, null );
+		RemoteUserImpl user = new RemoteUserImpl( namer.objectString() );
+		model.removeAll( namer );
 
-		for ( Statement stmt : Iterations.asList( rc.getStatements( id, null, null, false ) ) ) {
+		for ( Statement stmt : model ) {
 			URI pred = stmt.getPredicate();
 			String val = stmt.getObject().stringValue();
 
-			if ( FOAF.ACCOUNT.equals( pred ) ) {
-				// user.setUsername( val );
-			}
-			else {
-				for ( Map.Entry<UserProperty, URI> en : PROPMAP.entrySet() ) {
-					if ( en.getValue().equals( pred ) ) {
-						user.setProperty( en.getKey(), val );
-					}
+			for ( Map.Entry<UserProperty, URI> en : PROPMAP.entrySet() ) {
+				if ( en.getValue().equals( pred ) ) {
+					user.setProperty( en.getKey(), val );
 				}
 			}
 		}

@@ -64,7 +64,7 @@
 					}
 					
 					SEMOSS.getDatabase = function (id, callBackFunction, asynchronous){
-						var url = 'databases/get/' + id;
+						var url = 'databases/' + id;
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -78,7 +78,7 @@
 					}
 					
 					SEMOSS.listDatabases = function (callBackFunction, asynchronous){
-						var url = 'databases/list';
+						var url = 'databases/';
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -99,6 +99,57 @@
 							}
 						});
 					}
+					
+					
+					SEMOSS.User= function(){};
+					
+					SEMOSS.User.prototype.username = null;
+					SEMOSS.User.prototype.displayName = null;
+					SEMOSS.User.prototype.email = null;
+					SEMOSS.User.prototype.role = null;
+					
+					SEMOSS.User.prototype.setAttributes = function(object){
+						this.username = object['username'];
+						this.displayName = object['properties'].USER_FULLNAME;
+						this.email = object['properties'].USER_EMAIL;
+
+					}
+
+					
+					SEMOSS.listUsers = function (callBackFunction){
+						var url = 'users/';
+						$.ajax({
+							type : "GET",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							}
+						});
+					}
+					
+					SEMOSS.getUser = function (username, callBackFunction){
+						var url = 'users/' + username;
+						$.ajax({
+							type : "GET",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							}
+						});
+					}
+					
+					SEMOSS.setAccesses = function (username, map, callBackFunction){
+						var encoding = JSON.stringify(map);
+						var url = 'users/accesses/' + username + '/' + encoding;
+						$.ajax({
+							type : "GET",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							}
+						});
+					}
+					
 
 
 					SEMOSS.processResponse = function(response) {

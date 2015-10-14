@@ -1,4 +1,4 @@
-<div id="semoss_user_modal" class="modal fade">
+<div id="user_modal" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -24,13 +24,13 @@
 				
 				<div class="form-group">
 					<label for="semossInstanceRoleName">Role</label> 
-					<input ng-model="activeInstance.roleName"
+					<select ng-model="activeInstance.role"
 						type="text" class="form-control instance_field string_field" id="semossInstanceRoleName"
 						placeholder="The Role of the User">
-				</div>
-				<div class="form-group">
-					<input  ng-model="activeInstance.role"
-						type="text" class="instance_field string_field form-control" id="semossInstanceRole">
+						<option value="0">Base User</option>
+						<option value="1">Database Administrator</option>
+						<option value="2">Insights Administrator</option>
+					</select>
 				</div>
 						
 				<div class="form-group">
