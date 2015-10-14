@@ -49,6 +49,15 @@ public class UserMapper implements DataMapper<User, String> {
 
 	private DataStore store;
 
+	/**
+	 * Default constructor used for testing situations
+	 */
+	public UserMapper(){
+		// TODO To support testing, will populate with a 
+		// series of pre-populated users
+		
+	}
+	
 	@Override
 	public DataStore getDataStore() {
 		return store;

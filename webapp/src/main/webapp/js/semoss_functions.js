@@ -99,6 +99,57 @@
 							}
 						});
 					}
+					
+					
+					SEMOSS.User= function(){};
+					
+					SEMOSS.User.prototype.username = null;
+					SEMOSS.User.prototype.displayName = null;
+					SEMOSS.User.prototype.email = null;
+					SEMOSS.User.prototype.role = null;
+					
+					SEMOSS.User.prototype.setAttributes = function(object){
+						this.name = object['name'];
+						this.serverUrl = object['serverUrl'];
+						this.dataUrl = object['dataUrl'];
+						this.insightsUrl = object['insightsUrl'];
+					}
+
+					
+					SEMOSS.listUsers = function (callBackFunction){
+						var url = 'users/list';
+						$.ajax({
+							type : "GET",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							}
+						});
+					}
+					
+					SEMOSS.getUser = function (username, callBackFunction){
+						var url = 'users/get/' + username;
+						$.ajax({
+							type : "GET",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							}
+						});
+					}
+					
+					SEMOSS.setAccesses = function (username, map, callBackFunction){
+						var encoding = JSON.stringify(map);
+						var url = 'users/setAccesses/' + username + '/' + encoding;
+						$.ajax({
+							type : "GET",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							}
+						});
+					}
+					
 
 
 					SEMOSS.processResponse = function(response) {

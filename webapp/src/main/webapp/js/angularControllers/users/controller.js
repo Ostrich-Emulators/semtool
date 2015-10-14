@@ -17,12 +17,11 @@
         $scope.init = function () {
             $scope.loading = true;
             SEMOSS.listUsers(
-                    function (token) {
-    	                var returnedInstances = JSON.parse(token.data.data);
+                    function (users) {
     	                $scope.instances = [];
-    	                for (var i=0; i<returnedInstances.length; i++){
+    	                for (var i=0; i<users.length; i++){
     	                	var nativeInstance = new SEMOSS.User();
-    	                	nativeInstance.setAttributes(returnedInstances[i]);
+    	                	nativeInstance.setAttributes(users[i]);
     	                	$scope.instances.push(nativeInstance);
     	                }
     	                $scope.loading = false;
@@ -30,15 +29,15 @@
     	                	vm.dtInstance.rerender();
     	                }
     	                catch (err){}
-                    }, true);
+                    });
         };
         
         $scope.rowSelected = function(index){
         	$scope.currentRow = index;
         }
         
-        $scope.showEdit = function(id){
-       	 	SEMOSS.getUser(id, function(token){
+        $scope.showEdit = function(username){
+       	 	SEMOSS.getUser(username, function(token){
        	 		var foreignInstance = JSON.parse(token.data.data);
        	 		var nativeInstance = new SEMOSS.User();
        	 		nativeInstance.setAttributes(foreignInstance);
@@ -46,17 +45,17 @@
            	 	$scope.mode = 'edit';
            	 	$scope.$apply();
             	$('#user_modal').modal('show');
-       	 	}, true);
+       	 	});
         }
         
         $scope.update = function(){
-       	 	SEMOSS.updateUser($scope.activeInstance, function(token){
+       	 	SEMOSS.setAccesses($scope.activeInstance.username, function(token){
        	 		SEMOSS.processAnyFailures(token, 'User successfully updated.');
         		if (token.result <= 1){
         			$scope.instances.splice($scope.currentRow, 1, angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
         		}
-       	 	}, true);
+       	 	});
        	 	$scope.mode = 'edit';
        	 	$scope.$apply();
         	$('#user_modal').modal('hide');
@@ -72,6 +71,10 @@
            	 	$scope.$apply();
             	$('#user_modal').modal('show');
        	 	}, true);
+        }
+        
+        $scope.showPrivleges = function(){
+        	$('#user_privileges_modal').modal('show');
         }
         
         $scope.showCreate = function(){
@@ -100,12 +103,11 @@
         $scope.listInstances = function () {
             $scope.loading = true;
             SEMOSS.listUsers(
-                    function (token) {
-    	                var returnedInstances = JSON.parse(token.data.data);
+                    function (users) {
     	                $scope.instances = [];
-    	                for (var i=0; i<returnedInstances.length; i++){
+    	                for (var i=0; i<users.length; i++){
     	                	var nativeInstance = new SEMOSS.User();
-    	                	nativeInstance.setAttributes(returnedInstances[i]);
+    	                	nativeInstance.setAttributes(users[i]);
     	                	$scope.instances.push(nativeInstance);
     	                }
     	                $scope.loading = false;
