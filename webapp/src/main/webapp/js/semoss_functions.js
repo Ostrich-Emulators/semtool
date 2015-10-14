@@ -64,7 +64,7 @@
 					}
 					
 					SEMOSS.getDatabase = function (id, callBackFunction, asynchronous){
-						var url = 'databases/get/' + id;
+						var url = 'databases/' + id;
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -78,7 +78,7 @@
 					}
 					
 					SEMOSS.listDatabases = function (callBackFunction, asynchronous){
-						var url = 'databases/list';
+						var url = 'databases/';
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -109,15 +109,15 @@
 					SEMOSS.User.prototype.role = null;
 					
 					SEMOSS.User.prototype.setAttributes = function(object){
-						this.name = object['name'];
-						this.serverUrl = object['serverUrl'];
-						this.dataUrl = object['dataUrl'];
-						this.insightsUrl = object['insightsUrl'];
+						this.username = object['username'];
+						this.displayName = object['properties'].USER_FULLNAME;
+						this.email = object['properties'].USER_EMAIL;
+
 					}
 
 					
 					SEMOSS.listUsers = function (callBackFunction){
-						var url = 'users/list';
+						var url = 'users/';
 						$.ajax({
 							type : "GET",
 							url : url,
@@ -128,7 +128,7 @@
 					}
 					
 					SEMOSS.getUser = function (username, callBackFunction){
-						var url = 'users/get/' + username;
+						var url = 'users/' + username;
 						$.ajax({
 							type : "GET",
 							url : url,
@@ -140,7 +140,7 @@
 					
 					SEMOSS.setAccesses = function (username, map, callBackFunction){
 						var encoding = JSON.stringify(map);
-						var url = 'users/setAccesses/' + username + '/' + encoding;
+						var url = 'users/accesses/' + username + '/' + encoding;
 						$.ajax({
 							type : "GET",
 							url : url,
