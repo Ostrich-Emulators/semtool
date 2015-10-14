@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.openrdf.model.impl.URIImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
@@ -214,7 +215,8 @@ public class RemoteDBReverseProxyFilter implements Filter {
 		servletContext = filterConfig.getServletContext();
 		applicationContext = WebApplicationContextUtils.getWebApplicationContext( servletContext );
 		this.dbmapper = applicationContext.getBean( DbInfoMapper.class );
-		log.debug( "got the dbmapper bean" );
+		this.usermapper = applicationContext.getBean( UserMapper.class );
+		log.debug( "got the mapper beans" );
 	}
 
 	/**
