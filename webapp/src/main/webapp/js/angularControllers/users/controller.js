@@ -37,8 +37,7 @@
         }
         
         $scope.showEdit = function(username){
-       	 	SEMOSS.getUser(username, function(token){
-       	 		var foreignInstance = JSON.parse(token.data.data);
+       	 	SEMOSS.getUser(username, function(foreignInstance){
        	 		var nativeInstance = new SEMOSS.User();
        	 		nativeInstance.setAttributes(foreignInstance);
        	 		$scope.activeInstance = nativeInstance;
@@ -49,9 +48,19 @@
         }
         
         $scope.update = function(){
-       	 	SEMOSS.setAccesses($scope.activeInstance.username, function(token){
-       	 		SEMOSS.processAnyFailures(token, 'User successfully updated.');
-        		if (token.result <= 1){
+       	 	SEMOSS.updateUser($scope.activeInstance, function(result){
+       	 		if (result){
+        			$scope.instances.splice($scope.currentRow, 1, angular.copy($scope.activeInstance));
+        			vm.dtInstance.rerender();
+        		}
+       	 	});
+       	 	$scope.mode = 'edit';
+        	$('#user_modal').modal('hide');
+        }
+        
+        $scope.setAccesses = function(){
+       	 	SEMOSS.setAccesses($scope.activeInstance.username, function(result){
+       	 		if (result){
         			$scope.instances.splice($scope.currentRow, 1, angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
         		}
@@ -62,8 +71,7 @@
         }
         
         $scope.view = function(id){
-       	 	SEMOSS.getUser(id, function(token){
-       	 		var foreignInstance = JSON.parse(token.data.data);
+       	 	SEMOSS.getUser(id, function(foreignInstance){
        	 		var nativeInstance = new SEMOSS.User();
        	 		nativeInstance.setAttributes(foreignInstance);
        	 		$scope.activeInstance = nativeInstance;
@@ -87,8 +95,8 @@
         $scope.create = function(){
         	SEMOSS.createUser($scope.activeInstance, function(token){
         		$scope.activeInstance.id = token.data.id;
-        		SEMOSS.processAnyFailures(token, 'User successfully created.');
-        		if (token.result <= 1){
+        		
+        		if (result){
         			$scope.instances.push(angular.copy($scope.activeInstance));
         			var nameIDPair = new SEMOSS.NameIDPair();
         			nameIDPair.id = token.data.id;
@@ -97,7 +105,7 @@
         			vm.dtInstance.rerender();
         		}
        	 	}, true);
-        	$('tuser_modal').modal('hide');
+        	$('user_modal').modal('hide');
         }
 
         $scope.listInstances = function () {
@@ -116,9 +124,8 @@
         };
         
         $scope.deleteInstance = function(){
-        	SEMOSS.deleteUser($scope.deleteID, function(token){
-        		SEMOSS.processAnyFailures(token, 'User successfully deleted.');
-        		if (token.result <= 1){
+        	SEMOSS.deleteUser($scope.deleteID, function(result){
+        		if (result){
         			$scope.instances.splice($scope.currentRow, 1);
         			vm.dtInstance.rerender();
         		}

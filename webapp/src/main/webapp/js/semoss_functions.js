@@ -3,6 +3,7 @@
 					
 					SEMOSS.DbInfo = function(){};
 					
+					SEMOSS.DbInfo.prototype.vcamp_class = "gov.va.semoss.web.io.DbInfo";
 					SEMOSS.DbInfo.prototype.name = null;
 					SEMOSS.DbInfo.prototype.serverUrl = null;
 					SEMOSS.DbInfo.prototype.dataUrl = null;
@@ -13,11 +14,14 @@
 						this.serverUrl = object['serverUrl'];
 						this.dataUrl = object['dataUrl'];
 						this.insightsUrl = object['insightsUrl'];
+						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
 					}
 
 					SEMOSS.createDatabase = function (knowledgebase, callBackFunction, asynchronous){
 						var json = SEMOSS.encodeParamObject(knowledgebase);
 						var url = 'databases/create' + json;
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
@@ -28,38 +32,46 @@
 							success : function(response) {
 								var token = SEMOSS.processResponse(response);
 								callBackFunction(token);
-							}
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
 						});
 					}
 					
-					SEMOSS.updateDatabase = function (knowledgebase, callBackFunction, asynchronous){
+					SEMOSS.updateDatabase = function (knowledgebase, callBackFunction){
 						var json = SEMOSS.encodeParamObject(knowledgebase);
-						var url = 'databases/create' + json;
-						if (asynchronous == undefined){
-							asynchronous = true;
-						}
+						var url = 'databases/';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
 						$.ajax({
-							type : "GET",
+							type : "PUT",
 							url : url,
+							data : json,
 							success : function(response) {
 								var token = SEMOSS.processResponse(response);
 								callBackFunction(token);
-							}
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
 						});
 					}
 					
 					SEMOSS.deleteDatabase = function (id, callBackFunction, asynchronous){
-						var url = 'databases/delete/' + id;
+						var url = 'databases/' + id;
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
 						$.ajax({
-							type : "POST",
+							type : "DELETE",
 							url : url,
 							success : function(response) {
 								var token = SEMOSS.processResponse(response);
 								callBackFunction(token);
-							}
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
 						});
 					}
 					
@@ -86,6 +98,8 @@
 							type : "GET",
 							beforeSend: function (request)
 				            {
+								// This is how you auth with every REST call, rather than rely on
+								// a session auth
 								//var username = "rbobko";
 								//var password = "password";
 								//var plainCreds = username + ":" + password;
@@ -103,6 +117,7 @@
 					
 					SEMOSS.User= function(){};
 					
+					SEMOSS.User.prototype.vcamp_class = "gov.va.semoss.web.security.SemossUser";
 					SEMOSS.User.prototype.username = null;
 					SEMOSS.User.prototype.displayName = null;
 					SEMOSS.User.prototype.email = null;
@@ -112,7 +127,7 @@
 						this.username = object['username'];
 						this.displayName = object['properties'].USER_FULLNAME;
 						this.email = object['properties'].USER_EMAIL;
-
+						this.vcamp_class = "gov.va.semoss.web.security.SemossUser";
 					}
 
 					
@@ -127,6 +142,23 @@
 						});
 					}
 					
+					SEMOSS.createUser = function (user, callBackFunction){
+						var url = 'users/';
+						var json = SEMOSS.encodeParamObject(user);
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						$.ajax({
+							type : "POST",
+							url : url,
+							data : json,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
+						});
+					}
+					
 					SEMOSS.getUser = function (username, callBackFunction){
 						var url = 'users/' + username;
 						$.ajax({
@@ -138,15 +170,53 @@
 						});
 					}
 					
-					SEMOSS.setAccesses = function (username, map, callBackFunction){
-						var encoding = JSON.stringify(map);
-						var url = 'users/accesses/' + username + '/' + encoding;
+					SEMOSS.deleteUser = function (username, callBackFunction){
+						var url = 'users/' + username;
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						
 						$.ajax({
-							type : "GET",
+							type : "DELETE",
 							url : url,
 							success : function(response) {
 								callBackFunction(response);
-							}
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); },
+						});
+					}
+					
+					SEMOSS.setAccesses = function (username, map, callBackFunction){
+						var encoding = JSON.stringify(map);
+						var url = 'users/' + username + '/accesses';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						$.ajax({
+							type : "PUT",
+							data: SEMOSS.encodeParamObject(encoding),
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
+						});
+					}
+					
+					SEMOSS.updateUser = function (user, callBackFunction){
+						var encoding = SEMOSS.encodeParamObject(user);
+						var url = 'users/';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						$.ajax({
+							type : "PUT",
+							data: encoding,
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
 						});
 					}
 					
@@ -173,13 +243,12 @@
 
 					SEMOSS.processResponse = function(response) {
 						var unescapedString = unescape(response);
-						var token = JSON.parse(unescapedString);
-						SEMOSS.checkErrors(token);
-						return token;
+						var result = JSON.parse(unescapedString);
+						return result;
 					}
 
 
-/**
+					/**
 					 * Checks for errors and warnings in a communication token
 					 * that came back from the server after a REST call.
 					 * @return False if the operation was successful, even with warnings
