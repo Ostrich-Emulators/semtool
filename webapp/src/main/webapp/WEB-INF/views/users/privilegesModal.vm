@@ -1,0 +1,40 @@
+<div id="user_privileges_modal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">Database Privileges for {{instance.username}}</h4>
+			</div>
+			<div class="modal-body">
+				<table id="users_table" class="row-border hover" datatable="ng" dt-instance="instanceManager.dtInstance">                
+            <thead>
+                <tr>
+                    <th>Database</th>
+                    <th>Role</th>              
+                    <th></th>      
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-click="rowSelected($index)"  ng-repeat="instance in instances"  >
+                    <td>{{instance.username}}</td>
+                    <td >{{instance.displayName}}</td>
+                    <td>{{instance.email}}</td>
+                    <td >{{instance.role}}</td>
+                    <td><button class="btn btn-default btn-danger delete_instance_button" ng-click="showDelete(instance.id)" ><span class="glyphicon glyphicon-remove"></span></button></td>
+                </tr>
+            </tbody>            
+        </table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary update_instance_button" ng-click="update()" >Save changes</button>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

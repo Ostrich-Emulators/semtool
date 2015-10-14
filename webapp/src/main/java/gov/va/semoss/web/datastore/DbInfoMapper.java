@@ -23,6 +23,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -36,6 +37,7 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 	private static final URI INSIGHTS_PREDICATE
 			= new URIImpl( WEBDS.NAMESPACE + "dbinfo/insightsurl" );
 
+	@Autowired
 	private DataStore store;
 
 	@Override

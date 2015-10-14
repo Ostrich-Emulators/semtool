@@ -60,7 +60,7 @@ public class DatabaseController extends SemossControllerBase {
 		return testDbIDs;
 	}
 
-	@RequestMapping( value="/get/{name}")
+	@RequestMapping( value="/{name}")
 	@ResponseBody
 	public DbInfo getOneDatabaseWithID( @PathVariable( "name" ) String name,
 			HttpServletResponse response ) {
