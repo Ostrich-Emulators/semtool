@@ -298,6 +298,12 @@ public class InsightManagerImpl implements InsightManager {
 		}
 
 		perspectives.addAll( persps );
+
+		for ( Perspective p : persps ) {
+			for ( Insight i : p.getInsights() ) {
+				insights.put( i.getId(), i );
+			}
+		}
 	}
 
 	@Override
@@ -525,6 +531,10 @@ public class InsightManagerImpl implements InsightManager {
 	@Override
 	public void addInsight( Perspective p, Insight i, int pos ) {
 		insights.put( i.getId(), i );
+		if ( pos < 0 ) {
+			pos = p.getInsights().size();
+		}
+
 		p.getInsights().add( pos, i );
 	}
 
