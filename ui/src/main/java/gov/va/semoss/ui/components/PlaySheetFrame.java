@@ -39,10 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
-import javax.swing.Painter;
 import javax.swing.Timer;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeListener;
 
 import javax.swing.event.InternalFrameEvent;
@@ -84,13 +81,6 @@ public class PlaySheetFrame extends JInternalFrame {
 	public PlaySheetFrame( IEngine eng, String title ) {
 		super( title, true, true, true, true );
 
-		UIDefaults nimbusOverrides = new UIDefaults();
-		UIDefaults defaults = UIManager.getLookAndFeelDefaults();
-		defaults.put( "nimbusOrange", defaults.get( "nimbusInfoBlue" ) );
-		Painter<?> blue = (Painter<?>) defaults.get( "Button[Default+Focused+Pressed].backgroundPainter" );
-		nimbusOverrides.put( "ProgressBar[Enabled].foregroundPainter", blue );
-		jBar.putClientProperty( "Nimbus.Overrides", nimbusOverrides );
-		jBar.putClientProperty( "Nimbus.Overrides.InheritDefaults", false );
 		jBar.setStringPainted( true );
 
 		tabs.setTabPlacement( JTabbedPane.BOTTOM );
