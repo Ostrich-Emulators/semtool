@@ -92,19 +92,13 @@
         	$('#user_modal').modal('show');
         }
 
-        $scope.create = function(){
+        $scope.createInstance = function(){
         	SEMOSS.createUser($scope.activeInstance, function(token){
-        		$scope.activeInstance.id = token.data.id;
-        		
         		if (result){
         			$scope.instances.push(angular.copy($scope.activeInstance));
-        			var nameIDPair = new SEMOSS.NameIDPair();
-        			nameIDPair.id = token.data.id;
-        			nameIDPair.name = $scope.activeInstance.name;
-        			SEMOSS.userLookup[nameIDPair.id] = nameIDPair;
         			vm.dtInstance.rerender();
         		}
-       	 	}, true);
+       	 	});
         	$('user_modal').modal('hide');
         }
 

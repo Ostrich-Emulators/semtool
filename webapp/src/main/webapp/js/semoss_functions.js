@@ -1,9 +1,11 @@
 					
 					var SEMOSS = [];
 					
-					SEMOSS.DbInfo = function(){};
+					SEMOSS.DbInfo = function(){
+						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
+					};
 					
-					SEMOSS.DbInfo.prototype.vcamp_class = "gov.va.semoss.web.io.DbInfo";
+					SEMOSS.DbInfo.prototype.vcamp_class = null;
 					SEMOSS.DbInfo.prototype.name = null;
 					SEMOSS.DbInfo.prototype.serverUrl = null;
 					SEMOSS.DbInfo.prototype.dataUrl = null;
@@ -17,18 +19,15 @@
 						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
 					}
 
-					SEMOSS.createDatabase = function (knowledgebase, callBackFunction, asynchronous){
+					SEMOSS.createDatabase = function (knowledgebase, callBackFunction){
 						var json = SEMOSS.encodeParamObject(knowledgebase);
-						var url = 'databases/create' + json;
+						var url = 'databases/';
 						var token = $("meta[name='_csrf']").attr("content");
 						var header = $("meta[name='_csrf_header']").attr("content");
-						if (asynchronous == undefined){
-							asynchronous = true;
-						}
 						$.ajax({
 							type : "POST",
 							url : url,
-							async: asynchronous,
+							data : json,
 							success : function(response) {
 								var token = SEMOSS.processResponse(response);
 								callBackFunction(token);
@@ -115,7 +114,9 @@
 					}
 					
 					
-					SEMOSS.User= function(){};
+					SEMOSS.User= function(){
+						this.vcamp_class = "gov.va.semoss.web.security.SemossUser";
+					};
 					
 					SEMOSS.User.prototype.vcamp_class = "gov.va.semoss.web.security.SemossUser";
 					SEMOSS.User.prototype.username = null;
@@ -225,7 +226,6 @@
 					SEMOSS.processResponse = function(response) {
 						var unescapedString = unescape(response);
 						var token = JSON.parse(unescapedString);
-						SEMOSS.checkErrors(token);
 						return token;
 					}
 

@@ -80,14 +80,13 @@
         	$('#semossdb_modal').modal('show');
         }
 
-        $scope.create = function(){
-        	SEMOSS.createDatabase($scope.activeInstance, function(token){
-        		$scope.activeInstance.id = token.data.id;
-        		if (token.result <= 1){
+        $scope.createInstance = function(){
+        	SEMOSS.createDatabase($scope.activeInstance, function(reply){
+        		if (reply){
         			$scope.instances.push(angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
         		}
-       	 	}, true);
+       	 	});
         	$('#semossdb_modal').modal('hide');
         }
 
