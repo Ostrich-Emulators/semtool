@@ -8,7 +8,7 @@ import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Tree;
-import gov.va.semoss.ui.components.GraphToTreeConverter;
+import gov.va.semoss.graph.functions.GraphToTreeConverter;
 import gov.va.semoss.util.MultiSetMap;
 import gov.va.semoss.util.UriBuilder;
 import java.awt.Color;

@@ -64,7 +64,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.FilterPanel;
-import gov.va.semoss.ui.components.GraphToTreeConverter;
+import gov.va.semoss.graph.functions.GraphToTreeConverter;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.VertexColorShapeData;
 import gov.va.semoss.ui.components.api.GraphListener;

@@ -17,7 +17,7 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package gov.va.semoss.ui.components;
+package gov.va.semoss.graph.functions;
 
 import org.apache.log4j.Logger;
 
