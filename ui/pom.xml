@@ -282,7 +282,7 @@
 								<exclude>gov/va/semoss/util/ExportUtility.class</exclude>
 								<exclude>gov/va/semoss/util/PinningEngineListener.class</exclude>
 								<exclude>gov/va/semoss/rdf/engine/util/EngineUtil.class</exclude>
-								<exclude>gov/va/semoss/search/SearchController.class</exclude>
+								<exclude>gov/va/semoss/search/**</exclude>
 							</excludes>
 						</configuration>
 						<executions>
