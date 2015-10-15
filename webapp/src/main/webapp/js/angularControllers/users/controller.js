@@ -93,7 +93,7 @@
         }
 
         $scope.createInstance = function(){
-        	SEMOSS.createUser($scope.activeInstance, function(token){
+        	SEMOSS.createUser($scope.activeInstance, function(result){
         		if (result){
         			$scope.instances.push(angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
