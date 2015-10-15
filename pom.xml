@@ -241,11 +241,11 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>0.7.5.201505241946</version>
-						<configuration>
+						<!--configuration>
 							<excludes>
 								<exclude>gov/va/semoss/ui/**</exclude>
 							</excludes>
-						</configuration>
+						</configuration-->
 						<executions>
 							<execution>
 								<id>pre-unit-test</id>
