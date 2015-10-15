@@ -99,7 +99,7 @@
         			vm.dtInstance.rerender();
         		}
        	 	});
-        	$('user_modal').modal('hide');
+        	$('#user_modal').modal('hide');
         }
 
         $scope.listInstances = function () {

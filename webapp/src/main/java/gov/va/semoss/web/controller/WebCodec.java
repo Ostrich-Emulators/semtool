@@ -5,6 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import gov.va.semoss.user.RemoteUserImpl;
+import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.web.io.DbInfo;
 import gov.va.semoss.web.security.SemossUser;
 
@@ -67,11 +69,10 @@ public class WebCodec {
 		return object;
 	}
 	
-	private SemossUser parseUser(Map<?,?> map){
-		SemossUser user = new SemossUser();
-		user.setProperty("username", (String)map.get("username"));
-		user.setProperty("displayName", (String)map.get("displayName"));
-		user.setProperty("email", (String)map.get("email"));
+	private RemoteUserImpl parseUser(Map<?,?> map){
+		RemoteUserImpl user = new RemoteUserImpl((String)map.get("username"));
+		user.setProperty(UserProperty.USER_FULLNAME, (String)map.get("displayName"));
+		user.setProperty(UserProperty.USER_EMAIL, (String)map.get("email"));
 		return user;
 	}
 	
