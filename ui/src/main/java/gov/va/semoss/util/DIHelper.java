@@ -260,21 +260,10 @@ public class DIHelper {
 			return coreProp.getProperty( name, System.getProperty( "user.dir" ) );
 		}
 
-		if ( Constants.ENGINES.equals( name ) ) {
-			// support the old calling interface
-			StringBuilder sb = new StringBuilder();
-			for ( String ename : engines.keySet() ) {
-				if ( 0 != sb.length() ) {
-					sb.append( ";" );
-				}
-				sb.append( ename );
-			}
-			return sb.toString();
-		}
-
 		String retName = coreProp.getProperty( name );
-		if (retName != null)
+		if (retName != null){
 			return retName;
+		}
 
 		if ( repolist != null && getRdfEngine() != null) {
 			return getRdfEngine().getProperty( name );
@@ -290,9 +279,6 @@ public class DIHelper {
 	 * @param value String	Value mapped to specific key.
 	 */
 	public void putProperty( String name, String value ) {
-		if ( Constants.ENGINES.equals( name ) || Constants.ENGINE_NAME.equals( name ) ) {
-			logger.warn( "please use registerEngine() instead" );
-		}
 		coreProp.put( name, value );
 	}
 
@@ -492,20 +478,8 @@ public class DIHelper {
 	 * @return Property mapped to a specific key
 	 */
 	public Object getLocalProp( String key ) {
-      // if we're dealing with engine things, use the engines map
-		// this code is here to maintain backwards compatibility
-
-		if ( Constants.ENGINES.equals( key ) ) {
-			StringBuilder sb = new StringBuilder();
-			for ( String ename : engines.keySet() ) {
-				if ( 0 != sb.length() ) {
-					sb.append( ";" );
-				}
-				sb.append( ename );
-			}
-			return sb.toString();
-		}
-		else if ( engines.containsKey( key ) ) {
+    // if we're dealing with engine things, use the engines map
+		if ( engines.containsKey( key ) ) {
 			logger.warn( "please use getEngine() instead" );
 			return engines.get( key );
 		}
@@ -599,12 +573,6 @@ public class DIHelper {
 	 * @param value the thing to hash
 	 */
 	public void setLocalProperty( String property, Object value ) {
-		if ( engines.containsKey( property ) || Constants.ENGINES.equals( property )
-				|| Constants.ENGINE_NAME.equals( property ) ) {
-			logger.warn( "please use registerEngine() instead" );
-			return;
-		}
-
 		localProp.put( property, value );
 	}
 
