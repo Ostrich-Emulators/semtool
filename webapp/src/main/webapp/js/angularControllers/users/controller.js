@@ -131,6 +131,11 @@
         	$scope.deleteID = id;
         	$('#user_delete_confirm').modal('show');
         }
+        
+        $scope.showPrivleges = function(username){
+        	$scope.privileges = [];
+        	$('#user_privileges_modal').modal('show');
+        }
        
         // init immediately
         $scope.init();

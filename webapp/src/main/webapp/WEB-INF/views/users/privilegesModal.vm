@@ -9,24 +9,31 @@
 				<h4 class="modal-title">Database Privileges for {{instance.username}}</h4>
 			</div>
 			<div class="modal-body">
-				<table id="users_table" class="row-border hover" datatable="ng" dt-instance="instanceManager.dtInstance">                
-            <thead>
-                <tr>
-                    <th>Database</th>
-                    <th>Role</th>              
-                    <th></th>      
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-click="rowSelected($index)"  ng-repeat="instance in instances"  >
-                    <td>{{instance.username}}</td>
-                    <td >{{instance.displayName}}</td>
-                    <td>{{instance.email}}</td>
-                    <td >{{instance.role}}</td>
-                    <td><button class="btn btn-default btn-danger delete_instance_button" ng-click="showDelete(instance.id)" ><span class="glyphicon glyphicon-remove"></span></button></td>
-                </tr>
-            </tbody>            
-        </table>
+				<div ng-repeat="privilege in privileges">
+	        		<div>
+	        			<label for="semossInstanceRoleName">Database Name:</label> 
+	        			<select ng-model="privileges"
+							type="text" class="form-control instance_field string_field" id="semossInstanceRoleName"
+							placeholder="The Role of the User">
+							<option ng-selected="{{privilege.dbName == dbChoices.dbName}}"
+            					ng-repeat="privilege in privileges"
+            					value="{{privilege.dbName}}">
+							<option value="{{privilege.dbName}}">{{privilege.dbName}}</option>
+						</select>
+	        		</div>
+	        		<div class="form-group">
+						<label for="semossInstanceRoleName">Role</label> 
+						<select ng-model="activeInstance.role"
+							type="text" class="form-control instance_field string_field" id="semossInstanceRoleName"
+							placeholder="The Role of the User">
+							<option value="0">Base User</option>
+							<option value="1">Database Administrator</option>
+							<option value="2">Insights Administrator</option>
+						</select>
+					</div>
+					<hr>
+				</div>
+				<button type="button" class="btn btn-success" data-dismiss="modal">Add Database</button>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
