@@ -598,8 +598,15 @@ public class CLI {
 			}
 		}
 
+		List<File> vocabfiles = getFileList( cmd, "vocab" );
+		Collection<URL> vocabs = new ArrayList<>();
+		for ( File f : vocabfiles ) {
+			vocabs.add( f.toURI().toURL() );
+		}
+
+
 		LegacyUpgrader upg = new LegacyUpgrader( dbfile );
-		upg.upgradeTo( exportfile );
+		upg.upgradeTo( exportfile, vocabs );
 	}
 
 	private static List<File> getFileList( CommandLine cmd, String option )
