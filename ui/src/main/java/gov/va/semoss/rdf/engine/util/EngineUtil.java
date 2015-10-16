@@ -501,7 +501,7 @@ public class EngineUtil implements Runnable {
 	 * @throws EngineManagementException
 	 */
 	public synchronized void importInsights( IEngine engine, File insightsfile,
-			boolean clearfirst, Collection<URL> vocabs ) throws IOException, EngineManagementException {
+			boolean clearfirst ) throws IOException, EngineManagementException {
 		InsightManagerImpl imi = new InsightManagerImpl();
 		if ( null != insightsfile ) {
 			EngineUtil2.createInsightStatements( insightsfile, imi );

@@ -5,6 +5,7 @@
  */
 package gov.va.semoss.tools;
 
+import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
@@ -23,13 +24,18 @@ public class LegacyUpgrader {
 		legacydir = legacy;
 	}
 
-	public void upgradeTo( File tofile ) throws RepositoryException, IOException {
+	public void upgradeTo( File tofile )
+			throws RepositoryException, IOException, EngineManagementException {
 		log.info( "upgrading database in " + legacydir + " to " + tofile );
 		log.warn( "upgrade not yet implemented" );
-		
+
+//		EngineCreateBuilder ecb
+//				= new EngineCreateBuilder( tofile.getParentFile(), legacydir.getName() );
+//		ecb.setReificationModel( ReificationStyle.SEMOSS );
+//
+//		EngineUtil2.createNew( ecb, null );
+
+
 		//BigDataEngine engine = new BigDataEngine();
-
-
-
 	}
 }

@@ -440,7 +440,7 @@ public class EngineUtil2 {
 		return stmts;
 	}
 
-	static void createInsightStatements( File modelquestions,
+	public static void createInsightStatements( File modelquestions,
 			InsightManagerImpl imi ) throws IOException, EngineManagementException {
 
 		if ( null == modelquestions || !modelquestions.exists() ) {

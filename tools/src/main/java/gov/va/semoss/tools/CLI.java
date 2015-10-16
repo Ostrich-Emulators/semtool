@@ -34,11 +34,10 @@ import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
-import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
 
 import gov.va.semoss.rdf.engine.util.EngineUtil2;
+import gov.va.semoss.rdf.engine.util.ImportDataProcessor;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
 import gov.va.semoss.user.LocalUserImpl;
@@ -350,8 +349,9 @@ public class CLI {
 			engine = new BigDataEngine( dbfile );
 
 			if ( cmd.hasOption( "insightsdb" ) ) {
-				EngineUtil.getInstance().importInsights( engine, insights.get( 0 ),
-						true, vocab );
+				InsightManagerImpl imi  = new InsightManagerImpl();
+				EngineUtil2.createInsightStatements( insights.get( 0 ), imi );
+				engine.updateInsights( imi );
 				engine.commit();
 				return;
 			}
@@ -419,16 +419,12 @@ public class CLI {
 		engine = new BigDataEngine( dbfile );
 
 		if ( cmd.hasOption( "insightsdb" ) ) {
-			List<File> vocabfiles = getFileList( cmd, "vocab" );
-			Collection<URL> vocab = new ArrayList<>();
-			for ( File f : vocabfiles ) {
-				vocab.add( f.toURI().toURL() );
-			}
-
 			List<File> data = getFileList( cmd, "insights" );
 			data.addAll( getFileList( cmd, "sparql" ) );
 
-			EngineUtil.getInstance().importInsights( engine, dbfile, false, vocab );
+			InsightManagerImpl imi = new InsightManagerImpl( engine.getInsightManager() );
+			EngineUtil2.createInsightStatements( dbfile, imi );
+			engine.updateInsights( imi );
 		}
 		else {
 			List<File> data = getFileList( cmd, "data" );
@@ -582,7 +578,8 @@ public class CLI {
 		}
 	}
 
-	public void upgrade( CommandLine cmd ) throws IOException, RepositoryException {
+	public void upgrade( CommandLine cmd ) throws IOException, RepositoryException,
+			EngineManagementException {
 		if ( !dbfile.exists() ) {
 			throw new FileNotFoundException( dbfile.getAbsolutePath() );
 		}

@@ -12,7 +12,6 @@ import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
 import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter;
 import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter.ShotOp;
-import gov.va.semoss.rdf.engine.util.VocabularyRegistry;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -102,7 +101,7 @@ public class ImportInsightsAction extends DbAction {
 
 							EngineUtil.getInstance().addEngineOpListener( eol );
 							EngineUtil.getInstance().importInsights( getEngine(), importfile,
-									clear, VocabularyRegistry.getVocabularies( true ).values() );
+									clear );
 						}
 						catch ( IOException | EngineManagementException re ) {
 							GuiUtility.showError( re.getLocalizedMessage() );

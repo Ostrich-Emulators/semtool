@@ -81,8 +81,7 @@ public class ClearAction extends DbAction {
 
 							if ( copywhat.isInsightSelected() ) {
 								EngineUtil eu = EngineUtil.getInstance();
-								eu.importInsights( getEngine(), null, true,
-										copywhat.getSelectedVocabularies() );
+								eu.importInsights( getEngine(), null, true );
 							}
 						}
 						catch ( RepositoryException | IOException | EngineManagementException re ) {

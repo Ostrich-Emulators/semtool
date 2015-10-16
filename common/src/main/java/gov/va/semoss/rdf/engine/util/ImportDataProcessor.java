@@ -1,4 +1,4 @@
-package gov.va.semoss.ui.components;
+package gov.va.semoss.rdf.engine.util;
 
 import java.io.File;
 import java.io.FileInputStream;
