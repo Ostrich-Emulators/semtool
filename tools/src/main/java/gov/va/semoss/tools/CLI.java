@@ -264,7 +264,7 @@ public class CLI {
 		OptionBuilder.withDescription( "Start a Sparql Endpoint." );
 		Option server = OptionBuilder.create( "server" );
 
-		OptionBuilder.withArgName( "directory" );
+		OptionBuilder.withArgName( "directory> <new.jnl" );
 		OptionBuilder.hasArgs( 2 );
 		OptionBuilder.withDescription( "Upgrade a legacy database" );
 		Option upgrade = OptionBuilder.create( "upgrade" );
