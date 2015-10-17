@@ -584,7 +584,7 @@ public class CLI {
 			throw new FileNotFoundException( dbfile.getAbsolutePath() );
 		}
 
-		String exportnames[] = cmd.getOptionValues( "export" );
+		String exportnames[] = cmd.getOptionValues( "upgrade" );
 		File exportfile = null;
 		if ( 2 == exportnames.length ) {
 			exportfile = new File( exportnames[1] );
