@@ -30,10 +30,7 @@ import edu.uci.ics.jung.visualization.picking.PickedState;
 import gov.va.semoss.graph.functions.IslandProcessor;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 
