@@ -96,4 +96,15 @@ public class InsightManagerImplTest {
 		Perspective p = imi.getSystemPerspective( eng );
 		assertEquals( 3, p.getInsights().size() );
 	}
+
+	@Test
+	public void testCtor() throws IOException {
+		InsightManagerImpl imi = new InsightManagerImpl();
+		Properties props = Utility.loadProp( LEGACY_QUESTIONS );
+		imi.loadLegacyData( props );
+
+		InsightManager im = new InsightManagerImpl( imi );
+		assertEquals( imi.getPerspectives(), im.getPerspectives() );
+
+	}
 }

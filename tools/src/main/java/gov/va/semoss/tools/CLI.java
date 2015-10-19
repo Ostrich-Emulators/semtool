@@ -34,10 +34,10 @@ import gov.va.semoss.rdf.engine.impl.BigDataEngine;
 import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.engine.util.EngineCreateBuilder;
 import gov.va.semoss.rdf.engine.util.EngineLoader;
-import gov.va.semoss.ui.components.ImportDataProcessor;
 import gov.va.semoss.rdf.engine.util.EngineManagementException;
-import gov.va.semoss.rdf.engine.util.EngineUtil;
 
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
+import gov.va.semoss.rdf.engine.util.ImportDataProcessor;
 import gov.va.semoss.rdf.query.util.ModificationExecutorAdapter;
 import gov.va.semoss.rdf.query.util.UpdateExecutorAdapter;
 import gov.va.semoss.user.LocalUserImpl;
@@ -83,7 +83,7 @@ public class CLI {
 
 	private static final Logger log = Logger.getLogger( CLI.class );
 	private static final String TRIALS[] = { "create", "update", "replace",
-		"export", "server", "copy" };
+		"export", "server", "copy", "upgrade" };
 
 	private IEngine engine;
 	private File dbfile;
@@ -124,6 +124,9 @@ public class CLI {
 				break;
 			case 5:
 				copy( cmd );
+				break;
+			case 6:
+				upgrade( cmd );
 				break;
 		}
 	}
@@ -260,6 +263,11 @@ public class CLI {
 		OptionBuilder.withDescription( "Start a Sparql Endpoint." );
 		Option server = OptionBuilder.create( "server" );
 
+		OptionBuilder.withArgName( "directory> <new.jnl" );
+		OptionBuilder.hasArgs( 2 );
+		OptionBuilder.withDescription( "Upgrade a legacy database" );
+		Option upgrade = OptionBuilder.create( "upgrade" );
+
 		OptionGroup modes = new OptionGroup();
 		modes.addOption( create );
 		modes.addOption( update );
@@ -267,6 +275,7 @@ public class CLI {
 		modes.addOption( server );
 		modes.addOption( export );
 		modes.addOption( copy );
+		modes.addOption( upgrade );
 
 		options.addOption( help );
 		options.addOption( load );
@@ -294,7 +303,7 @@ public class CLI {
 	public int setDatabaseFile( CommandLine cmd ) {
 		for ( int i = 0; i < TRIALS.length; i++ ) {
 			if ( cmd.hasOption( TRIALS[i] ) ) {
-				// the export command needs two options
+				// the export and upgrade commands need two options
 				// values, so only look at the first one
 				String vals[] = cmd.getOptionValues( TRIALS[i] );
 				String val = vals[0];
@@ -340,8 +349,9 @@ public class CLI {
 			engine = new BigDataEngine( dbfile );
 
 			if ( cmd.hasOption( "insightsdb" ) ) {
-				EngineUtil.getInstance().importInsights( engine, insights.get( 0 ),
-						true, vocab );
+				InsightManagerImpl imi  = new InsightManagerImpl();
+				EngineUtil2.createInsightStatements( insights.get( 0 ), imi );
+				engine.updateInsights( imi );
 				engine.commit();
 				return;
 			}
@@ -367,7 +377,7 @@ public class CLI {
 				ecb.setDefaultsFiles( null, null, insights.get( 0 ) );
 			}
 
-			File smss = EngineUtil.createNew( ecb, errors );
+			File smss = EngineUtil2.createNew( ecb, errors );
 			engine = new BigDataEngine( BigDataEngine.generateProperties( smss ) );
 		}
 
@@ -409,16 +419,12 @@ public class CLI {
 		engine = new BigDataEngine( dbfile );
 
 		if ( cmd.hasOption( "insightsdb" ) ) {
-			List<File> vocabfiles = getFileList( cmd, "vocab" );
-			Collection<URL> vocab = new ArrayList<>();
-			for ( File f : vocabfiles ) {
-				vocab.add( f.toURI().toURL() );
-			}
-
 			List<File> data = getFileList( cmd, "insights" );
 			data.addAll( getFileList( cmd, "sparql" ) );
 
-			EngineUtil.getInstance().importInsights( engine, dbfile, false, vocab );
+			InsightManagerImpl imi = new InsightManagerImpl( engine.getInsightManager() );
+			EngineUtil2.createInsightStatements( dbfile, imi );
+			engine.updateInsights( imi );
 		}
 		else {
 			List<File> data = getFileList( cmd, "data" );
@@ -570,6 +576,37 @@ public class CLI {
 				}
 			}
 		}
+	}
+
+	public void upgrade( CommandLine cmd ) throws IOException, RepositoryException,
+			EngineManagementException {
+		if ( !dbfile.exists() ) {
+			throw new FileNotFoundException( dbfile.getAbsolutePath() );
+		}
+
+		String exportnames[] = cmd.getOptionValues( "upgrade" );
+		File exportfile = null;
+		if ( 2 == exportnames.length ) {
+			exportfile = new File( exportnames[1] );
+			if ( exportfile.exists() ) {
+				throw new IOException( "Output file already exists." );
+			}
+
+			File parentdir = exportfile.getAbsoluteFile().getParentFile();
+			if ( !( parentdir.exists() || parentdir.mkdirs() ) ) {
+				throw new IOException( "Could not create export file directory" );
+			}
+		}
+
+		List<File> vocabfiles = getFileList( cmd, "vocab" );
+		Collection<URL> vocabs = new ArrayList<>();
+		for ( File f : vocabfiles ) {
+			vocabs.add( f.toURI().toURL() );
+		}
+
+
+		LegacyUpgrader upg = new LegacyUpgrader( dbfile );
+		upg.upgradeTo( exportfile, vocabs );
 	}
 
 	private static List<File> getFileList( CommandLine cmd, String option )

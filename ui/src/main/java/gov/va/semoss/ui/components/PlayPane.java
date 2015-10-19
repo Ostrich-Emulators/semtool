@@ -123,6 +123,7 @@ import javax.swing.event.InternalFrameListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import javax.swing.table.DefaultTableModel;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -277,7 +278,11 @@ public class PlayPane extends JFrame {
 			DIHelper.getInstance().setLocalProperty( en.getValue(), en.getKey() );
 		}
 
-		statusbar.addStatus( "SEMOSS started" );
+		statusbar.addStatus( getStartupMessage() );
+	}
+
+	protected String getStartupMessage(){
+		return "SEMOSS started";
 	}
 
 	public void setApplicationIcons() {
