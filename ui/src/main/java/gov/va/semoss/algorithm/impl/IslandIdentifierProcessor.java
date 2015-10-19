@@ -21,17 +21,15 @@ package gov.va.semoss.algorithm.impl;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseGraph;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import gov.va.semoss.om.SEMOSSEdge;
 import gov.va.semoss.om.SEMOSSVertex;
 import edu.uci.ics.jung.visualization.picking.PickedState;
+import gov.va.semoss.graph.functions.IslandProcessor;
 import gov.va.semoss.ui.components.playsheets.GraphPlaySheet;
 import java.awt.event.ActionEvent;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,32 +58,24 @@ public class IslandIdentifierProcessor extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
+		IslandProcessor<SEMOSSVertex, SEMOSSEdge> proc = new IslandProcessor( graph );
+		Set<Graph<SEMOSSVertex, SEMOSSEdge>> islands = proc.getIslands( selectedVerts );
 
-		Map<Set<SEMOSSVertex>, Graph<SEMOSSVertex, SEMOSSEdge>> islands
-				= new HashMap<>();
+		if ( allIslands ) {
+			Graph<SEMOSSVertex, SEMOSSEdge> biggestIsland = null;
 
-		Graph<SEMOSSVertex, SEMOSSEdge> biggestIsland = null;
-		for ( SEMOSSVertex v : selectedVerts ) {
-			Graph<SEMOSSVertex, SEMOSSEdge> island = getIsland( v, graph );
-			Set<SEMOSSVertex> islandverts = new HashSet<>( island.getVertices() );
-
-			if ( !islands.containsKey( islandverts ) ) {
+			for ( Graph<SEMOSSVertex, SEMOSSEdge> island : islands ) {
 				if ( null == biggestIsland
 						|| island.getVertexCount() > biggestIsland.getVertexCount() ) {
 					biggestIsland = island;
 				}
-
-				islands.put( islandverts, island );
 			}
+
+			islands.remove( biggestIsland );
 		}
 
-		if ( allIslands && null != biggestIsland ) {
-			islands.remove( new HashSet<>( biggestIsland.getVertices() ) );
-		}
-
-		for ( Graph<SEMOSSVertex, SEMOSSEdge> island : islands.values() ) {
+		for ( Graph<SEMOSSVertex, SEMOSSEdge> island : islands ) {
 			highlightIsland( island.getVertices(), island.getEdges() );
 		}
 	}
@@ -109,32 +99,4 @@ public class IslandIdentifierProcessor extends AbstractAction {
 			gps.skeleton( islandVerts, islandEdges );
 		}
 	}
-
-	private Graph<SEMOSSVertex, SEMOSSEdge> getIsland( SEMOSSVertex node,
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-
-		// just do a depth-first search of everything this node connects to
-		SparseGraph<SEMOSSVertex, SEMOSSEdge> island = new SparseGraph<>();
-		Deque<SEMOSSVertex> todo = new ArrayDeque<>();
-		todo.add( node );
-
-		while ( !todo.isEmpty() ) {
-			SEMOSSVertex vert = todo.pop();
-			island.addVertex( vert );
-
-			for ( SEMOSSEdge ed : graph.getIncidentEdges( vert ) ) {
-				if ( !island.containsEdge( ed ) ) {
-					SEMOSSVertex v2 = graph.getOpposite( vert, ed );
-					if ( !island.containsVertex( v2 ) ) {
-						todo.push( v2 );
-					}
-
-					island.addEdge( ed, vert, v2 );
-				}
-			}
-		}
-
-		return island;
-	}
-
 }
