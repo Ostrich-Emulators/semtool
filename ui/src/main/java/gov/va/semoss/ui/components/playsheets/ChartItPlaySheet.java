@@ -19,8 +19,9 @@
  */
 package gov.va.semoss.ui.components.playsheets;
 
-import gov.va.semoss.om.SEMOSSVertex;
 import static gov.va.semoss.ui.helpers.NodeEdgeNumberedPropertyUtility.transformProperties;
+import gov.va.semoss.om.SEMOSSVertex;
+import gov.va.semoss.util.Constants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,8 +52,18 @@ public class ChartItPlaySheet extends BrowserPlaySheet2 {
 		
 		for(URI nodeType:nodeHash.keySet()) {
 			for (SEMOSSVertex node:nodeHash.get(nodeType)) {
-				Map<String, Object> props = transformProperties(node.getProperties(), true);
-				
+				Map<URI, Object> originalProps = node.getProperties();
+
+				int  inEdgeCount = gps.getGraphData().getGraph().getInEdges( node ).size();
+				int outEdgeCount = gps.getGraphData().getGraph().getOutEdges( node ).size();
+				int allEdgeCount = gps.getGraphData().getGraph().getIncidentEdges( node ).size();
+
+				originalProps.put(Constants.IN_EDGE_CNT, inEdgeCount+"");
+				originalProps.put(Constants.OUT_EDGE_CNT, outEdgeCount+"");
+				originalProps.put(Constants.EDGE_CNT, allEdgeCount+"");
+
+				Map<String, Object> props = transformProperties(originalProps, true);
+
 				node.setPropHash(props);
 			}
 			
