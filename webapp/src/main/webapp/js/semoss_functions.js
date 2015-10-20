@@ -187,23 +187,6 @@
 						});
 					}
 					
-					SEMOSS.setAccesses = function (username, map, callBackFunction){
-						var encoding = JSON.stringify(map);
-						var url = 'users/' + username + '/accesses';
-						var token = $("meta[name='_csrf']").attr("content");
-						var header = $("meta[name='_csrf_header']").attr("content");
-						$.ajax({
-							type : "PUT",
-							data: SEMOSS.encodeParamObject(encoding),
-							url : url,
-							success : function(response) {
-								callBackFunction(response);
-							},
-							beforeSend: function (xhr)
-							{ xhr.setRequestHeader(header, token); }
-						});
-					}
-					
 					SEMOSS.updateUser = function (user, callBackFunction){
 						var encoding = SEMOSS.encodeParamObject(user);
 						var url = 'users/';
@@ -221,7 +204,49 @@
 						});
 					}
 					
+					SEMOSS.PRIVILEGE_CHOICES = ['READ','WRITE','NONE'];
+					
+					SEMOSS.DBPrivilege = function(){
+						this.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+					};
+					
+					SEMOSS.DBPrivilege.prototype.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+					SEMOSS.DBPrivilege.prototype.uri = null;
+					SEMOSS.DBPrivilege.prototype.access = null;
+					
+					SEMOSS.DBPrivilege.prototype.setAttributes = function(object){
+						this.uri = object['uri'];
+						this.access = object['access'];
+						this.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+					}
+					
 
+					SEMOSS.setAccesses = function (username, map, callBackFunction){
+						var url = 'users/' + username + '/accesses';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						$.ajax({
+							type : "PUT",
+							data: SEMOSS.encodeParamObject(map),
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
+						});
+					}
+
+					SEMOSS.getAccesses = function (username, callBackFunction){
+						var url = 'users/' + username + '/accesses';
+						$.ajax({
+							type : "GET",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							}
+						});
+					}
 
 					SEMOSS.processResponse = function(response) {
 						var unescapedString = unescape(response);

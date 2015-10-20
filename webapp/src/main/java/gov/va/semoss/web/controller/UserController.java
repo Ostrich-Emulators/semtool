@@ -4,6 +4,7 @@ import gov.va.semoss.user.RemoteUserImpl;
 import gov.va.semoss.user.User;
 import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.web.datastore.UserMapper;
+import gov.va.semoss.web.security.DBPrivileges;
 import gov.va.semoss.web.security.DbAccess;
 import gov.va.semoss.web.security.SemossUser;
 
@@ -15,6 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.jena.atlas.json.JSON;
+import org.apache.jena.atlas.json.JsonObject;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,27 +99,30 @@ public class UserController extends SemossControllerBase {
 
 	@RequestMapping(value = "/{username}/accesses", method = RequestMethod.PUT)
 	@ResponseBody
-	public User updateUserAccess(@PathVariable("username") String username,
-			@RequestBody String accessMap, HttpServletResponse response)
+	public boolean updateUserAccess(@PathVariable("username") String username,
+			@RequestBody String encodedJSON, HttpServletResponse response)
+			throws JSONException {
+		User user = datastore.getOne(username);
+		if (user == null) {
+			return false;
+		}
+		DBPrivileges privileges = WebCodec.instance().parsePrivileges(encodedJSON);
+		datastore.setAccesses(user, privileges);
+		log.debug("Updating accesses for user " + username + " (user: "
+				+ user.getProperty(UserProperty.USER_FULLNAME) + ")");
+		return true;
+	}
+	
+	@RequestMapping(value = "/{username}/accesses", method = RequestMethod.GET)
+	@ResponseBody
+	public DBPrivileges getUserAccess(@PathVariable("username") String username, HttpServletResponse response)
 			throws JSONException {
 		User user = datastore.getOne(username);
 		if (user == null) {
 			throw new NotFoundException();
 		}
-		// ugh: why doens't Jackson automatically handle this for us?
-		JSONObject json = new JSONObject(accessMap);
-		Map<URI, DbAccess> accesses = new HashMap<>();
-		Iterator<String> keyit = json.keys();
-		while (keyit.hasNext()) {
-			String key = keyit.next();
-			accesses.put(new URIImpl(key),
-					DbAccess.valueOf(json.getString(key)));
-		}
-		datastore.setAccesses(user, accesses);
-
-		log.debug("Updating accesses for user " + username + " (user: "
-				+ user.getProperty(UserProperty.USER_FULLNAME) + ")");
-		return user;
+		DBPrivileges privs = datastore.getAccesses(user);
+		return privs;
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)

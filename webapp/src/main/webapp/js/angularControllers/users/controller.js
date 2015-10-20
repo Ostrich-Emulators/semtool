@@ -4,6 +4,8 @@
 	
 	var UserManagementController = function ($scope, $log) {
     	$scope.instances = [];
+    	$scope.activeInstance = null;
+    	$scope.activeInstancePrivileges = [];
         $scope.loading = false;
         $scope.instanceLoading = false;
         $scope.deleteID = null;
@@ -34,6 +36,7 @@
         
         $scope.rowSelected = function(index){
         	$scope.currentRow = index;
+        	$scope.activeInstance = $scope.instances[index];
         }
         
         $scope.showEdit = function(username){
@@ -57,18 +60,7 @@
        	 	$scope.mode = 'edit';
         	$('#user_modal').modal('hide');
         }
-        
-        $scope.setAccesses = function(){
-       	 	SEMOSS.setAccesses($scope.activeInstance.username, function(result){
-       	 		if (result){
-        			$scope.instances.splice($scope.currentRow, 1, angular.copy($scope.activeInstance));
-        			vm.dtInstance.rerender();
-        		}
-       	 	});
-       	 	$scope.mode = 'edit';
-       	 	$scope.$apply();
-        	$('#user_modal').modal('hide');
-        }
+
         
         $scope.view = function(id){
        	 	SEMOSS.getUser(id, function(foreignInstance){
@@ -81,8 +73,38 @@
        	 	}, true);
         }
         
-        $scope.showPrivleges = function(){
+        $scope.showPrivileges = function(username){
+        	$scope.getAccesses(username);
         	$('#user_privileges_modal').modal('show');
+        }
+        
+        $scope.createAccess = function(){
+        	$scope.activeInstancePrivileges.push(new SEMOSS.DBPrivilege());
+        	$scope.$apply();
+        }
+        
+        $scope.setAccesses = function(){
+       	 	SEMOSS.setAccesses($scope.activeInstance.username, $scope.activeInstancePrivileges, function(result){
+       	 		if (result){
+        			$scope.instances.splice($scope.currentRow, 1, angular.copy($scope.activeInstance));
+        		}
+       	 	});
+       	 	$scope.$apply();
+        	$('#user_privileges_modal').modal('hide');
+        }
+        
+        $scope.getAccesses = function(username){
+        	SEMOSS.getAccesses(username, function (accesses){
+        		$scope.activeInstancePrivileges = [];
+        		for(var uri in accesses) {
+        			var accessLevel = accesses[uri];
+                	var nativeInstance = new SEMOSS.DBPrivilege();
+                	nativeInstance.access = accessLevel;
+                	nativeInstance.uri = uri;
+                	$scope.activeInstancePrivileges.push(nativeInstance);
+                }
+                $scope.$apply();
+        	});
         }
         
         $scope.showCreate = function(){

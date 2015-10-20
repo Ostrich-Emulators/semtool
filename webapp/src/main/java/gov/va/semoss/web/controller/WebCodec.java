@@ -2,16 +2,23 @@ package gov.va.semoss.web.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import gov.va.semoss.user.RemoteUserImpl;
 import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.web.io.DbInfo;
+import gov.va.semoss.web.security.DBPrivileges;
+import gov.va.semoss.web.security.DbAccess;
 import gov.va.semoss.web.security.SemossUser;
 
+import org.apache.jena.atlas.json.JsonObject;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -32,6 +39,31 @@ public class WebCodec {
 			instance = new WebCodec();
 		}
 		return instance;
+	}
+	
+	public DBPrivileges parsePrivileges(String encodedJSON){
+		String json = null;
+		Object[] array = null;
+		DBPrivileges privileges = new DBPrivileges();
+		try {
+			json = java.net.URLDecoder.decode(encodedJSON, "UTF-8");
+			array = mapper.readValue(json, Object[].class);
+			for (int i=0; i<array.length; i++){
+				LinkedHashMap object = (LinkedHashMap)array[i];
+				this.parseAccessRights(object, privileges);
+			}
+			return privileges;
+		} 
+		catch (UnsupportedEncodingException e) {
+			log.error("Exception occurred when decoding json object.", e);
+		} catch (JsonParseException e) {
+			log.error("Exception occurred when decoding json object.", e);
+		} catch (JsonMappingException e) {
+			log.error("Exception occurred when decoding json object.", e);
+		} catch (IOException e) {
+			log.error("Exception occurred when decoding json object.", e);
+		}
+		return null;
 	}
 	
 	public Object parse(String encodedJSON){
@@ -62,7 +94,7 @@ public class WebCodec {
 		if (className.equals(DbInfo.class.getName())){
 			object = parseDatabase(map);
 		}
-		if (className.equals(HashMap.class.getName())){
+		if (className.equals(DBPrivileges.class.getName())){
 			object = parseAccessRights(map);
 		}
 		
@@ -83,6 +115,20 @@ public class WebCodec {
 		db.setDataUrl((String)map.get("dataUrl"));
 		db.setInsightsUrl((String)map.get("insightsUrl"));
 		return db;
+	}
+	
+	private DBPrivileges parseAccessRights(LinkedHashMap map, DBPrivileges privileges){
+		String s = (String)map.get("uri");
+		URI uri = new URIImpl(s);
+		try {
+			DbAccess privilege = DbAccess.valueOf((String)map.get("access"));
+			privileges.put(uri, privilege);
+			return privileges;
+		}
+		catch (Exception e){
+			log.error("Error occurred during parsing of DB Privilege");
+			return null;
+		}
 	}
 	
 	private HashMap<String, GrantedAuthority> parseAccessRights(Map<?,?> map){
