@@ -189,7 +189,9 @@ public class CondenseGraph extends AbstractAction {
 				// FIXME: we might have multiple pairs of
 				// endpoints through our middle, so loop
 				//while ( !( null == upstream || null == downstream ) ) {
-				removers.add( middle, new CondenserTuple( upstream, downstream ) );
+				if( !( null==upstream || null == downstream ) ){
+					removers.add( middle, new CondenserTuple( upstream, downstream ) );
+				}
 
 				// upstream = getVertex( endpoint, middle, graph, true );
 				//downstream = getVertex( endpoint, middle, graph, false );

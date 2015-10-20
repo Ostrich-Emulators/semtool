@@ -19,7 +19,9 @@
  */
 package gov.va.semoss.ui.helpers;
 
+import gov.va.semoss.ui.components.renderers.LabeledPairTreeCellRenderer;
 import gov.va.semoss.util.Constants;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,17 +29,20 @@ import java.util.Set;
 
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 public class NodeEdgeNumberedPropertyUtility {
 	private static final Map<String, URI> localNameToURIHash = new HashMap<>();
-	private static final Map<String, String> displayNameMap = new HashMap<>();
+	private static final Map<URI, String> displayNameMap = new HashMap<>();
 	private static final Set<String> hidePropertySet = new HashSet<>();
 	private static final Set<String> keepPropertySet = new HashSet<>();
 
 	static {
-		displayNameMap.put(Constants.IN_EDGE_CNT.getLocalName(),  "In-Degree");
-		displayNameMap.put(Constants.OUT_EDGE_CNT.getLocalName(), "Out-Degree");
-		
+		displayNameMap.put(Constants.IN_EDGE_CNT,  "In-Degree");
+		displayNameMap.put(Constants.OUT_EDGE_CNT, "Out-Degree");
+		displayNameMap.put(Constants.EDGE_CNT, "Degree");
+		displayNameMap.put(XMLSchema.ANYURI, "URI");
+
 		hidePropertySet.add("graphing.level");
 		
 		keepPropertySet.add("label");
@@ -52,10 +57,14 @@ public class NodeEdgeNumberedPropertyUtility {
 		HashMap<String, Object> newProperties = new HashMap<>();
 		
 		for( Map.Entry<URI, Object> propEntry : oldProperties.entrySet() ) {
-			String propertyName = propEntry.getKey().getLocalName();
+			URI propertyURI = propEntry.getKey();
+			String propertyName = propertyURI.getLocalName();
+			
+			if (displayNameMap.keySet().contains(propertyURI))
+				propertyName = displayNameMap.get(propertyURI);
 			if (displayNameMap.keySet().contains(propertyName))
 				propertyName = displayNameMap.get(propertyName);
-
+			
 			if (useKeepProperties && keepPropertySet.contains(propertyName)) {
 				String valueAsString = propEntry.getValue() + "";
 				if (propEntry.getValue() instanceof URI)
@@ -105,5 +114,13 @@ public class NodeEdgeNumberedPropertyUtility {
 		catch ( NumberFormatException e ) {
 			return -1;
 		}
+	}
+
+	public static Map<URI, String> getDisplayNameMap() {
+		return displayNameMap;
+	}
+	
+	public static String getDisplayName(String key) {
+		return displayNameMap.get(key);
 	}
 }

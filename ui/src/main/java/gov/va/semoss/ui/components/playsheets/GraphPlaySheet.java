@@ -64,7 +64,7 @@ import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.ui.components.ControlPanel;
 import gov.va.semoss.ui.components.FilterPanel;
-import gov.va.semoss.ui.components.GraphToTreeConverter;
+import gov.va.semoss.graph.functions.GraphToTreeConverter;
 import gov.va.semoss.ui.components.LegendPanel2;
 import gov.va.semoss.ui.components.VertexColorShapeData;
 import gov.va.semoss.ui.components.api.GraphListener;
@@ -273,6 +273,16 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		vis.setBackground( view.getBackground() );
 		vis.setRenderContext( view.getRenderContext() );
+
+		try {
+			// the visualization server seems to take a little time to render
+			// correctly. Wait a little before processing the image
+			// (this is really just voodoo...I don't know if/why it works)
+			Thread.sleep( 500 );
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+		}
 
 		BufferedImage image = (BufferedImage) vis.getImage(
 				new Point2D.Double( view.getGraphLayout().getSize().getWidth(),

@@ -11,9 +11,9 @@ import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.InsightManager;
 import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
+import gov.va.semoss.rdf.engine.util.EngineManagementException;
+import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
-import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter;
-import gov.va.semoss.rdf.engine.util.OneShotEngineAdapter.ShotOp;
 import gov.va.semoss.ui.components.OperationsProgress;
 import gov.va.semoss.ui.components.PlayPane;
 import gov.va.semoss.ui.components.ProgressTask;
@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  *
  * @author ryan
  */
-public class InsightManagerPanel extends javax.swing.JPanel {
+public class InsightManagerPanel extends javax.swing.JPanel implements EngineOperationListener {
 
 	private static final Logger log = Logger.getLogger( InsightManagerPanel.class );
 	private InsightManager wim;
@@ -51,6 +51,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 	private IEngine engine;
 	private DataPanel currentCard;
 	private final PropertyChangeListener propChangeListener;
+	private boolean listening = true;
 
 	/**
 	 * Creates new form InsightManagerPanel
@@ -199,6 +200,7 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 			}
 		} );
 
+		EngineUtil.getInstance().addEngineOpListener( this );
 	}
 
 	public void setEngine( IEngine eng ) {
@@ -363,17 +365,10 @@ public class InsightManagerPanel extends javax.swing.JPanel {
 
 			@Override
 			public void run() {
-				OneShotEngineAdapter eol = new OneShotEngineAdapter( engine, ShotOp.INSIGHTS ) {
-					@Override
-					public void doInsightsModified( IEngine eng, Collection<Perspective> perspectives ){
-						commitbtn.setEnabled( false );
-						GuiUtility.showMessage( "Perspectives Saved" );
-					}
-				};
-
 				wim.addAll( perspectives, true );
-				EngineUtil.getInstance().addEngineOpListener( eol );
+				listening = false;
 				EngineUtil.getInstance().importInsights( engine, wim );
+				listening = true;
 			}
 		} );
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
@@ -393,4 +388,30 @@ public class InsightManagerPanel extends javax.swing.JPanel {
   private javax.swing.JPanel rightside;
   private javax.swing.JTree tree;
   // End of variables declaration//GEN-END:variables
+
+	@Override
+	public void engineOpened( IEngine eng ) {
+	}
+
+	@Override
+	public void engineClosed( IEngine eng ) {
+	}
+
+	@Override
+	public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
+		if ( listening ) {
+			model.refresh( eng.getInsightManager() );
+		}
+		else {
+			// if we're not listening, then we are the cause of this call
+			if ( eng.equals( this.engine ) ) {
+				commitbtn.setEnabled( false );
+				GuiUtility.showMessage( "Perspectives Saved" );
+			}
+		}
+	}
+
+	@Override
+	public void handleError( IEngine eng, EngineManagementException eme ) {
+	}
 }

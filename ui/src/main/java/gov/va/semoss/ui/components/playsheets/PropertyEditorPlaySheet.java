@@ -22,18 +22,19 @@ package gov.va.semoss.ui.components.playsheets;
 import gov.va.semoss.om.SEMOSSVertex;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.ui.components.models.PropertyEditorTableModel;
-
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.ui.components.renderers.SimpleValueEditor;
+import gov.va.semoss.ui.helpers.NodeEdgeNumberedPropertyUtility;
 import gov.va.semoss.util.Utility;
+
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
 import java.util.Set;
+
 import javax.swing.Action;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -42,7 +43,6 @@ import javax.swing.JToolBar;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  */
@@ -65,7 +65,11 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 				= LabeledPairTableCellRenderer.getUriPairRenderer();
 		Set<URI> labels = getUrisThatNeedLabels( pickedVertices );
 		renderer.cache( Utility.getInstanceLabels( labels, engine ) );
-		renderer.cache( XMLSchema.ANYURI, "URI" );
+		
+		Map<URI, String> displayNames = NodeEdgeNumberedPropertyUtility.getDisplayNameMap();
+		for (URI key:displayNames.keySet()) {
+			renderer.cache( key, displayNames.get(key) );
+		}
 
 		LabeledPairTableCellRenderer trenderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( engine );

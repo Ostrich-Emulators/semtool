@@ -17,6 +17,7 @@ import gov.va.semoss.rdf.engine.util.EngineManagementException;
 import gov.va.semoss.rdf.engine.util.EngineOperationAdapter;
 import gov.va.semoss.rdf.engine.util.EngineOperationListener;
 import gov.va.semoss.rdf.engine.util.EngineUtil;
+import gov.va.semoss.rdf.engine.util.EngineUtil2;
 import gov.va.semoss.ui.helpers.StatementsSizeGuesser;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
@@ -481,7 +482,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 							.setBooleans( stageInMemory, calc, dometamodel )
 							.setVocabularies( vocabPanel.getSelectedVocabularies() );
 
-					smss[0] = EngineUtil.createNew( ecb, errors );
+					smss[0] = EngineUtil2.createNew( ecb, errors );
 					EngineUtil.getInstance().mount( smss[0], true );
 				}
 				catch ( IOException | EngineManagementException ioe ) {

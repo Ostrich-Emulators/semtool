@@ -24,7 +24,7 @@ public class RepositoryCopier implements RDFHandler {
 	private int totalAdds = 0;
 
 	/**
-	 * Creates an instance
+	 * Creates an instance that copies data to the given Repository
 	 *
 	 * @param rc
 	 */
@@ -51,7 +51,7 @@ public class RepositoryCopier implements RDFHandler {
 	@Override
 	public void endRDF() throws RDFHandlerException {
 		try {
-			log.debug( "committing " + totalAdds + " statements..." );
+ 			log.debug( "committing " + totalAdds + " statements..." );
 			conn.commit();
 		}
 		catch ( Exception e ) {

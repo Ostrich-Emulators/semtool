@@ -24,7 +24,6 @@ import gov.va.semoss.ui.components.models.ValueTableModel;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
 import gov.va.semoss.util.MultiSetMap;
 
-import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -79,7 +78,6 @@ public class GridPlaySheet extends GridRAWPlaySheet {
 		// Initialize a Copy/Paste mediator to handle the Ctrl+C, Ctrl+V events
 		cpMediator = new CopyPasteMediator();
 		JTableHeader header = getTable().getTableHeader();
-		header.addMouseListener(new HeaderActionMediator(getTable()));
 		table.setDefaultRenderer( URI.class, renderer );
 		// In order to enable the excel-style mouse interactions, we'll set
 		// the enhanced table interactions here

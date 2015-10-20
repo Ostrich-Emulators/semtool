@@ -17,12 +17,10 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package gov.va.semoss.ui.components;
+package gov.va.semoss.graph.functions;
 
 import org.apache.log4j.Logger;
 
-import gov.va.semoss.om.SEMOSSEdge;
-import gov.va.semoss.om.SEMOSSVertex;
 import edu.uci.ics.jung.graph.DelegateForest;
 import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -38,7 +36,7 @@ import java.util.Queue;
  * This class extends downstream processing in order to convert the graph into
  * the tree format.
  */
-public class GraphToTreeConverter {
+public class GraphToTreeConverter<V, E> {
 
 	public static enum Search {
 
@@ -58,9 +56,8 @@ public class GraphToTreeConverter {
 	 * @param search
 	 * @return
 	 */
-	public static Forest<SEMOSSVertex, SEMOSSEdge> convert(
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			Collection<SEMOSSVertex> roots, Search search ) {
+	public static <V, E> Forest<V, E> convert(
+			DirectedGraph<V, E> graph, Collection<V> roots, Search search ) {
 		return new GraphToTreeConverter( search ).convert( graph, roots );
 	}
 
@@ -72,17 +69,15 @@ public class GraphToTreeConverter {
 		this( Search.BFS );
 	}
 
-	public Forest<SEMOSSVertex, SEMOSSEdge> convert(
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Collection<SEMOSSVertex> roots ) {
-		DelegateForest<SEMOSSVertex, SEMOSSEdge> newforest = new DelegateForest<>();
-		for ( SEMOSSVertex root : roots ) {
+	public Forest<V, E> convert( DirectedGraph<V, E> graph, Collection<V> roots ) {
+		DelegateForest<V, E> newforest = new DelegateForest<>();
+		for ( V root : roots ) {
 			newforest.addTree( convert( graph, root ) );
 		}
 		return newforest;
 	}
 
-	public Tree<SEMOSSVertex, SEMOSSEdge> convert( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			SEMOSSVertex root ) {
+	public Tree<V, E> convert( DirectedGraph<V, E> graph, V root ) {
 		if ( Search.DFS == method ) {
 			return dfs( root, graph );
 		}
@@ -91,18 +86,17 @@ public class GraphToTreeConverter {
 		}
 	}
 
-	private Tree<SEMOSSVertex, SEMOSSEdge> dfs( SEMOSSVertex root,
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		DelegateTree<SEMOSSVertex, SEMOSSEdge> tree = new DelegateTree<>();
+	private Tree<V, E> dfs( V root, DirectedGraph<V, E> graph ) {
+		DelegateTree<V, E> tree = new DelegateTree<>();
 		tree.setRoot( root );
-		Queue<SEMOSSVertex> todo = Collections.asLifoQueue( new ArrayDeque<>() );
+		Queue<V> todo = Collections.asLifoQueue( new ArrayDeque<>() );
 		todo.add( root );
 
 		while ( !todo.isEmpty() ) {
-			SEMOSSVertex v = todo.poll();
+			V v = todo.poll();
 
-			for ( SEMOSSEdge e : graph.getOutEdges( v ) ) {
-				SEMOSSVertex child = graph.getOpposite( v, e );
+			for ( E e : graph.getOutEdges( v ) ) {
+				V child = graph.getOpposite( v, e );
 				if ( !tree.containsVertex( child ) ) {
 					tree.addChild( e, v, child );
 					todo.add( child );
@@ -113,18 +107,17 @@ public class GraphToTreeConverter {
 		return tree;
 	}
 
-	private Tree<SEMOSSVertex, SEMOSSEdge> bfs( SEMOSSVertex root,
-			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph ) {
-		DelegateTree<SEMOSSVertex, SEMOSSEdge> tree = new DelegateTree<>();
+	private Tree<V, E> bfs( V root, DirectedGraph<V, E> graph ) {
+		DelegateTree<V, E> tree = new DelegateTree<>();
 		tree.setRoot( root );
-		Deque<SEMOSSVertex> todo = new ArrayDeque<>();
+		Deque<V> todo = new ArrayDeque<>();
 		todo.add( root );
 
 		while ( !todo.isEmpty() ) {
-			SEMOSSVertex v = todo.poll();
+			V v = todo.poll();
 
-			for ( SEMOSSEdge e : graph.getOutEdges( v ) ) {
-				SEMOSSVertex child = graph.getOpposite( v, e );
+			for ( E e : graph.getOutEdges( v ) ) {
+				V child = graph.getOpposite( v, e );
 
 				if ( !tree.containsVertex( child ) ) {
 					tree.addChild( e, v, child );
@@ -136,18 +129,18 @@ public class GraphToTreeConverter {
 		return tree;
 	}
 
-	public static void printForest( Forest<SEMOSSVertex, SEMOSSEdge> forest ) {
-		for ( Tree<SEMOSSVertex, SEMOSSEdge> tree : forest.getTrees() ) {
+	public static <V, E> void printForest( Forest<V, E> forest ) {
+		for ( Tree<V, E> tree : forest.getTrees() ) {
 			printTree( tree );
 		}
 	}
 
-	public static void printTree( Tree<SEMOSSVertex, SEMOSSEdge> tree ) {
+	public static <V, E> void printTree( Tree<V, E> tree ) {
 		printTree( tree.getRoot(), tree, 0 );
 	}
 
-	public static void printTree( SEMOSSVertex root,
-			Tree<SEMOSSVertex, SEMOSSEdge> tree, int depth ) {
+	public static <V, E> void printTree( V root,
+			Tree<V, E> tree, int depth ) {
 		StringBuilder sb = new StringBuilder();
 		for ( int i = 0; i < depth; i++ ) {
 			sb.append( "  " );
@@ -155,7 +148,7 @@ public class GraphToTreeConverter {
 		sb.append( root );
 		log.debug( sb.toString() );
 
-		for ( SEMOSSVertex child : tree.getChildren( root ) ) {
+		for ( V child : tree.getChildren( root ) ) {
 			printTree( child, tree, depth + 1 );
 		}
 	}
