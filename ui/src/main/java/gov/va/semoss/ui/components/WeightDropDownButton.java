@@ -26,11 +26,11 @@ import gov.va.semoss.ui.components.renderers.LabeledPairTreeCellRenderer;
 import gov.va.semoss.ui.helpers.NodeEdgeNumberedPropertyUtility;
 import gov.va.semoss.ui.transformer.EdgeStrokeTransformer;
 import gov.va.semoss.ui.transformer.VertexShapeTransformer;
-
 import gov.va.semoss.util.Constants;
 import gov.va.semoss.util.MultiMap;
 import gov.va.semoss.util.MultiSetMap;
 import gov.va.semoss.util.RDFDatatypeTools;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -101,9 +101,12 @@ public class WeightDropDownButton extends JButton {
 		renderer.setClosedIcon( null );
 		renderer.setOpenIcon( null );
 		renderer.setLeafIcon( null );
-		renderer.cache( Constants.IN_EDGE_CNT, "In-Degree" );
-		renderer.cache( Constants.OUT_EDGE_CNT, "Out-Degree" );
-		renderer.cache( Constants.EDGE_CNT, "Degree" );
+		
+		Map<URI, String> displayNames = NodeEdgeNumberedPropertyUtility.getDisplayNameMap();
+		for (URI key:displayNames.keySet()) {
+			renderer.cache( key, displayNames.get(key) );
+		}
+		
 		edgePropTree.setCellRenderer( renderer );
 		nodePropTree.setCellRenderer( renderer );
 
