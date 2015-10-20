@@ -112,7 +112,8 @@ public class GraphToTreeConverterTest {
 		log.setLevel( Level.DEBUG );
 		log.addAppender( app );
 		GraphToTreeConverter.printForest( result );
-		assertEquals( "DEBUG - http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri\nDEBUG -   http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo\n", stringy.toString() );
+		String output = stringy.toString().replaceAll( "\\s", "" );
+		assertEquals( "DEBUG-http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/YuriDEBUG-http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo", output );
 	}
 
 }
