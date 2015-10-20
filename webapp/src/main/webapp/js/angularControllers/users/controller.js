@@ -100,7 +100,7 @@
         			var accessLevel = accesses[uri];
                 	var nativeInstance = new SEMOSS.DBPrivilege();
                 	nativeInstance.access = accessLevel;
-                	nativeInstance.uri = uri;
+                	nativeInstance.uri = decodeURIComponent(uri);
                 	$scope.activeInstancePrivileges.push(nativeInstance);
                 }
                 $scope.$apply();

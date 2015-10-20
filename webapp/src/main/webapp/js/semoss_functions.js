@@ -13,9 +13,9 @@
 					
 					SEMOSS.DbInfo.prototype.setAttributes = function(object){
 						this.name = object['name'];
-						this.serverUrl = object['serverUrl'];
-						this.dataUrl = object['dataUrl'];
-						this.insightsUrl = object['insightsUrl'];
+						this.serverUrl = decodeURIComponent(object['serverUrl']);
+						this.dataUrl = decodeURIComponent(object['dataUrl']);
+						this.insightsUrl = decodeURIComponent(object['insightsUrl']);
 						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
 					}
 
