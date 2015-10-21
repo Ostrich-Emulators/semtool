@@ -406,7 +406,7 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 			// if we're not listening, then we are the cause of this call
 			if ( eng.equals( this.engine ) ) {
 				commitbtn.setEnabled( false );
-				GuiUtility.showMessage( "Perspectives Saved" );
+				GuiUtility.showMessage( "Data Committed" );
 			}
 		}
 	}
