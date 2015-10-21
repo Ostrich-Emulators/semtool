@@ -58,6 +58,7 @@
 		<intercept-url pattern="/databases" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<intercept-url pattern="/databases/**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<intercept-url pattern="/databases/get/**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
+		<intercept-url pattern="/databases/delete/**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<intercept-url pattern="/data**" access="hasAnyRole('ROLE_DATA_ADMIN','ROLE_ADMINS')" />
 		<form-login 
 			login-page="/login" 

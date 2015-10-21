@@ -1,4 +1,9 @@
 <head>
+
+	<meta name="_csrf" content="${_csrf.token}"/>
+	
+	<meta name="_csrf_header" content="${_csrf.headerName}"/>
+	
    	<script src="js/lib/jquery/jquery-1.11.2.min.js"></script>
     <script src="js/lib/jquery/jquery.dataTables.min.js"></script>
 	<link rel="stylesheet" href="css/jquery.dataTables.css">

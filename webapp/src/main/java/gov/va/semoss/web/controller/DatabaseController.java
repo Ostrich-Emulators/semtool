@@ -18,11 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +42,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class DatabaseController extends SemossControllerBase {
 
 	private static final Logger log = Logger.getLogger( DatabaseController.class );
+	
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	@Autowired
 	private DbInfoMapper datastore;
@@ -47,20 +51,8 @@ public class DatabaseController extends SemossControllerBase {
 	@Autowired
 	ServletContext servletContext;
 
-	@RequestMapping("/list" )
-	@ResponseBody
-	public DbInfo[] getAllDatabases() {
-		log.debug( "Getting all database IDs." );
-		Collection<DbInfo> testDbs = datastore.getAll();
-		int i = 0;
-		DbInfo[] testDbIDs = new DbInfo[testDbs.size()];
-		for ( DbInfo dbi : testDbs ) {
-			testDbIDs[i++] = dbi;
-		}
-		return testDbIDs;
-	}
 
-	@RequestMapping( value="/{name}")
+	@RequestMapping( value="/{name}", method = RequestMethod.GET)
 	@ResponseBody
 	public DbInfo getOneDatabaseWithID( @PathVariable( "name" ) String name,
 			HttpServletResponse response ) {
@@ -74,6 +66,69 @@ public class DatabaseController extends SemossControllerBase {
 			throw new UnauthorizedException();
 		}
 		return dbi;
+	}
+	
+	
+	@RequestMapping( value="/", method = RequestMethod.POST)
+	@ResponseBody
+	public boolean createDatabase( @RequestBody String encodedJSON,
+			HttpServletResponse response ) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
+		try {
+			DbInfo db = (DbInfo)WebCodec.instance().parse(encodedJSON);
+			datastore.create(db);
+			log.debug( "Created database: " + db.getName() + " (user: "
+					+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
+			return true;
+		}
+		catch (Exception e){
+			log.error("Error creating database.", e);
+			return false;
+		}
+	}
+	
+	@RequestMapping( value="/", method = RequestMethod.PUT)
+	@ResponseBody
+	public boolean updateDatabase( @RequestBody String encodedJSON,
+			HttpServletResponse response ) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
+		try {
+			DbInfo db = (DbInfo)WebCodec.instance().parse(encodedJSON);
+			datastore.update(db);
+			log.debug( "Updated database: " + db.getName() + " (user: "
+					+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
+			return true;
+		}
+		catch (Exception e){
+			log.error("Error creating database.", e);
+			return false;
+		}
+	}
+	
+	@RequestMapping( value="/{name}", method = RequestMethod.DELETE)
+	@ResponseBody
+	public boolean deleteDatabase( @PathVariable( "name" ) String name,
+			HttpServletResponse response ) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		SemossUser user = SemossUser.class.cast( auth.getPrincipal() );
+		try {
+			DbInfo db = datastore.getOne(name);
+			if (db == null){
+				log.debug( "Unable to delete database, not found: " + db.getName() + " (user: "
+						+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
+				return false;
+			}
+			datastore.remove(db);
+			log.debug( "Deleted database: " + db.getName() + " (user: "
+					+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
+			return true;
+		}
+		catch (Exception e){
+			log.error("Error creating database.", e);
+			return false;
+		}
 	}
 
 	/**
@@ -108,11 +163,9 @@ public class DatabaseController extends SemossControllerBase {
 				+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
 
 		DbInfo[] testDbs = datastore.getAll().toArray( new DbInfo[0] );
-
 		for ( DbInfo dbi : testDbs ) {
 			RemoteDBReverseProxyFilter.convertToRPStyle(dbi, req );
 		}
-
 		return testDbs;
 	}
 	

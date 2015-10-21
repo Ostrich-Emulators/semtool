@@ -1,8 +1,11 @@
 					
 					var SEMOSS = [];
 					
-					SEMOSS.DbInfo = function(){};
+					SEMOSS.DbInfo = function(){
+						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
+					};
 					
+					SEMOSS.DbInfo.prototype.vcamp_class = null;
 					SEMOSS.DbInfo.prototype.name = null;
 					SEMOSS.DbInfo.prototype.serverUrl = null;
 					SEMOSS.DbInfo.prototype.dataUrl = null;
@@ -10,56 +13,64 @@
 					
 					SEMOSS.DbInfo.prototype.setAttributes = function(object){
 						this.name = object['name'];
-						this.serverUrl = object['serverUrl'];
-						this.dataUrl = object['dataUrl'];
-						this.insightsUrl = object['insightsUrl'];
+						this.serverUrl = decodeURIComponent(object['serverUrl']);
+						this.dataUrl = decodeURIComponent(object['dataUrl']);
+						this.insightsUrl = decodeURIComponent(object['insightsUrl']);
+						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
 					}
 
-					SEMOSS.createDatabase = function (knowledgebase, callBackFunction, asynchronous){
+					SEMOSS.createDatabase = function (knowledgebase, callBackFunction){
 						var json = SEMOSS.encodeParamObject(knowledgebase);
-						var url = 'databases/create' + json;
-						if (asynchronous == undefined){
-							asynchronous = true;
-						}
+						var url = 'databases/';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
 						$.ajax({
 							type : "POST",
 							url : url,
-							async: asynchronous,
+							data : json,
 							success : function(response) {
 								var token = SEMOSS.processResponse(response);
 								callBackFunction(token);
-							}
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
 						});
 					}
 					
-					SEMOSS.updateDatabase = function (knowledgebase, callBackFunction, asynchronous){
+					SEMOSS.updateDatabase = function (knowledgebase, callBackFunction){
 						var json = SEMOSS.encodeParamObject(knowledgebase);
-						var url = 'databases/create' + json;
-						if (asynchronous == undefined){
-							asynchronous = true;
-						}
+						var url = 'databases/';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
 						$.ajax({
-							type : "GET",
+							type : "PUT",
 							url : url,
+							data : json,
 							success : function(response) {
 								var token = SEMOSS.processResponse(response);
 								callBackFunction(token);
-							}
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
 						});
 					}
 					
 					SEMOSS.deleteDatabase = function (id, callBackFunction, asynchronous){
-						var url = 'databases/delete/' + id;
+						var url = 'databases/' + id;
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
 						if (asynchronous == undefined){
 							asynchronous = true;
 						}
 						$.ajax({
-							type : "POST",
+							type : "DELETE",
 							url : url,
 							success : function(response) {
 								var token = SEMOSS.processResponse(response);
 								callBackFunction(token);
-							}
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
 						});
 					}
 					
@@ -86,6 +97,8 @@
 							type : "GET",
 							beforeSend: function (request)
 				            {
+								// This is how you auth with every REST call, rather than rely on
+								// a session auth
 								//var username = "rbobko";
 								//var password = "password";
 								//var plainCreds = username + ":" + password;
@@ -101,8 +114,11 @@
 					}
 					
 					
-					SEMOSS.User= function(){};
+					SEMOSS.User= function(){
+						this.vcamp_class = "gov.va.semoss.web.security.SemossUser";
+					};
 					
+					SEMOSS.User.prototype.vcamp_class = "gov.va.semoss.web.security.SemossUser";
 					SEMOSS.User.prototype.username = null;
 					SEMOSS.User.prototype.displayName = null;
 					SEMOSS.User.prototype.email = null;
@@ -112,7 +128,7 @@
 						this.username = object['username'];
 						this.displayName = object['properties'].USER_FULLNAME;
 						this.email = object['properties'].USER_EMAIL;
-
+						this.vcamp_class = "gov.va.semoss.web.security.SemossUser";
 					}
 
 					
@@ -127,6 +143,23 @@
 						});
 					}
 					
+					SEMOSS.createUser = function (user, callBackFunction){
+						var url = 'users/';
+						var json = SEMOSS.encodeParamObject(user);
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						$.ajax({
+							type : "POST",
+							url : url,
+							data : json,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
+						});
+					}
+					
 					SEMOSS.getUser = function (username, callBackFunction){
 						var url = 'users/' + username;
 						$.ajax({
@@ -138,9 +171,74 @@
 						});
 					}
 					
+					SEMOSS.deleteUser = function (username, callBackFunction){
+						var url = 'users/' + username;
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						
+						$.ajax({
+							type : "DELETE",
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); },
+						});
+					}
+					
+					SEMOSS.updateUser = function (user, callBackFunction){
+						var encoding = SEMOSS.encodeParamObject(user);
+						var url = 'users/';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						$.ajax({
+							type : "PUT",
+							data: encoding,
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
+						});
+					}
+					
+					SEMOSS.PRIVILEGE_CHOICES = ['READ','WRITE','NONE'];
+					
+					SEMOSS.DBPrivilege = function(){
+						this.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+					};
+					
+					SEMOSS.DBPrivilege.prototype.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+					SEMOSS.DBPrivilege.prototype.uri = null;
+					SEMOSS.DBPrivilege.prototype.access = null;
+					
+					SEMOSS.DBPrivilege.prototype.setAttributes = function(object){
+						this.uri = object['uri'];
+						this.access = object['access'];
+						this.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+					}
+					
+
 					SEMOSS.setAccesses = function (username, map, callBackFunction){
-						var encoding = JSON.stringify(map);
-						var url = 'users/accesses/' + username + '/' + encoding;
+						var url = 'users/' + username + '/accesses';
+						var token = $("meta[name='_csrf']").attr("content");
+						var header = $("meta[name='_csrf_header']").attr("content");
+						$.ajax({
+							type : "PUT",
+							data: SEMOSS.encodeParamObject(map),
+							url : url,
+							success : function(response) {
+								callBackFunction(response);
+							},
+							beforeSend: function (xhr)
+							{ xhr.setRequestHeader(header, token); }
+						});
+					}
+
+					SEMOSS.getAccesses = function (username, callBackFunction){
+						var url = 'users/' + username + '/accesses';
 						$.ajax({
 							type : "GET",
 							url : url,
@@ -149,13 +247,10 @@
 							}
 						});
 					}
-					
-
 
 					SEMOSS.processResponse = function(response) {
 						var unescapedString = unescape(response);
 						var token = JSON.parse(unescapedString);
-						SEMOSS.checkErrors(token);
 						return token;
 					}
 
@@ -173,13 +268,12 @@
 
 					SEMOSS.processResponse = function(response) {
 						var unescapedString = unescape(response);
-						var token = JSON.parse(unescapedString);
-						SEMOSS.checkErrors(token);
-						return token;
+						var result = JSON.parse(unescapedString);
+						return result;
 					}
 
 
-/**
+					/**
 					 * Checks for errors and warnings in a communication token
 					 * that came back from the server after a REST call.
 					 * @return False if the operation was successful, even with warnings

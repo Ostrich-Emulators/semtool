@@ -1,5 +1,5 @@
 <html>
-	#include( "/common/adminHead.vm")
+	#parse( "/common/adminHead.vm")
 <body ng-app="semoss" >
 <div class="pages_container">
 	#include( "/common/header.vm")
