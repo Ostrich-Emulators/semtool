@@ -11,6 +11,7 @@ import org.openrdf.model.URI;
 
 import gov.va.semoss.om.Insight;
 import gov.va.semoss.om.Perspective;
+import java.util.List;
 
 /**
  *
@@ -35,7 +36,7 @@ public interface InsightManager {
 	 *
 	 * @return
 	 */
-	public Collection<Perspective> getPerspectives();
+	public List<Perspective> getPerspectives();
 
 	/**
 	 * Retrieves the given perspective from the datastore

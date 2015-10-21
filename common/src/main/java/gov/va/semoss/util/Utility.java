@@ -58,6 +58,7 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
@@ -230,19 +231,33 @@ public class Utility {
 		Calendar stopper = Calendar.getInstance();
 		stopper.setTime( stopTime );
 
-		int msecs = stopper.get( Calendar.MILLISECOND ) - starter.get(
-				Calendar.MILLISECOND );
-		int secs = stopper.get( Calendar.SECOND ) - starter.get( Calendar.SECOND );
-		int mins = stopper.get( Calendar.MINUTE ) - starter.get( Calendar.MINUTE );
+		int sval = starter.get( Calendar.MILLISECOND );
+		int eval = stopper.get( Calendar.MILLISECOND );
+		int msecs = eval - sval;
+
+		sval = starter.get( Calendar.SECOND );
+		eval = stopper.get( Calendar.SECOND );
+		int secs = eval - sval;
+
+		sval = starter.get( Calendar.MINUTE );
+		eval = stopper.get( Calendar.MINUTE );
+		int mins = eval - sval;
 
 		if ( msecs < 0 ) {
 			msecs += 1000;
 			secs--;
 		}
+
 		if ( secs < 0 ) {
 			secs += 60;
 			mins--;
 		}
+
+		// we don't expect any duration to be more than 1 hour
+		if ( mins < 0 ) {
+			mins += 60;
+		}
+
 		if ( 0 == mins ) {
 			// don't print "00m" if we don't have any minutes to report
 			return String.format( "%02d.%02ds", secs, msecs / 10 );
@@ -353,41 +368,6 @@ public class Utility {
 	}
 
 	/**
-	 * Overload on the above method, to get the URI's label from the passed-in uri
-	 * string. If the passed-in value is not a URI, then the above method is
-	 * called to extract the ending word, after the last "/".
-	 *
-	 * This method calls "String getInstanceLabel(URI uri, IEngine eng)" and
-	 * "String getInstanceName(String uri)".
-	 *
-	 * @param uri -- (String) A string URI.
-	 * @param eng -- (IEngine) The active query engine.
-	 *
-	 * @return getInstanceName -- (String) Described above.
-	 */
-	public static String getInstanceName( String uri, IEngine eng ) {
-		String strReturnValue;
-
-		//If the string is really a URI, then return its label:
-		try {
-			ValueFactory vf = new ValueFactoryImpl();
-			URI uriURI = vf.createURI( uri );
-			strReturnValue = getInstanceLabel( uriURI, eng );
-
-			//If the previous method call returned nothing,
-			//then extract the ending word of the URI's string:
-			if ( null == strReturnValue || strReturnValue.equals( "" ) ) {
-				strReturnValue = getInstanceName( uri );
-			}
-			//Otherwise, simply return the input string:
-		}
-		catch ( IllegalArgumentException e ) {
-			strReturnValue = uri;
-		}
-		return strReturnValue;
-	}
-
-	/**
 	 * Splits up a string URI into tokens based on "/" character, and uses logic
 	 * to return the instance name. If the input string is not a URI, then it is
 	 * returned unmodified.
@@ -395,7 +375,10 @@ public class Utility {
 	 * @param uri -- (String) to be split into tokens.
 	 *
 	 * @return getInstanceName -- (String) Described above.
+	 * @deprecated use {@link #getInstanceLabel(org.openrdf.model.Resource,
+	 * gov.va.semoss.rdf.engine.api.IEngine) } instead
 	 */
+	@Deprecated
 	public static String getInstanceName( String uri ) {
 		try {
 			//If the string is really a URI, then return its right end:
@@ -456,7 +439,9 @@ public class Utility {
 				log.warn( "trying to find the label of a null Resource? (probably a bug)" );
 			}
 			else {
-				sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+				if ( !( uri instanceof BNode ) ) { // don't know how to query a BNode
+					sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+				}
 			}
 		}
 		sb.append( "}" );
@@ -465,7 +450,8 @@ public class Utility {
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				String lbl = set.getValue( "label" ).stringValue();
-				retHash.put( fac.createURI( set.getValue( "s" ).stringValue() ), lbl );
+				Value r = set.getValue( "s" );
+				retHash.put( Resource.class.cast( r ), lbl );
 			}
 		};
 

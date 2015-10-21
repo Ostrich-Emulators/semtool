@@ -232,7 +232,7 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	@Override
-	public Collection<Perspective> getPerspectives() {
+	public List<Perspective> getPerspectives() {
 		return new ArrayList<>( perspectives );
 	}
 
