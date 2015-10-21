@@ -6,9 +6,11 @@
 package gov.va.semoss.rdf.engine.util;
 
 import gov.va.semoss.model.vocabulary.VAS;
+import gov.va.semoss.om.Perspective;
 import gov.va.semoss.rdf.engine.api.IEngine;
 import gov.va.semoss.rdf.engine.api.ReificationStyle;
 import gov.va.semoss.rdf.engine.impl.BigDataEngine;
+import gov.va.semoss.rdf.engine.impl.InsightManagerImpl;
 import gov.va.semoss.rdf.query.util.impl.ListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.OneVarListQueryAdapter;
 import gov.va.semoss.rdf.query.util.impl.StatementAddingExecutor;
@@ -21,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
@@ -248,4 +251,19 @@ public class EngineUtil2Test {
 		}
 	}
 
+	@Test
+	public void testCreateInsights() throws Exception {
+		File insights = new File( "src/test/resources/insights.ttl" );
+		InsightManagerImpl imi = new InsightManagerImpl();
+		EngineUtil2.createInsightStatements( insights, imi );
+		Collection<Perspective> persps = imi.getPerspectives();
+		assertEquals( 7, persps.size() );
+	}
+
+	@Test( expected = EngineManagementException.class )
+	public void testCreateInsights2() throws Exception {
+		File insights = new File( "src/main/resources/models/va-semoss.ttl" );
+		InsightManagerImpl imi = new InsightManagerImpl();
+		EngineUtil2.createInsightStatements( insights, imi );
+	}
 }
