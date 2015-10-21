@@ -50,15 +50,13 @@
         }
         
         $scope.update = function(){
-       	 	SEMOSS.updateDatabase($scope.activeInstance, function(token){
-       	 		SEMOSS.processAnyFailures(token, 'Database successfully updated.');
-        		if (token.result <= 1){
+       	 	SEMOSS.updateDatabase($scope.activeInstance, function(result){
+        		if (result){
         			$scope.instances.splice($scope.currentRow, 1, angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
         		}
        	 	}, true);
        	 	$scope.mode = 'edit';
-       	 	$scope.$apply();
         	$('#semossdb_modal').modal('hide');
         }
         
@@ -82,15 +80,13 @@
         	$('#semossdb_modal').modal('show');
         }
 
-        $scope.create = function(){
-        	SEMOSS.createDatabase($scope.activeInstance, function(token){
-        		$scope.activeInstance.id = token.data.id;
-        		SEMOSS.processAnyFailures(token, 'Database successfully created.');
-        		if (token.result <= 1){
+        $scope.createInstance = function(){
+        	SEMOSS.createDatabase($scope.activeInstance, function(reply){
+        		if (reply){
         			$scope.instances.push(angular.copy($scope.activeInstance));
         			vm.dtInstance.rerender();
         		}
-       	 	}, true);
+       	 	});
         	$('#semossdb_modal').modal('hide');
         }
 
@@ -111,9 +107,8 @@
         };
         
         $scope.deleteInstance = function(){
-        	SEMOSS.deleteDatabase($scope.deleteID, function(token){
-        		SEMOSS.processAnyFailures(token, 'Database successfully deleted.');
-        		if (token.result <= 1){
+        	SEMOSS.deleteDatabase($scope.deleteID, function(result){
+        		if (result){
         			$scope.instances.splice($scope.currentRow, 1);
         			vm.dtInstance.rerender();
         		}

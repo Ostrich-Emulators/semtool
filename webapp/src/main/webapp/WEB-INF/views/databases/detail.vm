@@ -16,12 +16,6 @@
 						placeholder="The Database Name">
 				</div>
 				<div class="form-group">
-					<label for="semoss_database_server_url">Server URL</label> 
-					<input  ng-model="activeInstance.serverUrl"
-						type="text" class="instance_field string_field form-control" id="semoss_database_server_url"
-						placeholder="The Database Description">
-				</div>
-				<div class="form-group">
 					<label for="semoss_database_data_url">Data URL</label> 
 					<input  ng-model="activeInstance.dataUrl"
 						type="text" class="instance_field string_field form-control" id="semoss_database_data_url"
@@ -46,7 +40,7 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				<button ng-if="mode=='edit'" type="button" class="btn btn-primary update_instance_button" ng-click="update()" >Save changes</button>
-				<button ng-if="mode=='create'" type="button" class="btn btn-primary create_instance_button" ng-click="create()" >Create</button>
+				<button ng-if="mode=='create'" type="button" class="btn btn-primary create_instance_button" ng-click="createInstance()" >Create</button>
 			</div>
 		</div>
 

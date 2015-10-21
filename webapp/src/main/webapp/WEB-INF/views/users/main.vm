@@ -13,4 +13,5 @@
 </script>
 	#parse("/users/delete_confirm.vm")
 	#parse("/users/user_modal.vm")
+	#parse("/users/privilegesModal.vm")
 </div>

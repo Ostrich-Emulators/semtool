@@ -80,9 +80,16 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 	public DbInfo create( DbInfo t ) throws Exception {
 		RepositoryConnection rc = store.getConnection();
 		UriBuilder urib = UriBuilder.getBuilder( WEBDS.NAMESPACE + "dbinfo" );
-
-		rc.add( getCreateStatements( urib.uniqueUri(), t, rc.getValueFactory() ) );
-
+		URI uri = urib.uniqueUri();
+		rc.begin();
+		try{
+			rc.add( getCreateStatements( uri, t, rc.getValueFactory() ) );
+			rc.commit();
+		}
+		catch( RepositoryException re ){
+			rc.rollback();
+			throw re;
+		}
 		return t;
 	}
 
@@ -92,7 +99,15 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 
 		Resource idToRemove = getId( t, rc );
 		if ( null != idToRemove ) {
-			rc.remove( idToRemove, null, null );
+			try{
+				rc.begin();
+				rc.remove( idToRemove, null, null );
+				rc.commit();
+			}
+			catch( RepositoryException re ){
+				rc.rollback();
+				throw re;
+			}
 		}
 	}
 
@@ -101,8 +116,16 @@ public class DbInfoMapper implements DataMapper<DbInfo, String> {
 		RepositoryConnection rc = store.getConnection();
 		Resource id = getId( data, rc );
 		if ( null != id ) {
-			rc.remove( id, null, null );
-			rc.add( getCreateStatements( id, data, rc.getValueFactory() ) );
+			try{
+				rc.begin();
+				rc.remove( id, null, null );
+				rc.add( getCreateStatements( id, data, rc.getValueFactory() ) );
+				rc.commit();
+			}
+			catch( RepositoryException re ){
+				rc.rollback();
+				throw re;
+			}
 		}
 	}
 

@@ -11,13 +11,16 @@ import gov.va.semoss.user.User.UserProperty;
 import gov.va.semoss.util.UriBuilder;
 import gov.va.semoss.web.datastore.vocabulary.WEBDS;
 import gov.va.semoss.web.io.DbInfo;
+import gov.va.semoss.web.security.DBPrivileges;
 import gov.va.semoss.web.security.DbAccess;
 import info.aduna.iteration.Iterations;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
@@ -170,8 +173,8 @@ public class UserMapper implements DataMapper<User, String> {
 		}
 	}
 
-	public Map<URI, DbAccess> getAccesses( User user ) {
-		Map<URI, DbAccess> accesses = new HashMap<>();
+	public DBPrivileges getAccesses( User user ) {
+		DBPrivileges accesses = new DBPrivileges();
 
 		RepositoryConnection rc = store.getConnection();
 		try {

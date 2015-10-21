@@ -21,29 +21,18 @@
 						type="text" class="instance_field string_field form-control" id="semossInstanceEmail"
 						placeholder="john@va.gov">
 				</div>
-				
-				<div class="form-group">
-					<label for="semossInstanceRoleName">Role</label> 
-					<select ng-model="activeInstance.role"
-						type="text" class="form-control instance_field string_field" id="semossInstanceRoleName"
-						placeholder="The Role of the User">
-						<option value="0">Base User</option>
-						<option value="1">Database Administrator</option>
-						<option value="2">Insights Administrator</option>
-					</select>
-				</div>
 						
 				<div class="form-group">
 					<label for="semossInstanceDisplayName">Display Name</label> 
 					<input  ng-model="activeInstance.displayName"
 						type="text" class="instance_field string_field form-control" id="semossInstanceDisplayName"
 						placeholder="The Display Name for the User">
-				</div>				
+				</div>			
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				<button ng-if="mode=='edit'" type="button" class="btn btn-primary update_instance_button" ng-click="update()" >Save changes</button>
-				<button ng-if="mode=='create'" type="button" class="btn btn-primary create_instance_button" ng-click="create()" >Create</button>
+				<button ng-if="mode=='create'" type="button" class="btn btn-primary create_instance_button" ng-click="createInstance()" >Create</button>
 			</div>
 		</div>
 		<!-- /.modal-content -->
