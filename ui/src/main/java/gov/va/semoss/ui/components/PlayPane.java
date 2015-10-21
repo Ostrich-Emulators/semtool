@@ -57,7 +57,6 @@ import gov.va.semoss.ui.components.playsheets.GridScatterSheet;
 import gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet;
 import gov.va.semoss.ui.components.playsheets.PieChartPlaySheet;
-import gov.va.semoss.ui.components.playsheets.SankeyPlaySheet;
 import gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet;
 import gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet;
 import gov.va.semoss.ui.components.renderers.LabeledPairTableCellRenderer;
@@ -123,7 +122,6 @@ import javax.swing.event.InternalFrameListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import javax.swing.table.DefaultTableModel;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
