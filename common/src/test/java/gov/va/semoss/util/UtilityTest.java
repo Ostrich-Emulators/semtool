@@ -149,8 +149,7 @@ public class UtilityTest {
 
 		Utility.unzip( file.getPath(), outdir.getPath() );
 		File[] firstdirs = outdir.listFiles();
-		File[] datas = firstdirs[1].listFiles();
-
+		File[] datas = new File( outdir, "testdir-2" ).listFiles();
 		String data = FileUtils.readFileToString( datas[0] );
 
 		FileUtils.deleteQuietly( outdir );
