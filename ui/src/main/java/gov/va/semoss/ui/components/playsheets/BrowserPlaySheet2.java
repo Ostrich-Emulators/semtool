@@ -25,14 +25,23 @@ import gov.va.semoss.util.DIHelper;
 import gov.va.semoss.util.ExportUtility;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -55,7 +64,6 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -64,19 +72,10 @@ import org.dom4j.Element;
 import org.dom4j.InvalidXPathException;
 import org.dom4j.XPath;
 import org.dom4j.io.DOMReader;
-
-import com.google.gson.Gson;
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
+
+import com.google.gson.Gson;
 
 /**
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
