@@ -368,7 +368,6 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 				wim.addAll( perspectives, true );
 				listening = false;
 				EngineUtil.getInstance().importInsights( engine, wim );
-				listening = true;
 			}
 		} );
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
@@ -404,6 +403,7 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 		}
 		else {
 			// if we're not listening, then we are the cause of this call
+			listening = true;
 			if ( eng.equals( this.engine ) ) {
 				commitbtn.setEnabled( false );
 				GuiUtility.showMessage( "Data Committed" );
