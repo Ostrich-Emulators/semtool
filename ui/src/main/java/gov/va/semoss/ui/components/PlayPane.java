@@ -1479,13 +1479,15 @@ public class PlayPane extends JFrame {
 				}
 			}
 		} );
-
+		insightManagerItem.setMnemonic(KeyEvent.VK_I);
 		insightManagerItem.setSelected( getProp( IMANAGE_2 ) );
+		
 		if ( getProp( IMANAGE_2 ) == true ) {
-			insightManagerItem.setToolTipText( "Disable the Insite Manager Tab" );
+			insightManagerItem.setMnemonic(KeyEvent.VK_I);
+			insightManagerItem.setToolTipText( "Disable the Insite Manager  Tab" );
 		}
 		else {
-			insightManagerItem.setToolTipText( "Enable the Insite Manager Tab" );
+			insightManagerItem.setToolTipText( "Enable the Insite Manager  Tab" );
 		}
 
 		insightManagerItem.addActionListener( new ActionListener() {
@@ -1501,9 +1503,11 @@ public class PlayPane extends JFrame {
 							"Manage perspectives and insights" );
 					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, insightManagerItem,
 							DbAction.getIcon( "insight_manager_tab1" ) );
+					insightManagerItem.setMnemonic(KeyEvent.VK_I);
 					int idx = rightTabs.indexOfComponent( insightManager );
 					rightTabs.setTabComponentAt( idx, ct2_2 );
-					insightManagerItem.setToolTipText( "Disable the Insite Manager Tab" );
+				
+					insightManagerItem.setToolTipText( "Disable the Insite Manager  Tab" );
 				}
 				else {
 					rightTabs.remove( insightManager );
@@ -1513,6 +1517,7 @@ public class PlayPane extends JFrame {
 		} );
 
 		semanticExplorerItem.setSelected( getProp( SEMANTICEXPLORER ) );
+		semanticExplorerItem.setMnemonic(KeyEvent.VK_S);
 		if ( getProp( SEMANTICEXPLORER ) ) {
 			semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
 		}
@@ -1529,7 +1534,7 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					rightTabs.addTab( "Semantic Explorer", DbAction.getIcon( "graphic_query" ), semanticExplorer,
+					rightTabs.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ), semanticExplorer,
 							"Explore the classes and instances" );
 					rightTabs.setTabComponentAt(
 							rightTabs.indexOfComponent( semanticExplorer ),
@@ -1539,7 +1544,7 @@ public class PlayPane extends JFrame {
 				}
 				else {
 					rightTabs.remove( semanticExplorer );
-					semanticExplorerItem.setToolTipText( "Enable the Semantic Explorer Tab" );
+					semanticExplorerItem.setToolTipText( "Enable the Semantic Explorer  Tab" );
 				}
 			}
 		} );
@@ -1558,7 +1563,7 @@ public class PlayPane extends JFrame {
 		view.add( gQueryBuilderItem );
 		gQueryBuilderItem.setMnemonic( KeyEvent.VK_B );
 		view.add( insightManagerItem );
-		insightManagerItem.setMnemonic( KeyEvent.VK_U );
+		insightManagerItem.setMnemonic( KeyEvent.VK_I );
 		view.add( splithider );
 		splithider.setMnemonic( KeyEvent.VK_L );
 		view.add( loggingItem );
