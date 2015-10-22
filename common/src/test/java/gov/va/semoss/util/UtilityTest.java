@@ -5,16 +5,38 @@
  */
 package gov.va.semoss.util;
 
+import gov.va.semoss.rdf.engine.impl.InMemorySesameEngine;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.openrdf.rio.turtle.TurtleWriter;
 
 /**
  *
@@ -41,66 +63,149 @@ public class UtilityTest {
 	public void tearDown() {
 	}
 
-	//@Test
-	public void testGetParams() {
+	@Test
+	public void testSortUrisByLabel() {
+		Map<URI, String> input = new HashMap<>();
+		input.put( RDFS.CLASS, "Z" );
+		input.put( RDFS.DOMAIN, "A" );
+
+		Map<URI, String> sorted = Utility.sortUrisByLabel( input );
+		List<URI> uris = Arrays.asList( RDFS.DOMAIN, RDFS.CLASS );
+		assertEquals( uris, new ArrayList<>( sorted.keySet() ) );
 	}
 
-	//@Test
-	public void testGetParamTypeHash() {
+	@Test
+	public void testDuration() {
+		Date start = new Date( 1092834757 );
+		Date ender = new Date( 1092854747 );
+		assertEquals( "19.99s", Utility.getDuration( start, ender ) );
+
+		ender = new Date( 1102723857 );
+		assertEquals( "44m, 49.10s", Utility.getDuration( start, ender ) );
 	}
 
-	//@Test
-	public void testNormalizeParam() {
+	@Test
+	public void testExporter() throws IOException {
+		Map<String, Class<?>> handlers = new HashMap<>();
+		handlers.put( "filename.ttl", TurtleWriter.class );
+		handlers.put( "filename.rdf", RDFXMLWriter.class );
+		handlers.put( "filename.x", NTriplesWriter.class );
+
+		for ( Map.Entry<String, Class<?>> en : handlers.entrySet() ) {
+			RDFHandler handler;
+			try ( StringWriter sw = new StringWriter() ) {
+				handler = Utility.getExporterFor( en.getKey(), sw );
+			}
+			assertEquals( en.getValue(), handler.getClass() );
+		}
 	}
 
-	//@Test
-	public void testFillParam() {
+	@Test
+	public void testGetLabels() throws Exception {
+		InMemorySesameEngine eng = new InMemorySesameEngine();
+		eng.getRawConnection().begin();
+		eng.getRawConnection().add( new StatementImpl( RDFS.ISDEFINEDBY,
+				RDFS.LABEL, new LiteralImpl( "my label" ) ) );
+		eng.getRawConnection().add( new StatementImpl( RDFS.MEMBER,
+				RDFS.LABEL, new LiteralImpl( "my label 2" ) ) );
+		eng.getRawConnection().commit();
+
+		String label = Utility.getInstanceLabel( RDFS.ISDEFINEDBY, eng );
+		assertEquals( "my label", label );
+
+		Map<Resource, String> labels = Utility.getInstanceLabels( null, eng );
+		assertTrue( labels.isEmpty() );
+
+		labels = Utility.getInstanceLabels( Arrays.asList(
+				RDFS.MEMBER, RDFS.DOMAIN ), eng );
+		assertEquals( "domain", labels.get( RDFS.DOMAIN ) );
+		assertEquals( "my label 2", labels.get( RDFS.MEMBER ) );
+
+		labels = Utility.getInstanceLabels( Arrays.asList( RDFS.ISDEFINEDBY,
+				RDFS.LITERAL ), null );
+		assertEquals( 2, labels.size() );
 	}
 
-	//@Test
-	public void testGetConceptType() {
+	@Test
+	public void testUnzip() throws Exception {
+		File file = File.createTempFile( "ziptest-", ".zip" );
+		File outdir = File.createTempFile( "ziptestdir-", "" );
+		outdir.delete();
+		outdir.mkdirs();
+
+		try ( ZipOutputStream zout = new ZipOutputStream( new BufferedOutputStream(
+				new FileOutputStream( file ) ) ) ) {
+			zout.putNextEntry( new ZipEntry( "testdir/" ) );
+			zout.closeEntry();
+
+			zout.putNextEntry( new ZipEntry( "testdir-2/test.txt" ) );
+			zout.write( "Hello World!".getBytes() );
+			zout.closeEntry();
+
+			zout.putNextEntry( new ZipEntry( "test.empty" ) );
+			zout.write( "".getBytes() );
+			zout.closeEntry();
+		}
+
+		Utility.unzip( file.getPath(), outdir.getPath() );
+		File[] firstdirs = outdir.listFiles();
+		File[] datas = new File( outdir, "testdir-2" ).listFiles();
+		String data = FileUtils.readFileToString( datas[0] );
+
+		FileUtils.deleteQuietly( outdir );
+		FileUtils.deleteQuietly( file );
+
+		assertEquals( 3, firstdirs.length );
+		assertEquals( "Hello World!", data );
 	}
 
-	//@Test
-	public void testGetQualifiedClassName() {
+	@Test
+	public void testImplode() {
+		assertEquals( "<one>,<two>",
+				Utility.implode( Arrays.asList( "one", "two" ), "<", ">", "," ) );
+		assertTrue( Utility.implode( null, "", "", "" ).isEmpty() );
+	}
+
+	@Test
+	public void testSaveFilename() {
+		assertTrue( Utility.getSaveFilename( "junker", ".x" ).startsWith( "junker" ) );
+		assertTrue( Utility.getSaveFilename( "junker", "x" ).endsWith( ".x" ) );
 	}
 
 	@Test
 	public void testRound() {
-		Map<Double, Double> ones = new HashMap<>();
-		ones.put( 1.05d, 1.1d );
-		ones.put( 1.04d, 1.0d );
-		ones.put( 1.09d, 1.1d );
-		ones.put( 1.04999d, 1.0d );
-		ones.put( -1.04999d, -1.0d );
-
-		for ( Map.Entry<Double, Double> e : ones.entrySet() ) {
-			Double rslt = Utility.round( e.getKey(), 1 );
-			assertEquals( "error rounding: " + e.getKey(), e.getValue(), rslt );
-		}
-
-		Map<Double, Double> twos = new HashMap<>();
-		twos.put( 1.05d, 1.05d );
-		twos.put( 1.049d, 1.05d );
-		twos.put( 1.123d, 1.12d );
-		twos.put( 1.00499d, 1.00d );
-		twos.put( -1.04999d, -1.05d );
-		twos.put( 13947.04999d, 13947.05d );
-
-		for ( Map.Entry<Double, Double> e : twos.entrySet() ) {
-			Double rslt = Utility.round( e.getKey(), 2 );
-			assertEquals( "error rounding: " + e.getKey(), e.getValue(), rslt );
-		}
-
-		assertFalse( "1.045 check", Utility.round( 1.045d, 2 ) == 1.04d );
-		assertTrue( "1.049 check", Utility.round( 1.049d, 0 ) == 1d );
+		double expected = 1.354d;
+		assertEquals( expected, Utility.round( 1.3540d, 3 ), 0.0005 );
 	}
 
-	//@Test
-	public void testSciToDollar() {
+	@Test
+	public void testMergeProps1() {
+		Properties base = new Properties();
+		base.setProperty( "one", "A" );
+		base.setProperty( "two", "B" );
+
+		Properties overlay = new Properties();
+		overlay.setProperty( "three", "C" );
+		overlay.setProperty( "two", "b" );
+
+		Utility.mergeProperties( base, overlay, false, null );
+		assertEquals( 3, base.size() );
+		assertEquals( "C", base.getProperty( "three" ) );
+		assertEquals( "b", base.getProperty( "two" ) );
 	}
 
-	//@Test
-	public void testGetParamsFromString() {
+	@Test
+	public void testMergeProps2() {
+		Properties base = new Properties();
+		base.setProperty( "one", "A" );
+		base.setProperty( "two", "B" );
+
+		Properties overlay = new Properties();
+		overlay.setProperty( "three", "C" );
+		overlay.setProperty( "one", "extra" );
+
+		Utility.mergeProperties( base, overlay, true, "-" );
+		assertEquals( 3, base.size() );
+		assertEquals( "A-extra", base.getProperty( "one" ) );
 	}
 }
