@@ -9,7 +9,6 @@ import gov.va.semoss.ui.components.FileBrowsePanel;
 import gov.va.semoss.ui.components.SemossFileView;
 import gov.va.semoss.util.DefaultIcons;
 import gov.va.semoss.util.GuiUtility;
-import gov.va.semoss.ui.actions.DbAction;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -79,7 +78,7 @@ public abstract class AbstractSavingAction extends AbstractAction {
 	}
 
 	public void setDefaultFileName( String defaultFileName ) {
-		this.defaultFileName = defaultFileName;
+		this.defaultFileName = defaultFileName.replaceAll( "[\\/:*?\"<>|]", "" );
 	}
 
 	public void setSaveFile( File f ) {
