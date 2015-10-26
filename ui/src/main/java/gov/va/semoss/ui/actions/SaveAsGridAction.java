@@ -36,7 +36,7 @@ public class SaveAsGridAction extends AbstractSavingAction {
 		super( "Save As", issaveas );
 		setToolTip( "Save to a new file name" );
 		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_A );
-		putValue( AbstractAction.SMALL_ICON,DbAction.getIcon( "save_as_diskette1"));
+		putValue( AbstractAction.SMALL_ICON, DbAction.getIcon( "save_as_diskette1" ) );
 		setAppendDate( true );
 	}
 
@@ -102,9 +102,9 @@ public class SaveAsGridAction extends AbstractSavingAction {
 		Builder prefb = new CsvPreference.Builder( (char) CsvPreference.STANDARD_PREFERENCE.getQuoteChar(),
 				(int) delimiter, CsvPreference.STANDARD_PREFERENCE.getEndOfLineSymbols() );
 
-		try (CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() )) {
+		try ( CsvMapWriter writer = new CsvMapWriter( new FileWriter( file ), prefb.build() ) ) {
 			writer.writeHeader( heads );
-			
+
 			for ( int r = 0; r < table.getRowCount(); r++ ) {
 				Map<String, Object> map = new HashMap<>();
 				for ( int c = 0; c < heads.length; c++ ) {

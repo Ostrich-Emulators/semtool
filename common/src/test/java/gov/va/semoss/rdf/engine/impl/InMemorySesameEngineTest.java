@@ -123,8 +123,8 @@ public class InMemorySesameEngineTest {
 		rc.close();
 		repo.shutDown();
 
-		// the /100 is to remove the ms, which aren't always the same because
+		// the 100 is to remove the ms, which aren't always the same because
 		// they're not stored in the RDF
-		assertEquals( now.getTime()/100, upd.getTime()/100 );
+		assertEquals( now.getTime(), upd.getTime(), 100 );
 	}
 }
