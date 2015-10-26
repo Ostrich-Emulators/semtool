@@ -148,7 +148,7 @@ public class InsightPanel extends DataPanel<Insight> {
 
     insightDesc.setColumns(20);
     insightDesc.setLineWrap(true);
-    insightDesc.setRows(5);
+    insightDesc.setRows(3);
     insightDesc.setWrapStyleWord(true);
     jScrollPane4.setViewportView(insightDesc);
 
@@ -196,18 +196,18 @@ public class InsightPanel extends DataPanel<Insight> {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(jLabel6)
-          .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+          .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(layout.createSequentialGroup()
             .addComponent(jLabel5)
             .addGap(0, 0, Short.MAX_VALUE))
-          .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE))
+          .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(testbtn)
           .addComponent(paramLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addGap(46, 46, 46))
+        .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
 
