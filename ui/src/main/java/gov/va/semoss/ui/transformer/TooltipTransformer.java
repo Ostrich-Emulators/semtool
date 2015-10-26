@@ -21,13 +21,15 @@ package gov.va.semoss.ui.transformer;
 
 import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.ui.components.ControlData;
+import gov.va.semoss.util.PropComparator;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.collections15.Transformer;
-import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -37,10 +39,9 @@ import org.openrdf.model.vocabulary.RDFS;
  * a graph.
  */
 public class TooltipTransformer<T extends GraphElement> implements Transformer<T, String> {
-
-	private static final Logger logger = Logger.getLogger(TooltipTransformer.class );
-	ControlData data;
-
+	private ControlData data;
+	private Set<URI> mains;
+	
 	/**
 	 * Constructor for VertexTooltipTransformer.
 	 *
@@ -48,6 +49,9 @@ public class TooltipTransformer<T extends GraphElement> implements Transformer<T
 	 */
 	public TooltipTransformer( ControlData data ) {
 		this.data = data;
+		
+		// don't show property type for these properties
+		mains = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );
 	}
 
 	/**
@@ -60,40 +64,41 @@ public class TooltipTransformer<T extends GraphElement> implements Transformer<T
 	 */
 	@Override
 	public String transform( GraphElement vertex ) {
-		StringBuilder propName = new StringBuilder();
-		// don't show property type for these properties
-		Set<URI> mains = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );
+		List<URI> propertiesList = data.getSelectedPropertiesTT( vertex.getType() );
+		Collections.sort( propertiesList, new PropComparator() );
 
-		List<URI> props = data.getSelectedPropertiesTT( vertex.getType() );
-		if ( !props.isEmpty() ) {
-
-			for ( URI prop : props ) {
-				if ( vertex.hasProperty( prop ) ) {
-					Object val = vertex.getProperty( prop );
-
-					if ( 0 != propName.length() ) {
-						propName.append( "<br>" );
-					}
-
-					if ( !mains.contains( prop ) ) {
-						propName.append( data.getLabel( prop ) ).append( ": " );
-					}
-
-					String str = ( RDF.TYPE.equals( prop )
-							? data.getLabel( URI.class.cast( val ) ) : val.toString() );
-
-					propName.append( str );
-				}
-			}
-		}
-		//logger.debug("Prop Name " + propName);
-
-		if ( 0 == propName.length() ) {
+		String propertiesHTMLString = buildPropertyHTMLString(propertiesList, vertex);
+		if ( 0 == propertiesHTMLString.length() ) {
 			return null;
 		}
 
 		String popup = "<html><body style=\"border:0px solid white; box-shadow:1px 1px 1px #000; padding:2px; background-color:white;\">"
-				+ "<font size=\"3\" color=\"black\"><i>" + propName + "</i></font></body></html>";
+				+ "<font size=\"3\" color=\"black\"><i>" + propertiesHTMLString + "</i></font></body></html>";
 		return popup;
+	}
+	
+	private String buildPropertyHTMLString(List<URI> properties, GraphElement vertex) {
+		StringBuilder propertiesHTMLString = new StringBuilder();
+		
+		for ( URI prop : properties ) {
+			if ( vertex.hasProperty( prop ) ) {
+				Object val = vertex.getProperty( prop );
+
+				if ( 0 != propertiesHTMLString.length() ) {
+					propertiesHTMLString.append( "<br>" );
+				}
+
+				if ( !mains.contains( prop ) ) {
+					propertiesHTMLString.append( data.getLabel( prop ) ).append( ": " );
+				}
+
+				String str = ( RDF.TYPE.equals( prop )
+						? data.getLabel( URI.class.cast( val ) ) : val.toString() );
+
+				propertiesHTMLString.append( str );
+			}
+		}
+		
+		return propertiesHTMLString.toString();
 	}
 }

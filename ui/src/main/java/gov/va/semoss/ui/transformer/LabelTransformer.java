@@ -23,17 +23,22 @@ import gov.va.semoss.om.GraphElement;
 import gov.va.semoss.ui.components.ControlData;
 import gov.va.semoss.util.PropComparator;
 
+import java.util.Arrays;
 import java.util.Collections;
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Transforms the property label on a node vertex in the graph.
  */
 public class LabelTransformer<T extends GraphElement> extends SelectingTransformer<T, String> {
-
 	private final ControlData data;
+	private Set<URI> mains;
 
 	/**
 	 * Constructor for VertexLabelTransformer.
@@ -42,7 +47,10 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 	 */
 	public LabelTransformer( ControlData data ) {
 		this.data = data;
-	}
+
+		// don't show property type for these properties
+		mains = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );
+}
 
 	/**
 	 * Method transform. Transforms the label on a node vertex in the graph
@@ -52,33 +60,30 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 	 * @return String - the property name of the vertex
 	 */
 	public String getText( T vertex ) {
-		List<URI> properties = data.getSelectedProperties( vertex );
-		
-		if ( properties.isEmpty() ) {
-			return "";
-		}
-
-		//order the props so the order is the same from run to run
-		Collections.sort( properties, new PropComparator() );
+		List<URI> propertiesList = data.getSelectedProperties( vertex );
+		Collections.sort( propertiesList, new PropComparator() );
 
 		//uri required for uniqueness, need these font tags so that when you increase 
 		//font through font transformer, the label doesn't get really far away from the vertex
 		StringBuilder html = new StringBuilder();
 		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
 		boolean first = true;
-		for ( URI property : properties ) {
+		for ( URI property : propertiesList ) {
 			if ( !first ) {
 				html.append( "<font size='1'><br></font>" );
 			}
 
 			if ( vertex.hasProperty( property ) ) {
+				if ( !mains.contains( property ) ) {
+					html.append( data.getLabel( property ) ).append( ": " );
+				}
+
 				String propval = vertex.getProperty( property ).toString();
 				html.append( chop( propval, 50 ) );
 			}
 			first = false;
 		}
 
-		// html.append( " lev: " ).append( vertex.getLevel() );
 		html.append( "</html>" );
 
 		return html.toString();
