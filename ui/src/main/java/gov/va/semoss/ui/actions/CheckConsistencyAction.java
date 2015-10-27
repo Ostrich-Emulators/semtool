@@ -25,7 +25,6 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
@@ -47,11 +46,6 @@ public class CheckConsistencyAction extends DbAction {
 		this.frame = frame;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Check Database Consistency" );
 		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_Q );
-	}
-
-	@Override
-	public boolean preAction( ActionEvent ae ) {
-		return true;
 	}
 
 	private boolean buildQuestionFrame() {
