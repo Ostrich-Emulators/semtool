@@ -9,7 +9,8 @@
         $scope.loading = false;
         $scope.instanceLoading = false;
         $scope.deleteID = null;
-
+        $scope.allDatabases = [];
+        
         var vm= this;
         vm.dtInstance = {};
         vm.dtOptions = {};
@@ -32,6 +33,7 @@
     	                }
     	                catch (err){}
                     });
+            $scope.getDatabases();
         };
         
         $scope.rowSelected = function(index){
@@ -158,6 +160,19 @@
         	$scope.privileges = [];
         	$('#user_privileges_modal').modal('show');
         }
+        
+        $scope.getDatabases = function () {
+            SEMOSS.listDatabases(
+                    function (databases) {
+    	                //var returnedInstances = JSON.parse(token.data);
+    	                $scope.allDatabases = [];
+    	                for (var i=0; i<databases.length; i++){
+    	                	var nativeInstance = new SEMOSS.DbInfo();
+    	                	nativeInstance.setAttributes(databases[i]);
+    	                	$scope.allDatabases.push(nativeInstance);
+    	                }
+                    }, true);
+        };
        
         // init immediately
         $scope.init();
