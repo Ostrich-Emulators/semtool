@@ -12,8 +12,9 @@
 				<div ng-repeat="privilege in activeInstancePrivileges">
 	        		<div class="form-group">
  						<label for="accessURI">URI</label>
- 						<select ng-model="privilege.uri" ngOptions="allDatabaseURIs" id="accessURI" class="form-control">
- 							<option ng-repeat="dbInfo in allDatabases" value="{{dbInfo.serverUrl}}">{{dbInfo.serverUrl}}</option>
+ 						
+ 						<select ng-model="privilege.uri" id="accessURI" >
+ 							<option ng-repeat="url in allDatabases" value="{{url}}" ng-selected="privilege.uri == url" >{{url}}</option>
  						</select>
 	        		</div>
 	        		<div class="form-group">

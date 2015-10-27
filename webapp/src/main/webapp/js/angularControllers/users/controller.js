@@ -169,7 +169,7 @@
     	                for (var i=0; i<databases.length; i++){
     	                	var nativeInstance = new SEMOSS.DbInfo();
     	                	nativeInstance.setAttributes(databases[i]);
-    	                	$scope.allDatabases.push(nativeInstance);
+    	                	$scope.allDatabases.push(nativeInstance.serverUrl);
     	                }
                     }, true);
         };
