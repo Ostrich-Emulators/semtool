@@ -30,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -211,7 +212,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				if ( path.getPathCount() == 1 ) {
 					;//This shouldn't be possible because the root node is invisible.
 				} else if ( path.getPathCount() == 2 ) {
-					;//We have no action here.
+					propertyTable.setModel( new DefaultTableModel() );
 				} else if ( path.getPathCount() == 3 ) {
 					//DefaultMutableTreeNode conceptNode = DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
 					//URI concept = URI.class.cast( conceptNode.getUserObject() );
