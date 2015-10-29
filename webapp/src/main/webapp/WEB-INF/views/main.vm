@@ -50,22 +50,29 @@
       <!-- Three columns of text below the carousel -->
       <div class="row">
         <div class="col-lg-4 semoss_explore_section">
-          <img class="img-circle" src="images/1.jpg" alt="Generic placeholder image" width="140" height="140">
-          <h2>Explore</h2>
-          <p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
-          <p><a class="btn btn-default" href="#" role="button">Log In &raquo;</a></p>
-        </div><!-- /.col-lg-4 -->
+        	<a href="#">
+          		<img class="img-circle" src="images/1.jpg" alt="Generic placeholder image" width="140" height="140">
+          		<h2>Explore</h2>
+          		<p>Use the VCAMP system to query and visualize knowledgebases managed by the KB Proxy Server.  Non-Admin basic users should enter here.</p>
+          	</a>
+          	<p><a class="btn btn-default" href="#" role="button">Log In &raquo;</a></p>
+        		</div><!-- /.col-lg-4 -->
+        	
         <div class="col-lg-4 semoss_manage_section">
-          <img class="img-circle" src="images/2.jpg" alt="Generic placeholder image" width="140" height="140">
-          <h2>Manage</h2>
-          <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.</p>
-          <p><a class="btn btn-default" href="admin" role="button">Log In &raquo;</a></p>
+        	<a href="admin">
+          		<img class="img-circle" src="images/2.jpg" alt="Generic placeholder image" width="140" height="140">
+          		<h2>Manage</h2>
+          		<p>Use the administrator's console to manage database and user entries found within the system, granting basic access and enhanced privileges to resources offered by the VCAMP Web Application.</p>
+          	</a>
+         	 <p><a class="btn btn-default" href="admin" role="button">Log In &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4 semoss_content_section">
-          <img class="img-circle" src="images/3.jpg" alt="Generic placeholder image" width="140" height="140">
-          <h2>Add Content</h2>
-          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-          <p><a class="btn btn-default" href="#" role="button">Log In &raquo;</a></p>
+       	 	<a href="#">
+          		<img class="img-circle" src="images/3.jpg" alt="Generic placeholder image" width="140" height="140">
+          		<h2>Add Content</h2>
+          		<p>Use the VCamp Web Application to manage the content of the knowledgebases behind the server.</p>
+          	</a>
+          	<p><a class="btn btn-default" href="#" role="button">Log In &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
       </div><!-- /.row -->
      
