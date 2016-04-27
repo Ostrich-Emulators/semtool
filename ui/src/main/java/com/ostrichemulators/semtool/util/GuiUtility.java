@@ -60,7 +60,7 @@ public class GuiUtility {
 	private static final Logger log = Logger.getLogger( GuiUtility.class );
 	private static int id = 0;
 
-	public static void extractHTML() throws IOException {
+	public static void extractHTML( String zipname ) throws IOException {
 		// check for html directory
 		// extract
 
@@ -70,7 +70,7 @@ public class GuiUtility {
 			return;
 		}
 
-		try ( InputStream htmlIs = Utility.class.getResourceAsStream( "/html.zip" ) ) {
+		try ( InputStream htmlIs = Utility.class.getResourceAsStream( zipname ) ) {
 			unzip( new ZipInputStream( htmlIs ), new File( "html" ) );
 		}
 	}

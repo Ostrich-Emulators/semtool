@@ -240,7 +240,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.5.201505241946</version>
+						<version>0.7.6.201602180812</version>
 						<!--configuration>
 							<excludes>
 								<exclude>gov/va/semoss/ui/**</exclude>
@@ -356,13 +356,9 @@
 	</build>
 
 	<issueManagement>
-		<url>https://github.com/Mantech/va-semoss/issues</url>
+		<url>https://github.com/Ostrich-Emulators/semtool/issues</url>
 		<system>GitHub</system>
 	</issueManagement>
-	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://104.130.3.174:8888/view/GitHub%20Builds/job/VA-SEMOSS%20GitHub%20All%20Branches/</url>
-	</ciManagement>
 	
 	<repositories>
 		<repository>

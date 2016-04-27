@@ -37,6 +37,7 @@ import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
 import com.ostrichemulators.semtool.ui.components.RepositoryList;
+import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.PinningEngineListener;
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.FileReader;
@@ -125,22 +126,21 @@ public class Starter {
 			logger.warn( e, e );
 		}
 
-
 		// load order: classpath resources, filesystem resources, RDF_Map prop (if exists)
 		Properties props = DIHelper.getInstance().getCoreProp();
-		
+
 		List<String> resources = getConfigResources();
-		for( String path : resources ){
-			try( InputStream is = Starter.class.getResourceAsStream( path ) ){
+		for ( String path : resources ) {
+			try ( InputStream is = Starter.class.getResourceAsStream( path ) ) {
 				Properties tempprops = new Properties();
 				tempprops.load( is );
 				Utility.mergeProperties( props, tempprops, false, null );
 			}
-			catch( IOException ioe ){
+			catch ( IOException ioe ) {
 				logger.warn( ioe, ioe );
-			}			
+			}
 		}
-		
+
 		props.load( Starter.class.getResourceAsStream( "/semoss.properties" ) );
 
 		File rdfmap = new File( WORKINGDIR, "RDF_Map.prop" );
@@ -245,16 +245,25 @@ public class Starter {
 		return configs;
 	}
 
-	protected List<String> getConfigResources(){
+	protected List<String> getConfigResources() {
 		List<String> configs = new ArrayList<>();
 		configs.add( "/semoss.properties" );
 		return configs;
 	}
-	
+
 	protected PlayPane getPlayPane() {
 		return new PlayPane();
 	}
 
 	protected void init() throws IOException {
+		try {
+			GuiUtility.extractHTML( "/gui-html.zip" );
+		}
+		catch ( IOException ioe ) {
+			String errorMessage = "Cound not extract application html: " + ioe.getMessage();
+			System.err.println( errorMessage );
+			logger.fatal( errorMessage, ioe );
+			System.exit( -1 );
+		}
 	}
 }
