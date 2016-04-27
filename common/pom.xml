@@ -2,21 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>gov.va.semoss</groupId>
-		<artifactId>va-semoss-parent</artifactId>
+		<groupId>com.ostrichemulators.semantics.tool</groupId>
+		<artifactId>parent</artifactId>
 		<version>2.0</version>
 	</parent>
 	<packaging>jar</packaging>
-	<name>VA SEMOSS Common</name>
-	<artifactId>va-semoss-common</artifactId>
+	<name>OS-EM Semantic Tool Common</name>
+	<artifactId>common</artifactId>
 	
-	<scm>
-		<connection>scm:git:https://github.com/Mantech/va-semoss.git</connection>
-		<url>https://github.com/Mantech/va-semoss</url>
-	</scm>
-    
 	<dependencies>
-
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-core</artifactId>
@@ -38,7 +32,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.5.201505241946</version>
+						<version>0.7.6.201602180812</version>
 						<!--configuration>
 							<excludes>
 								<exclude>gov/va/semoss/ui/**</exclude>

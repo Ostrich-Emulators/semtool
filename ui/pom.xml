@@ -2,19 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>gov.va.semoss</groupId>
-		<artifactId>va-semoss-parent</artifactId>
+		<groupId>com.ostrichemulators.semantics.tool</groupId>
+		<artifactId>parent</artifactId>
 		<version>2.0</version>
 	</parent>
 	<packaging>jar</packaging>
-	<name>VA SEMOSS UI</name>
-	<artifactId>va-semoss</artifactId>
- 
-	<scm>
-		<connection>scm:git:https://github.com/Mantech/va-semoss.git</connection>
-		<url>https://github.com/Mantech/va-semoss</url>
-	</scm>
-    
+	<name>OS-EM Semantic Tool GUI</name>
+	<artifactId>gui</artifactId>
+
 	<dependencies>
 		<!--dependency>
 			<groupId>com.bigdata</groupId>
@@ -274,16 +269,16 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.5.201505241946</version>
+						<version>0.7.6.201602180812</version>
 						<configuration>
 							<excludes>
-								<exclude>gov/va/semoss/ui/**</exclude>
-								<exclude>gov/va/semoss/util/GuiUtility.class</exclude>
-								<exclude>gov/va/semoss/util/ExportUtility.class</exclude>
-								<exclude>gov/va/semoss/util/PinningEngineListener.class</exclude>
-								<exclude>gov/va/semoss/rdf/engine/util/EngineUtil.class</exclude>
-								<exclude>gov/va/semoss/algorithm/impl/IslandIdentifierProcessor.class</exclude>
-								<exclude>gov/va/semoss/search/**</exclude>
+								<exclude>com/ostrichemulators/semtool/ui/**</exclude>
+								<exclude>com/ostrichemulators/semtool/util/GuiUtility.class</exclude>
+								<exclude>com/ostrichemulators/semtool/util/ExportUtility.class</exclude>
+								<exclude>com/ostrichemulators/semtool/util/PinningEngineListener.class</exclude>
+								<exclude>com/ostrichemulators/semtool/rdf/engine/util/EngineUtil.class</exclude>
+								<exclude>com/ostrichemulators/semtool/algorithm/impl/IslandIdentifierProcessor.class</exclude>
+								<exclude>com/ostrichemulators/semtool/search/**</exclude>
 							</excludes>
 						</configuration>
 						<executions>
@@ -417,19 +412,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<issueManagement>
-		<url>https://github.com/Mantech/va-semoss/issues</url>
-		<system>GitHub</system>
-	</issueManagement>
-	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://104.130.3.174:8888/view/GitHub%20Builds/job/VA-SEMOSS%20GitHub%20All%20Branches/</url>
-	</ciManagement>
-  
-	<organization>
-		<url>http://va.gov</url>
-		<name>U.S. Department of Veterans Affairs</name>
-	</organization>
-	<url>https://github.com/Mantech/va-semoss</url>
 </project>

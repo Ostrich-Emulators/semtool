@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>gov.va.semoss</groupId>
-	<artifactId>va-semoss-parent</artifactId>
+	<groupId>com.ostrichemulators.semantics.tool</groupId>
+	<artifactId>parent</artifactId>
 	<version>2.0</version>
 	<packaging>pom</packaging>
-	<name>VA SEMOSS Parent</name>
+	<name>OS-EM Semantic Tool Parent</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -25,8 +25,8 @@
 	</modules>
   
 	<scm>
-		<connection>scm:git:https://github.com/Mantech/va-semoss.git</connection>
-		<url>https://github.com/Mantech/va-semoss</url>
+		<connection>scm:git:https://github.com/Ostrich-Emulators/semtool.git</connection>
+		<url>https://github.com/Ostrich-Emulators/semtool.git</url>
 	</scm>
     
 	<dependencies>
@@ -382,8 +382,8 @@
 	</repositories>
   
 	<organization>
-		<url>http://va.gov</url>
-		<name>U.S. Department of Veterans Affairs</name>
+		<url>http://ostrich-emulators.com</url>
+		<name>Ostrich Emulators</name>
 	</organization>
-	<url>https://github.com/Mantech/va-semoss</url>
+	<url>https://github.com/Ostrich-Emulators/semtool</url>
 </project>
