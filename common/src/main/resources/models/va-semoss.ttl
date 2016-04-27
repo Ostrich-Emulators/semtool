@@ -1,14 +1,14 @@
-# baseURI: http://va.gov/ontologies/semoss
+# baseURI: http://os-em.com/ontologies/semoss
 # imports: http://purl.org/dc/terms/
 # imports: http://purl.org/ontology/olo/core#
 # imports: http://rdfs.org/ns/void
 # imports: http://spinrdf.org/spin
 # imports: http://uispin.org/ui
-# imports: http://va.gov/ontologies/core
+# imports: http://os-em.com/ontologies/core
 
 @prefix arg: <http://spinrdf.org/arg#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix insights: <http://va.gov/dataset/insights#> .
+@prefix insights: <http://os-em.com/dataset/insights#> .
 
 @prefix olo: <http://purl.org/ontology/olo/core#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -19,18 +19,18 @@
 @prefix spin: <http://spinrdf.org/spin#> .
 @prefix spl: <http://spinrdf.org/spl#> .
 @prefix ui: <http://uispin.org/ui#> .
-@prefix vac: <http://va.gov/ontologies/core#> .
-@prefix vas: <http://va.gov/ontologies/semoss#> .
+@prefix vac: <http://os-em.com/ontologies/core#> .
+@prefix vas: <http://os-em.com/ontologies/semoss#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<http://va.gov/ontologies/semoss>
+<http://os-em.com/ontologies/semoss>
   rdf:type owl:Ontology ;
   owl:imports dcterms: ;
   owl:imports olo: ;
   owl:imports <http://rdfs.org/ns/void> ;
   owl:imports <http://spinrdf.org/spin> ;
   owl:imports <http://uispin.org/ui> ;
-  owl:imports <http://va.gov/ontologies/core> ;
+  owl:imports <http://os-em.com/ontologies/core> ;
   owl:versionInfo "Created with TopBraid Composer"^^xsd:string ;
 .
 vas:DataView
@@ -93,8 +93,8 @@ vas:reification
   rdfs:range vas:ReificationModel ;
 .
 
-<http://va.gov/ontologies/semoss> a owl:Ontology ;
-	owl:imports <http://purl.org/ontology/olo/core#> , <http://rdfs.org/ns/void> , <http://spinrdf.org/spin> , <http://uispin.org/ui> , <http://va.gov/ontologies/core> , <http://purl.org/dc/terms/> ;
+<http://os-em.com/ontologies/semoss> a owl:Ontology ;
+	owl:imports <http://purl.org/ontology/olo/core#> , <http://rdfs.org/ns/void> , <http://spinrdf.org/spin> , <http://uispin.org/ui> , <http://os-em.com/ontologies/core> , <http://purl.org/dc/terms/> ;
 	owl:versionInfo "Created with TopBraid Composer"^^xsd:string .
 
 
@@ -144,8 +144,7 @@ vas:W3C-Reification a vas:ReificationModel ;
 
 
 
-<http://va.gov/ontologies/vcamp> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
-	vac:headURL "$HeadURL: http://104.130.3.174/svn/vcamp/V-CAMP/branches/dev/src/main/resources/models/vcamp.ttl $"^^xsd:string ;
+<http://os-em.com/ontologies/vcamp> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
 	vac:namespace "http://semoss.org/ontologies/vcamp#"^^xsd:string ;
 	vac:namespacePrefix "vcamp"^^xsd:string ;
 	vac:revision "$Revision: 2128 $"^^xsd:string ;
@@ -154,5 +153,5 @@ vas:W3C-Reification a vas:ReificationModel ;
 	vac:version "0.5"^^xsd:string ;
 	owl:versionIRI <http://semoss.org/ontologies/vcamp/v0.5> , <http://semoss.org/ontololgies/vcamp/v0.5> ;
 	a owl:Ontology ;
-	owl:imports <http://semoss.org/ontologies> , <http://va.gov/ontologies/core> ;
+	owl:imports <http://semoss.org/ontologies> , <http://os-em.com/ontologies/core> ;
 	owl:versionInfo "$Id: vcamp.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^xsd:string .

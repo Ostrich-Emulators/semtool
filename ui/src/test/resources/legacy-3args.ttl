@@ -3,15 +3,15 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix vas: <http://va.gov/ontologies/semoss#> .
-@prefix vac: <http://va.gov/ontologies/core#> .
+@prefix vas: <http://os-em.com/ontologies/semoss#> .
+@prefix vac: <http://os-em.com/ontologies/core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix testdata: <http://seman.tc/data/northwind/> .
 @prefix testowl: <http://seman.tc/models/northwind#> .
 
-<http://semoss.va.gov/database/S6fc2303f-ea5a-4ab8-83e5-2de72f5146c3> void:subset <http://junk.com/testfiles> .
+<http://semoss.os-em.com/database/S6fc2303f-ea5a-4ab8-83e5-2de72f5146c3> void:subset <http://junk.com/testfiles> .
 
 <http://junk.com/testfiles> a owl:Ontology , void:Dataset .
 
@@ -323,4 +323,4 @@ testowl:Sugar a owl:Class ;
 	rdfs:label "Sugar" ;
 	rdfs:subClassOf testowl:Concept .
 
-<http://semoss.va.gov/database/S6fc2303f-ea5a-4ab8-83e5-2de72f5146c3> owl:imports <http://junk.com/testfiles> .
+<http://semoss.os-em.com/database/S6fc2303f-ea5a-4ab8-83e5-2de72f5146c3> owl:imports <http://junk.com/testfiles> .

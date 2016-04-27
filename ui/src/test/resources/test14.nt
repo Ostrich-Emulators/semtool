@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.os-em.com/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semoss#Database> .
 <http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://sales.data/purchases/2015> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://sales.data/purchases/2015> <http://www.w3.org/2000/01/rdf-schema#label> "\"Purchase Dataset\"" .
@@ -41,5 +41,5 @@
 <http://sales.data/schema#Y77587239bf4c54ea493c7033e1dbf636> <http://www.w3.org/2000/01/rdf-schema#label> "Last Name" .
 <http://sales.data/schema#Y77587239bf4c54ea493c7033e1dbf636> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation> .
 <http://sales.data/schema#Y77587239bf4c54ea493c7033e1dbf636> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://sales.data/schema#Relation/Contains> .
-<http://semoss.va.gov/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/test14.xlsx> .
-<http://semoss.va.gov/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://rdfs.org/ns/void#subset> <http://sales.data/purchases/2015> .
+<http://semoss.os-em.com/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/test14.xlsx> .
+<http://semoss.os-em.com/database/W862130b8-9f66-43dc-a8fd-d655ded95b3d> <http://rdfs.org/ns/void#subset> <http://sales.data/purchases/2015> .

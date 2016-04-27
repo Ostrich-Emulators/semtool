@@ -24,7 +24,7 @@
 		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>va-semoss-common</artifactId>
+			<artifactId>common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

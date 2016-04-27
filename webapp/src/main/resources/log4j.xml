@@ -16,7 +16,7 @@
     <priority value="info"/>
   </category>
 
-  <logger name="gov.va.semoss">
+  <logger name="com.ostrichemulators.semtool">
     <level value="debug"/>
   </logger>
 

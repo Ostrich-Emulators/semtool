@@ -1,24 +1,23 @@
-# baseURI: http://va.gov/ontologies/core
+# baseURI: http://os-em.com/ontologies/core
 
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix vac: <http://va.gov/ontologies/core#> .
+@prefix vac: <http://os-em.com/ontologies/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<http://va.gov/ontologies/core>
+<http://os-em.com/ontologies/core>
   rdf:type owl:Ontology ;
   vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
   vac:description "The purpose of the Veterans Affairs (VA) Core Ontology is to provide a set of universal properties and the minimal classes needed to document ontologies developed at the VA.  Many of the properties provided here are suitable as metadata attributes applicable to arbitrary assets."^^xsd:string ;
-  vac:headURL "$HeadURL: http://104.130.3.174/svn/vcamp/SEMOSS_SRC/branches/dev/src/main/resources/models/va-core.ttl $"^^xsd:string ;
-  vac:namespace "http://va.gov/ontologies/core#"^^xsd:string ;
+  vac:namespace "http://os-em.com/ontologies/core#"^^xsd:string ;
   vac:namespacePrefix "vac"^^xsd:string ;
   vac:revision "$Revision: 2129 $"^^xsd:string ;
   vac:revisionDate "$Date: 2015-04-05 21:30:23 -0400 (Sun, 05 Apr 2015) $"^^xsd:string ;
   vac:specificity 1 ;
   vac:version "0.5"^^xsd:string ;
   rdfs:label "VA Core Ontology"^^xsd:string ;
-  owl:versionIRI <http://va.gov/ontologies/core/v0.5> ;
+  owl:versionIRI <http://os-em.com/ontologies/core/v0.5> ;
   owl:versionInfo "$Id: va-core.ttl 2129 2015-04-06 01:30:23Z daniel.mekonnen $"^^xsd:string ;
 .
 vac:author

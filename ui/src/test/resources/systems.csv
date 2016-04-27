@@ -10,7 +10,7 @@ Robin Schoelerman",NA,"Celeste Matthews
 Gregory Haines",NA,00-Priority,Routine Support,NA,NA,NA,
 1066,BVAR,Board of Veterans Appeals Remand,BVA,BVAR is a database used to track the reasons for BVA Remands and the validly of the Remands.  Also provides reports.,Mission System,NA,NA,NA,"Award Approval
 Claimant Data",NA,NA,NA,NA,Medical Legacy,Robin Schoelerman,NA,Gregory Haines,NA,02-High,No DR,NA,NA,NA,
-1970,GAR,Gravesite Assessment Reporting,NCA,"GAR - The GAR application operates/functions within the Burial Operations Support System (BOSS) environment. It is accessed through the Quantico Regional Processing Center home page at http://vaww.cem.va.gov. The Gravesite Assessment Reporting (GAR) application delivers the semi-annual and fiscal year Gravesite Assessment reports. The reports collect information about the cleanliness, height and alignment of headstones/markers National Cemeteries. The Assessment is based on a random sampling of gravesites inspected by cemetery staff in April and October each year.",Mission System,NA,NA,No,NA,NA,NA,NA,NA,NA,NA,NA,Glen MacDonald,NA,02-High,NA,NA,NA,NA,
+1970,GAR,Gravesite Assessment Reporting,NCA,"GAR - The GAR application operates/functions within the Burial Operations Support System (BOSS) environment. It is accessed through the Quantico Regional Processing Center home page at http://vaww.cem.os-em.com. The Gravesite Assessment Reporting (GAR) application delivers the semi-annual and fiscal year Gravesite Assessment reports. The reports collect information about the cleanliness, height and alignment of headstones/markers National Cemeteries. The Assessment is based on a random sampling of gravesites inspected by cemetery staff in April and October each year.",Mission System,NA,NA,No,NA,NA,NA,NA,NA,NA,NA,NA,Glen MacDonald,NA,02-High,NA,NA,NA,NA,
 1304,GRS,Gravesite Reservation System,NCA,Receives a file of gravesite reservations for dependents of Veterans. Designed to produce correspondence to be mailed to each reservee requesting confirmation of their intent to use.,Mission System,NA,NA,No,NA,NA,NA,NA,Austin Information Technology Center,NA,"Steve Jung
 Timothy Godlove",Bill Barnes,"Bill Barnes
 Cindy Mack
@@ -185,7 +185,7 @@ Talent Management System FY12 Enhancements",NA,NA,Jeffrey Henry,NA,Chris Jaqua,O
 SQL Server
 Windows Server",03-Medium,NA,NA,NA,NA,
 1685,POLLY,VACO Position Classification Tracking,OHRA,VACO Position Classification Tracking,Support System,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,03-Medium,NA,NA,NA,NA,
-1142,VAKN/CDN,VAKN - Content Distribution Network,OHRA,"VAKN started in 2000 as an e-learning initiative to effectively distribute educational programs. The Content Distribution Network (CDN) provide an e-learning platform through the use of the VA Knowledge Network to broadcast live video and video on demand to the desktops of VA employees across the country. Content on Demand will be delivered on the CDN to each facility for local use.  User be able to log on to the CDN, view what content is available and join a broadcast with the click of a button. Users can also choose from a library of programs to watch right at the computer. CDN offers the content you need when and where you need it. You ll never have to miss an important broadcast or satellite feed again! CDN uses the existing satellite installed at all VBA ROs and Centers by splitting the signal from the IRD and is broadcast over the ROs and Centers LAN in multicast mode.  The system also has a digitally stored video capability.   The CDN website is located at http://vaww.vakncdn.lrn.va.gov.   Technical support is provided by VA Knowledge Network.",Support System,NA,NA,NA,Promote Training & Employment,FPO - VAKN/CDN Assessing,NA,NA,NA,Benefits Legacy VETSNET,NA,NA,Joe Schaefer,NA,03-Medium,NA,NA,NA,NA,
+1142,VAKN/CDN,VAKN - Content Distribution Network,OHRA,"VAKN started in 2000 as an e-learning initiative to effectively distribute educational programs. The Content Distribution Network (CDN) provide an e-learning platform through the use of the VA Knowledge Network to broadcast live video and video on demand to the desktops of VA employees across the country. Content on Demand will be delivered on the CDN to each facility for local use.  User be able to log on to the CDN, view what content is available and join a broadcast with the click of a button. Users can also choose from a library of programs to watch right at the computer. CDN offers the content you need when and where you need it. You ll never have to miss an important broadcast or satellite feed again! CDN uses the existing satellite installed at all VBA ROs and Centers by splitting the signal from the IRD and is broadcast over the ROs and Centers LAN in multicast mode.  The system also has a digitally stored video capability.   The CDN website is located at http://vaww.vakncdn.lrn.os-em.com.   Technical support is provided by VA Knowledge Network.",Support System,NA,NA,NA,Promote Training & Employment,FPO - VAKN/CDN Assessing,NA,NA,NA,Benefits Legacy VETSNET,NA,NA,Joe Schaefer,NA,03-Medium,NA,NA,NA,NA,
 1863,WebHR,WebHR,OHRA,"Automation (WebHR) of internal Human Resource Services which may interface with the Shared Service Center (SSC) in accordance with Federally mandated Human Resource Line of Business (HR LOB) Initiative. The identified goal for this effort is to expand and convert two existing applications (WebHR and HealthCare Retention, Recruitment Education and Scholarship) into the WebHR portal primarily supporting services and products for the workforce, human resources, and talent management areas.",Support System,NA,NA,NA,NA,NA,Human Resource Management,WebHR,NA,NA,NA,NA,NA,NA,03-Medium,NA,NA,NA,NA,
 1868,WC-OSH,Workers Compensation - Occupational Safety Health Management Information System,OHRA,DVA's Workers compensation injury and illness claim data filed with the Department of Labor (DOL).,Support System,NA,NA,NA,NA,Workers Compensation-Occupational Safety Health/Management Information System,NA,"ASISTS and WC_OSH MIS Enhancements
 Workers Compensation System",Austin Information Technology Center,NA,Michael Ahrighi,NA,Tammy Watson,NA,03-Medium,NA,30 Days,24 Hours,High,
@@ -210,7 +210,7 @@ Provide Access to Workforce & Economic Development Benefit",NA,NA,NA,NA,Medical 
 1026,ACD,Automated Call Distributor,OI&T,Call Accounting Application for AITC Telephone Services (ACD),Support System,NA,NA,NA,NA,NA,NA,NA,Austin Information Technology Center,Medical 21st Century Registries,John Frazier,NA,"Steve Gavenda
 Steve Gavenda",NA,03-Medium,No DR,NA,NA,NA,
 1035,ANR,Automated Notification Reporting Tool,OI&T,"The ANR Tool is a web-based application that allows VA personnel in the field to report IT resource outages and service disruptions both scheduled and unscheduled, as well as other information to the VA Service Desk for dissemination.",Support System,NA,NA,No,NA,NA,NA,NA,NA,Medical 21st Century Bar Code Expansion(BCE),Charles DeSanno,NA,NA,NA,03-Medium,NA,NA,NA,NA,
-1073,CMD,Capacity Management Database,OI&T,"The Capacity Management Database (CMD) is designed to track computer resource usage of the computer hardware running Veterans Health Information Systems and Technology Architecture (VistA). Information derived from CMD is used to assess the impact of planned new software products, identify the ramifications of archiving and purging of existing data, recognize emerging problems through database analysis, and validate sizing model expectations. Data for CMD is captured from all VistA systems in real time. Accumulated data is processed at each site and the results are transmitted to CMD using MailMan messages. Data can be added to CMD daily, along with the monthly updates. On a monthly basis, reports are sent to the Chief Information Officers (CIOs) of the Veterans Integrated Service Networks (VISNs) and Veterans Affairs Medical Center (VAMC) CIOs to allow review of the system's performance and identify future problems (e.g., lack of available disk space). IT personnel can access the database through the VA's intranet (http://vaww.va.gov/capman) for comparison of their system with other sites. The users of CMD include the VA Office of Information & Technology, VISN CIOs, and facility CIO staff.",Support System,NA,NA,NA,Utilize Information Technology Services,Region 4 VistA Assessing,NA,NA,NA,Medical Legacy,NA,John Kupecki,"Andrea Kucharski
+1073,CMD,Capacity Management Database,OI&T,"The Capacity Management Database (CMD) is designed to track computer resource usage of the computer hardware running Veterans Health Information Systems and Technology Architecture (VistA). Information derived from CMD is used to assess the impact of planned new software products, identify the ramifications of archiving and purging of existing data, recognize emerging problems through database analysis, and validate sizing model expectations. Data for CMD is captured from all VistA systems in real time. Accumulated data is processed at each site and the results are transmitted to CMD using MailMan messages. Data can be added to CMD daily, along with the monthly updates. On a monthly basis, reports are sent to the Chief Information Officers (CIOs) of the Veterans Integrated Service Networks (VISNs) and Veterans Affairs Medical Center (VAMC) CIOs to allow review of the system's performance and identify future problems (e.g., lack of available disk space). IT personnel can access the database through the VA's intranet (http://vaww.os-em.com/capman) for comparison of their system with other sites. The users of CMD include the VA Office of Information & Technology, VISN CIOs, and facility CIO staff.",Support System,NA,NA,NA,Utilize Information Technology Services,Region 4 VistA Assessing,NA,NA,NA,Medical Legacy,NA,John Kupecki,"Andrea Kucharski
 Donna Augustine
 Jack Galvin
 Katherine Fitzpatrick","FileMan
@@ -227,7 +227,7 @@ Louis Cheevers
 Mark Cecil
 Michael Lay
 Steven Johs",NA,03-Medium,Mission Critical,NA,NA,NA,
-1173,DBA,Database Administration - FORUM Menu,OI&T,old FORUM menu  This is a configuration management tool used to document VISTA development domain (Info: http://vista.med.va.gov/dba/),Support System,NA,NA,NA,NA,NA,NA,NA,NA,Corporate 21st Century Core,Javier Albarran,"Cameron Schlehuber
+1173,DBA,Database Administration - FORUM Menu,OI&T,old FORUM menu  This is a configuration management tool used to document VISTA development domain (Info: http://vista.med.os-em.com/dba/),Support System,NA,NA,NA,NA,NA,NA,NA,NA,Corporate 21st Century Core,Javier Albarran,"Cameron Schlehuber
 Julie S. Harvey","Julie S.Harvey
 Katherine Fitzpatrick","Dec Alpha
 VMS",03-Medium,NA,NA,NA,NA,
@@ -252,7 +252,7 @@ Sacramento Regional Data Center",NA,Ron Klavohn,NA,"Fay Weinstein
 Jerry Taylor",NA,03-Medium,NA,NA,NA,NA,
 1449,NRD,National Resource Directory,OI&T,veteran and family web based directory of services,Support System,NA,NA,NA,NA,EO National Resource Directory,NA,Sustainment of National Resource Directory (NRD),Austin Information Technology Center,NA,Sherry-Lynn Smith,NA,"Paul Tryhus
 Tammy Watson",NA,03-Medium,NA,30 Days,24 Hours,NA,
-1553,OIT FO LAN,OI Field Offices - LAN Assessing,OI&T,"The OIT FO LAN is the communication system, which is designed to facilitate the services and resources needed to support the operations of OIT FO’s users.",Support System,NA,NA,NA,NA,OI Field Offices - LAN Assessing,NA,NA,NA,NA,NA,NA,Joe Gibbons,NA,03-Medium,NA,NA,NA,NA,
+1553,OIT FO LAN,OI Field Offices - LAN Assessing,OI&T,"The OIT FO LAN is the communication system, which is designed to facilitate the services and resources needed to support the operations of OIT FOï¿½s users.",Support System,NA,NA,NA,NA,OI Field Offices - LAN Assessing,NA,NA,NA,NA,NA,NA,Joe Gibbons,NA,03-Medium,NA,NA,NA,NA,
 1471,IBC,OIT Business Continuity,OI&T,OIT Business Continuity (IT Disruptions),Support System,NA,NA,NA,NA,Region 3 GSS Assessing,NA,NA,NA,NA,Don Sheehan,NA,"Michael Callewaert
 Michael Lay",NA,03-Medium,NA,NA,NA,NA,
 1938,OOC,Office of IT Oversight and Compliance Document Management Workflow,OI&T,To track the Office of IT Oversight and Compliance s (ITOC) use of the USD tool,Support System,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,Dion Castillo,NA,03-Medium,NA,NA,NA,NA,
@@ -603,7 +603,7 @@ Justin Holloway",NA,"Alvin Donnell
 Benito Urbina
 Daivid Kubacki
 David Kubacki",NA,03-Medium,Mission Critical,12 Hours,2 Hours,NA,
-1681,NA,VA.GOV Website,OPIA,The VA.Gov Website.  It is the public affairs website that provides public affairs information to the Veteran and Public.,Support System,NA,NA,Yes,NA,NA,NA,NA,Capital Regional Recovery Center,NA,"Josh Tuscher
+1681,NA,os-em.com Website,OPIA,The os-em.com Website.  It is the public affairs website that provides public affairs information to the Veteran and Public.,Support System,NA,NA,Yes,NA,NA,NA,NA,Capital Regional Recovery Center,NA,"Josh Tuscher
 Joshua Tuscher",NA,Tammy Watson,NA,03-Medium,NA,NA,NA,NA,
 1294,GCLAWS,General Counsel Legal Automation Workload System,OGC,"GCLAWS is the legal case matter tracking application developed for the VA Office of the General Counsel (OGC).      Backend Database built on SQL Server 2005, SP2.  Front-end is a custom Windows application built with Borland Delphi.   A GUI (graphic user interface) database system that is user friendly and designed to work with Microsoft Office Suite applications.    Designed to allow only authorized users, OGC attorneys and support staff, access to subject matter databases on a need-to-know basis and can be made available to any OGC and Regional Counsel Office employee as necessary.    Designed to track matters according to a Product Line Crediting System (PLCS).   Accessed from individual workstations via GCLAWS client which accesses data on the GCLAWS server located in the relevant Regional Counsel office or General Counsel Central Office (OGCCO).    Rigid, in that certain data fields are required to establish records on the database, yet flexible enough to allow for future considerations, should the volume and scope of the Regional Counsels or Office of the General Counsel workload change.",Support System,NA,NA,NA,NA,NA,NA,General Counsel LAWS,NA,NA,NA,NA,Randy Trexler,NA,03-Medium,NA,NA,NA,NA,
 1232,NA,Entellitrak,OSVA,NA,Support System,COTS,NA,NA,NA,VACO-HRA-Entellitrak Assessing,NA,NA,NA,NA,NA,NA,NA,NA,03-Medium,NA,NA,NA,Medium,
@@ -851,7 +851,7 @@ Hines Information Technology Center",Benefits Legacy VETSNET,Justin Holloway,NA,
 BK Hack
 Carol Kirkwood
 Tammy Watson",NA,01-Premium,Special Critical,NA,NA,NA,
-1935,KOFAX,KOFAX,VBA,"The VBMS claims processing workflow is initiated when a Veteran User (or a Regional Office User on behalf of a veteran) submits a paper claim. National Archives and Records Administration (NARA) KOFAX service scans the paper claims, creates claim images and claim metadata. This data is then forwarded to VBMS using a standard web services interface from NARA’s KOFAX service to the KOFAX adapter that comes out-of-the-box with FileNet.",NA,COTS,VBMS,NA,NA,Terremark - Veterans Benefits Management Systems (VBMS) Assessing,NA,NA,Terremark-Culppper,NA,NA,NA,Tammy Watson,NA,01-Premium,NA,NA,NA,NA,
+1935,KOFAX,KOFAX,VBA,"The VBMS claims processing workflow is initiated when a Veteran User (or a Regional Office User on behalf of a veteran) submits a paper claim. National Archives and Records Administration (NARA) KOFAX service scans the paper claims, creates claim images and claim metadata. This data is then forwarded to VBMS using a standard web services interface from NARAï¿½s KOFAX service to the KOFAX adapter that comes out-of-the-box with FileNet.",NA,COTS,VBMS,NA,NA,Terremark - Veterans Benefits Management Systems (VBMS) Assessing,NA,NA,Terremark-Culppper,NA,NA,NA,Tammy Watson,NA,01-Premium,NA,NA,NA,NA,
 1420,MAP-D,Modern Awards Processing - Development,VBA,"Supports development of claims, and workflow tracking. MAP-D provides single processing development capability. This addresses complete claims development, claims status, and case management using the best features of existing applications. MAP-D also provides access to those applications that support the claims development process including COVERS, CSS, PIES, AVAIS, BDN, BIRLS and SPP.",Mission System,NA,VETSNET,No,"Provide Access to Education Benefit
 Provide Access to Income Security Benefit
 Provide Access to Workforce & Economic Development Benefit",NA,NA,NA,Hines Information Technology Center,NA,Justin Holloway,NA,"Ashley Wilson
@@ -1127,7 +1127,7 @@ Provide Access to Workforce & Economic Development Benefit",NA,NA,NA,Philadelphi
 Terris Farmer",NA,02-High,Routine Support,NA,NA,NA,
 1729,VBI,Veterans Business Information,VBA,"Use CS & PFS master records and provides info on what benefit, %, type are paid to the veterans.",Mission System,NA,NA,NA,Benefit Data,NA,NA,NA,NA,NA,NA,NA,NA,NA,02-High,NA,NA,NA,NA,
 1998,VRM,Veterans Relationship Management,VBA,"The VRM Program was established as an enterprise-wide, multi-year initiative to improve
-Veteran’s secure access to benefits and services delivered through Veterans Benefits
+Veteranï¿½s secure access to benefits and services delivered through Veterans Benefits
 Administration (VBA), in partnership with the Veterans Health Administration (VHA) and the
 National Cemetery Administration (NCA).",Mission System,Custom Development,NA,NA,NA,NA,NA,NA,Austin Information Technology Center,NA,Michelle Rowe,Jessie Rai,"Barbara Jones-Odell
 Gregory Haines
@@ -1179,7 +1179,7 @@ Sterling Stokes
 Susan Perez
 Tammy Watson
 Tanya Finley",IBM Mainframe,03-Medium,Routine Support,30 Days,24 Hours,NA,
-1227,NA,Dragon Voice Recognition,VBA,"Dragon Voice Recognition is a speech recognition software. It turns your talk into text and can make virtually any computer task easier and faster. From capturing ideas and creating documents, to email and searching the web, to using simple voice commands to control many of the popular programs you use every day at home, work – and beyond.",NA,COTS,NA,NA,NA,"Region 1 GSS Assessing
+1227,NA,Dragon Voice Recognition,VBA,"Dragon Voice Recognition is a speech recognition software. It turns your talk into text and can make virtually any computer task easier and faster. From capturing ideas and creating documents, to email and searching the web, to using simple voice commands to control many of the popular programs you use every day at home, work ï¿½ and beyond.",NA,COTS,NA,NA,NA,"Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
@@ -1469,7 +1469,7 @@ VistAWeb Performance and User Interface Enhancements for VLER
 Vista Data Extract Transmission Monitor
 Vista Fee Separation of Duties
 Vista Imaging Storage Management Enhancements Phase 1",NA,NA,"Denise Kitts
-Laura Prietula",NA,Larry Weldon,"InterSystems Caché
+Laura Prietula",NA,Larry Weldon,"InterSystems Cachï¿½
 MUMPS",00-Priority,NA,NA,NA,NA,
 1745,VIS,Veterans Information Solution,VHA,"A Web application that provides a consolidated view of eligibility and benefits utilization data from across VBA and DOD Defense Manpower Data Center (DMDC), Beneficiary Identification Records Locator System (BIRLS) and Compensation & Pension Service (C&P",Mission System,NA,NA,NA,Analyze Medical Services Utilization,Veterans Information Solution,NA,NA,Austin Information Technology Center,NA,"Arthur Trabucco
 Chris Cardella
@@ -1518,7 +1518,7 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1996,AEMS/MERS,VistA - Automated Engineering Management System/Medical Equipment Reporting System,VHA,"AEMS/MERS provides equipment histories, preventive maintenance scheduling, project tracking, and other facility engineering management functions. Also known as VistA - Engineering",NA,NA,IFCAP,No,"Conduct Supply Chain Operations
 Manage VHA-Wide Administrative Services
@@ -1533,7 +1533,7 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1032,AMIE-II,VistA - Automated Medical Information Exchange II,VHA,"The AMIE software automates the administrative procedures involved in sending medical information used in determining veteran benefit payments from the VA medical centers to the VA regional offices.  A 2507 examination request is a request for specific examination(s) to be performed on a veteran to determine compensation or pension benefits. The regional office has the ability to add a patient to the medical center's database if s/he does not exist there. All aspects of the examination process - notifying MAS of the request, scheduling of the exams, transcribing the results, forwarding the results to the RO -are handled through AMIE. Medical centers have the ability to transfer any exams they are unable to perform to other sites via MailMan messages. The AMIE software at the receiving medical center takes the mail message and enters a 2507 request into that hospital's database. Once these exams are completed, they are transferred back to the original medical center.  Both modules of AMIE provide a number of reports to provide medical center and regional office personnel with the status and timeliness of any request.",Mission System,NA,VistA,No,NA,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -1545,12 +1545,12 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1039,ASCD,VistA - Automated Service Connected Designation,VHA,"Automated Service Connected Designation (ASCD) project will automate the Service Connected (SC) decision for outpatient encounters using the mapped ICD/Rated Disability codes at the time the clinician actually picks the ICD code for the encounter within the Patient Care Encounter (PCE) and Scheduling packages. Thus, when a provider or clinician chooses the diagnosis code for the encounter the system will automatically determine if the diagnosis is related to the veteran's established service connected conditions, and will likewise automatically make the proper SC/NSC determination for that encounter. This software recognizes potentially billable encounters for SC veterans that cannot be automatically matched to Rated Disability codes. These encounters are displayed in reports for coders and/or utilization review staffs who then review the patient visit information, edit incorrect SC designated encounters, and release them to Claims Tracking for billing where appropriate.",Mission System,NA,VistA,No,"Capture Patient Care Encounter Information
 Determine Allowable Services
 Perform Billing and Claims Submissions
-Perform Patient Care Encounter",NA,NA,NA,NA,Medical Legacy,NA,NA,Larry Weldon,"InterSystems Caché
+Perform Patient Care Encounter",NA,NA,NA,NA,Medical Legacy,NA,NA,Larry Weldon,"InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1064,BR,VistA - Blind Rehabilitation,VHA,"Tracking and reporting of services to visually impaired veterans Enterprise System  BR Version 5.0 provides a web-enabled GUI through which users can access enhanced capabilities intended for VIST Coordinators, new functionality for BROS, BRC personnel and",Mission System,NA,VistA,NA,"Capture Patient Care Encounter Information
 Create Patient Summary Record of Care
@@ -1565,7 +1565,7 @@ Jack Galvin
 Jerry Taylor
 Mark Cecil
 Sean Curtis
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1158,NA,VistA - CPRS: Clinic Medication Orders,VHA,"CPRS Clinic Medication Orders will function comparable to Inpatient Medications. In addition, CPRS will allow all authorized VHA personnel with prescribing privileges to easily recognize and access a One Step process to document clinic orders and the administration by the clinician from any area where orders can be called.",Mission System,NA,VistA,No,Provide Clinical Decision Support,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -1603,7 +1603,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1784,CM,VistA - Care Management,VHA,"Care Management is the first application to run within the HealtheVet Desktop (the VHA s new Java application framework) and the first to offer a convenient way for health care providers to view on a single screen pertinent information about multiple patients. With Care Management, users can see at a glance multiple patients for whom they have items that require attention. The current distribution of Care Management offers the following four perspectives (which are similar to applications): Clinician Dashboard; Nurse Dashboard; Query Tool; Sign List.  This distribution of Care Management also includes the Task Editor, which enables users to create patient-related tasks.",Mission System,NA,VistA,No,"Assign Clinical Tasks
 Create Patient Summary Record of Care
@@ -1619,11 +1619,11 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
-1883,VCM,VistA - Chemotheraphy Manager,VHA,"VCM, is the premier technology for computerizing the administration of chemotherapy for cancer care. It automates the clinical practice of Oncology from the assignment of therapy to the calculation of chemotherapy doses, all the way through to the documentation of care. It is the most widely used product of its type because it combines the most complete range of automation, safety features and flexibility that Oncology practices demand with a highly intuitive user interface making it simple to use. DSS VistA Chemotherapy Manager – VCM is scalable to all clinical settings",Mission System,COTS,VistA,No,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
+1883,VCM,VistA - Chemotheraphy Manager,VHA,"VCM, is the premier technology for computerizing the administration of chemotherapy for cancer care. It automates the clinical practice of Oncology from the assignment of therapy to the calculation of chemotherapy doses, all the way through to the documentation of care. It is the most widely used product of its type because it combines the most complete range of automation, safety features and flexibility that Oncology practices demand with a highly intuitive user interface making it simple to use. DSS VistA Chemotherapy Manager ï¿½ VCM is scalable to all clinical settings",Mission System,COTS,VistA,No,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
-Larry Weldon","InterSystems Caché
+Larry Weldon","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1787,CP,VistA - Clinical Procedures,VHA,"VistA package Clinical Procedures (CP) primarily functions as a conduit for passing final patient results, using HL7 messaging, between vendor clinical information systems (CIS), and the VISTA hospital information system. Clinical Procedures was developed",Mission System,NA,VistA,No,"Manage Health Records
 Provide Health Data Processing Management and Collaboration
@@ -1636,7 +1636,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1849,CPRS,VistA - Computerized Patient Record System,VHA,"CPRS is a VistA module that enables clinicians to enter, review, and continuously update all order-related information connected with any patient. With CPRS, you can order lab tests, medications, diets, radiology tests and procedures, record a patient s allergies or adverse reactions to medications, request and track consults, and enter progress notes, diagnoses, and treatments for each encounter, and enter discharge summaries. Close integration with the Clinical Reminders and Text Integration packages allows better record keeping and compliance with Clinical Guidelines and medical record requirements. CPRS not only allows hospital personnel to keep comprehensive patient records, it also enables clinicians, managers, and QA staff to review and analyze the data gathered on any patient in a way that directly supports clinical decision-making. CPRS integrates important VistA sub-modules: Adverse Reaction Tracking (ART), Authorization/Subscription Utility (ASU), Clinical Reminders, Consult/Request Tracking, Health Summary, Bed Control, Consults, Dietetics, Encounter Forms,",Mission System,NA,VistA,No,"Capture Patient Care Encounter Information
 Create Patient Summary Record of Care
@@ -1679,7 +1679,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1163,CPT,VistA - Current Procedural Terminology,VHA,"Current Procedural Terminology (CPT) codes are used for reporting medical services and procedures performed by clinicians. The purpose of the code is to provide a uniform language that will accurately describe medical, surgical, and diagnostic services, thereby providing an effective means for reliable nationwide communication among physicians, patients, and third parties.  This system of terminology is the most widely accepted nomenclature for the reporting of clinical procedures and services under government and private health insurance programs.",Mission System,NA,VistA,No,"Perform Billing and Claims Submissions
 Provide Partner Interoperability, Collaboration, Sharing, and Exchange
@@ -1691,7 +1691,7 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1850,NA,VistA - DBA Menu,VHA,Database Administration (DBA) is a menu of database tables stored on the VA national electronic mail system FORUM. It is used primarily by VA Office of Information & Technology personnel involved in maintaining and operating Veterans Health Information Systems and Technology Architecture (VistA).,Support System,NA,VistA,No,NA,Region 3 VistA Assessing,NA,NA,NA,NA,NA,NA,"Larry Weldon
 Michael Lay",NA,01-Premium,NA,NA,NA,NA,
@@ -1720,7 +1720,7 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1790,DA,VistA - Drug Accountability,VHA,"Provides a national database containing information on drug dispensing at VAMCs. Provides reporting at local, regional, and national levels for VAMCs and VISNs.Provides monthly, quarterly, and annual reports to the VAMCs and VISNs. Provides the translation of local pharmaceutical names to common names. Provides confirmation to VAMCs that MailMan messages have been received successfully by the Hines facility.",Mission System,NA,VistA,No,"Maintain Pharmacy Inventory
 Provide Inpatient Pharmacy Services
@@ -1735,7 +1735,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay","Intel
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 SQL Server
 Windows XP",01-Premium,NA,NA,NA,NA,
@@ -1748,7 +1748,7 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1791,ESig,VistA - Electronic Signature,VHA,"Contains the M-side portion of the electronic signature methods for rehosted applications that validate, store, and retrieve electronic signature data.",Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation","Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -1758,7 +1758,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1792,EDIS,VistA - Emergency Department Integration Software,VHA,"The Emergency Department Integration System (EDIS) is a VHA-wide application used to track and manage the delivery off care to patients in the Emergency Care System (ECS).  This critical IT solution directly supports the Major Initiative """"Enhance the Veteran Experience and Access to Healthcare (EVEAH).  EDIS v1.0 is currently being deployed in each VHA hospital and is scheduled for deployment completion by 7/31/2011.  The application improves emergency department care by introducing the systematic collection, display and reporting on patient status information.  It is able to integrate with Appointment Management and Patient Care Encounter within VistA.  EDIS v2.0 is currently being planned and will provide enhancements, better functionality and improved reports.",Mission System,NA,VistA,No,"Capture Patient Care Encounter Information
 Provide Emergency Pharmacy Services
@@ -1784,7 +1784,7 @@ Mark Cecil
 Michael Lay
 Tammy Watson
 Vitalia Devlin","Alphaserver
-InterSystems Caché
+InterSystems Cachï¿½
 Linux
 MUMPS",01-Premium,NA,NA,NA,High,
 1292,FIM,VistA - Functional Independence Measurement,VHA,"The Functional Independence Measures (VA FIMware) Version 1.0 provides an integration of FIM assessments into the Computerized Patient Record System (CPRS) and into the Functional Status and Outcomes Database (FSOD) at the Austin Automation Center (AAC). The FIM is an 18-item 7-level functional assessment designed to evaluate the amount of assistance required by a person with a disability to perform basic life activities safely and effectively. There are five types of FIM assessments: admission, goals, interim, discharge, and follow-up.",Mission System,NA,VistA,No,"Evaluate Health Status and Determine Risks
@@ -1795,7 +1795,7 @@ Provide Rehabilitation Services","Region 1 VistA Assessing
 Region 4 VistA Assessing",NA,NA,NA,NA,Thomas Holohan,NA,"Donna Augustine
 Jack Galvin
 Mark Cecil
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1306,NA,VistA - Group Notes,VHA,"This program was designed to assist providers in documenting group therapy sessions and events such as immunization clinics. It allows the easy assembly of patient groups based on Clinics, Specialties, Wards, Teams, or Provider lists. It then allows the note author to specify parts of a note that apply to the entire group and parts that apply to individuals. It does the same with encounter data. After the note and encounter information is complete, it provides for a single signature for the entire group.",Mission System,NA,VistA,No,"Manage Health Records
 Manage Medical Notes
@@ -1808,7 +1808,7 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1332,HT,VistA - Home TeleHealth,VHA,"Maintenance of modem back and physical network connectivity (firewalls, cables, etc.) for system setup so that Veterans will have devices to check vitals and send information to the doctors.",Mission System,NA,VistA,No,"Provide General and Home Telehealth Services
 Provide Home and Community Based Care
@@ -1818,7 +1818,7 @@ Support Communication with Medical Devices",Home TeleHealth,NA,"Home TeleHealth 
 Home TeleHealth Sustainment
 Home Telehealth Reporting Enhancements (HTRE)",Austin Information Technology Center,NA,"Adam Darkins
 Adam Durkins",NA,"Tammy Watson
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,High,
 1328,NA,VistA - Imaging,VHA,"VistA Imaging facilitates medical decision-making by delivering complete multimedia patient information to the clinician s desktop in an integrated manner. Windows-based workstations, which are interfaced to the main hospital system in a client-server architecture, make images and associated text data available at all times anywhere in the hospital or across VA.",Mission System,NA,VistA,No,"Archive Digital Images
 Archive Scanned Images
@@ -1833,7 +1833,7 @@ Donna Cabral
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1851,NA,VistA - Imaging System,VHA,"VistA Imaging facilitates medical decision-making by delivering complete multimedia patient information to the clinician s desktop in an integrated manner. Windows-based workstations, which are interfaced to the main hospital system in a client-server architecture, make images and associated text data available at all times anywhere in the hospital or across VA.",Mission System,NA,VistA,No,"Archive Digital Images
 Archive Scanned Images
@@ -1847,7 +1847,7 @@ Donna Cabral
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1878,NA,VistA - Imaging: Background Processor,VHA,"The Background Processor manages image storage on various network devices, including magnetic storage (RAID) and optical storage (jukebox) as a long-term archive.",Mission System,Custom Development,VistA,No,"Provide Ancillary Services
 Utilize Information Technology Services","Region 1 VistA Assessing
@@ -1859,7 +1859,7 @@ Donna Cabral
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1879,NA,VistA - Imaging: Clinical Capture,VHA,Clinical Capture is a part of the VistA Imaging System,Mission System,Custom Development,VistA,No,"Provide Ancillary Services
 Utilize Information Technology Services","Region 1 VistA Assessing
@@ -1870,7 +1870,7 @@ Donna Cabral
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1880,NA,VistA - Imaging: Clinical Display,VHA,Clinical Display is a part of the Veterans Health Information System and Technology Architecture (VistA) Imaging System.,Mission System,Custom Development,VistA,No,"Provide Ancillary Services
 Utilize Information Technology Services","Region 1 VistA Assessing
@@ -1881,7 +1881,7 @@ Donna Cabral
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1962,NA,VistA - Imaging: Core Infrastructure,VHA,"The VistA Imaging Core Infrastructure includes the components used to capture, store, and display all types of images. Images can be captured using video cameras, digital cameras, document and color scanners, x-ray scanners, and imported files created by electronically by commercial systems. Images can also be directly acquired from DICOM-compliant devices such as CT scanners, MR scanners and digital x-ray machines.  Captured images are accessible through VistA Imaging or the Computerized Patient Record System (CPRS) graphical user interface (GUI) on the clinician s desktop. Viewing a procedure/exam report or progress note in CPRS allows the user to automatically access any associated images.  Core Imaging Infrastructure is made up of the following:    DICOM text gateways, which provide patient and order information to medical devices (such as CT scanners and digital radiography systems), allowing selection of the examination to be performed. The data provided by DICOM text gateways complies with the DICOM Modality Work list standard.    DICOM image gateways, which allow VistA Imaging to receive images from PACS systems or acquisition devices. Image gateways can also be used to transfer images from the VistA system to any DICOM-compliant devices for display, printing, or teleradiology purposes.    Windows-based workstation software for clinical image display and capture.    The Background Processor, which manages image storage on various network devices, including magnetic storage (RAID) and optical storage (jukebox) as a long-term archive.    The VistA Imaging database, which manages image information and the relationship between images and study data.    The commercially available equipment required by VistA Imaging, including magnetic servers, optical disk jukeboxes, and utility workstations.",Mission System,NA,VistA,No,"Archive Digital Images
 Archive Scanned Images
@@ -1897,14 +1897,14 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1881,NA,VistA - Imaging: Telereader,VHA,The TeleReader is a stand alone application that displays the Unread List and Read List to the readers.  It allows the readers to select a study from the Unread List and view the study and associated data in CPRS and Clinical Display.,Mission System,NA,VistA,No,"Provide Ancillary Services
 Utilize Information Technology Services","Region 1 VistA Assessing
 Region 4 VistA Assessing",NA,NA,NA,NA,NA,NA,"Donna Cabral
 Jack Galvin
 Larry Weldon
-Mark Cecil","InterSystems Caché
+Mark Cecil","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1963,NA,VistA - Incident Reporting,VHA,"The Incident Reporting package is a component of the Quality Management sub-system. It deals with the gathering and manipulation of data for such incidents as Suicide, Suicide Attempt, Sexual Assault, Homicide, Patient Abuse, Alleged or Proven Fall, Transfusion or Medication Error, etc. The application is driven by the incident rather than the patient. This was done to allow for the entry of more than one patient associated with a single incident as may occur with fires or patient to patient assaults.",Mission System,NA,VistA,No,"Evaluate Incidents
 Manage Hospital Safety Program
@@ -1915,7 +1915,7 @@ Region 4 VistA Assessing",NA,NA,NA,NA,NA,NA,"BK Hack
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1964,IVM,VistA - Income Verification Match,VHA,The IVM package will transmit information to the Health Eligibility Center for certain Veterans to determine the correct eligibility status based on their financial status.,Mission System,NA,VistA,No,Determine Eligibility,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -1925,7 +1925,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1804,IRT,VistA - Incomplete Records Tracking,VHA,"The Incomplete Records Tracking (IRT) package provides the medical center the ability to monitor incomplete records. Interim summaries, discharge summaries, and both inpatient and outpatient operation reports are tracked. Records may be incomplete or deficient for one or more of the following reasons - not dictated, not transcribed, not signed, or not reviewed.",Mission System,NA,VistA,No,"Manage Consults
 Manage Health Records","Region 1 VistA Assessing
@@ -1937,7 +1937,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1965,IPM,VistA - Inpatient Medications,VHA,Combination of Unit Dose Medications and IV Medications and their associated utilities.,Mission System,NA,VistA,No,"Administer Medication
 Implement Patient Safety Improvement
@@ -1956,14 +1956,14 @@ Region 4 VistA Assessing",Inpatient Pharmacy,NA,NA,NA,Michael Valentino,NA,"BK H
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1882,ICB,VistA - Insurance Capture Buffer,VHA,"ICB is an insurance care scanning and VistA buffer file update management system, integrated with eIV, appointment scheduling, and patient insurance file.  Patient insurance information is electronically captured and immediately available for verification",Mission System,NA,VistA,No,"Conduct Insurance Identification and Verification
 Maintain Patient Summary Lists","Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,NA,Region 1,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Larry Weldon
-Mark Cecil","InterSystems Caché
+Mark Cecil","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,7 Days,Not Specified,NA,
 1356,I&O,VistA - Intake and Output,VHA,"The Intake and Output (I&O) application is designed to store, in the patient's electronic medical record, all patient intake and output information associated with a hospital stay or outpatient visit. This application is not service specific and currently is interfaced with the Patient Information Management System (PIMS) (MAS), Nursing, and Pharmacy applications.",Mission System,NA,VistA,No,"Manage Health Records
 Monitor Patient Clinical Measurements","Region 1 VistA Assessing
@@ -1973,7 +1973,7 @@ Region 4 VistA Assessing",NA,NA,NA,NA,NA,NA,"BK Hack
 Donna Augustine
 Jack Galvin
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1966,NA,VistA - Interface Utility,VHA,"VistA Interface Utility (also referred to as DataBridge) serves as a bridge between the VistA systems of a VISN, and the ICU CIS and ARK of the VISN.  It does not interface the ICU CIS and ARK with each other.  By transferring data between VistA systems and the CISs, as well as sending VistA data to Medical Analytics (defined below), clinicians can view clinical data in a single representation, and can document procedures and assessments in the CIS in which automated data is collected. 
 Includes the Vitria Businessware connectivity",Mission System,NA,VistA,No,NA,"Region 1 VistA Assessing
@@ -1994,7 +1994,7 @@ Donna Augustine
 Jack Galvin
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1381,NA,VistA - Laboratory,VHA,"The Veterans Health Information System and Technology Architecture (VistA) Laboratory module is a clinically oriented system designed to provide data to health care personnel. It assists the Pathology and Laboratory Medicine Service in managing and automating the workload and reporting process. The Laboratory module supports the following areas: General Laboratory, Microbiology, Histology, Cytology, Surgical Pathology, Electron Microscopy, Blood Donors, and Blood Bank",Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
 Provide General Laboratory Services
@@ -2010,7 +2010,7 @@ Region 4 VistA Assessing",NA,VistA Evolution - Laboratory (IOC),NA,NA,Michael Ic
 Donna Augustine
 Jack Galvin
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1810,NA,VistA - Laboratory: Anatomic Pathology,VHA,"The VistA Laboratory Anatomic Pathology module automates record keeping and reporting for all areas of Anatomic Pathology (i.e., Surgical Pathology (SP), Cytopathology, Electron Microscopy (EM), and Autopsy). The module provides valuable quality management features, increases productivity, provides comprehensive search and reporting capabilities, and facilitates the gathering of workload statistics.",Mission System,NA,VistA,No,"Provide General Laboratory Services
 Provide Health Data Processing Management and Collaboration
@@ -2024,7 +2024,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1812,POC,VistA - Laboratory: Point of Care,VHA,"The VistA Laboratory Point of Care software is a type of interface that downloads and stores results for a bed side analyzer/device or any instrument that performs laboratory testing at the site of care (examination, treatment, diagnosis, etc.)",Mission System,NA,VistA,No,"Provide General Laboratory Services
 Provide Pathology Services
@@ -2034,7 +2034,7 @@ Region 4 VistA Assessing",NA,NA,NA,NA,Michael Icardi,NA,"Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1813,UI,VistA - Laboratory: Universal Interface,VHA,"The purpose of the VistA Laboratory Universal Interface (UI) Health Level (HL) v1.6 Upgrade Patch LA*5.2*66 software release is to improve the transmission of laboratory test results from clinical analyzers to the VistA system. This release upgrades Lab UI from VistA s Health Level Seven (HL) v1.5 to VistA s HL v1.6, which includes the use of version 1.6 Transmission Control Protocol/Internet Protocol (TCP/IP) functionality. This functionality supports the current Lab UI HL7 Interface Specifications based on the HL7 Standard V2.2.",Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
 Provide Orders Management
@@ -2046,7 +2046,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1817,NA,VistA - Mailman,VHA,"MailMan is a communications package that can be used by software and hardware. In its' user mode it operates in a kind of mode that is very nice for asynchronous teleconferencing. It has many functions that can be used by software, including the ability to address messages to software (servers) and extract data from message fields.",Mission System,NA,VistA,No,"Provide Electronic Communication Between Provider and Patient
 Provide Inter-Provider Communication
@@ -2058,7 +2058,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1825,VistA - NT Cache,VistA - NT Cache,VHA,"Windows has a file caching mechanism which is tightly integrated with the memory manager. It helps disk performance by keeping the most recent files in memory, whether is is EXE or DLL files loaded by the memory manager or data files loaded by the running applications.",Mission System,NA,VistA,No,NA,"Region 2 GSS Assessing
 Region 3 VistA Assessing
@@ -2071,7 +2071,7 @@ Michael Lay",NA,01-Premium,NA,NA,NA,High,
 Region 4 VistA Assessing",NA,NA,NA,NA,NA,NA,"BK Hack
 Donna Augustine
 Jack Galvin
-Larry Weldon","InterSystems Caché
+Larry Weldon","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1821,NDF,VistA - National Drug File,VHA,This is the National Drug File Package V 3.15; ongoing enhancements,Mission System,NA,VistA,No,"Manage the National Formulary
 Provide Health Data Processing Management and Collaboration
@@ -2086,7 +2086,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1822,NLT,VistA - National Laboratory Test,VHA,This package is used to update NLT files consisting of nationally standardized terms and procedure names. Any new procedure of term created by the site must use terms already defined by the NLT package.,Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
 Provide Health Data Processing Management and Collaboration
@@ -2101,7 +2101,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1466,N&FS,VistA - Nutrition and Food Service,VHA,"The Nutrition and Food Service (N&FS) software integrates the automation of many Clinical Nutrition, Food Management, and Management Reports functions. The Clinical N&FS activities of Nutrition Screening, Nutrition Assessment, Diet Order Entry, Tube Feeding and Supplemental Feeding Orders, Patient Food Preferences, Specific Diet Pattern Calculations, Nutrient Analysis of meals, Consult Reporting, Encounter Tracking, and Quality Care Monitoring are all available in this program. The Food Management function has complete automation of food production activities; Service and Distribution, Inventory and Cost Management, Recipe Expansion, Menu and Recipe Nutrient Analysis, Meal and Diet Pattern Development and Implementation, Diet Card and Tray Ticket Printing, and Quality Service Tracking are available. The Management Reports include the Served Meals, Additional Meals, Cost Per Meal, Tube Feeding Cost, Supplemental Feeding Cost, Staffing Data, Encounter Data, and Annual Management Reports.",Mission System,NA,VistA,No,"Create Patient Summary Record of Care
 Maintain Patient Summary Lists
@@ -2117,7 +2117,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1852,Tumor Registry,VistA - OncoTraX,VHA,OncoTrax v2.11 is the Veterans Health Information Systems and Technology Architecture package at each of the Medical Centers which stores and transmits cancer diagnosis and treatment constraints data entered by the local cancer registry staff. The cancer,Mission System,NA,VistA,No,"Capture Data and Documentation from External Sources
 Manage Consults
@@ -2140,13 +2140,13 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1493,PAIT,VistA - Patient Appointment Information Transmission,VHA,Modify the national wait time database that contains only summarized information about waiting times to allow wait time extracts of schedule appointments to send data at the SSN level so that VSSC can do analysis on the data when questions arise. This patch will add extensive system monitoring to ensure the records are sent and received properly.,Mission System,NA,VistA,No,"Perform Clinical Process Improvement
 Provide Support to Identify Potential Problems and Trends",Region 3 VistA Assessing,Inpatient Pharmacy,NA,NA,NA,NA,"Kevin Martin
 Stacey Campbell","Larry Weldon
 Michael Lay","Intel
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 Windows 2003",01-Premium,NA,NA,NA,NA,
 1463,PDX,VistA - Patient Data Exchange,VHA,VISTA Package/ obsolete. This module (PIR) allows medical centers to exchange patient clinical and administrative information through the use of MailMan. Requests can be sent to a remote site. The remote site can process the request and a message containi,Mission System,NA,VistA,No,"Provide Clinical Patient Identity Management
@@ -2161,7 +2161,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1464,NA,VistA - Patient Representative,VHA,The purpose of the Patient Representative module is to ensure that VA medical facilities respond to patient needs. The software tracks and trends compliments and complaints and measures the facility's types of complaints as they relate to the Customer Services Standards and the National Patient Satisfaction Survey. This package supports the Patient Advocate with the collection and categorization of complaints and compliments that give the medical center an opportunity to meet and exceed the customer s expectations. The issue codes provide the opportunity to track types of complaints and,Mission System,NA,VistA,No,"Communicate Process Appeal and/or Notice of Disagreement
 Manage Customer Relations
@@ -2175,14 +2175,14 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1510,PSIM,VistA - Person Services Identity Management,VHA,Person Services Identity Management. PSIM is an authoritative source for veterans' identity traits. This is a child of the IAM application.,Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
 Provide Clinical Patient Identity Management
 Provide Health Data Processing Management and Collaboration
 Provide Partner Interoperability, Collaboration, Sharing, and Exchange
 Provide Person Identity Management",Identity Management - Person Services,NA,NA,Austin Information Technology Center,NA,Elizabeth Franchi,NA,"Samantha Cooper
-Tammy Watson","InterSystems Caché
+Tammy Watson","InterSystems Cachï¿½
 Linux
 MUMPS
 VMWare farm
@@ -2210,7 +2210,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1832,PBM,VistA - Pharmacy Benefits Management,VHA,"VistA Pharmacy Benefits Management (PBM) software extracts statistics from  files on a monthly basis. This data is electronically exported via MailMan to the National PBM Section. These messages are then passed through a translation process to convert all local drug names to a common drug name and all local dispensing units to a common dispensing unit. After translation the information will be added to a national database. The PBM Section will be able to provide information on facility, regional, and ;;national product use on a monthly, quarterly, and annual intervals.",Mission System,NA,VistA,No,"Provide Consolidated Mail Outpatient Pharmacy Services
 Provide Enterprise Reporting
@@ -2232,7 +2232,7 @@ Larry Weldon
 Mark Cecil
 Michael Lay
 Vitalia Devlin","Intel
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 SQL Server
 Windows 2003
@@ -2253,7 +2253,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1491,PPP,VistA - Pharmacy Prescription Practice,VHA,The Pharmacy Prescription Practices Package is a set of routines for determining whether a patient has visited other VAMC's and the making the prescription data from those facilities aviable to the local pharmacist,Mission System,NA,VistA,No,"Provide Internal Electronic Information Exchange
 Provide Pharmacy Benefits Management Systems Oversight","Region 1 VistA Assessing
@@ -2264,7 +2264,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1834,NA,VistA - Pharmacy: Clinical Orders,VHA,"VistA - Pharmacy: Clinical Orders will enhance the accurate administration of medications, thereby enhancing patient safety.  The software will provide the functionality requested by the Health Systems Committee to meet patient safety goals to improve communication between caregivers, eliminates the need to abbreviate provider comments addressing a Joint Commission on Accreditation of Healthcare Organizations (JCAHO) requirement, and enhances productivity so that Veterans  pharmacy needs more effectively met.",Mission System,NA,VistA,No,Support Medication Orders,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -2274,7 +2274,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1972,NA,VistA - Pharmacy: Outpatient Pharmacy,VHA,"VISTA Outpatient labels, profile, inventory and prescriptions.",Mission System,NA,VistA,No,"Implement Patient Safety Improvement
 Maintain Patient Summary Lists
@@ -2292,7 +2292,7 @@ Region 3 VistA Assessing
 Region 4 VistA Assessing",NA,NA,NA,NA,Michael Valentino,NA,"BK Hack
 Jack Galvin
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1835,NA,VistA - Police & Security,VHA,"This package supports the role of the VA police officer. Functions include Offense Reports, Violations, Quick Name Check, Wants & Warrants, and Vehicle Registration.",Mission System,NA,VistA,No,"Manage Hospital Safety Program
 Provide Security Services","Region 1 VistA Assessing
@@ -2303,7 +2303,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1506,QUASAR,VistA - Quality Audiology & Speech Analysis Reporting,VHA,VistA Package (ACKQ) that automates sending of audiology and speech pathology data to PCE - inactive since 2007 Quality: Audiology and Speech Pathology Audit and Review (QUASAR) was designed to capture patient treatment and workload information for Audio,Mission System,NA,VistA,No,Provide Rehabilitation Services,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -2314,13 +2314,13 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1947,QMIM,VistA - Quality Management Integration Module,VHA,The QM Integration Module (often called the QAQ routines) contains utilities that are common to some or all of the QM software packages. Utilities that you may recognize are as follows. It lets the user choose the date range that is needed for the report.  The group selector lets the user select more than one item to print or view at a time.  The Ad Hoc Report Generator uses basic VA FileMan sort and print modifiers and adds the capability of building macros (often termed templates) for those reports that are routinely required.  The audit file builds an audit trail for each record in the QM packages.,Mission System,NA,VistA,NA,Provide Enterprise Reporting,"Region 1 VistA Assessing
 Region 2 VistA Assessing
 Region 4 VistA Assessing",NA,NA,NA,NA,NA,NA,"BK Hack
 Jack Galvin
-Mark Cecil","InterSystems Caché
+Mark Cecil","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1837,NA,VistA - Radiology/Nuclear Medicine,VHA,Radiology/Nuclear Medicine is a comprehensive software package designed to assist with the functions related to processing patients for imaging examinations. The Radiology/Nuclear Medicine package automates the entire range of diagnostic functions performed in imaging departments.,Mission System,NA,VistA,No,"Provide National Nuclear Medicine Health Care and Radiation Safety Services Advice
 Provide National Radiology and Radiation Oncology Program Support
@@ -2334,7 +2334,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1971,NA,VistA - Record Tracking,VHA,The Record Tracking module provides for the maintenance and control of medical records and x-ray films to facilitate availability to a variety of users. The system offers a wide range of individual site-definable parameters such that it may be custom-tailored to specific needs and used in any type of file setting. The Record Tracking module is integrated with other associated modules such as Radiology and Patient Information Management System.,Mission System,NA,VistA,No,"Archive Digital Images
 Archive Scanned Images
@@ -2347,7 +2347,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1564,NA,VistA - Release of Information Manager,VHA,"The ROI Manager is an application that uses """"RPC Broker"""" technology that permits the facility users to retrieve clinical data within the VistA System. The user can work offline of VistA and only administrator functions will be active. The ROI Manager Encounter System database is linked to the VistA System database that stores registered patient documentation. These databases are  in sync  with each other and reduce data entry time because certain data fields are automatically populated (or filled-in) ensuring data accuracy.",Mission System,COTS,VistA,No,"Provide Partner Interoperability, Collaboration, Sharing, and Exchange
 Provide Patient Information Security","Region 1 VistA Assessing
@@ -2359,7 +2359,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1838,ROES,VistA - Remote Order Entry System,VHA,"ROES is the application and underlying order fulfillment system allowing VHA clinical staff in designated disciplines to obtain patient care products and services through the Denver Acquisition & Logistics Center.  Clinical programs supported by ROES include Audiology & Speech Pathology, Prosthetic & Sensory Aids, and Home Telehealth.",Mission System,NA,VistA,No,"Acquire Goods and Services
 Provide Facility Procurement, Warehousing, and Supplies","Region 1 VistA Assessing
@@ -2376,7 +2376,7 @@ Michael Lay
 Samantha Cooper","ASP
 Cache, FileMan
 Intel
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 Windows 2003
 Windows Server",01-Premium,NA,NA,NA,Medium,
@@ -2390,7 +2390,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1841,NA,VistA - Social Work,VHA,"The Social Work package is designed to facilitate the Social Work Service functions within a medical facility and is composed of Case Management, Clinical Assessment, and Community Resource. The Case Management software is used for managing social work cases (e.g., opening and closing cases, recording problems and outcomes, storing referrals) and for generation of reports that are transmitted quarterly to VA Central Office. The Clinical Assessment software provides a method of identifying, upon admission, patients most likely to require social work assistance before or after discharge. The hospital stay may be minimized with the anticipation of patients  domestic or social needs prior to discharge.",Mission System,NA,VistA,No,"Provide Case Management
 Provide Social Work Services","Region 1 VistA Assessing
@@ -2402,7 +2402,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1046,NA,VistA - Surgery,VHA,"VISTA Package. The DHCP Surgery package is used to enter/edit and display information related to the Surgical Service. It will track surgical cases, provide useful management reports, and produce the necessary documentation for all surgical cases. Annual",Mission System,NA,VistA,No,"Assign Clinical Tasks
 Monitor Clinical Tasks
@@ -2416,7 +2416,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1842,NA,VistA - Survey Generator,VHA,"The Survey Generator is a software package which allows creation and maintenance of computerized survey forms. It also provides for entry of any respondents answers via computer terminal or a hard copy filled out and then entered by any designated person. In addition, it provides useful statistical information by survey alone or by demographic data items.  This package is designed with both the survey author and the respondent in mind. It is simple to use and straightforward in operation and does not require any exceptional skills on the user's part.",Mission System,NA,VistA,No,"Manage Customer Relations
 Promote Clinical Public Health
@@ -2426,7 +2426,7 @@ Region 4 VistA Assessing",NA,NA,NA,NA,NA,NA,"BK Hack
 Donna Augustine
 Jack Galvin
 Larry Weldon
-Mark Cecil","InterSystems Caché
+Mark Cecil","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1786,NA,VistA - VA Fileman,VHA,VA FileMan is Veterans Health Information Systems and Technology Architecture s (VistA) database management system (DBMS). It runs in any American National Standards Institute (ANSI) environment. The majority of VHA clinical data is stored in VA FileMan files and is retrieved and accessed through VA FileMan Application Programmer Interfaces (API) and user interfaces.,Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
 Provide Facility Information Management Support
@@ -2440,7 +2440,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1845,VistA - VMS Cache,VistA - VMS Cache,VHA,"OpenVMS is a general-purpose, multi-user operating system. It has well-integrated networking, distributed computing, client/server, multiprocessing, and windowing capabilities.",Mission System,NA,VistA,No,NA,"Region 1 GSS Assessing
 Region 2 VistA Assessing
@@ -2461,9 +2461,9 @@ Larry Weldon
 Mark Cecil
 Michael Lay",NA,01-Premium,NA,NA,NA,NA,
 1710,VIC,VistA - Veteran Identification Card,VHA,To provide Veterans an identifacation card used to recieve healthcare benefits and services.,Mission System,NA,VistA,NA,NA,Region 3 VistA Assessing,NA,Veteran Identification Card,Capital Regional Recovery Center,NA,Lynne Harbin,NA,"Michael Lay
-Paul Tryhus","InterSystems Caché
+Paul Tryhus","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
-1525,VBECS,VistA - VistA Blood Establishment Computer Software,VHA,"The main purpose of VBECS is to automate the daily processing of blood inventory and patient transfusions in a hospital transfusion service. VBECS facilitates ongoing compliance with Food and Drug Administration (FDA) standards for medical devices and enhances the VA Veterans Health Administration’s (VHA’s) ability to produce high-quality blood products and services to veterans. The system follows blood bank standards, standards of national accrediting agencies, FDA regulations, and VA policies. VBECS is the replacement for the VistA Blood Bank application.",Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
+1525,VBECS,VistA - VistA Blood Establishment Computer Software,VHA,"The main purpose of VBECS is to automate the daily processing of blood inventory and patient transfusions in a hospital transfusion service. VBECS facilitates ongoing compliance with Food and Drug Administration (FDA) standards for medical devices and enhances the VA Veterans Health Administrationï¿½s (VHAï¿½s) ability to produce high-quality blood products and services to veterans. The system follows blood bank standards, standards of national accrediting agencies, FDA regulations, and VA policies. VBECS is the replacement for the VistA Blood Bank application.",Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
 Provide Blood Services
 Provide General Laboratory Services
 Provide Partner Interoperability, Collaboration, Sharing, and Exchange
@@ -2482,7 +2482,7 @@ Mark Cecil
 Mary Hadd
 Michael Lay
 Reyes Ruiz
-Tammy Watson","InterSystems Caché
+Tammy Watson","InterSystems Cachï¿½
 MUMPS",01-Premium,Mission Critical,NA,NA,NA,
 1844,NA,VistA - VistaLink,VHA,VistaLink; TSPR project  The Generic Instrument Manager (GIM) is a locally procured commercial device that controls communications between the Laboratory instruments and VistA. The VistA system downloads work lists through the GIM to the various instrument,Mission System,NA,VistA,No,"Provide Facility Information Management Support
 Provide Inter-Provider Communication","Region 1 VistA Assessing
@@ -2493,7 +2493,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1846,NA,VistA - Women's Health,VHA,"The purpose of the Women's Health package is to establish a computerized tracking system that generates aggregate data at the facility level. The product would assist in the assessment of various aspects of care provided to women veterans, such as efficiency of care, outcomes of care, and quality of care for individual patients. It is intended to: provide data to determine if there are differences in disease frequency between women veterans and the general population; provide information for clinical guideline development and determine if preventive health screening guidelines developed for the general population are applicable, or need modification in the women veteran population; and provide workload, preventive screening, women veterans health profile, outcome measurement, and provider profiling data.",Mission System,NA,VistA,No,"Provide Medical Registry Service
 Provide Specialty Care
@@ -2506,7 +2506,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1847,WII,VistA - Wounded Injured Ill Warriors,VHA,"Injured Senior Oversight Committee, Support and Care for the Wounded - Task Force, under Line of Action (LOA) #8 Pay Management, to develop a tool to provide accurate and timely personnel and health related data to the Defense Finance and Accounting Service (DFAS) supporting adequate maintenance of pay and entitlements for all wounded warriors.",Mission System,NA,VistA,No,"Provide Evidence-Based Psychotherapy (EBP)
 Provide Mental Health Residential Rehabilitation and Treatment
@@ -2519,7 +2519,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1871,NA,VistA - XML Parser,VHA,"The VistA Extensible Markup Language (XML) Parser is a full-featured, validating XML parser written in the M programming language and designed to interface with the VistA suite of M-based applications. It is not a standalone product. Rather, it acts as a server application that can provide XML parsing capabilities to any client application that subscribes to the application programmer interface (API) specification detailed in this document.",Support System,NA,VistA,No,"Provide Facility Information Management Support
 Provide Inter-Provider Communication","Region 1 VistA Assessing
@@ -2537,7 +2537,7 @@ Region 4 VistA Assessing",NA,Update to Third Party Joint Inquiry and Claims Matc
 Jack Galvin
 Michael Lay
 Samantha Cooper
-Tammy Watson","InterSystems Caché
+Tammy Watson","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1853,NVW,VistaWeb,VHA,"VistaWeb is an intranet web based application used to review remote patient information found in VistA and the Health Data Repository (HDR). To a large extent, VistAWeb mirrors the reports behavior of the Computerized Patient Record System (CPRS) and Remote Data View (RDV). However, by permitting a more robust and timely retrieval of remote-site patient data, VistAWeb is also an enhancement to CPRS/RDV.",Mission System,NA,VistA,No,"Provide Internal Electronic Information Exchange
 Utilize Code Sets and Provide Terminology Management","NwHIN VistAWeb
@@ -3005,7 +3005,7 @@ Vitalia Devlin",NA,02-High,NA,NA,NA,NA,
 Vitalia Devlin",NA,02-High,NA,NA,NA,NA,
 1654,NA,User Interface for Care Delivery,VHA,"User Interface for Care Delivery, for use by clinical end users at points-of-care to access, view and provide input.  The interface at a point-of-care can be one or multiple devices and interfaces are required at multiple points-of-care.",Mission System,NA,NA,NA,NA,Region 4 GSS Assessing,NA,NA,NA,NA,Timothy Hammond,NA,"Donna Augustine
 Jack Galvin",NA,02-High,NA,NA,NA,NA,
-1656,VA ADERS (VA ADR),VA Adverse Drug Event Reaction System,VHA,"VA has developed an integrated web?based application that fully automates the adverse drug event (ADE) reporting process (including direct submission to the FDA's MedWatch program) through a single portal for all VA facilities. This system is called the VA Adverse Drug Event Reporting System (VA ADERS) and can be accessed at https://medora.va.gov/adr. With ADE searches being facilitated by the modernized web?based interface technology developed by the VA, VA ADERS will have the capability to extract desired ADE information by standardizing how the data submitted to the system is coded. VA ADERS will also increase VA medical facililties report capability to detect ADEs of clinical significance and ability to download consolidated reports on suspect drugs.",Mission System,NA,NA,NA,NA,NA,NA,NA,NA,NA,Lynn Sanders,NA,NA,NA,02-High,NA,NA,NA,NA,
+1656,VA ADERS (VA ADR),VA Adverse Drug Event Reaction System,VHA,"VA has developed an integrated web?based application that fully automates the adverse drug event (ADE) reporting process (including direct submission to the FDA's MedWatch program) through a single portal for all VA facilities. This system is called the VA Adverse Drug Event Reporting System (VA ADERS) and can be accessed at https://medora.os-em.com/adr. With ADE searches being facilitated by the modernized web?based interface technology developed by the VA, VA ADERS will have the capability to extract desired ADE information by standardizing how the data submitted to the system is coded. VA ADERS will also increase VA medical facililties report capability to detect ADEs of clinical significance and ability to download consolidated reports on suspect drugs.",Mission System,NA,NA,NA,NA,NA,NA,NA,NA,NA,Lynn Sanders,NA,NA,NA,02-High,NA,NA,NA,NA,
 1671,VANOD,VA Nursing Outcomes Database,VHA,"VANOD provides the ability to support strategic planning that includes nurse staffing levels, patient care interventions, identification of best practices, intra  and inter facility comparisons, and health policy decisions. It will allow for intra- and inter-facility comparisons, creating a VA database which provides leadership with an opportunity to transform the way nurses do work and become the largest repository of nursing outcomes data in the nation.",Mission System,NA,NA,NA,NA,Region 3 VistA Assessing,NA,PAID Enhancements for VANOD,NA,NA,NA,NA,Michael Lay,NA,02-High,NA,NA,NA,NA,
 1876,VIP-D,VIP Director,VHA,"VIP Director is a management tool for Inpatient reporting Coded in VistA, Case Assignment Report, Census Status Report, Professional Services Productivity Report, DRG Change Report, Report Builder - on demand reporting PTF Record Transmission",Mission System,COTS,VIP,NA,NA,"Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
@@ -3180,7 +3180,7 @@ Ray Baca
 Stacey Campbell",IBM Mainframe,03-Medium,Routine Support,30 Days,24 Hours,NA,
 1179,DSS - R,Decision Support System - Reporting,VHA,The reporting module of VHA's Decision Support System.,Support System,NA,DSS,No,"Provide Clinical Decision Support
 Provide Health Data Processing Management and Collaboration",Decision Support System - Reporting,NA,NA,Austin Information Technology Center,Corporate 21st Century Core,Troy Sherrill,NA,Tammy Watson,NA,03-Medium,NA,NA,NA,NA,
-1191,NA,DocManager,VHA,"DOC DocManager™ allows users to scan and view both clinical and administrative documents. Multiple users, within a facility or VISN, can access these documents simultaneously.",NA,COTS,NA,NA,NA,"Region 1 GSS Assessing
+1191,NA,DocManager,VHA,"DOC DocManagerï¿½ allows users to scan and view both clinical and administrative documents. Multiple users, within a facility or VISN, can access these documents simultaneously.",NA,COTS,NA,NA,NA,"Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,NA,NA,InterAgency 21st Century Core,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
@@ -3320,7 +3320,7 @@ SQL Server
 Solaris
 Sun
 Windows",03-Medium,Essential Support,30 Days,24 Hours,High,
-1624,NA,PowerScribe 360,VHA,"PowerScribe 360 is increasingly becoming a necessity for radiology departments and organizations looking to maintain their viability and achieve industry leadership. With spiraling costs, decreasing reimbursements, increased competition, slowing growth of referral networks and Radiology’s role in improving patient outcomes; PowerScribe 360 delivers the confidence to overcome challenges for healthcare.",NA,COTS,NA,No,NA,"Region 1 GSS Assessing
+1624,NA,PowerScribe 360,VHA,"PowerScribe 360 is increasingly becoming a necessity for radiology departments and organizations looking to maintain their viability and achieve industry leadership. With spiraling costs, decreasing reimbursements, increased competition, slowing growth of referral networks and Radiologyï¿½s role in improving patient outcomes; PowerScribe 360 delivers the confidence to overcome challenges for healthcare.",NA,COTS,NA,No,NA,"Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
@@ -3363,7 +3363,7 @@ Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
 Region 4 GSS Assessing",NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
-1640,NA,Radwhere,VHA,"RADWhere (by Nuance) & VistA Interface.  Voice recognition radiology reporting. RadWhere™ for Radiology is a front-end speech recognition solution for academic centers, hospitals, and imaging centers with unique workflow, data-driven reporting, and commun",NA,COTS,NA,No,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
+1640,NA,Radwhere,VHA,"RADWhere (by Nuance) & VistA Interface.  Voice recognition radiology reporting. RadWhereï¿½ for Radiology is a front-end speech recognition solution for academic centers, hospitals, and imaging centers with unique workflow, data-driven reporting, and commun",NA,COTS,NA,No,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin",NA,03-Medium,NA,NA,NA,NA,
 1562,NA,Registries,VHA,The Registries Program supports the population-specific data needs of the enterprise.,Support System,NA,NA,No,"Conduct Public Health Assessment
 Provide Medical Registry Service",NA,NA,NA,NA,NA,NA,NA,NA,NA,03-Medium,NA,NA,NA,NA,
@@ -3411,7 +3411,7 @@ For demographic, scheduling, or order interfaces, we have two methods of data tr
 into Database entries that are made available to Medical Transcriptionists and Providers in real time.Alternately ShadowLink can watch a specified file path containing flat files. The file is generated by the Scheduling software and then transferred to the EMDAT database as patient demographics in a batch format. 
 For a transcription interface, EMDAT and ShadowLink are capable of providing completed transcriptions in a wide variety of formats and interfacing with Electronic Medical Records (EMR) systems. EMDAT supports common formats such as PDF, Word, RTF, Text, and HL/7 messages. The EMDAT interface team is capable of developing other custom formats built to order as required. 
 EMDAT ShadowLink is the service that transfers available patient demographic and schedule information to the Medical Transcriptionists to provide Fast, Accurate, and Consistent Medical Transcriptions. Additionally, 
-completed Transcriptions are then automatically transferred back to the Provider’s EMR or another Transcription Repository. Medical Providers send and receive Patient documents and information with minimum User interaction. This allows Medical Providers to concentrate on providing medical services instead of clerical duties.",NA,COTS,NA,NA,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
+completed Transcriptions are then automatically transferred back to the Providerï¿½s EMR or another Transcription Repository. Medical Providers send and receive Patient documents and information with minimum User interaction. This allows Medical Providers to concentrate on providing medical services instead of clerical duties.",NA,COTS,NA,NA,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin",NA,03-Medium,NA,NA,NA,NA,
 1591,NA,Shift Handoff Tool,VHA,"The Shift Handoff Tool is a utility that assists hospital staff going off shift to create a report for the incoming shift. This report contains demographic and medical information about each patient being handed off. At a minimum it shows medications and allergies, but can be customized to show other medical information that is relevant to the patient s condition.",Support System,NA,NA,NA,"Create Patient Summary Record of Care
 Monitor Patient Clinical Measurements","Region 1 VistA Assessing
@@ -3448,7 +3448,7 @@ Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
 Region 4 GSS Assessing",NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
-1857,NA,TheraDoc Infection Surveillance,VHA,"TheraDoc is a decision support web application that has been utilized by the infection diseases (ID) department for several years and is now in the process of being implemented within the clinical pharmacy department as well as in other treatment specialties at the Michael E. DeBakey Veterans Affairs Medical Center (MEDVAMC). TheraDoc’s rosters, alerts, and rounding tools give clinicians real-time clinical information and robust data reporting capability.",NA,COTS,NA,NA,NA,"Region 1 GSS Assessing
+1857,NA,TheraDoc Infection Surveillance,VHA,"TheraDoc is a decision support web application that has been utilized by the infection diseases (ID) department for several years and is now in the process of being implemented within the clinical pharmacy department as well as in other treatment specialties at the Michael E. DeBakey Veterans Affairs Medical Center (MEDVAMC). TheraDocï¿½s rosters, alerts, and rounding tools give clinicians real-time clinical information and robust data reporting capability.",NA,COTS,NA,NA,NA,"Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
@@ -3513,7 +3513,7 @@ Richard LeBlanc
 Tammy Watson","SQL Server
 VMWare farm
 Windows",03-Medium,Routine Support,30 Days,24 Hours,High,
-1884,NA,VoiceBrook VoiceOver,VHA,"VoiceOver® is a desktop software application that incorporates speech recognition, digital dictation, customizable templates, and an assortment of input devices, providing direct integration with the user's Anatomic Pathology (AP) system. VoiceOver® allows Pathology professionals to rapidly and accurately create pathology reports, choosing one of three workflows",Support System,COTS,NA,NA,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
+1884,NA,VoiceBrook VoiceOver,VHA,"VoiceOverï¿½ is a desktop software application that incorporates speech recognition, digital dictation, customizable templates, and an assortment of input devices, providing direct integration with the user's Anatomic Pathology (AP) system. VoiceOverï¿½ allows Pathology professionals to rapidly and accurately create pathology reports, choosing one of three workflows",Support System,COTS,NA,NA,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin",NA,03-Medium,NA,NA,NA,NA,
 1885,NA,WatchDog,VHA,"DSS, Inc product",Support System,COTS,NA,NA,NA,Region 4 GSS Assessing,NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin",NA,03-Medium,NA,NA,NA,NA,
@@ -3523,11 +3523,11 @@ Melinda Gentry",NA,"Ashley Wilson
 Tammy Watson
 Thomas Phillips",NA,03-Medium,Routine Support,NA,NA,NA,
 1222,NA,eMove!,VHA,The goal of the eMOVE! Web-based Self Managed Care for Weight Management is to create a Veterans Health Administration,Support System,NA,NA,Yes,NA,NA,NA,eMOVE! Web-based Self Managed Care for Weight Management,NA,NA,NA,NA,NA,NA,03-Medium,NA,NA,NA,NA,
-1417,NA,iMedConsent,VHA,"The iMedConsent™ application enhances the education, discussion and documentation associated with the informed consent process for physicians, ambulatory surgery centers and hospitals. It is integral to healthcare organizations' efforts to standardize communication across the enterprise, manage risk, comply with regulatory requirements and better document informed consent encounters.",NA,COTS,NA,No,NA,"Region 1 GSS Assessing
+1417,NA,iMedConsent,VHA,"The iMedConsentï¿½ application enhances the education, discussion and documentation associated with the informed consent process for physicians, ambulatory surgery centers and hospitals. It is integral to healthcare organizations' efforts to standardize communication across the enterprise, manage risk, comply with regulatory requirements and better document informed consent encounters.",NA,COTS,NA,No,NA,"Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,Apple Mac Standardization,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
-1548,NA,nCoderMD,VHA,"nCoder+® — the sophisticated ICD-9-CM and Physicians’ Current Procedural Terminology (CPT®)1 encoder, DRG calculator, and clinical code editor",NA,COTS,NA,No,NA,"Region 1 GSS Assessing
+1548,NA,nCoderMD,VHA,"nCoder+ï¿½ ï¿½ the sophisticated ICD-9-CM and Physiciansï¿½ Current Procedural Terminology (CPTï¿½)1 encoder, DRG calculator, and clinical code editor",NA,COTS,NA,No,NA,"Region 1 GSS Assessing
 Region 4 GSS Assessing",NA,NA,NA,NA,NA,NA,"Cheryl Fashandi
 Jack Galvin
 Mark Cecil",NA,03-Medium,NA,NA,NA,NA,
@@ -3545,7 +3545,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1819,NA,VistA - Mental Health,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM),"The Mental Health module provides computer support for both clinical and administrative patient care activities associated with mental health care. Psychiatrists and psychologists have directed its design with active input from all health care disciplines, guided by the principle of creating software that makes the clinician s job easier and leads to better patient care. A by-product of this approach has been the creation of a clinical database, which is useful to mental health program managers in many ways, including evaluating clinical productivity, monitoring and improving the quality of care, and trending various patient care events. This clinical database package is comprehensive and accessible from workstations throughout medical facilities.",Mission System,NA,VistA,No,"Evaluate Health Status and Determine Risks
 Manage Medical Notes
@@ -3567,7 +3567,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1006,ADR,Administrative Data Repository,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"The Administrative Data Repository (ADR) was established to provide support for the administrative data elements relative to multiple categories of a person entity such as demographic and eligibility information. Although initially focused on the computing needs of the Veterans Health Administration, the ADR is positioned to provide identity management and demographics support for all IT systems within the Department of Veterans Affairs.",Mission System,NA,NA,NA,"Determine Allowable Services
 Determine Eligibility
@@ -3601,7 +3601,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1778,ADT,VistA - Admission Discharge Transfer,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"The VISTA PIMS package provides a comprehensive range of software supporting the administrative functions of patient registration, admission, discharge, transfer, and appointment scheduling. Its functions apply throughout a patient's inpatient and/or outpatient stay from registration, eligibility and Means Testing through discharge with on-line transmission of PTF (Patient Treatment File) data and/or NPCDB (National Patient Care Database) data to the Austin Information Technology Center (AITC), (formerly the Austin Automation Center (AAC)).The ADT module aids in recovery of cost of care by supplying comprehensive PTF/RUGII options and Means Test options.",Mission System,NA,VistA,No,"Capture Patient Demographics
 Determine Allowable Services
@@ -3622,7 +3622,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1781,DGBT,VistA - Beneficiary Travel,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"VistA Beneficiary Travel  This program assists eligible beneficiaries with travel to and/or from VA or VA authorized health care either through mileage reimbursement, or arrangement of special mode (ambulance, wheelchair van etc.) transportation.",Mission System,NA,VistA,No,"Facilitate Patient Travel to Points of Care
 Process Health Care Reimbursements","Region 1 VistA Assessing
@@ -3634,7 +3634,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1785,CMS,VistA - Clinical Monitoring System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"The Clinical Monitoring System allows the users to create their own monitors from a list of pre-defined conditions. The monitors then run nightly, scanning DHCP data for patients who meet the conditions of the monitor. The user may select data elements fr",Mission System,NA,VistA,No,"Provide Clinical Decision Support
 Provide Support to Identify Potential Problems and Trends","Region 1 VistA Assessing
@@ -3643,7 +3643,7 @@ Region 4 VistA Assessing",NA,NA,NA,NA,NA,NA,"BK Hack
 Donna Augustine
 Jack Galvin
 Larry Weldon
-Mark Cecil","InterSystems Caché
+Mark Cecil","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1244,EAS,VistA - Enrollment Application System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"Enrollment Application System (EAS) is currently a single module application. It facilitates the processing of the 10-10EZ Application for Health Benefits, which has been transmitted to the VHA site from the On-Line 10-10EZ web-based software.  This 10-10EZ module allows site staff with enrollment and registration responsibilities to review all data entered by a veteran on the electronic 10-1 0EZ form before committing the data to the site database. It also provides a basic tracking mechanism in order to follow the progress of the veteran s application and respond to specific inquiries.",Mission System,NA,VistA,No,"Determine Eligibility
 Perform Enrollment","Region 1 VistA Assessing
@@ -3656,7 +3656,7 @@ Larry Weldon
 Mark Cecil
 Michael Lay
 Paul Tryhus
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1796,FB,VistA - Fee Basis,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"VistA system to process and pay invoices from private vendors for authorized procedures provided to veterans. Initial version will include the the processing of Hometown Pharmacy, Patient Travel, and Outpatient Medical claims. Version 2 includes Contract",Mission System,NA,VistA,No,Provide Financial Management,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -3671,7 +3671,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1799,GCS,VistA - Generic Code Sheet,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),Part of Vista financials - last update 1995. This package allows for the creation and entry of code sheets; the management of the code sheet from creation to batching to transmission.,Mission System,NA,VistA,No,"Perform Billing and Claims Submissions
 Utilize Code Sets and Provide Terminology Management","Region 1 VistA Assessing
@@ -3683,7 +3683,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1801,HINQ,VistA - Hospital Inquiry,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),VistA Hospital inquiry system (Duplicate 2011RR_0464),Mission System,NA,VistA,No,"Determine Eligibility
 Perform Registration","Region 1 VistA Assessing
@@ -3695,7 +3695,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1806,IB,VistA - Integrated Billing,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"The Integrated Billing (IB) software provides all the features necessary to create first party (patient) and third party (insurance carriers/Medicare) bills. It allows for the capture, maintenance, and storage of insurance data including policy information and related benefits. It provides the ability to electronically transmit bills to payers with the data required by HIPAA. It also provides the ability to receive and store electronic 835 Health Care Claim Payment/Advice. It includes the ability to create printed bills which can then be mailed to payers who are unable to accept an electronic claim.",Mission System,NA,VistA,No,"Analyze Medical Services Utilization
 Conduct Insurance Identification and Verification
@@ -3711,7 +3711,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1808,NA,VistA - Integrated Patient Funds,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"The PFOP system electronically manages money held for patients hospitalized at VA facilities. The systems foundation is the Patient Funds account. Essentially, the Patient Funds account operates much like a checking account; however, the money in a Patient Funds account does not accrue interest and, in some cases, restrictions limit the amount of cash patients may withdraw in a given time period. PFOP system enables the user to perform tasks that closely resemble the banking activities required to maintain checking accounts. Thess functions include  Establish Patient Funds Account, Post Transactions, and Reconcile Accounts and Reports.",Mission System,NA,VistA,No,Provide General Ledger Execution,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -3722,7 +3722,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1659,VES,VistA - VA Enrollment System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"The Enrollment VistA Changes (EVC) Release 2 project was undertaken to support technology and business changes that were occurring with the implementation of the HECMS V3.0 project. Some modified and new business functionality is being included in the new system, and corresponding changes are necessary in VistA for preliminary determination of the veteran's Enrollment and Eligibility status. The EVC R2 project was released just prior to the HECMS V3.0 project.",Mission System,NA,VistA,No,"Determine Allowable Services
 Determine Eligibility
@@ -3730,7 +3730,7 @@ Perform Enrollment",NA,Enrollment,NA,NA,NA,"Caroline Johnson
 Lynne Harbin
 Scott Ward",NA,"Carol Winter
 Larry Weldon
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1085,FEE,Central Fee System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Chief Business Office (CBO),"FEE Basis Treatment/Central Fee SystemAuthorizes and pays private physicians, hospitals (in-patient) and pharmacists for products and services dispersed to approved Veterans for non-VA care. This system also reimburses Veterans for medical care and travel. Also known as Central Fee.",Mission System,NA,NA,NA,Process Health Care Reimbursements,"Central FEE
 Region 1 VistA Assessing
@@ -3785,7 +3785,7 @@ Larry Weldon
 Mark Cecil
 Michael Lay
 Ricky Stephens",HP BL870c,00-Priority,NA,NA,NA,NA,
-1052,BMS,VistA - Bed Management System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Office of the Assistant Deputy Under Secretary for Health for Administrative Operations (ADUSH/AO),"Automated system to manage bed allocation at VA Medical Centers; not class I yet  Bed Management Solution (BMS) is a Waived Class III product currently installed at 133 sites and another 22 sites will be installed by the December 2010. BMS addresses the need to optimize the flow of patients from admission through discharge, and to improve patients’ safety, quality of care, and customer satisfaction. BMS provides the capability to manage bed availability at the facility, VISN and national levels and provides national data for bed availability during a disaster.",Mission System,NA,VistA,NA,Track Patient Bed/Room Assignment,"Bed Management System
+1052,BMS,VistA - Bed Management System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Office of the Assistant Deputy Under Secretary for Health for Administrative Operations (ADUSH/AO),"Automated system to manage bed allocation at VA Medical Centers; not class I yet  Bed Management Solution (BMS) is a Waived Class III product currently installed at 133 sites and another 22 sites will be installed by the December 2010. BMS addresses the need to optimize the flow of patients from admission through discharge, and to improve patientsï¿½ safety, quality of care, and customer satisfaction. BMS provides the capability to manage bed availability at the facility, VISN and national levels and provides national data for bed availability during a disaster.",Mission System,NA,VistA,NA,Track Patient Bed/Room Assignment,"Bed Management System
 Region 1 VistA Assessing
 Region 2 VistA Assessing
 Region 3 VistA Assessing",NA,"Bed Management Solution (BMS) Version 1
@@ -3806,7 +3806,7 @@ Scott Herman
 Tammy Watson
 Troy Sherrill
 Vitalia Devlin","Dell
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 SQL Server
 Windows
@@ -3820,7 +3820,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1807,IFCAP,"VistA - Integrated Funds Distribution, Control Point Activity, Accounting and Procurement",VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Office of the Assistant Deputy Under Secretary for Health for Administrative Operations (ADUSH/AO),"Integrated Funds Distribution, Control Point Activity, Accounting and Procurement (IFCAP) module automates a spectrum of VA financial activities. VA employees use IFCAP to manage budgets, order goods and services, maintain records of available funds, determine the status of a request, compare vendors and items to determine the best purchase, record the receipt of items into the warehouse, and pay vendors. IFCAP automates the written regulations and policy for VA funding and procurement, which define the actions taken on requests for goods and services as formal transactions, orders, and payments. 
 Includes the Automated Engineering Management System/Medical Equipment Reporting System (AEMS/MERS)  sub-system",Mission System,NA,VistA,No,"Control Inventory
@@ -3838,7 +3838,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1079,CART-CL,Cardiology Assessment Reporting and Tracking System/Catheterization Labs,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR OPERATIONS AND MANAGEMENT (DUSHOM) >> VHA Office of the Assistant Deputy Under Secretary for Health for Administrative Operations (ADUSH/AO),"The mission of the VA Clinical Assessment Reporting and Tracking (CART) Program for cardiac catheterization laboratories (CART-CL) is to support a national VA reporting system, data repository, and quality improvement program for procedures performed in VA cardiac catheterization laboratories. CART-CL is intended to improve clinical care/communication, support local and national quality improvement, monitor patient safety, capture workload of cardiac catheterization lab procedures, and inform VA system evaluation to maximize operational efficiency and patient outcomes. CART-CL is a collaborative effort between the VA Patient Care Services, Office of Information and Analytics, Ischemic Heart Disease Quality Enhancement Research Initiative (IHD-QUERI), and Office of Information and Technology (OI&T).",Mission System,NA,NA,NA,NA,Region 3 VistA Assessing,NA,NA,NA,Medical Legacy,Hans Gethoffer,Hans Gethoffer,"Michael Lay
 Noonan Gregory","Intel
@@ -3898,7 +3898,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1330,HBPC,VistA - Home Based Primary Care,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office Patient Care Services (PCS),See0463 A patient-oriented information system of patients admitted to the home based care program.,Mission System,NA,VistA,No,NA,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -3914,7 +3914,7 @@ Mark Cecil
 Michael Lay
 Roger Bragg
 Vitalia Devlin","Flat File
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 Mainframe
 z/OS",01-Premium,NA,30 Days,24 Hours,NA,
@@ -3934,7 +3934,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1827,NA,VistA - Oncology,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office Patient Care Services (PCS),"The Oncology module automates the tumor registry and supports tumor registrars in abstracting cancer cases, following up on cancer patients and producing the Hospital Annual Report. Functions are grouped according to order of use: Case Finding and Suspense; Abstracting, Printing and Quality Management; Follow-up; Registry Lists; Annual Reports; Statistical Reports; and Utilities.",Mission System,NA,VistA,No,"Conduct Public Health Assessment
 Provide Medical Registry Service
@@ -3947,7 +3947,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1788,CMOP,VistA - Pharmacy: Consolidated Mail Outpatient Pharmacy,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office Patient Care Services (PCS),"The Consolidated Mail Outpatient Pharmacy (CMOP) package provides a regional system resource to expedite the distribution of mail-out prescriptions to veteran patients. CMOP host facilities, regionally located, receive data from medical centers within the area of service. Current CMOPs are designed to handle the dispensing and mailing of between 20,000 and 40,000 prescriptions in an 8-hour workday.",Mission System,NA,VistA,No,"Provide Access to Self-Services
 Provide Consolidated Mail Outpatient Pharmacy Services
@@ -3965,7 +3965,7 @@ Kelly Hughes
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1836,NA,VistA - Prosthetics,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office Patient Care Services (PCS),"The Veterans Health Information Systems and Technology Architecture (VistA) Prosthetics package automates purchasing. The Prosthetics module enhances patient care by determining what prosthetic services and devices have been provided to the veteran in the past, and decreasing the time required for the order, delivery, and/or repair of devices. The Prosthetics package provides control and auditing of expenditures and generates management reports.",Mission System,NA,VistA,No,"Manage Prosthetic Clinical Program
 Provide Dental Prosthetic Services
@@ -3980,7 +3980,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1571,RAI MDS,VistA - Resident Assessment Instrument/Minimum Data Set,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office Patient Care Services (PCS),"A database oriented system to provide storage, access and analysis of long-term care data on patients in VA facilities. Also called Resident Assessment Instrument/Minimum Data Set (RAI/MDS)",Mission System,COTS,VistA,NA,"Provide Patient Assessments
 Provide Treatment Plans","Region 1 VistA Assessing
@@ -3995,7 +3995,7 @@ Michael Lay
 Rocco DiFronzo
 Samantha Cooper
 Tammy Watson","Intel
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 Oracle
 VMWare farm
@@ -4021,7 +4021,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia devlin","InterSystems Caché
+Vitalia devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1005,ASI,Addiction Severity Index,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office Patient Care Services (PCS),Provides centralized record keeping on substance abuse patients using VA medical facilities. Provides reports to Performance Evaluation Resource Center (PERC) for evaluation of substance abuse patient care performance at each of the VAMCs.,Mission System,NA,NA,NA,NA,"Region 1 VistA Assessing
 Region 2 VistA Assessing
@@ -4151,7 +4151,7 @@ Jeff Podolec
 Paul Tryhus","Cache
 HP
 VMS",00-Priority,NA,NA,NA,NA,
-2000,MDWS,Medical Domain Web Services,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"Medical Domain Web Services (MDWS) (pronounced “meadows”) is a suite of Service Oriented Architecture (SOA) middle-tier web services that exposes medical domain functionality, Medical Domain Objects (MDO). MDWS is equipped with the capacity to virtualize any legacy Veterans Health Information Systems and Technology Architecture (VistA) Remote Procedure Call (RPC) as a web service. A web service is an Application Programming Interface (API), which uses Simple Object Access Protocol (SOAP), the standardized protocol to communicate with subscribed client applications.",Mission System,Custom Development,NA,NA,NA,NA,NA,Medical Domain Web Services (MDWS),NA,NA,NA,NA,NA,NA,01-Premium,NA,NA,NA,NA,
+2000,MDWS,Medical Domain Web Services,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"Medical Domain Web Services (MDWS) (pronounced ï¿½meadowsï¿½) is a suite of Service Oriented Architecture (SOA) middle-tier web services that exposes medical domain functionality, Medical Domain Objects (MDO). MDWS is equipped with the capacity to virtualize any legacy Veterans Health Information Systems and Technology Architecture (VistA) Remote Procedure Call (RPC) as a web service. A web service is an Application Programming Interface (API), which uses Simple Object Access Protocol (SOAP), the standardized protocol to communicate with subscribed client applications.",Mission System,Custom Development,NA,NA,NA,NA,NA,Medical Domain Web Services (MDWS),NA,NA,NA,NA,NA,NA,01-Premium,NA,NA,NA,NA,
 1183,PXRM,VistA - CPRS: Clinical Reminders,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"The Clinical Reminders package is a valuable aid in patient treatment. Reminders assist clinical decision-making and educate providers about appropriate care. Electronic clinical reminders also improve documentation and follow-up, by allowing providers to easily view when certain tests or evaluations were performed and to track and document when care has been delivered. They can direct providers to perform certain tests or other evaluations that will enhance the quality of care for specific conditions. Clinical Reminders may be used for both clinical and administrative purposes. However, the primary goal is to provide relevant information to providers at the point of care, for improving care for veterans.  The package benefits clinicians by providing pertinent data for clinical decision-making and reducing duplicate documenting activities. It also assists in targeting patients with particular diagnoses and procedures or site-defined criteria, and complying with VHA performance measures and with Health Promotion and Disease Prevention guidelines. The Quality Enhancement Research Initiative (QUERI), a Health Services Research and Development (HSR&D) program, and the National Clinical Practice Guidelines Committee have joined with the Office of Information, System Design & Development office (SD&D) in designing national reminders and dialogs that will help promote informed decision-making and consistency of health care practices. Cooperatively developed reminders include: Ischemic Heart Disease (IHD), Major Mood Disorder (MDD), Hypertension, Iraq and Afghan Post-Deployment Screen, Race and Ethnicity, Women s Veterans Health, My HealtheVet, and VA Geriatric Care Referral (GEC) reminders.",Mission System,NA,VistA,No,"Provide Clinical Decision Support
 Provide Orders Management
 Provide Reminders for Preventative Care","Region 1 VistA Assessing
@@ -4175,7 +4175,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1814,NA,VistA - Lexicon Utility,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"The Lexicon contains medical and biomedical major concepts. Each major concept can be expressed in numerous forms (major concepts, and synonyms or lexical variants to the major concepts). These expressions are updated using VA terminology sources. These sources include the various disciplines not well represented to date (i.e., Social Work, Nursing, etc.) and the Lexicon itself through the capturing of terms not found within the file. Updates to the Lexicon will be simultaneously sent to all sites, providing them with the ability to communicate medical concepts across disciplines and computer systems.",Mission System,NA,VistA,No,"Perform Clinical Data Quality Verification, Validation
 Provide Facility Information Management Support
@@ -4193,7 +4193,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1820,MHV,VistA - My HealtheVet,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"My HealtheVet (MHV) is a Web-based application that creates a new, online environment where Veterans, family, and clinicians may come together to optimize veterans  health care. This Web technology combines essential health record information enhanced by online health resources to enable and encourage patient/clinician collaboration.",Mission System,NA,VistA,No,"Benefit Resource Management
 Capture Data and Documentation from External Sources
@@ -4274,7 +4274,7 @@ Larry Weldon
 Mark Cecil
 Michael Lay","Dec Alpha
 FileMan
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 VMS",01-Premium,NA,NA,NA,NA,
 1829,PCE,VistA - Patient Care Encounter,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"Patient Care Encounter (PCE) captures clinical data resulting from ambulatory care patient encounters. The captured clinical data documents  encounters  and related encounter information, such as problems treated at encounter, procedures done, immunizations, patient education, and skin tests.  DUPLICATE _0689",Mission System,NA,VistA,No,"Capture Patient Care Encounter Information
@@ -4291,7 +4291,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1494,GMPL,VistA - Problem List,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"VistA  package allows for entry and tracking of a patient's problems within DHCP. Other components of the clinical record may be linked to a problem, such as orders, procedures, and progress notes. Recent T21 project was PL Standardization.",Mission System,NA,VistA,No,"Create Patient Summary Record of Care
 Maintain Patient Summary Lists
@@ -4303,7 +4303,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1139,CCPCS,Consolidated Copayment Processing Center System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Informatics and Analytics (OIA),"The Consolidated Copayment Processing Center (CCPC) System contains Veteran patient contact and billing information in order to support the printing and mailing of patient billing statements. The CCPC system is designed to handle first-party medical debt billing information. First-party billing is defined as a patient debt for which the patient is responsible for payment (normally co-payment) for health care treatment. This differs from third-party billing where a third party (e.g., insurance company, Health Maintenance Organization (HMO)) is primarily responsible for repaying the VA. CCPC does not handle third-party billing information. The Veterans Health Information Systems and Technology Architecture Accounts Receivable (AR) module collects information for CCPC at every Veterans Affairs Medical Center (VAMC). A daily batch process is used to collect and transmit the information to the VA Austin Information Technology Center. All collected patient and billing information is kept active on CCPC for a period of one month. A master list containing six months activity is archived for reference should historical information be needed. The users of this database include the VAMCs, Veterans Health Administration Chief Business Office, and the patients who receive billing statements.",Mission System,NA,NA,NA,NA,NA,Financial Management,Consolidated Co-Payment Processing Center (CCPC) Patient Statement Enhancement and Consolidation,Austin Information Technology Center,Benefits Legacy Memorials Legacy Development Support,Terry Hance,"Karyn Barrett
 Richard Rhoades
@@ -4465,7 +4465,7 @@ Michael Lay
 Pamela Loftin
 Pamela Loftin
 Tammy Watson
-Vitalia Devlin","InterSystems Caché
+Vitalia Devlin","InterSystems Cachï¿½
 MUMPS
 Oracle
 Solaris
@@ -4480,7 +4480,7 @@ Donna Augustine
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1037,ASISTS,VistA - Automated Safety Incident Surveillance and Tracking System,VHA >> VHA OFFICE OF THE DEPUTY UNDER SECRETARY FOR HEALTH FOR POLICY AND SERVICES >> VHA Office of Public Health,"The Automated Safety Incident Surveillance and Tracking System (ASISTS) is a repository of VHA employee accident data. Many types of accidents are captured, but the primary focus of the ASISTS database is to track and to r",Mission System,NA,VistA,No,"Evaluate Incidents
 Manage Hospital Safety Program
@@ -4499,7 +4499,7 @@ Kathy Frisbee
 Kevin Magee
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS
 Mainframe
 z/OS",01-Premium,NA,NA,NA,NA,
@@ -4655,7 +4655,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1795,EC,VistA - Event Capture,VHA >> VHA OFFICE OF THE PRINCIPAL DEPUTY UNDER SECRETARY FOR HEALTH (PDUSH),"Event Capture is that portion of the Decision Support System (DSS) which has been designed to capture the workload for those areas which do not currently have a software system which may be extracted. Such areas as Chaplain, Canteen, and non-associated clinics can use Event Capture to track their workload.",Mission System,NA,VistA,No,"Capture Patient Care Encounter Information
 Manage Health Care Costs and Administrative Efficiency
@@ -4669,7 +4669,7 @@ Jack Galvin
 Larry Weldon
 Mark Cecil
 Michael Lay
-Samantha Cooper","InterSystems Caché
+Samantha Cooper","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1830,PAID,VistA - Personnel and Accounting Integrated Data,VHA >> VHA OFFICE OF THE PRINCIPAL DEPUTY UNDER SECRETARY FOR HEALTH (PDUSH),Department of Veterans Affairs (VAs) automated payroll system and serves as the central system for support of human resources and payroll functions.,Mission System,NA,VistA,No,"Manage Workforce Time and Attendance
 Monitor Employee Training","EO Personnel and Accounting Integrated Data
@@ -4694,9 +4694,9 @@ Tammy Watson
 Tanya Finley","IBM Mainframe
 SAS",01-Premium,Mission Critical,NA,NA,High,
 1887,NA,VistA - Personnel and Accounting Integrated Data: Enhanced Time and Attendance System,VHA >> VHA OFFICE OF THE PRINCIPAL DEPUTY UNDER SECRETARY FOR HEALTH (PDUSH),"The Department of Veterans Affairs (VA)  utilizes the Personnel and Accounting Integrated Data (PAID) System to support time and attendance data collection.  The Enhanced Time and Attendance (ETA) System, a component of PAID, automates time and attendance for employees, timekeepers, payroll, and supervisors.  It provides employees the ability to request leave and display both the status of pending requests and leave balances and allows payroll to manage time and leave (T&L) units and tours of duty.  As the official record keeping system for time and attendance within the VA, it provides timekeeping, supervisory certification, and overtime management.   
-The Telework Enhancement Act of 2010 [Public Law 111-292, House Resolution (H.R.) 1772] requires government agencies to establish a policy under which eligible employees may be authorized to telework to the maximum extent that is possible without diminishing performance, determine employee eligibility to participate in telework, and notify all employees of their eligibility to telework.  Agencies are also required to provide training to teleworkers and ensure that no distinction is made between those who chose to telecommute and those who don’t in the areas of performance and training.  OPM would be required to provide regulations and assistance regarding teleworking.    
+The Telework Enhancement Act of 2010 [Public Law 111-292, House Resolution (H.R.) 1772] requires government agencies to establish a policy under which eligible employees may be authorized to telework to the maximum extent that is possible without diminishing performance, determine employee eligibility to participate in telework, and notify all employees of their eligibility to telework.  Agencies are also required to provide training to teleworkers and ensure that no distinction is made between those who chose to telecommute and those who donï¿½t in the areas of performance and training.  OPM would be required to provide regulations and assistance regarding teleworking.    
 The Department of Veterans Affairs (VA)  utilizes the Personnel and Accounting Integrated Data (PAID) System to support time and attendance data collection.  The Enhanced Time and Attendance (ETA) System, a component of PAID, automates time and attendance for employees, timekeepers, payroll, and supervisors.  It provides employees the ability to request leave and display both the status of pending requests and leave balances and allows payroll to manage time and leave (T&L) units and tours of duty.  As the official record keeping system for time and attendance within the VA, it provides timekeeping, supervisory certification, and overtime management.   
-The Telework Enhancement Act of 2010 [Public Law 111-292, House Resolution (H.R.) 1772] requires government agencies to establish a policy under which eligible employees may be authorized to telework to the maximum extent that is possible without diminishing performance, determine employee eligibility to participate in telework, and notify all employees of their eligibility to telework.  Agencies are also required to provide training to teleworkers and ensure that no distinction is made between those who chose to telecommute and those who don’t in the areas of performance and training.  OPM would be required to provide regulations and assistance regarding teleworking.",Mission System,NA,VistA,No,Manage Human Resources,NA,NA,NA,NA,NA,NA,NA,Larry Weldon,"InterSystems Caché
+The Telework Enhancement Act of 2010 [Public Law 111-292, House Resolution (H.R.) 1772] requires government agencies to establish a policy under which eligible employees may be authorized to telework to the maximum extent that is possible without diminishing performance, determine employee eligibility to participate in telework, and notify all employees of their eligibility to telework.  Agencies are also required to provide training to teleworkers and ensure that no distinction is made between those who chose to telecommute and those who donï¿½t in the areas of performance and training.  OPM would be required to provide regulations and assistance regarding teleworking.",Mission System,NA,VistA,No,Manage Human Resources,NA,NA,NA,NA,NA,NA,NA,Larry Weldon,"InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1365,IPPS,Invoice Payment Processing System,VHA >> VHA OFFICE OF THE PRINCIPAL DEPUTY UNDER SECRETARY FOR HEALTH (PDUSH) >> VHA Office of Finance,We capture maximum dollar savings processing payments for those invoices requiring a receiving report with prompt and accurate service. We offer our innovative On-Line Certification System (OLCS) in conjunction with our certified invoice payment processing to provide you with the most reliable and efficient payment processing services. FSC's payment services allow you to work more efficiently and effectively within your organization. These are just a few reasons to do business with us:  Full compliance with the Prompt Payment Act and OMB Circular A-123 Internal Control Management ensuring your payments are made correctly.  The On-Line Certification System (OLCS) allows our customers to electronically certify invoices via the Intranet.  Post Audit services on statistically selected invoices.,Support System,NA,NA,NA,NA,OM FSC IPPS (Invoice payment Processing System) Assessing,NA,NA,NA,NA,NA,NA,NA,NA,03-Medium,NA,NA,NA,NA,
 1465,NA,VistA - Nursing,VHA >> VHA OFFICE OF THE PRINCIPAL DEPUTY UNDER SECRETARY FOR HEALTH (PDUSH) >> VHA Office of Nursing Services (ONS),"The Nursing application is a component of the Department of Veterans Affairs VistA program. It is comprised of multiple modules (i.e., Administration, Education, Clinical, Quality Assurance, and Package Management).",Mission System,NA,VistA,No,"Evaluate Incidents
@@ -4722,7 +4722,7 @@ Floyd Rinehimer
 Jack Galvin
 Larry Weldon
 Mark Cecil
-Michael Lay","InterSystems Caché
+Michael Lay","InterSystems Cachï¿½
 MUMPS",01-Premium,NA,NA,NA,NA,
 1218,EWL,VistA - Electronic Wait List,VHA >> VHA OFFICE OF THE UNDER SECRETARY OF HEALTH,"The goal of the Electronic Wait List (EWL) is to provide care to the patient as quickly as possible. To facilitate this goal, patients may be placed on a Wait List for a different team or even at a different facility. The EWL keeps track of appointments, clinics, and providers associated with patients on the various EWL. Patient eligibility information and service connected status is also recorded and updated. EWL is able to determine a status change in the veteran's service connected percentage and service connected priority. As well as changes to appointment, clinics, and personnel that affect Wait List patients. EWL is able to provide email notifications regarding status changes to assigned mail groups.",Mission System,NA,VistA,No,"Manage Appointments
 Provide Health Data Processing Management and Collaboration","Analytics and Business Intelligence LAN
@@ -4738,7 +4738,7 @@ Mark Cecil
 Michael Lay
 Samantha Cooper
 Tammy Watson","Intel
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 Windows 2003",01-Premium,NA,NA,NA,NA,
 1530,PCMM,VistA - Primary Care Management Module,VHA >> VHA OFFICE OF THE UNDER SECRETARY OF HEALTH,"The Primary Care Management Module (PCMM) was developed to assist VA facilities in implementing Primary Care.PCMM supports both Primary Care and non-Primary Care teams.  The software allows the user to set up and define a team, assign positions to the team, assign staff to the positions, assign patients to the team, and assign patients to a Primary Care Provider (PCP) or Associate Provider (AP). In a Primary Care setting, patients are assigned a PCP, Associate Provider (AP) and/or a Transition Patient Advocate (TPA) who is responsible for delivering essential health care, coordinating all health care services, and serving as the point of access for specialty care. The PCP is supported by a team of professionals which may include nurses, pharmacists, social workers, etc. Associate Providers are non-physician clinicians (such as Physicians Assistants, Nurse Practitioners or Residents) who may provide care under the supervision of a presiding PCP. The PCMM software is considered to be an important component to measure patient demand and the PCPs capacity to meet that demand and to reduce wait times.",Mission System,NA,VistA,No,"Assign Clinical Tasks
@@ -4757,7 +4757,7 @@ Mark Cecil
 Michael Lay
 Samantha Cooper
 Tammy Watson","Intel
-InterSystems Caché
+InterSystems Cachï¿½
 MUMPS
 Windows 2003",01-Premium,NA,NA,NA,NA,
 1531,NA,Primary Care Staffing,VHA >> VHA OFFICE OF THE UNDER SECRETARY OF HEALTH,"Link to view reports generated from the Primary Care Staffing and Rooms Database, as well as modify and add divisions to the PC Staffing and Rooms Database. Access to view the reports is not limited; however, access to modify the database is limited to VISN designees.",Mission System,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,Troy Sherrill,Tom Salisbury,"Dell

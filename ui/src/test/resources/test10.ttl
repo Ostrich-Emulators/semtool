@@ -3,15 +3,15 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix vas: <http://va.gov/ontologies/semoss#> .
-@prefix vac: <http://va.gov/ontologies/core#> .
+@prefix vas: <http://os-em.com/ontologies/semoss#> .
+@prefix vac: <http://os-em.com/ontologies/core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix testdata: <http://sales.data/purchases#> .
 @prefix testowl: <http://sales.data/schema#> .
 
-<http://semoss.va.gov/database/re05dd7dc-6db8-47f1-bd73-21c2a1f201c6> vas:ReificationModel vas:VASEMOSS-Reification .
+<http://semoss.os-em.com/database/re05dd7dc-6db8-47f1-bd73-21c2a1f201c6> vas:ReificationModel vas:VASEMOSS-Reification .
 
 <http://sales.data/purchases/2015> a owl:Ontology , void:Dataset ;
 	rdfs:label "\"Purchase Dataset\"" .
@@ -45,5 +45,5 @@ testowl:Human_Being a owl:Class ;
 testowl:Price a owl:DatatypeProperty ;
 	rdfs:label "Price" .
 
-<http://semoss.va.gov/database/re05dd7dc-6db8-47f1-bd73-21c2a1f201c6> owl:imports <http://sales.data/purchases/2015> ;
+<http://semoss.os-em.com/database/re05dd7dc-6db8-47f1-bd73-21c2a1f201c6> owl:imports <http://sales.data/purchases/2015> ;
 	void:subset <http://sales.data/purchases/2015> .

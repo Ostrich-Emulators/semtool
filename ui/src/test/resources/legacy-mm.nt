@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/B148ea906-9005-4346-a3e9-6c35e76b2843> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.os-em.com/database/B148ea906-9005-4346-a3e9-6c35e76b2843> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://junk.com/testfiles/Concept/Category/Beverages> <http://owl.junk.com/testfiles/Description> "Soft drinks, coffees, teas, beers, and ales" .
@@ -231,5 +231,5 @@
 <http://owl.junk.com/testfiles/Sugar> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
 <http://owl.junk.com/testfiles/Sugar> <http://www.w3.org/2000/01/rdf-schema#label> "Sugar" .
 <http://owl.junk.com/testfiles/Sugar> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://owl.junk.com/testfiles/Concept> .
-<http://semoss.va.gov/database/B148ea906-9005-4346-a3e9-6c35e76b2843> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/legacy.xlsx> .
-<http://semoss.va.gov/database/B148ea906-9005-4346-a3e9-6c35e76b2843> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.os-em.com/database/B148ea906-9005-4346-a3e9-6c35e76b2843> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/legacy.xlsx> .
+<http://semoss.os-em.com/database/B148ea906-9005-4346-a3e9-6c35e76b2843> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

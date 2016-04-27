@@ -16,7 +16,7 @@
 	<mvc:resources mapping="/styles/**" location="/styles/" />
 	<mvc:resources mapping="/images/**" location="/images/" />
 
-	<context:component-scan base-package="gov.va.semoss.web"/>
+	<context:component-scan base-package="com.ostrichemulators.semtool.web"/>
 	<context:annotation-config/>
 	<mvc:annotation-driven/>
                                        

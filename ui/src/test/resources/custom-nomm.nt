@@ -1,4 +1,4 @@
-<http://semoss.va.gov/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://va.gov/ontologies/semoss#Database> .
+<http://semoss.os-em.com/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semoss#Database> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://junk.com/testfiles> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://schema.org/subject> <http://www.w3.org/2000/01/rdf-schema#label> "<http://junk/just-for-fun>" .
@@ -115,5 +115,5 @@
 <http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> <http://www.w3.org/2000/01/rdf-schema#label> "carnes preparadas"@es .
 <http://seman.tc/data/northwind/Y6fb185e92be8114afa4b9e554f3acd84> <http://seman.tc/data/northwind/Relation/Category/Mdef89d3bb50df4e59b703cf8916601c8> <http://seman.tc/data/northwind/W87ef52d611a9e479ee89efd3c70384c8> .
 <http://seman.tc/data/northwind/Y6fb185e92be8114afa4b9e554f3acd84> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://seman.tc/models/northwind#Product> .
-<http://semoss.va.gov/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/custom.xlsx> .
-<http://semoss.va.gov/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .
+<http://semoss.os-em.com/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://www.w3.org/2002/07/owl#imports> <file:/home/ryan/devl/7delta/git/va-semoss/src/test/resources/custom.xlsx> .
+<http://semoss.os-em.com/database/K3fd2bd5c-0635-4321-ad32-0aa2cb121e4a> <http://rdfs.org/ns/void#subset> <http://junk.com/testfiles> .

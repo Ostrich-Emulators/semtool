@@ -1,6 +1,6 @@
 # imports: http://spinrdf.org/spin
 # imports: http://spinrdf.org/sp
-@prefix vas: <http://va.gov/ontologies/semoss#> .
+@prefix vas: <http://os-em.com/ontologies/semoss#> .
 @prefix spin: <http://spinrdf.org/spin#> .
 @prefix sp: <http://spinrdf.org/sp#> .
 @prefix spl: <http://spinrdf.org/spl#> .
@@ -13,9 +13,9 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix vac: <http://va.gov/ontologies/core#> .
+@prefix vac: <http://os-em.com/ontologies/core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix vcamp: <http://va.gov/ontologies/vcamp#> .
+@prefix vcamp: <http://os-em.com/ontologies/vcamp#> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 

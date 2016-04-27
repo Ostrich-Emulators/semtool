@@ -1,21 +1,21 @@
 # imports: http://spinrdf.org/spin
 # imports: http://spinrdf.org/sp
-@prefix vas: <http://va.gov/ontologies/semoss#> .
+@prefix vas: <http://os-em.com/ontologies/semoss#> .
 @prefix spin: <http://spinrdf.org/spin#> .
 @prefix sp: <http://spinrdf.org/sp#> .
 @prefix spl: <http://spinrdf.org/spl#> .
 @prefix olo: <http://purl.org/ontology/olo/core#> .
 @prefix ui: <http://uispin.org/ui#> .
-@prefix insights: <http://va.gov/dataset/insights#> .
+@prefix insights: <http://os-em.com/dataset/insights#> .
 @prefix arg: <http://spinrdf.org/arg#> .
 @prefix void: <http://rdfs.org/ns/void#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix vac: <http://va.gov/ontologies/core#> .
+@prefix vac: <http://os-em.com/ontologies/core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix vcamp: <http://va.gov/ontologies/vcamp#> .
+@prefix vcamp: <http://os-em.com/ontologies/vcamp#> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
@@ -204,12 +204,12 @@ semoss:usedBy a owl:InverseFunctionalProperty , owl:ObjectProperty ;
 semoss:uses a owl:ObjectProperty ;
 	rdfs:label "Uses"^^xsd:string .
 
-<http://semoss.va.gov/database/bae730f85-78ea-46d3-a907-624cf69ee4c5> a vas:Database .
+<http://semoss.os-em.com/database/bae730f85-78ea-46d3-a907-624cf69ee4c5> a vas:Database .
 
-<http://va.gov/dataset/insights> a vac:InsightDataset .
+<http://os-em.com/dataset/insights> a vac:InsightDataset .
 
 insights:Activity-Perspective-insight-1431577739478 spin:constraint insights:constraint-1441828465426 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Immunization specific mappings for selected BusinessProcess" ;
@@ -256,43 +256,43 @@ insights:Activity-Perspective-slot-9 olo:index "9"^^xsd:int ;
 	olo:item insights:ActP9 .
 
 insights:ActP1 spin:body insights:What_is_the_crosswalk_from_iBRM_v1_to_v2__query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What is the crosswalk from iBRM v1 to v2?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP1" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP1" .
 
 insights:ActP10 spin:body insights:Show_Count_of_Activities_by_Level_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ColumnChartPlaySheet ;
 	vas:outputType "COLUMN_CHART" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Count of Activities by Level" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP10" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP10" .
 
-insights:ActP11 ui:dataView vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
+insights:ActP11 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
 	vas:outputType "PARALLEL_COORDS" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show PC of Activity requirements for Data, BLU and Human Logic" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP11" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP11" .
 
 insights:ActP12 spin:body insights:Show_Direct_Indirect_Designation_for_Activities_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Direct/Indirect Designation for Activities" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP12" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP12" .
 
 insights:ActP13 spin:body insights:Show_Direct_Designation_for_Activities_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Direct Designation for Activities" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP13" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP13" .
 
 insights:A26f83079-4c43-4bf3-837e-6cd6e27ed58a sp:text """CONSTRUCT { ?InterfaceControlDocument semoss:usedBy ?DataObjectURI }
 WHERE {
@@ -308,12 +308,12 @@ WHERE{
 }""" .
 
 insights:ActP2 spin:constraint insights:constraint-1441828465418 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "What is the iBRM v2 activities for this v1 activity?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP2" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP2" .
 
 insights:A804f0177-f05f-4484-9fd5-1803ee97d042 rdfs:label "Activity" .
 
@@ -322,12 +322,12 @@ insights:AP1 dcterms:created "2015-09-14T14:20:15.853-04:00"^^xsd:dateTime ;
 	dcterms:modified "2015-09-24T13:11:10.460-04:00"^^xsd:dateTime .
 
 insights:ActP3 spin:constraint insights:constraint-1441828465420 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Pharmacy specific Activities for selected BusinessProcess" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP3" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP3" .
 
 insights:AP1 spin:body insights:y9428ff1b-0f80-4ef3-ac87-04881cd10a9c .
 
@@ -336,12 +336,12 @@ insights:AP11 dcterms:created "2015-09-14T14:20:15.857-04:00"^^xsd:dateTime ;
 	dcterms:modified "2015-09-24T13:11:10.464-04:00"^^xsd:dateTime .
 
 insights:ActP4 spin:constraint insights:constraint-1441828465422 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Laboratory specific Activities for selected BusinessProcess" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP4" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP4" .
 
 insights:AP12 dcterms:created "2015-09-14T14:20:15.857-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -349,12 +349,12 @@ insights:AP12 dcterms:created "2015-09-14T14:20:15.857-04:00"^^xsd:dateTime ;
 	spin:body insights:Sbf6a0fd8-75a6-4039-b1c1-c4866fcb0d63 .
 
 insights:ActP5 spin:constraint insights:constraint-1441828465424 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Imaging specific mappings for selected BusinessProcess" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP5" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP5" .
 
 insights:AP13 dcterms:created "2015-09-14T14:20:15.858-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -363,24 +363,24 @@ insights:AP13 dcterms:created "2015-09-14T14:20:15.858-04:00"^^xsd:dateTime ;
 insights:AP14 dcterms:created "2015-09-14T14:20:15.858-04:00"^^xsd:dateTime .
 
 insights:ActP7 spin:constraint insights:constraint-1441828465428 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show CPRS specific mappings for selected BusinessProcess" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP7" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP7" .
 
 insights:AP14 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.465-04:00"^^xsd:dateTime ;
 	spin:body insights:p0de5d42e-202f-4697-95d2-0cc154d52aad .
 
 insights:ActP8 spin:body insights:Show_Activity_to_Activity_mappings_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show Activity to Activity mappings" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP8" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP8" .
 
 insights:AP15 dcterms:created "2015-09-14T14:20:15.859-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -388,12 +388,12 @@ insights:AP15 dcterms:created "2015-09-14T14:20:15.859-04:00"^^xsd:dateTime ;
 
 insights:ActP9 spin:body insights:Pick_Activity_Level_and_show_graph_of_Activities_query ;
 	spin:constraint insights:constraint-1441828465431 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick Activity Level and show graph of Activities" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#ActP9" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#ActP9" .
 
 insights:AP15 spin:body insights:U3bacd43b-8066-4daa-aa86-64f821661246 .
 
@@ -402,24 +402,24 @@ insights:AP16 dcterms:created "2015-09-14T14:20:15.859-04:00"^^xsd:dateTime ;
 	dcterms:modified "2015-09-24T13:11:10.466-04:00"^^xsd:dateTime ;
 	spin:body insights:l8d922803-6158-4f45-bb04-55c2921f3a30 .
 
-insights:AP1 ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+insights:AP1 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show the list of all Application Modules and their descriptions." ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP1" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP1" .
 
 insights:AP17 dcterms:created "2015-09-14T14:20:15.860-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.467-04:00"^^xsd:dateTime .
 
 insights:AP11 spin:body insights:What_are_the_Data_Objects_for_all_Applications_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
 	vas:outputType "PARALLEL_COORDS" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the Data Objects for all Applications" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP11" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP11" .
 
 insights:AP17 spin:body insights:Ube4a4ae1-66fd-4652-b65d-345828f0153e .
 
@@ -427,12 +427,12 @@ insights:AP18 dcterms:created "2015-09-14T14:20:15.861-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.468-04:00"^^xsd:dateTime .
 
-insights:AP12 ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+insights:AP12 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the Business Logic Units for all Applications?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP12" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP12" .
 
 insights:AP18 spin:body insights:nbca31ab7-058a-423e-9bc5-c1e79578785e .
 
@@ -440,12 +440,12 @@ insights:AP19 dcterms:created "2015-09-14T14:20:15.861-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
 insights:AP13 spin:body insights:What_are_the_DataObjects_for_all_Applications__query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the DataObjects for all Applications?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP13" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP13" .
 
 insights:AP19 dcterms:modified "2015-09-24T13:11:10.468-04:00"^^xsd:dateTime ;
 	spin:body insights:Idb505493-ac77-4407-8915-b3f3bb4e2d32 .
@@ -453,12 +453,12 @@ insights:AP19 dcterms:modified "2015-09-24T13:11:10.468-04:00"^^xsd:dateTime ;
 insights:AP2 dcterms:created "2015-09-14T14:20:15.853-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
-insights:AP14 ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+insights:AP14 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "How Many ICDs are there between each Application?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP14" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP14" .
 
 insights:AP2 dcterms:modified "2015-09-24T13:11:10.461-04:00"^^xsd:dateTime ;
 	spin:body insights:yb1705f2c-1db7-4341-9778-a458d5f895c8 .
@@ -467,12 +467,12 @@ insights:AP20 dcterms:created "2015-09-14T14:20:15.862-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
 insights:AP15 spin:constraint insights:constraint-1441828465454 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Which downstream Applications are consuming information from this Application?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP15" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP15" .
 
 insights:AP20 dcterms:modified "2015-09-24T13:11:10.469-04:00"^^xsd:dateTime .
 
@@ -481,12 +481,12 @@ insights:AP21 dcterms:created "2015-09-14T14:20:15.863-04:00"^^xsd:dateTime ;
 	dcterms:modified "2015-09-24T13:11:10.469-04:00"^^xsd:dateTime .
 
 insights:AP16 spin:constraint insights:constraint-1441828465456 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Which upstream Applications are sending information to this Application?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP16" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP16" .
 
 insights:AP22 dcterms:created "2015-09-14T14:20:15.863-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -495,12 +495,12 @@ insights:AP22 dcterms:created "2015-09-14T14:20:15.863-04:00"^^xsd:dateTime ;
 insights:AP3 dcterms:created "2015-09-14T14:20:15.854-04:00"^^xsd:dateTime .
 
 insights:AP17 spin:constraint insights:constraint-1441828465458 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Which downstream Applications are consuming information from this Application?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP17" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP17" .
 
 insights:AP3 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.461-04:00"^^xsd:dateTime .
@@ -509,12 +509,12 @@ insights:AP4 dcterms:created "2015-09-14T14:20:15.854-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
 insights:AP18 spin:constraint insights:constraint-1441828465460 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Which upstream Applications are sending information to this Application?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP18" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP18" .
 
 insights:AP4 dcterms:modified "2015-09-24T13:11:10.462-04:00"^^xsd:dateTime .
 
@@ -523,12 +523,12 @@ insights:AP5 dcterms:created "2015-09-14T14:20:15.855-04:00"^^xsd:dateTime ;
 	dcterms:modified "2015-09-24T13:11:10.462-04:00"^^xsd:dateTime .
 
 insights:AP19 spin:constraint insights:constraint-1441828465462 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What is the difference between EA Mapping and VCAMP Mapping?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP19" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP19" .
 
 insights:AP5 spin:body insights:V813694fa-a677-496b-b522-81c1d31fd9fc .
 
@@ -537,12 +537,12 @@ insights:AP6 dcterms:created "2015-09-14T14:20:15.856-04:00"^^xsd:dateTime ;
 	dcterms:modified "2015-09-24T13:11:10.463-04:00"^^xsd:dateTime .
 
 insights:AP2 spin:constraint insights:constraint-1441828465439 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Data does this Application Create, Modify or Read?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP2" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP2" .
 
 insights:AP7 dcterms:created "2015-09-14T14:20:15.856-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -550,12 +550,12 @@ insights:AP7 dcterms:created "2015-09-14T14:20:15.856-04:00"^^xsd:dateTime ;
 
 insights:AP20 spin:body insights:What_Data_Elements_does_this_Application_Create__query ;
 	spin:constraint insights:constraint-1441828465464 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Data Elements does this Application Create?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP20" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP20" .
 
 insights:AP7 spin:body insights:a225870f3-2cc8-4145-99cd-a85b60f292d3 .
 
@@ -565,12 +565,12 @@ insights:ActP1 dcterms:created "2015-09-14T14:20:15.837-04:00"^^xsd:dateTime .
 
 insights:AP21 spin:body insights:What_Data_Elements_does_this_Application_Modify__query ;
 	spin:constraint insights:constraint-1441828465466 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Data Elements does this Application Modify?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP21" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP21" .
 
 insights:ActP1 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.445-04:00"^^xsd:dateTime .
@@ -579,12 +579,12 @@ insights:ActP10 dcterms:created "2015-09-14T14:20:15.847-04:00"^^xsd:dateTime .
 
 insights:AP22 spin:body insights:What_Data_Elements_does_this_Application_Read__query ;
 	spin:constraint insights:constraint-1441828465468 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Data Elements does this Application Read?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP22" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP22" .
 
 insights:ActP10 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.454-04:00"^^xsd:dateTime .
@@ -593,12 +593,12 @@ insights:ActP11 dcterms:created "2015-09-14T14:20:15.848-04:00"^^xsd:dateTime .
 
 insights:AP3 spin:body insights:What_BLUs_does_this_Application_provide__query ;
 	spin:constraint insights:constraint-1441828465441 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What BLUs does this Application provide?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP3" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP3" .
 
 insights:ActP11 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.454-04:00"^^xsd:dateTime ;
@@ -606,12 +606,12 @@ insights:ActP11 dcterms:creator "ryan" ;
 
 insights:AP4 spin:body insights:What_Requirements_does_this_Application_fulfill__query ;
 	spin:constraint insights:constraint-1441828465443 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Requirements does this Application fulfill?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP4" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP4" .
 
 insights:ActP12 dcterms:created "2015-09-14T14:20:15.848-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -620,12 +620,12 @@ insights:ActP12 dcterms:created "2015-09-14T14:20:15.848-04:00"^^xsd:dateTime ;
 insights:ActP13 dcterms:created "2015-09-14T14:20:15.849-04:00"^^xsd:dateTime .
 
 insights:AP5 spin:constraint insights:constraint-1441828465445 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What BusinessRules does this Application implement?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP5" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP5" .
 
 insights:ActP13 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.455-04:00"^^xsd:dateTime .
@@ -634,12 +634,12 @@ insights:ActP2 dcterms:created "2015-09-14T14:20:15.842-04:00"^^xsd:dateTime .
 
 insights:AP6 spin:body insights:What_UseCases_does_this_Application_fulfill__query ;
 	spin:constraint insights:constraint-1441828465447 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What UseCases does this Application fulfill?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP6" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP6" .
 
 insights:ActP2 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.449-04:00"^^xsd:dateTime ;
@@ -647,12 +647,12 @@ insights:ActP2 dcterms:creator "ryan" ;
 
 insights:ActP3 dcterms:created "2015-09-14T14:20:15.843-04:00"^^xsd:dateTime .
 
-insights:AP7 ui:dataView vas:gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet ;
+insights:AP7 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.AppDupeHeatMapSheet ;
 	vas:outputType "HEATMAP_APPDUPE" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the levels of duplication between Applications?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#AP7" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#AP7" .
 
 insights:ActP3 dcterms:creator "ryan" .
 
@@ -735,12 +735,12 @@ insights:ActP4 dcterms:created "2015-09-14T14:20:15.843-04:00"^^xsd:dateTime ;
 	dcterms:modified "2015-09-24T13:11:10.450-04:00"^^xsd:dateTime .
 
 insights:BP1 spin:constraint insights:constraint-1441828465471 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.DendrogramPlaySheet ;
 	vas:outputType "DENDROGRAM" ;
 	a spin:MagicProperty ;
 	rdfs:label "What data objects and BLUs fulfill each Business Process" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#BP1" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#BP1" .
 
 insights:ActP4 spin:body insights:r4a1d0eb9-566a-4496-a78b-a043bafeb161 .
 
@@ -749,12 +749,12 @@ insights:ActP5 dcterms:created "2015-09-14T14:20:15.844-04:00"^^xsd:dateTime ;
 
 insights:BP3 spin:body insights:Pick_BP___show_Pharmacy_specific_mappings_query ;
 	spin:constraint insights:constraint-1441828465473 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick BP & show Pharmacy specific mappings" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#BP3" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#BP3" .
 
 insights:ActP5 dcterms:modified "2015-09-24T13:11:10.451-04:00"^^xsd:dateTime ;
 	spin:body insights:D8acc7adb-fff7-4198-bffd-7f7f50f631d5 .
@@ -763,12 +763,12 @@ insights:ActP7 dcterms:created "2015-09-14T14:20:15.846-04:00"^^xsd:dateTime .
 
 insights:BP4 spin:body insights:Pick_BP___show_Laboratory_specific_mappings_query ;
 	spin:constraint insights:constraint-1441828465475 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick BP & show Laboratory specific mappings" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#BP4" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#BP4" .
 
 insights:ActP7 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.453-04:00"^^xsd:dateTime ;
@@ -776,12 +776,12 @@ insights:ActP7 dcterms:creator "ryan" ;
 
 insights:BP7 spin:body insights:Pick_BP___show_CPRS_specific_mappings_query ;
 	spin:constraint insights:constraint-1441828465481 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick BP & show CPRS specific mappings" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#BP7" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#BP7" .
 
 insights:ActP8 dcterms:created "2015-09-14T14:20:15.846-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -789,12 +789,12 @@ insights:ActP8 dcterms:created "2015-09-14T14:20:15.846-04:00"^^xsd:dateTime ;
 
 insights:BP8 spin:body insights:Pick_BP___show_ENTERPRISE_level_mappings_query ;
 	spin:constraint insights:constraint-1441828465483 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick BP & show ENTERPRISE level mappings" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#BP8" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#BP8" .
 
 insights:ActP9 dcterms:created "2015-09-14T14:20:15.847-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -802,7 +802,7 @@ insights:ActP9 dcterms:created "2015-09-14T14:20:15.847-04:00"^^xsd:dateTime ;
 
 insights:BusinessProcess-Perspective-insight-1438621600519 spin:body insights:Pick_BP___show_Imaging_specific_mappings_query ;
 	spin:constraint insights:constraint-1441828465479 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick BP & show Imaging specific mappings" ;
@@ -815,7 +815,7 @@ insights:Activity-Perspective-insight-1431577739478 dcterms:created "2015-09-14T
 
 insights:BusinessProcess-Perspective-insight-1438625130072 spin:body insights:Pick_BP___show_Immunization_specific_mappings_query ;
 	spin:constraint insights:constraint-1441828465477 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick BP & show Immunization specific mappings" ;
@@ -1281,12 +1281,12 @@ insights:IO1 dcterms:created "2015-09-14T14:20:15.880-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
 insights:CP1 spin:constraint insights:constraint-1441828465486 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Business Processeses are relevant to this Capability?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP1" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP1" .
 
 insights:IO1 dcterms:modified "2015-09-24T13:11:10.484-04:00"^^xsd:dateTime ;
 	spin:body insights:p1fe7bee0-16b6-4339-827a-eda4e8115159 .
@@ -1295,12 +1295,12 @@ insights:IO2 dcterms:created "2015-09-14T14:20:15.880-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
 insights:CP2 spin:constraint insights:constraint-1441828465488 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Requirements are applicable to this Capability?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP2" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP2" .
 
 insights:IO2 dcterms:modified "2015-09-24T13:11:10.485-04:00"^^xsd:dateTime ;
 	spin:body insights:A26f83079-4c43-4bf3-837e-6cd6e27ed58a .
@@ -1309,12 +1309,12 @@ insights:IO3 dcterms:created "2015-09-14T14:20:15.881-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
 insights:CP3 spin:constraint insights:constraint-1441828465490 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Data Objects are required for this Capability?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP3" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP3" .
 
 insights:IO3 dcterms:modified "2015-09-24T13:11:10.485-04:00"^^xsd:dateTime .
 
@@ -1326,12 +1326,12 @@ insights:CP4 spin:body insights:What_BLU_is_required_for_this_Capability__query 
 
 insights:IO4 dcterms:modified "2015-09-24T13:11:10.486-04:00"^^xsd:dateTime .
 
-insights:CP4 ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+insights:CP4 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What BLU is required for this Capability?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP4" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP4" .
 
 insights:IO4 spin:body insights:Ta5f26afe-f385-4058-9598-9feeeea55e86 .
 
@@ -1339,12 +1339,12 @@ insights:IO5 dcterms:created "2015-09-14T14:20:15.882-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.486-04:00"^^xsd:dateTime .
 
-insights:CP5 ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+insights:CP5 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "How many times does each Capability require each Data Object?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP5" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP5" .
 
 insights:IO5 spin:body insights:Bdb8de616-522a-4573-85e7-93a6bbdf287a .
 
@@ -1356,12 +1356,12 @@ insights:CP7 spin:constraint insights:constraint-1441828465496 .
 
 insights:IO7 dcterms:created "2015-09-14T14:20:15.883-04:00"^^xsd:dateTime .
 
-insights:CP7 ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+insights:CP7 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the five most frequently used Data Objects within this Capability?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP7" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP7" .
 
 insights:IO7 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.487-04:00"^^xsd:dateTime ;
@@ -1370,12 +1370,12 @@ insights:IO7 dcterms:creator "ryan" ;
 insights:IO8 dcterms:created "2015-09-14T14:20:15.883-04:00"^^xsd:dateTime .
 
 insights:CP8 spin:constraint insights:constraint-1441828465499 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick a Capability and show heatmap of BusinessProcesses to Activities clinical relevance scores." ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP8" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP8" .
 
 insights:IO8 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.488-04:00"^^xsd:dateTime ;
@@ -1384,12 +1384,12 @@ insights:IO8 dcterms:creator "ryan" ;
 insights:IO9 dcterms:created "2015-09-14T14:20:15.884-04:00"^^xsd:dateTime .
 
 insights:CP9 spin:constraint insights:constraint-1441828465501 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
 	vas:outputType "PARALLEL_COORDS" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick a Capability and show Parallel Coordinates of BusinessProcesses to their activites and clinical relevance scores" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#CP9" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#CP9" .
 
 insights:IO9 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.488-04:00"^^xsd:dateTime .
@@ -1473,7 +1473,7 @@ insights:N2e608058-ba68-403c-80c8-1debcff2fdc6 rdfs:label "Data Object" .
 
 insights:Na9a6819f-9e14-49e9-b5f5-bc00b0553757 rdfs:label "Data Object" .
 
-insights:Enterprise-Perspective-insight-1440005855943 ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+insights:Enterprise-Perspective-insight-1440005855943 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "Compare Capabilities, Applications & App BP Values" ;
@@ -1510,7 +1510,7 @@ WHERE {
 }""" .
 
 insights:Enterprise-Perspective-insight-1440526096022 spin:body insights:Show_all_Applications_and_their_Interfaces_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show all Applications and their Interfaces" ;
@@ -1563,12 +1563,12 @@ WHERE{
 }""" .
 
 insights:EP1 spin:constraint insights:constraint-1441828465520 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick Capability and expose graph of clinical side of Enterprise" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP1" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP1" .
 
 insights:Qf7d8d6ad-d494-4839-a7d1-6c95273ebe7b sp:text """SELECT ?CapabilityURI ?label 
 WHERE{
@@ -1585,24 +1585,24 @@ WHERE{
 }""" .
 
 insights:EP10 spin:body insights:Compare_all_Enterprise_ApplicationScores_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ColumnChartPlaySheet ;
 	vas:outputType "COLUMN_CHART" ;
 	a spin:MagicProperty ;
 	rdfs:label "Compare all Enterprise ApplicationScores" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP10" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP10" .
 
 insights:RP1 dcterms:created "2015-09-14T14:20:15.894-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.496-04:00"^^xsd:dateTime ;
 	spin:body insights:X8da80b5c-675a-4478-9a13-2bb8b41e58b6 .
 
-insights:EP2 ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+insights:EP2 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "Expose graph of technical side of enterprise Capabilities" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP2" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP2" .
 
 insights:RP12 dcterms:created "2015-09-14T14:20:15.896-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -1610,24 +1610,24 @@ insights:RP12 dcterms:created "2015-09-14T14:20:15.896-04:00"^^xsd:dateTime ;
 	spin:body insights:uf8d452f7-78ad-427a-993b-f7a15f14e9fd .
 
 insights:EP3 spin:constraint insights:constraint-1441828465525 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
 	vas:outputType "PARALLEL_COORDS" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick BP and show PC of associated Capabilities, Activities and EnterpriseWeights" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP3" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP3" .
 
 insights:RP13 dcterms:created "2015-09-14T14:20:15.897-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.498-04:00"^^xsd:dateTime ;
 	spin:body insights:s0ead19f3-45af-433b-b6f0-3df7580a362b .
 
-insights:EP4 ui:dataView vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
+insights:EP4 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet ;
 	vas:outputType "PARALLEL_COORDS" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show PC of All Capabilities and their associated Applications and BusinessProcesses" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP4" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP4" .
 
 insights:RP15 dcterms:created "2015-09-14T14:20:15.897-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
@@ -1636,12 +1636,12 @@ insights:RP15 dcterms:created "2015-09-14T14:20:15.897-04:00"^^xsd:dateTime ;
 insights:RP2 dcterms:created "2015-09-14T14:20:15.895-04:00"^^xsd:dateTime .
 
 insights:EP5 spin:constraint insights:constraint-1441828465528 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.PieChartPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet ;
 	vas:outputType "PIE_CHART" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick a BP and show pie chart of clinical relevance scores for the activities under selected BP" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP5" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP5" .
 
 insights:RP2 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.496-04:00"^^xsd:dateTime ;
@@ -1649,12 +1649,12 @@ insights:RP2 dcterms:creator "ryan" ;
 
 insights:RP4 dcterms:created "2015-09-14T14:20:15.895-04:00"^^xsd:dateTime .
 
-insights:EP6 ui:dataView vas:gov.va.semoss.ui.components.playsheets.PieChartPlaySheet ;
+insights:EP6 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet ;
 	vas:outputType "PIE_CHART" ;
 	a spin:MagicProperty ;
 	rdfs:label "Show pie chart of Application Module Enterprise scores" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP6" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP6" .
 
 insights:RP4 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.497-04:00"^^xsd:dateTime ;
@@ -1663,12 +1663,12 @@ insights:RP4 dcterms:creator "ryan" ;
 insights:RP5 dcterms:created "2015-09-14T14:20:15.896-04:00"^^xsd:dateTime .
 
 insights:EP7 spin:constraint insights:constraint-1441828465531 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.PieChartPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet ;
 	vas:outputType "PIE_CHART" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick Capability and show Capability Specific scores" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP7" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP7" .
 
 insights:RP5 dcterms:creator "ryan" ;
 	dcterms:modified "2015-09-24T13:11:10.497-04:00"^^xsd:dateTime ;
@@ -1677,12 +1677,12 @@ insights:RP5 dcterms:creator "ryan" ;
 insights:Re436b939-aa59-43c0-b922-2dacd2e03183 rdfs:label "Requirement" .
 
 insights:EP8 spin:constraint insights:constraint-1441828465533 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "Pick Capability and show Heatmap for BP to Activity Enterprise Weight" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#EP8" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#EP8" .
 
 insights:S11bf65cb-33b5-4f6a-a4f5-1862da3c4f06 sp:text """SELECT ?Capability ?label 
 WHERE{
@@ -1834,12 +1834,12 @@ WHERE {
 	a sp:Construct .
 
 insights:IO1 spin:constraint insights:constraint-1441828465504 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Applications Create, Modify or Read this Data?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO1" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO1" .
 
 insights:Zc36a2e13-2789-412d-b4ff-4f1fe3e4cb48 sp:text """SELECT ?RequirementURI ?label 
 WHERE{
@@ -1854,12 +1854,12 @@ insights:a13182730-4f79-4e0c-a123-34373804e0db rdfs:label "Business Process" .
 insights:a225870f3-2cc8-4145-99cd-a85b60f292d3 sp:text "" .
 
 insights:IO2 spin:constraint insights:constraint-1441828465506 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Interface Control Documents exchange this Data?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO2" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO2" .
 
 insights:a225870f3-2cc8-4145-99cd-a85b60f292d3 a sp:Select .
 
@@ -1876,12 +1876,12 @@ WHERE{
 }""" .
 
 insights:IO3 spin:body insights:What_number_of_ICDs_carry_each_DataObject__query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ColumnChartPlaySheet ;
 	vas:outputType "COLUMN_CHART" ;
 	a spin:MagicProperty ;
 	rdfs:label "What number of ICDs carry each DataObject?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO3" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO3" .
 
 insights:ae59679e7-4c1e-4b56-9fce-920629a94348 sp:text """CONSTRUCT {?Capability semoss:realizes ?BusinessProcess}
 WHERE{
@@ -1899,12 +1899,12 @@ WHERE{
 insights:bc85f23d6-9a38-497c-878c-4a936c893e24 rdfs:label "Capability" .
 
 insights:IO4 spin:constraint insights:constraint-1441828465509 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What data elements do data objects consist of? (Files and Fields included)" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO4" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO4" .
 
 insights:ccd35980d-abab-49ed-b6a8-cba4317bf73f rdfs:label "Capability" .
 
@@ -1913,12 +1913,12 @@ insights:constraint-1441828465418 sp:query insights:Qb701ee75-a65d-40bc-94b4-210
 
 insights:constraint-1441828465420 sp:query insights:lfe226c44-70c4-4882-8f0e-55ab28d68eaf .
 
-insights:IO5 ui:dataView vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ;
+insights:IO5 ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.ColumnChartPlaySheet ;
 	vas:outputType "COLUMN_CHART" ;
 	a spin:MagicProperty ;
 	rdfs:label "How many Applications are modifying each Data Object?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO5" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO5" .
 
 insights:constraint-1441828465420 spl:predicate insights:x930d15c0-87fb-4cb6-aa1b-d1b12b42beab .
 
@@ -1927,12 +1927,12 @@ insights:constraint-1441828465422 sp:query insights:fe8d3a411-48b5-4ab8-93d2-8d0
 
 insights:IO6 spin:body insights:What_are_the_Interfaces_for_this_Data_Object__query ;
 	spin:constraint insights:constraint-1441828465512 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the Interfaces for this Data Object?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO6" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO6" .
 
 insights:constraint-1441828465424 sp:query insights:D5de0003c-938d-45f1-b401-363a5e258770 ;
 	spl:predicate insights:mfc32f01e-d792-4245-87ae-3dfd307c033f .
@@ -1941,12 +1941,12 @@ insights:constraint-1441828465426 sp:query insights:h821a063a-ca61-4215-b4fd-ec0
 	spl:predicate insights:sb158a01b-56c1-4fb1-896a-68ff611579be .
 
 insights:IO7 spin:constraint insights:constraint-1441828465514 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the Interface Elements for this Data Object?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO7" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO7" .
 
 insights:constraint-1441828465428 sp:query insights:ya2c72327-a040-4f44-b75a-7203e05e51fe ;
 	spl:predicate insights:e30c23b86-d1cd-44c7-930b-a86a61515b20 .
@@ -1955,12 +1955,12 @@ insights:constraint-1441828465431 sp:query insights:O464c805c-2374-4fd8-9fc6-e9a
 	spl:predicate insights:kd259198b-c5ca-4628-8c1e-77d42fbde0bf .
 
 insights:IO8 spin:constraint insights:constraint-1441828465516 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ;
 	vas:outputType "GRAPH" ;
 	a spin:MagicProperty ;
 	rdfs:label "What is the network of Systems for the selected DataObject" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO8" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO8" .
 
 insights:constraint-1441828465439 sp:query insights:jd6da57e3-ec57-40cc-b580-35cf13122768 ;
 	spl:predicate insights:X3d397a8f-cb92-47de-b121-cbcc338dcc78 .
@@ -1968,12 +1968,12 @@ insights:constraint-1441828465439 sp:query insights:jd6da57e3-ec57-40cc-b580-35c
 insights:constraint-1441828465441 sp:query insights:x95ade467-38cb-4e8f-9cc7-d6f2b9debb2c .
 
 insights:IO9 spin:body insights:What_are_the_DataObjects_and_their_Descriptions_query ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the DataObjects and their Descriptions" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#IO9" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#IO9" .
 
 insights:constraint-1441828465441 spl:predicate insights:vddcfbaa9-6526-4440-95b3-b9b2decf7ece .
 
@@ -2293,12 +2293,12 @@ WHERE{
 }""" .
 
 insights:RP1 spin:constraint insights:constraint-1441828465545 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Applications are applicable to this Requirement?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#RP1" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#RP1" .
 
 insights:h05963276-68b8-4fa3-ac19-da4e0ce37013 sp:text """SELECT ?ApplicationModuleURI ?label 
 WHERE{
@@ -2329,12 +2329,12 @@ WHERE {
 } GROUP BY ?Capability ?DataObject""" .
 
 insights:RP12 spin:constraint insights:constraint-1441828465553 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What are the Business Rules for this Application?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#RP12" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#RP12" .
 
 insights:hee427792-6cf9-4c78-86c5-ec053f78940d a sp:Select .
 
@@ -2359,12 +2359,12 @@ WHERE{
 }""" .
 
 insights:RP13 spin:constraint insights:constraint-1441828465555 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Requirements are applicable to this Activity?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#RP13" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#RP13" .
 
 insights:ifa0c7d2f-ff7f-4d6c-b7b9-6067e14b472b sp:text """SELECT ?CapabilityURI ?label 
 WHERE{
@@ -2387,12 +2387,12 @@ WHERE{
 
 insights:RP15 spin:body insights:Application_Requirement_Business_Rules_Matrix_query ;
 	spin:constraint insights:constraint-1441828465557 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ;
 	vas:outputType "HEATMAP" ;
 	a spin:MagicProperty ;
 	rdfs:label "Application Requirement-Business Rules Matrix" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#RP15" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#RP15" .
 
 insights:je9f2cfb9-5d7f-4a53-a417-9fe212cbbfbf rdfs:label "Business Process" .
 
@@ -2408,12 +2408,12 @@ WHERE {
 	a sp:Construct .
 
 insights:RP2 spin:constraint insights:constraint-1441828465547 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What Activities are applicable to this Requirement?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#RP2" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#RP2" .
 
 insights:k615272a9-d6ff-41b5-8b1a-9b7143e538ba sp:text """SELECT ?ApplicationModuleURI ?label 
 WHERE{
@@ -2441,12 +2441,12 @@ WHERE {
 }""" .
 
 insights:RP4 spin:constraint insights:constraint-1441828465549 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What is the relationship between Requirement and Application (Data)?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#RP4" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#RP4" .
 
 insights:l8d922803-6158-4f45-bb04-55c2921f3a30 a sp:Select .
 
@@ -2461,12 +2461,12 @@ insights:m3cd9483a-bcef-4ab2-9ef6-1edcc8d85de6 sp:text "SELECT ?BusinessProcess 
 insights:mfc32f01e-d792-4245-87ae-3dfd307c033f rdfs:label "Business Process" .
 
 insights:RP5 spin:constraint insights:constraint-1441828465551 ;
-	ui:dataView vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ;
+	ui:dataView vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ;
 	vas:outputType "GRID" ;
 	a spin:MagicProperty ;
 	rdfs:label "What is the relationship between Requirement and Application (BLU)?" ;
 	rdfs:subClassOf vas:InsightProperties ;
-	dcterms:description "Test Description: http://va.gov/dataset/insights#RP5" .
+	dcterms:description "Test Description: http://os-em.com/dataset/insights#RP5" .
 
 insights:n3df70fea-4762-4b1c-95cd-f05777527d8a rdfs:label "Business Process" .
 
@@ -2893,16 +2893,16 @@ WHERE {
 }""" ;
 	a sp:Select .
 
-<http://va.gov/ontologies/core> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
+<http://os-em.com/ontologies/core> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
 	vac:description "The purpose of the Veterans Affairs (VA) Core Ontology is to provide a set of universal properties and the minimal classes needed to document ontologies developed at the VA.  Many of the properties provided here are suitable as metadata attributes applicable to arbitrary assets."^^xsd:string ;
 	vac:headURL "$HeadURL: http://104.130.3.174/svn/vcamp/SEMOSS_SRC/branches/dev/src/main/resources/models/va-core.ttl $"^^xsd:string ;
-	vac:namespace "http://va.gov/ontologies/core#"^^xsd:string ;
+	vac:namespace "http://os-em.com/ontologies/core#"^^xsd:string ;
 	vac:namespacePrefix "vac"^^xsd:string ;
 	vac:revision "$Revision: 2129 $"^^xsd:string ;
 	vac:revisionDate "$Date: 2015-04-05 21:30:23 -0400 (Sun, 05 Apr 2015) $"^^xsd:string ;
 	vac:specificity "1"^^xsd:integer ;
 	vac:version "0.5"^^xsd:string ;
-	owl:versionIRI <http://va.gov/ontologies/core/v0.5> ;
+	owl:versionIRI <http://os-em.com/ontologies/core/v0.5> ;
 	a owl:Ontology ;
 	rdfs:label "VA Core Ontology"^^xsd:string ;
 	owl:versionInfo "$Id: va-core.ttl 2129 2015-04-06 01:30:23Z daniel.mekonnen $"^^xsd:string .
@@ -2968,8 +2968,8 @@ vac:version a owl:DatatypeProperty ;
 	rdfs:label "version"^^xsd:string ;
 	rdfs:range xsd:string .
 
-<http://va.gov/ontologies/semoss> a owl:Ontology ;
-	owl:imports <http://purl.org/ontology/olo/core#> , <http://rdfs.org/ns/void> , <http://spinrdf.org/spin> , <http://uispin.org/ui> , <http://va.gov/ontologies/core> , <http://purl.org/dc/terms/> ;
+<http://os-em.com/ontologies/semoss> a owl:Ontology ;
+	owl:imports <http://purl.org/ontology/olo/core#> , <http://rdfs.org/ns/void> , <http://spinrdf.org/spin> , <http://uispin.org/ui> , <http://os-em.com/ontologies/core> , <http://purl.org/dc/terms/> ;
 	owl:versionInfo "Created with TopBraid Composer"^^xsd:string .
 
 vas:Database a owl:Class ;
@@ -2980,74 +2980,74 @@ vas:DataView a owl:Class ;
 	rdfs:label "Data View"^^xsd:string ;
 	rdfs:subClassOf ui:DataViews , _:t943 , _:t944 , _:t946 , _:t947 , _:t951 , _:t952 , _:t959 , _:t962 , _:t963 , _:t965 , _:t966 , _:t970 , _:t972 , _:t974 , _:t975 , _:t982 , _:t983 , _:t986 , _:t987 , _:t989 , _:t990 , _:t991 , _:t993 , _:t994 , _:t996 , _:t997 , _:t1002 , _:t1005 , _:t1006 , _:t1007 , _:t1008 , _:t1009 , _:t1010 , _:t1011 , _:t1012 , _:t1013 , _:t1014 , _:t1018 , _:t1020 , _:t1021 , _:t1026 , _:t1031 , _:t1032 , _:t1035 , _:t1036 , _:t1037 , _:t1043 , _:t1044 , _:t1047 , _:t1048 , _:t1050 , _:t1051 , _:t1052 , _:t1053 , _:t1054 , _:t1059 , _:t1061 , _:t1065 , _:t1067 , _:t1068 , _:t1069 , _:t1076 , _:t1077 , _:t1079 , _:t1082 , _:t1084 , _:t1086 , _:t1088 , _:t1090 , _:t1092 , _:t1094 , _:t1097 .
 
-vas:gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet ui:viewClass "gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet" , "gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.AppDupeHeatMapSheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.AppDupeHeatMapSheet" , "com.ostrichemulators.semtool.ui.components.playsheets.AppDupeHeatMapSheet"^^xsd:string ;
 	vas:icon "AppDupeHeatMapSheet" , "questions_heat_map3_16.png" , "questions_heat_map3_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Application Duplication Heat Map" , "Application Duplication Heat Map"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet" , "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.ColumnChartPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.ColumnChartPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.ColumnChartPlaySheet"^^xsd:string ;
 	vas:icon "ColumnChartPlaySheet" , "questions_bar_chart1_16.png" , "questions_bar_chart1_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Column Chart" , "Column Chart"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet" , "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.DendrogramPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.DendrogramPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.DendrogramPlaySheet"^^xsd:string ;
 	vac:description "The Play Sheet for creating a Dendrogram diagram using names and children.  "^^xsd:string ;
 	vas:icon "DendrogramPlaySheet" , "questions_dendrogram1_16.png" , "questions_dendrogram1_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Dendrogram" , "Dendrogram"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.GraphPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GraphPlaySheet" , "gov.va.semoss.ui.components.playsheets.GraphPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet"^^xsd:string ;
 	vas:icon "GraphPlaySheet" , "questions_graph_16.png" , "questions_graph_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Graph" , "Graph"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.GridPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridPlaySheet" , "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet"^^xsd:string ;
 	vac:description "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^xsd:string ;
 	vas:icon "GridPlaySheet" , "questions_grid2_16.png" , "questions_grid2_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
-	rdfs:label "gov.va.semoss.ui.components.playsheets.GridPlaySheet" , "Grid" , "Grid"^^xsd:string .
+	rdfs:label "com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet" , "Grid" , "Grid"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
-	vac:description "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.GridRAWPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.GridRAWPlaySheet"^^xsd:string ;
+	vac:description "Identical to com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^xsd:string ;
 	vas:icon "questions_raw_grid2_16.png"^^xsd:string ;
 	a vas:DataView ;
 	rdfs:label "Raw Grid"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.GridScatterSheet ui:viewClass "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.GridScatterSheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.GridScatterSheet"^^xsd:string ;
 	vac:description "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^xsd:string ;
 	vas:icon "questions_grid_scatter1_16.png"^^xsd:string ;
 	a vas:DataView ;
 	rdfs:label "Grid Scatter"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet" , "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet"^^xsd:string ;
 	vac:description "The Play Sheet for creating a heat map diagram. "^^xsd:string ;
 	vas:icon "HeatMapPlaySheet" , "questions_heat_map3_16.png" , "questions_heat_map3_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Heat Map" , "Heat Map"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet" , "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.MetamodelGraphPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.MetamodelGraphPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.MetamodelGraphPlaySheet"^^xsd:string ;
 	vas:icon "MetamodelGraphPlaySheet" , "questions_metamodel1_16.png" , "questions_metamodel1_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Metamodel Graph" , "Metamodel Graph"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet" , "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet"^^xsd:string ;
 	vac:description "The Play Sheet for creating a Parallel Coordinates diagram."^^xsd:string ;
 	vas:icon "ParallelCoordinatesPlaySheet" , "questions_parcoords6_16.png" , "questions_parcoords4_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Parallel Coordinates" , "Parallel Coordinates"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.PieChartPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet" , "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet" , "com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet"^^xsd:string ;
 	vas:icon "PieChartPlaySheet" , "questions_pie_chart1_16.png" , "questions_pie_chart1_16.png"^^xsd:string ;
 	a ui:dataView , vas:DataView ;
 	rdfs:label "Pie Chart" , "Pie Chart"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.SankeyPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.SankeyPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.SankeyPlaySheet"^^xsd:string ;
 	vac:description "The Play Sheet for creating a Sankey diagram using nodes and relationships."^^xsd:string ;
 	vas:icon "questions_sankey2_16.png"^^xsd:string ;
 	a vas:DataView ;
 	rdfs:label "Sankey Diagram"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet"^^xsd:string ;
 	vac:description """The Play Sheet for the United States geo-location data heatmap.  
 Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string , """The Play Sheet for the United States geo-location data heatmap.  
 Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
@@ -3055,7 +3055,7 @@ Visualizes a world heat map that can show any numeric property on a node."""^^xs
 	a vas:DataView ;
 	rdfs:label "US Heat Map"^^xsd:string .
 
-vas:gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet ui:viewClass "gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet"^^xsd:string ;
+vas:com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet ui:viewClass "com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet"^^xsd:string ;
 	vac:description """The Play Sheet for the World geo-location data heatmap.  
 Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string , """The Play Sheet for the World geo-location data heatmap.  
 Visualizes a world heat map that can show any numeric property on a node."""^^xsd:string ;
@@ -3110,7 +3110,7 @@ vas:VASEMOSS-Reification a vas:ReificationModel ;
 vas:W3C-Reification a vas:ReificationModel ;
 	rdfs:label "W3C Reification"^^xsd:string .
 
-<http://va.gov/ontologies/vcamp> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
+<http://os-em.com/ontologies/vcamp> vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
 	vac:headURL "$HeadURL: http://104.130.3.174/svn/vcamp/V-CAMP/branches/dev/src/main/resources/models/vcamp.ttl $"^^xsd:string ;
 	vac:namespace "http://semoss.org/ontologies/vcamp#"^^xsd:string ;
 	vac:namespacePrefix "vcamp"^^xsd:string ;
@@ -3120,7 +3120,7 @@ vas:W3C-Reification a vas:ReificationModel ;
 	vac:version "0.5"^^xsd:string ;
 	owl:versionIRI <http://semoss.org/ontologies/vcamp/v0.5> , <http://semoss.org/ontololgies/vcamp/v0.5> ;
 	a owl:Ontology ;
-	owl:imports <http://semoss.org/ontologies> , <http://va.gov/ontologies/core> ;
+	owl:imports <http://semoss.org/ontologies> , <http://os-em.com/ontologies/core> ;
 	owl:versionInfo "$Id: vcamp.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^xsd:string .
 
 _:t945 a owl:Restriction ;

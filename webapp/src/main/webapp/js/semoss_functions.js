@@ -2,7 +2,7 @@
 					var SEMOSS = [];
 					
 					SEMOSS.DbInfo = function(){
-						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
+						this.vcamp_class = "com.ostrichemulators.semtool.web.io.DbInfo";
 					};
 					
 					SEMOSS.DbInfo.prototype.vcamp_class = null;
@@ -16,7 +16,7 @@
 						this.serverUrl = decodeURIComponent(object['serverUrl']);
 						this.dataUrl = decodeURIComponent(object['dataUrl']);
 						this.insightsUrl = decodeURIComponent(object['insightsUrl']);
-						this.vcamp_class = "gov.va.semoss.web.io.DbInfo";
+						this.vcamp_class = "com.ostrichemulators.semtool.web.io.DbInfo";
 					}
 
 					SEMOSS.createDatabase = function (knowledgebase, callBackFunction){
@@ -115,10 +115,10 @@
 					
 					
 					SEMOSS.User= function(){
-						this.vcamp_class = "gov.va.semoss.web.security.SemossUser";
+						this.vcamp_class = "com.ostrichemulators.semtool.web.security.SemossUser";
 					};
 					
-					SEMOSS.User.prototype.vcamp_class = "gov.va.semoss.web.security.SemossUser";
+					SEMOSS.User.prototype.vcamp_class = "com.ostrichemulators.semtool.web.security.SemossUser";
 					SEMOSS.User.prototype.username = null;
 					SEMOSS.User.prototype.displayName = null;
 					SEMOSS.User.prototype.email = null;
@@ -128,7 +128,7 @@
 						this.username = object['username'];
 						this.displayName = object['properties'].USER_FULLNAME;
 						this.email = object['properties'].USER_EMAIL;
-						this.vcamp_class = "gov.va.semoss.web.security.SemossUser";
+						this.vcamp_class = "com.ostrichemulators.semtool.web.security.SemossUser";
 					}
 
 					
@@ -207,17 +207,17 @@
 					SEMOSS.PRIVILEGE_CHOICES = ['READ','WRITE','NONE'];
 					
 					SEMOSS.DBPrivilege = function(){
-						this.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+						this.vcamp_class = "com.ostrichemulators.semtool.web.security.DBPrivilege";
 					};
 					
-					SEMOSS.DBPrivilege.prototype.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+					SEMOSS.DBPrivilege.prototype.vcamp_class = "com.ostrichemulators.semtool.web.security.DBPrivilege";
 					SEMOSS.DBPrivilege.prototype.uri = null;
 					SEMOSS.DBPrivilege.prototype.access = null;
 					
 					SEMOSS.DBPrivilege.prototype.setAttributes = function(object){
 						this.uri = object['uri'];
 						this.access = object['access'];
-						this.vcamp_class = "gov.va.semoss.web.security.DBPrivilege";
+						this.vcamp_class = "com.ostrichemulators.semtool.web.security.DBPrivilege";
 					}
 					
 

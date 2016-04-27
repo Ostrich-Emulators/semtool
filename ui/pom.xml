@@ -11,6 +11,11 @@
 	<artifactId>gui</artifactId>
 
 	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!--dependency>
 			<groupId>com.bigdata</groupId>
 			<artifactId>bigdata-ganglia</artifactId>
@@ -236,11 +241,6 @@
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-codec</artifactId>
 			<version>1.8</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>va-semoss-common</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
