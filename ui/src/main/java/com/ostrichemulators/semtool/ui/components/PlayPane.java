@@ -67,7 +67,6 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 
-import com.ostrichemulators.semtool.util.Utility;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -936,18 +935,16 @@ public class PlayPane extends JFrame {
 		}
 
 		helpdata.append( "<h3>Build Information</h3>" );
-		try {
-			Properties buildprops = Utility.loadProp( PlayPane.class.getResource( "/build.properties" ) );
+		Properties buildprops = GuiUtility.getBuildProperties();
+		if ( buildprops.isEmpty() ) {
+			helpdata.append( "no build information found" );
+		}
+		else {
 			for ( String str : buildprops.stringPropertyNames() ) {
 				helpdata.append( str ).append( ": " ).
 						append( buildprops.getProperty( str, "not available" ) ).
 						append( "<br/>\n" );
-
 			}
-		}
-		catch ( IOException ioe ) {
-			logger.warn( ioe, ioe );
-			helpdata.append( "no build information found" );
 		}
 
 		JPanel helpPanel = new JPanel( new BorderLayout() );

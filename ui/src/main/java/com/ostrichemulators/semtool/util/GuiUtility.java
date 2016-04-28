@@ -36,6 +36,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.util.HashMap;
+import java.util.Properties;
 import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -261,6 +263,16 @@ public class GuiUtility {
 				}
 			}
 		}
+	}
+
+	public static Properties getBuildProperties() {
+		try {
+			return Utility.loadProp( GuiUtility.class.getResource( "/build.properties" ) );
+		}
+		catch ( IOException ioe ) {
+			log.warn( ioe, ioe );
+		}
+		return new Properties();
 	}
 
 	public static void resetJTable( String tableKey ) {

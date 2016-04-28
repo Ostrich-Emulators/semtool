@@ -353,6 +353,9 @@
 					<shortRevisionLength>15</shortRevisionLength>
 					<timestampFormat>yyyy-MM-dd H:mm:ssZ</timestampFormat>
 					<addOutputDirectoryToResources>true</addOutputDirectoryToResources>
+					<properties>
+						<artifact>${project.artifactId}</artifact>
+					</properties>s
 				</configuration>
 			</plugin>
 		</plugins>

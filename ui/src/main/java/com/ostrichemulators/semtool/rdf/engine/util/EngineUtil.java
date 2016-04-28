@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,7 +50,6 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.Er
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.user.Security;
-import java.net.URL;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -550,8 +548,9 @@ public class EngineUtil implements Runnable {
 			final Map<URI, Value> oldmetas = from.query( new MetadataQuery() );
 			final URI newbase = to.getBaseUri();
 			Date now = new Date();
+			Properties props = GuiUtility.getBuildProperties();
 			oldmetas.put( VAC.SOFTWARE_AGENT,
-					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) );
+					vf.createLiteral( props.getProperty( "name", "unknown" ) ) );
 			oldmetas.put( MetadataConstants.DCT_CREATED, vf.createLiteral( now ) );
 			oldmetas.put( MetadataConstants.DCT_MODIFIED, vf.createLiteral( now ) );
 			oldmetas.put( RDFS.LABEL, vf.createLiteral( title ) );

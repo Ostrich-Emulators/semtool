@@ -121,7 +121,7 @@ public class Starter {
 			}
 		}
 
-		Properties buildprops = Utility.loadProp( Starter.class.getResource( "/build.properties" ) );
+		Properties buildprops = GuiUtility.getBuildProperties();
 		// props.load( Starter.class.getResourceAsStream( "/semoss.properties" ) );
 		logger.info( "OS-EM Semantic Toolkit, build "
 				+ buildprops.getProperty( "revision", "unknown" ) );
