@@ -369,6 +369,7 @@
 								</manifest>
 								<manifestEntries>
 									<Implementation-Build>${buildNumber}</Implementation-Build>
+									<SplashScreen-Image>images/splash.png</SplashScreen-Image>
 								</manifestEntries>
 							</archive>
 							<outputDirectory>${launcher.dir}</outputDirectory>
@@ -393,6 +394,12 @@
 									<downloadUrl>http://java.com/download</downloadUrl>
 									<chdir>.</chdir>
 									<priority>normal</priority>
+									<!-- splash>
+										<file>src/main/resources/images/SEMOSS-Splash.png</file>
+										<waitForWindow>true</waitForWindow>
+										<timeout>60</timeout>
+										<timeoutErr>true</timeoutErr>
+									</splash -->
 									<classPath>
 										<mainClass>com.ostrichemulators.semtool.ui.main.Starter</mainClass>
 										<jarLocation>lib/</jarLocation>

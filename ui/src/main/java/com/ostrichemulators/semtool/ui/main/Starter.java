@@ -36,7 +36,6 @@ import com.ostrichemulators.semtool.util.DIHelper;
 
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
-import com.ostrichemulators.semtool.ui.components.RepositoryList;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.PinningEngineListener;
 import com.ostrichemulators.semtool.util.Utility;
@@ -48,13 +47,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import javax.swing.Painter;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 /**
  * The Starter class is run to start the SEMOSS application. This launches the
@@ -65,7 +59,7 @@ public class Starter {
 	/**
 	 * The set of possible image paths which define the Splash screen
 	 */
-	private static final String SPLASH_SCREEN_IMAGE_PATH = "/images/SEMOSS-Splash.png";
+	private static final String SPLASH_SCREEN_IMAGE_PATH = "/images/splash.png";
 	private static final Logger logger = Logger.getLogger( Starter.class );
 
 	/**
@@ -96,7 +90,7 @@ public class Starter {
 		try {
 			for ( LookAndFeelInfo info : UIManager.getInstalledLookAndFeels() ) {
 				if ( "Nimbus".equals( info.getName() ) ) {
-					logger.info( "Got the nimbus" );
+					logger.trace( "Got the nimbus" );
 					UIManager.setLookAndFeel( info.getClassName() );
 					//Pretty Colors.
 					UIManager.put( "nimbusSelectionBackground", new Color( 67, 144, 212 ) ); //Light blue for selection
@@ -175,8 +169,6 @@ public class Starter {
 		}
 
 		final PlayPane frame = getPlayPane();
-		final SEMOSSSplashScreen ss = new SEMOSSSplashScreen( splashpath );
-		ss.displaySplashScreen();
 		java.awt.EventQueue.invokeLater( new Runnable() {
 			@Override
 			public void run() {
@@ -187,30 +179,6 @@ public class Starter {
 					logger.error( "error connecting the frame", e );
 				}
 				frame.setVisible( true );
-			}
-		} );
-
-		// don't let the splash screen go for more than 10 seconds
-		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 1 );
-		scheduler.schedule( new Runnable() {
-
-			@Override
-			public void run() {
-				if ( ss.isVisible() ) {
-					ss.setVisible( false );
-					ss.dispose();
-				}
-			}
-		}, 10, TimeUnit.SECONDS );
-
-		final RepositoryList repolist = frame.getRepoList();
-		repolist.addListSelectionListener( new ListSelectionListener() {
-
-			@Override
-			public void valueChanged( ListSelectionEvent e ) {
-				// close the splash screen
-				ss.setVisible( false );
-				ss.dispose();
 			}
 		} );
 

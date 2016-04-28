@@ -18,6 +18,7 @@ ui/.settings
 ui/.settings/*
 ui/src/main/resources/html.zip
 ui/nbactions*
+ui/logs
 webapp/src/main/resources/semoss-web.properties
 webapp/nb-configuration.xml
 webapp/src/main/resources/ldap.properties
