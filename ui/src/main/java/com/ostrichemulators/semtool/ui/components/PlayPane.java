@@ -67,11 +67,13 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 
+import com.ostrichemulators.semtool.util.Utility;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
@@ -86,8 +88,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -279,11 +284,19 @@ public class PlayPane extends JFrame {
 		statusbar.addStatus( getStartupMessage() );
 	}
 
-	protected String getStartupMessage(){
-		return "SEMOSS started";
+	protected String getStartupMessage() {
+		return "Semantic Toolkit started";
 	}
 
 	public void setApplicationIcons() {
+		List<Image> images = new ArrayList<>();
+		images.add( GuiUtility.loadImage( "SemTool-16x16.png" ) );
+		images.add( GuiUtility.loadImage( "SemTool-32x32.png" ) );
+		images.add( GuiUtility.loadImage( "SemTool-64x64.png" ) );
+		images.add( GuiUtility.loadImage( "SemTool-128x128.png" ) );
+		images.add( GuiUtility.loadImage( "SemTool-256x256.png" ) );
+		setIconImages( images );
+
 	}
 
 	/**
@@ -299,10 +312,10 @@ public class PlayPane extends JFrame {
 		registerPlaySheets( registry );
 		customSparqlPanel.setOutputTypeRegistry( registry );
 
-		setTitle( "SEMOSS - Analytics Environment" );
+		setTitle( "OS-EM Semantic Toolkit" );
 		windowSelector.setEnabled( false );
 		windowSelector.setMnemonic( KeyEvent.VK_W );
-		windowSelector.setToolTipText( "Manage Opened Windows" );
+		windowSelector.setToolTipText( "Manage Open Windows" );
 
 		String wloc = prefs.get( "windowLocation", "" );
 
@@ -896,7 +909,9 @@ public class PlayPane extends JFrame {
 
 	private JComponent makeHelpPane() {
 		// Here we read the release notes text file
-		StringBuilder helpdata = new StringBuilder( "<html><h3>About</h3>" );
+		StringBuilder helpdata = new StringBuilder();
+		helpdata.append( "<html><h2>OS-EM Semantic Toolkit</h2>" );
+		helpdata.append( "<h3>About</h3>" );
 		InputStream aboutFile = PlayPane.class.getResourceAsStream( "/help/about.txt" );
 
 		if ( aboutFile != null ) {
@@ -921,6 +936,21 @@ public class PlayPane extends JFrame {
 			catch ( IOException ioe ) {
 				logger.warn( "missing release notes", ioe );
 			}
+		}
+
+		helpdata.append( "<h3>Build Information</h3>" );
+		try {
+			Properties buildprops = Utility.loadProp( PlayPane.class.getResource( "/build.properties" ) );
+			for ( String str : buildprops.stringPropertyNames() ) {
+				helpdata.append( str ).append( ": " ).
+						append( buildprops.getProperty( str, "not available" ) ).
+						append( "<br/>\n" );
+
+			}
+		}
+		catch ( IOException ioe ) {
+			logger.warn( ioe, ioe );
+			helpdata.append( "no build information found" );
 		}
 
 		JPanel helpPanel = new JPanel( new BorderLayout() );
@@ -1113,7 +1143,7 @@ public class PlayPane extends JFrame {
 
 	protected JMenu buildHelpMenu() {
 		JMenu help = new JMenu( "Help" );
-		JMenuItem helpitem = new JMenuItem( "About SEMOSS Tool" );
+		JMenuItem helpitem = new JMenuItem( "About OS-EM Semantic Toolkit" );
 		help.add( helpitem );
 		help.add( new AbstractAction( "Options" ) {
 			private static final long serialVersionUID = -5306914853342321083L;
@@ -1129,7 +1159,7 @@ public class PlayPane extends JFrame {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				final JDialog dlg = new JDialog( (Frame) null, false );
-				dlg.setTitle( "About V-CAMP SEMOSS Tool" );
+				dlg.setTitle( "About OS-EM Semantic Toolkit" );
 				dlg.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
 				JButton closer = new JButton( "Close" );
 				dlg.getContentPane().setLayout( new BorderLayout() );
@@ -1479,11 +1509,11 @@ public class PlayPane extends JFrame {
 				}
 			}
 		} );
-		insightManagerItem.setMnemonic(KeyEvent.VK_I);
+		insightManagerItem.setMnemonic( KeyEvent.VK_I );
 		insightManagerItem.setSelected( getProp( IMANAGE_2 ) );
-		
+
 		if ( getProp( IMANAGE_2 ) == true ) {
-			insightManagerItem.setMnemonic(KeyEvent.VK_I);
+			insightManagerItem.setMnemonic( KeyEvent.VK_I );
 			insightManagerItem.setToolTipText( "Disable the Insite Manager  Tab" );
 		}
 		else {
@@ -1503,10 +1533,10 @@ public class PlayPane extends JFrame {
 							"Manage perspectives and insights" );
 					CloseableTab ct2_2 = new PlayPaneCloseableTab( rightTabs, insightManagerItem,
 							DbAction.getIcon( "insight_manager_tab1" ) );
-					insightManagerItem.setMnemonic(KeyEvent.VK_I);
+					insightManagerItem.setMnemonic( KeyEvent.VK_I );
 					int idx = rightTabs.indexOfComponent( insightManager );
 					rightTabs.setTabComponentAt( idx, ct2_2 );
-				
+
 					insightManagerItem.setToolTipText( "Disable the Insite Manager  Tab" );
 				}
 				else {
@@ -1517,7 +1547,7 @@ public class PlayPane extends JFrame {
 		} );
 
 		semanticExplorerItem.setSelected( getProp( SEMANTICEXPLORER ) );
-		semanticExplorerItem.setMnemonic(KeyEvent.VK_S);
+		semanticExplorerItem.setMnemonic( KeyEvent.VK_S );
 		if ( getProp( SEMANTICEXPLORER ) ) {
 			semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
 		}
@@ -1821,7 +1851,6 @@ public class PlayPane extends JFrame {
 //		reg.register( InsightOutputType.SANKEY, SankeyPlaySheet.class, "Sankey Diagram",
 //				GuiUtility.loadImageIcon( "icons16/questions_sankey2_16.png" ),
 //				"SankeyPlaySheet Hint: SELECT ?source ?target ?value ?target2 ?value2 ?target3 ?value3...etc  Note: ?target is the source for ?target2 and ?target2 is the source for ?target3...etc WHERE{ ... }" );
-
 		reg.register( InsightOutputType.HEATMAP_US, USHeatMapPlaySheet.class, "US Heat Map",
 				GuiUtility.loadImageIcon( "icons16/questions_us_heat_map1_16.png" ),
 				"USHeatMapPlaySheet Hint: SELECT ?state ?numericHeatValue WHERE{ ... }" );

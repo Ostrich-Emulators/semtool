@@ -56,36 +56,13 @@ import javax.swing.UnsupportedLookAndFeelException;
  */
 public class Starter {
 
-	/**
-	 * The set of possible image paths which define the Splash screen
-	 */
-	private static final String SPLASH_SCREEN_IMAGE_PATH = "/images/splash.png";
 	private static final Logger logger = Logger.getLogger( Starter.class );
 
-	/**
-	 * Method main. Starts the SEMOSS application. read the properties file -
-	 * DBCM_RDF_Map.Prop Creates the PlayPane 1. Read the perspective properties
-	 * to get all the perspectives. 2. For each of the perspectives, read all the
-	 * question numbers. 3. For each question, get the description. 4. Convert
-	 * this into a 2 dimensional Hashtable Hash1 - Perspective Questions, Hash2
-	 * for each question description and layout classes 5. Set this information
-	 * into the util DIHelper class 6. Populate the perspective combo-boxes with
-	 * all the information retrieved on perspectives 7. Create the User Interface.
-	 *
-	 * @param args String[] - the Main method.
-	 * @throws java.lang.Exception
-	 */
 	public static void main( String[] args ) throws Exception {
-		new Starter().startup( SPLASH_SCREEN_IMAGE_PATH, args );
+		new Starter().startup( args );
 	}
 
-	public void startup( String splashpath, String[] args ) throws IOException {
-		final String WORKINGDIR = System.getProperty( "user.dir" );
-		init();
-
-		final EngineUtil engineutil = EngineUtil.getInstance();
-		new Thread( engineutil ).start();
-
+	protected void initUI() {
 		// Nimbus me
 		try {
 			for ( LookAndFeelInfo info : UIManager.getInstalledLookAndFeels() ) {
@@ -95,7 +72,7 @@ public class Starter {
 					//Pretty Colors.
 					UIManager.put( "nimbusSelectionBackground", new Color( 67, 144, 212 ) ); //Light blue for selection
 					UIManager.put( "controlDkShadow", new Color( 100, 100, 100 ) ); //Color of scroll icons arrows
-					UIManager.put( "controlHighlight", new Color( 100, 100, 100 ) ); //Color of scroll icons highlights 
+					UIManager.put( "controlHighlight", new Color( 100, 100, 100 ) ); //Color of scroll icons highlights
 					UIManager.put( "ProgressBar.repaintInterval", 250 );//speed of indeterminate progress bar
 					UIManager.put( "ProgressBar.cycleTime", 1300 );
 
@@ -119,6 +96,15 @@ public class Starter {
 			// handle exception
 			logger.warn( e, e );
 		}
+	}
+
+	public void startup( String[] args ) throws IOException {
+		init();
+		initUI();
+		final String WORKINGDIR = System.getProperty( "user.dir" );
+
+		final EngineUtil engineutil = EngineUtil.getInstance();
+		new Thread( engineutil ).start();
 
 		// load order: classpath resources, filesystem resources, RDF_Map prop (if exists)
 		Properties props = DIHelper.getInstance().getCoreProp();
@@ -135,7 +121,10 @@ public class Starter {
 			}
 		}
 
-		props.load( Starter.class.getResourceAsStream( "/semoss.properties" ) );
+		Properties buildprops = Utility.loadProp( Starter.class.getResource( "/build.properties" ) );
+		// props.load( Starter.class.getResourceAsStream( "/semoss.properties" ) );
+		logger.info( "OS-EM Semantic Toolkit, build "
+				+ buildprops.getProperty( "revision", "unknown" ) );
 
 		File rdfmap = new File( WORKINGDIR, "RDF_Map.prop" );
 		List<File> configs = getConfigs( WORKINGDIR );

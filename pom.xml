@@ -20,7 +20,6 @@
 	<modules>
 		<module>ui</module>
 		<module>common</module>
-		<module>webapp</module>
 		<module>tools</module>
 	</modules>
   
@@ -338,18 +337,22 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.3</version>
+				<version>1.4</version>
 				<executions>
 					<execution>
-						<phase>validate</phase>
+						<phase>generate-resources</phase>
 						<goals>
-							<goal>create</goal>
+							<goal>create-metadata</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
 					<doCheck>false</doCheck>
 					<doUpdate>false</doUpdate>
+					<getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+					<shortRevisionLength>15</shortRevisionLength>
+					<timestampFormat>yyyy-MM-dd H:mm:ssZ</timestampFormat>
+					<addOutputDirectoryToResources>true</addOutputDirectoryToResources>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -32,9 +32,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -183,6 +185,19 @@ public class Utility {
 		}
 	}
 
+	public static void loadProp( URL file, Properties props ) throws IOException {
+		try ( InputStream is = file.openStream() ) {
+			props.load( is );
+
+			if ( log.isDebugEnabled() ) {
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter( sw );
+				props.list( pw );
+				log.debug( sw );
+			}
+		}
+	}
+
 	/**
 	 * Loads a Properties object from the given file
 	 *
@@ -198,6 +213,13 @@ public class Utility {
 		loadProp( file, p );
 		return p;
 	}
+
+	public static Properties loadProp( URL url ) throws IOException {
+		Properties p = new Properties();
+		loadProp( url, p );
+		return p;
+	}
+
 
 	/**
 	 * Copies the given properties into a new Properties object. This function

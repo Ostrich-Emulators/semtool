@@ -34,3 +34,5 @@ tools/.settings
 tools/.settings/*
 doxygen-output
 common/nbactions*
+html
+logs
