@@ -394,12 +394,6 @@
 									<downloadUrl>http://java.com/download</downloadUrl>
 									<chdir>.</chdir>
 									<priority>normal</priority>
-									<!-- splash>
-										<file>src/main/resources/images/SEMOSS-Splash.png</file>
-										<waitForWindow>true</waitForWindow>
-										<timeout>60</timeout>
-										<timeoutErr>true</timeoutErr>
-									</splash -->
 									<classPath>
 										<mainClass>com.ostrichemulators.semtool.ui.main.Starter</mainClass>
 										<jarLocation>lib/</jarLocation>
