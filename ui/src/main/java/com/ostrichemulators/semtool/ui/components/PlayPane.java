@@ -178,9 +178,9 @@ public class PlayPane extends JFrame {
 
 	private LoggingPanel loggingPanel;
 
-	private final JTabbedPane leftTabs;
-	private final JTabbedPane rightTabs;
-	private final StatusBar statusbar;
+	private JTabbedPane leftTabs;
+	private JTabbedPane rightTabs;
+	private StatusBar statusbar;
 
 	private final DbAction creater = new CreateDbAction( UIPROGRESS, this );
 	private final DbAction mounter = new MountAction( UIPROGRESS, this );
@@ -241,10 +241,10 @@ public class PlayPane extends JFrame {
 	private final JCheckBoxMenuItem semanticExplorerItem = new JCheckBoxMenuItem( "Semantic Explorer",
 			DbAction.getIcon( "semantic_dataset2" ) );
 
-	private final JToolBar toolbar;
-	private final JToolBar playsheetToolbar;
-	private final JSplitPane mainSplitPane;
-	private final JSplitPane combinedSplitPane;
+	private JToolBar toolbar;
+	private JToolBar playsheetToolbar;
+	private JSplitPane mainSplitPane;
+	private JSplitPane combinedSplitPane;
 	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
 
 	public JTable colorShapeTable;
@@ -255,15 +255,20 @@ public class PlayPane extends JFrame {
 	private SelectDatabasePanel selectDatabasePanel;
 	private final static Preferences prefs = Preferences.userNodeForPackage( PlayPane.class );
 
+	public PlayPane() {
+	}
+
+	protected String getStartupMessage() {
+		return "Semantic Toolkit started";
+	}
+
 	/**
 	 * Launch the application.
 	 *
 	 * @throws java.lang.Exception
 	 */
 	public void start() throws Exception {
-		//Since the "Custom Sparql Query" window, and related controls, 
-		//exist in a separate class, load all of their listeners first:
-		// customSparqlPanel.loadCustomSparqlPanelListeners();
+		initializeUi();
 		desktopPane.registerFrameListener( customSparqlPanel.makeDesktopListener() );
 		ApplicationContext ctx = new ClassPathXmlApplicationContext( "/appContext.xml" );
 		DIHelper.getInstance().setAppCtx( ctx );
@@ -284,10 +289,6 @@ public class PlayPane extends JFrame {
 		statusbar.addStatus( getStartupMessage() );
 	}
 
-	protected String getStartupMessage() {
-		return "Semantic Toolkit started";
-	}
-
 	public void setApplicationIcons() {
 		List<Image> images = new ArrayList<>();
 		images.add( GuiUtility.loadImage( "SemTool-16x16.png" ) );
@@ -299,12 +300,7 @@ public class PlayPane extends JFrame {
 
 	}
 
-	/**
-	 * Create the frame.
-	 *
-	 * @throws java.io.IOException
-	 */
-	public PlayPane() {
+	protected void initializeUi() {
 		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 
 		setApplicationIcons();
@@ -372,6 +368,7 @@ public class PlayPane extends JFrame {
 
 		initMenuItems();
 		initRepoList();
+
 		DIHelper.getInstance().setRepoList( repoList );
 
 		playsheetToolbar = new JToolBar();
@@ -1206,35 +1203,34 @@ public class PlayPane extends JFrame {
 					JPanel panel = preflistenermap.get( cmd );
 
 					if ( ischecked ) {
-						// Enable- Disable Logic
-						if ( GFILTER.equals( cmd ) ) {
-							item.setToolTipText( "Disable the Graph Filter Tab " );
-							item.getAccessibleContext().setAccessibleName( "Disable the Graph Filter Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Filter Tab " );
-						}
-						else if ( GFLABEL.equals( cmd ) ) {
-							item.setToolTipText( "Disable the Graph Label Tab" );
-							item.getAccessibleContext().setAccessibleName( "Disable the Graph Label Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Label Tab " );
-
-						}
-						else if ( LOGGING.equals( cmd ) ) {
-							item.setToolTipText( "Disable the Logging Tab" );
-							item.getAccessibleContext().setAccessibleName( "Disable the Logging Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab " );
-
-						}
-						else if ( GCOSMETICS.equals( cmd ) ) {
-							item.setToolTipText( "Disable the Graph Cosmetics Tab" );
-							item.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab " );
-
-						}
-						else {
-							item.setToolTipText( "Disable " + cmd );
-							item.getAccessibleContext().setAccessibleName( "Disable " + cmd );
-							item.getAccessibleContext().setAccessibleDescription( "Disable " + cmd );
-
+						if ( null != cmd ) { // Enable- Disable Logic
+							switch ( cmd ) {
+								case GFILTER:
+									item.setToolTipText( "Disable the Graph Filter Tab " );
+									item.getAccessibleContext().setAccessibleName( "Disable the Graph Filter Tab " );
+									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Filter Tab " );
+									break;
+								case GFLABEL:
+									item.setToolTipText( "Disable the Graph Label Tab" );
+									item.getAccessibleContext().setAccessibleName( "Disable the Graph Label Tab " );
+									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Label Tab " );
+									break;
+								case LOGGING:
+									item.setToolTipText( "Disable the Logging Tab" );
+									item.getAccessibleContext().setAccessibleName( "Disable the Logging Tab " );
+									item.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab " );
+									break;
+								case GCOSMETICS:
+									item.setToolTipText( "Disable the Graph Cosmetics Tab" );
+									item.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab " );
+									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab " );
+									break;
+								default:
+									item.setToolTipText( "Disable " + cmd );
+									item.getAccessibleContext().setAccessibleName( "Disable " + cmd );
+									item.getAccessibleContext().setAccessibleDescription( "Disable " + cmd );
+									break;
+							}
 						}
 
 						if ( cosmeticsPanel == panel ) {
@@ -1261,30 +1257,34 @@ public class PlayPane extends JFrame {
 						}
 					}
 					else {
-						if ( GFILTER.equals( cmd ) ) {
-							item.setToolTipText( "Enable the Graph Filter Tab " );
-							item.getAccessibleContext().setAccessibleName( "Enable the Graph Filter Tab" );
-							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Filter Tab " );
-						}
-						else if ( GFLABEL.equals( cmd ) ) {
-							item.setToolTipText( "Enable the Graph Label Tab" );
-							item.getAccessibleContext().setAccessibleName( "Enable the Graph Label Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Label Tab " );
-						}
-						else if ( LOGGING.equals( cmd ) ) {
-							item.setToolTipText( "Enable the Logging Tab" );
-							item.getAccessibleContext().setAccessibleName( "Enable the Logging Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Enable the Logging Tab " );
-						}
-						else if ( GCOSMETICS.equals( cmd ) ) {
-							item.setToolTipText( "Enable the Graph Cosmetics Tab" );
-							item.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab " );
-							item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
-						}
-						else {
-							item.setToolTipText( "Enable " + cmd );
-							item.getAccessibleContext().setAccessibleName( "Enable " + cmd );
-							item.getAccessibleContext().setAccessibleDescription( "Enable " + cmd );
+						if ( null != cmd ) {
+							switch ( cmd ) {
+								case GFILTER:
+									item.setToolTipText( "Enable the Graph Filter Tab " );
+									item.getAccessibleContext().setAccessibleName( "Enable the Graph Filter Tab" );
+									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Filter Tab " );
+									break;
+								case GFLABEL:
+									item.setToolTipText( "Enable the Graph Label Tab" );
+									item.getAccessibleContext().setAccessibleName( "Enable the Graph Label Tab " );
+									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Label Tab " );
+									break;
+								case LOGGING:
+									item.setToolTipText( "Enable the Logging Tab" );
+									item.getAccessibleContext().setAccessibleName( "Enable the Logging Tab " );
+									item.getAccessibleContext().setAccessibleDescription( "Enable the Logging Tab " );
+									break;
+								case GCOSMETICS:
+									item.setToolTipText( "Enable the Graph Cosmetics Tab" );
+									item.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab " );
+									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
+									break;
+								default:
+									item.setToolTipText( "Enable " + cmd );
+									item.getAccessibleContext().setAccessibleName( "Enable " + cmd );
+									item.getAccessibleContext().setAccessibleDescription( "Enable " + cmd );
+									break;
+							}
 						}
 
 						if ( loggingPanel == panel ) {
