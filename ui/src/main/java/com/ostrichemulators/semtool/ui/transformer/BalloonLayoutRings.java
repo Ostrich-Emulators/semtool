@@ -29,7 +29,6 @@ import java.awt.geom.Point2D;
 
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
-import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.VisualizationServer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -87,7 +86,7 @@ public class BalloonLayoutRings implements VisualizationServer.Paintable {
 			if ( radius == null ) {
 				continue;
 			}
-			Point2D p = layout.transform( v );
+			Point2D p = layout.apply( v );
 			ellipse.setFrame( -radius, -radius, 2 * radius, 2 * radius );
 			AffineTransform at = AffineTransform.getTranslateInstance( p.getX(), p.getY() );
 			Shape shape = at.createTransformedShape( ellipse );

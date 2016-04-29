@@ -5,11 +5,9 @@
  */
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
-import edu.uci.ics.jung.graph.util.EdgeType;
+import com.google.common.base.Supplier;
 import edu.uci.ics.jung.visualization.control.EditingGraphMousePlugin;
 import java.awt.event.MouseEvent;
-import org.apache.commons.collections15.Factory;
-import org.apache.log4j.Logger;
 
 /**
  * The stock EditingGraphMousePlugin breaks when you have an observable graph
@@ -20,17 +18,17 @@ import org.apache.log4j.Logger;
  */
 public class QueryGraphMousePlugin<V, E> extends EditingGraphMousePlugin<V, E> {
 
-	public QueryGraphMousePlugin( Factory<V> vertexFactory, Factory<E> edgeFactory ) {
+	public QueryGraphMousePlugin( Supplier<V> vertexFactory, Supplier<E> edgeFactory ) {
 		super( vertexFactory, edgeFactory );
 	}
 
-	public QueryGraphMousePlugin( int modifiers, Factory<V> vertexFactory, Factory<E> edgeFactory ) {
+	public QueryGraphMousePlugin( int modifiers, Supplier<V> vertexFactory, Supplier<E> edgeFactory ) {
 		super( modifiers, vertexFactory, edgeFactory );
 	}
 
 	@Override
 	public void mousePressed( MouseEvent e ) {
 		super.mousePressed( e );
-		edgeIsDirected = EdgeType.DIRECTED;
+		// edgeIsDirected = EdgeType.DIRECTED;
 	}
 }

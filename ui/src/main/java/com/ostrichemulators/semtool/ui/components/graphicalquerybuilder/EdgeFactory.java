@@ -5,21 +5,21 @@
  */
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
+import com.google.common.base.Supplier;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.UriBuilder;
-import org.apache.commons.collections15.Factory;
 import org.openrdf.model.vocabulary.RDFS;
 
 /**
  *
  * @author ryan
  */
-public class EdgeFactory implements Factory<QueryEdge> {
+public class EdgeFactory implements Supplier<QueryEdge> {
 
 	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
 
 	@Override
-	public QueryEdge create() {
+	public QueryEdge get() {
 		QueryEdge edge = new QueryEdge( uribuilder.uniqueUri() );
 		edge.removeProperty( RDFS.LABEL );
 

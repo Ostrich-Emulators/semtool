@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
+import com.google.common.base.Predicate;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Paint;
@@ -33,7 +34,6 @@ import java.util.List;
 
 import javax.swing.JSplitPane;
 
-import org.apache.commons.collections15.Predicate;
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleGraph;
 import org.openrdf.model.Model;
@@ -92,6 +92,7 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.GuiUtility;
+import edu.uci.ics.jung.graph.util.EdgeIndexFunction;
 import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.event.ItemListener;
@@ -259,7 +260,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getVisibleGraph() {
 		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter;
 		filter = new VertexPredicateFilter<>( predicate );
-		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) filter.transform( gdm.getGraph() );
+		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) filter.apply( gdm.getGraph() );
 	}
 
 	@Override
@@ -338,7 +339,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter
 				= new VertexPredicateFilter<>( predicate );
 		Layout<SEMOSSVertex, SEMOSSEdge> layout = view.getGraphLayout();
-		layout.setGraph( filter.transform( gdm.getGraph() ) );
+		layout.setGraph( filter.apply( gdm.getGraph() ) );
 		view.setGraphLayout( layout );
 	}
 
@@ -398,6 +399,23 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		viewer.setBackground( Color.WHITE );
 
 		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = viewer.getRenderContext();
+		// FIXME: this edge function seems to be needed since JUNG 2.1
+		// However, it seems that graph is always null, so can't use the default impl
+		// rc.setParallelEdgeIndexFunction( DefaultParallelEdgeIndexFunction.getInstance() );
+		rc.setParallelEdgeIndexFunction( new EdgeIndexFunction<SEMOSSVertex, SEMOSSEdge>() {
+			@Override
+			public int getIndex( Graph<SEMOSSVertex, SEMOSSEdge> graph, SEMOSSEdge e ) {
+				return 0;
+			}
+
+			@Override
+			public void reset( Graph<SEMOSSVertex, SEMOSSEdge> graph, SEMOSSEdge e ) {
+			}
+
+			@Override
+			public void reset() {
+			}
+		} );
 		rc.setVertexLabelTransformer( vlt );
 		viewer.setVertexToolTipTransformer( vtt );
 		rc.setVertexStrokeTransformer( vst );
@@ -900,7 +918,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		Predicate<E> edgehider = new Predicate<E>() {
 
 			@Override
-			public boolean evaluate( E v ) {
+			public boolean apply( E v ) {
 				return ( v.isVisible() && v.getVerticesVisible()
 						&& getGraphData().presentAtLevel( v, overlayLevel ) );
 			}
@@ -912,7 +930,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			setEdgeVisibilities( layout.getGraph() );
 			try {
 				for ( E e : layout.getGraph().getEdges() ) {
-					if ( edgehider.evaluate( e ) ) {
+					if ( edgehider.apply( e ) ) {
 						renderEdge( renderContext, layout, e );
 						renderEdgeLabel( renderContext, layout, e );
 					}
@@ -925,7 +943,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			// paint all the vertices
 			try {
 				for ( V v : layout.getGraph().getVertices() ) {
-					if ( predicate.evaluate( v ) ) {
+					if ( predicate.apply( v ) ) {
 						renderVertex( renderContext, layout, v );
 						renderVertexLabel( renderContext, layout, v );
 					}
@@ -994,7 +1012,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	protected class HidingPredicate<V extends SEMOSSVertex> implements Predicate<V> {
 
 		@Override
-		public boolean evaluate( V v ) {
+		public boolean apply( V v ) {
 			return ( v.isVisible() && getGraphData().presentAtLevel( v, overlayLevel ) );
 		}
 	}

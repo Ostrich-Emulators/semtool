@@ -5,20 +5,21 @@
  */
 package com.ostrichemulators.semtool.ui.transformer;
 
+import com.google.common.base.Function;
 import static com.ostrichemulators.semtool.ui.transformer.SelectingTransformer.SelectedState.NOTHING_SELECTED;
 import static com.ostrichemulators.semtool.ui.transformer.SelectingTransformer.SelectedState.NOT_SELECTED;
 import static com.ostrichemulators.semtool.ui.transformer.SelectingTransformer.SelectedState.SELECTED;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.collections15.Transformer;
+
 
 /**
  * A super class to worry about what's selected, not selected, or normal
  *
  * @author ryan
  */
-public abstract class SelectingTransformer<T, V> implements Transformer<T, V> {
+public abstract class SelectingTransformer<T, V> implements Function<T, V> {
 
 	public enum SelectedState {
 
@@ -86,7 +87,7 @@ public abstract class SelectingTransformer<T, V> implements Transformer<T, V> {
 	}
 
 	@Override
-	public V transform( T i ) {
+	public V apply( T i ) {
 		switch ( getState( i ) ) {
 			case NOT_SELECTED:
 				return transformNotSelected( i, skeleton );

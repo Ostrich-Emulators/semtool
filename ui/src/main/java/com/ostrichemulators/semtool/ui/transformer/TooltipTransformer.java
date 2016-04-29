@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.transformer;
 
+import com.google.common.base.Function;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.ui.components.ControlData;
 import com.ostrichemulators.semtool.util.PropComparator;
@@ -29,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections15.Transformer;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -38,9 +38,9 @@ import org.openrdf.model.vocabulary.RDFS;
  * Transforms what is displayed on the tooltip when a vertex/node is selected on
  * a graph.
  */
-public class TooltipTransformer<T extends GraphElement> implements Transformer<T, String> {
-	private ControlData data;
-	private Set<URI> mains;
+public class TooltipTransformer<T extends GraphElement> implements Function<T, String> {
+	private final ControlData data;
+	private final Set<URI> mains;
 	
 	/**
 	 * Constructor for VertexTooltipTransformer.
@@ -63,7 +63,7 @@ public class TooltipTransformer<T extends GraphElement> implements Transformer<T
 	 * @return String - The name of the property.
 	 */
 	@Override
-	public String transform( GraphElement vertex ) {
+	public String apply( GraphElement vertex ) {
 		List<URI> propertiesList = data.getSelectedPropertiesTT( vertex.getType() );
 		Collections.sort( propertiesList, new PropComparator() );
 

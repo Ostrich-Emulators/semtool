@@ -38,7 +38,7 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class LabelTransformer<T extends GraphElement> extends SelectingTransformer<T, String> {
 	private final ControlData data;
-	private Set<URI> mains;
+	private final Set<URI> mains;
 
 	/**
 	 * Constructor for VertexLabelTransformer.
