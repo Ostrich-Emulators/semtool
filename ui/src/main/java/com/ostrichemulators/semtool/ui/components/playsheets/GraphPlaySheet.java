@@ -70,13 +70,6 @@ import com.ostrichemulators.semtool.ui.components.VertexColorShapeData;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.models.NodeEdgePropertyTableModel;
 import com.ostrichemulators.semtool.ui.components.models.VertexFilterTableModel;
-import com.ostrichemulators.semtool.ui.components.renderers.ColorRenderer;
-import com.ostrichemulators.semtool.ui.components.renderers.ResourceNameRenderer;
-import com.ostrichemulators.semtool.ui.components.renderers.ShapeRenderer;
-import com.ostrichemulators.semtool.ui.components.renderers.TableColorRenderer;
-import com.ostrichemulators.semtool.ui.components.renderers.TableShapeRenderer;
-import com.ostrichemulators.semtool.om.GraphColorRepository;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.PickedStateListener;
 import com.ostrichemulators.semtool.ui.transformer.ArrowPaintTransformer;
@@ -94,17 +87,12 @@ import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import edu.uci.ics.jung.graph.util.EdgeIndexFunction;
 import java.awt.Dimension;
-import java.awt.Shape;
 import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
-import javax.swing.table.TableColumnModel;
 
 /**
  */
@@ -360,22 +348,18 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		GuiUtility.addModelToJTable( controlData.getVertexTableModel(), Constants.LABEL_TABLE );
 		GuiUtility.addModelToJTable( controlData.getEdgeTableModel(), Constants.TOOLTIP_TABLE );
 
-		JTable colorShapeTable = DIHelper.getJTable( Constants.COLOR_SHAPE_TABLE );
-		colorShapeTable.setModel( colorShapeData );
-
-		TableColumnModel tcm = colorShapeTable.getColumnModel();
-
-		tcm.getColumn( 1 ).setCellRenderer( new ResourceNameRenderer() );
-
-		JComboBox<Shape> shapes = new JComboBox<>( GraphShapeRepository.instance().getAllShapes() );
-		shapes.setRenderer( new ShapeRenderer() );
-		tcm.getColumn( 2 ).setCellRenderer( new TableShapeRenderer() );
-		tcm.getColumn( 2 ).setCellEditor( new DefaultCellEditor( shapes ) );
-
-		JComboBox<Color> colors = new JComboBox<>( GraphColorRepository.instance().getAllNamedColors() );
-		colors.setRenderer( new ColorRenderer() );
-		tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
-		tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );
+		//JTable colorShapeTable = DIHelper.getJTable( Constants.COLOR_SHAPE_TABLE );
+		//colorShapeTable.setModel( colorShapeData );
+		//TableColumnModel tcm = colorShapeTable.getColumnModel();
+		//tcm.getColumn( 1 ).setCellRenderer( new ResourceNameRenderer() );
+		//JComboBox<Shape> shapes = new JComboBox<>( GraphShapeRepository.instance().getAllShapes() );
+		//shapes.setRenderer( new ShapeRenderer() );
+		//tcm.getColumn( 2 ).setCellRenderer( new TableShapeRenderer() );
+		//tcm.getColumn( 2 ).setCellEditor( new DefaultCellEditor( shapes ) );
+		//JComboBox<Color> colors = new JComboBox<>( GraphColorRepository.instance().getAllNamedColors() );
+		//colors.setRenderer( new ColorRenderer() );
+		//tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
+		//tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );
 	}
 
 	/**

@@ -146,7 +146,7 @@ public class PlayPane extends JFrame {
 	private final String GQUERYBUILDER = "qQueryBuilderPanel";
 	private final String SEMANTICEXPLORER = "semanticExplorer";
 	private final String IMANAGE_2 = "iManagePanel_2";
-	private final String GCOSMETICS = "graphcosmetics";
+	//private final String GCOSMETICS = "graphcosmetics";
 	private final String GFILTER = "graphfilter";
 	private final String GFLABEL = "graphlabel";
 	private final String LOGGING = "loggingpanel";
@@ -168,7 +168,7 @@ public class PlayPane extends JFrame {
 	private CustomDesktopPane desktopPane;
 
 	// left cosmetic panel components
-	private JPanel cosmeticsPanel;
+	// private JPanel cosmeticsPanel;
 
 	// Left label panel
 	private FilterPanel filterPanel;
@@ -246,7 +246,7 @@ public class PlayPane extends JFrame {
 	private JSplitPane combinedSplitPane;
 	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
 
-	public JTable colorShapeTable;
+	// public JTable colorShapeTable;
 	public JTable sizeTable;
 	public JTable labelTable;
 	public JTable tooltipTable;
@@ -275,7 +275,7 @@ public class PlayPane extends JFrame {
 
 		// run through the view components
 		Map<JTable, String> publics = new HashMap<>();
-		publics.put( colorShapeTable, Constants.COLOR_SHAPE_TABLE );
+		// publics.put( colorShapeTable, Constants.COLOR_SHAPE_TABLE );
 		publics.put( sizeTable, Constants.SIZE_TABLE );
 		publics.put( labelTable, Constants.LABEL_TABLE );
 		publics.put( tooltipTable, Constants.TOOLTIP_TABLE );
@@ -475,9 +475,9 @@ public class PlayPane extends JFrame {
 			customSparqlPanel.setVisible( false );
 		}
 
-		if ( !getProp( GCOSMETICS ) ) {
-			leftTabs.remove( cosmeticsPanel );
-		}
+//		if ( !getProp( GCOSMETICS ) ) {
+//			leftTabs.remove( cosmeticsPanel );
+//		}
 		if ( !getProp( GFILTER ) ) {
 			leftTabs.remove( filterPanel );
 		}
@@ -522,9 +522,9 @@ public class PlayPane extends JFrame {
 		//filterLabel = makeFilterPanel();
 		//leftView.addTab( "Graph Filter", null, filterPanel, "Customize graph display" );
 
-		cosmeticsPanel = makeGraphCosmeticsPanel();
-		leftView.addTab( "Graph Cosmetics", null, cosmeticsPanel,
-				"Modify visual appearance of a node" );
+//		cosmeticsPanel = makeGraphCosmeticsPanel();
+//		leftView.addTab( "Graph Cosmetics", null, cosmeticsPanel,
+//				"Modify visual appearance of a node" );
 
 		return leftView;
 	}
@@ -625,7 +625,7 @@ public class PlayPane extends JFrame {
 	private JPanel makeGraphCosmeticsPanel() {
 		JPanel panel = new JPanel( new GridLayout( 1, 1 ) );
 		panel.setBackground( SystemColor.control );
-		colorShapeTable = initJTableAndAddTo( panel );
+		// colorShapeTable = initJTableAndAddTo( panel );
 		return panel;
 	}
 
@@ -1179,7 +1179,7 @@ public class PlayPane extends JFrame {
 	//Added 508 compliance code
 	protected JMenu buildViewMenu() {
 		final Map<String, JPanel> preflistenermap = new HashMap<>();
-		preflistenermap.put( GCOSMETICS, cosmeticsPanel );
+		// preflistenermap.put( GCOSMETICS, cosmeticsPanel );
 		preflistenermap.put( GFILTER, filterPanel );
 		preflistenermap.put( GFLABEL, outputPanel );
 		preflistenermap.put( LOGGING, loggingPanel );
@@ -1217,11 +1217,11 @@ public class PlayPane extends JFrame {
 									item.getAccessibleContext().setAccessibleName( "Disable the Logging Tab " );
 									item.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab " );
 									break;
-								case GCOSMETICS:
-									item.setToolTipText( "Disable the Graph Cosmetics Tab" );
-									item.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab " );
-									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab " );
-									break;
+//								case GCOSMETICS:
+//									item.setToolTipText( "Disable the Graph Cosmetics Tab" );
+//									item.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab " );
+//									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab " );
+//									break;
 								default:
 									item.setToolTipText( "Disable " + cmd );
 									item.getAccessibleContext().setAccessibleName( "Disable " + cmd );
@@ -1230,11 +1230,11 @@ public class PlayPane extends JFrame {
 							}
 						}
 
-						if ( cosmeticsPanel == panel ) {
-							leftTabs.addTab( "Graph Cosmetics", null, cosmeticsPanel,
-									"Modify visual appearance of a node" );
-						}
-						else if ( filterPanel == panel ) {
+//						if ( cosmeticsPanel == panel ) {
+//							leftTabs.addTab( "Graph Cosmetics", null, cosmeticsPanel,
+//									"Modify visual appearance of a node" );
+//						} else 
+						if ( filterPanel == panel ) {
 							leftTabs.addTab( "Graph Filter", null, filterPanel,
 									"Customize graph display" );
 						}
@@ -1271,11 +1271,11 @@ public class PlayPane extends JFrame {
 									item.getAccessibleContext().setAccessibleName( "Enable the Logging Tab " );
 									item.getAccessibleContext().setAccessibleDescription( "Enable the Logging Tab " );
 									break;
-								case GCOSMETICS:
-									item.setToolTipText( "Enable the Graph Cosmetics Tab" );
-									item.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab " );
-									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
-									break;
+//								case GCOSMETICS:
+//									item.setToolTipText( "Enable the Graph Cosmetics Tab" );
+//									item.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab " );
+//									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
+//									break;
 								default:
 									item.setToolTipText( "Enable " + cmd );
 									item.getAccessibleContext().setAccessibleName( "Enable " + cmd );
@@ -1328,22 +1328,22 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		final JCheckBoxMenuItem gcos = new JCheckBoxMenuItem( "Graph Cosmetics tab",
-				getProp( GCOSMETICS ) );
-		gcos.setActionCommand( GCOSMETICS );
-		gcos.addActionListener( preflistener );
+//		final JCheckBoxMenuItem gcos = new JCheckBoxMenuItem( "Graph Cosmetics tab",
+//				getProp( GCOSMETICS ) );
+//		gcos.setActionCommand( GCOSMETICS );
+//		gcos.addActionListener( preflistener );
 		//	gcos.setToolTipText( "Enables/Disables graph cosmetics tab" );
 
-		if ( getProp( GCOSMETICS ) == true ) {
-			gcos.setToolTipText( "Disable the Graph Cosmetics Tab" );
-			gcos.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab" );
-			gcos.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab" );
-		}
-		else {
-			gcos.setToolTipText( "Enable the Graph Cosmetics Tab" );
-			gcos.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab" );
-			gcos.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab" );
-		}
+//		if ( getProp( GCOSMETICS ) == true ) {
+//			gcos.setToolTipText( "Disable the Graph Cosmetics Tab" );
+//			gcos.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab" );
+//			gcos.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab" );
+//		}
+//		else {
+//			gcos.setToolTipText( "Enable the Graph Cosmetics Tab" );
+//			gcos.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab" );
+//			gcos.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab" );
+//		}
 
 		final JCheckBoxMenuItem gfilt = new JCheckBoxMenuItem( "Graph Filter tab",
 				getProp( GFILTER ) );
@@ -1571,18 +1571,18 @@ public class PlayPane extends JFrame {
 				}
 				else {
 					rightTabs.remove( semanticExplorer );
-					semanticExplorerItem.setToolTipText( "Enable the Semantic Explorer  Tab" );
+					semanticExplorerItem.setToolTipText( "Enable the Semantic Explorer Tab" );
 				}
 			}
 		} );
 
 		JMenu view = new JMenu( "View" );
 		view.setMnemonic( KeyEvent.VK_V );
-		view.setToolTipText( "Enable or disable the V-CAMP application tabs" );
+		view.setToolTipText( "Enable or disable the application tabs" );
 		view.getAccessibleContext().setAccessibleName( "Enable the Insite Manager Tab" );
 		view.getAccessibleContext().setAccessibleDescription( "Enable the Insite Manager Tab" );
-		view.add( gcos );
-		gcos.setMnemonic( KeyEvent.VK_C );
+//		view.add( gcos );
+//		gcos.setMnemonic( KeyEvent.VK_C );
 		view.add( gfilt );
 		gfilt.setMnemonic( KeyEvent.VK_F );
 		view.add( gflab );
