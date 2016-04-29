@@ -19,8 +19,13 @@
 		<dependency>
 			<groupId>org.mapdb</groupId>
 			<artifactId>mapdb</artifactId>
-			<version>2.0-beta6</version>
+			<version>2.0-beta13</version>
 		</dependency>
+	 <dependency>
+	  <groupId>org.dom4j</groupId>
+	  <artifactId>dom4j</artifactId>
+	  <version>2.0.0</version>
+	 </dependency>
 	</dependencies>
 
 	<profiles>
@@ -33,11 +38,6 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>0.7.6.201602180812</version>
-						<!--configuration>
-							<excludes>
-								<exclude>gov/va/semoss/ui/**</exclude>
-							</excludes>
-						</configuration-->
 						<executions>
 							<execution>
 								<id>pre-unit-test</id>
@@ -54,24 +54,6 @@
 								</goals>
 								<configuration>
 									<rules>
-										<!--  implmentation is needed only for Maven 2  -->
-										<!--
-										<rule implementation="org.jacoco.maven.RuleConfiguration">
-											<element>BUNDLE</element>
-											<limits>
-												<limit implementation="org.jacoco.report.check.Limit">
-													<counter>INSTRUCTION</counter>
-													<value>COVEREDRATIO</value>
-													<minimum>0.95</minimum>			
-												</limit>
-														<limit implementation="org.jacoco.report.check.Limit">
-													<counter>COMPLEXITY</counter>
-													<value>COVEREDRATIO</value>
-													<minimum>0.75</minimum>
-												</limit>
-											</limits>
-										</rule>
-										-->
 									</rules>									
 								</configuration>
 							</execution>

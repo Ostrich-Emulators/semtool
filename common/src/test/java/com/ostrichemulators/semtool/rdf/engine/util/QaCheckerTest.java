@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import com.ostrichemulators.semtool.model.vocabulary.VAS;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData;

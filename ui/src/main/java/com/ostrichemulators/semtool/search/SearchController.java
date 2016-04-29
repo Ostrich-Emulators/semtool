@@ -54,11 +54,13 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -66,7 +68,6 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -85,9 +86,9 @@ public class SearchController implements KeyListener, FocusListener,
 
 	private GraphPlaySheet gps;
 
-	private final StandardAnalyzer analyzer = new StandardAnalyzer( Version.LUCENE_36 );
+	private final StandardAnalyzer analyzer = new StandardAnalyzer();
 	private final Directory ramdir = new RAMDirectory();
-	private IndexReader reader;
+	private DirectoryReader reader;
 	private IndexSearcher searcher;
 	private final Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	private Date lastIndexed = null;
@@ -132,18 +133,17 @@ public class SearchController implements KeyListener, FocusListener,
 
 	private void searchStatement( String searchString ) {
 		StringBuilder query = new StringBuilder();
-		if( searchString.isEmpty() ){
+		if ( searchString.isEmpty() ) {
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
 			view.getPickedVertexState().clear();
 			gps.clearHighlighting();
 		}
-		
+
 		query.append( " label: " ).append( searchString ).append( "*" );
 		query.append( " description: " ).append( searchString );
 		query.append( " type: " ).append( searchString );
 
-		QueryParser alltextqp
-				= new QueryParser( Version.LUCENE_36, TEXT_FIELD, analyzer );
+		QueryParser alltextqp = new QueryParser( TEXT_FIELD, analyzer );
 
 		try {
 			Query q = alltextqp.parse( query.toString() );
@@ -250,7 +250,7 @@ public class SearchController implements KeyListener, FocusListener,
 					needLabels.addAll( e.getProperties().keySet() );
 				}
 
-				Map<Resource, String> labels 
+				Map<Resource, String> labels
 						= Utility.getInstanceLabels( needLabels, engine );
 				RepositoryIndexer ri = new RepositoryIndexer( labels );
 
@@ -270,15 +270,13 @@ public class SearchController implements KeyListener, FocusListener,
 			public void done() {
 				try {
 					if ( null == reader ) {
-						reader = IndexReader.open( ramdir );
+						reader = DirectoryReader.open( ramdir );
 					}
 					else {
-						IndexReader rdr = IndexReader.openIfChanged( reader );
+						DirectoryReader rdr = DirectoryReader.openIfChanged( reader );
 						if ( null != rdr ) {
 							reader = rdr;
 						}
-
-						searcher.close();
 					}
 
 					searcher = new IndexSearcher( reader );
@@ -290,7 +288,7 @@ public class SearchController implements KeyListener, FocusListener,
 				}
 				finally {
 					indexing = false;
-					log.debug("done indexing graph: "
+					log.debug( "done indexing graph: "
 							+ Utility.getDuration( lastIndexed, new Date() ) );
 				}
 			}
@@ -325,8 +323,7 @@ public class SearchController implements KeyListener, FocusListener,
 
 		public RepositoryIndexer( Map<Resource, String> labs ) {
 			labels = labs;
-			IndexWriterConfig config
-					= new IndexWriterConfig( Version.LUCENE_36, analyzer );
+			IndexWriterConfig config = new IndexWriterConfig( analyzer );
 			config.setOpenMode( IndexWriterConfig.OpenMode.CREATE );
 			try {
 				indexer = new IndexWriter( ramdir, config );
@@ -341,8 +338,7 @@ public class SearchController implements KeyListener, FocusListener,
 				for ( Map.Entry<URI, Document> en : doccache.entrySet() ) {
 					String sb = textcache.get( en.getKey() ).toString().trim();
 					if ( !sb.isEmpty() ) {
-						en.getValue().add( new Field( TEXT_FIELD, sb, Field.Store.YES,
-								Field.Index.ANALYZED ) );
+						en.getValue().add( new TextField( TEXT_FIELD, sb, Field.Store.YES ) );
 					}
 				}
 
@@ -354,8 +350,8 @@ public class SearchController implements KeyListener, FocusListener,
 					File lucenedir
 							= new File( FileUtils.getTempDirectory(), "search.lucene" );
 					IndexWriterConfig config
-							= new IndexWriterConfig( Version.LUCENE_36, analyzer );
-					try ( IndexWriter iw = new IndexWriter( FSDirectory.open( lucenedir ), config ) ) {
+							= new IndexWriterConfig( analyzer );
+					try ( IndexWriter iw = new IndexWriter( FSDirectory.open( lucenedir.toPath() ), config ) ) {
 						iw.addDocuments( doccache.values() );
 						iw.commit();
 					}
@@ -375,8 +371,7 @@ public class SearchController implements KeyListener, FocusListener,
 				if ( !doccache.containsKey( sub ) ) {
 					Document doc = new Document();
 					doccache.put( sub, doc );
-					doc.add( new Field( "URI", sub.stringValue(), Field.Store.YES,
-							Field.Index.NOT_ANALYZED ) );
+					doc.add( new StringField( "URI", sub.stringValue(), Field.Store.YES ) );
 
 					textcache.put( sub, new StringBuilder() );
 				}
@@ -387,8 +382,7 @@ public class SearchController implements KeyListener, FocusListener,
 
 				String label = ( labels.containsKey( pred )
 						? labels.get( pred ) : pred.getLocalName() );
-				Field f = new Field( label, en.getValue().toString(), Field.Store.YES,
-						Field.Index.ANALYZED );
+				Field f = new TextField( label, en.getValue().toString(), Field.Store.YES );
 				if ( null != label ) {
 					switch ( label ) {
 						case "Description":

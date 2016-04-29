@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util;
 
-import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.model.vocabulary.VAS;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;

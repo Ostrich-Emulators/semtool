@@ -106,11 +106,11 @@ public class LegacyUpgrader {
 		upgradeInsights( dbfile, UriBuilder.getBuilder( schema ),
 				UriBuilder.getBuilder( data ) );
 
-		BigdataSailRepository legacyrepo = BigdataSailFactory.openRepository( legacyjnl.getPath() );
+		BigdataSailRepository legacyrepo = BigdataSailRepository.class.cast( BigdataSailFactory.openRepository( legacyjnl.getPath() ) );
 		legacyrepo.initialize();
 		RepositoryConnection legacyconn = legacyrepo.getReadOnlyConnection();
 
-		BigdataSailRepository newrepo = BigdataSailFactory.openRepository( dbfile.getPath() );
+		BigdataSailRepository newrepo = BigdataSailRepository.class.cast( BigdataSailFactory.openRepository( dbfile.getPath() ) );
 		newrepo.initialize();
 		RepositoryConnection newconn = newrepo.getConnection();
 

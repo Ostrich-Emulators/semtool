@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util;
 
-import com.ostrichemulators.semtool.rdf.query.util.AbstractBindable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

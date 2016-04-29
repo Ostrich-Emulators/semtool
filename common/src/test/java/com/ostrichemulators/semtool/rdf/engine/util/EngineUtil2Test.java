@@ -5,9 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.rdf.engine.util.EngineCreateBuilder;
-import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
-import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.model.vocabulary.VAS;
 import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;

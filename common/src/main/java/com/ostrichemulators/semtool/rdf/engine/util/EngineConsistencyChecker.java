@@ -26,7 +26,6 @@ import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.search.spell.StringDistance;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDF;
@@ -186,8 +185,8 @@ public class EngineConsistencyChecker {
 
 		List<URI> errors = new ArrayList<>();
 		try {
-			analyzer = new StandardAnalyzer( Version.LUCENE_36 );
-			IndexWriterConfig config = new IndexWriterConfig( Version.LUCENE_36, analyzer );
+			analyzer = new StandardAnalyzer();
+			IndexWriterConfig config = new IndexWriterConfig( analyzer );
 			speller = new SpellChecker( ramdir, strdist );
 
 			StringBuilder names = new StringBuilder();

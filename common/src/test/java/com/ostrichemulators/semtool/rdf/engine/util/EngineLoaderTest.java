@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.rdf.engine.util.EngineLoader;
 import com.bigdata.rdf.model.BigdataValueFactoryImpl;
 import com.ostrichemulators.semtool.model.vocabulary.VAS;
 import com.ostrichemulators.semtool.poi.main.CSVReader;

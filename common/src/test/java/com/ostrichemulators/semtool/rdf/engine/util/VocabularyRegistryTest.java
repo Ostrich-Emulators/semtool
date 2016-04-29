@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.rdf.engine.util.VocabularyRegistry;
 import java.net.URL;
 import org.junit.After;
 import org.junit.AfterClass;

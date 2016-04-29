@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.rdf.engine.util.RepositoryCopier;
 import info.aduna.iteration.Iterations;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -74,7 +73,7 @@ public class RepositoryCopierTest {
 	public void testCopy() throws Exception {
 		RepositoryCopier rc = new RepositoryCopier( to );
 		rc.setCommitLimit( 1 );
-		
+
 		from.export( rc );
 
 		assertEquals( 2, to.size() );

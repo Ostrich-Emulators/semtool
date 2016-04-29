@@ -5,11 +5,6 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.poi.main.ImportMetadata;
-import com.ostrichemulators.semtool.poi.main.POIReader;
-import com.ostrichemulators.semtool.poi.main.XlsWriter;
-import com.ostrichemulators.semtool.poi.main.ImportData;
-import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import com.ostrichemulators.semtool.poi.main.XlsWriter.SheetRowCol;
 import com.ostrichemulators.semtool.util.Utility;
@@ -187,7 +182,7 @@ public class XlsWriterTest {
 		writer.write( aos );
 
 		// we get slightly different sizes per builds
-		assertTrue( aos.size() > 3270 && aos.size() < 3285 );
+		assertTrue( aos.size() > 3270 && aos.size() < 3300 );
 	}
 
 	@Test

@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.rdf.engine.util.EngineConsistencyChecker;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineConsistencyChecker.Hit;
 import com.ostrichemulators.semtool.util.MultiMap;
