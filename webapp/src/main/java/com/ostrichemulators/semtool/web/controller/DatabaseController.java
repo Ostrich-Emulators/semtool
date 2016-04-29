@@ -1,5 +1,6 @@
 package com.ostrichemulators.semtool.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ostrichemulators.semtool.user.User.UserProperty;
 import com.ostrichemulators.semtool.web.datastore.DbInfoMapper;
 import com.ostrichemulators.semtool.web.filters.RemoteDBReverseProxyFilter;
@@ -11,14 +12,13 @@ import com.ostrichemulators.semtool.web.security.SemossUser;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -116,7 +116,7 @@ public class DatabaseController extends SemossControllerBase {
 		try {
 			DbInfo db = datastore.getOne(name);
 			if (db == null){
-				log.debug( "Unable to delete database, not found: " + db.getName() + " (user: "
+				log.debug( "Unable to delete database, not found: " + name + " (user: "
 						+ user.getProperty( UserProperty.USER_FULLNAME ) + ")" );
 				return false;
 			}
