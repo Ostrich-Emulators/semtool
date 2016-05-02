@@ -251,16 +251,16 @@ public class ControlPanel extends JPanel implements GraphListener {
 	 * @param _gps GraphPlaySheet
 	 */
 	public void setPlaySheet( GraphPlaySheet gps ) {
-		treeListener.setPlaySheet( gps );
-		resetTransListener.setPlaySheet( gps );
-		redoListener.setPlaySheet( gps );
-		undoListener.setPlaySheet( gps );
-		searchController.setGPS( gps );
-		weightButton.setPlaySheet( gps );
-
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
-		vertSizeListener.setViewer( viewer );
-		ringsListener.setViewer( viewer );
+//		treeListener.setPlaySheet( gps );
+//		resetTransListener.setPlaySheet( gps );
+//		redoListener.setPlaySheet( gps );
+//		undoListener.setPlaySheet( gps );
+//		searchController.setGPS( gps );
+//		weightButton.setPlaySheet( gps );
+//
+//		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
+//		vertSizeListener.setViewer( viewer );
+//		ringsListener.setViewer( viewer );
 	}
 
 	public void setUndoButtonEnabled( boolean enabled ) {

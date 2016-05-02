@@ -19,55 +19,32 @@
  */
 package com.ostrichemulators.semtool.ui.transformer;
 
-import com.google.common.base.Function;
 import com.ostrichemulators.semtool.om.GraphElement;
-import com.ostrichemulators.semtool.ui.components.ControlData;
-import com.ostrichemulators.semtool.util.PropComparator;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.List;
-import java.util.Set;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Transforms what is displayed on the tooltip when a vertex/node is selected on
  * a graph.
  */
-public class TooltipTransformer<T extends GraphElement> implements Function<T, String> {
-	private final ControlData data;
-	private final Set<URI> mains;
-	
-	/**
-	 * Constructor for VertexTooltipTransformer.
-	 *
-	 * @param data ControlData
-	 */
-	public TooltipTransformer( ControlData data ) {
-		this.data = data;
-		
-		// don't show property type for these properties
-		mains = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );
+public class TooltipTransformer<T extends GraphElement> extends LabelTransformer<T> {
+
+	public TooltipTransformer( MultiMap<URI, URI> data ) {
+		super( data );
 	}
 
-	/**
-	 * Method transform. Get the DI Helper to find what is needed to get for
-	 * vertex
-	 *
-	 * @param vertex DBCMVertex - The edge of which this returns the properties.
-	 *
-	 * @return String - The name of the property.
-	 */
+	public TooltipTransformer() {
+	}
+
 	@Override
 	public String apply( GraphElement vertex ) {
-		List<URI> propertiesList = data.getSelectedPropertiesTT( vertex.getType() );
-		Collections.sort( propertiesList, new PropComparator() );
+		List<URI> propertiesList = super.getDisplayableProperties( vertex.getType() );
 
-		String propertiesHTMLString = buildPropertyHTMLString(propertiesList, vertex);
+		String propertiesHTMLString = buildPropertyHTMLString( propertiesList, vertex );
 		if ( 0 == propertiesHTMLString.length() ) {
 			return null;
 		}
@@ -76,29 +53,29 @@ public class TooltipTransformer<T extends GraphElement> implements Function<T, S
 				+ "<font size=\"3\" color=\"black\"><i>" + propertiesHTMLString + "</i></font></body></html>";
 		return popup;
 	}
-	
-	private String buildPropertyHTMLString(List<URI> properties, GraphElement vertex) {
+
+	private String buildPropertyHTMLString( List<URI> properties, GraphElement vertex ) {
 		StringBuilder propertiesHTMLString = new StringBuilder();
-		
+
 		for ( URI prop : properties ) {
 			if ( vertex.hasProperty( prop ) ) {
-				Object val = vertex.getProperty( prop );
+				Value val = vertex.getValue( prop );
 
 				if ( 0 != propertiesHTMLString.length() ) {
 					propertiesHTMLString.append( "<br>" );
 				}
 
-				if ( !mains.contains( prop ) ) {
-					propertiesHTMLString.append( data.getLabel( prop ) ).append( ": " );
+				if ( displayLabelFor( prop ) ) {
+					propertiesHTMLString.append( getLabel( prop ) ).append( ": " );
 				}
 
 				String str = ( RDF.TYPE.equals( prop )
-						? data.getLabel( URI.class.cast( val ) ) : val.toString() );
+						? getLabel( URI.class.cast( val ) ) : val.stringValue() );
 
 				propertiesHTMLString.append( str );
 			}
 		}
-		
+
 		return propertiesHTMLString.toString();
 	}
 }

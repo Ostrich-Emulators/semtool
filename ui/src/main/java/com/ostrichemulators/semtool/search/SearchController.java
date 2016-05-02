@@ -121,14 +121,14 @@ public class SearchController implements KeyListener, FocusListener,
 
 	private void handleSelectionOfButton() {
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
-		gps.clearHighlighting();
-		gps.skeleton( view.getPickedVertexState().getPicked(), null );
+		gps.getView().clearHighlighting();
+		gps.getView().skeleton( view.getPickedVertexState().getPicked(), null );
 	}
 
 	private void handleDeselectionOfButton() {
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
-		gps.clearHighlighting();
-		gps.highlight( view.getPickedVertexState().getPicked(), null );
+		gps.getView().clearHighlighting();
+		gps.getView().highlight( view.getPickedVertexState().getPicked(), null );
 	}
 
 	private void searchStatement( String searchString ) {
@@ -136,7 +136,7 @@ public class SearchController implements KeyListener, FocusListener,
 		if ( searchString.isEmpty() ) {
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
 			view.getPickedVertexState().clear();
-			gps.clearHighlighting();
+			gps.getView().clearHighlighting();
 		}
 
 		query.append( " label: " ).append( searchString ).append( "*" );
@@ -166,12 +166,12 @@ public class SearchController implements KeyListener, FocusListener,
 			}
 
 			boolean skel = gps.getVertexLabelFontTransformer().isSkeletonMode();
-			gps.clearHighlighting();
+			gps.getView().clearHighlighting();
 			if ( skel ) {
-				gps.skeleton( verts, null );
+				gps.getView().skeleton( verts, null );
 			}
 			else {
-				gps.highlight( verts, null );
+				gps.getView().highlight( verts, null );
 			}
 		}
 		catch ( ParseException | IOException e ) {

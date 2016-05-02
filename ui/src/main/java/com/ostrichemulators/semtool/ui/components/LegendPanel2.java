@@ -23,19 +23,17 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.MultiMap;
 
-import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,23 +45,25 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 
 /**
  * This class is used to create the legend for visualizations.
  */
-public class LegendPanel2 extends JPanel implements GraphListener {
+public final class LegendPanel2 extends JPanel implements GraphListener {
 
 	private static final long serialVersionUID = -2364666196260002413L;
 	private final List<SEMOSSVertex> selVs = new ArrayList<>();
+	private Map<Value, String> labels = new HashMap<>();
 
 	/**
 	 * Create the panel.
 	 */
-	public LegendPanel2() {
+	public LegendPanel2( Map<Value, String> labels ) {
 		setLayout( new WrapLayout( WrapLayout.LEFT, 5, 5 ) );
-		setToolTipText( "You can adjust the shape and color by going to the cosmetics tab on the navigation panel" );
 		setBorder( BorderFactory.createLineBorder( Color.LIGHT_GRAY, 1 ) );
+		this.labels = labels;
 	}
 
 	@Override
@@ -71,15 +71,13 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 		MultiMap<URI, SEMOSSVertex> types = new MultiMap<>();
 		Map<URI, Shape> shapes = new HashMap<>();
 		Map<URI, Color> colors = new HashMap<>();
-		for ( SEMOSSVertex v : gps.getVisibleGraph().getVertices() ) {
+		Collection<SEMOSSVertex> vs = gps.getVisibleGraph().getVertices();
+		for ( SEMOSSVertex v : vs ) {
 			URI type = new URIImpl( v.getType().stringValue() );
 			types.add( type, v );
 			shapes.put( type, GraphShapeRepository.instance().getLegendShape( v.getShape() ) );
 			colors.put( type, v.getColor() );
 		}
-
-		IEngine eng = DIHelper.getInstance().getRdfEngine();
-		Map<URI, String> labels = Utility.getInstanceLabels( shapes.keySet(), eng );
 
 		removeAll();
 		selVs.clear();
@@ -110,9 +108,9 @@ public class LegendPanel2 extends JPanel implements GraphListener {
 								selVs.removeAll( sch.getValue() );
 							}
 
-							gps.clearHighlighting();
+							gps.getView().clearHighlighting();
 							if ( !selVs.isEmpty() ) {
-								gps.skeleton( selVs, null );
+								gps.getView().skeleton( selVs, null );
 							}
 						}
 					}

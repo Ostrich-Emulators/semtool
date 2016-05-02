@@ -126,6 +126,6 @@ public class AdjacentPopupMenuListener extends AbstractAction {
 			state.pick( v, true );
 		}
 
-		gps.highlight( selectedVerts, selectedEdges );
+		gps.getView().highlight( selectedVerts, selectedEdges );
 	}
 }

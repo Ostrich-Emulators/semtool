@@ -83,7 +83,7 @@ public abstract class ImageExportingPlaySheet extends PlaySheetCentralComponent 
 						}
 					}
 					catch ( IOException | DocumentException e ) {
-						e.printStackTrace();
+						log.error( e, e );
 						exceptions[0] = e;
 					}
 				}

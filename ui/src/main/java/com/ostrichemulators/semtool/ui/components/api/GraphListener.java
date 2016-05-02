@@ -17,6 +17,12 @@ import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
  */
 public interface GraphListener {
 
+	/**
+	 * Notifies when the graph has changed
+	 *
+	 * @param graph The full graph (including any hidden nodes, etc.)
+	 * @param gps The graph playsheet
+	 */
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps );
 
 	public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,

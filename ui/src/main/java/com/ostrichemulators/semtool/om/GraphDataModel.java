@@ -44,7 +44,6 @@ public class GraphDataModel {
 	private static final Logger log = Logger.getLogger( GraphDataModel.class );
 
 	private final Map<GraphElement, Integer> level = new HashMap<>();
-	protected Map<Resource, String> labelcache = new HashMap<>();
 
 	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	protected Map<String, SEMOSSEdge> edgeStore = new HashMap<>();
@@ -222,25 +221,9 @@ public class GraphDataModel {
 	}
 
 	/**
-	 * Is this node present at the given level (is it's level <= the given level?)
-	 * @param check
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 * @
-	 * param level
+	 * Is this node present at the given level (is it's level <?= the given level)
+	 * @param check the element to check
+	 * @param level is it present at this level?
 	 * @return
 	 */
 	public boolean presentAtLevel( GraphElement check, int level ) {

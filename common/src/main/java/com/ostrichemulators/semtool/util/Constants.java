@@ -40,7 +40,6 @@ public class Constants {
 	public static final String NA = "n/a";
 
 	public static final String ENTER_TEXT = "Enter your search text here";
-	public static final String EMPTY = "@@";
 
 	public static final String LAYOUT = "LAYOUT";
 	public static final String PERSPECTIVE = "PERSPECTIVE";

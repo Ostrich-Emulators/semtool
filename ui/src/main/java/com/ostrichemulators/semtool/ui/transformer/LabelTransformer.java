@@ -20,16 +20,20 @@
 package com.ostrichemulators.semtool.ui.transformer;
 
 import com.ostrichemulators.semtool.om.GraphElement;
-import com.ostrichemulators.semtool.ui.components.ControlData;
+import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.PropComparator;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -37,20 +41,74 @@ import org.openrdf.model.vocabulary.RDFS;
  * Transforms the property label on a node vertex in the graph.
  */
 public class LabelTransformer<T extends GraphElement> extends SelectingTransformer<T, String> {
-	private final ControlData data;
-	private final Set<URI> mains;
+
+	// node type -> what properties to display
+	private final MultiMap<URI, URI> displayables = new MultiMap<>();
+	// don't show property type for these properties
+	private final Set<URI> nolabels;
+	private Map<Value, String> labelmap = new HashMap<>();
 
 	/**
 	 * Constructor for VertexLabelTransformer.
 	 *
 	 * @param data ControlData
 	 */
-	public LabelTransformer( ControlData data ) {
-		this.data = data;
+	public LabelTransformer( MultiMap<URI, URI> data ) {
+		this();
+		displayables.putAll( data );
+	}
 
-		// don't show property type for these properties
-		mains = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );
-}
+	public LabelTransformer() {
+		nolabels = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );
+	}
+
+	public void setLabelCache( Map<Value, String> map ) {
+		labelmap = map;
+	}
+
+	/**
+	 * Sets what properties should be displayed for what node/edge types
+	 *
+	 * @param type
+	 * @param propsToDisplay
+	 */
+	public void setDisplay( URI type, Collection<URI> propsToDisplay ) {
+		displayables.remove( type );
+
+		for ( URI prop : propsToDisplay ) {
+			displayables.add( type, prop );
+		}
+	}
+
+	public List<URI> getDisplayableProperties( URI type ) {
+		List<URI> list = displayables.get( type );
+		if ( null == list ) {
+			list = Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT );
+		}
+		Collections.sort( list, new PropComparator() );
+		return list;
+	}
+
+	public String getLabel( URI prop ) {
+		return labelmap.get( prop );
+	}
+
+	public boolean displayLabelFor( URI prop ) {
+		return !nolabels.contains( prop );
+	}
+
+	public void setLabels( Map<URI, String> propToLabel ) {
+		labelmap.putAll( propToLabel );
+	}
+
+	public void resetLabels( Map<URI, String> propToLabel ) {
+		labelmap.clear();
+		setLabels( propToLabel );
+	}
+
+	public void addLabel( URI uri, String label ) {
+		labelmap.put( uri, label );
+	}
 
 	/**
 	 * Method transform. Transforms the label on a node vertex in the graph
@@ -60,8 +118,7 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 	 * @return String - the property name of the vertex
 	 */
 	public String getText( T vertex ) {
-		List<URI> propertiesList = data.getSelectedProperties( vertex );
-		Collections.sort( propertiesList, new PropComparator() );
+		List<URI> propertiesList = getDisplayableProperties( vertex.getType() );
 
 		//uri required for uniqueness, need these font tags so that when you increase 
 		//font through font transformer, the label doesn't get really far away from the vertex
@@ -74,11 +131,14 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 			}
 
 			if ( vertex.hasProperty( property ) ) {
-				if ( !mains.contains( property ) ) {
-					html.append( data.getLabel( property ) ).append( ": " );
+				if ( displayLabelFor( property ) ) {
+					String label = getLabel( property );
+					html.append( label ).append( ": " );
 				}
 
-				String propval = vertex.getProperty( property ).toString();
+				Value val = vertex.getValue( property );
+				String propval = ( RDF.TYPE.equals( property )
+						? getLabel( URI.class.cast( val ) ) : val.stringValue() );
 				html.append( chop( propval, 50 ) );
 			}
 			first = false;

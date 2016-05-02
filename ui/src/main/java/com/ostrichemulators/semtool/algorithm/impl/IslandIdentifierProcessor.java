@@ -84,7 +84,7 @@ public class IslandIdentifierProcessor extends AbstractAction {
 			Collection<SEMOSSEdge> islandEdges ) {
 
 		if ( allIslands ) {
-			gps.highlight( islandVerts, islandEdges );
+			gps.getView().highlight( islandVerts, islandEdges );
 		}
 		else {
 			PickedState state = gps.getView().getPickedVertexState();
@@ -93,7 +93,7 @@ public class IslandIdentifierProcessor extends AbstractAction {
 				state.pick( v, true );
 			}
 
-			gps.skeleton( islandVerts, islandEdges );
+			gps.getView().skeleton( islandVerts, islandEdges );
 		}
 	}
 }

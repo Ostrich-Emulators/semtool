@@ -19,17 +19,15 @@
  */
 package com.ostrichemulators.semtool.ui.components.models;
 
-
 import com.ostrichemulators.semtool.om.GraphElement;
+import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import java.util.Map;
-import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 
 import org.openrdf.model.URI;
@@ -44,49 +42,36 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 
 	private final String[] columnNames = { "Show", "Node Type", "Instance" };
 	private final List<FilterRow> data = new ArrayList<>();
-	private final Set<URI> visibleTypes = new HashSet<>();
+	private SemossGraphVisualization viz;
 
 	public VertexFilterTableModel( String middleColumnName ) {
 		columnNames[1] = middleColumnName;
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		data.clear();
 		fireTableDataChanged();
 	}
 
-	public void refresh( Collection<T> instances ) {
+	public void refresh( Collection<T> instances, SemossGraphVisualization v ) {
 		data.clear();
+		viz = v;
 
 		MultiMap<URI, T> typeToInstances = new MultiMap<>();
 		for ( T t : instances ) {
 			typeToInstances.add( t.getType(), t );
 		}
+
 		for ( Map.Entry<URI, List<T>> en : typeToInstances.entrySet() ) {
 			data.add( new FilterRow( en.getKey(), null ) );
 
 			for ( T instance : en.getValue() ) {
 				data.add( new FilterRow( en.getKey(), instance ) );
 			}
-
-			populateVisibleTypes( en.getKey(), en.getValue() );
 		}
 
 		Collections.sort( data );
 		fireTableDataChanged();
-	}
-
-	private void populateVisibleTypes( URI type, Collection<T> items ) {
-		int visibles = 0;
-		for ( T t : items ) {
-			if ( t.isVisible() ) {
-				visibles++;
-			}
-		}
-
-		if ( visibles > 0 ) {
-			visibleTypes.add( type );
-		}
 	}
 
 	public FilterRow<T> getRawRow( int row ) {
@@ -106,9 +91,9 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 		FilterRow vfRow = data.get( row );
 		switch ( column ) {
 			case 0:
-				return ( vfRow.isHeader()
-						? typeIsVisible( vfRow.type )
-						: vfRow.instance.isVisible() );
+				return !( vfRow.isHeader()
+						? typeIsHidden( vfRow.type )
+						: viz.isHidden( vfRow.instance ) );
 			case 1:
 				return ( vfRow.isHeader() ? vfRow.type : null );
 			case 2:
@@ -118,8 +103,20 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 		}
 	}
 
-	private boolean typeIsVisible( URI type ) {
-		return visibleTypes.contains( type );
+	private boolean typeIsHidden( URI type ) {
+		int visible = 0;
+
+		for ( FilterRow fr : data ) {
+			if ( fr.type.equals( type ) ) {
+				if ( !fr.isHeader() ) {
+					if ( !viz.isHidden( fr.instance ) ) {
+						visible++;
+					}
+				}
+			}
+		}
+
+		return ( 0 == visible );
 	}
 
 	/**
@@ -132,32 +129,24 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 	@Override
 	public void setValueAt( Object value, int row, int column ) {
 		FilterRow vfRow = data.get( row );
-		boolean visible = Boolean.class.cast( value );
+		boolean hideit = !Boolean.class.cast( value );
 
 		if ( vfRow.isHeader() ) {
-			List<FilterRow> tochange = new ArrayList<>();
-
+			// all vertices/edges of this type
+			// viz.hide( vfRow.type, hideit );
+			List<URI> tochange = new ArrayList<>();
 			for ( FilterRow fr : data ) {
 				if ( fr.type.equals( vfRow.type ) && !fr.isHeader() ) {
-					tochange.add( fr );
+					tochange.add( fr.instance.getURI() );
 				}
 			}
 
-			for ( FilterRow fr : tochange ) {
-				fr.instance.setVisible( visible );
-			}
-
-			if ( visible ) {
-				visibleTypes.add( vfRow.type );
-			}
-			else {
-				visibleTypes.remove( vfRow.type );
-			}
+			viz.hide( tochange, hideit );
 			fireTableDataChanged();
 		}
 		else {
 			// we are only dealing with one vertex
-			vfRow.instance.setVisible( visible );
+			viz.hide( vfRow.instance.getURI(), hideit );
 			fireTableCellUpdated( row, row );
 		}
 	}
