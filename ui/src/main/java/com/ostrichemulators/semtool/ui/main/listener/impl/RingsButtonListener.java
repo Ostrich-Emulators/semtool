@@ -44,6 +44,7 @@ public class RingsButtonListener extends AbstractAction {
 	private final BalloonLayoutRings rings = new BalloonLayoutRings();
 	private final RadialTreeLayoutRings treeRings = new RadialTreeLayoutRings();
 	private SemossGraphVisualization view;
+	private Layout lay;
 
 	public RingsButtonListener() {
 		super( "", GuiUtility.loadImageIcon( "ring.png" ) );
@@ -75,6 +76,7 @@ public class RingsButtonListener extends AbstractAction {
 	 * @param lay Layout
 	 */
 	private void setLayout( Layout lay ) {
+		this.lay = lay;
 		if ( lay instanceof BalloonLayout ) {
 			this.rings.setLayout( BalloonLayout.class.cast( lay ) );
 		}
@@ -94,8 +96,7 @@ public class RingsButtonListener extends AbstractAction {
 		// Get if the button is selected
 		JToggleButton button = JToggleButton.class.cast( e.getSource() );
 
-		Layout lay = view.getEffectiveLayout();
-		setLayout( lay );
+		setLayout( view.getEffectiveLayout() );
 
 		if ( !button.isSelected() ) {
 			if ( lay instanceof BalloonLayout ) {
@@ -114,5 +115,21 @@ public class RingsButtonListener extends AbstractAction {
 			}
 		}
 		view.repaint();
+	}
+
+	@Override
+	public void setEnabled( boolean b ) {
+		super.setEnabled( b );
+
+		if ( !b ) {
+			if ( lay instanceof BalloonLayout ) {
+				view.removePreRenderPaintable( rings );
+			}
+			else if ( lay instanceof RadialTreeLayout ) {
+				view.removePreRenderPaintable( treeRings );
+			}
+
+			view.repaint();
+		}
 	}
 }

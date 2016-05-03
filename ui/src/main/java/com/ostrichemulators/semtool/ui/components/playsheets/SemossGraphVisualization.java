@@ -203,6 +203,11 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			}
 		}
 
+		if ( null == constructor ) {
+			// should never be null here anyway
+			return;
+		}
+
 		Layout<SEMOSSVertex, SEMOSSEdge> newlayout = null;
 		try {
 			Object o = constructor.newInstance( graph );

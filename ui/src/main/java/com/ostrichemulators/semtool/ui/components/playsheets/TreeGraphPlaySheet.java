@@ -99,9 +99,6 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 					String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
 				rings.setEnabled( newlayout instanceof BalloonLayout
 						|| newlayout instanceof RadialTreeLayout );
-				if( !rings.isEnabled() && ringbtn.isSelected() ){
-					ringbtn.doClick();
-				}
 			}
 		} );
 	}
