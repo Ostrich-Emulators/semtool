@@ -59,14 +59,14 @@ public class ShapePopup extends JMenu {
 					for ( SEMOSSVertex v : vertices ) {
 						v.setShape( en.getValue() );
 						try {
-						//Properties props = DIHelper.getInstance().getCoreProp();
-						LocalUserImpl.getLocalUser().setProperty(v.getType().getLocalName()+"_SHAPE", en.getKey());
-						
-						} catch (Exception ex) {
+							//Properties props = DIHelper.getInstance().getCoreProp();
+							LocalUserImpl.getLocalUser().setProperty( v.getType().getLocalName() + "_SHAPE", en.getKey() );
+						}
+						catch ( Exception ex ) {
 							// TODO Auto-generated catch block
 							log.error( ex, ex );
 						}
-						
+
 					}
 				}
 			} );

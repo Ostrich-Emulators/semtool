@@ -30,7 +30,6 @@ import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.om.TreeGraphDataModel;
-import com.ostrichemulators.semtool.ui.main.listener.impl.DuplicatingPickedStateListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
@@ -77,7 +76,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		view.setGraphMouse( gl );
 
-		setPicker( new DuplicatingPickedStateListener( view, this ) );
+		//setPicker( new DuplicatingPickedStateListener( view, this ) );
 	}
 
 	public Set<SEMOSSVertex> getDuplicates( SEMOSSVertex v ) {

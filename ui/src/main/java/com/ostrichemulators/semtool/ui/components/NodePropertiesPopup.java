@@ -19,7 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
-import com.ostrichemulators.semtool.om.SEMOSSVertex;
+import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.ui.components.playsheets.PlaySheetCentralComponent;
 import com.ostrichemulators.semtool.ui.components.playsheets.PropertyEditorPlaySheet;
 
@@ -36,10 +36,10 @@ public class NodePropertiesPopup extends AbstractAction {
 
 	private static final long serialVersionUID = -1859278887122010885L;
 	private final PlaySheetCentralComponent gps;
-	private final Collection<SEMOSSVertex> pickedVertexList;
+	private final Collection<? extends GraphElement> pickedVertexList;
 
 	public NodePropertiesPopup( PlaySheetCentralComponent _gps,
-			Collection<SEMOSSVertex> _pickedVertexList ) {
+			Collection<? extends GraphElement> _pickedVertexList ) {
 		super( "Edit Properties for Node(s)" );
 		putValue( Action.SHORT_DESCRIPTION, "Edit the properties of this node" );
 		gps = _gps;
@@ -54,6 +54,6 @@ public class NodePropertiesPopup extends AbstractAction {
 
 	public void showPropertiesView() {
 		gps.addSibling( new PropertyEditorPlaySheet( pickedVertexList,
-				"Selected Node Properties", gps.getEngine() ) );
+				"Selected Node/Edge Properties", gps.getEngine() ) );
 	}
 }

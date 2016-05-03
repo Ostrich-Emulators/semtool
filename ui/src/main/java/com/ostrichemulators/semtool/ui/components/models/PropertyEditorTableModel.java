@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.ostrichemulators.semtool.ui.components.models;
 
-import com.ostrichemulators.semtool.om.SEMOSSVertex;
+import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.util.StatementPersistenceUtility;
 
@@ -48,7 +48,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	private static final String[] columnNames = { "Node Label", "Property Name", "XML Datatype", "Value" };
 	private static final Class<?>[] classNames = { String.class, URI.class, URI.class, Value.class };
 	private ArrayList<PropertyEditorRow> rows;
-	private final Collection<SEMOSSVertex> pickedVertices;
+	private final Collection<? extends GraphElement> pickedVertices;
 	private final IEngine engine;
 	private final Set<URI> uneditableProps = new HashSet<>();
 	
@@ -58,7 +58,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	 * @param nodeOrEdge AbstractNodeEdgeBase
 	 * @param IEngine engine
 	 */
-	public PropertyEditorTableModel(Collection<SEMOSSVertex> _pickedVertices,
+	public PropertyEditorTableModel(Collection<? extends GraphElement> _pickedVertices,
 			IEngine _engine) { 
 		pickedVertices = _pickedVertices;
 		engine = _engine;
@@ -72,7 +72,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	public void populateRows() {
 		rows = new ArrayList<>();
 		URI datatypeURI;
-		for ( SEMOSSVertex vertex : pickedVertices ) {
+		for ( GraphElement vertex : pickedVertices ) {
 			for ( Map.Entry<URI, Value> entry : vertex.getValues().entrySet() ) {
 				// don't edit the SUBJECT field (it's just an ID for the vertex)
 				if( !RDF.SUBJECT.equals( entry.getKey()) ){
@@ -146,7 +146,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 			return;
 		}
 		
-		SEMOSSVertex vertex = pRow.getVertex();
+		GraphElement vertex = pRow.getVertex();
 		vertex.setValue(pRow.getName(), pRow.getValue());
 		StatementPersistenceUtility.updateNodeOrEdgePropertyValue(
 				engine, 
@@ -224,12 +224,12 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	}
 
 	public class PropertyEditorRow {
-		private final SEMOSSVertex vertex;
+		private final GraphElement vertex;
 		private final URI name;
 		private final URI datatype;
 		private Value value;
 
-		public PropertyEditorRow( SEMOSSVertex vertex, URI name, URI datatype, Value value ) {
+		public PropertyEditorRow( GraphElement vertex, URI name, URI datatype, Value value ) {
 			this.vertex = vertex;
 			this.name = name;
 			this.datatype = datatype;
@@ -241,7 +241,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 			return true;
 		}
 
-		public SEMOSSVertex getVertex() {
+		public GraphElement getVertex() {
 			return vertex;
 		}
 

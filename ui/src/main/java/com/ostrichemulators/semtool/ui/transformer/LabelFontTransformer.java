@@ -32,9 +32,10 @@ public class LabelFontTransformer<T extends GraphElement> extends SizedSelecting
 	private static final int DEFAULT_SIZE = Constants.INITIAL_GRAPH_FONT_SIZE;
 	private static final int MAXSIZE = 55;
 	private static final int MINSIZE = 0;
+	private static final Font hidden = new Font( "Plain", Font.PLAIN, MINSIZE );
 
 	private Font normal = new Font( "Plain", Font.PLAIN, DEFAULT_SIZE );
-	private Font unsel = new Font( "Plain", Font.PLAIN, MINSIZE );
+	private Font unsel = new Font( "Plain", Font.PLAIN, DEFAULT_SIZE );
 
 	public LabelFontTransformer() {
 		super( DEFAULT_SIZE, MAXSIZE, MINSIZE, 1.0 );
@@ -54,7 +55,7 @@ public class LabelFontTransformer<T extends GraphElement> extends SizedSelecting
 
 	@Override
 	protected Font transformNotSelected( T t, boolean skel ) {
-		return unsel;
+		return ( skel ? hidden : unsel );
 	}
 
 	@Override

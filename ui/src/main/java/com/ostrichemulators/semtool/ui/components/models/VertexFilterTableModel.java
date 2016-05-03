@@ -134,10 +134,10 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 		if ( vfRow.isHeader() ) {
 			// all vertices/edges of this type
 			// viz.hide( vfRow.type, hideit );
-			List<URI> tochange = new ArrayList<>();
+			List<GraphElement> tochange = new ArrayList<>();
 			for ( FilterRow fr : data ) {
 				if ( fr.type.equals( vfRow.type ) && !fr.isHeader() ) {
-					tochange.add( fr.instance.getURI() );
+					tochange.add( fr.instance );
 				}
 			}
 

@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.om.GraphElement;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -59,7 +60,7 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 
 	private final IEngine engine;
 
-	public TraverseFreelyPopup( SEMOSSVertex vertex, IEngine e,
+	public TraverseFreelyPopup( GraphElement vertex, IEngine e,
 			GraphPlaySheet ps, Collection<SEMOSSVertex> picked, boolean instance ) {
 		super( "Traverse Freely: "
 				+ ( instance

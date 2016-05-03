@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet;
@@ -43,12 +44,13 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * This class is used to display information about a node in a popup window.
  */
 public class NodeInfoPopup extends AbstractAction {
-	private static final long serialVersionUID = -1859278887122010885L;
-	
-	private final GraphPlaySheet gps;
-	private final Collection<SEMOSSVertex> pickedVertex;
 
-	public NodeInfoPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> picked ) {
+	private static final long serialVersionUID = -1859278887122010885L;
+
+	private final GraphPlaySheet gps;
+	private final Collection<GraphElement> pickedVertex;
+
+	public NodeInfoPopup( GraphPlaySheet gps, Collection<GraphElement> picked ) {
 		super( "Show Information about Selected Node(s)" );
 		this.putValue( Action.SHORT_DESCRIPTION,
 				"Draw a box to select nodes, or hold Shift and click on nodes" );
@@ -58,8 +60,8 @@ public class NodeInfoPopup extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
-		MultiMap<URI, SEMOSSVertex> typeCounts = new MultiMap<>();
-		for ( SEMOSSVertex v : pickedVertex ) {
+		MultiMap<URI, GraphElement> typeCounts = new MultiMap<>();
+		for ( GraphElement v : pickedVertex ) {
 			URI vType = v.getType();
 			typeCounts.add( vType, v );
 		}
@@ -67,7 +69,7 @@ public class NodeInfoPopup extends AbstractAction {
 		ValueFactory vf = new ValueFactoryImpl();
 		List<Value[]> data = new ArrayList<>();
 		int total = 0;
-		for ( Map.Entry<URI, List<SEMOSSVertex>> en : typeCounts.entrySet() ) {
+		for ( Map.Entry<URI, List<GraphElement>> en : typeCounts.entrySet() ) {
 			Value[] row = { en.getKey(), vf.createLiteral( en.getValue().size() ) };
 			data.add( row );
 			total += en.getValue().size();
@@ -77,7 +79,7 @@ public class NodeInfoPopup extends AbstractAction {
 			vf.createLiteral( total ) } );
 
 		GridPlaySheet grid = new GridPlaySheet();
-		grid.setTitle( "Selected Node Information" );
+		grid.setTitle( "Selected Node/Edge Information" );
 		grid.create( data, Arrays.asList( "Property Name", "Value" ), gps.getEngine() );
 		gps.addSibling( grid );
 	}

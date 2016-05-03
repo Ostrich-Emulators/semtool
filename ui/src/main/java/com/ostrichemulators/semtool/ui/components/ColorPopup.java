@@ -25,10 +25,10 @@ import javax.swing.JMenuItem;
 
 import org.apache.log4j.Logger;
 
-import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.util.Utility;
 import com.ostrichemulators.semtool.om.GraphColorRepository;
+import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -43,33 +43,31 @@ public class ColorPopup extends JMenu {
 	private static final long serialVersionUID = -4784260297860900414L;
 	private static final Logger log = Logger.getLogger( Utility.class );
 
-
-	public ColorPopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
+	public ColorPopup( GraphPlaySheet gps, Collection<? extends GraphElement> vertices ) {
 		super( "Modify Color" );
 
 		GraphColorRepository gcr = GraphColorRepository.instance();
-		for( Map.Entry<String, Color> en : gcr.getNamedColorMap().entrySet() ){
+		for ( Map.Entry<String, Color> en : gcr.getNamedColorMap().entrySet() ) {
 			JMenuItem menuItem = new JMenuItem( en.getKey() );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338447465448152673L;
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					for( SEMOSSVertex v : vertices ){
-						
+					for ( GraphElement v : vertices ) {
+
 						v.setColor( en.getValue() );
-					
+
 						try {
-							//Properties props = DIHelper.getInstance().getCoreProp();
-							gcr.updateColor(v.getType(), en.getValue());
-							LocalUserImpl.getLocalUser().setProperty(v.getType().getLocalName()+"_COLOR", en.getKey());
-							
-							} catch (Exception ex) {
-								// TODO Auto-generated catch block
-								log.error( ex, ex );
-							}
-						
-					}					
+							gcr.updateColor( v.getType(), en.getValue() );
+							LocalUserImpl.getLocalUser().setProperty( v.getType().getLocalName() + "_COLOR", en.getKey() );
+						}
+						catch ( Exception ex ) {
+							// TODO Auto-generated catch block
+							log.error( ex, ex );
+						}
+
+					}
 				}
 			} );
 			add( menuItem );

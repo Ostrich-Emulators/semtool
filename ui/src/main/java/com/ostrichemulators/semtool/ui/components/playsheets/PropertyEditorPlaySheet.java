@@ -19,7 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
-import com.ostrichemulators.semtool.om.SEMOSSVertex;
+import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.models.PropertyEditorTableModel;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
@@ -53,7 +53,7 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 	private final PropertyEditorTableModel model;
 	private final JTable table;
 
-	public PropertyEditorPlaySheet( Collection<SEMOSSVertex> pickedVertices,
+	public PropertyEditorPlaySheet( Collection<? extends GraphElement> pickedVertices,
 			String title, IEngine engine ) {
 		setLayout( new BorderLayout() );
 		setTitle( title );	
@@ -87,9 +87,9 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 		add( jsp, BorderLayout.CENTER );
 	}
 
-	private Set<URI> getUrisThatNeedLabels( Collection<SEMOSSVertex> verts ) {
+	private Set<URI> getUrisThatNeedLabels( Collection<? extends GraphElement> verts ) {
 		Set<URI> needs = new HashSet<>();
-		for ( SEMOSSVertex v : verts ) {
+		for ( GraphElement v : verts ) {
 			for ( Map.Entry<URI, Value> en : v.getValues().entrySet() ) {
 				needs.add( en.getKey() );
 				if ( en.getValue() instanceof URI ) {

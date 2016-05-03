@@ -122,12 +122,14 @@ public class SearchController implements KeyListener, FocusListener,
 	private void handleSelectionOfButton() {
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
 		gps.getView().clearHighlighting();
-		gps.getView().skeleton( view.getPickedVertexState().getPicked(), null );
+		gps.getView().setSkeletonMode( true );
+		gps.getView().highlight( view.getPickedVertexState().getPicked(), null );
 	}
 
 	private void handleDeselectionOfButton() {
 		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view = gps.getView();
 		gps.getView().clearHighlighting();
+		gps.getView().setSkeletonMode( false );
 		gps.getView().highlight( view.getPickedVertexState().getPicked(), null );
 	}
 
@@ -165,14 +167,7 @@ public class SearchController implements KeyListener, FocusListener,
 				}
 			}
 
-			boolean skel = gps.getView().getVertexLabelFontTransformer().isSkeletonMode();
-			gps.getView().clearHighlighting();
-			if ( skel ) {
-				gps.getView().skeleton( verts, null );
-			}
-			else {
-				gps.getView().highlight( verts, null );
-			}
+			gps.getView().highlight( verts, null );
 		}
 		catch ( ParseException | IOException e ) {
 			log.error( e, e );

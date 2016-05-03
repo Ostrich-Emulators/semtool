@@ -19,9 +19,9 @@
  */
 package com.ostrichemulators.semtool.ui.main.listener.impl;
 
-import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
+import com.ostrichemulators.semtool.om.GraphElement;
 
+import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,17 +36,17 @@ public class HideVertexPopupMenuListener extends AbstractAction {
 
 	private static final long serialVersionUID = -2864866456286018607L;
 
-	private final List<SEMOSSVertex> highlightedVertices = new ArrayList<>();
+	private final List<GraphElement> highlighted = new ArrayList<>();
+	private final SemossGraphVisualization viz;
 
-	public HideVertexPopupMenuListener( Collection<SEMOSSVertex> highlights ) {
+	public HideVertexPopupMenuListener( Collection<GraphElement> highlights, SemossGraphVisualization vizzy ) {
 		super( "Hide Nodes" );
-		highlightedVertices.addAll( highlights );
+		viz = vizzy;
+		highlighted.addAll( highlights );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		for ( SEMOSSVertex vertex : highlightedVertices ) {
-			vertex.setVisible( false );
-		}
+		viz.hide( highlighted, enabled );
 	}
 }

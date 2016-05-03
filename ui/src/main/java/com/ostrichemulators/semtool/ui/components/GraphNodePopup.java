@@ -23,6 +23,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import com.ostrichemulators.semtool.algorithm.impl.DistanceDownstreamProcessor;
 import com.ostrichemulators.semtool.algorithm.impl.IslandIdentifierProcessor;
 import com.ostrichemulators.semtool.algorithm.impl.LoopIdentifierProcessor;
+import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.playsheets.ChartItPlaySheet;
@@ -57,25 +58,33 @@ public class GraphNodePopup extends JPopupMenu {
 	private static final long serialVersionUID = 7106248215097748901L;
 
 	private final GraphPlaySheet gps;
-	private final Set<SEMOSSVertex> highlightedVertices;
-	private SEMOSSVertex pickedVertex;
+	private final Set<GraphElement> highlightedElements;
+	private final Set<SEMOSSVertex> highlightedVertices = new HashSet<>();
+
+	private GraphElement pickedVertex;
 	private final IEngine engine;
 	private final boolean forTree;
 
-	public GraphNodePopup( GraphPlaySheet gps, SEMOSSVertex pickedVertex,
-			SEMOSSVertex[] highlightedVertices, boolean forTree ) {
+	public GraphNodePopup( GraphPlaySheet gps, GraphElement pickedVertex,
+			SEMOSSVertex[] highlights, boolean forTree ) {
 
 		this.forTree = forTree;
 		this.gps = gps;
-		this.highlightedVertices = new HashSet<>( Arrays.asList( highlightedVertices ) );
+		this.highlightedElements = new HashSet<>( Arrays.asList( highlights ) );
 		this.pickedVertex = pickedVertex;
 
-		if ( 1 == this.highlightedVertices.size() ) {
-			this.pickedVertex = highlightedVertices[0];
+		if ( 1 == this.highlightedElements.size() ) {
+			this.pickedVertex = highlights[0];
 		}
 
-		if ( this.pickedVertex != null && this.highlightedVertices.isEmpty() ) {
-			this.highlightedVertices.add( this.pickedVertex );
+		if ( this.pickedVertex != null && this.highlightedElements.isEmpty() ) {
+			this.highlightedElements.add( this.pickedVertex );
+		}
+
+		for ( GraphElement ge : highlightedElements ) {
+			if ( ge.isNode() ) {
+				highlightedVertices.add( SEMOSSVertex.class.cast( ge ) );
+			}
 		}
 
 		engine = gps.getEngine();
@@ -112,8 +121,8 @@ public class GraphNodePopup extends JPopupMenu {
 		addSeparator();
 
 		JMenuItem item = add( "Hide Nodes" );
-		item.addActionListener( new HideVertexPopupMenuListener( highlightedVertices ) );
-		item.setEnabled( !highlightedVertices.isEmpty() && gps.areNodesHidable() );
+		item.addActionListener( new HideVertexPopupMenuListener( highlightedElements, gps.getView() ) );
+		item.setEnabled( !highlightedElements.isEmpty() && gps.areNodesHidable() );
 
 		item = add( "Unhide Nodes" );
 		item.addActionListener( new UnHideVertexPopupMenuListener( gps ) );
@@ -123,13 +132,13 @@ public class GraphNodePopup extends JPopupMenu {
 	private void addCosmeticsOptions() {
 		addSeparator();
 
-		JMenuItem item = add( new ColorPopup( gps, highlightedVertices ) );
+		JMenuItem item = add( new ColorPopup( gps, highlightedElements ) );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
-		item.setEnabled( !highlightedVertices.isEmpty() );
+		item.setEnabled( !highlightedElements.isEmpty() );
 
 		item = add( new ShapePopup( gps, highlightedVertices ) );
 		item.setToolTipText( "Modify overall appearance of the graph" );
-		item.setEnabled( !highlightedVertices.isEmpty() );
+		item.setEnabled( !highlightedElements.isEmpty() );
 
 		item = add( new LayoutPopup( "Modify Layout", gps, highlightedVertices ) );
 		item.setToolTipText( "To select nodes press Shift and click on nodes" );
@@ -170,11 +179,11 @@ public class GraphNodePopup extends JPopupMenu {
 
 		add( new GraphPlaySheetTableExporter( gps ) );
 		add( new GraphPlaySheetEdgeListExporter( gps ) );
-		add( new NodeInfoPopup( gps, highlightedVertices ) );
+		add( new NodeInfoPopup( gps, highlightedElements ) );
 
 		if ( !forTree ) {
-			JMenuItem item = add( new NodePropertiesPopup( gps, highlightedVertices ) );
-			item.setEnabled( highlightedVertices.size() >= 1 );
+			JMenuItem item = add( new NodePropertiesPopup( gps, highlightedElements ) );
+			item.setEnabled( highlightedElements.size() >= 1 );
 
 			add( new CondenseGraph( gps ) );
 		}

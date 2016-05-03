@@ -80,7 +80,7 @@ public class MSTPopupMenuListener extends AbstractAction {
 
 		// repaint it
 		ps.getView().repaint();
-		int originalSize = ps.asForest().getEdgeCount();
+		int originalSize = ps.getVisibleGraph().getEdgeCount();
 		int shortestPathSize = kmst.getEdgeSet().size();
 		GuiUtility.showMessage( "Minimum Spanning Tree uses " + shortestPathSize
 				+ " edges out of " + originalSize + " original edges" );

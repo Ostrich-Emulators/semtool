@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.main.listener.impl;
 
+import com.ostrichemulators.semtool.om.GraphElement;
 import java.awt.event.MouseEvent;
 import java.util.Set;
 
@@ -32,9 +33,10 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.GraphNodePopup;
 import com.ostrichemulators.semtool.ui.components.NodePropertiesPopup;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
+import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.components.playsheets.TreeGraphPlaySheet;
-import com.ostrichemulators.semtool.ui.transformer.LabelFontTransformer;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import javax.swing.SwingUtilities;
 
@@ -71,58 +73,53 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 			return;
 		}
 
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
-
-		SEMOSSVertex clickedVertex = getClickedVertex( viewer, e.getX(),
-				e.getY() );
-
-		if ( clickedVertex != null ) {
-			checkForDoubleClick( viewer, clickedVertex, e );
+		SemossGraphVisualization viewer = gps.getView();
+		GraphElement ele = getClickedElement( viewer, e.getX(), e.getY() );
+		
+		if( null == ele ){
+			// clicked in space, so unhighlight everything
+			viewer.clearHighlighting();
+			viewer.setSkeletonMode( false );
 		}
 
-		Set<SEMOSSVertex> vertHash = new HashSet<>();
+		if ( ele != null ) {
+			checkForDoubleClick( viewer, ele, e );
+		}
+
 		if ( SwingUtilities.isRightMouseButton( e ) ) {
-			vertHash = handleRightClick( viewer, clickedVertex, e );
-		}
-
-		if ( null != gps ) {
-//			if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-//				handleHighlightVertexInSkeletonMode( viewer, vertHash );
-//			}
+			handleRightClick( viewer, ele, e );
 		}
 	}
 
 	long lastTimeClicked = 0;
 
+	private GraphElement getClickedElement( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
+			double x, double y ) {
+		GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport
+				= viewer.getPickSupport();
+
+		SEMOSSVertex vert = pickSupport.getVertex( viewer.getGraphLayout(), x, y );
+		if ( null != vert ) {
+			return vert;
+		}
+
+		SEMOSSEdge edge = pickSupport.getEdge( viewer.getGraphLayout(), x, y );
+		if ( null != edge ) {
+			return edge;
+		}
+
+		return null;
+	}
+
 	private void checkForDoubleClick( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
-			SEMOSSVertex clickedVertex, MouseEvent e ) {
+			GraphElement clickedVertex, MouseEvent e ) {
 
 		long thisTimeClicked = System.currentTimeMillis();
 		if ( ( thisTimeClicked - lastTimeClicked ) < 250 ) {
-			new NodePropertiesPopup( gps, viewer.getPickedVertexState().getPicked() ).showPropertiesView();
+			new NodePropertiesPopup( gps, Arrays.asList( clickedVertex ) ).showPropertiesView();
 		}
 
 		lastTimeClicked = thisTimeClicked;
-	}
-
-	/*
-	 * Method checkIfVertexWasClicked Check to see if an edge or a vertex was
-	 * selected so we know which to show in the property table model
-	 * 
-	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
-	 * to use to get the vertex
-	 */
-	private SEMOSSVertex getClickedVertex(
-			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer, int x, int y ) {
-
-		GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport
-				= viewer.getPickSupport();
-		SEMOSSVertex clickedObject = pickSupport.getVertex( viewer.getGraphLayout(),
-				x, y );
-		if ( null != clickedObject ) {
-			logger.debug( "The user clicked a SEMOSSVertex." );
-		}
-		return clickedObject;
 	}
 
 	/*
@@ -135,7 +132,7 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 	 */
 	protected Set<SEMOSSVertex> handleRightClick(
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
-			SEMOSSVertex clickedVertex, MouseEvent e ) {
+			GraphElement ele, MouseEvent e ) {
 		logger.debug( "The user right clicked." );
 
 		Set<SEMOSSVertex> vertHash = new HashSet<>();
@@ -145,27 +142,10 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 
 		SEMOSSVertex[] vertices
 				= pickedVertices.toArray( new SEMOSSVertex[pickedVertices.size()] );
-		new GraphNodePopup( gps, clickedVertex, vertices, forTree ).show( e );
+
+		// for now...
+		new GraphNodePopup( gps, ele, vertices, forTree ).show( e );
 
 		return vertHash;
-	}
-
-	/*
-	 * Method handleHighlightVertexInSkeletonMode Need vertex to highlight when
-	 * click in skeleton mode. Here we need to get the already selected vertices
-	 * so that we can add to them.
-	 * 
-	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
-	 * to use to get the edges
-	 * 
-	 * @param Map<String, String> vertHash - The vertixes which were highlighted
-	 */
-	private void handleHighlightVertexInSkeletonMode(
-			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
-			Set<SEMOSSVertex> verts ) {
-
-		LabelFontTransformer<SEMOSSVertex> vlft = gps.getView().getVertexLabelFontTransformer();
-		vlft.select( verts );
-		viewer.repaint();
 	}
 }

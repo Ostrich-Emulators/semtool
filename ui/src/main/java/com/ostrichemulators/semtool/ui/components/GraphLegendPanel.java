@@ -51,7 +51,7 @@ import org.openrdf.model.impl.URIImpl;
 /**
  * This class is used to create the legend for visualizations.
  */
-public final class LegendPanel2 extends JPanel implements GraphListener {
+public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 	private static final long serialVersionUID = -2364666196260002413L;
 	private final List<SEMOSSVertex> selVs = new ArrayList<>();
@@ -60,7 +60,7 @@ public final class LegendPanel2 extends JPanel implements GraphListener {
 	/**
 	 * Create the panel.
 	 */
-	public LegendPanel2( Map<Value, String> labels ) {
+	public GraphLegendPanel( Map<Value, String> labels ) {
 		setLayout( new WrapLayout( WrapLayout.LEFT, 5, 5 ) );
 		setBorder( BorderFactory.createLineBorder( Color.LIGHT_GRAY, 1 ) );
 		this.labels = labels;
@@ -109,8 +109,9 @@ public final class LegendPanel2 extends JPanel implements GraphListener {
 							}
 
 							gps.getView().clearHighlighting();
+							gps.getView().setSkeletonMode( !selVs.isEmpty() );
 							if ( !selVs.isEmpty() ) {
-								gps.getView().skeleton( selVs, null );
+								gps.getView().highlight( selVs, null );
 							}
 						}
 					}

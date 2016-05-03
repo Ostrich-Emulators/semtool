@@ -54,17 +54,15 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.ControlData;
 import com.ostrichemulators.semtool.ui.components.ControlPanel;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
-import com.ostrichemulators.semtool.ui.components.LegendPanel2;
+import com.ostrichemulators.semtool.ui.components.GraphLegendPanel;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.PickedStateListener;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -96,7 +94,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
-	private ItemListener pickStateListener = null;
 	private final RetrievingLabelCache labelcache = new RetrievingLabelCache();
 
 	/**
@@ -125,12 +122,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		setLayout( new BorderLayout() );
 		add( graphSplitPane, BorderLayout.CENTER );
-		LegendPanel2 legendPanel = new LegendPanel2( labelcache );
+		GraphLegendPanel legendPanel = new GraphLegendPanel( labelcache );
 		add( legendPanel, BorderLayout.SOUTH );
 		add( control, BorderLayout.EAST );
 
 		view = new SemossGraphVisualization( gdm );
 		initVisualizer( view );
+		view.addPickingSupport();
 		control.setVisualization( view );
 
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
@@ -276,26 +274,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		view.setOverlayLevel( overlayLevel );
 	}
 
-	@Override
-	public void activated() {
-		// FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
-		// fp.setModels( nodemodel, edgemodel, propmodel, getEngine() );
-
-//		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
-//		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
-//		if ( !pickedVerts.isEmpty() ) {
-//			propmodel.setVertex( pickedVerts.iterator().next() );
-//		}
-//		else if ( !pickedEdges.isEmpty() ) {
-//			propmodel.setEdge( pickedEdges.iterator().next() );
-//		}
-	}
-
 	/**
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
-		//setLayoutName( layoutName );
 		view.refresh();
 		fireGraphUpdated();
 		setUndoRedoBtn();
@@ -318,21 +300,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 						fireGraphUpdated();
 					}
 				} );
-
-		setPicker( new PickedStateListener( viewer, this ) );
-	}
-
-	protected void setPicker( ItemListener psl ) {
-		if ( null != pickStateListener ) {
-			// remove the old listener
-			view.getPickedVertexState().removeItemListener( pickStateListener );
-			view.getPickedEdgeState().removeItemListener( pickStateListener );
-		}
-		if ( null != psl ) {
-			pickStateListener = psl;
-			view.getPickedVertexState().addItemListener( pickStateListener );
-			view.getPickedEdgeState().addItemListener( pickStateListener );
-		}
 	}
 
 	public String getLayoutName() {

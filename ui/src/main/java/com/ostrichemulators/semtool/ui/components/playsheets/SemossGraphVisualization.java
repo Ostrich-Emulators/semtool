@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
 import com.google.common.base.Predicate;
+import static com.hp.hpl.jena.assembler.JA.uri;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
@@ -33,12 +34,15 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.util.Animator;
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
@@ -79,6 +83,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	protected EdgeStrokeTransformer est = new EdgeStrokeTransformer();
 	protected ArrowPaintTransformer adpt = new ArrowPaintTransformer();
 	protected ArrowPaintTransformer aft = new ArrowPaintTransformer();
+	protected boolean skeletonmode = false;
 
 	private final HidingPredicate<? extends GraphElement> predicate = new HidingPredicate<>();
 	private final VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> visibleFilter
@@ -115,7 +120,12 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		refresh();
 	}
 
-	public void hide( Collection<URI> uris, boolean hideme ) {
+	public void hide( Collection<GraphElement> elements, boolean hideme ) {
+		List<URI> uris = new ArrayList<>();
+		for ( GraphElement e : elements ) {
+			uris.add( e.getURI() );
+		}
+
 		if ( hideme ) {
 			hiddens.addAll( uris );
 		}
@@ -205,14 +215,23 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) visibleFilter.apply( gdm.getGraph() );
 	}
 
+	public void setSkeletonMode( boolean skele ) {
+		skeletonmode = skele;
+		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
+			vht, est, ept, eft, elt, adpt, aft } ) {
+			s.setSkeletonMode( skeletonmode );
+		}
+
+		//firePropertyChange( REPAINT_NEEDED, false, true );
+		repaint();
+	}
+
 	/**
-	 * Clears the highlighting, turns off skeleton mode if it's enabled, and
-	 * resizes all nodes with a custom size
+	 * Clears the highlighting and resizes all nodes with a custom size
 	 */
 	public void clearHighlighting() {
 		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
 			vht, est, ept, eft, elt, adpt, aft } ) {
-			s.setSkeletonMode( false );
 			s.clearSelected();
 		}
 
@@ -227,14 +246,12 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	 *
 	 * @param verts
 	 * @param edges
-	 * @param asSkeleton should the skeleton mode be activated as well?
 	 */
-	protected void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges,
-			boolean asSkeleton ) {
+	public void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
 
 		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
 			vht, est, ept, eft, elt, adpt, aft } ) {
-			s.setSkeletonMode( asSkeleton );
+			s.setSkeletonMode( skeletonmode );
 		}
 
 		vft.select( verts );
@@ -248,14 +265,6 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		aft.select( edges );
 
 		repaint();
-	}
-
-	public void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
-		highlight( verts, edges, false );
-	}
-
-	public void skeleton( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
-		highlight( verts, edges, true );
 	}
 
 	public Collection<SEMOSSVertex> getHighlightedVertices() {
@@ -342,6 +351,52 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		rc.setArrowFillPaintTransformer( aft );
 		getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.S );
 		rc.setLabelOffset( 0 );
+	}
+
+	public void addPickingSupport() {
+		ItemListener il = new ItemListener() {
+
+			@Override
+			public void itemStateChanged( ItemEvent e ) {
+				// increase/decrease the size of nodes as they get selected/unselected
+				if ( e.getItem() instanceof SEMOSSVertex ) {
+					SEMOSSVertex v = SEMOSSVertex.class.cast( e.getItem() );
+
+					log.debug( ( ItemEvent.DESELECTED == e.getStateChange()
+							? "Deselecting"
+							: "Selecting" ) + " node: " + v );
+
+					double delta = ( ItemEvent.DESELECTED == e.getStateChange()
+							? -VertexShapeTransformer.STEPSIZE
+							: VertexShapeTransformer.STEPSIZE );
+					vht.changeSize( delta, Arrays.asList( v ) );
+				}
+				else {
+					log.debug( ( ItemEvent.DESELECTED == e.getStateChange()
+							? "Deselecting"
+							: "Selecting" ) + " edge: " + e.getItem() );
+				}
+
+				Collection<SEMOSSVertex> nodes = getPickedVertexState().getPicked();
+				for ( SelectingTransformer<SEMOSSVertex, ?> s : new SelectingTransformer[]{ vlt, vft, vpt, vht, vst } ) {
+					s.setSelected( nodes );
+				}
+
+				Collection<SEMOSSEdge> edges = getPickedEdgeState().getPicked();
+				for ( SelectingTransformer<SEMOSSEdge, ?> s : new SelectingTransformer[]{ est, eft, elt, adpt, aft } ) {
+					s.setSelected( edges );
+				}
+
+				SemossGraphVisualization.this.repaint();
+//		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+//			vlft = (LabelFontTransformer<SEMOSSVertex>) rc.getVertexFontTransformer();
+//			selectedVertices.addAll( vlft.getSelected() );
+//		}
+			}
+		};
+
+		getPickedEdgeState().addItemListener( il );
+		getPickedVertexState().addItemListener( il );
 	}
 
 	protected class HidingPredicate<V extends GraphElement> implements Predicate<V> {
