@@ -166,8 +166,7 @@ public class SearchController implements KeyListener, FocusListener,
 					gps.getView().getPickedVertexState().pick( v, true );
 				}
 			}
-
-			gps.getView().highlight( verts, null );
+			gps.getView().setSkeletonMode( true );
 		}
 		catch ( ParseException | IOException e ) {
 			log.error( e, e );

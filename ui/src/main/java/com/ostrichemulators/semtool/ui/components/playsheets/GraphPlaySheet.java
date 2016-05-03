@@ -196,8 +196,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		JTextField searchbar = new JTextField();
 		searchbar.setBorder( BorderFactory.createBevelBorder( BevelBorder.LOWERED ) );
-		searchbar.setColumns( 9 );
+		searchbar.setColumns( 15 );
 		SearchController src = new SearchController( searchbar );
+		src.setGPS( this );
 		toolBar.add( searchbar );
 
 		addGraphListener( new GraphListener() {
