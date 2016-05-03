@@ -29,9 +29,10 @@ import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.graph.Forest;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
+import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
+import com.ostrichemulators.semtool.util.GuiUtility;
 import javax.swing.AbstractAction;
 
 /**
@@ -42,15 +43,18 @@ public class RingsButtonListener extends AbstractAction {
 
 	private final BalloonLayoutRings rings = new BalloonLayoutRings();
 	private final RadialTreeLayoutRings treeRings = new RadialTreeLayoutRings();
-	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
-	private Layout lay;
+	private SemossGraphVisualization view;
+
+	public RingsButtonListener() {
+		super( "", GuiUtility.loadImageIcon( "ring.png" ) );
+	}
 
 	/**
 	 * Method setViewer. Sets the view that the listener will access.
 	 *
 	 * @param view VisualizationViewer
 	 */
-	public void setViewer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view ) {
+	public void setViewer( SemossGraphVisualization view ) {
 		this.view = view;
 		this.rings.setViewer( view );
 		this.treeRings.setViewer( view );
@@ -70,8 +74,7 @@ public class RingsButtonListener extends AbstractAction {
 	 *
 	 * @param lay Layout
 	 */
-	public void setLayout( Layout lay ) {
-		this.lay = lay;
+	private void setLayout( Layout lay ) {
 		if ( lay instanceof BalloonLayout ) {
 			this.rings.setLayout( BalloonLayout.class.cast( lay ) );
 		}
@@ -91,6 +94,9 @@ public class RingsButtonListener extends AbstractAction {
 		// Get if the button is selected
 		JToggleButton button = JToggleButton.class.cast( e.getSource() );
 
+		Layout lay = view.getEffectiveLayout();
+		setLayout( lay );
+
 		if ( !button.isSelected() ) {
 			if ( lay instanceof BalloonLayout ) {
 				view.removePreRenderPaintable( rings );
@@ -108,7 +114,5 @@ public class RingsButtonListener extends AbstractAction {
 			}
 		}
 		view.repaint();
-
 	}
-
 }

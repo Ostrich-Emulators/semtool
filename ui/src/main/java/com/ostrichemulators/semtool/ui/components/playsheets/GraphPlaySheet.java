@@ -55,22 +55,26 @@ import com.ostrichemulators.semtool.ui.components.ControlData;
 import com.ostrichemulators.semtool.ui.components.ControlPanel;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
 import com.ostrichemulators.semtool.ui.components.GraphLegendPanel;
+import com.ostrichemulators.semtool.ui.components.WeightDropDownButton;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
+import com.ostrichemulators.semtool.ui.main.listener.impl.TreeConverterListener;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
+import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
 import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
@@ -97,6 +101,21 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
 	private final RetrievingLabelCache labelcache = new RetrievingLabelCache();
+	private final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			undoView();
+		}
+	};
+
+	private final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			redoView();
+		}
+	};
+
+	private final TreeConverterListener tree = new TreeConverterListener();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -142,14 +161,35 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
 		super.populateToolBar( toolBar, tabTitle );
-		JToggleButton tb = new JToggleButton();
-		tb.setAction( new AbstractAction( "Graph Properties" ) {
+		JToggleButton props = new JToggleButton();
+		props.setAction( new AbstractAction( "Graph Properties" ) {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				control.setVisible( tb.isSelected() );
+				control.setVisible( props.isSelected() );
 			}
 		} );
-		toolBar.add( tb );
+
+		WeightDropDownButton weightButton = new WeightDropDownButton( GuiUtility.loadImageIcon( "width.png" ) );
+		weightButton.setToolTipText( "<html><b>Edge Weight</b><br>Convert edge thickness corresponding to properties that exist on the edges</html>" );
+		weightButton.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				weightButton.showPopup();
+			}
+		} );
+		weightButton.setPlaySheet( this );
+
+		tree.setVisualization( this );
+
+		undo.setEnabled( false );
+		redo.setEnabled( false );
+
+		toolBar.add( props );
+		toolBar.add( weightButton );
+		toolBar.add( undo );
+		toolBar.add( redo );
+		toolBar.addSeparator();
+		toolBar.add( tree );
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -312,8 +352,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * Method setUndoRedoBtn.
 	 */
 	private void setUndoRedoBtn() {
-		//controlPanel.setUndoButtonEnabled( overlayLevel > 1 );
-		//controlPanel.setRedoButtonEnabled( maxOverlayLevel > overlayLevel );
+		undo.setEnabled( overlayLevel > 1 );
+		redo.setEnabled( maxOverlayLevel > overlayLevel );
 	}
 
 	public MultiMap<URI, SEMOSSVertex> getVerticesByType() {

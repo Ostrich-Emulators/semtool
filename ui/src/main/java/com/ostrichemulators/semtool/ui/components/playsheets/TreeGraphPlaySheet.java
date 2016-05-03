@@ -31,12 +31,16 @@ import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.om.TreeGraphDataModel;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
+import com.ostrichemulators.semtool.ui.main.listener.impl.RingsButtonListener;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
+import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import java.awt.Dimension;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 
 /**
  */
@@ -44,20 +48,21 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 	private static final Logger log = Logger.getLogger( TreeGraphPlaySheet.class );
 	private TreeGraphDataModel model;
+	private final RingsButtonListener rings = new RingsButtonListener();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
 	 */
 	public TreeGraphPlaySheet() {
-		this( new TreeGraphDataModel(), Constants.TREE_LAYOUT );
+		this( new TreeGraphDataModel(), TreeLayout.class );
 	}
 
-	public TreeGraphPlaySheet( TreeGraphDataModel model, String layoutname ) {
+	public TreeGraphPlaySheet( TreeGraphDataModel model, Class<? extends Layout> klass ) {
 		super( model );
 		this.model = model;
-		log.debug( "new TreeGrap PlaySheet" );
+		log.debug( "new treeplaysheet" );
 
-		setLayoutName( layoutname );
+		getView().setGraphLayout( klass );
 		//controlPanel.setForTree( true );
 		fixVis();
 
@@ -68,6 +73,14 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		for ( SEMOSSEdge e : model.getForest().getEdges() ) {
 			e.addPropertyChangeListener( this );
 		}
+	}
+
+	@Override
+	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
+		super.populateToolBar( toolBar, tabTitle );
+		rings.setViewer( getView() );
+		rings.setGraph( asForest() );
+		toolBar.add( new JToggleButton( rings ) );
 	}
 
 	private void fixVis() {
@@ -111,7 +124,6 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 //			}
 //		};
 //	}
-
 	@Override
 	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
 		return model.getRealVertex( v );
@@ -186,5 +198,5 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		fireLayoutUpdated( graph, oldName, layout );
 
 		return ok;
-	}	
+	}
 }

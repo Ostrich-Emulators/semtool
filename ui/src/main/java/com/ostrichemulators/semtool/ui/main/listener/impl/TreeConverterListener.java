@@ -25,8 +25,9 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.om.TreeGraphDataModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.TreeGraphPlaySheet;
-import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.GuiUtility;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
@@ -42,19 +43,18 @@ public class TreeConverterListener extends AbstractAction {
 	private GraphPlaySheet gps;
 
 	public TreeConverterListener() {
-		super("Convert to Tree", GuiUtility.loadImageIcon( "tree.png" ) );
+		super( "Convert to Tree", GuiUtility.loadImageIcon( "tree.png" ) );
 
 		putValue( Action.SHORT_DESCRIPTION,
-				"<html><b>Convert to Tree</b><br>Convert graph to tree by"
-				+ " duplicating nodes with multiple in-edges (in new tab)</html>" );
+				"Convert graph to tree by duplicating nodes with multiple in-edges (in new tab)" );
 	}
 
 	/**
-	 * Method setPlaySheet. Sets the play sheet that the listener will access.
+	 * Method setVisualization. Sets the play sheet that the listener will access.
 	 *
 	 * @param ps GraphPlaySheet
 	 */
-	public void setPlaySheet( GraphPlaySheet ps ) {
+	public void setVisualization( GraphPlaySheet ps ) {
 		gps = ps;
 		setEnabled( false );
 
@@ -76,15 +76,14 @@ public class TreeConverterListener extends AbstractAction {
 	public void actionPerformed( ActionEvent e ) {
 		TreeGraphDataModel model = new TreeGraphDataModel( gps.getGraphData().getGraph(),
 				gps.getView().getPickedVertexState().getPicked() );
-		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( model, getLayoutName() );
+		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( model, getLayoutClass() );
 		tgps.setTitle( "Tree Conversion" );
 		gps.addSibling( tgps );
 		tgps.fireGraphUpdated();
 	}
 
-	private String getLayoutName() {
+	private Class<? extends Layout> getLayoutClass() {
 		Object obj = getValue( LAYOUT_NAME );
-		return ( null == obj ? Constants.TREE_LAYOUT : obj.toString() );
+		return (Class<? extends Layout>) ( null == obj ? TreeLayout.class : obj );
 	}
-
 }

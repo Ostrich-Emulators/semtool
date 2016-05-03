@@ -24,7 +24,6 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.search.SearchController;
@@ -180,7 +179,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 			ringsListener.setEnabled( true );
 		}
 
-		ringsListener.setLayout( newlayout );
+		// ringsListener.setLayout( newlayout );
 	}
 
 	public void setForTree( boolean b ) {
@@ -251,12 +250,12 @@ public class ControlPanel extends JPanel implements GraphListener {
 	 * @param _gps GraphPlaySheet
 	 */
 	public void setPlaySheet( GraphPlaySheet gps ) {
-//		treeListener.setPlaySheet( gps );
-//		resetTransListener.setPlaySheet( gps );
-//		redoListener.setPlaySheet( gps );
-//		undoListener.setPlaySheet( gps );
+//		treeListener.setVisualization( gps );
+//		resetTransListener.setVisualization( gps );
+//		redoListener.setVisualization( gps );
+//		undoListener.setVisualization( gps );
 //		searchController.setGPS( gps );
-//		weightButton.setPlaySheet( gps );
+//		weightButton.setVisualization( gps );
 //
 //		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
 //		vertSizeListener.setViewer( viewer );

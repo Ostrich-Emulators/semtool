@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -86,6 +87,10 @@ public class WeightDropDownButton extends JButton {
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
 		initializeButton();
+	}
+
+	public WeightDropDownButton( Action a ) {
+		super( a );
 	}
 
 	public void setPlaySheet( GraphPlaySheet gps ) {

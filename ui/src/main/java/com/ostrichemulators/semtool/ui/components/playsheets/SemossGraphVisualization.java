@@ -23,6 +23,7 @@ import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.EdgeIndexFunction;
 import edu.uci.ics.jung.visualization.RenderContext;
@@ -156,24 +157,63 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	}
 
 	public void refresh() {
+		setGraphLayout( getEffectiveLayout().getClass() );
+	}
+
+	public Layout<SEMOSSVertex, SEMOSSEdge> getEffectiveLayout(){
 		Layout<SEMOSSVertex, SEMOSSEdge> currentlayout = super.getGraphLayout();
 		ObservableCachingLayout<SEMOSSVertex, SEMOSSEdge> ocl
 				= ObservableCachingLayout.class.cast( currentlayout );
-		setGraphLayout( (Class<Layout>) ocl.getDelegate().getClass() );
+		return (Layout<SEMOSSVertex, SEMOSSEdge>) ocl.getDelegate();
 	}
 
 	public void setGraphLayout( Class<? extends Layout> layklass ) {
 
+		Graph<SEMOSSVertex, SEMOSSEdge> graph = visibleFilter.apply( gdm.getGraph() );
+		Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>> constructor = null;
+
 		try {
 			Constructor<? extends Layout> ctor = layklass.getConstructor( new Class[]{ Graph.class } );
-			Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>> constructor
-					= (Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>>) ctor;
+			constructor = (Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>>) ctor;
+		}
+		catch ( NoSuchMethodException | SecurityException e ) {
+			// ignore this for now
+		}
 
-			Graph<SEMOSSVertex, SEMOSSEdge> graph = visibleFilter.apply( gdm.getGraph() );
+		if ( null == constructor ) {
+			try {
+				Constructor<? extends Layout> ctor = layklass.getConstructor( new Class[]{ Forest.class } );
+				constructor = (Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>>) ctor;
+			}
+			catch ( NoSuchMethodException | SecurityException e ) {
+				log.warn( "cannot figure out this layout, using FR by default", e );
+				throw new RuntimeException( "Cannot find default layout" );
+			}
+		}
+
+		if ( null == constructor ) {
+			try {
+				Constructor<? extends Layout> ctor
+						= FRLayout.class.getConstructor( new Class[]{ Graph.class } );
+				constructor = (Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>>) ctor;
+			}
+			catch ( NoSuchMethodException | SecurityException x ) {
+				log.error( x, x );
+			}
+		}
+
+		try {
 			Object o = constructor.newInstance( graph );
 			Layout<SEMOSSVertex, SEMOSSEdge> l = (Layout<SEMOSSVertex, SEMOSSEdge>) o;
+
 			l.setInitializer( super.getGraphLayout() );
-			l.setSize( getSize() );
+			try {
+				l.setSize( getSize() );
+			}
+			catch ( UnsupportedOperationException ueo ) {
+				// not all layouts can have their sizes set, but
+				// there's no way to tell which is which
+			}
 
 			LayoutTransition<SEMOSSVertex, SEMOSSEdge> lt
 					= new LayoutTransition<>( this, getGraphLayout(), l );
@@ -182,8 +222,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			getRenderContext().getMultiLayerTransformer().setToIdentity();
 			repaint();
 		}
-		catch ( NoSuchMethodException | SecurityException |
-				InstantiationException | IllegalAccessException |
+		catch ( InstantiationException | IllegalAccessException |
 				IllegalArgumentException | InvocationTargetException e ) {
 			log.error( e, e );
 		}
@@ -191,15 +230,20 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 
 	public void incrementFont( float incr ) {
 		//if no vertices or edges are selected, perform action on all vertices and edges
+		double delta = ( incr > 0 ? VertexShapeTransformer.STEPSIZE
+				: -VertexShapeTransformer.STEPSIZE );
 		if ( getPickedVertexState().getPicked().isEmpty()
 				&& getPickedEdgeState().getPicked().isEmpty() ) {
 			vft.changeSize( (int) incr );
 			eft.changeSize( (int) incr );
+			vht.changeSize( VertexShapeTransformer.STEPSIZE );
 		}
 		else {
 			//otherwise, only perform action on the selected vertices and edges
 			vft.changeSize( (int) incr, getPickedVertexState().getPicked() );
 			eft.changeSize( (int) incr, getPickedEdgeState().getPicked() );
+			vht.changeSize( delta, getPickedVertexState().getPicked() );
+
 		}
 
 		repaint();
