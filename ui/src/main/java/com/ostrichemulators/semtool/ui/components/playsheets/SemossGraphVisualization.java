@@ -160,7 +160,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		setGraphLayout( getEffectiveLayout().getClass() );
 	}
 
-	public Layout<SEMOSSVertex, SEMOSSEdge> getEffectiveLayout(){
+	public Layout<SEMOSSVertex, SEMOSSEdge> getEffectiveLayout() {
 		Layout<SEMOSSVertex, SEMOSSEdge> currentlayout = super.getGraphLayout();
 		ObservableCachingLayout<SEMOSSVertex, SEMOSSEdge> ocl
 				= ObservableCachingLayout.class.cast( currentlayout );
@@ -168,6 +168,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	}
 
 	public void setGraphLayout( Class<? extends Layout> layklass ) {
+		Layout oldlayout = getEffectiveLayout();
 
 		Graph<SEMOSSVertex, SEMOSSEdge> graph = visibleFilter.apply( gdm.getGraph() );
 		Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>> constructor = null;
@@ -202,13 +203,14 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			}
 		}
 
+		Layout<SEMOSSVertex, SEMOSSEdge> newlayout = null;
 		try {
 			Object o = constructor.newInstance( graph );
-			Layout<SEMOSSVertex, SEMOSSEdge> l = (Layout<SEMOSSVertex, SEMOSSEdge>) o;
+			newlayout = (Layout<SEMOSSVertex, SEMOSSEdge>) o;
 
-			l.setInitializer( super.getGraphLayout() );
+			newlayout.setInitializer( super.getGraphLayout() );
 			try {
-				l.setSize( getSize() );
+				newlayout.setSize( getSize() );
 			}
 			catch ( UnsupportedOperationException ueo ) {
 				// not all layouts can have their sizes set, but
@@ -216,7 +218,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			}
 
 			LayoutTransition<SEMOSSVertex, SEMOSSEdge> lt
-					= new LayoutTransition<>( this, getGraphLayout(), l );
+					= new LayoutTransition<>( this, getGraphLayout(), newlayout );
 			Animator animator = new Animator( lt );
 			animator.start();
 			getRenderContext().getMultiLayerTransformer().setToIdentity();
@@ -225,6 +227,10 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		catch ( InstantiationException | IllegalAccessException |
 				IllegalArgumentException | InvocationTargetException e ) {
 			log.error( e, e );
+		}
+
+		if ( !oldlayout.getClass().equals( layklass ) ) {
+			firePropertyChange( LAYOUT_CHANGED, oldlayout, newlayout );
 		}
 	}
 

@@ -54,6 +54,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.ControlData;
 import com.ostrichemulators.semtool.ui.components.ControlPanel;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
+import com.ostrichemulators.semtool.search.SearchController;
 import com.ostrichemulators.semtool.ui.components.GraphLegendPanel;
 import com.ostrichemulators.semtool.ui.components.WeightDropDownButton;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
@@ -74,9 +75,11 @@ import java.beans.PropertyChangeListener;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.border.BevelBorder;
 
 /**
  */
@@ -190,6 +193,25 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		toolBar.add( redo );
 		toolBar.addSeparator();
 		toolBar.add( tree );
+
+		JTextField searchbar = new JTextField();
+		searchbar.setBorder( BorderFactory.createBevelBorder( BevelBorder.LOWERED ) );
+		searchbar.setColumns( 9 );
+		SearchController src = new SearchController( searchbar );
+		toolBar.add( searchbar );
+
+		addGraphListener( new GraphListener() {
+			@Override
+			public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+				src.indexGraph( graph, gps.getEngine() );
+			}
+
+			@Override
+			public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+					String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
+				// don't care
+			}
+		} );
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -340,6 +362,15 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 					@Override
 					public void propertyChange( PropertyChangeEvent evt ) {
 						fireGraphUpdated();
+					}
+				} );
+		view.addPropertyChangeListener( SemossGraphVisualization.LAYOUT_CHANGED,
+				new PropertyChangeListener() {
+
+					@Override
+					public void propertyChange( PropertyChangeEvent evt ) {
+						fireLayoutUpdated( gdm.getGraph(), "",
+								(Layout<SEMOSSVertex, SEMOSSEdge>) evt.getNewValue() );
 					}
 				} );
 	}

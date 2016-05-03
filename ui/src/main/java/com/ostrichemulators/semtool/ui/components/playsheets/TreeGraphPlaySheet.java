@@ -30,10 +30,13 @@ import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.om.TreeGraphDataModel;
+import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.RingsButtonListener;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
+import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
+import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import java.awt.Dimension;
 import java.lang.reflect.Constructor;
@@ -80,7 +83,27 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		super.populateToolBar( toolBar, tabTitle );
 		rings.setViewer( getView() );
 		rings.setGraph( asForest() );
-		toolBar.add( new JToggleButton( rings ) );
+		Layout lay = getView().getEffectiveLayout();
+		rings.setEnabled( lay instanceof BalloonLayout || lay instanceof RadialTreeLayout );
+		JToggleButton ringbtn = new JToggleButton( rings );
+		toolBar.add( ringbtn );
+
+		addGraphListener( new GraphListener() {
+			@Override
+			public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+				rings.setGraph( Forest.class.cast( graph ) );
+			}
+
+			@Override
+			public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+					String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
+				rings.setEnabled( newlayout instanceof BalloonLayout
+						|| newlayout instanceof RadialTreeLayout );
+				if( !rings.isEnabled() && ringbtn.isSelected() ){
+					ringbtn.doClick();
+				}
+			}
+		} );
 	}
 
 	private void fixVis() {
