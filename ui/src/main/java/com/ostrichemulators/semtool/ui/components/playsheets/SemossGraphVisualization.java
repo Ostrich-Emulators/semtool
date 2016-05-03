@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
@@ -53,8 +52,10 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, SEMOSSEdge> {
 
+	public static final String REPAINT_NEEDED = "repaint-needed";
+	public static final String LAYOUT_CHANGED = "layout-changed";
+
 	private static final Logger log = Logger.getLogger( SemossGraphVisualization.class );
-	private final List<SemossVisualizationListener> listenees = new ArrayList<>();
 	private final GraphDataModel gdm;
 	protected int overlayLevel = 0;
 
@@ -110,7 +111,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			hiddens.remove( uri );
 		}
 
-		fireUpdated();
+		firePropertyChange( REPAINT_NEEDED, false, true );
 		refresh();
 	}
 
@@ -122,27 +123,14 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			hiddens.removeAll( uris );
 		}
 
-		fireUpdated();
+		firePropertyChange( REPAINT_NEEDED, false, true );
 		refresh();
 	}
 
 	public void clearHiddens() {
 		hiddens.clear();
-		fireUpdated();
-	}
-
-	protected void fireUpdated() {
-		for ( SemossVisualizationListener l : listenees ) {
-			l.nodesUpdated( gdm.getGraph(), this );
-		}
-	}
-
-	public void addListener( SemossVisualizationListener l ) {
-		listenees.add( l );
-	}
-
-	public void removeListener( SemossVisualizationListener l ) {
-		listenees.remove( l );
+		firePropertyChange( REPAINT_NEEDED, false, true );
+		refresh();
 	}
 
 	public Set<URI> getHiddens() {

@@ -9,6 +9,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
@@ -66,34 +67,38 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 
 	@Override
 	public String get( Object value ) {
-		if ( value instanceof URI ) {
-			URI uri = URI.class.cast( value );
-			if ( !super.containsKey( uri ) ) {
-				String label = ( null == engine
-						? uri.getLocalName()
-						: Utility.getInstanceLabel( uri, engine ) );
+		if ( value instanceof Value ) {
+			Value val = Value.class.cast( value );
+			String label = null;
+
+			if ( !super.containsKey( val ) ) {
+				if ( value instanceof URI ) {
+					URI uri = URI.class.cast( value );
+					label = ( null == engine
+							? uri.getLocalName()
+							: Utility.getInstanceLabel( uri, engine ) );
+				}
+				else if ( value instanceof Literal ) {
+					Literal lit = Literal.class.cast( value );
+					label = lit.getLabel();
+				}
+				else {
+					label = value.toString();
+				}
 
 				if ( caching ) {
-					put( uri, label );
+					put( Value.class.cast( value ), label );
 				}
 				else {
 					return label;
 				}
 			}
 		}
-		else if ( value instanceof Value ) {
-			if ( caching ) {
-				put( Value.class.cast( value ), value.toString() );
-			}
-			else {
-				return value.toString();
-			}
-		}
 
 		return super.get( value );
 	}
 
-	public void reset( Map<URI, String> newdata ) {
+	public void reset( Map<Value, String> newdata ) {
 		clear();
 		putAll( newdata );
 	}

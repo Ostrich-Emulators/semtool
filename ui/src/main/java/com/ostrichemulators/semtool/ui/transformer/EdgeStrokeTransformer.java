@@ -32,8 +32,8 @@ import java.util.Map;
 public class EdgeStrokeTransformer<T extends GraphElement> extends SelectingTransformer<T, Stroke> {
 
 	private Map<SEMOSSEdge, Double> edges = new HashMap<>();
-	public static final float DEFAULT_SIZE = 0.3f;
-	public static final float UNSELECTED_SIZE = 0.1f;
+	public static final float DEFAULT_SIZE = 1f;
+	public static final float UNSELECTED_SIZE = 0.3f;
 	public static final double SELECTED_SIZE = 2f;
 
 	private Stroke normal;

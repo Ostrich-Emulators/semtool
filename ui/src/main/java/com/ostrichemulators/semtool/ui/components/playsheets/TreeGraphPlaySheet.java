@@ -30,7 +30,6 @@ import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.om.TreeGraphDataModel;
-import com.ostrichemulators.semtool.ui.components.models.NodeEdgePropertyTableModel;
 import com.ostrichemulators.semtool.ui.main.listener.impl.DuplicatingPickedStateListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
 import com.ostrichemulators.semtool.util.Constants;
@@ -83,11 +82,6 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 	public Set<SEMOSSVertex> getDuplicates( SEMOSSVertex v ) {
 		return model.getDuplicatesOf( v );
-	}
-
-	@Override
-	protected NodeEdgePropertyTableModel createPropertyModel() {
-		return super.createPropertyModel();
 	}
 
 //	@Override

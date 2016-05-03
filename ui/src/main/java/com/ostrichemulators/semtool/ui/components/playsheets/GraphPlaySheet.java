@@ -56,10 +56,8 @@ import com.ostrichemulators.semtool.ui.components.ControlPanel;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
 import com.ostrichemulators.semtool.ui.components.LegendPanel2;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
-import com.ostrichemulators.semtool.ui.components.models.NodeEdgePropertyTableModel;
 import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.PickedStateListener;
-import com.ostrichemulators.semtool.ui.transformer.LabelFontTransformer;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.MultiMap;
@@ -99,7 +97,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
 	private ItemListener pickStateListener = null;
-	private NodeEdgePropertyTableModel propmodel;
 	private final RetrievingLabelCache labelcache = new RetrievingLabelCache();
 
 	/**
@@ -132,19 +129,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		add( legendPanel, BorderLayout.SOUTH );
 		add( control, BorderLayout.EAST );
 
-		propmodel = createPropertyModel();
-
 		view = new SemossGraphVisualization( gdm );
 		initVisualizer( view );
-		
-		view.addListener( new SemossVisualizationListener() {
-
-			@Override
-			public void nodesUpdated( Graph<SEMOSSVertex, SEMOSSEdge> graph,
-					SemossGraphVisualization viz ) {
-				fireGraphUpdated();
-			}
-		} );
+		control.setVisualization( view );
 
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
 
@@ -163,10 +150,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			}
 		} );
 		toolBar.add( tb );
-	}
-
-	protected NodeEdgePropertyTableModel createPropertyModel() {
-		return new NodeEdgePropertyTableModel( this );
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -298,14 +281,14 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		// FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
 		// fp.setModels( nodemodel, edgemodel, propmodel, getEngine() );
 
-		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
-		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
-		if ( !pickedVerts.isEmpty() ) {
-			propmodel.setVertex( pickedVerts.iterator().next() );
-		}
-		else if ( !pickedEdges.isEmpty() ) {
-			propmodel.setEdge( pickedEdges.iterator().next() );
-		}
+//		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
+//		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
+//		if ( !pickedVerts.isEmpty() ) {
+//			propmodel.setVertex( pickedVerts.iterator().next() );
+//		}
+//		else if ( !pickedEdges.isEmpty() ) {
+//			propmodel.setEdge( pickedEdges.iterator().next() );
+//		}
 	}
 
 	/**
@@ -326,6 +309,16 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		view.setGraphMouse( gl );
 		view.setLabelCache( labelcache );
+
+		view.addPropertyChangeListener( SemossGraphVisualization.REPAINT_NEEDED,
+				new PropertyChangeListener() {
+
+					@Override
+					public void propertyChange( PropertyChangeEvent evt ) {
+						fireGraphUpdated();
+					}
+				} );
+
 		setPicker( new PickedStateListener( viewer, this ) );
 	}
 
@@ -334,17 +327,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			// remove the old listener
 			view.getPickedVertexState().removeItemListener( pickStateListener );
 			view.getPickedEdgeState().removeItemListener( pickStateListener );
-
-			view.getPickedVertexState().removeItemListener( propmodel );
-			view.getPickedEdgeState().removeItemListener( propmodel );
 		}
 		if ( null != psl ) {
 			pickStateListener = psl;
 			view.getPickedVertexState().addItemListener( pickStateListener );
 			view.getPickedEdgeState().addItemListener( pickStateListener );
-
-			view.getPickedVertexState().addItemListener( propmodel );
-			view.getPickedEdgeState().addItemListener( propmodel );
 		}
 	}
 
@@ -506,19 +493,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			catch ( Exception ex ) {
 				log.error( "Error updating graph for GraphListener " + gl + ": " + ex, ex );
 			}
-		}
-
-		// these aren't true graph listeners, but we
-		// need to update them when the graph updates
-		//nodemodel.refresh( g.getVertices() );
-		//edgemodel.refresh( g.getEdges() );
-		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
-		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
-		if ( !pickedVerts.isEmpty() ) {
-			propmodel.setVertex( pickedVerts.iterator().next() );
-		}
-		else if ( !pickedEdges.isEmpty() ) {
-			propmodel.setEdge( pickedEdges.iterator().next() );
 		}
 	}
 

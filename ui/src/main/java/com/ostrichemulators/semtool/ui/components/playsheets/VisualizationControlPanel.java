@@ -9,6 +9,7 @@ import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.models.GraphLabelsTableModel;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
+import com.ostrichemulators.semtool.ui.components.models.NodeEdgePropertyTableModel;
 import com.ostrichemulators.semtool.ui.components.models.VertexFilterTableModel;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
 import com.ostrichemulators.semtool.util.Constants;
@@ -26,6 +27,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
 /**
+ * A panel to hold the metadata and controls about the graph
  *
  * @author ryan
  */
@@ -36,6 +38,7 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 	private final JTable edges;
 	private final JTable nodelabels;
 	private final JTable edgelabels;
+	private final JTable selecteds;
 
 	private final VertexFilterTableModel vertexmodel = new VertexFilterTableModel( "Node Type" );
 	private final VertexFilterTableModel edgemodel = new VertexFilterTableModel( "Edge Type" );
@@ -43,6 +46,7 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 			= new GraphLabelsTableModel<>( "Node Type", "Property", "Label", "Tooltip" );
 	private final GraphLabelsTableModel<SEMOSSEdge> elabelmodel
 			= new GraphLabelsTableModel<>( "Edge Type", "Property", "Label", "Tooltip" );
+	private final NodeEdgePropertyTableModel propmodel = new NodeEdgePropertyTableModel();
 
 	public VisualizationControlPanel() {
 		nodes = new JTable( vertexmodel );
@@ -51,6 +55,9 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		nodelabels = new JTable( vlabelmodel );
 		edgelabels = new JTable( elabelmodel );
 
+		selecteds = new JTable( propmodel );
+
+		super.add( "Properties", new JScrollPane( selecteds ) );
 		super.add( "Node Labels", new JScrollPane( nodelabels ) );
 		super.add( "Edge Labels", new JScrollPane( edgelabels ) );
 		super.add( "Node Filter", new JScrollPane( nodes ) );
@@ -70,6 +77,12 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		edges.setDefaultRenderer( URI.class, renderer );
 		nodelabels.setDefaultRenderer( URI.class, renderer );
 		edgelabels.setDefaultRenderer( URI.class, renderer );
+		selecteds.setDefaultRenderer( URI.class, renderer );
+		selecteds.setDefaultRenderer( Value.class, renderer );
+	}
+
+	public void setVisualization( SemossGraphVisualization vizzy ){
+		propmodel.setVisualization( vizzy );
 	}
 
 	public void setLabelCache( RetrievingLabelCache cacher ) {
@@ -86,6 +99,8 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		edges.setDefaultRenderer( URI.class, renderer );
 		nodelabels.setDefaultRenderer( URI.class, renderer );
 		edgelabels.setDefaultRenderer( URI.class, renderer );
+		selecteds.setDefaultRenderer( URI.class, renderer );
+		selecteds.setDefaultRenderer( Value.class, renderer );
 	}
 
 	@Override
@@ -99,7 +114,7 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		vlabelmodel.setLabelers( view.getVertexLabelTransformer(),
 				view.getVertexTooltipTransformer() );
 
-		elabelmodel.refresh( graph.getEdges(), gps.getView() );
+		elabelmodel.refresh( graph.getEdges(), view );
 		elabelmodel.setLabelers( view.getEdgeLabelTransformer(),
 				view.getEdgeTooltipTransformer() );
 	}

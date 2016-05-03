@@ -23,7 +23,7 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 
-import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
+import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.PropComparator;
 import java.awt.event.ItemEvent;
@@ -62,10 +62,13 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	private static final Class<?>[] classNames = { URI.class, Value.class };
 	private final List<PropertyRow> rows = new ArrayList<>();
 	private GraphElement vertex = null;
-	private final GraphPlaySheet gps;
+	private SemossGraphVisualization viz;
 
-	public NodeEdgePropertyTableModel( GraphPlaySheet gps ) {
-		this.gps = gps;
+	public void setVisualization( SemossGraphVisualization vizzy ) {
+		viz = vizzy;
+
+		viz.getPickedEdgeState().addItemListener( this );
+		viz.getPickedVertexState().addItemListener( this );
 	}
 
 	public void clear() {
@@ -74,6 +77,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	}
 
 	public void setItem( GraphElement item ) {
+		vertex = item;
 		if ( item.isNode() ) {
 			setVertex( SEMOSSVertex.class.cast( item ) );
 		}
@@ -85,8 +89,9 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	public void setVertex( SEMOSSVertex item ) {
 		rows.clear();
 
-		Collection<SEMOSSEdge> ins = gps.getGraphData().getGraph().getInEdges( item );
-		Collection<SEMOSSEdge> outs = gps.getGraphData().getGraph().getOutEdges( item );
+		Collection<SEMOSSEdge> ins = viz.getGraph().getInEdges( item );
+		Collection<SEMOSSEdge> outs = viz.getGraph().getOutEdges( item );
+		
 		rows.add( new PropertyRow( Constants.IN_EDGE_CNT,
 				new LiteralImpl( Integer.toString( ins.size() ), XMLSchema.INT ), true ) );
 		rows.add( new PropertyRow( Constants.OUT_EDGE_CNT,
@@ -100,7 +105,6 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	}
 
 	private void refresh( GraphElement item ) {
-		vertex = item;
 		for ( Map.Entry<URI, Value> entry : item.getValues().entrySet() ) {
 			if ( !RDF.SUBJECT.equals( entry.getKey() ) ) {
 				rows.add( new PropertyRow( entry.getKey(), entry.getValue() ) );
