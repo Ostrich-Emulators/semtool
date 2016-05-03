@@ -29,12 +29,11 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JToggleButton;
 
 /**
  * This class is used to paint a text string on a display area.
  */
-public class PaintLabel extends JToggleButton {
+public class PaintLabel extends JButton {
 
 	private static final long serialVersionUID = 990020151L;
 	private Shape shape = null;

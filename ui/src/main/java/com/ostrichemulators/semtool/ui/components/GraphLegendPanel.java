@@ -25,6 +25,7 @@ import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
+import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 import com.ostrichemulators.semtool.util.MultiMap;
 
@@ -32,7 +33,6 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +54,6 @@ import org.openrdf.model.impl.URIImpl;
 public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 	private static final long serialVersionUID = -2364666196260002413L;
-	private final List<SEMOSSVertex> selVs = new ArrayList<>();
 	private Map<Value, String> labels = new HashMap<>();
 
 	/**
@@ -68,6 +67,8 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
+		final SemossGraphVisualization view = gps.getView();
+
 		MultiMap<URI, SEMOSSVertex> types = new MultiMap<>();
 		Map<URI, Shape> shapes = new HashMap<>();
 		Map<URI, Color> colors = new HashMap<>();
@@ -80,7 +81,6 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 		}
 
 		removeAll();
-		selVs.clear();
 
 		for ( Map.Entry<URI, List<SEMOSSVertex>> en : types.entrySet() ) {
 			String label = labels.get( en.getKey() );
@@ -101,18 +101,11 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 					public void mouseClicked( MouseEvent e ) {
 						super.mouseClicked( e );
 						if ( !SwingUtilities.isRightMouseButton( e ) ) {
-							if ( pl.isSelected() ) {
-								selVs.addAll( sch.getValue() );
-							}
-							else {
-								selVs.removeAll( sch.getValue() );
-							}
+							List<SEMOSSVertex> selVs = sch.getValue();
 
-							gps.getView().clearHighlighting();
-							gps.getView().setSkeletonMode( !selVs.isEmpty() );
-							if ( !selVs.isEmpty() ) {
-								gps.getView().highlight( selVs, null );
-							}
+							view.clearHighlighting();
+							view.setSkeletonMode( true );
+							view.highlight( selVs, null );
 						}
 					}
 

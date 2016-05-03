@@ -63,6 +63,8 @@ import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;

@@ -6,7 +6,6 @@
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
 import com.google.common.base.Predicate;
-import static com.hp.hpl.jena.assembler.JA.uri;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
@@ -30,6 +29,7 @@ import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.layout.LayoutTransition;
 import edu.uci.ics.jung.visualization.layout.ObservableCachingLayout;
+import edu.uci.ics.jung.visualization.picking.PickedState;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.util.Animator;
 import java.awt.Color;
@@ -222,7 +222,6 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			s.setSkeletonMode( skeletonmode );
 		}
 
-		//firePropertyChange( REPAINT_NEEDED, false, true );
 		repaint();
 	}
 
@@ -238,7 +237,9 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		eft.clearSizeData();
 		vft.clearSizeData();
 		vht.clearSizeData();
-		repaint();
+
+		getPickedEdgeState().clear();
+		getPickedVertexState().clear();
 	}
 
 	/**
@@ -249,22 +250,19 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	 */
 	public void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
 
-		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
-			vht, est, ept, eft, elt, adpt, aft } ) {
-			s.setSkeletonMode( skeletonmode );
+		if ( !( null == verts || verts.isEmpty() ) ) {
+			PickedState<SEMOSSVertex> vpicks = getPickedVertexState();
+			for ( SEMOSSVertex v : verts ) {
+				vpicks.pick( v, true );
+			}
 		}
 
-		vft.select( verts );
-		vpt.select( verts );
-
-		est.select( edges );
-		ept.select( edges );
-		eft.select( edges );
-		elt.select( edges );
-		adpt.select( edges );
-		aft.select( edges );
-
-		repaint();
+		if ( !( null == edges || edges.isEmpty() ) ) {
+			PickedState<SEMOSSEdge> epicks = getPickedEdgeState();
+			for ( SEMOSSEdge v : edges ) {
+				epicks.pick( v, true );
+			}
+		}
 	}
 
 	public Collection<SEMOSSVertex> getHighlightedVertices() {
@@ -273,15 +271,6 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 
 	public Collection<SEMOSSEdge> getHighlightedEdges() {
 		return new HashSet<>( est.getSelected() );
-	}
-
-	/**
-	 * Method getEdgeLabelFontTransformer.
-	 *
-	 * @return EdgeLabelFontTransformer
-	 */
-	public LabelFontTransformer<SEMOSSEdge> getEdgeLabelFontTransformer() {
-		return eft;
 	}
 
 	public LabelTransformer<SEMOSSVertex> getVertexLabelTransformer() {
@@ -298,15 +287,6 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 
 	public TooltipTransformer<SEMOSSEdge> getEdgeTooltipTransformer() {
 		return ett;
-	}
-
-	/**
-	 * Method getVertexLabelFontTransformer.
-	 *
-	 * @return VertexLabelFontTransformer
-	 */
-	public LabelFontTransformer<SEMOSSVertex> getVertexLabelFontTransformer() {
-		return vft;
 	}
 
 	private void init() {
@@ -388,10 +368,6 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 				}
 
 				SemossGraphVisualization.this.repaint();
-//		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-//			vlft = (LabelFontTransformer<SEMOSSVertex>) rc.getVertexFontTransformer();
-//			selectedVertices.addAll( vlft.getSelected() );
-//		}
 			}
 		};
 
