@@ -36,6 +36,7 @@ import java.awt.Paint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  *
@@ -159,14 +161,15 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		Layout<SEMOSSVertex, SEMOSSEdge> currentlayout = super.getGraphLayout();
 		ObservableCachingLayout<SEMOSSVertex, SEMOSSEdge> ocl
 				= ObservableCachingLayout.class.cast( currentlayout );
-		setLayout( (Class<Layout<SEMOSSVertex, SEMOSSEdge>>) ocl.getDelegate().getClass() );
+		setGraphLayout( (Class<Layout>) ocl.getDelegate().getClass() );
 	}
 
-	public void setLayout( Class<Layout<SEMOSSVertex, SEMOSSEdge>> layklass ) {
+	public void setGraphLayout( Class<? extends Layout> layklass ) {
 
 		try {
-			Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>> constructor = layklass
-					.getConstructor( new Class[]{ Graph.class } );
+			Constructor<? extends Layout> ctor = layklass.getConstructor( new Class[]{ Graph.class } );
+			Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>> constructor
+					= (Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>>) ctor;
 
 			Graph<SEMOSSVertex, SEMOSSEdge> graph = visibleFilter.apply( gdm.getGraph() );
 			Object o = constructor.newInstance( graph );
@@ -284,6 +287,22 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		return eft;
 	}
 
+	public LabelTransformer<SEMOSSVertex> getVertexLabelTransformer() {
+		return vlt;
+	}
+
+	public TooltipTransformer<SEMOSSVertex> getVertexTooltipTransformer() {
+		return vtt;
+	}
+
+	public LabelTransformer<SEMOSSEdge> getEdgeLabelTransformer() {
+		return elt;
+	}
+
+	public TooltipTransformer<SEMOSSEdge> getEdgeTooltipTransformer() {
+		return ett;
+	}
+
 	/**
 	 * Method getVertexLabelFontTransformer.
 	 *
@@ -295,7 +314,9 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 
 	private void init() {
 		setBackground( Color.WHITE );
-		//setRenderer( new SemossBasicRenderer() );
+
+		vlt.setDefaultDisplayables( Arrays.asList( RDFS.LABEL ) );
+		elt.setDefaultDisplayables( new ArrayList<>() );
 
 		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = getRenderContext();
 		// FIXME: this edge function seems to be needed since JUNG 2.1

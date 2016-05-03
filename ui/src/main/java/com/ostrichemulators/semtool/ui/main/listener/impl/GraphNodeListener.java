@@ -22,7 +22,6 @@ package com.ostrichemulators.semtool.ui.main.listener.impl;
 import java.awt.event.MouseEvent;
 import java.util.Set;
 
-
 import org.apache.log4j.Logger;
 
 import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
@@ -87,9 +86,9 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 		}
 
 		if ( null != gps ) {
-			if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-				handleHighlightVertexInSkeletonMode( viewer, vertHash );
-			}
+//			if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+//				handleHighlightVertexInSkeletonMode( viewer, vertHash );
+//			}
 		}
 	}
 
@@ -113,14 +112,14 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 	 * @param VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer - The viewer
 	 * to use to get the vertex
 	 */
-	private SEMOSSVertex getClickedVertex (
+	private SEMOSSVertex getClickedVertex(
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer, int x, int y ) {
 
-		GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport 
+		GraphElementAccessor<SEMOSSVertex, SEMOSSEdge> pickSupport
 				= viewer.getPickSupport();
 		SEMOSSVertex clickedObject = pickSupport.getVertex( viewer.getGraphLayout(),
 				x, y );
-		if( null != clickedObject ){
+		if ( null != clickedObject ) {
 			logger.debug( "The user clicked a SEMOSSVertex." );
 		}
 		return clickedObject;
@@ -134,7 +133,7 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 	 * @param e
 	 * @return all the currently selected nodes
 	 */
-	protected Set<SEMOSSVertex> handleRightClick( 
+	protected Set<SEMOSSVertex> handleRightClick(
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
 			SEMOSSVertex clickedVertex, MouseEvent e ) {
 		logger.debug( "The user right clicked." );
@@ -165,7 +164,7 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 			VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer,
 			Set<SEMOSSVertex> verts ) {
 
-		LabelFontTransformer<SEMOSSVertex> vlft = gps.getVertexLabelFontTransformer();
+		LabelFontTransformer<SEMOSSVertex> vlft = gps.getView().getVertexLabelFontTransformer();
 		vlft.select( verts );
 		viewer.repaint();
 	}

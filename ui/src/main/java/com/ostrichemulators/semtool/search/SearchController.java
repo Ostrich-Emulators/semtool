@@ -165,7 +165,7 @@ public class SearchController implements KeyListener, FocusListener,
 				}
 			}
 
-			boolean skel = gps.getVertexLabelFontTransformer().isSkeletonMode();
+			boolean skel = gps.getView().getVertexLabelFontTransformer().isSkeletonMode();
 			gps.getView().clearHighlighting();
 			if ( skel ) {
 				gps.getView().skeleton( verts, null );

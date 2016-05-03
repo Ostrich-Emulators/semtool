@@ -7,20 +7,23 @@ package com.ostrichemulators.semtool.ui.components.playsheets;
 
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
+import com.ostrichemulators.semtool.ui.components.GraphLabelsTableModel;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.models.VertexFilterTableModel;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
+import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import java.awt.Dimension;
-import java.util.Set;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  *
@@ -31,38 +34,74 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 	private static final Logger log = Logger.getLogger( VisualizationControlPanel.class );
 	private final JTable nodes;
 	private final JTable edges;
+	private final JTable nodelabels;
+	private final JTable edgelabels;
+
 	private final VertexFilterTableModel vertexmodel = new VertexFilterTableModel( "Node Type" );
 	private final VertexFilterTableModel edgemodel = new VertexFilterTableModel( "Edge Type" );
+	private final GraphLabelsTableModel<SEMOSSVertex> vlabelmodel
+			= new GraphLabelsTableModel<>( "Node Type", "Property", "Label", "Tooltip" );
+	private final GraphLabelsTableModel<SEMOSSEdge> elabelmodel
+			= new GraphLabelsTableModel<>( "Edge Type", "Property", "Label", "Tooltip" );
 
 	public VisualizationControlPanel() {
 		nodes = new JTable( vertexmodel );
 		edges = new JTable( edgemodel );
 
+		nodelabels = new JTable( vlabelmodel );
+		edgelabels = new JTable( elabelmodel );
+
+		super.add( "Node Labels", new JScrollPane( nodelabels ) );
+		super.add( "Edge Labels", new JScrollPane( edgelabels ) );
 		super.add( "Node Filter", new JScrollPane( nodes ) );
 		super.add( "Edge Filter", new JScrollPane( edges ) );
+
 		super.setPreferredSize( new Dimension( 250, 400 ) );
 	}
 
 	public VisualizationControlPanel( RetrievingLabelCache cacher ) {
 		this();
 
+		cacher.put( Constants.ANYNODE, "SELECT ALL" );
+
 		LabeledPairTableCellRenderer<Value> renderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( cacher );
 		nodes.setDefaultRenderer( URI.class, renderer );
 		edges.setDefaultRenderer( URI.class, renderer );
+		nodelabels.setDefaultRenderer( URI.class, renderer );
+		edgelabels.setDefaultRenderer( URI.class, renderer );
 	}
 
 	public void setLabelCache( RetrievingLabelCache cacher ) {
+		cacher.put( Constants.ANYNODE, "SELECT ALL" );
+		cacher.put( RDF.SUBJECT, "URI" );
+		cacher.put( RDFS.LABEL, "Label" );
+		cacher.put( RDF.TYPE, "Type" );
+		cacher.put( Constants.IN_EDGE_CNT, "Inputs" );
+		cacher.put( Constants.OUT_EDGE_CNT, "Outputs" );
+
 		LabeledPairTableCellRenderer<Value> renderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( cacher );
 		nodes.setDefaultRenderer( URI.class, renderer );
 		edges.setDefaultRenderer( URI.class, renderer );
+		nodelabels.setDefaultRenderer( URI.class, renderer );
+		edgelabels.setDefaultRenderer( URI.class, renderer );
 	}
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		vertexmodel.refresh( graph.getVertices(), gps.getView() );
-		edgemodel.refresh( graph.getEdges(), gps.getView() );
+		SemossGraphVisualization view = gps.getView();
+
+		vertexmodel.refresh( graph.getVertices(), view );
+		edgemodel.refresh( graph.getEdges(), view );
+
+		vlabelmodel.refresh( graph.getVertices(), view );
+		vlabelmodel.setLabelers( view.getVertexLabelTransformer(),
+				view.getVertexTooltipTransformer() );
+
+		elabelmodel.refresh( graph.getEdges(), gps.getView() );
+		elabelmodel.setLabelers( view.getEdgeLabelTransformer(),
+				view.getEdgeTooltipTransformer() );
 	}
 
 	@Override

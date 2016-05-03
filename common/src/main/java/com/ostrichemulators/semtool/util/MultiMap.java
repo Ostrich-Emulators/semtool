@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,12 @@ public class MultiMap<T, V> extends HashMap<T, List<V>> {
 		List<V> list;
 		list = ( containsKey( key ) ? get( key ) : new ArrayList<>() );
 		list.add( value );
+		return put( key, list );
+	}
+
+	public List<V> addAll( T key, Collection<V> values ) {
+		List<V> list = ( containsKey( key ) ? get( key ) : new ArrayList<>() );
+		list.addAll( values );
 		return put( key, list );
 	}
 

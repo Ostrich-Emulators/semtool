@@ -25,9 +25,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
-import com.ostrichemulators.semtool.util.GuiUtility;
+import edu.uci.ics.jung.algorithms.layout.Layout;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import javax.swing.AbstractAction;
@@ -41,7 +40,7 @@ public class LayoutMenuItem extends AbstractAction {
 	private static final long serialVersionUID = 3303474056533355632L;
 
 	private final GraphPlaySheet gps;
-	private final String layout;
+	private final Class<? extends Layout> layout;
 	private final Collection<SEMOSSVertex> verts;
 
 	/**
@@ -50,8 +49,9 @@ public class LayoutMenuItem extends AbstractAction {
 	 * @param layout String
 	 * @param ps IPlaySheet
 	 */
-	public LayoutMenuItem( String layout, GraphPlaySheet ps, Collection<SEMOSSVertex> verts ) {
-		super( layout );
+	public LayoutMenuItem( Class<? extends Layout> layout, GraphPlaySheet ps,
+			Collection<SEMOSSVertex> verts ) {
+		super( layout.getSimpleName() );
 		this.gps = ps;
 		this.layout = layout;
 		this.verts = verts;
@@ -64,18 +64,16 @@ public class LayoutMenuItem extends AbstractAction {
 			// *AND* at least one tree root, then convert to a tree before
 			// processing the layout
 
-			if ( ( layout.equals( Constants.RADIAL_TREE_LAYOUT )
-					|| layout.equals( Constants.BALLOON_LAYOUT )
-					|| layout.equals( Constants.TREE_LAYOUT ) ) && !verts.isEmpty() ) {
+			if ( LayoutPopup.TREELAYOUTS.contains( layout ) && !verts.isEmpty() ) {
 				Logger.getLogger( getClass() ).debug( "automatically converting to a tree layout" );
-				gps.getSearchPanel().clickTreeButton( layout );
+				//gps.getSearchPanel().clickTreeButton( layout );
 			}
 			else{
-				setGraphLayout();
+				gps.getView().setGraphLayout( this.layout );
 			}
 		}
 		else{
-			setGraphLayout();
+			gps.getView().setGraphLayout( this.layout );
 		}
 	}
 
@@ -83,25 +81,26 @@ public class LayoutMenuItem extends AbstractAction {
 	 * Paints the specified layout.
 	 */
 	public void setGraphLayout() {
-		String oldLayout = gps.getLayoutName();
-		boolean success = gps.setLayoutName( layout );
-		if ( !success ) {
-			if ( layout.equals( Constants.RADIAL_TREE_LAYOUT )
-					|| layout.equals( Constants.BALLOON_LAYOUT )
-					|| layout.equals( Constants.TREE_LAYOUT ) ) {
-				int response = showOptionPopup();
-				if ( response == 1 ) {
-					gps.getSearchPanel().clickTreeButton( layout );
-				}
-				else {
-					gps.setLayoutName( oldLayout );
-				}
-			}
-			else {
-				GuiUtility.showError( "This layout cannot be used with the current graph" );
-				gps.setLayoutName( oldLayout );
-			}
-		}
+
+//		String oldLayout = gps.getLayoutName();
+//		boolean success = gps.setLayoutName( layout );
+//		if ( !success ) {
+//			if ( layout.equals( Constants.RADIAL_TREE_LAYOUT )
+//					|| layout.equals( Constants.BALLOON_LAYOUT )
+//					|| layout.equals( Constants.TREE_LAYOUT ) ) {
+//				int response = showOptionPopup();
+//				if ( response == 1 ) {
+//					gps.getSearchPanel().clickTreeButton( layout );
+//				}
+//				else {
+//					gps.setLayoutName( oldLayout );
+//				}
+//			}
+//			else {
+//				GuiUtility.showError( "This layout cannot be used with the current graph" );
+//				gps.setLayoutName( oldLayout );
+//			}
+//		}
 	}
 
 	/**

@@ -99,8 +99,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
 	private ItemListener pickStateListener = null;
-	//private VertexFilterTableModel nodemodel;
-	//private VertexFilterTableModel edgemodel;
 	private NodeEdgePropertyTableModel propmodel;
 	private final RetrievingLabelCache labelcache = new RetrievingLabelCache();
 
@@ -116,8 +114,12 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public GraphPlaySheet( GraphDataModel model, VisualizationControlPanel vcp ) {
-		log.debug( "new Graph PlaySheet" );
+		log.debug( "new graphplaysheet" );
 		gdm = model;
+
+		control = vcp;
+		control.setLabelCache( labelcache );
+		control.setVisible( false );
 
 		graphSplitPane = new JSplitPane();
 		graphSplitPane.setEnabled( false );
@@ -128,13 +130,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		add( graphSplitPane, BorderLayout.CENTER );
 		LegendPanel2 legendPanel = new LegendPanel2( labelcache );
 		add( legendPanel, BorderLayout.SOUTH );
+		add( control, BorderLayout.EAST );
 
-		// nodemodel = createNodeModel();
-		// edgemodel = createEdgeModel();
 		propmodel = createPropertyModel();
 
 		view = new SemossGraphVisualization( gdm );
 		initVisualizer( view );
+		
 		view.addListener( new SemossVisualizationListener() {
 
 			@Override
@@ -144,18 +146,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			}
 		} );
 
-		control = vcp;
-		control.setLabelCache( labelcache );
-		control.setVisible( false );
-		add( control, BorderLayout.EAST );
-
 		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
 
 		addGraphListener( legendPanel );
 		addGraphListener( control );
-		//addGraphListener( controlData );
-		// addGraphListener( colorShapeData );
-		//addGraphListener( controlPanel );
 	}
 
 	@Override
@@ -538,24 +532,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	public SemossGraphVisualization getView() {
 		return view;
-	}
-
-	/**
-	 * Method getEdgeLabelFontTransformer.
-	 *
-	 * @return EdgeLabelFontTransformer
-	 */
-	public LabelFontTransformer<SEMOSSEdge> getEdgeLabelFontTransformer() {
-		return view.getEdgeLabelFontTransformer();
-	}
-
-	/**
-	 * Method getVertexLabelFontTransformer.
-	 *
-	 * @return VertexLabelFontTransformer
-	 */
-	public LabelFontTransformer<SEMOSSVertex> getVertexLabelFontTransformer() {
-		return view.getVertexLabelFontTransformer();
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.PropComparator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +48,7 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 	// don't show property type for these properties
 	private final Set<URI> nolabels;
 	private Map<Value, String> labelmap = new HashMap<>();
+	private final Set<URI> defaults = new HashSet<>();
 
 	/**
 	 * Constructor for VertexLabelTransformer.
@@ -60,6 +62,12 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 
 	public LabelTransformer() {
 		nolabels = new HashSet<>( Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT ) );
+		defaults.addAll( nolabels );
+	}
+
+	public void setDefaultDisplayables( Collection<URI> propsToDisplay ) {
+		defaults.clear();
+		defaults.addAll( propsToDisplay );
 	}
 
 	public void setLabelCache( Map<Value, String> map ) {
@@ -74,16 +82,23 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 	 */
 	public void setDisplay( URI type, Collection<URI> propsToDisplay ) {
 		displayables.remove( type );
+		displayables.addAll( type, propsToDisplay );
+	}
 
-		for ( URI prop : propsToDisplay ) {
+	public void setDisplay( URI type, URI prop, boolean showit ) {
+		if ( showit ) {
 			displayables.add( type, prop );
+		}
+		else {
+			displayables.get( type ).remove( prop );
 		}
 	}
 
 	public List<URI> getDisplayableProperties( URI type ) {
 		List<URI> list = displayables.get( type );
 		if ( null == list ) {
-			list = Arrays.asList( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT );
+			displayables.addAll( type, defaults );
+			list = new ArrayList<>( defaults );
 		}
 		Collections.sort( list, new PropComparator() );
 		return list;

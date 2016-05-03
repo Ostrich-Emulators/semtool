@@ -26,9 +26,19 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import javax.swing.JMenu;
 
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.util.Constants;
+import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
+import edu.uci.ics.jung.algorithms.layout.KKLayout;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
+import edu.uci.ics.jung.algorithms.layout.SpringLayout;
+import edu.uci.ics.jung.algorithms.layout.TreeLayout;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,9 +46,21 @@ import java.util.Set;
  */
 public class LayoutPopup extends JMenu {
 
-	private static final String[] layoutNames = { Constants.FR, Constants.KK,
-		Constants.SPRING, Constants.ISO, Constants.CIRCLE_LAYOUT,
-		Constants.TREE_LAYOUT, Constants.RADIAL_TREE_LAYOUT, Constants.BALLOON_LAYOUT };
+	private static final List<Class<? extends Layout>> layouts = Arrays.asList(
+			FRLayout.class,
+			KKLayout.class,
+			SpringLayout.class,
+			ISOMLayout.class,
+			CircleLayout.class,
+			TreeLayout.class,
+			RadialTreeLayout.class,
+			BalloonLayout.class );
+
+	public static final Set<Class<? extends Layout>> TREELAYOUTS
+			= new HashSet<>( Arrays.asList(
+							TreeLayout.class,
+							RadialTreeLayout.class,
+							BalloonLayout.class ) );
 
 	/**
 	 * Constructor for LayoutPopup.
@@ -51,16 +73,12 @@ public class LayoutPopup extends JMenu {
 
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> viz = ps.getVisibleGraph();
 		boolean forestok = ( viz instanceof Forest || !verts.isEmpty() );
-		Set<String> treelayouts = new HashSet<>();
-		treelayouts.add( Constants.TREE_LAYOUT );
-		treelayouts.add( Constants.RADIAL_TREE_LAYOUT );
-		treelayouts.add( Constants.BALLOON_LAYOUT );
 
-		for ( String layoutName : layoutNames ) {
-			LayoutMenuItem mi = new LayoutMenuItem( layoutName, ps, verts );
+		for ( Class<? extends Layout> layout : layouts ) {
+			LayoutMenuItem mi = new LayoutMenuItem( layout, ps, verts );
 			add( mi );
 
-			if ( treelayouts.contains( layoutName ) ) {
+			if ( TREELAYOUTS.contains( layout ) ) {
 				mi.setEnabled( forestok );
 			}
 		}

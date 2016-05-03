@@ -80,10 +80,10 @@ public class PickedStateListener implements ItemListener {
 		Set<SEMOSSVertex> selectedVertices = new HashSet<>();
 		LabelFontTransformer<SEMOSSVertex> vlft = null;
 
-		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
-			vlft = (LabelFontTransformer<SEMOSSVertex>) rc.getVertexFontTransformer();
-			selectedVertices.addAll( vlft.getSelected() );
-		}
+//		if ( gps.getSearchPanel().isHighlightButtonSelected() ) {
+//			vlft = (LabelFontTransformer<SEMOSSVertex>) rc.getVertexFontTransformer();
+//			selectedVertices.addAll( vlft.getSelected() );
+//		}
 
 		selectedVertices.addAll( viewer.getPickedVertexState().getPicked() );
 

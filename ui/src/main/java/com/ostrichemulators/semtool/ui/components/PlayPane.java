@@ -59,7 +59,6 @@ import com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinates
 import com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet;
-import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
 import com.ostrichemulators.semtool.ui.components.semanticexplorer.SemanticExplorerPanel;
 import com.ostrichemulators.semtool.ui.main.SemossPreferences;
 import com.ostrichemulators.semtool.ui.swing.custom.CustomDesktopPane;
@@ -71,7 +70,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
@@ -128,9 +126,6 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -146,9 +141,6 @@ public class PlayPane extends JFrame {
 	private final String GQUERYBUILDER = "qQueryBuilderPanel";
 	private final String SEMANTICEXPLORER = "semanticExplorer";
 	private final String IMANAGE_2 = "iManagePanel_2";
-	//private final String GCOSMETICS = "graphcosmetics";
-	private final String GFILTER = "graphfilter";
-	private final String GFLABEL = "graphlabel";
 	private final String LOGGING = "loggingpanel";
 	private final String QUERYPANEL = "customSparqlPanel";
 	public static final String UIPROGRESS = "UI";
@@ -167,17 +159,9 @@ public class PlayPane extends JFrame {
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
 
-	// left cosmetic panel components
-	// private JPanel cosmeticsPanel;
-
-	// Left label panel
-	private FilterPanel filterPanel;
-	//private JPanel filterLabel;
-	private JPanel outputPanel;
-
 	private LoggingPanel loggingPanel;
 
-	private JTabbedPane leftTabs;
+	private JComponent dbexplorer;
 	private JTabbedPane rightTabs;
 	private StatusBar statusbar;
 
@@ -248,8 +232,6 @@ public class PlayPane extends JFrame {
 
 	// public JTable colorShapeTable;
 	public JTable sizeTable;
-	public JTable labelTable;
-	public JTable tooltipTable;
 
 	private SelectDatabasePanel selectDatabasePanel;
 	private final static Preferences prefs = Preferences.userNodeForPackage( PlayPane.class );
@@ -275,10 +257,7 @@ public class PlayPane extends JFrame {
 
 		// run through the view components
 		Map<JTable, String> publics = new HashMap<>();
-		// publics.put( colorShapeTable, Constants.COLOR_SHAPE_TABLE );
 		publics.put( sizeTable, Constants.SIZE_TABLE );
-		publics.put( labelTable, Constants.LABEL_TABLE );
-		publics.put( tooltipTable, Constants.TOOLTIP_TABLE );
 
 		for ( Map.Entry<JTable, String> en : publics.entrySet() ) {
 			logger.debug( "Loading " + en.getValue() + " to local prop cache" );
@@ -372,11 +351,11 @@ public class PlayPane extends JFrame {
 
 		playsheetToolbar = new JToolBar();
 		rightTabs = makeRightPane();
-		leftTabs = makeLeftPane();
+		dbexplorer = makeExplorerPane();
 		customSparqlPanel.setOverlayCheckBox( appendChkBox );
 		customSparqlPanel.setInsightsComboBox( questionSelector );
 
-		mainSplitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, leftTabs, rightTabs );
+		mainSplitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, dbexplorer, rightTabs );
 		mainSplitPane.setOneTouchExpandable( true );
 		mainSplitPane.setDividerLocation( 300 );
 		mainSplitPane.setContinuousLayout( true );
@@ -461,7 +440,6 @@ public class PlayPane extends JFrame {
 
 				gQueryBuilderPanel.setEngine( engine );
 				insightManager.setEngine( engine );
-				filterPanel.setEngine( engine );
 				semanticExplorer.setEngine( engine );
 			}
 		} );
@@ -473,16 +451,6 @@ public class PlayPane extends JFrame {
 
 		if ( !getProp( QUERYPANEL ) ) {
 			customSparqlPanel.setVisible( false );
-		}
-
-//		if ( !getProp( GCOSMETICS ) ) {
-//			leftTabs.remove( cosmeticsPanel );
-//		}
-		if ( !getProp( GFILTER ) ) {
-			leftTabs.remove( filterPanel );
-		}
-		if ( !getProp( GFLABEL ) ) {
-			leftTabs.remove( outputPanel );
 		}
 
 		if ( !getProp( LOGGING ) ) {
@@ -497,36 +465,6 @@ public class PlayPane extends JFrame {
 		if ( !getProp( IMANAGE_2 ) ) {
 			rightTabs.remove( insightManager );
 		}
-	}
-
-	protected JTabbedPane makeLeftPane() {
-		JTabbedPane leftView = new JTabbedPane( JTabbedPane.TOP );
-		JComponent main = makeMainTab();
-		leftView.addTab( "Database Explorer", DbAction.getIcon( "db_explorer1" ), main,
-				"Ask the SEMOSS database a question" );
-		JLabel dislbl = new JLabel( "Database Explorer" );
-		Icon disicon = DbAction.getIcon( "db_explorer1" );
-		dislbl.setIcon( disicon );
-		dislbl.setIconTextGap( 5 );
-		dislbl.setHorizontalTextPosition( SwingConstants.RIGHT );
-		leftView.setTabComponentAt( 0, dislbl );
-
-		//Label
-		outputPanel = makeOutputPanel();
-		leftView.addTab( "Graph Labels", null, outputPanel,
-				"Customize the labels associated with the objects displayed on the graph" );
-
-		filterPanel = makeFilterPanel();
-		leftView.addTab( "Graph Filter", null, filterPanel, "Customize graph display" );
-		//Label
-		//filterLabel = makeFilterPanel();
-		//leftView.addTab( "Graph Filter", null, filterPanel, "Customize graph display" );
-
-//		cosmeticsPanel = makeGraphCosmeticsPanel();
-//		leftView.addTab( "Graph Cosmetics", null, cosmeticsPanel,
-//				"Modify visual appearance of a node" );
-
-		return leftView;
 	}
 
 	protected JTabbedPane makeRightPane() {
@@ -600,7 +538,7 @@ public class PlayPane extends JFrame {
 	 * @return makeMainTab -- (JPanel) Combines the database selector and
 	 * categories/ questions in a vertical JSplitPane.
 	 */
-	private JComponent makeMainTab() {
+	private JComponent makeExplorerPane() {
 		Font labelFont = new Font( "SansSerif", Font.PLAIN, 10 );
 		Font selectorFont = new Font( "Tahoma", Font.PLAIN, 11 );
 
@@ -620,62 +558,6 @@ public class PlayPane extends JFrame {
 		submitButton.getActionMap().put( "handleQuestionKeys", handleQuestionKeys );
 
 		return selectDatabasePanel;
-	}
-
-	private JPanel makeGraphCosmeticsPanel() {
-		JPanel panel = new JPanel( new GridLayout( 1, 1 ) );
-		panel.setBackground( SystemColor.control );
-		// colorShapeTable = initJTableAndAddTo( panel );
-		return panel;
-	}
-
-	private JPanel makeOutputPanel() {
-		JPanel panel = new JPanel( new GridLayout( 2, 1 ) );
-		panel.setBackground( SystemColor.control );
-
-		LabeledPairTableCellRenderer<URI> renderer
-				= LabeledPairTableCellRenderer.getUriPairRenderer();
-		renderer.cache( Constants.ANYNODE, "SELECT ALL" );
-		renderer.cache( RDF.SUBJECT, "URI" );
-		renderer.cache( RDFS.LABEL, "Label" );
-		renderer.cache( Constants.IN_EDGE_CNT, "Inputs" );
-		renderer.cache( Constants.OUT_EDGE_CNT, "Outputs" );
-
-		labelTable = initJTableAndAddTo( panel );
-		tooltipTable = initJTableAndAddTo( panel );
-
-		labelTable.setDefaultRenderer( URI.class, renderer );
-		tooltipTable.setDefaultRenderer( URI.class, renderer );
-
-		return panel;
-	}
-
-	private FilterPanel makeFilterPanel() {
-		return new FilterPanel();
-	}
-
-	public FilterPanel getFilterPanel() {
-		return filterPanel;
-	}
-
-	/**
-	 * Resets the interface to account for <code>user</code>'s permissions
-	 *
-	 * @param user public void resetForUser( User user ) {
-	 * iManageItem_2.setEnabled( user.hasPermission(
-	 * SemossPermission.INSIGHTWRITER ) ); int idx = rightTabs.indexOfComponent(
-	 * iManagePanel_2 ); if ( idx >= 0 ) { if ( !user.hasPermission(
-	 * SemossPermission.INSIGHTWRITER ) ) { iManageItem_2.doClick(); } }
-	 *
-	 * idx = rightTabs.indexOfComponent( loggingPanel ); if ( idx >= 0 ) { if (
-	 * !user.hasPermission( SemossPermission.LOGVIEWER ) ) {
-	 * loggingItem.doClick(); } } }
-	 */
-	private JTable initJTableAndAddTo( JPanel panel ) {
-		JTable table = new JTable();
-		table.setShowGrid( true );
-		panel.add( new JScrollPane( table ) );
-		return table;
 	}
 
 	private JComponent makeGraphTab() {
@@ -1179,9 +1061,6 @@ public class PlayPane extends JFrame {
 	//Added 508 compliance code
 	protected JMenu buildViewMenu() {
 		final Map<String, JPanel> preflistenermap = new HashMap<>();
-		// preflistenermap.put( GCOSMETICS, cosmeticsPanel );
-		preflistenermap.put( GFILTER, filterPanel );
-		preflistenermap.put( GFLABEL, outputPanel );
 		preflistenermap.put( LOGGING, loggingPanel );
 
 		ActionListener preflistener = new ActionListener() {
@@ -1202,26 +1081,11 @@ public class PlayPane extends JFrame {
 					if ( ischecked ) {
 						if ( null != cmd ) { // Enable- Disable Logic
 							switch ( cmd ) {
-								case GFILTER:
-									item.setToolTipText( "Disable the Graph Filter Tab " );
-									item.getAccessibleContext().setAccessibleName( "Disable the Graph Filter Tab " );
-									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Filter Tab " );
-									break;
-								case GFLABEL:
-									item.setToolTipText( "Disable the Graph Label Tab" );
-									item.getAccessibleContext().setAccessibleName( "Disable the Graph Label Tab " );
-									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Label Tab " );
-									break;
 								case LOGGING:
 									item.setToolTipText( "Disable the Logging Tab" );
 									item.getAccessibleContext().setAccessibleName( "Disable the Logging Tab " );
 									item.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab " );
 									break;
-//								case GCOSMETICS:
-//									item.setToolTipText( "Disable the Graph Cosmetics Tab" );
-//									item.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab " );
-//									item.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab " );
-//									break;
 								default:
 									item.setToolTipText( "Disable " + cmd );
 									item.getAccessibleContext().setAccessibleName( "Disable " + cmd );
@@ -1230,20 +1094,7 @@ public class PlayPane extends JFrame {
 							}
 						}
 
-//						if ( cosmeticsPanel == panel ) {
-//							leftTabs.addTab( "Graph Cosmetics", null, cosmeticsPanel,
-//									"Modify visual appearance of a node" );
-//						} else 
-						if ( filterPanel == panel ) {
-							leftTabs.addTab( "Graph Filter", null, filterPanel,
-									"Customize graph display" );
-						}
-						//Label
-						else if ( outputPanel == panel ) {
-							leftTabs.addTab( "Graph Label", null, outputPanel,
-									"Customize graph Label" );
-						}
-						else if ( loggingPanel == panel ) {
+						if ( loggingPanel == panel ) {
 							rightTabs.addTab( "Logging", DbAction.getIcon( "log_tab1" ), loggingPanel,
 									"This tab keeps a log of SEMOSS warnings and error messges for "
 									+ "use by the SEMOSS development team" );
@@ -1256,26 +1107,11 @@ public class PlayPane extends JFrame {
 					else {
 						if ( null != cmd ) {
 							switch ( cmd ) {
-								case GFILTER:
-									item.setToolTipText( "Enable the Graph Filter Tab " );
-									item.getAccessibleContext().setAccessibleName( "Enable the Graph Filter Tab" );
-									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Filter Tab " );
-									break;
-								case GFLABEL:
-									item.setToolTipText( "Enable the Graph Label Tab" );
-									item.getAccessibleContext().setAccessibleName( "Enable the Graph Label Tab " );
-									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Label Tab " );
-									break;
 								case LOGGING:
 									item.setToolTipText( "Enable the Logging Tab" );
 									item.getAccessibleContext().setAccessibleName( "Enable the Logging Tab " );
 									item.getAccessibleContext().setAccessibleDescription( "Enable the Logging Tab " );
 									break;
-//								case GCOSMETICS:
-//									item.setToolTipText( "Enable the Graph Cosmetics Tab" );
-//									item.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab " );
-//									item.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab " );
-//									break;
 								default:
 									item.setToolTipText( "Enable " + cmd );
 									item.getAccessibleContext().setAccessibleName( "Enable " + cmd );
@@ -1288,7 +1124,7 @@ public class PlayPane extends JFrame {
 							rightTabs.remove( panel );
 						}
 						else {
-							leftTabs.remove( panel );
+							dbexplorer.remove( panel );
 						}
 					}
 				}
@@ -1328,52 +1164,11 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-//		final JCheckBoxMenuItem gcos = new JCheckBoxMenuItem( "Graph Cosmetics tab",
-//				getProp( GCOSMETICS ) );
-//		gcos.setActionCommand( GCOSMETICS );
-//		gcos.addActionListener( preflistener );
-		//	gcos.setToolTipText( "Enables/Disables graph cosmetics tab" );
-
-//		if ( getProp( GCOSMETICS ) == true ) {
-//			gcos.setToolTipText( "Disable the Graph Cosmetics Tab" );
-//			gcos.getAccessibleContext().setAccessibleName( "Disable the Graph Cosmetics Tab" );
-//			gcos.getAccessibleContext().setAccessibleDescription( "Disable the Graph Cosmetics Tab" );
-//		}
-//		else {
-//			gcos.setToolTipText( "Enable the Graph Cosmetics Tab" );
-//			gcos.getAccessibleContext().setAccessibleName( "Enable the Graph Cosmetics Tab" );
-//			gcos.getAccessibleContext().setAccessibleDescription( "Enable the Graph Cosmetics Tab" );
-//		}
-
-		final JCheckBoxMenuItem gfilt = new JCheckBoxMenuItem( "Graph Filter tab",
-				getProp( GFILTER ) );
-		gfilt.setActionCommand( GFILTER );
-		gfilt.addActionListener( preflistener );
-		//	gfilt.setToolTipText( "Enables/Disables graph filter tab" );
-
-		if ( getProp( GFILTER ) == true ) {
-			gfilt.setToolTipText( "Disable the Graph Filter Tab" );
-			gfilt.getAccessibleContext().setAccessibleName( "Disable the Graph Filter Tab" );
-			gfilt.getAccessibleContext().setAccessibleDescription( "Disable the Graph Filter Tab" );
-		}
-		else {
-			gfilt.setToolTipText( "Enable the Graph Filter Tab" );
-			gfilt.getAccessibleContext().setAccessibleName( "Enable the Graph Filter Tab" );
-			gfilt.getAccessibleContext().setAccessibleDescription( "Enable the Graph Filter Tab" );
-		}
-
-		//Graph Labels tab
-		final JCheckBoxMenuItem gflab = new JCheckBoxMenuItem( "Graph Label tab",
-				getProp( GFLABEL ) );
-		gflab.setActionCommand( GFLABEL );
-		gflab.addActionListener( preflistener );
-
 		loggingItem.setSelected( getProp( LOGGING ) );
 		loggingItem.setActionCommand( LOGGING );
 		loggingItem.addActionListener( preflistener );
-		//logging.setToolTipText( "Enables/Disables logging tab" );
 
-		if ( getProp( LOGGING ) == true ) {
+		if ( getProp( LOGGING ) ) {
 			loggingItem.setToolTipText( "Disable the Logging Tab" );
 			loggingItem.getAccessibleContext().setAccessibleName( "Disable the Logging Tab" );
 			loggingItem.getAccessibleContext().setAccessibleDescription( "Disable the Logging Tab" );
@@ -1417,30 +1212,27 @@ public class PlayPane extends JFrame {
 			}
 		} );
 
-		splithider = new JCheckBoxMenuItem( "Left Panel", true );
+		splithider = new JCheckBoxMenuItem( "Database Explorer", true );
 
-		splithider.setToolTipText( "Disable the Left Panel " );
-		splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
-		splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
+		splithider.setToolTipText( "Disable the Database Explorer" );
+		splithider.getAccessibleContext().setAccessibleName( splithider.getToolTipText() );
+		splithider.getAccessibleContext().setAccessibleDescription( splithider.getToolTipText() );
 
 		splithider.addActionListener( new ActionListener() {
 
 			@Override
 			public void actionPerformed( ActionEvent ae ) {
-				leftTabs.setVisible( !leftTabs.isVisible() );
-				if ( leftTabs.isVisible() ) {
+				dbexplorer.setVisible( !dbexplorer.isVisible() );
+				if ( dbexplorer.isVisible() ) {
 					mainSplitPane.setDividerLocation( 0.25 );
-
-					splithider.setToolTipText( "Disable the Left Panel" );
-					splithider.getAccessibleContext().setAccessibleName( "Disable the Left Panel" );
-					splithider.getAccessibleContext().setAccessibleDescription( "Disable the Left Panel" );
+					splithider.setToolTipText( "Disable the Database Explorer" );
 				}
 				else {
 					splithider.setToolTipText( "Enable the Left Panel" );
-					splithider.getAccessibleContext().setAccessibleName( "Enable the Left Panel" );
-					splithider.getAccessibleContext().setAccessibleDescription( "Enable the Left Panel" );
-
 				}
+
+				splithider.getAccessibleContext().setAccessibleName( splithider.getToolTipText() );
+				splithider.getAccessibleContext().setAccessibleDescription( splithider.getToolTipText() );
 			}
 		} );
 
@@ -1581,12 +1373,7 @@ public class PlayPane extends JFrame {
 		view.setToolTipText( "Enable or disable the application tabs" );
 		view.getAccessibleContext().setAccessibleName( "Enable the Insite Manager Tab" );
 		view.getAccessibleContext().setAccessibleDescription( "Enable the Insite Manager Tab" );
-//		view.add( gcos );
-//		gcos.setMnemonic( KeyEvent.VK_C );
-		view.add( gfilt );
-		gfilt.setMnemonic( KeyEvent.VK_F );
-		view.add( gflab );
-		gflab.setMnemonic( KeyEvent.VK_G );
+
 		view.add( gQueryBuilderItem );
 		gQueryBuilderItem.setMnemonic( KeyEvent.VK_B );
 		view.add( insightManagerItem );
