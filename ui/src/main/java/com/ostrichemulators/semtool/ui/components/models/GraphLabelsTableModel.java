@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ostrichemulators.semtool.ui.components;
+package com.ostrichemulators.semtool.ui.components.models;
 
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;

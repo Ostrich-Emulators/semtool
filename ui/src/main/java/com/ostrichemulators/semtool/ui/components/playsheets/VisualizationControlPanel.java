@@ -7,7 +7,7 @@ package com.ostrichemulators.semtool.ui.components.playsheets;
 
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.ui.components.GraphLabelsTableModel;
+import com.ostrichemulators.semtool.ui.components.models.GraphLabelsTableModel;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.models.VertexFilterTableModel;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
