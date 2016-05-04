@@ -195,7 +195,7 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 		}
 
 		fireTableDataChanged();
-		viz.refresh();
+		viz.repaint();
 	}
 
 	public static class ControlDataRow implements Comparable<ControlDataRow> {

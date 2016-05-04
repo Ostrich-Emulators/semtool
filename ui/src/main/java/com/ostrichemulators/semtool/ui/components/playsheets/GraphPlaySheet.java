@@ -191,7 +191,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 						view.setSkeletonMode( xray.isSelected() );
 					}
 				} );
-		xray.setToolTipText( "X-Ray Highlighting" );
+		xray.setToolTipText( "X-Ray Highlighting");
 
 		reset.putValue( Action.SHORT_DESCRIPTION, "Reset graph transformers" );
 
@@ -313,24 +313,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	/**
-	 * Method resetView. Reset to original view.
-	 */
-	public void resetView() {
-		if ( overlayLevel > 1 ) {
-			overlayLevel = 1;
-			view.setOverlayLevel( overlayLevel );
-			fireGraphUpdated();
-		}
-	}
-
-	/**
 	 * Method undoView. Get the latest view and undo it.
 	 */
 	public void undoView() {
 		if ( overlayLevel > 1 ) {
 			overlayLevel--;
-			view.setOverlayLevel( overlayLevel );
 			setUndoRedoBtn();
+			view.refresh();
 			fireGraphUpdated();
 		}
 	}
@@ -341,8 +330,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void redoView() {
 		if ( overlayLevel < maxOverlayLevel ) {
 			overlayLevel++;
-			view.setOverlayLevel( overlayLevel );
 			setUndoRedoBtn();
+			view.refresh();
 			fireGraphUpdated();
 		}
 	}
@@ -351,9 +340,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
-		view.refresh();
-		fireGraphUpdated();
 		setUndoRedoBtn();
+		fireGraphUpdated();
 	}
 
 	/**
@@ -390,6 +378,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private void setUndoRedoBtn() {
 		undo.setEnabled( overlayLevel > 1 );
 		redo.setEnabled( maxOverlayLevel > overlayLevel );
+		view.setOverlayLevel( overlayLevel );
 	}
 
 	public MultiMap<URI, SEMOSSVertex> getVerticesByType() {

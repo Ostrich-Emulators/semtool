@@ -110,7 +110,6 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 
 	public void setOverlayLevel( int level ) {
 		overlayLevel = level;
-		refresh();
 	}
 
 	public void setLabelCache( Map<Value, String> map ) {
