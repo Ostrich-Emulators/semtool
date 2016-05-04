@@ -44,7 +44,6 @@ public class GraphSearchTextField extends JTextField {
 			@Override
 			public void keyReleased( KeyEvent e ) {
 				gps.getView().clearHighlighting();
-				gps.getView().setSkeletonMode( false );
 
 				if ( !getText().isEmpty() ) {
 					Set<SEMOSSVertex> vs = new HashSet<>();
@@ -52,7 +51,6 @@ public class GraphSearchTextField extends JTextField {
 					gts.search( getText(), vs, es );
 
 					if ( !( vs.isEmpty() && es.isEmpty() ) ) {
-						gps.getView().setSkeletonMode( true );
 						gps.getView().highlight( vs, null );
 					}
 					requestFocus( true );

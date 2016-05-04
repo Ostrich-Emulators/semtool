@@ -90,13 +90,11 @@ public class IslandIdentifierProcessor extends AbstractAction {
 			Collection<SEMOSSEdge> islandEdges ) {
 
 		if ( allIslands ) {
-			gps.getView().setSkeletonMode( false );
 			gps.getView().highlight( islandVerts, islandEdges );
 		}
 		else {
 			PickedState state = gps.getView().getPickedVertexState();
 
-			gps.getView().setSkeletonMode( true );
 			for ( SEMOSSVertex v : islandVerts ) {
 				state.pick( v, true );
 			}

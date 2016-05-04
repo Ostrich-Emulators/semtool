@@ -96,6 +96,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
 	private final RetrievingLabelCache labelcache = new RetrievingLabelCache();
+
 	private final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
@@ -109,15 +110,19 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			redoView();
 		}
 	};
+
 	private final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
-			view.setSkeletonMode( false );
+			if ( xray.isSelected() ) {
+				xray.doClick();
+			}
 			view.clearHighlighting();
 		}
 	};
 
 	private final JToggleButton graphprops = new JToggleButton();
+	private final JToggleButton xray = new JToggleButton();
 	private final TreeConverterListener tree = new TreeConverterListener();
 	private final WeightDropDownButton weightButton = new WeightDropDownButton();
 	private final GraphSearchTextField searcher = new GraphSearchTextField();
@@ -179,6 +184,15 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			}
 		} );
 
+		xray.setAction( new AbstractAction( "",
+				GuiUtility.loadImageIcon( "x-ray.png" ) ) {
+					@Override
+					public void actionPerformed( ActionEvent e ) {
+						view.setSkeletonMode( xray.isSelected() );
+					}
+				} );
+		xray.setToolTipText( "X-Ray Highlighting" );
+
 		reset.putValue( Action.SHORT_DESCRIPTION, "Reset graph transformers" );
 
 		addGraphListener( legendPanel );
@@ -205,6 +219,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		tree.setPlaySheet( this );
 
 		toolBar.add( graphprops );
+		toolBar.add( xray );
 		toolBar.add( reset );
 		toolBar.add( weightButton );
 		toolBar.add( undo );

@@ -105,7 +105,6 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 							List<SEMOSSVertex> selVs = sch.getValue();
 
 							view.clearHighlighting();
-							view.setSkeletonMode( true );
 							view.highlight( selVs, null );
 						}
 					}

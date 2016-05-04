@@ -30,8 +30,6 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalLensGraphMouse;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodePopup;
-import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.NodePropertiesPopup;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.components.playsheets.TreeGraphPlaySheet;
@@ -78,8 +76,8 @@ public class GraphNodeListener extends ModalLensGraphMouse {
 		
 		if( null == ele ){
 			// clicked in space, so unhighlight everything
-			viewer.clearHighlighting();
-			viewer.setSkeletonMode( false );
+			// viewer.clearHighlighting();
+			// viewer.setSkeletonMode( false );
 		}
 
 		if ( ele != null ) {

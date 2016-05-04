@@ -306,6 +306,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 
 		getPickedEdgeState().clear();
 		getPickedVertexState().clear();
+		repaint();
 	}
 
 	/**
