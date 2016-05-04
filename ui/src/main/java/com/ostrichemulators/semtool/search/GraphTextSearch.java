@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -47,6 +49,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -67,7 +70,7 @@ import org.openrdf.model.vocabulary.RDFS;
 public class GraphTextSearch {
 
 	private static final Logger log = Logger.getLogger( GraphTextSearch.class );
-	private static final String TEXT_FIELD = "alltext";
+	private static final String ALL_TEXT = "alltext";
 	private static final String URI_FIELD = "URI";
 
 	private final StandardAnalyzer analyzer = new StandardAnalyzer();
@@ -104,15 +107,31 @@ public class GraphTextSearch {
 	public void search( String query, Set<SEMOSSVertex> nodes, Set<SEMOSSEdge> edges ) {
 		try {
 			StringBuilder sb = new StringBuilder();
+			Pattern pat = Pattern.compile( "^(\\S*):(.*)" );
+			Matcher m = pat.matcher( query );
+			String field = ALL_TEXT;
 
-			sb.append( " label: " ).append( query ).append( "*" );
-			sb.append( " description: " ).append( query );
-			sb.append( " type: " ).append( query );
+			if ( m.matches() ) {
+				field = m.group( 1 );
+				sb.append( m.group( 2 ) );
+			}
+			else {
+				sb.append( "label: " ).append( query ).append( "*" );
+				sb.append( " description: " ).append( query );
+				sb.append( " type: " ).append( query );
+			}
 
-			QueryParser alltextqp = new QueryParser( TEXT_FIELD, analyzer );
+			if ( 0 == sb.length() ) {
+				return;
+			}
+
+			QueryParser alltextqp = new QueryParser( field, analyzer );
 			Query q = alltextqp.parse( sb.toString() );
 			log.debug( q );
 			search( q, nodes, edges );
+		}
+		catch ( ParseException e ) {
+			log.warn( e );
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
@@ -127,14 +146,14 @@ public class GraphTextSearch {
 	 * @return
 	 */
 	public List<? extends GraphElement> search( String searchString ) {
-		List<GraphElement> graphhits = new ArrayList<>();
 
 		Set<SEMOSSVertex> vs = new HashSet<>();
 		Set<SEMOSSEdge> es = new HashSet<>();
 		search( searchString, vs, es );
+
+		List<GraphElement> graphhits = new ArrayList<>();
 		graphhits.addAll( vs );
 		graphhits.addAll( es );
-
 		return graphhits;
 	}
 
@@ -255,7 +274,7 @@ public class GraphTextSearch {
 				for ( Map.Entry<URI, Document> en : doccache.entrySet() ) {
 					String sb = textcache.get( en.getKey() ).toString().trim();
 					if ( !sb.isEmpty() ) {
-						en.getValue().add( new TextField( TEXT_FIELD, sb, Field.Store.YES ) );
+						en.getValue().add( new TextField( ALL_TEXT, sb, Field.Store.YES ) );
 					}
 				}
 

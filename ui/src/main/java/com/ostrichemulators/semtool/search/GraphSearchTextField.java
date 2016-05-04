@@ -53,7 +53,7 @@ public class GraphSearchTextField extends JTextField {
 
 					if ( !( vs.isEmpty() && es.isEmpty() ) ) {
 						gps.getView().setSkeletonMode( true );
-						gps.getView().highlight( vs, es );
+						gps.getView().highlight( vs, null );
 					}
 					requestFocus( true );
 				}
