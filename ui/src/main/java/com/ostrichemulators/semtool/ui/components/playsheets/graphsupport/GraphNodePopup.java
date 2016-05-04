@@ -17,7 +17,7 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package com.ostrichemulators.semtool.ui.components;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import com.ostrichemulators.semtool.algorithm.impl.DistanceDownstreamProcessor;
@@ -26,17 +26,9 @@ import com.ostrichemulators.semtool.algorithm.impl.LoopIdentifierProcessor;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.ui.components.TraverseFreelyPopup;
 import com.ostrichemulators.semtool.ui.components.playsheets.ChartItPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.main.listener.impl.AdjacentPopupMenuListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.CondenseGraph;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeRankListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphPlaySheetEdgeListExporter;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphPlaySheetTableExporter;
-import com.ostrichemulators.semtool.ui.main.listener.impl.HideVertexPopupMenuListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.MSTPopupMenuListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.MouseTransformPickPopupMenuListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.UnHideVertexPopupMenuListener;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

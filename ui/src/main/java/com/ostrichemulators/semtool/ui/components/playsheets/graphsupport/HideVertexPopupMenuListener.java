@@ -17,37 +17,36 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package com.ostrichemulators.semtool.ui.main.listener.impl;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
-import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.util.EdgeType;
-import com.ostrichemulators.semtool.om.SEMOSSEdge;
-import com.ostrichemulators.semtool.om.SEMOSSVertex;
+import com.ostrichemulators.semtool.om.GraphElement;
+
+import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import javax.swing.AbstractAction;
 
 /**
- * Controls the un-hiding of the vertex pop up menu.
+ * Controls hiding the pop up menu for nodes on the graph play sheet.
  */
-public class UnHideVertexPopupMenuListener extends AbstractAction {
-	private static final long serialVersionUID = 2098465418944831050L;	
-	private final GraphPlaySheet gps;
+public class HideVertexPopupMenuListener extends AbstractAction {
 
-	public UnHideVertexPopupMenuListener( GraphPlaySheet gps ) {
-		super( "Unhide Nodes" );
-		this.gps = gps;
+	private static final long serialVersionUID = -2864866456286018607L;
+
+	private final List<GraphElement> highlighted = new ArrayList<>();
+	private final SemossGraphVisualization viz;
+
+	public HideVertexPopupMenuListener( Collection<GraphElement> highlights, SemossGraphVisualization vizzy ) {
+		super( "Hide Nodes" );
+		viz = vizzy;
+		highlighted.addAll( highlights );
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		Graph<SEMOSSVertex, SEMOSSEdge> realg = gps.getGraphData().getGraph();
-
-		for ( SEMOSSVertex v : realg.getVertices() ) {
-			if( !v.isVisible() ){
-				v.setVisible( true );
-			}
-		}
+		viz.hide( highlighted, enabled );
 	}
 }

@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.NeighborMenuItem;
 import com.ostrichemulators.semtool.om.GraphElement;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SEMOSS.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.ostrichemulators.semtool.ui.main.listener.impl;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

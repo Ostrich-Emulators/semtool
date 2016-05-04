@@ -8,7 +8,7 @@ package com.ostrichemulators.semtool.ui.components.semanticexplorer;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
-import com.ostrichemulators.semtool.ui.components.PaintLabel;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintLabel;
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 import com.ostrichemulators.semtool.ui.main.SemossPreferences;

@@ -17,7 +17,7 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package com.ostrichemulators.semtool.ui.components;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
@@ -27,6 +27,7 @@ import com.ostrichemulators.semtool.ui.helpers.NodeEdgeNumberedPropertyUtility;
 import com.ostrichemulators.semtool.ui.transformer.EdgeStrokeTransformer;
 import com.ostrichemulators.semtool.ui.transformer.VertexShapeTransformer;
 import com.ostrichemulators.semtool.util.Constants;
+import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.MultiSetMap;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
@@ -84,9 +85,21 @@ public class WeightDropDownButton extends JButton {
 	private LabeledPairTreeCellRenderer renderer;
 	private URI lastSelectedValue;
 
+	public WeightDropDownButton() {
+		this( GuiUtility.loadImageIcon( "width.png" ) );
+	}
+
 	public WeightDropDownButton( ImageIcon icon ) {
 		setIcon( icon );
 		initializeButton();
+		setToolTipText( "Convert edge thickness corresponding to properties that exist on the edges" );
+
+		addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				showPopup();
+			}
+		} );
 	}
 
 	public WeightDropDownButton( Action a ) {
@@ -106,12 +119,12 @@ public class WeightDropDownButton extends JButton {
 		renderer.setClosedIcon( null );
 		renderer.setOpenIcon( null );
 		renderer.setLeafIcon( null );
-		
+
 		Map<URI, String> displayNames = NodeEdgeNumberedPropertyUtility.getDisplayNameMap();
-		for (URI key:displayNames.keySet()) {
-			renderer.cache( key, displayNames.get(key) );
+		for ( URI key : displayNames.keySet() ) {
+			renderer.cache( key, displayNames.get( key ) );
 		}
-		
+
 		edgePropTree.setCellRenderer( renderer );
 		nodePropTree.setCellRenderer( renderer );
 

@@ -17,9 +17,12 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package com.ostrichemulators.semtool.ui.components;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.rdf.query.util.impl.ModelQueryAdapter;
+import com.ostrichemulators.semtool.ui.components.OperationsProgress;
+import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import org.apache.log4j.Logger;
 
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;

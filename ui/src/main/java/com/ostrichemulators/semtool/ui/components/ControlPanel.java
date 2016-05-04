@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.WeightDropDownButton;
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
@@ -29,12 +30,12 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.search.SearchController;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphTransformerResetListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphVertexSizeListener;
+//import com.ostrichemulators.semtool.ui.main.listener.impl.GraphTransformerResetListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphVertexSizeListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.RedoListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.RingsButtonListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.TreeConverterListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.UndoListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.RingsButtonListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.UndoListener;
 import com.ostrichemulators.semtool.util.Constants;
 
 import com.ostrichemulators.semtool.util.GuiUtility;
@@ -79,8 +80,8 @@ public class ControlPanel extends JPanel implements GraphListener {
 	private final WeightDropDownButton weightButton;
 	private final JTextField searchText = new JTextField();
 
-	private final GraphTransformerResetListener resetTransListener
-			= new GraphTransformerResetListener();
+//	private final GraphTransformerResetListener resetTransListener
+//			= new GraphTransformerResetListener();
 	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
 	private final TreeConverterListener treeListener = new TreeConverterListener();
 	private final RingsButtonListener ringsListener = new RingsButtonListener();
@@ -104,10 +105,10 @@ public class ControlPanel extends JPanel implements GraphListener {
 		highlightButton.addActionListener( searchController );
 
 		resetBtn = new JButton( GuiUtility.loadImageIcon( "refresh.png" ) );
-		resetBtn.addActionListener( resetTransListener );
-		resetBtn.setToolTipText( "<html><b>Reset (F5)</b><br>Reset Graph Transformers</html>" );
-		addKeyListener( resetBtn, resetTransListener,
-				"F5", KeyStroke.getKeyStroke( "F5" ) );
+//		resetBtn.addActionListener( resetTransListener );
+//		resetBtn.setToolTipText( "<html><b>Reset (F5)</b><br>Reset Graph Transformers</html>" );
+//		addKeyListener( resetBtn, resetTransListener,
+//				"F5", KeyStroke.getKeyStroke( "F5" ) );
 
 		undoButton = new JButton( GuiUtility.loadImageIcon( "undo.png" ) );
 		undoButton.setToolTipText( "<html><b>Undo (CRTL+Z)</b><br>Undo the last graph action</html>" );

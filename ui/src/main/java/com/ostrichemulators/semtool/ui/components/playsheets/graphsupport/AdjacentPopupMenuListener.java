@@ -17,7 +17,7 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package com.ostrichemulators.semtool.ui.main.listener.impl;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import java.awt.event.ActionEvent;

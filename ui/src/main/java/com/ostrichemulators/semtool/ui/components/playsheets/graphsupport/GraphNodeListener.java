@@ -17,7 +17,7 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package com.ostrichemulators.semtool.ui.main.listener.impl;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.om.GraphElement;
 import java.awt.event.MouseEvent;
@@ -30,8 +30,8 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalLensGraphMouse;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.ui.components.GraphNodePopup;
-import com.ostrichemulators.semtool.ui.components.NodePropertiesPopup;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodePopup;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.NodePropertiesPopup;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.components.playsheets.TreeGraphPlaySheet;

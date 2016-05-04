@@ -43,6 +43,7 @@ public class GraphDataModel {
 
 	private static final Logger log = Logger.getLogger( GraphDataModel.class );
 
+	private final List<GraphModelListener> listenees = new ArrayList<>();
 	private final Map<GraphElement, Integer> level = new HashMap<>();
 
 	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
@@ -56,6 +57,20 @@ public class GraphDataModel {
 
 	public GraphDataModel( DirectedGraph<SEMOSSVertex, SEMOSSEdge> g ) {
 		vizgraph = g;
+	}
+
+	public void addModelListener( GraphModelListener l ) {
+		listenees.add( l );
+	}
+
+	public void removeModelListener( GraphModelListener l ) {
+		listenees.remove( l );
+	}
+
+	protected void fireModelChanged() {
+		for ( GraphModelListener l : listenees ) {
+			l.changed( vizgraph, this );
+		}
 	}
 
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
@@ -93,6 +108,7 @@ public class GraphDataModel {
 	 * @param overlayLevel the level of the nodes
 	 */
 	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
+
 		try {
 			Map<Value, URI> nonUriIds = new HashMap<>();
 
@@ -156,6 +172,8 @@ public class GraphDataModel {
 		catch ( RepositoryException | QueryEvaluationException e ) {
 			log.error( e, e );
 		}
+
+		fireModelChanged();
 	}
 
 	public void addGraphLevel( Collection<URI> nodes, IEngine engine, int overlayLevel ) {
@@ -170,6 +188,8 @@ public class GraphDataModel {
 		catch ( RepositoryException | QueryEvaluationException e ) {
 			log.error( e, e );
 		}
+
+		fireModelChanged();
 	}
 
 	/**
@@ -211,6 +231,7 @@ public class GraphDataModel {
 		}
 
 		removedVs.addAll( nodesToRemove );
+		fireModelChanged();
 	}
 
 	public int getLevel( GraphElement check ) {
@@ -222,7 +243,12 @@ public class GraphDataModel {
 
 	/**
 	 * Is this node present at the given level (is it's level <?= the given level)
-	 * @param check the element to check
+	 * @param check th
+	 *
+	 *
+	 *
+	 *
+	 * e element to check
 	 * @param level is it present at this level?
 	 * @return
 	 */

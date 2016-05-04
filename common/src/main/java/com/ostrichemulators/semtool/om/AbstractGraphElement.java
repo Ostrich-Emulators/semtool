@@ -37,8 +37,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
 	public static final String CHANGE_COLOR = "color";
-	public static final String CHANGE_VISIBLE = "visible";
-	private transient boolean visible = true;
 	private transient URI id;
 	private transient Color color;
 
@@ -114,17 +112,17 @@ public abstract class AbstractGraphElement implements GraphElement {
 		return color;
 	}
 
-	@Override
-	public void setVisible( boolean b ) {
-		boolean old = visible;
-		visible = b;
-		this.fireIfPropertyChanged( CHANGE_VISIBLE, old, b );
-	}
-
-	@Override
-	public boolean isVisible() {
-		return visible;
-	}
+//	@Override
+//	public void setVisible( boolean b ) {
+//		boolean old = visible;
+//		visible = b;
+//		this.fireIfPropertyChanged( CHANGE_VISIBLE, old, b );
+//	}
+//
+//	@Override
+//	public boolean isVisible() {
+//		return visible;
+//	}
 
 	/**
 	 * Method setProperty.

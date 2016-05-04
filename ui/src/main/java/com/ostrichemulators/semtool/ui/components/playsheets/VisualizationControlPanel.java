@@ -16,7 +16,6 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import java.awt.Dimension;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -63,7 +62,7 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		super.add( "Node Filter", new JScrollPane( nodes ) );
 		super.add( "Edge Filter", new JScrollPane( edges ) );
 
-		super.setPreferredSize( new Dimension( 250, 400 ) );
+		//super.setPreferredSize( new Dimension( 250, 400 ) );
 	}
 
 	public VisualizationControlPanel( RetrievingLabelCache cacher ) {

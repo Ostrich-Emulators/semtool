@@ -20,8 +20,6 @@
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
 import java.awt.BorderLayout;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -37,42 +35,37 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
-import edu.uci.ics.jung.visualization.Layer;
-import edu.uci.ics.jung.visualization.MultiLayerTransformer;
 import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.ui.components.ControlData;
 import com.ostrichemulators.semtool.ui.components.ControlPanel;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
 import com.ostrichemulators.semtool.search.SearchController;
-import com.ostrichemulators.semtool.ui.components.GraphLegendPanel;
-import com.ostrichemulators.semtool.ui.components.WeightDropDownButton;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphLegendPanel;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.WeightDropDownButton;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.TreeConverterListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
 import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
+import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -85,6 +78,7 @@ import javax.swing.border.BevelBorder;
  */
 public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyChangeListener {
 
+	private static final String PROPERTY_PREF = "GraphPropertyLocation";
 	private static final long serialVersionUID = 4699492732234656487L;
 	private static final Logger log = Logger.getLogger( GraphPlaySheet.class );
 
@@ -117,8 +111,17 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			redoView();
 		}
 	};
+	private final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			view.setSkeletonMode( false );
+			view.clearHighlighting();
+		}
+	};
 
+	private final JToggleButton graphprops = new JToggleButton();
 	private final TreeConverterListener tree = new TreeConverterListener();
+	private final WeightDropDownButton weightButton = new WeightDropDownButton();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -135,27 +138,49 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		log.debug( "new graphplaysheet" );
 		gdm = model;
 
+		undo.setEnabled( false );
+		redo.setEnabled( false );
+
 		control = vcp;
 		control.setLabelCache( labelcache );
-		control.setVisible( false );
 
 		graphSplitPane = new JSplitPane();
-		graphSplitPane.setEnabled( false );
 		graphSplitPane.setOneTouchExpandable( true );
-		graphSplitPane.setOrientation( JSplitPane.VERTICAL_SPLIT );
+		graphSplitPane.setOrientation( JSplitPane.HORIZONTAL_SPLIT );
 
 		setLayout( new BorderLayout() );
 		add( graphSplitPane, BorderLayout.CENTER );
 		GraphLegendPanel legendPanel = new GraphLegendPanel( labelcache );
 		add( legendPanel, BorderLayout.SOUTH );
-		add( control, BorderLayout.EAST );
 
 		view = new SemossGraphVisualization( gdm );
 		initVisualizer( view );
 		view.addPickingSupport();
 		control.setVisualization( view );
 
-		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
+		control.setMinimumSize( new Dimension( 0, 0 ) );
+		graphSplitPane.setLeftComponent( new GraphZoomScrollPane( view ) );
+		graphSplitPane.setRightComponent( control );
+		graphSplitPane.setDividerLocation( 1d );
+		graphSplitPane.setResizeWeight( 1d );
+
+		graphprops.setAction( new AbstractAction( "Graph Properties" ) {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Preferences prefs = Preferences.userNodeForPackage( getClass() );
+
+				if ( graphprops.isSelected() ) {
+					int pct = prefs.getInt( PROPERTY_PREF, GraphPlaySheet.this.getWidth() - 250 );
+					graphSplitPane.setDividerLocation( pct );
+				}
+				else {
+					prefs.putInt( PROPERTY_PREF, graphSplitPane.getDividerLocation() );
+					graphSplitPane.setDividerLocation( 1d );
+				}
+			}
+		} );
+
+		reset.putValue( Action.SHORT_DESCRIPTION, "Reset graph transformers" );
 
 		addGraphListener( legendPanel );
 		addGraphListener( control );
@@ -164,30 +189,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
 		super.populateToolBar( toolBar, tabTitle );
-		JToggleButton props = new JToggleButton();
-		props.setAction( new AbstractAction( "Graph Properties" ) {
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				control.setVisible( props.isSelected() );
-			}
-		} );
 
-		WeightDropDownButton weightButton = new WeightDropDownButton( GuiUtility.loadImageIcon( "width.png" ) );
-		weightButton.setToolTipText( "<html><b>Edge Weight</b><br>Convert edge thickness corresponding to properties that exist on the edges</html>" );
-		weightButton.addActionListener( new ActionListener() {
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				weightButton.showPopup();
-			}
-		} );
 		weightButton.setPlaySheet( this );
 
 		tree.setVisualization( this );
 
-		undo.setEnabled( false );
-		redo.setEnabled( false );
-
-		toolBar.add( props );
+		toolBar.add( graphprops );
+		toolBar.add( reset );
 		toolBar.add( weightButton );
 		toolBar.add( undo );
 		toolBar.add( redo );
@@ -305,7 +313,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		if ( overlayLevel > 1 ) {
 			overlayLevel = 1;
 			view.setOverlayLevel( overlayLevel );
-			updateLayout();
 			fireGraphUpdated();
 		}
 	}
@@ -317,7 +324,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		if ( overlayLevel > 1 ) {
 			overlayLevel--;
 			view.setOverlayLevel( overlayLevel );
-			updateLayout();
 			setUndoRedoBtn();
 			fireGraphUpdated();
 		}
@@ -329,14 +335,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void redoView() {
 		if ( overlayLevel < maxOverlayLevel ) {
 			overlayLevel++;
-			updateLayout();
+			view.setOverlayLevel( overlayLevel );
 			setUndoRedoBtn();
 			fireGraphUpdated();
 		}
-	}
-
-	public void updateLayout() {
-		view.setOverlayLevel( overlayLevel );
 	}
 
 	/**
@@ -357,7 +359,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		view.setGraphMouse( gl );
 		view.setLabelCache( labelcache );
 
-		view.addPropertyChangeListener( SemossGraphVisualization.REPAINT_NEEDED,
+		view.addPropertyChangeListener( SemossGraphVisualization.VISIBILITY_CHANGED,
 				new PropertyChangeListener() {
 
 					@Override
@@ -402,115 +404,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			typeToInstances.add( v.getType(), v );
 		}
 		return typeToInstances;
-	}
-
-	/**
-	 * Method getControlData.
-	 *
-	 * @return ControlData
-	 */
-	public ControlData getControlData() {
-		//return controlData;
-		return null;
-	}
-
-	/**
-	 * Sets the layout of the visualization. The name must be a key pointing to a
-	 * a class name in the semoss.properties file. If any error occurs, the layout
-	 * is clearSelected to {@link Constants#FR}. (Not all layouts can support all
-	 * graph topologies)
-	 *
-	 * @return true if the desired layout was applied
-	 * @param layout String
-	 */
-	public boolean setLayoutName( String newName ) {
-		String oldName = this.layoutName;
-		this.layoutName = newName;
-
-		Class<?> layoutClass = (Class<?>) DIHelper.getInstance().getLocalProp( layoutName );
-		log.debug( "Create layout from layoutName " + layoutName
-				+ ", and layoutClass " + layoutClass );
-
-		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = getVisibleGraph();
-
-		boolean ok = false;
-		Layout<SEMOSSVertex, SEMOSSEdge> layout = null;
-		try {
-			Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
-			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
-			ok = true;
-		}
-		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-			log.error( "could not create layout", e );
-		}
-
-		if ( null == layout ) {
-			layout = new FRLayout<>( graph );
-		}
-
-		fitGraphinWindow();
-		layout.initialize();
-		try {
-			double scale = 0.85;
-			Dimension d = view.getSize();
-			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
-			layout.setSize( d );
-		}
-		catch ( UnsupportedOperationException uoe ) {
-			// you can set the layout size for some layouts...but there's no way to
-			// know which ones
-		}
-
-		view.setGraphLayout( layout );
-
-		fireLayoutUpdated( graph, oldName, layout );
-
-		return ok;
-	}
-
-	/*
-	 * This method tries to fit the graph to the available space.
-	 * It could work better.
-	 */
-	protected void fitGraphinWindow() {
-		MultiLayerTransformer mlt = view.getRenderContext().getMultiLayerTransformer();
-		double vscalex = mlt.getTransformer( Layer.VIEW ).getScaleX() * 1.1;
-		double vscaley = mlt.getTransformer( Layer.VIEW ).getScaleY() * 1.1;
-
-		// Dimension d = view.getSize();
-		// d.setSize( d.getWidth() / vscalex, d.getHeight() / vscaley );
-		double scalex = 1 / vscaley;
-		double scaley = 1 / vscalex;
-
-		mlt.getTransformer( Layer.LAYOUT ).setScale( scalex, scaley, view.getCenter() );
-//
-//		
-//		
-//		// two steps here: figure out the center of our layout, and translate
-//		// that center so it's in the center of our visualization
-//		// we'll take the average X and Y, so big clusters get closer to the center
-//		double totalX = 0;
-//		double totalY = 0;
-//
-//		Graph<SEMOSSVertex, SEMOSSEdge> graph = layout.getGraph();
-//		Collection<SEMOSSVertex> verts = graph.getVertices();
-//		for ( SEMOSSVertex v : verts ) {
-//			double x = layout.getX( v );
-//			double y = layout.getY( v );
-//
-//			totalX += x;
-//			totalY += y;
-//		}
-//
-//		Point2D viewCenter = view.getCenter();
-//		Point2D layoutCenter
-//				= new Point2D.Double( totalX / verts.size(), totalY / verts.size() );
-//		log.debug( "layout center is: " + layoutCenter );
-//		log.debug( "view center is: " + view.getCenter() );
-//
-//		view.getRenderContext().getMultiLayerTransformer().getTransformer( Layer.LAYOUT ).
-//				translate( viewCenter.getX() - layoutCenter.getX(),
-//						viewCenter.getY() - layoutCenter.getY() );
 	}
 
 	public void fireLayoutUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,

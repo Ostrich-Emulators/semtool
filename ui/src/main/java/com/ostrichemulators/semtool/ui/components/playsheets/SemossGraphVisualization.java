@@ -8,6 +8,7 @@ package com.ostrichemulators.semtool.ui.components.playsheets;
 import com.google.common.base.Predicate;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
+import com.ostrichemulators.semtool.om.GraphModelListener;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.transformer.ArrowPaintTransformer;
@@ -57,8 +58,9 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, SEMOSSEdge> {
 
-	public static final String REPAINT_NEEDED = "repaint-needed";
+	public static final String VISIBILITY_CHANGED = "visibility-changed";
 	public static final String LAYOUT_CHANGED = "layout-changed";
+	public static final String GRAPH_CHANGED = "graph-changed";
 
 	private static final Logger log = Logger.getLogger( SemossGraphVisualization.class );
 	private final GraphDataModel gdm;
@@ -95,6 +97,15 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		super( new FRLayout<>( gdm.getGraph() ) );
 		this.gdm = gdm;
 		init();
+
+		gdm.addModelListener( new GraphModelListener(){
+
+			@Override
+			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphDataModel gdm ) {
+				refresh();
+			}
+		} );
+
 	}
 
 	public void setOverlayLevel( int level ) {
@@ -117,11 +128,11 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			hiddens.remove( uri );
 		}
 
-		firePropertyChange( REPAINT_NEEDED, false, true );
+		firePropertyChange( VISIBILITY_CHANGED, false, true );
 		refresh();
 	}
 
-	public void hide( Collection<GraphElement> elements, boolean hideme ) {
+	public void hide( Collection<? extends GraphElement> elements, boolean hideme ) {
 		List<URI> uris = new ArrayList<>();
 		for ( GraphElement e : elements ) {
 			uris.add( e.getURI() );
@@ -134,13 +145,13 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			hiddens.removeAll( uris );
 		}
 
-		firePropertyChange( REPAINT_NEEDED, false, true );
+		firePropertyChange( VISIBILITY_CHANGED, false, true );
 		refresh();
 	}
 
 	public void clearHiddens() {
 		hiddens.clear();
-		firePropertyChange( REPAINT_NEEDED, false, true );
+		firePropertyChange( VISIBILITY_CHANGED, false, true );
 		refresh();
 	}
 
@@ -247,7 +258,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 				&& getPickedEdgeState().getPicked().isEmpty() ) {
 			vft.changeSize( (int) incr );
 			eft.changeSize( (int) incr );
-			vht.changeSize( VertexShapeTransformer.STEPSIZE );
+			vht.changeSize( delta );
 		}
 		else {
 			//otherwise, only perform action on the selected vertices and edges
