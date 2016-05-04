@@ -50,11 +50,11 @@ public class TreeConverterListener extends AbstractAction {
 	}
 
 	/**
-	 * Method setVisualization. Sets the play sheet that the listener will access.
+	 * Method setPlaySheet. Sets the play sheet that the listener will access.
 	 *
 	 * @param ps GraphPlaySheet
 	 */
-	public void setVisualization( GraphPlaySheet ps ) {
+	public void setPlaySheet( GraphPlaySheet ps ) {
 		gps = ps;
 		setEnabled( false );
 

@@ -48,13 +48,13 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.ControlPanel;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
-import com.ostrichemulators.semtool.search.SearchController;
+import com.ostrichemulators.semtool.om.GraphModelListener;
+import com.ostrichemulators.semtool.search.GraphSearchTextField;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphLegendPanel;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.WeightDropDownButton;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
-import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
@@ -69,7 +69,6 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
@@ -87,7 +86,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final VisualizationControlPanel control;
 
 	protected GraphDataModel gdm;
-	protected String layoutName = Constants.FR;
 
 	protected boolean traversable = true;
 	protected boolean nodesHidable = true;
@@ -122,6 +120,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private final JToggleButton graphprops = new JToggleButton();
 	private final TreeConverterListener tree = new TreeConverterListener();
 	private final WeightDropDownButton weightButton = new WeightDropDownButton();
+	private final GraphSearchTextField searcher = new GraphSearchTextField();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -184,6 +183,17 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		addGraphListener( legendPanel );
 		addGraphListener( control );
+
+		searcher.setBorder( BorderFactory.createBevelBorder( BevelBorder.LOWERED ) );
+		searcher.setColumns( 15 );
+
+		gdm.addModelListener( new GraphModelListener() {
+
+			@Override
+			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphDataModel gdm ) {
+				searcher.index( graph );
+			}
+		} );
 	}
 
 	@Override
@@ -191,8 +201,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		super.populateToolBar( toolBar, tabTitle );
 
 		weightButton.setPlaySheet( this );
-
-		tree.setVisualization( this );
+		searcher.setPlaySheet( this );
+		tree.setPlaySheet( this );
 
 		toolBar.add( graphprops );
 		toolBar.add( reset );
@@ -201,26 +211,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		toolBar.add( redo );
 		toolBar.addSeparator();
 		toolBar.add( tree );
-
-		JTextField searchbar = new JTextField();
-		searchbar.setBorder( BorderFactory.createBevelBorder( BevelBorder.LOWERED ) );
-		searchbar.setColumns( 15 );
-		SearchController src = new SearchController( searchbar );
-		src.setGPS( this );
-		toolBar.add( searchbar );
-
-		addGraphListener( new GraphListener() {
-			@Override
-			public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-				src.indexGraph( graph, gps.getEngine() );
-			}
-
-			@Override
-			public void layoutChanged( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-					String oldlayout, Layout<SEMOSSVertex, SEMOSSEdge> newlayout, GraphPlaySheet gps ) {
-				// don't care
-			}
-		} );
+		toolBar.add( searcher );
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -376,10 +367,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 								(Layout<SEMOSSVertex, SEMOSSEdge>) evt.getNewValue() );
 					}
 				} );
-	}
-
-	public String getLayoutName() {
-		return layoutName;
 	}
 
 	/**

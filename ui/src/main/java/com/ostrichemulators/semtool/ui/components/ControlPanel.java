@@ -27,7 +27,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.search.SearchController;
+import com.ostrichemulators.semtool.search.GraphTextSearch;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 //import com.ostrichemulators.semtool.ui.main.listener.impl.GraphTransformerResetListener;
@@ -85,7 +85,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
 	private final TreeConverterListener treeListener = new TreeConverterListener();
 	private final RingsButtonListener ringsListener = new RingsButtonListener();
-	private final SearchController searchController;
+	private final GraphTextSearch searchController;
 	private final RedoListener redoListener = new RedoListener();
 	private final UndoListener undoListener = new UndoListener();
 
@@ -98,11 +98,12 @@ public class ControlPanel extends JPanel implements GraphListener {
 		searchText.setMaximumSize( new Dimension( 300, 20 ) );
 		searchText.setBorder( new BevelBorder( BevelBorder.LOWERED, null, null, null, null ) );
 		searchText.setColumns( 9 );
-		searchController = new SearchController( searchText );
+		searchController=null;
+		//searchController = new GraphTextSearch( searchText );
 
 		highlightButton = new JToggleButton( GuiUtility.loadImageIcon( "search.png" ) );
 		highlightButton.setToolTipText( "<html><b>Search</b><br>Depress to see your results on the graph,<br>keep it depressed to see results as you type (slow)</html>" );
-		highlightButton.addActionListener( searchController );
+		//highlightButton.addActionListener( searchController );
 
 		resetBtn = new JButton( GuiUtility.loadImageIcon( "refresh.png" ) );
 //		resetBtn.addActionListener( resetTransListener );
@@ -169,7 +170,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		searchController.indexGraph( graph, gps.getEngine() );
+		//searchController.index( graph, gps.getEngine() );
 	}
 
 	@Override
@@ -251,12 +252,12 @@ public class ControlPanel extends JPanel implements GraphListener {
 	 * @param _gps GraphPlaySheet
 	 */
 	public void setPlaySheet( GraphPlaySheet gps ) {
-//		treeListener.setVisualization( gps );
-//		resetTransListener.setVisualization( gps );
-//		redoListener.setVisualization( gps );
-//		undoListener.setVisualization( gps );
+//		treeListener.setPlaySheet( gps );
+//		resetTransListener.setPlaySheet( gps );
+//		redoListener.setPlaySheet( gps );
+//		undoListener.setPlaySheet( gps );
 //		searchController.setGPS( gps );
-//		weightButton.setVisualization( gps );
+//		weightButton.setPlaySheet( gps );
 //
 //		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
 //		vertSizeListener.setViewer( viewer );
@@ -278,6 +279,6 @@ public class ControlPanel extends JPanel implements GraphListener {
 	public void clickTreeButton( String layout ) {
 		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, layout );
 		treeButton.doClick();
-		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, Constants.TREE_LAYOUT );
+		//treeListener.putValue( TreeConverterListener.LAYOUT_NAME, Constants.TREE_LAYOUT );
 	}
 }

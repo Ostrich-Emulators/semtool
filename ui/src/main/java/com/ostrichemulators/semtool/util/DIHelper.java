@@ -19,14 +19,6 @@
  */
 package com.ostrichemulators.semtool.util;
 
-import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
-import edu.uci.ics.jung.algorithms.layout.CircleLayout;
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
-import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
-import edu.uci.ics.jung.algorithms.layout.KKLayout;
-import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
-import edu.uci.ics.jung.algorithms.layout.SpringLayout;
-import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.OutputTypeRegistry;
 import com.ostrichemulators.semtool.ui.components.PlayPane;
@@ -173,17 +165,6 @@ public class DIHelper {
 			helper.localProp.put( Constants.ORANGE, orange );
 			helper.localProp.put( Constants.PURPLE, purple );
 			helper.localProp.put( Constants.AQUA, aqua );
-
-			// put all the layouts as well
-			helper.localProp.put( Constants.FR, FRLayout.class );
-			helper.localProp.put( Constants.KK, KKLayout.class );
-			helper.localProp.put( Constants.ISO, ISOMLayout.class );
-			helper.localProp.put( Constants.SPRING, SpringLayout.class );
-			helper.localProp.put( Constants.CIRCLE_LAYOUT, CircleLayout.class );
-			helper.localProp.put( Constants.RADIAL_TREE_LAYOUT, RadialTreeLayout.class );
-			helper.localProp.put( Constants.TREE_LAYOUT, TreeLayout.class );
-			helper.localProp.put( Constants.BALLOON_LAYOUT, BalloonLayout.class );
-
 		}
 		return helper;
 	}
