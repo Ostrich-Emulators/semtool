@@ -91,7 +91,7 @@ public class LoopIdentifierProcessor extends AbstractAction {
 						vs.addAll( realg.getEndpoints( e ) );
 					}
 
-					gps.skeleton( vs, edges );
+					gps.getView().highlight( vs, edges );
 				}
 			}
 		}

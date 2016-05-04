@@ -22,7 +22,6 @@ package com.ostrichemulators.semtool.algorithm.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.ostrichemulators.semtool.algorithm.api.IAlgorithm;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -52,7 +51,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * This class uses the information from DistanceDownstreamInserter in order to
  * actually perform the distance downstream calculation.
  */
-public class DistanceDownstreamProcessor extends AbstractAction implements IAlgorithm {
+public class DistanceDownstreamProcessor extends AbstractAction {
 
 	private static final long serialVersionUID = 3191222375480129585L;
 	public static final URI WEIGHT = new URIImpl( "semoss://weight" );
@@ -101,15 +100,6 @@ public class DistanceDownstreamProcessor extends AbstractAction implements IAlgo
 		grid.create( rows, Arrays.asList( "Root Vertex", "Hops", "Child Vertex",
 				"Child Type" ), gps.getEngine() );
 		gps.addSibling( "Hops Downstream", grid );
-	}
-
-	/**
-	 * Performs downstream processing.
-	 */
-	@Override
-	public void execute( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-			Collection<SEMOSSVertex> nodes ) {
-		actionPerformed( null );
 	}
 
 	public void setPlaySheet( GraphPlaySheet ps ) {

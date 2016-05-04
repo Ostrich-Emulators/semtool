@@ -59,7 +59,10 @@ public class IslandIdentifierProcessor extends AbstractAction {
 		IslandProcessor<SEMOSSVertex, SEMOSSEdge> proc = new IslandProcessor( graph );
 		Set<Graph<SEMOSSVertex, SEMOSSEdge>> islands = proc.getIslands( selectedVerts );
 
-		if ( allIslands ) {
+		if ( allIslands && islands.size() > 3 ) {
+			// if we're highlighting all islands, unhighlight the biggest one
+			// so we can see the smaller ones (it's tough to see what's what if
+			// everything is highlighted)
 			Graph<SEMOSSVertex, SEMOSSEdge> biggestIsland = null;
 
 			for ( Graph<SEMOSSVertex, SEMOSSEdge> island : islands ) {
@@ -69,7 +72,10 @@ public class IslandIdentifierProcessor extends AbstractAction {
 				}
 			}
 
-			islands.remove( biggestIsland );
+			// if the biggest island is small, don't do anything
+			if ( biggestIsland.getVertexCount() > 5 ) {
+				islands.remove( biggestIsland );
+			}
 		}
 
 		for ( Graph<SEMOSSVertex, SEMOSSEdge> island : islands ) {
@@ -84,7 +90,7 @@ public class IslandIdentifierProcessor extends AbstractAction {
 			Collection<SEMOSSEdge> islandEdges ) {
 
 		if ( allIslands ) {
-			gps.highlight( islandVerts, islandEdges );
+			gps.getView().highlight( islandVerts, islandEdges );
 		}
 		else {
 			PickedState state = gps.getView().getPickedVertexState();
@@ -93,7 +99,7 @@ public class IslandIdentifierProcessor extends AbstractAction {
 				state.pick( v, true );
 			}
 
-			gps.skeleton( islandVerts, islandEdges );
+			// gps.getView().highlight( islandVerts, islandEdges );
 		}
 	}
 }

@@ -33,11 +33,6 @@ public class SEMOSSEdgeImpl extends AbstractGraphElement
 		implements SEMOSSEdge, Comparable<SEMOSSEdge> {
 
 	private final String uniqueifier;
-	/**
-	 * Flag which signifies whether the vertices of this edge are ALL visible -
-	 * for rendering purposes
-	 */
-	private boolean verticesVisible;
 
 	/**
 	 * @param _outVertex
@@ -86,26 +81,6 @@ public class SEMOSSEdgeImpl extends AbstractGraphElement
 	@Override
 	public int compareTo( SEMOSSEdge t ) {
 		return toString().compareTo( t.toString() );
-	}
-
-	/**
-	 * Set whether all of the vertices for this edge are visible
-	 *
-	 * @param visible the visibility of this edge's vertices
-	 */
-	@Override
-	public void setVerticesVisible( boolean visible ) {
-		this.verticesVisible = visible;
-	}
-
-	/**
-	 * Get whether all of the vertices for this edge are visible
-	 *
-	 * @return True if all vertices are visible, false otherwise
-	 */
-	@Override
-	public boolean getVerticesVisible() {
-		return this.verticesVisible;
 	}
 
 	@Override

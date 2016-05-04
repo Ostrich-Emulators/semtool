@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Component;
 import java.util.HashMap;
@@ -80,14 +81,27 @@ public class LabeledPairTableCellRenderer<T> extends DefaultTableCellRenderer {
 		};
 	}
 
+	public static LabeledPairTableCellRenderer<Value> getValuePairRenderer( RetrievingLabelCache rlc ) {
+		return new LabeledPairTableCellRenderer<Value>() {
+			@Override
+			protected String getLabelForCacheMiss( Value val ) {
+				if ( null == val ) {
+					return "";
+				}
+
+				return rlc.get( val );
+			}
+		};
+	}
+
 	public static LabeledPairTableCellRenderer<Value> getValuePairRenderer( IEngine eng ) {
 		return new LabeledPairTableCellRenderer<Value>() {
 			@Override
 			protected String getLabelForCacheMiss( Value val ) {
-				if( null == val ){
+				if ( null == val ) {
 					return "";
 				}
-			
+
 				String ret;
 				if ( val instanceof URI ) {
 					URI uri = URI.class.cast( val );

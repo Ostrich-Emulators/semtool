@@ -10,14 +10,4 @@ package com.ostrichemulators.semtool.om;
  * @author ryan
  */
 public interface SEMOSSEdge extends GraphElement {
-
-	public void setVerticesVisible( boolean visible );
-
-	/**
-	 * Get whether all of the vertices for this edge are visible
-	 *
-	 * @return True if all vertices are visible, false otherwise
-	 */
-	public boolean getVerticesVisible();	
-
 }

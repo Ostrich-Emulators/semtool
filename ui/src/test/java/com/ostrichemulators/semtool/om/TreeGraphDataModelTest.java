@@ -110,13 +110,11 @@ public class TreeGraphDataModelTest {
 		yuri.setLabel( "Yuri" );
 		yuri.setColor( Color.BLUE );
 		yuri.setShape( new Rectangle( 6, 1000 ) );
-		yuri.setVisible( false );
 
 		edge.setLabel( "edge label" );
 		edge.setColor( Color.BLUE );
-		edge.setVisible( false );
 
-		assertEquals( 7, val[0] );
+		assertEquals( 5, val[0] );
 	}
 
 }

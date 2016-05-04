@@ -21,8 +21,6 @@ package com.ostrichemulators.semtool.util;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
-import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
-import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 
 import static com.ostrichemulators.semtool.util.Utility.unzip;
 import java.awt.Desktop;
@@ -36,18 +34,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 
 import org.apache.log4j.Logger;
 
@@ -236,35 +228,6 @@ public class GuiUtility {
 		return new ImageIcon();
 	}
 
-	public static GraphPlaySheet getActiveGraphPlaysheet() {
-		JInternalFrame jif = DIHelper.getInstance().getDesktop().getSelectedFrame();
-		if ( jif instanceof PlaySheetFrame ) {
-			PlaySheetFrame psf = PlaySheetFrame.class.cast( jif );
-			return GraphPlaySheet.class.cast( psf.getActivePlaySheet() );
-		}
-		return null;
-	}
-
-	public static void repaintActiveGraphPlaysheet() {
-		getActiveGraphPlaysheet().fireGraphUpdated();
-	}
-
-	public static void addModelToJTable( AbstractTableModel tableModel, String tableKey ) {
-		JTable table = DIHelper.getJTable( tableKey );
-		table.setModel( tableModel );
-		tableModel.fireTableDataChanged();
-
-		for ( int i = 0; i < tableModel.getColumnCount(); i++ ) {
-			if ( Boolean.class.equals( tableModel.getColumnClass( i ) ) ) {
-				TableColumnModel columnModel = table.getColumnModel();
-
-				if ( i < columnModel.getColumnCount() ) {
-					columnModel.getColumn( i ).setPreferredWidth( 35 );
-				}
-			}
-		}
-	}
-
 	public static Properties getBuildProperties() {
 		try {
 			return Utility.loadProp( GuiUtility.class.getResource( "/build.properties" ) );
@@ -273,10 +236,5 @@ public class GuiUtility {
 			log.warn( ioe, ioe );
 		}
 		return new Properties();
-	}
-
-	public static void resetJTable( String tableKey ) {
-		DIHelper.getJTable( tableKey ).setModel( new DefaultTableModel() );
-		log.debug( "Resetting the " + tableKey + " table model." );
 	}
 }

@@ -13,7 +13,6 @@ import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ModelQueryAdapter;
 import com.ostrichemulators.semtool.ui.actions.DbAction;
 import com.ostrichemulators.semtool.ui.components.playsheets.PlaySheetCentralComponent;
-import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 
 import com.ostrichemulators.semtool.util.GuiUtility;
@@ -143,44 +142,36 @@ public class PlaySheetFrame extends JInternalFrame {
 	 */
 	protected void onFrameClose() {
 		PlaySheetCentralComponent pscc = getActivePlaySheet();
-		if ( null != pscc ) {
-			DIHelper.getInstance().getPlayPane().getFilterPanel().useBlankModels();
+		if ( null != pscc && pscc.hasChanges() ) {
+			Map<String, Action> actions = pscc.getActions();
+			Map<String, Action> optactions = new LinkedHashMap<>();
 
-			if ( pscc.hasChanges() ) {
-				GuiUtility.resetJTable( Constants.LABEL_TABLE );
-				GuiUtility.resetJTable( Constants.TOOLTIP_TABLE );
-				GuiUtility.resetJTable( Constants.COLOR_SHAPE_TABLE );
+			if ( actions.containsKey( SAVE ) ) {
+				optactions.put( "Save", actions.get( SAVE ) );
+			}
 
-				Map<String, Action> actions = pscc.getActions();
-				Map<String, Action> optactions = new LinkedHashMap<>();
+			if ( actions.containsKey( SAVE_ALL ) ) {
+				optactions.put( "Save All", actions.get( SAVE_ALL ) );
+			}
 
-				if ( actions.containsKey( SAVE ) ) {
-					optactions.put( "Save", actions.get( SAVE ) );
-				}
+			if ( optactions.isEmpty() ) {
+				return;
+			}
 
-				if ( actions.containsKey( SAVE_ALL ) ) {
-					optactions.put( "Save All", actions.get( SAVE_ALL ) );
-				}
+			optactions.put( "Discard", null );
 
-				if ( optactions.isEmpty() ) {
-					return;
-				}
+			int dtype = ( 2 == optactions.size() ? JOptionPane.YES_NO_OPTION
+					: JOptionPane.YES_NO_CANCEL_OPTION );
+			String[] options = optactions.keySet().toArray( new String[0] );
 
-				optactions.put( "Discard", null );
+			int ret = JOptionPane.showOptionDialog( this, "Playsheet \"" + pscc.getTitle()
+					+ "\" has unsaved data. Save it? ", "Save Unsaved Data?", dtype,
+					JOptionPane.QUESTION_MESSAGE, null, options, options[0] );
 
-				int dtype = ( 2 == optactions.size() ? JOptionPane.YES_NO_OPTION
-						: JOptionPane.YES_NO_CANCEL_OPTION );
-				String[] options = optactions.keySet().toArray( new String[0] );
+			Action a = optactions.get( options[ret] );
 
-				int ret = JOptionPane.showOptionDialog( this, "Playsheet \"" + pscc.getTitle()
-						+ "\" has unsaved data. Save it? ", "Save Unsaved Data?", dtype,
-						JOptionPane.QUESTION_MESSAGE, null, options, options[0] );
-
-				Action a = optactions.get( options[ret] );
-
-				if ( null != a ) {
-					a.actionPerformed( null );
-				}
+			if ( null != a ) {
+				a.actionPerformed( null );
 			}
 		}
 	}
@@ -282,7 +273,7 @@ public class PlaySheetFrame extends JInternalFrame {
 	public ProgressTask getCreateTask( Insight insight, Map<String, Value> bindings ) {
 		OutputTypeRegistry registry = DIHelper.getInstance().getOutputTypeRegistry();
 		InsightOutputType type = insight.getOutput();
-			
+
 		PlaySheetCentralComponent cmp
 				= PlaySheetCentralComponent.class.cast( registry.getSheetInstance( type ) );
 		cmp.setTitle( insight.getLabel() );

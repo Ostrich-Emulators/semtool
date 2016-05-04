@@ -84,7 +84,7 @@ public abstract class SizedSelectingTransformer<T extends GraphElement, V>
 	public void clearSizeData() {
 		customSizeData.clear();
 		setDefaultSize( DEFAULTSIZE );
-		setUnselectedSize( MINSIZE );
+		setUnselectedSize( DEFAULTSIZE );
 	}
 
 	/**

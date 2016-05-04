@@ -45,8 +45,6 @@ public interface GraphElement {
 
 	public boolean isMarked( URI prop );
 
-	public boolean isVisible();
-
 	public void mark( URI prop, boolean makeMark );
 
 	public void removeProperty( URI prop );
@@ -58,8 +56,6 @@ public interface GraphElement {
 	public void setURI( URI uri );
 
 	public void setValue( URI prop, Value val );
-
-	public void setVisible( boolean b );
 
 	public void addPropertyChangeListener( PropertyChangeListener pcl );
 

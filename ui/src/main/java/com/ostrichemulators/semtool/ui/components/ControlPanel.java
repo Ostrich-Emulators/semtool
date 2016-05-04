@@ -19,23 +19,23 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.WeightDropDownButton;
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.search.SearchController;
+import com.ostrichemulators.semtool.search.GraphTextSearch;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphTransformerResetListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphVertexSizeListener;
+//import com.ostrichemulators.semtool.ui.main.listener.impl.GraphTransformerResetListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphVertexSizeListener;
 import com.ostrichemulators.semtool.ui.main.listener.impl.RedoListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.RingsButtonListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.TreeConverterListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.UndoListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.RingsButtonListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.UndoListener;
 import com.ostrichemulators.semtool.util.Constants;
 
 import com.ostrichemulators.semtool.util.GuiUtility;
@@ -80,12 +80,12 @@ public class ControlPanel extends JPanel implements GraphListener {
 	private final WeightDropDownButton weightButton;
 	private final JTextField searchText = new JTextField();
 
-	private final GraphTransformerResetListener resetTransListener
-			= new GraphTransformerResetListener();
+//	private final GraphTransformerResetListener resetTransListener
+//			= new GraphTransformerResetListener();
 	private final GraphVertexSizeListener vertSizeListener = new GraphVertexSizeListener();
 	private final TreeConverterListener treeListener = new TreeConverterListener();
 	private final RingsButtonListener ringsListener = new RingsButtonListener();
-	private final SearchController searchController;
+	private final GraphTextSearch searchController;
 	private final RedoListener redoListener = new RedoListener();
 	private final UndoListener undoListener = new UndoListener();
 
@@ -98,17 +98,18 @@ public class ControlPanel extends JPanel implements GraphListener {
 		searchText.setMaximumSize( new Dimension( 300, 20 ) );
 		searchText.setBorder( new BevelBorder( BevelBorder.LOWERED, null, null, null, null ) );
 		searchText.setColumns( 9 );
-		searchController = new SearchController( searchText );
+		searchController=null;
+		//searchController = new GraphTextSearch( searchText );
 
 		highlightButton = new JToggleButton( GuiUtility.loadImageIcon( "search.png" ) );
 		highlightButton.setToolTipText( "<html><b>Search</b><br>Depress to see your results on the graph,<br>keep it depressed to see results as you type (slow)</html>" );
-		highlightButton.addActionListener( searchController );
+		//highlightButton.addActionListener( searchController );
 
 		resetBtn = new JButton( GuiUtility.loadImageIcon( "refresh.png" ) );
-		resetBtn.addActionListener( resetTransListener );
-		resetBtn.setToolTipText( "<html><b>Reset (F5)</b><br>Reset Graph Transformers</html>" );
-		addKeyListener( resetBtn, resetTransListener,
-				"F5", KeyStroke.getKeyStroke( "F5" ) );
+//		resetBtn.addActionListener( resetTransListener );
+//		resetBtn.setToolTipText( "<html><b>Reset (F5)</b><br>Reset Graph Transformers</html>" );
+//		addKeyListener( resetBtn, resetTransListener,
+//				"F5", KeyStroke.getKeyStroke( "F5" ) );
 
 		undoButton = new JButton( GuiUtility.loadImageIcon( "undo.png" ) );
 		undoButton.setToolTipText( "<html><b>Undo (CRTL+Z)</b><br>Undo the last graph action</html>" );
@@ -169,7 +170,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 
 	@Override
 	public void graphUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphPlaySheet gps ) {
-		searchController.indexGraph( graph, gps.getEngine() );
+		//searchController.index( graph, gps.getEngine() );
 	}
 
 	@Override
@@ -180,7 +181,7 @@ public class ControlPanel extends JPanel implements GraphListener {
 			ringsListener.setEnabled( true );
 		}
 
-		ringsListener.setLayout( newlayout );
+		// ringsListener.setLayout( newlayout );
 	}
 
 	public void setForTree( boolean b ) {
@@ -251,16 +252,16 @@ public class ControlPanel extends JPanel implements GraphListener {
 	 * @param _gps GraphPlaySheet
 	 */
 	public void setPlaySheet( GraphPlaySheet gps ) {
-		treeListener.setPlaySheet( gps );
-		resetTransListener.setPlaySheet( gps );
-		redoListener.setPlaySheet( gps );
-		undoListener.setPlaySheet( gps );
-		searchController.setGPS( gps );
-		weightButton.setPlaySheet( gps );
-
-		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
-		vertSizeListener.setViewer( viewer );
-		ringsListener.setViewer( viewer );
+//		treeListener.setPlaySheet( gps );
+//		resetTransListener.setPlaySheet( gps );
+//		redoListener.setPlaySheet( gps );
+//		undoListener.setPlaySheet( gps );
+//		searchController.setGPS( gps );
+//		weightButton.setPlaySheet( gps );
+//
+//		VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer = gps.getView();
+//		vertSizeListener.setViewer( viewer );
+//		ringsListener.setViewer( viewer );
 	}
 
 	public void setUndoButtonEnabled( boolean enabled ) {
@@ -278,6 +279,6 @@ public class ControlPanel extends JPanel implements GraphListener {
 	public void clickTreeButton( String layout ) {
 		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, layout );
 		treeButton.doClick();
-		treeListener.putValue( TreeConverterListener.LAYOUT_NAME, Constants.TREE_LAYOUT );
+		//treeListener.putValue( TreeConverterListener.LAYOUT_NAME, Constants.TREE_LAYOUT );
 	}
 }

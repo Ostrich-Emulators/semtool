@@ -379,11 +379,11 @@ public class ControlDataTable {
 			if ( getClass() != obj.getClass() ) {
 				return false;
 			}
-			final ControlDataRow other = (ControlDataRow) obj;
-			if ( !Objects.equals( this.type, other.type ) ) {
+			final ControlDataRow cdr = (ControlDataRow) obj;
+			if ( !Objects.equals( this.type, cdr.type ) ) {
 				return false;
 			}
-			if ( !Objects.equals( this.prop, other.prop ) ) {
+			if ( !Objects.equals( this.prop, cdr.prop ) ) {
 				return false;
 			}
 			return true;

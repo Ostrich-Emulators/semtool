@@ -22,7 +22,7 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PaintLabel;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintLabel;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.tabbedqueries.SparqlTextArea;
 import com.ostrichemulators.semtool.om.GraphColorRepository;

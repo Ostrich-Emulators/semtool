@@ -19,16 +19,9 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
-import com.google.common.base.Predicate;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Paint;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -42,109 +35,97 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
 
-import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
-import edu.uci.ics.jung.visualization.Layer;
-import edu.uci.ics.jung.visualization.MultiLayerTransformer;
-import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationImageServer;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
-import edu.uci.ics.jung.visualization.renderers.BasicRenderer;
-import edu.uci.ics.jung.visualization.renderers.Renderer;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.ui.components.ControlData;
 import com.ostrichemulators.semtool.ui.components.ControlPanel;
-import com.ostrichemulators.semtool.ui.components.FilterPanel;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
-import com.ostrichemulators.semtool.ui.components.LegendPanel2;
-import com.ostrichemulators.semtool.ui.components.VertexColorShapeData;
+import com.ostrichemulators.semtool.om.GraphModelListener;
+import com.ostrichemulators.semtool.search.GraphSearchTextField;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphLegendPanel;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.WeightDropDownButton;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
-import com.ostrichemulators.semtool.ui.components.models.NodeEdgePropertyTableModel;
-import com.ostrichemulators.semtool.ui.components.models.VertexFilterTableModel;
-import com.ostrichemulators.semtool.ui.main.listener.impl.GraphNodeListener;
-import com.ostrichemulators.semtool.ui.main.listener.impl.PickedStateListener;
-import com.ostrichemulators.semtool.ui.transformer.ArrowPaintTransformer;
-import com.ostrichemulators.semtool.ui.transformer.EdgeStrokeTransformer;
-import com.ostrichemulators.semtool.ui.transformer.LabelFontTransformer;
-import com.ostrichemulators.semtool.ui.transformer.LabelTransformer;
-import com.ostrichemulators.semtool.ui.transformer.PaintTransformer;
-import com.ostrichemulators.semtool.ui.transformer.SelectingTransformer;
-import com.ostrichemulators.semtool.ui.transformer.TooltipTransformer;
-import com.ostrichemulators.semtool.ui.transformer.VertexShapeTransformer;
-import com.ostrichemulators.semtool.ui.transformer.VertexStrokeTransformer;
-import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.DIHelper;
-import com.ostrichemulators.semtool.util.MultiMap;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
 import com.ostrichemulators.semtool.util.GuiUtility;
-import edu.uci.ics.jung.graph.util.EdgeIndexFunction;
+import com.ostrichemulators.semtool.util.MultiMap;
+import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Dimension;
-import java.awt.event.ItemListener;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
+import java.util.prefs.Preferences;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.border.BevelBorder;
 
 /**
  */
 public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyChangeListener {
 
+	private static final String PROPERTY_PREF = "GraphPropertyLocation";
 	private static final long serialVersionUID = 4699492732234656487L;
 	private static final Logger log = Logger.getLogger( GraphPlaySheet.class );
 
-	private VisualizationViewer<SEMOSSVertex, SEMOSSEdge> view;
+	private SemossGraphVisualization view;
 	private JSplitPane graphSplitPane;
-	protected ControlPanel controlPanel;
-
-	private VertexColorShapeData colorShapeData = new VertexColorShapeData();
+	private final VisualizationControlPanel control;
 
 	protected GraphDataModel gdm;
-	protected String layoutName = Constants.FR;
-	protected ControlData controlData = new ControlData();
-
-	protected LabelFontTransformer<SEMOSSVertex> vft = new LabelFontTransformer<>();
-	protected LabelTransformer<SEMOSSVertex> vlt = new LabelTransformer<>( controlData );
-	protected TooltipTransformer<SEMOSSVertex> vtt = new TooltipTransformer<>( controlData );
-	protected PaintTransformer<SEMOSSVertex> vpt = new PaintTransformer<>();
-	protected VertexShapeTransformer vht = new VertexShapeTransformer();
-	protected VertexStrokeTransformer vst = new VertexStrokeTransformer();
-
-	protected LabelFontTransformer<SEMOSSEdge> eft = new LabelFontTransformer<>();
-	protected LabelTransformer<SEMOSSEdge> elt = new LabelTransformer<>( controlData );
-	protected TooltipTransformer<SEMOSSEdge> ett = new TooltipTransformer<>( controlData );
-	protected PaintTransformer<SEMOSSEdge> ept = new PaintTransformer<SEMOSSEdge>() {
-		@Override
-		protected Paint transformNotSelected( SEMOSSEdge t, boolean skel ) {
-			// always show the edge
-			return super.transformNotSelected( t, false );
-		}
-	};
-	protected EdgeStrokeTransformer est = new EdgeStrokeTransformer();
-	protected ArrowPaintTransformer adpt = new ArrowPaintTransformer();
-	protected ArrowPaintTransformer aft = new ArrowPaintTransformer();
 
 	protected boolean traversable = true;
 	protected boolean nodesHidable = true;
 
 	protected int overlayLevel = 0;
 	protected int maxOverlayLevel = 0;
-	private final HidingPredicate<SEMOSSVertex> predicate = new HidingPredicate<>();
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
-	private ItemListener pickStateListener = null;
-	private VertexFilterTableModel nodemodel;
-	private VertexFilterTableModel edgemodel;
-	private NodeEdgePropertyTableModel propmodel;
+	private final RetrievingLabelCache labelcache = new RetrievingLabelCache();
+
+	private final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			undoView();
+		}
+	};
+
+	private final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			redoView();
+		}
+	};
+
+	private final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+			if ( xray.isSelected() ) {
+				xray.doClick();
+			}
+			view.clearHighlighting();
+		}
+	};
+
+	private final JToggleButton graphprops = new JToggleButton();
+	private final JToggleButton xray = new JToggleButton();
+	private final TreeConverterListener tree = new TreeConverterListener();
+	private final WeightDropDownButton weightButton = new WeightDropDownButton();
+	private final GraphSearchTextField searcher = new GraphSearchTextField();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -154,53 +135,98 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public GraphPlaySheet( GraphDataModel model ) {
-		log.debug( "new Graph PlaySheet" );
+		this( model, new VisualizationControlPanel() );
+	}
+
+	public GraphPlaySheet( GraphDataModel model, VisualizationControlPanel vcp ) {
+		log.debug( "new graphplaysheet" );
 		gdm = model;
 
-		controlPanel = new ControlPanel();
+		undo.setEnabled( false );
+		redo.setEnabled( false );
+
+		control = vcp;
+		control.setLabelCache( labelcache );
 
 		graphSplitPane = new JSplitPane();
-		graphSplitPane.setEnabled( false );
 		graphSplitPane.setOneTouchExpandable( true );
-		graphSplitPane.setOrientation( JSplitPane.VERTICAL_SPLIT );
+		graphSplitPane.setOrientation( JSplitPane.HORIZONTAL_SPLIT );
 
 		setLayout( new BorderLayout() );
 		add( graphSplitPane, BorderLayout.CENTER );
-		LegendPanel2 legendPanel = new LegendPanel2();
+		GraphLegendPanel legendPanel = new GraphLegendPanel( labelcache );
 		add( legendPanel, BorderLayout.SOUTH );
 
-		nodemodel = createNodeModel();
-		edgemodel = createEdgeModel();
-		propmodel = createPropertyModel();
-
-		Layout<SEMOSSVertex, SEMOSSEdge> layout = new FRLayout<>( gdm.getGraph() );
-		view = new VisualizationViewer<>( layout );
+		view = new SemossGraphVisualization( gdm );
 		initVisualizer( view );
+		view.addPickingSupport();
+		control.setVisualization( view );
 
-		controlData.setViewer( view );
+		control.setMinimumSize( new Dimension( 0, 0 ) );
+		graphSplitPane.setLeftComponent( new GraphZoomScrollPane( view ) );
+		graphSplitPane.setRightComponent( control );
+		graphSplitPane.setDividerLocation( 1d );
+		graphSplitPane.setResizeWeight( 1d );
 
-		controlPanel.setPlaySheet( this );
-		controlPanel.layoutChanged( gdm.getGraph(), null, layout, this );
+		graphprops.setAction( new AbstractAction( "Graph Properties" ) {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Preferences prefs = Preferences.userNodeForPackage( getClass() );
 
-		graphSplitPane.setTopComponent( controlPanel );
-		graphSplitPane.setBottomComponent( new GraphZoomScrollPane( view ) );
+				if ( graphprops.isSelected() ) {
+					int pct = prefs.getInt( PROPERTY_PREF, GraphPlaySheet.this.getWidth() - 250 );
+					graphSplitPane.setDividerLocation( pct );
+				}
+				else {
+					prefs.putInt( PROPERTY_PREF, graphSplitPane.getDividerLocation() );
+					graphSplitPane.setDividerLocation( 1d );
+				}
+			}
+		} );
+
+		xray.setAction( new AbstractAction( "",
+				GuiUtility.loadImageIcon( "x-ray.png" ) ) {
+					@Override
+					public void actionPerformed( ActionEvent e ) {
+						view.setSkeletonMode( xray.isSelected() );
+					}
+				} );
+		xray.setToolTipText( "X-Ray Highlighting");
+
+		reset.putValue( Action.SHORT_DESCRIPTION, "Reset graph transformers" );
 
 		addGraphListener( legendPanel );
-		addGraphListener( controlData );
-		addGraphListener( colorShapeData );
-		addGraphListener( controlPanel );
+		addGraphListener( control );
+
+		searcher.setBorder( BorderFactory.createBevelBorder( BevelBorder.LOWERED ) );
+		searcher.setColumns( 15 );
+
+		gdm.addModelListener( new GraphModelListener() {
+
+			@Override
+			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphDataModel gdm ) {
+				searcher.index( graph );
+			}
+		} );
 	}
 
-	protected VertexFilterTableModel<SEMOSSVertex> createNodeModel() {
-		return new VertexFilterTableModel( "Node Type" );
-	}
+	@Override
+	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
+		super.populateToolBar( toolBar, tabTitle );
 
-	protected VertexFilterTableModel<SEMOSSEdge> createEdgeModel() {
-		return new VertexFilterTableModel( "Edge Type" );
-	}
+		weightButton.setPlaySheet( this );
+		searcher.setPlaySheet( this );
+		tree.setPlaySheet( this );
 
-	protected NodeEdgePropertyTableModel createPropertyModel() {
-		return new NodeEdgePropertyTableModel( this );
+		toolBar.add( graphprops );
+		toolBar.add( xray );
+		toolBar.add( reset );
+		toolBar.add( weightButton );
+		toolBar.add( undo );
+		toolBar.add( redo );
+		toolBar.addSeparator();
+		toolBar.add( tree );
+		toolBar.add( searcher );
 	}
 
 	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
@@ -246,9 +272,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * @return
 	 */
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getVisibleGraph() {
-		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter;
-		filter = new VertexPredicateFilter<>( predicate );
-		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) filter.apply( gdm.getGraph() );
+		return view.getGraph();
 	}
 
 	@Override
@@ -289,24 +313,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	/**
-	 * Method resetView. Reset to original view.
-	 */
-	public void resetView() {
-		if ( overlayLevel > 1 ) {
-			overlayLevel = 1;
-			updateLayout();
-			fireGraphUpdated();
-		}
-	}
-
-	/**
 	 * Method undoView. Get the latest view and undo it.
 	 */
 	public void undoView() {
 		if ( overlayLevel > 1 ) {
 			overlayLevel--;
-			updateLayout();
 			setUndoRedoBtn();
+			view.refresh();
 			fireGraphUpdated();
 		}
 	}
@@ -317,139 +330,55 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void redoView() {
 		if ( overlayLevel < maxOverlayLevel ) {
 			overlayLevel++;
-			updateLayout();
 			setUndoRedoBtn();
+			view.refresh();
 			fireGraphUpdated();
 		}
-	}
-
-	public void updateLayout() {
-		VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> filter
-				= new VertexPredicateFilter<>( predicate );
-		Layout<SEMOSSVertex, SEMOSSEdge> layout = view.getGraphLayout();
-		layout.setGraph( filter.apply( gdm.getGraph() ) );
-		view.setGraphLayout( layout );
-	}
-
-	@Override
-	public void activated() {
-		FilterPanel fp = DIHelper.getInstance().getPlayPane().getFilterPanel();
-		fp.setModels( nodemodel, edgemodel, propmodel, getEngine() );
-
-		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
-		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
-		if ( !pickedVerts.isEmpty() ) {
-			propmodel.setVertex( pickedVerts.iterator().next() );
-		}
-		else if ( !pickedEdges.isEmpty() ) {
-			propmodel.setEdge( pickedEdges.iterator().next() );
-		}
-
-		GuiUtility.addModelToJTable( controlData.getVertexTableModel(), Constants.LABEL_TABLE );
-		GuiUtility.addModelToJTable( controlData.getEdgeTableModel(), Constants.TOOLTIP_TABLE );
-
-		//JTable colorShapeTable = DIHelper.getJTable( Constants.COLOR_SHAPE_TABLE );
-		//colorShapeTable.setModel( colorShapeData );
-		//TableColumnModel tcm = colorShapeTable.getColumnModel();
-		//tcm.getColumn( 1 ).setCellRenderer( new ResourceNameRenderer() );
-		//JComboBox<Shape> shapes = new JComboBox<>( GraphShapeRepository.instance().getAllShapes() );
-		//shapes.setRenderer( new ShapeRenderer() );
-		//tcm.getColumn( 2 ).setCellRenderer( new TableShapeRenderer() );
-		//tcm.getColumn( 2 ).setCellEditor( new DefaultCellEditor( shapes ) );
-		//JComboBox<Color> colors = new JComboBox<>( GraphColorRepository.instance().getAllNamedColors() );
-		//colors.setRenderer( new ColorRenderer() );
-		//tcm.getColumn( 3 ).setCellRenderer( new TableColorRenderer() );
-		//tcm.getColumn( 3 ).setCellEditor( new DefaultCellEditor( colors ) );
 	}
 
 	/**
 	 * Regenerates all the data needed to display the graph
 	 */
 	public void updateGraph() {
-		setLayoutName( layoutName );
-		fireGraphUpdated();
 		setUndoRedoBtn();
+		fireGraphUpdated();
 	}
 
 	/**
 	 * Method initVisualizer.
 	 */
-	private void initVisualizer( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> viewer ) {
-		viewer.setRenderer( new SemossBasicRenderer() );
-
+	private void initVisualizer( SemossGraphVisualization viewer ) {
 		GraphNodeListener gl = new GraphNodeListener( this );
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
-		viewer.setGraphMouse( gl );
-		viewer.setBackground( Color.WHITE );
+		view.setGraphMouse( gl );
+		view.setLabelCache( labelcache );
 
-		RenderContext<SEMOSSVertex, SEMOSSEdge> rc = viewer.getRenderContext();
-		// FIXME: this edge function seems to be needed since JUNG 2.1
-		// However, it seems that graph is always null, so can't use the default impl
-		// rc.setParallelEdgeIndexFunction( DefaultParallelEdgeIndexFunction.getInstance() );
-		rc.setParallelEdgeIndexFunction( new EdgeIndexFunction<SEMOSSVertex, SEMOSSEdge>() {
-			@Override
-			public int getIndex( Graph<SEMOSSVertex, SEMOSSEdge> graph, SEMOSSEdge e ) {
-				return 0;
-			}
+		view.addPropertyChangeListener( SemossGraphVisualization.VISIBILITY_CHANGED,
+				new PropertyChangeListener() {
 
-			@Override
-			public void reset( Graph<SEMOSSVertex, SEMOSSEdge> graph, SEMOSSEdge e ) {
-			}
+					@Override
+					public void propertyChange( PropertyChangeEvent evt ) {
+						fireGraphUpdated();
+					}
+				} );
+		view.addPropertyChangeListener( SemossGraphVisualization.LAYOUT_CHANGED,
+				new PropertyChangeListener() {
 
-			@Override
-			public void reset() {
-			}
-		} );
-		rc.setVertexLabelTransformer( vlt );
-		viewer.setVertexToolTipTransformer( vtt );
-		rc.setVertexStrokeTransformer( vst );
-		rc.setVertexShapeTransformer( vht );
-		rc.setVertexFillPaintTransformer( vpt );
-		rc.setVertexFontTransformer( vft );
-
-		rc.setEdgeLabelTransformer( elt );
-		viewer.setEdgeToolTipTransformer( ett );
-		rc.setEdgeDrawPaintTransformer( ept );
-		rc.setEdgeStrokeTransformer( est );
-		rc.setEdgeArrowStrokeTransformer( est );
-		rc.setEdgeFontTransformer( eft );
-		rc.setArrowDrawPaintTransformer( adpt );
-		rc.setArrowFillPaintTransformer( aft );
-		viewer.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.S );
-		rc.setLabelOffset( 0 );
-
-		setPicker( new PickedStateListener( viewer, this ) );
-	}
-
-	protected void setPicker( ItemListener psl ) {
-		if ( null != pickStateListener ) {
-			// remove the old listener
-			view.getPickedVertexState().removeItemListener( pickStateListener );
-			view.getPickedEdgeState().removeItemListener( pickStateListener );
-
-			view.getPickedVertexState().removeItemListener( propmodel );
-			view.getPickedEdgeState().removeItemListener( propmodel );
-		}
-		if ( null != psl ) {
-			pickStateListener = psl;
-			view.getPickedVertexState().addItemListener( pickStateListener );
-			view.getPickedEdgeState().addItemListener( pickStateListener );
-
-			view.getPickedVertexState().addItemListener( propmodel );
-			view.getPickedEdgeState().addItemListener( propmodel );
-		}
-	}
-
-	public String getLayoutName() {
-		return layoutName;
+					@Override
+					public void propertyChange( PropertyChangeEvent evt ) {
+						fireLayoutUpdated( gdm.getGraph(), "",
+								(Layout<SEMOSSVertex, SEMOSSEdge>) evt.getNewValue() );
+					}
+				} );
 	}
 
 	/**
 	 * Method setUndoRedoBtn.
 	 */
 	private void setUndoRedoBtn() {
-		controlPanel.setUndoButtonEnabled( overlayLevel > 1 );
-		controlPanel.setRedoButtonEnabled( maxOverlayLevel > overlayLevel );
+		undo.setEnabled( overlayLevel > 1 );
+		redo.setEnabled( maxOverlayLevel > overlayLevel );
+		view.setOverlayLevel( overlayLevel );
 	}
 
 	public MultiMap<URI, SEMOSSVertex> getVerticesByType() {
@@ -468,123 +397,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		return typeToInstances;
 	}
 
-	/**
-	 * Method getColorShapeData.
-	 *
-	 * @return VertexColorShapeData
-	 */
-	public VertexColorShapeData getColorShapeData() {
-		return colorShapeData;
-	}
-
-	/**
-	 * Method getControlData.
-	 *
-	 * @return ControlData
-	 */
-	public ControlData getControlData() {
-		return controlData;
-	}
-
-	/**
-	 * Sets the layout of the visualization. The name must be a key pointing to a
-	 * a class name in the semoss.properties file. If any error occurs, the layout
-	 * is clearSelected to {@link Constants#FR}. (Not all layouts can support all
-	 * graph topologies)
-	 *
-	 * @return true if the desired layout was applied
-	 * @param layout String
-	 */
-	public boolean setLayoutName( String newName ) {
-		String oldName = this.layoutName;
-		this.layoutName = newName;
-
-		Class<?> layoutClass = (Class<?>) DIHelper.getInstance().getLocalProp( layoutName );
-		log.debug( "Create layout from layoutName " + layoutName
-				+ ", and layoutClass " + layoutClass );
-
-		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = getVisibleGraph();
-
-		boolean ok = false;
-		Layout<SEMOSSVertex, SEMOSSEdge> layout = null;
-		try {
-			Constructor<?> constructor = layoutClass.getConstructor( Graph.class );
-			layout = (Layout<SEMOSSVertex, SEMOSSEdge>) constructor.newInstance( graph );
-			ok = true;
-		}
-		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-			log.error( "could not create layout", e );
-		}
-
-		if ( null == layout ) {
-			layout = new FRLayout<>( graph );
-		}
-
-		fitGraphinWindow();
-		layout.initialize();
-		try {
-			double scale = 0.85;
-			Dimension d = view.getSize();
-			d.setSize( d.getWidth() * scale, d.getHeight() * scale );
-			layout.setSize( d );
-		}
-		catch ( UnsupportedOperationException uoe ) {
-			// you can set the layout size for some layouts...but there's no way to
-			// know which ones
-		}
-
-		view.setGraphLayout( layout );
-
-		fireLayoutUpdated( graph, oldName, layout );
-
-		return ok;
-	}
-
-	/*
-	 * This method tries to fit the graph to the available space.
-	 * It could work better.
-	 */
-	protected void fitGraphinWindow() {
-		MultiLayerTransformer mlt = view.getRenderContext().getMultiLayerTransformer();
-		double vscalex = mlt.getTransformer( Layer.VIEW ).getScaleX() * 1.1;
-		double vscaley = mlt.getTransformer( Layer.VIEW ).getScaleY() * 1.1;
-
-		// Dimension d = view.getSize();
-		// d.setSize( d.getWidth() / vscalex, d.getHeight() / vscaley );
-		double scalex = 1 / vscaley;
-		double scaley = 1 / vscalex;
-
-		mlt.getTransformer( Layer.LAYOUT ).setScale( scalex, scaley, view.getCenter() );
-//
-//		
-//		
-//		// two steps here: figure out the center of our layout, and translate
-//		// that center so it's in the center of our visualization
-//		// we'll take the average X and Y, so big clusters get closer to the center
-//		double totalX = 0;
-//		double totalY = 0;
-//
-//		Graph<SEMOSSVertex, SEMOSSEdge> graph = layout.getGraph();
-//		Collection<SEMOSSVertex> verts = graph.getVertices();
-//		for ( SEMOSSVertex v : verts ) {
-//			double x = layout.getX( v );
-//			double y = layout.getY( v );
-//
-//			totalX += x;
-//			totalY += y;
-//		}
-//
-//		Point2D viewCenter = view.getCenter();
-//		Point2D layoutCenter
-//				= new Point2D.Double( totalX / verts.size(), totalY / verts.size() );
-//		log.debug( "layout center is: " + layoutCenter );
-//		log.debug( "view center is: " + view.getCenter() );
-//
-//		view.getRenderContext().getMultiLayerTransformer().getTransformer( Layer.LAYOUT ).
-//				translate( viewCenter.getX() - layoutCenter.getX(),
-//						viewCenter.getY() - layoutCenter.getY() );
-	}
-
 	public void fireLayoutUpdated( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 			String oldName, Layout<SEMOSSVertex, SEMOSSEdge> layout ) {
 		for ( GraphListener gl : listenees ) {
@@ -598,27 +410,14 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public void fireGraphUpdated() {
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> g = getGraphData().getGraph();
 		for ( GraphListener gl : listenees ) {
 			try {
-				gl.graphUpdated( gdm.getGraph(), this );
+				gl.graphUpdated( g, this );
 			}
 			catch ( Exception ex ) {
 				log.error( "Error updating graph for GraphListener " + gl + ": " + ex, ex );
 			}
-		}
-
-		// these aren't true graph listeners, but we
-		// need to update them when the graph updates
-		DirectedGraph<SEMOSSVertex, SEMOSSEdge> g = getGraphData().getGraph();
-		nodemodel.refresh( g.getVertices() );
-		edgemodel.refresh( g.getEdges() );
-		Set<SEMOSSVertex> pickedVerts = getView().getPickedVertexState().getPicked();
-		Set<SEMOSSEdge> pickedEdges = getView().getPickedEdgeState().getPicked();
-		if ( !pickedVerts.isEmpty() ) {
-			propmodel.setVertex( pickedVerts.iterator().next() );
-		}
-		else if ( !pickedEdges.isEmpty() ) {
-			propmodel.setEdge( pickedEdges.iterator().next() );
 		}
 	}
 
@@ -630,30 +429,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		listenees.remove( gl );
 	}
 
-	public VisualizationViewer<SEMOSSVertex, SEMOSSEdge> getView() {
+	public SemossGraphVisualization getView() {
 		return view;
-	}
-
-	protected void setView( VisualizationViewer<SEMOSSVertex, SEMOSSEdge> v ) {
-		view = v;
-	}
-
-	/**
-	 * Method getEdgeLabelFontTransformer.
-	 *
-	 * @return EdgeLabelFontTransformer
-	 */
-	public LabelFontTransformer<SEMOSSEdge> getEdgeLabelFontTransformer() {
-		return eft;
-	}
-
-	/**
-	 * Method getVertexLabelFontTransformer.
-	 *
-	 * @return VertexLabelFontTransformer
-	 */
-	public LabelFontTransformer<SEMOSSVertex> getVertexLabelFontTransformer() {
-		return vft;
 	}
 
 	@Override
@@ -676,6 +453,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 */
 	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
+		labelcache.setEngine( engine );
 		List<URI> nodes = new ArrayList<>();
 		Model model = new LinkedHashModel();
 		for ( Value[] row : data ) {
@@ -716,6 +494,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public void add( Model m, List<URI> nodes, IEngine engine ) {
+		labelcache.setEngine( engine );
 		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 		if ( null == nodes ) {
 			nodes = new ArrayList<>();
@@ -742,6 +521,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 
 		overlayLevel++;
+		view.setOverlayLevel( overlayLevel );
 
 		Set<SEMOSSVertex> oldverts = new HashSet<>( gdm.getGraph().getVertices() );
 		Set<SEMOSSEdge> oldedges = new HashSet<>( gdm.getGraph().getEdges() );
@@ -782,20 +562,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void incrementFont( float incr ) {
 		super.incrementFont( incr );
-
-		//if no vertices or edges are selected, perform action on all vertices and edges
-		if ( view.getPickedVertexState().getPicked().isEmpty()
-				&& view.getPickedEdgeState().getPicked().isEmpty() ) {
-			vft.changeSize( (int) incr );
-			eft.changeSize( (int) incr );
-		}
-		else {
-			//otherwise, only perform action on the selected vertices and edges
-			vft.changeSize( (int) incr, view.getPickedVertexState().getPicked() );
-			eft.changeSize( (int) incr, view.getPickedEdgeState().getPicked() );
-		}
-
-		view.repaint();
+		view.incrementFont( incr );
 	}
 
 	public boolean isTraversable() {
@@ -807,68 +574,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public ControlPanel getSearchPanel() {
-		return controlPanel;
-	}
-
-	/**
-	 * Clears the highlighting, turns off skeleton mode if it's enabled, and
-	 * resizes all nodes with a custom size
-	 */
-	public void clearHighlighting() {
-		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
-			vht, est, ept, eft, elt, adpt, aft } ) {
-			s.setSkeletonMode( false );
-			s.clearSelected();
-		}
-
-		eft.clearSizeData();
-		vft.clearSizeData();
-		vht.clearSizeData();
-		view.repaint();
-	}
-
-	/**
-	 * Adds the given vertices and edges to the highlighted parts of the graph
-	 *
-	 * @param verts
-	 * @param edges
-	 * @param asSkeleton should the skeleton mode be activated as well?
-	 */
-	protected void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges,
-			boolean asSkeleton ) {
-
-		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
-			vht, est, ept, eft, elt, adpt, aft } ) {
-			s.setSkeletonMode( asSkeleton );
-		}
-
-		vft.select( verts );
-		vpt.select( verts );
-
-		est.select( edges );
-		ept.select( edges );
-		eft.select( edges );
-		elt.select( edges );
-		adpt.select( edges );
-		aft.select( edges );
-
-		view.repaint();
-	}
-
-	public void highlight( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
-		highlight( verts, edges, false );
-	}
-
-	public void skeleton( Collection<SEMOSSVertex> verts, Collection<SEMOSSEdge> edges ) {
-		highlight( verts, edges, true );
-	}
-
-	public Collection<SEMOSSVertex> getHighlightedVertices() {
-		return new HashSet<>( vft.getSelected() );
-	}
-
-	public Collection<SEMOSSEdge> getHighlightedEdges() {
-		return new HashSet<>( est.getSelected() );
+		// return controlPanel;
+		return null;
 	}
 
 	/**
@@ -892,112 +599,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	@Override
 	public void propertyChange( PropertyChangeEvent evt ) {
 		if ( !isloading() ) {
-			view.repaint();
+			view.refresh();
 			fireGraphUpdated();
-		}
-	}
-
-	protected class SemossBasicRenderer<V extends SEMOSSVertex, E extends SEMOSSEdge> extends BasicRenderer<V, E> {
-
-		Predicate<E> edgehider = new Predicate<E>() {
-
-			@Override
-			public boolean apply( E v ) {
-				return ( v.isVisible() && v.getVerticesVisible()
-						&& getGraphData().presentAtLevel( v, overlayLevel ) );
-			}
-		};
-
-		@Override
-		public void render( RenderContext<V, E> renderContext,
-				Layout<V, E> layout ) {
-			setEdgeVisibilities( layout.getGraph() );
-			try {
-				for ( E e : layout.getGraph().getEdges() ) {
-					if ( edgehider.apply( e ) ) {
-						renderEdge( renderContext, layout, e );
-						renderEdgeLabel( renderContext, layout, e );
-					}
-				}
-			}
-			catch ( ConcurrentModificationException cme ) {
-				renderContext.getScreenDevice().repaint();
-			}
-
-			// paint all the vertices
-			try {
-				for ( V v : layout.getGraph().getVertices() ) {
-					if ( predicate.apply( v ) ) {
-						renderVertex( renderContext, layout, v );
-						renderVertexLabel( renderContext, layout, v );
-					}
-				}
-			}
-			catch ( ConcurrentModificationException cme ) {
-				renderContext.getScreenDevice().repaint();
-			}
-
-			if ( log.isTraceEnabled() ) {
-				renderContext.getGraphicsContext().setPaint( Color.RED );
-				log.debug( "size: (" + view.getX() + "," + view.getY() + ","
-						+ view.getWidth() + "," + view.getHeight() + ")" );
-				renderContext.getGraphicsContext().drawRect( view.getX() + 1, view.getY() + 1,
-						view.getWidth() - 2, view.getHeight() - 2 );
-				renderContext.getGraphicsContext().drawOval( (int) view.getCenter().getX(),
-						(int) view.getCenter().getY(), 20, 20 );
-			}
-		}
-
-		/**
-		 * Convenience method which sets t the visibility of edges in the current
-		 * graph based on the visibility flag within the edge, but ALSO on whether
-		 * the vertices which the edge connects are visible
-		 */
-		private void setEdgeVisibilities( Graph<V, E> graph ) {
-			Collection<E> allEdges = graph.getEdges();
-			for ( E edge : allEdges ) {
-				V destination = graph.getDest( edge );
-				V source = graph.getSource( edge );
-				boolean destVisible = true;
-				boolean sourceVisible = true;
-				// If the destination vertex/node is not visible, neither should the edge 
-				// be visible
-				// The edge may not have a destination vertex/node, so prepare for that
-				if ( destination != null ) {
-					if ( !destination.isVisible() ) {
-						destVisible = false;
-					}
-				}
-				else {
-					destVisible = false;
-				}
-				// If the destination vertex/node is not visible, neither should the edge 
-				// be visible
-				// The edge may not have a source vertex/node, so prepare for that
-				if ( source != null ) {
-					if ( !source.isVisible() ) {
-						sourceVisible = false;
-					}
-				}
-				else {
-					sourceVisible = false;
-				}
-				// If both of the edges are visible, set the edgesVisible flag in the Edge object
-				if ( destVisible && sourceVisible ) {
-					edge.setVerticesVisible( true );
-				}
-				else {
-					edge.setVerticesVisible( false );
-				}
-			}
-		}
-	}
-
-	protected class HidingPredicate<V extends SEMOSSVertex> implements Predicate<V> {
-
-		@Override
-		public boolean apply( V v ) {
-			return ( v.isVisible() && getGraphData().presentAtLevel( v, overlayLevel ) );
 		}
 	}
 }

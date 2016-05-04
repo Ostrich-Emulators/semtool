@@ -180,9 +180,6 @@ public class TreeGraphDataModel extends GraphDataModel implements PropertyChange
 					case AbstractGraphElement.CHANGE_COLOR:
 						v.setColor( Color.class.cast( newval ) );
 						break;
-					case AbstractGraphElement.CHANGE_VISIBLE:
-						v.setVisible( Boolean.class.cast( newval ) );
-						break;
 					case SEMOSSVertex.CHANGE_SHAPE:
 						v.setShape( Shape.class.cast( newval ) );
 						break;
@@ -197,9 +194,6 @@ public class TreeGraphDataModel extends GraphDataModel implements PropertyChange
 				if ( null != propname ) switch ( propname ) {
 					case AbstractGraphElement.CHANGE_COLOR:
 						v.setColor( Color.class.cast( newval ) );
-						break;
-					case AbstractGraphElement.CHANGE_VISIBLE:
-						v.setVisible( Boolean.class.cast( newval ) );
 						break;
 					default:
 						v.setValue( new URIImpl( propname ), Value.class.cast( newval ) );

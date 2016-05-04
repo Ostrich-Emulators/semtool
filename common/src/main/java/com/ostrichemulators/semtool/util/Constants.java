@@ -39,9 +39,6 @@ public class Constants {
 	public static final String TBD = "TBD";
 	public static final String NA = "n/a";
 
-	public static final String ENTER_TEXT = "Enter your search text here";
-	public static final String EMPTY = "@@";
-
 	public static final String LAYOUT = "LAYOUT";
 	public static final String PERSPECTIVE = "PERSPECTIVE";
 	public static final String PROCESS_CURRENT_DATE = "PROCESS_CURRENT_DATE";
@@ -70,16 +67,16 @@ public class Constants {
 	public static final String SEMOSS_URI = "SEMOSS_URI";
 	public static final String DEFAULT_SEMOSS_URI = "http://semoss.org/ontologies";
 
-	// layouts
-	public static final String FR = "Fruchterman-Reingold";
-	public static final String KK = "Kamada-Kawai";
-	public static final String SPRING = "Spring-Layout";
-	public static final String SPRING2 = "Spring-Layout2";
-	public static final String CIRCLE_LAYOUT = "Circle-Layout";
-	public static final String ISO = "ISO-Layout";
-	public static final String TREE_LAYOUT = "Tree-Layout";
-	public static final String RADIAL_TREE_LAYOUT = "Radial-Tree-Layout";
-	public static final String BALLOON_LAYOUT = "Balloon Layout";
+//	// layouts
+//	public static final String FR = "Fruchterman-Reingold";
+//	public static final String KK = "Kamada-Kawai";
+//	public static final String SPRING = "Spring-Layout";
+//	public static final String SPRING2 = "Spring-Layout2";
+//	public static final String CIRCLE_LAYOUT = "Circle-Layout";
+//	public static final String ISO = "ISO-Layout";
+//	public static final String TREE_LAYOUT = "Tree-Layout";
+//	public static final String RADIAL_TREE_LAYOUT = "Radial-Tree-Layout";
+//	public static final String BALLOON_LAYOUT = "Balloon Layout";
 
 	public static final String LEGEND = "_LEGEND";
 

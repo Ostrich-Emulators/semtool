@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.om;
 
-import com.ostrichemulators.semtool.om.GraphColorRepository;
 import com.ostrichemulators.semtool.util.Constants;
 import java.awt.Color;
 import org.junit.After;

@@ -57,7 +57,7 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 	 * @param data ControlData
 	 */
 	public GqbLabelTransformer( IEngine engine ) {
-		super( null );
+		super();
 		this.engine = engine;
 	}
 
