@@ -19,7 +19,6 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
-import com.hp.hpl.jena.sparql.function.library.leviathan.e;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.GraphModelListener;

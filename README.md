@@ -2,6 +2,7 @@
 This is an almost complete re-write of SEMOSS project from https://github.com/semoss/semoss.git. That project appears dormant, though it may simply have moved to https://sourceforge.net/projects/semoss.
 
 The toolkit is a GUI application to explore semantic databases. It includes almost all the functionality of the original tool, but includes:
+
 1. An updated technology stack (Java 8, BlazeGraph 2.1, JUNG 2.1)
 2. Standardized GUI elements and behaviors
 3. Standardized RDF predicates and querying

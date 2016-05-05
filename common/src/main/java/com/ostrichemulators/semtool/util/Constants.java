@@ -66,6 +66,7 @@ public class Constants {
 
 	public static final String SEMOSS_URI = "SEMOSS_URI";
 	public static final String DEFAULT_SEMOSS_URI = "http://semoss.org/ontologies";
+	public static final String INTERNAL_NS = "semoss://internal/";
 
 //	// layouts
 //	public static final String FR = "Fruchterman-Reingold";
@@ -77,7 +78,6 @@ public class Constants {
 //	public static final String TREE_LAYOUT = "Tree-Layout";
 //	public static final String RADIAL_TREE_LAYOUT = "Radial-Tree-Layout";
 //	public static final String BALLOON_LAYOUT = "Balloon Layout";
-
 	public static final String LEGEND = "_LEGEND";
 
 	public static final String DESCR = "DESCRIPTION";
@@ -149,7 +149,7 @@ public class Constants {
 	public static final String BASEURI_KEY = "baseuri";
 	public static final String PIN_KEY = "pinned";
 	public static final String DEFAULTUI_KEY = "DefaultUI";
-	
+
 	public static final String CALC_INFERENCES_PREF = "calculateInferences";
 	public static final String SEMEX_USE_LABELS_PREF = "semexUseLabels";
 	public static final String INSIGHTKB = "insights";

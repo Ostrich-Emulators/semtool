@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.graph.functions;
 
-import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Forest;
@@ -60,7 +59,7 @@ public class GraphToTreeConverterTest {
 	}
 
 	@Test
-	public void testBfs() {
+	public void testBfs() throws Exception {
 
 		DirectedGraph<URI, URI> graph = new DirectedSparseGraph<>();
 		graph.addVertex( YURI );
@@ -78,7 +77,7 @@ public class GraphToTreeConverterTest {
 	}
 
 	@Test
-	public void testDfs() {
+	public void testDfs() throws Exception {
 
 		DirectedGraph<URI, URI> graph = new DirectedSparseGraph<>();
 		graph.addVertex( YURI );
@@ -96,7 +95,7 @@ public class GraphToTreeConverterTest {
 	}
 
 	@Test
-	public void testPrint() {
+	public void testPrint() throws Exception {
 
 		DirectedGraph<URI, URI> graph = new DirectedSparseGraph<>();
 		graph.addVertex( YURI );

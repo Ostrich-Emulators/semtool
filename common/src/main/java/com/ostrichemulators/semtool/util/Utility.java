@@ -84,6 +84,7 @@ import org.openrdf.rio.turtle.TurtleWriter;
 public class Utility {
 
 	private static final Logger log = Logger.getLogger( Utility.class );
+	private static final UriBuilder BUILDER = UriBuilder.getBuilder( Constants.INTERNAL_NS );
 	public static final Map<String, String> DEFAULTNAMESPACES = new HashMap<>();
 
 	static {
@@ -97,6 +98,14 @@ public class Utility {
 		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
 		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
 		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
+	}
+
+	public static URI getUniqueUri() {
+		return BUILDER.uniqueUri();
+	}
+
+	public static URI makeInternalUri( String something ) {
+		return BUILDER.build( something );
 	}
 
 	/**
@@ -219,7 +228,6 @@ public class Utility {
 		loadProp( url, p );
 		return p;
 	}
-
 
 	/**
 	 * Copies the given properties into a new Properties object. This function

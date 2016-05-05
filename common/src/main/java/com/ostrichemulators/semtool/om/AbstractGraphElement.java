@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.om;
 
-
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Constants;
 import java.awt.Color;
@@ -37,7 +36,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
 	public static final String CHANGE_COLOR = "color";
-	private transient URI id;
 	private transient Color color;
 
 	// callers can "mark" properties for their own use
@@ -55,7 +53,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 	}
 
 	public AbstractGraphElement( URI id, URI type, String label, Color col ) {
-		this.id = id;
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
@@ -111,18 +108,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 	public Color getColor() {
 		return color;
 	}
-
-//	@Override
-//	public void setVisible( boolean b ) {
-//		boolean old = visible;
-//		visible = b;
-//		this.fireIfPropertyChanged( CHANGE_VISIBLE, old, b );
-//	}
-//
-//	@Override
-//	public boolean isVisible() {
-//		return visible;
-//	}
 
 	/**
 	 * Method setProperty.
@@ -269,7 +254,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 	@Override
 	public int hashCode() {
 		int hash = 7;
-		hash = 41 * hash + Objects.hashCode( this.id );
+		hash = 41 * hash + Objects.hashCode( this.getURI() );
 		return hash;
 	}
 
@@ -282,12 +267,12 @@ public abstract class AbstractGraphElement implements GraphElement {
 			return false;
 		}
 		final AbstractGraphElement other = (AbstractGraphElement) obj;
-		
-		return Objects.equals( this.id, other.id );
+
+		return Objects.equals( this.getURI(), other.getURI() );
 	}
 
 	@Override
 	public String toString() {
-		return id + "; " + getType().getLocalName() + "; " + getLabel();
+		return getURI() + "; " + getType().getLocalName() + "; " + getLabel();
 	}
 }

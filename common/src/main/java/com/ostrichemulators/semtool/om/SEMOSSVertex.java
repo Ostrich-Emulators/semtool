@@ -13,15 +13,17 @@ import java.util.Map;
  * @author ryan
  */
 public interface SEMOSSVertex extends GraphElement {
+
 	public static final String CHANGE_SHAPE = "shape";
-	
+
 	public Shape getShape();
 
 	public void setShape( Shape s );
 
 	/**
 	 * This is needed for the browser playsheets
-	 * @param _propHash 
+	 *
+	 * @param _propHash
 	 */
 	public void setPropHash( Map<String, Object> _propHash );
 }

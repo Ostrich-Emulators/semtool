@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.om;
 
-import com.ostrichemulators.semtool.om.AbstractGraphElement;
 import java.awt.Color;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -208,6 +207,11 @@ public class AbstractGraphElementTest {
 		@Override
 		public boolean isNode() {
 			return true;
+		}
+
+		@Override
+		public GraphElement duplicate() {
+			throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
 		}
 	}
 

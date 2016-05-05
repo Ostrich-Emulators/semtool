@@ -18,9 +18,9 @@ import org.openrdf.model.Value;
  * @author ryan
  */
 public interface GraphElement {
-	
+
 	public boolean isNode();
-	
+
 	public Color getColor();
 
 	public String getLabel();
@@ -56,6 +56,8 @@ public interface GraphElement {
 	public void setURI( URI uri );
 
 	public void setValue( URI prop, Value val );
+
+	public <X extends GraphElement> X duplicate();
 
 	public void addPropertyChangeListener( PropertyChangeListener pcl );
 

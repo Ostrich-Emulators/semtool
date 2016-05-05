@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.graph.functions;
 
+import com.ostrichemulators.semtool.util.Utility;
 import org.apache.log4j.Logger;
 
 import edu.uci.ics.jung.graph.DelegateForest;
@@ -29,8 +30,10 @@ import edu.uci.ics.jung.graph.Tree;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
+import org.openrdf.model.URI;
 
 /**
  * This class extends downstream processing in order to convert the graph into
@@ -57,8 +60,13 @@ public class GraphToTreeConverter<V, E> {
 	 * @return
 	 */
 	public static <V, E> Forest<V, E> convert(
-			DirectedGraph<V, E> graph, Collection<V> roots, Search search ) {
+			DirectedGraph<V, E> graph, Collection<V> roots, Search search ) throws TreeConversionException {
 		return new GraphToTreeConverter( search ).convert( graph, roots );
+	}
+
+	public static <V, E> Forest<V, E> convertq(
+			DirectedGraph<V, E> graph, Collection<V> roots, Search search ) {
+		return new GraphToTreeConverter( search ).convertq( graph, roots );
 	}
 
 	public GraphToTreeConverter( Search search ) {
@@ -69,7 +77,22 @@ public class GraphToTreeConverter<V, E> {
 		this( Search.BFS );
 	}
 
-	public Forest<V, E> convert( DirectedGraph<V, E> graph, Collection<V> roots ) {
+	/**
+	 * @see #convertq(edu.uci.ics.jung.graph.DirectedGraph, java.lang.Object)
+	 *
+	 * @param graph
+	 * @param root
+	 * @return
+	 */
+	public Forest<V, E> convertq( DirectedGraph<V, E> graph, Collection<V> roots ) {
+		DelegateForest<V, E> newforest = new DelegateForest<>();
+		for ( V root : roots ) {
+			newforest.addTree( convertq( graph, root ) );
+		}
+		return newforest;
+	}
+
+	public Forest<V, E> convert( DirectedGraph<V, E> graph, Collection<V> roots ) throws TreeConversionException {
 		DelegateForest<V, E> newforest = new DelegateForest<>();
 		for ( V root : roots ) {
 			newforest.addTree( convert( graph, root ) );
@@ -77,40 +100,92 @@ public class GraphToTreeConverter<V, E> {
 		return newforest;
 	}
 
-	public Tree<V, E> convert( DirectedGraph<V, E> graph, V root ) {
-		if ( Search.DFS == method ) {
-			return dfs( root, graph );
+	/**
+	 * Converts the given graph "quietly." It will not throw exceptions, but will
+	 * skip edges to vertices that already have a parent edge
+	 *
+	 * @param graph
+	 * @param root
+	 * @return
+	 */
+	public Tree<V, E> convertq( DirectedGraph<V, E> graph, V root ) {
+		try {
+			return iconvert( graph, root, false );
 		}
-		else {
-			return bfs( root, graph );
+		catch ( Exception x ) {
+			log.error( "BUG: this exception should never be thrown!" );
 		}
+
+		return null;
 	}
 
-	private Tree<V, E> dfs( V root, DirectedGraph<V, E> graph ) {
-		DelegateTree<V, E> tree = new DelegateTree<>();
-		tree.setRoot( root );
-		Queue<V> todo = Collections.asLifoQueue( new ArrayDeque<>() );
-		todo.add( root );
+	public Tree<V, E> convert( DirectedGraph<V, E> graph, V root ) throws TreeConversionException {
+		return iconvert( graph, root, true );
+	}
 
+	/**
+	 * Creates a tree using random, unique URIs instead of actual vertices and
+	 * nodes. The lookup maps are populated with the conversions. NOTE: the Tree
+	 * can contain duplicates in the sense that different URIs might map to the
+	 * same vertex/edge.
+	 *
+	 * @param graph the graph to convert
+	 * @param root the root of the tree
+	 * @param vlookup a (usually empty) map that will be populated with the
+	 * uri-to-vertex lookup
+	 * @param elookup a (usually empty) map that will be populated with the
+	 * uri-to-edge lookup
+	 * @return a valid tree, no matter what
+	 */
+	public Tree<URI, URI> convert( DirectedGraph<V, E> graph,
+			V root, Map<URI, V> vlookup, Map<URI, E> elookup ) {
+
+		DelegateTree<URI, URI> tree = new DelegateTree<>();
+		Map<V, URI> revlkp = new HashMap<>();
+
+		ArrayDeque<V> deque = new ArrayDeque<>();
+		Queue<V> todo = ( Search.DFS == method
+				? Collections.asLifoQueue( deque )
+				: deque );
+
+		URI rootu = Utility.getUniqueUri();
+		vlookup.put( rootu, root );
+		revlkp.put( root, rootu );
+		tree.setRoot( rootu );
+
+		todo.add( root );
 		while ( !todo.isEmpty() ) {
 			V v = todo.poll();
+			URI srcuri = revlkp.get( v );
 
 			for ( E e : graph.getOutEdges( v ) ) {
 				V child = graph.getOpposite( v, e );
-				if ( !tree.containsVertex( child ) ) {
-					tree.addChild( e, v, child );
-					todo.add( child );
-				}
+
+				URI edgeuri = Utility.getUniqueUri();
+				URI tgturi = Utility.getUniqueUri();
+
+				elookup.put( edgeuri, e );
+				vlookup.put( tgturi, child );
+				revlkp.put( child, tgturi );
+
+				tree.addChild( edgeuri, srcuri, tgturi );
+				todo.add( child );
 			}
 		}
 
 		return tree;
 	}
 
-	private Tree<V, E> bfs( V root, DirectedGraph<V, E> graph ) {
+	private Tree<V, E> iconvert( DirectedGraph<V, E> graph, V root,
+			boolean throwExceptions ) throws TreeConversionException {
+
+		ArrayDeque<V> deque = new ArrayDeque<>();
+		Queue<V> todo = ( Search.DFS == method
+				? Collections.asLifoQueue( deque )
+				: deque );
+
 		DelegateTree<V, E> tree = new DelegateTree<>();
 		tree.setRoot( root );
-		Deque<V> todo = new ArrayDeque<>();
 		todo.add( root );
 
 		while ( !todo.isEmpty() ) {
@@ -119,7 +194,12 @@ public class GraphToTreeConverter<V, E> {
 			for ( E e : graph.getOutEdges( v ) ) {
 				V child = graph.getOpposite( v, e );
 
-				if ( !tree.containsVertex( child ) ) {
+				if ( tree.containsVertex( child ) ) {
+					if ( throwExceptions ) {
+						throw new TreeConversionException();
+					}
+				}
+				else {
 					tree.addChild( e, v, child );
 					todo.add( child );
 				}
@@ -150,6 +230,13 @@ public class GraphToTreeConverter<V, E> {
 
 		for ( V child : tree.getChildren( root ) ) {
 			printTree( child, tree, depth + 1 );
+		}
+	}
+
+	public static class TreeConversionException extends Exception {
+
+		public TreeConversionException() {
+			super( "Tree conversion failed (too many parents)" );
 		}
 	}
 }
