@@ -54,7 +54,7 @@ public class CONUSMapPlaySheet extends BrowserPlaySheet2 {
 	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
-		convertUrisToLabels( data, getPlaySheetFrame().getEngine() );
+		convertUrisToLabels( data, engine );
 		
 		Set<Map<String, Object>> hashes = new HashSet<>();
 		

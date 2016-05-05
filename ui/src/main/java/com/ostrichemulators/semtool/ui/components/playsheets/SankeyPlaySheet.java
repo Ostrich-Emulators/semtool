@@ -48,7 +48,7 @@ public class SankeyPlaySheet extends BrowserPlaySheet2 {
 	@Override
 	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
-		convertUrisToLabels( newdata, getPlaySheetFrame().getEngine() );
+		convertUrisToLabels( newdata, engine );
 
 		Set<Map<String, Object>> links = new HashSet<>();
 		Set<Map<String, String>> nodes = new HashSet<>();

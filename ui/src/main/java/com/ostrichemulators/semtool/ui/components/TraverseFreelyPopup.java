@@ -22,7 +22,6 @@ package com.ostrichemulators.semtool.ui.components;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.NeighborMenuItem;
 import com.ostrichemulators.semtool.om.GraphElement;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JMenu;
 
@@ -36,6 +35,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.transformer.LabelTransformer;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.Utility;
+import java.awt.event.MouseAdapter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,7 +49,7 @@ import org.openrdf.model.vocabulary.RDFS;
 /**
  * This class is used to create a popup menu for the TF instance relation.
  */
-public class TraverseFreelyPopup extends JMenu implements MouseListener {
+public class TraverseFreelyPopup extends JMenu {
 
 	private static final Logger logger
 			= Logger.getLogger( TraverseFreelyPopup.class );
@@ -65,8 +65,8 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 			GraphPlaySheet ps, Collection<SEMOSSVertex> picked, boolean instance ) {
 		super( "Traverse Freely: "
 				+ ( instance
-						? LabelTransformer.chop( Utility.getInstanceLabel( vertex.getURI(), e ), 30 )
-						: "All " + Utility.getInstanceLabel( vertex.getType(), e ) + "(s) " ) );
+						? LabelTransformer.chop( vertex.getLabel(), 30 )
+						: "All " + ps.getLabelCache().get( vertex.getType() ) + "(s) " ) );
 		this.isInstance = instance;
 		this.gps = ps;
 		this.engine = e;
@@ -86,12 +86,23 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 				}
 			}
 		}
-		
+
 		for ( SEMOSSVertex thisVert : verts ) {
 			instances.add( thisVert.getURI() );
-		}		
-		
-		addMouseListener( this );
+		}
+
+		addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseEntered( MouseEvent arg0 ) {
+				if ( !populated ) {
+					int added = addRelations( true );
+					if ( added > 0 ) {
+						addSeparator();
+					}
+					addRelations( false );
+				}
+			}
+		} );
 	}
 
 	/**
@@ -124,7 +135,7 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 		neighborTypes.removeAll( Arrays.asList( RDFS.RESOURCE, RDFS.CLASS,
 				OWL.NOTHING, OWL.THING, OWL.CLASS ) );
 
-		Map<URI, String> labelmap	= Utility.getInstanceLabels( neighborTypes, engine );
+		Map<URI, String> labelmap = Utility.getInstanceLabels( neighborTypes, engine );
 		labelmap = Utility.sortUrisByLabel( labelmap );
 
 		if ( !labelmap.isEmpty() ) {
@@ -138,62 +149,6 @@ public class TraverseFreelyPopup extends JMenu implements MouseListener {
 
 		populated = true;
 		return neighborTypes.size();
-	}
-
-	/**
-	 * Invoked when the mouse button has been clicked (pressed and released) on a
-	 * component.
-	 *
-	 * @param arg0 MouseEvent
-	 */
-	@Override
-	public void mouseClicked( MouseEvent arg0 ) {
-	}
-
-	/**
-	 * Invoked when the mouse enters a component.
-	 *
-	 * @param arg0 MouseEvent
-	 */
-	@Override
-	public void mouseEntered( MouseEvent arg0 ) {
-		if ( !populated ) {
-			int added = addRelations( true );
-			if ( added > 0 ) {
-				addSeparator();
-			}
-			addRelations( false );
-		}
-	}
-
-	/**
-	 * Invoked when the mouse exits a component.
-	 *
-	 * @param arg0 MouseEvent
-	 */
-	@Override
-	public void mouseExited( MouseEvent arg0 ) {
-
-	}
-
-	/**
-	 * Invoked when a mouse button has been pressed on a component.
-	 *
-	 * @param arg0 MouseEvent
-	 */
-	@Override
-	public void mousePressed( MouseEvent arg0 ) {
-
-	}
-
-	/**
-	 * Invoked when a mouse button has been released on a component.
-	 *
-	 * @param arg0 MouseEvent
-	 */
-	@Override
-	public void mouseReleased( MouseEvent arg0 ) {
-
 	}
 
 	private static ModelQueryAdapter getExpander( Collection<URI> instances, URI totype,

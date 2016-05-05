@@ -53,7 +53,7 @@ public class OCONUSMapPlaySheet extends BrowserPlaySheet2 {
 	@Override
 	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
-		convertUrisToLabels( newdata, getPlaySheetFrame().getEngine() );
+		convertUrisToLabels( newdata, engine );
 
 		Set<Map<String, Object>> data = new HashSet<>();
 		String[] var = headers.toArray( new String[0] );

@@ -21,10 +21,8 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
-import edu.uci.ics.jung.graph.DelegateForest;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
@@ -91,13 +89,9 @@ public class GraphDataModel {
 		return graph;
 	}
 
-	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
-		DelegateForest<SEMOSSVertex, SEMOSSEdge> forest = new DelegateForest<>( vizgraph );
-		return forest;
-	}
-
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
 		vizgraph = f;
+		fireModelChanged();
 	}
 
 	/**
@@ -244,6 +238,7 @@ public class GraphDataModel {
 	/**
 	 * Is this node present at the given level (is it's level <?= the given level)
 	 * @param check th
+	 *
 	 *
 	 *
 	 *

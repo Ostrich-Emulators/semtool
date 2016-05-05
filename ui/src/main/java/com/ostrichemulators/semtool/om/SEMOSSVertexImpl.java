@@ -25,6 +25,7 @@ import com.ostrichemulators.semtool.util.Constants;
 
 import java.awt.Shape;
 
+import java.util.Map;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
@@ -43,6 +44,19 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 	public SEMOSSVertexImpl( URI id, URI type, String label ) {
 		super( id, type, label, DynamicColorRepository.instance().getColor( type ) );
 		shape = GraphShapeRepository.instance().getShape( type );
+	}
+
+	@Override
+	public SEMOSSVertex duplicate() {
+		SEMOSSVertexImpl newone = new SEMOSSVertexImpl( getURI(), getType(), getLabel() );
+		newone.setShape( getShape() );
+		newone.setColor( getColor() );
+
+		for ( Map.Entry<URI, Value> en : getValues().entrySet() ) {
+			newone.setValue( en.getKey(), en.getValue() );
+		}
+
+		return newone;
 	}
 
 	@Override

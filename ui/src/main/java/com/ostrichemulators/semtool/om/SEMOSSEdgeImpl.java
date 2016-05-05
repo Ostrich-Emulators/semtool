@@ -21,8 +21,10 @@ package com.ostrichemulators.semtool.om;
 
 import java.awt.Color;
 
+import java.util.Map;
 import java.util.Objects;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  *
@@ -50,6 +52,19 @@ public class SEMOSSEdgeImpl extends AbstractGraphElement
 	public SEMOSSEdgeImpl( URI _uri ) {
 		super( _uri, null, _uri.getLocalName(), Color.DARK_GRAY );
 		uniqueifier = "";
+	}
+
+	@Override
+	public SEMOSSEdgeImpl duplicate() {
+		SEMOSSEdgeImpl newone = new SEMOSSEdgeImpl( getURI() );
+		newone.setLabel( getLabel() );
+		newone.setColor( getColor() );
+		
+		for ( Map.Entry<URI, Value> en : getValues().entrySet() ) {
+			newone.setValue( en.getKey(), en.getValue() );
+		}
+
+		return newone;
 	}
 
 	@Override

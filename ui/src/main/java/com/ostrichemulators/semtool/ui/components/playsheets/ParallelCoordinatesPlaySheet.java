@@ -50,7 +50,7 @@ public class ParallelCoordinatesPlaySheet extends BrowserPlaySheet2 {
 	public void create( List<Value[]> data, List<String> heads, IEngine engine ) {
 		setHeaders( heads );
 		
-		convertUrisToLabels( data, getPlaySheetFrame().getEngine() );
+		convertUrisToLabels( data, engine );
 		
 		List<Map<String, Object>> dataArrayList = new ArrayList<>();
 		for ( Value[] varValuesArray : data ) {

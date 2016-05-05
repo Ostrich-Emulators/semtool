@@ -82,12 +82,12 @@ public class GraphNodeRankListener extends AbstractAction {
 		} );
 
 		GridRAWPlaySheet grid = new GridPlaySheet();
+		grid.setLabelCache( playsheet.getLabelCache() );
+
 
 		List<String> colNames
 				= Arrays.asList( "Vertex Name", "Vertex Type", "Page Rank Score" );
 		List<Value[]> list = new ArrayList<>();
-		LabeledPairTableCellRenderer<Value> renderer
-				= LabeledPairTableCellRenderer.getValuePairRenderer( playsheet.getEngine() );
 
 		// process the graph and list out all nodes, type, pagerank
 		ValueFactory vf = new ValueFactoryImpl();
@@ -101,6 +101,7 @@ public class GraphNodeRankListener extends AbstractAction {
 		}
 
 		grid.create( list, colNames, playsheet.getEngine() );
+		grid.setTitle( "NodeRank Scores" );
 		playsheet.addSibling( "NodeRank Scores", grid );
 	}
 }

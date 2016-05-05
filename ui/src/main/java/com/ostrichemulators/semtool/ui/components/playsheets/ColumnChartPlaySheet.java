@@ -22,7 +22,7 @@ public class ColumnChartPlaySheet extends BrowserPlaySheet2 {
 	@Override
 	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
-		convertUrisToLabels( newdata, getPlaySheetFrame().getEngine() );
+		convertUrisToLabels( newdata, engine );
 
 		Map<String, List<Object>> data = new HashMap<>();
 		for ( Value[] elemValues : newdata ) {

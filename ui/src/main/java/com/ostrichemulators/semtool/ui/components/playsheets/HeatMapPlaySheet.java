@@ -50,13 +50,13 @@ public class HeatMapPlaySheet extends BrowserPlaySheet2 {
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
 		try {
 			setHeaders( headers );
-			convertUrisToLabels( data, getPlaySheetFrame().getEngine() );
+			convertUrisToLabels( data, engine );
 	
 			String xName = headers.get(0);
 			String yName = headers.get(1);
 			String zName = headers.get(2);
 			
-			Map<String, Object> hash = new HashMap<String, Object>();
+			Map<String, Object> hash = new HashMap<>();
 			for ( Value[] listElement : data ) {
 				String methodName = listElement[0].stringValue().replaceAll( "\"", "" );
 				String  groupName = listElement[1].stringValue().replaceAll( "\"", "" );
@@ -80,7 +80,8 @@ public class HeatMapPlaySheet extends BrowserPlaySheet2 {
 	
 			addDataHash( allHash );
 			createView();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			log.debug("Exception in create: " + e, e);
 		}
 	}

@@ -38,10 +38,11 @@ import org.openrdf.model.Value;
  * world heat map that can show any numeric property on a node.
  */
 public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
+
 	private static final long serialVersionUID = 150592881428916712L;
 	private final static String LOCATION_ID = "locationId";
-	private final static String HEAT_VALUE  = "heatValue";
-	private final static String PARAM_MAP  = "paramMap";
+	private final static String HEAT_VALUE = "heatValue";
+	private final static String PARAM_MAP = "paramMap";
 
 	/**
 	 * Constructor for USHeatMapPlaySheet.
@@ -53,43 +54,47 @@ public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 	@Override
 	public void create( List<Value[]> newdata, List<String> headers, IEngine engine ) {
 		setHeaders( headers );
-		convertUrisToLabels( newdata, getPlaySheetFrame().getEngine() );
-		
-		Set<Map<String, Object>> data = new HashSet<Map<String, Object>>();
-		
-		outsideLoop: for ( Value[] listElement : newdata ) {
-			Literal location  = Literal.class.cast( listElement[0] );
+		convertUrisToLabels( newdata, engine );
+
+		Set<Map<String, Object>> data = new HashSet<>();
+
+		for ( Value[] listElement : newdata ) {
+			Literal location = Literal.class.cast( listElement[0] );
 			Literal heatValue = Literal.class.cast( listElement[1] );
-			if (location == null || heatValue == null)
-				continue outsideLoop;
-			
-			LinkedHashMap<String,Object> elementHash = new LinkedHashMap<String,Object>();
-			
+			if ( location == null || heatValue == null ) {
+				continue;
+			}
+
+			LinkedHashMap<String, Object> elementHash = new LinkedHashMap<>();
+
 			try {
 				elementHash.put( HEAT_VALUE, heatValue.doubleValue() );
-			} catch (Exception e) {
-				continue outsideLoop;
 			}
-			
+			catch ( Exception e ) {
+				continue;
+			}
+
 			elementHash.put( LOCATION_ID, location.stringValue() );
-			
-			HashMap<String, String> tooltipParams = new HashMap<String, String>();
-			insideLoop: for (int i=2; i<listElement.length; i++) {
+
+			HashMap<String, String> tooltipParams = new HashMap<>();
+			insideLoop:
+			for ( int i = 2; i < listElement.length; i++ ) {
 				Literal thisParam = Literal.class.cast( listElement[i] );
-				if (thisParam == null)
-					continue insideLoop;
-				tooltipParams.put( headers.get(i), thisParam.stringValue() );
+				if ( thisParam == null ) {
+					continue;
+				}
+				tooltipParams.put( headers.get( i ), thisParam.stringValue() );
 			}
 			elementHash.put( PARAM_MAP, tooltipParams );
-			
+
 			data.add( elementHash );
 		}
-		
+
 		Map<String, Object> allHash = new HashMap<>();
 		allHash.put( "dataSeries", data );
-		allHash.put( "heatDataName", headers.get(1) );
+		allHash.put( "heatDataName", headers.get( 1 ) );
 		addDataHash( allHash );
-		
+
 		createView();
 	}
 

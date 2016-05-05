@@ -9,6 +9,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.api.IPlaySheet;
 
+import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Component;
 import java.awt.Container;
@@ -48,9 +49,18 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	private PlaySheetFrame playframe;
 	private String title;
 	private final List<String> headers = new ArrayList<>();
+	private RetrievingLabelCache labelcache = new RetrievingLabelCache();
 
 	public void setFrame( PlaySheetFrame f ) {
 		playframe = f;
+	}
+
+	public void setLabelCache( RetrievingLabelCache r ) {
+		labelcache = r;
+	}
+
+	public RetrievingLabelCache getLabelCache() {
+		return labelcache;
 	}
 
 	@Override
@@ -139,6 +149,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 	@Override
 	public void create( Model m, IEngine engine ) {
+		labelcache.setEngine( engine );
 		List<Value[]> valdata = new ArrayList<>();
 		for ( Statement s : m ) {
 			valdata.add( new Value[]{ s.getSubject(), s.getPredicate(),
@@ -150,6 +161,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 	@Override
 	public void overlay( Model m, IEngine engine ) {
+		labelcache.setEngine( engine );
 		List<Value[]> valdata = new ArrayList<>();
 		for ( Statement s : m ) {
 			valdata.add( new Value[]{ s.getSubject(), s.getPredicate(),

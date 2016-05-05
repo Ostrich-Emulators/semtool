@@ -29,7 +29,7 @@ public class PieChartPlaySheet extends BrowserPlaySheet2 {
 		setHeaders( headers );
 		float valuesTotal = 0L;
 
-		convertUrisToLabels( data, getPlaySheetFrame().getEngine() );
+		convertUrisToLabels( data, engine );
 
 		List<HashMap<String, Object>> dataSeries = new ArrayList<>();
 		for ( Value[] thisResult : data ) {

@@ -294,6 +294,9 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	 * Clears the highlighting and resizes all nodes with a custom size
 	 */
 	public void clearHighlighting() {
+		getPickedEdgeState().clear();
+		getPickedVertexState().clear();
+
 		for ( SelectingTransformer<?, ?> s : new SelectingTransformer[]{ vft, vpt, vst,
 			vht, est, ept, eft, elt, adpt, aft } ) {
 			s.clearSelected();
@@ -303,8 +306,6 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		vft.clearSizeData();
 		vht.clearSizeData();
 
-		getPickedEdgeState().clear();
-		getPickedVertexState().clear();
 		repaint();
 	}
 

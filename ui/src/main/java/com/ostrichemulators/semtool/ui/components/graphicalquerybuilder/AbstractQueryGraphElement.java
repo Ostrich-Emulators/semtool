@@ -58,6 +58,11 @@ public abstract class AbstractQueryGraphElement extends AbstractGraphElement
 	}
 
 	@Override
+	public AbstractQueryGraphElement duplicate() {
+		throw new UnsupportedOperationException( "Not supported yet." );
+	}
+
+	@Override
 	public boolean isSelected( URI prop ) {
 		return selecteds.contains( prop );
 	}

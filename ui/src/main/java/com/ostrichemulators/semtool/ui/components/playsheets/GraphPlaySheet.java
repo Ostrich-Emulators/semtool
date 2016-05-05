@@ -37,7 +37,6 @@ import org.openrdf.model.impl.LinkedHashModel;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.Forest;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationImageServer;
@@ -46,10 +45,9 @@ import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.ui.components.ControlPanel;
-import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
 import com.ostrichemulators.semtool.om.GraphModelListener;
 import com.ostrichemulators.semtool.search.GraphSearchTextField;
+import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphLegendPanel;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.WeightDropDownButton;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
@@ -57,9 +55,10 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphN
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
-import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -95,23 +94,22 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
-	private final RetrievingLabelCache labelcache = new RetrievingLabelCache();
 
-	private final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
+	protected final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			undoView();
 		}
 	};
 
-	private final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
+	protected final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			redoView();
 		}
 	};
 
-	private final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
+	protected final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			if ( xray.isSelected() ) {
@@ -121,11 +119,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 	};
 
-	private final JToggleButton graphprops = new JToggleButton();
-	private final JToggleButton xray = new JToggleButton();
-	private final TreeConverterListener tree = new TreeConverterListener();
-	private final WeightDropDownButton weightButton = new WeightDropDownButton();
-	private final GraphSearchTextField searcher = new GraphSearchTextField();
+	protected final JToggleButton graphprops = new JToggleButton();
+	protected final JToggleButton xray = new JToggleButton();
+	protected final TreeConverterListener tree = new TreeConverterListener();
+	protected final WeightDropDownButton weightButton = new WeightDropDownButton();
+	protected final GraphSearchTextField searcher = new GraphSearchTextField();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -146,7 +144,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		redo.setEnabled( false );
 
 		control = vcp;
-		control.setLabelCache( labelcache );
+		control.setLabelCache( getLabelCache() );
 
 		graphSplitPane = new JSplitPane();
 		graphSplitPane.setOneTouchExpandable( true );
@@ -154,46 +152,19 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		setLayout( new BorderLayout() );
 		add( graphSplitPane, BorderLayout.CENTER );
-		GraphLegendPanel legendPanel = new GraphLegendPanel( labelcache );
+		GraphLegendPanel legendPanel = new GraphLegendPanel( getLabelCache() );
 		add( legendPanel, BorderLayout.SOUTH );
 
 		view = new SemossGraphVisualization( gdm );
 		initVisualizer( view );
 		view.addPickingSupport();
 		control.setVisualization( view );
-
 		control.setMinimumSize( new Dimension( 0, 0 ) );
+
 		graphSplitPane.setLeftComponent( new GraphZoomScrollPane( view ) );
 		graphSplitPane.setRightComponent( control );
 		graphSplitPane.setDividerLocation( 1d );
 		graphSplitPane.setResizeWeight( 1d );
-
-		graphprops.setAction( new AbstractAction( "Graph Properties" ) {
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				Preferences prefs = Preferences.userNodeForPackage( getClass() );
-
-				if ( graphprops.isSelected() ) {
-					int pct = prefs.getInt( PROPERTY_PREF, GraphPlaySheet.this.getWidth() - 250 );
-					graphSplitPane.setDividerLocation( pct );
-				}
-				else {
-					prefs.putInt( PROPERTY_PREF, graphSplitPane.getDividerLocation() );
-					graphSplitPane.setDividerLocation( 1d );
-				}
-			}
-		} );
-
-		xray.setAction( new AbstractAction( "",
-				GuiUtility.loadImageIcon( "x-ray.png" ) ) {
-					@Override
-					public void actionPerformed( ActionEvent e ) {
-						view.setSkeletonMode( xray.isSelected() );
-					}
-				} );
-		xray.setToolTipText( "X-Ray Highlighting");
-
-		reset.putValue( Action.SHORT_DESCRIPTION, "Reset graph transformers" );
 
 		addGraphListener( legendPanel );
 		addGraphListener( control );
@@ -211,15 +182,59 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	@Override
-	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
-		super.populateToolBar( toolBar, tabTitle );
+	public void setFrame( PlaySheetFrame f ) {
+		attachActions();
+		super.setFrame( f );
+	}
+
+	protected void attachActions() {
+		graphprops.setAction( new AbstractAction( "Graph Properties" ) {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Preferences prefs = Preferences.userNodeForPackage( getClass() );
+
+				if ( graphprops.isSelected() ) {
+					int pct = prefs.getInt( PROPERTY_PREF, GraphPlaySheet.this.getWidth() - 250 );
+					graphSplitPane.setDividerLocation( pct );
+				}
+				else {
+					prefs.putInt( PROPERTY_PREF, graphSplitPane.getDividerLocation() );
+					graphSplitPane.setDividerLocation( 1d );
+				}
+			}
+		} );
 
 		weightButton.setPlaySheet( this );
 		searcher.setPlaySheet( this );
 		tree.setPlaySheet( this );
 
+		xray.setAction( new AbstractAction( "",
+				GuiUtility.loadImageIcon( "search.png" ) ) {
+					@Override
+					public void actionPerformed( ActionEvent e ) {
+						view.setSkeletonMode( xray.isSelected() );
+					}
+				} );
+		xray.setToolTipText( "X-Ray Highlighting" );
+
+		reset.putValue( Action.SHORT_DESCRIPTION, "Reset graph transformers" );
+
+		view.getPickedVertexState().addItemListener( new ItemListener() {
+
+			@Override
+			public void itemStateChanged( ItemEvent e ) {
+				Set<? extends SEMOSSVertex> picks
+						= view.getPickedVertexState().getPicked();
+				tree.setEnabled( !picks.isEmpty() );
+			}
+		} );
+	}
+
+	@Override
+	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
+		super.populateToolBar( toolBar, tabTitle );
+
 		toolBar.add( graphprops );
-		toolBar.add( xray );
 		toolBar.add( reset );
 		toolBar.add( weightButton );
 		toolBar.add( undo );
@@ -227,16 +242,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		toolBar.addSeparator();
 		toolBar.add( tree );
 		toolBar.add( searcher );
-	}
-
-	public Forest<SEMOSSVertex, SEMOSSEdge> asForest() {
-		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gdm.getGraph();
-		Forest<SEMOSSVertex, SEMOSSEdge> forest = ( graph instanceof Forest
-				? Forest.class.cast( graph )
-				: new GraphToTreeConverter().convert( graph,
-						view.getPickedVertexState().getPicked() ) );
-		GraphToTreeConverter.printForest( forest );
-		return forest;
+		toolBar.add( xray );
 	}
 
 	/**
@@ -350,10 +356,10 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private void initVisualizer( SemossGraphVisualization viewer ) {
 		GraphNodeListener gl = new GraphNodeListener( this );
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
-		view.setGraphMouse( gl );
-		view.setLabelCache( labelcache );
+		viewer.setGraphMouse( gl );
+		viewer.setLabelCache( getLabelCache() );
 
-		view.addPropertyChangeListener( SemossGraphVisualization.VISIBILITY_CHANGED,
+		viewer.addPropertyChangeListener( SemossGraphVisualization.VISIBILITY_CHANGED,
 				new PropertyChangeListener() {
 
 					@Override
@@ -361,7 +367,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 						fireGraphUpdated();
 					}
 				} );
-		view.addPropertyChangeListener( SemossGraphVisualization.LAYOUT_CHANGED,
+		viewer.addPropertyChangeListener( SemossGraphVisualization.LAYOUT_CHANGED,
 				new PropertyChangeListener() {
 
 					@Override
@@ -453,7 +459,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 */
 	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
-		labelcache.setEngine( engine );
 		List<URI> nodes = new ArrayList<>();
 		Model model = new LinkedHashModel();
 		for ( Value[] row : data ) {
@@ -494,7 +499,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	public void add( Model m, List<URI> nodes, IEngine engine ) {
-		labelcache.setEngine( engine );
 		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 		if ( null == nodes ) {
 			nodes = new ArrayList<>();
@@ -571,25 +575,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	public boolean areNodesHidable() {
 		return nodesHidable;
-	}
-
-	public ControlPanel getSearchPanel() {
-		// return controlPanel;
-		return null;
-	}
-
-	/**
-	 * Allow subclasses to substitute a different vertex for the given one
-	 *
-	 * @param v
-	 * @return
-	 */
-	public SEMOSSVertex getRealVertex( SEMOSSVertex v ) {
-		return v;
-	}
-
-	public SEMOSSEdge getRealEdge( SEMOSSEdge v ) {
-		return v;
 	}
 
 	protected boolean isloading() {

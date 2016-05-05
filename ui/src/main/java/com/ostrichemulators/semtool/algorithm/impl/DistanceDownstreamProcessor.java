@@ -72,8 +72,9 @@ public class DistanceDownstreamProcessor extends AbstractAction {
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		ValueFactory vf = new ValueFactoryImpl();
+
 		Forest<SEMOSSVertex, SEMOSSEdge> forest
-				= GraphToTreeConverter.convert( graph, selecteds, Search.BFS );
+				= GraphToTreeConverter.convertq( graph, selecteds, Search.BFS );
 
 		List<Value[]> rows = new ArrayList<>();
 		for ( Tree<SEMOSSVertex, SEMOSSEdge> tree : forest.getTrees() ) {
