@@ -75,18 +75,16 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		model.addModelListener( new GraphModelListener() {
 
 			@Override
-			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphDataModel gdm ) {
+			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+					int level, GraphDataModel gdm ) {
+
+				for ( GraphElement ge : model.elementsFromLevel( level ) ) {
+					ge.addPropertyChangeListener( TreeGraphPlaySheet.this );
+				}
+
 				updateLabels();
 			}
 		} );
-
-		for ( SEMOSSVertex v : model.getForest().getVertices() ) {
-			v.addPropertyChangeListener( this );
-		}
-
-		for ( SEMOSSEdge e : model.getForest().getEdges() ) {
-			e.addPropertyChangeListener( this );
-		}
 	}
 
 	@Override

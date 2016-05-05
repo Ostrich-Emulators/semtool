@@ -13,6 +13,13 @@ import edu.uci.ics.jung.graph.DirectedGraph;
  */
 public interface GraphModelListener {
 
-	public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+	/**
+	 * Notifies that the given graph changed at the given level
+	 *
+	 * @param graph the graph
+	 * @param level the level of changes (undefined: -1)
+	 * @param gdm the source of the change
+	 */
+	public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, int level,
 			GraphDataModel gdm );
 }

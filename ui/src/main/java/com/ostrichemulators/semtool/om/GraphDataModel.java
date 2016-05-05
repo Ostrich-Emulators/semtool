@@ -63,9 +63,9 @@ public class GraphDataModel {
 		listenees.remove( l );
 	}
 
-	protected void fireModelChanged() {
+	protected void fireModelChanged( int olevel ) {
 		for ( GraphModelListener l : listenees ) {
-			l.changed( vizgraph, this );
+			l.changed( vizgraph, olevel, this );
 		}
 	}
 
@@ -89,7 +89,7 @@ public class GraphDataModel {
 
 	public void setGraph( DirectedGraph<SEMOSSVertex, SEMOSSEdge> f ) {
 		vizgraph = f;
-		fireModelChanged();
+		fireModelChanged( 1 );
 	}
 
 	/**
@@ -166,7 +166,7 @@ public class GraphDataModel {
 			log.error( e, e );
 		}
 
-		fireModelChanged();
+		fireModelChanged( overlayLevel );
 		return elementsFromLevel( overlayLevel );
 	}
 
@@ -184,7 +184,7 @@ public class GraphDataModel {
 			log.error( e, e );
 		}
 
-		fireModelChanged();
+		fireModelChanged( overlayLevel );
 		return elementsFromLevel( overlayLevel );
 	}
 
@@ -236,7 +236,7 @@ public class GraphDataModel {
 		}
 
 		removers.addAll( nodesToRemove );
-		fireModelChanged();
+		fireModelChanged( overlayLevel );
 		return removers;
 	}
 

@@ -176,7 +176,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		gdm.addModelListener( new GraphModelListener() {
 
 			@Override
-			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphDataModel gdm ) {
+			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+					int level, GraphDataModel gdm ) {
 				if ( !inGraphOp ) {
 					searcher.index( graph );
 				}
