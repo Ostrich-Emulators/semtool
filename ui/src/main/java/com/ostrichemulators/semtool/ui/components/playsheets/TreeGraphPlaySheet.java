@@ -169,7 +169,6 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 					}
 				}
 			}
-
 		};
 
 		getView().getPickedEdgeState().addItemListener( il );

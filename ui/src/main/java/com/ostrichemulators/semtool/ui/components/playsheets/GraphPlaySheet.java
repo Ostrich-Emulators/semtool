@@ -22,7 +22,6 @@ package com.ostrichemulators.semtool.ui.components.playsheets;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.JSplitPane;
@@ -42,6 +41,7 @@ import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import com.ostrichemulators.semtool.om.GraphDataModel;
+import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
@@ -63,6 +63,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
@@ -176,7 +177,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 			@Override
 			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphDataModel gdm ) {
-				searcher.index( graph );
+				if ( !inGraphOp ) {
+					searcher.index( graph );
+				}
 			}
 		} );
 	}
@@ -367,6 +370,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 						fireGraphUpdated();
 					}
 				} );
+
 		viewer.addPropertyChangeListener( SemossGraphVisualization.LAYOUT_CHANGED,
 				new PropertyChangeListener() {
 
@@ -498,7 +502,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		create( data, headers, eng );
 	}
 
-	public void add( Model m, List<URI> nodes, IEngine engine ) {
+	protected void add( Model m, List<URI> nodes, IEngine engine ) {
 		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 		if ( null == nodes ) {
 			nodes = new ArrayList<>();
@@ -513,39 +517,25 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 		inGraphOp = true;
 		if ( overlayLevel < maxOverlayLevel ) {
-			Set<SEMOSSVertex> removedVs = new HashSet<>();
-			Set<SEMOSSEdge> removedEs = new HashSet<>();
-			gdm.removeElementsSinceLevel( overlayLevel, removedVs, removedEs );
-			for ( SEMOSSVertex v : removedVs ) {
-				v.removePropertyChangeListener( this );
-			}
-			for ( SEMOSSEdge v : removedEs ) {
-				v.removePropertyChangeListener( this );
+			Collection<GraphElement> removed = gdm.removeElementsSinceLevel( overlayLevel );
+			for ( GraphElement ge : removed ) {
+				ge.removePropertyChangeListener( this );
 			}
 		}
 
 		overlayLevel++;
 		view.setOverlayLevel( overlayLevel );
 
-		Set<SEMOSSVertex> oldverts = new HashSet<>( gdm.getGraph().getVertices() );
-		Set<SEMOSSEdge> oldedges = new HashSet<>( gdm.getGraph().getEdges() );
+		List<GraphElement> added = new ArrayList<>();
 		if ( !m.isEmpty() ) {
-			gdm.addGraphLevel( m, engine, overlayLevel );
+			added.addAll( gdm.addGraphLevel( m, engine, overlayLevel ) );
 		}
 		if ( !nodes.isEmpty() ) {
-			gdm.addGraphLevel( nodes, engine, overlayLevel );
+			added.addAll( gdm.addGraphLevel( nodes, engine, overlayLevel ) );
 		}
 
-		Set<SEMOSSVertex> newverts = new HashSet<>( gdm.getGraph().getVertices() );
-		Set<SEMOSSEdge> newedges = new HashSet<>( gdm.getGraph().getEdges() );
-		newverts.removeAll( oldverts );
-		newedges.removeAll( oldedges );
-
-		for ( SEMOSSVertex v : newverts ) {
-			v.addPropertyChangeListener( this );
-		}
-		for ( SEMOSSEdge v : newedges ) {
-			v.addPropertyChangeListener( this );
+		for ( GraphElement e : added ) {
+			e.addPropertyChangeListener( this );
 		}
 
 		if ( overlayLevel > maxOverlayLevel ) {

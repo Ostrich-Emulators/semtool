@@ -26,8 +26,6 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
-import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.UriBuilder;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Utility;
 import org.openrdf.model.impl.URIImpl;
@@ -101,7 +99,8 @@ public class GraphDataModel {
 	 * @param engine the engine to get other data from
 	 * @param overlayLevel the level of the nodes
 	 */
-	public void addGraphLevel( Model model, IEngine engine, int overlayLevel ) {
+	public Collection<GraphElement> addGraphLevel( Model model, IEngine engine,
+			int overlayLevel ) {
 
 		try {
 			Map<Value, URI> nonUriIds = new HashMap<>();
@@ -126,7 +125,7 @@ public class GraphDataModel {
 					dst = createOrRetrieveVertex( URI.class.cast( obj ), overlayLevel );
 				}
 				else {
-					URI uri = UriBuilder.getBuilder( Constants.ANYNODE + "/" ).uniqueUri();
+					URI uri = Utility.getUniqueUri();
 					dst = createOrRetrieveVertex( uri, overlayLevel );
 					dst.setLabel( obj.stringValue() );
 					URI type = RDFDatatypeTools.getDatatype( obj );
@@ -168,9 +167,11 @@ public class GraphDataModel {
 		}
 
 		fireModelChanged();
+		return elementsFromLevel( overlayLevel );
 	}
 
-	public void addGraphLevel( Collection<URI> nodes, IEngine engine, int overlayLevel ) {
+	public Collection<GraphElement> addGraphLevel( Collection<URI> nodes,
+			IEngine engine, int overlayLevel ) {
 		try {
 			for ( URI sub : nodes ) {
 				SEMOSSVertex vert1 = createOrRetrieveVertex( sub, overlayLevel );
@@ -184,19 +185,27 @@ public class GraphDataModel {
 		}
 
 		fireModelChanged();
+		return elementsFromLevel( overlayLevel );
+	}
+
+	public List<GraphElement> elementsFromLevel( int overlayLevel ) {
+		List<GraphElement> list = new ArrayList<>();
+		for ( Map.Entry<GraphElement, Integer> en : level.entrySet() ) {
+			if ( overlayLevel == en.getValue() ) {
+				list.add( en.getKey() );
+			}
+		}
+
+		return list;
 	}
 
 	/**
 	 * Removes elements that are "undone" when the history tree branches
 	 *
 	 * @param overlayLevel
-	 * @param removedVs if not null, the vertices that were removed will be added
-	 * to this list
-	 * @param removedEs if not null, the edges that were removed will be added to
-	 * this list
+	 * @return the removed elements
 	 */
-	public void removeElementsSinceLevel( int overlayLevel,
-			Collection<SEMOSSVertex> removedVs, Collection<SEMOSSEdge> removedEs ) {
+	public Collection<GraphElement> removeElementsSinceLevel( int overlayLevel ) {
 		// if we've undone some data and now want to add 
 		// something else, get rid of the future redo data
 		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
@@ -206,10 +215,12 @@ public class GraphDataModel {
 			}
 		}
 
+		List<GraphElement> removers = new ArrayList<>();
 		for ( SEMOSSVertex v : nodesToRemove ) {
 			// edges will be removed automatically...but sync our level mapping
 			Collection<SEMOSSEdge> edges = vizgraph.getIncidentEdges( v );
-			removedEs.addAll( edges );
+			removers.addAll( edges );
+
 			for ( SEMOSSEdge e : edges ) {
 				level.remove( e );
 
@@ -224,8 +235,9 @@ public class GraphDataModel {
 			level.remove( v );
 		}
 
-		removedVs.addAll( nodesToRemove );
+		removers.addAll( nodesToRemove );
 		fireModelChanged();
+		return removers;
 	}
 
 	public int getLevel( GraphElement check ) {
@@ -236,14 +248,10 @@ public class GraphDataModel {
 	}
 
 	/**
-	 * Is this node present at the given level (is it's level <?= the given level)
-	 * @param check th
+	 * Is this node present at the given level (is it's level &gt;?= the given
+	 * level)
 	 *
-	 *
-	 *
-	 *
-	 *
-	 * e element to check
+	 * @param check the element to check
 	 * @param level is it present at this level?
 	 * @return
 	 */
@@ -266,10 +274,14 @@ public class GraphDataModel {
 		return new SEMOSSVertexImpl( uri );
 	}
 
+	protected final String getEdgeKey( URI edge, SEMOSSVertex src, SEMOSSVertex dst ) {
+		return edge.stringValue() + src.getURI() + dst.getURI();
+	}
+
 	protected SEMOSSEdge createOrRetrieveEdge( URI edgeKey, SEMOSSVertex src,
 			SEMOSSVertex dst, int overlayLevel ) {
 		URI uri = new URIImpl( edgeKey.stringValue() );
-		String key = edgeKey.stringValue() + src.getURI() + dst.getURI();
+		String key = getEdgeKey( edgeKey, src, dst );
 
 		if ( !edgeStore.containsKey( key ) ) {
 			SEMOSSEdge edge = createEdge( src, dst, uri );

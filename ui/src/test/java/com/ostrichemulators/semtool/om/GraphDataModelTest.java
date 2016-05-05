@@ -9,10 +9,8 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -145,9 +143,7 @@ public class GraphDataModelTest {
 		assertTrue( gdm.presentAtLevel( yugo, 2 ) );
 		assertEquals( 1, gdm.getGraph().getEdgeCount() );
 
-		List<SEMOSSVertex> vs = new ArrayList<>();
-		List<SEMOSSEdge> es = new ArrayList<>();
-		gdm.removeElementsSinceLevel( 1, vs, es );
+		gdm.removeElementsSinceLevel( 1 );
 
 		assertTrue( gdm.getGraph().getEdges().isEmpty() );
 		assertEquals( yuri, gdm.getGraph().getVertices().iterator().next() );
