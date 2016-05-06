@@ -7,6 +7,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,24 +24,17 @@ import org.openrdf.model.URI;
  */
 public class GraphShapeRepository {
 
+	private static final double DEFAULT_SIZE = 24d;
 	/**
 	 * A hash which tracks URIs that have been assigned shapes, so that we can
 	 * consistently assign shapes through recall
 	 */
 	private final Map<URI, Shape> vertexShapeHash = new HashMap<>();
-	/**
-	 * A lookup for legend shapes, with actual shapes as keys and their
-	 * corresponding legend shapes as values
-	 */
-	private final Map<Shape, Shape> vertexShapeLegendHash = new HashMap<>();
+
 	/**
 	 * The utility class instance responsible for shape generation
 	 */
 	private ShapeGenerator shapeGenerator;
-	/**
-	 * The singleton instance of this class
-	 */
-	private static GraphShapeRepository instance = null;
 	/**
 	 * The logger that this class will use
 	 */
@@ -51,20 +45,8 @@ public class GraphShapeRepository {
 	/**
 	 * Default constructor
 	 */
-	private GraphShapeRepository() {
-		shapeGenerator = new ShapeGenerator();
-	}
-
-	/**
-	 * Singleton access method
-	 *
-	 * @return The singleton instance
-	 */
-	public static GraphShapeRepository instance() {
-		if ( instance == null ) {
-			instance = new GraphShapeRepository();
-		}
-		return instance;
+	public GraphShapeRepository() {
+		shapeGenerator = new ShapeGenerator( DEFAULT_SIZE );
 	}
 
 	/**
@@ -79,6 +61,10 @@ public class GraphShapeRepository {
 			logger.warn( "Shape was not found using key = " + name );
 		}
 		return shape;
+	}
+
+	public Shape getShape( URI type, URI instance ) {
+		return getShape( type );
 	}
 
 	public String getShapeName( Shape s ) {
@@ -130,12 +116,8 @@ public class GraphShapeRepository {
 	 * @return The associated legend shape, null if it is not found
 	 */
 	public Shape getLegendShape( Shape svshape ) {
-		Shape legendShape = vertexShapeLegendHash.get( svshape );
-		if ( legendShape == null ) {
-			logger.warn( "Warning - Requested legend shape not found for shape: "
-					+ shapeNameLkp.get( svshape ) );
-		}
-		return legendShape;
+		double side = svshape.getBounds2D().getWidth();
+		return shapeGenerator.createHex( side * 1.25 );
 	}
 
 	/**
@@ -143,7 +125,7 @@ public class GraphShapeRepository {
 	 */
 	public void clearAll() {
 		vertexShapeHash.clear();
-		shapeGenerator = new ShapeGenerator();
+		shapeGenerator = new ShapeGenerator( DEFAULT_SIZE );
 	}
 
 	/**
@@ -186,22 +168,7 @@ public class GraphShapeRepository {
 		 * the key and the composite shape class as the value
 		 */
 		private final Map<String, Shape> shapes = new HashMap<>();
-		/**
-		 * The translation applied to the triangle shape when it is drawn
-		 */
-		private static final int UP_TRIANGLE_ORIGIN = 6;
-		/**
-		 * The translation applied to the diamond shape when it is drawn
-		 */
-		private static final int RHOMBUS_ORIGIN = 7;
-		/**
-		 * The translation applied to the hexagon shape when it is drawn
-		 */
-		private static final int HEX_ORIGIN = 7;
-		/**
-		 * The translation applied to the pentagon shape when it is drawn
-		 */
-		private static final int PENT_ORIGIN = 7;
+
 		/**
 		 * The last shape index chosen when nextShape() was called
 		 */
@@ -218,18 +185,16 @@ public class GraphShapeRepository {
 			Constants.CIRCLE,
 			Constants.SQUARE, };
 
-		/**
-		 * Default constructor
-		 */
-		public ShapeGenerator() {
+		public ShapeGenerator( double size ) {
+
 			// Create the shapes to populate the shapes hash
-			Shape star = createStar();
-			Shape hex = createHex( HEX_ORIGIN );
-			Shape pent = createPent( PENT_ORIGIN );
-			Shape diamond = createRhombus( RHOMBUS_ORIGIN );
-			Shape triangle = createUpTriangle( UP_TRIANGLE_ORIGIN );
-			Shape circle = new Ellipse2D.Double( -6, -6, 12, 12 );
-			Shape square = new Rectangle2D.Double( -6, -6, 12, 12 );
+			Shape star = createStar( size, 5 );
+			Shape hex = createPolygon( size, 6 );
+			Shape pent = createPolygon( size, 5 );
+			Shape diamond = createPolygon( size, 4 );
+			Shape triangle = createPolygon( size, 3 );
+			Shape circle = new Ellipse2D.Double( 0, 0, size, size );
+			Shape square = new Rectangle2D.Double( 0, 0, size, size );
 			shapes.put( Constants.STAR, star );
 			shapes.put( Constants.HEXAGON, hex );
 			shapes.put( Constants.PENTAGON, pent );
@@ -238,38 +203,11 @@ public class GraphShapeRepository {
 			shapes.put( Constants.CIRCLE, circle );
 			shapes.put( Constants.SQUARE, square );
 
-			// Populate the legend hash, the "legend" shapes are correlated with their "normal"
-			// shape types
-			vertexShapeLegendHash.put( star, createStarL() );
-			vertexShapeLegendHash.put( hex, createHexL() );
-			vertexShapeLegendHash.put( pent, createPentL() );
-			vertexShapeLegendHash.put( diamond, createRhombusL() );
-			vertexShapeLegendHash.put( triangle, createUpTriangleL() );
-			vertexShapeLegendHash.put( circle, new Ellipse2D.Double( 0, 0, 20, 20 ) );
-			vertexShapeLegendHash.put( square, new Rectangle2D.Double( 0, 0, 40, 40 ) );
-
 			// make our shape-to-name hash
 			for ( String shapename : shapeNames ) {
 				Shape shape = shapes.get( shapename );
-				Shape shapel = vertexShapeLegendHash.get( shape );
-				shapes.put( shapename + Constants.LEGEND, shapel );
 				shapeNameLkp.put( shape, shapename );
-				shapeNameLkp.put( shapel, shapename + Constants.LEGEND );
 			}
-		}
-
-		/**
-		 * Get the "legend" shape, associated with a given normal shape
-		 *
-		 * @param shape The normal shape
-		 * @return The legend shape, or null if it is not found
-		 */
-		public Shape getLegendShape( Shape shape ) {
-			Shape legendShape = vertexShapeLegendHash.get( shape );
-			if ( legendShape == null ) {
-				logger.warn( "Legend shape not found." );
-			}
-			return legendShape;
 		}
 
 		/**
@@ -308,10 +246,8 @@ public class GraphShapeRepository {
 		 * @return An array composed of each shape
 		 */
 		public Shape[] getAllShapes() {
-			Shape array[] = new Shape[shapeNames.length];
-			for ( int i = 0; i < shapeNames.length; i++ ) {
-				array[i] = shapes.get( shapeNames[i] );
-			}
+			Shape array[] = new Shape[shapes.size()];
+			new ArrayList<>( shapes.values() ).toArray( array );
 			return array;
 		}
 
@@ -321,194 +257,166 @@ public class GraphShapeRepository {
 		 * @return Star
 		 *
 		 */
-		private Shape createStar() {
-			double x = .5;
-			double points[][] = { { 0 * x, -15 * x }, { 4.5 * x, -5 * x },
-			{ 14.5 * x, -5 * x }, { 7.5 * x, 3 * x },
-			{ 10.5 * x, 13 * x }, { 0 * x, 7 * x },
-			{ -10.5 * x, 13 * x }, { -7.5 * x, 3 * x },
-			{ -14.5 * x, -5 * x }, { -4.5 * x, -5 * x }, { 0, -15 * x } };
-			final GeneralPath star = new GeneralPath();
-			star.moveTo( points[0][0], points[0][1] );
+		private Shape createStar( double size, int points ) {
+			// we're (imagining) drawing two concentric circles
+			// and walking around both, while putting points.
+			// then just connect the inner points to the outer ones,
+			// and we have our star
+			//Ellipse2D outer = new Ellipse2D.Double( 0, 0, size, size );
+			//Ellipse2D inner = new Ellipse2D.Double( size / 3, size / 3, size / 3, size / 3 );
 
-			for ( int k = 1; k < points.length; k++ ) {
-				star.lineTo( points[k][0], points[k][1] );
+			final double center = size / 2;
+			final double outerRadius = size / 2;
+			final double innerRadius = size / 6;
+			final double pointAngle = 360 / points;
+
+			double x[] = new double[points * 2];
+			double y[] = new double[points * 2];
+
+			GeneralPath star = new GeneralPath();
+			// star.append( outer, false );
+			// star.append( inner, false );
+			double offset = Math.PI / 2;
+
+			for ( int i = 0; i < points; i++ ) {
+				double innerDegree = ( Math.toRadians( i - 0.5 ) * pointAngle ) - offset;
+				double innerX = innerRadius * Math.cos( innerDegree ) + center;
+				double innerY = innerRadius * Math.sin( innerDegree ) + center;
+
+				double outerDegree = ( Math.toRadians( i ) * pointAngle ) - offset;
+				double outerX = outerRadius * Math.cos( outerDegree ) + center;
+				double outerY = outerRadius * Math.sin( outerDegree ) + center;
+
+				int pos = 2 * i;
+				x[pos] = innerX;
+				y[pos] = innerY;
+				x[pos + 1] = outerX;
+				y[pos + 1] = outerY;
+
+				//star.append( new Ellipse2D.Double( x[pos], y[pos], 1, 1 ), false );
+				//star.append( new Ellipse2D.Double( x[pos + 1], y[pos + 1], 1, 1 ), false );
 			}
 
+			star.moveTo( x[0], y[0] );
+			for ( int i = 1; i < x.length; i++ ) {
+				star.lineTo( x[i], y[i] );
+			}
 			star.closePath();
 			return star;
 		}
 
-		/**
-		 * Creates a star shape for the legend.
-		 *
-		 * @return Star
-		 */
-		private Shape createStarL() {
-			double points[][] = { { 10, 0 }, { 13, 6.66 }, { 20, 6.66 },
-			{ 14.66, 12 }, { 16.66, 18.66 }, { 10, 14 },
-			{ 3.33, 18.66 }, { 5.33, 12 }, { 0, 6.66 }, { 7, 6.66 },
-			{ 10, 0 } };
+		private Shape createPolygon( double size, int points ) {
+			// we're (imagining) drawing a circle, and walking aroun
+			// walking around it while putting points.
+			// Ellipse2D outer = new Ellipse2D.Double( 0, 0, size, size );
 
-			final GeneralPath star = new GeneralPath();
-			star.moveTo( points[0][0], points[0][1] );
+			final double center = size / 2;
+			final double radius = size / 2;
+			final double pointAngle = 360 / points;
 
-			for ( int k = 1; k < points.length; k++ ) {
-				star.lineTo( points[k][0], points[k][1] );
+			double x[] = new double[points];
+			double y[] = new double[points];
+
+			GeneralPath poly = new GeneralPath();
+			// poly.append( outer, false );
+
+			// back up our points by 90% so the shapes "point" up instead of to the right
+			double offset = Math.PI / 2;
+
+			for ( int i = 0; i < points; i++ ) {
+				double outerDegree = ( Math.toRadians( i ) * pointAngle ) - offset;
+				double outerX = radius * Math.cos( outerDegree ) + center;
+				double outerY = radius * Math.sin( outerDegree ) + center;
+
+				x[i] = outerX;
+				y[i] = outerY;
+
+				//poly.append( new Ellipse2D.Double( x[i], y[i], 1, 1 ), false );
 			}
 
-			star.closePath();
-			return star;
+			poly.moveTo( x[0], y[0] );
+			for ( int i = 1; i < x.length; i++ ) {
+				poly.lineTo( x[i], y[i] );
+			}
+			poly.closePath();
+			return poly;
 		}
 
 		/**
-		 * Creates a hexagon shape.
+		 * Creates a shape.
 		 *
-		 * @param s start position (X-coordinate) for drawing the hexagon.
-		 * @return Hexagon
+		 * @param s the length of one side of the bounding box
+		 * @return a shape
 		 */
-		private Shape createHex( final double s ) {
+		private Shape createHex( double size ) {
 			GeneralPath hexagon = new GeneralPath();
-			hexagon.moveTo( s, 0 );
-			for ( int i = 0; i < 6; i++ ) {
-				hexagon.lineTo( (float) Math.cos( i * Math.PI / 3 ) * s,
-						(float) Math.sin( i * Math.PI / 3 ) * s );
-			}
+			hexagon.moveTo( 0, size / 2 );
+			hexagon.lineTo( size / 4, size );
+			hexagon.lineTo( size - size / 4, size );
+			hexagon.lineTo( size, size / 2 );
+			hexagon.lineTo( size - size / 4, 0 );
+			hexagon.lineTo( size / 4, 0 );
 			hexagon.closePath();
 			return hexagon;
 		}
 
 		/**
-		 * Creates a hexagon shape for the legend
+		 * Creates a shape.
 		 *
-		 * @return Hexagon
+		 * @param s the length of one side of the bounding box
+		 * @return a shape
 		 */
-		private Shape createHexL() {
-			double points[][] = { { 20, 10 }, { 15, 0 }, { 5, 0 }, { 0, 10 },
-			{ 5, 20 }, { 15, 20 } };
+		private Shape createPent( double size ) {
+			final double degrees072 = Math.toRadians( 72 );
+			double angle = 3 * degrees072; // starting angle
 
-			final GeneralPath pent = new GeneralPath();
-			pent.moveTo( points[0][0], points[0][1] );
+			GeneralPath hex = new GeneralPath();
+			double x = size / 2;
+			double y = 0;
+			double side = size / 1.5;
 
-			for ( int k = 1; k < points.length; k++ ) {
-				pent.lineTo( points[k][0], points[k][1] );
-			}
+			hex.moveTo( x, y );
 
-			pent.closePath();
-			return pent;
-		}
-
-		/**
-		 * Creates a pentagon shape
-		 *
-		 * @param s start position (X-coordinate) for drawing the pentagon
-		 * @return Pentagon
-		 */
-		private Shape createPent( final double s ) {
-			GeneralPath hexagon = new GeneralPath();
-			hexagon.moveTo( (float) Math.cos( Math.PI / 10 ) * s,
-					(float) Math.sin( Math.PI / 10 ) * ( -s ) );
+			// draw from the top
 			for ( int i = 0; i < 5; i++ ) {
-				hexagon.lineTo(
-						(float) Math.cos( i * 2 * Math.PI / 5 + Math.PI / 10 )
-						* s,
-						(float) Math.sin( i * 2 * Math.PI / 5 + Math.PI / 10 )
-						* ( -s ) );
+				x = x + Math.cos( angle ) * side;
+				y = y - Math.sin( angle ) * side;
+				hex.lineTo( x, y );
+				angle += degrees072;
 			}
-			hexagon.closePath();
-			return hexagon;
+
+			return hex;
 		}
 
 		/**
-		 * Creates a pentagon shape for the legend.
+		 * Creates a shape.
 		 *
-		 * @return Pentagon
+		 * @param s the length of one side of the bounding box
+		 * @return a shape
 		 */
-		private Shape createPentL() {
-			double points[][] = { { 10, 0 }, { 19.510565163, 6.90983005625 },
-			{ 15.8778525229, 18.0901699437 },
-			{ 4.12214747708, 18.0901699437 },
-			{ 0.48943483704, 6.90983005625 } };
-
-			final GeneralPath pent = new GeneralPath();
-			pent.moveTo( points[0][0], points[0][1] );
-
-			for ( int k = 1; k < points.length; k++ ) {
-				pent.lineTo( points[k][0], points[k][1] );
-			}
-
-			pent.closePath();
-			return pent;
-		}
-
-		/**
-		 * Creates a rhombus shape.
-		 *
-		 * @param s start position (X-coordinate) for drawing the rhombus
-		 * @return Rhombus
-		 */
-		private Shape createRhombus( final double s ) {
-			double points[][] = { { 0, -s }, { -s, 0 }, { 0, s }, { s, 0 }, };
+		private Shape createRhombus( double size ) {
 			final GeneralPath r = new GeneralPath();
-			r.moveTo( points[0][0], points[0][1] );
-
-			for ( int k = 1; k < points.length; k++ ) {
-				r.lineTo( points[k][0], points[k][1] );
-			}
-
+			r.moveTo( 0, size / 2 );
+			r.lineTo( size / 2, size );
+			r.lineTo( size, size / 2 );
+			r.lineTo( size / 2, 0 );
 			r.closePath();
 			return r;
 		}
 
 		/**
-		 * Creates a rhombus shape for the legend.
+		 * Creates a shape.
 		 *
-		 * @return Rhombus
+		 * @param s the length of one side of the bounding box
+		 * @return a shape
 		 */
-		private Shape createRhombusL() {
-			double points2[][] = { { 10, 0 }, { 0, 10 }, { 10, 20 },
-			{ 20, 10 }, };
-			final GeneralPath r = new GeneralPath(); // rhombus
-			r.moveTo( points2[0][0], points2[0][1] );
-
-			for ( int k = 1; k < points2.length; k++ ) {
-				r.lineTo( points2[k][0], points2[k][1] );
-			}
-
-			r.closePath();
-			return r;
-		}
-
-		/**
-		 * Creates a triangle.
-		 *
-		 * @param s start position (X-coordinate) for drawing the triangle.
-		 *
-		 * @return Triangle
-		 */
-		private Shape createUpTriangle( final double s ) {
+		private Shape createUpTriangle( double size ) {
 			final GeneralPath p0 = new GeneralPath();
-			p0.moveTo( 0, -s );
-			p0.lineTo( s, s );
-			p0.lineTo( -s, s );
+			p0.moveTo( 0, size );
+			p0.lineTo( size, size );
+			p0.lineTo( size / 2, 0 );
 			p0.closePath();
 			return p0;
 		}
-
-		/**
-		 * Creates a triangle for the legend.
-		 *
-		 * @return Triangle
-		 */
-		private Shape createUpTriangleL() {
-			GeneralPath p0 = new GeneralPath(); // triangle
-
-			p0.moveTo( 10, 0 );
-			p0.lineTo( 20, 20 );
-			p0.lineTo( 0, 20 );
-			p0.closePath();
-			return p0;
-		}
-
 	}
 }

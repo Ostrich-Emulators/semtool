@@ -43,7 +43,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 
 	public SEMOSSVertexImpl( URI id, URI type, String label ) {
 		super( id, type, label, DynamicColorRepository.instance().getColor( type ) );
-		shape = GraphShapeRepository.instance().getShape( type );
+		shape = new GraphShapeRepository().getShape( type );
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor( DynamicColorRepository.instance().getColor( typeURI ) );
-			setShape( GraphShapeRepository.instance().getShape( getType() ) );
+			setShape( new GraphShapeRepository().getShape( getType() ) );
 		}
 	}
 
@@ -73,7 +73,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 	public final void setShape( Shape _shape ) {
 		Shape old = shape;
 		shape = ( null == _shape
-				? GraphShapeRepository.instance().getShapeByName( Constants.CIRCLE )
+				? new GraphShapeRepository().getShapeByName( Constants.CIRCLE )
 				: _shape );
 		fireIfPropertyChanged( CHANGE_SHAPE, old, shape );
 	}

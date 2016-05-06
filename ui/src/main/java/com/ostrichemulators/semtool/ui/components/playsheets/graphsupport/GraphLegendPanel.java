@@ -56,6 +56,7 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 	private static final long serialVersionUID = -2364666196260002413L;
 	private Map<Value, String> labels = new HashMap<>();
+	private final GraphShapeRepository shapefactory = new GraphShapeRepository();
 
 	/**
 	 * Create the panel.
@@ -77,7 +78,7 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 		for ( SEMOSSVertex v : vs ) {
 			URI type = new URIImpl( v.getType().stringValue() );
 			types.add( type, v );
-			shapes.put( type, GraphShapeRepository.instance().getLegendShape( v.getShape() ) );
+			shapes.put(type, shapefactory.getLegendShape( v.getShape() ) );
 			colors.put( type, v.getColor() );
 		}
 
@@ -88,7 +89,7 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 			MultiMap<ShapeColorHelper, SEMOSSVertex> mm = new MultiMap<>();
 			for ( SEMOSSVertex v : en.getValue() ) {
-				mm.add( new ShapeColorHelper( GraphShapeRepository.instance().getLegendShape( v.getShape() ),
+				mm.add(new ShapeColorHelper( shapefactory.getLegendShape( v.getShape() ),
 						v.getColor() ), v );
 			}
 

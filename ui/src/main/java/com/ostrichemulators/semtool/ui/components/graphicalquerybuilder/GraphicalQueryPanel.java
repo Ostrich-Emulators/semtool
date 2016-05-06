@@ -184,6 +184,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 				@Override
 				public void run() {
+					GraphShapeRepository shapefactory = new GraphShapeRepository();
 					vlt.setEngine( engine );
 					elt.setEngine( engine );
 					if ( null != engine ) {
@@ -192,7 +193,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
 
 						List<URI> concepts = NodeDerivationTools.createConceptList( engine );
-						Map<URI, String> conceptlabels 
+						Map<URI, String> conceptlabels
 								= Utility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );
@@ -207,7 +208,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
 							v.setColor( GraphColorRepository.instance().getColor( en.getKey() ) );
-							v.setShape( GraphShapeRepository.instance().getShape( en.getKey() ) );
+							v.setShape( shapefactory.getShape( en.getKey() ) );
 
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
 									new Dimension( 12, 12 ) ) );
@@ -429,7 +430,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		Iterator<QueryOrder> it = ordering.iterator();
 		while ( it.hasNext() ) {
 			QueryOrder qo = it.next();
-			
+
 			if ( !todo.contains( qo.base ) ) {
 				it.remove();
 			}

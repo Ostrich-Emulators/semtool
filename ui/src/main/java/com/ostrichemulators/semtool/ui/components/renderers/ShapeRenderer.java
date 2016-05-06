@@ -6,11 +6,8 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.DIHelper;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -29,6 +26,7 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 
 	private static final ImageIcon EMPTY;
 	private static final Map<Shape, Icon> icons = new HashMap<>();
+	private final GraphShapeRepository repo = new GraphShapeRepository();
 
 	static {
 		BufferedImage img = new BufferedImage( 16, 16, BufferedImage.TYPE_INT_ARGB );
@@ -43,7 +41,7 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 			return super.getListCellRendererComponent( list, val, index, sel, focus );
 		}
 		
-		String s = GraphShapeRepository.instance().getShapeName( Shape.class.cast( val ) );
+		String s = repo.getShapeName( Shape.class.cast( val ) );
 		return super.getListCellRendererComponent( list, s, index, sel, focus );
 	}
 }

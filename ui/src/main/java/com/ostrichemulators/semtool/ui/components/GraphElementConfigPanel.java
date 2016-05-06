@@ -52,6 +52,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	private final RetrievingLabelCache cache;
 	private final DefaultListModel<Color> colormodel = new DefaultListModel<>();
 	private final DefaultListModel<Shape> shapemodel = new DefaultListModel<>();
+	private final GraphShapeRepository shapefactory=new GraphShapeRepository();
 
 	/**
 	 * Creates new form GraphElementConfigPanel
@@ -68,7 +69,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 			colormodel.addElement( c );
 		}
 
-		for ( Shape s : GraphShapeRepository.instance().getAllShapes() ) {
+		for ( Shape s : shapefactory.getAllShapes() ) {
 			shapemodel.addElement( s );
 		}
 
@@ -171,8 +172,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		title.setText( String.format( cache.get( me ) ) );
 		uri.setText( me.stringValue() );
 
-		shapes.setSelectedValue( GraphShapeRepository.instance().getShape( null == type
-				? me : type ), true );
+		shapes.setSelectedValue(shapefactory.getShape( type, instance ), true );
 		colors.setSelectedValue( DynamicColorRepository.instance().getColor( null == type
 				? me : type ), true );
 

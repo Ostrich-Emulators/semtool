@@ -6,7 +6,6 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-import com.ostrichemulators.semtool.util.Constants;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -22,6 +21,8 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class TableShapeRenderer extends DefaultTableCellRenderer {
 
+	private final GraphShapeRepository repo = new GraphShapeRepository();
+
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object val,
 			boolean isSelected, boolean hasFocus, int row, int column ) {
@@ -31,7 +32,7 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 					hasFocus, row, column );
 		}
 
-		String s = GraphShapeRepository.instance().getShapeName( Shape.class.cast( val ) );
+		String s = repo.getShapeName( Shape.class.cast( val ) );
 		return super.getTableCellRendererComponent( table, s, isSelected,
 				hasFocus, row, column );
 	}

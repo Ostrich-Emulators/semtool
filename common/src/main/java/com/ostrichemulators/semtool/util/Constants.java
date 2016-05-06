@@ -78,7 +78,7 @@ public class Constants {
 //	public static final String TREE_LAYOUT = "Tree-Layout";
 //	public static final String RADIAL_TREE_LAYOUT = "Radial-Tree-Layout";
 //	public static final String BALLOON_LAYOUT = "Balloon Layout";
-	public static final String LEGEND = "_LEGEND";
+	//public static final String LEGEND = "_LEGEND";
 
 	public static final String DESCR = "DESCRIPTION";
 	public static final String QUERY = "QUERY";

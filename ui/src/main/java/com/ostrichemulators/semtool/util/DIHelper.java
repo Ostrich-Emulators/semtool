@@ -26,9 +26,7 @@ import com.ostrichemulators.semtool.ui.components.RepositoryList;
 
 import java.awt.Color;
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -103,49 +101,6 @@ public class DIHelper {
 	public static DIHelper getInstance() {
 		if ( helper == null ) {
 			helper = new DIHelper();
-			// need to set up the shapes here
-			//Shape square = new Rectangle2D.Double(-5,-5,10, 10);
-
-			//new Graphics2D().dr
-			//square = (Shape) g2;
-			//Shape circle = new Ellipse2D.Double(-5, -5, 10, 10);
-			Ellipse2D.Double circle = new Ellipse2D.Double( -6, -6, 12, 12 );
-
-			Rectangle2D.Double square = new Rectangle2D.Double( -6, -6, 12, 12 );
-			//RoundRectangle2D.Double round = new RoundRectangle2D.Double(-6,-6,12, 12, 6, 6);
-
-			Shape triangle = helper.createUpTriangle( 6 );
-			Shape star = helper.createStar();
-			Shape rhom = helper.createRhombus( 7 );
-			Shape hex = helper.createHex( 7 );
-			Shape pent = helper.createPent( 7 );
-
-			helper.localProp.put( Constants.SQUARE, square );
-			helper.localProp.put( Constants.CIRCLE, circle );
-			helper.localProp.put( Constants.TRIANGLE, triangle );
-			helper.localProp.put( Constants.STAR, star );
-			helper.localProp.put( Constants.DIAMOND, rhom );
-			helper.localProp.put( Constants.HEXAGON, hex );
-			helper.localProp.put( Constants.PENTAGON, pent );
-
-			Shape squareL = new Rectangle2D.Double( 0, 0, 40, 40 );
-			//Shape circleL = new Ellipse2D.Double(0, 0, 13, 13);
-			Shape circleL = new Ellipse2D.Double( 0, 0, 20, 20 );
-			Shape triangleL = helper.createUpTriangleL();
-			Shape starL = helper.createStarL();
-			Shape rhomL = helper.createRhombusL();
-			Shape pentL = helper.createPentL();
-			Shape hexL = helper.createHexL();
-
-			helper.localProp.put( Constants.SQUARE + Constants.LEGEND, squareL );
-			helper.localProp.put( Constants.CIRCLE + Constants.LEGEND, circleL );
-			helper.localProp.put( Constants.TRIANGLE + Constants.LEGEND, triangleL );
-			helper.localProp.put( Constants.STAR + Constants.LEGEND, starL );
-			helper.localProp.put( Constants.HEXAGON + Constants.LEGEND, hex );
-			helper.localProp.put( Constants.DIAMOND + Constants.LEGEND, rhomL );
-			helper.localProp.put( Constants.PENTAGON + Constants.LEGEND, pentL );
-			helper.localProp.put( Constants.HEXAGON + Constants.LEGEND, hexL );
-
 			Color blue = new Color( 31, 119, 180 );
 			Color green = new Color( 44, 160, 44 );
 			Color red = new Color( 214, 39, 40 );
