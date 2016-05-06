@@ -87,7 +87,7 @@ public class TreeGraphDataModelTest {
 	}
 
 	@Test
-	public void testPropChange() {
+	public void testPropChangeReal() {
 		SEMOSSVertex yuri = new SEMOSSVertexImpl( YURI, RDFS.MEMBER, "yuri" );
 		SEMOSSVertex yugo = new SEMOSSVertexImpl( YUGO, RDFS.CONTAINER, "yugo" );
 		SEMOSSEdge edge = new SEMOSSEdgeImpl( yuri, yugo, RDFS.DOMAIN );
@@ -98,7 +98,7 @@ public class TreeGraphDataModelTest {
 		graph.addEdge( edge, yuri, yugo, EdgeType.DIRECTED );
 
 		int val[] = { 0 };
-		new TreeGraphDataModel( graph, Arrays.asList( yuri ) ) {
+		TreeGraphDataModel m = new TreeGraphDataModel( graph, Arrays.asList( yuri ) ) {
 
 			@Override
 			public void propertyChange( PropertyChangeEvent evt ) {
@@ -114,7 +114,43 @@ public class TreeGraphDataModelTest {
 		edge.setLabel( "edge label" );
 		edge.setColor( Color.BLUE );
 
-		assertEquals( 5, val[0] );
+		// 5 changes, but each one calls propertyChange twice (one for the real
+		// element, once for the duplicate)
+		assertEquals( 10, val[0] );
 	}
 
+	@Test
+	public void testPropChangeDupe() {
+		SEMOSSVertex yuri = new SEMOSSVertexImpl( YURI, RDFS.MEMBER, "yuri" );
+		SEMOSSVertex yugo = new SEMOSSVertexImpl( YUGO, RDFS.CONTAINER, "yugo" );
+		SEMOSSEdge edge = new SEMOSSEdgeImpl( yuri, yugo, RDFS.DOMAIN );
+
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
+		graph.addVertex( yuri );
+		graph.addVertex( yugo );
+		graph.addEdge( edge, yuri, yugo, EdgeType.DIRECTED );
+
+		int val[] = { 0 };
+		TreeGraphDataModel m = new TreeGraphDataModel( graph, Arrays.asList( yuri ) ) {
+
+			@Override
+			public void propertyChange( PropertyChangeEvent evt ) {
+				super.propertyChange( evt );
+				val[0]++;
+			}
+		};
+
+		for ( SEMOSSVertex v : m.getDuplicatesOf( yuri ) ) {
+			v.setLabel( "Yuri" );
+			v.setColor( Color.BLUE );
+			v.setShape( new Rectangle( 6, 1000 ) );
+		}
+
+		for ( SEMOSSEdge e : m.getDuplicatesOf( edge ) ) {
+			e.setLabel( "edge label" );
+			e.setColor( Color.BLUE );
+		}
+
+		assertEquals( 5, val[0] );
+	}
 }

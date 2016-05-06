@@ -8,3 +8,4 @@ The toolkit is a GUI application to explore semantic databases. It includes almo
 3. Standardized RDF predicates and querying
 4. Graphical Query Builder -- generate SPARQL via a graphical interface
 5. Insight Manager -- pre-define and organize queries, output styles
+6. Unit testing

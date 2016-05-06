@@ -98,10 +98,11 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		this.gdm = gdm;
 		init();
 
-		gdm.addModelListener( new GraphModelListener(){
+		gdm.addModelListener( new GraphModelListener() {
 
 			@Override
-			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, GraphDataModel gdm ) {
+			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
+					int level, GraphDataModel gdm ) {
 				refresh();
 			}
 		} );

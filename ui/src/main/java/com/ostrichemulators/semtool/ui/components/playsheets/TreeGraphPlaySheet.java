@@ -56,7 +56,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 	private static final Logger log = Logger.getLogger( TreeGraphPlaySheet.class );
 	private TreeGraphDataModel model;
 	private final RingsButtonListener rings = new RingsButtonListener();
-
+	
 	/**
 	 * Constructor for GraphPlaySheetFrame.
 	 */

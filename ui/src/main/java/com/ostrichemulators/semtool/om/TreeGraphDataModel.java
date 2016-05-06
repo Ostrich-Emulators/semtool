@@ -16,9 +16,12 @@ import java.awt.Shape;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.Value;
@@ -53,15 +56,19 @@ public class TreeGraphDataModel extends GraphDataModel implements PropertyChange
 		return Forest.class.cast( getGraph() );
 	}
 
-	public Set<? extends GraphElement> getDuplicatesOf( GraphElement v ) {
+	public <X extends GraphElement> Set<X> getDuplicatesOf( X v ) {
 		// if our element has a duplicateof property, then figure out 
 		// which other elements share the property
 		// if there is no duplicateof property, then assume we're looking at
 		// the "true" element
-		GraphElement trueEle = ( v.hasProperty( DUPLICATE_OF )
-				? trueElements.get( v.getValue( DUPLICATE_OF ) )
-				: v );
-		return trueUriToDupes.getNN( trueEle.getURI() );
+		GraphElement trueEle = ( isTrueElement( v )
+				? v
+				: trueElements.get( v.getValue( DUPLICATE_OF ) ) );
+		Set<X> set = new HashSet<>();
+		for ( GraphElement e : trueUriToDupes.getNN( trueEle.getURI() ) ) {
+			set.add( (X) e );
+		}
+		return set;
 	}
 
 	public URI getRealUri( GraphElement v ) {
@@ -69,9 +76,13 @@ public class TreeGraphDataModel extends GraphDataModel implements PropertyChange
 		// which other elements share the property
 		// if there is no duplicateof property, then assume we're looking at
 		// the "true" element
-		return ( v.hasProperty( DUPLICATE_OF )
-				? URI.class.cast( v.getValue( DUPLICATE_OF ) )
-				: v.getURI() );
+		return ( isTrueElement( v )
+				? v.getURI()
+				: URI.class.cast( v.getValue( DUPLICATE_OF ) ) );
+	}
+
+	protected boolean isTrueElement( GraphElement e ) {
+		return !e.hasProperty( DUPLICATE_OF );
 	}
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> makeDuplicateForest(
@@ -115,14 +126,17 @@ public class TreeGraphDataModel extends GraphDataModel implements PropertyChange
 			newforest.addTree( dupetree );
 		}
 
+		List<GraphElement> ll = new ArrayList<>();
+		ll.addAll( newforest.getVertices() );
+		ll.addAll( newforest.getEdges() );
+		ll.addAll( graph.getVertices() );
+		ll.addAll( graph.getEdges() );
+
 		ValueFactory vf = new ValueFactoryImpl();
-		for ( SEMOSSVertex v : newforest.getVertices() ) {
-			v.setValue( DUPLICATES_SIZE,
-					vf.createLiteral( getDuplicatesOf( v ).size() ) );
-		}
-		for ( SEMOSSEdge v : newforest.getEdges() ) {
-			v.setValue( DUPLICATES_SIZE,
-					vf.createLiteral( getDuplicatesOf( v ).size() ) );
+		for ( GraphElement ge : ll ) {
+			ge.setValue( DUPLICATES_SIZE,
+					vf.createLiteral( getDuplicatesOf( ge ).size() ) );
+			ge.addPropertyChangeListener( this );
 		}
 
 		return newforest;
@@ -137,7 +151,6 @@ public class TreeGraphDataModel extends GraphDataModel implements PropertyChange
 		trueUriToDupes.add( old.getURI(), newer );
 		trueElements.put( old.getURI(), old );
 
-		newer.addPropertyChangeListener( this );
 		return newer;
 	}
 
