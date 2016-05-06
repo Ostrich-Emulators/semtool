@@ -22,14 +22,12 @@ package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-import com.ostrichemulators.semtool.user.LocalUserImpl;
+import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository.Shapes;
 import com.ostrichemulators.semtool.util.Utility;
 
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 
-import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
@@ -48,19 +46,20 @@ public class ShapePopup extends JMenu {
 	public ShapePopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( "Modify Shape" );
 
-		GraphShapeRepository gsr = new GraphShapeRepository();
-		for ( Map.Entry<String, Shape> en : gsr.getNamedShapeMap().entrySet() ) {
-			JMenuItem menuItem = new JMenuItem( en.getKey() );
+		GraphShapeRepository repo = gps.getShapeRepository();
+
+		for ( Shapes en : GraphShapeRepository.Shapes.values() ) {
+			JMenuItem menuItem = new JMenuItem( repo.createIcon( en ) );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338448713648152673L;
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
 					for ( SEMOSSVertex v : vertices ) {
-						v.setShape( en.getValue() );
+						v.setShape( repo.getShape( en ) );
+						
 						try {
-							//Properties props = DIHelper.getInstance().getCoreProp();
-							LocalUserImpl.getLocalUser().setProperty( v.getType().getLocalName() + "_SHAPE", en.getKey() );
+							repo.setShape( v.getURI(), v.getShape() );
 						}
 						catch ( Exception ex ) {
 							// TODO Auto-generated catch block

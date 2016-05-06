@@ -7,6 +7,7 @@ package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 
+import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository.Shapes;
 import java.awt.Component;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -33,15 +34,32 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 		EMPTY = new ImageIcon( img );
 	}
 
+	public ShapeRenderer() {
+	}
+
+	public ShapeRenderer( double sz ) {
+		repo.setDefaultSize( sz );
+		for ( Shapes s : GraphShapeRepository.Shapes.values() ) {
+			icons.put( repo.getShape( s ), repo.createIcon( s ) );
+		}
+	}
+
+	public void setSize( double sz ) {
+		repo.setDefaultSize( sz );
+	}
+
 	@Override
 	public Component getListCellRendererComponent( JList<?> list, Object val,
 			int index, boolean sel, boolean focus ) {
 
-		if( null == val ){
+		if ( null == val ) {
 			return super.getListCellRendererComponent( list, val, index, sel, focus );
 		}
-		
-		String s = repo.getShapeName( Shape.class.cast( val ) );
-		return super.getListCellRendererComponent( list, s, index, sel, focus );
+
+		super.getListCellRendererComponent( list, "", index, sel, focus );
+		Shape s = Shape.class.cast( val );
+		icons.put( s, repo.createIcon( Shape.class.cast( val ) ) );
+		setIcon( icons.get( s ) );
+		return this;
 	}
 }

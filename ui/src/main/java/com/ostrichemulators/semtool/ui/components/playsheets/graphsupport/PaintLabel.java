@@ -22,9 +22,9 @@ package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
@@ -38,7 +38,7 @@ public class PaintLabel extends JButton {
 	private static final long serialVersionUID = 990020151L;
 	private Shape shape = null;
 	private Color color = null;
-	private Dimension dim = new Dimension( 20, 20 );
+	private Dimension dim = new Dimension( 30, 30 );
 
 	/**
 	 * Constructor for PaintLabel.
@@ -106,42 +106,20 @@ public class PaintLabel extends JButton {
 	public static ImageIcon makeShapeIcon( Color color, Shape shape, Dimension dim ) {
 		// Set some padding around the ImageIcon, for better display
 		int padding = 2;
-		// Get the bounds of the shape, for use in subsequent calculations
-		Rectangle rect = shape.getBounds();
-		// Add the padding (2 sides) to the height and width around the icon
-		int totalWidth = dim.width + ( padding * 2 );
-		int totalHeight = dim.height + ( padding * 2 );
-		// Create the Buffered Image, using the bounds of the Shape instance it will contain, plus the padding
-		BufferedImage bi = new BufferedImage( totalWidth, totalHeight, BufferedImage.TYPE_INT_ARGB );
+
+		double imgwidth = dim.getWidth() - ( 2 * padding );
+		double imgheight = dim.getHeight() - ( 2 * padding );
+
+		Rectangle2D shapebounds = shape.getBounds2D();
+
+		BufferedImage bi = new BufferedImage( dim.width, dim.height,
+				BufferedImage.TYPE_INT_ARGB );
 		// Get the buffered image's graphics context
 		Graphics2D g = bi.createGraphics();
-		// If the origin of the shape is offset from zero (this shouldn't happen), then translate the x and y to compensate
-		// to compensate
-		int x = 0;
-		int y = 0;
-		if ( rect.x != 0 ) {
-			x = ( rect.x ) * ( -1 );
-		}
-		if ( rect.y != 0 ) {
-			y = ( rect.y ) * ( -1 );
-		}
-		// Move the graphics to compensate for the x and y offset found in the shape, above
-		g.translate( x, y );
-		// Move the graphics cursor to account for the padding
 		g.translate( padding, padding );
-		// If the dim requested is different from the shape extents, apply a scale
-		double requestedWidth = dim.getWidth();
-		double requestedHeight = dim.getHeight();
-		double scaleX = 1.0d;
-		double scaleY = 1.0d;
-		if ( requestedWidth != ( (double) rect.width ) ) {
-			scaleX = requestedWidth / ( (double) rect.width );
-		}
-		if ( requestedHeight != ( (double) rect.height ) ) {
-			scaleY = requestedHeight / ( (double) rect.width );
-		}
+
 		// Apply the scale
-		g.scale( scaleX, scaleY );
+		g.scale( imgwidth / shapebounds.getWidth(), imgheight / shapebounds.getHeight() );
 		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
 		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 		g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );

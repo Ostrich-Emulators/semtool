@@ -21,7 +21,6 @@ package com.ostrichemulators.semtool.om;
 
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-import com.ostrichemulators.semtool.util.Constants;
 
 import java.awt.Shape;
 
@@ -73,7 +72,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 	public final void setShape( Shape _shape ) {
 		Shape old = shape;
 		shape = ( null == _shape
-				? new GraphShapeRepository().getShapeByName( Constants.CIRCLE )
+				? GraphShapeRepository.Shapes.CIRCLE.getShape( 16 )
 				: _shape );
 		fireIfPropertyChanged( CHANGE_SHAPE, old, shape );
 	}

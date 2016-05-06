@@ -14,6 +14,7 @@ import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTreeCellR
 import com.ostrichemulators.semtool.ui.components.renderers.ShapeRenderer;
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository.Shapes;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Color;
@@ -52,7 +53,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	private final RetrievingLabelCache cache;
 	private final DefaultListModel<Color> colormodel = new DefaultListModel<>();
 	private final DefaultListModel<Shape> shapemodel = new DefaultListModel<>();
-	private final GraphShapeRepository shapefactory=new GraphShapeRepository();
+	private final GraphShapeRepository shapefactory = new GraphShapeRepository();
 
 	/**
 	 * Creates new form GraphElementConfigPanel
@@ -63,14 +64,14 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		initComponents();
 
 		colors.setCellRenderer( new ColorRenderer() );
-		shapes.setCellRenderer( new ShapeRenderer() );
+		shapes.setCellRenderer( new ShapeRenderer( 30 ) );
 
 		for ( Color c : GraphColorRepository.instance().getAllNamedColors() ) {
 			colormodel.addElement( c );
 		}
 
-		for ( Shape s : shapefactory.getAllShapes() ) {
-			shapemodel.addElement( s );
+		for ( Shapes s : GraphShapeRepository.Shapes.values() ) {
+			shapemodel.addElement( s.getShape( 24 ) );
 		}
 
 		LabeledPairTreeCellRenderer renderer = LabeledPairTreeCellRenderer.getValuePairRenderer( cache );
@@ -172,7 +173,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		title.setText( String.format( cache.get( me ) ) );
 		uri.setText( me.stringValue() );
 
-		shapes.setSelectedValue(shapefactory.getShape( type, instance ), true );
+		shapes.setSelectedValue( shapefactory.getShape( type, instance ), true );
 		colors.setSelectedValue( DynamicColorRepository.instance().getColor( null == type
 				? me : type ), true );
 

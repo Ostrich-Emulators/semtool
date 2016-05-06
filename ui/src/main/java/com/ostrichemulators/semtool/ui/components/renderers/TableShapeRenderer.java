@@ -8,10 +8,11 @@ package com.ostrichemulators.semtool.ui.components.renderers;
 import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Shape;
 
-import javax.swing.JLabel;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.Icon;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -21,7 +22,22 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class TableShapeRenderer extends DefaultTableCellRenderer {
 
+	private static final Map<Shape, Icon> icons = new HashMap<>();
 	private final GraphShapeRepository repo = new GraphShapeRepository();
+
+	public TableShapeRenderer() {
+	}
+
+	public TableShapeRenderer( double sz ) {
+		repo.setDefaultSize( sz );
+		for ( GraphShapeRepository.Shapes s : GraphShapeRepository.Shapes.values() ) {
+			icons.put( repo.getShape( s ), repo.createIcon( s ) );
+		}
+	}
+
+	public void setSize( double sz ) {
+		repo.setDefaultSize( sz );
+	}
 
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object val,
@@ -32,37 +48,11 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 					hasFocus, row, column );
 		}
 
-		String s = repo.getShapeName( Shape.class.cast( val ) );
-		return super.getTableCellRendererComponent( table, s, isSelected,
+		super.getTableCellRendererComponent( table, "", isSelected,
 				hasFocus, row, column );
+		Shape s = Shape.class.cast( val );
+		icons.put( s, repo.createIcon( Shape.class.cast( val ) ) );
+		setIcon( icons.get( s ) );
+		return this;
 	}
-
-	public static void shapeify( JLabel lbl, Shape s, Dimension d ) {
-//		if ( null == s ) {
-//			lbl.setIcon( EMPTY );
-//		}
-//		else {
-//			if ( !icons.containsKey( s ) || true ) {
-//				BufferedImage img
-//						= new BufferedImage( 22, 22, BufferedImage.TYPE_INT_ARGB );
-//				Graphics2D g = img.createGraphics();
-//				g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
-//				g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
-//				g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-//
-//				double scalex = d.width/22d;
-//				double scaley = d.height/22d;
-//				
-//				g.scale( scalex, scaley );
-//				
-//				g.setColor( Color.BLACK );
-//				g.draw( s );
-//				g.dispose();
-//
-//				icons.put( s, new ImageIcon( img ) );
-//			}
-//		}
-//		lbl.setIcon( icons.get( s ) );
-	}
-
 }

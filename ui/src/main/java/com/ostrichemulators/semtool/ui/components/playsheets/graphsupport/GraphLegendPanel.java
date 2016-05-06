@@ -27,7 +27,6 @@ import com.ostrichemulators.semtool.ui.components.WrapLayout;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 import com.ostrichemulators.semtool.util.MultiMap;
 
 import java.awt.Color;
@@ -56,7 +55,6 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 	private static final long serialVersionUID = -2364666196260002413L;
 	private Map<Value, String> labels = new HashMap<>();
-	private final GraphShapeRepository shapefactory = new GraphShapeRepository();
 
 	/**
 	 * Create the panel.
@@ -78,7 +76,7 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 		for ( SEMOSSVertex v : vs ) {
 			URI type = new URIImpl( v.getType().stringValue() );
 			types.add( type, v );
-			shapes.put(type, shapefactory.getLegendShape( v.getShape() ) );
+			shapes.put( type, v.getShape() );
 			colors.put( type, v.getColor() );
 		}
 
@@ -89,8 +87,7 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 			MultiMap<ShapeColorHelper, SEMOSSVertex> mm = new MultiMap<>();
 			for ( SEMOSSVertex v : en.getValue() ) {
-				mm.add(new ShapeColorHelper( shapefactory.getLegendShape( v.getShape() ),
-						v.getColor() ), v );
+				mm.add( new ShapeColorHelper( v.getShape(), v.getColor() ), v );
 			}
 
 			for ( Map.Entry<ShapeColorHelper, List<SEMOSSVertex>> sch : mm.entrySet() ) {
