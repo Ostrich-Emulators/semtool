@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.util.Utility;
+import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Component;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +14,6 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
@@ -89,6 +87,10 @@ public class LabeledPairTreeCellRenderer<T> extends DefaultTreeCellRenderer {
 	}
 
 	public static LabeledPairTreeCellRenderer<Value> getValuePairRenderer( IEngine eng ) {
+		return getValuePairRenderer( new RetrievingLabelCache( eng ) );
+	}
+
+	public static LabeledPairTreeCellRenderer<Value> getValuePairRenderer( RetrievingLabelCache rlc ) {
 		return new LabeledPairTreeCellRenderer<Value>() {
 			@Override
 			protected String getLabelForCacheMiss( Value val ) {
@@ -96,20 +98,7 @@ public class LabeledPairTreeCellRenderer<T> extends DefaultTreeCellRenderer {
 					return "";
 				}
 
-				String ret;
-				if ( val instanceof URI ) {
-					URI uri = URI.class.cast( val );
-					ret = ( null == eng ? uri.getLocalName()
-							: Utility.getInstanceLabel( Resource.class.cast( val ), eng ) );
-					cache( val, ret );
-				}
-				else if ( val instanceof Literal ) {
-					ret = Literal.class.cast( val ).getLabel();
-				}
-				else {
-					ret = val.stringValue();
-				}
-				return ret;
+				return rlc.get( val );
 			}
 		};
 	}

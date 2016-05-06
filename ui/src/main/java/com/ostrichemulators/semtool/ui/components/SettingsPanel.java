@@ -19,6 +19,7 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.ui.actions.DbAction;
 import com.ostrichemulators.semtool.ui.components.models.NamespaceTableModel;
+import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.main.SemossPreferences;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.user.User.UserProperty;
@@ -29,6 +30,7 @@ import com.ostrichemulators.semtool.user.Security;
  * @author ryan
  */
 public class SettingsPanel extends javax.swing.JPanel {
+
 	private static final long serialVersionUID = 4802080643740346669L;
 	private static final Logger log = Logger.getLogger( SettingsPanel.class );
 
@@ -52,8 +54,8 @@ public class SettingsPanel extends javax.swing.JPanel {
 
 				DIHelper.getInstance().getCoreProp()
 						.setProperty( actionCommandString, Boolean.toString( ischecked ) );
-				
-				if (Constants.SEMEX_USE_LABELS_PREF.equals(actionCommandString)) {
+
+				if ( Constants.SEMEX_USE_LABELS_PREF.equals( actionCommandString ) ) {
 					PlayPane.getSemanticExplorerPanel().populateDataForThisDB();
 				}
 			}
@@ -66,12 +68,12 @@ public class SettingsPanel extends javax.swing.JPanel {
 		for ( Map.Entry<JCheckBox, String> entry : map.entrySet() ) {
 			JCheckBox checkbox = entry.getKey();
 			String actionCommandString = entry.getValue();
-			
+
 			checkbox.setActionCommand( actionCommandString );
 			checkbox.addActionListener( preflistener );
 			checkbox.setSelected( prefs.getBoolean( actionCommandString, false ) );
-			
-			if (Constants.SEMEX_USE_LABELS_PREF.equals(actionCommandString)) {
+
+			if ( Constants.SEMEX_USE_LABELS_PREF.equals( actionCommandString ) ) {
 				checkbox.setSelected( prefs.getBoolean( actionCommandString, true ) );
 			}
 		}
@@ -123,6 +125,7 @@ public class SettingsPanel extends javax.swing.JPanel {
     jScrollPane2 = new javax.swing.JScrollPane();
     namespaces = new javax.swing.JTable();
     semexUseLabels = new javax.swing.JCheckBox();
+    graphdisp = new javax.swing.JButton();
 
     calcInfers.setText("Compute dependent relationships following load");
 
@@ -200,6 +203,13 @@ public class SettingsPanel extends javax.swing.JPanel {
 
     semexUseLabels.setText("Semantic Explorer tree uses labels");
 
+    graphdisp.setText("Edit Graph Display");
+    graphdisp.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        graphdispActionPerformed(evt);
+      }
+    });
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -213,7 +223,8 @@ public class SettingsPanel extends javax.swing.JPanel {
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(semexUseLabels)
               .addComponent(calcInfers)
-              .addComponent(jButton1))
+              .addComponent(jButton1)
+              .addComponent(graphdisp))
             .addGap(0, 0, Short.MAX_VALUE)))
         .addContainerGap())
     );
@@ -224,6 +235,8 @@ public class SettingsPanel extends javax.swing.JPanel {
         .addComponent(calcInfers)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(semexUseLabels)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(graphdisp)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(jButton1)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -240,13 +253,14 @@ public class SettingsPanel extends javax.swing.JPanel {
 				"Confirm Reset", JOptionPane.WARNING_MESSAGE );
 		if ( JOptionPane.YES_OPTION == ok ) {
 			Class<?> classesToClear[] = { DbAction.class, FileBrowsePanel.class,
-				PlayPane.class, SemossPreferences.class, BindingPanel.class
+				PlayPane.class, SemossPreferences.class, BindingPanel.class,
+				GraphPlaySheet.class
 			};
 
 			for ( Class<?> c : classesToClear ) {
-				Preferences prefs = Preferences.userNodeForPackage( c );
+				Preferences prefs2 = Preferences.userNodeForPackage( c );
 				try {
-					prefs.clear();
+					prefs2.clear();
 				}
 				catch ( BackingStoreException bse ) {
 					log.error( bse, bse );
@@ -255,11 +269,16 @@ public class SettingsPanel extends javax.swing.JPanel {
 		}
   }//GEN-LAST:event_jButton1ActionPerformed
 
+  private void graphdispActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_graphdispActionPerformed
+		GraphElementConfigPanel.showDialog( JOptionPane.getFrameForComponent( this ),
+				DIHelper.getInstance().getRdfEngine() );
+  }//GEN-LAST:event_graphdispActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox calcInfers;
   private javax.swing.JTextField email;
   private javax.swing.JTextField fullname;
+  private javax.swing.JButton graphdisp;
   private javax.swing.JButton jButton1;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;

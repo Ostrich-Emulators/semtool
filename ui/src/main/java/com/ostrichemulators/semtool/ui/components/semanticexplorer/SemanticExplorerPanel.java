@@ -55,13 +55,13 @@ import org.openrdf.repository.RepositoryException;
 public class SemanticExplorerPanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = -9040079407021692942L;
 	private static final Logger log = Logger.getLogger( SemanticExplorerPanel.class );
-	private JTree nodeClassesAndInstances;
+	private final JTree nodeClassesAndInstances;
 	private IEngine engine;
-	private DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "Please wait while classes and instances populate..." );
+	private final DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "Please wait while classes and instances populate..." );
 	
-	private JScrollPane leftSide, rightSide;
-	private JSplitPane jSplitPane;
-	private JTable propertyTable;
+	private final JScrollPane leftSide, rightSide;
+	private final JSplitPane jSplitPane;
+	private final JTable propertyTable;
 	
 	private boolean useLabels = false;
 
@@ -259,13 +259,13 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 		invisibleRoot.removeAllChildren();
 		
-		ArrayList<URITreeNode> conceptListURITreeNodes = new ArrayList<URITreeNode>();
+		ArrayList<URITreeNode> conceptListURITreeNodes = new ArrayList<>();
 		List<URI> concepts = runConceptsQuery();
 		for (URI concept:concepts) {
 			URITreeNode conceptNode = new URITreeNode( concept, useLabels );
 			conceptListURITreeNodes.add( conceptNode );
 
-			ArrayList<URITreeNode> instanceListURITreeNodes = new ArrayList<URITreeNode>();
+			ArrayList<URITreeNode> instanceListURITreeNodes = new ArrayList<>();
 			List<Value[]> instancesAndTheirLabels = runInstancesAndLabelsQuery(concept);
 			for (Value[] values:instancesAndTheirLabels) {
 				instanceListURITreeNodes.add( new URITreeNode(values[0], values[1], useLabels) );

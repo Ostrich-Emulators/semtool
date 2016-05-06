@@ -21,6 +21,7 @@ package com.ostrichemulators.semtool.ui.components.models;
 
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
+import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -205,5 +206,39 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 	@Override
 	public boolean isCellEditable( int row, int column ) {
 		return ( 0 == column );
+	}
+
+	public class FilterRow<T extends GraphElement> implements Comparable<FilterRow> {
+
+		public final URI type;
+		public final T instance;
+
+		public FilterRow( URI type, T nodeedge ) {
+			this.type = type;
+			this.instance = nodeedge;
+		}
+
+		public boolean isHeader() {
+			return ( null == instance || Constants.ANYNODE.equals( instance ) );
+		}
+
+		@Override
+		public int compareTo( FilterRow o ) {
+		// if we have the same type, sort on the instance label
+			// if we don't have the same type, sort by type
+
+			if ( type.equals( o.type ) ) {
+				if ( isHeader() ) {
+					return -1;
+				}
+				if ( o.isHeader() ) {
+					return 1;
+				}
+				return instance.getLabel().compareTo( o.instance.getLabel() );
+			}
+
+			// types aren't the same, so just worry about sorting on type
+			return type.stringValue().compareTo( o.type.stringValue() );
+		}
 	}
 }

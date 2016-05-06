@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.query.BindingSet;
 
 /**
  * This class is responsible for providing a number of utility methods for the
@@ -42,7 +44,7 @@ public class NodeDerivationTools {
 	 * @return A list of concepts in URI form
 	 */
 	public static List<URI> createConceptList( IEngine engine ) {
-		
+
 		String query = "SELECT ?entity WHERE "
 				+ "{ ?entity rdfs:subClassOf+ ?concept . FILTER( ?entity != ?concept ) }";
 		OneVarListQueryAdapter<URI> qe
@@ -51,6 +53,21 @@ public class NodeDerivationTools {
 
 		final List<URI> conceptList = engine.queryNoEx( qe );
 		return conceptList;
+	}
+
+	public static List<URI> createInstanceList( URI concept, IEngine engine ) {
+		String query = "SELECT DISTINCT ?s WHERE { ?s rdf:type ?concept }";
+
+		ListQueryAdapter<URI> qa = new ListQueryAdapter<URI>( query ) {
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				URI instance = URI.class.cast( set.getValue( "s" ) );
+				add( instance );
+			}
+		};
+		qa.bind( "concept", concept );
+
+		return engine.queryNoEx( qa );
 	}
 
 	/**
