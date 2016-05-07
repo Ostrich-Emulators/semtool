@@ -13,8 +13,8 @@ import com.ostrichemulators.semtool.ui.components.renderers.ColorRenderer;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTreeCellRenderer;
 import com.ostrichemulators.semtool.ui.components.renderers.ShapeRenderer;
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository.Shapes;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository.NamedShape;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Color;
@@ -53,7 +53,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	private final RetrievingLabelCache cache;
 	private final DefaultListModel<Color> colormodel = new DefaultListModel<>();
 	private final DefaultListModel<Shape> shapemodel = new DefaultListModel<>();
-	private final GraphShapeRepository shapefactory = new GraphShapeRepository();
+	private final DefaultGraphShapeRepository shapefactory = new DefaultGraphShapeRepository();
 
 	/**
 	 * Creates new form GraphElementConfigPanel
@@ -70,7 +70,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 			colormodel.addElement( c );
 		}
 
-		for ( Shapes s : GraphShapeRepository.Shapes.values() ) {
+		for ( NamedShape s : DefaultGraphShapeRepository.NamedShape.values() ) {
 			shapemodel.addElement( s.getShape( 24 ) );
 		}
 

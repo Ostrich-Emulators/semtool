@@ -5,9 +5,8 @@
  */
 package com.ostrichemulators.semtool.ui.components.renderers;
 
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository.Shapes;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository.NamedShape;
 import java.awt.Component;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -27,7 +26,7 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 
 	private static final ImageIcon EMPTY;
 	private static final Map<Shape, Icon> icons = new HashMap<>();
-	private final GraphShapeRepository repo = new GraphShapeRepository();
+	private final DefaultGraphShapeRepository repo = new DefaultGraphShapeRepository();
 
 	static {
 		BufferedImage img = new BufferedImage( 16, 16, BufferedImage.TYPE_INT_ARGB );
@@ -38,14 +37,14 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 	}
 
 	public ShapeRenderer( double sz ) {
-		repo.setDefaultSize( sz );
-		for ( Shapes s : GraphShapeRepository.Shapes.values() ) {
+		repo.setIconSize( sz );
+		for ( NamedShape s : DefaultGraphShapeRepository.NamedShape.values() ) {
 			icons.put( repo.getShape( s ), repo.createIcon( s ) );
 		}
 	}
 
 	public void setSize( double sz ) {
-		repo.setDefaultSize( sz );
+		repo.setIconSize( sz );
 	}
 
 	@Override

@@ -5,8 +5,8 @@
  */
 package com.ostrichemulators.semtool.ui.components.renderers;
 
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
 import java.awt.Component;
 import java.awt.Shape;
 
@@ -23,20 +23,20 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class TableShapeRenderer extends DefaultTableCellRenderer {
 
 	private static final Map<Shape, Icon> icons = new HashMap<>();
-	private final GraphShapeRepository repo = new GraphShapeRepository();
+	private final DefaultGraphShapeRepository repo = new DefaultGraphShapeRepository();
 
 	public TableShapeRenderer() {
 	}
 
 	public TableShapeRenderer( double sz ) {
-		repo.setDefaultSize( sz );
-		for ( GraphShapeRepository.Shapes s : GraphShapeRepository.Shapes.values() ) {
+		repo.setIconSize( sz );
+		for ( DefaultGraphShapeRepository.NamedShape s : DefaultGraphShapeRepository.NamedShape.values() ) {
 			icons.put( repo.getShape( s ), repo.createIcon( s ) );
 		}
 	}
 
 	public void setSize( double sz ) {
-		repo.setDefaultSize( sz );
+		repo.setIconSize( sz );
 	}
 
 	@Override

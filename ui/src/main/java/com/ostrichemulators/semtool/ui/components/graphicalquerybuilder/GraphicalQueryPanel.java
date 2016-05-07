@@ -26,7 +26,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintL
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.tabbedqueries.SparqlTextArea;
 import com.ostrichemulators.semtool.om.GraphColorRepository;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
 import com.ostrichemulators.semtool.ui.transformer.ArrowPaintTransformer;
 import com.ostrichemulators.semtool.ui.transformer.EdgeStrokeTransformer;
 import com.ostrichemulators.semtool.ui.transformer.LabelFontTransformer;
@@ -180,11 +180,11 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private void buildTypeSelector() {
 
 		try {
-			SwingUtilities.invokeAndWait( new Runnable() {
+			SwingUtilities.invokeAndWait(new Runnable() {
 
 				@Override
 				public void run() {
-					GraphShapeRepository shapefactory = new GraphShapeRepository();
+					DefaultGraphShapeRepository shapefactory = new DefaultGraphShapeRepository();
 					vlt.setEngine( engine );
 					elt.setEngine( engine );
 					if ( null != engine ) {

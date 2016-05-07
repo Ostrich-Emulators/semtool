@@ -21,8 +21,8 @@ package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository.Shapes;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository.NamedShape;
 import com.ostrichemulators.semtool.util.Utility;
 
 import java.awt.event.ActionEvent;
@@ -46,9 +46,9 @@ public class ShapePopup extends JMenu {
 	public ShapePopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( "Modify Shape" );
 
-		GraphShapeRepository repo = gps.getShapeRepository();
+		DefaultGraphShapeRepository repo = gps.getShapeRepository();
 
-		for ( Shapes en : GraphShapeRepository.Shapes.values() ) {
+		for ( NamedShape en : DefaultGraphShapeRepository.NamedShape.values() ) {
 			JMenuItem menuItem = new JMenuItem( repo.createIcon( en ) );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338448713648152673L;

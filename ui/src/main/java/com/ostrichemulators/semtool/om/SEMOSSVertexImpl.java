@@ -20,8 +20,8 @@
 package com.ostrichemulators.semtool.om;
 
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
 
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
 import java.awt.Shape;
 
 import java.util.Map;
@@ -42,7 +42,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 
 	public SEMOSSVertexImpl( URI id, URI type, String label ) {
 		super( id, type, label, DynamicColorRepository.instance().getColor( type ) );
-		shape = new GraphShapeRepository().getShape( type );
+		shape = new DefaultGraphShapeRepository().getShape( type );
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor( DynamicColorRepository.instance().getColor( typeURI ) );
-			setShape( new GraphShapeRepository().getShape( getType() ) );
+			setShape(new DefaultGraphShapeRepository().getShape( getType() ) );
 		}
 	}
 
@@ -72,7 +72,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 	public final void setShape( Shape _shape ) {
 		Shape old = shape;
 		shape = ( null == _shape
-				? GraphShapeRepository.Shapes.CIRCLE.getShape( 16 )
+				? DefaultGraphShapeRepository.NamedShape.CIRCLE.getShape( 16 )
 				: _shape );
 		fireIfPropertyChanged( CHANGE_SHAPE, old, shape );
 	}

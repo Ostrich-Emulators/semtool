@@ -8,7 +8,7 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.om.GraphColorRepository;
 
-import com.ostrichemulators.semtool.ui.helpers.GraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
 import java.awt.Shape;
 
 import java.util.Collection;
@@ -31,7 +31,7 @@ public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex
 
 	public QueryNode( URI id, URI type, String label ) {
 		super( id, type, label, GraphColorRepository.instance().getColor( type ) );
-		shape = new GraphShapeRepository().getShape( type );
+		shape = new DefaultGraphShapeRepository().getShape( type );
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor( GraphColorRepository.instance().getColor( typeURI ) );
-			setShape( new GraphShapeRepository().getShape( getType() ) );
+			setShape(new DefaultGraphShapeRepository().getShape( getType() ) );
 		}
 	}
 
@@ -60,7 +60,7 @@ public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor( GraphColorRepository.instance().getColor( typeURI ) );
-			setShape( new GraphShapeRepository().getShape( getType() ) );
+			setShape(new DefaultGraphShapeRepository().getShape( getType() ) );
 		}
 	}
 
