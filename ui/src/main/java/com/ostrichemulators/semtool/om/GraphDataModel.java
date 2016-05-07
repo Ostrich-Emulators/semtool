@@ -349,7 +349,7 @@ public class GraphDataModel {
 					SEMOSSVertex v = createOrRetrieveVertex( s, overlayLevel );
 					v.setValue( prop, val );
 					v.setType( type );
-					v.setShape( shapefactory.getShape( v.getType(), v.getURI() ) );
+					v.setShape( shapefactory.getRawShape( v ) );
 				}
 			};
 

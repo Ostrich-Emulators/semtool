@@ -19,15 +19,14 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
+import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository.NamedShape;
 import com.ostrichemulators.semtool.util.Utility;
 
 import java.awt.event.ActionEvent;
 import java.util.Collection;
-
 
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
@@ -48,24 +47,16 @@ public class ShapePopup extends JMenu {
 
 		DefaultGraphShapeRepository repo = gps.getShapeRepository();
 
-		for ( NamedShape en : DefaultGraphShapeRepository.NamedShape.values() ) {
-			JMenuItem menuItem = new JMenuItem( repo.createIcon( en ) );
+		for ( NamedShape en : NamedShape.values() ) {
+			JMenuItem menuItem = new JMenuItem( repo.getIcon( en ) );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338448713648152673L;
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
 					for ( SEMOSSVertex v : vertices ) {
-						v.setShape( repo.getShape( en ) );
-						
-						try {
-							repo.setShape( v.getURI(), v.getShape() );
-						}
-						catch ( Exception ex ) {
-							// TODO Auto-generated catch block
-							log.error( ex, ex );
-						}
-
+						v.setShape( repo.getRawShape( en ) );
+						repo.set( v, v.getColor(), en );
 					}
 				}
 			} );

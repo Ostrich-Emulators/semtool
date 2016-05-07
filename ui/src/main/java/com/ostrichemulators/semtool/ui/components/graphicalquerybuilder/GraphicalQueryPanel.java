@@ -208,7 +208,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
 							v.setColor( GraphColorRepository.instance().getColor( en.getKey() ) );
-							v.setShape( shapefactory.getShape( en.getKey() ) );
+							v.setShape( shapefactory.getRawShape( en.getKey() ) );
 
 							button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
 									new Dimension( 12, 12 ) ) );

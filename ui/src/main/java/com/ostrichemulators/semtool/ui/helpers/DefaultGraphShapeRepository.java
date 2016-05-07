@@ -7,6 +7,7 @@ import com.ostrichemulators.semtool.om.NamedShape;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.URL;
@@ -177,6 +178,31 @@ public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
+	public ImageIcon getIcon( Shape shape ){
+		BufferedImage img = new BufferedImage( (int) size, (int) size, BufferedImage.TYPE_INT_ARGB );
+
+		// Get the buffered image's graphics context
+		Graphics2D g = img.createGraphics();
+		g.translate( padding, padding );
+
+		// make it look nice (hopefully)
+		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
+		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
+		g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+		g.draw( shape );
+		g.dispose();
+
+		return new ImageIcon( img );
+
+	}
+
+	@Override
+	public ImageIcon getIcon( NamedShape shape ) {
+		return getIcon( shape.getShape( size ) );
+	}
+
+	@Override
 	public ImageIcon getIcon( URI uri, double sz ) {
 		ImageIcon old = getIcon( uri );
 
@@ -208,35 +234,35 @@ public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
 	}
 
 	private ImageIcon genIcon( URI uri ) {
-		BufferedImage img = null;
 		if ( imglkp.containsKey( uri ) ) {
 			try ( InputStream is = imglkp.get( uri ).openStream() ) {
-				img = ImageIO.read( is );
+				return new ImageIcon( ImageIO.read( is ) );
 			}
 			catch ( Exception e ) {
 				log.warn( e, e );
 			}
 		}
 
-		if ( null == img ) {
-			img = new BufferedImage( (int) size, (int) size, BufferedImage.TYPE_INT_ARGB );
+		return getIcon( getShape( uri ) );
+	}
 
-			// Get the buffered image's graphics context
-			Graphics2D g = img.createGraphics();
-			g.translate( padding, padding );
+	@Override
+	public Shape getRawShape( GraphElement ge ) {
+		return getRawShape( getShape( ge ) );
+	}
 
-			// make it look nice (hopefully)
-			g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
-			g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
-			g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+	@Override
+	public Shape getRawShape( URI uri ) {
+		return getRawShape( getShape( uri ) );
+	}
 
-			Color col = getColor( uri );
-			NamedShape shape = getShape( uri );
-			g.setPaint( col );
-			g.draw( shape.getShape( size ) );
-			g.dispose();
-		}
+	@Override
+	public Shape getRawShape( NamedShape ns ) {
+		return ns.getShape( size );
+	}
 
-		return new ImageIcon( img );
+	@Override
+	public boolean hasShape( URI uri ) {
+		return shapelkp.containsKey( uri );
 	}
 }

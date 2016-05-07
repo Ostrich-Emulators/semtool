@@ -240,7 +240,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				DefaultMutableTreeNode dmtNode = (DefaultMutableTreeNode) value;
 				if ( ( dmtNode.getUserObject() instanceof URI ) && ( dmtNode.getChildCount() > 0 ) ) {
 					Color color = DynamicColorRepository.instance().getColor( (URI) dmtNode.getUserObject() );
-					Shape shape = shapefactory.getShape( (URI) dmtNode.getUserObject() );
+					Shape shape = shapefactory.getRawShape( (URI) dmtNode.getUserObject() );
 
 					setIcon( PaintLabel.makeShapeIcon( color, shape, new Dimension( 12, 12 ) ) );
 				}

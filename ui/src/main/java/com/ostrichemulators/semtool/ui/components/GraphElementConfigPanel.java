@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.ui.components;
 
 import com.ostrichemulators.semtool.om.GraphColorRepository;
+import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.models.GraphElementTreeModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintLabel;
@@ -14,7 +15,6 @@ import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTreeCellR
 import com.ostrichemulators.semtool.ui.components.renderers.ShapeRenderer;
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
 import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository.NamedShape;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Color;
@@ -70,7 +70,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 			colormodel.addElement( c );
 		}
 
-		for ( NamedShape s : DefaultGraphShapeRepository.NamedShape.values() ) {
+		for ( NamedShape s : NamedShape.values() ) {
 			shapemodel.addElement( s.getShape( 24 ) );
 		}
 
@@ -173,7 +173,18 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		title.setText( String.format( cache.get( me ) ) );
 		uri.setText( me.stringValue() );
 
-		shapes.setSelectedValue( shapefactory.getShape( type, instance ), true );
+		Shape shape = null;
+		if ( shapefactory.hasShape( instance ) ) {
+			shape = shapefactory.getRawShape( instance );
+		}
+		else if ( shapefactory.hasShape( type ) ) {
+			shape = shapefactory.getRawShape( type );
+		}
+		else {
+			shape = shapefactory.getRawShape( type );
+		}
+
+		shapes.setSelectedValue( shape, true );
 		colors.setSelectedValue( DynamicColorRepository.instance().getColor( null == type
 				? me : type ), true );
 

@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.om;
 
 import java.awt.Color;
+import java.awt.Shape;
 import java.net.URL;
 import java.util.Map;
 import javax.swing.ImageIcon;
@@ -58,6 +59,10 @@ public interface GraphColorShapeRepository {
 
 	public ImageIcon getIcon( URI uri, double size );
 
+	public ImageIcon getIcon( Shape s );
+
+	public ImageIcon getIcon( NamedShape ns );
+
 	public void setIconPadding( double sz );
 
 	public void setIconSize( double sz );
@@ -65,4 +70,18 @@ public interface GraphColorShapeRepository {
 	public double getIconSize();
 
 	public double getIconPadding();
+
+	public Shape getRawShape( GraphElement ge );
+
+	public Shape getRawShape( URI uri );
+
+	public Shape getRawShape( NamedShape ns );
+
+	/**
+	 * Do we already have a shape for this URI?
+	 *
+	 * @param uri
+	 * @return
+	 */
+	public boolean hasShape( URI uri );
 }

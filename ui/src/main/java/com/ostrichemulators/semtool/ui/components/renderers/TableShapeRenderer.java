@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.renderers;
 
-
+import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
 import java.awt.Component;
 import java.awt.Shape;
@@ -30,8 +30,8 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 
 	public TableShapeRenderer( double sz ) {
 		repo.setIconSize( sz );
-		for ( DefaultGraphShapeRepository.NamedShape s : DefaultGraphShapeRepository.NamedShape.values() ) {
-			icons.put( repo.getShape( s ), repo.createIcon( s ) );
+		for ( NamedShape s : NamedShape.values() ) {
+			icons.put( repo.getRawShape( s ), repo.getIcon( s ) );
 		}
 	}
 
@@ -51,7 +51,7 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 		super.getTableCellRendererComponent( table, "", isSelected,
 				hasFocus, row, column );
 		Shape s = Shape.class.cast( val );
-		icons.put( s, repo.createIcon( Shape.class.cast( val ) ) );
+		icons.put( s, repo.getIcon( Shape.class.cast( val ) ) );
 		setIcon( icons.get( s ) );
 		return this;
 	}

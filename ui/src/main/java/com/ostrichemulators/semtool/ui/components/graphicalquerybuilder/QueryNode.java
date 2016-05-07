@@ -31,7 +31,7 @@ public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex
 
 	public QueryNode( URI id, URI type, String label ) {
 		super( id, type, label, GraphColorRepository.instance().getColor( type ) );
-		shape = new DefaultGraphShapeRepository().getShape( type );
+		shape = new DefaultGraphShapeRepository().getRawShape( type );
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor( GraphColorRepository.instance().getColor( typeURI ) );
-			setShape(new DefaultGraphShapeRepository().getShape( getType() ) );
+			setShape(new DefaultGraphShapeRepository().getRawShape( getType() ) );
 		}
 	}
 
@@ -60,7 +60,7 @@ public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor( GraphColorRepository.instance().getColor( typeURI ) );
-			setShape(new DefaultGraphShapeRepository().getShape( getType() ) );
+			setShape(new DefaultGraphShapeRepository().getRawShape( getType() ) );
 		}
 	}
 
