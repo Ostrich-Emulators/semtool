@@ -100,7 +100,7 @@ public class IconBuilder {
 	}
 
 	public ImageIcon build() {
-		int pad = (int) Math.rint( padding );
+		int pad = (int) ( centerAtTL ? -iconsize / 2 : Math.rint( padding ) );
 		if ( null != imgloc ) {
 			return external( pad );
 		}
