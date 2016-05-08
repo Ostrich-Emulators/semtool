@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.models.GraphElementTreeModel;
@@ -56,7 +57,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	/**
 	 * Creates new form GraphElementConfigPanel
 	 */
-	public GraphElementConfigPanel( IEngine engine ) {
+	public GraphElementConfigPanel( IEngine engine, GraphColorShapeRepository repo ) {
+		shapefactory.importFrom( repo );
 		cache = new RetrievingLabelCache( engine );
 		model = new GraphElementTreeModel( engine );
 		initComponents();
@@ -139,14 +141,18 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		shapes.addListSelectionListener( lsl );
 	}
 
-	public static void showDialog( Frame frame, IEngine eng ) {
+	public DefaultColorShapeRepository getRepository() {
+		return shapefactory;
+	}
+
+	public static void showDialog( Frame frame, IEngine eng, GraphColorShapeRepository repo ) {
 		String opts[] = { "Save", "Cancel" };
-		GraphElementConfigPanel p = new GraphElementConfigPanel( eng );
+		GraphElementConfigPanel p = new GraphElementConfigPanel( eng, repo );
 		int ans = JOptionPane.showOptionDialog( frame, p,
 				"Graph Display Configuration", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );
 		if ( JOptionPane.YES_OPTION == ans ) {
-			// save stuff somewhere
+			repo.importFrom( p.getRepository() );
 		}
 	}
 
@@ -194,6 +200,9 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	}
 
 	private void setNewPanel() {
+		URI me = getUriFromPath( tree.getSelectionPath() );
+		shapefactory.set( me, colors.getSelectedValue(), shapes.getSelectedValue() );
+
 		is.setIcon( PaintLabel.makeShapeIcon( colors.getSelectedValue(),
 				shapes.getSelectedValue().getShape( 22 ), RESULT_DIM ) );
 	}

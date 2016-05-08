@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.InsightOutputType;
 import com.ostrichemulators.semtool.om.Perspective;
@@ -60,6 +61,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.semanticexplorer.SemanticExplorerPanel;
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.ui.main.SemossPreferences;
 import com.ostrichemulators.semtool.ui.swing.custom.CustomDesktopPane;
 import com.ostrichemulators.semtool.util.Constants;
@@ -235,8 +237,14 @@ public class PlayPane extends JFrame {
 
 	private SelectDatabasePanel selectDatabasePanel;
 	private final static Preferences prefs = Preferences.userNodeForPackage( PlayPane.class );
+	private final DefaultColorShapeRepository colorsShapes = new DefaultColorShapeRepository();
 
 	public PlayPane() {
+		colorsShapes.setSaveToPreferences( true );
+	}
+
+	public GraphColorShapeRepository getColorShapeRepository() {
+		return colorsShapes;
 	}
 
 	protected String getStartupMessage() {

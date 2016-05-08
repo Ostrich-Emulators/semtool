@@ -271,7 +271,8 @@ public class SettingsPanel extends javax.swing.JPanel {
 
   private void graphdispActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_graphdispActionPerformed
 		GraphElementConfigPanel.showDialog( JOptionPane.getFrameForComponent( this ),
-				DIHelper.getInstance().getRdfEngine() );
+				DIHelper.getInstance().getRdfEngine(),
+				DIHelper.getInstance().getPlayPane().getColorShapeRepository() );
   }//GEN-LAST:event_graphdispActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

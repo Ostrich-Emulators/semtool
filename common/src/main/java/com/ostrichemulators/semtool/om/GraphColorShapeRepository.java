@@ -18,6 +18,21 @@ import org.openrdf.model.URI;
  */
 public interface GraphColorShapeRepository {
 
+	public static final Color COLORS[] = {
+		new Color( 31, 119, 180 ), // blue
+		new Color( 44, 160, 44 ), // green
+		new Color( 214, 39, 40 ), // red
+		new Color( 143, 99, 42 ), // brown
+		new Color( 254, 208, 2 ), // yellow
+		new Color( 255, 127, 14 ), // orange
+		new Color( 148, 103, 189 ), // purple
+		new Color( 23, 190, 207 ), // aqua
+		new Color( 241, 47, 158 ), // pink
+		Color.GRAY
+	};
+
+	public void importFrom( GraphColorShapeRepository repo );
+
 	public void set( GraphElement ge, Color color, NamedShape shape );
 
 	public void set( URI ge, Color color, NamedShape shape );
