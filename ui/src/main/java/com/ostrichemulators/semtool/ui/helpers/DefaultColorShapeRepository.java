@@ -120,7 +120,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 		shapelkp.putAll( repo.getShapes() );
 		colorlkp.putAll( repo.getColors() );
 		imglkp.putAll( repo.getIcons() );
-		trysave( null );
+		trysave();
 	}
 
 	@Override

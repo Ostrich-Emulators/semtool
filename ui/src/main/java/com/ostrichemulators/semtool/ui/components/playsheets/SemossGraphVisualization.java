@@ -101,7 +101,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		@Override
 		public void dataChanged( URI uri, NamedShape ns, Color c, URL img ) {
 			firePropertyChange( VISIBILITY_CHANGED, false, true );
-			refresh();
+			repaint();
 		}
 	};
 
