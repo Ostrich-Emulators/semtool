@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.transformer;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.GraphElement;
 import java.awt.Color;
 import java.awt.Paint;
@@ -27,10 +28,15 @@ import java.awt.Paint;
  * Transforms the color of vertices/nodes on the graph.
  */
 public class PaintTransformer<T extends GraphElement> extends SelectingTransformer<T, Paint> {
+	private GraphColorShapeRepository repo;
+
+	public void setColorShapeRepository( GraphColorShapeRepository repo ) {
+		this.repo = repo;
+	}
 
 	@Override
 	protected Paint transformNormal( T t ) {
-		Color c = t.getColor();
+		Color c = repo.getColor( t );
 		return c;
 	}
 

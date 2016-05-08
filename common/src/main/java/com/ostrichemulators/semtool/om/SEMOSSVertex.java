@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.om;
 
-import java.awt.Shape;
 import java.util.Map;
 
 /**
@@ -13,12 +12,6 @@ import java.util.Map;
  * @author ryan
  */
 public interface SEMOSSVertex extends GraphElement {
-
-	public static final String CHANGE_SHAPE = "shape";
-
-	public Shape getShape();
-
-	public void setShape( Shape s );
 
 	/**
 	 * This is needed for the browser playsheets

@@ -6,15 +6,8 @@
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.om.GraphColorRepository;
 
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import java.awt.Shape;
-
-import java.util.Collection;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDF;
 
 /**
  * An extension of SEMOSSVertex to allow multiple values for one property
@@ -23,45 +16,12 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex {
 
-	private Shape shape;
-
 	public QueryNode( URI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
 	public QueryNode( URI id, URI type, String label ) {
-		super( id, type, label, GraphColorRepository.instance().getColor( type ) );
-		shape = new DefaultColorShapeRepository().getRawShape( type );
-	}
-
-	@Override
-	public Shape getShape() {
-		return shape;
-	}
-
-	@Override
-	public void setShape( Shape s ) {
-		shape = s;
-	}
-
-	@Override
-	public void setValue( URI prop, Value val ) {
-		super.setValue( prop, val );
-		if ( RDF.TYPE.equals( prop ) ) {
-			URI typeURI = getType();
-			setColor( GraphColorRepository.instance().getColor( typeURI ) );
-			setShape(new DefaultColorShapeRepository().getRawShape( getType() ) );
-		}
-	}
-
-	@Override
-	public void setProperties( URI prop, Collection<Value> val ) {
-		super.setProperties( prop, val );
-		if ( RDF.TYPE.equals( prop ) ) {
-			URI typeURI = getType();
-			setColor( GraphColorRepository.instance().getColor( typeURI ) );
-			setShape(new DefaultColorShapeRepository().getRawShape( getType() ) );
-		}
+		super( id, type, label );
 	}
 
 	@Override

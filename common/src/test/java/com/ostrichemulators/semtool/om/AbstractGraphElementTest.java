@@ -54,15 +54,6 @@ public class AbstractGraphElementTest {
 	}
 
 	@Test
-	public void testSetColor1() {
-		TestNode tn = new TestNode();
-		tn.setColor( Color.yellow );
-		assertEquals( Color.yellow, tn.getColor() );
-		tn.setColor( null );
-		assertEquals( new Color( 255, 255, 255, 0 ), tn.getColor() );
-	}
-
-	@Test
 	public void testGetPropertyChangeListeners() {
 	}
 
@@ -132,14 +123,6 @@ public class AbstractGraphElementTest {
 
 	@Test
 	public void testRemoveProperty() {
-	}
-
-	@Test
-	public void testCtors() {
-		TestNode tn = new TestNode( RDFS.LABEL, RDFS.DOMAIN, "label" );
-		tn.setProperty( RDFS.COMMENT, "test comment" );
-		Color c = new Color( 255, 255, 255, 0 );
-		assertEquals( c, tn.getColor() );
 	}
 
 	@Test

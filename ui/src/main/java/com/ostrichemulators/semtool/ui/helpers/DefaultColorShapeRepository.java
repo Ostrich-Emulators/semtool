@@ -115,10 +115,15 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 					prefs.put( uri.stringValue() + "_IMAGE", imglkp.get( uri ).toExternalForm() );
 				}
 				else {
-					prefs.put( uri.stringValue() + "_SHAPE", shapelkp.get( uri ).toString() );
-					Color c = colorlkp.get( uri );
-					prefs.put( uri.stringValue() + "_COLOR",
-							String.format( "%d,%d,%d", c.getRed(), c.getGreen(), c.getBlue() ) );
+					if ( shapelkp.containsKey( uri ) ) {
+						prefs.put( uri.stringValue() + "_SHAPE", shapelkp.get( uri ).toString() );
+					}
+
+					if ( colorlkp.containsKey( uri ) ) {
+						Color c = colorlkp.get( uri );
+						prefs.put( uri.stringValue() + "_COLOR",
+								String.format( "%d,%d,%d", c.getRed(), c.getGreen(), c.getBlue() ) );
+					}
 				}
 			}
 		}
@@ -342,5 +347,21 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	@Override
 	public boolean hasShape( URI uri ) {
 		return shapelkp.containsKey( uri );
+	}
+
+	@Override
+	public ImageIcon getIcon( Color fill ) {
+		BufferedImage img = new BufferedImage( (int) size, (int) size, BufferedImage.TYPE_INT_ARGB );
+		Graphics2D g = img.createGraphics();
+		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
+		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
+		g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+		g.setColor( fill );
+		int h = ( size > 8 ? (int) size - 8 : (int) size );
+		int w = ( size > 4 ? (int) size - 4 : (int) size );
+		g.fillOval( 0, 2, w, h );
+		g.dispose();
+		return new ImageIcon( img );
 	}
 }

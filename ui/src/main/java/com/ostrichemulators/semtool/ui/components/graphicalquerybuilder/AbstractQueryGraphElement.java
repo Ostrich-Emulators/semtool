@@ -7,9 +7,7 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import com.ostrichemulators.semtool.om.AbstractGraphElement;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
-import com.ostrichemulators.semtool.om.GraphColorRepository;
 import com.ostrichemulators.semtool.util.MultiSetMap;
-import java.awt.Color;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,16 +40,8 @@ public abstract class AbstractQueryGraphElement extends AbstractGraphElement
 		}
 	}
 
-	public AbstractQueryGraphElement( URI id, Color col ) {
-		this( id, null, id.getLocalName(), col );
-	}
-
 	public AbstractQueryGraphElement( URI id, URI type, String label ) {
-		this( id, type, label, GraphColorRepository.instance().getColor( type ) );
-	}
-
-	public AbstractQueryGraphElement( URI id, URI type, String label, Color col ) {
-		super( id, type, label, col );
+		super( id, type, label );
 		for ( Map.Entry<URI, Value> en : super.getValues().entrySet() ) {
 			properties.add( en.getKey(), en.getValue() );
 		}

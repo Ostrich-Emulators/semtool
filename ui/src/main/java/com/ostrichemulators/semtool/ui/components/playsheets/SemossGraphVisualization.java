@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
 import com.google.common.base.Predicate;
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.GraphModelListener;
@@ -118,6 +119,14 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		for ( LabelTransformer l : lt ) {
 			l.setLabelCache( map );
 		}
+	}
+
+	public void setColorShapeRepository( GraphColorShapeRepository repo ) {
+		vht.setColorShapeRepository( repo );
+		vpt.setColorShapeRepository( repo );
+		ept.setColorShapeRepository( repo );
+		adpt.setColorShapeRepository( repo );
+		aft.setColorShapeRepository( repo );
 	}
 
 	public void hide( URI uri, boolean hideme ) {

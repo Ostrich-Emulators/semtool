@@ -19,10 +19,10 @@
  */
 package com.ostrichemulators.semtool.ui.transformer;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-
 
 /**
  * Transforms the size and shape of selected nodes.
@@ -33,6 +33,11 @@ public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelecti
 	private static final double MAXSIZE = 100.0;
 	private static final double MINSIZE = 0.0;
 	public static final double STEPSIZE = 0.5;
+	private GraphColorShapeRepository repo;
+
+	public void setColorShapeRepository( GraphColorShapeRepository repo ) {
+		this.repo = repo;
+	}
 
 	public VertexShapeTransformer() {
 		super( INITIAL_SCALE, MAXSIZE, MINSIZE, STEPSIZE );
@@ -40,12 +45,12 @@ public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelecti
 
 	@Override
 	protected Shape transformNotSelected( SEMOSSVertex t, boolean inSkeletonMode ) {
-		return t.getShape();
+		return repo.getShape( t ).getShape( 16 );
 	}
 
 	@Override
 	protected Shape getNormal( SEMOSSVertex t, Double sz, double defaultSize ) {
-		Shape s = t.getShape();
+		Shape s = repo.getShape( t ).getShape( 16 );
 		if ( null == sz ) {
 			sz = defaultSize;
 		}

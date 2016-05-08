@@ -19,6 +19,8 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
+import com.ostrichemulators.semtool.om.NamedShape;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
@@ -30,7 +32,6 @@ import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualiz
 import com.ostrichemulators.semtool.util.MultiMap;
 
 import java.awt.Color;
-import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
@@ -70,14 +71,15 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 		final SemossGraphVisualization view = gps.getView();
 
 		MultiMap<URI, SEMOSSVertex> types = new MultiMap<>();
-		Map<URI, Shape> shapes = new HashMap<>();
+		Map<URI, NamedShape> shapes = new HashMap<>();
 		Map<URI, Color> colors = new HashMap<>();
+		GraphColorShapeRepository repo = gps.getShapeRepository();
 		Collection<SEMOSSVertex> vs = gps.getVisibleGraph().getVertices();
 		for ( SEMOSSVertex v : vs ) {
 			URI type = new URIImpl( v.getType().stringValue() );
 			types.add( type, v );
-			shapes.put( type, v.getShape() );
-			colors.put( type, v.getColor() );
+			shapes.put( type, repo.getShape( v ) );
+			colors.put( type, repo.getColor( v ) );
 		}
 
 		removeAll();
@@ -87,7 +89,7 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 			MultiMap<ShapeColorHelper, SEMOSSVertex> mm = new MultiMap<>();
 			for ( SEMOSSVertex v : en.getValue() ) {
-				mm.add( new ShapeColorHelper( v.getShape(), v.getColor() ), v );
+				mm.add( new ShapeColorHelper( repo.getShape( v ), repo.getColor( v ) ), v );
 			}
 
 			for ( Map.Entry<ShapeColorHelper, List<SEMOSSVertex>> sch : mm.entrySet() ) {
@@ -135,10 +137,10 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 	private class ShapeColorHelper {
 
-		public final Shape shape;
+		public final NamedShape shape;
 		public final Color color;
 
-		public ShapeColorHelper( Shape s, Color c ) {
+		public ShapeColorHelper( NamedShape s, Color c ) {
 			shape = s;
 			color = c;
 		}

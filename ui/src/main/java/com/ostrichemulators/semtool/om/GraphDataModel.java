@@ -26,7 +26,6 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Utility;
 import org.openrdf.model.impl.URIImpl;
@@ -45,7 +44,6 @@ public class GraphDataModel {
 
 	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
 	protected Map<String, SEMOSSEdge> edgeStore = new HashMap<>();
-	private DefaultColorShapeRepository shapefactory = new DefaultColorShapeRepository();
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph;
 
@@ -55,10 +53,6 @@ public class GraphDataModel {
 
 	public GraphDataModel( DirectedGraph<SEMOSSVertex, SEMOSSEdge> g ) {
 		vizgraph = g;
-	}
-
-	public void setShapeRepository( DefaultColorShapeRepository repo ) {
-		shapefactory = repo;
 	}
 
 	public void addModelListener( GraphModelListener l ) {
@@ -349,7 +343,6 @@ public class GraphDataModel {
 					SEMOSSVertex v = createOrRetrieveVertex( s, overlayLevel );
 					v.setValue( prop, val );
 					v.setType( type );
-					v.setShape( shapefactory.getRawShape( v ) );
 				}
 			};
 

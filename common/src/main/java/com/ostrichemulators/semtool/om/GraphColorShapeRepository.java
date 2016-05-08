@@ -76,6 +76,8 @@ public interface GraphColorShapeRepository {
 
 	public ImageIcon getIcon( Shape s, Color fill, Color line );
 
+	public ImageIcon getIcon( Color fill );
+
 	public ImageIcon getIcon( NamedShape ns );
 
 	public void setIconPadding( double sz );

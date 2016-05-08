@@ -19,10 +19,10 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.util.Utility;
 
 import java.awt.event.ActionEvent;
@@ -45,7 +45,7 @@ public class ShapePopup extends JMenu {
 	public ShapePopup( GraphPlaySheet gps, Collection<SEMOSSVertex> vertices ) {
 		super( "Modify Shape" );
 
-		DefaultColorShapeRepository repo = gps.getShapeRepository();
+		GraphColorShapeRepository repo = gps.getShapeRepository();
 
 		for ( NamedShape en : NamedShape.values() ) {
 			JMenuItem menuItem = new JMenuItem( repo.getIcon( en ) );
@@ -55,8 +55,7 @@ public class ShapePopup extends JMenu {
 				@Override
 				public void actionPerformed( ActionEvent e ) {
 					for ( SEMOSSVertex v : vertices ) {
-						v.setShape( repo.getRawShape( en ) );
-						repo.set( v, v.getColor(), en );
+						repo.set( v, repo.getColor( v ), en );
 					}
 				}
 			} );

@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.util.Utility;
-import com.ostrichemulators.semtool.om.GraphColorRepository;
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import java.awt.Color;
@@ -46,27 +46,16 @@ public class ColorPopup extends JMenu {
 	public ColorPopup( GraphPlaySheet gps, Collection<? extends GraphElement> vertices ) {
 		super( "Modify Color" );
 
-		GraphColorRepository gcr = GraphColorRepository.instance();
-		for ( Map.Entry<String, Color> en : gcr.getNamedColorMap().entrySet() ) {
-			JMenuItem menuItem = new JMenuItem( en.getKey() );
+		GraphColorShapeRepository repo = gps.getShapeRepository();
+		for ( Color en : GraphColorShapeRepository.COLORS ) {
+			JMenuItem menuItem = new JMenuItem( repo.getIcon( en ) );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338447465448152673L;
 
 				@Override
 				public void actionPerformed( ActionEvent e ) {
 					for ( GraphElement v : vertices ) {
-
-						v.setColor( en.getValue() );
-
-						try {
-							gcr.updateColor( v.getType(), en.getValue() );
-							LocalUserImpl.getLocalUser().setProperty( v.getType().getLocalName() + "_COLOR", en.getKey() );
-						}
-						catch ( Exception ex ) {
-							// TODO Auto-generated catch block
-							log.error( ex, ex );
-						}
-
+						repo.set( v, en, repo.getShape( v ) );
 					}
 				}
 			} );

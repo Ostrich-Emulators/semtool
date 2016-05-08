@@ -196,7 +196,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		colors.setSelectedValue( color, true );
 
 		was.setIcon( PaintLabel.makeShapeIcon( colors.getSelectedValue(),
-				shapes.getSelectedValue().getShape( 22 ), RESULT_DIM ) );
+				shapes.getSelectedValue(), RESULT_DIM ) );
 	}
 
 	private void setNewPanel() {
@@ -204,7 +204,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		shapefactory.set( me, colors.getSelectedValue(), shapes.getSelectedValue() );
 
 		is.setIcon( PaintLabel.makeShapeIcon( colors.getSelectedValue(),
-				shapes.getSelectedValue().getShape( 22 ), RESULT_DIM ) );
+				shapes.getSelectedValue(), RESULT_DIM ) );
 	}
 
 	private static URI getUriFromPath( TreePath tp ) {

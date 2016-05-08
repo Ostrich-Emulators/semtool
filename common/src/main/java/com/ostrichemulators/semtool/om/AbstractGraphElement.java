@@ -7,7 +7,6 @@ package com.ostrichemulators.semtool.om;
 
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Constants;
-import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -35,8 +34,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
-	public static final String CHANGE_COLOR = "color";
-	private transient Color color;
 
 	// callers can "mark" properties for their own use
 	private final Set<URI> markedProperties = new HashSet<>();
@@ -48,16 +45,9 @@ public abstract class AbstractGraphElement implements GraphElement {
 	}
 
 	public AbstractGraphElement( URI id, URI type, String label ) {
-		this( id, type, label,
-				GraphColorRepository.instance().getColor( (URI) null ) );
-	}
-
-	public AbstractGraphElement( URI id, URI type, String label, Color col ) {
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
-		color
-				= ( null == col ? GraphColorRepository.instance().getColor( type ) : col );
 	}
 
 	@Override
@@ -68,16 +58,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 	@Override
 	public void removePropertyChangeListener( PropertyChangeListener pcl ) {
 		listeners.remove( pcl );
-	}
-
-	@Override
-	public final void setColor( Color _color ) {
-		Color old = color;
-		color = ( null == _color
-				? GraphColorRepository.instance().getColor( Constants.TRANSPARENT )
-				: _color );
-
-		fireIfPropertyChanged( CHANGE_COLOR, old, color );
 	}
 
 	@Override
@@ -102,11 +82,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 				pcl.propertyChange( pce );
 			}
 		}
-	}
-
-	@Override
-	public Color getColor() {
-		return color;
 	}
 
 	/**

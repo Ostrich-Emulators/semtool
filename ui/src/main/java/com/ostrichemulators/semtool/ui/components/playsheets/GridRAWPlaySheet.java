@@ -31,6 +31,7 @@ import com.ostrichemulators.semtool.ui.components.LineNumberTableRowHeader;
 import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.models.ValueTableModel;
 import com.ostrichemulators.semtool.ui.components.renderers.URIEditor;
+import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.MultiMap;
 
 import java.awt.BorderLayout;
@@ -333,6 +334,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			GraphPlaySheet gps = new GraphPlaySheet();
+			gps.setShapeRepository( DIHelper.getInstance().getPlayPane().getColorShapeRepository() );
 			gps.setTitle( "Node Explorer" );
 			List<Value[]> vals = new ArrayList<>();
 			vals.add( new Value[]{ uri } );
