@@ -6,7 +6,8 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.om.NamedShape;
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -26,7 +27,7 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 
 	private static final ImageIcon EMPTY;
 	private static final Map<Shape, Icon> icons = new HashMap<>();
-	private final DefaultGraphShapeRepository repo = new DefaultGraphShapeRepository();
+	private final DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
 
 	static {
 		BufferedImage img = new BufferedImage( 16, 16, BufferedImage.TYPE_INT_ARGB );
@@ -56,9 +57,15 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 		}
 
 		super.getListCellRendererComponent( list, "", index, sel, focus );
-		Shape s = Shape.class.cast( val );
-		icons.put( s, repo.getIcon( Shape.class.cast( val ) ) );
-		setIcon( icons.get( s ) );
+		Shape s = null;
+		if ( val instanceof Shape ) {
+			s = Shape.class.cast( val );
+		}
+		else if ( val instanceof NamedShape ) {
+			s = NamedShape.class.cast( val ).getShape( repo.getIconSize() );
+		}
+		//icons.put( s, repo.getIcon( s ) );
+		setIcon( repo.getIcon( s, null, Color.BLACK ) );
 		return this;
 	}
 }

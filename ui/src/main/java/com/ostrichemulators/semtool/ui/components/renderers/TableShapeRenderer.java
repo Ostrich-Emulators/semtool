@@ -6,7 +6,8 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.om.NamedShape;
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
 
@@ -23,7 +24,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class TableShapeRenderer extends DefaultTableCellRenderer {
 
 	private static final Map<Shape, Icon> icons = new HashMap<>();
-	private final DefaultGraphShapeRepository repo = new DefaultGraphShapeRepository();
+	private final DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
 
 	public TableShapeRenderer() {
 	}
@@ -51,7 +52,7 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 		super.getTableCellRendererComponent( table, "", isSelected,
 				hasFocus, row, column );
 		Shape s = Shape.class.cast( val );
-		icons.put( s, repo.getIcon( Shape.class.cast( val ) ) );
+		icons.put( s, repo.getIcon( Shape.class.cast( val ), null, Color.BLACK ) );
 		setIcon( icons.get( s ) );
 		return this;
 	}

@@ -53,7 +53,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.Weight
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.awt.Dimension;
@@ -96,7 +96,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
-	private DefaultGraphShapeRepository shaper;
+	private DefaultColorShapeRepository shaper;
 
 	protected final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
 		@Override
@@ -141,7 +141,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	public GraphPlaySheet( GraphDataModel model, VisualizationControlPanel vcp ) {
 		log.debug( "new graphplaysheet" );
-		shaper = new DefaultGraphShapeRepository();
+		shaper = new DefaultColorShapeRepository();
 		gdm = model;
 		gdm.setShapeRepository( shaper );
 
@@ -195,11 +195,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		super.setFrame( f );
 	}
 
-	public DefaultGraphShapeRepository getShapeRepository() {
+	public DefaultColorShapeRepository getShapeRepository() {
 		return shaper;
 	}
 
-	public void setShapeRepository( DefaultGraphShapeRepository gsr ) {
+	public void setShapeRepository( DefaultColorShapeRepository gsr ) {
 		shaper = gsr;
 		gdm.setShapeRepository( shaper );
 	}

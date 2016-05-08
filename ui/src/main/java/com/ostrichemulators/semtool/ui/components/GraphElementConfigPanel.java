@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
-import com.ostrichemulators.semtool.om.GraphColorRepository;
 import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.models.GraphElementTreeModel;
@@ -13,8 +12,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintL
 import com.ostrichemulators.semtool.ui.components.renderers.ColorRenderer;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTreeCellRenderer;
 import com.ostrichemulators.semtool.ui.components.renderers.ShapeRenderer;
-import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Color;
@@ -52,8 +50,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	private final GraphElementTreeModel model;
 	private final RetrievingLabelCache cache;
 	private final DefaultListModel<Color> colormodel = new DefaultListModel<>();
-	private final DefaultListModel<Shape> shapemodel = new DefaultListModel<>();
-	private final DefaultGraphShapeRepository shapefactory = new DefaultGraphShapeRepository();
+	private final DefaultListModel<NamedShape> shapemodel = new DefaultListModel<>();
+	private final DefaultColorShapeRepository shapefactory = new DefaultColorShapeRepository();
 
 	/**
 	 * Creates new form GraphElementConfigPanel
@@ -64,14 +62,14 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		initComponents();
 
 		colors.setCellRenderer( new ColorRenderer() );
-		shapes.setCellRenderer( new ShapeRenderer( 30 ) );
+		shapes.setCellRenderer( new ShapeRenderer( 24 ) );
 
-		for ( Color c : GraphColorRepository.instance().getAllNamedColors() ) {
+		for ( Color c : DefaultColorShapeRepository.COLORS ) {
 			colormodel.addElement( c );
 		}
 
 		for ( NamedShape s : NamedShape.values() ) {
-			shapemodel.addElement( s.getShape( 24 ) );
+			shapemodel.addElement( s );
 		}
 
 		LabeledPairTreeCellRenderer renderer = LabeledPairTreeCellRenderer.getValuePairRenderer( cache );
@@ -173,28 +171,31 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		title.setText( String.format( cache.get( me ) ) );
 		uri.setText( me.stringValue() );
 
-		Shape shape = null;
+		NamedShape shape = null;
+		Color color = null;
 		if ( shapefactory.hasShape( instance ) ) {
-			shape = shapefactory.getRawShape( instance );
+			shape = shapefactory.getShape( instance );
+			color = shapefactory.getColor( instance );
 		}
 		else if ( shapefactory.hasShape( type ) ) {
-			shape = shapefactory.getRawShape( type );
+			shape = shapefactory.getShape( type );
+			color = shapefactory.getColor( type );
 		}
 		else {
-			shape = shapefactory.getRawShape( type );
+			shape = shapefactory.getShape( instance );
+			color = shapefactory.getColor( instance );
 		}
 
 		shapes.setSelectedValue( shape, true );
-		colors.setSelectedValue( DynamicColorRepository.instance().getColor( null == type
-				? me : type ), true );
+		colors.setSelectedValue( color, true );
 
 		was.setIcon( PaintLabel.makeShapeIcon( colors.getSelectedValue(),
-				shapes.getSelectedValue(), RESULT_DIM ) );
+				shapes.getSelectedValue().getShape( 22 ), RESULT_DIM ) );
 	}
 
 	private void setNewPanel() {
 		is.setIcon( PaintLabel.makeShapeIcon( colors.getSelectedValue(),
-				shapes.getSelectedValue(), RESULT_DIM ) );
+				shapes.getSelectedValue().getShape( 22 ), RESULT_DIM ) );
 	}
 
 	private static URI getUriFromPath( TreePath tp ) {
@@ -219,7 +220,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
     title = new javax.swing.JLabel();
     jLabel1 = new javax.swing.JLabel();
     jScrollPane2 = new javax.swing.JScrollPane();
-    shapes = new javax.swing.JList<Shape>();
+    shapes = new javax.swing.JList<NamedShape>();
     jLabel2 = new javax.swing.JLabel();
     jScrollPane3 = new javax.swing.JScrollPane();
     colors = new javax.swing.JList<Color>();
@@ -244,12 +245,16 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
     shapes.setModel(shapemodel);
     shapes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     shapes.setToolTipText("");
+    shapes.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
+    shapes.setVisibleRowCount(-1);
     jScrollPane2.setViewportView(shapes);
 
     jLabel2.setText("Color");
 
     colors.setModel(colormodel);
     colors.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    colors.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
+    colors.setVisibleRowCount(-1);
     jScrollPane3.setViewportView(colors);
 
     jLabel3.setText("Original");
@@ -273,34 +278,34 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
       Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(Panel1Layout.createSequentialGroup()
         .addGap(24, 24, 24)
+        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(18, 18, 18)
+        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(122, 122, 122))
+      .addGroup(Panel1Layout.createSequentialGroup()
+        .addGap(24, 24, 24)
         .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(Panel1Layout.createSequentialGroup()
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-            .addGap(18, 18, 18)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jLabel1)
+            .addGap(151, 151, 151)
+            .addComponent(jLabel2))
           .addGroup(Panel1Layout.createSequentialGroup()
+            .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+              .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+              .addComponent(was, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGap(18, 18, 18)
             .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addGroup(Panel1Layout.createSequentialGroup()
-                .addComponent(jLabel1)
-                .addGap(151, 151, 151)
-                .addComponent(jLabel2))
-              .addGroup(Panel1Layout.createSequentialGroup()
-                .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                  .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                  .addComponent(was, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                  .addComponent(jLabel4)
-                  .addComponent(is, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))))
-            .addGap(0, 119, Short.MAX_VALUE)))
-        .addGap(122, 122, 122))
+              .addComponent(jLabel4)
+              .addComponent(is, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))))
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, Panel1Layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(title, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addContainerGap())
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, Panel1Layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(uri, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, Panel1Layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(uri, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, Panel1Layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(title, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         .addContainerGap())
     );
     Panel1Layout.setVerticalGroup(
@@ -316,8 +321,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
           .addComponent(jLabel2))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+          .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+          .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addGap(18, 18, 18)
         .addGroup(Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(jLabel3)
@@ -347,7 +352,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JScrollPane jScrollPane3;
   private javax.swing.JSplitPane jSplitPane1;
-  private javax.swing.JList<Shape> shapes;
+  private javax.swing.JList<NamedShape> shapes;
   private javax.swing.JLabel title;
   private javax.swing.JTree tree;
   private javax.swing.JLabel uri;

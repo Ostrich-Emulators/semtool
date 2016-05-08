@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.ui.components.renderers;
 
-
 import com.ostrichemulators.semtool.om.GraphColorRepository;
 import com.ostrichemulators.semtool.util.Constants;
 import java.awt.Color;
@@ -32,7 +31,7 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 	private static final Map<Color, Icon> icons = new HashMap<>();
 
 	static {
-		BufferedImage img = new BufferedImage( 16, 16, BufferedImage.TYPE_INT_ARGB );
+		BufferedImage img = new BufferedImage( 18, 18, BufferedImage.TYPE_INT_ARGB );
 		EMPTY = new ImageIcon( img );
 	}
 
@@ -45,8 +44,7 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 		}
 
 		Color color = Color.class.cast( val );
-		val = GraphColorRepository.instance().getColorName( color );
-		super.getTableCellRendererComponent( t, val, sel, focus, r, c );
+		super.getTableCellRendererComponent( t, "", sel, focus, r, c );
 		colorify( this, color );
 
 		return this;
@@ -60,14 +58,14 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 //			lbl.setBackground( s );
 //		}
 			if ( !icons.containsKey( s ) ) {
-				BufferedImage img = new BufferedImage( 16, 16, BufferedImage.TYPE_INT_ARGB );
+				BufferedImage img = new BufferedImage( 18, 18, BufferedImage.TYPE_INT_ARGB );
 				Graphics2D g = img.createGraphics();
 				g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
 				g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 				g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
 				g.setColor( s );
-				g.fillOval( 0, 2, 16, 12 );
+				g.fillOval( 0, 2, 18, 14 );
 				g.dispose();
 
 				icons.put( s, new ImageIcon( img ) );

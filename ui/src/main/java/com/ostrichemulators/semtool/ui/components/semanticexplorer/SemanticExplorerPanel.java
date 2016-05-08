@@ -10,7 +10,7 @@ import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintLabel;
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.ui.main.SemossPreferences;
 import com.ostrichemulators.semtool.util.Constants;
 
@@ -59,7 +59,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 	private final JTree nodeClassesAndInstances;
 	private IEngine engine;
 	private final DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "Please wait while classes and instances populate..." );
-	private final DefaultGraphShapeRepository shapefactory = new DefaultGraphShapeRepository();
+	private final DefaultColorShapeRepository shapefactory = new DefaultColorShapeRepository();
 	private final JScrollPane leftSide, rightSide;
 	private final JSplitPane jSplitPane;
 	private final JTable propertyTable;

@@ -19,13 +19,10 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -104,34 +101,8 @@ public class PaintLabel extends JButton {
 	 * @return
 	 */
 	public static ImageIcon makeShapeIcon( Color color, Shape shape, Dimension dim ) {
-		// Set some padding around the ImageIcon, for better display
-		int padding = 2;
-
-		double imgwidth = dim.getWidth() - ( 2 * padding );
-		double imgheight = dim.getHeight() - ( 2 * padding );
-
-		Rectangle2D shapebounds = shape.getBounds2D();
-
-		BufferedImage bi = new BufferedImage( dim.width, dim.height,
-				BufferedImage.TYPE_INT_ARGB );
-		// Get the buffered image's graphics context
-		Graphics2D g = bi.createGraphics();
-		g.translate( padding, padding );
-
-		// Apply the scale
-		g.scale( imgwidth / shapebounds.getWidth(), imgheight / shapebounds.getHeight() );
-		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
-		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
-		g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-		if ( null != color ) {
-			g.setColor( color );
-		}
-
-		g.fill( shape );
-		g.dispose();
-
-		return new ImageIcon( bi );
+		DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
+		return repo.getIcon( shape, color, null );
 	}
 
 	private void makeShapeIcon() {

@@ -59,7 +59,7 @@ public interface GraphColorShapeRepository {
 
 	public ImageIcon getIcon( URI uri, double size );
 
-	public ImageIcon getIcon( Shape s );
+	public ImageIcon getIcon( Shape s, Color fill, Color line );
 
 	public ImageIcon getIcon( NamedShape ns );
 

@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.URL;
@@ -28,22 +29,22 @@ import org.openrdf.model.URI;
  * @author Wayne Warren
  *
  */
-public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
+public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
-	private final Logger log = Logger.getLogger( DefaultGraphShapeRepository.class );
+	private final Logger log = Logger.getLogger(DefaultColorShapeRepository.class );
 	private static final double DEFAULT_SIZE = 24;
 
-	private static final Color COLORS[] = {
-		Color.BLUE,
-		Color.GREEN,
-		Color.RED,
-		Color.GRAY,
-		Color.MAGENTA,
-		Color.YELLOW,
-		Color.ORANGE,
-		Color.PINK,
-		Color.CYAN,
-		new Color( 23, 190, 207 ) // aqua
+	public static final Color COLORS[] = {
+		new Color( 31, 119, 180 ), // blue
+		new Color( 44, 160, 44 ), // green
+		new Color( 214, 39, 40 ), // red
+		new Color( 143, 99, 42 ), // brown
+		new Color( 254, 208, 2 ), // yellow
+		new Color( 255, 127, 14 ), // orange
+		new Color( 148, 103, 189 ), // purple
+		new Color( 23, 190, 207 ), // aqua
+		new Color( 241, 47, 158 ), // pink
+		Color.GRAY
 	};
 
 	private final Random random = new Random();
@@ -57,15 +58,15 @@ public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
 	/**
 	 * Default constructor
 	 */
-	public DefaultGraphShapeRepository() {
+	public DefaultColorShapeRepository() {
 		this( DEFAULT_SIZE );
 	}
 
-	public DefaultGraphShapeRepository( double sz ) {
+	public DefaultColorShapeRepository( double sz ) {
 		this( sz, 0 );
 	}
 
-	public DefaultGraphShapeRepository( double sz, double pad ) {
+	public DefaultColorShapeRepository( double sz, double pad ) {
 		size = sz;
 		padding = pad;
 	}
@@ -129,25 +130,22 @@ public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public NamedShape getShape( URI ge ) {
-		return shapelkp.getOrDefault( ge, nextShape( ge ) );
+		if ( !shapelkp.containsKey( ge ) ) {
+			NamedShape[] shapes = NamedShape.values();
+			NamedShape shape = shapes[random.nextInt( shapes.length )];
+			shapelkp.put( ge, shape );
+		}
+		return shapelkp.get( ge );
 	}
 
 	@Override
 	public Color getColor( URI ge ) {
-		return colorlkp.getOrDefault( ge, nextColor( ge ) );
-	}
+		if ( !colorlkp.containsKey( ge ) ) {
+			Color col = COLORS[random.nextInt( COLORS.length )];
+			colorlkp.put( ge, col );
+		}
 
-	private NamedShape nextShape( URI ge ) {
-		NamedShape[] shapes = NamedShape.values();
-		NamedShape shape = shapes[random.nextInt( shapes.length )];
-		shapelkp.put( ge, shape );
-		return shape;
-	}
-
-	private Color nextColor( URI ge ) {
-		Color col = COLORS[random.nextInt( COLORS.length )];
-		colorlkp.put( ge, col );
-		return col;
+		return colorlkp.get( ge );
 	}
 
 	@Override
@@ -178,11 +176,19 @@ public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public ImageIcon getIcon( Shape shape ){
+	public ImageIcon getIcon( Shape shape, Color fill, Color line ) {
 		BufferedImage img = new BufferedImage( (int) size, (int) size, BufferedImage.TYPE_INT_ARGB );
+
+		Rectangle2D rect = shape.getBounds2D();
+		double side = rect.getWidth();
+		double maxshapesize = size - ( 2 * padding );
 
 		// Get the buffered image's graphics context
 		Graphics2D g = img.createGraphics();
+		if ( side > maxshapesize ) {
+			g.scale( maxshapesize / side, maxshapesize / side );
+		}
+
 		g.translate( padding, padding );
 
 		// make it look nice (hopefully)
@@ -190,7 +196,14 @@ public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
 		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 		g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-		g.draw( shape );
+		if ( null != fill ) {
+			g.setPaint( fill );
+			g.fill( shape );
+		}
+		if ( null != line ) {
+			g.setPaint( line );
+			g.draw( shape );
+		}
 		g.dispose();
 
 		return new ImageIcon( img );
@@ -199,7 +212,7 @@ public class DefaultGraphShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public ImageIcon getIcon( NamedShape shape ) {
-		return getIcon( shape.getShape( size ) );
+		return getIcon( shape.getShape( size ), null, Color.BLACK );
 	}
 
 	@Override

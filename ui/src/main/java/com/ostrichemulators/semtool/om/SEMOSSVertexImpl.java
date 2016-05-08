@@ -21,7 +21,7 @@ package com.ostrichemulators.semtool.om;
 
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
 
-import com.ostrichemulators.semtool.ui.helpers.DefaultGraphShapeRepository;
+import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import java.awt.Shape;
 
 import java.util.Map;
@@ -42,7 +42,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 
 	public SEMOSSVertexImpl( URI id, URI type, String label ) {
 		super( id, type, label, DynamicColorRepository.instance().getColor( type ) );
-		shape = new DefaultGraphShapeRepository().getRawShape( type );
+		shape = new DefaultColorShapeRepository().getRawShape( type );
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVert
 		if ( RDF.TYPE.equals( prop ) ) {
 			URI typeURI = getType();
 			setColor( DynamicColorRepository.instance().getColor( typeURI ) );
-			setShape(new DefaultGraphShapeRepository().getRawShape( getType() ) );
+			setShape(new DefaultColorShapeRepository().getRawShape( getType() ) );
 		}
 	}
 
