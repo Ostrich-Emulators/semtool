@@ -1,13 +1,17 @@
 package com.ostrichemulators.semtool.ui.helpers;
 
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
+import com.ostrichemulators.semtool.om.GraphColorShapeRepositoryListener;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.NamedShape;
 
 import java.awt.Color;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import java.util.Random;
@@ -37,6 +41,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	private final Map<URI, URL> imglkp = new HashMap<>();
 	private boolean saveToPrefs = false;
 	private final Preferences prefs = Preferences.userNodeForPackage( getClass() );
+	private final List<GraphColorShapeRepositoryListener> listenees = new ArrayList<>();
 
 	public DefaultColorShapeRepository() {
 	}
@@ -75,32 +80,38 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 		saveToPrefs = b;
 	}
 
-	private void trysave( URI uri ) {
+	private void trysave( URI... uris ) {
 		if ( saveToPrefs ) {
-			if ( null == uri ) {
-				for ( URI u : imglkp.keySet() ) {
-					trysave( u );
-				}
-				for ( URI u : shapelkp.keySet() ) {
-					trysave( u );
-				}
+			if ( null == uris ) {
+				trysave( imglkp.keySet().toArray( new URI[0] ) );
+				trysave( shapelkp.keySet().toArray( new URI[0] ) );
 			}
 			else {
-				if ( imglkp.containsKey( uri ) ) {
-					prefs.put( uri.stringValue() + "_IMAGE", imglkp.get( uri ).toExternalForm() );
-				}
-				else {
-					if ( shapelkp.containsKey( uri ) ) {
-						prefs.put( uri.stringValue() + "_SHAPE", shapelkp.get( uri ).toString() );
+				for ( URI uri : uris ) {
+					if ( imglkp.containsKey( uri ) ) {
+						prefs.put( uri.stringValue() + "_IMAGE", imglkp.get( uri ).toExternalForm() );
 					}
-
-					if ( colorlkp.containsKey( uri ) ) {
-						Color c = colorlkp.get( uri );
-						prefs.put( uri.stringValue() + "_COLOR",
-								String.format( "%d,%d,%d", c.getRed(), c.getGreen(), c.getBlue() ) );
+					else {
+						try {
+							if ( shapelkp.containsKey( uri ) ) {
+								prefs.put( uri.stringValue() + "_SHAPE", shapelkp.get( uri ).toString() );
+							}
+							if ( colorlkp.containsKey( uri ) ) {
+								Color c = colorlkp.get( uri );
+								prefs.put( uri.stringValue() + "_COLOR",
+										String.format( "%d,%d,%d", c.getRed(), c.getGreen(), c.getBlue() ) );
+							}
+						}
+						catch ( Exception e ) {
+							log.warn( e );
+						}
 					}
 				}
 			}
+		}
+
+		for ( GraphColorShapeRepositoryListener l : listenees ) {
+			l.dataChanged( null, null, null, null );
 		}
 	}
 
@@ -189,5 +200,27 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	@Override
 	public boolean hasShape( URI uri ) {
 		return shapelkp.containsKey( uri );
+	}
+
+	@Override
+	public void set( Collection<GraphElement> ges, Color color, NamedShape shape ) {
+		List<URI> saves = new ArrayList<>();
+		for ( GraphElement ge : ges ) {
+			URI u = ge.getURI();
+			saves.add( u );
+			shapelkp.put( u, shape );
+			colorlkp.put( u, color );
+		}
+		trysave( saves.toArray( new URI[0] ) );
+	}
+
+	@Override
+	public void addListener( GraphColorShapeRepositoryListener l ) {
+		listenees.add( l );
+	}
+
+	@Override
+	public void removeListener( GraphColorShapeRepositoryListener l ) {
+		listenees.remove( l );
 	}
 }

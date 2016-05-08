@@ -7,6 +7,7 @@ package com.ostrichemulators.semtool.om;
 
 import java.awt.Color;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Map;
 import org.openrdf.model.URI;
 
@@ -32,6 +33,8 @@ public interface GraphColorShapeRepository {
 	public void importFrom( GraphColorShapeRepository repo );
 
 	public void set( GraphElement ge, Color color, NamedShape shape );
+
+	public void set( Collection<GraphElement> ge, Color color, NamedShape shape );
 
 	public void set( URI ge, Color color, NamedShape shape );
 
@@ -73,4 +76,8 @@ public interface GraphColorShapeRepository {
 	 * @return
 	 */
 	public boolean hasShape( URI uri );
+
+	public void addListener( GraphColorShapeRepositoryListener l );
+
+	public void removeListener( GraphColorShapeRepositoryListener l );
 }
