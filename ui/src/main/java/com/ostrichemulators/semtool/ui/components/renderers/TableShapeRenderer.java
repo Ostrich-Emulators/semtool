@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.om.NamedShape;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.util.IconBuilder;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
@@ -23,21 +23,18 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class TableShapeRenderer extends DefaultTableCellRenderer {
 
-	private static final Map<Shape, Icon> icons = new HashMap<>();
-	private final DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
+	private static final Map<Object, Icon> icons = new HashMap<>();
+	double iconsize = -1;
 
 	public TableShapeRenderer() {
 	}
 
 	public TableShapeRenderer( double sz ) {
-		repo.setIconSize( sz );
-		for ( NamedShape s : NamedShape.values() ) {
-			icons.put( repo.getRawShape( s ), repo.getIcon( s ) );
-		}
+		iconsize = sz;
 	}
 
 	public void setSize( double sz ) {
-		repo.setIconSize( sz );
+		iconsize = sz;
 	}
 
 	@Override
@@ -51,9 +48,18 @@ public class TableShapeRenderer extends DefaultTableCellRenderer {
 
 		super.getTableCellRendererComponent( table, "", isSelected,
 				hasFocus, row, column );
-		Shape s = Shape.class.cast( val );
-		icons.put( s, repo.getIcon( Shape.class.cast( val ), null, Color.BLACK ) );
-		setIcon( icons.get( s ) );
+		if ( !icons.containsKey( val ) ) {
+			IconBuilder bldr = ( val instanceof Shape
+					? new IconBuilder( Shape.class.cast( val ) )
+					: new IconBuilder( NamedShape.class.cast( val ) ) );
+			bldr.setIconSize( iconsize < 1 ? getWidth() : iconsize );
+			bldr.setPadding( 1 );
+			bldr.setStroke( Color.BLACK );
+
+			icons.put( val, bldr.build() );
+		}
+		setIcon( icons.get( val ) );
+
 		return this;
 	}
 }

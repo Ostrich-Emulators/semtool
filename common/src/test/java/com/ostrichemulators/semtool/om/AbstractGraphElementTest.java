@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.om;
 
-import java.awt.Color;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -181,10 +180,6 @@ public class AbstractGraphElementTest {
 
 		public TestNode( URI id, URI type, String label ) {
 			super( id, type, label );
-		}
-
-		public TestNode( URI id, URI type, String label, Color col ) {
-			super( id, type, label, col );
 		}
 
 		@Override

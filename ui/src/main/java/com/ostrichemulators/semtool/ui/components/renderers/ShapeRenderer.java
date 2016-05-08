@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.om.NamedShape;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.util.IconBuilder;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
 
@@ -26,8 +25,8 @@ import javax.swing.JList;
 public class ShapeRenderer extends DefaultListCellRenderer {
 
 	private static final ImageIcon EMPTY;
-	private static final Map<Shape, Icon> icons = new HashMap<>();
-	private final DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
+	private static final Map<Object, ImageIcon> icons = new HashMap<>();
+	private double iconsize = -1;
 
 	static {
 		BufferedImage img = new BufferedImage( 16, 16, BufferedImage.TYPE_INT_ARGB );
@@ -38,14 +37,11 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 	}
 
 	public ShapeRenderer( double sz ) {
-		repo.setIconSize( sz );
-		for ( NamedShape s : NamedShape.values() ) {
-			icons.put( repo.getRawShape( s ), repo.getIcon( s ) );
-		}
+		iconsize = (int) Math.rint( sz );
 	}
 
 	public void setSize( double sz ) {
-		repo.setIconSize( sz );
+		iconsize = (int) Math.rint( sz );
 	}
 
 	@Override
@@ -57,15 +53,17 @@ public class ShapeRenderer extends DefaultListCellRenderer {
 		}
 
 		super.getListCellRendererComponent( list, "", index, sel, focus );
-		Shape s = null;
-		if ( val instanceof Shape ) {
-			s = Shape.class.cast( val );
+		if ( !icons.containsKey( val ) ) {
+			IconBuilder bldr = ( val instanceof Shape
+					? new IconBuilder( Shape.class.cast( val ) )
+					: new IconBuilder( NamedShape.class.cast( val ) ) );
+			bldr.setIconSize( iconsize < 1 ? getWidth() : iconsize );
+			bldr.setPadding( 1 );
+			bldr.setStroke( Color.BLACK );
+
+			icons.put( val, bldr.build() );
 		}
-		else if ( val instanceof NamedShape ) {
-			s = NamedShape.class.cast( val ).getShape( repo.getIconSize() );
-		}
-		//icons.put( s, repo.getIcon( s ) );
-		setIcon( repo.getIcon( s, null, Color.BLACK ) );
+		setIcon( icons.get( val ) );
 		return this;
 	}
 }

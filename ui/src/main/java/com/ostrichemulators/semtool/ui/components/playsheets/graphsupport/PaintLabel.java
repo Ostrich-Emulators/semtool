@@ -20,12 +20,10 @@
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.om.NamedShape;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.util.IconBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Shape;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 /**
@@ -92,22 +90,8 @@ public class PaintLabel extends JButton {
 		makeShapeIcon();
 	}
 
-	/**
-	 * Create a vector-graphics based Shape Icon for display in a JLabel or
-	 * JButton
-	 *
-	 * @param color The color of the fill of the Shape Icon
-	 * @param shape The awt.Shape that the fill color is to occupy
-	 * @param dim The desired dimensions of the icon
-	 * @return
-	 */
-	public static ImageIcon makeShapeIcon( Color color, NamedShape shape, Dimension dim ) {
-		DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
-		return repo.getIcon( shape.getShape( dim.width ), color, null );
-	}
-
 	private void makeShapeIcon() {
-		ImageIcon ii = makeShapeIcon( color, shape, dim );
-		setIcon( ii );
+		setIcon( new IconBuilder( shape, color ).
+				setIconSize( dim.getWidth() ).setPadding( 2 ).build() );
 	}
 }

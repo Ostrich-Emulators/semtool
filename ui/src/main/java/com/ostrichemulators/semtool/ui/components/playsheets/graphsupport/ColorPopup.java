@@ -29,11 +29,11 @@ import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.util.Utility;
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.GraphElement;
-import com.ostrichemulators.semtool.user.LocalUserImpl;
+import com.ostrichemulators.semtool.util.IconBuilder;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
-import java.util.Map;
+import javax.swing.ImageIcon;
 
 /**
  * This class sets the visualization viewer for a popup menu.
@@ -48,7 +48,8 @@ public class ColorPopup extends JMenu {
 
 		GraphColorShapeRepository repo = gps.getShapeRepository();
 		for ( Color en : GraphColorShapeRepository.COLORS ) {
-			JMenuItem menuItem = new JMenuItem( repo.getIcon( en ) );
+			ImageIcon icon = new IconBuilder( en ).setPadding( 2 ).setIconSize( 18 ).build();
+			JMenuItem menuItem = new JMenuItem( icon );
 			menuItem.addActionListener( new AbstractAction() {
 				private static final long serialVersionUID = -8338447465448152673L;
 

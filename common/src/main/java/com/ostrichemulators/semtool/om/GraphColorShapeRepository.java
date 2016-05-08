@@ -6,10 +6,8 @@
 package com.ostrichemulators.semtool.om;
 
 import java.awt.Color;
-import java.awt.Shape;
 import java.net.URL;
 import java.util.Map;
-import javax.swing.ImageIcon;
 import org.openrdf.model.URI;
 
 /**
@@ -67,32 +65,6 @@ public interface GraphColorShapeRepository {
 	public Map<URI, NamedShape> getShapes();
 
 	public Map<URI, URL> getIcons();
-
-	public ImageIcon getIcon( GraphElement ge );
-
-	public ImageIcon getIcon( URI uri );
-
-	public ImageIcon getIcon( URI uri, double size );
-
-	public ImageIcon getIcon( Shape s, Color fill, Color line );
-
-	public ImageIcon getIcon( Color fill );
-
-	public ImageIcon getIcon( NamedShape ns );
-
-	public void setIconPadding( double sz );
-
-	public void setIconSize( double sz );
-
-	public double getIconSize();
-
-	public double getIconPadding();
-
-	public Shape getRawShape( GraphElement ge );
-
-	public Shape getRawShape( URI uri );
-
-	public Shape getRawShape( NamedShape ns );
 
 	/**
 	 * Do we already have a shape for this URI?

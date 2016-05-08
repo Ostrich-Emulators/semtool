@@ -10,8 +10,6 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.util.UriBuilder;
-import java.awt.Color;
-import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Arrays;
@@ -22,6 +20,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
@@ -108,11 +108,12 @@ public class TreeGraphDataModelTest {
 		};
 
 		yuri.setLabel( "Yuri" );
-		yuri.setColor( Color.BLUE );
-		yuri.setShape( new Rectangle( 6, 1000 ) );
+		yuri.setValue( DCTERMS.ABSTRACT, new LiteralImpl( "one" ) );
+		yuri.setValue( DCTERMS.ABSTRACT, new LiteralImpl( "three" ) );
+		yuri.setValue( DCTERMS.ABSTRACT, new LiteralImpl( "two" ) );
 
 		edge.setLabel( "edge label" );
-		edge.setColor( Color.BLUE );
+		yuri.setValue( DCTERMS.ABSTRACT, new LiteralImpl( "two" ) );
 
 		// 5 changes, but each one calls propertyChange twice (one for the real
 		// element, once for the duplicate)
@@ -142,15 +143,12 @@ public class TreeGraphDataModelTest {
 
 		for ( SEMOSSVertex v : m.getDuplicatesOf( yuri ) ) {
 			v.setLabel( "Yuri" );
-			v.setColor( Color.BLUE );
-			v.setShape( new Rectangle( 6, 1000 ) );
 		}
 
 		for ( SEMOSSEdge e : m.getDuplicatesOf( edge ) ) {
 			e.setLabel( "edge label" );
-			e.setColor( Color.BLUE );
 		}
 
-		assertEquals( 5, val[0] );
+		assertEquals( 2, val[0] );
 	}
 }
