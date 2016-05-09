@@ -10,7 +10,6 @@ import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.control.EdgeEffects;
 import edu.uci.ics.jung.visualization.control.EditingGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.SimpleEdgeSupport;
 import java.awt.event.MouseEvent;
@@ -141,14 +140,15 @@ public class QueryGraphMousePlugin<V, E> extends EditingGraphMousePlugin<V, E> {
 
 		public EasyEdgeSupport( Supplier<E> edgeFactory ) {
 			super( edgeFactory );
+			setEdgeType( EdgeType.DIRECTED );
 		}
 
 		public void cleanup( VisualizationViewer<V, E> vv ) {
 			// trying to fix the superimposed arrows when we have nothing to connect to
+			// FIXME: this doesn't actually work at the moment
 			startVertex = null;
-			edgeType = EdgeType.UNDIRECTED;
-			edgeEffects.endEdgeEffects( vv );
-			edgeEffects.endArrowEffects( vv );
+			super.getEdgeEffects().endEdgeEffects( vv );
+			super.getEdgeEffects().endArrowEffects( vv );
 			vv.repaint();
 		}
 	}
