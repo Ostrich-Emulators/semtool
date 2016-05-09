@@ -52,7 +52,6 @@ import org.apache.log4j.Logger;
 public class GuiUtility {
 
 	private static final Logger log = Logger.getLogger( GuiUtility.class );
-	private static int id = 0;
 
 	public static void extractHTML( String zipname ) throws IOException {
 		// check for html directory
@@ -67,16 +66,6 @@ public class GuiUtility {
 		try ( InputStream htmlIs = Utility.class.getResourceAsStream( zipname ) ) {
 			unzip( new ZipInputStream( htmlIs ), new File( "html" ) );
 		}
-	}
-
-	/**
-	 * Increases the counter and gets the next ID for a URI.
-	 *
-	 * @return Next ID
-	 */
-	public static String getNextID() {
-		id++;
-		return Constants.BLANK_URL + "/" + id;
 	}
 
 	/**

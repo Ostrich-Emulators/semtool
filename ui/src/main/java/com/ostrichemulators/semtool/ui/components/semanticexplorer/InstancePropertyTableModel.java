@@ -22,9 +22,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairRenderer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -32,7 +30,6 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
@@ -44,13 +41,8 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 
 	private static final String[] columnNames = { "Property Name", "XML Datatype", "Value" };
 	private static final Class<?>[] classNames = {URI.class, URI.class, Value.class };
-	private ArrayList<PropertyEditorRow> rows;
-	
-	@SuppressWarnings("unused")
-	private final IEngine engine;
-	private final Set<URI> uneditableProps = new HashSet<>();
-	
-	private LabeledPairRenderer<URI> renderer;
+	private ArrayList<PropertyEditorRow> rows;	
+	private final LabeledPairRenderer<URI> renderer;
 	
 	/**
 	 * Constructor for InstancePropertyTableModel.
@@ -58,12 +50,7 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	 * @param List<Value[]> propertyList
 	 * @param IEngine engine
 	 */
-	public InstancePropertyTableModel(List<Value[]> propertyList, IEngine _engine) { 
-		engine = _engine;
-		
-		uneditableProps.add(RDF.SUBJECT);
-		uneditableProps.add(RDF.TYPE);
-		
+	public InstancePropertyTableModel(List<Value[]> propertyList, IEngine _engine) { 		
 		renderer = LabeledPairRenderer.getUriPairRenderer();
 		renderer.cache(XMLSchema.ANYURI, "URI");
 		
@@ -132,7 +119,6 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public void setValueAt(Object val, int row, int column) {
-		return;
 	}
 
 	/**

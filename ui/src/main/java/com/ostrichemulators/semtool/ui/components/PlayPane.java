@@ -504,8 +504,8 @@ public class PlayPane extends JFrame {
 		);
 
 		semanticExplorer = new SemanticExplorerPanel();
-		rightView.addTab( "Semantic Explorer", null, semanticExplorer,
-				"Explore the classes and instances" );
+		rightView.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ),
+				semanticExplorer,	"Explore the classes and instances" );
 		rightView.setTabComponentAt(
 				rightView.indexOfComponent( semanticExplorer ),
 				new PlayPaneCloseableTab( rightView, semanticExplorerItem, DbAction.getIcon( "semantic_dataset2" ) )
@@ -1361,7 +1361,7 @@ public class PlayPane extends JFrame {
 							"Explore the classes and instances" );
 					rightTabs.setTabComponentAt(
 							rightTabs.indexOfComponent( semanticExplorer ),
-							new PlayPaneCloseableTab( rightTabs, semanticExplorerItem, DbAction.getIcon( "graphic_query" ) )
+							new PlayPaneCloseableTab( rightTabs, semanticExplorerItem, DbAction.getIcon( "semantic_dataset2" ) )
 					);
 					semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
 				}
