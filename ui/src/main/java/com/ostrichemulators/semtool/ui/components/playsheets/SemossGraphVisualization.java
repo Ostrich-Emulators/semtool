@@ -14,7 +14,6 @@ import com.ostrichemulators.semtool.om.GraphModelListener;
 import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.ui.transformer.ArrowPaintTransformer;
 import com.ostrichemulators.semtool.ui.transformer.EdgeStrokeTransformer;
 import com.ostrichemulators.semtool.ui.transformer.LabelFontTransformer;
 import com.ostrichemulators.semtool.ui.transformer.LabelTransformer;
@@ -88,8 +87,8 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		}
 	};
 	protected EdgeStrokeTransformer est = new EdgeStrokeTransformer();
-	protected ArrowPaintTransformer adpt = new ArrowPaintTransformer();
-	protected ArrowPaintTransformer aft = new ArrowPaintTransformer();
+	protected PaintTransformer<SEMOSSEdge> adpt = new PaintTransformer<>();
+	protected PaintTransformer<SEMOSSEdge> aft = new PaintTransformer<>();
 	protected boolean skeletonmode = false;
 
 	private final HidingPredicate<? extends GraphElement> predicate = new HidingPredicate<>();

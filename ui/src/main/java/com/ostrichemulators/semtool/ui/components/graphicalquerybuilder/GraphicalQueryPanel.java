@@ -5,14 +5,12 @@
  */
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.ObservableGraph;
-import edu.uci.ics.jung.graph.event.GraphEvent;
-import edu.uci.ics.jung.graph.event.GraphEventListener;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -22,23 +20,24 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintLabel;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.tabbedqueries.SparqlTextArea;
-import com.ostrichemulators.semtool.om.GraphColorRepository;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import com.ostrichemulators.semtool.ui.transformer.ArrowPaintTransformer;
 import com.ostrichemulators.semtool.ui.transformer.EdgeStrokeTransformer;
 import com.ostrichemulators.semtool.ui.transformer.LabelFontTransformer;
 import com.ostrichemulators.semtool.ui.transformer.PaintTransformer;
 import com.ostrichemulators.semtool.ui.transformer.VertexShapeTransformer;
 import com.ostrichemulators.semtool.ui.transformer.VertexStrokeTransformer;
 import com.ostrichemulators.semtool.util.Constants;
+import com.ostrichemulators.semtool.util.IconBuilder;
 import com.ostrichemulators.semtool.util.UriBuilder;
 
 import com.ostrichemulators.semtool.util.Utility;
+import edu.uci.ics.jung.algorithms.layout.StaticLayout;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.event.GraphEvent;
+import edu.uci.ics.jung.graph.event.GraphEventListener;
+import edu.uci.ics.jung.graph.util.EdgeIndexFunction;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Point;
@@ -53,10 +52,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -84,6 +83,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private final Layout<QueryNode, QueryEdge> vizlayout = new StaticLayout<>( observer );
 	private final VisualizationViewer<QueryNode, QueryEdge> view
 			= new VisualizationViewer<>( vizlayout );
+
 	private final VertexFactory vfac = new VertexFactory();
 	private final EdgeFactory efac = new EdgeFactory();
 	private final List<QueryOrder> ordering = new ArrayList<>();
@@ -92,12 +92,14 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private SparqlTextArea sparqlarea;
 	private EditingModalGraphMouse mouse;
 	private ButtonGroup buttongroup;
+	private final GraphColorShapeRepository csfac;
 
 	/**
 	 * Creates new form GraphicalQueryBuilderPanel
 	 */
-	public GraphicalQueryPanel( String progressname ) {
+	public GraphicalQueryPanel( String progressname, GraphColorShapeRepository csfac ) {
 		progress = progressname;
+		this.csfac = csfac;
 		initComponents();
 		initVizualizer();
 		visarea.add( new GraphZoomScrollPane( view ) );
@@ -180,11 +182,10 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	private void buildTypeSelector() {
 
 		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
+			SwingUtilities.invokeAndWait( new Runnable() {
 
 				@Override
 				public void run() {
-					DefaultColorShapeRepository shapefactory = new DefaultColorShapeRepository();
 					vlt.setEngine( engine );
 					elt.setEngine( engine );
 					if ( null != engine ) {
@@ -207,8 +208,8 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 							button.setActionCommand( en.getKey().stringValue() );
 							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
 									en.getKey(), en.getValue() );
-							//button.setIcon( PaintLabel.makeShapeIcon( v.getColor(), v.getShape(),
-							//		new Dimension( 12, 12 ) ) );
+							button.setIcon( new IconBuilder( csfac.getShape( v ),
+									csfac.getColor( v ) ).setIconSize( csfac.getIconSize() ).build() );
 							typearea.add( button );
 							buttongroup.add( button );
 						}
@@ -241,9 +242,13 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 			}
 		};
 		EdgeStrokeTransformer est = new EdgeStrokeTransformer( 1.5, 1.5, 1.5 );
-		ArrowPaintTransformer adpt = new ArrowPaintTransformer();
-		ArrowPaintTransformer aft = new ArrowPaintTransformer();
+		PaintTransformer<QueryEdge> adpt = new PaintTransformer<>();
+		PaintTransformer<QueryEdge> aft = new PaintTransformer<>();
 
+		vpt.setColorShapeRepository( csfac );
+		vht.setColorShapeRepository( csfac );
+		adpt.setColorShapeRepository( csfac );
+		aft.setColorShapeRepository( csfac );
 		addMouse();
 		view.setBackground( Color.WHITE );
 
@@ -264,9 +269,22 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		view.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.S );
 		rc.setLabelOffset( 0 );
 
-		//PickedStateListener psl = new PickedStateListener( view, this );
-		//view.getPickedVertexState().addItemListener( psl );
-		//view.getPickedEdgeState().addItemListener( psl );
+		rc.setParallelEdgeIndexFunction( new EdgeIndexFunction<QueryNode, QueryEdge>(){
+
+			@Override
+			public int getIndex( Graph<QueryNode, QueryEdge> graph, QueryEdge e ) {
+				return 0;
+			}
+
+			@Override
+			public void reset( Graph<QueryNode, QueryEdge> g, QueryEdge edge ) {
+			}
+
+			@Override
+			public void reset() {
+				throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+			}
+		} );
 	}
 
 	public VisualizationViewer<QueryNode, QueryEdge> getViewer() {

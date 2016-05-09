@@ -19,6 +19,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -34,14 +35,16 @@ import org.openrdf.model.impl.URIImpl;
 public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	private final Logger log = Logger.getLogger( DefaultColorShapeRepository.class );
+	private static final double DEFAULT_ICON_SIZE = 16;
 
 	private final Random random = new Random();
 	private final Map<URI, NamedShape> shapelkp = new HashMap<>();
 	private final Map<URI, Color> colorlkp = new HashMap<>();
 	private final Map<URI, URL> imglkp = new HashMap<>();
-	private boolean saveToPrefs = false;
 	private final Preferences prefs = Preferences.userNodeForPackage( getClass() );
 	private final List<GraphColorShapeRepositoryListener> listenees = new ArrayList<>();
+	private boolean saveToPrefs = false;
+	private double iconsize = DEFAULT_ICON_SIZE;
 
 	public DefaultColorShapeRepository() {
 	}
@@ -50,10 +53,19 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 		if ( b ) {
 			Pattern pat = Pattern.compile( "^(.+)_(IMAGE|SHAPE|COLOR)$" );
 			try {
+				Map<String, URI> uris = new HashMap<>();
+				for ( String key : prefs.keys() ) {
+					if ( key.endsWith( "_URI" ) ) {
+						uris.put( key.substring( 0, key.length() - 4 ),
+								new URIImpl( prefs.get( key, "" ) ) );
+					}
+				}
+
 				for ( String key : prefs.keys() ) {
 					Matcher m = pat.matcher( key );
 					if ( m.matches() ) {
-						URI uri = new URIImpl( m.group( 1 ) );
+						String hash = m.group( 1 );
+						URI uri = uris.get( hash );
 						String type = m.group( 2 );
 						String val = prefs.get( key, "" );
 						switch ( type ) {
@@ -87,18 +99,21 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 				trysave( shapelkp.keySet().toArray( new URI[0] ) );
 			}
 			else {
+
 				for ( URI uri : uris ) {
+					String key = DigestUtils.md5Hex( uri.stringValue() );
+					prefs.put( key + "_URI", uri.stringValue() );
 					if ( imglkp.containsKey( uri ) ) {
-						prefs.put( uri.stringValue() + "_IMAGE", imglkp.get( uri ).toExternalForm() );
+						prefs.put( key + "_IMAGE", imglkp.get( uri ).toExternalForm() );
 					}
 					else {
 						try {
 							if ( shapelkp.containsKey( uri ) ) {
-								prefs.put( uri.stringValue() + "_SHAPE", shapelkp.get( uri ).toString() );
+								prefs.put( key + "_SHAPE", shapelkp.get( uri ).toString() );
 							}
 							if ( colorlkp.containsKey( uri ) ) {
 								Color c = colorlkp.get( uri );
-								prefs.put( uri.stringValue() + "_COLOR",
+								prefs.put( key + "_COLOR",
 										String.format( "%d,%d,%d", c.getRed(), c.getGreen(), c.getBlue() ) );
 							}
 						}
@@ -120,6 +135,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 		shapelkp.putAll( repo.getShapes() );
 		colorlkp.putAll( repo.getColors() );
 		imglkp.putAll( repo.getIcons() );
+		iconsize = repo.getIconSize();
 		trysave();
 	}
 
@@ -222,5 +238,15 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	@Override
 	public void removeListener( GraphColorShapeRepositoryListener l ) {
 		listenees.remove( l );
+	}
+
+	@Override
+	public double getIconSize() {
+		return iconsize;
+	}
+
+	@Override
+	public void setIconSize( double d ) {
+		iconsize = d;
 	}
 }

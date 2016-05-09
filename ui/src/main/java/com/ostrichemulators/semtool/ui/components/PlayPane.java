@@ -110,6 +110,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -353,13 +354,13 @@ public class PlayPane extends JFrame {
 		} );
 
 		initMenuItems();
-		initRepoList();
-
 		DIHelper.getInstance().setRepoList( repoList );
 
 		playsheetToolbar = new JToolBar();
 		rightTabs = makeRightPane();
 		dbexplorer = makeExplorerPane();
+		initRepoList();
+
 		customSparqlPanel.setOverlayCheckBox( appendChkBox );
 		customSparqlPanel.setInsightsComboBox( questionSelector );
 
@@ -496,7 +497,7 @@ public class PlayPane extends JFrame {
 				new PlayPaneCloseableTab( rightView, loggingItem, DbAction.getIcon( "log_tab1" ) )
 		);
 
-		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS );
+		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS, colorsShapes );
 		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
 		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
 				"Build queries graphically and generate Sparql" );
@@ -1299,6 +1300,12 @@ public class PlayPane extends JFrame {
 					int idx = rightTabs.indexOfComponent( gQueryBuilderPanel );
 					rightTabs.setTabComponentAt( idx, ct1 );
 					gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );
+
+					GraphicalQueryPanel qp = new GraphicalQueryPanel( PlayPane.UIPROGRESS, colorsShapes );
+					qp.setEngine( repoList.getSelectedValue() );
+					qp.setSparqlArea( customSparqlPanel.getOpenEditor() );
+					JOptionPane.showMessageDialog( repoList, qp );
+
 				}
 				else {
 					rightTabs.remove( gQueryBuilderPanel );

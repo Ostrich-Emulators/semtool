@@ -54,7 +54,6 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.Weight
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
@@ -100,21 +99,21 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private boolean inGraphOp = false;
 	private GraphColorShapeRepository shaper;
 
-	protected final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
+	private final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			undoView();
 		}
 	};
 
-	protected final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
+	private final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			redoView();
 		}
 	};
 
-	protected final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
+	private final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			if ( xray.isSelected() ) {
@@ -124,11 +123,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 	};
 
-	protected final JToggleButton graphprops = new JToggleButton();
-	protected final JToggleButton xray = new JToggleButton();
-	protected final TreeConverterListener tree = new TreeConverterListener();
-	protected final WeightDropDownButton weightButton = new WeightDropDownButton();
-	protected final GraphSearchTextField searcher = new GraphSearchTextField();
+	private final JToggleButton graphprops = new JToggleButton();
+	private final JToggleButton xray = new JToggleButton();
+	private final TreeConverterListener tree = new TreeConverterListener();
+	private final WeightDropDownButton weightButton = new WeightDropDownButton();
+	private final GraphSearchTextField searcher = new GraphSearchTextField();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.

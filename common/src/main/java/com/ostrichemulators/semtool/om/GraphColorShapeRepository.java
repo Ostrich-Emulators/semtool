@@ -77,6 +77,10 @@ public interface GraphColorShapeRepository {
 	 */
 	public boolean hasShape( URI uri );
 
+	public double getIconSize();
+
+	public void setIconSize( double d );
+
 	public void addListener( GraphColorShapeRepositoryListener l );
 
 	public void removeListener( GraphColorShapeRepositoryListener l );
