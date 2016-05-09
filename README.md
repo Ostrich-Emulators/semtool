@@ -32,3 +32,4 @@ And Adds:
   * Export Edge List
 * Automatic database metamodel generation
 * Convert table to graph and vice versa
+* Syntax-highlighting
