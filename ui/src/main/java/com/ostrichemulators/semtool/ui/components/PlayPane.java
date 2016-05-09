@@ -64,7 +64,6 @@ import com.ostrichemulators.semtool.ui.components.semanticexplorer.SemanticExplo
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.ui.main.SemossPreferences;
 import com.ostrichemulators.semtool.ui.swing.custom.CustomDesktopPane;
-import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 
@@ -115,7 +114,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
@@ -234,7 +232,7 @@ public class PlayPane extends JFrame {
 	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
 
 	// public JTable colorShapeTable;
-	public JTable sizeTable;
+	//public JTable sizeTable;
 
 	private SelectDatabasePanel selectDatabasePanel;
 	private final static Preferences prefs = Preferences.userNodeForPackage( PlayPane.class );
@@ -263,15 +261,6 @@ public class PlayPane extends JFrame {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext( "/appContext.xml" );
 		DIHelper.getInstance().setAppCtx( ctx );
 		DIHelper.getInstance().setPlayPane( this );
-
-		// run through the view components
-		Map<JTable, String> publics = new HashMap<>();
-		publics.put( sizeTable, Constants.SIZE_TABLE );
-
-		for ( Map.Entry<JTable, String> en : publics.entrySet() ) {
-			logger.debug( "Loading " + en.getValue() + " to local prop cache" );
-			DIHelper.getInstance().setLocalProperty( en.getValue(), en.getKey() );
-		}
 
 		statusbar.addStatus( getStartupMessage() );
 	}

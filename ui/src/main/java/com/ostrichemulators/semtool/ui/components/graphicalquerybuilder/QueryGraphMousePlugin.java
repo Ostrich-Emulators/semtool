@@ -36,13 +36,13 @@ public class QueryGraphMousePlugin<V, E> extends EditingGraphMousePlugin<V, E> {
 	public QueryGraphMousePlugin( Supplier<V> vertexFactory, Supplier<E> edgeFactory ) {
 		super( vertexFactory, edgeFactory );
 		edger = new EasyEdgeSupport<>( edgeFactory );
-		setEdgeSupport( new EasyEdgeSupport<>( edgeFactory ) );
+		setEdgeSupport( edger );
 	}
 
 	public QueryGraphMousePlugin( int modifiers, Supplier<V> vertexFactory, Supplier<E> edgeFactory ) {
 		super( modifiers, vertexFactory, edgeFactory );
 		edger = new EasyEdgeSupport<>( edgeFactory );
-		setEdgeSupport( new EasyEdgeSupport<>( edgeFactory ) );
+		setEdgeSupport( edger );
 	}
 
 	/**
