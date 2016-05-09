@@ -36,3 +36,11 @@ And Adds:
 * Automatic database metamodel generation
 * Convert table to graph and vice versa
 * Syntax-highlighting
+
+## Code Organization
+The source code is organized into several packages, and built with Maven.
+* Parent -- The meta-package to kick everything off
+  * Common -- Pieces of code that span multiple projects
+  * GUI -- The main GUI application
+  * Utilities -- A collection of tools like a legacy database upgrader and embedded webserver
+  * Web -- Not fully functional at the moment
