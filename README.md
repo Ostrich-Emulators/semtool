@@ -1,4 +1,7 @@
 # OS-EM Semantic Toolkit
+
+[![Build Status](https://travis-ci.org/Ostrich-Emulators/semtool.svg?branch=master)](https://travis-ci.org/Ostrich-Emulators/semtool)
+
 This is an almost complete re-write of SEMOSS project from https://github.com/semoss. That project appears dormant, though it may simply have moved to [SourceForge](https://sourceforge.net/projects/semoss).
 
 The toolkit is a GUI application to explore semantic databases. It includes almost all the functionality of the original tool, including:
