@@ -58,6 +58,7 @@ public class TableColorRenderer extends DefaultTableCellRenderer {
 //			lbl.setBackground( s );
 //		}
 			if ( !icons.containsKey( s ) ) {
+				
 				BufferedImage img = new BufferedImage( 18, 18, BufferedImage.TYPE_INT_ARGB );
 				Graphics2D g = img.createGraphics();
 				g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );

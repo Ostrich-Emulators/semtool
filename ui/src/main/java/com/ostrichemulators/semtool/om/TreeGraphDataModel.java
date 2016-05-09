@@ -11,8 +11,6 @@ import edu.uci.ics.jung.graph.Tree;
 import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
 import com.ostrichemulators.semtool.util.MultiSetMap;
 import com.ostrichemulators.semtool.util.Utility;
-import java.awt.Color;
-import java.awt.Shape;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
@@ -164,17 +162,7 @@ public class TreeGraphDataModel extends GraphDataModel implements PropertyChange
 		GraphElement ge = GraphElement.class.cast( src );
 		Set<? extends GraphElement> dupes = getDuplicatesOf( ge );
 
-		if ( AbstractGraphElement.CHANGE_COLOR.equals( propname ) ) {
-			for ( GraphElement e : dupes ) {
-				e.setColor( Color.class.cast( newval ) );
-			}
-		}
-		else if ( SEMOSSVertex.CHANGE_SHAPE.equals( propname ) ) {
-			for ( GraphElement e : dupes ) {
-				SEMOSSVertex.class.cast( e ).setShape( Shape.class.cast( newval ) );
-			}
-		}
-		else if ( null != propname ) {
+		if ( null != propname ) {
 			for ( GraphElement e : dupes ) {
 				e.setValue( new URIImpl( propname ), Value.class.cast( newval ) );
 			}

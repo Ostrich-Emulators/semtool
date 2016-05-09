@@ -19,12 +19,11 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.om.NamedShape;
+import com.ostrichemulators.semtool.util.IconBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Shape;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 /**
@@ -33,7 +32,7 @@ import javax.swing.JButton;
 public class PaintLabel extends JButton {
 
 	private static final long serialVersionUID = 990020151L;
-	private Shape shape = null;
+	private NamedShape shape = null;
 	private Color color = null;
 	private Dimension dim = new Dimension( 30, 30 );
 
@@ -46,7 +45,7 @@ public class PaintLabel extends JButton {
 		this( text, null, null );
 	}
 
-	public PaintLabel( String text, Shape s, Color c ) {
+	public PaintLabel( String text, NamedShape s, Color c ) {
 		super();
 		setHorizontalTextPosition( JButton.CENTER );
 		setVerticalTextPosition( JButton.BOTTOM );
@@ -64,7 +63,7 @@ public class PaintLabel extends JButton {
 	 *
 	 * @param shape Shape.
 	 */
-	public void setShape( Shape shape ) {
+	public void setShape( NamedShape shape ) {
 		this.shape = shape;
 		makeShapeIcon();
 	}
@@ -79,7 +78,7 @@ public class PaintLabel extends JButton {
 		makeShapeIcon();
 	}
 
-	public final void set( String txt, Shape s, Color c ) {
+	public final void set( String txt, NamedShape s, Color c ) {
 		setTextAndTooltip( txt );
 		shape = s;
 		color = c;
@@ -91,22 +90,8 @@ public class PaintLabel extends JButton {
 		makeShapeIcon();
 	}
 
-	/**
-	 * Create a vector-graphics based Shape Icon for display in a JLabel or
-	 * JButton
-	 *
-	 * @param color The color of the fill of the Shape Icon
-	 * @param shape The awt.Shape that the fill color is to occupy
-	 * @param dim The desired dimensions of the icon
-	 * @return
-	 */
-	public static ImageIcon makeShapeIcon( Color color, Shape shape, Dimension dim ) {
-		DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
-		return repo.getIcon( shape, color, null );
-	}
-
 	private void makeShapeIcon() {
-		ImageIcon ii = makeShapeIcon( color, shape, dim );
-		setIcon( ii );
+		setIcon( new IconBuilder( shape, color ).
+				setIconSize( dim.getWidth() ).setPadding( 2 ).build() );
 	}
 }

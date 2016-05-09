@@ -5,19 +5,18 @@
  */
 package com.ostrichemulators.semtool.ui.components.semanticexplorer;
 
+import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
-import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintLabel;
 import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.ui.main.SemossPreferences;
 import com.ostrichemulators.semtool.util.Constants;
 
+import com.ostrichemulators.semtool.util.IconBuilder;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -240,9 +239,9 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				DefaultMutableTreeNode dmtNode = (DefaultMutableTreeNode) value;
 				if ( ( dmtNode.getUserObject() instanceof URI ) && ( dmtNode.getChildCount() > 0 ) ) {
 					Color color = DynamicColorRepository.instance().getColor( (URI) dmtNode.getUserObject() );
-					Shape shape = shapefactory.getRawShape( (URI) dmtNode.getUserObject() );
-
-					setIcon( PaintLabel.makeShapeIcon( color, shape, new Dimension( 12, 12 ) ) );
+					NamedShape shape = shapefactory.getShape( (URI) dmtNode.getUserObject() );
+					setIcon( new IconBuilder( shape ).setStroke( Color.BLACK )
+							.setPadding( 2 ).setIconSize( 18 ).build() );
 				}
 				else {
 					//setIcon( null );

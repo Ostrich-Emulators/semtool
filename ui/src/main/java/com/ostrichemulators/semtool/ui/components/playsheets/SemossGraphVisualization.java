@@ -6,12 +6,14 @@
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
 import com.google.common.base.Predicate;
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
+import com.ostrichemulators.semtool.om.GraphColorShapeRepositoryListener;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.GraphModelListener;
+import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.ui.transformer.ArrowPaintTransformer;
 import com.ostrichemulators.semtool.ui.transformer.EdgeStrokeTransformer;
 import com.ostrichemulators.semtool.ui.transformer.LabelFontTransformer;
 import com.ostrichemulators.semtool.ui.transformer.LabelTransformer;
@@ -40,6 +42,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -84,14 +87,22 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		}
 	};
 	protected EdgeStrokeTransformer est = new EdgeStrokeTransformer();
-	protected ArrowPaintTransformer adpt = new ArrowPaintTransformer();
-	protected ArrowPaintTransformer aft = new ArrowPaintTransformer();
+	protected PaintTransformer<SEMOSSEdge> adpt = new PaintTransformer<>();
+	protected PaintTransformer<SEMOSSEdge> aft = new PaintTransformer<>();
 	protected boolean skeletonmode = false;
 
 	private final HidingPredicate<? extends GraphElement> predicate = new HidingPredicate<>();
 	private final VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> visibleFilter
 			= new VertexPredicateFilter<>( (HidingPredicate<SEMOSSVertex>) predicate );
 	private final Set<URI> hiddens = new HashSet<>();
+	private final GraphColorShapeRepositoryListener listener = new GraphColorShapeRepositoryListener() {
+
+		@Override
+		public void dataChanged( URI uri, NamedShape ns, Color c, URL img ) {
+			firePropertyChange( VISIBILITY_CHANGED, false, true );
+			repaint();
+		}
+	};
 
 	public SemossGraphVisualization( GraphDataModel gdm ) {
 		super( new FRLayout<>( gdm.getGraph() ) );
@@ -118,6 +129,16 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		for ( LabelTransformer l : lt ) {
 			l.setLabelCache( map );
 		}
+	}
+
+	public void setColorShapeRepository( GraphColorShapeRepository repo ) {
+		repo.removeListener( listener );
+		vht.setColorShapeRepository( repo );
+		vpt.setColorShapeRepository( repo );
+		ept.setColorShapeRepository( repo );
+		adpt.setColorShapeRepository( repo );
+		aft.setColorShapeRepository( repo );
+		repo.addListener( listener );
 	}
 
 	public void hide( URI uri, boolean hideme ) {

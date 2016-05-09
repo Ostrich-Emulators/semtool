@@ -34,52 +34,23 @@ import org.openrdf.model.vocabulary.RDF;
  */
 public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVertex {
 
-	private transient Shape shape;
-
 	public SEMOSSVertexImpl( URI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
 	public SEMOSSVertexImpl( URI id, URI type, String label ) {
-		super( id, type, label, DynamicColorRepository.instance().getColor( type ) );
-		shape = new DefaultColorShapeRepository().getRawShape( type );
+		super( id, type, label );
 	}
 
 	@Override
 	public SEMOSSVertex duplicate() {
 		SEMOSSVertexImpl newone = new SEMOSSVertexImpl( getURI(), getType(), getLabel() );
-		newone.setShape( getShape() );
-		newone.setColor( getColor() );
 
 		for ( Map.Entry<URI, Value> en : getValues().entrySet() ) {
 			newone.setValue( en.getKey(), en.getValue() );
 		}
 
 		return newone;
-	}
-
-	@Override
-	public void setValue( URI prop, Value val ) {
-		super.setValue( prop, val );
-		if ( RDF.TYPE.equals( prop ) ) {
-			URI typeURI = getType();
-			setColor( DynamicColorRepository.instance().getColor( typeURI ) );
-			setShape(new DefaultColorShapeRepository().getRawShape( getType() ) );
-		}
-	}
-
-	@Override
-	public final void setShape( Shape _shape ) {
-		Shape old = shape;
-		shape = ( null == _shape
-				? NamedShape.CIRCLE.getShape( 16 )
-				: _shape );
-		fireIfPropertyChanged( CHANGE_SHAPE, old, shape );
-	}
-
-	@Override
-	public Shape getShape() {
-		return shape;
 	}
 
 	@Override

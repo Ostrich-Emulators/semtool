@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +54,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.Weight
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.awt.Dimension;
@@ -96,23 +97,23 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
-	private DefaultColorShapeRepository shaper;
+	private GraphColorShapeRepository shaper;
 
-	protected final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
+	private final Action undo = new AbstractAction( "Undo", GuiUtility.loadImageIcon( "undo.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			undoView();
 		}
 	};
 
-	protected final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
+	private final Action redo = new AbstractAction( "Redo", GuiUtility.loadImageIcon( "redo.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			redoView();
 		}
 	};
 
-	protected final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
+	private final Action reset = new AbstractAction( "Reset", GuiUtility.loadImageIcon( "refresh.png" ) ) {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 			if ( xray.isSelected() ) {
@@ -122,11 +123,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 	};
 
-	protected final JToggleButton graphprops = new JToggleButton();
-	protected final JToggleButton xray = new JToggleButton();
-	protected final TreeConverterListener tree = new TreeConverterListener();
-	protected final WeightDropDownButton weightButton = new WeightDropDownButton();
-	protected final GraphSearchTextField searcher = new GraphSearchTextField();
+	private final JToggleButton graphprops = new JToggleButton();
+	private final JToggleButton xray = new JToggleButton();
+	private final TreeConverterListener tree = new TreeConverterListener();
+	private final WeightDropDownButton weightButton = new WeightDropDownButton();
+	private final GraphSearchTextField searcher = new GraphSearchTextField();
 
 	/**
 	 * Constructor for GraphPlaySheetFrame.
@@ -141,9 +142,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	public GraphPlaySheet( GraphDataModel model, VisualizationControlPanel vcp ) {
 		log.debug( "new graphplaysheet" );
-		shaper = new DefaultColorShapeRepository();
+		shaper = DIHelper.getInstance().getPlayPane().getColorShapeRepository();
 		gdm = model;
-		gdm.setShapeRepository( shaper );
 
 		undo.setEnabled( false );
 		redo.setEnabled( false );
@@ -195,13 +195,14 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		super.setFrame( f );
 	}
 
-	public DefaultColorShapeRepository getShapeRepository() {
+	public GraphColorShapeRepository getShapeRepository() {
 		return shaper;
 	}
 
-	public void setShapeRepository( DefaultColorShapeRepository gsr ) {
+	public void setShapeRepository( GraphColorShapeRepository gsr ) {
 		shaper = gsr;
-		gdm.setShapeRepository( shaper );
+		view.setColorShapeRepository( gsr );
+		view.refresh();
 	}
 
 	protected void attachActions() {
@@ -375,6 +376,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		viewer.setGraphMouse( gl );
 		viewer.setLabelCache( getLabelCache() );
+
+		viewer.setColorShapeRepository( shaper );
 
 		viewer.addPropertyChangeListener( SemossGraphVisualization.VISIBILITY_CHANGED,
 				new PropertyChangeListener() {

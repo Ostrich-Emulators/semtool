@@ -19,20 +19,26 @@
  */
 package com.ostrichemulators.semtool.ui.transformer;
 
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-
 
 /**
  * Transforms the size and shape of selected nodes.
  */
 public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelectingTransformer<T, Shape> {
 
+	private static final double ICONSIZE = 16;
 	private static final double INITIAL_SCALE = 1.0;
 	private static final double MAXSIZE = 100.0;
 	private static final double MINSIZE = 0.0;
 	public static final double STEPSIZE = 0.5;
+	private GraphColorShapeRepository repo;
+
+	public void setColorShapeRepository( GraphColorShapeRepository repo ) {
+		this.repo = repo;
+	}
 
 	public VertexShapeTransformer() {
 		super( INITIAL_SCALE, MAXSIZE, MINSIZE, STEPSIZE );
@@ -40,22 +46,22 @@ public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelecti
 
 	@Override
 	protected Shape transformNotSelected( SEMOSSVertex t, boolean inSkeletonMode ) {
-		return t.getShape();
+		Shape shape = repo.getShape( t ).getShape( ICONSIZE );
+		AffineTransform at = AffineTransform.getTranslateInstance( -ICONSIZE / 2, -ICONSIZE / 2 );
+		return at.createTransformedShape( shape );
 	}
 
 	@Override
-	protected Shape getNormal( SEMOSSVertex t, Double sz, double defaultSize ) {
-		Shape s = t.getShape();
-		if ( null == sz ) {
-			sz = defaultSize;
+	protected Shape getNormal( SEMOSSVertex t, Double scale, double defaultScale ) {
+		if ( null == scale ) {
+			scale = defaultScale;
 		}
 
-		// only scale the instance if we have to
-		if ( sz == INITIAL_SCALE ) {
-			return s;
-		}
+		double iconsize = ICONSIZE * scale;
+		Shape s = repo.getShape( t ).getShape( iconsize );
 
-		return AffineTransform.getScaleInstance( sz, sz ).createTransformedShape( s );
+		AffineTransform at = AffineTransform.getTranslateInstance( -iconsize / 2, -iconsize / 2 );
+		return at.createTransformedShape( s );
 	}
 
 	@Override

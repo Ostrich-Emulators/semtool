@@ -5,18 +5,14 @@
  */
 package com.ostrichemulators.semtool.om;
 
-import java.util.Map;
+import java.awt.Color;
+import java.net.URL;
+import org.openrdf.model.URI;
 
 /**
  *
  * @author ryan
  */
-public interface SEMOSSVertex extends GraphElement {
-
-	/**
-	 * This is needed for the browser playsheets
-	 *
-	 * @param _propHash
-	 */
-	public void setPropHash( Map<String, Object> _propHash );
+public interface GraphColorShapeRepositoryListener {
+	public void dataChanged( URI uri, NamedShape ns, Color c, URL img );
 }

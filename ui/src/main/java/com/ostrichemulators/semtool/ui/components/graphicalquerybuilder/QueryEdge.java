@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
-import java.awt.Color;
 import org.openrdf.model.URI;
 
 /**
@@ -15,10 +14,14 @@ import org.openrdf.model.URI;
  */
 public class QueryEdge extends AbstractQueryGraphElement implements QueryGraphElement {
 
-	public QueryEdge( URI _uri ) {
-		super( _uri, Color.DARK_GRAY );
+	public QueryEdge( URI id ) {
+		super( id );
 	}
-	
+
+	public QueryEdge( URI id, URI type, String label ) {
+		super( id, type, label );
+	}
+
 	@Override
 	public boolean isNode() {
 		return false;

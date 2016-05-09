@@ -21,8 +21,6 @@ public interface GraphElement {
 
 	public boolean isNode();
 
-	public Color getColor();
-
 	public String getLabel();
 
 	public void setLabel( String name );
@@ -48,8 +46,6 @@ public interface GraphElement {
 	public void mark( URI prop, boolean makeMark );
 
 	public void removeProperty( URI prop );
-
-	public void setColor( Color _color );
 
 	public void setType( URI type );
 

@@ -9,11 +9,11 @@ import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.models.GraphElementTreeModel;
-import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.PaintLabel;
 import com.ostrichemulators.semtool.ui.components.renderers.ColorRenderer;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTreeCellRenderer;
 import com.ostrichemulators.semtool.ui.components.renderers.ShapeRenderer;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.util.IconBuilder;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Color;
@@ -195,16 +195,19 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		shapes.setSelectedValue( shape, true );
 		colors.setSelectedValue( color, true );
 
-		was.setIcon( PaintLabel.makeShapeIcon( colors.getSelectedValue(),
-				shapes.getSelectedValue().getShape( 22 ), RESULT_DIM ) );
+		was.setIcon( new IconBuilder( shapes.getSelectedValue(), colors.getSelectedValue() )
+				.setPadding( 2 ).setIconSize( 40 ).build() );
 	}
 
 	private void setNewPanel() {
-		URI me = getUriFromPath( tree.getSelectionPath() );
-		shapefactory.set( me, colors.getSelectedValue(), shapes.getSelectedValue() );
+		if ( null != tree.getSelectionPath() ) {
+			URI me = getUriFromPath( tree.getSelectionPath() );
+			shapefactory.set( me, colors.getSelectedValue(), shapes.getSelectedValue() );
+		}
 
-		is.setIcon( PaintLabel.makeShapeIcon( colors.getSelectedValue(),
-				shapes.getSelectedValue().getShape( 22 ), RESULT_DIM ) );
+		is.setText( null );
+		is.setIcon( new IconBuilder( shapes.getSelectedValue(), colors.getSelectedValue() )
+				.setPadding( 2 ).setIconSize( 40 ).build() );
 	}
 
 	private static URI getUriFromPath( TreePath tp ) {
