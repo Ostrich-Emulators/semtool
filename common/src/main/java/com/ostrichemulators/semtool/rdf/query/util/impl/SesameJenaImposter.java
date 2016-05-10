@@ -14,7 +14,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
 
 /**
- * A class to mimic the {@link gov.va.semoss.rdf.engine.impl.SesameJenaSelectWrapper} class to ease the
+ * A class to mimic the legacy SesameJenaSelectWrapper class to ease the
  * transition
  *
  * @author ryan

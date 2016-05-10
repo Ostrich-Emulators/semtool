@@ -34,6 +34,8 @@ import java.util.Set;
  * different between edges. Internally, size information is stored and
  * calculated as Doubles.
  *
+ * @param <T> the type of node
+ * @param <V> vertex type
  */
 public abstract class SizedSelectingTransformer<T extends GraphElement, V>
 		extends SelectingTransformer<T, V> {
@@ -197,7 +199,7 @@ public abstract class SizedSelectingTransformer<T extends GraphElement, V>
 	/**
 	 * @param t the thing to transform
 	 * @param sz the new size info...if null, use default size
-	 * @defaultSize the current default size
+	 * @param defaultSize the current default size
 	 * @return
 	 */
 	protected abstract V getNormal( T t, Double sz, double defaultSize );
@@ -205,7 +207,7 @@ public abstract class SizedSelectingTransformer<T extends GraphElement, V>
 	/**
 	 * @param t the thing to transform
 	 * @param sz the new size info...if null, use default size
-	 * @defaultSize the current default size
+	 * @param defaultSize the current default size
 	 * @return
 	 */
 	protected abstract V getSelected( T t, Double sz, double defaultSize );

@@ -180,8 +180,7 @@ public class XlsWriter implements GraphWriter {
 	 * Is the next row the first one of the tab (excluding headers)?
 	 *
 	 * @return true if the next call to {@link #addRow(java.lang.String[],
-	 * org.apache.poi.xssf.usermodel.XSSFCellStyle[]) } will be the first row of
-	 * the tab
+	 * org.apache.poi.ss.usermodel.CellStyle[]) } will be the first row of the tab
 	 */
 	protected boolean nextRowIsFirstRowOfTab() {
 		if ( maxtabrows == rowcount ) {
@@ -223,11 +222,11 @@ public class XlsWriter implements GraphWriter {
 		currentheader.clear();
 		desiredtabname = tabname;
 		String realname = generateSheetName( tabname, currentnames );
-		
-		if( null == currentwb ){
+
+		if ( null == currentwb ) {
 			createWorkbook();
 		}
-		
+
 		currentsheet = currentwb.createSheet( realname );
 		rowcount = 0;
 

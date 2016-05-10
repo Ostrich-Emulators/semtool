@@ -37,9 +37,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
 /**
- * This is the eventual replacement for {@link ParamPanel}, but it's not fully
- * functional yet. In general, you should use ParamPanel until it is removed
- * from the code base.
+ * A panel to present the user with insights and parameters for the insights
  *
  * @author ryan
  */

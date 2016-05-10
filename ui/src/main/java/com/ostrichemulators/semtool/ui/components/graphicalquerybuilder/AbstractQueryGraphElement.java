@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
@@ -100,31 +99,12 @@ public abstract class AbstractQueryGraphElement extends AbstractGraphElement
 	}
 
 	@Override
-	public Map<URI, Object> getProperties() {
-		Map<URI, Object> map = new HashMap<>();
-		for ( Map.Entry<URI, Set<Value>> en : properties.entrySet() ) {
-			if ( en.getValue().isEmpty() ) {
-				Logger.getLogger( getClass() ).debug( "empty property!" + en.getKey() );
-			}
-
-			map.put( en.getKey(),
-					RDFDatatypeTools.getObjectFromValue( en.getValue().iterator().next() ) );
-		}
-		return map;
-	}
-
-	@Override
 	public Value getValue( URI prop ) {
 		if ( properties.containsKey( prop ) ) {
 			return properties.get( prop ).iterator().next();
 		}
 
 		return null;
-	}
-
-	@Override
-	public Object getProperty( URI prop ) {
-		return RDFDatatypeTools.getObjectFromValue( getValue( prop ) );
 	}
 
 	@Override

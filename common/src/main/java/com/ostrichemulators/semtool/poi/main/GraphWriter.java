@@ -24,7 +24,7 @@ public interface GraphWriter {
 	 * be created if they don't already exist.
 	 *
 	 * @param data
-	 * @param output
+	 * @param file the output file
 	 * @throws IOException
 	 */
 	void write( ImportData data, File file ) throws IOException;

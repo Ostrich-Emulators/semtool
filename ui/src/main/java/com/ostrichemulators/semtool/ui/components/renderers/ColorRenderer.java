@@ -5,8 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.renderers;
 
-import com.ostrichemulators.semtool.om.GraphColorRepository;
-import com.ostrichemulators.semtool.util.Constants;
+import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
@@ -23,7 +22,7 @@ public class ColorRenderer extends DefaultListCellRenderer {
 			int index, boolean sel, boolean focus ) {
 
 		if ( null == val ) {
-			val = GraphColorRepository.instance().getColor( Constants.TRANSPARENT );
+			val = GraphColorShapeRepository.TRANSPARENT;
 		}
 
 		Color color = Color.class.cast( val );

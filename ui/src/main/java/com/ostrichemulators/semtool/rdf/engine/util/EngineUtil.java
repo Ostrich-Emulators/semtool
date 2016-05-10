@@ -340,6 +340,7 @@ public class EngineUtil implements Runnable {
 	 * repository is loaded?
 	 * @param noDupeEx if the given SMSS is already loaded, do nothing instead of
 	 * throwing the usual DuplicateName exception
+	 * @param user the user doing the mounting
 	 *
 	 * @throws EngineManagementException
 	 */
@@ -493,7 +494,6 @@ public class EngineUtil implements Runnable {
 	 * "properties" file). If null, this function will clear all insights from the
 	 * engine without adding anything
 	 * @param clearfirst remove the current insights before adding the new ones?
-	 * @param vocabs list of vocabularies to import
 	 *
 	 * @throws IOException
 	 * @throws EngineManagementException
@@ -513,7 +513,8 @@ public class EngineUtil implements Runnable {
 	 * Imports Insights from a list into the active repository. Reports upon
 	 * success.
 	 *
-	 * @param statements -- The RDF Statemsnts to be imported.
+	 * @param engine where to put the insights
+	 * @param wim -- The insights to import
 	 *
 	 * @return -- (boolean) Whether the import succeeded.
 	 */

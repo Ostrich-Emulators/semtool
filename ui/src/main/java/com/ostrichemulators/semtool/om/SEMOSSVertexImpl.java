@@ -19,15 +19,9 @@
  */
 package com.ostrichemulators.semtool.om;
 
-import com.ostrichemulators.semtool.ui.helpers.DynamicColorRepository;
-
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import java.awt.Shape;
-
 import java.util.Map;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDF;
 
 /**
  * Variables are transient because this tells the json writer to ignore them

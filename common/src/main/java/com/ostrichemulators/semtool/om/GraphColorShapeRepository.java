@@ -17,6 +17,7 @@ import org.openrdf.model.URI;
  */
 public interface GraphColorShapeRepository {
 
+	public static final Color TRANSPARENT = new Color( 255, 255, 255, 0 );
 	public static final Color COLORS[] = {
 		new Color( 31, 119, 180 ), // blue
 		new Color( 44, 160, 44 ), // green

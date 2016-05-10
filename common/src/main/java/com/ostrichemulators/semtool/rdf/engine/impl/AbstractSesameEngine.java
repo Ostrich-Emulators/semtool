@@ -321,14 +321,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		}
 	}
 
-	/**
-	 * Returns whether or not an engine is currently connected to the data store.
-	 * The connection becomes true when {@link #openDB(String)} is called and the
-	 * connection becomes false when {@link #closeDB()} is called.
-	 *
-	 * @return true if the engine is connected to its data store and false if it
-	 * is not
-	 */
 	@Override
 	public boolean isConnected() {
 		try {

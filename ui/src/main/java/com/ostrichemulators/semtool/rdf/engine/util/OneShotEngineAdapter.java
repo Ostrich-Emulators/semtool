@@ -30,7 +30,7 @@ public class OneShotEngineAdapter extends EngineOperationAdapter {
 	 * Creates a new EngineAdapter that automatically closes itself when the given
 	 * ShotOp is called with the given IEngine
 	 *
-	 * @param eng
+	 * @param smss the database locator
 	 * @param op
 	 */
 	public OneShotEngineAdapter( String smss, ShotOp op ) {

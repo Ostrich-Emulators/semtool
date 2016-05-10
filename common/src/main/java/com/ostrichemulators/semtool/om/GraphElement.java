@@ -25,10 +25,6 @@ public interface GraphElement {
 
 	public void setLabel( String name );
 
-	public Map<URI, Object> getProperties();
-
-	public Object getProperty( URI prop );
-
 	public URI getType();
 
 	public URI getURI();

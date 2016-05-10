@@ -23,11 +23,13 @@ import static com.ostrichemulators.semtool.ui.helpers.NodeEdgeNumberedPropertyUt
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.util.Constants;
 
+import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  * This class is used in chart listeners to create the appropriate browser and
@@ -52,7 +54,12 @@ public class ChartItPlaySheet extends BrowserPlaySheet2 {
 		
 		for(URI nodeType:nodeHash.keySet()) {
 			for (SEMOSSVertex node:nodeHash.get(nodeType)) {
-				Map<URI, Object> originalProps = node.getProperties();
+				Map<URI, Object> originalProps = new HashMap<>();
+				Map<URI, Value> vals = node.getValues();
+				for ( Map.Entry<URI, Value> en : vals.entrySet() ) {
+					originalProps.put( en.getKey(),
+							RDFDatatypeTools.getObjectFromValue( en.getValue() ) );
+				}
 
 				int  inEdgeCount = gps.getGraphData().getGraph().getInEdges( node ).size();
 				int outEdgeCount = gps.getGraphData().getGraph().getOutEdges( node ).size();

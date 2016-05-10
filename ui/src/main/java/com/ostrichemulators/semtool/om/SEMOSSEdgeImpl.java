@@ -37,7 +37,7 @@ public class SEMOSSEdgeImpl extends AbstractGraphElement
 	/**
 	 * @param _outVertex
 	 * @param _inVertex
-	 * @param _uri Vertex1 (OutVertex) -------> Vertex2 (InVertex) (OutEdge)
+	 * @param _uri Vertex1 (OutVertex) -------&gt; Vertex2 (InVertex) (OutEdge)
 	 * (InEdge)
 	 */
 	public SEMOSSEdgeImpl( SEMOSSVertex _outVertex, SEMOSSVertex _inVertex, URI _uri ) {

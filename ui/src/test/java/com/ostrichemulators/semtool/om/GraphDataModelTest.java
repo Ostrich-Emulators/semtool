@@ -94,7 +94,7 @@ public class GraphDataModelTest {
 		assertEquals( 1, graph.getEdgeCount() );
 
 		SEMOSSEdge edge = graph.getEdges().iterator().next();
-		assertEquals( "3000 USD", edge.getProperty( PRICE ) );
+		assertEquals( "3000 USD", edge.getValue( PRICE ).stringValue() );
 	}
 
 	@Test

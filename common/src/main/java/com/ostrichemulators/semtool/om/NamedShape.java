@@ -60,10 +60,10 @@ public enum NamedShape {
 	}
 
 	/**
-	 * Creates a star shape.
-	 *
-	 * @return Star
-	 *
+	 * Creates a star shape
+	 * @param size how big to make the star
+	 * @param points how many points does it have?
+	 * @return a star
 	 */
 	public static Shape createStar( double size, int points ) {
 		// we're (imagining) drawing two concentric circles

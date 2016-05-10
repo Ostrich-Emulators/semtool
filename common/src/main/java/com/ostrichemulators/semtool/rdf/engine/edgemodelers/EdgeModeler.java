@@ -60,7 +60,7 @@ public interface EdgeModeler {
 	 * Create statements for all of the properties of the instanceURI
 	 *
 	 * @param subject URI containing the subject instance URI
-	 * @param properties Map<String, Object> that contains all properties
+	 * @param properties Map&lt;String, Object&gt; that contains all properties
 	 * @param namespaces
 	 * @param sheet
 	 * @param metas Metadata to use when loading. This argument MUST pass the

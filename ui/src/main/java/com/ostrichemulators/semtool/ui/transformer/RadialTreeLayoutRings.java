@@ -87,7 +87,7 @@ public class RadialTreeLayoutRings implements VisualizationServer.Paintable {
 	/**
 	 * Method getDepths. - gets the radii for each of the rings in the graph
 	 *
-	 * @return Collection<Double> - returns the radii results.
+	 * @return Collection - returns the radii results.
 	 */
 	public Collection<Double> getDepths() {
 		Set<Double> depths = new HashSet<>();

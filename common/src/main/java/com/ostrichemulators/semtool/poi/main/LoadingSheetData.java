@@ -97,7 +97,7 @@ public class LoadingSheetData {
 	/**
 	 * Removes nodes from the list. This may be an expensive operation.
 	 *
-	 * @param nap
+	 * @param naps
 	 */
 	public void removeAll( Collection<LoadingNodeAndPropertyValues> naps ) {
 		data.removeAll( naps );

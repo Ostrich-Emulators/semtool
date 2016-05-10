@@ -75,11 +75,11 @@ public class GraphPlaySheetTableExporter extends AbstractAction {
 		List<Value[]> vals = new ArrayList<>();
 		for ( SEMOSSVertex v : verts ) {
 			Value subj = vf.createLiteral( v.getLabel() );
-			Object o = v.getProperty( RDF.TYPE );
+			Value o =  v.getValue( RDF.TYPE );
 			if ( null != o ) {
 				Value pred = vf.createLiteral( "Vertex Type" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
+				// Value obj = vf.createLiteral( o.toString() );
+				vals.add( new Value[]{ subj, pred, o } );
 			}
 			o = v.getURI();
 			if ( null != o ) {
@@ -94,11 +94,11 @@ public class GraphPlaySheetTableExporter extends AbstractAction {
 
 		for ( SEMOSSEdge v : edges ) {
 			Value subj = vf.createLiteral( v.getLabel() );
-			Object o = v.getProperty( Constants.EDGE_NAME );
+			Value o = v.getValue( Constants.EDGE_NAME );
 			if ( null != o ) {
 				Value pred = vf.createLiteral( "Name" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
+				//Value obj = vf.createLiteral( o.toString() );
+				vals.add( new Value[]{ subj, pred, o } );
 			}
 			o = v.getURI();
 			if ( null != o ) {
@@ -107,11 +107,11 @@ public class GraphPlaySheetTableExporter extends AbstractAction {
 				vals.add( new Value[]{ subj, pred, obj } );
 			}
 
-			o = v.getProperty( Constants.EDGE_TYPE );
+			o = v.getValue( Constants.EDGE_TYPE );
 			if ( null != o ) {
 				Value pred = vf.createLiteral( "Edge Type" );
-				Value obj = vf.createLiteral( o.toString() );
-				vals.add( new Value[]{ subj, pred, obj } );
+				// Value obj = vf.createLiteral( o.toString() );
+				vals.add( new Value[]{ subj, pred, o } );
 			}
 
 			Value pred = vf.createLiteral( "Type" );

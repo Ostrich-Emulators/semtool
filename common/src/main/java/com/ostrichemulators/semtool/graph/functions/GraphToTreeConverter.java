@@ -51,13 +51,13 @@ public class GraphToTreeConverter<V, E> {
 
 	/**
 	 * Converts the given graph to a tree
-	 *
-	 * @param <SEMOSSVertex>
+	 * @param <V>
 	 * @param <E>
 	 * @param graph
 	 * @param roots
 	 * @param search
 	 * @return
+	 * @throws com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter.TreeConversionException 
 	 */
 	public static <V, E> Forest<V, E> convert(
 			DirectedGraph<V, E> graph, Collection<V> roots, Search search ) throws TreeConversionException {
@@ -81,7 +81,7 @@ public class GraphToTreeConverter<V, E> {
 	 * @see #convertq(edu.uci.ics.jung.graph.DirectedGraph, java.lang.Object)
 	 *
 	 * @param graph
-	 * @param root
+	 * @param roots
 	 * @return
 	 */
 	public Forest<V, E> convertq( DirectedGraph<V, E> graph, Collection<V> roots ) {

@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.om;
 
+import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -92,8 +93,8 @@ public class AbstractGraphElementTest {
 	public void testGetProperties() {
 		TestNode tn = new TestNode();
 		String expected = "a comment";
-		tn.setProperty( RDFS.COMMENT, expected );
-		assertEquals( expected, tn.getProperties().get( RDFS.COMMENT ) );
+		tn.setValue( RDFS.COMMENT, RDFDatatypeTools.getValueFromObject( expected ) );
+		assertEquals( expected, tn.getValue( RDFS.COMMENT ).stringValue() );
 	}
 
 	@Test
@@ -127,7 +128,7 @@ public class AbstractGraphElementTest {
 	@Test
 	public void testGetDataType() {
 		TestNode tn = new TestNode();
-		tn.setProperty( RDFS.COMMENT, "test comment" );
+		tn.setValue( RDFS.COMMENT, RDFDatatypeTools.getValueFromObject( "test comment" ) );
 		assertEquals( XMLSchema.STRING, tn.getDataType( RDFS.COMMENT ) );
 	}
 
@@ -140,7 +141,7 @@ public class AbstractGraphElementTest {
 	@Test
 	public void testGetDataType2() {
 		TestNode tn = new TestNode();
-		tn.setProperty( RDFS.COMMENT, RDFS.DOMAIN );
+		tn.setValue( RDFS.COMMENT, RDFS.DOMAIN );
 		assertEquals( XMLSchema.ANYURI, tn.getDataType( RDFS.COMMENT ) );
 	}
 
@@ -149,8 +150,7 @@ public class AbstractGraphElementTest {
 		TestNode tn = new TestNode();
 		tn.mark( RDFS.COMMENT, true ); // comment isn't one of our known properties
 		assertFalse( tn.isMarked( RDFS.LABEL ) );
-
-		tn.setProperty( RDFS.COMMENT, "test comment" );
+		tn.setValue( RDFS.COMMENT, RDFDatatypeTools.getValueFromObject( "test comment") );
 		tn.mark( RDFS.COMMENT, true );
 		assertTrue( tn.isMarked( RDFS.COMMENT ) );
 	}

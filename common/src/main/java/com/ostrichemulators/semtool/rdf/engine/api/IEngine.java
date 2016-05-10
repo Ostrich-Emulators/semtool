@@ -70,8 +70,8 @@ public interface IEngine {
 
 	/**
 	 * Returns whether or not an engine is currently connected to the data store.
-	 * The connection becomes true when {@link #openDB(String)} is called and the
-	 * connection becomes false when {@link #closeDB()} is called.
+	 * The connection becomes true when {@link #openDB(java.util.Properties)} is
+	 * called and the connection becomes false when {@link #closeDB()} is called.
 	 *
 	 * @return true if the engine is connected to its data store and false if it
 	 * is not
@@ -236,10 +236,11 @@ public interface IEngine {
 
 	/**
 	 * Updates to disk the Insights for this engine
-	 * @param insmgr 
+	 *
+	 * @param insmgr
 	 */
 	public void updateInsights( InsightManager insmgr ) throws EngineManagementException;
-	
+
 	// gets the insight database
 	public InsightManager getInsightManager();
 

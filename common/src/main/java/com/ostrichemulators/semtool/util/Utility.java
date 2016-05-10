@@ -377,11 +377,13 @@ public class Utility {
 	 * Gets the appropriate exporter for the given filename. "Appropriate" means
 	 * the file's suffix determines exporter. If no appropriate handler can be
 	 * found, an NTriples one is returned. Handled suffixes (case insensitive):
-	 * <li>nt</li>
-	 * <li>rdf</li>
-	 * <li>ttl</li>
+	 * <ul>
+	 * <li>nt
+	 * <li>rdf
+	 * <li>ttl
+	 * </ul>
 	 *
-	 * @param file the filename to determine the handler to use
+	 * @param filename the filename to determine the handler to use
 	 * @param out the output writer to use to create the handler
 	 * @return a handler (always)
 	 */

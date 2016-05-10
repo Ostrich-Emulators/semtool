@@ -21,7 +21,6 @@ import java.util.Set;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -85,26 +84,15 @@ public abstract class AbstractGraphElement implements GraphElement {
 	}
 
 	/**
-	 * Method setProperty.
-	 *
-	 * @param propNameURI String
-	 * @param propValue Object
-	 */
-	public void setProperty( String propNameURI, Object propValue ) {
-		setProperty( new URIImpl( propNameURI ), propValue );
-	}
-
-	/**
-	 * Sets a new label for this vertex. This function is really a convenience to
-	 * {@link #putProperty(java.lang.String, java.lang.String)}, but doesn't go
-	 * through the same error-checking. Any name is acceptable. We can always
-	 * rename a label.
+	 * Sets a new label for this vertex. This function is a convenience to
+	 * {@link #setValue(org.openrdf.model.URI, org.openrdf.model.Value)  }
+	 * Any name is acceptable. We can always rename a vertex or edge.
 	 *
 	 * @param label the new label to set
 	 */
 	@Override
 	public void setLabel( String label ) {
-		setProperty( RDFS.LABEL, label );
+		setValue( RDFS.LABEL, RDFDatatypeTools.getValueFromObject( label ) );
 	}
 
 	@Override
@@ -116,10 +104,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 	public String getLabel() {
 		return ( properties.containsKey( RDFS.LABEL )
 				? properties.get( RDFS.LABEL ).stringValue() : "" );
-	}
-
-	public void setProperty( URI prop, Object propValue ) {
-		setValue( prop, RDFDatatypeTools.getValueFromObject( propValue ) );
 	}
 
 	@Override
@@ -138,22 +122,8 @@ public abstract class AbstractGraphElement implements GraphElement {
 	}
 
 	@Override
-	public Object getProperty( URI prop ) {
-		return RDFDatatypeTools.getObjectFromValue( getValue( prop ) );
-	}
-
-	@Override
 	public Value getValue( URI prop ) {
 		return properties.get( prop );
-	}
-
-	@Override
-	public Map<URI, Object> getProperties() {
-		Map<URI, Object> map = new HashMap<>();
-		for ( Map.Entry<URI, Value> en : properties.entrySet() ) {
-			map.put( en.getKey(), RDFDatatypeTools.getObjectFromValue( en.getValue() ) );
-		}
-		return map;
 	}
 
 	@Override
@@ -193,11 +163,11 @@ public abstract class AbstractGraphElement implements GraphElement {
 
 	/**
 	 * Gets the datatype for the value that would be returned for the given
-	 * property from a call to {@link #getProperty(org.openrdf.model.URI) }
+	 * property from a call to {@link #getValue(org.openrdf.model.URI)  }
 	 *
 	 * @param prop the property to find
 	 * @return the datatype, or {@link XMLSchema#ANYURI} if the value is a URI, or
-	 * {@link XMLSChema#ENTITY} for a BNode.
+	 * {@link XMLSchema#ENTITY} for a BNode.
 	 */
 	public URI getDataType( URI prop ) {
 		if ( properties.containsKey( prop ) ) {

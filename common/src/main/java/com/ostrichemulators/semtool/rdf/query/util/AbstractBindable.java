@@ -28,7 +28,6 @@ import org.openrdf.query.Operation;
  * A class that handles all the housekeeping of the QueryExecutor interface
  *
  * @author ryan
- * @param <T> the type of the result
  */
 public abstract class AbstractBindable implements Bindable {
 
