@@ -254,15 +254,15 @@
 		</profile>
 	</profiles>
   
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
-      </plugin>
-    </plugins>
-  </reporting>
+	<reporting>
+		<plugins>			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<build>    
 		<plugins>
@@ -338,4 +338,11 @@
 		<name>Ostrich Emulators</name>
 	</organization>
 	<url>https://github.com/Ostrich-Emulators/semtool</url>
+
+	<distributionManagement>
+		<site>
+			<id>Ostrich-Emulators.github.io</id>
+			<url>ostrich-emulators.com/semtool</url>
+		</site>
+	</distributionManagement>
 </project>
