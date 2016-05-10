@@ -9,9 +9,7 @@ import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -143,16 +141,6 @@ public class AbstractGraphElementTest {
 		TestNode tn = new TestNode();
 		tn.setValue( RDFS.COMMENT, RDFS.DOMAIN );
 		assertEquals( XMLSchema.ANYURI, tn.getDataType( RDFS.COMMENT ) );
-	}
-
-	@Test
-	public void testGetMarkedProperties() {
-		TestNode tn = new TestNode();
-		tn.mark( RDFS.COMMENT, true ); // comment isn't one of our known properties
-		assertFalse( tn.isMarked( RDFS.LABEL ) );
-		tn.setValue( RDFS.COMMENT, RDFDatatypeTools.getValueFromObject( "test comment") );
-		tn.mark( RDFS.COMMENT, true );
-		assertTrue( tn.isMarked( RDFS.COMMENT ) );
 	}
 
 	@Test

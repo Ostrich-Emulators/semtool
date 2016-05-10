@@ -175,6 +175,7 @@ public class CondenseGraph extends AbstractAction {
 	 *
 	 * @param graph the graph to inspect
 	 * @param type the node type that has the edges
+	 * @param endpoint
 	 * @return
 	 */
 	public static MultiMap<SEMOSSVertex, CondenserTuple>

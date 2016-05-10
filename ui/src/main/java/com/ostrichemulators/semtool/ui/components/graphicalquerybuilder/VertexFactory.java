@@ -6,8 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import com.google.common.base.Supplier;
-import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.UriBuilder;
+import com.ostrichemulators.semtool.util.Utility;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -17,12 +16,11 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class VertexFactory implements Supplier<QueryNode> {
 
-	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
 	private URI verttype;
 
 	@Override
 	public QueryNode get() {
-		QueryNode v = new QueryNode( uribuilder.uniqueUri(), verttype, "" );
+		QueryNode v = new QueryNode( Utility.getUniqueUri(), verttype, "" );
 		v.setSelected( RDFS.LABEL, true );
 		return v;
 	}

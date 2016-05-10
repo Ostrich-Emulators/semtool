@@ -97,6 +97,11 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 			for ( Map.Entry<ShapeColorHelper, List<SEMOSSVertex>> sch : mm.entrySet() ) {
 				String text = label + " (" + sch.getValue().size() + ")";
 				PaintLabel pl = new PaintLabel( text, sch.getKey().shape, sch.getKey().color );
+
+				if ( 1 == sch.getValue().size() ) {
+					pl.setToolTipText( sch.getValue().get( 0 ).getLabel() );
+				}
+
 				add( pl );
 				pl.addMouseListener( new MouseAdapter() {
 

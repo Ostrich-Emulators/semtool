@@ -5,13 +5,10 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
-import com.ostrichemulators.semtool.rdf.engine.impl.AbstractSesameEngine;
-import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import static com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter.getDate;
 import com.ostrichemulators.semtool.rdf.query.util.UpdateExecutorAdapter;
-import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.UriBuilder;
+import com.ostrichemulators.semtool.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.util.Date;
@@ -108,8 +105,8 @@ public class InMemorySesameEngineTest {
 		Repository repo = new SailRepository( new MemoryStore() );
 		repo.initialize();
 		RepositoryConnection rc = repo.getConnection();
-		UriBuilder urib = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
-		URI base = urib.uniqueUri();
+		
+		URI base = Utility.getUniqueUri();
 		Date now = new Date();
 		rc.add( new StatementImpl( base, MetadataConstants.DCT_MODIFIED,
 				rc.getValueFactory().createLiteral( now ) ) );

@@ -37,6 +37,7 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.event.GraphEvent;
 import edu.uci.ics.jung.graph.event.GraphEventListener;
 import edu.uci.ics.jung.graph.util.EdgeIndexFunction;
+import edu.uci.ics.jung.graph.util.Pair;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Paint;
@@ -46,6 +47,8 @@ import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -96,6 +99,9 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 	/**
 	 * Creates new form GraphicalQueryBuilderPanel
+	 *
+	 * @param progressname the progress bar name to update
+	 * @param csfac the graph color shape factory to use
 	 */
 	public GraphicalQueryPanel( String progressname, GraphColorShapeRepository csfac ) {
 		progress = progressname;
@@ -269,11 +275,23 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		view.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.S );
 		rc.setLabelOffset( 0 );
 
-		rc.setParallelEdgeIndexFunction( new EdgeIndexFunction<QueryNode, QueryEdge>(){
+		rc.setParallelEdgeIndexFunction( new EdgeIndexFunction<QueryNode, QueryEdge>() {
 
 			@Override
-			public int getIndex( Graph<QueryNode, QueryEdge> graph, QueryEdge e ) {
-				return 0;
+			public int getIndex( Graph<QueryNode, QueryEdge> g, QueryEdge e ) {
+				Pair<QueryNode> ends = graph.getEndpoints( e );
+				List<QueryEdge> edges
+						= new ArrayList<>( graph.findEdgeSet( ends.getFirst(),
+										ends.getSecond() ) );
+
+				Collections.sort( edges, new Comparator<QueryEdge>() {
+
+					@Override
+					public int compare( QueryEdge o1, QueryEdge o2 ) {
+						return o1.getURI().stringValue().compareTo( o2.getURI().stringValue() );
+					}
+				} );
+				return edges.indexOf( e );
 			}
 
 			@Override

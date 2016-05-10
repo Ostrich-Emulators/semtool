@@ -6,8 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import com.google.common.base.Supplier;
-import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.UriBuilder;
+import com.ostrichemulators.semtool.util.Utility;
 import org.openrdf.model.vocabulary.RDFS;
 
 /**
@@ -16,11 +15,9 @@ import org.openrdf.model.vocabulary.RDFS;
  */
 public class EdgeFactory implements Supplier<QueryEdge> {
 
-	private final UriBuilder uribuilder = UriBuilder.getBuilder( Constants.ANYNODE + "/" );
-
 	@Override
 	public QueryEdge get() {
-		QueryEdge edge = new QueryEdge( uribuilder.uniqueUri() );
+		QueryEdge edge = new QueryEdge( Utility.getUniqueUri() );
 		edge.removeProperty( RDFS.LABEL );
 
 		return edge;

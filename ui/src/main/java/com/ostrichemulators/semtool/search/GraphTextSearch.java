@@ -190,6 +190,7 @@ public class GraphTextSearch {
 	 *
 	 * @param graph
 	 * @param engine
+	 * @throws java.io.IOException
 	 */
 	public void index( Graph<SEMOSSVertex, SEMOSSEdge> graph, IEngine engine ) throws IOException {
 		log.trace( "asking to update search index" );

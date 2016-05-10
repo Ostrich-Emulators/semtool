@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.om;
 
-import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Map;
@@ -36,10 +35,6 @@ public interface GraphElement {
 	public Set<URI> getPropertyKeys();
 
 	public boolean hasProperty( URI prop );
-
-	public boolean isMarked( URI prop );
-
-	public void mark( URI prop, boolean makeMark );
 
 	public void removeProperty( URI prop );
 

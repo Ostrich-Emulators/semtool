@@ -34,9 +34,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
 
-	// callers can "mark" properties for their own use
-	private final Set<URI> markedProperties = new HashSet<>();
-
 	private Map<String, Object> propHash = new HashMap<>(); //this is sent to the js (ChartIt)
 
 	public AbstractGraphElement( URI id ) {
@@ -175,25 +172,6 @@ public abstract class AbstractGraphElement implements GraphElement {
 			return RDFDatatypeTools.getDatatype( data );
 		}
 		return null;
-	}
-
-	@Override
-	public void mark( URI prop, boolean makeMark ) {
-		if ( makeMark && hasProperty( prop ) ) {
-			markedProperties.add( prop );
-		}
-		else {
-			markedProperties.remove( prop );
-		}
-	}
-
-	public Set<URI> getMarkedProperties() {
-		return new HashSet<>( markedProperties );
-	}
-
-	@Override
-	public boolean isMarked( URI prop ) {
-		return markedProperties.contains( prop );
 	}
 
 	@Override
