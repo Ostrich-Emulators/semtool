@@ -174,7 +174,7 @@ public class GuiUtility {
 	/**
 	 * Tries to load an image by first checking the filesystem, then the jar
 	 * itself. The filesystem location is &lt;CWD&gt;/pictures/&lt;filename&gt;
-	 * while the jar location is jar:/images/&lt;filename&gt
+	 * while the jar location is jar:/images/&lt;filename&gt;
 	 *
 	 * @param imagename
 	 *

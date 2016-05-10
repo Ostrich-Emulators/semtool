@@ -19,7 +19,6 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
-import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.ExportUtility;
@@ -56,7 +55,6 @@ import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 
 import javax.imageio.ImageIO;
-import javax.swing.JDesktopPane;
 
 import netscape.javascript.JSObject;
 
@@ -131,18 +129,7 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	}
 
 	/**
-	 * This is the function that is used to create the first view of any play
-	 * sheet. It often uses a lot of the variables previously set on the play
-	 * sheet, such as {@link #setQuery(String)},
-	 * {@link #setJDesktopPane(JDesktopPane)}, {@link #setEngine(IEngine)}, and
-	 * {@link #setTitle(String)} so that the play sheet is displayed correctly
-	 * when the view is first created. It generally creates the model for
-	 * visualization from the specified engine, then creates the visualization,
-	 * and finally displays it on the specified desktop pane
-	 *
-	 * This is the function called by the PlaysheetCreateRunner.
-	 * PlaysheetCreateRunner is the runner used whenever a play sheet is to first
-	 * be created, most notably in ProcessQueryListener.
+	 * Loads the HTML file
 	 */
 	public void createView() {
 		Platform.runLater( new Runnable() {
@@ -153,16 +140,12 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		} );
 	}
 
-	protected void createData(){
+	protected void createData() {
 		// we don't have any data to create
 	}
-	
+
 	/**
-	 * Method callIt. Converts a given Hashtable to a Json and passes it to the
-	 * browser.
-	 *
-	 * @param table Hashtable - the correctly formatted data from the SPARQL query
-	 * results.
+	 * Converts the internal data a Json object and passes it to the browser.
 	 */
 	public void callIt() {
 		// Initialize the key used to store the Data Series being visualized

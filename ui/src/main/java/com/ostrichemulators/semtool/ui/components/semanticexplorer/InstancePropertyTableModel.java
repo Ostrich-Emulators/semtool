@@ -47,8 +47,8 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	/**
 	 * Constructor for InstancePropertyTableModel.
 	 * 
-	 * @param List<Value[]> propertyList
-	 * @param IEngine engine
+	 * @param propertyList the properties to get
+	 * @param _engine the engine to query
 	 */
 	public InstancePropertyTableModel(List<Value[]> propertyList, IEngine _engine) { 		
 		renderer = LabeledPairRenderer.getUriPairRenderer();
@@ -83,10 +83,8 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	/**
 	 * Gets the cell value at a particular row and column index.
 	 * 
-	 * @param arg0
-	 *            Row index.
-	 * @param arg1
-	 *            Column index.
+	 * @param row Row index.
+	 * @param column Column index.
 	 * 
 	 * @return Object Cell value.
 	 */

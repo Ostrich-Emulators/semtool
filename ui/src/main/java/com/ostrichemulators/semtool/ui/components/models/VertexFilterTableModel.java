@@ -35,6 +35,7 @@ import org.openrdf.model.URI;
 
 /**
  * This class is used to create a table model for the vertex filter.
+ * @param <T>
  */
 public class VertexFilterTableModel<T extends GraphElement> extends AbstractTableModel {
 
@@ -172,24 +173,11 @@ public class VertexFilterTableModel<T extends GraphElement> extends AbstractTabl
 		return columnNames.length;
 	}
 
-	/**
-	 * Gets the column class at a particular index.
-	 *
-	 * @param column Column index.
-	 *
-	 * @return Class Column class.
-	 */
 	@Override
 	public Class<?> getColumnClass( int columnIndex ) {
 		return classNames[columnIndex];
 	}
 
-	/**
-	 * Gets the column name at a particular index.
-	 *
-	 * @param index Column index.
-	 * @return String Column name.
-	 */
 	@Override
 	public String getColumnName( int column ) {
 		return columnNames[column];

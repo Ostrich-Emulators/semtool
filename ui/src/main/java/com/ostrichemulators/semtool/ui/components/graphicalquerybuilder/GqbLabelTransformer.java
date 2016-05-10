@@ -43,6 +43,7 @@ import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Transforms the property label on a node vertex in the graph.
+ * @param <T>
  */
 public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTransformer<T> {
 
@@ -54,7 +55,7 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 	/**
 	 * Constructor for VertexLabelTransformer.
 	 *
-	 * @param data ControlData
+	 * @param engine
 	 */
 	public GqbLabelTransformer( IEngine engine ) {
 		super();

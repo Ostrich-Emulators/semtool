@@ -118,8 +118,8 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	/**
 	 * Gets the cell value at a particular row and column index.
 	 *
-	 * @param arg0 Row index.
-	 * @param arg1 Column index.
+	 * @param row Row index.
+	 * @param column Column index.
 	 *
 	 * @return Object Cell value.
 	 */

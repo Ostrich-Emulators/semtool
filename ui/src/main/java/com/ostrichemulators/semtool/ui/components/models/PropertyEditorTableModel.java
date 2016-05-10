@@ -53,10 +53,9 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 	private final Set<URI> uneditableProps = new HashSet<>();
 	
 	/**
-	 * Constructor for VertexPropertyTableModel.
-	 * 
-	 * @param nodeOrEdge AbstractNodeEdgeBase
-	 * @param IEngine engine
+	 *
+	 * @param _pickedVertices the verts/edges to show
+	 * @param _engine the place where the data is
 	 */
 	public PropertyEditorTableModel(Collection<? extends GraphElement> _pickedVertices,
 			IEngine _engine) { 
@@ -69,7 +68,7 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		populateRows();
 	}
 
-	public void populateRows() {
+	public final void populateRows() {
 		rows = new ArrayList<>();
 		URI datatypeURI;
 		for ( GraphElement vertex : pickedVertices ) {
@@ -96,16 +95,6 @@ public class PropertyEditorTableModel extends AbstractTableModel {
 		}
 	}
 	
-	/**
-	 * Gets the cell value at a particular row and column index.
-	 * 
-	 * @param arg0
-	 *            Row index.
-	 * @param arg1
-	 *            Column index.
-	 * 
-	 * @return Object Cell value.
-	 */
 	@Override
 	public Object getValueAt(int row, int column) {
 		PropertyEditorRow pRow = rows.get(row);

@@ -246,7 +246,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	 * not support tabular data.
 	 *
 	 * @return tabular data, or null if this playsheet does not support tables
-	 * @see @link #getHeaders()}
+	 * @see #getHeaders()
 	 */
 	@Override
 	public List<Object[]> getTabularData() {

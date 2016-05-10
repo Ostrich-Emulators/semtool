@@ -385,10 +385,11 @@ public class WeightDropDownButton extends JButton {
 	 * Method getNodeWeightHash. Builds up the hash of the nodes and weights of
 	 * the selected item
 	 *
-	 * @param Collection<X> collection - the list of items which may or may not be
-	 * selected
-	 * @param URI selectedURI - the URI which is currently selected
-	 * @return <X extends GraphElement> Map<X, Double> of the nodes and weights
+	 * @param <X> the type of graph element we want to get
+	 * @param collection the list of items which may or may not be selected
+	 * @param selectedURI the URI which is currently selected
+	 * @param defaultScale the default scale of the graph elements
+	 * @return map of the nodes and weights
 	 */
 	@SuppressWarnings( "unchecked" )
 	public <X extends GraphElement> Map<X, Double>

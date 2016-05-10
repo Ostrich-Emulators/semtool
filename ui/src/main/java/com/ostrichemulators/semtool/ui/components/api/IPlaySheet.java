@@ -20,6 +20,7 @@
 package com.ostrichemulators.semtool.ui.components.api;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
@@ -69,7 +70,6 @@ public interface IPlaySheet {
 
 	/**
 	 * Gets a map of String-to-Actions from this tab.
-	 *
 	 * @see PlaySheetFrame#getActions()
 	 * @return a (by default, empty) mapping of actions
 	 */
@@ -84,6 +84,7 @@ public interface IPlaySheet {
 	 * @return
 	 */
 	public List<String> getHeaders();
+
 	/**
 	 * Signals when this playsheet's tab is selected in the frame. By default,
 	 * does nothing
@@ -123,7 +124,7 @@ public interface IPlaySheet {
 	 * not support tabular data.
 	 *
 	 * @return tabular data, or null if this playsheet does not support tables
-	 * @see @link #getHeaders()}
+	 * @see #getHeaders()
 	 */
 	public List<Object[]> getTabularData();
 
