@@ -41,6 +41,6 @@ And Adds:
 The source code is organized into several packages, and built with Maven.
 * [Parent](http://ostrich-emulators.github.io/semtool/index.html) -- The meta-package to kick everything off [docs](http://ostrich-emulators.github.io/semtool/apidocs/index.html)
   * [Common](http://ostrich-emulators.github.io/semtool/common/index.html) -- Pieces of code that span multiple projects [docs](http://ostrich-emulators.github.io/semtool/common/apidocs/index.html)
-  * [GUI](http://ostrich-emulators.github.io/semtool/ui/index.html) -- The main GUI application [docs](http://ostrich-emulators.github.io/semtool/ui/apidocs/index.html)
+  * [GUI](http://ostrich-emulators.github.io/semtool/gui/index.html) -- The main GUI application [docs](http://ostrich-emulators.github.io/semtool/gui/apidocs/index.html)
   * [Tools](http://ostrich-emulators.github.io/semtool/tools/index.html) -- A collection of tools like a legacy database upgrader and embedded webserver [docs](http://ostrich-emulators.github.io/semtool/tools/apidocs/index.html)
   * Web -- Not fully functional at the moment
