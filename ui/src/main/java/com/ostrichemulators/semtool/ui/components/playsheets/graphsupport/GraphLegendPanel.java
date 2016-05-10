@@ -59,6 +59,8 @@ public final class GraphLegendPanel extends JPanel implements GraphListener {
 
 	/**
 	 * Create the panel.
+	 *
+	 * @param labels
 	 */
 	public GraphLegendPanel( Map<Value, String> labels ) {
 		setLayout( new WrapLayout( WrapLayout.LEFT, 5, 5 ) );

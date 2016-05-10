@@ -23,6 +23,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * The Graph Shape Repository is responsible for serving as a single point of
@@ -47,6 +49,10 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	private double iconsize = DEFAULT_ICON_SIZE;
 
 	public DefaultColorShapeRepository() {
+		shapelkp.put( RDFS.CLASS, NamedShape.URCHIN );
+		colorlkp.put( RDFS.CLASS, Color.PINK );
+		shapelkp.put( OWL.CLASS, NamedShape.URCHIN );
+		colorlkp.put( OWL.CLASS, Color.PINK );
 	}
 
 	public void setSaveToPreferences( boolean b ) {
@@ -164,9 +170,16 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public NamedShape getShape( GraphElement ge ) {
-		return ( shapelkp.containsKey( ge.getURI() )
-				? getShape( ge.getURI() )
-				: getShape( ge.getType() ) );
+		return getShape( ge.getType(), ge.getURI() );
+	}
+
+	@Override
+	public NamedShape getShape( URI type, URI instance ){
+		if( shapelkp.containsKey( instance ) ){
+			return shapelkp.get( instance );
+		}
+
+		return getShape( type );
 	}
 
 	@Override
@@ -214,11 +227,6 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public boolean hasShape( URI uri ) {
-		return shapelkp.containsKey( uri );
-	}
-
-	@Override
 	public void set( Collection<GraphElement> ges, Color color, NamedShape shape ) {
 		List<URI> saves = new ArrayList<>();
 		for ( GraphElement ge : ges ) {
@@ -248,5 +256,37 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	@Override
 	public void setIconSize( double d ) {
 		iconsize = d;
+	}
+
+	@Override
+	public void set( URI ge, NamedShape s ) {
+		shapelkp.put( ge, s );
+	}
+
+	@Override
+	public void set( URI ge, Color c ) {
+		colorlkp.put( ge, c );
+	}
+
+	@Override
+	public Color getColor( URI type, URI instance ) {
+		if( colorlkp.containsKey( instance ) ){
+			return colorlkp.get( instance );
+		}
+
+		return getColor( type );
+	}
+
+	@Override
+	public URL getUrl( URI ge ) {
+		return imglkp.get( ge );
+	}
+
+	@Override
+	public URL getUrl( URI type, URI instance ) {
+		if( imglkp.containsKey( type ) ){
+			return imglkp.get( type );
+		}
+		return imglkp.get( instance );
 	}
 }

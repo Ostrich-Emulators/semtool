@@ -92,6 +92,6 @@ public class PaintLabel extends JButton {
 
 	private void makeShapeIcon() {
 		setIcon( new IconBuilder( shape, color ).
-				setIconSize( dim.getWidth() ).setPadding( 2 ).build() );
+				setIconSize( dim.getWidth() ).setPadding( 1 ).build() );
 	}
 }

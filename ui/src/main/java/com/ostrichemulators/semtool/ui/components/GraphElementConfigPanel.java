@@ -56,6 +56,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 
 	/**
 	 * Creates new form GraphElementConfigPanel
+	 * @param engine
+	 * @param repo
 	 */
 	public GraphElementConfigPanel( IEngine engine, GraphColorShapeRepository repo ) {
 		shapefactory.importFrom( repo );
@@ -177,20 +179,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		title.setText( String.format( cache.get( me ) ) );
 		uri.setText( me.stringValue() );
 
-		NamedShape shape = null;
-		Color color = null;
-		if ( shapefactory.hasShape( instance ) ) {
-			shape = shapefactory.getShape( instance );
-			color = shapefactory.getColor( instance );
-		}
-		else if ( shapefactory.hasShape( type ) ) {
-			shape = shapefactory.getShape( type );
-			color = shapefactory.getColor( type );
-		}
-		else {
-			shape = shapefactory.getShape( instance );
-			color = shapefactory.getColor( instance );
-		}
+		NamedShape shape = shapefactory.getShape( type, instance );
+		Color color = shapefactory.getColor( type, instance );
 
 		shapes.setSelectedValue( shape, true );
 		colors.setSelectedValue( color, true );

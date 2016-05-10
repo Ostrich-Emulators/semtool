@@ -109,7 +109,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -233,7 +232,6 @@ public class PlayPane extends JFrame {
 
 	// public JTable colorShapeTable;
 	//public JTable sizeTable;
-
 	private SelectDatabasePanel selectDatabasePanel;
 	private final static Preferences prefs = Preferences.userNodeForPackage( PlayPane.class );
 	private final DefaultColorShapeRepository colorsShapes = new DefaultColorShapeRepository();
@@ -436,7 +434,9 @@ public class PlayPane extends JFrame {
 					dba.setEnabled( null != engine );
 				}
 
-				gQueryBuilderPanel.setEngine( engine );
+				if ( null != gQueryBuilderPanel ) {
+					gQueryBuilderPanel.setEngine( engine );
+				}
 				insightManager.setEngine( engine );
 				semanticExplorer.setEngine( engine );
 			}
@@ -486,15 +486,14 @@ public class PlayPane extends JFrame {
 				new PlayPaneCloseableTab( rightView, loggingItem, DbAction.getIcon( "log_tab1" ) )
 		);
 
-		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS, colorsShapes );
-		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
-		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
-				"Build queries graphically and generate Sparql" );
-		rightView.setTabComponentAt(
-				rightView.indexOfComponent( gQueryBuilderPanel ),
-				new PlayPaneCloseableTab( rightView, gQueryBuilderItem, DbAction.getIcon( "graphic_query" ) )
-		);
-
+//		gQueryBuilderPanel = new GraphicalQueryPanel( UIPROGRESS, colorsShapes );
+//		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
+//		rightView.addTab( "Graphical Query Builder", null, gQueryBuilderPanel,
+//				"Build queries graphically and generate Sparql" );
+//		rightView.setTabComponentAt(
+//				rightView.indexOfComponent( gQueryBuilderPanel ),
+//				new PlayPaneCloseableTab( rightView, gQueryBuilderItem, DbAction.getIcon( "graphic_query" ) )
+//		);
 		insightManager = new InsightManagerPanel();
 		rightView.addTab( "Insight Manager", null, insightManager,
 				"Manage perspectives and insights" );
@@ -505,7 +504,7 @@ public class PlayPane extends JFrame {
 
 		semanticExplorer = new SemanticExplorerPanel();
 		rightView.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ),
-				semanticExplorer,	"Explore the classes and instances" );
+				semanticExplorer, "Explore the classes and instances" );
 		rightView.setTabComponentAt(
 				rightView.indexOfComponent( semanticExplorer ),
 				new PlayPaneCloseableTab( rightView, semanticExplorerItem, DbAction.getIcon( "semantic_dataset2" ) )
@@ -1266,8 +1265,9 @@ public class PlayPane extends JFrame {
 		} );
 
 		gQueryBuilderItem.setSelected( getProp( GQUERYBUILDER ) );
-		if ( getProp( GQUERYBUILDER ) == true ) {
+		if ( getProp( GQUERYBUILDER ) ) {
 			gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );
+			makeGQB();
 		}
 		else {
 			gQueryBuilderItem.setToolTipText( "Enable the Graphical Query Builder Tab" );
@@ -1282,19 +1282,7 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "graphic_query" ),
-							gQueryBuilderPanel, "Build queries graphically and generate Sparql" );
-					CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, gQueryBuilderItem,
-							DbAction.getIcon( "graphic_query" ) );
-					int idx = rightTabs.indexOfComponent( gQueryBuilderPanel );
-					rightTabs.setTabComponentAt( idx, ct1 );
-					gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );
-
-					GraphicalQueryPanel qp = new GraphicalQueryPanel( PlayPane.UIPROGRESS, colorsShapes );
-					qp.setEngine( repoList.getSelectedValue() );
-					qp.setSparqlArea( customSparqlPanel.getOpenEditor() );
-					JOptionPane.showMessageDialog( repoList, qp );
-
+					makeGQB();
 				}
 				else {
 					rightTabs.remove( gQueryBuilderPanel );
@@ -1396,6 +1384,21 @@ public class PlayPane extends JFrame {
 		tb.setMnemonic( KeyEvent.VK_T );
 
 		return view;
+	}
+
+	private GraphicalQueryPanel makeGQB() {
+		gQueryBuilderPanel = new GraphicalQueryPanel( PlayPane.UIPROGRESS, colorsShapes );
+		gQueryBuilderPanel.setEngine( repoList.getSelectedValue() );
+		gQueryBuilderPanel.setSparqlArea( customSparqlPanel.getOpenEditor() );
+
+		rightTabs.addTab( "Graphical Query Builder", DbAction.getIcon( "graphic_query" ),
+				gQueryBuilderPanel, "Build queries graphically and generate Sparql" );
+		CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, gQueryBuilderItem,
+				DbAction.getIcon( "graphic_query" ) );
+		int idx = rightTabs.indexOfComponent( gQueryBuilderPanel );
+		rightTabs.setTabComponentAt( idx, ct1 );
+		gQueryBuilderItem.setToolTipText( "Disable the Graphical Query Builder Tab" );
+		return gQueryBuilderPanel;
 	}
 
 	protected void buildMenuBar() {

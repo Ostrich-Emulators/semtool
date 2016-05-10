@@ -26,10 +26,10 @@ import java.awt.geom.AffineTransform;
 
 /**
  * Transforms the size and shape of selected nodes.
+ * @param <T>
  */
 public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelectingTransformer<T, Shape> {
 
-	private static final double ICONSIZE = 16;
 	private static final double INITIAL_SCALE = 1.0;
 	private static final double MAXSIZE = 100.0;
 	private static final double MINSIZE = 0.0;
@@ -46,6 +46,7 @@ public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelecti
 
 	@Override
 	protected Shape transformNotSelected( SEMOSSVertex t, boolean inSkeletonMode ) {
+		double ICONSIZE = repo.getIconSize();
 		Shape shape = repo.getShape( t ).getShape( ICONSIZE );
 		AffineTransform at = AffineTransform.getTranslateInstance( -ICONSIZE / 2, -ICONSIZE / 2 );
 		return at.createTransformedShape( shape );
@@ -57,7 +58,7 @@ public class VertexShapeTransformer<T extends SEMOSSVertex> extends SizedSelecti
 			scale = defaultScale;
 		}
 
-		double iconsize = ICONSIZE * scale;
+		double iconsize = repo.getIconSize() * scale;
 		Shape s = repo.getShape( t ).getShape( iconsize );
 
 		AffineTransform at = AffineTransform.getTranslateInstance( -iconsize / 2, -iconsize / 2 );

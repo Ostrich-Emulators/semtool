@@ -12,6 +12,11 @@ import java.util.Map;
 import org.openrdf.model.URI;
 
 /**
+ * A repository to hold colors and shapes (and icons, too!) for graph elements.
+ * In all cases, the getXX functions should return a valid value, even if a
+ * random value must be generated. In fact, for consistency, random values
+ * <em>should</em> be generated and saved for future calls (this rule doesn't
+ * apply to icons)
  *
  * @author ryan
  */
@@ -43,9 +48,14 @@ public interface GraphColorShapeRepository {
 
 	public void set( URI ge, URL imageloc );
 
+	public void set( URI ge, NamedShape s );
+
+	public void set( URI ge, Color c );
+
 	/**
 	 *
-	 * A convenience function to {@link #getShape(org.openrdf.model.URI) }
+	 * A convenience function to {@link #getShape(org.openrdf.model.URI, org.openrdf.model.URI)
+	 * }
 	 *
 	 * @param ge
 	 * @return
@@ -53,30 +63,51 @@ public interface GraphColorShapeRepository {
 	public NamedShape getShape( GraphElement ge );
 
 	/**
-	 * A convenience function to {@link #getColor(org.openrdf.model.URI) }.
+	 * A convenience function to {@link #getColor(org.openrdf.model.URI, org.openrdf.model.URI)
+	 * }
 	 *
 	 * @param ge
 	 * @return
 	 */
 	public Color getColor( GraphElement ge );
 
+	/**
+	 * Gets the previously-saved or newly-generated shape for this URI
+	 *
+	 * @param ge
+	 * @return
+	 */
 	public NamedShape getShape( URI ge );
 
+	/**
+	 * Gets the shape for this instance, or if none is set, the shape for this
+	 * type
+	 *
+	 * @param type
+	 * @param instance
+	 * @return
+	 */
+	public NamedShape getShape( URI type, URI instance );
+
+	/**
+	 * Gets the previously-saved or newly-generated color for this URI
+	 *
+	 * @param ge
+	 * @return
+	 */
 	public Color getColor( URI ge );
+
+	public Color getColor( URI type, URI instance );
+
+	public URL getUrl( URI ge );
+
+	public URL getUrl( URI ge, URI instance );
 
 	public Map<URI, Color> getColors();
 
 	public Map<URI, NamedShape> getShapes();
 
 	public Map<URI, URL> getIcons();
-
-	/**
-	 * Do we already have a shape for this URI?
-	 *
-	 * @param uri
-	 * @return
-	 */
-	public boolean hasShape( URI uri );
 
 	public double getIconSize();
 

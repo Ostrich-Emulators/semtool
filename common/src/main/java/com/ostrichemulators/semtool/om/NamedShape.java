@@ -17,7 +17,8 @@ import java.awt.geom.Rectangle2D;
 public enum NamedShape {
 
 	CIRCLE( 0 ), SQUARE( -1 ), STAR3( 3, true ), DIAMOND( 4 ), STAR5( 5, true ),
-	HEXAGON( 6 ), STAR6( 6, true ), PENTAGON( 5 ), TRIANGLE( 3 ), STAR4( 4, true );
+	HEXAGON( 6 ), STAR6( 6, true ), PENTAGON( 5 ), TRIANGLE( 3 ), STAR4( 4, true ),
+	URCHIN( 9, true );
 
 	int points;
 	boolean star;
