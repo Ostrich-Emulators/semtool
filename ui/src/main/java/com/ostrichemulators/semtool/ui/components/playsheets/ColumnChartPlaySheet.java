@@ -5,7 +5,9 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,7 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
 public class ColumnChartPlaySheet extends BrowserPlaySheet2 {
+
 	private static final long serialVersionUID = 164953538466235737L;
 
 	public ColumnChartPlaySheet() {
@@ -49,5 +52,24 @@ public class ColumnChartPlaySheet extends BrowserPlaySheet2 {
 	@Override
 	protected BufferedImage getExportImage() throws IOException {
 		return getExportImageFromSVGBlock();
+	}
+
+	@Override
+	protected Object processDataSeriesForDisplay( Object undigestedData ) {
+		if ( undigestedData instanceof Map ) {
+			Map<String, ?> map = Map.class.cast( undigestedData );
+			List<String> keylist = new ArrayList<>( map.keySet() );
+			Collections.sort( keylist );
+
+			LinkedHashMap<String, Object> sortedHash = new LinkedHashMap<>();
+			for ( String key : keylist ) {
+				Object value = map.get( key );
+				sortedHash.put( key, value );
+			}
+			return sortedHash;
+		}
+		else {
+			return super.processDataSeriesForDisplay( undigestedData );
+		}
 	}
 }

@@ -58,7 +58,7 @@ public class DendrogramPlaySheet extends BrowserPlaySheet2 {
 			newdata[row++] = rowdata;
 		}
 
-		TreeNode<String> root = new TreeNode<>( "VA" );
+		TreeNode<String> root = new TreeNode<>( "Root" );
 		buildTree( root, newdata, 0, newdata.length, 0 );
 		// printTree( root, 0 );
 		addDataHash( buildAllHash( root ) );

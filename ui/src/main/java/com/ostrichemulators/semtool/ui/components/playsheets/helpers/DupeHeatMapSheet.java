@@ -64,7 +64,7 @@ public class DupeHeatMapSheet extends BrowserPlaySheet2 {
 	}
 
 	@Override
-	public void callIt() {
+	public void sendToWebView() {
 		Gson gson = new Gson();
 		ArrayList<String> args = new ArrayList<String>();
 

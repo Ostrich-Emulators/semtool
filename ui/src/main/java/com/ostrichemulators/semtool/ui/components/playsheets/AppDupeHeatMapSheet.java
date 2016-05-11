@@ -16,6 +16,7 @@ public abstract class AppDupeHeatMapSheet extends DupeHeatMapSheet {
 	/**
 	 * The Application Duplication Heatmap defines its own queries. So, the user
 	 * need not enter one into the Insight Manager.
+	 * @return
 	 */
 	@Override
 	public boolean requiresQuery() {

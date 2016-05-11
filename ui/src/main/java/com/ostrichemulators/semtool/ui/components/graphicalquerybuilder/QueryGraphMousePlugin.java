@@ -22,6 +22,8 @@ import java.awt.geom.Point2D;
  * (ugh!).
  *
  * @author ryan
+ * @param <V>
+ * @param <E>
  */
 public class QueryGraphMousePlugin<V, E> extends EditingGraphMousePlugin<V, E> {
 

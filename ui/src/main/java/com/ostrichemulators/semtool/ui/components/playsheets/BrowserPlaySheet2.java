@@ -77,7 +77,8 @@ import com.google.gson.Gson;
 
 /**
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
- * Javascript library to create visualizations.
+ * Javascript library to create visualizations. This whole class and all its
+ * subclasses need to be refactored for sanity's sake.
  */
 public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 
@@ -114,7 +115,7 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 								log.debug( "handling event: " + event );
 								if ( "document:loaded".equals( event.getData() ) ) {
 									log.debug( "Document is loaded." );
-									callIt();
+									sendToWebView();
 								}
 								else if ( event.getData().startsWith( "download:csv" ) ) {
 									log.debug( "Downloading CSV file from browser." );
@@ -147,15 +148,13 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	/**
 	 * Converts the internal data a Json object and passes it to the browser.
 	 */
-	public void callIt() {
+	public void sendToWebView() {
 		// Initialize the key used to store the Data Series being visualized
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
 		Object dataSeries = dataHash.get( dataSeriesKey );
-		// Digest/process the data for display
-		String fileNameOnly = getFileName( fileName );
-		dataSeries = DataSeriesDigester.instance().digestData( dataSeries, fileNameOnly );
-		// After digestion, put the data back
+		dataSeries = processDataSeriesForDisplay( dataHash.get(  dataSeriesKey )  );
+		// After processing, put the data back
 		dataHash.put( dataSeriesKey, dataSeries );
 		// Continue with the processing
 		String json = new Gson().toJson( dataHash );
@@ -168,19 +167,13 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	}
 
 	/**
-	 * Convenience method for extracting only the filename, plus extension out of
-	 * a complete file path
-	 *
-	 * @param filepath The file path, plus filename, with extension
-	 * @return Just the filename, with extension
+	 * Gives subclasses a chance to modify their own data (?) before sending it
+	 * to the webview engine. This function needs to be removed completely, I think
+	 * @param undigestedData
+	 * @return 
 	 */
-	private String getFileName( String filepath ) {
-		int separatorIndex = filepath.lastIndexOf( '/' );
-		String onlyFilename = "";
-		if ( separatorIndex >= 0 ) {
-			onlyFilename = filepath.substring( separatorIndex + 1 );
-		}
-		return onlyFilename;
+	protected Object processDataSeriesForDisplay(Object undigestedData) {
+		return undigestedData;
 	}
 
 	@Override
@@ -194,7 +187,10 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		Platform.runLater( new Runnable() {
 			@Override
 			public void run() {
+				// get firebug involved...
+				// engine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
 				engine.executeScript( functionNameAndArgs );
+				engine.executeScript( "zoom(1.01)" );
 			}
 		} );
 	}
@@ -226,8 +222,7 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	 * Method processQueryData. Processes the data from the SPARQL query into an
 	 * appropriate format for the specific play sheet.
 	 *
-	 * @return Hashtable - the data from the SPARQL query results, formatted
-	 * accordingly.
+	 * @return the data from the SPARQL query results, formatted accordingly.
 	 */
 	public Map<String, Object> processQueryData() {
 		return new HashMap<>();
