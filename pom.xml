@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ostrichemulators.semantics.tool</groupId>
 	<artifactId>parent</artifactId>
-	<version>2.0</version>
+	<version>1.0</version>
 	<packaging>pom</packaging>
 	<name>OS-EM Semantic Tool Parent</name>
 	<properties>
@@ -342,7 +342,7 @@
 	<distributionManagement>
 		<site>
 			<id>Ostrich-Emulators.github.io</id>
-			<url>ostrich-emulators.com/semtool</url>
+			<url>http://ostrich-emulators.github.io/semtool</url>
 		</site>
 	</distributionManagement>
 </project>
