@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javafx.scene.web.WebEngine;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
 
@@ -97,6 +98,12 @@ public class USHeatMapPlaySheet extends BrowserPlaySheet2 {
 
 		createView();
 	}
+
+	@Override
+	protected void postExecute( WebEngine eng ){
+		eng.executeScript( "zoom( 1.01 )");
+	}
+
 
 	@Override
 	protected BufferedImage getExportImage() throws IOException {

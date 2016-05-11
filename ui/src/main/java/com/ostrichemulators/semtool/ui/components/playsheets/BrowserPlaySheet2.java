@@ -190,9 +190,13 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 				// get firebug involved...
 				// engine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
 				engine.executeScript( functionNameAndArgs );
-				engine.executeScript( "zoom(1.01)" );
+				postExecute( engine );
 			}
 		} );
+	}
+
+	protected void postExecute( WebEngine eng ){
+		// nothing by default
 	}
 
 	public void registerFunction( String namespace, Object theClass ) {
