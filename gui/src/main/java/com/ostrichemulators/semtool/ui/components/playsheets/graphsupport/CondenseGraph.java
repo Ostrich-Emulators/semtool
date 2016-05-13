@@ -141,7 +141,7 @@ public class CondenseGraph extends AbstractAction {
 				SEMOSSVertex from = graph.getSource( tup.in );
 				SEMOSSVertex to =  graph.getDest( tup.out );
 
-				SEMOSSEdge edge = new SEMOSSEdgeImpl( from, to, middle.getURI() );
+				SEMOSSEdge edge = new SEMOSSEdgeImpl( middle.getURI() );
 
 				Map<URI, Value> props;
 				switch ( strat ) {

@@ -46,6 +46,24 @@ public interface GraphElement {
 
 	public <X extends GraphElement> X duplicate();
 
+	/**
+	 * Sets an ID to be used by the graphing system (and
+	 * {@link #equals(java.lang.Object)} and {@link #hashCode() }. JUNG requires
+	 * each node/edge to have a unique id, which isn't always the case for us. For
+	 * example, many edges may have the same ID, but we still want them displayed
+	 * on the graph.
+	 *
+	 * @param graphid
+	 */
+	public void setGraphId( URI graphid );
+
+	/**
+	 * Gets the ID for the graphing system.
+	 *
+	 * @return
+	 */
+	public URI getGraphId();
+
 	public void addPropertyChangeListener( PropertyChangeListener pcl );
 
 	public void removePropertyChangeListener( PropertyChangeListener pcl );

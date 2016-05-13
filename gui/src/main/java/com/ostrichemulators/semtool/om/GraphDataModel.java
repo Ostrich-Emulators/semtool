@@ -98,6 +98,8 @@ public class GraphDataModel {
 	 * @param model the nodes/edges to add
 	 * @param engine the engine to get other data from
 	 * @param overlayLevel the level of the nodes
+	 * @return the elements added to the graph (equivalent to
+	 * {@link #elementsFromLevel(int)} )
 	 */
 	public Collection<GraphElement> addGraphLevel( Model model, IEngine engine,
 			int overlayLevel ) {
@@ -226,8 +228,7 @@ public class GraphDataModel {
 
 				SEMOSSVertex src = vizgraph.getSource( e );
 				SEMOSSVertex dst = vizgraph.getDest( e );
-				String edgekey = e.getURI().stringValue()
-						+ src.getURI().stringValue() + dst.getURI().stringValue();
+				String edgekey = getEdgeKey( e.getURI(), src, dst );
 				edgeStore.remove( edgekey );
 			}
 
@@ -271,7 +272,9 @@ public class GraphDataModel {
 	}
 
 	protected SEMOSSVertex createVertex( URI uri ) {
-		return new SEMOSSVertexImpl( uri );
+		SEMOSSVertexImpl impl = new SEMOSSVertexImpl( uri );
+		impl.setGraphId( Utility.getUniqueUri() );
+		return impl;
 	}
 
 	protected final String getEdgeKey( URI edge, SEMOSSVertex src, SEMOSSVertex dst ) {
@@ -294,7 +297,8 @@ public class GraphDataModel {
 
 	protected SEMOSSEdge createEdge( SEMOSSVertex src, SEMOSSVertex dst, URI uri ) {
 		// edge URIs and types are the same
-		SEMOSSEdge edge = new SEMOSSEdgeImpl( src, dst, uri );
+		SEMOSSEdge edge = new SEMOSSEdgeImpl( uri );
+		edge.setGraphId( Utility.getUniqueUri() );
 		edge.setType( uri );
 		return edge;
 

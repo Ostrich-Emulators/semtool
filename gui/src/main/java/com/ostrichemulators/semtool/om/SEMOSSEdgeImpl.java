@@ -20,7 +20,6 @@
 package com.ostrichemulators.semtool.om;
 
 import java.util.Map;
-import java.util.Objects;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
@@ -32,24 +31,8 @@ import org.openrdf.model.Value;
 public class SEMOSSEdgeImpl extends AbstractGraphElement
 		implements SEMOSSEdge, Comparable<SEMOSSEdge> {
 
-	private final String uniqueifier;
-
-	/**
-	 * @param _outVertex
-	 * @param _inVertex
-	 * @param _uri Vertex1 (OutVertex) -------&gt; Vertex2 (InVertex) (OutEdge)
-	 * (InEdge)
-	 */
-	public SEMOSSEdgeImpl( SEMOSSVertex _outVertex, SEMOSSVertex _inVertex, URI _uri ) {
-		super( _uri, null, _uri.getLocalName() );
-
-		uniqueifier = ( null == _outVertex ? "" : _outVertex.getURI().stringValue() )
-				+ ( null == _inVertex ? "" : _inVertex.getURI().stringValue() );
-	}
-
 	public SEMOSSEdgeImpl( URI _uri ) {
 		super( _uri, null, _uri.getLocalName() );
-		uniqueifier = "";
 	}
 
 	@Override
@@ -62,32 +45,6 @@ public class SEMOSSEdgeImpl extends AbstractGraphElement
 		}
 
 		return newone;
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = 5;
-		hash = 97 * hash + Objects.hashCode( uniqueifier );
-		hash = 97 * hash + super.hashCode();
-		return hash;
-	}
-
-	@Override
-	public boolean equals( Object obj ) {
-		if ( obj == null ) {
-			return false;
-		}
-		if ( getClass() != obj.getClass() ) {
-			return false;
-		}
-		final SEMOSSEdgeImpl other = (SEMOSSEdgeImpl) obj;
-		if ( !Objects.equals( this.getURI(), other.getURI() ) ) {
-			return false;
-		}
-		if ( !Objects.equals( uniqueifier, other.uniqueifier ) ) {
-			return false;
-		}
-		return true;
 	}
 
 	@Override

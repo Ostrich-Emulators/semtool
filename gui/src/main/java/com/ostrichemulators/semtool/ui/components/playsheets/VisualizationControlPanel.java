@@ -61,8 +61,6 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		super.add( "Edge Labels", new JScrollPane( edgelabels ) );
 		super.add( "Node Filter", new JScrollPane( nodes ) );
 		super.add( "Edge Filter", new JScrollPane( edges ) );
-
-		//super.setPreferredSize( new Dimension( 250, 400 ) );
 	}
 
 	public VisualizationControlPanel( RetrievingLabelCache cacher ) {
@@ -78,9 +76,16 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		edgelabels.setDefaultRenderer( URI.class, renderer );
 		selecteds.setDefaultRenderer( URI.class, renderer );
 		selecteds.setDefaultRenderer( Value.class, renderer );
+
+		nodelabels.invalidate();
+		edgelabels.invalidate();
+		selecteds.invalidate();
+		nodes.invalidate();
+		edges.invalidate();
+
 	}
 
-	public void setVisualization( SemossGraphVisualization vizzy ){
+	public void setVisualization( SemossGraphVisualization vizzy ) {
 		propmodel.setVisualization( vizzy );
 	}
 
@@ -100,6 +105,12 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		edgelabels.setDefaultRenderer( URI.class, renderer );
 		selecteds.setDefaultRenderer( URI.class, renderer );
 		selecteds.setDefaultRenderer( Value.class, renderer );
+
+		nodelabels.invalidate();
+		edgelabels.invalidate();
+		selecteds.invalidate();
+		nodes.invalidate();
+		edges.invalidate();
 	}
 
 	@Override

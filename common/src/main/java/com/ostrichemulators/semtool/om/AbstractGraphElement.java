@@ -33,7 +33,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
-
+	private URI graphid;
 	private Map<String, Object> propHash = new HashMap<>(); //this is sent to the js (ChartIt)
 
 	public AbstractGraphElement( URI id ) {
@@ -44,6 +44,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 		properties.put( RDF.SUBJECT, id );
 		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
+		graphid = id;
 	}
 
 	@Override
@@ -81,8 +82,8 @@ public abstract class AbstractGraphElement implements GraphElement {
 	}
 
 	/**
-	 * Sets a new label for this vertex. This function is a convenience to
-	 * {@link #setValue(org.openrdf.model.URI, org.openrdf.model.Value)  }
+	 * Sets a new label for this vertex. This function is a convenience to 	 {@link #setValue(org.openrdf.model.URI, org.openrdf.model.Value)
+	 * }
 	 * Any name is acceptable. We can always rename a vertex or edge.
 	 *
 	 * @param label the new label to set
@@ -160,7 +161,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 
 	/**
 	 * Gets the datatype for the value that would be returned for the given
-	 * property from a call to {@link #getValue(org.openrdf.model.URI)  }
+	 * property from a call to {@link #getValue(org.openrdf.model.URI) }
 	 *
 	 * @param prop the property to find
 	 * @return the datatype, or {@link XMLSchema#ANYURI} if the value is a URI, or
@@ -172,6 +173,16 @@ public abstract class AbstractGraphElement implements GraphElement {
 			return RDFDatatypeTools.getDatatype( data );
 		}
 		return null;
+	}
+
+	@Override
+	public URI getGraphId() {
+		return graphid;
+	}
+
+	@Override
+	public void setGraphId( URI graphid ) {
+		this.graphid = graphid;
 	}
 
 	@Override
