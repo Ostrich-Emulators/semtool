@@ -28,8 +28,7 @@ import org.openrdf.model.Value;
  * @author pkapaleeswaran Something that expresses the edge
  * @version $Revision: 1.0 $
  */
-public class SEMOSSEdgeImpl extends AbstractGraphElement
-		implements SEMOSSEdge, Comparable<SEMOSSEdge> {
+public class SEMOSSEdgeImpl extends AbstractGraphElement implements SEMOSSEdge {
 
 	public SEMOSSEdgeImpl( URI _uri ) {
 		super( _uri, null, _uri.getLocalName() );
@@ -45,11 +44,6 @@ public class SEMOSSEdgeImpl extends AbstractGraphElement
 		}
 
 		return newone;
-	}
-
-	@Override
-	public int compareTo( SEMOSSEdge t ) {
-		return toString().compareTo( t.toString() );
 	}
 
 	@Override

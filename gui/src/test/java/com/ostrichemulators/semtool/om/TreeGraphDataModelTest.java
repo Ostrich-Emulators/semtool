@@ -73,7 +73,7 @@ public class TreeGraphDataModelTest {
 	public void testGetForest() {
 		SEMOSSVertex yuri = new SEMOSSVertexImpl( YURI, RDFS.MEMBER, "yuri" );
 		SEMOSSVertex yugo = new SEMOSSVertexImpl( YUGO, RDFS.CONTAINER, "yugo" );
-		SEMOSSEdge edge = new SEMOSSEdgeImpl( yuri, yugo, RDFS.DOMAIN );
+		SEMOSSEdge edge = new SEMOSSEdgeImpl( RDFS.DOMAIN );
 
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
 		graph.addVertex( yuri );
@@ -90,7 +90,7 @@ public class TreeGraphDataModelTest {
 	public void testPropChangeReal() {
 		SEMOSSVertex yuri = new SEMOSSVertexImpl( YURI, RDFS.MEMBER, "yuri" );
 		SEMOSSVertex yugo = new SEMOSSVertexImpl( YUGO, RDFS.CONTAINER, "yugo" );
-		SEMOSSEdge edge = new SEMOSSEdgeImpl( yuri, yugo, RDFS.DOMAIN );
+		SEMOSSEdge edge = new SEMOSSEdgeImpl( RDFS.DOMAIN );
 
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
 		graph.addVertex( yuri );
@@ -124,7 +124,7 @@ public class TreeGraphDataModelTest {
 	public void testPropChangeDupe() {
 		SEMOSSVertex yuri = new SEMOSSVertexImpl( YURI, RDFS.MEMBER, "yuri" );
 		SEMOSSVertex yugo = new SEMOSSVertexImpl( YUGO, RDFS.CONTAINER, "yugo" );
-		SEMOSSEdge edge = new SEMOSSEdgeImpl( yuri, yugo, RDFS.DOMAIN );
+		SEMOSSEdge edge = new SEMOSSEdgeImpl( RDFS.DOMAIN );
 
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = new DirectedSparseGraph<>();
 		graph.addVertex( yuri );

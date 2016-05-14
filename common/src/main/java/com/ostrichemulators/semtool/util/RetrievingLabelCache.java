@@ -6,7 +6,6 @@
 package com.ostrichemulators.semtool.util;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;

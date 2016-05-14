@@ -26,7 +26,7 @@ import org.openrdf.model.Value;
 /**
  * Variables are transient because this tells the json writer to ignore them
  */
-public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVertex {
+public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVertex{
 
 	public SEMOSSVertexImpl( URI id ) {
 		this( id, null, id.getLocalName() );

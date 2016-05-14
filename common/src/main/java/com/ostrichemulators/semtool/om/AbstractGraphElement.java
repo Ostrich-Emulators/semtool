@@ -29,7 +29,7 @@ import org.openrdf.model.vocabulary.XMLSchema;
  *
  * @author ryan
  */
-public abstract class AbstractGraphElement implements GraphElement {
+public abstract class AbstractGraphElement implements GraphElement, Comparable<AbstractGraphElement> {
 
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
@@ -188,7 +188,7 @@ public abstract class AbstractGraphElement implements GraphElement {
 	@Override
 	public int hashCode() {
 		int hash = 7;
-		hash = 41 * hash + Objects.hashCode( this.getURI() );
+		hash = 41 * hash + Objects.hashCode( this.getGraphId() );
 		return hash;
 	}
 
@@ -202,11 +202,16 @@ public abstract class AbstractGraphElement implements GraphElement {
 		}
 		final AbstractGraphElement other = (AbstractGraphElement) obj;
 
-		return Objects.equals( this.getURI(), other.getURI() );
+		return Objects.equals( this.getGraphId(), other.getGraphId() );
 	}
 
 	@Override
 	public String toString() {
 		return getURI() + "; " + getType().getLocalName() + "; " + getLabel();
+	}
+
+	@Override
+	public int compareTo( AbstractGraphElement o ){
+		return toString().compareTo( o.toString() );
 	}
 }

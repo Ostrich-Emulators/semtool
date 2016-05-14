@@ -113,6 +113,7 @@ public class Utility {
 	 * gov.va.semoss.rdf.engine.api.IEngine) }, but returns a sorted map with
 	 * consistent iteration pattern
 	 *
+	 * @param <X>
 	 * @param urilabels a mapping of URIs to their labels. Say, the results of {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) }
 	 *
@@ -434,6 +435,7 @@ public class Utility {
 	 * you have more than one URI, {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) } is much more performant.
 	 *
+	 * @param <X>
 	 * @param eng where to get the label from
 	 * @param uri the uri we need a label for
 	 *
@@ -449,6 +451,7 @@ public class Utility {
 	 * {@link URLDecoder#decode(java.lang.String, java.lang.String) URLDecoded}
 	 * version of the local name
 	 *
+	 * @param <X>
 	 * @param uris the URIs to retrieve the labels from
 	 * @param eng the engine to search for labels
 	 *

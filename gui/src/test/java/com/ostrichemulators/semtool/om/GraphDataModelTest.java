@@ -9,8 +9,11 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -34,6 +37,13 @@ import org.openrdf.rio.RDFFormat;
  */
 public class GraphDataModelTest {
 
+	private static final Comparator<SEMOSSVertex> VERTCOMP
+			= new Comparator<SEMOSSVertex>() {
+				@Override
+				public int compare( SEMOSSVertex o1, SEMOSSVertex o2 ) {
+					return o1.toString().compareTo( o2.toString() );
+				}
+			};
 	private static final File DATAFILE = new File( "src/test/resources/test12.nt" );
 	private static final UriBuilder datab = UriBuilder.getBuilder( "http://semoss.os-em.com/database/T44889381-85ce-43e3-893d-6267fd480660/" );
 	private static final UriBuilder owlb = UriBuilder.getBuilder( "http://semoss.org/ontologies/" );
@@ -116,9 +126,11 @@ public class GraphDataModelTest {
 		gdm.addGraphLevel( Arrays.asList( YURI ), eng, 1 );
 		gdm.addGraphLevel( Arrays.asList( YUGO ), eng, 2 );
 
-		Iterator<SEMOSSVertex> vit = gdm.getGraph().getVertices().iterator();
-		SEMOSSVertex yuri = vit.next();
-		SEMOSSVertex yugo = vit.next();
+		List<SEMOSSVertex> list = new ArrayList<>( gdm.getGraph().getVertices() );
+		Collections.sort( list, VERTCOMP );
+
+		SEMOSSVertex yuri = list.get( 1 );
+		SEMOSSVertex yugo = list.get( 0 );
 
 		assertTrue( gdm.presentAtLevel( yuri, 1 ) );
 		assertFalse( gdm.presentAtLevel( yugo, 1 ) );
@@ -135,9 +147,11 @@ public class GraphDataModelTest {
 		m.add( new StatementImpl( YURI, YPY, YUGO ) );
 		gdm.addGraphLevel( m, eng, 2 );
 
-		Iterator<SEMOSSVertex> vit = gdm.getGraph().getVertices().iterator();
-		SEMOSSVertex yuri = vit.next();
-		SEMOSSVertex yugo = vit.next();
+		List<SEMOSSVertex> list = new ArrayList<>( gdm.getGraph().getVertices() );
+		Collections.sort( list, VERTCOMP );
+
+		SEMOSSVertex yuri = list.get( 1 );
+		SEMOSSVertex yugo = list.get( 0 );
 
 		assertTrue( gdm.presentAtLevel( yuri, 2 ) );
 		assertTrue( gdm.presentAtLevel( yugo, 2 ) );
@@ -155,9 +169,11 @@ public class GraphDataModelTest {
 		gdm.addGraphLevel( Arrays.asList( YURI ), eng, 1 );
 		gdm.addGraphLevel( Arrays.asList( YUGO ), eng, 2 );
 
-		Iterator<SEMOSSVertex> vit = gdm.getGraph().getVertices().iterator();
-		SEMOSSVertex yuri = vit.next();
-		SEMOSSVertex yugo = vit.next();
+		List<SEMOSSVertex> list = new ArrayList<>( gdm.getGraph().getVertices() );
+		Collections.sort( list, VERTCOMP );
+
+		SEMOSSVertex yuri = list.get( 1 );
+		SEMOSSVertex yugo = list.get( 0 );
 
 		assertEquals( 1, gdm.getLevel( yuri ) );
 		assertEquals( 2, gdm.getLevel( yugo ) );

@@ -66,30 +66,14 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 	public VisualizationControlPanel( RetrievingLabelCache cacher ) {
 		this();
 
-		cacher.put( Constants.ANYNODE, "SELECT ALL" );
-
-		LabeledPairTableCellRenderer<Value> renderer
-				= LabeledPairTableCellRenderer.getValuePairRenderer( cacher );
-		nodes.setDefaultRenderer( URI.class, renderer );
-		edges.setDefaultRenderer( URI.class, renderer );
-		nodelabels.setDefaultRenderer( URI.class, renderer );
-		edgelabels.setDefaultRenderer( URI.class, renderer );
-		selecteds.setDefaultRenderer( URI.class, renderer );
-		selecteds.setDefaultRenderer( Value.class, renderer );
-
-		nodelabels.invalidate();
-		edgelabels.invalidate();
-		selecteds.invalidate();
-		nodes.invalidate();
-		edges.invalidate();
-
+		setRenderer( cacher );
 	}
 
 	public void setVisualization( SemossGraphVisualization vizzy ) {
 		propmodel.setVisualization( vizzy );
 	}
 
-	public void setLabelCache( RetrievingLabelCache cacher ) {
+	private void setRenderer( RetrievingLabelCache cacher ) {
 		cacher.put( Constants.ANYNODE, "SELECT ALL" );
 		cacher.put( RDF.SUBJECT, "URI" );
 		cacher.put( RDFS.LABEL, "Label" );
@@ -99,18 +83,15 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 
 		LabeledPairTableCellRenderer<Value> renderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( cacher );
-		nodes.setDefaultRenderer( URI.class, renderer );
-		edges.setDefaultRenderer( URI.class, renderer );
-		nodelabels.setDefaultRenderer( URI.class, renderer );
-		edgelabels.setDefaultRenderer( URI.class, renderer );
-		selecteds.setDefaultRenderer( URI.class, renderer );
-		selecteds.setDefaultRenderer( Value.class, renderer );
+		for ( JTable jt : new JTable[]{ nodes, edges, nodelabels, edgelabels, selecteds } ) {
+			jt.setDefaultRenderer( URI.class, renderer );
+			jt.setDefaultRenderer( Value.class, renderer );
+		}
 
-		nodelabels.invalidate();
-		edgelabels.invalidate();
-		selecteds.invalidate();
-		nodes.invalidate();
-		edges.invalidate();
+	}
+
+	public void setLabelCache( RetrievingLabelCache cacher ) {
+		setRenderer( cacher );
 	}
 
 	@Override
