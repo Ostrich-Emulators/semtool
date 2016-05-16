@@ -22,6 +22,7 @@ import com.ostrichemulators.semtool.ui.transformer.SelectingTransformer;
 import com.ostrichemulators.semtool.ui.transformer.TooltipTransformer;
 import com.ostrichemulators.semtool.ui.transformer.VertexShapeTransformer;
 import com.ostrichemulators.semtool.ui.transformer.VertexStrokeTransformer;
+import edu.uci.ics.jung.algorithms.filters.EdgePredicateFilter;
 import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -92,8 +93,10 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	protected boolean skeletonmode = false;
 
 	private final HidingPredicate<? extends GraphElement> predicate = new HidingPredicate<>();
-	private final VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> visibleFilter
+	private final VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> visibleNodesFilter
 			= new VertexPredicateFilter<>( (HidingPredicate<SEMOSSVertex>) predicate );
+	private final EdgePredicateFilter<SEMOSSVertex, SEMOSSEdge> visibleEdgesFilter
+			= new EdgePredicateFilter<>( (HidingPredicate<SEMOSSEdge>) predicate );
 	private final Set<URI> hiddens = new HashSet<>();
 	private final GraphColorShapeRepositoryListener listener = new GraphColorShapeRepositoryListener() {
 
@@ -202,7 +205,10 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	public void setGraphLayout( Class<? extends Layout> layklass ) {
 		Layout oldlayout = getEffectiveLayout();
 
-		Graph<SEMOSSVertex, SEMOSSEdge> graph = visibleFilter.apply( gdm.getGraph() );
+		// get rid of hidden nodes
+		Graph<SEMOSSVertex, SEMOSSEdge> graph = visibleNodesFilter.apply( gdm.getGraph() );
+		// get rid of hidden edges, too
+		graph = visibleEdgesFilter.apply( graph );
 		Constructor<? extends Layout<SEMOSSVertex, SEMOSSEdge>> constructor = null;
 
 		try {
@@ -299,7 +305,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	 * @return
 	 */
 	public DirectedGraph<SEMOSSVertex, SEMOSSEdge> getGraph() {
-		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) visibleFilter.apply( gdm.getGraph() );
+		return (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) visibleNodesFilter.apply( gdm.getGraph() );
 	}
 
 	public void setSkeletonMode( boolean skele ) {

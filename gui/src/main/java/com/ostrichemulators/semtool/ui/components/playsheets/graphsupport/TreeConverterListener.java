@@ -76,6 +76,7 @@ public class TreeConverterListener extends AbstractAction {
 		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( gps.getGraphData().getGraph(),
 				gps.getView().getPickedVertexState().getPicked(), getLayoutClass() );
 		tgps.setTitle( "Tree Conversion" );
+		tgps.setLabelCache( gps.getLabelCache() );
 		gps.addSibling( tgps );
 	}
 
