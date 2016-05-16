@@ -31,13 +31,18 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import org.openrdf.model.URI;
 
 /**
  * This class extends downstream processing in order to convert the graph into
  * the tree format.
+ *
+ * @param <V>
+ * @param <E>
  */
 public class GraphToTreeConverter<V, E> {
 
@@ -51,13 +56,15 @@ public class GraphToTreeConverter<V, E> {
 
 	/**
 	 * Converts the given graph to a tree
+	 *
 	 * @param <V>
 	 * @param <E>
 	 * @param graph
 	 * @param roots
 	 * @param search
 	 * @return
-	 * @throws com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter.TreeConversionException 
+	 * @throws
+	 * com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter.TreeConversionException
 	 */
 	public static <V, E> Forest<V, E> convert(
 			DirectedGraph<V, E> graph, Collection<V> roots, Search search ) throws TreeConversionException {
@@ -153,12 +160,21 @@ public class GraphToTreeConverter<V, E> {
 		revlkp.put( root, rootu );
 		tree.setRoot( rootu );
 
+		// avoid cycles in the graph
+		Set<E> edgesToSkip = new HashSet<>();
+
 		todo.add( root );
 		while ( !todo.isEmpty() ) {
 			V v = todo.poll();
 			URI srcuri = revlkp.get( v );
+			// once we visit a node, we can never end
+			// up there again, or we're not acyclic
+			edgesToSkip.addAll( graph.getInEdges( v ) );
 
-			for ( E e : graph.getOutEdges( v ) ) {
+			Set<E> outgoings = new HashSet<>( graph.getOutEdges( v ) );
+			outgoings.removeAll( edgesToSkip );
+
+			for ( E e : outgoings ) {
 				V child = graph.getOpposite( v, e );
 
 				URI edgeuri = Utility.getUniqueUri();
@@ -188,10 +204,20 @@ public class GraphToTreeConverter<V, E> {
 		tree.setRoot( root );
 		todo.add( root );
 
+		// avoid cycles in the graph
+		Set<E> edgesToSkip = new HashSet<>();
+
 		while ( !todo.isEmpty() ) {
 			V v = todo.poll();
 
-			for ( E e : graph.getOutEdges( v ) ) {
+			// once we visit a node, we can never end
+			// up there again, or we're not acyclic
+			edgesToSkip.addAll( graph.getInEdges( v ) );
+
+			Set<E> outgoings = new HashSet<>( graph.getOutEdges( v ) );
+			outgoings.removeAll( edgesToSkip );
+
+			for ( E e : outgoings ) {
 				V child = graph.getOpposite( v, e );
 
 				if ( tree.containsVertex( child ) ) {

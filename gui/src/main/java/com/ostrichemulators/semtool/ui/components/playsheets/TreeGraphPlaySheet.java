@@ -70,6 +70,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 			Collection<SEMOSSVertex> roots, Class<? extends Layout> klass ) {
 		super( new GraphDataModel( makeDuplicateForest( basegraph, roots,
 				new GraphToTreeConverter() ) ) );
+		setTitle( "Tree Conversion" );
 
 		getView().setGraphLayout( klass );
 		addSelectionExpander();

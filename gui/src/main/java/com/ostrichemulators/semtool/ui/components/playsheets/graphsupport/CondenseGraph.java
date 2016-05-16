@@ -72,7 +72,6 @@ public class CondenseGraph extends AbstractAction {
 
 					GraphPlaySheet gps2 = new GraphPlaySheet( new GraphDataModel( newg ) );
 					gps2.setTitle( "Condensed Graph" );
-					gps.setLabelCache( gps.getLabelCache() );
 					gps.addSibling( gps2 );
 					nodecount[0] = newg.getVertexCount();
 				}

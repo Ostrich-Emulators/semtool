@@ -36,12 +36,12 @@ import javax.swing.Action;
 /**
  * Controls converting the graph to a tree layout.
  */
-public class TreeConverterListener extends AbstractAction {
+public class TreeifyGraph extends AbstractAction {
 
 	public static final String LAYOUT_NAME = "layout";
 	private GraphPlaySheet gps;
 
-	public TreeConverterListener() {
+	public TreeifyGraph() {
 		super( "Convert to Tree", GuiUtility.loadImageIcon( "tree.png" ) );
 
 		putValue( Action.SHORT_DESCRIPTION,
@@ -75,8 +75,6 @@ public class TreeConverterListener extends AbstractAction {
 	public void actionPerformed( ActionEvent e ) {
 		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( gps.getGraphData().getGraph(),
 				gps.getView().getPickedVertexState().getPicked(), getLayoutClass() );
-		tgps.setTitle( "Tree Conversion" );
-		tgps.setLabelCache( gps.getLabelCache() );
 		gps.addSibling( tgps );
 	}
 

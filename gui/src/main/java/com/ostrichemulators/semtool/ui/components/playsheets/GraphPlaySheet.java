@@ -54,7 +54,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphL
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.WeightDropDownButton;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
-import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeConverterListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeifyGraph;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
@@ -127,7 +127,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private final JToggleButton graphprops = new JToggleButton();
 	private final JToggleButton xray = new JToggleButton();
-	private final TreeConverterListener tree = new TreeConverterListener();
+	private final TreeifyGraph tree = new TreeifyGraph();
 	private final WeightDropDownButton weightButton = new WeightDropDownButton();
 	private final GraphSearchTextField searcher = new GraphSearchTextField();
 

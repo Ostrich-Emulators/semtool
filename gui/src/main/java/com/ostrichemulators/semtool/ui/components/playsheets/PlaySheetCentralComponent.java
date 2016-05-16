@@ -75,6 +75,7 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 
 	public void addSibling( PlaySheetCentralComponent pscc ) {
 		getPlaySheetFrame().addTab( pscc );
+		pscc.setLabelCache( labelcache );
 	}
 
 	public void addSibling( String title, PlaySheetCentralComponent pscc ) {
