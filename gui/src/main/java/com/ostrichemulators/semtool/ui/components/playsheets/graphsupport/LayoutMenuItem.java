@@ -21,11 +21,9 @@ package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import edu.uci.ics.jung.graph.Forest;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.util.DIHelper;
+import com.ostrichemulators.semtool.ui.components.playsheets.TreeGraphPlaySheet;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
@@ -48,6 +46,7 @@ public class LayoutMenuItem extends AbstractAction {
 	 *
 	 * @param layout String
 	 * @param ps IPlaySheet
+	 * @param verts
 	 */
 	public LayoutMenuItem( Class<? extends Layout> layout, GraphPlaySheet ps,
 			Collection<SEMOSSVertex> verts ) {
@@ -59,6 +58,7 @@ public class LayoutMenuItem extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
+		boolean done = false;
 		if ( !( gps.getGraphData().getGraph() instanceof Forest ) ) {
 			// if we're not already a tree, but the user selected a tree layout
 			// *AND* at least one tree root, then convert to a tree before
@@ -66,54 +66,18 @@ public class LayoutMenuItem extends AbstractAction {
 
 			if ( LayoutPopup.TREELAYOUTS.contains( layout ) && !verts.isEmpty() ) {
 				Logger.getLogger( getClass() ).debug( "automatically converting to a tree layout" );
-				//gps.getSearchPanel().clickTreeButton( layout );
-			}
-			else{
-				gps.getView().setGraphLayout( this.layout );
+
+				TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( gps.getGraphData().getGraph(),
+						gps.getView().getPickedVertexState().getPicked(), layout );
+				tgps.setTitle( "Tree Conversion" );
+				gps.addSibling( tgps );
+				done = true;
 			}
 		}
-		else{
+
+		if ( !done ) {
+			// normal, non-tree layout
 			gps.getView().setGraphLayout( this.layout );
 		}
-	}
-
-	/**
-	 * Paints the specified layout.
-	 */
-	public void setGraphLayout() {
-
-//		String oldLayout = gps.getLayoutName();
-//		boolean success = gps.setLayoutName( layout );
-//		if ( !success ) {
-//			if ( layout.equals( Constants.RADIAL_TREE_LAYOUT )
-//					|| layout.equals( Constants.BALLOON_LAYOUT )
-//					|| layout.equals( Constants.TREE_LAYOUT ) ) {
-//				int response = showOptionPopup();
-//				if ( response == 1 ) {
-//					gps.getSearchPanel().clickTreeButton( layout );
-//				}
-//				else {
-//					gps.setLayoutName( oldLayout );
-//				}
-//			}
-//			else {
-//				GuiUtility.showError( "This layout cannot be used with the current graph" );
-//				gps.setLayoutName( oldLayout );
-//			}
-//		}
-	}
-
-	/**
-	 * This displays options to the user in a popup menu about what type of layout
-	 * they want to display.
-	 *
-	 * @return int User response.
-	 */
-	private int showOptionPopup() {
-		JFrame playPane = DIHelper.getInstance().getPlayPane();
-		Object[] buttons = { "Cancel Layout", "Continue With Tree" };
-		int response = JOptionPane.showOptionDialog( playPane, "This layout requires the graph to be in the format of a tree.\nWould you like to duplicate nodes so that it is in the fromat of a tree?\n\nPreferred root node must already be selected",
-				"Convert to Tree", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[1] );
-		return response;
 	}
 }

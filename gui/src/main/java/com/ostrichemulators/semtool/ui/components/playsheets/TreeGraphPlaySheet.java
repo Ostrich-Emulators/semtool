@@ -84,6 +84,8 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 				for ( GraphElement ge : gdm.elementsFromLevel( level ) ) {
 					ge.addPropertyChangeListener( TreeGraphPlaySheet.this );
 				}
+
+				addDuplicateValues( gdm );
 			}
 		} );
 	}

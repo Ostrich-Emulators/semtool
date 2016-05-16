@@ -46,7 +46,7 @@ import java.util.Set;
  */
 public class LayoutPopup extends JMenu {
 
-	private static final List<Class<? extends Layout>> layouts = Arrays.asList(
+	private static final List<Class<? extends Layout>> LAYOUTS = Arrays.asList(
 			FRLayout.class,
 			KKLayout.class,
 			SpringLayout.class,
@@ -74,7 +74,7 @@ public class LayoutPopup extends JMenu {
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> viz = ps.getVisibleGraph();
 		boolean forestok = ( viz instanceof Forest || !verts.isEmpty() );
 
-		for ( Class<? extends Layout> layout : layouts ) {
+		for ( Class<? extends Layout> layout : LAYOUTS ) {
 			LayoutMenuItem mi = new LayoutMenuItem( layout, ps, verts );
 			add( mi );
 
