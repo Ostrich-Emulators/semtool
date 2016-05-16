@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ostrichemulators.semtool.ui.components.playsheets;
+package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.google.common.base.Predicate;
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;

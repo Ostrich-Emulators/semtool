@@ -84,7 +84,7 @@ public class GraphNodePopup extends JPopupMenu {
 		addHighlightingOptions();
 		addGraphOptions();
 		addDataOptions();
-		addSOATransitionOptions();
+
 		if ( !forTree ) {
 			addTraverseAndAlgorithmOptions();
 		}
@@ -159,13 +159,6 @@ public class GraphNodePopup extends JPopupMenu {
 		add( menu );
 	}
 
-	private void addSOATransitionOptions() {
-		addSeparator();
-
-		JMenuItem item = add( "SOA Transition All" );
-		item.setEnabled( containsICDType() );
-	}
-
 	private void addDataOptions() {
 		addSeparator();
 
@@ -217,21 +210,6 @@ public class GraphNodePopup extends JPopupMenu {
 		moreHighlight.add( highAdjAll );
 		moreHighlight.add( MST );
 		this.add( moreHighlight );
-	}
-
-	/**
-	 * Checks whether the node type represents an interface control document.
-	 *
-	 * @return boolean True if the type of node represents an ICD.
-	 */
-	public final boolean containsICDType() {
-		for ( SEMOSSVertex vertex : gps.getGraphData().getGraph().getVertices() ) {
-			if ( vertex.getType().stringValue().equals( "InterfaceControlDocument" ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	public void show( MouseEvent event ) {

@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.VisualizationControlPanel;
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import java.awt.BorderLayout;

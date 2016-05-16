@@ -12,7 +12,6 @@ import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.models.NodeEdgePropertyTableModel;
 import com.ostrichemulators.semtool.ui.components.models.VertexFilterTableModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;

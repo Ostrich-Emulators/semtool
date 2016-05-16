@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.ui.components.models;
 
 import com.ostrichemulators.semtool.om.GraphElement;
-import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.transformer.LabelTransformer;
 import com.ostrichemulators.semtool.ui.transformer.TooltipTransformer;
 import com.ostrichemulators.semtool.util.Constants;

@@ -31,7 +31,6 @@ import edu.uci.ics.jung.visualization.control.ModalLensGraphMouse;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import com.ostrichemulators.semtool.ui.components.playsheets.TreeGraphPlaySheet;
 
 import java.util.Arrays;

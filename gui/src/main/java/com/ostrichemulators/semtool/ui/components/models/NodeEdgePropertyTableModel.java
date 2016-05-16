@@ -23,7 +23,7 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 
-import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.SemossGraphVisualization;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.PropComparator;
 import java.awt.event.ItemEvent;

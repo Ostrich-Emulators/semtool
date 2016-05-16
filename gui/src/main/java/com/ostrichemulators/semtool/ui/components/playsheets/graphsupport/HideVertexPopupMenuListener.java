@@ -21,7 +21,6 @@ package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.om.GraphElement;
 
-import com.ostrichemulators.semtool.ui.components.playsheets.SemossGraphVisualization;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
