@@ -92,9 +92,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private GraphDataModel gdm;
 
-	protected boolean traversable = true;
-	protected boolean nodesHidable = true;
-
 	protected int overlayLevel = 0;
 	protected int maxOverlayLevel = 0;
 
@@ -595,14 +592,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void incrementFont( float incr ) {
 		super.incrementFont( incr );
 		view.incrementFont( incr );
-	}
-
-	public boolean isTraversable() {
-		return traversable;
-	}
-
-	public boolean areNodesHidable() {
-		return nodesHidable;
 	}
 
 	protected boolean isloading() {

@@ -37,6 +37,7 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -112,13 +113,13 @@ public class GraphNodePopup extends JPopupMenu {
 	private void addHidingOptions() {
 		addSeparator();
 
-		JMenuItem item = add( "Hide Nodes" );
-		item.addActionListener( new HideVertexPopupMenuListener( highlightedElements, gps.getView() ) );
-		item.setEnabled( !highlightedElements.isEmpty() && gps.areNodesHidable() );
+		Action hider = new HideVertexPopupMenuListener( highlightedElements, gps.getView() );
+		JMenuItem item = add( hider );
+		hider.setEnabled( !highlightedElements.isEmpty() );
 
-		item = add( "Unhide Nodes" );
-		item.addActionListener( new UnHideVertexPopupMenuListener( gps ) );
-		item.setEnabled( gps.areNodesHidable() );
+		Action unhider = new UnHideVertexPopupMenuListener( gps );
+		item = add( unhider );
+		item.setEnabled( !gps.getView().getHiddens().isEmpty() );
 	}
 
 	private void addCosmeticsOptions() {
@@ -139,7 +140,7 @@ public class GraphNodePopup extends JPopupMenu {
 	private void addTraverseAndAlgorithmOptions() {
 		addSeparator();
 
-		if ( pickedVertex == null || !gps.isTraversable() ) {
+		if ( pickedVertex == null || !pickedVertex.isNode() ) {
 			add( "Traverse Freely" ).setEnabled( false );
 		}
 		else {

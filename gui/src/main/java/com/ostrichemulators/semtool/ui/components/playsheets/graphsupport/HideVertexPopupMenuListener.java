@@ -39,7 +39,7 @@ public class HideVertexPopupMenuListener extends AbstractAction {
 	private final SemossGraphVisualization viz;
 
 	public HideVertexPopupMenuListener( Collection<GraphElement> highlights, SemossGraphVisualization vizzy ) {
-		super( "Hide Nodes" );
+		super( "Hide Selected Element(s)" );
 		viz = vizzy;
 		highlighted.addAll( highlights );
 	}

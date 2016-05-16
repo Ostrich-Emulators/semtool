@@ -39,7 +39,7 @@ public class UnHideVertexPopupMenuListener extends AbstractAction {
 	private final GraphPlaySheet gps;
 
 	public UnHideVertexPopupMenuListener( GraphPlaySheet gps ) {
-		super( "Unhide Nodes" );
+		super( "Unhide All Elements" );
 		this.gps = gps;
 	}
 
