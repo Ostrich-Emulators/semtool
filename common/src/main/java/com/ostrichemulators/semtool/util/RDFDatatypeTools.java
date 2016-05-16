@@ -46,10 +46,6 @@ public class RDFDatatypeTools {
 			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
 
 	/**
-	 * The singleton instance for this class
-	 */
-	private static RDFDatatypeTools instance;
-	/**
 	 * A lookup which stores the various static tags for the data types that one
 	 * might find in an XML Schema as keys, and the corresponding native Java
 	 * classes as values

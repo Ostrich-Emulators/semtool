@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.VisualizationControlPanel;
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.TreeCo
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.MultiMap;
+import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -190,9 +192,15 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	@Override
+	public void setLabelCache( RetrievingLabelCache t ){
+		super.setLabelCache( t );
+		control.setLabelCache( t );
+	}
+
+	@Override
 	public void setFrame( PlaySheetFrame f ) {
-		attachActions();
 		super.setFrame( f );
+		attachActions();
 
 		if ( gdm.getGraph().getVertexCount() > 0 ) {
 			searcher.index( gdm.getGraph() );
@@ -374,11 +382,15 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		fireGraphUpdated();
 	}
 
+	protected GraphNodeListener getGraphNodeListener(){
+		return new GraphNodeListener( this );
+	}
+
 	/**
 	 * Method initVisualizer.
 	 */
 	private void initVisualizer( SemossGraphVisualization viewer ) {
-		GraphNodeListener gl = new GraphNodeListener( this );
+		GraphNodeListener gl = getGraphNodeListener();
 		gl.setMode( ModalGraphMouse.Mode.PICKING );
 		viewer.setGraphMouse( gl );
 		viewer.setLabelCache( getLabelCache() );

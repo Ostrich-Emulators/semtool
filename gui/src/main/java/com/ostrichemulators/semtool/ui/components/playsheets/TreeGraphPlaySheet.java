@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
+import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.GraphNodeListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.RingsButtonListener;
 import com.ostrichemulators.semtool.util.Utility;
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
@@ -91,8 +92,14 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 	}
 
 	@Override
+	protected GraphNodeListener getGraphNodeListener() {
+		return new GraphNodeListener( this );
+	}
+
+	@Override
 	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
 		super.populateToolBar( toolBar, tabTitle );
+		
 		rings.setViewer( getView() );
 		rings.setGraph( Forest.class.cast( getGraphData().getGraph() ) );
 		Layout lay = getView().getEffectiveLayout();
