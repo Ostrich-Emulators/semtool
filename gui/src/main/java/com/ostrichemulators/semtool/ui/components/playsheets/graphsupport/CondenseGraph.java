@@ -5,10 +5,10 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
+import com.google.common.base.Predicate;
+import com.ostrichemulators.semtool.om.GraphDataModel;
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
-import edu.uci.ics.jung.graph.util.Pair;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSEdgeImpl;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
@@ -19,13 +19,12 @@ import com.ostrichemulators.semtool.ui.components.PlayPane;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.util.MultiMap;
+import edu.uci.ics.jung.algorithms.filters.VertexPredicateFilter;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
@@ -70,15 +69,18 @@ public class CondenseGraph extends AbstractAction {
 					DirectedGraph<SEMOSSVertex, SEMOSSEdge> newg
 							= condense( oldg, gcp.getEdgeTypeToRemove(),
 									gcp.getEdgeEndpointType(), gcp.getPropertySource() );
-					gps.getGraphData().setGraph( newg );
-					gps.updateGraph();
+
+					GraphPlaySheet gps2 = new GraphPlaySheet( new GraphDataModel( newg ) );
+					gps2.setTitle( "Condensed Graph" );
+					gps.addSibling( gps2 );
+					nodecount[0] = newg.getVertexCount();
 				}
 			} ) {
 
 				@Override
 				public void done() {
 					super.done();
-					int count = nodecount[0] - gps.getVisibleGraph().getVertexCount();
+					int count = gps.getVisibleGraph().getVertexCount() - nodecount[0];
 					String msg = "Graph condensed: " + count + " Nodes removed";
 					this.setLabel( msg );
 					JOptionPane.showMessageDialog( gps, msg, "Condenser Results",
@@ -94,52 +96,28 @@ public class CondenseGraph extends AbstractAction {
 			condense( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 					URI toremove, URI endpoint, EdgePropertySource strat ) {
 
-		DirectedGraph<SEMOSSVertex, SEMOSSEdge> newgraph = new DirectedSparseGraph<>();
-
 		MultiMap<SEMOSSVertex, CondenserTuple> triples
 				= findNodesToCondense( graph, toremove, endpoint );
-		Set<SEMOSSVertex> middles = triples.keySet();
-		Set<SEMOSSEdge> edges = new HashSet<>();
-		for ( Collection<CondenserTuple> tlist : triples.values() ) {
-			for ( CondenserTuple tup : tlist ) {
-				edges.add( tup.in );
-				edges.add( tup.out );
-			}
-		}
 
-		// copy all the edges and their endpoints that we don't want to condense
-		for ( SEMOSSEdge edge : graph.getEdges() ) {
-			if ( !edges.contains( edge ) ) {
-				Pair<SEMOSSVertex> endpoints = graph.getEndpoints( edge );
+		final VertexPredicateFilter<SEMOSSVertex, SEMOSSEdge> nomiddles
+				= new VertexPredicateFilter<>( new Predicate<SEMOSSVertex>() {
 
-				if ( !graph.containsVertex( endpoints.getFirst() ) ) {
-					newgraph.addVertex( endpoints.getFirst() );
-				}
-				if ( !graph.containsVertex( endpoints.getSecond() ) ) {
-					newgraph.addVertex( endpoints.getSecond() );
-				}
+					@Override
+					public boolean apply( SEMOSSVertex input ) {
+						return !triples.containsKey( input );
+					}
+				} );
 
-				newgraph.addEdge( edge, endpoints.getFirst(), endpoints.getSecond() );
-			}
-		}
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> newgraph
+				= (DirectedGraph<SEMOSSVertex, SEMOSSEdge>) nomiddles.apply( graph );
 
-		// copy any nodes that don't have any edges
-		// (and also that we don't want to condense)
-		Set<SEMOSSVertex> islands = new HashSet<>( graph.getVertices() );
-		islands.removeAll( middles );
-		for ( SEMOSSVertex v : islands ) {
-			if ( !newgraph.containsVertex( v ) ) {
-				newgraph.addVertex( v );
-			}
-		}
-
-		// finally, condense everything in our condenser map
+		// finally, makes the new edges from the condensed nodes
 		for ( Map.Entry<SEMOSSVertex, List<CondenserTuple>> en : triples.entrySet() ) {
 			SEMOSSVertex middle = en.getKey();
 
 			for ( CondenserTuple tup : en.getValue() ) {
 				SEMOSSVertex from = graph.getSource( tup.in );
-				SEMOSSVertex to =  graph.getDest( tup.out );
+				SEMOSSVertex to = graph.getDest( tup.out );
 
 				SEMOSSEdge edge = new SEMOSSEdgeImpl( middle.getURI() );
 
@@ -190,7 +168,7 @@ public class CondenseGraph extends AbstractAction {
 				// FIXME: we might have multiple pairs of
 				// endpoints through our middle, so loop
 				//while ( !( null == upstream || null == downstream ) ) {
-				if( !( null==upstream || null == downstream ) ){
+				if ( !( null == upstream || null == downstream ) ) {
 					removers.add( middle, new CondenserTuple( upstream, downstream ) );
 				}
 

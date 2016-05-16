@@ -23,7 +23,6 @@ import java.awt.event.ActionEvent;
 
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.om.TreeGraphDataModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.TreeGraphPlaySheet;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -74,12 +73,10 @@ public class TreeConverterListener extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		TreeGraphDataModel model = new TreeGraphDataModel( gps.getGraphData().getGraph(),
-				gps.getView().getPickedVertexState().getPicked() );
-		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( model, getLayoutClass() );
+		TreeGraphPlaySheet tgps = new TreeGraphPlaySheet( gps.getGraphData().getGraph(),
+				gps.getView().getPickedVertexState().getPicked(), getLayoutClass() );
 		tgps.setTitle( "Tree Conversion" );
 		gps.addSibling( tgps );
-		tgps.fireGraphUpdated();
 	}
 
 	private Class<? extends Layout> getLayoutClass() {

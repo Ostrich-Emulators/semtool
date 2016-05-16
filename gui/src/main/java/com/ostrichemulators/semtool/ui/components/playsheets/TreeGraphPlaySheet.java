@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.playsheets;
 
+import com.ostrichemulators.semtool.graph.functions.GraphToTreeConverter;
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.GraphModelListener;
@@ -28,19 +29,22 @@ import edu.uci.ics.jung.graph.Forest;
 import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
-import com.ostrichemulators.semtool.om.TreeGraphDataModel;
-import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.graphsupport.RingsButtonListener;
-import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
 import edu.uci.ics.jung.algorithms.layout.BalloonLayout;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
-import edu.uci.ics.jung.algorithms.layout.TreeLayout;
+import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DelegateTree;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.visualization.picking.PickedState;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,41 +52,38 @@ import java.util.Set;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
  */
 public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 	private static final Logger log = Logger.getLogger( TreeGraphPlaySheet.class );
-	private TreeGraphDataModel model;
-	private final RingsButtonListener rings = new RingsButtonListener();
-	
-	/**
-	 * Constructor for GraphPlaySheetFrame.
-	 */
-	public TreeGraphPlaySheet() {
-		this( new TreeGraphDataModel(), TreeLayout.class );
-	}
+	//private TreeGraphDataModel model;
+	public static final URI DUPLICATES_SIZE = Utility.makeInternalUri( "num-duplicates" );
 
-	public TreeGraphPlaySheet( TreeGraphDataModel model, Class<? extends Layout> klass ) {
-		super( model );
-		this.model = model;
-		log.debug( "new treeplaysheet" );
+	private final RingsButtonListener rings = new RingsButtonListener();
+
+	public TreeGraphPlaySheet( DirectedGraph<SEMOSSVertex, SEMOSSEdge> basegraph,
+			Collection<SEMOSSVertex> roots, Class<? extends Layout> klass ) {
+		super( new GraphDataModel( makeDuplicateForest( basegraph, roots,
+				new GraphToTreeConverter() ) ) );
 
 		getView().setGraphLayout( klass );
 		addSelectionExpander();
 
-		model.addModelListener( new GraphModelListener() {
+		GraphDataModel gdm = super.getGraphData();
+		addDuplicateValues( gdm );
+		gdm.addModelListener( new GraphModelListener() {
 
 			@Override
 			public void changed( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
 					int level, GraphDataModel gdm ) {
 
-				for ( GraphElement ge : model.elementsFromLevel( level ) ) {
+				for ( GraphElement ge : gdm.elementsFromLevel( level ) ) {
 					ge.addPropertyChangeListener( TreeGraphPlaySheet.this );
 				}
-
-				updateLabels();
 			}
 		} );
 	}
@@ -91,7 +92,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
 		super.populateToolBar( toolBar, tabTitle );
 		rings.setViewer( getView() );
-		rings.setGraph( model.getForest() );
+		rings.setGraph( Forest.class.cast( getGraphData().getGraph() ) );
 		Layout lay = getView().getEffectiveLayout();
 		rings.setEnabled( lay instanceof BalloonLayout || lay instanceof RadialTreeLayout );
 		JToggleButton ringbtn = new JToggleButton( rings );
@@ -112,44 +113,32 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		} );
 	}
 
-	@Override
-	public void setFrame( PlaySheetFrame f ) {
-		super.setFrame( f );
-		updateLabels();
-	}
+	private void addDuplicateValues( GraphDataModel gdm ) {
 
-	private void updateLabels() {
-		// we want our duplicate (random) URIs to resolve to their true labels
-		RetrievingLabelCache rlc = getLabelCache();
-		Map<URI, URI> map = new HashMap<>();
+		List<GraphElement> ll = new ArrayList<>();
+		Graph<SEMOSSVertex, SEMOSSEdge> newforest = gdm.getGraph();
+		ll.addAll( newforest.getVertices() );
+		ll.addAll( newforest.getEdges() );
 
-		List<GraphElement> all = new ArrayList<>();
-		all.addAll( model.getGraph().getVertices() );
-		all.addAll( model.getGraph().getEdges() );
-
-		for ( GraphElement e : all ) {
-			map.put( e.getURI(), model.getRealUri( e ) );
+		ValueFactory vf = new ValueFactoryImpl();
+		for ( GraphElement ge : ll ) {
+			ge.setValue( DUPLICATES_SIZE,
+					vf.createLiteral( gdm.getDuplicatesOf( ge ).size() ) );
 		}
-
-		Map<URI, String> labels = Utility.getInstanceLabels( map.values(), getEngine() );
-		rlc.putAll( labels );
-
-		for ( Map.Entry<URI, URI> en : map.entrySet() ) {
-			rlc.put( en.getKey(), rlc.get( en.getValue() ) );
-		}
-
-		rlc.put( TreeGraphDataModel.DUPLICATES_SIZE, "Duplicates" );
-		rlc.put( TreeGraphDataModel.DUPLICATE_OF, "True Identity" );
 	}
 
 	private void addSelectionExpander() {
 		// we want to highlight all nodes/edges that share the same "true" element
+		getLabelCache().put( DUPLICATES_SIZE, "Duplicates" );
+
+		GraphDataModel gdm = getGraphData();
+
 		ItemListener il = new ItemListener() {
 			@Override
 			public void itemStateChanged( ItemEvent e ) {
 				// increase/decrease the size of nodes as they get selected/unselected
 				GraphElement ele = GraphElement.class.cast( e.getItem() );
-				Set<? extends GraphElement> expandeds = model.getDuplicatesOf( ele );
+				Set<? extends GraphElement> expandeds = gdm.getDuplicatesOf( ele );
 
 				PickedState<SEMOSSVertex> vpicks = getView().getPickedVertexState();
 				PickedState<SEMOSSEdge> epicks = getView().getPickedEdgeState();
@@ -171,5 +160,57 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 		getView().getPickedEdgeState().addItemListener( il );
 		getView().getPickedVertexState().addItemListener( il );
+	}
+
+	private static DirectedGraph<SEMOSSVertex, SEMOSSEdge> makeDuplicateForest(
+			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, Collection<SEMOSSVertex> roots,
+			GraphToTreeConverter gttc ) {
+
+		DelegateForest<SEMOSSVertex, SEMOSSEdge> newforest = new DelegateForest<>();
+		for ( SEMOSSVertex root : roots ) {
+			Map<URI, SEMOSSVertex> vlkp = new HashMap<>();
+			Map<URI, SEMOSSEdge> elkp = new HashMap<>();
+
+			Tree<URI, URI> tree = gttc.convert( graph, root, vlkp, elkp );
+
+			// convert the URI tree to our node/edge tree
+			DelegateTree<SEMOSSVertex, SEMOSSEdge> dupetree = new DelegateTree<>();
+
+			// make duplicate vertices and edges with the new URIs
+			Map<URI, SEMOSSVertex> dupesV = new HashMap<>();
+			Map<URI, SEMOSSEdge> dupesE = new HashMap<>();
+			for ( Map.Entry<URI, SEMOSSVertex> en : vlkp.entrySet() ) {
+				dupesV.put( en.getKey(), duplicate( en.getKey(), vlkp ) );
+			}
+			for ( Map.Entry<URI, SEMOSSEdge> en : elkp.entrySet() ) {
+				dupesE.put( en.getKey(), duplicate( en.getKey(), elkp ) );
+			}
+
+			dupetree.setRoot( dupesV.get( tree.getRoot() ) );
+
+			Deque<URI> todo = new ArrayDeque<>( tree.getChildren( tree.getRoot() ) );
+			while ( !todo.isEmpty() ) {
+				URI child = todo.poll();
+				URI edge = tree.getParentEdge( child );
+				URI parent = tree.getParent( child );
+
+				dupetree.addChild( dupesE.get( edge ),
+						dupesV.get( parent ), dupesV.get( child ) );
+
+				todo.addAll( tree.getChildren( child ) );
+			}
+
+			newforest.addTree( dupetree );
+		}
+
+		return newforest;
+	}
+
+	private static <X extends GraphElement> X duplicate( URI uri, Map<URI, X> lkp ) {
+		X old = lkp.get( uri );
+		X newer = old.duplicate();
+		newer.setGraphId( uri );
+
+		return newer;
 	}
 }

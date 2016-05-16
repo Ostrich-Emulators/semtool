@@ -87,7 +87,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	private JSplitPane graphSplitPane;
 	private final VisualizationControlPanel control;
 
-	protected GraphDataModel gdm;
+	private GraphDataModel gdm;
 
 	protected boolean traversable = true;
 	protected boolean nodesHidable = true;
@@ -193,6 +193,11 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void setFrame( PlaySheetFrame f ) {
 		attachActions();
 		super.setFrame( f );
+
+		if ( gdm.getGraph().getVertexCount() > 0 ) {
+			searcher.index( gdm.getGraph() );
+			fireGraphUpdated();
+		}
 	}
 
 	public GraphColorShapeRepository getShapeRepository() {
@@ -437,7 +442,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 	}
 
-	public void fireGraphUpdated() {
+	private void fireGraphUpdated() {
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> g = getGraphData().getGraph();
 		for ( GraphListener gl : listenees ) {
 			try {

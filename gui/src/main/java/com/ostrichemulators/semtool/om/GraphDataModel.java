@@ -93,6 +93,38 @@ public class GraphDataModel {
 	}
 
 	/**
+	 * Gets duplicates (if they exist) of the given node. A duplicate node is one
+	 * in which {@link GraphElement#getURI()} matches the given node's value. Note
+	 * that each returned GraphElement will have a different
+	 * {@link GraphElement#getGraphId() GraphID}
+	 *
+	 * @param <X>
+	 * @param v
+	 * @return
+	 */
+	public <X extends GraphElement> Set<X> getDuplicatesOf( X v ) {
+		URI uri = v.getURI();
+
+		Set<X> set = new HashSet<>();
+		if ( v.isNode() ) {
+			for ( SEMOSSVertex s : getGraph().getVertices() ) {
+				if ( s.getURI().equals( uri ) ) {
+					set.add( (X) s );
+				}
+			}
+		}
+		else {
+			for ( SEMOSSEdge s : getGraph().getEdges() ) {
+				if ( s.getURI().equals( uri ) ) {
+					set.add( (X) s );
+				}
+			}
+		}
+
+		return set;
+	}
+
+	/**
 	 * Adds new nodes/edges to the graph at the specified "redo" level.
 	 *
 	 * @param model the nodes/edges to add
