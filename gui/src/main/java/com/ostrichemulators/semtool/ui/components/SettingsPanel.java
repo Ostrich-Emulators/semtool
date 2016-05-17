@@ -37,12 +37,10 @@ public class SettingsPanel extends javax.swing.JPanel {
 
 	private final NamespaceTableModel namespacemodel = new NamespaceTableModel(
 			Security.getSecurity().getAssociatedUser( DIHelper.getInstance().getRdfEngine() ).isLocal() );
-	private Preferences prefs;
+	private Preferences prefs = SemossPreferences.get();
 
-	protected SettingsPanel( Class<?> preferenceRoot ) {
+	protected SettingsPanel() {
 		initComponents();
-
-		prefs = Preferences.userNodeForPackage( preferenceRoot );
 
 		ActionListener preflistener = new ActionListener() {
 			@Override
@@ -91,7 +89,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 	}
 
 	public static void showDialog( Frame frame ) {
-		SettingsPanel sp = new SettingsPanel( SemossPreferences.class );
+		SettingsPanel sp = new SettingsPanel();
 		String opts[] = { "Close" };
 		int ans = JOptionPane.showOptionDialog( frame, sp, "Options",
 				JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );

@@ -19,7 +19,6 @@
  */
 package com.ostrichemulators.semtool.ui.main;
 
-import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.InsightOutputType;
@@ -43,6 +42,7 @@ import com.ostrichemulators.semtool.ui.actions.MergeAction;
 import com.ostrichemulators.semtool.ui.actions.MountAction;
 import com.ostrichemulators.semtool.ui.actions.NewLoadingSheetAction;
 import com.ostrichemulators.semtool.ui.actions.OpenSparqlAction;
+import com.ostrichemulators.semtool.ui.actions.OpenURLAction;
 import com.ostrichemulators.semtool.ui.actions.PinAction;
 import com.ostrichemulators.semtool.ui.actions.PropertiesAction;
 import com.ostrichemulators.semtool.ui.actions.RemoteDbAction;
@@ -72,6 +72,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.semanticexplorer.SemanticExplorerPanel;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
@@ -1026,6 +1027,9 @@ public class PlayPane extends JFrame {
 		JMenu help = new JMenu( "Help" );
 		JMenuItem helpitem = new JMenuItem( "About OS-EM Semantic Toolkit" );
 		help.add( helpitem );
+		help.add( OpenURLAction.getTracAction() );
+		help.add( OpenURLAction.getLicense() );
+
 		help.add( new AbstractAction( "Options" ) {
 			private static final long serialVersionUID = -5306914853342321083L;
 
@@ -1582,30 +1586,8 @@ public class PlayPane extends JFrame {
 		return getProp( propstr, false );
 	}
 
-	public static boolean getProp( String propstr, boolean defaultValue ) {
-		String prop = prefs.get( propstr, null );
-		if ( null == prop ) {
-			prop = DIHelper.getInstance().getProperty( propstr );
-		}
-
-		if ( null == prop ) {
-			prop = Boolean.toString( defaultValue );
-		}
-
-		return Boolean.parseBoolean( prop );
-	}
-
-	public static boolean getProp( SemossPreferences prefs, String propstr ) {
-		String prop = prefs.get( propstr, null );
-		if ( null == prop ) {
-			prop = DIHelper.getInstance().getProperty( propstr );
-		}
-
-		if ( null == prop ) {
-			prop = Boolean.toString( false );
-		}
-
-		return Boolean.parseBoolean( prop );
+	private static boolean getProp( String propstr, boolean defaultValue ) {
+		return SemossPreferences.get().getBoolean( propstr, defaultValue );
 	}
 
 	protected void initPreferenceValues( Preferences p ) {

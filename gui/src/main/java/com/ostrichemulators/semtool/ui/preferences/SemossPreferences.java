@@ -5,110 +5,23 @@
  */
 package com.ostrichemulators.semtool.ui.preferences;
 
-import java.util.Set;
 import java.util.prefs.Preferences;
 import org.apache.log4j.Logger;
-import com.ostrichemulators.semtool.util.Constants;
 
 /**
- * A helper class for working with preferences. The goal is to provide a FULLY
- * backward-compatible interface (so you don't have to use this class to get/set
- * preferences; you can use a plain old {@link Preferences} if you want), with
- * some special encoding/decoding for some preferences
+ * A class to facilitate getting/setting UI preferences and such
  *
  * @author ryan
  */
 public class SemossPreferences {
 
 	private static final Logger log = Logger.getLogger( SemossPreferences.class );
-	private final Preferences prefs
-			= Preferences.userNodeForPackage( SemossPreferences.class );
-	private static SemossPreferences instance;
-
-	public static SemossPreferences getInstance() {
-		if ( null == instance ) {
-			instance = new SemossPreferences();
-		}
-		return instance;
-	}
 
 	private SemossPreferences() {
+
 	}
 
-	public boolean getBoolean( String key, boolean def ) {
-		return prefs.getBoolean( key, def );
-	}
-
-	public void putBoolean( String key, boolean val ) {
-		prefs.putBoolean( key, val );
-	}
-
-	public String get( String key, String def ) {
-		return prefs.get( key, def );
-	}
-
-	public void put( String key, String val ) {
-		prefs.put( key, val );
-	}
-
-	public void set( Class<?> k, String key, String value ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		spref.put( key, value );
-	}
-
-	public String get( Class<?> k, String key, String def ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		return spref.get( key, def );
-	}
-
-	public void set( Class<?> k, String key, int value ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		spref.putInt( key, value );
-	}
-
-	public int get( Class<?> k, String key, int def ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		return spref.getInt( key, def );
-	}
-
-	public void set( Class<?> k, String key, double value ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		spref.putDouble( key, value );
-	}
-
-	public double get( Class<?> k, String key, double def ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		return spref.getDouble( key, def );
-	}
-
-	public void set( Class<?> k, String key, boolean value ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		spref.putBoolean( key, value );
-	}
-
-	public boolean get( Class<?> k, String key, boolean def ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		return spref.getBoolean( key, def );
-	}
-
-	public void set( Class<?> k, String key, byte[] value ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		spref.putByteArray( key, value );
-	}
-
-	public byte[] get( Class<?> k, String key, byte[] def ) {
-		Preferences spref = Preferences.userNodeForPackage( k );
-		return spref.getByteArray( key, def );
-	}
-
-	private void writePins( Set<String> pins ) {
-		StringBuilder sb = new StringBuilder();
-		for ( String smss : pins ) {
-			if ( 0 != sb.length() ) {
-				sb.append( ";" );
-			}
-			sb.append( smss );
-		}
-		prefs.put( Constants.PIN_KEY, sb.toString() );
+	public static Preferences get() {
+		return Preferences.userNodeForPackage( SemossPreferences.class );
 	}
 }

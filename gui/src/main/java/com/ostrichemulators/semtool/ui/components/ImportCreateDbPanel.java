@@ -170,9 +170,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		dbdir.addDocumentListener( dl );
 		file.addDocumentListener( dl2 );
 
-		SemossPreferences vc = SemossPreferences.getInstance();
-		calcInfers.setSelected( PlayPane.
-				getProp( vc, Constants.CALC_INFERENCES_PREF ) );
+		Preferences vc = SemossPreferences.get();
+		calcInfers.setSelected( vc.getBoolean( Constants.CALC_INFERENCES_PREF, false ) );
 	}
 
 	private void checkOk() {

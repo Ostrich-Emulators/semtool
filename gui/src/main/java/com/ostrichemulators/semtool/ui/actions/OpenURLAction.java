@@ -15,8 +15,6 @@ import javax.swing.AbstractAction;
 
 import org.apache.log4j.Logger;
 
-import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 
@@ -36,6 +34,7 @@ public class OpenURLAction extends DbAction {
 	 * @param description the short description
 	 * @param uristr the url to open when selected
 	 * @param imagePart the image name locator
+	 * @param shortCut a shortcut
 	 */
 	public OpenURLAction( String text, String description, String uristr,
 			String imagePart, int shortCut ) {
@@ -60,50 +59,16 @@ public class OpenURLAction extends DbAction {
 
 	public static OpenURLAction getTracAction() {
 		return new OpenURLAction( "Report an Issue",
-				"Opens a Browser to the V-CAMP Issue Reporting systems",
-				DIHelper.getInstance().getProperty( Constants.HELPURI_KEY ), "trac", KeyEvent.VK_I );
+				"Opens a Browser to the OS-EM Semantic Toolkit Issue Reporting system",
+				"https://github.com/Ostrich-Emulators/semtool/issues", "trac", KeyEvent.VK_I );
 		
-	}
-
-	public static OpenURLAction getLatestReleaseAction() {
-		return new OpenURLAction( "Get the Latest Release",
-				"Opens a Browser to the latest V-CAMP Stable application",
-				DIHelper.getInstance().getProperty( Constants.LATESTRELEASE_KEY ),
-				"VCAMP-Tool", KeyEvent.VK_S );
-	}
-
-	public static OpenURLAction getExperimentalReleaseAction() {
-		return new OpenURLAction( "Get the Experimental Release",
-				"Opens a browser to the latest V-CAMP experimental release",
-				DIHelper.getInstance().getProperty( Constants.EXPERIMENTALRELEASE_KEY ),
-				"VCAMP-Labs", KeyEvent.VK_E );
-	}
-
-	public static OpenURLAction getSemossAction() {
-		return new OpenURLAction( "SEMOSS User Manual",
-				"Opens a browser to the online SEMOSS user manual",
-				"http://semoss.org/userdocs.html", "whitelogo", KeyEvent.VK_M );
 	}
 
 	public static OpenURLAction getLicense() {
 		return new OpenURLAction( "Read the Software License",
-				"Opens the Browser to V-CAMP SEMOSS Tool License",
-				DIHelper.getInstance().getProperty( Constants.LICENSEURI_KEY ),
+				"Opens the Browser to OS-EM Semantic Toolkit License",
+				"http://www.gnu.org/licenses/gpl-3.0.en.html",
 				"license", KeyEvent.VK_L );
-	}
-
-	public static OpenURLAction getHelpManual() {
-		try {
-			return new OpenURLAction( "V-CAMP SEMOSS User Manual",
-					"Opens the local V-CAMP SEMOSS User Manual",
-					OpenURLAction.class.getResource( "/help/V-CAMP SEMOSS Tool User Manual.pdf" ).toURI().toString(),
-					"helpbook", KeyEvent.VK_M );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-			GuiUtility.showError( e.getMessage() );
-			throw new IllegalArgumentException( "Could not find manual" );
-		}
 	}
 
 	@Override

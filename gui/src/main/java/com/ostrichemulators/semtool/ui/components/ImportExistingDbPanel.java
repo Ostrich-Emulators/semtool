@@ -105,8 +105,8 @@ public class ImportExistingDbPanel extends JPanel {
 		
 		setEngine( eng );
 
-		SemossPreferences vc = SemossPreferences.getInstance();
-		calcInfers.setSelected( PlayPane.getProp( vc, Constants.CALC_INFERENCES_PREF ) );
+		Preferences vc = SemossPreferences.get();
+		calcInfers.setSelected( vc.getBoolean( Constants.CALC_INFERENCES_PREF, false ) );
 
 		baseuri.addItem( ImportCreateDbPanel.METADATABASEURI );
 		Set<String> seen = new HashSet<>();

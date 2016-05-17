@@ -37,7 +37,9 @@ import org.openrdf.sail.memory.MemoryStore;
 
 /**
  * A class to store data about individual databases (things like graph icons,
- * colors, insight locations, reification data).
+ * colors, insight locations, reification data). This class if different from
+ * the standard Preferences object in that it is intended for per-database
+ * settings instead of UI-specific user preferences.
  *
  * @author ryan
  */

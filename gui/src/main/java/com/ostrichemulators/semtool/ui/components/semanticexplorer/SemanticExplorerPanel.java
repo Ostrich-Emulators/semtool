@@ -209,7 +209,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				TreePath path = e.getPath();
 
 				if ( path.getPathCount() == 1 ) {
-					;//This shouldn't be possible because the root node is invisible.
+					//This shouldn't be possible because the root node is invisible.
 				}
 				else if ( path.getPathCount() == 2 ) {
 					propertyTable.setModel( new DefaultTableModel() );
@@ -255,7 +255,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 			return;
 		}
 
-		Preferences prefs = Preferences.userNodeForPackage( SemossPreferences.class );
+		Preferences prefs = SemossPreferences.get();
 		useLabels = prefs.getBoolean( Constants.SEMEX_USE_LABELS_PREF, true );
 
 		invisibleRoot.removeAllChildren();
