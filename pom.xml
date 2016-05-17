@@ -6,6 +6,8 @@
 	<version>1.0</version>
 	<packaging>pom</packaging>
 	<name>OS-EM Semantic Tool Parent</name>
+	<description>A Semantic database explorer and management tool</description>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -260,11 +262,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.10.3</version>
-        <configuration>
-          <aggregate>true</aggregate>
-        </configuration>
-      </plugin>
-    </plugins>
+				<configuration>
+					<aggregate>true</aggregate>
+				</configuration>
+			</plugin>
+		</plugins>
 	</reporting>
 
 	<build>    
@@ -348,4 +350,42 @@
 			<url>http://ostrich-emulators.github.io/semtool</url>
 		</site>
 	</distributionManagement>
+
+	<developers>
+		<developer>
+			<id>ry99</id>
+			<name>Ry Bobko</name>
+			<email>ryan@ostrich-emulators.com</email>
+			<roles>
+				<role>Project Manager</role>
+				<role>Architect</role>
+			</roles>
+			<organization>Ostrich Emulators, LLC</organization>
+			<timezone>-5</timezone>
+		</developer>
+		<developer>
+			<id>hwalbert</id>
+			<name>Harold Walbert</name>
+			<roles>
+				<role>Data Specialist</role>
+			</roles>
+			<timezone>-5</timezone>
+		</developer>
+		<developer>
+			<id>quest5020</id>
+			<name>John Marquiss</name>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>-8</timezone>
+		</developer>
+		<developer>
+			<id>wildlyadequate</id>
+			<name>Wayne Warren</name>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>-8</timezone>
+		</developer>
+	</developers>
 </project>

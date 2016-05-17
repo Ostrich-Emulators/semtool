@@ -44,14 +44,19 @@ public interface GraphElement {
 
 	public void setValue( URI prop, Value val );
 
+	/**
+	 * Duplicates this graph element
+	 * @param <X> the type of element (used for subclasses)
+	 * @return a new object initialized exactly like this one
+	 */
 	public <X extends GraphElement> X duplicate();
 
 	/**
 	 * Sets an ID to be used by the graphing system (and
-	 * {@link #equals(java.lang.Object)} and {@link #hashCode() }. JUNG requires
-	 * each node/edge to have a unique id, which isn't always the case for us. For
-	 * example, many edges may have the same ID, but we still want them displayed
-	 * on the graph.
+	 * <code>equals(java.lang.Object)</code> and <code>hashCode()</code>. JUNG
+	 * requires each node/edge to have a unique id, which isn't always the case
+	 * for us. For example, many edges may have the same ID, but we still want
+	 * them displayed on the graph.
 	 *
 	 * @param graphid
 	 */
