@@ -72,12 +72,18 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		LabeledPairRenderer<URI> dbrenderer
 				= LabeledPairRenderer.getUriPairRenderer( engine );
 		dbrenderer.cache( Constants.ANYNODE, "Default" );
+		dbmodel.addElement( Constants.ANYNODE );
+		Set<URI> dbs = DIHelper.getInstance().getMetadataStore().getDatabases();
+
+		// per-database graph settings don't work yet, so don't give a user the option
+//		for ( URI u : dbs ) {
+//			dbmodel.addElement( u );
+//		}
 		for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
 			dbrenderer.cache( eng.getBaseUri(), eng.getEngineName() );
-		}
-		dbmodel.addElement( Constants.ANYNODE );
-		for ( URI u : DIHelper.getInstance().getMetadataStore().getDatabases() ) {
-			dbmodel.addElement( u );
+			if ( !dbs.contains( eng.getBaseUri() ) ) {
+				//dbmodel.addElement( eng.getBaseUri() );
+			}
 		}
 
 		dbchsr.setRenderer( dbrenderer );
@@ -177,7 +183,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	}
 
 	public URI getDb() {
-		return dbchsr.getItemAt( dbchsr.getSelectedIndex() );
+		URI uri = dbchsr.getItemAt( dbchsr.getSelectedIndex() );
+		return ( Constants.ANYNODE.equals( uri ) ? null : uri );
 	}
 
 	public Map<URI, Color> getColors() {
