@@ -18,17 +18,21 @@ import com.ostrichemulators.semtool.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.awt.Color;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ContextStatementImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -103,6 +107,20 @@ public class StoredMetadata {
 		set( null, PIN_SUB, RDFS.LABEL, pins.toArray( new String[0] ) );
 	}
 
+	public Set<URI> getDatabases() {
+		Set<URI> set = new HashSet<>();
+		try {
+			for ( Resource r : Iterations.asList( rc.getContextIDs() ) ) {
+				set.add( URI.class.cast( r ) );
+			}
+		}
+		catch ( RepositoryException e ) {
+			log.error( e, e );
+		}
+
+		return set;
+	}
+
 	public boolean isPinned( URI database ) {
 		return getBool( null, database, PIN, false );
 	}
@@ -173,11 +191,10 @@ public class StoredMetadata {
 					repo.set( URI.class.cast( s.getSubject() ),
 							new URL( s.getObject().stringValue() ) );
 				}
-				catch ( Exception x ) {
+				catch ( MalformedURLException x ) {
 					log.warn( x );
 				}
 			}
-
 		}
 		catch ( RepositoryException e ) {
 			log.error( e, e );
@@ -186,11 +203,37 @@ public class StoredMetadata {
 		return repo;
 	}
 
-	private void set( URI ctx, URI dbid, URI pref, boolean bool ) {
+	public void clearGraphSettings( URI database ) {
+		try {
+			rc.remove( rc.getStatements( null, GRAPH_SHAPE, null, false, database ) );
+			rc.remove( rc.getStatements( null, GRAPH_COLOR, null, false, database ) );
+			rc.remove( rc.getStatements( null, GRAPH_ICON, null, false, database ) );
+		}
+		catch ( RepositoryException re ) {
+			log.error( re, re );
+		}
+	}
+
+	public void set( URI database, GraphColorShapeRepository repo ) {
+		clearGraphSettings( database );
+
+		for ( Map.Entry<URI, NamedShape> en : repo.getShapes().entrySet() ) {
+			set( database, en.getKey(), en.getValue() );
+		}
+		for ( Map.Entry<URI, Color> en : repo.getColors().entrySet() ) {
+			set( database, en.getKey(), en.getValue() );
+		}
+		for ( Map.Entry<URI, URL> en : repo.getIcons().entrySet() ) {
+			set( database, en.getKey(), GRAPH_ICON,
+					new URIImpl( en.getValue().toExternalForm() ) );
+		}
+	}
+
+	private void set( URI ctx, URI subj, URI pref, boolean bool ) {
 		try {
 			rc.begin();
-			rc.remove( dbid, pref, null );
-			rc.add( new ContextStatementImpl( dbid, pref, vf.createLiteral( bool ), ctx ) );
+			rc.remove( subj, pref, null, ctx );
+			rc.add( new ContextStatementImpl( subj, pref, vf.createLiteral( bool ), ctx ) );
 			rc.commit();
 		}
 		catch ( Exception e ) {
@@ -204,14 +247,14 @@ public class StoredMetadata {
 		}
 	}
 
-	public void set( URI ctx, URI dbid, URI pref, URI... uris ) {
+	public void set( URI ctx, URI subj, URI pref, URI... uris ) {
 		try {
 			rc.begin();
-			rc.remove( dbid, pref, null );
+			rc.remove( subj, pref, null, ctx );
 
 			if ( !( null == uris || 0 == uris.length ) ) {
 				for ( URI u : uris ) {
-					rc.add( new ContextStatementImpl( dbid, pref, u, ctx ) );
+					rc.add( new ContextStatementImpl( subj, pref, u, ctx ) );
 				}
 			}
 			rc.commit();
@@ -227,12 +270,12 @@ public class StoredMetadata {
 		}
 	}
 
-	public void set( URI ctx, URI dbid, URI pref, String... val ) {
+	public void set( URI ctx, URI subj, URI pref, String... val ) {
 		try {
 			rc.begin();
-			rc.remove( dbid, pref, null );
+			rc.remove( subj, pref, null, ctx );
 			for ( String s : val ) {
-				rc.add( new ContextStatementImpl( dbid, pref, vf.createLiteral( s ), ctx ) );
+				rc.add( new ContextStatementImpl( subj, pref, vf.createLiteral( s ), ctx ) );
 			}
 			rc.commit();
 		}
@@ -247,38 +290,38 @@ public class StoredMetadata {
 		}
 	}
 
-	private <X> X get( URI ctx, URI dbid, URI pref, QueryExecutor<X> qa ) {
-		qa.bind( "db", dbid );
+	private <X> X get( URI ctx, URI subj, URI pref, QueryExecutor<X> qa ) {
+		qa.bind( "db", subj );
 		qa.bind( "pred", pref );
 		qa.setContext( ctx );
 		return AbstractSesameEngine.getSelectNoEx( qa, rc, true );
 	}
 
-	public boolean getBool( URI ctx, URI dbid, URI pref, boolean defaultval ) {
-		Boolean b = get( ctx, dbid, pref,
+	public boolean getBool( URI ctx, URI uri, URI pref, boolean defaultval ) {
+		Boolean b = get( ctx, uri, pref,
 				OneValueQueryAdapter.getBoolean( "SELECT ?val WHERE { ?db ?pred ?val }" ) );
 
 		return ( null == b ? defaultval : b );
 	}
 
-	public String getString( URI ctx, URI dbid, URI pref, String defaultval ) {
-		String str = get( ctx, dbid, pref,
+	public String getString( URI ctx, URI uri, URI pref, String defaultval ) {
+		String str = get( ctx, uri, pref,
 				OneValueQueryAdapter.getString( "SELECT ?val WHERE { ?db ?pred ?val }" ) );
 		return ( null == str ? defaultval : str );
 	}
 
-	public Set<String> getStrings( URI ctx, URI dbid, URI pref ) {
-		return new HashSet<>( get( ctx, dbid, pref,
+	public Set<String> getStrings( URI ctx, URI uri, URI pref ) {
+		return new HashSet<>( get( ctx, uri, pref,
 				OneVarListQueryAdapter.getStringList( "SELECT ?val WHERE { ?db ?pred ?val }" ) ) );
 	}
 
-	public Set<URI> getUris( URI ctx, URI dbid, URI pref ) {
-		return new HashSet<>( get( ctx, dbid, pref,
+	public Set<URI> getUris( URI ctx, URI uri, URI pref ) {
+		return new HashSet<>( get( ctx, uri, pref,
 				OneVarListQueryAdapter.getUriList( "SELECT ?val WHERE { ?db ?pred ?val }" ) ) );
 	}
 
-	public URI getUri( URI ctx, URI dbid, URI pref ) {
-		return get( ctx, dbid, pref,
+	public URI getUri( URI ctx, URI uri, URI pref ) {
+		return get( ctx, uri, pref,
 				OneValueQueryAdapter.getUri( "SELECT ?val WHERE { ?db ?pred ?val }" ) );
 	}
 }
