@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,7 +21,7 @@ import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.ui.actions.DbAction;
 import com.ostrichemulators.semtool.ui.components.models.NamespaceTableModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.main.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.user.User.UserProperty;
 import com.ostrichemulators.semtool.user.Security;

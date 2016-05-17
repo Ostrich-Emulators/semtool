@@ -15,16 +15,17 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************
+ * ****************************************************************************
  */
 package com.ostrichemulators.semtool.util;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.ui.components.OutputTypeRegistry;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.RepositoryList;
 
-import java.awt.Color;
+import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -72,6 +73,8 @@ public class DIHelper {
 	private PlayPane playpane;
 	private ApplicationContext appctx;
 	private final OutputTypeRegistry registry = new OutputTypeRegistry();
+	private StoredMetadata metadata;
+	private File localstore;
 
 	/**
 	 * Constructor for DIHelper.
@@ -80,10 +83,10 @@ public class DIHelper {
 		// do nothing
 	}
 
-	public OutputTypeRegistry getOutputTypeRegistry(){
+	public OutputTypeRegistry getOutputTypeRegistry() {
 		return registry;
 	}
-	
+
 	/**
 	 * Set up shapes, colors, and layouts. Put properties for each in a hashtable
 	 * of local properties.
@@ -93,25 +96,6 @@ public class DIHelper {
 	public static DIHelper getInstance() {
 		if ( helper == null ) {
 			helper = new DIHelper();
-			Color blue = new Color( 31, 119, 180 );
-			Color green = new Color( 44, 160, 44 );
-			Color red = new Color( 214, 39, 40 );
-			Color brown = new Color( 143, 99, 42 );
-			Color yellow = new Color( 254, 208, 2 );
-			Color orange = new Color( 255, 127, 14 );
-			Color purple = new Color( 148, 103, 189 );
-			Color aqua = new Color( 23, 190, 207 );
-			Color pink = new Color( 241, 47, 158 );
-
-			helper.localProp.put( Constants.BLUE, blue );
-			helper.localProp.put( Constants.GREEN, green );
-			helper.localProp.put( Constants.RED, red );
-			helper.localProp.put( Constants.BROWN, brown );
-			helper.localProp.put( Constants.MAGENTA, pink );
-			helper.localProp.put( Constants.YELLOW, yellow );
-			helper.localProp.put( Constants.ORANGE, orange );
-			helper.localProp.put( Constants.PURPLE, purple );
-			helper.localProp.put( Constants.AQUA, aqua );
 		}
 		return helper;
 	}
@@ -156,17 +140,17 @@ public class DIHelper {
 	 */
 	public String getProperty( String name ) {
 		if ( Constants.BASE_FOLDER.equals( name ) ) {
-      // this is a very common call, but we're deprecating it
+			// this is a very common call, but we're deprecating it
 			// make sure it always returns something
 			return coreProp.getProperty( name, System.getProperty( "user.dir" ) );
 		}
 
 		String retName = coreProp.getProperty( name );
-		if (retName != null){
+		if ( retName != null ) {
 			return retName;
 		}
 
-		if ( repolist != null && getRdfEngine() != null) {
+		if ( repolist != null && getRdfEngine() != null ) {
 			return getRdfEngine().getProperty( name );
 		}
 
@@ -221,5 +205,21 @@ public class DIHelper {
 
 	public ApplicationContext getAppCtx() {
 		return appctx;
+	}
+
+	public StoredMetadata getMetadataStore() {
+		return metadata;
+	}
+
+	public void setMetadataStore( StoredMetadata sm ) {
+		metadata = sm;
+	}
+
+	public void setLocalStore( File datadir ) {
+		localstore = datadir;
+	}
+
+	public File getLocalStore() {
+		return localstore;
 	}
 }

@@ -6,7 +6,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.ModificationExecutor;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 
 import java.util.Collection;

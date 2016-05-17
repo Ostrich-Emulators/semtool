@@ -10,7 +10,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import com.ostrichemulators.semtool.ui.main.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.util.Constants;
 
 import com.ostrichemulators.semtool.util.IconBuilder;

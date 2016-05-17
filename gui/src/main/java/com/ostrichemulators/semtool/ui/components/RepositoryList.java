@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.model.vocabulary.VAS;
 import java.awt.Point;
 import java.awt.event.MouseEvent;

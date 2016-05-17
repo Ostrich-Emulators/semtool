@@ -15,7 +15,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineOperationListener;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.renderers.PerspectiveTreeCellRenderer;
 import com.ostrichemulators.semtool.util.DIHelper;

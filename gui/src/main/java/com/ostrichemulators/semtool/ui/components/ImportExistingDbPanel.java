@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.rdf.engine.util.ImportDataProcessor;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
 import com.ostrichemulators.semtool.poi.main.ImportData;
@@ -33,7 +34,7 @@ import com.ostrichemulators.semtool.ui.actions.OpenAction;
 import com.ostrichemulators.semtool.ui.actions.OpenAction.FileHandling;
 import com.ostrichemulators.semtool.ui.helpers.StatementsSizeGuesser;
 import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.ui.main.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.Arrays;
 import java.util.HashSet;

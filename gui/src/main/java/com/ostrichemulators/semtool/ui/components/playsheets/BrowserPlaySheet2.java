@@ -97,7 +97,7 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		add( jfxPanel );
 
 		fileName = "file:///"
-				+ DIHelper.getInstance().getProperty( Constants.BASE_FOLDER ) + htmlPath;
+				+ new File( DIHelper.getInstance().getLocalStore(), htmlPath );
 
 		Platform.setImplicitExit( false );
 		Platform.runLater( new Runnable() {
@@ -153,7 +153,7 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		String dataSeriesKey = "dataSeries";
 		// Get the data series
 		Object dataSeries = dataHash.get( dataSeriesKey );
-		dataSeries = processDataSeriesForDisplay( dataHash.get(  dataSeriesKey )  );
+		dataSeries = processDataSeriesForDisplay( dataHash.get( dataSeriesKey ) );
 		// After processing, put the data back
 		dataHash.put( dataSeriesKey, dataSeries );
 		// Continue with the processing
@@ -167,12 +167,13 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 	}
 
 	/**
-	 * Gives subclasses a chance to modify their own data (?) before sending it
-	 * to the webview engine. This function needs to be removed completely, I think
+	 * Gives subclasses a chance to modify their own data (?) before sending it to
+	 * the webview engine. This function needs to be removed completely, I think
+	 *
 	 * @param undigestedData
-	 * @return 
+	 * @return
 	 */
-	protected Object processDataSeriesForDisplay(Object undigestedData) {
+	protected Object processDataSeriesForDisplay( Object undigestedData ) {
 		return undigestedData;
 	}
 
@@ -195,7 +196,7 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 		} );
 	}
 
-	protected void postExecute( WebEngine eng ){
+	protected void postExecute( WebEngine eng ) {
 		// nothing by default
 	}
 

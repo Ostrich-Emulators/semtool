@@ -15,7 +15,7 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.GraphCondensePanel;
 import com.ostrichemulators.semtool.ui.components.GraphCondensePanel.EdgePropertySource;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.util.MultiMap;

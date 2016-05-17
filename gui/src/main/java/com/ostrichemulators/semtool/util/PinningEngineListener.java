@@ -9,120 +9,59 @@ import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
 import java.io.File;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.monitor.FileAlterationListener;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineOperationListener;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
-import com.ostrichemulators.semtool.ui.main.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
 
 /**
  *
  * @author ryan
  */
-public class PinningEngineListener extends AbstractFileWatcher
-		implements FileAlterationListener, EngineOperationListener {
+public class PinningEngineListener implements EngineOperationListener {
 
 	private static final Logger log = Logger.getLogger( PinningEngineListener.class );
-	private final Set<String> pinWhenOpen = new HashSet<>();
+	private final StoredMetadata metas;
 
-	@Override
-	public void onStart( FileAlterationObserver fao ) {
+	public PinningEngineListener( StoredMetadata metas ) {
+		this.metas = metas;
 	}
 
-	@Override
-	public void onDirectoryCreate( File file ) {
-	}
-
-	@Override
-	public void onDirectoryChange( File file ) {
-	}
-
-	@Override
-	public void onDirectoryDelete( File file ) {
-	}
-
-	@Override
-	public void onFileCreate( File file ) {
-		// see if we should care, and add the db if we do
-		if ( fileHasMyExtension( file ) ) {
-			// we care...so load the db
-
-			try {
-				EngineUtil.getInstance().mount( file, true, true, new LocalUserImpl() );
-			}
-			catch ( EngineManagementException ioe ) {
-				log.error( "could not load db from file: " + file, ioe );
-			}
+	private void repin( File file ) {
+		try {
+			EngineUtil.getInstance().mount( file, true, true, new LocalUserImpl() );
+		}
+		catch ( EngineManagementException ioe ) {
+			log.error( "could not load database: " + file, ioe );
 		}
 	}
 
-	@Override
-	public void onFileChange( File file ) {
-	}
+	public synchronized void reopenPinned() {
+		log.debug( "reopening pinned databases" );
 
-	@Override
-	public void onFileDelete( File file ) {
-		// if we care, remove the engine from the list
-		if ( fileHasMyExtension( file ) ) {
-			log.debug( "i care about (delete): " + file.getAbsolutePath() );
-		}
-	}
-
-	@Override
-	public void onStop( FileAlterationObserver fao ) {
-	}
-
-	@Override
-	public synchronized void loadFirst() {
-		log.debug( "into loadFirst" );
-		SemossPreferences prefs = SemossPreferences.getInstance();
-
-		// PINNED_DBS is a ;-delimited list of smss files
-		Collection<String> pinned = prefs.getPinnedSmsses();
+		Set<String> pinned = metas.getPinnedLocations();
 
 		// open everything that has been pinned
 		for ( String smss : pinned ) {
-			log.debug( "found pinned SMSS: " + smss );
+			log.debug( "found pinned database: " + smss );
 			File smssfile = new File( smss );
 			if ( smssfile.exists() ) {
-				onFileCreate( smssfile );
+				repin( smssfile );
 			}
 			else {
-				log.error( "could not find pinned smss file: " + smss );
-				SemossPreferences.getInstance().removePin( smss );
+				log.warn( "could not find pinned database: " + smss );
 			}
 		}
-	}
-
-	@Override
-	public void process( String fileName ) {
-	}
-
-	private boolean fileHasMyExtension( File file ) {
-		String ext = "." + FilenameUtils.getExtension( file.getName() );
-		return extensions.contains( ext );
 	}
 
 	@Override
 	public void engineOpened( IEngine eng ) {
 		// check to see if this database should be pinned
-		SemossPreferences prefs = SemossPreferences.getInstance();
-		String smss = eng.getProperty( Constants.SMSS_LOCATION );
-		if ( pinWhenOpen.contains( smss ) ) {
-			prefs.togglePin( eng );
-			pinWhenOpen.remove( smss );
-		}
-		else {
-			Set<String> pins = prefs.getPinnedSmsses();
-			if ( pins.contains( smss ) ) {
-				eng.setProperty( Constants.PIN_KEY, Boolean.toString( true ) );
-			}
+		if ( metas.isPinned( eng.getBaseUri() ) ) {
+			eng.setProperty( Constants.PIN_KEY, Boolean.TRUE.toString() );
 		}
 	}
 

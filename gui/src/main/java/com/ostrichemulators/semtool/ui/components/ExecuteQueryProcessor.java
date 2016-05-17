@@ -1,5 +1,6 @@
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import org.apache.log4j.Logger;
 
 import com.ostrichemulators.semtool.om.Insight;

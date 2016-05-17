@@ -18,6 +18,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.URIImpl;
@@ -37,12 +38,23 @@ public abstract class AbstractBindable implements Bindable {
 	private final ValueFactory vf = new ValueFactoryImpl();
 	private String sparql;
 	private boolean infer = false;
+	private URI context;
 
 	public AbstractBindable() {
 	}
 
 	public AbstractBindable( String sparq ) {
 		sparql = sparq;
+	}
+
+	@Override
+	public void setContext( URI ctx ) {
+		context = ctx;
+	}
+
+	@Override
+	public URI getContext() {
+		return context;
 	}
 
 	@Override
@@ -246,12 +258,12 @@ public abstract class AbstractBindable implements Bindable {
 		// with our VALUES statements. This will break on just about any complicated
 		// Sparql
 		int last = sparql.lastIndexOf( '}' );
-		if( last > -1 ){
+		if ( last > -1 ) {
 			String select = sparql.substring( 0, last );
 			String end = sparql.substring( last );
 			return select + binds.toString() + end;
 		}
-		else{
+		else {
 			// no }, so just append the bindings (is this even valid?)
 			return sparql + binds.toString();
 		}

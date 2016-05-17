@@ -56,6 +56,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 
 	/**
 	 * Creates new form GraphElementConfigPanel
+	 *
 	 * @param engine
 	 * @param repo
 	 */
@@ -178,6 +179,13 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 
 		title.setText( String.format( cache.get( me ) ) );
 		uri.setText( me.stringValue() );
+
+		if ( null == type ) {
+			// the user clicked on a type, not an instance, so switch the two
+			// (if we only have one value, treat it as the type, not instance)
+			type = instance;
+			instance = null;
+		}
 
 		NamedShape shape = shapefactory.getShape( type, instance );
 		Color color = shapefactory.getColor( type, instance );

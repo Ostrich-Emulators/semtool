@@ -10,7 +10,7 @@ import com.ostrichemulators.semtool.om.InsightOutputType;
 import com.ostrichemulators.semtool.om.Parameter;
 import com.ostrichemulators.semtool.ui.components.BindingPanel;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.renderers.PlaySheetEnumRenderer;
 import com.ostrichemulators.semtool.util.DIHelper;

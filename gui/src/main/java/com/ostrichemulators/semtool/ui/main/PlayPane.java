@@ -17,8 +17,9 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * *************************style***************************************************
  */
-package com.ostrichemulators.semtool.ui.components;
+package com.ostrichemulators.semtool.ui.main;
 
+import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.InsightOutputType;
@@ -46,6 +47,15 @@ import com.ostrichemulators.semtool.ui.actions.PinAction;
 import com.ostrichemulators.semtool.ui.actions.PropertiesAction;
 import com.ostrichemulators.semtool.ui.actions.RemoteDbAction;
 import com.ostrichemulators.semtool.ui.actions.UnmountAction;
+import com.ostrichemulators.semtool.ui.components.CloseableTab;
+import com.ostrichemulators.semtool.ui.components.CustomSparqlPanel;
+import com.ostrichemulators.semtool.ui.components.LoggingPanel;
+import com.ostrichemulators.semtool.ui.components.OutputTypeRegistry;
+import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
+import com.ostrichemulators.semtool.ui.components.RepositoryList;
+import com.ostrichemulators.semtool.ui.components.SelectDatabasePanel;
+import com.ostrichemulators.semtool.ui.components.SettingsPanel;
+import com.ostrichemulators.semtool.ui.components.StatusBar;
 import com.ostrichemulators.semtool.ui.components.graphicalquerybuilder.GraphicalQueryPanel;
 import com.ostrichemulators.semtool.ui.components.insight.manager.InsightManagerPanel;
 import com.ostrichemulators.semtool.ui.components.playsheets.AppDupeHeatMapSheet;
@@ -62,8 +72,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.semanticexplorer.SemanticExplorerPanel;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import com.ostrichemulators.semtool.ui.main.SemossPreferences;
-import com.ostrichemulators.semtool.ui.swing.custom.CustomDesktopPane;
+import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 
@@ -196,7 +205,7 @@ public class PlayPane extends JFrame {
 	private final DbAction unmounter = new UnmountAction( this, "Close DB" );
 	private final ImportLoadingSheetAction importls
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
-//	private final OpenAction importxls = new OpenAction( UIPROGRESS, this );
+
 	private final RemoteDbAction remoteDb = new RemoteDbAction( UIPROGRESS, this );
 	private final NewLoadingSheetAction newls
 			= new NewLoadingSheetAction( UIPROGRESS, this );
@@ -207,22 +216,22 @@ public class PlayPane extends JFrame {
 
 	private final CheckConsistencyAction consistencyCheck
 			= new CheckConsistencyAction( UIPROGRESS, this );
-	protected final JMenu windowSelector = new JMenu( "Window" );
-	protected final JMenu fileMenu = new JMenu( "File" );
-	protected final JMenuItem fileMenuSave = new JMenuItem( "Save" );
-	protected final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
-	protected final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
+	private final JMenu windowSelector = new JMenu( "Window" );
+	private final JMenu fileMenu = new JMenu( "File" );
+	private final JMenuItem fileMenuSave = new JMenuItem( "Save" );
+	private final JMenuItem fileMenuSaveAs = new JMenuItem( "Save As" );
+	private final JMenuItem fileMenuSaveAll = new JMenuItem( "Save All" );
 	private JCheckBoxMenuItem hidecsp;
 	private JCheckBoxMenuItem splithider;
-	private final JCheckBoxMenuItem loggingItem = new JCheckBoxMenuItem( "Logging",
-			DbAction.getIcon( "log_tab1" ) );
+	private final JCheckBoxMenuItem loggingItem
+			= new JCheckBoxMenuItem( "Logging", DbAction.getIcon( "log_tab1" ) );
 	private final JCheckBoxMenuItem gQueryBuilderItem
 			= new JCheckBoxMenuItem( "Graphical Query Builder",
 					DbAction.getIcon( "graphic_query" ) );
-	private final JCheckBoxMenuItem insightManagerItem = new JCheckBoxMenuItem( "Insight Manager",
-			DbAction.getIcon( "insight_manager_tab1" ) );
-	private final JCheckBoxMenuItem semanticExplorerItem = new JCheckBoxMenuItem( "Semantic Explorer",
-			DbAction.getIcon( "semantic_dataset2" ) );
+	private final JCheckBoxMenuItem insightManagerItem
+			= new JCheckBoxMenuItem( "Insight Manager", DbAction.getIcon( "insight_manager_tab1" ) );
+	private final JCheckBoxMenuItem semanticExplorerItem
+			= new JCheckBoxMenuItem( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ) );
 
 	private JToolBar toolbar;
 	private JToolBar playsheetToolbar;
@@ -230,14 +239,13 @@ public class PlayPane extends JFrame {
 	private JSplitPane combinedSplitPane;
 	private final CustomSparqlPanel customSparqlPanel = new CustomSparqlPanel();
 
-	// public JTable colorShapeTable;
-	//public JTable sizeTable;
 	private SelectDatabasePanel selectDatabasePanel;
 	private final static Preferences prefs = Preferences.userNodeForPackage( PlayPane.class );
 	private final DefaultColorShapeRepository colorsShapes = new DefaultColorShapeRepository();
 
-	public PlayPane() {
-		colorsShapes.setSaveToPreferences( true );
+	public PlayPane( StoredMetadata metas ) {
+		colorsShapes.importFrom( metas.getCSRepo( null ) );
+		colorsShapes.saveTo( null, metas );
 	}
 
 	public GraphColorShapeRepository getColorShapeRepository() {
@@ -1131,7 +1139,7 @@ public class PlayPane extends JFrame {
 		//Status Tab
 		final JCheckBoxMenuItem statbar = new JCheckBoxMenuItem( "Status Bar",
 				prefs.getBoolean( "showStatus", true ) );
-		if ( prefs.getBoolean( "showStatus", true ) == true ) {
+		if ( prefs.getBoolean( "showStatus", true ) ) {
 			statbar.setToolTipText( "Disable the Status bar" );
 			statbar.getAccessibleContext().setAccessibleName( "Disable the Status bar" );
 			statbar.getAccessibleContext().setAccessibleDescription( "Disable the Status bar" );
@@ -1180,7 +1188,7 @@ public class PlayPane extends JFrame {
 		final JCheckBoxMenuItem tb = new JCheckBoxMenuItem( "Tool Bar",
 				prefs.getBoolean( "showToolBar", true ) );
 
-		if ( prefs.getBoolean( "showToolBar", true ) == true ) {
+		if ( prefs.getBoolean( "showToolBar", true ) ) {
 			tb.setToolTipText( "Disable the Tool Bar" );
 			tb.getAccessibleContext().setAccessibleName( "Disable the Tool Bar" );
 			tb.getAccessibleContext().setAccessibleDescription( "Disable the Tool Bar" );
@@ -1345,11 +1353,12 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					rightTabs.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ), semanticExplorer,
-							"Explore the classes and instances" );
+					rightTabs.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ),
+							semanticExplorer, "Explore the classes and instances" );
 					rightTabs.setTabComponentAt(
 							rightTabs.indexOfComponent( semanticExplorer ),
-							new PlayPaneCloseableTab( rightTabs, semanticExplorerItem, DbAction.getIcon( "semantic_dataset2" ) )
+							new PlayPaneCloseableTab( rightTabs, semanticExplorerItem,
+									DbAction.getIcon( "semantic_dataset2" ) )
 					);
 					semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
 				}

@@ -3,14 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ostrichemulators.semtool.ui.main;
+package com.ostrichemulators.semtool.ui.preferences;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import org.apache.log4j.Logger;
-import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.util.Constants;
 
 /**
@@ -36,47 +33,6 @@ public class SemossPreferences {
 	}
 
 	private SemossPreferences() {
-	}
-
-	public Set<String> getPinnedSmsses() {
-		String smsses = prefs.get( Constants.PIN_KEY, "" );
-		Set<String> pins = new HashSet<>();
-		if ( !smsses.isEmpty() ) {
-			pins.addAll( Arrays.asList( smsses.split( ";" ) ) );
-		}
-
-		return pins;
-	}
-
-	/**
-	 * Removes an SMSS file location that no longer exists, or can't be opened
-	 *
-	 * @param smssloc the location to forget
-	 */
-	public void removePin( String smssloc ) {
-		Set<String> names = getPinnedSmsses();
-		names.remove( smssloc );
-		writePins( names );
-	}
-
-	/**
-	 * Toggles the pinning of the given repository
-	 *
-	 * @param eng the repository to toggle
-	 */
-	public void togglePin( IEngine eng ) {
-		Set<String> names = getPinnedSmsses();
-		String smssloc = eng.getProperty( Constants.SMSS_LOCATION );
-		if ( Boolean.parseBoolean( eng.getProperty( Constants.PIN_KEY ) ) ) {
-			eng.setProperty( Constants.PIN_KEY, null );
-			names.remove( smssloc );
-		}
-		else {
-			eng.setProperty( Constants.PIN_KEY, Boolean.toString( true ) );
-			names.add( smssloc );
-		}
-
-		writePins( names );
 	}
 
 	public boolean getBoolean( String key, boolean def ) {

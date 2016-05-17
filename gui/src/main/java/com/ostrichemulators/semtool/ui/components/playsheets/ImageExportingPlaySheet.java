@@ -9,7 +9,7 @@ import com.itextpdf.text.DocumentException;
 
 import com.ostrichemulators.semtool.ui.actions.DbAction;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.util.ExportUtility;
 import static com.ostrichemulators.semtool.util.ExportUtility.getExportFileLocation;

@@ -83,6 +83,7 @@ import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.Update;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.query.impl.DatasetImpl;
 
 /**
  * An Abstract Engine that sets up the base constructs needed to create an
@@ -386,6 +387,13 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 		ValueFactory vfac = new ValueFactoryImpl();
 		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql );
+
+		if( null != query.getContext() ){
+			DatasetImpl dataset = new DatasetImpl();
+			dataset.addDefaultGraph( query.getContext() );
+			tq.setDataset( dataset );
+		}
+
 		if ( dobindings ) {
 			tq.setIncludeInferred( query.usesInferred() );
 			query.setBindings( tq, vfac );

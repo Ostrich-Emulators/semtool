@@ -30,9 +30,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import java.util.Properties;
 import java.util.zip.ZipInputStream;
@@ -53,18 +50,18 @@ public class GuiUtility {
 
 	private static final Logger log = Logger.getLogger( GuiUtility.class );
 
-	public static void extractHTML( String zipname ) throws IOException {
+	public static void extractHTML( String zipname, File datadir ) throws IOException {
 		// check for html directory
 		// extract
 
-		// this should look for an "html" folder under the current working (execution) directory of the tool:
-		Path localHtmlPath = Paths.get( "html" );
-		if ( Files.exists( localHtmlPath ) ) {
+		// see if we've already extracted the html before doing it again
+		File localHtmlPath = new File( datadir, "html" );
+		if ( localHtmlPath.exists() ) {
 			return;
 		}
 
 		try ( InputStream htmlIs = Utility.class.getResourceAsStream( zipname ) ) {
-			unzip( new ZipInputStream( htmlIs ), new File( "html" ) );
+			unzip( new ZipInputStream( htmlIs ), localHtmlPath );
 		}
 	}
 

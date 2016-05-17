@@ -5,21 +5,19 @@ import com.ostrichemulators.semtool.om.GraphColorShapeRepositoryListener;
 import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.NamedShape;
 
+import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
 import java.awt.Color;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import java.util.Random;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.apache.commons.codec.digest.DigestUtils;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -43,10 +41,10 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	private final Map<URI, NamedShape> shapelkp = new HashMap<>();
 	private final Map<URI, Color> colorlkp = new HashMap<>();
 	private final Map<URI, URL> imglkp = new HashMap<>();
-	private final Preferences prefs = Preferences.userNodeForPackage( getClass() );
 	private final List<GraphColorShapeRepositoryListener> listenees = new ArrayList<>();
-	private boolean saveToPrefs = false;
+	private boolean saveOnChange = false;
 	private double iconsize = DEFAULT_ICON_SIZE;
+	private StoredMetadata persistance;
 
 	public DefaultColorShapeRepository() {
 		shapelkp.put( RDFS.CLASS, NamedShape.URCHIN );
@@ -55,78 +53,42 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 		colorlkp.put( OWL.CLASS, Color.PINK );
 	}
 
-	public void setSaveToPreferences( boolean b ) {
-		if ( b ) {
-			Pattern pat = Pattern.compile( "^(.+)_(IMAGE|SHAPE|COLOR)$" );
-			try {
-				Map<String, URI> uris = new HashMap<>();
-				for ( String key : prefs.keys() ) {
-					if ( key.endsWith( "_URI" ) ) {
-						uris.put( key.substring( 0, key.length() - 4 ),
-								new URIImpl( prefs.get( key, "" ) ) );
-					}
-				}
-
-				for ( String key : prefs.keys() ) {
-					Matcher m = pat.matcher( key );
-					if ( m.matches() ) {
-						String hash = m.group( 1 );
-						URI uri = uris.get( hash );
-						String type = m.group( 2 );
-						String val = prefs.get( key, "" );
-						switch ( type ) {
-							case "IMAGE":
-								set( uri, new URL( val ) );
-								break;
-							case "SHAPE":
-								shapelkp.put( uri, NamedShape.valueOf( val ) );
-								break;
-							case "COLOR":
-								String vals[] = val.split( "," );
-								colorlkp.put( uri, new Color( Integer.parseInt( vals[0] ),
-										Integer.parseInt( vals[1] ), Integer.parseInt( vals[2] ) ) );
-								break;
-						}
-					}
-				}
-			}
-			catch ( BackingStoreException | MalformedURLException | NumberFormatException e ) {
-				log.warn( e, e );
-			}
-		}
-
-		saveToPrefs = b;
+	public void saveTo( URI database, StoredMetadata pers ) {
+		persistance = pers;
+		saveOnChange = ( null != persistance );
 	}
 
 	private void trysave( URI... uris ) {
-		if ( saveToPrefs ) {
-			if ( null == uris ) {
-				trysave( imglkp.keySet().toArray( new URI[0] ) );
-				trysave( shapelkp.keySet().toArray( new URI[0] ) );
+		if ( saveOnChange ) {
+			Set<URI> tosave = new HashSet<>( Arrays.asList( uris ) );
+			if ( 0 == uris.length ) {
+				tosave.addAll( imglkp.keySet() );
+				tosave.addAll( shapelkp.keySet() );
+				tosave.addAll( imglkp.keySet() );
 			}
-			else {
 
-				for ( URI uri : uris ) {
-					String key = DigestUtils.md5Hex( uri.stringValue() );
-					prefs.put( key + "_URI", uri.stringValue() );
+			for ( URI uri : tosave ) {
+				try {
 					if ( imglkp.containsKey( uri ) ) {
-						prefs.put( key + "_IMAGE", imglkp.get( uri ).toExternalForm() );
+						persistance.set( null, uri, StoredMetadata.GRAPH_ICON,
+								new URIImpl( imglkp.get( uri ).toExternalForm() ) );
 					}
 					else {
 						try {
 							if ( shapelkp.containsKey( uri ) ) {
-								prefs.put( key + "_SHAPE", shapelkp.get( uri ).toString() );
+								persistance.set( null, uri, shapelkp.get( uri ) );
 							}
 							if ( colorlkp.containsKey( uri ) ) {
-								Color c = colorlkp.get( uri );
-								prefs.put( key + "_COLOR",
-										String.format( "%d,%d,%d", c.getRed(), c.getGreen(), c.getBlue() ) );
+								persistance.set( null, uri, colorlkp.get( uri ) );
 							}
 						}
 						catch ( Exception e ) {
 							log.warn( e );
 						}
 					}
+				}
+				catch ( Exception e ) {
+
 				}
 			}
 		}
@@ -174,8 +136,8 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public NamedShape getShape( URI type, URI instance ){
-		if( shapelkp.containsKey( instance ) ){
+	public NamedShape getShape( URI type, URI instance ) {
+		if ( shapelkp.containsKey( instance ) ) {
 			return shapelkp.get( instance );
 		}
 
@@ -270,7 +232,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public Color getColor( URI type, URI instance ) {
-		if( colorlkp.containsKey( instance ) ){
+		if ( colorlkp.containsKey( instance ) ) {
 			return colorlkp.get( instance );
 		}
 
@@ -284,7 +246,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public URL getUrl( URI type, URI instance ) {
-		if( imglkp.containsKey( type ) ){
+		if ( imglkp.containsKey( type ) ) {
 			return imglkp.get( type );
 		}
 		return imglkp.get( instance );

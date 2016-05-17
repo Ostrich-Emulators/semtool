@@ -17,11 +17,10 @@
  * SEMOSS. If not, see <http://www.gnu.org/licenses/>.
  * ****************************************************************************
  */
-package com.ostrichemulators.semtool.ui.swing.custom;
+package com.ostrichemulators.semtool.ui.main;
 
 import com.ostrichemulators.semtool.ui.actions.OpenAction;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
 import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.main.listener.impl.PlaySheetFrameToolBarListener;

@@ -98,4 +98,18 @@ public abstract class OneValueQueryAdapter<T> extends QueryExecutorAdapter<T> {
 	public static OneValueQueryAdapter<Double> getDouble( String sparql ) {
 		return getDouble( sparql, null );
 	}
+
+	public static OneValueQueryAdapter<Boolean> getBoolean( String sparql, String var ) {
+		return new OneValueQueryAdapter<Boolean>( sparql, var ) {
+
+			@Override
+			protected Boolean getValue( Value value, ValueFactory fac ) {
+				return ( null == value ? false : Literal.class.cast( value ).booleanValue() );
+			}
+		};
+	}
+
+	public static OneValueQueryAdapter<Boolean> getBoolean( String sparql ) {
+		return getBoolean( sparql, null );
+	}
 }

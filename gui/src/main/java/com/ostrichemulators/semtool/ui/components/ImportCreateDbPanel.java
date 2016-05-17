@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.ImportFileReader;
@@ -26,7 +27,7 @@ import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.GuiUtility;
-import com.ostrichemulators.semtool.ui.main.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.util.DIHelper;
 import java.awt.Frame;
 import java.io.File;

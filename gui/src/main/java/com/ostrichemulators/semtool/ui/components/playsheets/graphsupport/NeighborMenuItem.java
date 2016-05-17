@@ -21,7 +21,7 @@ package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.rdf.query.util.impl.ModelQueryAdapter;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import org.apache.log4j.Logger;
 

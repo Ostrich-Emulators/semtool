@@ -17,6 +17,7 @@ gui/.project
 gui/.settings
 gui/.settings/*
 gui/src/main/resources/html.zip
+gui/semtool-data
 gui/nbactions*
 gui/logs
 webapp/src/main/resources/semoss-web.properties

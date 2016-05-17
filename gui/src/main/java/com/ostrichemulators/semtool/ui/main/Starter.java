@@ -30,12 +30,12 @@ import javax.swing.plaf.ColorUIResource;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.ostrichemulators.semtool.ui.components.PlayPane;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
+import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.util.PinningEngineListener;
 import com.ostrichemulators.semtool.util.Utility;
@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import javax.swing.Painter;
@@ -99,9 +98,15 @@ public class Starter {
 	}
 
 	public void startup( String[] args ) throws IOException {
-		init();
-		initUI();
 		final String WORKINGDIR = System.getProperty( "user.dir" );
+		File localstore = new File( WORKINGDIR, "semtool-data" );
+		StoredMetadata metas
+				= new StoredMetadata( localstore );
+		DIHelper.getInstance().setLocalStore( localstore );
+		DIHelper.getInstance().setMetadataStore( metas );
+
+		init( localstore );
+		initUI();
 
 		final EngineUtil engineutil = EngineUtil.getInstance();
 		new Thread( engineutil ).start();
@@ -157,7 +162,7 @@ public class Starter {
 			}
 		}
 
-		final PlayPane frame = getPlayPane();
+		final PlayPane frame = getPlayPane( metas );
 		java.awt.EventQueue.invokeLater( new Runnable() {
 			@Override
 			public void run() {
@@ -188,11 +193,9 @@ public class Starter {
 			}
 		}
 		else {
-			String ext = DIHelper.getInstance().getProperty( Constants.ENGINE_EXT );
-			PinningEngineListener watcherInstance = new PinningEngineListener();
+			PinningEngineListener watcherInstance = new PinningEngineListener( metas );
 			engineutil.addEngineOpListener( watcherInstance );
-			watcherInstance.setExtensions( Arrays.asList( ext.split( ";" ) ) );
-			watcherInstance.loadFirst();
+			watcherInstance.reopenPinned();
 		}
 	}
 
@@ -208,13 +211,13 @@ public class Starter {
 		return configs;
 	}
 
-	protected PlayPane getPlayPane() {
-		return new PlayPane();
+	protected PlayPane getPlayPane( StoredMetadata metas ) {
+		return new PlayPane( metas );
 	}
 
-	protected void init() throws IOException {
+	protected void init( File localstore ) throws IOException {
 		try {
-			GuiUtility.extractHTML( "/gui-html.zip" );
+			GuiUtility.extractHTML( "/gui-html.zip", localstore );
 		}
 		catch ( IOException ioe ) {
 			String errorMessage = "Cound not extract application html: " + ioe.getMessage();

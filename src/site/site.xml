@@ -26,8 +26,6 @@ under the License.
 	<body>
 		<menu name="Getting Started">
 			<item name="Introduction" href="getting-started.html"/>
-			<item name="Goals" href="plugin-info.html"/>
-			<item name="Usage" href="usage.html"/>
 			<item name="Loading Data" href="loading-data.html"/>
 		</menu>
 		<menu ref="modules"/>

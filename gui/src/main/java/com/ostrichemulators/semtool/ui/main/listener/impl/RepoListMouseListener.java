@@ -42,8 +42,8 @@ import com.ostrichemulators.semtool.ui.actions.MountAction;
 import com.ostrichemulators.semtool.ui.actions.PinAction;
 import com.ostrichemulators.semtool.ui.actions.PropertiesAction;
 import com.ostrichemulators.semtool.ui.actions.UnmountAction;
-import com.ostrichemulators.semtool.ui.components.PlayPane;
-import static com.ostrichemulators.semtool.ui.components.PlayPane.UIPROGRESS;
+import com.ostrichemulators.semtool.ui.main.PlayPane;
+import static com.ostrichemulators.semtool.ui.main.PlayPane.UIPROGRESS;
 import java.awt.event.KeyEvent;
 
 /**
