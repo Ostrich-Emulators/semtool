@@ -5,8 +5,8 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAC;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FilenameFilter;
@@ -306,9 +306,9 @@ public class EngineUtil implements Runnable {
 			log.error( "no metadata to clone", meq );
 		}
 
-		URI reification = ( oldmetadata.containsKey( VAS.ReificationModel )
-				? URI.class.cast( oldmetadata.get( VAS.ReificationModel ) )
-				: VAS.VASEMOSS_Reification );
+		URI reification = ( oldmetadata.containsKey(SEMTOOL.ReificationModel )
+				? URI.class.cast(oldmetadata.get(SEMTOOL.ReificationModel ) )
+				: SEMTOOL.SEMTOOL_Reification );
 
 		EngineCreateBuilder ecb
 				= new EngineCreateBuilder( metadata.getLocation(), metadata.getName() );
@@ -550,12 +550,12 @@ public class EngineUtil implements Runnable {
 			final URI newbase = to.getBaseUri();
 			Date now = new Date();
 			Properties props = GuiUtility.getBuildProperties();
-			oldmetas.put( VAC.SOFTWARE_AGENT,
+			oldmetas.put(SEMCORE.SOFTWARE_AGENT,
 					vf.createLiteral( props.getProperty( "name", "unknown" ) ) );
 			oldmetas.put( MetadataConstants.DCT_CREATED, vf.createLiteral( now ) );
 			oldmetas.put( MetadataConstants.DCT_MODIFIED, vf.createLiteral( now ) );
 			oldmetas.put( RDFS.LABEL, vf.createLiteral( title ) );
-			oldmetas.remove( VAS.Database );
+			oldmetas.remove(SEMTOOL.Database );
 
 			to.execute( new ModificationExecutorAdapter( true ) {
 

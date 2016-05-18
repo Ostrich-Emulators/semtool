@@ -19,7 +19,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.Security;
 import java.util.Properties;
@@ -118,7 +118,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			URI baseuri = null;
 			// if the baseuri isn't already set, then query the kb for void:Dataset
 			RepositoryResult<Statement> rr
-					= rc.getStatements( null, RDF.TYPE, VAS.Database, false );
+					= rc.getStatements(null, RDF.TYPE, SEMTOOL.Database, false );
 			List<Statement> stmts = Iterations.asList( rr );
 			for ( Statement s : stmts ) {
 				baseuri = URI.class.cast( s.getSubject() );
@@ -129,8 +129,8 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 				// no base uri in the DB, so make a new one
 				baseuri = getNewBaseUri();
 				//rc.begin();
-				rc.add( baseuri, RDF.TYPE, VAS.Database );
-				//rc.add(  baseuri, VAS.ReificationModel, VAS.VASEMOSS_Reification );
+				rc.add(baseuri, RDF.TYPE, SEMTOOL.Database );
+				//rc.add(  baseuri, SEMTOOL.ReificationModel, SEMTOOL.SEMTOOL_Reification );
 				//rc.commit();
 			}
 

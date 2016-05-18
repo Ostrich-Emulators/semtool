@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.util;
 
 import com.bigdata.rdf.model.BigdataValueFactoryImpl;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.CSVReader;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
@@ -393,7 +393,7 @@ public class EngineLoaderTest {
 		el.loadToEngine( Arrays.asList( TICKET584_EXP ), engine, true, errors );
 
 		// cleanup
-		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.Database );
+		engine.getRawConnection().remove((Resource) null, RDF.TYPE, SEMTOOL.Database );
 		el.release();
 
 		if ( log.isTraceEnabled() ) {
@@ -638,8 +638,8 @@ public class EngineLoaderTest {
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
-		engine.getRawConnection().add( engine.getBaseUri(), VAS.ReificationModel,
-				VAS.VASEMOSS_Reification );
+		engine.getRawConnection().add(engine.getBaseUri(), SEMTOOL.ReificationModel,
+				SEMTOOL.SEMTOOL_Reification );
 		engine.getRawConnection().commit();
 
 		POIReader rdr = new POIReader();
@@ -778,7 +778,7 @@ public class EngineLoaderTest {
 		ImportData data = new ImportData();
 		EngineLoader.initNamespaces( data );
 		assertEquals( 10, data.getMetadata().getNamespaces().size() );
-		assertEquals( VAS.NAMESPACE, data.getMetadata().getNamespaces().get( VAS.PREFIX ) );
+		assertEquals(SEMTOOL.NAMESPACE, data.getMetadata().getNamespaces().get(SEMTOOL.PREFIX ) );
 	}
 
 	@Test
@@ -1078,7 +1078,7 @@ public class EngineLoaderTest {
 			boolean doCountsOnly ) throws IOException, RepositoryException, RDFHandlerException {
 
 		// get rid of the random database id
-		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.Database );
+		engine.getRawConnection().remove((Resource) null, RDF.TYPE, SEMTOOL.Database );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();

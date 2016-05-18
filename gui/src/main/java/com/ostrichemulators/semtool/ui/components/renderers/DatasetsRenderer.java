@@ -5,14 +5,12 @@
  */
 package com.ostrichemulators.semtool.ui.components.renderers;
 
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
-import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
-import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.GuiUtility;
 
 /**
@@ -31,7 +29,7 @@ public class DatasetsRenderer extends DefaultListCellRenderer {
 	@Override
 	public Component getListCellRendererComponent( JList list, Object val, int idx,
 			boolean sel, boolean hasfocus ) {
-		super.getListCellRendererComponent( list, "http://os-em.com/ontologies/", idx, sel, hasfocus );
+		super.getListCellRendererComponent( list, SEMONTO.NAMESPACE, idx, sel, hasfocus );
 		setIcon( dbpin );
 
 		return this;

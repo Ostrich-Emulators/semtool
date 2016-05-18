@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneValueQueryAdapter;
@@ -90,10 +90,10 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 		OneValueQueryAdapter<String> qa
 				= OneValueQueryAdapter.getString( "SELECT ?val WHERE { ?base ?pred ?val }" );
 		qa.bind( "base", engine.getBaseUri() );
-		qa.bind( "pred", VAS.ConceptsSparql );
+		qa.bind("pred", SEMTOOL.ConceptsSparql );
 		String concept = engine.queryNoEx( qa );
 
-		qa.bind( "pred", VAS.EdgesSparql );
+		qa.bind("pred", SEMTOOL.EdgesSparql );
 		String edge = engine.queryNoEx( qa );
 
 		crp.setConceptSparql( concept );
@@ -108,35 +108,35 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 		if ( JOptionPane.CANCEL_OPTION != ans ) {
 
 			try {
-				engine.execute( new ModificationExecutorAdapter() {
+				engine.execute(new ModificationExecutorAdapter() {
 
 					@Override
 					public void exec( RepositoryConnection conn ) throws RepositoryException {
 						ValueFactory vf = conn.getValueFactory();
 						URI base = engine.getBaseUri();
 
-						conn.remove( base, VAS.ReificationModel, null );
-						conn.remove( base, VAS.ConceptsSparql, null );
-						conn.remove( base, VAS.EdgesSparql, null );
+						conn.remove(base, SEMTOOL.ReificationModel, null );
+						conn.remove(base, SEMTOOL.ConceptsSparql, null );
+						conn.remove(base, SEMTOOL.EdgesSparql, null );
 
 						if ( JOptionPane.YES_OPTION == ans ) {
-							model[0] = VAS.Custom_Reification;
+							model[0] = SEMTOOL.Custom_Reification;
 
 							String cpc = crp.getConceptSparql();
 							if ( !( null == cpc || cpc.isEmpty() ) ) {
-								conn.add( base, VAS.ConceptsSparql, vf.createLiteral( cpc ) );
+								conn.add(base, SEMTOOL.ConceptsSparql, vf.createLiteral( cpc ) );
 							}
 
 							cpc = crp.getEdgeSparql();
 							if ( !( null == cpc || cpc.isEmpty() ) ) {
-								conn.add( base, VAS.EdgesSparql, vf.createLiteral( cpc ) );
+								conn.add(base, SEMTOOL.EdgesSparql, vf.createLiteral( cpc ) );
 							}
 						}
 						else {
-							model[0] = VAS.VASEMOSS_Reification;
+							model[0] = SEMTOOL.SEMTOOL_Reification;
 						}
 
-						conn.add( base, VAS.ReificationModel, model[0] );
+						conn.add(base, SEMTOOL.ReificationModel, model[0] );
 					}
 				} );
 			}

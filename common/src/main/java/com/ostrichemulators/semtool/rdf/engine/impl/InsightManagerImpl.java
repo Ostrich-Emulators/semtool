@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
+import com.ostrichemulators.semtool.model.vocabulary.SEMPERS;
 import info.aduna.iteration.Iterations;
 
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import com.ostrichemulators.semtool.model.vocabulary.SP;
 import com.ostrichemulators.semtool.model.vocabulary.SPIN;
 import com.ostrichemulators.semtool.model.vocabulary.SPL;
 import com.ostrichemulators.semtool.model.vocabulary.UI;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.InsightOutputType;
 import com.ostrichemulators.semtool.om.Parameter;
@@ -38,7 +38,6 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.om.Perspective;
-import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import static com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter.getDate;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -67,7 +66,7 @@ public class InsightManagerImpl implements InsightManager {
 			= Pattern.compile( "((BIND\\s*\\(\\s*)?<@(\\w+)((?:-)([^@]+))?@>(\\s*AS\\s+\\?(\\w+)\\s*\\)\\s*\\.?\\s*)?)" );
 	// strictly for upgrading old insights
 	private static final Map<String, InsightOutputType> UPGRADETYPEMAP = new HashMap<>();
-	private UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+	private UriBuilder urib = UriBuilder.getBuilder(SEMPERS.NAMESPACE );
 	private final Map<URI, Insight> insights = new HashMap<>();
 	private final List<Perspective> perspectives = new ArrayList<>();
 
@@ -267,8 +266,8 @@ public class InsightManagerImpl implements InsightManager {
 	public void loadFromRepository( RepositoryConnection rc ) {
 		List<Perspective> persps = new ArrayList<>();
 		try {
-			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
-					RDF.TYPE, VAS.Perspective, true ) );
+			List<Statement> stmts = Iterations.asList(rc.getStatements(null,
+					RDF.TYPE, SEMPERS.Perspective, true ) );
 			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
 				Perspective p = loadPerspective( URI.class.cast( s.getSubject() ), rc, urib );
@@ -605,7 +604,7 @@ public class InsightManagerImpl implements InsightManager {
 
 					insight.setLabel( obj.stringValue() );
 				}
-				else if ( VAS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
+				else if ( SEMPERS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
 					try {
 						insight.setOutput( InsightOutputType.valueOf( obj.stringValue() ) );
 					}
@@ -636,7 +635,7 @@ public class InsightManagerImpl implements InsightManager {
 				else if ( SP.text.equals( pred ) ) {
 					insight.setSparql( obj.stringValue() );
 				}
-				else if ( VAS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
+				else if ( SEMPERS.INSIGHT_OUTPUT_TYPE.equals( pred ) ) {
 					insight.setOutput( InsightOutputType.valueOf( obj.stringValue() ) );
 				}
 				else if ( UI.viewClass.equals( pred ) && null == insight.getOutput() ) {
@@ -782,11 +781,11 @@ public class InsightManagerImpl implements InsightManager {
 	 */
 	public static Collection<Statement> getStatements( Perspective p, User user ) {
 		List<Statement> statements = new ArrayList<>();
-		UriBuilder urib = UriBuilder.getBuilder( MetadataConstants.VA_INSIGHTS_NS );
+		UriBuilder urib = UriBuilder.getBuilder(SEMPERS.NAMESPACE );
 
 		// if we're creating statements, mark our repository as an insights db
-		statements.add( new StatementImpl( MetadataConstants.VA_INSIGHTS, RDF.TYPE,
-				MetadataConstants.INSIGHT_CORE_TYPE ) );
+		statements.add(new StatementImpl( SEMPERS.INSIGHT_DB, RDF.TYPE,
+				SEMPERS.INSIGHT_CORE_TYPE ) );
 
 		ValueFactory vf = new ValueFactoryImpl();
 
@@ -832,7 +831,7 @@ public class InsightManagerImpl implements InsightManager {
 		URI pid = p.getId();
 		Date now = new Date();
 
-		statements.add( new StatementImpl( pid, RDF.TYPE, VAS.Perspective ) );
+		statements.add(new StatementImpl( pid, RDF.TYPE, SEMPERS.Perspective ) );
 		statements.add( new StatementImpl( pid, RDFS.LABEL,
 				vf.createLiteral( p.getLabel() ) ) );
 		if ( null != p.getDescription() ) {
@@ -865,11 +864,11 @@ public class InsightManagerImpl implements InsightManager {
 		}
 
 		if ( null != insight.getOutput() ) {
-			statements.add( new StatementImpl( iid, VAS.INSIGHT_OUTPUT_TYPE,
+			statements.add(new StatementImpl( iid, SEMPERS.INSIGHT_OUTPUT_TYPE,
 					vf.createLiteral( insight.getOutput().toString() ) ) );
 		}
 
-		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, VAS.InsightProperties ) );
+		statements.add(new StatementImpl( iid, RDFS.SUBCLASSOF, SEMPERS.InsightProperties ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATED,
 				vf.createLiteral( null == insight.getCreated() ? new Date()
 								: insight.getCreated() ) ) );

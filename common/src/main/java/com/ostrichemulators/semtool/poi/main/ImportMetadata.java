@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.ArrayList;
 import java.util.Collection;

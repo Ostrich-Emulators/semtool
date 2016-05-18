@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
@@ -135,8 +135,8 @@ public class EngineUtil2Test {
 		assertEquals( ReificationStyle.LEGACY, EngineUtil2.getReificationStyle( null ) );
 
 		StatementAddingExecutor sae = new StatementAddingExecutor();
-		sae.addStatement( new StatementImpl( eng.getBaseUri(), VAS.ReificationModel,
-				VAS.W3C_Reification ) );
+		sae.addStatement(new StatementImpl( eng.getBaseUri(), SEMTOOL.ReificationModel,
+				SEMTOOL.W3C_Reification ) );
 
 		eng.execute( sae );
 

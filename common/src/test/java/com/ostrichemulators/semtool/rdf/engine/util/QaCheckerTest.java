@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
@@ -167,8 +167,8 @@ public class QaCheckerTest {
 	public void testLoadCachesModern() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
 				UriBuilder.getBuilder( OWLSTART ) );
-		engine.getRawConnection().add( engine.getBaseUri(), VAS.ReificationModel,
-				VAS.VASEMOSS_Reification );
+		engine.getRawConnection().add(engine.getBaseUri(), SEMTOOL.ReificationModel,
+				SEMTOOL.SEMTOOL_Reification );
 
 		RepositoryConnection rc = engine.getRawConnection();
 		rc.begin();

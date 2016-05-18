@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,7 +36,7 @@ public class MetadataQueryTest {
 		engine = new InMemorySesameEngine();
 		try {
 			RepositoryConnection rc = engine.getRawConnection();
-			rc.add( bldr.toUri(), RDF.TYPE, VAS.Database );
+			rc.add(bldr.toUri(), RDF.TYPE, SEMTOOL.Database );
 		}
 		catch ( Exception e ) {
 		}

@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.rdf.engine.util.ImportDataProcessor;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
@@ -111,7 +112,7 @@ public class ImportExistingDbPanel extends JPanel {
 		baseuri.addItem( ImportCreateDbPanel.METADATABASEURI );
 		Set<String> seen = new HashSet<>();
 		seen.add( ImportCreateDbPanel.METADATABASEURI );
-		for ( String uri : prefs.get( "lastontopath", "http://os-em.com/ontologies" ).split( ";" ) ) {
+		for ( String uri : prefs.get( "lastontopath", SEMONTO.BASE_URI ).split( ";" ) ) {
 			if ( !seen.contains( uri ) ) {
 				baseuri.addItem( uri );
 				seen.add( uri );
@@ -353,7 +354,7 @@ public class ImportExistingDbPanel extends JPanel {
 					|| ImportCreateDbPanel.METADATABASEURI.equals( mybase ) ) {
 				Set<URI> uris = new HashSet<>();
 				Preferences prefs = Preferences.userNodeForPackage( getClass() );
-				String basepref = prefs.get( "lastontopath", "http://os-em.com/ontologies/" );
+				String basepref = prefs.get( "lastontopath", SEMONTO.NAMESPACE );
 				for ( String b : basepref.split( ";" ) ) {
 					uris.add( new URIImpl( b ) );
 				}

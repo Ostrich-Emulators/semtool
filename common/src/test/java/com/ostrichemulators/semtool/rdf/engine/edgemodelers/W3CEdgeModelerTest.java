@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.edgemodelers;
 
 import com.ostrichemulators.semtool.rdf.engine.edgemodelers.W3CEdgeModeler;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
@@ -177,7 +177,7 @@ public class W3CEdgeModelerTest {
 			boolean doCountsOnly ) throws IOException, RepositoryException, RDFHandlerException {
 
 		// get rid of the random database id
-		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, VAS.Database );
+		engine.getRawConnection().remove((Resource) null, RDF.TYPE, SEMTOOL.Database );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();

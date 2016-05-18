@@ -29,11 +29,4 @@ public class MetadataConstants {
 
 	public static final URI DCT_CREATED = DCTERMS.CREATED;
 	public static final URI DCT_MODIFIED = DCTERMS.MODIFIED;
-
-	public static final String VA_INSIGHTS_PREFIX = "insights";
-	public static final String VA_INSIGHTS_NS = "http://os-em.com/dataset/insights#";
-	public static final URI VA_INSIGHTS = new URIImpl( "http://os-em.com/dataset/insights" );
-	public static final URI INSIGHT_CORE_TYPE
-			= new URIImpl( "http://os-em.com/ontologies/core#InsightDataset" );
-
 }

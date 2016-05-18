@@ -19,10 +19,10 @@
  */
 package com.ostrichemulators.semtool.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.SEMOSS;
-import com.ostrichemulators.semtool.model.vocabulary.VAC;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
 
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
+import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
@@ -77,7 +77,7 @@ import org.openrdf.rio.turtle.TurtleWriter;
 
 /**
  * The GuiUtility class contains a variety of miscellaneous functions
- * implemented extensively throughout SEMOSS. Some of these functionalities
+ implemented extensively throughout SEMONTO. Some of these functionalities
  * include getting concept names, printing messages, loading engines, and
  * writing Excel workbooks.
  */
@@ -95,9 +95,9 @@ public class Utility {
 		DEFAULTNAMESPACES.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
 		DEFAULTNAMESPACES.put( FOAF.PREFIX, FOAF.NAMESPACE );
 		DEFAULTNAMESPACES.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
-		DEFAULTNAMESPACES.put( VAS.PREFIX, VAS.NAMESPACE );
-		DEFAULTNAMESPACES.put( VAC.PREFIX, VAC.NAMESPACE );
-		DEFAULTNAMESPACES.put( SEMOSS.PREFIX, SEMOSS.NAMESPACE );
+		DEFAULTNAMESPACES.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
+		DEFAULTNAMESPACES.put(SEMCORE.PREFIX, SEMCORE.NAMESPACE );
+		DEFAULTNAMESPACES.put(SEMONTO.PREFIX, SEMONTO.NAMESPACE );
 	}
 
 	public static URI getUniqueUri() {

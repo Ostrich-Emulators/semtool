@@ -19,7 +19,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.Bindable;
 import info.aduna.iteration.Iterations;
 import java.io.IOException;
@@ -159,7 +159,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			try {
 				// if the baseuri isn't already set, then query the kb for void:Dataset
 				RepositoryResult<Statement> rr
-						= getRawConnection().getStatements( null, RDF.TYPE, VAS.Database, false );
+						= getRawConnection().getStatements(null, RDF.TYPE, SEMTOOL.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = URI.class.cast( s.getSubject() );
@@ -199,7 +199,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	protected URI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
 		URI baseuri = getNewBaseUri();
-		rc.add( baseuri, RDF.TYPE, VAS.Database );
+		rc.add(baseuri, RDF.TYPE, SEMTOOL.Database );
 
 		// see if we have some old metadata we can move over, too
 		VoidQueryAdapter q = new VoidQueryAdapter( "SELECT ?pred ?val { ?uri a ?voidds . ?uri ?pred ?val}" ) {
@@ -560,8 +560,8 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		ValueFactory vf = rc.getValueFactory();
 		try {
 			if ( null == baseuri ) {
-				RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
-						VAS.Database, false );
+				RepositoryResult<Statement> rr = rc.getStatements(null, RDF.TYPE,
+						SEMTOOL.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = s.getSubject();

@@ -19,6 +19,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -86,8 +87,8 @@ public abstract class AbstractEngine implements IEngine {
 			String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
 			String owlstarter = prop.getProperty( Constants.SEMOSS_URI, null );
 			if ( null == owlstarter ) {
-				log.warn( "no schema URI set...using " + Constants.DEFAULT_SEMOSS_URI );
-				owlstarter = Constants.DEFAULT_SEMOSS_URI;
+				log.warn( "no schema URI set...using " + SEMONTO.NAMESPACE );
+				owlstarter = SEMONTO.NAMESPACE;
 			}
 			baseuri = new URIImpl( setUris( baseuristr, owlstarter ).stringValue() );
 
@@ -453,7 +454,7 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	public static final URI getNewBaseUri() {
-		URI baseuri = UriBuilder.getBuilder( "http://semtool.os-em.com/database/" ).uniqueUri();
+		URI baseuri = UriBuilder.getBuilder( "http://os-em.com/semtool/database/" ).uniqueUri();
 		return baseuri;
 	}
 

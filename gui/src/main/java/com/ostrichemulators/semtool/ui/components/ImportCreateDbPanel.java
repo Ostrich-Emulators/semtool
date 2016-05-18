@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
 import com.ostrichemulators.semtool.poi.main.ImportData;
@@ -72,7 +73,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 				// for now, we only support SEMOSS reification
 				jrb.setEnabled( ReificationStyle.SEMOSS == rs );
-
 				jrb.setSelected( ReificationStyle.SEMOSS == rs );
 			}
 		}
@@ -93,7 +93,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		baseuri.addItem( METADATABASEURI );
 		Set<String> seen = new HashSet<>();
 		seen.add( METADATABASEURI );
-		for ( String uri : prefs.get( "lastontopath", "http://os-em.com/ontologies" ).split( ";" ) ) {
+		for ( String uri : prefs.get( "lastontopath", SEMONTO.NAMESPACE ).split( ";" ) ) {
 			if ( !seen.contains( uri ) ) {
 				baseuri.addItem( uri );
 				seen.add( uri );
@@ -397,11 +397,14 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 		Collection<File> files = file.getFiles();
 
+		
+
+
 		URI defaultBase = null;
 		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
 			Set<URI> uris = new HashSet<>();
 			Preferences prefs = Preferences.userNodeForPackage( getClass() );
-			String basepref = prefs.get( "lastontopath", "http://os-em.com/ontologies/" );
+			String basepref = prefs.get( "lastontopath", SEMONTO.NAMESPACE );
 			for ( String b : basepref.split( ";" ) ) {
 				uris.add( new URIImpl( b ) );
 			}
@@ -469,15 +472,12 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 					EngineCreateBuilder ecb
 							= new EngineCreateBuilder( dbdir.getFirstFile(), dbname.getText() );
 
-					//If no question file is entered, then use "va-semoss.ttl":
-					File fileQuestions = questionfile.getFirstFile();
-					fileQuestions = ( fileQuestions != null ) ? fileQuestions
-							: new File( "/models/va-semoss.ttl" );
+					File insights = questionfile.getFirstFile();
 
 					ecb.setDefaultBaseUri( defaultBaseUri,
 							defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ) )
 							.setReificationModel( reif )
-							.setDefaultsFiles( null, null, fileQuestions )
+							.setDefaultsFiles( null, null, insights )
 							.setFiles( files )
 							.setBooleans( stageInMemory, calc, dometamodel )
 							.setVocabularies( vocabPanel.getSelectedVocabularies() );
@@ -537,14 +537,16 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 		for ( File f : files ) {
 			ImportFileReader reader = EngineLoader.getDefaultReader( f );
-			ImportMetadata metadata = reader.getMetadata( f );
+			if ( null != reader ) { // triples files don't have custom readers
+				ImportMetadata metadata = reader.getMetadata( f );
 
-			URI baser = metadata.getBase();
-			if ( null == baser ) {
-				everyFileHasBase = false;
-			}
-			else {
-				bases.add( metadata.getBase().stringValue() );
+				URI baser = metadata.getBase();
+				if ( null == baser ) {
+					everyFileHasBase = false;
+				}
+				else {
+					bases.add( metadata.getBase().stringValue() );
+				}
 			}
 		}
 

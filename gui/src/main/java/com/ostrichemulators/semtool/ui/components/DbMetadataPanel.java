@@ -5,8 +5,8 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
 
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -84,8 +84,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		fieldlkp.put( MetadataConstants.DCT_PUBLISHER, poc );
 		fieldlkp.put( MetadataConstants.DCT_CREATED, created );
 		fieldlkp.put( MetadataConstants.DCT_MODIFIED, update );
-		fieldlkp.put( VAS.ReificationModel, edgemodel );
-		fieldlkp.put( VAS.Database, voiduri );
+		fieldlkp.put(SEMTOOL.ReificationModel, edgemodel );
+		fieldlkp.put(SEMTOOL.Database, voiduri );
 
 		voiduri.setEditable( null == baseuri );
 		voiduri.setBackground( null == baseuri ? title.getBackground()
@@ -152,8 +152,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 	private void doSave() {
 		int i = 1;
 		for ( Map.Entry<URI, JTextField> entry : fieldlkp.entrySet() ) {
-			if ( !( VAS.Database.equals( entry.getKey() )
-					|| VAS.ReificationModel.equals( entry.getKey() ) ) ) {
+			if ( !( SEMTOOL.Database.equals( entry.getKey() )
+					|| SEMTOOL.ReificationModel.equals( entry.getKey() ) ) ) {
 				DbMetadataPanel.this.actionPerformed( new ActionEvent( entry.getValue(),
 						i++, entry.getKey().stringValue() ) );
 			}
@@ -219,13 +219,13 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		try {
 			MetadataQuery mq = new MetadataQuery();
 			Map<URI, Value> metadata = eng.query( mq );
-			if ( metadata.containsKey( VAS.Database ) ) {
-				baseuri = URI.class.cast( metadata.get( VAS.Database ) );
+			if ( metadata.containsKey(SEMTOOL.Database ) ) {
+				baseuri = URI.class.cast(metadata.get(SEMTOOL.Database ) );
 			}
 
-			if ( metadata.containsKey( VAS.ReificationModel ) ) {
-				URI reif = URI.class.cast( metadata.get( VAS.ReificationModel ) );
-				metadata.put( VAS.ReificationModel,
+			if ( metadata.containsKey(SEMTOOL.ReificationModel ) ) {
+				URI reif = URI.class.cast(metadata.get(SEMTOOL.ReificationModel ) );
+				metadata.put(SEMTOOL.ReificationModel,
 						new LiteralImpl( Utility.getInstanceLabel( reif, eng ) ) );
 			}
 
@@ -516,14 +516,14 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		final String val = fieldlkp.get( uri ).getText();
 
 		try {
-			eng.execute( new ModificationExecutorAdapter( true ) {
+			eng.execute(new ModificationExecutorAdapter( true ) {
 
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					ValueFactory fac = conn.getValueFactory();
-					if ( uri.equals( VAS.Database ) ) {
+					if ( uri.equals(SEMTOOL.Database ) ) {
 						baseuri = fac.createURI( val );
-						conn.add( baseuri, RDF.TYPE, VAS.Database );
+						conn.add(baseuri, RDF.TYPE, SEMTOOL.Database );
 					}
 					else {
 						if ( conn.hasStatement( baseuri, uri, null, false ) ) {

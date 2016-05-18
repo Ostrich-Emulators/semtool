@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.api;
 
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.util.Constants;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,7 +54,7 @@ public class ReificationStyleTest {
 
 	@Test
 	public void testFromUri() {
-		ReificationStyle style = ReificationStyle.fromUri( VAS.RDR_Reification );
+		ReificationStyle style = ReificationStyle.fromUri(SEMTOOL.RDR_Reification );
 		assertEquals( ReificationStyle.RDR, style );
 	}
 

@@ -7,8 +7,9 @@ package com.ostrichemulators.semtool.rdf.engine.util;
 
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
-import com.ostrichemulators.semtool.model.vocabulary.VAC;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.ImportMetadata;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
@@ -79,7 +80,7 @@ public class EngineUtil2 {
 	public static void clear( IEngine engine ) throws RepositoryException {
 		try {
 			final Map<URI, Value> metas = engine.query( new MetadataQuery() );
-			metas.remove( VAS.Database );
+			metas.remove(SEMTOOL.Database );
 
 			engine.execute( new ModificationExecutorAdapter( true ) {
 
@@ -123,7 +124,7 @@ public class EngineUtil2 {
 	public static ReificationStyle getReificationStyle( IEngine engine ) {
 		URI reif = Constants.NONODE;
 		if ( null != engine ) {
-			MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
+			MetadataQuery mq = new MetadataQuery( SEMTOOL.ReificationModel );
 			try {
 				engine.query( mq );
 				Value str = mq.getOne();
@@ -341,17 +342,17 @@ public class EngineUtil2 {
 			// add the metadata
 			rc.begin();
 			ValueFactory vf = rc.getValueFactory();
-			rc.add( new StatementImpl( baseuri, RDF.TYPE, VAS.Database ) );
+			rc.add(new StatementImpl( baseuri, RDF.TYPE, SEMTOOL.Database ) );
 			Date today = new Date();
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
-			rc.add( new StatementImpl( baseuri, VAS.ReificationModel,
+			rc.add(new StatementImpl( baseuri, SEMTOOL.ReificationModel,
 					ecb.getReificationModel().uri ) );
 
-			rc.add( new StatementImpl( baseuri, VAC.SOFTWARE_AGENT,
+			rc.add(new StatementImpl( baseuri, SEMCORE.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
 
 			String username = user.getProperty( User.UserProperty.USER_FULLNAME );
@@ -403,7 +404,7 @@ public class EngineUtil2 {
 			repo.initialize();
 			rc = repo.getConnection();
 
-			rc.add( is, Constants.DEFAULT_SEMOSS_URI, fmt );
+			rc.add( is, SEMONTO.BASE_URI, fmt );
 			rc.commit();
 			stmts.addAll( Iterations.asList( rc.getStatements( null, null, null, false ) ) );
 		}

@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.edgemodelers;
 
 import com.ostrichemulators.semtool.rdf.engine.edgemodelers.AbstractEdgeModeler;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getRDFStringValue;
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getUriFromRawString;
 import java.util.HashMap;
@@ -51,21 +51,21 @@ public class AbstractEdgeModelerTest {
 	@Test
 	public void testIsUri1() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		boolean result = AbstractEdgeModeler.isUri( VAS.PREFIX + ":bobo", namespaces );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
+		boolean result = AbstractEdgeModeler.isUri(SEMTOOL.PREFIX + ":bobo", namespaces );
 		assertTrue( result );
 	}
 
 	public void testIsUri2() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
 		boolean result = AbstractEdgeModeler.isUri( "<http://foo.bar/bah/bobo>", namespaces );
 		assertTrue( result );
 	}
 
 	public void testIsUri3() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
 		boolean result = AbstractEdgeModeler.isUri( "blah", namespaces );
 		assertTrue( !result );
 	}
@@ -73,7 +73,7 @@ public class AbstractEdgeModelerTest {
 	@Test
 	public void testGetUriFromRawString1() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
 
 		// ryan:int is an invalid datatype, so this is a string
 		Value val = getRDFStringValue( "\"16\"^^ryan:int", namespaces,
@@ -95,15 +95,15 @@ public class AbstractEdgeModelerTest {
 	@Test
 	public void testGetRDFStringValue1() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
 		Value val = getUriFromRawString( "vas:foobar", namespaces );
-		assertEquals( VAS.NAMESPACE + "foobar", val.stringValue() );
+		assertEquals(SEMTOOL.NAMESPACE + "foobar", val.stringValue() );
 	}
 
 	@Test
 	public void testGetRDFStringValue2() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
 		Value val = getUriFromRawString( "vat:foobar", namespaces );
 		assertNull( val );
 	}
@@ -111,7 +111,7 @@ public class AbstractEdgeModelerTest {
 	@Test
 	public void testGetRDFStringValue3() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
 		Value val = getUriFromRawString( "vat:test:foobar", namespaces );
 		assertNull( val );
 	}
@@ -119,16 +119,16 @@ public class AbstractEdgeModelerTest {
 	@Test
 	public void testGetRDFStringValue4() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
-		Value val = getUriFromRawString( VAS.NAMESPACE + "foobar",
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
+		Value val = getUriFromRawString(SEMTOOL.NAMESPACE + "foobar",
 				namespaces );
-		assertEquals( VAS.NAMESPACE + "foobar", val.stringValue() );
+		assertEquals(SEMTOOL.NAMESPACE + "foobar", val.stringValue() );
 	}
 
 	@Test
 	public void testGetRDFStringValue5() {
 		Map<String, String> namespaces = new HashMap<>();
-		namespaces.put( VAS.PREFIX, VAS.NAMESPACE );
+		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
 		Value val = getUriFromRawString( "foobar", namespaces );
 		assertNull( val );
 	}

@@ -65,7 +65,6 @@ public class Constants {
 	public static final String CONTAINS = "Contains";
 
 	public static final String SEMOSS_URI = "SEMOSS_URI";
-	public static final String DEFAULT_SEMOSS_URI = "http://semoss.org/ontologies";
 	public static final String INTERNAL_NS = "semoss://internal/";
 
 //	// layouts

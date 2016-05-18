@@ -1,284 +1,106 @@
-# baseURI: http://semoss.org/ontologies
+# baseURI: http://os-em.com/ontologies/semoss
 # imports: http://purl.org/dc/terms/
+# imports: http://purl.org/ontology/olo/core#
+# imports: http://rdfs.org/ns/void
+# imports: http://spinrdf.org/spin
+# imports: http://uispin.org/ui
+# imports: http://os-em.com/ontologies/core
 
+@prefix arg: <http://spinrdf.org/arg#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+@prefix olo: <http://purl.org/ontology/olo/core#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix semoss: <http://semoss.org/ontologies/> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix spl: <http://spinrdf.org/spl#> .
+@prefix ui: <http://uispin.org/ui#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix vac: <http://os-em.com/ontologies/core#> .
-@prefix vas: <http://os-em.com/ontologies/semoss#> .
 
-<http://semoss.org/ontologies>
+@prefix semonto: <http://os-em.com/ontologies/semtool/> .
+@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
+@prefix semtool: <http://os-em.com/ontologies/semtool#> .
+@prefix sempers: <http://os-em.com/ontologies/semtool/insights#> .
+
+<http://os-em.com/ontologies/semtool>
   rdf:type owl:Ontology ;
-  owl:imports <http://purl.org/dc/terms/> ;
+  owl:imports dcterms: ;
+  owl:imports olo: ;
+  owl:imports <http://rdfs.org/ns/void> ;
+  owl:imports <http://spinrdf.org/spin> ;
+  owl:imports <http://uispin.org/ui> ;
+  owl:imports <http://os-em.com/ontologies/semtool/core> ;
   owl:versionInfo "Created with TopBraid Composer"^^xsd:string ;
 .
-semoss:Concept
+semtool:DataView
   rdf:type owl:Class ;
-  rdfs:comment "A SEMOSS Concept is a base class for any class constructed under the semoss: namespace.  The utility of the Concept class is merely for easy identification of the auto-created class of the SEMOSS importer."^^xsd:string ;
-  rdfs:label "Concept"^^xsd:string ;
-  rdfs:subClassOf owl:Thing ;
-  owl:sameAs <http://www.w3.org/2004/02/skos/core#Concept> ;
-.
-semoss:Relation
-  rdf:type rdfs:Class ;
-  rdfs:comment "A \"Relation\" in SEMOSS parlance is a reification, or graph edge. A semoss:Relation property is unique between a source (subject) and target (object) node (instance). Every semoss:Relation is associated with exactly 1 rdf:Property identified by the required rdf:predicate property of the relation property instance. The grounding predicate must also be asserted in a statement between the same source and target nodes (a SPO assertion). A semoss:Relation is only created when attributes must be applied to the statement -thus necessitating the need for reification. Attributes and their values applied to a semoss:Relation instance will come from Columns D and later in a \"Relation Sheet\" found in a SEMOSS Loading Workbook."^^xsd:string ;
-  rdfs:label "Relation"^^xsd:string ;
-  rdfs:subClassOf rdf:Property ;
-  rdfs:subClassOf [
-      rdf:type owl:Restriction ;
-      owl:onClass rdf:Property ;
-      owl:onProperty rdf:predicate ;
-      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-    ] ;
-.
-semoss:has
-  rdf:type owl:ObjectProperty ;
-  rdfs:comment "\"Has\" is an atomic property for the use case where a Node type appears in an attribute header of another Node or Relation sheet."^^xsd:string ;
-  rdfs:label "Has"^^xsd:string ;
-.
-
-semoss:Activity
-  rdf:type owl:Class ;
-  vac:description "An activity is set of individual steps that must be performed in both clinical and logistical settings. "^^xsd:string ;
-  rdfs:label "Activity"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
- # rdfs:subClassOf [
- #     rdf:type owl:Restriction ;
- #     owl:allValuesFrom semoss:BusinessLogicUnit ;
- #     owl:onProperty semoss:needs ;
- #   ] ;
- # rdfs:subClassOf [
- #     rdf:type owl:Restriction ;
- #     owl:allValuesFrom semoss:DataObject ;
- #     owl:onProperty semoss:needs ;
- #   ] ;
- # rdfs:subClassOf [
- #     rdf:type owl:Restriction ;
- #     owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
- #     owl:onClass semoss:Activity ;
- #     owl:onProperty semoss:part ;
- #   ] ;
-.
-semoss:ActivityLevel
-  rdf:type owl:Class ;
-  rdfs:label "Activity Level"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:iBRMv2Activity
-  rdf:type owl:Class ;
-  rdfs:label "iBRMv2 Activity"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:ApplicationModule
-  rdf:type owl:Class ;
-  vac:description "An application module is a distinct module within an application that has a specific purpose. The existing set of DoD-VA Application "^^xsd:string ;
-  rdfs:label "Application Module"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:BFF25Activity
-  rdf:type owl:Class ;
-  rdfs:label "BFF25 Activity"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:BusinessLogicUnit
-  rdf:type owl:Class ;
-  vac:description "A Business Logic Unit is a functional, automated algorithm that the enterprise uses to transform inputs into outputs. BLUs are needed to perform business activities. "^^xsd:string ;
-  rdfs:label "Business Logic Unit"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:BusinessProcess
-  rdf:type owl:Class ;
-  vac:description "A Business Process is a collection of related, structured activities or tasks that produce a specific service or product (serve a particular goal) for a particular customer or customers. One or more business processes support each capability. "^^xsd:string ;
-  rdfs:label "Business Process"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:BusinessRule
-  rdf:type owl:Class ;
-  vac:description "A business rule is a high-level functionality condition that the system must support in order to complete the business of the organization. Business rules describe the operations, definitions and constraints that apply to an organization."^^xsd:string ;
-  rdfs:label "Business Rule"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:Capability
-  rdf:type owl:Class ;
-  vac:description "A Capability is a high-level grouping of different types of missions within the organization. "^^xsd:string ;
-  rdfs:label "Capability"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-  rdfs:subClassOf [
-      rdf:type owl:Restriction ;
-      owl:allValuesFrom semoss:ApplicationModule ;
-      owl:onProperty semoss:consists ;
-    ] ;
-.
-semoss:DBIANumber
-  rdf:type owl:Class ;
-  rdfs:label "DBIA Number"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:DataElement
-  rdf:type owl:Class ;
-  vac:description "A data element is a unit of decomposition that identifies specific information or fields within a Data Object. An example might be a social security number or a first name. "^^xsd:string ;
-  rdfs:label "Data Element"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:DataObject
-  rdf:type owl:Class ;
-  vac:description "A Data Object is a grouping of data elements into a logical unit of similar types of data. "^^xsd:string ;
-  rdfs:label "Data Object"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:InterfaceControlDocument
-  rdf:type owl:Class ;
-  vac:description "An Interface Control Document describes how two applications communicate with one another. It specifies what data is being exchanged, how frequently, and in what format."^^xsd:string ;
-  rdfs:label "Interface Control Document"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:InterfaceElement
-  rdf:type owl:Class ;
-  rdfs:label "Interface Element"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
+  rdfs:label "Data View"^^xsd:string ;
+  rdfs:subClassOf ui:DataViews ;
   rdfs:subClassOf [
       rdf:type owl:Restriction ;
       owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-      owl:onProperty semoss:dbiaNumber ;
     ] ;
 .
-semoss:Lifecycle
+semtool:Database
   rdf:type owl:Class ;
-  vac:description "TBD: Lifecycle has not been defined in tthe \"Customized Metamodel\" document."^^xsd:string ;
-  rdfs:label "Lifecycle"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
+  rdfs:label "Database"^^xsd:string ;
+  rdfs:subClassOf <http://rdfs.org/ns/void#Dataset> ;
 .
-semoss:Project
+semtool:RDR-Reification
+  rdf:type semtool:ReificationModel ;
+  rdfs:label "RDR Reification"^^xsd:string ;
+.
+semtool:ReificationModel
   rdf:type owl:Class ;
-  vac:description "A project governed by the VA."^^xsd:string ;
-  rdfs:label "Project"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
+  rdfs:label "Reification Model"^^xsd:string ;
+  rdfs:subClassOf owl:Thing ;
 .
-semoss:Reference
+semtool:SEMTOOL-Reification
+  rdf:type semtool:ReificationModel ;
+  rdfs:label "OS-EM Semantic Toolkit Reification"^^xsd:string ;
+.
+semtool:W3C-Reification
+  rdf:type semtool:ReificationModel ;
+  rdfs:label "W3C Reification"^^xsd:string ;
+.
+semtool:reification
+  rdf:type rdf:Property ;
+  rdfs:label "Reification"^^xsd:string ;
+  rdfs:range semtool:ReificationModel ;
+.
+sempers:InsightProperties
+  rdf:type spin:MagicProperty ;
+  rdfs:label "Insight Properties"^^xsd:string ;
+  rdfs:subClassOf spin:MagicProperties ;
+.
+sempers:Perspective
   rdf:type owl:Class ;
-  vac:description "TBD: Reference has not been defined in tthe \"Customized Metamodel\" document."^^xsd:string ;
-  rdfs:label "Reference"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
+  rdfs:label "Perspective"^^xsd:string ;
+  rdfs:subClassOf olo:OrderedList ;
+  rdfs:subClassOf ui:Element ;
+  rdfs:subClassOf [
+      rdf:type owl:Restriction ;
+      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:onClass sempers:InsightProperties ;
+      owl:onProperty olo:item ;
+    ] ;
 .
-semoss:Requirement
-  rdf:type owl:Class ;
-  vac:description "A Requirement specifies functions that the application should be able to perform and constraints on application performance.  Requirements are usually constructed as shall statements, such as, the system shall provide the ability to capture that a patient received an immunization as a part of a combination immunization (e.g., Tetanus-Diphtheria)."^^xsd:string ;
-  rdfs:label "Requirement"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:StandardServiceArea
-  rdf:type owl:Class ;
-  vac:description "TBD: Standard Service Area has not been defined in tthe \"Customized Metamodel\" document."^^xsd:string ;
-  rdfs:label "Standard Service Area"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:Task
-  rdf:type owl:Class ;
-  vac:description "A task is a low-level characterization of individual roles that must be performed within the enterprise. This is the lowest level of detail in terms of the steps that are completed in the enterprise. Activities are comprised of one or more tasks, and these tasks should be a series of related steps to accomplish something, produce something, enable something etc. The steps in the task should be related where it would not make sense to separate them. Tasks may result in an output or be triggered by an event. "^^xsd:string ;
-  rdfs:label "Task"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:UseCase
-  rdf:type owl:Class ;
-  rdfs:label "Use Case"^^xsd:string ;
-  rdfs:subClassOf semoss:Concept ;
-.
-semoss:consists
+sempers:insight
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Consists"^^xsd:string ;
+  rdfs:label "insight"^^xsd:string ;
+  rdfs:range semtool:InsightProperties ;
 .
-semoss:consumes
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Consumes"^^xsd:string ;
-.
-semoss:contains
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Contains"^^xsd:string ;
-.
-semoss:creates
-  rdf:type owl:ObjectProperty, owl:TransitiveProperty ;
-  rdfs:label "Creates"^^xsd:string ;
-.
-semoss:createdBy
-  rdf:type owl:ObjectProperty, owl:TransitiveProperty ;
-  rdfs:label "Created By"^^xsd:string ;
-  owl:inverseOf semoss:creates ;
-.
-semoss:dbiaNumber
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "DBIA Number"^^xsd:string ;
-  rdfs:range semoss:DBIANumber ;
-.
-semoss:fulfills
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Fulfills"^^xsd:string ;
-.
-semoss:implements
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Implements"^^xsd:string ;
-.
-semoss:involves
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Involves"^^xsd:string ;
-.
-semoss:mapsTo
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Maps To"^^xsd:string ;
-.
-semoss:modifies
-  rdf:type owl:ObjectProperty, owl:TransitiveProperty ;
-  rdfs:label "Modifies"^^xsd:string ;
-.
-semoss:needs
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Needs"^^xsd:string ;
-.
-semoss:part
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Part"^^xsd:string ;
-.
-semoss:provides
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Provides"^^xsd:string ;
-.
-semoss:reads
-  rdf:type owl:ObjectProperty, owl:TransitiveProperty ;
-  rdfs:label "Reads"^^xsd:string ;
-.
-semoss:realizes
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Realizes"^^xsd:string ;
-.
-semoss:supported
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Supported"^^xsd:string ;
-.
-semoss:supports
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Supports"^^xsd:string ;
-.
-semoss:uses
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Uses"^^xsd:string ;
-.
-semoss:usedBy
-  rdf:type owl:ObjectProperty, owl:InverseFunctionalProperty ;
-  rdfs:label "Used By"^^xsd:string ;
-  owl:inverseOf semoss:uses ;
-.
-<http://os-em.com/ontologies/vcamp>
-  rdf:type owl:Ontology ;
-  vac:author "$Author: daniel.mekonnen $"^^xsd:string ;
-  vac:namespace "http://semoss.org/ontologies/vcamp#"^^xsd:string ;
-  vac:namespacePrefix "vcamp"^^xsd:string ;
-  vac:revision "$Revision: 2128 $"^^xsd:string ;
-  vac:revisionDate "$Date: 2015-04-05 21:14:03 -0400 (Sun, 05 Apr 2015) $"^^xsd:string ;
-  vac:specificity 1 ;
-  vac:version "0.5"^^xsd:string ;
-  owl:imports <http://semoss.org/ontologies> ;
-  owl:imports <http://os-em.com/ontologies/core> ;
-  owl:versionIRI <http://semoss.org/ontologies/vcamp/v0.5> ;
-  owl:versionInfo "$Id: semoss.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^xsd:string ;
-.
+
+<http://os-em.com/ontologies/semtool/vcamp> semcore:author "$Author: daniel.mekonnen $"^^xsd:string ;
+	semcore:namespace "http://semoss.org/ontologies/semtool/vcamp#"^^xsd:string ;
+	semcore:namespacePrefix "vcamp"^^xsd:string ;
+	semcore:revision "$Revision: 2128 $"^^xsd:string ;
+	semcore:revisionDate "$Date: 2015-04-05 21:14:03 -0400 (Sun, 05 Apr 2015) $"^^xsd:string ;
+	semcore:specificity "1"^^xsd:integer ;
+	semcore:version "0.5"^^xsd:string ;
+	owl:versionIRI <http://semoss.org/ontologies/vcamp/v0.5> , <http://semoss.org/ontololgies/vcamp/v0.5> ;
+	a owl:Ontology ;
+	owl:imports <http://os-em.com/ontologies/semtool> , <http://os-em.com/ontologies/semtool/core> ;
+	owl:versionInfo "$Id: vcamp.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^xsd:string .

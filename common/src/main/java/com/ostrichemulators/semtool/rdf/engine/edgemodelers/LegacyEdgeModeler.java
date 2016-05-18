@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.edgemodelers;
 
-import com.ostrichemulators.semtool.model.vocabulary.SEMOSS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.ImportMetadata;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
@@ -287,10 +287,10 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				// check to see if we're actually a link to some
 				// other node (and not really a new property
 				if ( sheet.isLink( propname ) || hasCachedInstanceClass( propname ) ) {
-					log.debug( "linking " + propname + " as a " + SEMOSS.has
+					log.debug("linking " + propname + " as a " + SEMONTO.has
 							+ " relationship to " + getCachedInstanceClass( propname ) );
 
-					cacheRelationClass( SEMOSS.has, sheet.getSubjectType()
+					cacheRelationClass(SEMONTO.has, sheet.getSubjectType()
 							+ sheet.getObjectType() + propname );
 					continue;
 				}

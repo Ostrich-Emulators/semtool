@@ -6,15 +6,16 @@
 package com.ostrichemulators.semtool.ui.actions;
 
 import com.ostrichemulators.semtool.model.vocabulary.ARG;
+import com.ostrichemulators.semtool.model.vocabulary.SEMPERS;
 import com.ostrichemulators.semtool.model.vocabulary.OLO;
+import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.model.vocabulary.SP;
 import com.ostrichemulators.semtool.model.vocabulary.SPIN;
 import com.ostrichemulators.semtool.model.vocabulary.SPL;
 import com.ostrichemulators.semtool.model.vocabulary.UI;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
-import com.ostrichemulators.semtool.om.Perspective;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
-import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 
@@ -122,15 +123,17 @@ public class ExportInsightsAction extends DbAction {
 							final RepositoryConnection rc = repo.getConnection();
 							InsightManager im = getEngine().getInsightManager();
 							rc.add( InsightManagerImpl.getStatements( im, user ) );
-							rc.setNamespace( VAS.PREFIX, VAS.NAMESPACE );
 							rc.setNamespace( SPIN.PREFIX, SPIN.NAMESPACE );
 							rc.setNamespace( SP.PREFIX, SP.NAMESPACE );
 							rc.setNamespace( SPL.PREFIX, SPL.NAMESPACE );
 							rc.setNamespace( OLO.PREFIX, OLO.NAMESPACE );
 							rc.setNamespace( UI.PREFIX, UI.NAMESPACE );
-							rc.setNamespace( MetadataConstants.VA_INSIGHTS_PREFIX, 
-									MetadataConstants.VA_INSIGHTS_NS );
-					    rc.setNamespace( ARG.PREFIX, ARG.NAMESPACE );
+							rc.setNamespace( ARG.PREFIX, ARG.NAMESPACE );
+							
+							rc.setNamespace(SEMPERS.PREFIX, SEMPERS.NAMESPACE );
+							rc.setNamespace( SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
+							rc.setNamespace( SEMCORE.PREFIX, SEMCORE.NAMESPACE );
+							rc.setNamespace(SEMONTO.PREFIX, SEMONTO.NAMESPACE );
 
 							getEngine().execute( new ModificationExecutorAdapter() {
 
@@ -147,7 +150,7 @@ public class ExportInsightsAction extends DbAction {
 								fw.write( "# imports: " + SPIN.BASE_URI + "\r\n" );
 								fw.write( "# imports: " + SP.BASE_URI + "\r\n" );
 								rc.export( "nt".equals( FilenameUtils.getExtension( expname ) )
-										? new NTriplesWriter( fw ) : new TurtleWriter( fw ) );
+												? new NTriplesWriter( fw ) : new TurtleWriter( fw ) );
 							}
 							catch ( Exception ioe ) {
 								// we'll catch this below, in the outer catch

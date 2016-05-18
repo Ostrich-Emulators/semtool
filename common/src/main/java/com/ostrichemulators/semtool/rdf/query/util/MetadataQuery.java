@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.util.HashMap;
 import java.util.Map;
 import org.openrdf.model.URI;
@@ -30,15 +30,15 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 	public MetadataQuery() {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
 		result = new HashMap<>();
-		bind( "dataset", VAS.Database );
+		bind("dataset", SEMTOOL.Database );
 	}
 
 	public MetadataQuery( URI uri ) {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
 		result = new HashMap<>();
-		bind( "dataset", VAS.Database );
+		bind("dataset", SEMTOOL.Database );
 		// special handling when we're trying to figure out the base uri
-		bind( "p", ( VAS.Database.equals( uri ) ? RDF.TYPE : uri ) );
+		bind("p", ( SEMTOOL.Database.equals( uri ) ? RDF.TYPE : uri ) );
 	}
 
 	public Map<URI, String> asStrings() {
@@ -77,7 +77,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 		// for baseuri, we need the subject, not the object
 		// and also, we use the VOID_DS as the key elsewhere in the code
 		if ( RDF.TYPE.equals( pred ) ) {
-			pred = VAS.Database;
+			pred = SEMTOOL.Database;
 			val = set.getValue( "db" );
 		}
 		else if ( pred.getNamespace().equals( DC.NAMESPACE ) ) {

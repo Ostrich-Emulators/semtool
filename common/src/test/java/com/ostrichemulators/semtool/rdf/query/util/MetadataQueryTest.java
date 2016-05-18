@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ public class MetadataQueryTest {
 		// DC.PULISHER should get silently upgraded to MetadataConstants.DCT_PUBLISHER
 		rc.add( new StatementImpl( eng.getBaseUri(), DC.PUBLISHER,
 				new LiteralImpl( "me" ) ) );
-		rc.add( new StatementImpl( eng.getBaseUri(), RDF.TYPE, VAS.Database ) );
+		rc.add(new StatementImpl( eng.getBaseUri(), RDF.TYPE, SEMTOOL.Database ) );
 		rc.commit();
 	}
 
@@ -66,10 +66,10 @@ public class MetadataQueryTest {
 
 	@Test
 	public void testAsStrings() {
-		MetadataQuery mq = new MetadataQuery( VAS.Database );
+		MetadataQuery mq = new MetadataQuery( SEMTOOL.Database );
 		eng.queryNoEx( mq );
 		assertEquals( 1, mq.asStrings().size() );
-		assertEquals( eng.getBaseUri().stringValue(), mq.asStrings().get( VAS.Database ) );
+		assertEquals(eng.getBaseUri().stringValue(), mq.asStrings().get(SEMTOOL.Database ) );
 	}
 
 	@Test

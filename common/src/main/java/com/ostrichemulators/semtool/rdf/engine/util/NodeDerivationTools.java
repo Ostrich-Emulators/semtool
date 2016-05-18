@@ -1,6 +1,6 @@
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
@@ -37,15 +37,15 @@ public class NodeDerivationTools {
 	}
 
 	public static String getConceptQuery( IEngine engine ) {
-		MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
+		MetadataQuery mq = new MetadataQuery( SEMTOOL.ReificationModel );
 		engine.queryNoEx( mq );
 		URI reif = URI.class.cast( mq.getOne() );
 
-		if ( VAS.Custom_Reification.equals( reif ) ) {
+		if ( SEMTOOL.Custom_Reification.equals( reif ) ) {
 			OneValueQueryAdapter<String> qq = OneValueQueryAdapter.
 					getString( "SELECT ?val WHERE { ?base ?pred ?val }" );
 			qq.bind( "base", engine.getBaseUri() );
-			qq.bind( "pred", VAS.ConceptsSparql );
+			qq.bind("pred", SEMTOOL.ConceptsSparql );
 
 			return engine.queryNoEx( qq );
 		}

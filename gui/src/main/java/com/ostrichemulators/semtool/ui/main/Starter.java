@@ -127,7 +127,6 @@ public class Starter {
 		}
 
 		Properties buildprops = GuiUtility.getBuildProperties();
-		// props.load( Starter.class.getResourceAsStream( "/semoss.properties" ) );
 		logger.info( "OS-EM Semantic Toolkit, build "
 				+ buildprops.getProperty( "revision", "unknown" ) );
 
@@ -206,9 +205,7 @@ public class Starter {
 	}
 
 	protected List<String> getConfigResources() {
-		List<String> configs = new ArrayList<>();
-		configs.add( "/semoss.properties" );
-		return configs;
+		return new ArrayList<>();
 	}
 
 	protected PlayPane getPlayPane( StoredMetadata metas ) {

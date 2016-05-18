@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.ui.components;
 
 import com.ostrichemulators.semtool.ui.main.PlayPane;
-import com.ostrichemulators.semtool.model.vocabulary.VAS;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class RepositoryList extends JList<IEngine> {
 				sb.append( "Location: " ).append( FilenameUtils.getFullPathNoEndSeparator( loc ) );
 			}
 
-			String onto = metadata.get( VAS.Database ).stringValue();
+			String onto = metadata.get(SEMTOOL.Database ).stringValue();
 			if ( null != onto ) {
 				if ( sb.length() > 0 ) {
 					sb.append( "<br>" );
