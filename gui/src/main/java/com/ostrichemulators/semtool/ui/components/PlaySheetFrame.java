@@ -280,6 +280,7 @@ public class PlaySheetFrame extends JInternalFrame {
 		addTab( cmp );
 
 		String query = insight.getSparql();
+		log.debug( "query is: " + query );
 
 		updateProgress( "Preparing Query", 10 );
 		final StringBuilder builder = new StringBuilder();
@@ -291,7 +292,6 @@ public class PlaySheetFrame extends JInternalFrame {
 			public void run() {
 				try {
 					updateProgress( "Executing Query", 40 );
-
 					int dsize = 0;
 					if ( null == query || query.isEmpty() || "NULL".equals( query.toUpperCase() ) ) {
 						// uh oh...no sparql given

@@ -164,7 +164,7 @@ public class PlayPane extends JFrame {
 
 	private GraphicalQueryPanel gQueryBuilderPanel;
 	private InsightManagerPanel insightManager;
-	private static SemanticExplorerPanel semanticExplorer;
+	private SemanticExplorerPanel semanticExplorer;
 
 	// Right graphPanel desktopPane
 	private CustomDesktopPane desktopPane;
@@ -447,7 +447,10 @@ public class PlayPane extends JFrame {
 					gQueryBuilderPanel.setEngine( engine );
 				}
 				insightManager.setEngine( engine );
-				semanticExplorer.setEngine( engine );
+
+				if ( null != semanticExplorer ) {
+					semanticExplorer.setEngine( engine );
+				}
 			}
 		} );
 	}
@@ -508,17 +511,18 @@ public class PlayPane extends JFrame {
 				"Manage perspectives and insights" );
 		rightView.setTabComponentAt(
 				rightView.indexOfComponent( insightManager ),
-				new PlayPaneCloseableTab( rightView, insightManagerItem, DbAction.getIcon( "insight_manager_tab1" ) )
+				new PlayPaneCloseableTab( rightView, insightManagerItem,
+						DbAction.getIcon( "insight_manager_tab1" ) )
 		);
 
-		semanticExplorer = new SemanticExplorerPanel();
-		rightView.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ),
-				semanticExplorer, "Explore the classes and instances" );
-		rightView.setTabComponentAt(
-				rightView.indexOfComponent( semanticExplorer ),
-				new PlayPaneCloseableTab( rightView, semanticExplorerItem, DbAction.getIcon( "semantic_dataset2" ) )
-		);
-
+//		semanticExplorer = new SemanticExplorerPanel();
+//		rightView.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ),
+//				semanticExplorer, "Explore the classes and instances" );
+//		rightView.setTabComponentAt(
+//				rightView.indexOfComponent( semanticExplorer ),
+//				new PlayPaneCloseableTab( rightView, semanticExplorerItem,
+//						DbAction.getIcon( "semantic_dataset2" ) )
+//		);
 		rightView.addChangeListener( new ChangeListener() {
 			@Override
 			public void stateChanged( ChangeEvent e ) {
@@ -1298,6 +1302,7 @@ public class PlayPane extends JFrame {
 				}
 				else {
 					rightTabs.remove( gQueryBuilderPanel );
+					gQueryBuilderPanel = null;
 					gQueryBuilderItem.setToolTipText( "Enable the Graphical Query Builder Tab" );
 				}
 			}
@@ -1305,7 +1310,7 @@ public class PlayPane extends JFrame {
 		insightManagerItem.setMnemonic( KeyEvent.VK_I );
 		insightManagerItem.setSelected( getProp( IMANAGE_2 ) );
 
-		if ( getProp( IMANAGE_2 ) == true ) {
+		if ( getProp( IMANAGE_2 ) ) {
 			insightManagerItem.setMnemonic( KeyEvent.VK_I );
 			insightManagerItem.setToolTipText( "Disable the Insite Manager  Tab" );
 		}
@@ -1343,6 +1348,7 @@ public class PlayPane extends JFrame {
 		semanticExplorerItem.setMnemonic( KeyEvent.VK_S );
 		if ( getProp( SEMANTICEXPLORER ) ) {
 			semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
+			makeSemPanel();
 		}
 		else {
 			semanticExplorerItem.setToolTipText( "Enable the Semantic Explorer Tab" );
@@ -1357,17 +1363,11 @@ public class PlayPane extends JFrame {
 						Boolean.toString( ischecked ) );
 
 				if ( ischecked ) {
-					rightTabs.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ),
-							semanticExplorer, "Explore the classes and instances" );
-					rightTabs.setTabComponentAt(
-							rightTabs.indexOfComponent( semanticExplorer ),
-							new PlayPaneCloseableTab( rightTabs, semanticExplorerItem,
-									DbAction.getIcon( "semantic_dataset2" ) )
-					);
-					semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
+					makeSemPanel();
 				}
 				else {
 					rightTabs.remove( semanticExplorer );
+					semanticExplorer = null;
 					semanticExplorerItem.setToolTipText( "Enable the Semantic Explorer Tab" );
 				}
 			}
@@ -1397,6 +1397,20 @@ public class PlayPane extends JFrame {
 		tb.setMnemonic( KeyEvent.VK_T );
 
 		return view;
+	}
+
+	private SemanticExplorerPanel makeSemPanel() {
+		semanticExplorer = new SemanticExplorerPanel();
+		semanticExplorer.setEngine( repoList.getSelectedValue() );
+
+		rightTabs.addTab( "Semantic Explorer", DbAction.getIcon( "semantic_dataset2" ),
+				semanticExplorer, "Explore the classes and instances" );
+		CloseableTab ct1 = new PlayPaneCloseableTab( rightTabs, semanticExplorerItem,
+				DbAction.getIcon( "semantic_dataset2" ) );
+		int idx = rightTabs.indexOfComponent( semanticExplorer );
+		rightTabs.setTabComponentAt( idx, ct1 );
+		semanticExplorerItem.setToolTipText( "Disable the Semantic Explorer Tab" );
+		return semanticExplorer;
 	}
 
 	private GraphicalQueryPanel makeGQB() {
@@ -1672,9 +1686,5 @@ public class PlayPane extends JFrame {
 				item.doClick();
 			}
 		}
-	}
-
-	public static SemanticExplorerPanel getSemanticExplorerPanel() {
-		return semanticExplorer;
 	}
 }

@@ -7,18 +7,21 @@ package com.ostrichemulators.semtool.ui.components.semanticexplorer;
 
 import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
-import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
 import com.ostrichemulators.semtool.util.Constants;
 
 import com.ostrichemulators.semtool.util.IconBuilder;
+import com.ostrichemulators.semtool.util.RDFDatatypeTools;
+import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.swing.GroupLayout;
@@ -100,52 +103,6 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				layout.createParallelGroup( GroupLayout.Alignment.LEADING )
 				.addComponent( jSplitPane, GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE )
 		);
-	}
-
-	private List<URI> runConceptsQuery() {
-		String conceptsQuery
-				= "SELECT DISTINCT ?returnVariable WHERE {"
-				+ "  ?returnVariable a owl:Class . "
-				+ "} ORDER BY ?returnVariable";
-
-		OneVarListQueryAdapter<URI> queryer
-				= OneVarListQueryAdapter.getUriList( conceptsQuery, "returnVariable" );
-
-		try {
-			return engine.query( queryer );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( "Could not query concepts: " + e, e );
-			return null;
-		}
-	}
-
-	private List<Value[]> runInstancesAndLabelsQuery( URI concept ) {
-		String instancesQuery
-				= "SELECT DISTINCT ?instance ?label WHERE {"
-				+ "  ?instance rdf:type ?concept . "
-				+ "  OPTIONAL { ?instance rdfs:label ?label . }"
-				+ "} ORDER BY ?instance";
-
-		ListQueryAdapter<Value[]> instancesQA = new ListQueryAdapter<Value[]>( instancesQuery ) {
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				Value values[] = {
-					Value.class.cast( set.getValue( "instance" ) ),
-					Value.class.cast( set.getValue( "label" ) )
-				};
-				add( values );
-			}
-		};
-		instancesQA.bind( "concept", concept );
-
-		try {
-			return engine.query( instancesQA );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( "Could not query concepts: " + e, e );
-			return null;
-		}
 	}
 
 	private List<Value[]> runPropertiesQuery( URI instance ) {
@@ -232,11 +189,13 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 			private static final long serialVersionUID = 4433791433874526433L;
 
 			@Override
-			public Component getTreeCellRendererComponent( JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus ) {
-				super.getTreeCellRendererComponent( tree, value, selected, expanded, leaf, row, hasFocus );
+			public Component getTreeCellRendererComponent( JTree tree, Object value,
+					boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus ) {
+				super.getTreeCellRendererComponent( tree, value, selected, expanded,
+						leaf, row, hasFocus );
 
 				DefaultMutableTreeNode dmtNode = (DefaultMutableTreeNode) value;
-				if ( ( dmtNode.getUserObject() instanceof URI ) && ( dmtNode.getChildCount() > 0 ) ) {
+				if ( ( dmtNode.getUserObject() instanceof URI ) && !dmtNode.isLeaf() ) {
 					NamedShape shape = shapefactory.getShape( URI.class.cast( dmtNode.getUserObject() ) );
 					setIcon( new IconBuilder( shape ).setStroke( Color.BLACK )
 							.setPadding( 2 ).setIconSize( 18 ).build() );
@@ -261,15 +220,20 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 		invisibleRoot.removeAllChildren();
 
 		ArrayList<URITreeNode> conceptListURITreeNodes = new ArrayList<>();
-		List<URI> concepts = runConceptsQuery();
+
+		List<URI> concepts = NodeDerivationTools.createConceptList( engine );
 		for ( URI concept : concepts ) {
 			URITreeNode conceptNode = new URITreeNode( concept, useLabels );
 			conceptListURITreeNodes.add( conceptNode );
 
-			ArrayList<URITreeNode> instanceListURITreeNodes = new ArrayList<>();
-			List<Value[]> instancesAndTheirLabels = runInstancesAndLabelsQuery( concept );
-			for ( Value[] values : instancesAndTheirLabels ) {
-				instanceListURITreeNodes.add( new URITreeNode( values[0], values[1], useLabels ) );
+			List<URITreeNode> instanceListURITreeNodes = new ArrayList<>();
+			List<URI> instances = NodeDerivationTools.createInstanceList( concept, engine );
+			Map<URI, String> labels = Utility.getInstanceLabels( instances, engine );
+
+			for ( URI instance : instances ) {
+				instanceListURITreeNodes.add( new URITreeNode( instance,
+						RDFDatatypeTools.getValueFromObject( labels.get( instance ) ),
+						useLabels ) );
 			}
 
 			Collections.sort( instanceListURITreeNodes );

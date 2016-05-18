@@ -1,7 +1,6 @@
 package com.ostrichemulators.semtool.ui.components.tabbedqueries;
 
 import com.ostrichemulators.semtool.ui.actions.AbstractSavingAction;
-import java.awt.Component;
 import java.awt.Font;
 import java.io.File;
 import java.io.IOException;

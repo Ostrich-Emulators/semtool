@@ -39,6 +39,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
+import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import static com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter.getDate;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.user.User;
@@ -162,7 +163,7 @@ public class InsightManagerImpl implements InsightManager {
 
 			Date now = new Date();
 			Literal creator = insightVF.createLiteral( "Imported By "
-					+ System.getProperty( "release.nameVersion", "VA SEMOSS" ) );
+					+ System.getProperty( "release.nameVersion", "OS-EM Semantic Toolkit" ) );
 
 			for ( String pname : persps.split( ";" ) ) {
 				Perspective p = new Perspective( pname );
@@ -335,10 +336,11 @@ public class InsightManagerImpl implements InsightManager {
 		explore.setId( urib.uniqueUri() );
 
 		Parameter concept = new Parameter( "Concept",
-				"SELECT ?concept WHERE { ?concept rdfs:subClassOf <" + conceptUri + ">} " );
+				NodeDerivationTools.getConceptQuery( eng ) );
 		concept.setId( urib.uniqueUri() );
 
-		Parameter instance = new Parameter( "Instance", "SELECT ?instance WHERE { ?instance a ?concept }" );
+		Parameter instance = new Parameter( "Instance",
+				"SELECT ?instance WHERE { ?instance a ?concept }" );
 		instance.setId( urib.uniqueUri() );
 
 		explore.setParameters( Arrays.asList( concept, instance ) );
@@ -775,6 +777,7 @@ public class InsightManagerImpl implements InsightManager {
 	 * the object
 	 *
 	 * @param p the perspective to convert.
+	 * @param user
 	 * @return a list of statements that completely represent the perspective tree
 	 */
 	public static Collection<Statement> getStatements( Perspective p, User user ) {

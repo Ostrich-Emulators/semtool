@@ -42,6 +42,8 @@ public class VAS {
 
 	public final static URI W3C_Reification;
 
+	public final static URI Custom_Reification;
+
 	public final static URI INSIGHT_OUTPUT_TYPE;
 	// ----- Properties ------
 
@@ -54,6 +56,10 @@ public class VAS {
 	public static final URI rendererClass;
 
 	public static final URI reification;
+
+	public static final URI ConceptsSparql;
+
+	public static final URI EdgesSparql;
 
 	static {
 		final ValueFactory factory = ValueFactoryImpl.getInstance();
@@ -69,6 +75,9 @@ public class VAS {
 		RDR_Reification = factory.createURI( NAMESPACE, "RDR-Reification" );
 		VASEMOSS_Reification = factory.createURI( NAMESPACE, "VASEMOSS-Reification" );
 		W3C_Reification = factory.createURI( NAMESPACE, "W3C-Reification" );
+		Custom_Reification = factory.createURI( NAMESPACE, "Custom-Reification" );
+		ConceptsSparql = factory.createURI( NAMESPACE, "Custom-Concept-Sparql" );
+		EdgesSparql = factory.createURI( NAMESPACE, "Custom-Edge-Sparql" );
 
 		// ----- Properties ------
 		insight = factory.createURI( NAMESPACE, "insight" );

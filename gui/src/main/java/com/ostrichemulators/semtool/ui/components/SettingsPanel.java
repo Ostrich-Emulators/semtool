@@ -55,7 +55,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 						.setProperty( actionCommandString, Boolean.toString( ischecked ) );
 
 				if ( Constants.SEMEX_USE_LABELS_PREF.equals( actionCommandString ) ) {
-					PlayPane.getSemanticExplorerPanel().populateDataForThisDB();
+					//PlayPane.getSemanticExplorerPanel().populateDataForThisDB();
 				}
 			}
 		};

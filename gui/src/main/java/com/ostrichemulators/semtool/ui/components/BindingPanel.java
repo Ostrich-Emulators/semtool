@@ -113,7 +113,7 @@ public class BindingPanel extends JPanel {
 				comboconstraints.insets = new Insets( 0, 5, 5, 0 );
 				comboconstraints.gridx = 1;
 				comboconstraints.gridy = pcount;
-				
+
 				add( lbl, labelconstraints );
 				add( cmb, comboconstraints );
 
@@ -173,6 +173,7 @@ public class BindingPanel extends JPanel {
 			}
 		}
 
+		log.debug( "requery: " + onevar.bindAndGetSparql() );
 		List<URI> vals = engine.queryNoEx( onevar );
 		UriComboBox combo = combos.get( child );
 		combo.removeItemListener( listener );
@@ -180,8 +181,8 @@ public class BindingPanel extends JPanel {
 		combo.setData( Utility.sortUrisByLabel( labels ) );
 		//combo.setMaximumSize( new Dimension( 100, 25  ) );
 		//combo.setPreferredSize( new Dimension( 100, 25  ) );
-		combo.setMinimumSize( new Dimension( 10, 25  ) );
-		
+		combo.setMinimumSize( new Dimension( 10, 25 ) );
+
 		combo.addItemListener( listener );
 	}
 

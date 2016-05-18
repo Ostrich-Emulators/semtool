@@ -1,6 +1,8 @@
 package com.ostrichemulators.semtool.rdf.engine.util;
 
+import com.ostrichemulators.semtool.model.vocabulary.VAS;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneValueQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -11,8 +13,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
 
 /**
  * This class is responsible for providing a number of utility methods for the
@@ -36,35 +36,49 @@ public class NodeDerivationTools {
 
 	}
 
+	public static String getConceptQuery( IEngine engine ) {
+		MetadataQuery mq = new MetadataQuery( VAS.ReificationModel );
+		engine.queryNoEx( mq );
+		URI reif = URI.class.cast( mq.getOne() );
+
+		if ( VAS.Custom_Reification.equals( reif ) ) {
+			OneValueQueryAdapter<String> qq = OneValueQueryAdapter.
+					getString( "SELECT ?val WHERE { ?base ?pred ?val }" );
+			qq.bind( "base", engine.getBaseUri() );
+			qq.bind( "pred", VAS.ConceptsSparql );
+
+			return engine.queryNoEx( qq );
+		}
+		else {
+			String query = "SELECT ?concept WHERE "
+					+ "{ "
+					+ "  ?concept rdfs:subClassOf+ ?top ."
+					+ "  FILTER( ?concept != ?top ) ."
+					+ "  VALUES ?top {<replace-with-binding>} "
+					+ " }";
+
+			return query.replaceAll( "replace-with-binding",
+					engine.getSchemaBuilder().getConceptUri().build().stringValue() );
+		}
+	}
+
 	/**
 	 * Produces a list of concepts based on a given engine that has digested a RDF
 	 * knowledgebase.
 	 *
-	 * @param engine The RDF knowledgbase
+	 * @param engine The RDF knowledgebase
 	 * @return A list of concepts in URI form
 	 */
 	public static List<URI> createConceptList( IEngine engine ) {
-
-		String query = "SELECT ?entity WHERE "
-				+ "{ ?entity rdfs:subClassOf+ ?concept . FILTER( ?entity != ?concept ) }";
 		OneVarListQueryAdapter<URI> qe
-				= OneVarListQueryAdapter.getUriList( query, "entity" );
-		qe.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
-
+				= OneVarListQueryAdapter.getUriList( getConceptQuery( engine ) );
 		final List<URI> conceptList = engine.queryNoEx( qe );
 		return conceptList;
 	}
 
 	public static List<URI> createInstanceList( URI concept, IEngine engine ) {
-		String query = "SELECT DISTINCT ?s WHERE { ?s rdf:type ?concept }";
-
-		ListQueryAdapter<URI> qa = new ListQueryAdapter<URI>( query ) {
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI instance = URI.class.cast( set.getValue( "s" ) );
-				add( instance );
-			}
-		};
+		String query = "SELECT DISTINCT ?s WHERE { ?instance rdf:type ?concept }";
+		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query );
 		qa.bind( "concept", concept );
 
 		return engine.queryNoEx( qa );
