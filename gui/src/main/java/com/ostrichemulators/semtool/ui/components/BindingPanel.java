@@ -173,7 +173,7 @@ public class BindingPanel extends JPanel {
 			}
 		}
 
-		log.debug( "requery: " + onevar.bindAndGetSparql() );
+		log.debug( "approximate requery is: " + onevar.bindAndGetSparql() );
 		List<URI> vals = engine.queryNoEx( onevar );
 		UriComboBox combo = combos.get( child );
 		combo.removeItemListener( listener );

@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
  * @author ryan
  */
 public class InsightMenu extends MouseAdapter {
-
+	private static final Logger log = Logger.getLogger( InsightMenu.class );
 	private final JTree tree;
 	private final DefaultTreeModel model;
 
@@ -53,8 +53,10 @@ public class InsightMenu extends MouseAdapter {
 					public void actionPerformed( ActionEvent e ) {
 						Perspective persp = new Perspective( "New Perspective" );
 						DefaultMutableTreeNode newnode = new DefaultMutableTreeNode( persp );
+
 						model.insertNodeInto( newnode,
 								DefaultMutableTreeNode.class.cast( model.getRoot() ), 0 );
+						model.reload();
 						tree.scrollRowToVisible( 0 );
 						tree.setSelectionRow( 0 );
 					}
