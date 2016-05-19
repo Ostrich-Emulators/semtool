@@ -44,6 +44,7 @@ import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.user.User;
 
 import com.ostrichemulators.semtool.util.UriBuilder;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -54,6 +55,8 @@ import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.Repository;
+import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.turtle.TurtleParser;
 
 /**
  *
@@ -66,7 +69,7 @@ public class InsightManagerImpl implements InsightManager {
 			= Pattern.compile( "((BIND\\s*\\(\\s*)?<@(\\w+)((?:-)([^@]+))?@>(\\s*AS\\s+\\?(\\w+)\\s*\\)\\s*\\.?\\s*)?)" );
 	// strictly for upgrading old insights
 	private static final Map<String, InsightOutputType> UPGRADETYPEMAP = new HashMap<>();
-	private UriBuilder urib = UriBuilder.getBuilder(SEMPERS.NAMESPACE );
+	private UriBuilder urib = UriBuilder.getBuilder( SEMPERS.NAMESPACE );
 	private final Map<URI, Insight> insights = new HashMap<>();
 	private final List<Perspective> perspectives = new ArrayList<>();
 
@@ -266,7 +269,7 @@ public class InsightManagerImpl implements InsightManager {
 	public void loadFromRepository( RepositoryConnection rc ) {
 		List<Perspective> persps = new ArrayList<>();
 		try {
-			List<Statement> stmts = Iterations.asList(rc.getStatements(null,
+			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
 					RDF.TYPE, SEMPERS.Perspective, true ) );
 			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
@@ -759,6 +762,15 @@ public class InsightManagerImpl implements InsightManager {
 	public static Collection<Statement> getStatements( InsightManager im, User user ) {
 		List<Statement> statements = new ArrayList<>();
 		int idx = 0;
+
+		RDFParser parser = new TurtleParser();
+		try ( InputStream is = IEngine.class.getResourceAsStream( "/models/sempers.ttl" ) ) {
+			parser.parse( is, SEMPERS.BASE_URI );
+		}
+		catch ( Exception e ) {
+			log.warn( "could not include sempers.ttl ontology in statements", e );
+		}
+
 		ValueFactory vf = new ValueFactoryImpl();
 		for ( Perspective p : im.getPerspectives() ) {
 			statements.addAll( getStatements( p, user ) );
@@ -781,10 +793,10 @@ public class InsightManagerImpl implements InsightManager {
 	 */
 	public static Collection<Statement> getStatements( Perspective p, User user ) {
 		List<Statement> statements = new ArrayList<>();
-		UriBuilder urib = UriBuilder.getBuilder(SEMPERS.NAMESPACE );
+		UriBuilder urib = UriBuilder.getBuilder( SEMPERS.NAMESPACE );
 
 		// if we're creating statements, mark our repository as an insights db
-		statements.add(new StatementImpl( SEMPERS.INSIGHT_DB, RDF.TYPE,
+		statements.add( new StatementImpl( SEMPERS.INSIGHT_DB, RDF.TYPE,
 				SEMPERS.INSIGHT_CORE_TYPE ) );
 
 		ValueFactory vf = new ValueFactoryImpl();
@@ -831,7 +843,7 @@ public class InsightManagerImpl implements InsightManager {
 		URI pid = p.getId();
 		Date now = new Date();
 
-		statements.add(new StatementImpl( pid, RDF.TYPE, SEMPERS.Perspective ) );
+		statements.add( new StatementImpl( pid, RDF.TYPE, SEMPERS.Perspective ) );
 		statements.add( new StatementImpl( pid, RDFS.LABEL,
 				vf.createLiteral( p.getLabel() ) ) );
 		if ( null != p.getDescription() ) {
@@ -864,11 +876,11 @@ public class InsightManagerImpl implements InsightManager {
 		}
 
 		if ( null != insight.getOutput() ) {
-			statements.add(new StatementImpl( iid, SEMPERS.INSIGHT_OUTPUT_TYPE,
+			statements.add( new StatementImpl( iid, SEMPERS.INSIGHT_OUTPUT_TYPE,
 					vf.createLiteral( insight.getOutput().toString() ) ) );
 		}
 
-		statements.add(new StatementImpl( iid, RDFS.SUBCLASSOF, SEMPERS.InsightProperties ) );
+		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, SEMPERS.InsightProperties ) );
 		statements.add( new StatementImpl( iid, DCTERMS.CREATED,
 				vf.createLiteral( null == insight.getCreated() ? new Date()
 								: insight.getCreated() ) ) );

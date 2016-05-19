@@ -22,7 +22,6 @@
 @prefix semonto: <http://os-em.com/ontologies/semtool/> .
 @prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
 @prefix semtool: <http://os-em.com/ontologies/semtool#> .
-@prefix sempers: <http://os-em.com/ontologies/semtool/insights#> .
 
 <http://os-em.com/ontologies/semtool>
   rdf:type owl:Ontology ;
@@ -32,7 +31,6 @@
   owl:imports <http://spinrdf.org/spin> ;
   owl:imports <http://uispin.org/ui> ;
   owl:imports <http://os-em.com/ontologies/semtool/core> ;
-  owl:versionInfo "Created with TopBraid Composer"^^xsd:string ;
 .
 semtool:DataView
   rdf:type owl:Class ;
@@ -70,37 +68,3 @@ semtool:reification
   rdfs:label "Reification"^^xsd:string ;
   rdfs:range semtool:ReificationModel ;
 .
-sempers:InsightProperties
-  rdf:type spin:MagicProperty ;
-  rdfs:label "Insight Properties"^^xsd:string ;
-  rdfs:subClassOf spin:MagicProperties ;
-.
-sempers:Perspective
-  rdf:type owl:Class ;
-  rdfs:label "Perspective"^^xsd:string ;
-  rdfs:subClassOf olo:OrderedList ;
-  rdfs:subClassOf ui:Element ;
-  rdfs:subClassOf [
-      rdf:type owl:Restriction ;
-      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-      owl:onClass sempers:InsightProperties ;
-      owl:onProperty olo:item ;
-    ] ;
-.
-sempers:insight
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "insight"^^xsd:string ;
-  rdfs:range semtool:InsightProperties ;
-.
-
-<http://os-em.com/ontologies/semtool/vcamp> semcore:author "$Author: daniel.mekonnen $"^^xsd:string ;
-	semcore:namespace "http://semoss.org/ontologies/semtool/vcamp#"^^xsd:string ;
-	semcore:namespacePrefix "vcamp"^^xsd:string ;
-	semcore:revision "$Revision: 2128 $"^^xsd:string ;
-	semcore:revisionDate "$Date: 2015-04-05 21:14:03 -0400 (Sun, 05 Apr 2015) $"^^xsd:string ;
-	semcore:specificity "1"^^xsd:integer ;
-	semcore:version "0.5"^^xsd:string ;
-	owl:versionIRI <http://semoss.org/ontologies/vcamp/v0.5> , <http://semoss.org/ontololgies/vcamp/v0.5> ;
-	a owl:Ontology ;
-	owl:imports <http://os-em.com/ontologies/semtool> , <http://os-em.com/ontologies/semtool/core> ;
-	owl:versionInfo "$Id: vcamp.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^xsd:string .
