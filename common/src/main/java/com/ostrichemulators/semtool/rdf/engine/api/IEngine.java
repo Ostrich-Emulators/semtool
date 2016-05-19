@@ -171,7 +171,12 @@ public interface IEngine {
 	 */
 	public void removeOwlData( Statement stmt );
 
-	// get property
+	/**
+	 * Gets a single property from {@link #getProperties()}
+	 *
+	 * @param key
+	 * @return
+	 */
 	public String getProperty( String key );
 
 	/**
@@ -207,6 +212,9 @@ public interface IEngine {
 	 * Runs an update on the engine.
 	 *
 	 * @param ue
+	 * @throws org.openrdf.repository.RepositoryException
+	 * @throws org.openrdf.query.MalformedQueryException
+	 * @throws org.openrdf.query.UpdateExecutionException
 	 * @throws SecurityException if the user does not have enough permissions to
 	 * run the update
 	 */
@@ -238,6 +246,7 @@ public interface IEngine {
 	 * Updates to disk the Insights for this engine
 	 *
 	 * @param insmgr
+	 * @throws com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
 	 */
 	public void updateInsights( InsightManager insmgr ) throws EngineManagementException;
 
