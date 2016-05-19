@@ -31,6 +31,10 @@ public class EngineFactory {
 
 	}
 
+	/**
+	 * Gets a new in-memory engine
+	 * @return
+	 */
 	public static IEngine memory() {
 		IEngine eng = new InMemorySesameEngine();
 		try {
@@ -44,7 +48,8 @@ public class EngineFactory {
 
 	/**
 	 * Creates and opens an IEngine based on some heuristics of the given
-	 * properties.
+	 * properties. Of particular interest, {@link Constants#ENGINE_IMPL} will
+	 * create the given engine no questions asked.
 	 *
 	 * @param props
 	 * @return
@@ -95,7 +100,7 @@ public class EngineFactory {
 	}
 
 	/**
-	 * Creates and opens an IEngine based on heuristics of the given file
+	 * Creates and opens an IEngine based on the given file's extension
 	 *
 	 * @param file
 	 * @return

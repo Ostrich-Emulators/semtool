@@ -115,19 +115,25 @@ public interface IEngine {
 
 	/**
 	 * Sets the start of the URI to be used for separating OWL statements from
-	 * data statements (e.g., http://semoss.org/ontologies)
+	 * data statements (e.g., http://os-em.com/ontologies/semtool/)
 	 *
 	 * @param bldr the start of the URI. If it doesn't end in a trailing slash,
 	 * one will be added
 	 */
 	public void setSchemaBuilder( UriBuilder bldr );
 
+	/**
+	 * Sets the start of the URI to be used for separating data statements from
+	 * OWL statements. Defaults to using the namespace of {@link #getBaseUri()}
+	 *
+	 * @param bldr
+	 */
 	public void setDataBuilder( UriBuilder bldr );
 
 	/**
 	 * Gets a URI builder for constructing OWL metamodel URIs
 	 *
-	 * @return the default uri for OWL statementsfor this engine, or null, if one
+	 * @return the default uri for OWL statements for this engine, or null, if one
 	 * has not been set
 	 */
 	public UriBuilder getSchemaBuilder();
@@ -245,7 +251,8 @@ public interface IEngine {
 	 * Updates to disk the Insights for this engine
 	 *
 	 * @param insmgr
-	 * @throws com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
+	 * @throws
+	 * com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
 	 */
 	public void updateInsights( InsightManager insmgr ) throws EngineManagementException;
 

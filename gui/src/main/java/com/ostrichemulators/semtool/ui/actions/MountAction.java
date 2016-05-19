@@ -24,6 +24,9 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
 import com.ostrichemulators.semtool.ui.components.FileBrowsePanel;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.SemossFileView;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -33,7 +36,7 @@ public class MountAction extends DbAction {
 
 	private static final Logger log = Logger.getLogger( MountAction.class );
 	private Frame frame;
-	private File smssfile;
+	private final List<File> smssfiles = new ArrayList<>();
 
 	public MountAction( String optg, Frame frame ) {
 		super( optg, MOUNT, "attachdb" );
@@ -42,10 +45,13 @@ public class MountAction extends DbAction {
 
 	@Override
 	protected boolean preAction( ActionEvent e ) {
+		smssfiles.clear();
+
 		Preferences prefs = Preferences.userNodeForPackage( MountAction.class );
 		JFileChooser chsr = new JFileChooser( prefs.get( "lastmountloc", "." ) );
 		chsr.setDialogTitle( "Select Directory" );
 		chsr.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
+		chsr.setMultiSelectionEnabled( true );
 
 		// we want to hide smss files that are already loaded
 		final Set<File> loaded = new HashSet<>();
@@ -59,10 +65,10 @@ public class MountAction extends DbAction {
 		chsr.setFileView( new SemossFileView() );
 		int rslt = chsr.showOpenDialog( frame );
 		if ( JFileChooser.APPROVE_OPTION == rslt ) {
-			smssfile = chsr.getSelectedFile();
+			smssfiles.addAll( Arrays.asList( chsr.getSelectedFiles() ) );
 
-			if ( null != smssfile ) {
-				prefs.put( "lastmountloc", smssfile.getParent() );
+			if ( !smssfiles.isEmpty() ) {
+				prefs.put( "lastmountloc", smssfiles.get( 0 ).getParent() );
 				return true;
 			}
 		}
@@ -71,19 +77,25 @@ public class MountAction extends DbAction {
 
 	@Override
 	protected ProgressTask getTask( ActionEvent e ) {
-		ProgressTask pt = new ProgressTask( "Submitting attach request for " + smssfile,
+		String lbl = ( 1 == smssfiles.size()
+				? smssfiles.get( 0 ).getName()
+				: "multiple files" );
+
+		ProgressTask pt = new ProgressTask( "Submitting attach request for " + lbl,
 				new Runnable() {
 					@Override
 					public void run() {
-						try {
-							EngineUtil.getInstance().mount( smssfile, true );
-						}
-						catch ( EngineManagementException eme ) {
-							String msg = ( ErrorCode.DUPLICATE_NAME == eme.getCode()
-									? "A repository with this name is already open. Please choose another."
-									: eme.getLocalizedMessage() );
-							GuiUtility.showError( msg );
-							log.error( eme );
+						for ( File smssfile : smssfiles ) {
+							try {
+								EngineUtil.getInstance().mount( smssfile, true );
+							}
+							catch ( EngineManagementException eme ) {
+								String msg = ( ErrorCode.DUPLICATE_NAME == eme.getCode()
+										? "A repository with this name is already open. Please choose another."
+										: eme.getLocalizedMessage() );
+								GuiUtility.showError( msg );
+								log.error( eme );
+							}
 						}
 					}
 				} );

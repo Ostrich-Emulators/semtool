@@ -328,17 +328,17 @@ public class OpenAction extends DbAction {
 		int progressPerFile = 100 / xslxes.size();
 		String sTitle = xslxes.toString();
 		//PlaySheetFrame psf = new PlaySheetFrame( engine, "Import Data" );
-		PlaySheetFrame psf = new PlaySheetFrame( engine, sTitle.substring(sTitle.lastIndexOf("\\")+1, sTitle.lastIndexOf("]")) );
+		PlaySheetFrame psf = new PlaySheetFrame( engine,
+				sTitle.substring( sTitle.lastIndexOf( "\\" ) + 1, sTitle.lastIndexOf( "]" ) ) );
 		try {
-			psf.setIcon(true);
-		} catch (PropertyVetoException e) {
+			psf.setIcon( true );
+		}
+		catch ( PropertyVetoException e ) {
 			// TODO Auto-generated catch block
-			
+
 		}
 		pane.add( psf );
-		
 
-		POIReader xlsreader = new POIReader();
 		for ( File fileToLoad : xslxes ) {
 			psf.addProgress( "Reading " + fileToLoad, progressPerFile );
 			try {
@@ -353,7 +353,7 @@ public class OpenAction extends DbAction {
 
 					List<Value[]> vals = new ArrayList<>();
 					DataIterator di = lsd.iterator();
-					while( di.hasNext() ){
+					while ( di.hasNext() ) {
 						LoadingNodeAndPropertyValues nap = di.next();
 						vals.add( nap.convertToValueArray( vf ) );
 					}
