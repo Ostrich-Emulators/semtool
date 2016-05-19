@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.util;
 
-import com.ostrichemulators.semtool.util.Utility;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -103,7 +102,7 @@ public class UtilityTest {
 
 	@Test
 	public void testGetLabels() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
+		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		eng.getRawConnection().begin();
 		eng.getRawConnection().add( new StatementImpl( RDFS.ISDEFINEDBY,
 				RDFS.LABEL, new LiteralImpl( "my label" ) ) );

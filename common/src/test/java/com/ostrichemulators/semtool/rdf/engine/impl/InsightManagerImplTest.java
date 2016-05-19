@@ -7,14 +7,14 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 
 import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
+import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
+import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.UriBuilder;
-import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Properties;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,7 +34,6 @@ import org.openrdf.sail.memory.MemoryStore;
  */
 public class InsightManagerImplTest {
 
-	private static final File LEGACY_QUESTIONS = new File( "src/test/resources/questions.prop" );
 	private static final File SRCFILE = new File( "src/test/resources/insmgr.data-source.ttl" );
 
 	@BeforeClass
@@ -51,14 +50,6 @@ public class InsightManagerImplTest {
 
 	@After
 	public void tearDown() {
-	}
-
-	@Test
-	public void testLoadLegacyData() throws IOException {
-		InsightManagerImpl imi = new InsightManagerImpl();
-		Properties props = Utility.loadProp( LEGACY_QUESTIONS );
-		imi.loadLegacyData( props );
-		assertEquals( 8, imi.getPerspectives().size() );
 	}
 
 	@Test
@@ -79,18 +70,17 @@ public class InsightManagerImplTest {
 	@Test
 	public void testCreateStatements() throws Exception {
 		InsightManagerImpl imi = new InsightManagerImpl();
-		Properties props = Utility.loadProp( LEGACY_QUESTIONS );
-		imi.loadLegacyData( props );
+		EngineUtil2.createInsightStatements( SRCFILE, imi );
 
 		Collection<Statement> stmts
 				= InsightManagerImpl.getStatements( imi, new LocalUserImpl() );
-		assertEquals( 1502, stmts.size() );
+		assertEquals( 22, stmts.size() );
 	}
 
 	@Test
 	public void testSystemP() {
 		InsightManagerImpl imi = new InsightManagerImpl();
-		InMemorySesameEngine eng = new InMemorySesameEngine();
+		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		eng.setBuilders( UriBuilder.getBuilder( Constants.ANYNODE + "/data/" ),
 				UriBuilder.getBuilder( Constants.ANYNODE + "/schema/" ) );
 		Perspective p = imi.getSystemPerspective( eng );
@@ -98,10 +88,9 @@ public class InsightManagerImplTest {
 	}
 
 	@Test
-	public void testCtor() throws IOException {
+	public void testCtor() throws IOException, EngineManagementException {
 		InsightManagerImpl imi = new InsightManagerImpl();
-		Properties props = Utility.loadProp( LEGACY_QUESTIONS );
-		imi.loadLegacyData( props );
+		EngineUtil2.createInsightStatements( SRCFILE, imi );
 
 		InsightManager im = new InsightManagerImpl( imi );
 		assertEquals( imi.getPerspectives(), im.getPerspectives() );

@@ -64,7 +64,7 @@ public class QueryExecutorAdapterTest {
 	@BeforeClass
 	public static void setupClass() {
 		TimeZone.setDefault( TimeZone.getTimeZone( "GMT-04:00" ) );
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 		try {
 			RepositoryConnection rc = engine.getRawConnection();
 

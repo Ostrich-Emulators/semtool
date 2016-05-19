@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
-import com.ostrichemulators.semtool.rdf.engine.impl.JenaEngine;
 import com.hp.hpl.jena.query.Dataset;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -42,7 +41,7 @@ public class JenaEngineTest {
 	}
 
 	@Before
-	public void setUp() throws IOException {		
+	public void setUp() throws IOException, RepositoryException {
 		tdb = RDFDataMgr.loadDataset( loadfile.toString() );
 		instance = new JenaEngine( tdb );
 	}

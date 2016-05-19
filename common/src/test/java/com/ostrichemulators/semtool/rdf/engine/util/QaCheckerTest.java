@@ -61,7 +61,7 @@ public class QaCheckerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 		el = new QaChecker();
 	}
 

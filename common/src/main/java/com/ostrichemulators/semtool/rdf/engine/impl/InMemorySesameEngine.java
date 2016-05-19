@@ -22,6 +22,7 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.Security;
+import com.ostrichemulators.semtool.util.Constants;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
@@ -30,7 +31,9 @@ import org.openrdf.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.util.UriBuilder;
 import info.aduna.iteration.Iterations;
+import java.io.File;
 import java.util.List;
+import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -39,6 +42,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.sail.Sail;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -48,27 +52,37 @@ import org.openrdf.sail.memory.MemoryStore;
  */
 public class InMemorySesameEngine extends AbstractSesameEngine {
 
+	public static final String SYNC_DELAY = "sync-delay";
+	public static final String MEMSTORE_DIR = "memory-store-dir";
+	public static final String INFER = "infer";
+
 	private static final Logger log = Logger.getLogger( InMemorySesameEngine.class );
 	private RepositoryConnection rc = null;
 	private boolean iControlMyRc = false;
 
-	public InMemorySesameEngine() {
-		super(new Properties());
-		Properties initProps = new Properties();
-		createRc( initProps );
-		this.openDB(initProps);
+	protected InMemorySesameEngine() {
 	}
 
-	public InMemorySesameEngine(Properties initProps, RepositoryConnection rc ) {
-		super(initProps);
-		setRepositoryConnection( rc, false );
-		this.openDB(initProps);
+	public static InMemorySesameEngine open() {
+		InMemorySesameEngine eng = new InMemorySesameEngine();
+		try {
+			eng.openDB( new Properties() );
+		}
+		catch ( Exception e ) {
+			log.error( e );
+		}
+		return eng;
 	}
 
-	public InMemorySesameEngine(Properties initProps, RepositoryConnection rc, boolean takeControl ) {
-		super(initProps);
-		this.openDB(initProps);
-		setRepositoryConnection( rc, takeControl );
+	public static Properties generateProperties( File file ) {
+
+		Properties props = new Properties();
+		props.setProperty( MEMSTORE_DIR, ( "memorystore.data".equals( file.getName() )
+				? file.getAbsoluteFile().getParent()
+				: file.getPath() ) );
+		props.setProperty( Constants.ENGINE_IMPL,
+				InMemorySesameEngine.class.getCanonicalName() );
+		return props;
 	}
 
 	@Override
@@ -79,9 +93,20 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		}
 
 		Security.getSecurity().associateUser( this, new LocalUserImpl() );
-		ForwardChainingRDFSInferencer inferencer
-				= new ForwardChainingRDFSInferencer( new MemoryStore() );
-		Repository repo = new SailRepository( inferencer );
+
+		MemoryStore memstore = ( p.containsKey( MEMSTORE_DIR )
+				? new MemoryStore( new File( p.getProperty( MEMSTORE_DIR ) ) )
+				: new MemoryStore() );
+
+		if ( p.containsKey( SYNC_DELAY ) ) {
+			memstore.setSyncDelay( Long.parseLong( p.getProperty( SYNC_DELAY ) ) );
+		}
+
+		Sail sail = ( p.containsKey( INFER )
+				? new ForwardChainingRDFSInferencer( memstore )
+				: memstore );
+
+		Repository repo = new SailRepository( sail );
 
 		try {
 			repo.initialize();
@@ -113,12 +138,10 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 
 		try {
 
-			startLoading( new Properties() );
-
 			URI baseuri = null;
 			// if the baseuri isn't already set, then query the kb for void:Dataset
 			RepositoryResult<Statement> rr
-					= rc.getStatements(null, RDF.TYPE, SEMTOOL.Database, false );
+					= rc.getStatements( null, RDF.TYPE, SEMTOOL.Database, false );
 			List<Statement> stmts = Iterations.asList( rr );
 			for ( Statement s : stmts ) {
 				baseuri = URI.class.cast( s.getSubject() );
@@ -129,7 +152,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 				// no base uri in the DB, so make a new one
 				baseuri = getNewBaseUri();
 				//rc.begin();
-				rc.add(baseuri, RDF.TYPE, SEMTOOL.Database );
+				rc.add( baseuri, RDF.TYPE, SEMTOOL.Database );
 				//rc.add(  baseuri, SEMTOOL.ReificationModel, SEMTOOL.SEMTOOL_Reification );
 				//rc.commit();
 			}

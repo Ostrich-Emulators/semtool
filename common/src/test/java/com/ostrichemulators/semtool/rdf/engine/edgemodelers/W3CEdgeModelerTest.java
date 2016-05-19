@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.edgemodelers;
 
-import com.ostrichemulators.semtool.rdf.engine.edgemodelers.W3CEdgeModeler;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
@@ -101,7 +100,7 @@ public class W3CEdgeModelerTest {
 	public void setUp() throws RepositoryException {
 		// this basically duplicates the data from test12.xlsx
 
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 		engine.setBuilders( UriBuilder.getBuilder( DATA ), UriBuilder.getBuilder( SCHEMA ) );
 		engine.getRawConnection().setNamespace( "vcamp", DATA );
 		engine.getRawConnection().setNamespace( "semoss", SCHEMA );

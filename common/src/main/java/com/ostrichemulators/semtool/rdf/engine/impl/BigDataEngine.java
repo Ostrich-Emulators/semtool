@@ -34,18 +34,15 @@ import com.bigdata.rdf.store.AbstractTripleStore;
 import com.bigdata.rdf.task.AbstractApiTask;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
-import static com.ostrichemulators.semtool.rdf.engine.impl.AbstractEngine.searchFor;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.StatementSorter;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
-import com.ostrichemulators.semtool.util.Utility;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
@@ -72,13 +69,11 @@ public class BigDataEngine extends AbstractSesameEngine {
 	private BigdataSailRepository insightrepo = null;
 	private InsightManagerImpl insightEngine = null;
 
-	public BigDataEngine( Properties initProps ) {
-		super( initProps );
-		this.openDB( initProps );
+	public BigDataEngine() {
 	}
 
-	public BigDataEngine( File jnl ) {
-		this( generateProperties( jnl ) );
+	public BigDataEngine( File jnl ) throws RepositoryException {
+		openDB( generateProperties( jnl ) );
 	}
 
 	@Override
@@ -128,28 +123,6 @@ public class BigDataEngine extends AbstractSesameEngine {
 			}
 			rc = repo.getConnection();
 		}
-	}
-
-	@Override
-	protected Properties loadAllProperties( Properties props, String engineName,
-			File... searchpath ) throws IOException {
-		Properties ret = super.loadAllProperties( props, engineName, searchpath );
-
-		String rwspropfile
-				= ret.getProperty( Constants.SMSS_RWSTORE_KEY, "RWStore.properties" );
-		File rwsfile = searchFor( rwspropfile, searchpath );
-
-		Properties rws = ( null == rwsfile ? props : Utility.loadProp( rwsfile ) );
-
-		String jnlName
-				= rws.getProperty( BigdataSail.Options.FILE, getEngineName() + ".jnl" );
-		// fix the path for the jnl file
-		boolean isremote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY, "false" ) );
-		if ( !isremote ) {
-			File jnl = searchFor( jnlName, searchpath );
-			ret.put( BigdataSail.Options.FILE, jnl.toString() );
-		}
-		return ret;
 	}
 
 	@Override
@@ -237,15 +210,6 @@ public class BigDataEngine extends AbstractSesameEngine {
 			catch ( Exception ioe ) {
 				log.warn( ioe, ioe );
 			}
-		}
-	}
-
-	@Override
-	protected void loadLegacyInsights( Properties props ) throws RepositoryException {
-		// this gets called from the startup logic
-		super.loadLegacyInsights( props );
-		if ( !props.isEmpty() ) {
-			copyInsightsToDisk( insightEngine );
 		}
 	}
 

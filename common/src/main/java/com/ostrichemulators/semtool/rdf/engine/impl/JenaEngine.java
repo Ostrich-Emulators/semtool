@@ -57,13 +57,10 @@ public class JenaEngine extends AbstractSesameEngine {
 	private File tdbdir;
 	private boolean needsSave = false;
 
-	public JenaEngine( Properties initProps ) {
-		super( initProps );
-		openDB( initProps );
+	public JenaEngine() {
 	}
 
-	public JenaEngine( Dataset dataset ) {
-		super( new Properties() );
+	public JenaEngine( Dataset dataset ) throws RepositoryException {
 		openDB( new Properties() );
 		tdbdir = null;
 		try {

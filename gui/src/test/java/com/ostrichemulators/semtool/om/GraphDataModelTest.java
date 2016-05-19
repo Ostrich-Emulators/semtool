@@ -67,7 +67,7 @@ public class GraphDataModelTest {
 
 	@Before
 	public void setUp() throws Exception {
-		eng = new InMemorySesameEngine();
+		eng = InMemorySesameEngine.open();
 		eng.setBuilders( datab, owlb );
 
 		RepositoryConnection rc = eng.getRawConnection();

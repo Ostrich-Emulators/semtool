@@ -65,8 +65,7 @@ public abstract class AbstractEngine implements IEngine {
 	private UriBuilder databuilder;
 	private URI baseuri;
 
-	public AbstractEngine( Properties initProps ) {
-
+	public AbstractEngine() {
 	}
 
 	/**
@@ -76,151 +75,27 @@ public abstract class AbstractEngine implements IEngine {
 	 * java.lang.String, java.io.File...) },
 	 * <li>{@link #setUris(java.lang.String, java.lang.String) },
 	 * <li>{@link #finishLoading(java.util.Properties) }
-	 *</ol>
+	 * </ol>
+	 *
 	 * @param initprops
 	 */
 	@Override
-	public void openDB( Properties initprops ) {
-		try {
-			File[] searchpath = makeSearchPath( initprops );
+	public void openDB( Properties initprops ) throws RepositoryException {
+		prop = Utility.copyProperties( initprops );
+		startLoading( prop );
 
-			prop = loadAllProperties( initprops, engineName, searchpath );
-			startLoading( prop );
 
-			String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
-			String owlstarter = prop.getProperty( Constants.SEMOSS_URI, null );
-			if ( null == owlstarter ) {
-				log.warn( "no schema URI set...using " + SEMONTO.NAMESPACE );
-				owlstarter = SEMONTO.NAMESPACE;
-			}
-			baseuri = new URIImpl( setUris( baseuristr, owlstarter ).stringValue() );
 
-			String dreamerfileloc = prop.getProperty( Constants.DREAMER );
-			if ( null != dreamerfileloc ) {
-				Properties legacyquestions = Utility.loadProp( new File( dreamerfileloc ) );
-				loadLegacyInsights( legacyquestions );
-			}
 
-			String ontofileloc = prop.getProperty( Constants.OWLFILE );
-			if ( null != ontofileloc ) {
-				loadLegacyOwl( ontofileloc );
-			}
-
-			finishLoading( prop );
+		String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
+		String owlstarter = prop.getProperty( Constants.SEMOSS_URI, null );
+		if ( null == owlstarter ) {
+			log.warn( "no schema URI set...using " + SEMONTO.NAMESPACE );
+			owlstarter = SEMONTO.NAMESPACE;
 		}
-		catch ( IOException | RepositoryException e ) {
-			log.error( e );
-		}
-	}
+		baseuri = new URIImpl( setUris( baseuristr, owlstarter ).stringValue() );
 
-	/**
-	 * Loads the insights (questions and perspectives) from the given properties.
-	 *
-	 * @param props the insights
-	 * @throws org.openrdf.repository.RepositoryException
-	 */
-	protected void loadLegacyInsights( Properties props ) throws RepositoryException {
-		log.warn( "this engine type does not persist its insights" );
-		if ( !props.isEmpty() ) {
-			InsightManagerImpl imi = new InsightManagerImpl();
-			imi.loadLegacyData( props );
-			insightEngine.addAll( imi.getPerspectives(), true );
-		}
-	}
-
-	/**
-	 * Loads the metadata information from the given file.
-	 *
-	 * @param ontoloc the location of the owl file. It is guaranteed to exist
-	 */
-	protected abstract void loadLegacyOwl( String ontoloc );
-
-	/**
-	 * Loads and optionally modifies the given properties. This is the first step
-	 * in {@link #openDB(java.util.Properties) }
-	 *
-	 * @param props the properties
-	 * @param ename the engine name
-	 * @param searchpath where to look for any files specified in
-	 * <code>props</code>
-	 * @return the modified properties
-	 * @throws IOException
-	 */
-	protected Properties loadAllProperties( Properties props, String ename,
-			File... searchpath ) throws IOException {
-
-		Properties newprops = Utility.copyProperties( props );
-		Properties ontoProp = new Properties( newprops );
-		Properties dreamerProp = new Properties( ontoProp );
-
-		String questionPropFile = props.getProperty( Constants.DREAMER,
-				getDefaultName( Constants.DREAMER, ename ) );
-		File dreamer = searchFor( questionPropFile, searchpath );
-		if ( null != dreamer ) {
-			try {
-				Utility.loadProp( dreamer, dreamerProp );
-				newprops.setProperty( Constants.DREAMER, dreamer.getCanonicalPath() );
-			}
-			catch ( IOException ioe ) {
-				log.warn( ioe, ioe );
-			}
-		}
-
-		File owlf = searchFor( props.getProperty( Constants.OWLFILE,
-				getDefaultName( Constants.OWLFILE, ename ) ), searchpath );
-		if ( owlf != null ) {
-			newprops.setProperty( Constants.OWLFILE, owlf.getCanonicalPath() );
-		}
-
-		File ontof = searchFor( props.getProperty( Constants.ONTOLOGY,
-				getDefaultName( Constants.ONTOLOGY, ename ) ), searchpath );
-		if ( ontof != null ) {
-			newprops.setProperty( Constants.ONTOLOGY, ontof.getCanonicalPath() );
-			Utility.loadProp( ontof, ontoProp );
-		}
-
-		return newprops;
-	}
-
-	/**
-	 * Makes an array of directories to search to resolve file locations in the
-	 * properties
-	 *
-	 * @param props the properties (should contain {@link Constants#SMSS_LOCATION}
-	 * @return an array of directories to search for files
-	 */
-	private File[] makeSearchPath( Properties props ) {
-		Set<File> searchpath = new HashSet<>();
-
-		File propfile = new File( props.getProperty( Constants.SMSS_LOCATION, "." ) );
-		File propdir = propfile.getParentFile();
-		String verprop = props.getProperty( Constants.SMSS_VERSION_KEY, "0.0" );
-
-		// support the old path resolution, but we really check all over
-		// because the paths inside the properties files might also be wrong
-		if ( Double.parseDouble( verprop ) < 1.0 ) {
-			// these are legacy locations
-			File dbdir
-					= ( null == engineName ? propdir
-							: new File( propdir, this.engineName ) );
-
-			String basefolder = System.getProperty( "user.dir" );
-			final File BASEDIR = new File( basefolder );
-			searchpath.add( dbdir );
-			searchpath.add( BASEDIR );
-		}
-
-		searchpath.add( propdir );
-
-		String searchpathprop = props.getProperty( Constants.SMSS_SEARCHPATH, "" );
-		if ( !searchpathprop.isEmpty() ) {
-			for ( String p : searchpathprop.split( ";" ) ) {
-				File f = new File( p );
-				searchpath.add( f );
-			}
-		}
-
-		return searchpath.toArray( new File[0] );
+		finishLoading( prop );
 	}
 
 	/**

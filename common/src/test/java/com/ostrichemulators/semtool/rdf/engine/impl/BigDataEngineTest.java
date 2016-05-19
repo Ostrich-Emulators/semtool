@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
-import com.ostrichemulators.semtool.util.Utility;
+import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
 import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -22,7 +22,7 @@ import org.junit.Test;
 public class BigDataEngineTest {
 
 	private static final File JNL = new File( "src/test/resources/test.jnl" );
-	private static final File PROPS = new File( "src/test/resources/questions.prop" );
+	private static final File INSIGHTS = new File( "src/test/resources/insmgr.data-source.ttl" );
 	private BigDataEngine eng;
 	private File jnl;
 
@@ -53,7 +53,7 @@ public class BigDataEngineTest {
 	@Test
 	public void testUpdateInsights() throws Exception {
 		InsightManagerImpl im = new InsightManagerImpl();
-		im.loadLegacyData( Utility.loadProp( PROPS ) );
+		EngineUtil2.createInsightStatements( INSIGHTS, im );
 
 		assertEquals( 1, eng.getInsightManager().getPerspectives().size() );
 		eng.updateInsights( im );

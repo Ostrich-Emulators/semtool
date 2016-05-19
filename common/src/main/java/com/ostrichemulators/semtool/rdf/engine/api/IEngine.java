@@ -51,15 +51,14 @@ public interface IEngine {
 	 * properties is dependent on the type of engine that is being initiated. This
 	 * is the function that first initializes an engine. One property in
 	 * particular should ALWAYS be included in the Properties argument:
-	 * {@link Constants#SMSS_LOCATION}. Also, {@link Constants#SMSS_SEARCHPATH} is
-	 * a semicolon-delimited set of paths that can be set to specify where to look
-	 * for supporting files listed in the Properties.
+	 * {@link Constants#SMSS_LOCATION}.
 	 *
 	 * @param props contains all information regarding the data store and how the
 	 * engine should be instantiated. Dependent on what type of engine is being
 	 * instantiated.
+	 * @throws org.openrdf.repository.RepositoryException if something goes wrong
 	 */
-	public void openDB( Properties props );
+	public void openDB( Properties props ) throws RepositoryException;
 
 	/**
 	 * Closes the data base associated with the engine. This will prevent further

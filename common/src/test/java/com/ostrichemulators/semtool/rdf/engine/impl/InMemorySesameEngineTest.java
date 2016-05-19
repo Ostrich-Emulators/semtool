@@ -58,7 +58,7 @@ public class InMemorySesameEngineTest {
 
 	@Before
 	public void setUp() throws Exception {
-		eng = new InMemorySesameEngine();
+		eng = InMemorySesameEngine.open();
 
 		RepositoryConnection rc = eng.getRawConnection();
 		rc.begin();

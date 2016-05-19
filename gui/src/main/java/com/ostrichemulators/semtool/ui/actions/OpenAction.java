@@ -304,7 +304,7 @@ public class OpenAction extends DbAction {
 		for ( File f : noreader ) {
 			psf.addProgress( "Reading " + f, progressPerFile );
 
-			InMemorySesameEngine eng = new InMemorySesameEngine();
+			InMemorySesameEngine eng = InMemorySesameEngine.open();
 			EngineLoader loader = new EngineLoader();
 			try {
 				loader.loadToEngine( Arrays.asList( f ), eng, false, null );

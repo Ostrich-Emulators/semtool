@@ -33,7 +33,7 @@ public class MetadataQueryTest {
 
 	@Before
 	public void setUp() {
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 		try {
 			RepositoryConnection rc = engine.getRawConnection();
 			rc.add(bldr.toUri(), RDF.TYPE, SEMTOOL.Database );

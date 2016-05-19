@@ -10,6 +10,7 @@ import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -83,7 +84,7 @@ public class EngineUtil2Test {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, "http://junkowl/testfile/one" );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		eng = new BigDataEngine( props );
+		eng = EngineFactory.getEngine( props );
 	}
 
 	@After
@@ -148,7 +149,7 @@ public class EngineUtil2Test {
 	public void testLoadEngine1() throws Exception {
 		eng.closeDB();
 		assertFalse( eng.isConnected() );
-		eng = EngineUtil2.loadEngine( dbfile );
+		eng = EngineFactory.getEngine( dbfile );
 		assertTrue( eng.isConnected() );
 		assertEquals( dbfile.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
 	}
@@ -163,18 +164,11 @@ public class EngineUtil2Test {
 			props.store( w, null );
 		}
 
-		eng = EngineUtil2.loadEngine( tmp );
+		eng = EngineFactory.getEngine( tmp );
 		FileUtils.deleteQuietly( tmp );
 
 		assertTrue( eng.isConnected() );
 		assertEquals( tmp.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
-	}
-
-	@Test
-	public void testCloseEngine() {
-		assertTrue( eng.isConnected() );
-		EngineUtil2.closeEngine( eng );
-		assertFalse( eng.isConnected() );
 	}
 
 	@Test

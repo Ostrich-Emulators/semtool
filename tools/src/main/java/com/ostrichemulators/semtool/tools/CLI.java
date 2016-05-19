@@ -31,6 +31,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineCreateBuilder;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineLoader;
@@ -378,7 +379,7 @@ public class CLI {
 			}
 
 			File smss = EngineUtil2.createNew( ecb, errors );
-			engine = new BigDataEngine( BigDataEngine.generateProperties( smss ) );
+			engine = EngineFactory.getEngine( smss );
 		}
 
 		// set the metadata on the just-created database

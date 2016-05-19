@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util.impl;
 
-import com.ostrichemulators.semtool.rdf.query.util.impl.ListOfMapsQueryAdapter;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,7 @@ public class ListOfMapsQueryAdapterTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		eng = new InMemorySesameEngine();
+		eng = InMemorySesameEngine.open();
 		RepositoryConnection rc = eng.getRawConnection();
 		rc.begin();
 		rc.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL, new LiteralImpl( "test" ) ) );

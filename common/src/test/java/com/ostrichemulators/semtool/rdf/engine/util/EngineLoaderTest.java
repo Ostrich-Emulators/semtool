@@ -16,6 +16,7 @@ import com.ostrichemulators.semtool.poi.main.POIReader;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
@@ -157,7 +158,7 @@ public class EngineLoaderTest {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		BigDataEngine eng = new BigDataEngine( props );
+		IEngine eng = EngineFactory.getEngine(  props );
 		eng.setDataBuilder( data );
 		eng.setSchemaBuilder( schema );
 		return eng;
@@ -180,7 +181,7 @@ public class EngineLoaderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 		engine.setEngineName( "engine loader tester" );
 	}
 

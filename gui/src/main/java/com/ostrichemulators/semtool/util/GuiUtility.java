@@ -20,7 +20,7 @@
 package com.ostrichemulators.semtool.util;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
+import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 
 import static com.ostrichemulators.semtool.util.Utility.unzip;
 import java.awt.Desktop;
@@ -158,13 +158,13 @@ public class GuiUtility {
 	 * @throws java.io.IOException
 	 */
 	public static IEngine loadEngine( File smssfile ) throws IOException {
-		IEngine engine = EngineUtil2.loadEngine( smssfile );
+		IEngine engine = EngineFactory.getEngine( smssfile );
 		DIHelper.getInstance().registerEngine( engine );
 		return engine;
 	}
 
 	public static void closeEngine( IEngine engine ) {
-		EngineUtil2.closeEngine( engine );
+		engine.closeDB();
 		DIHelper.getInstance().unregisterEngine( engine );
 	}
 

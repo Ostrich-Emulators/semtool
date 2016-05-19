@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util.impl;
 
-import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -59,7 +58,7 @@ public class ListQueryAdapterTest {
 			};
 
 	static {
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 		RepositoryConnection rc = engine.getRawConnection();
 		try {
 			GregorianCalendar gCalendar = new GregorianCalendar();

@@ -26,7 +26,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.impl.AbstractEngine;
-import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
@@ -36,13 +36,11 @@ import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -171,66 +169,6 @@ public class EngineUtil2 {
 	}
 
 	/**
-	 * Factory method for loading an engine.
-	 *
-	 * @param smssfile
-	 *
-	 * @return Loaded engine.
-	 *
-	 * @throws java.io.IOException
-	 */
-	public static IEngine loadEngine( File smssfile ) throws IOException {
-		log.debug( "In Utility file name is " + smssfile );
-		String smssloc = smssfile.getCanonicalPath();
-		IEngine engine = null;
-		String engineName = FilenameUtils.getBaseName( smssloc );
-
-		if ( "jnl".equalsIgnoreCase(
-				FilenameUtils.getExtension( smssfile.getName() ).toLowerCase() ) ) {
-			// we're loading a BigData journal file, so jump straight to its ctor
-			engine = new BigDataEngine( smssfile );
-		}
-		else {
-			Properties props = Utility.loadProp( smssfile );
-			engineName = props.getProperty( Constants.ENGINE_NAME, engineName );
-
-			String engineClass = props.getProperty( Constants.ENGINE_IMPL );
-			engineClass = engineClass.replaceAll( "prerna", "gov.va.semoss" );
-
-			try {
-				Class<IEngine> theClass = (Class<IEngine>) Class.forName( engineClass );
-				engine = (IEngine) theClass.getConstructor( Properties.class ).newInstance( props );
-
-			}
-			catch ( ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-				log.error( e );
-			}
-		}
-
-		if ( null == engine ) {
-			throw new IOException( "Could not create engine" );
-		}
-
-		if ( null == engine.getEngineName() && null != engineName ) {
-			engine.setEngineName( engineName );
-		}
-
-		engine.setProperty( Constants.SMSS_LOCATION, smssloc );
-
-		return engine;
-	}
-
-	/**
-	 * Pair for {@link #loadEngine(java.io.File) }. Implementation simply calls
-	 * {@link IEngine#closeDB() }
-	 *
-	 * @param eng
-	 */
-	public static void closeEngine( IEngine eng ) {
-		eng.closeDB();
-	}
-
-	/**
 	 * Creates an empty database by copying data from the db/Default directory
 	 *
 	 * @param ecb how the new database should be created
@@ -251,7 +189,7 @@ public class EngineUtil2 {
 		User user = new LocalUserImpl();
 		File smssfile = createEngine( ecb, user );
 
-		IEngine bde = EngineUtil2.loadEngine( smssfile.getAbsoluteFile() );
+		IEngine bde = EngineFactory.getEngine( smssfile.getAbsoluteFile() );
 		Security.getSecurity().associateUser( bde, user );
 
 		if ( null != ecb.getQuestions() ) {
@@ -469,10 +407,6 @@ public class EngineUtil2 {
 				loader.loadFromRepository( rc );
 				rc.close();
 				repo.shutDown();
-			}
-			else {
-				Properties p = Utility.loadProp( modelquestions );
-				loader.loadLegacyData( p );
 			}
 		}
 		catch ( RepositoryException | RDFParseException e ) {

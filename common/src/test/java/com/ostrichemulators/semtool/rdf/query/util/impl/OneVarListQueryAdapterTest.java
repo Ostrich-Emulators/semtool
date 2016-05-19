@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util.impl;
 
-import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +32,7 @@ public class OneVarListQueryAdapterTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		eng = new InMemorySesameEngine();
+		eng = InMemorySesameEngine.open();
 		RepositoryConnection rc = eng.getRawConnection();
 		rc.begin();
 		rc.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL, new LiteralImpl( "test" ) ) );
@@ -57,7 +56,7 @@ public class OneVarListQueryAdapterTest {
 	public void testGetLabels() {
 		OneVarListQueryAdapter<String> q = OneVarListQueryAdapter.getLabels( RDFS.DOMAIN );
 		List<String> results = eng.queryNoEx( q );
-		assertEquals( Arrays.asList( "test" ), results );		
+		assertEquals( Arrays.asList( "test" ), results );
 	}
 
 }

@@ -39,7 +39,7 @@ public class MetadataQueryTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		eng = new InMemorySesameEngine();
+		eng = InMemorySesameEngine.open();
 		
 		RepositoryConnection rc = eng.getRawConnection();
 		rc.begin();

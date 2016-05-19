@@ -32,7 +32,7 @@ public class DBToLoadingSheetExporterTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 		engine.setBuilders( UriBuilder.getBuilder( "http://semoss.os-em.com/database/T44889381-85ce-43e3-893d-6267fd480660/" ),
 				UriBuilder.getBuilder( "http://semoss.org/ontologies/" ) );
 		engine.getRawConnection().begin();

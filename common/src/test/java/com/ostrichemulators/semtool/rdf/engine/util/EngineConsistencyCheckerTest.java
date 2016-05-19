@@ -54,7 +54,7 @@ public class EngineConsistencyCheckerTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		engine = new InMemorySesameEngine();
+		engine = InMemorySesameEngine.open();
 
 		engine.setBuilders( datab, UriBuilder.getBuilder( "http://semoss.org/ontologies/" ) );
 

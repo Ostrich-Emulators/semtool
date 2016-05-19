@@ -8,12 +8,10 @@ package com.ostrichemulators.semtool.tools;
 import com.bigdata.rdf.sail.BigdataSail;
 import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.bigdata.rdf.sail.remote.BigdataSailFactory;
-import com.ostrichemulators.semtool.om.Insight;
-import com.ostrichemulators.semtool.om.Parameter;
-import com.ostrichemulators.semtool.om.Perspective;
-import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
+import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
-import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
+import com.ostrichemulators.semtool.rdf.engine.impl.LegacyUpgradingInsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineCreateBuilder;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.ErrorCode;
@@ -30,8 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
@@ -93,18 +89,21 @@ public class LegacyUpgrader {
 
 		EngineCreateBuilder ecb = new EngineCreateBuilder( tofile.getParentFile(),
 				FilenameUtils.getBaseName( tofile.getName() ) );
-		ecb.setReificationModel(ReificationStyle.SEMTOOL );
-		ecb.setDefaultsFiles( null, null, questions );
+		ecb.setReificationModel( ReificationStyle.SEMTOOL );
+		//ecb.setDefaultsFiles( null, null, null );
 		ecb.setDefaultBaseUri( schema, true );
 		ecb.setVocabularies( vocabs );
 		ecb.setBooleans( true, true, true );
 		File dbfile = EngineUtil2.createNew( ecb, null );
 
+		IEngine bde = EngineFactory.getEngine( dbfile );
+		LegacyUpgradingInsightManagerImpl im = new LegacyUpgradingInsightManagerImpl();
+		im.loadLegacyData( Utility.loadProp( questions ) );
+		bde.updateInsights( im );
+		bde.closeDB();
+
 		File legacyjnl
 				= new File( legacydir, props.getProperty( BigdataSail.Options.FILE ) );
-
-		upgradeInsights( dbfile, UriBuilder.getBuilder( schema ),
-				UriBuilder.getBuilder( data ) );
 
 		BigdataSailRepository legacyrepo = BigdataSailRepository.class.cast( BigdataSailFactory.openRepository( legacyjnl.getPath() ) );
 		legacyrepo.initialize();
@@ -127,70 +126,6 @@ public class LegacyUpgrader {
 			newconn.close();
 			newrepo.shutDown();
 		}
-	}
-
-	private static void upgradeInsights( File jnl, UriBuilder owlb, UriBuilder datab )
-			throws EngineManagementException {
-		BigDataEngine eng = new BigDataEngine( jnl );
-		InsightManager im = eng.getInsightManager();
-
-		final Pattern PAT = Pattern.compile( "<([^>]+)>" );
-
-		Perspective genericP = null;
-		for ( Perspective p : im.getPerspectives() ) {
-			if ( "Generic-Perspective".equals( p.getLabel() ) ) {
-				// don't upgrade the generic perspective...get rid of it
-				genericP = p;
-			}
-			else {
-				for ( Insight i : p.getInsights() ) {
-					String query = i.getSparql();
-					StringBuffer sb = new StringBuffer();
-					Matcher m = PAT.matcher( query );
-					while ( m.find() ) {
-						String newstr = m.group( 1 );
-						URI repl = new URIImpl( newstr );
-						if ( owlb.contains( repl ) ) {
-							m.appendReplacement( sb,
-									"<" + owlb.build( repl.getLocalName() ).stringValue() + ">" );
-						}
-						else if ( datab.contains( repl ) ) {
-							m.appendReplacement( sb,
-									"<" + datab.build( repl.getLocalName() ).stringValue() + ">" );
-						}
-					}
-					m.appendTail( sb );
-					i.setSparql( sb.toString() );
-
-					for ( Parameter a : i.getInsightParameters() ) {
-						StringBuffer aqb = new StringBuffer();
-						String aq = a.getDefaultQuery();
-						m.reset( aq );
-						while ( m.find() ) {
-							String newstr = m.group( 1 );
-							URI repl = new URIImpl( newstr );
-							if ( owlb.contains( repl ) ) {
-								m.appendReplacement( aqb,
-										"<" + owlb.build( repl.getLocalName() ).stringValue() + ">" );
-							}
-							else if ( datab.contains( repl ) ) {
-								m.appendReplacement( aqb,
-										"<" + datab.build( repl.getLocalName() ).stringValue() + ">" );
-							}
-						}
-						m.appendTail( aqb );
-						a.setDefaultQuery( aqb.toString() );
-					}
-				}
-			}
-		}
-
-		if ( null != genericP ) {
-			im.remove( genericP );
-		}
-
-		eng.updateInsights( im );
-		eng.closeDB();
 	}
 
 	private static Map<URI, URI> figureUris( File custommap, URI[] uris )

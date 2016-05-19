@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
+import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.security.BasicAuthRequestFactory;
 import com.ostrichemulators.semtool.web.io.SemossService;
@@ -57,13 +58,12 @@ public class SesameEngineTest {
 
 		BasicAuthRequestFactory authfac = new BasicAuthRequestFactory();
 		RestTemplate rt = new RestTemplate( authfac );
-		
-		
-		ServiceClient sc = new ServiceClientImpl( rt );		
+
+		ServiceClient sc = new ServiceClientImpl( rt );
 		SemossService svc = new SemossServiceImpl( "http://localhost:8080/semoss" );
 		sc.setAuthentication( svc, "ryan", "1234".toCharArray() );
 
-		SesameEngine se = new SesameEngine( props );
+		IEngine se = EngineFactory.getEngine( props );
 		MetadataQuery mq = new MetadataQuery();
 		se.query( mq );
 		se.closeDB();

@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.query.util.impl;
 
-import com.ostrichemulators.semtool.rdf.query.util.impl.StatementAddingExecutor;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import java.util.Arrays;
 import org.junit.After;
@@ -46,7 +45,7 @@ public class StatementAddingExecutorTest {
 
 	@Test
 	public void testExec() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
+		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		StatementAddingExecutor sae = new StatementAddingExecutor();
 
 		Model before = eng.toModel();
@@ -60,7 +59,7 @@ public class StatementAddingExecutorTest {
 
 	@Test
 	public void testExec2() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
+		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		StatementAddingExecutor sae = new StatementAddingExecutor(
 				Arrays.asList( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
 								new LiteralImpl( "label" ) ) ), true );
@@ -74,7 +73,7 @@ public class StatementAddingExecutorTest {
 
 	@Test
 	public void testExec3() throws Exception {
-		InMemorySesameEngine eng = new InMemorySesameEngine();
+		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		StatementAddingExecutor sae = new StatementAddingExecutor(
 				Arrays.asList( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
 								new LiteralImpl( "label" ) ) ), true );

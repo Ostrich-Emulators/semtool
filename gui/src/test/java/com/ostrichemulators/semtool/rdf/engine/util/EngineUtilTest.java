@@ -7,6 +7,7 @@ package com.ostrichemulators.semtool.rdf.engine.util;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil.DbCloneMetadata;
 import com.ostrichemulators.semtool.util.Constants;
 import java.io.File;
@@ -63,7 +64,7 @@ public class EngineUtilTest {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, "http://junkowl/testfile/one" );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		eng = new BigDataEngine( props );
+		eng = EngineFactory.getEngine( props );
 	}
 
 	@After

@@ -22,7 +22,6 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.Bindable;
 import info.aduna.iteration.Iterations;
-import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -38,7 +37,6 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.util.Constants;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -54,8 +52,6 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
@@ -75,6 +71,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.vocabulary.OWL;
@@ -92,31 +89,13 @@ import org.openrdf.query.impl.DatasetImpl;
 public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private static final Logger log = Logger.getLogger( AbstractSesameEngine.class );
-	public static final String REMOTE_KEY = "remote";
+	public static final String REMOTE_KEY = "repo-is-remote";
 	public static final String REPOSITORY_KEY = "repository";
 	public static final String INSIGHTS_KEY = "insights";
 
 	private RepositoryConnection owlRc;
 
-	public AbstractSesameEngine( Properties initProps ) {
-		super( initProps );
-	}
-
-	/**
-	 * Loads the metadata information from the given file.
-	 *
-	 * @param ontoloc the location of the owl file. It is guaranteed to exist
-	 */
-	@Override
-	protected void loadLegacyOwl( String ontoloc ) {
-		try {
-			owlRc.begin();
-			owlRc.add( new File( ontoloc ), ontoloc, RDFFormat.RDFXML );
-			owlRc.commit();
-		}
-		catch ( IOException | RDFParseException | RepositoryException e ) {
-			log.error( e, e );
-		}
+	public AbstractSesameEngine() {
 	}
 
 	protected RepositoryConnection createOwlRc() throws RepositoryException {
@@ -233,7 +212,10 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
 
-		String realname = getEngineName();
+		String realname = ( null == getEngineName()  
+				? props.getProperty( Constants.ENGINE_NAME, 
+						FilenameUtils.getBaseName( props.getProperty( Constants.SMSS_LOCATION ) ) )
+				: getEngineName() );
 		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
 		queryNoEx( mq );
 		String str = mq.getString();
@@ -251,7 +233,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	protected void refreshSchemaData() {
-		// load everything from the SEMOSS namespace as our OWL dataset
+		// load everything from the SEMONTO namespace as our OWL dataset
 		UriBuilder owlb = getSchemaBuilder();
 		if ( null == owlb ) {
 			throw new UnsupportedOperationException(
