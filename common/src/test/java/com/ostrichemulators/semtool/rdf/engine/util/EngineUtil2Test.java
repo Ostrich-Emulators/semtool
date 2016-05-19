@@ -211,10 +211,10 @@ public class EngineUtil2Test {
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
 					.setDefaultsFiles( new File( "src/main/resources/defaultdb/Default.properties" ),
-							new File( "src/main/resources/models/va-semoss.ttl" ),
-							new File( "src/test/resources/insights.ttl" ) )
+							new File( "src/main/resources/models/semtool.ttl" ),
+							new File( "src/test/resources/insmgr.data-source.ttl" ) )
 					.setFiles( Arrays.asList( LEGACY ) )
-					.addVocabulary( new File( "src/main/resources/models/va-semoss.ttl" ).toURI().toURL() )
+					.addVocabulary( new File( "src/main/resources/models/semtool.ttl" ).toURI().toURL() )
 					.setBooleans( true, true, true );
 			smss = EngineUtil2.createNew( ecb, null );
 			assertTrue( smss.exists() );
@@ -237,8 +237,8 @@ public class EngineUtil2Test {
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
 					.setDefaultsFiles( new File( "src/main/resources/defaultdb/Default.properties" ),
-							new File( "src/main/resources/models/va-semoss.ttl" ),
-							new File( "src/test/resources/insights.ttl" ) )
+							new File( "src/main/resources/models/semtool.ttl" ),
+							new File( "src/test/resources/insmgr.data-source.ttl" ) )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.addVocabulary( new File( "src/main/resources/models/va-semoss.ttlx" ).toURI().toURL() )
 					.setBooleans( true, true, true );
@@ -253,16 +253,16 @@ public class EngineUtil2Test {
 
 	@Test
 	public void testCreateInsights() throws Exception {
-		File insights = new File( "src/test/resources/insights.ttl" );
+		File insights = new File( "src/test/resources/insmgr.data-source.ttl" );
 		InsightManagerImpl imi = new InsightManagerImpl();
 		EngineUtil2.createInsightStatements( insights, imi );
 		Collection<Perspective> persps = imi.getPerspectives();
-		assertEquals( 7, persps.size() );
+		assertEquals( 1, persps.size() );
 	}
 
 	@Test( expected = EngineManagementException.class )
-	public void testCreateInsights2() throws Exception {
-		File insights = new File( "src/main/resources/models/va-semoss.ttl" );
+	public void testMustHaveInsightDataset() throws Exception {
+		File insights = new File( "src/main/resources/models/semtool.ttl" );
 		InsightManagerImpl imi = new InsightManagerImpl();
 		EngineUtil2.createInsightStatements( insights, imi );
 	}

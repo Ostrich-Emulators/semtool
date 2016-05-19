@@ -96,7 +96,7 @@ public class AbstractEdgeModelerTest {
 	public void testGetRDFStringValue1() {
 		Map<String, String> namespaces = new HashMap<>();
 		namespaces.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
-		Value val = getUriFromRawString( "vas:foobar", namespaces );
+		Value val = getUriFromRawString( "semtool:foobar", namespaces );
 		assertEquals(SEMTOOL.NAMESPACE + "foobar", val.stringValue() );
 	}
 

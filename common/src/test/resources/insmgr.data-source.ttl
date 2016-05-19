@@ -1,203 +1,51 @@
+# imports: http://spinrdf.org/spin
+# imports: http://spinrdf.org/sp
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix spl: <http://spinrdf.org/spl#> .
+@prefix olo: <http://purl.org/ontology/olo/core#> .
+@prefix ui: <http://uispin.org/ui#> .
+@prefix arg: <http://spinrdf.org/arg#> .
+@prefix sempers: <http://os-em.com/ontologies/semtool/insights#> .
+@prefix semtool: <http://os-em.com/ontologies/semtool#> .
+@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
+@prefix semonto: <http://os-em.com/ontologies/semtool/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-<http://semoss.org/ontologies> a <http://www.w3.org/2002/07/owl#Ontology> ;
-	<http://www.w3.org/2002/07/owl#imports> <http://purl.org/dc/terms/> ;
-	<http://www.w3.org/2002/07/owl#versionInfo> "Created with TopBraid Composer"^^<http://www.w3.org/2001/XMLSchema#string> .
+semonto:insights a semcore:InsightDataset .
 
-<http://semoss.org/ontologies/Concept> a <http://www.w3.org/2002/07/owl#Class> ;
-	<http://www.w3.org/2000/01/rdf-schema#comment> "A SEMOSS Concept is a base class for any class constructed under the semoss: namespace.  The utility of the Concept class is merely for easy identification of the auto-created class of the SEMOSS importer."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Concept"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> ;
-	<http://www.w3.org/2002/07/owl#sameAs> <http://www.w3.org/2004/02/skos/core#Concept> .
+sempers:A_Test_Perspective a sempers:Perspective ;
+	rdfs:label "A Test Perspective" ;
+	dcterms:description "A Perspective for unit testing" ;
+	dcterms:created "2016-05-18T20:12:14.099-04:00"^^xsd:dateTime ;
+	dcterms:modified "2016-05-18T20:12:14.099-04:00"^^xsd:dateTime ;
+	dcterms:creator "ryan" .
 
-<http://semoss.org/ontologies/has> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
-	<http://www.w3.org/2000/01/rdf-schema#comment> "\"Has\" is an atomic property for the use case where a Node type appears in an attribute header of another Node or Relation sheet."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Has"^^<http://www.w3.org/2001/XMLSchema#string> .
+sempers:A_Test_Perspective_A_Test_Insight a spin:MagicProperty ;
+	rdfs:label "A Test Insight" ;
+	dcterms:description "A list of airplanes" ;
+	sempers:outputType "GRID" ;
+	rdfs:subClassOf sempers:InsightProperties ;
+	dcterms:created "2016-05-18T20:12:14.100-04:00"^^xsd:dateTime ;
+	dcterms:modified "2016-05-18T20:12:14.100-04:00"^^xsd:dateTime ;
+	dcterms:creator "ryan" ;
+	spin:body sempers:A_Test_Insight_query .
 
-<http://semoss.org/ontologies/Relation> a <http://www.w3.org/2000/01/rdf-schema#Class> ;
-	<http://www.w3.org/2000/01/rdf-schema#comment> "A \"Relation\" in SEMOSS parlance is a reification, or graph edge. A semoss:Relation property is unique between a source (subject) and target (object) node (instance). Every semoss:Relation is associated with exactly 1 rdf:Property identified by the required rdf:predicate property of the relation property instance. The grounding predicate must also be asserted in a statement between the same source and target nodes (a SPO assertion). A semoss:Relation is only created when attributes must be applied to the statement -thus necessitating the need for reification. Attributes and their values applied to a semoss:Relation instance will come from Columns D and later in a \"Relation Sheet\" found in a SEMOSS Loading Workbook."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Relation"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> , _:t193 .
-
-<http://os-em.com/ontologies/semoss> a <http://www.w3.org/2002/07/owl#Ontology> ;
-	<http://www.w3.org/2002/07/owl#imports> <http://purl.org/ontology/olo/core#> , <http://rdfs.org/ns/void> , <http://spinrdf.org/spin> , <http://uispin.org/ui> , <http://os-em.com/ontologies/core> , <http://purl.org/dc/terms/> ;
-	<http://www.w3.org/2002/07/owl#versionInfo> "Created with TopBraid Composer"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#Database> a <http://www.w3.org/2002/07/owl#Class> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Database"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://rdfs.org/ns/void#Dataset> .
-
-<http://os-em.com/ontologies/semoss#DataView> a <http://www.w3.org/2002/07/owl#Class> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Data View"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://uispin.org/ui#DataViews> , _:t177 , _:t179 , _:t181 , _:t183 , _:t185 , _:t187 , _:t189 , _:t191 .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.AppDupeHeatMapSheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_heat_map3_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Application Duplication Heat Map"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.ColumnChartPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_bar_chart1_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Column Chart"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.DendrogramPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> "The Play Sheet for creating a Dendrogram diagram using names and children.  "^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_dendrogram1_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Dendrogram"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GraphPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.GraphPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_graph_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Graph"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.GridPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> "The GridPlaySheet class creates the panel and table for a grid view of data from a SPARQL query."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_grid2_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "gov.va.semoss.ui.components.playsheets.GridPlaySheet" , "Grid"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.GridRAWPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> "Identical to gov.va.semoss.ui.components.playsheets.GridPlaySheet but columns show resource URIs."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_raw_grid2_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Raw Grid"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridScatterSheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.GridScatterSheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> "The GridScatterPlaySheet class creates the panel and table for a scatter plot view of data from a SPARQL query."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_grid_scatter1_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Grid Scatter"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.HeatMapPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> "The Play Sheet for creating a heat map diagram. "^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_heat_map3_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Heat Map"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.MetamodelGraphPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_metamodel1_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Metamodel Graph"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.ParallelCoordinatesPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> "The Play Sheet for creating a Parallel Coordinates diagram."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_parcoords4_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Parallel Coordinates"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.PieChartPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.PieChartPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_pie_chart1_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Pie Chart"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.SankeyPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.SankeyPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> "The Play Sheet for creating a Sankey diagram using nodes and relationships."^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_sankey2_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Sankey Diagram"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.USHeatMapPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> """The Play Sheet for the United States geo-location data heatmap.  
-Visualizes a world heat map that can show any numeric property on a node."""^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_us_heat_map1_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "US Heat Map"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet> <http://uispin.org/ui#viewClass> "gov.va.semoss.ui.components.playsheets.WorldHeatMapPlaySheet"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#description> """The Play Sheet for the World geo-location data heatmap.  
-Visualizes a world heat map that can show any numeric property on a node."""^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/semoss#icon> "questions_world_heat_map1_16.png"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	a <http://os-em.com/ontologies/semoss#DataView> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "World Heat Map"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#icon> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
-	<http://www.w3.org/2000/01/rdf-schema#domain> <http://uispin.org/ui#Element> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "icon"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#insight> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "insight"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#range> <http://os-em.com/ontologies/semoss#InsightProperties> .
-
-<http://os-em.com/ontologies/semoss#InsightProperties> a <http://spinrdf.org/spin#MagicProperty> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Insight Properties"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://spinrdf.org/spin#MagicProperties> .
-
-<http://os-em.com/ontologies/semoss#isLegacy> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Is Legacy"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
-
-<http://os-em.com/ontologies/semoss#Perspective> a <http://www.w3.org/2002/07/owl#Class> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Perspective"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://purl.org/ontology/olo/core#OrderedList> , <http://uispin.org/ui#Element> , _:t178 , _:t180 , _:t182 , _:t184 , _:t186 , _:t188 , _:t190 , _:t192 .
-
-<http://os-em.com/ontologies/semoss#RDR-Reification> a <http://os-em.com/ontologies/semoss#ReificationModel> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "RDR Reification"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#reification> a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Reification"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#range> <http://os-em.com/ontologies/semoss#ReificationModel> .
-
-<http://os-em.com/ontologies/semoss#ReificationModel> a <http://www.w3.org/2002/07/owl#Class> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "Reification Model"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
-
-<http://os-em.com/ontologies/semoss#VASEMOSS-Reification> a <http://os-em.com/ontologies/semoss#ReificationModel> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "VA-SEMOSS Reification"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/semoss#W3C-Reification> a <http://os-em.com/ontologies/semoss#ReificationModel> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "W3C Reification"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/ontologies/vcamp> <http://os-em.com/ontologies/core#author> "$Author: daniel.mekonnen $"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#headURL> "$HeadURL: http://104.130.3.174/svn/vcamp/V-CAMP/branches/dev/src/main/resources/models/vcamp.ttl $"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#namespace> "http://semoss.org/ontologies/vcamp#"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#namespacePrefix> "vcamp"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#revision> "$Revision: 2128 $"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#revisionDate> "$Date: 2015-04-05 21:14:03 -0400 (Sun, 05 Apr 2015) $"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://os-em.com/ontologies/core#specificity> "1"^^<http://www.w3.org/2001/XMLSchema#integer> ;
-	<http://os-em.com/ontologies/core#version> "0.5"^^<http://www.w3.org/2001/XMLSchema#string> ;
-	<http://www.w3.org/2002/07/owl#versionIRI> <http://semoss.org/ontologies/vcamp/v0.5> , <http://semoss.org/ontololgies/vcamp/v0.5> ;
-	a <http://www.w3.org/2002/07/owl#Ontology> ;
-	<http://www.w3.org/2002/07/owl#imports> <http://semoss.org/ontologies> , <http://os-em.com/ontologies/core> ;
-	<http://www.w3.org/2002/07/owl#versionInfo> "$Id: vcamp.ttl 2128 2015-04-06 01:14:03Z daniel.mekonnen $"^^<http://www.w3.org/2001/XMLSchema#string> .
-
-<http://os-em.com/dataset/insights#insight-1441046366491-SELECT> <http://spinrdf.org/sp#text> """SELECT *
+sempers:A_Test_Insight_query sp:text """SELECT *
 WHERE {
   ?id a <http://foo.bar/model#Aeroplane>
-}"""@en ;
-	a <http://spinrdf.org/spl#Select> .
+}""" ;
+	a sp:Select .
 
-<http://os-em.com/dataset/insights#Insight-1441046475366> <http://os-em.com/ontologies/semoss#isLegacy> "false"@en ;
-	<http://purl.org/dc/terms/created> "Mon Aug 31 14:41:15 EDT 2015"@en ;
-	<http://purl.org/dc/terms/creator> "full name <email>, org"@en ;
-	<http://spinrdf.org/spin#body> <http://os-em.com/dataset/insights#insight-1441046366491-SELECT> ;
-	<http://uispin.org/ui#dataView> <http://os-em.com/ontologies/semoss#gov.va.semoss.ui.components.playsheets.GridPlaySheet> ;
-	<http://www.w3.org/2000/01/rdf-schema#subclassof> <http://os-em.com/ontologies/semoss#InsightProperties> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "A Test Insight"@en ;
-	<http://purl.org/dc/terms/description> "A list of airplanes"@en ;
-	<http://purl.org/dc/terms/modified> "Mon Aug 31 14:42:10 EDT 2015"@en .
+sempers:A_Test_Perspective olo:slot sempers:A_Test_Perspective_slot_1 .
 
-<http://os-em.com/dataset/insights#perspective-1441046366490> <http://purl.org/dc/terms/created> "2015-08-31T18:42:12.989Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-	<http://purl.org/dc/terms/creator> "full name <email>, org"@en ;
-	<http://purl.org/ontology/olo/core#slot> <http://os-em.com/dataset/insights#perspective-1441046366490-slot-1441046366491> ;
-	a <http://os-em.com/ontologies/semoss#Perspective> ;
-	<http://www.w3.org/2000/01/rdf-schema#label> "A Test Perspective"@en ;
-	<http://purl.org/dc/terms/description> "A Perspective for unit testing"@en ;
-	<http://purl.org/dc/terms/modified> "2015-08-31T18:42:12.989Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+sempers:A_Test_Perspective_slot_1 olo:index "1"^^xsd:int ;
+	olo:item sempers:A_Test_Perspective_A_Test_Insight .
 
-<http://os-em.com/dataset/insights#perspective-1441046366490-slot-1441046366491> <http://purl.org/ontology/olo/core#item> <http://os-em.com/dataset/insights#Insight-1441046475366> ;
-	<http://purl.org/ontology/olo/core#index> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
-
-_:t191 a <http://www.w3.org/2002/07/owl#Restriction> ;
-	<http://www.w3.org/2002/07/owl#maxCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger> ;
-	<http://www.w3.org/2002/07/owl#onProperty> <http://os-em.com/ontologies/semoss#icon> .
-
-_:t192 <http://www.w3.org/2002/07/owl#minQualifiedCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger> ;
-	<http://www.w3.org/2002/07/owl#onClass> <http://os-em.com/ontologies/semoss#InsightProperties> ;
-	a <http://www.w3.org/2002/07/owl#Restriction> ;
-	<http://www.w3.org/2002/07/owl#onProperty> <http://purl.org/ontology/olo/core#item> .
-
-_:t193 <http://www.w3.org/2002/07/owl#onClass> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> ;
-	<http://www.w3.org/2002/07/owl#qualifiedCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger> ;
-	a <http://www.w3.org/2002/07/owl#Restriction> ;
-	<http://www.w3.org/2002/07/owl#onProperty> <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> .
+sempers:A_Test_Perspective olo:index "0"^^xsd:int .

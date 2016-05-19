@@ -7,7 +7,6 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
-import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -51,7 +50,7 @@ public class BigDataEngineTest {
 		FileUtils.deleteQuietly( jnl );
 	}
 
-	@Test
+	// @Test
 	public void testUpdateInsights() throws Exception {
 		InsightManagerImpl im = new InsightManagerImpl();
 		im.loadLegacyData( Utility.loadProp( PROPS ) );
