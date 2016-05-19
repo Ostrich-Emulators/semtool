@@ -20,6 +20,7 @@ gui/src/main/resources/html.zip
 gui/semtool-data
 gui/nbactions*
 gui/logs
+semtool-data
 webapp/src/main/resources/semoss-web.properties
 webapp/nb-configuration.xml
 webapp/src/main/resources/ldap.properties

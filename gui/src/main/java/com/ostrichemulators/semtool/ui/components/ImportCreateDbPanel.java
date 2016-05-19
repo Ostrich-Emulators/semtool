@@ -71,9 +71,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				edgegroup.add( jrb );
 				edgemodelPanel.add( jrb );
 
-				// for now, we only support SEMOSS reification
-				jrb.setEnabled( ReificationStyle.SEMOSS == rs );
-				jrb.setSelected( ReificationStyle.SEMOSS == rs );
+				// for now, we only support SEMTOOL reification
+				jrb.setEnabled( ReificationStyle.SEMTOOL == rs );
+				jrb.setSelected( ReificationStyle.SEMTOOL == rs );
 			}
 		}
 

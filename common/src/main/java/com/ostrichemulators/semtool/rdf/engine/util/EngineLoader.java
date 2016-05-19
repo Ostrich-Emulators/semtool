@@ -578,7 +578,7 @@ public class EngineLoader {
 	public EdgeModeler getEdgeModeler( ReificationStyle reif ) {
 		EdgeModeler modeler = null;
 		switch ( reif ) {
-			case SEMOSS:
+			case SEMTOOL:
 				modeler = new SemossEdgeModeler( qaer );
 				break;
 			case LEGACY:

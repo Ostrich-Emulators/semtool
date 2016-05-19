@@ -50,7 +50,7 @@ public class BigDataEngineTest {
 		FileUtils.deleteQuietly( jnl );
 	}
 
-	// @Test
+	@Test
 	public void testUpdateInsights() throws Exception {
 		InsightManagerImpl im = new InsightManagerImpl();
 		im.loadLegacyData( Utility.loadProp( PROPS ) );

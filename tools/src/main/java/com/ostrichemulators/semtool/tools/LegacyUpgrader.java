@@ -93,7 +93,7 @@ public class LegacyUpgrader {
 
 		EngineCreateBuilder ecb = new EngineCreateBuilder( tofile.getParentFile(),
 				FilenameUtils.getBaseName( tofile.getName() ) );
-		ecb.setReificationModel( ReificationStyle.SEMOSS );
+		ecb.setReificationModel(ReificationStyle.SEMTOOL );
 		ecb.setDefaultsFiles( null, null, questions );
 		ecb.setDefaultBaseUri( schema, true );
 		ecb.setVocabularies( vocabs );

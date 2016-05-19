@@ -215,12 +215,6 @@ public class GuiUtility {
 	}
 
 	public static Properties getBuildProperties() {
-		try {
-			return Utility.loadProp( GuiUtility.class.getResource( "/build.properties" ) );
-		}
-		catch ( IOException ioe ) {
-			log.warn( ioe, ioe );
-		}
-		return new Properties();
+		return Utility.getBuildProperties( GuiUtility.class );
 	}
 }

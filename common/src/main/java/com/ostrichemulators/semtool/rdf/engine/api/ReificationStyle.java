@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.api;
 
-import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.util.Constants;
 import org.openrdf.model.URI;
 
@@ -16,9 +15,9 @@ import org.openrdf.model.URI;
 public enum ReificationStyle {
 
 	LEGACY( Constants.NONODE ),
-	SEMOSS( SEMTOOL.SEMTOOL_Reification ),
-	W3C( SEMTOOL.W3C_Reification ),
-	RDR( SEMTOOL.RDR_Reification );
+	SEMTOOL( com.ostrichemulators.semtool.model.vocabulary.SEMTOOL.SEMTOOL_Reification ),
+	W3C( com.ostrichemulators.semtool.model.vocabulary.SEMTOOL.W3C_Reification ),
+	RDR( com.ostrichemulators.semtool.model.vocabulary.SEMTOOL.RDR_Reification );
 	public final URI uri;
 
 	ReificationStyle( URI u ) {

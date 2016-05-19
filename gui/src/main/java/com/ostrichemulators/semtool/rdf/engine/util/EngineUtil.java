@@ -306,8 +306,8 @@ public class EngineUtil implements Runnable {
 			log.error( "no metadata to clone", meq );
 		}
 
-		URI reification = ( oldmetadata.containsKey(SEMTOOL.ReificationModel )
-				? URI.class.cast(oldmetadata.get(SEMTOOL.ReificationModel ) )
+		URI reification = ( oldmetadata.containsKey( SEMTOOL.ReificationModel )
+				? URI.class.cast( oldmetadata.get( SEMTOOL.ReificationModel ) )
 				: SEMTOOL.SEMTOOL_Reification );
 
 		EngineCreateBuilder ecb
@@ -550,12 +550,12 @@ public class EngineUtil implements Runnable {
 			final URI newbase = to.getBaseUri();
 			Date now = new Date();
 			Properties props = GuiUtility.getBuildProperties();
-			oldmetas.put(SEMCORE.SOFTWARE_AGENT,
+			oldmetas.put( SEMCORE.SOFTWARE_AGENT,
 					vf.createLiteral( props.getProperty( "name", "unknown" ) ) );
 			oldmetas.put( MetadataConstants.DCT_CREATED, vf.createLiteral( now ) );
 			oldmetas.put( MetadataConstants.DCT_MODIFIED, vf.createLiteral( now ) );
 			oldmetas.put( RDFS.LABEL, vf.createLiteral( title ) );
-			oldmetas.remove(SEMTOOL.Database );
+			oldmetas.remove( SEMTOOL.Database );
 
 			to.execute( new ModificationExecutorAdapter( true ) {
 

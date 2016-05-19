@@ -130,12 +130,12 @@ public class EngineUtil2Test {
 
 	@Test
 	public void testReifStyle() throws Exception {
-		assertEquals( ReificationStyle.LEGACY, EngineUtil2.getReificationStyle( eng ) );
+		assertEquals( ReificationStyle.SEMTOOL, EngineUtil2.getReificationStyle( eng ) );
 
 		assertEquals( ReificationStyle.LEGACY, EngineUtil2.getReificationStyle( null ) );
 
 		StatementAddingExecutor sae = new StatementAddingExecutor();
-		sae.addStatement(new StatementImpl( eng.getBaseUri(), SEMTOOL.ReificationModel,
+		sae.addStatement( new StatementImpl( eng.getBaseUri(), SEMTOOL.ReificationModel,
 				SEMTOOL.W3C_Reification ) );
 
 		eng.execute( sae );

@@ -44,6 +44,7 @@ import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.user.User;
 
 import com.ostrichemulators.semtool.util.UriBuilder;
+import com.ostrichemulators.semtool.util.Utility;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -165,7 +166,8 @@ public class InsightManagerImpl implements InsightManager {
 
 			Date now = new Date();
 			Literal creator = insightVF.createLiteral( "Imported By "
-					+ System.getProperty( "release.nameVersion", "OS-EM Semantic Toolkit" ) );
+					+ Utility.getBuildProperties( Utility.class ).getProperty( "name",
+							"OS-EM Semantic Toolkit" ) );
 
 			for ( String pname : persps.split( ";" ) ) {
 				Perspective p = new Perspective( pname );

@@ -19,7 +19,6 @@
  */
 package com.ostrichemulators.semtool.util;
 
-
 import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
@@ -77,7 +76,7 @@ import org.openrdf.rio.turtle.TurtleWriter;
 
 /**
  * The GuiUtility class contains a variety of miscellaneous functions
- implemented extensively throughout SEMONTO. Some of these functionalities
+ * implemented extensively throughout SEMONTO. Some of these functionalities
  * include getting concept names, printing messages, loading engines, and
  * writing Excel workbooks.
  */
@@ -95,9 +94,9 @@ public class Utility {
 		DEFAULTNAMESPACES.put( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
 		DEFAULTNAMESPACES.put( FOAF.PREFIX, FOAF.NAMESPACE );
 		DEFAULTNAMESPACES.put( MetadataConstants.VOID_PREFIX, MetadataConstants.VOID_NS );
-		DEFAULTNAMESPACES.put(SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
-		DEFAULTNAMESPACES.put(SEMCORE.PREFIX, SEMCORE.NAMESPACE );
-		DEFAULTNAMESPACES.put(SEMONTO.PREFIX, SEMONTO.NAMESPACE );
+		DEFAULTNAMESPACES.put( SEMTOOL.PREFIX, SEMTOOL.NAMESPACE );
+		DEFAULTNAMESPACES.put( SEMCORE.PREFIX, SEMCORE.NAMESPACE );
+		DEFAULTNAMESPACES.put( SEMONTO.PREFIX, SEMONTO.NAMESPACE );
 	}
 
 	public static URI getUniqueUri() {
@@ -513,6 +512,16 @@ public class Utility {
 		}
 
 		return (Map<X, String>) retHash;
+	}
+
+	public static Properties getBuildProperties( Class<?> klass ) {
+		try {
+			return Utility.loadProp( klass.getResource( "/build.properties" ) );
+		}
+		catch ( IOException ioe ) {
+			log.warn( ioe, ioe );
+		}
+		return new Properties();
 	}
 
 	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {

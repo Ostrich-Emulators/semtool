@@ -368,7 +368,7 @@ public class CLI {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( dbdir,
 					FilenameUtils.getBaseName( dbfile.getName() ) )
 					.setDefaultBaseUri( new URIImpl( baseURI ), false )
-					.setReificationModel( ReificationStyle.SEMOSS )
+					.setReificationModel(ReificationStyle.SEMTOOL )
 					.setFiles( data )
 					.setVocabularies( vocab )
 					.setBooleans( stageInMemory, closure, createMetamodel );
