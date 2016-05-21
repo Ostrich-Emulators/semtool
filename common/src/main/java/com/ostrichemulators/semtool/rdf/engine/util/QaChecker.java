@@ -312,6 +312,7 @@ public class QaChecker {
 	 * @param dataNodes
 	 * @param relationClassCache
 	 * @param relationCache
+	 * @param propertyClassCache
 	 */
 	public void setCaches( Map<String, URI> schemaNodes,
 			Map<ConceptInstanceCacheKey, URI> dataNodes,
