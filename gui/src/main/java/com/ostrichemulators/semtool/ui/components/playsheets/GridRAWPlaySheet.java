@@ -296,7 +296,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 		table.addMouseListener( new MouseAdapter() {
 			@Override
 			public void mouseReleased( MouseEvent e ) {
-				int r = table.rowAtPoint( e.getPoint() );
+				int r = table.convertRowIndexToModel( table.rowAtPoint( e.getPoint() ) );
 				int c = table.columnAtPoint( e.getPoint() );
 				if ( r >= 0 && r < table.getRowCount() ) {
 					table.setRowSelectionInterval( r, r );
