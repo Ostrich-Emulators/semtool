@@ -418,8 +418,6 @@ public class EngineLoader {
 				DataIterator lit = sheet.iterator();
 				while ( lit.hasNext() ) {
 					LoadingNodeAndPropertyValues nap = lit.next();
-					log.debug( "loading: " + nap.getSubject() + "..." + nap.getRelname()
-							+ "..." + nap.getObject() );
 					try {
 						modeler.addRel( nap, namespaces, sheet, metas, myrc );
 					}

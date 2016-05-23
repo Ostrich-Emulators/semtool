@@ -118,6 +118,16 @@ public class XlsWriter implements GraphWriter {
 			String[] row = new String[2 + props.size()];
 			CellStyle[] fmts = new CellStyle[2 + props.size()];
 
+			Map<String, URI> proplkp = nodes.getPropertiesAndDataTypes();
+			URI[] datatypes = new URI[2 + props.size()];
+			int dtcol = 2;
+			for ( String propname : props ) {
+				if ( null != proplkp.get( propname ) ) {
+					datatypes[dtcol] = proplkp.get( propname );
+				}
+				dtcol++;
+			}
+
 			DataIterator di = nodes.iterator();
 			while ( di.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = di.next();
@@ -130,7 +140,7 @@ public class XlsWriter implements GraphWriter {
 					row[col++] = ( null == val ? null : val.stringValue() );
 				}
 
-				addRow( row, fmts );
+				addRow( row, fmts, datatypes );
 			}
 		}
 
@@ -145,6 +155,16 @@ public class XlsWriter implements GraphWriter {
 			if ( rels.isEmpty() ) {
 				// no rows to add, but still add the relationship name field
 				row[0] = rels.getRelname();
+			}
+
+			Map<String, URI> proplkp = rels.getPropertiesAndDataTypes();
+			URI[] datatypes = new URI[3 + props.size()];
+			int dtcol = 3;
+			for ( String propname : props ) {
+				if ( null != proplkp.get( propname ) ) {
+					datatypes[dtcol] = proplkp.get( propname );
+				}
+				dtcol++;
 			}
 
 			DataIterator di = rels.iterator();
@@ -169,7 +189,7 @@ public class XlsWriter implements GraphWriter {
 					row[col++] = ( null == val ? null : val.stringValue() );
 				}
 
-				addRow( row, fmts );
+				addRow( row, fmts, datatypes );
 			}
 		}
 
@@ -255,9 +275,10 @@ public class XlsWriter implements GraphWriter {
 	 *
 	 * @param values the row data
 	 * @param formatting cell formatting
+	 * @param datatypes
 	 * @return true, if a new tab is created, else false
 	 */
-	public boolean addRow( String[] values, CellStyle[] formatting ) {
+	public boolean addRow( String[] values, CellStyle[] formatting, URI[] datatypes ) {
 		boolean newtab = ( maxtabrows == rowcount );
 
 		if ( newtab ) {
@@ -276,12 +297,20 @@ public class XlsWriter implements GraphWriter {
 
 			String val = values[col];
 			if ( null != val ) {
-				if ( NUMERIC.matcher( val ).find() ) {
-					cell.setCellType( Cell.CELL_TYPE_NUMERIC );
-					cell.setCellValue( Double.parseDouble( val ) );
+				if ( null == datatypes[col] ) {
+					if ( NUMERIC.matcher( val ).find() ) {
+						cell.setCellType( Cell.CELL_TYPE_NUMERIC );
+						cell.setCellValue( Double.parseDouble( val ) );
+					}
+					else {
+						cell.setCellValue( val.replaceAll( "\"", "" ) );
+					}
 				}
 				else {
-					cell.setCellValue( val.replaceAll( "\"", "" ) );
+					// set the datatype for this element
+					String str = val.replaceAll( "\"", "" );
+					str = String.format( "\"%s\"^^<%s>", str, datatypes[col] );
+					cell.setCellValue( str );
 				}
 			}
 		}
@@ -299,7 +328,7 @@ public class XlsWriter implements GraphWriter {
 			rows[i] = ( null == values[i] ? null : values[i].toString() );
 		}
 
-		return addRow( rows, formatting );
+		return addRow( rows, formatting, new URI[values.length] );
 	}
 
 	/**
