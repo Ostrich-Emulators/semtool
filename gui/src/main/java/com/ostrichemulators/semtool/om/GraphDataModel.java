@@ -346,26 +346,14 @@ public class GraphDataModel {
 				+ " FILTER ( isLiteral( ?o ) ) }"
 				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
 
-		// we can't be sure if our predicates are the base relation or the 
-		// specific relation, so query for both just in case
 		String specificEdgeProps
 				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 				+ "  ?rel ?prop ?literal ."
-				+ "  ?rel a ?semossrel ."
-				+ "  ?rel rdf:predicate ?superrel ."
+				+ "  ?rel a ?superrel ."
 				+ "  ?s ?rel ?o ."
 				+ "  FILTER ( isLiteral( ?literal ) )"
 				+ "}"
 				+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
-		String baseEdgeProps
-				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
-				+ "  ?rel ?prop ?literal ."
-				+ "  ?rel a ?semossrel ."
-				+ "  ?rel rdf:predicate ?superrel ."
-				+ "  ?s ?rel ?o ."
-				+ "  FILTER ( isLiteral( ?literal ) )"
-				+ "}"
-				+ "VALUES ?rel { " + Utility.implode( preds, "<", ">", " " ) + " }";
 		try {
 			VoidQueryAdapter cqa = new VoidQueryAdapter( conceptprops ) {
 
@@ -412,35 +400,9 @@ public class GraphDataModel {
 				}
 			};
 
-			VoidQueryAdapter baseedge = new VoidQueryAdapter( baseEdgeProps ) {
-
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					// ?s ?rel ?o ?prop ?literal
-					URI s = URI.class.cast( set.getValue( "s" ) );
-					URI rel = URI.class.cast( set.getValue( "rel" ) );
-					URI prop = URI.class.cast( set.getValue( "prop" ) );
-					URI o = URI.class.cast( set.getValue( "o" ) );
-					Value propval = set.getValue( "literal" );
-					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
-
-					if ( concepts.contains( s ) && concepts.contains( o ) ) {
-						SEMOSSEdge edge = createOrRetrieveEdge(
-								rel,
-								createOrRetrieveVertex( s, overlayLevel ),
-								createOrRetrieveVertex( o, overlayLevel ),
-								overlayLevel );
-						edge.setValue( prop, propval );
-						edge.setType( superrel );
-					}
-				}
-			};
 			if ( null != preds ) {
 				specifics.useInferred( false );
 				engine.query( specifics );
-
-				baseedge.useInferred( false );
-				engine.query( baseedge );
 			}
 		}
 		catch ( MalformedQueryException ex ) {

@@ -199,7 +199,9 @@ public class SemtoolEdgeModelerTest {
 		}
 		else {
 			for ( Statement s : stmts ) {
-				assertTrue( model.contains( s ) );
+				assertTrue( "not in model: " + s.getSubject()
+						+ "->" + s.getPredicate() + "->" + s.getObject().stringValue(),
+						model.contains( s ) );
 			}
 		}
 	}
