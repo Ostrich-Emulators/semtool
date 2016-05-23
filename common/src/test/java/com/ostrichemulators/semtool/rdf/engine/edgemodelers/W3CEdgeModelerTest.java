@@ -176,7 +176,7 @@ public class W3CEdgeModelerTest {
 			boolean doCountsOnly ) throws IOException, RepositoryException, RDFHandlerException {
 
 		// get rid of the random database id
-		engine.getRawConnection().remove((Resource) null, RDF.TYPE, SEMTOOL.Database );
+		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, SEMTOOL.Database );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -197,7 +197,9 @@ public class W3CEdgeModelerTest {
 		}
 		else {
 			for ( Statement s : stmts ) {
-				assertTrue( model.contains( s ) );
+				assertTrue( "not in model: " + s.getSubject()
+						+ "->" + s.getPredicate() + "->" + s.getObject().stringValue(),
+						model.contains( s ) );
 			}
 		}
 	}
