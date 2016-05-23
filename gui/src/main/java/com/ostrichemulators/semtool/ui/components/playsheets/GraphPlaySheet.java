@@ -69,6 +69,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
@@ -190,7 +191,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	}
 
 	@Override
-	public void setLabelCache( RetrievingLabelCache t ){
+	public void setLabelCache( RetrievingLabelCache t ) {
 		super.setLabelCache( t );
 		control.setLabelCache( t );
 	}
@@ -378,9 +379,26 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		searcher.index( gdm.getGraph() );
 		setUndoRedoBtn();
 		fireGraphUpdated();
+
+		if ( log.isTraceEnabled() ) {
+			log.debug( "GRAPH UPDATE!" );
+			for ( SEMOSSVertex v : gdm.getGraph().getVertices() ) {
+				log.debug( "vertex: " + v );
+				for ( Map.Entry<URI, Value> en : v.getValues().entrySet() ) {
+					log.debug( "\t" + en.getKey().getLocalName() + " -> " + en.getValue().stringValue() );
+				}
+			}
+
+			for ( SEMOSSEdge v : gdm.getGraph().getEdges() ) {
+				log.debug( "edge: " + v );
+				for ( Map.Entry<URI, Value> en : v.getValues().entrySet() ) {
+					log.debug( "\t" + en.getKey().getLocalName() + " -> " + en.getValue().stringValue() );
+				}
+			}
+		}
 	}
 
-	protected GraphNodeListener getGraphNodeListener(){
+	protected GraphNodeListener getGraphNodeListener() {
 		return new GraphNodeListener( this );
 	}
 
