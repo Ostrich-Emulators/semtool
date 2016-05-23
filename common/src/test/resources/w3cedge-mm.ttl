@@ -11,6 +11,8 @@
 @prefix vcamp: <http://va.gov/ontologies/> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 
+semoss:Last_Name a owl:DatatypeProperty .
+
 semoss:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf semoss:Concept .
@@ -32,5 +34,4 @@ semoss:Date rdfs:label "Date" ;
 semoss:First_Name rdfs:label "First Name" ;
 	a owl:DatatypeProperty .
 
-semoss:Last_Name rdfs:label "Last Name" ;
-	a owl:DatatypeProperty .
+semoss:Last_Name rdfs:label "Last Name" .

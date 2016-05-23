@@ -11,7 +11,7 @@
 @prefix vcamp: <http://va.gov/ontologies/> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 
-vcamp:John semoss:hates vcamp:Ved22bccb-40ee-4af7-9cd7-a4f62c82dcd2 .
+vcamp:John semoss:hates vcamp:pc70682f3-223a-451c-876c-52b19322e475 .
 
 semoss:Person a owl:Class ;
 	rdfs:label "Person" ;
@@ -41,5 +41,5 @@ vcamp:Golden_Delicious a semoss:Apple ;
 
 vcamp:John semoss:likes vcamp:Golden_Delicious .
 
-vcamp:Ved22bccb-40ee-4af7-9cd7-a4f62c82dcd2 a semoss:Orange ;
+vcamp:pc70682f3-223a-451c-876c-52b19322e475 a semoss:Orange ;
 	rdfs:label "Golden Delicious" .
