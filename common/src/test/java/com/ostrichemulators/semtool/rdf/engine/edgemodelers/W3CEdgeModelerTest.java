@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -84,6 +85,7 @@ public class W3CEdgeModelerTest {
 	private ImportData data;
 
 	static {
+		TimeZone.setDefault( TimeZone.getTimeZone( "GMT-04:00" ) );
 		Calendar cal = Calendar.getInstance();
 		cal.set( 2031, 9, 22, 6, 58, 59 );
 		cal.set( Calendar.MILLISECOND, 15 );
