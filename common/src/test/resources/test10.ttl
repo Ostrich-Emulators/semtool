@@ -3,47 +3,49 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix vas: <http://va.gov/ontologies/semoss#> .
-@prefix vac: <http://va.gov/ontologies/core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix semoss: <http://semoss.org/ontologies/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
+@prefix semtool: <http://os-em.com/ontologies/semtool#> .
+@prefix semonto: <http://os-em.com/ontologies/semtool/> .
 @prefix testdata: <http://sales.data/purchases#> .
 @prefix testowl: <http://sales.data/schema#> .
 
-<http://semoss.va.gov/database/re05dd7dc-6db8-47f1-bd73-21c2a1f201c6> vas:ReificationModel vas:VASEMOSS-Reification .
+<http://sales.data/purchases/2015> a owl:Ontology .
 
-<http://sales.data/purchases/2015> a owl:Ontology , void:Dataset ;
-	rdfs:label "\"Purchase Dataset\"" .
+<http://os-em.com/semtool/database/H40a54a8e-0361-4b42-9ae7-217f1f0cbb85> semtool:ReificationModel semtool:SEMTOOL-Reification .
 
-testdata:Yugo a testowl:Car ;
-	rdfs:label "Yugo" .
-
-testdata:Yuri testdata:Z1717a8a66fbe94aba40d1c198e3983c9 testdata:Yugo ;
-	testowl:First_Name "Yuri" ;
-	testowl:Last_Name "Gargarin" ;
-	testowl:Purchased testdata:Yugo ;
-	a testowl:Human_Being ;
-	rdfs:label "Yuri" .
-
-testdata:Z1717a8a66fbe94aba40d1c198e3983c9 testowl:Date "2014-11-09T05:00:00.000Z"^^xsd:dateTime ;
-	testowl:Price "3000 USD" ;
-	rdf:predicate testowl:Purchased ;
-	a testowl:Relation ;
-	rdfs:label "<http://sales.data/purchases#Yuri> <http://sales.data/schema#Purchased> Yugo" .
-
-testowl:Date a owl:DatatypeProperty ;
-	rdfs:label "Date" .
-
-testowl:First_Name a owl:DatatypeProperty ;
-	rdfs:label "First Name" .
+<http://sales.data/purchases/2015> rdfs:label "\"Purchase Dataset\"" .
 
 testowl:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf testowl:Concept .
 
-testowl:Price a owl:DatatypeProperty ;
-	rdfs:label "Price" .
+testowl:Price rdfs:label "Price" ;
+	a owl:DatatypeProperty .
 
-<http://semoss.va.gov/database/re05dd7dc-6db8-47f1-bd73-21c2a1f201c6> owl:imports <http://sales.data/purchases/2015> ;
-	void:subset <http://sales.data/purchases/2015> .
+testowl:Date rdfs:label "Date" ;
+	a owl:DatatypeProperty .
+
+testowl:First_Name rdfs:label "First Name" ;
+	a owl:DatatypeProperty .
+
+testdata:Yuri a testowl:Human_Being ;
+	rdfs:label "Yuri" ;
+	testowl:First_Name "Yuri" ;
+	testowl:Last_Name "Gargarin" .
+
+testdata:Yugo a testowl:Car ;
+	rdfs:label "Yugo" .
+
+testdata:Yuri testdata:Z1717a8a66fbe94aba40d1c198e3983c9 testdata:Yugo .
+
+testdata:Z1717a8a66fbe94aba40d1c198e3983c9 a testowl:Purchased ;
+	rdfs:label "<http://sales.data/schema#Purchased>" ;
+	testowl:Price "3000 USD" ;
+	testowl:Date "2014-11-09T00:00:00.000-04:00"^^xsd:dateTime .
+
+<http://os-em.com/semtool/database/H40a54a8e-0361-4b42-9ae7-217f1f0cbb85> void:subset <http://sales.data/purchases/2015> ;
+	owl:imports <http://sales.data/purchases/2015> .
+
+<http://sales.data/purchases/2015> a void:Dataset .

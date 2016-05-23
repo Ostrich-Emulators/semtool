@@ -701,10 +701,13 @@ public class QaChecker {
 		}
 
 		@Override
+		public String toString() {
+			return String.format( "%s%s%s%s%s", stype, otype, s, o, relname );
+		}
+
+		@Override
 		public int compareTo( RelationCacheKey other ) {
-			String me = stype + otype + s + o + relname;
-			String them = other.stype + other.otype + other.s + other.o + other.relname;
-			return me.compareTo( them );
+			return toString().compareTo( other.toString() );
 		}
 	}
 }

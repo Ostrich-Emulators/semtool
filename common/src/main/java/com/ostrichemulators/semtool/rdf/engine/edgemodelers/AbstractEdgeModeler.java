@@ -101,6 +101,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	 * @param namespaces
 	 * @param metas
 	 * @param myrc
+	 * @param checkCacheFirst
 	 * @return
 	 * @throws org.openrdf.repository.RepositoryException
 	 */
@@ -253,6 +254,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					if ( save && !relationAlreadyMade ) {
 						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
 						myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
+						myrc.add( ret, RDFS.SUBCLASSOF, schema.getRelationUri().build() );
 					}
 				}
 			}

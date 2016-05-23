@@ -1,30 +1,37 @@
-@prefix vcamp: <http://va.gov/ontologies/> .
-@prefix semoss: <http://semoss.org/ontologies/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
+@prefix semtool: <http://os-em.com/ontologies/semtool#> .
+@prefix semonto: <http://os-em.com/ontologies/semtool/> .
+@prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
+@prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-semoss:Last_Name a owl:DatatypeProperty .
+schema:Last_Name a owl:DatatypeProperty .
 
-semoss:Human_Being a owl:Class ;
+schema:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
-	rdfs:subClassOf semoss:Concept .
+	rdfs:subClassOf schema:Concept .
 
-semoss:Car a owl:Class ;
+schema:Car a owl:Class ;
 	rdfs:label "Car" ;
-	rdfs:subClassOf semoss:Concept .
+	rdfs:subClassOf schema:Concept .
 
-semoss:Purchased rdfs:label "Purchased" ;
-	a owl:ObjectProperty .
+schema:Purchased rdfs:label "Purchased" ;
+	a owl:ObjectProperty ;
+	rdfs:subClassOf schema:Relation .
 
-semoss:Price rdfs:label "Price" ;
+schema:Price rdfs:label "Price" ;
 	a owl:DatatypeProperty .
 
-semoss:Date rdfs:label "Date" ;
+schema:Date rdfs:label "Date" ;
 	a owl:DatatypeProperty .
 
-semoss:First_Name rdfs:label "First Name" ;
+schema:First_Name rdfs:label "First Name" ;
 	a owl:DatatypeProperty .
 
-semoss:Last_Name rdfs:label "Last Name" .
+schema:Last_Name rdfs:label "Last Name" .

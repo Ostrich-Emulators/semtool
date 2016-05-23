@@ -24,11 +24,11 @@ import org.openrdf.repository.RepositoryException;
  *
  * @author ryan
  */
-public class SemossEdgeModeler extends AbstractEdgeModeler {
+public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 
-	private static final Logger log = Logger.getLogger( SemossEdgeModeler.class );
+	private static final Logger log = Logger.getLogger( SemtoolEdgeModeler.class );
 
-	public SemossEdgeModeler( QaChecker qa ) {
+	public SemtoolEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}
 
@@ -66,13 +66,13 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 		RelationCacheKey connectorkey = new RelationCacheKey( nap.getSubjectType(),
 				nap.getObjectType(), relname, nap.getSubject(), nap.getObject() );
 
+		URI connector = null;
 		if ( relIsAlreadyUri ) {
-			URI connector = getUriFromRawString( relname, namespaces );
+			connector = getUriFromRawString( relname, namespaces );
 			cacheRelationClass( connector, relname );
 		}
 
 		if ( !hasCachedRelation( connectorkey ) ) {
-			URI connector = null;
 			if ( nap.isEmpty() ) {
 				connector = getCachedRelationClass( relname );
 			}
@@ -86,21 +86,21 @@ public class SemossEdgeModeler extends AbstractEdgeModeler {
 
 			cacheRelationNode( connector, connectorkey );
 		}
-
-		myrc.add( subject, getCachedRelationClass( relname ), object );
-
-		URI connector = getCachedRelation( connectorkey );
-		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
-			ValueFactory vf = myrc.getValueFactory();
-
-			myrc.add( connector, RDF.TYPE, metas.getSchemaBuilder().getRelationUri().build() );
-			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
-					+ sheet.getRelname() + " " + orawlabel ) );
-			URI pred = getCachedRelationClass( sheet.getRelname() );
-			myrc.add( connector, RDF.PREDICATE, pred );
+		else {
+			connector = getCachedRelation( connectorkey );
 		}
 
 		myrc.add( subject, connector, object );
+
+		// we're going to be adding properties to our new edge type
+		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
+			ValueFactory vf = myrc.getValueFactory();
+
+			// our new edge is the same as our old type
+			URI relclass = getCachedRelationClass( relname );
+			myrc.add( connector, RDF.TYPE, relclass );
+			myrc.add( connector, RDFS.LABEL, vf.createLiteral( relname ) );
+		}
 
 		addProperties( connector, nap, namespaces, sheet, metas, myrc );
 

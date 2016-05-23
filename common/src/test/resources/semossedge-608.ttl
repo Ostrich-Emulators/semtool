@@ -1,37 +1,45 @@
-@prefix vcamp: <http://va.gov/ontologies/> .
-@prefix semoss: <http://semoss.org/ontologies/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
+@prefix semtool: <http://os-em.com/ontologies/semtool#> .
+@prefix semonto: <http://os-em.com/ontologies/semtool/> .
+@prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
+@prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-semoss:Person a owl:Class ;
+schema:Person a owl:Class ;
 	rdfs:label "Person" ;
-	rdfs:subClassOf semoss:Concept .
+	rdfs:subClassOf schema:Concept .
 
-semoss:Apple a owl:Class ;
+schema:Apple a owl:Class ;
 	rdfs:label "Apple" ;
-	rdfs:subClassOf semoss:Concept .
+	rdfs:subClassOf schema:Concept .
 
-semoss:likes rdfs:label "likes" ;
-	a owl:ObjectProperty .
+schema:likes rdfs:label "likes" ;
+	a owl:ObjectProperty ;
+	rdfs:subClassOf schema:Relation .
 
-semoss:Orange a owl:Class ;
+schema:Orange a owl:Class ;
 	rdfs:label "Orange" ;
-	rdfs:subClassOf semoss:Concept .
+	rdfs:subClassOf schema:Concept .
 
-semoss:hates rdfs:label "hates" ;
-	a owl:ObjectProperty .
+schema:hates rdfs:label "hates" ;
+	a owl:ObjectProperty ;
+	rdfs:subClassOf schema:Relation .
 
-vcamp:John a semoss:Person ;
+data:John a schema:Person ;
 	rdfs:label "John" .
 
-vcamp:Golden_Delicious a semoss:Apple ;
+data:Golden_Delicious a schema:Apple ;
 	rdfs:label "Golden Delicious" .
 
-vcamp:John semoss:likes vcamp:Golden_Delicious .
+data:John schema:likes data:Golden_Delicious .
 
-vcamp:B342d0955-9af2-455f-ad15-e3e93e7f1575 a semoss:Orange ;
+data:Rdef5dc69-b296-4ce3-9ac2-88b5861322e8 a schema:Orange ;
 	rdfs:label "Golden Delicious" .
 
-vcamp:John semoss:hates vcamp:B342d0955-9af2-455f-ad15-e3e93e7f1575 .
+data:John schema:hates data:Rdef5dc69-b296-4ce3-9ac2-88b5861322e8 .

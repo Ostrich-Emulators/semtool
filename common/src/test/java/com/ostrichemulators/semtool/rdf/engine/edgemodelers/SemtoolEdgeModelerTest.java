@@ -62,13 +62,13 @@ import org.openrdf.sail.memory.MemoryStore;
  *
  * @author ryan
  */
-public class SemossEdgeModelerTest {
+public class SemtoolEdgeModelerTest {
 
-	private static final Logger log = Logger.getLogger( SemossEdgeModelerTest.class );
+	private static final Logger log = Logger.getLogger( SemtoolEdgeModelerTest.class );
 	private static final ValueFactory vf = new ValueFactoryImpl();
 	private static final Date now;
-	private static final String SCHEMA = "http://semoss.org/ontologies/";
-	private static final String DATA = "http://va.gov/ontologies/";
+	private static final String SCHEMA = "http://os-em.com/ontologies/semtool/test-onto/";
+	private static final String DATA = "http://os-em.com/ontologies/semtool/test-data/";
 
 	private static final File REL1 = new File( "src/test/resources/semossedge-rel1.ttl" );
 	private static final File REL2 = new File( "src/test/resources/semossedge-rel2.ttl" );
@@ -104,8 +104,8 @@ public class SemossEdgeModelerTest {
 
 		engine = InMemorySesameEngine.open();
 		engine.setBuilders( UriBuilder.getBuilder( DATA ), UriBuilder.getBuilder( SCHEMA ) );
-		engine.getRawConnection().setNamespace( "vcamp", DATA );
-		engine.getRawConnection().setNamespace( "semoss", SCHEMA );
+		engine.getRawConnection().setNamespace( "data", DATA );
+		engine.getRawConnection().setNamespace( "schema", SCHEMA );
 		engine.getRawConnection().setNamespace( RDFS.PREFIX, RDFS.NAMESPACE );
 		engine.getRawConnection().setNamespace( RDF.PREFIX, RDF.NAMESPACE );
 		engine.getRawConnection().setNamespace( OWL.PREFIX, OWL.NAMESPACE );
@@ -178,7 +178,7 @@ public class SemossEdgeModelerTest {
 			boolean doCountsOnly ) throws IOException, RepositoryException, RDFHandlerException {
 
 		// get rid of the random database id
-		engine.getRawConnection().remove((Resource) null, RDF.TYPE, SEMTOOL.Database );
+		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, SEMTOOL.Database );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -211,7 +211,7 @@ public class SemossEdgeModelerTest {
 		props.put( "Date", vf.createLiteral( now ) );
 		LoadingNodeAndPropertyValues rel = rels.add( "Yuri", "Yugo", props );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
@@ -224,7 +224,7 @@ public class SemossEdgeModelerTest {
 	public void testAddRel2() throws Exception {
 		LoadingNodeAndPropertyValues rel = rels.add( "Alan", "Cadillac" );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
@@ -241,7 +241,7 @@ public class SemossEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel1 = rels.add( "Yuri", "Yugo", props );
 		LoadingNodeAndPropertyValues rel2 = rels.add( "Yuri", "Pinto" );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( rel1, new HashMap<>(), rels, data.getMetadata(),
@@ -254,7 +254,7 @@ public class SemossEdgeModelerTest {
 
 	@Test
 	public void testCreateMetamodel() throws Exception {
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 		compare( engine, META );
 	}
@@ -266,7 +266,7 @@ public class SemossEdgeModelerTest {
 		props.put( "Last Name", vf.createLiteral( "Gagarin" ) );
 		LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
@@ -287,7 +287,7 @@ public class SemossEdgeModelerTest {
 		id.add( apples );
 		id.add( oranges );
 
-		SemossEdgeModeler instance = new SemossEdgeModeler( qaer );
+		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( id, new HashMap<>(), engine.getRawConnection() );
 
 		instance.addRel( apple, new HashMap<>(), apples, id.getMetadata(),

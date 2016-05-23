@@ -1,11 +1,17 @@
-@prefix vcamp: <http://va.gov/ontologies/> .
-@prefix semoss: <http://semoss.org/ontologies/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
+@prefix semtool: <http://os-em.com/ontologies/semtool#> .
+@prefix semonto: <http://os-em.com/ontologies/semtool/> .
+@prefix vcamp: <http://va.gov/ontologies/> .
+@prefix semoss: <http://semoss.org/ontologies/> .
 
-vcamp:John semoss:hates vcamp:O210491fc-2b9d-4e31-b7d6-b93dd5058009 .
+vcamp:John semoss:hates vcamp:Ved22bccb-40ee-4af7-9cd7-a4f62c82dcd2 .
 
 semoss:Person a owl:Class ;
 	rdfs:label "Person" ;
@@ -16,14 +22,16 @@ semoss:Apple a owl:Class ;
 	rdfs:subClassOf semoss:Concept .
 
 semoss:likes rdfs:label "likes" ;
-	a owl:ObjectProperty .
+	a owl:ObjectProperty ;
+	rdfs:subClassOf semoss:Relation .
 
 semoss:Orange a owl:Class ;
 	rdfs:label "Orange" ;
 	rdfs:subClassOf semoss:Concept .
 
 semoss:hates rdfs:label "hates" ;
-	a owl:ObjectProperty .
+	a owl:ObjectProperty ;
+	rdfs:subClassOf semoss:Relation .
 
 vcamp:John a semoss:Person ;
 	rdfs:label "John" .
@@ -33,5 +41,5 @@ vcamp:Golden_Delicious a semoss:Apple ;
 
 vcamp:John semoss:likes vcamp:Golden_Delicious .
 
-vcamp:O210491fc-2b9d-4e31-b7d6-b93dd5058009 a semoss:Orange ;
+vcamp:Ved22bccb-40ee-4af7-9cd7-a4f62c82dcd2 a semoss:Orange ;
 	rdfs:label "Golden Delicious" .

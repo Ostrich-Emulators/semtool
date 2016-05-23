@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-
 import com.ostrichemulators.semtool.rdf.engine.edgemodelers.EdgeModeler;
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +41,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.api.ModificationExecutor;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.edgemodelers.LegacyEdgeModeler;
-import com.ostrichemulators.semtool.rdf.engine.edgemodelers.SemossEdgeModeler;
+import com.ostrichemulators.semtool.rdf.engine.edgemodelers.SemtoolEdgeModeler;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 
 import com.ostrichemulators.semtool.util.UriBuilder;
@@ -419,7 +418,14 @@ public class EngineLoader {
 				DataIterator lit = sheet.iterator();
 				while ( lit.hasNext() ) {
 					LoadingNodeAndPropertyValues nap = lit.next();
-					modeler.addRel( nap, namespaces, sheet, metas, myrc );
+					log.debug( "loading: " + nap.getSubject() + "..." + nap.getRelname()
+							+ "..." + nap.getObject() );
+					try {
+						modeler.addRel( nap, namespaces, sheet, metas, myrc );
+					}
+					catch ( RuntimeException re ) {
+						log.error( re, re );
+					}
 				}
 			}
 			else {
@@ -579,7 +585,7 @@ public class EngineLoader {
 		EdgeModeler modeler = null;
 		switch ( reif ) {
 			case SEMTOOL:
-				modeler = new SemossEdgeModeler( qaer );
+				modeler = new SemtoolEdgeModeler( qaer );
 				break;
 			case LEGACY:
 				modeler = new LegacyEdgeModeler( qaer );
