@@ -27,7 +27,7 @@ public class NodeDerivationTools {
 	/**
 	 * The logger for this class
 	 */
-	private static final Logger logger = Logger.getLogger( NodeDerivationTools.class );
+	private static final Logger log = Logger.getLogger( NodeDerivationTools.class );
 
 	/**
 	 * Private singleton default constructor
@@ -96,18 +96,22 @@ public class NodeDerivationTools {
 	public static ListQueryAdapter<URI> getPredicatesBetween( URI subjectNodeType,
 			URI objectNodeType ) {
 		String q
-				= "SELECT DISTINCT ?relationship WHERE {"
-				+ "?in  a ?stype . "
-				+ "?out a ?otype . "
-				+ "?in ?relationship ?out . "
-				+ "MINUS{ ?relationship rdf:predicate ?p }"
+				= "SELECT DISTINCT ?superrel WHERE {"
+				+ "  ?in  a ?stype . "
+				+ "  ?out a ?otype . "
+				+ "  ?in ?relationship ?out  ."
+				+ "  ?relationship rdfs:subClassOf ?superrel . "
+				+ "  ?superrel rdfs:subClassOf+ semonto:Relation ."
+				+ "  FILTER( ?superrel != semonto:Relation )"
+				+ "  FILTER( ?superrel != ?relationship )"
 				+ "}";
-		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q, "relationship" );
+		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q );
 		varq.useInferred( false );
 		varq.bind( "stype", subjectNodeType );
 		if ( !objectNodeType.equals( Constants.ANYNODE ) ) {
 			varq.bind( "otype", objectNodeType );
 		}
+
 		return varq;
 	}
 
@@ -156,8 +160,8 @@ public class NodeDerivationTools {
 			lqa.bind( "object", instance );
 		}
 
-		logger.debug( "query is: " + query );
-		logger.debug( "instance is: " + instance );
+		log.debug( "query is: " + query );
+		log.debug( "instance is: " + instance );
 
 		return engine.queryNoEx( lqa );
 	}
@@ -186,8 +190,8 @@ public class NodeDerivationTools {
 			lqa.setVariableName( "subtype" );
 		}
 
-		logger.debug( "query is: " + query );
-		logger.debug( "instances are: " + instances );
+		log.debug( "query is: " + query );
+		log.debug( "instances are: " + instances );
 
 		return engine.queryNoEx( lqa );
 	}

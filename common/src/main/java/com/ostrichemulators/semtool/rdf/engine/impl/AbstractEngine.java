@@ -84,9 +84,6 @@ public abstract class AbstractEngine implements IEngine {
 		prop = Utility.copyProperties( initprops );
 		startLoading( prop );
 
-
-
-
 		String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
 		String owlstarter = prop.getProperty( Constants.SEMOSS_URI, null );
 		if ( null == owlstarter ) {

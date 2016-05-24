@@ -34,37 +34,33 @@
 .
 semtool:DataView
   rdf:type owl:Class ;
-  rdfs:label "Data View"^^xsd:string ;
+  rdfs:label "Data View" ;
   rdfs:subClassOf ui:DataViews ;
-  rdfs:subClassOf [
-      rdf:type owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-    ] ;
 .
 semtool:Database
   rdf:type owl:Class ;
-  rdfs:label "Database"^^xsd:string ;
+  rdfs:label "Database" ;
   rdfs:subClassOf <http://rdfs.org/ns/void#Dataset> ;
 .
 semtool:RDR-Reification
   rdf:type semtool:ReificationModel ;
-  rdfs:label "RDR Reification"^^xsd:string ;
+  rdfs:label "RDR Reification" ;
 .
 semtool:ReificationModel
   rdf:type owl:Class ;
-  rdfs:label "Reification Model"^^xsd:string ;
+  rdfs:label "Reification Model" ;
   rdfs:subClassOf owl:Thing ;
 .
 semtool:SEMTOOL-Reification
   rdf:type semtool:ReificationModel ;
-  rdfs:label "OS-EM Semantic Toolkit Reification"^^xsd:string ;
+  rdfs:label "OS-EM Semantic Toolkit Reification" ;
 .
 semtool:W3C-Reification
   rdf:type semtool:ReificationModel ;
-  rdfs:label "W3C Reification"^^xsd:string ;
+  rdfs:label "W3C Reification" ;
 .
 semtool:reification
   rdf:type rdf:Property ;
-  rdfs:label "Reification"^^xsd:string ;
+  rdfs:label "Reification" ;
   rdfs:range semtool:ReificationModel ;
 .

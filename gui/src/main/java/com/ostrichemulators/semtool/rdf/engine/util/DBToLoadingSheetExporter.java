@@ -204,8 +204,6 @@ public class DBToLoadingSheetExporter {
 		return new File( fileloc.toString() );
 	}
 
-
-
 	private List<URI> findSubclassNodesToAdd( List<URI> nodes ) {
 		findDupsToFilterOut();
 
@@ -286,7 +284,10 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub ?rel ?obj ."
 				+ "  ?objtype rdfs:subClassOf ?concept ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?rel a owl:ObjectProperty ."
+				+ "  ?rel a semonto:Relation ."
+				+ "  FILTER ( ?objtype != semonto:Concept ) ."
+				+ "  FILTER ( ?subtype != semonto:Concept ) ."
+				+ "  FILTER ( ?subtype != rdfs:Resource ) ."
 				+ "}";
 		ListQueryAdapter<URI[]> triples = new ListQueryAdapter<URI[]>( q ) {
 
@@ -300,6 +301,7 @@ public class DBToLoadingSheetExporter {
 			}
 		};
 		triples.bind( "concept", getEngine().getSchemaBuilder().getConceptUri().build() );
+		triples.useInferred( true );
 
 		for ( URI subjectType : subjectTypes ) {
 			triples.bind( "subtype", subjectType );
@@ -432,7 +434,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub ?specificrel ?obj ."
 				+ "  ?obj a ?objtype ."
 				+ "  ?specificrel a ?semossrel ."
-				+ "  ?specificrel rdf:predicate ?rel ."
+				+ "  ?specificrel a ?rel ."
 				+ "  ?specificrel ?prop ?propval ."
 				+ "  FILTER( isLiteral( ?propval ) ) ."
 				+ "}";

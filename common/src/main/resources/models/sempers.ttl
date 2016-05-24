@@ -24,26 +24,26 @@
 @prefix sempers: <http://os-em.com/ontologies/semtool/insights#> .
 
 <http://os-em.com/ontologies/semtool/insights>
-  semcore:author "ry.bobko <ryan@ostrich-emulators.com>"^^xsd:string ;
-  semcore:namespace "http://semoss.org/ontologies/semtool/insights#"^^xsd:string ;
-  semcore:namespacePrefix "sempers"^^xsd:string ;
-  semcore:revision "2129"^^xsd:string ;
+  semcore:author "ry.bobko <ryan@ostrich-emulators.com>" ;
+  semcore:namespace "http://semoss.org/ontologies/semtool/insights#" ;
+  semcore:namespacePrefix "sempers" ;
+  semcore:revision "2129" ;
   semcore:revisionDate "2016-05-18T19:55:03.120-04:00"^^xsd:dateTime ;
   semcore:specificity "1"^^xsd:integer ;
-  semcore:version "1.0"^^xsd:string ;
+  semcore:version "1.0" ;
   owl:versionIRI <http://semoss.org/ontologies/semtool/insights/v1.0> ;
   a owl:Ontology ;
   owl:imports <http://os-em.com/ontologies/semtool/core> ;
-  owl:versionInfo "sempers.ttl 2129 2016-05-18T19:55:03.120-04:00 ry.bobko"^^xsd:string ;
+  owl:versionInfo "sempers.ttl 2129 2016-05-18T19:55:03.120-04:00 ry.bobko" ;
 .
 sempers:InsightProperties
   rdf:type spin:MagicProperty ;
-  rdfs:label "Insight Properties"^^xsd:string ;
+  rdfs:label "Insight Properties" ;
   rdfs:subClassOf spin:MagicProperties ;
 .
 sempers:Perspective
   rdf:type owl:Class ;
-  rdfs:label "Perspective"^^xsd:string ;
+  rdfs:label "Perspective" ;
   rdfs:subClassOf olo:OrderedList ;
   rdfs:subClassOf ui:Element ;
   rdfs:subClassOf [
@@ -55,6 +55,6 @@ sempers:Perspective
 .
 sempers:insight
   rdf:type owl:ObjectProperty ;
-  rdfs:label "insight"^^xsd:string ;
+  rdfs:label "insight" ;
   rdfs:range sempers:InsightProperties ;
 .

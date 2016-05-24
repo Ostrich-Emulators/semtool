@@ -28,8 +28,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
 
 /**
@@ -53,7 +51,7 @@ public class EngineConsistencyChecker {
 	private final StringDistance strdist;
 	private final Map<URI, String> labels = new HashMap<>();
 	private final Map<URI, URI> uriToTypeLkp = new HashMap<>();
-	private final MultiMap<URI, URI> typeLkp = new MultiMap<>();
+	private final MultiMap<URI, URI> typeToURILkp = new MultiMap<>();
 
 	public EngineConsistencyChecker( IEngine eng, boolean across, StringDistance dist ) {
 		this.engine = eng;
@@ -64,7 +62,7 @@ public class EngineConsistencyChecker {
 	public void release() {
 		labels.clear();
 		uriToTypeLkp.clear();
-		typeLkp.clear();
+		typeToURILkp.clear();
 	}
 
 	/**
@@ -89,10 +87,8 @@ public class EngineConsistencyChecker {
 	private void makeConceptDocuments( URI concept ) {
 
 		String query = "SELECT ?s ?type ?slabel WHERE {"
-				+ " ?s ?rdftype ?concept . "
-				+ " ?s ?label ?slabel . "
-				+ " ?s ?rdftype ?type . "
-				+ " FILTER ( ?type != ?rsr ) } ORDER BY ?s";
+				+ " ?s a ?concept ;rdfs:label ?slabel ; a ?type . "
+				+ " FILTER ( ?type != rdfs:Resource ) } ORDER BY ?s";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
 			URI lastS = null;
 			Document currentDoc = null;
@@ -103,7 +99,7 @@ public class EngineConsistencyChecker {
 				URI s = URI.class.cast( set.getValue( "s" ) );
 				if ( s != lastS ) {
 					seenLabels.clear();
-					typeLkp.add( concept, s );
+					typeToURILkp.add( concept, s );
 					uriToTypeLkp.put( s, concept );
 					lastS = s;
 				}
@@ -117,50 +113,47 @@ public class EngineConsistencyChecker {
 			}
 		};
 
-		vqa.bind( "rdftype", RDF.TYPE );
 		vqa.bind( "concept", concept );
-		vqa.bind( "label", RDFS.LABEL );
-		vqa.bind( "rsr", RDFS.RESOURCE );
 		engine.queryNoEx( vqa );
 	}
 
-	private void makeRelationDocuments( URI rel ) {
-		String query = "SELECT ?s ?slabel WHERE {"
-				+ " ?s rdf:predicate ?rel . "
-				+ " ?s rdfs:label ?slabel . "
-				+ " FILTER ( ?rel != rdfs:resource ) . FILTER ( ?s != ?rel ) "
-				+ "} ORDER BY ?s";
+	private void makeRelationDocuments( URI superclass ) {
+		// get all suclasses of superclass
+		String query = "SELECT DISTINCT ?rel ?label WHERE {"
+				+ " ?rel rdfs:subClassOf* ?superclass ; rdfs:label ?label . "
+				+ " FILTER( ?rel != ?superclass )"
+				+ "} ORDER BY ?rel";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
-			URI lastS = null;
+			URI lastRel = null;
 			Set<String> seenLabels = new HashSet<>();
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI s = URI.class.cast( set.getValue( "s" ) );
-				if ( s != lastS ) {
+				URI rel = URI.class.cast( set.getValue( "rel" ) );
+				if ( rel != lastRel ) {
 					seenLabels.clear();
 
 					// add the URI information now; seenLabels later (avoid saving too much data)
-					typeLkp.add( rel, s );
-					uriToTypeLkp.put( s, rel );
-					lastS = s;
+					typeToURILkp.add( superclass, rel );
+					uriToTypeLkp.put( rel, superclass );
+					lastRel = rel;
 				}
 
-				String label = set.getValue( "slabel" ).stringValue();
+				String label = set.getValue( "label" ).stringValue();
 				// don't add multiple copies of the same label
 				if ( !seenLabels.contains( label ) ) {
 					seenLabels.add( label );
-					labels.put( s, label );
+					labels.put( rel, label );
 				}
 			}
 		};
 
-		vqa.bind( "concept", rel );
+		vqa.bind( "superclass", superclass );
 		engine.queryNoEx( vqa );
 	}
 
 	public int getItemsForType( URI uri ) {
-		return typeLkp.getNN( uri ).size();
+		return typeToURILkp.getNN( uri ).size();
 	}
 
 	/**
@@ -196,7 +189,7 @@ public class EngineConsistencyChecker {
 			PlainTextDictionary ptd = new PlainTextDictionary( new StringReader( names.toString() ) );
 			speller.indexDictionary( ptd, config, true );
 
-			List<URI> needles = typeLkp.get( uri );
+			List<URI> needles = typeToURILkp.get( uri );
 			for ( URI needle : needles ) {
 				String needlelabel = labels.get( needle );
 				try {
@@ -276,7 +269,7 @@ public class EngineConsistencyChecker {
 			possibles.putAll( labels );
 		}
 		else {
-			for ( URI key : typeLkp.getNN( type ) ) {
+			for ( URI key : typeToURILkp.getNN( type ) ) {
 				possibles.put( key, labels.get( key ) );
 			}
 		}

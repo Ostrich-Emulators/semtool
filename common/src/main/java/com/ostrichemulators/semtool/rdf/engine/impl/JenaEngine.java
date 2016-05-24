@@ -131,12 +131,21 @@ public class JenaEngine extends AbstractSesameEngine {
 				Property pred = stmt.getPredicate();
 				RDFNode val = stmt.getObject();
 				Node valnode = val.asNode();
-
-				Resource sub = ( rsr.isAnon()
-						? vf.createBNode( valnode.getBlankNodeLabel() )
-						: vf.createURI( rsr.toString() ) );
+				
+				Resource sub;
+				try {
+					sub = ( rsr.isAnon()
+							? vf.createBNode( valnode.getBlankNodeLabel() )
+							: vf.createURI( rsr.toString() ) );
+				}
+				catch ( UnsupportedOperationException uoo ) {
+					log.warn( uoo, uoo );
+					continue;
+				}
+				
 				URI pred2 = vf.createURI( pred.toString() );
 				Value val2;
+
 				if ( val.isLiteral() ) {
 					Literal lit = val.asLiteral();
 					String dtstr = lit.getDatatypeURI();
@@ -163,7 +172,6 @@ public class JenaEngine extends AbstractSesameEngine {
 						val2 = vf.createURI( val.toString() );
 					}
 				}
-
 				rc.add( sub, pred2, val2 );
 			}
 			rc.commit();

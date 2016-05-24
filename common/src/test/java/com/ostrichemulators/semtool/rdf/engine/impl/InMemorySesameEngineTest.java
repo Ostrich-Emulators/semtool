@@ -80,17 +80,17 @@ public class InMemorySesameEngineTest {
 
 	@Test
 	public void testUpdate() throws Exception {
-		assertEquals( 41, eng.getRawConnection().size() );
+		assertEquals( 68, eng.getRawConnection().size() );
 		eng.update( new UpdateExecutorAdapter( "DELETE DATA { rdfs:domain rdfs:label \"label\" } " ) );
-		assertEquals( 40, eng.getRawConnection().size() );
+		assertEquals( 67, eng.getRawConnection().size() );
 	}
 
 	@Test
 	public void testUpdateDate() throws Exception {
 		Date date = new Date();
-		assertEquals( 41, eng.getRawConnection().size() );
+		assertEquals( 68, eng.getRawConnection().size() );
 		eng.update( new UpdateExecutorAdapter( "DELETE DATA { rdfs:domain rdfs:label \"label\" } " ) );
-		assertEquals( 40, eng.getRawConnection().size() );
+		assertEquals( 67, eng.getRawConnection().size() );
 
 		List<Statement> stmts = Iterations.asList( eng.getRawConnection().
 				getStatements( eng.getBaseUri(), MetadataConstants.DCT_MODIFIED,

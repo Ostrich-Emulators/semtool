@@ -346,14 +346,6 @@ public class GraphDataModel {
 				+ " FILTER ( isLiteral( ?o ) ) }"
 				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
 
-		String specificEdgeProps
-				= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
-				+ "  ?rel ?prop ?literal ."
-				+ "  ?rel a ?superrel ."
-				+ "  ?s ?rel ?o ."
-				+ "  FILTER ( isLiteral( ?literal ) )"
-				+ "}"
-				+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
 		try {
 			VoidQueryAdapter cqa = new VoidQueryAdapter( conceptprops ) {
 
@@ -374,6 +366,17 @@ public class GraphDataModel {
 				cqa.useInferred( false );
 				engine.query( cqa );
 			}
+
+			String specificEdgeProps
+					= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
+					+ "  ?rel ?prop ?literal ; a ?superrel ."
+					+ "  ?superrel rdfs:subClassOf* semonto:Relation ."
+					+ "    FILTER ( ?superrel != semonto:Relation ) ."
+					+ "    FILTER ( ?superrel != ?rel ) ."
+					+ "  ?s ?rel ?o ."
+					+ "  FILTER ( isLiteral( ?literal ) )"
+					+ "}"
+					+ "VALUES ?rel { " + Utility.implode( preds, "<", ">", " " ) + " }";
 
 			// do the same thing, but for edges
 			VoidQueryAdapter specifics = new VoidQueryAdapter( specificEdgeProps ) {

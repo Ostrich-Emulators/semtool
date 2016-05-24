@@ -36,7 +36,7 @@ public class JenaEngineTest {
 	private static final File loadfile = new File( "src/test/resources/test12.nt" );
 	private Dataset tdb;
 	private JenaEngine instance;
-		
+
 	public JenaEngineTest() {
 	}
 
@@ -55,13 +55,12 @@ public class JenaEngineTest {
 	@Test
 	public void testStartLoading() throws Exception {
 		OneVarListQueryAdapter<String> lqa
-				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }",
-						"label" );
+				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }" );
 		Set<String> names = new HashSet<>( instance.query( lqa ) );
-		Set<String> expected = new HashSet<>( Arrays.asList( "Yuri", "Yugo",
-				"Yuri Purchased Yugo", "Human Being", "Car", "Price", "Date", "First Name",
-				"Last Name", "Purchased" ) );
-
+		Set<String> expected = new HashSet<>( Arrays.asList( "Reification", "RDR Reification",
+				"First Name", "Purchased", "Reification Model", "Yugo", "Date", "Price",
+				"Database", "Yuri", "OS-EM Semantic Toolkit Reification", "Last Name",
+				"W3C Reification", "Human Being", "Data View", "Car" ) );
 		assertEquals( expected, names );
 	}
 
@@ -78,12 +77,12 @@ public class JenaEngineTest {
 		} );
 
 		OneVarListQueryAdapter<String> lqa
-				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }",
-						"label" );
+				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }" );
 		Set<String> names = new HashSet<>( instance.query( lqa ) );
-		Set<String> expected = new HashSet<>( Arrays.asList( "Yuri", "Yugo", 
-				"Yuri Purchased Yugo", "Human Being", "Car", "Price", "Date", "First Name",
-				"Last Name", "Purchased", "extra" ) );
+		Set<String> expected = new HashSet<>( Arrays.asList( "Reification", "RDR Reification",
+				"First Name", "Purchased", "Reification Model", "Yugo", "Date", "Price",
+				"Database", "Yuri", "OS-EM Semantic Toolkit Reification", "Last Name",
+				"W3C Reification", "Human Being", "Data View", "Car", "extra" ) );
 		instance.closeDB();
 		assertEquals( expected, names );
 	}

@@ -11,8 +11,6 @@
 @prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
 @prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-data:Alan schema:Purchased data:Cadillac .
-
 schema:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf schema:Concept .
@@ -42,3 +40,7 @@ data:Alan a schema:Human_Being ;
 
 data:Cadillac a schema:Car ;
 	rdfs:label "Cadillac" .
+
+data:Purchased rdfs:subClassOf schema:Purchased .
+
+data:Alan data:Purchased data:Cadillac .

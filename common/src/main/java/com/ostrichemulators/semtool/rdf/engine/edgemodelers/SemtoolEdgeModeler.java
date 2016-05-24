@@ -15,7 +15,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -44,6 +43,7 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 		final String orawlabel = nap.getObject();
 
 		final String relname = sheet.getRelname();
+		URI relclass = getCachedRelationClass( relname );
 
 		// get both ends of the relationship...
 		if ( !hasCachedInstance( stype, srawlabel ) ) {
@@ -74,7 +74,9 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 
 		if ( !hasCachedRelation( connectorkey ) ) {
 			if ( nap.isEmpty() ) {
-				connector = getCachedRelationClass( relname );
+				connector = metas.getDataBuilder().build( relname );
+				connector = ensureUnique( connector );
+				myrc.add( connector, RDFS.SUBCLASSOF, relclass );
 			}
 			else {
 				// make a new edge so we can add properties
@@ -97,8 +99,7 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 			ValueFactory vf = myrc.getValueFactory();
 
 			// our new edge is the same as our old type
-			URI relclass = getCachedRelationClass( relname );
-			myrc.add( connector, RDF.TYPE, relclass );
+			myrc.add( connector, RDFS.SUBCLASSOF, relclass );
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( relname ) );
 		}
 

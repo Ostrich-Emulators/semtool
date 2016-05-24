@@ -33,7 +33,6 @@ import com.ostrichemulators.semtool.util.UriBuilder;
 import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -64,9 +63,13 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 	}
 
 	public static InMemorySesameEngine open() {
+		return open( new Properties() );
+	}
+
+	public static InMemorySesameEngine open( Properties props ) {
 		InMemorySesameEngine eng = new InMemorySesameEngine();
 		try {
-			eng.openDB( new Properties() );
+			eng.openDB( props );
 		}
 		catch ( Exception e ) {
 			log.error( e );

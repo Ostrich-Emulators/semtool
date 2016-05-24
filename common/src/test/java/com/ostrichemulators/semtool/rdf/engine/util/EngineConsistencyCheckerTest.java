@@ -10,6 +10,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineConsistencyChecker.Hit
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.Arrays;
 import org.apache.lucene.search.spell.LevensteinDistance;
 import org.junit.After;
@@ -26,6 +27,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.ntriples.NTriplesWriter;
 
 /**
  *
@@ -34,15 +36,15 @@ import org.openrdf.rio.RDFFormat;
 public class EngineConsistencyCheckerTest {
 
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
-	private static final UriBuilder datab = UriBuilder.getBuilder( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/" );
-	private static final URI CAR = new URIImpl( "http://semoss.org/ontologies/Car" );
+	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/" );
+	private static final URI CAR = new URIImpl( "http://os-em.com/ontologies/semtool/Car" );
 	private static final URI YUGO = datab.build( "Yugo" );
 	private static final URI YIGO = datab.build( "Yigo" );
 	private static final URI YUGO2 = datab.build( "Yugah" );
 	private static final URI YUGO3 = datab.build( "Yugaoh" );
 
-	private static final URI PURCHASE = new URIImpl( "http://semoss.org/ontologies/Purchased" );
-	private static final URI REL = new URIImpl( "http://semoss.org/ontologies/Relation" );
+	private static final URI PURCHASE = new URIImpl( "http://os-em.com/ontologies/semtool/Purchased" );
+	private static final URI REL = new URIImpl( "http://os-em.com/ontologies/semtool/Relation" );
 	private static final URI REL1 = datab.build( "Yuri_Purchased_Yugo" );
 	private static final URI REL2 = datab.build( "Yuri_Purchased_Yigo" );
 
@@ -56,7 +58,7 @@ public class EngineConsistencyCheckerTest {
 	public static void setUpClass() throws Exception {
 		engine = InMemorySesameEngine.open();
 
-		engine.setBuilders( datab, UriBuilder.getBuilder( "http://semoss.org/ontologies/" ) );
+		engine.setBuilders( datab, UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool/" ) );
 
 		RepositoryConnection rc = engine.getRawConnection();
 		rc.begin();
@@ -68,19 +70,24 @@ public class EngineConsistencyCheckerTest {
 					new LiteralImpl( extra.getLocalName() ) ) );
 		}
 
-		rc.add( new StatementImpl( REL2, RDFS.SUBPROPERTYOF, REL ) );
+		rc.add( new StatementImpl( REL2, RDF.TYPE, REL ) );
 		rc.add( new StatementImpl( REL2, RDFS.LABEL, new LiteralImpl( "Yuri Purchased a Yigo" ) ) );
-		rc.add( new StatementImpl( REL2, RDF.PREDICATE, PURCHASE ) );
-		rc.add( new StatementImpl( REL2, new URIImpl( "http://semoss.org/ontologies/Price" ),
+		rc.add( new StatementImpl( REL2, RDFS.SUBCLASSOF, PURCHASE ) );
+		rc.add( new StatementImpl( REL2, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
 				new LiteralImpl( "8000 USD" ) ) );
 
+		rc.remove(  REL1, null, null );
 		rc.add( new StatementImpl( REL1, RDFS.SUBPROPERTYOF, REL ) );
 		rc.add( new StatementImpl( REL1, RDFS.LABEL, new LiteralImpl( "Yuri Purchased Yugo" ) ) );
-		rc.add( new StatementImpl( REL1, RDF.PREDICATE, PURCHASE ) );
-		rc.add( new StatementImpl( REL1, new URIImpl( "http://semoss.org/ontologies/Price" ),
+		rc.add( new StatementImpl( REL1, RDFS.SUBCLASSOF, PURCHASE ) );
+		rc.add( new StatementImpl( REL1, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
 				new LiteralImpl( "3000 USD" ) ) );
 
 		rc.commit();
+
+		try( FileWriter gw = new FileWriter( "/tmp/x.nt" ) ){
+			rc.export( new NTriplesWriter( gw ) );
+		}
 	}
 
 	@AfterClass

@@ -29,12 +29,12 @@ import org.openrdf.rio.RDFFormat;
 public class NodeDerivationToolsTest {
 
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
-	private static final URI HUMAN = new URIImpl( "http://semoss.org/ontologies/Human_Being" );
-	private static final URI CAR = new URIImpl( "http://semoss.org/ontologies/Car" );
+	private static final URI HUMAN = new URIImpl( "http://os-em.com/ontologies/semtool/Human_Being" );
+	private static final URI CAR = new URIImpl( "http://os-em.com/ontologies/semtool/Car" );
 	private static final URI YUGO
-			= new URIImpl( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yugo" );
+			= new URIImpl( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/Yugo" );
 	private static final URI YURI
-			= new URIImpl( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/Yuri" );
+			= new URIImpl( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/Yuri" );
 	private static InMemorySesameEngine engine;
 
 	public NodeDerivationToolsTest() {
@@ -43,8 +43,8 @@ public class NodeDerivationToolsTest {
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		engine = InMemorySesameEngine.open();
-		engine.setBuilders( UriBuilder.getBuilder( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/" ),
-				UriBuilder.getBuilder( "http://semoss.org/ontologies/" ) );
+		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/" ),
+				UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool" ) );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );
 		engine.getRawConnection().commit();
@@ -72,7 +72,7 @@ public class NodeDerivationToolsTest {
 
 	@Test
 	public void testGetPredicatesBetween_3args() {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( new URIImpl( "http://semoss.org/ontologies/Purchased" ) ) );
+		Set<URI> expResult = new HashSet<>( Arrays.asList( new URIImpl( "http://os-em.com/ontologies/semtool/Purchased" ) ) );
 		Set<URI> result = new HashSet<>( NodeDerivationTools.getPredicatesBetween( HUMAN, CAR, engine ) );
 		assertEquals( expResult, result );
 	}

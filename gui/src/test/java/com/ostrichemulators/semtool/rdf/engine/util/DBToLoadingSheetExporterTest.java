@@ -10,6 +10,7 @@ import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Properties;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,9 +33,11 @@ public class DBToLoadingSheetExporterTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		engine = InMemorySesameEngine.open();
-		engine.setBuilders( UriBuilder.getBuilder( "http://semoss.os-em.com/database/T44889381-85ce-43e3-893d-6267fd480660/" ),
-				UriBuilder.getBuilder( "http://semoss.org/ontologies/" ) );
+		Properties props = new Properties();
+		props.setProperty( InMemorySesameEngine.INFER, Boolean.TRUE.toString() );
+		engine = InMemorySesameEngine.open( props );
+		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/" ),
+				UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool/" ) );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );
 		engine.getRawConnection().commit();
