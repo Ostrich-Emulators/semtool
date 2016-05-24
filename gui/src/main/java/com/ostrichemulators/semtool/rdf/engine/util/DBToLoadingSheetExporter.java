@@ -242,9 +242,9 @@ public class DBToLoadingSheetExporter {
 		}
 
 		String q = "SELECT ?keeper ?duplicate WHERE {"
-				+ " ?keeper ?subclass ?concept ."
-				+ " ?duplicate ?subclass ?concept ."
-				+ " ?keeper ?subclass ?duplicate ."
+				+ " ?keeper rdfs:subClassOf ?concept ."
+				+ " ?duplicate rdfs:subClassOf ?concept ."
+				+ " ?keeper rdfs:subClassOf ?duplicate ."
 				+ " FILTER( ?duplicate != ?concept ) }";
 		QueryExecutor<Void> qe = new QueryExecutorAdapter<Void>( q ) {
 
@@ -256,11 +256,11 @@ public class DBToLoadingSheetExporter {
 			}
 		};
 
-		qe.bind( "subclass", RDFS.SUBCLASSOF );
 		qe.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 		IEngine eng = ( null == engine ? DIHelper.getInstance().getRdfEngine()
 				: engine );
 		try {
+			// logger.debug( qe.bindAndGetSparql() );
 			eng.query( qe );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
@@ -279,15 +279,17 @@ public class DBToLoadingSheetExporter {
 	public void exportAllRelationships( List<URI> subjectTypes, ImportData data ) {
 		findDupsToFilterOut();
 
-		String q = "SELECT DISTINCT ?subtype ?rel ?objtype WHERE {"
+		String q = "SELECT DISTINCT ?sub ?subtype ?superrel ?obj ?objtype WHERE {"
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?rel ?obj ."
-				+ "  ?objtype rdfs:subClassOf ?concept ."
+				+ "  ?objtype rdfs:subClassOf* semonto:Concept ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?rel a semonto:Relation ."
+				+ "  ?rel rdfs:subClassOf+ ?superrel ."
+				+ "  ?superrel rdfs:subClassOf semonto:Relation ."
 				+ "  FILTER ( ?objtype != semonto:Concept ) ."
 				+ "  FILTER ( ?subtype != semonto:Concept ) ."
-				+ "  FILTER ( ?subtype != rdfs:Resource ) ."
+				+ "  FILTER ( ?superrel != ?rel ) ."
+				+ "  FILTER ( ?superrel != semonto:Relation ) ."
 				+ "}";
 		ListQueryAdapter<URI[]> triples = new ListQueryAdapter<URI[]>( q ) {
 
@@ -295,18 +297,18 @@ public class DBToLoadingSheetExporter {
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				URI triple[] = {
 					URI.class.cast( set.getValue( "subtype" ) ),
-					URI.class.cast( set.getValue( "rel" ) ),
+					URI.class.cast( set.getValue( "superrel" ) ),
 					URI.class.cast( set.getValue( "objtype" ) ) };
 				add( triple );
 			}
 		};
-		triples.bind( "concept", getEngine().getSchemaBuilder().getConceptUri().build() );
 		triples.useInferred( true );
 
 		for ( URI subjectType : subjectTypes ) {
 			triples.bind( "subtype", subjectType );
 
 			try {
+				// logger.debug( triples.bindAndGetSparql() );
 				List<URI[]> relsToExport = getEngine().query( triples );
 				exportTheseRelationships( relsToExport, data );
 			}
@@ -397,7 +399,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?rel ?obj ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?rel a owl:ObjectProperty ."
+				+ "  ?rel rdfs:subClassOf ?superrel ."
 				+ "}";
 
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
@@ -418,8 +420,9 @@ public class DBToLoadingSheetExporter {
 		};
 
 		vqa.bind( "subtype", subjectType );
-		vqa.bind( "rel", predicateType );
+		vqa.bind( "superrel", predicateType );
 		vqa.bind( "objtype", objectType );
+		logger.debug( vqa.bindAndGetSparql() );
 		vqa.useInferred( false );
 
 		try {
@@ -433,8 +436,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?specificrel ?obj ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?specificrel a ?semossrel ."
-				+ "  ?specificrel a ?rel ."
+				+ "  ?specificrel rdfs:subClassOf ?rel ."
 				+ "  ?specificrel ?prop ?propval ."
 				+ "  FILTER( isLiteral( ?propval ) ) ."
 				+ "}";
@@ -462,7 +464,6 @@ public class DBToLoadingSheetExporter {
 
 		edges.bind( "subtype", subjectType );
 		edges.bind( "rel", predicateType );
-		edges.bind( "semossrel", getEngine().getSchemaBuilder().getRelationUri().build() );
 		edges.bind( "objtype", objectType );
 		edges.useInferred( false );
 
