@@ -29,7 +29,6 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 
 import com.ostrichemulators.semtool.util.GuiUtility;
-import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -40,8 +39,6 @@ import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.ntriples.NTriplesWriter;
 
 /**
  *

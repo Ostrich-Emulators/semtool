@@ -45,6 +45,6 @@ data:Yugo a schema:Car ;
 
 data:Yuri data:Yuri_Purchased_Yugo data:Yugo .
 
-data:Yuri_Purchased_Yugo rdfs:subClassOf schema:Purchased ;
+data:Yuri_Purchased_Yugo a schema:Purchased ;
 	rdfs:label "Purchased" ;
 	schema:Price "3000 USD" .

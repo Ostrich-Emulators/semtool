@@ -36,7 +36,7 @@ public class DBToLoadingSheetExporterTest {
 		Properties props = new Properties();
 		props.setProperty( InMemorySesameEngine.INFER, Boolean.TRUE.toString() );
 		engine = InMemorySesameEngine.open( props );
-		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/" ),
+		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/" ),
 				UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool/" ) );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );

@@ -32,9 +32,9 @@ public class NodeDerivationToolsTest {
 	private static final URI HUMAN = new URIImpl( "http://os-em.com/ontologies/semtool/Human_Being" );
 	private static final URI CAR = new URIImpl( "http://os-em.com/ontologies/semtool/Car" );
 	private static final URI YUGO
-			= new URIImpl( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/Yugo" );
+			= new URIImpl( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yugo" );
 	private static final URI YURI
-			= new URIImpl( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/Yuri" );
+			= new URIImpl( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri" );
 	private static InMemorySesameEngine engine;
 
 	public NodeDerivationToolsTest() {
@@ -43,7 +43,7 @@ public class NodeDerivationToolsTest {
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		engine = InMemorySesameEngine.open();
-		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/" ),
+		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/" ),
 				UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool" ) );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );
@@ -85,7 +85,7 @@ public class NodeDerivationToolsTest {
 
 	@Test
 	public void testGetConnectedConceptTypes_3args_1() {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( CAR, OWL.CLASS ) );
+		Set<URI> expResult = new HashSet<>( Arrays.asList( CAR ) );
 		Set<URI> result
 				= new HashSet<>( NodeDerivationTools.getConnectedConceptTypes( YURI, engine, true ) );
 		assertEquals( expResult, result );

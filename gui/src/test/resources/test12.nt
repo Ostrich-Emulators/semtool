@@ -1,4 +1,4 @@
-# baseURI: http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb
+# baseURI: http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33
 <http://os-em.com/ontologies/semtool> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://os-em.com/ontologies/semtool> <http://www.w3.org/2002/07/owl#imports> <http://os-em.com/ontologies/semtool/core> .
 <http://os-em.com/ontologies/semtool> <http://www.w3.org/2002/07/owl#imports> <http://purl.org/ontology/olo/core#> .
@@ -7,31 +7,30 @@
 <http://os-em.com/ontologies/semtool> <http://www.w3.org/2002/07/owl#imports> <http://uispin.org/ui> .
 <http://os-em.com/ontologies/semtool> <http://www.w3.org/2002/07/owl#imports> <http://purl.org/dc/terms/> .
 <http://os-em.com/ontologies/semtool#Database> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://os-em.com/ontologies/semtool#Database> <http://www.w3.org/2000/01/rdf-schema#label> "Database"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://os-em.com/ontologies/semtool#Database> <http://www.w3.org/2000/01/rdf-schema#label> "Database" .
 <http://os-em.com/ontologies/semtool#Database> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://rdfs.org/ns/void#Dataset> .
 <http://os-em.com/ontologies/semtool#DataView> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://os-em.com/ontologies/semtool#DataView> <http://www.w3.org/2000/01/rdf-schema#label> "Data View"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://os-em.com/ontologies/semtool#DataView> <http://www.w3.org/2000/01/rdf-schema#label> "Data View" .
 <http://os-em.com/ontologies/semtool#DataView> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://uispin.org/ui#DataViews> .
-<http://os-em.com/ontologies/semtool#DataView> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:t23 .
 <http://os-em.com/ontologies/semtool#RDR-Reification> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool#ReificationModel> .
-<http://os-em.com/ontologies/semtool#RDR-Reification> <http://www.w3.org/2000/01/rdf-schema#label> "RDR Reification"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://os-em.com/ontologies/semtool#RDR-Reification> <http://www.w3.org/2000/01/rdf-schema#label> "RDR Reification" .
 <http://os-em.com/ontologies/semtool#reification> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
-<http://os-em.com/ontologies/semtool#reification> <http://www.w3.org/2000/01/rdf-schema#label> "Reification"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://os-em.com/ontologies/semtool#reification> <http://www.w3.org/2000/01/rdf-schema#label> "Reification" .
 <http://os-em.com/ontologies/semtool#reification> <http://www.w3.org/2000/01/rdf-schema#range> <http://os-em.com/ontologies/semtool#ReificationModel> .
 <http://os-em.com/ontologies/semtool#ReificationModel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://os-em.com/ontologies/semtool#ReificationModel> <http://www.w3.org/2000/01/rdf-schema#label> "Reification Model"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://os-em.com/ontologies/semtool#ReificationModel> <http://www.w3.org/2000/01/rdf-schema#label> "Reification Model" .
 <http://os-em.com/ontologies/semtool#ReificationModel> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .
 <http://os-em.com/ontologies/semtool#SEMTOOL-Reification> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool#ReificationModel> .
-<http://os-em.com/ontologies/semtool#SEMTOOL-Reification> <http://www.w3.org/2000/01/rdf-schema#label> "OS-EM Semantic Toolkit Reification"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://os-em.com/ontologies/semtool#SEMTOOL-Reification> <http://www.w3.org/2000/01/rdf-schema#label> "OS-EM Semantic Toolkit Reification" .
 <http://os-em.com/ontologies/semtool#W3C-Reification> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool#ReificationModel> .
-<http://os-em.com/ontologies/semtool#W3C-Reification> <http://www.w3.org/2000/01/rdf-schema#label> "W3C Reification"^^<http://www.w3.org/2001/XMLSchema#string> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb> <http://os-em.com/ontologies/semtool#ReificationModel> <http://os-em.com/ontologies/semtool#SEMTOOL-Reification> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb> <http://os-em.com/ontologies/semtool/core#softwareAgent> "unknown" .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb> <http://purl.org/dc/terms/created> "2016-05-24T00:10:32.833Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool#Database> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb> <http://www.w3.org/2002/07/owl#imports> <http://os-em.com/ontologies/semtool/> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb> <http://purl.org/dc/terms/modified> "2016-05-24T00:10:32.833Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb> <http://rdfs.org/ns/void#subset> <http://os-em.com/ontologies/semtool/> .
+<http://os-em.com/ontologies/semtool#W3C-Reification> <http://www.w3.org/2000/01/rdf-schema#label> "W3C Reification" .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33> <http://os-em.com/ontologies/semtool#ReificationModel> <http://os-em.com/ontologies/semtool#SEMTOOL-Reification> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33> <http://os-em.com/ontologies/semtool/core#softwareAgent> "unknown" .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33> <http://purl.org/dc/terms/created> "2016-05-24T23:56:35.088Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool#Database> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33> <http://www.w3.org/2002/07/owl#imports> <http://os-em.com/ontologies/semtool/> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33> <http://purl.org/dc/terms/modified> "2016-05-24T23:56:35.088Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33> <http://rdfs.org/ns/void#subset> <http://os-em.com/ontologies/semtool/> .
 <http://os-em.com/ontologies/semtool/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
 <http://os-em.com/ontologies/semtool/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/ns/void#Dataset> .
 <http://os-em.com/ontologies/semtool/Car> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
@@ -51,16 +50,14 @@
 <http://os-em.com/ontologies/semtool/Purchased> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
 <http://os-em.com/ontologies/semtool/Purchased> <http://www.w3.org/2000/01/rdf-schema#label> "Purchased" .
 <http://os-em.com/ontologies/semtool/Purchased> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://os-em.com/ontologies/semtool/Relation> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool/Car> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Yugo" .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri> <http://os-em.com/ontologies/semtool/First_Name> "Yuri" .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri> <http://os-em.com/ontologies/semtool/Last_Name> "Gargarin" .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri> <http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri_Purchased_Yugo> <http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yugo> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool/Human_Being> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri" .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri_Purchased_Yugo> <http://os-em.com/ontologies/semtool/Date> "2014-11-09T05:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri_Purchased_Yugo> <http://os-em.com/ontologies/semtool/Price> "3000 USD" .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri_Purchased_Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool/Purchased> .
-<http://os-em.com/semtool/database/Lca9f3fb2-26c1-4551-a753-1ca40095dadb/Yuri_Purchased_Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Purchased" .
-_:t23 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
-_:t23 <http://www.w3.org/2002/07/owl#maxCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool/Car> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Yugo" .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri> <http://os-em.com/ontologies/semtool/First_Name> "Yuri" .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri> <http://os-em.com/ontologies/semtool/Last_Name> "Gargarin" .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri> <http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri_Purchased_Yugo> <http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yugo> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool/Human_Being> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri> <http://www.w3.org/2000/01/rdf-schema#label> "Yuri" .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri_Purchased_Yugo> <http://os-em.com/ontologies/semtool/Date> "2014-11-09T05:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri_Purchased_Yugo> <http://os-em.com/ontologies/semtool/Price> "3000 USD" .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri_Purchased_Yugo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://os-em.com/ontologies/semtool/Purchased> .
+<http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri_Purchased_Yugo> <http://www.w3.org/2000/01/rdf-schema#label> "Purchased" .

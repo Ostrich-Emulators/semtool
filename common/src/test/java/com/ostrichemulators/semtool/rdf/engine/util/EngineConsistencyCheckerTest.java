@@ -36,7 +36,7 @@ import org.openrdf.rio.ntriples.NTriplesWriter;
 public class EngineConsistencyCheckerTest {
 
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
-	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/Xced94a65-e9d9-4232-b140-ecda31fbcbca/" );
+	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33" );
 	private static final URI CAR = new URIImpl( "http://os-em.com/ontologies/semtool/Car" );
 	private static final URI YUGO = datab.build( "Yugo" );
 	private static final URI YIGO = datab.build( "Yigo" );
@@ -70,24 +70,24 @@ public class EngineConsistencyCheckerTest {
 					new LiteralImpl( extra.getLocalName() ) ) );
 		}
 
-		rc.add( new StatementImpl( REL2, RDF.TYPE, REL ) );
+		//rc.add( new StatementImpl( REL2, RDF.TYPE, REL ) );
 		rc.add( new StatementImpl( REL2, RDFS.LABEL, new LiteralImpl( "Yuri Purchased a Yigo" ) ) );
-		rc.add( new StatementImpl( REL2, RDFS.SUBCLASSOF, PURCHASE ) );
+		rc.add( new StatementImpl( REL2, RDF.TYPE, PURCHASE ) );
 		rc.add( new StatementImpl( REL2, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
 				new LiteralImpl( "8000 USD" ) ) );
 
 		rc.remove(  REL1, null, null );
-		rc.add( new StatementImpl( REL1, RDFS.SUBPROPERTYOF, REL ) );
+		//rc.add( new StatementImpl( REL1, RDFS.SUBPROPERTYOF, REL ) );
 		rc.add( new StatementImpl( REL1, RDFS.LABEL, new LiteralImpl( "Yuri Purchased Yugo" ) ) );
-		rc.add( new StatementImpl( REL1, RDFS.SUBCLASSOF, PURCHASE ) );
+		rc.add( new StatementImpl( REL1, RDF.TYPE, PURCHASE ) );
 		rc.add( new StatementImpl( REL1, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
 				new LiteralImpl( "3000 USD" ) ) );
 
 		rc.commit();
 
-		try( FileWriter gw = new FileWriter( "/tmp/x.nt" ) ){
-			rc.export( new NTriplesWriter( gw ) );
-		}
+//		try( FileWriter gw = new FileWriter( "/tmp/x.nt" ) ){
+//			rc.export( new NTriplesWriter( gw ) );
+//		}
 	}
 
 	@AfterClass

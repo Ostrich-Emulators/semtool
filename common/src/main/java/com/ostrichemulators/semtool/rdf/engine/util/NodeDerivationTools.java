@@ -100,7 +100,7 @@ public class NodeDerivationTools {
 				+ "  ?in  a ?stype . "
 				+ "  ?out a ?otype . "
 				+ "  ?in ?relationship ?out  ."
-				+ "  ?relationship rdfs:subClassOf ?superrel . "
+				+ "  ?relationship a ?superrel . "
 				+ "  ?superrel rdfs:subClassOf+ semonto:Relation ."
 				+ "  FILTER( ?superrel != semonto:Relation )"
 				+ "  FILTER( ?superrel != ?relationship )"
@@ -145,9 +145,11 @@ public class NodeDerivationTools {
 			boolean instanceIsSubject ) {
 		String query = "SELECT DISTINCT ?subtype ?objtype "
 				+ "WHERE { "
-				+ "  ?subject ?predicate ?object . FILTER( isUri( ?object ) ) ."
+				+ "  ?subject ?predicate ?object ."
 				+ "  ?subject a ?subtype ."
+				+ "  ?subtype rdfs:subClassOf semonto:Concept . FILTER( ?subtype != semonto:Concept ) ."
 				+ "  ?object a ?objtype ."
+				+ "  ?objtype rdfs:subClassOf semonto:Concept . FILTER( ?objtype != semonto:Concept ) ."
 				+ "}";
 
 		OneVarListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList( query );
@@ -160,7 +162,7 @@ public class NodeDerivationTools {
 			lqa.bind( "object", instance );
 		}
 
-		log.debug( "query is: " + query );
+		log.debug( "query is: " + lqa.bindAndGetSparql() );
 		log.debug( "instance is: " + instance );
 
 		return engine.queryNoEx( lqa );

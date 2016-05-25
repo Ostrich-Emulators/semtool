@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -76,7 +77,7 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 			if ( nap.isEmpty() ) {
 				connector = metas.getDataBuilder().build( relname );
 				connector = ensureUnique( connector );
-				myrc.add( connector, RDFS.SUBCLASSOF, relclass );
+				myrc.add( connector, RDF.TYPE, relclass );
 			}
 			else {
 				// make a new edge so we can add properties
@@ -99,7 +100,7 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 			ValueFactory vf = myrc.getValueFactory();
 
 			// our new edge is the same as our old type
-			myrc.add( connector, RDFS.SUBCLASSOF, relclass );
+			myrc.add( connector, RDF.TYPE, relclass );
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( relname ) );
 		}
 

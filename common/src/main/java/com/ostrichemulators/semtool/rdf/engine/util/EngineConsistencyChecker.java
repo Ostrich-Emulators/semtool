@@ -120,7 +120,7 @@ public class EngineConsistencyChecker {
 	private void makeRelationDocuments( URI superclass ) {
 		// get all suclasses of superclass
 		String query = "SELECT DISTINCT ?rel ?label WHERE {"
-				+ " ?rel rdfs:subClassOf* ?superclass ; rdfs:label ?label . "
+				+ " ?rel a ?superclass ; rdfs:label ?label . "
 				+ " FILTER( ?rel != ?superclass )"
 				+ "} ORDER BY ?rel";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {

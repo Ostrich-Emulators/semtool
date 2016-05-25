@@ -284,7 +284,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub ?rel ?obj ."
 				+ "  ?objtype rdfs:subClassOf* semonto:Concept ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?rel rdfs:subClassOf+ ?superrel ."
+				+ "  ?rel a ?superrel ."
 				+ "  ?superrel rdfs:subClassOf semonto:Relation ."
 				+ "  FILTER ( ?objtype != semonto:Concept ) ."
 				+ "  FILTER ( ?subtype != semonto:Concept ) ."
@@ -399,7 +399,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?rel ?obj ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?rel rdfs:subClassOf ?superrel ."
+				+ "  ?rel a ?superrel ."
 				+ "}";
 
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
@@ -422,7 +422,7 @@ public class DBToLoadingSheetExporter {
 		vqa.bind( "subtype", subjectType );
 		vqa.bind( "superrel", predicateType );
 		vqa.bind( "objtype", objectType );
-		logger.debug( vqa.bindAndGetSparql() );
+		// logger.debug( vqa.bindAndGetSparql() );
 		vqa.useInferred( false );
 
 		try {
@@ -436,7 +436,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?specificrel ?obj ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?specificrel rdfs:subClassOf ?rel ."
+				+ "  ?specificrel a ?rel ."
 				+ "  ?specificrel ?prop ?propval ."
 				+ "  FILTER( isLiteral( ?propval ) ) ."
 				+ "}";

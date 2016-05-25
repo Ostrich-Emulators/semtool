@@ -45,7 +45,7 @@ data:Yugo a schema:Car ;
 
 data:Yuri data:Yuri_Purchased_Yugo data:Yugo .
 
-data:Yuri_Purchased_Yugo rdfs:subClassOf schema:Purchased ;
+data:Yuri_Purchased_Yugo a schema:Purchased ;
 	rdfs:label "Purchased" ;
 	schema:Price "3000 USD" ;
 	schema:Date "2031-10-22T06:58:59.015-04:00"^^xsd:dateTime .
@@ -53,4 +53,4 @@ data:Yuri_Purchased_Yugo rdfs:subClassOf schema:Purchased ;
 data:Pinto a schema:Car ;
 	rdfs:label "Pinto" .
 
-data:Purchased rdfs:subClassOf schema:Purchased .
+data:Purchased a schema:Purchased .
