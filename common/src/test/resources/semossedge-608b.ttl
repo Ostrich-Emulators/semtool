@@ -11,41 +11,31 @@
 @prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
 @prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-data:Yuri_Purchased_Yugo schema:Date "2031-10-22T06:58:59.015-04:00"^^xsd:dateTime .
+data:John schema:likes data:Navel .
 
-schema:Human_Being a owl:Class ;
-	rdfs:label "Human Being" ;
+schema:Person a owl:Class ;
+	rdfs:label "Person" ;
 	rdfs:subClassOf schema:Concept .
 
-schema:Car a owl:Class ;
-	rdfs:label "Car" ;
+schema:Apple a owl:Class ;
+	rdfs:label "Apple" ;
 	rdfs:subClassOf schema:Concept .
 
-schema:Purchased rdfs:label "Purchased" ;
+schema:likes rdfs:label "likes" ;
 	a owl:ObjectProperty ;
 	rdfs:subClassOf schema:Relation .
 
-schema:Price rdfs:label "Price" ;
-	a owl:DatatypeProperty .
+schema:Orange a owl:Class ;
+	rdfs:label "Orange" ;
+	rdfs:subClassOf schema:Concept .
 
-schema:Date rdfs:label "Date" ;
-	a owl:DatatypeProperty .
+data:John a schema:Person ;
+	rdfs:label "John" .
 
-schema:First_Name rdfs:label "First Name" ;
-	a owl:DatatypeProperty .
+data:Golden_Delicious a schema:Apple ;
+	rdfs:label "Golden Delicious" .
 
-schema:Last_Name rdfs:label "Last Name" ;
-	a owl:DatatypeProperty .
+data:John schema:likes data:Golden_Delicious .
 
-data:Yuri a schema:Human_Being ;
-	rdfs:label "Yuri" .
-
-data:Yugo a schema:Car ;
-	rdfs:label "Yugo" .
-
-data:Yuri schema:Purchased data:Yugo ;
-	data:Yuri_Purchased_Yugo data:Yugo .
-
-data:Yuri_Purchased_Yugo a schema:Purchased ;
-	rdfs:label "Purchased" ;
-	schema:Price "3000 USD" .
+data:Navel a schema:Orange ;
+	rdfs:label "Navel" .

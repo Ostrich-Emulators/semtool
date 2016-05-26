@@ -36,7 +36,7 @@ public class DBToLoadingSheetExporterTest {
 		Properties props = new Properties();
 		props.setProperty( InMemorySesameEngine.INFER, Boolean.TRUE.toString() );
 		engine = InMemorySesameEngine.open( props );
-		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/" ),
+		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/" ),
 				UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool/" ) );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );
@@ -62,7 +62,7 @@ public class DBToLoadingSheetExporterTest {
 		ImportData result = instance.runExport( true, true );
 		assertEquals( Arrays.asList( "Car", "Human Being", "Human Being-Purchased-Car" ),
 				result.getSheetNames() );
-		assertEquals( 1, result.getSheet( "Car" ).rows() );
+		assertEquals( 2, result.getSheet( "Car" ).rows() );
 	}
 
 	@Test

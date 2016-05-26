@@ -282,14 +282,14 @@ public class DBToLoadingSheetExporter {
 		String q = "SELECT DISTINCT ?sub ?subtype ?superrel ?obj ?objtype WHERE {"
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?rel ?obj ."
-				+ "  ?objtype rdfs:subClassOf* semonto:Concept ."
+				+ "  ?objtype rdfs:subClassOf* ?concept ."
 				+ "  ?obj a ?objtype ."
 				+ "  ?rel a ?superrel ."
-				+ "  ?superrel rdfs:subClassOf semonto:Relation ."
-				+ "  FILTER ( ?objtype != semonto:Concept ) ."
-				+ "  FILTER ( ?subtype != semonto:Concept ) ."
+				+ "  ?superrel rdfs:subClassOf ?semrel ."
+				+ "  FILTER ( ?objtype != ?concept ) ."
+				+ "  FILTER ( ?subtype != ?concept ) ."
 				+ "  FILTER ( ?superrel != ?rel ) ."
-				+ "  FILTER ( ?superrel != semonto:Relation ) ."
+				+ "  FILTER ( ?superrel != ?semrel ) ."
 				+ "}";
 		ListQueryAdapter<URI[]> triples = new ListQueryAdapter<URI[]>( q ) {
 
@@ -303,12 +303,14 @@ public class DBToLoadingSheetExporter {
 			}
 		};
 		triples.useInferred( true );
+		triples.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
+		triples.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
 
 		for ( URI subjectType : subjectTypes ) {
 			triples.bind( "subtype", subjectType );
 
 			try {
-				// logger.debug( triples.bindAndGetSparql() );
+				logger.debug( triples.bindAndGetSparql() );
 				List<URI[]> relsToExport = getEngine().query( triples );
 				exportTheseRelationships( relsToExport, data );
 			}
@@ -399,7 +401,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?rel ?obj ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?rel a ?superrel ."
+				+ "  ?rel rdfs:subClassOf+ ?superrel ."
 				+ "}";
 
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
@@ -422,7 +424,7 @@ public class DBToLoadingSheetExporter {
 		vqa.bind( "subtype", subjectType );
 		vqa.bind( "superrel", predicateType );
 		vqa.bind( "objtype", objectType );
-		// logger.debug( vqa.bindAndGetSparql() );
+		logger.debug( vqa.bindAndGetSparql() );
 		vqa.useInferred( false );
 
 		try {
@@ -436,8 +438,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?sub a ?subtype ."
 				+ "  ?sub ?specificrel ?obj ."
 				+ "  ?obj a ?objtype ."
-				+ "  ?specificrel a ?rel ."
-				+ "  ?specificrel ?prop ?propval ."
+				+ "  ?specificrel a ?rel ; ?prop ?propval ."
 				+ "  FILTER( isLiteral( ?propval ) ) ."
 				+ "}";
 		VoidQueryAdapter edges = new VoidQueryAdapter( edgequery ) {

@@ -12,6 +12,7 @@ import com.ostrichemulators.semtool.util.UriBuilder;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Arrays;
+import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -35,8 +36,9 @@ import org.openrdf.rio.ntriples.NTriplesWriter;
  */
 public class EngineConsistencyCheckerTest {
 
+	private static final Logger log = Logger.getLogger( EngineConsistencyCheckerTest.class );
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
-	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33" );
+	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5" );
 	private static final URI CAR = new URIImpl( "http://os-em.com/ontologies/semtool/Car" );
 	private static final URI YUGO = datab.build( "Yugo" );
 	private static final URI YIGO = datab.build( "Yigo" );
@@ -76,8 +78,7 @@ public class EngineConsistencyCheckerTest {
 		rc.add( new StatementImpl( REL2, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
 				new LiteralImpl( "8000 USD" ) ) );
 
-		rc.remove(  REL1, null, null );
-		//rc.add( new StatementImpl( REL1, RDFS.SUBPROPERTYOF, REL ) );
+		rc.remove( REL1, null, null );
 		rc.add( new StatementImpl( REL1, RDFS.LABEL, new LiteralImpl( "Yuri Purchased Yugo" ) ) );
 		rc.add( new StatementImpl( REL1, RDF.TYPE, PURCHASE ) );
 		rc.add( new StatementImpl( REL1, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
@@ -85,9 +86,11 @@ public class EngineConsistencyCheckerTest {
 
 		rc.commit();
 
-//		try( FileWriter gw = new FileWriter( "/tmp/x.nt" ) ){
-//			rc.export( new NTriplesWriter( gw ) );
-//		}
+		if ( log.isTraceEnabled() ) {
+			try ( FileWriter gw = new FileWriter( "/tmp/x.nt" ) ) {
+				rc.export( new NTriplesWriter( gw ) );
+			}
+		}
 	}
 
 	@AfterClass
@@ -109,7 +112,7 @@ public class EngineConsistencyCheckerTest {
 	public void testAdd() {
 		ecc.add( Arrays.asList( CAR ), EngineConsistencyChecker.Type.CONCEPT );
 		ecc.add( Arrays.asList( PURCHASE ), EngineConsistencyChecker.Type.RELATIONSHIP );
-		assertEquals( 4, ecc.getItemsForType( CAR ) );
+		assertEquals( 5, ecc.getItemsForType( CAR ) );
 		assertEquals( 2, ecc.getItemsForType( PURCHASE ) );
 	}
 

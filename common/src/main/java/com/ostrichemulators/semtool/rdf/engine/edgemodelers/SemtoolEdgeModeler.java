@@ -28,6 +28,9 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 
 	private static final Logger log = Logger.getLogger( SemtoolEdgeModeler.class );
 
+	// relations that don't have properties should re-use the same edge
+	// map is relname->URI
+	// private final Map<String, URI> propertylessRelations = new HashMap<>();
 	public SemtoolEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}
@@ -73,11 +76,12 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationClass( connector, relname );
 		}
 
+		// always add the superclass for easy querying
+		myrc.add( subject, relclass, object );
+
 		if ( !hasCachedRelation( connectorkey ) ) {
 			if ( nap.isEmpty() ) {
-				connector = metas.getDataBuilder().build( relname );
-				connector = ensureUnique( connector );
-				myrc.add( connector, RDF.TYPE, relclass );
+				connector = relclass;
 			}
 			else {
 				// make a new edge so we can add properties
@@ -101,7 +105,12 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 
 			// our new edge is the same as our old type
 			myrc.add( connector, RDF.TYPE, relclass );
-			myrc.add( connector, RDFS.LABEL, vf.createLiteral( relname ) );
+			String specificName = relname;
+			if ( isUri( relname, namespaces ) ) {
+				URI uri = getUriFromRawString( relname, namespaces );
+				specificName = uri.getLocalName();
+			}
+			myrc.add( connector, RDFS.LABEL, vf.createLiteral( specificName ) );
 		}
 
 		addProperties( connector, nap, namespaces, sheet, metas, myrc );

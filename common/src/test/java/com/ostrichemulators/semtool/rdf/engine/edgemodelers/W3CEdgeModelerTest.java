@@ -73,8 +73,6 @@ public class W3CEdgeModelerTest {
 	private static final File REL1 = new File( "src/test/resources/w3cedge-rel1.ttl" );
 	private static final File REL2 = new File( "src/test/resources/w3cedge-rel2.ttl" );
 	private static final File REL3 = new File( "src/test/resources/w3cedge-rel3.ttl" );
-	private static final File META = new File( "src/test/resources/w3cedge-mm.ttl" );
-	private static final File NODE = new File( "src/test/resources/w3cedge-node.ttl" );
 	private static final File T608 = new File( "src/test/resources/w3cedge-608.ttl" );
 
 	private QaChecker qaer;
@@ -252,29 +250,6 @@ public class W3CEdgeModelerTest {
 				engine.getRawConnection() );
 
 		compare( engine, REL3 );
-	}
-
-	@Test
-	public void testCreateMetamodel() throws Exception {
-		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
-		compare( engine, META );
-	}
-
-	@Test
-	public void testAddNode() throws Exception {
-		Map<String, Value> props = new HashMap<>();
-		props.put( "First Name", vf.createLiteral( "Yuri" ) );
-		props.put( "Last Name", vf.createLiteral( "Gagarin" ) );
-		LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
-
-		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
-
-		instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
-				engine.getRawConnection() );
-
-		compare( engine, NODE );
 	}
 
 	@Test

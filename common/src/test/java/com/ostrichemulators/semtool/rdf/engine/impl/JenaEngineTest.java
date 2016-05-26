@@ -60,7 +60,7 @@ public class JenaEngineTest {
 		Set<String> expected = new HashSet<>( Arrays.asList( "Reification", "RDR Reification",
 				"First Name", "Purchased", "Reification Model", "Yugo", "Date", "Price",
 				"Database", "Yuri", "OS-EM Semantic Toolkit Reification", "Last Name",
-				"W3C Reification", "Human Being", "Data View", "Car" ) );
+				"W3C Reification", "Human Being", "Data View", "Car", "Alan", "Cadillac" ) );
 		assertEquals( expected, names );
 	}
 
@@ -82,7 +82,8 @@ public class JenaEngineTest {
 		Set<String> expected = new HashSet<>( Arrays.asList( "Reification", "RDR Reification",
 				"First Name", "Purchased", "Reification Model", "Yugo", "Date", "Price",
 				"Database", "Yuri", "OS-EM Semantic Toolkit Reification", "Last Name",
-				"W3C Reification", "Human Being", "Data View", "Car", "extra" ) );
+				"W3C Reification", "Human Being", "Data View", "Car", "Alan", "Cadillac",
+				"extra" ) );
 		instance.closeDB();
 		assertEquals( expected, names );
 	}

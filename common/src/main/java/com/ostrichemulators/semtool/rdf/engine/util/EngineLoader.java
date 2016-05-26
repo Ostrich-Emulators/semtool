@@ -434,8 +434,6 @@ public class EngineLoader {
 				}
 			}
 			myrc.commit();
-			// myrc.close();
-			// myrc = myrc.getRepository().getConnection();
 		}
 		catch ( RepositoryException re ) {
 			log.error( re, re );

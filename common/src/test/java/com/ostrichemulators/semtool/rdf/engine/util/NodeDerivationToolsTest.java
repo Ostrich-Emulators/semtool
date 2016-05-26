@@ -19,7 +19,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.rio.RDFFormat;
 
 /**
@@ -32,9 +31,9 @@ public class NodeDerivationToolsTest {
 	private static final URI HUMAN = new URIImpl( "http://os-em.com/ontologies/semtool/Human_Being" );
 	private static final URI CAR = new URIImpl( "http://os-em.com/ontologies/semtool/Car" );
 	private static final URI YUGO
-			= new URIImpl( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yugo" );
+			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yugo" );
 	private static final URI YURI
-			= new URIImpl( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/Yuri" );
+			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yuri" );
 	private static InMemorySesameEngine engine;
 
 	public NodeDerivationToolsTest() {
@@ -43,7 +42,7 @@ public class NodeDerivationToolsTest {
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		engine = InMemorySesameEngine.open();
-		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/" ),
+		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/" ),
 				UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool" ) );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );

@@ -86,9 +86,7 @@ public class EngineConsistencyChecker {
 
 	private void makeConceptDocuments( URI concept ) {
 
-		String query = "SELECT ?s ?type ?slabel WHERE {"
-				+ " ?s a ?concept ;rdfs:label ?slabel ; a ?type . "
-				+ " FILTER ( ?type != rdfs:Resource ) } ORDER BY ?s";
+		String query = "SELECT DISTINCT ?s ?slabel WHERE { ?s a ?concept ; rdfs:label ?slabel } ORDER BY ?s";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
 			URI lastS = null;
 			Document currentDoc = null;
@@ -114,6 +112,7 @@ public class EngineConsistencyChecker {
 		};
 
 		vqa.bind( "concept", concept );
+		// log.debug( vqa.bindAndGetSparql() );
 		engine.queryNoEx( vqa );
 	}
 
@@ -149,6 +148,7 @@ public class EngineConsistencyChecker {
 		};
 
 		vqa.bind( "superclass", superclass );
+		// log.debug( vqa.bindAndGetSparql() );
 		engine.queryNoEx( vqa );
 	}
 

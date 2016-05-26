@@ -45,7 +45,7 @@ public class GraphDataModelTest {
 				}
 			};
 	private static final File DATAFILE = new File( "src/test/resources/test12.nt" );
-	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/l2129784d-e281-45af-a69f-1650aff8bc33/" );
+	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/" );
 	private static final UriBuilder owlb = UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool" );
 	private static final URI PRICE = owlb.build( "Price" );
 	private static final URI YUGO = datab.build( "Yugo" );

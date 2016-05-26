@@ -370,8 +370,8 @@ public class GraphDataModel {
 			String specificEdgeProps
 					= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 					+ "  ?rel ?prop ?literal ; a ?superrel ."
-					+ "  ?superrel rdfs:subClassOf* semonto:Relation ."
-					+ "    FILTER ( ?superrel != semonto:Relation ) ."
+					+ "  ?superrel rdfs:subClassOf* ?semrel ."
+					+ "    FILTER ( ?superrel != ?semrel ) ."
 					+ "    FILTER ( ?superrel != ?rel ) ."
 					+ "  ?s ?rel ?o ."
 					+ "  FILTER ( isLiteral( ?literal ) )"
@@ -405,6 +405,8 @@ public class GraphDataModel {
 
 			if ( null != preds ) {
 				specifics.useInferred( false );
+				specifics.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
+				log.debug( specifics.bindAndGetSparql() );
 				engine.query( specifics );
 			}
 		}

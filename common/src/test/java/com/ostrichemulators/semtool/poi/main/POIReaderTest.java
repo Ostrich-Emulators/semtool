@@ -5,10 +5,6 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.poi.main.ImportValidationException;
-import com.ostrichemulators.semtool.poi.main.ImportMetadata;
-import com.ostrichemulators.semtool.poi.main.POIReader;
-import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException.ErrorType;
 import java.io.File;
 import java.io.IOException;
@@ -38,8 +34,7 @@ public class POIReaderTest {
 	private static final File FAIL7 = new File( "src/test/resources/loaderfail7.xlsx" );
 	private static final File FAIL8 = new File( "src/test/resources/loaderfail8.xlsx" );
 	private static final File FAIL9 = new File( "src/test/resources/loaderfail9.xlsx" );
-	private static final File TEST11 = new File( "src/test/resources/test11.xlsx" );
-	private static final File TEST12 = new File( "src/test/resources/test12.xlsx" );
+	private static final File BASICS = new File( "src/test/resources/basic-loading-sheet.xlsx" );
 	private static final File TEST13 = new File( "src/test/resources/test13.xlsx" );
 	private static final File TEST16 = new File( "src/test/resources/test16.xlsx" );
 
@@ -193,22 +188,12 @@ public class POIReaderTest {
 	}
 
 	@Test
-	public void testLoadingSheet11() throws Exception {
+	public void testLoadingBasics() throws Exception {
 		POIReader rdr = new POIReader();
-		data = rdr.readOneFile( TEST11 );
-		assertEquals( 1, data.getSheet( "Humans" ).rows() );
+		data = rdr.readOneFile( BASICS );
+		assertEquals( 2, data.getSheet( "Humans" ).rows() );
 		assertEquals( "Yuri", data.getSheet( "Humans" ).iterator().next().getSubject() );
-		assertEquals( 1, data.getSheet( "Purchases" ).rows() );
-		assertEquals( "Yugo", data.getSheet( "Purchases" ).iterator().next().getObject() );
-	}
-
-	@Test
-	public void testLoadingSheet12() throws Exception {
-		POIReader rdr = new POIReader();
-		data = rdr.readOneFile( TEST12 );
-		assertEquals( 1, data.getSheet( "Humans" ).rows() );
-		assertEquals( "Yuri", data.getSheet( "Humans" ).iterator().next().getSubject() );
-		assertEquals( 1, data.getSheet( "Purchases" ).rows() );
+		assertEquals( 2, data.getSheet( "Purchases" ).rows() );
 		assertEquals( "Yugo", data.getSheet( "Purchases" ).iterator().next().getObject() );
 	}
 

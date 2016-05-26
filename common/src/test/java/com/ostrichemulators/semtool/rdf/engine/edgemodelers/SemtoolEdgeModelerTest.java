@@ -43,6 +43,7 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.OWL;
@@ -73,10 +74,11 @@ public class SemtoolEdgeModelerTest {
 	private static final File REL1 = new File( "src/test/resources/semossedge-rel1.ttl" );
 	private static final File REL2 = new File( "src/test/resources/semossedge-rel2.ttl" );
 	private static final File REL3 = new File( "src/test/resources/semossedge-rel3.ttl" );
-	private static final File META = new File( "src/test/resources/semossedge-mm.ttl" );
-	private static final File NODE = new File( "src/test/resources/semossedge-node.ttl" );
+	private static final File REL4 = new File( "src/test/resources/semossedge-rel4.ttl" );
 	private static final File T608 = new File( "src/test/resources/semossedge-608.ttl" );
-
+	private static final File T608B = new File( "src/test/resources/semossedge-608b.ttl" );
+	private static final File HAS = new File( "src/test/resources/semossedge-has.ttl" );
+	
 	private QaChecker qaer;
 	private InMemorySesameEngine engine;
 	private EngineLoader loader;
@@ -207,7 +209,7 @@ public class SemtoolEdgeModelerTest {
 	}
 
 	@Test
-	public void testAddRel1() throws Exception {
+	public void testAddRelWithProps() throws Exception {
 		Map<String, Value> props = new HashMap<>();
 		props.put( "Price", vf.createLiteral( "3000 USD" ) );
 		props.put( "Date", vf.createLiteral( now ) );
@@ -223,7 +225,7 @@ public class SemtoolEdgeModelerTest {
 	}
 
 	@Test
-	public void testAddRel2() throws Exception {
+	public void testAddRelNoProps() throws Exception {
 		LoadingNodeAndPropertyValues rel = rels.add( "Alan", "Cadillac" );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
@@ -236,7 +238,7 @@ public class SemtoolEdgeModelerTest {
 	}
 
 	@Test
-	public void testAddRel3() throws Exception {
+	public void testAddRelWithPropsAndRelNoProps() throws Exception {
 		Map<String, Value> props = new HashMap<>();
 		props.put( "Price", vf.createLiteral( "3000 USD" ) );
 		props.put( "Date", vf.createLiteral( now ) );
@@ -255,27 +257,86 @@ public class SemtoolEdgeModelerTest {
 	}
 
 	@Test
-	public void testCreateMetamodel() throws Exception {
+	public void testTwoNonPropsOneProp() throws Exception {
+		Map<String, Value> props = new HashMap<>();
+		props.put( "Price", vf.createLiteral( "3000 USD" ) );
+		props.put( "Date", vf.createLiteral( now ) );
+		LoadingNodeAndPropertyValues rel1 = rels.add( "Yuri", "Yugo", props );
+		LoadingNodeAndPropertyValues rel2 = rels.add( "Yuri", "Pinto" );
+		LoadingNodeAndPropertyValues rel3 = rels.add( "Yuri", "Pacer" );
+
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
-		compare( engine, META );
+
+		instance.addRel( rel1, new HashMap<>(), rels, data.getMetadata(),
+				engine.getRawConnection() );
+		instance.addRel( rel2, new HashMap<>(), rels, data.getMetadata(),
+				engine.getRawConnection() );
+		instance.addRel( rel3, new HashMap<>(), rels, data.getMetadata(),
+				engine.getRawConnection() );
+
+		compare( engine, REL4 );
 	}
 
 	@Test
-	public void testAddNode() throws Exception {
-		Map<String, Value> props = new HashMap<>();
-		props.put( "First Name", vf.createLiteral( "Yuri" ) );
-		props.put( "Last Name", vf.createLiteral( "Gagarin" ) );
-		LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
+	public void testDifferentTypesSameEdge() throws Exception {
+		LoadingSheetData apples = LoadingSheetData.relsheet( "Person", "Apple", "likes" );
+		LoadingNodeAndPropertyValues apple = apples.add( "John", "Golden Delicious" );
+
+		LoadingSheetData oranges = LoadingSheetData.relsheet( "Person", "Orange", "likes" );
+		LoadingNodeAndPropertyValues orange = oranges.add( "John", "Navel" );
+
+		ImportData id = EngineUtil2.createImportData( engine );
+		id.add( apples );
+		id.add( oranges );
+
+		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
+		instance.createMetamodel( id, new HashMap<>(), engine.getRawConnection() );
+
+		instance.addRel( apple, new HashMap<>(), apples, id.getMetadata(),
+				engine.getRawConnection() );
+		instance.addRel( orange, new HashMap<>(), oranges, id.getMetadata(),
+				engine.getRawConnection() );
+
+		compare( engine, T608B, false );
+	}
+
+
+	@Test
+	public void testEdgeWithLinkToConcept() throws Exception {
+		// relation BR1->LUA should have a "has" property to App1.
+		data.release();
+		data = EngineUtil2.createImportData( engine );
+		rels.clear();
+		LoadingSheetData brs = LoadingSheetData.nodesheet( "Rule" );
+		LoadingSheetData blus = LoadingSheetData.nodesheet( "Logic Unit" );
+		LoadingSheetData apps = LoadingSheetData.nodesheet( "App" );
+		rels = LoadingSheetData.relsheet( "Rule", "Logic Unit", "Implements" );
+		rels.addProperty( "App" );
+
+		LoadingNodeAndPropertyValues br = brs.add( "BR 1" );
+		LoadingNodeAndPropertyValues lu = blus.add( "LU A" );
+		LoadingNodeAndPropertyValues ap = apps.add( "App A1" );
+		LoadingNodeAndPropertyValues rel = rels.add( "BR 1", "LU A" );
+		rel.put( "App", new LiteralImpl( "App A1" ) );
+
+		data.add( brs );
+		data.add( blus );
+		data.add( apps );
+		data.add( rels );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
 		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
 
-		instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
-				engine.getRawConnection() );
+		instance.addNode( br, null, brs, data.getMetadata(), engine.getRawConnection() );
+		instance.addNode( lu, null, blus, data.getMetadata(), engine.getRawConnection() );
+		instance.addNode( ap, null, apps, data.getMetadata(), engine.getRawConnection() );
+		data.findPropertyLinks();
+		instance.addRel( rel, null, rels, data.getMetadata(), engine.getRawConnection() );
 
-		compare( engine, NODE );
+		compare( engine, HAS );
 	}
+
 
 	@Test
 	public void testTicket608() throws Exception {
@@ -297,6 +358,8 @@ public class SemtoolEdgeModelerTest {
 		instance.addRel( orange, new HashMap<>(), oranges, id.getMetadata(),
 				engine.getRawConnection() );
 
+		// the orange entity is going to get a UUID, so we can't really
+		// check exact matches on the dataset. just check statement totals
 		compare( engine, T608, true );
 	}
 }

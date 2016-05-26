@@ -90,28 +90,31 @@ public class NodeDerivationTools {
 	 *
 	 * @param subjectNodeType The type (in URI form) of the subject node
 	 * @param objectNodeType The type (in URI form) of the object node
+	 * @param engine
 	 * @return A proper query adapter capable of querying a knowledgebase for the
 	 * desired predicates
 	 */
-	public static ListQueryAdapter<URI> getPredicatesBetween( URI subjectNodeType,
-			URI objectNodeType ) {
+	public static ListQueryAdapter<URI> getPredicatesBetweenQA( URI subjectNodeType,
+			URI objectNodeType, IEngine engine ) {
 		String q
 				= "SELECT DISTINCT ?superrel WHERE {"
 				+ "  ?in  a ?stype . "
 				+ "  ?out a ?otype . "
 				+ "  ?in ?relationship ?out  ."
 				+ "  ?relationship a ?superrel . "
-				+ "  ?superrel rdfs:subClassOf+ semonto:Relation ."
-				+ "  FILTER( ?superrel != semonto:Relation )"
+				+ "  ?superrel rdfs:subClassOf ?semrel ."
+				+ "  FILTER( ?superrel != ?semrel )"
 				+ "  FILTER( ?superrel != ?relationship )"
 				+ "}";
 		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q );
 		varq.useInferred( false );
+		varq.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
 		varq.bind( "stype", subjectNodeType );
 		if ( !objectNodeType.equals( Constants.ANYNODE ) ) {
 			varq.bind( "otype", objectNodeType );
 		}
 
+		// log.debug( varq.bindAndGetSparql() );
 		return varq;
 	}
 
@@ -127,7 +130,8 @@ public class NodeDerivationTools {
 	 */
 	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
 			IEngine engine ) {
-		List<URI> values = engine.queryNoEx( getPredicatesBetween( subjectNodeType, objectNodeType ) );
+		List<URI> values = engine.queryNoEx( getPredicatesBetweenQA( subjectNodeType,
+				objectNodeType, engine ) );
 		return values;
 	}
 
@@ -147,12 +151,13 @@ public class NodeDerivationTools {
 				+ "WHERE { "
 				+ "  ?subject ?predicate ?object ."
 				+ "  ?subject a ?subtype ."
-				+ "  ?subtype rdfs:subClassOf semonto:Concept . FILTER( ?subtype != semonto:Concept ) ."
+				+ "  ?subtype rdfs:subClassOf ?concept . FILTER( ?subtype != ?concept ) ."
 				+ "  ?object a ?objtype ."
-				+ "  ?objtype rdfs:subClassOf semonto:Concept . FILTER( ?objtype != semonto:Concept ) ."
+				+ "  ?objtype rdfs:subClassOf ?concept . FILTER( ?objtype != ?concept ) ."
 				+ "}";
 
 		OneVarListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList( query );
+		lqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 		if ( instanceIsSubject ) {
 			lqa.setVariableName( "objtype" );
 			lqa.bind( "subject", instance );
@@ -162,8 +167,7 @@ public class NodeDerivationTools {
 			lqa.bind( "object", instance );
 		}
 
-		log.debug( "query is: " + lqa.bindAndGetSparql() );
-		log.debug( "instance is: " + instance );
+		// log.debug( "query is: " + lqa.bindAndGetSparql() );
 
 		return engine.queryNoEx( lqa );
 	}

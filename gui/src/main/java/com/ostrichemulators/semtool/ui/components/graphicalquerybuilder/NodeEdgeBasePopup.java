@@ -44,6 +44,7 @@ import org.openrdf.repository.RepositoryException;
 /**
  *
  * @author ryan
+ * @param <T>
  */
 public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPopupMenu {
 
@@ -172,7 +173,8 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 				URI endtype = graph.getDest( v ).getType();
 
 				ListQueryAdapter<URI> links
-						= NodeDerivationTools.getPredicatesBetween( starttype, endtype );
+						= NodeDerivationTools.getPredicatesBetweenQA( starttype, endtype,
+								pnl.getEngine() );
 
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Edge", "New Type", links );

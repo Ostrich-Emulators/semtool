@@ -41,8 +41,6 @@ public class InMemorySesameEngineTest {
 
 	private static final Logger log = Logger.getLogger( InMemorySesameEngineTest.class );
 	private static final File DATA = new File( "src/test/resources/test12.nt" );
-	public static final File LEGACY_QUESTIONS
-			= new File( "src/test/resources/questions.prop" );
 	private InMemorySesameEngine eng;
 
 	public InMemorySesameEngineTest() {
@@ -80,17 +78,17 @@ public class InMemorySesameEngineTest {
 
 	@Test
 	public void testUpdate() throws Exception {
-		assertEquals( 65, eng.getRawConnection().size() );
+		assertEquals( 73, eng.getRawConnection().size() );
 		eng.update( new UpdateExecutorAdapter( "DELETE DATA { rdfs:domain rdfs:label \"label\" } " ) );
-		assertEquals( 64, eng.getRawConnection().size() );
+		assertEquals( 72, eng.getRawConnection().size() );
 	}
 
 	@Test
 	public void testUpdateDate() throws Exception {
 		Date date = new Date();
-		assertEquals( 65, eng.getRawConnection().size() );
+		assertEquals( 73, eng.getRawConnection().size() );
 		eng.update( new UpdateExecutorAdapter( "DELETE DATA { rdfs:domain rdfs:label \"label\" } " ) );
-		assertEquals( 64, eng.getRawConnection().size() );
+		assertEquals( 72, eng.getRawConnection().size() );
 
 		List<Statement> stmts = Iterations.asList( eng.getRawConnection().
 				getStatements( eng.getBaseUri(), MetadataConstants.DCT_MODIFIED,

@@ -268,7 +268,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					log.debug("linking " + propname + " as a " + SEMONTO.has
 							+ " relationship to " + getCachedInstanceClass( propname ) );
 
-					cacheRelationClass(SEMONTO.has,
+					cacheRelationClass( SEMONTO.has,
 							sheet.getSubjectType() + sheet.getObjectType() + propname );
 					continue;
 				}
