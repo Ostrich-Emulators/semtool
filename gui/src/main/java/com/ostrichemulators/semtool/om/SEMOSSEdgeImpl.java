@@ -30,15 +30,28 @@ import org.openrdf.model.Value;
  */
 public class SEMOSSEdgeImpl extends AbstractGraphElement implements SEMOSSEdge {
 
+	private URI specifictype;
+
 	public SEMOSSEdgeImpl( URI _uri ) {
 		super( _uri, null, _uri.getLocalName() );
+	}
+
+	@Override
+	public void setSpecificType( URI st ) {
+		specifictype = st;
+	}
+
+	@Override
+	public URI getSpecificType() {
+		return specifictype;
 	}
 
 	@Override
 	public SEMOSSEdgeImpl duplicate() {
 		SEMOSSEdgeImpl newone = new SEMOSSEdgeImpl( getURI() );
 		newone.setLabel( getLabel() );
-		
+		newone.setSpecificType( specifictype );
+
 		for ( Map.Entry<URI, Value> en : getValues().entrySet() ) {
 			newone.setValue( en.getKey(), en.getValue() );
 		}

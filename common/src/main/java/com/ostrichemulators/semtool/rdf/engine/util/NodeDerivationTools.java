@@ -167,7 +167,7 @@ public class NodeDerivationTools {
 			lqa.bind( "object", instance );
 		}
 
-		// log.debug( "query is: " + lqa.bindAndGetSparql() );
+		log.debug( "connected types (one instance) is: " + lqa.bindAndGetSparql() );
 
 		return engine.queryNoEx( lqa );
 	}
@@ -196,8 +196,7 @@ public class NodeDerivationTools {
 			lqa.setVariableName( "subtype" );
 		}
 
-		log.debug( "query is: " + query );
-		log.debug( "instances are: " + instances );
+		log.debug( "connected types (many instances) is: " + lqa.bindAndGetSparql() );
 
 		return engine.queryNoEx( lqa );
 	}

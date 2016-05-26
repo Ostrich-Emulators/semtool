@@ -40,6 +40,7 @@ import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Transforms the property label on a node vertex in the graph.
+ * @param <T>
  */
 public class LabelTransformer<T extends GraphElement> extends SelectingTransformer<T, String> {
 

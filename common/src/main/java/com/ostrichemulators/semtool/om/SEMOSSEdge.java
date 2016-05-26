@@ -5,9 +5,15 @@
  */
 package com.ostrichemulators.semtool.om;
 
+import org.openrdf.model.URI;
+
 /**
  *
  * @author ryan
  */
 public interface SEMOSSEdge extends GraphElement {
+
+	public void setSpecificType( URI st );
+
+	public URI getSpecificType();
 }

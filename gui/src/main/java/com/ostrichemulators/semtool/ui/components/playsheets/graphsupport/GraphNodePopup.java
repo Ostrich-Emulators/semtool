@@ -119,7 +119,7 @@ public class GraphNodePopup extends JPopupMenu {
 
 		Action unhider = new UnHideVertexPopupMenuListener( gps );
 		item = add( unhider );
-		item.setEnabled( !gps.getView().getHiddens().isEmpty() );
+		item.setEnabled( gps.getView().isHidingSomething() );
 	}
 
 	private void addCosmeticsOptions() {

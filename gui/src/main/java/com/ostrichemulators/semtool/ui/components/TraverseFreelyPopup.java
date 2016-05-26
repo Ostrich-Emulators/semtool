@@ -151,31 +151,25 @@ public class TraverseFreelyPopup extends JMenu {
 		return neighborTypes.size();
 	}
 
-	private static ModelQueryAdapter getExpander( Collection<URI> instances, URI totype,
+	private ModelQueryAdapter getExpander( Collection<URI> instances, URI totype,
 			boolean instanceIsSubject ) {
+		// we only want the "root" edges (those in the 
+		// schema namespace, also, those without properties)
 		StringBuilder query = new StringBuilder( "CONSTRUCT { ?subject ?predicate ?object } " )
 				.append( "WHERE { " )
 				.append( "  ?subject ?predicate ?object ." )
 				.append( "  ?subject a ?subtype ." )
-				.append( "  ?object a ?objtype ." );
-		if ( instanceIsSubject ) {
-			query.append( " VALUES ?subject {" )
-					.append( Utility.implode( instances, "<", ">", " " ) )
-					.append( "} ." );
-		}
-		else {
-			query.append( " VALUES ?object {" )
-					.append( Utility.implode( instances, "<", ">", " " ) )
-					.append( "}" );
-		}
-		query.append( "  MINUS { ?subject a ?object } " )
-				.append( "}" );
-
-		logger.debug( "expander query is: " + query );
-		logger.debug( ( instanceIsSubject ? "objtype" : "subtype" ) + ": " + totype );
+				.append( "  ?object a ?objtype . VALUES ?" )
+				.append( instanceIsSubject ? "subject" : "object" );
+		query.append( "{ " )
+				.append( Utility.implode( instances, "<", ">", " " ) )
+				.append( "} ." );
+		query.append( "}" );
 
 		ModelQueryAdapter mqa = new ModelQueryAdapter( query.toString() );
 		mqa.bind( instanceIsSubject ? "objtype" : "subtype", totype );
+		logger.debug( "expander query is: " + mqa.bindAndGetSparql() );
+
 		return mqa;
 	}
 }

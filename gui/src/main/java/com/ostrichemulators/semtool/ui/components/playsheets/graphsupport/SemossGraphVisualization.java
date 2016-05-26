@@ -97,7 +97,8 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			= new VertexPredicateFilter<>( (HidingPredicate<SEMOSSVertex>) predicate );
 	private final EdgePredicateFilter<SEMOSSVertex, SEMOSSEdge> visibleEdgesFilter
 			= new EdgePredicateFilter<>( (HidingPredicate<SEMOSSEdge>) predicate );
-	private final Set<URI> hiddens = new HashSet<>();
+	private final Set<URI> hiddenSingles = new HashSet<>();
+	private final Set<URI> hiddenTypes = new HashSet<>();
 	private final GraphColorShapeRepositoryListener listener = new GraphColorShapeRepositoryListener() {
 
 		@Override
@@ -144,12 +145,24 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		repo.addListener( listener );
 	}
 
-	public void hide( URI uri, boolean hideme ) {
+	public void hideOne( URI uri, boolean hideme ) {
 		if ( hideme ) {
-			hiddens.add( uri );
+			hiddenSingles.add( uri );
 		}
 		else {
-			hiddens.remove( uri );
+			hiddenSingles.remove( uri );
+		}
+
+		firePropertyChange( VISIBILITY_CHANGED, false, true );
+		refresh();
+	}
+
+	public void hideType( URI uri, boolean hideme ) {
+		if ( hideme ) {
+			hiddenTypes.add( uri );
+		}
+		else {
+			hiddenTypes.remove( uri );
 		}
 
 		firePropertyChange( VISIBILITY_CHANGED, false, true );
@@ -159,14 +172,14 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	public void hide( Collection<? extends GraphElement> elements, boolean hideme ) {
 		List<URI> uris = new ArrayList<>();
 		for ( GraphElement e : elements ) {
-			uris.add( e.getURI() );
+			uris.add( e.getGraphId() );
 		}
 
 		if ( hideme ) {
-			hiddens.addAll( uris );
+			hiddenSingles.addAll( uris );
 		}
 		else {
-			hiddens.removeAll( uris );
+			hiddenSingles.removeAll( uris );
 		}
 
 		firePropertyChange( VISIBILITY_CHANGED, false, true );
@@ -174,21 +187,23 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	}
 
 	public void clearHiddens() {
-		hiddens.clear();
+		hiddenSingles.clear();
+		hiddenTypes.clear();
 		firePropertyChange( VISIBILITY_CHANGED, false, true );
 		refresh();
 	}
 
-	public Set<URI> getHiddens() {
-		return new HashSet<>( hiddens );
+	public boolean isHidingSomething() {
+		return !( hiddenSingles.isEmpty() && hiddenTypes.isEmpty() );
 	}
 
 	public boolean isHidden( GraphElement element ) {
-		return ( isHidden( element.getURI() ) || isHidden( element.getType() ) );
+		return ( hiddenSingles.contains( element.getGraphId() )
+				|| hiddenTypes.contains( element.getType() ) );
 	}
 
 	public boolean isHidden( URI uri ) {
-		return hiddens.contains( uri );
+		return ( hiddenSingles.contains( uri ) || hiddenTypes.contains( uri ) );
 	}
 
 	public void refresh() {
@@ -476,7 +491,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		public boolean apply( V v ) {
 
 			if ( gdm.presentAtLevel( v, overlayLevel ) ) {
-				return !( hiddens.contains( v.getURI() ) || hiddens.contains( v.getType() ) );
+				return !isHidden( v );
 			}
 
 			return false;

@@ -10,7 +10,7 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.models.GraphLabelsTableModel;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.models.NodeEdgePropertyTableModel;
-import com.ostrichemulators.semtool.ui.components.models.VertexFilterTableModel;
+import com.ostrichemulators.semtool.ui.components.models.NodeEdgeFilterTableModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
 import com.ostrichemulators.semtool.util.Constants;
@@ -40,8 +40,8 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 	private final JTable edgelabels;
 	private final JTable selecteds;
 
-	private final VertexFilterTableModel vertexmodel = new VertexFilterTableModel( "Node Type" );
-	private final VertexFilterTableModel edgemodel = new VertexFilterTableModel( "Edge Type" );
+	private final NodeEdgeFilterTableModel vertexmodel = new NodeEdgeFilterTableModel( "Node Type" );
+	private final NodeEdgeFilterTableModel edgemodel = new NodeEdgeFilterTableModel( "Edge Type" );
 	private final GraphLabelsTableModel<SEMOSSVertex> vlabelmodel
 			= new GraphLabelsTableModel<>( "Node Type", "Property", "Label", "Tooltip" );
 	private final GraphLabelsTableModel<SEMOSSEdge> elabelmodel

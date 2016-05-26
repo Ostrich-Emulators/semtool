@@ -328,7 +328,6 @@ public class GraphDataModel {
 	}
 
 	protected SEMOSSEdge createEdge( SEMOSSVertex src, SEMOSSVertex dst, URI uri ) {
-		// edge URIs and types are the same
 		SEMOSSEdge edge = new SEMOSSEdgeImpl( uri );
 		edge.setGraphId( Utility.getUniqueUri() );
 		edge.setType( uri );
@@ -367,18 +366,15 @@ public class GraphDataModel {
 				engine.query( cqa );
 			}
 
+			// do the same thing, but for edges
 			String specificEdgeProps
 					= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
 					+ "  ?rel ?prop ?literal ; a ?superrel ."
-					+ "  ?superrel rdfs:subClassOf* ?semrel ."
-					+ "    FILTER ( ?superrel != ?semrel ) ."
-					+ "    FILTER ( ?superrel != ?rel ) ."
 					+ "  ?s ?rel ?o ."
 					+ "  FILTER ( isLiteral( ?literal ) )"
 					+ "}"
-					+ "VALUES ?rel { " + Utility.implode( preds, "<", ">", " " ) + " }";
+					+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
 
-			// do the same thing, but for edges
 			VoidQueryAdapter specifics = new VoidQueryAdapter( specificEdgeProps ) {
 
 				@Override
@@ -393,11 +389,12 @@ public class GraphDataModel {
 
 					if ( concepts.contains( s ) && concepts.contains( o ) ) {
 						SEMOSSEdge edge = createOrRetrieveEdge(
-								rel,
+								superrel,
 								createOrRetrieveVertex( s, overlayLevel ),
 								createOrRetrieveVertex( o, overlayLevel ),
 								overlayLevel );
 						edge.setValue( prop, propval );
+						edge.setURI( rel );
 						edge.setType( superrel );
 					}
 				}
