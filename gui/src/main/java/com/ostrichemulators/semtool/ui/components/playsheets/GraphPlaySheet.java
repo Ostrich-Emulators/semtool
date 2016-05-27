@@ -555,7 +555,6 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	protected void add( Model m, List<URI> nodes, IEngine engine ) {
 		getLabelCache().setEngine( engine );
-		getLabelCache().clear();
 		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 		if ( null == nodes ) {
 			nodes = new ArrayList<>();

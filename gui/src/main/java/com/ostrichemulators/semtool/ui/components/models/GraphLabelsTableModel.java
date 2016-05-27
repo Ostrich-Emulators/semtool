@@ -27,6 +27,7 @@ import org.openrdf.model.URI;
 /**
  *
  * @author ryan
+ * @param <V>
  */
 public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTableModel {
 
@@ -129,12 +130,30 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 			case 1:
 				return cdr.prop;
 			case 2:
-				return texter.getDisplayableProperties( cdr.type ).contains( cdr.prop );
-			case 3:
-				return tooltipper.getDisplayableProperties( cdr.type ).contains( cdr.prop );
+			case 3: {
+				LabelTransformer lt = ( 2 == column ? texter : tooltipper );
+				List<URI> props = lt.getDisplayableProperties( cdr.type );
+				if ( cdr.isHeader() ) {
+					return ( this.getInstanceRows( cdr.type ).size() == props.size() );
+				}
+				else {
+					return props.contains( cdr.prop );
+				}
+			}
 			default:
 				return null;
 		}
+	}
+
+	private List<ControlDataRow> getInstanceRows( URI type ) {
+		List<ControlDataRow> rows = new ArrayList<>();
+		for ( ControlDataRow cdr : data ) {
+			if ( cdr.type.equals( type ) && !cdr.isHeader() ) {
+				rows.add( cdr );
+			}
+		}
+
+		return rows;
 	}
 
 	/**
@@ -177,17 +196,15 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 
 		if ( cdr.isHeader() ) {
 			Set<URI> tochange = new HashSet<>();
-			final URI TYPE = cdr.type;
-			for ( int rr = row + 1; rr < data.size() && cdr.type.equals( TYPE ); rr++ ) {
-				cdr = data.get( rr );
-				tochange.add( cdr.prop );
+			for ( ControlDataRow inst : getInstanceRows( cdr.type ) ) {
+				tochange.add( inst.prop );
 			}
 
 			if ( showit ) {
-				transformer.setDisplay( TYPE, tochange );
+				transformer.setDisplay( cdr.type, tochange );
 			}
 			else {
-				transformer.setDisplay( TYPE, new ArrayList<>() );
+				transformer.setDisplay( cdr.type, new ArrayList<>() );
 			}
 		}
 		else {
@@ -208,7 +225,7 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 			this.type = type;
 			this.prop = prop;
 		}
-		
+
 		public boolean isHeader() {
 			return ( null == type || Constants.ANYNODE.equals( prop ) );
 		}

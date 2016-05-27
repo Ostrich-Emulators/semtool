@@ -128,7 +128,7 @@ public class UriBuilder {
 	}
 
 	public URI build( String extra ) {
-		return copy().add( extra ).build();
+		return copy().add( sanitizer.sanitize( extra ) ).build();
 	}
 
 	public URI uniqueUri() {

@@ -311,7 +311,11 @@ public class GraphDataModel {
 	}
 
 	protected final String getEdgeKey( URI edge, SEMOSSVertex src, SEMOSSVertex dst ) {
-		return edge.stringValue() + src.getURI() + dst.getURI();
+		return getEdgeKey( edge, src.getURI(), dst.getURI() );
+	}
+
+	protected final String getEdgeKey( URI edge, URI src, URI dst ) {
+		return edge.stringValue() + src + dst;
 	}
 
 	protected SEMOSSEdge createOrRetrieveEdge( URI edgeKey, SEMOSSVertex src,
@@ -400,10 +404,10 @@ public class GraphDataModel {
 						// we don't know if our edge is stored as the generic or specific
 						// version (if it's been stored at all). Regardless, set the URI and
 						// type of the edge as best as we can
-						String key = getEdgeKey( rel, src, dst );
-						URI edgeuri = ( edgeStore.containsKey( key ) ? rel : superrel );
+						String key = getEdgeKey( superrel, src, dst );
+						URI fetchkey = ( edgeStore.containsKey( key ) ? superrel : rel );
 
-						SEMOSSEdge edge = createOrRetrieveEdge( edgeuri, src, dst, overlayLevel );
+						SEMOSSEdge edge = createOrRetrieveEdge( fetchkey, src, dst, overlayLevel );
 						edge.setValue( prop, propval );
 						edge.setURI( rel );
 						edge.setType( superrel );
