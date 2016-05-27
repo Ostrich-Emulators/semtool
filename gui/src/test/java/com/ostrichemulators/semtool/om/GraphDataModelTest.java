@@ -108,11 +108,10 @@ public class GraphDataModelTest {
 		assertEquals( "3000 USD", edge.getValue( PRICE ).stringValue() );
 	}
 
-	// FIXME: this test should work, but the GDM query isn't quite right
-	//@Test
+	@Test
 	public void testAddGraphLevel_model_specific() throws RepositoryException {
 		Model m = new LinkedHashModel();
-		m.add( new StatementImpl( YURI, PURCHASE, YUGO ) );
+		m.add( new StatementImpl( YURI, YPY, YUGO ) );
 
 		GraphDataModel gdm = new GraphDataModel();
 		gdm.addGraphLevel( m, eng, 1 );

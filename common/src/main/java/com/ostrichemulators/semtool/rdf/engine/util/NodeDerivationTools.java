@@ -4,15 +4,21 @@ import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
+import com.ostrichemulators.semtool.rdf.query.util.impl.MapQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneValueQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.Utility;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
+import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.query.BindingSet;
 
 /**
  * This class is responsible for providing a number of utility methods for the
@@ -45,7 +51,7 @@ public class NodeDerivationTools {
 			OneValueQueryAdapter<String> qq = OneValueQueryAdapter.
 					getString( "SELECT ?val WHERE { ?base ?pred ?val }" );
 			qq.bind( "base", engine.getBaseUri() );
-			qq.bind("pred", SEMTOOL.ConceptsSparql );
+			qq.bind( "pred", SEMTOOL.ConceptsSparql );
 
 			return engine.queryNoEx( qq );
 		}
@@ -184,7 +190,7 @@ public class NodeDerivationTools {
 				.append( "} VALUES ?" );
 		query.append( instanceIsSubject ? "subject " : "object" );
 		query.append( "{" );
-		query.append( Utility.implode( instances, "<", ">", " " ) );
+		query.append( Utility.implode( instances ) );
 		query.append( "}" );
 
 		OneVarListQueryAdapter<URI> lqa
@@ -199,5 +205,49 @@ public class NodeDerivationTools {
 		log.debug( "connected types (many instances) is: " + lqa.bindAndGetSparql() );
 
 		return engine.queryNoEx( lqa );
+	}
+
+	/**
+	 * Gets the set of top-level relations for the given set. The input may
+	 * contain all "specific" relationships, all "top level", or a mixture of both
+	 *
+	 * @param rels
+	 * @param engine
+	 * @return the smallest set of relations that cover the input rels. All the
+	 * returned URIs will be <code>rdfs:subClassOf semonto:Relation</code>
+	 */
+	public static Set<URI> getTopLevelRelations( Collection<URI> rels,
+			IEngine engine ) {
+
+		Set<URI> todo = new HashSet<>( rels ); // get unique set of input
+		// this query gets the top level URI for any specific URI
+		String query = "SELECT ?rel ?superrel WHERE {\n"
+				+ "  ?rel a ?superrel .\n"
+				+ "  ?superrel rdfs:subClassOf ?semrel .\n"
+				+ "  FILTER( ?superrel != ?semrel ) .\n"
+				+ "  VALUES ?rel {" + Utility.implode( todo ) + "} ."
+				+ "}";
+		MapQueryAdapter<URI, URI> mqa = new MapQueryAdapter<URI, URI>( query ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				add( URI.class.cast( set.getValue( "rel" ) ),
+						URI.class.cast( set.getValue( "superrel" ) ) );
+			}
+
+		};
+		mqa.bind( "semrel", engine.getSchemaBuilder().getRelationUri().toUri() );
+
+		Map<URI, URI> inputOutput = engine.queryNoEx( mqa );
+
+		// anything *not* in the inputOutput map wasn't a specific relation,
+		// so it must be a top-level relation. Remove the specifics from the todo
+		// set, and then add whatever's left to the output
+		todo.removeAll( inputOutput.keySet() );
+		for ( URI alreadytop : todo ) {
+			inputOutput.put( alreadytop, alreadytop );
+		}
+
+		return new HashSet<>( inputOutput.values() );
 	}
 }

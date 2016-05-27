@@ -162,7 +162,7 @@ public class TraverseFreelyPopup extends JMenu {
 				.append( "  ?object a ?objtype . VALUES ?" )
 				.append( instanceIsSubject ? "subject" : "object" );
 		query.append( "{ " )
-				.append( Utility.implode( instances, "<", ">", " " ) )
+				.append( Utility.implode( instances ) )
 				.append( "} ." );
 		query.append( "}" );
 

@@ -12,6 +12,8 @@ import java.util.Map;
 /**
  *
  * @author John Marquiss
+ * @param <T>
+ * @param <V>
  */
 public abstract class MapQueryAdapter<T,V> extends QueryExecutorAdapter<Map<T, V>> {
   public MapQueryAdapter() {

@@ -61,7 +61,6 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.OWL;
@@ -374,6 +373,19 @@ public class Utility {
 	}
 
 	/**
+	 * Gets the implosion suitable for building a SPARQL VALUES token . This is a
+	 * convenience function to {@link #implode(java.util.Collection,
+	 * java.lang.String, java.lang.String, java.lang.String)
+	 * implode( collection, "<", ">", " " ) }
+	 *
+	 * @param collection
+	 * @return
+	 */
+	public static String implode( Collection<URI> collection ) {
+		return implode( collection, "<", ">", " " );
+	}
+
+	/**
 	 * Gets the appropriate exporter for the given filename. "Appropriate" means
 	 * the file's suffix determines exporter. If no appropriate handler can be
 	 * found, an NTriples one is returned. Handled suffixes (case insensitive):
@@ -397,35 +409,6 @@ public class Utility {
 			default:
 				return new NTriplesWriter( out );
 		}
-	}
-
-	/**
-	 * Splits up a string URI into tokens based on "/" character, and uses logic
-	 * to return the instance name. If the input string is not a URI, then it is
-	 * returned unmodified.
-	 *
-	 * @param uri -- (String) to be split into tokens.
-	 *
-	 * @return getInstanceName -- (String) Described above.
-	 * @deprecated use {@link #getInstanceLabel(org.openrdf.model.Resource,
-	 * gov.va.semoss.rdf.engine.api.IEngine) } instead
-	 */
-	@Deprecated
-	public static String getInstanceName( String uri ) {
-		try {
-			//If the string is really a URI, then return its right end:
-			new ValueFactoryImpl().createURI( uri );
-			//This code block will only continue if the passed-in value
-			//can be converted into an absolute URI:
-
-			String uris[] = uri.split( "/" );
-			return uris[uris.length - 1];
-		}
-		catch ( IllegalArgumentException e ) {
-		}
-
-		//Otherwise, simply return the input string:
-		return uri;
 	}
 
 	/**

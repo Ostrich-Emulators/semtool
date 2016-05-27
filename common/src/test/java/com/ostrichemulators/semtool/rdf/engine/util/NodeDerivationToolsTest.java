@@ -19,6 +19,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.rio.RDFFormat;
 
 /**
@@ -34,6 +36,9 @@ public class NodeDerivationToolsTest {
 			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yugo" );
 	private static final URI YURI
 			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yuri" );
+	private static final URI YPY
+			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yuri_Purchased_Yugo" );
+	private static final URI PURCHASE = new URIImpl( "http://os-em.com/ontologies/semtool/Purchased" );
 	private static InMemorySesameEngine engine;
 
 	public NodeDerivationToolsTest() {
@@ -108,6 +113,36 @@ public class NodeDerivationToolsTest {
 		result.clear();
 		result.addAll( NodeDerivationTools.getConnectedConceptTypes( Arrays.asList( YUGO ),
 				engine, false ) );
+		assertEquals( expResult, result );
+	}
+
+	@Test
+	public void testTopLevelRelsGeneric() throws Exception {
+		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
+		Set<URI> result = NodeDerivationTools.getTopLevelRelations( expResult, engine );
+		assertEquals( expResult, result );
+	}
+
+	@Test
+	public void testTopLevelRelsSpecific() throws Exception {
+		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
+		Set<URI> result = NodeDerivationTools.getTopLevelRelations(
+				Arrays.asList( YPY ), engine );
+		assertEquals( expResult, result );
+	}
+
+	@Test
+	public void testTopLevelRelsMixed() throws Exception {
+		// this is just extra stuff that shouldn't be returned in the tests
+		final URI REL = engine.getSchemaBuilder().getRelationUri().build();
+		final URI EXTRA = engine.getSchemaBuilder().build( "AnotherRelType" );
+		final URI EXTRAIMPL = engine.getDataBuilder().build( "AnotherRel" );
+		engine.getRawConnection().add( EXTRA, RDFS.SUBCLASSOF, REL );
+		engine.getRawConnection().add( EXTRAIMPL, RDF.TYPE, REL );
+
+		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
+		Set<URI> result = NodeDerivationTools.getTopLevelRelations(
+				Arrays.asList( YPY, PURCHASE ), engine );
 		assertEquals( expResult, result );
 	}
 }

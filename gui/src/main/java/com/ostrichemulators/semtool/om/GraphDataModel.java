@@ -25,6 +25,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Utility;
@@ -338,12 +339,13 @@ public class GraphDataModel {
 	private void fetchProperties( Collection<URI> concepts, Collection<URI> preds,
 			IEngine engine, int overlayLevel ) throws RepositoryException, QueryEvaluationException {
 
+		String conceptimplosion = Utility.implode( concepts );
 		String conceptprops
 				= "SELECT ?s ?p ?o ?type WHERE {"
 				+ " ?s ?p ?o . "
 				+ " ?s a ?type ."
 				+ " FILTER ( isLiteral( ?o ) ) }"
-				+ "VALUES ?s { " + Utility.implode( concepts, "<", ">", " " ) + " }";
+				+ "VALUES ?s { " + conceptimplosion + " }";
 
 		try {
 			VoidQueryAdapter cqa = new VoidQueryAdapter( conceptprops ) {
@@ -366,41 +368,48 @@ public class GraphDataModel {
 				engine.query( cqa );
 			}
 
-			// do the same thing, but for edges
-			String specificEdgeProps
-					= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
-					+ "  ?rel ?prop ?literal ; a ?superrel ."
-					+ "  ?s ?rel ?o ."
-					+ "  FILTER ( isLiteral( ?literal ) )"
-					+ "}"
-					+ "VALUES ?superrel { " + Utility.implode( preds, "<", ">", " " ) + " }";
+			if ( null != preds ) {
+				preds = NodeDerivationTools.getTopLevelRelations( preds, engine );
 
-			VoidQueryAdapter specifics = new VoidQueryAdapter( specificEdgeProps ) {
+				// do the same thing, but for edges
+				String specificEdgeProps
+						= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
+						+ "  ?rel ?prop ?literal ; a ?superrel ."
+						+ "  ?s ?rel ?o ."
+						+ "  VALUES ?s { " + conceptimplosion + " } ."
+						+ "  VALUES ?o { " + conceptimplosion + " } ."
+						+ "  FILTER ( isLiteral( ?literal ) )"
+						+ "}"
+						+ "VALUES ?superrel { " + Utility.implode( preds ) + " }";
 
-				@Override
-				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					// ?s ?rel ?o ?prop ?literal
-					URI s = URI.class.cast( set.getValue( "s" ) );
-					URI rel = URI.class.cast( set.getValue( "rel" ) );
-					URI prop = URI.class.cast( set.getValue( "prop" ) );
-					URI o = URI.class.cast( set.getValue( "o" ) );
-					Value propval = set.getValue( "literal" );
-					URI superrel = URI.class.cast( set.getValue( "superrel" ) );
+				VoidQueryAdapter specifics = new VoidQueryAdapter( specificEdgeProps ) {
 
-					if ( concepts.contains( s ) && concepts.contains( o ) ) {
-						SEMOSSEdge edge = createOrRetrieveEdge(
-								superrel,
-								createOrRetrieveVertex( s, overlayLevel ),
-								createOrRetrieveVertex( o, overlayLevel ),
-								overlayLevel );
+					@Override
+					public void handleTuple( BindingSet set, ValueFactory fac ) {
+						// ?s ?rel ?o ?prop ?literal
+						URI s = URI.class.cast( set.getValue( "s" ) );
+						URI rel = URI.class.cast( set.getValue( "rel" ) );
+						URI prop = URI.class.cast( set.getValue( "prop" ) );
+						URI o = URI.class.cast( set.getValue( "o" ) );
+						Value propval = set.getValue( "literal" );
+						URI superrel = URI.class.cast( set.getValue( "superrel" ) );
+
+						SEMOSSVertex src = createOrRetrieveVertex( s, overlayLevel );
+						SEMOSSVertex dst = createOrRetrieveVertex( o, overlayLevel );
+
+						// we don't know if our edge is stored as the generic or specific
+						// version (if it's been stored at all). Regardless, set the URI and
+						// type of the edge as best as we can
+						String key = getEdgeKey( rel, src, dst );
+						URI edgeuri = ( edgeStore.containsKey( key ) ? rel : superrel );
+
+						SEMOSSEdge edge = createOrRetrieveEdge( edgeuri, src, dst, overlayLevel );
 						edge.setValue( prop, propval );
 						edge.setURI( rel );
 						edge.setType( superrel );
 					}
-				}
-			};
+				};
 
-			if ( null != preds ) {
 				specifics.useInferred( false );
 				specifics.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
 				log.debug( specifics.bindAndGetSparql() );
