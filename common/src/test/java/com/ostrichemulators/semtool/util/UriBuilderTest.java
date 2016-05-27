@@ -5,8 +5,6 @@
  */
 package com.ostrichemulators.semtool.util;
 
-import com.ostrichemulators.semtool.util.DeterministicSanitizer;
-import com.ostrichemulators.semtool.util.UriBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -113,7 +111,7 @@ public class UriBuilderTest {
     assertEquals( exp, uri );
   }
 
-  @Test
+	@Test
   public void testSanitizer1() {
     UriBuilder bldr = UriBuilder.getBuilder( OWLSTART );
     URI uri = bldr.add( "concept/shmoncept/" ).build();

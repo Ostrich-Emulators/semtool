@@ -1,47 +1,29 @@
 package com.ostrichemulators.semtool.util;
 
-import com.ostrichemulators.semtool.util.DeterministicSanitizer;
-import static org.junit.Assert.*;
-
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-
-import org.apache.xerces.util.URI.MalformedURIException;
-import org.junit.After;
-import org.junit.Before;
+import java.util.HashMap;
+import java.util.Map;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class DeterministicSanitizerTest {
 
 	private final DeterministicSanitizer santizer = new DeterministicSanitizer();
-	
-	private String[] uris;
-	
-	private String badURI = "server.domain.com/%%%%%";
-	
-	@Before
-	public void setUp() throws Exception {
-		uris = new String[4];
-		uris[0] = "http://va.semoss.gov/ontology/terms/term1";
-		uris[1] = "http://va.semoss.gov/ontology/terms/term1 2";
-		uris[2] = "http://va.semoss.gov/ontology/terms/term1**2";
-		uris[3] = "http://va.semoss.gov/ontology/terms/term%201";
-	}
 
-	@After
-	public void tearDown() throws Exception {
-	}
-
-	@Test  
+	@Test
 	public void testSanitize() throws URISyntaxException {
-		URI uri = null;
-		for (String s : uris){
-			String sanitized = santizer.sanitize(s);
-			uri = new URI(sanitized);
+		Map<String, String> map = new HashMap<>();
+		map.put( "http://va.semoss.gov/ontology/terms/term1", "Ec5d065097a5859ca4abdbc11123c8b43" );
+		map.put( "http://va.semoss.gov/ontology/terms/term1 2", "N682a7974602128c1639319c37d2c6696" );
+		map.put( "http://va.semoss.gov/ontology/terms/term1**2", "Q554f72d2c49364d4a6ac24507aa1a100" );
+		map.put( "http://va.semoss.gov/ontology/terms/term%201", "A18bc4f5c18d450894a4c8ede4756e6b9" );
+
+		for ( String s : map.keySet() ) {
+			String sanitized = santizer.sanitize( s );
+			URI uri = new URI( sanitized );
+			//System.out.println( "map.put( \"" + s + "\", \"" + uri.toASCIIString() + "\" );" );
+			assertEquals( map.get( s ), uri.toASCIIString() );
 		}
 	}
-	
-
-
 }

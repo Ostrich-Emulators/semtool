@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.util;
 
-import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;

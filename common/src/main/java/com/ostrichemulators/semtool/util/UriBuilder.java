@@ -119,7 +119,7 @@ public class UriBuilder {
 
 		boolean removeLast = ( uristart.endsWith( "/" )
 				|| uristart.endsWith( "#" ) || uristart.endsWith( ":" ) );
-		return vf.createURI( removeLast
+				return vf.createURI( removeLast
 				? uristart.substring( 0, uristart.length() - 1 ) : uristart );
 	}
 

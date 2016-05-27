@@ -1,23 +1,22 @@
 package com.ostrichemulators.semtool.util;
 
-import com.ostrichemulators.semtool.util.LegacySanitizer;
-import static org.junit.Assert.*;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.After;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 
 public class LegacySanitizerTest {
-	
+
 	private final LegacySanitizer santizer = new LegacySanitizer();
-	
+
 	private String[] uris;
-	
-	private String badURI = "server.domain.com/%%%%%";
-	
+
+	private final String badURI = "server.domain.com/%%%%%";
+
 	@Before
 	public void setUp() throws Exception {
 		uris = new String[4];
@@ -31,20 +30,22 @@ public class LegacySanitizerTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test  
+	@Test
 	public void testSanitize() throws URISyntaxException {
-		URI uri = null;
-		for (String s : uris){
-			String sanitized = santizer.sanitize(s);
-			uri = new URI(sanitized);
+		for ( String s : uris ) {
+			String sanitized = santizer.sanitize( s );
+			URI uri = new URI( sanitized );
+			assertFalse( uri.toASCIIString().contains(  ":" ) );
+			assertFalse( uri.toASCIIString().contains(  "/" ) );
 		}
 	}
-	
-	@Test  (expected = URISyntaxException.class)
-	public void testBadSanitize() throws URISyntaxException {
-		URI uri = null;
-		String sanitized = santizer.sanitize(badURI);
-		uri = new URI(sanitized);
-	}
 
+	@Test( expected = URISyntaxException.class )
+	public void testBadSanitize() throws URISyntaxException {
+		String sanitized = santizer.sanitize( badURI );
+		URI uri = new URI( sanitized );
+
+		// we'll never get here (hopefully)
+		assertNotNull( uri );
+	}
 }
