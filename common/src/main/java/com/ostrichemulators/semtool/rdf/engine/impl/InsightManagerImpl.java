@@ -194,7 +194,7 @@ public class InsightManagerImpl implements InsightManager {
 		URI relUri = eng.getSchemaBuilder().getRelationUri().build();
 
 		String mmspql = "CONSTRUCT{ ?source ?relation ?target } WHERE {\n"
-				+ "  ?relation rdfs:subPropertyOf <" + relUri + "> .\n"
+				+ "  ?relation rdfs:subPropertyOf+ <" + relUri + "> .\n"
 				+ "  ?s ?relation ?o .\n"
 				+ "  ?s a ?source .\n"
 				+ "  ?o a ?target .\n"
