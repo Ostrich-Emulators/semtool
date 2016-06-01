@@ -10,7 +10,7 @@
 	<name>OS-EM Semantic Tool GUI</name>
 	<artifactId>gui</artifactId>
 	<properties>
-		<launcher.dir>${project.build.directory}/executable</launcher.dir>
+		<launcher.dir>${project.build.directory}/semtool-${version}</launcher.dir>
 	</properties>
 
 	<dependencies>
