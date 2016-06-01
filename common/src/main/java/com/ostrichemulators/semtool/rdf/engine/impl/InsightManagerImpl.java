@@ -193,18 +193,18 @@ public class InsightManagerImpl implements InsightManager {
 		URI conceptUri = eng.getSchemaBuilder().getConceptUri().build();
 		URI relUri = eng.getSchemaBuilder().getRelationUri().build();
 
-		String mmspql = "CONSTRUCT{ ?source ?relation ?target } WHERE {"
-				+ "  ?relation a owl:ObjectProperty ."
-				+ "  ?s ?relation ?o ."
-				+ "  ?s a ?source ."
-				+ "  ?o a ?target ."
+		String mmspql = "CONSTRUCT{ ?source ?relation ?target } WHERE {\n"
+				+ "  ?relation rdfs:subPropertyOf <" + relUri + "> .\n"
+				+ "  ?s ?relation ?o .\n"
+				+ "  ?s a ?source .\n"
+				+ "  ?o a ?target .\n"
 				+ "  FILTER( ?source != <" + conceptUri + ">"
 				+ "    && ?source != owl:Class"
 				+ "    && ?source != rdfs:Resource"
-				+ "    && ?source != <" + relUri + "> )"
+				+ "    && ?source != <" + relUri + "> )\n"
 				+ "  FILTER( ?target != <" + conceptUri + ">"
 				+ "    && ?target != owl:Class"
-				+ "    && ?target != rdfs:Resource )"
+				+ "    && ?target != rdfs:Resource )\n"
 				+ "}";
 		Insight metamodel = new Insight( "View the Database Metamodel", mmspql,
 				InsightOutputType.GRAPH_METAMODEL );

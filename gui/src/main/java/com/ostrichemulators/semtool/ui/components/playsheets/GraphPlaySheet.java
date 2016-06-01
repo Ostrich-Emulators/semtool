@@ -159,6 +159,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		setLayout( new BorderLayout() );
 		add( graphSplitPane, BorderLayout.CENTER );
 		GraphLegendPanel legendPanel = new GraphLegendPanel( getLabelCache() );
+		legendPanel.setMinimumSize( new Dimension( 40, 40 ) );
 		add( legendPanel, BorderLayout.SOUTH );
 
 		view = new SemossGraphVisualization( gdm );
@@ -224,8 +225,13 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 				Preferences prefs = Preferences.userNodeForPackage( getClass() );
 
 				if ( graphprops.isSelected() ) {
-					int pct = prefs.getInt( PROPERTY_PREF, GraphPlaySheet.this.getWidth() - 250 );
-					graphSplitPane.setDividerLocation( pct );
+					int pos = prefs.getInt( PROPERTY_PREF, -1 );
+					if ( pos < 0 ) {
+						graphSplitPane.setDividerLocation( 0.25 );
+					}
+					else {
+						graphSplitPane.setDividerLocation( pos );
+					}
 				}
 				else {
 					prefs.putInt( PROPERTY_PREF, graphSplitPane.getDividerLocation() );
