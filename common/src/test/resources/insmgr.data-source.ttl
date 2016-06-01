@@ -1,30 +1,54 @@
-# imports: http://spinrdf.org/spin
-# imports: http://spinrdf.org/sp
+@prefix sempers: <http://os-em.com/ontologies/semtool/insights#> .
+@prefix semonto: <http://os-em.com/ontologies/semtool/> .
+@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
 @prefix spin: <http://spinrdf.org/spin#> .
 @prefix sp: <http://spinrdf.org/sp#> .
-@prefix spl: <http://spinrdf.org/spl#> .
-@prefix olo: <http://purl.org/ontology/olo/core#> .
 @prefix ui: <http://uispin.org/ui#> .
-@prefix arg: <http://spinrdf.org/arg#> .
-@prefix sempers: <http://os-em.com/ontologies/semtool/insights#> .
-@prefix semtool: <http://os-em.com/ontologies/semtool#> .
-@prefix semcore: <http://os-em.com/ontologies/semtool/core#> .
-@prefix semonto: <http://os-em.com/ontologies/semtool/> .
-@prefix void: <http://rdfs.org/ns/void#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix olo: <http://purl.org/ontology/olo/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+semonto:insights semcore:author "ry.bobko <ryan@ostrich-emulators.com>" ;
+	semcore:namespace "http://semoss.org/ontologies/semtool/insights#" ;
+	semcore:namespacePrefix "sempers" ;
+	semcore:revision "2129" ;
+	semcore:revisionDate "2016-05-18T19:55:03.120-04:00"^^xsd:dateTime ;
+	semcore:specificity "1"^^xsd:integer ;
+	semcore:version "1.0" ;
+	owl:versionIRI <http://semoss.org/ontologies/semtool/insights/v1.0> ;
+	a owl:Ontology ;
+	owl:imports semonto:core ;
+	owl:versionInfo "sempers.ttl 2129 2016-05-18T19:55:03.120-04:00 ry.bobko" .
+
+sempers:InsightProperties a spin:MagicProperty ;
+	rdfs:label "Insight Properties" ;
+	rdfs:subClassOf spin:MagicProperties .
+
+sempers:Perspective a owl:Class ;
+	rdfs:label "Perspective" ;
+	rdfs:subClassOf olo:OrderedList , ui:Element .
+
+_:node1ak5u3vk3x1 a owl:Restriction ;
+	owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+	owl:onClass sempers:InsightProperties ;
+	owl:onProperty olo:item .
+
+sempers:Perspective rdfs:subClassOf _:node1ak5u3vk3x1 .
+
+sempers:insight a owl:ObjectProperty ;
+	rdfs:label "insight" ;
+	rdfs:range sempers:InsightProperties .
 
 semonto:insights a semcore:InsightDataset .
 
 sempers:A_Test_Perspective a sempers:Perspective ;
 	rdfs:label "A Test Perspective" ;
 	dcterms:description "A Perspective for unit testing" ;
-	dcterms:created "2016-05-18T20:12:14.099-04:00"^^xsd:dateTime ;
-	dcterms:modified "2016-05-18T20:12:14.099-04:00"^^xsd:dateTime ;
+	dcterms:created "2016-06-01T08:13:28.069-04:00"^^xsd:dateTime ;
+	dcterms:modified "2016-06-01T08:13:28.069-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" .
 
 sempers:A_Test_Perspective_A_Test_Insight a spin:MagicProperty ;
@@ -33,7 +57,7 @@ sempers:A_Test_Perspective_A_Test_Insight a spin:MagicProperty ;
 	sempers:outputType "GRID" ;
 	rdfs:subClassOf sempers:InsightProperties ;
 	dcterms:created "2016-05-18T20:12:14.100-04:00"^^xsd:dateTime ;
-	dcterms:modified "2016-05-18T20:12:14.100-04:00"^^xsd:dateTime ;
+	dcterms:modified "2016-06-01T08:13:28.072-04:00"^^xsd:dateTime ;
 	dcterms:creator "ryan" ;
 	spin:body sempers:A_Test_Insight_query .
 

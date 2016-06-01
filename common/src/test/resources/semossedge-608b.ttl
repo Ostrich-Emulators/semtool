@@ -23,7 +23,7 @@ schema:Apple a owl:Class ;
 
 schema:likes rdfs:label "likes" ;
 	a owl:ObjectProperty ;
-	rdfs:subClassOf schema:Relation .
+	rdfs:subPropertyOf schema:Relation .
 
 schema:Orange a owl:Class ;
 	rdfs:label "Orange" ;

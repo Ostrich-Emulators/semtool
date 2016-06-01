@@ -76,7 +76,7 @@ public class NodeDerivationToolsTest {
 
 	@Test
 	public void testGetPredicatesBetween_3args() {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( new URIImpl( "http://os-em.com/ontologies/semtool/Purchased" ) ) );
+		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
 		Set<URI> result = new HashSet<>( NodeDerivationTools.getPredicatesBetween( HUMAN, CAR, engine ) );
 		assertEquals( expResult, result );
 	}
@@ -137,7 +137,7 @@ public class NodeDerivationToolsTest {
 		final URI REL = engine.getSchemaBuilder().getRelationUri().build();
 		final URI EXTRA = engine.getSchemaBuilder().build( "AnotherRelType" );
 		final URI EXTRAIMPL = engine.getDataBuilder().build( "AnotherRel" );
-		engine.getRawConnection().add( EXTRA, RDFS.SUBCLASSOF, REL );
+		engine.getRawConnection().add( EXTRA, RDFS.SUBPROPERTYOF, REL );
 		engine.getRawConnection().add( EXTRAIMPL, RDF.TYPE, REL );
 
 		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );

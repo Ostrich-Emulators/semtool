@@ -5,6 +5,13 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
+import com.ostrichemulators.semtool.model.vocabulary.OLO;
+import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
+import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
+import com.ostrichemulators.semtool.model.vocabulary.SEMPERS;
+import com.ostrichemulators.semtool.model.vocabulary.SP;
+import com.ostrichemulators.semtool.model.vocabulary.SPIN;
+import com.ostrichemulators.semtool.model.vocabulary.UI;
 import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
@@ -12,9 +19,14 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.UriBuilder;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Collection;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,10 +34,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.openrdf.model.Statement;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sail.memory.MemoryStore;
 
 /**
@@ -34,6 +52,7 @@ import org.openrdf.sail.memory.MemoryStore;
  */
 public class InsightManagerImplTest {
 
+	private static final Logger log = Logger.getLogger( InsightManagerImplTest.class );
 	private static final File SRCFILE = new File( "src/test/resources/insmgr.data-source.ttl" );
 
 	@BeforeClass
@@ -74,7 +93,35 @@ public class InsightManagerImplTest {
 
 		Collection<Statement> stmts
 				= InsightManagerImpl.getStatements( imi, new LocalUserImpl() );
-		assertEquals( 22, stmts.size() );
+
+		if ( log.isTraceEnabled() ) {
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					SRCFILE.getName() ) ) ) ) {
+				TurtleWriter tw = new TurtleWriter( w );
+				tw.startRDF();
+
+				tw.handleNamespace( SEMPERS.PREFIX, SEMPERS.NAMESPACE );
+				tw.handleNamespace( SEMONTO.PREFIX, SEMONTO.NAMESPACE );
+				tw.handleNamespace( SEMCORE.PREFIX, SEMCORE.NAMESPACE );
+				tw.handleNamespace( SPIN.PREFIX, SPIN.NAMESPACE );
+				tw.handleNamespace( SP.PREFIX, SP.NAMESPACE );
+				tw.handleNamespace( UI.PREFIX, UI.NAMESPACE );
+				tw.handleNamespace( RDFS.PREFIX, RDFS.NAMESPACE );
+				tw.handleNamespace( RDF.PREFIX, RDF.NAMESPACE );
+				tw.handleNamespace( OWL.PREFIX, OWL.NAMESPACE );
+				tw.handleNamespace( OLO.PREFIX, OLO.NAMESPACE );
+				tw.handleNamespace( DCTERMS.PREFIX, DCTERMS.NAMESPACE );
+				tw.handleNamespace( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
+
+				for ( Statement s : stmts ) {
+					tw.handleStatement( s );
+				}
+				tw.endRDF();
+			}
+		}
+
+		assertEquals(48, stmts.size() );
 	}
 
 	@Test

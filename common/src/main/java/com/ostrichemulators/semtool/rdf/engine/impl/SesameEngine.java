@@ -11,6 +11,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.Er
 import com.ostrichemulators.semtool.rdf.engine.util.StatementSorter;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +40,8 @@ public class SesameEngine extends AbstractSesameEngine {
 	protected void createRc( Properties props ) throws RepositoryException {
 		String url = props.getProperty( REPOSITORY_KEY );
 		String ins = props.getProperty( INSIGHTS_KEY );
+		boolean local = Boolean.parseBoolean( props.getProperty( REMOTE_KEY,
+				Boolean.FALSE.toString() ) );
 
 		Pattern pat = Pattern.compile( "^(.*)/repositories/(.*)" );
 		Matcher m = pat.matcher( url );
@@ -71,6 +74,15 @@ public class SesameEngine extends AbstractSesameEngine {
 		insights = tmp;
 	}
 
+	public static Properties generateProperties( File dir ) {
+		Properties props = new Properties();
+		props.setProperty( SesameEngine.REPOSITORY_KEY, new File( dir, "repo" ).toString() );
+		props.setProperty( SesameEngine.INSIGHTS_KEY, new File( dir, "insights" ).toString() );
+		props.setProperty( SesameEngine.REMOTE_KEY, Boolean.FALSE.toString() );
+
+		return props;
+	}
+
 	@Override
 	protected RepositoryConnection getRawConnection() {
 		return data;
@@ -96,7 +108,7 @@ public class SesameEngine extends AbstractSesameEngine {
 			rc.add( stmts );
 			rc.commit();
 		}
-		catch( UnauthorizedException ue ){
+		catch ( UnauthorizedException ue ) {
 			throw new EngineManagementException( ErrorCode.ACCESS_DENIED, ue );
 		}
 		catch ( RepositoryException re ) {

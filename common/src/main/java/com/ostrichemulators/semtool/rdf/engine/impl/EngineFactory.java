@@ -129,6 +129,11 @@ public class EngineFactory {
 			else if ( "tdb".equalsIgnoreCase( name ) ) {
 				engine = new JenaEngine();
 			}
+			else if( null !=file && file.isDirectory() ){
+				// default behaviour: assume it's a plain old openrdf triplestore
+				engine = new SesameEngine();
+				props = SesameEngine.generateProperties( file );
+			}
 
 			if ( !( null == engine || null == props ) ) {
 				engine.setProperty( Constants.SMSS_LOCATION, abspath );

@@ -11,8 +11,6 @@
 @prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
 @prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-data:Yuri schema:Last_Name "Gagarin" .
-
 schema:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf schema:Concept .
@@ -23,7 +21,7 @@ schema:Car a owl:Class ;
 
 schema:Purchased rdfs:label "Purchased" ;
 	a owl:ObjectProperty ;
-	rdfs:subClassOf schema:Relation .
+	rdfs:subPropertyOf schema:Relation .
 
 schema:Price rdfs:label "Price" ;
 	a owl:DatatypeProperty .
@@ -39,4 +37,5 @@ schema:Last_Name rdfs:label "Last Name" ;
 
 data:Yuri a schema:Human_Being ;
 	rdfs:label "Yuri" ;
-	schema:First_Name "Yuri" .
+	schema:First_Name "Yuri" ;
+	schema:Last_Name "Gagarin" .

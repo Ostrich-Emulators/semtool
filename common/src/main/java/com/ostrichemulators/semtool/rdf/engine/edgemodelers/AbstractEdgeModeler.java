@@ -254,7 +254,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					if ( save && !relationAlreadyMade ) {
 						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
 						myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
-						myrc.add( ret, RDFS.SUBCLASSOF, schema.getRelationUri().build() );
+						myrc.add( ret, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
 					}
 				}
 			}
@@ -265,7 +265,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				// check to see if we're actually a link to some
 				// other node (and not really a new property
 				if ( sheet.isLink( propname ) || hasCachedInstanceClass( propname ) ) {
-					log.debug("linking " + propname + " as a " + SEMONTO.has
+					log.debug( "linking " + propname + " as a " + SEMONTO.has
 							+ " relationship to " + getCachedInstanceClass( propname ) );
 
 					cacheRelationClass( SEMONTO.has,
@@ -290,6 +290,20 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				}
 			}
 		}
+	}
+
+	protected void makeTopClass( RepositoryConnection myrc, UriBuilder schema )
+			throws RepositoryException {
+		URI klass = schema.getConceptUri().build();
+		myrc.add( klass, RDF.TYPE, RDFS.CLASS );
+		myrc.add( klass, RDFS.LABEL, myrc.getValueFactory().createLiteral( "Concept" ) );
+	}
+
+	protected void makeTopRel( RepositoryConnection myrc, UriBuilder schema )
+			throws RepositoryException {
+		URI klass = schema.getRelationUri().build();
+		myrc.add( klass, RDF.TYPE, OWL.OBJECTPROPERTY );
+		myrc.add( klass, RDFS.LABEL, myrc.getValueFactory().createLiteral( "Relation" ) );
 	}
 
 	@Override

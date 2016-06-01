@@ -52,6 +52,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.Repository;
 import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.turtle.TurtleParser;
 
 /**
@@ -532,12 +533,16 @@ public class InsightManagerImpl implements InsightManager {
 		int idx = 0;
 
 		RDFParser parser = new TurtleParser();
+		StatementCollector coll = new StatementCollector();
+		parser.setRDFHandler( coll );
 		try ( InputStream is = IEngine.class.getResourceAsStream( "/models/sempers.ttl" ) ) {
 			parser.parse( is, SEMPERS.BASE_URI );
 		}
 		catch ( Exception e ) {
 			log.warn( "could not include sempers.ttl ontology in statements", e );
 		}
+
+		statements.addAll( coll.getStatements() );
 
 		ValueFactory vf = new ValueFactoryImpl();
 		for ( Perspective p : im.getPerspectives() ) {

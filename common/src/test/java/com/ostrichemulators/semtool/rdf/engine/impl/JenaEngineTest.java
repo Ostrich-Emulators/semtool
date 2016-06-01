@@ -58,9 +58,9 @@ public class JenaEngineTest {
 				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }" );
 		Set<String> names = new HashSet<>( instance.query( lqa ) );
 		Set<String> expected = new HashSet<>( Arrays.asList( "Reification", "RDR Reification",
-				"First Name", "Purchased", "Reification Model", "Yugo", "Date", "Price",
-				"Database", "Yuri", "OS-EM Semantic Toolkit Reification", "Last Name",
-				"W3C Reification", "Human Being", "Data View", "Car", "Alan", "Cadillac" ) );
+				"Alan", "First Name", "Purchased", "Reification Model", "Date", "Yugo",
+				"Cadillac", "Price", "Car", "Database", "Yuri", "OS-EM Semantic Toolkit Reification",
+				"Has", "Last Name", "W3C Reification", "Human Being", "Data View" ) );
 		assertEquals( expected, names );
 	}
 
@@ -80,10 +80,9 @@ public class JenaEngineTest {
 				= OneVarListQueryAdapter.getStringList( "SELECT ?label { ?s rdfs:label ?label }" );
 		Set<String> names = new HashSet<>( instance.query( lqa ) );
 		Set<String> expected = new HashSet<>( Arrays.asList( "Reification", "RDR Reification",
-				"First Name", "Purchased", "Reification Model", "Yugo", "Date", "Price",
-				"Database", "Yuri", "OS-EM Semantic Toolkit Reification", "Last Name",
-				"W3C Reification", "Human Being", "Data View", "Car", "Alan", "Cadillac",
-				"extra" ) );
+				"Alan", "First Name", "Purchased", "Reification Model", "Date", "Yugo",
+				"Cadillac", "Price", "Car", "Database", "Yuri", "OS-EM Semantic Toolkit Reification",
+				"Has", "Last Name", "W3C Reification", "Human Being", "Data View", "extra" ) );
 		instance.closeDB();
 		assertEquals( expected, names );
 	}

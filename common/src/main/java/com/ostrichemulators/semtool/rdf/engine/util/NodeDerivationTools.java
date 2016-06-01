@@ -9,6 +9,7 @@ import com.ostrichemulators.semtool.rdf.query.util.impl.OneValueQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.Utility;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -91,8 +92,11 @@ public class NodeDerivationTools {
 	}
 
 	/**
-	 * Derive a query adapter capable of pulling out the predicates that connect
-	 * all subject nodes of a given type and all object nodes of a given type
+	 * Derives a query adapter capable of pulling out the predicates that connect
+	 * all subject nodes of a given type and all object nodes of a given type. The
+	 * results will contain *all* types, so they will generally be run through 	 {@link #getTopLevelRelations(java.util.Collection,
+	 * com.ostrichemulators.semtool.rdf.engine.api.IEngine) } to get only the
+	 * top-level relationships
 	 *
 	 * @param subjectNodeType The type (in URI form) of the subject node
 	 * @param objectNodeType The type (in URI form) of the object node
@@ -103,14 +107,11 @@ public class NodeDerivationTools {
 	public static ListQueryAdapter<URI> getPredicatesBetweenQA( URI subjectNodeType,
 			URI objectNodeType, IEngine engine ) {
 		String q
-				= "SELECT DISTINCT ?superrel WHERE {"
-				+ "  ?in  a ?stype . "
-				+ "  ?out a ?otype . "
-				+ "  ?in ?relationship ?out  ."
-				+ "  ?relationship a ?superrel . "
-				+ "  ?superrel rdfs:subClassOf ?semrel ."
-				+ "  FILTER( ?superrel != ?semrel )"
-				+ "  FILTER( ?superrel != ?relationship )"
+				= "SELECT DISTINCT ?relationship WHERE {\n"
+				+ "  ?in  a ?stype . \n"
+				+ "  ?out a ?otype . \n"
+				+ "  ?in ?relationship ?out .\n"
+				+ "  FILTER( ?relationship != ?semrel )\n"
 				+ "}";
 		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q );
 		varq.useInferred( false );
@@ -120,7 +121,7 @@ public class NodeDerivationTools {
 			varq.bind( "otype", objectNodeType );
 		}
 
-		// log.debug( varq.bindAndGetSparql() );
+		log.debug( varq.bindAndGetSparql() );
 		return varq;
 	}
 
@@ -138,7 +139,7 @@ public class NodeDerivationTools {
 			IEngine engine ) {
 		List<URI> values = engine.queryNoEx( getPredicatesBetweenQA( subjectNodeType,
 				objectNodeType, engine ) );
-		return values;
+		return new ArrayList<>( getTopLevelRelations( values, engine ) );
 	}
 
 	public static URI getType( URI instance, IEngine engine ) {
@@ -153,13 +154,13 @@ public class NodeDerivationTools {
 
 	public static List<URI> getConnectedConceptTypes( URI instance, IEngine engine,
 			boolean instanceIsSubject ) {
-		String query = "SELECT DISTINCT ?subtype ?objtype "
-				+ "WHERE { "
-				+ "  ?subject ?predicate ?object ."
-				+ "  ?subject a ?subtype ."
-				+ "  ?subtype rdfs:subClassOf ?concept . FILTER( ?subtype != ?concept ) ."
-				+ "  ?object a ?objtype ."
-				+ "  ?objtype rdfs:subClassOf ?concept . FILTER( ?objtype != ?concept ) ."
+		String query = "SELECT DISTINCT ?subtype ?objtype \n"
+				+ "WHERE { \n"
+				+ "  ?subject ?predicate ?object .\n"
+				+ "  ?subject a ?subtype .\n"
+				+ "  ?subtype rdfs:subClassOf ?concept . FILTER( ?subtype != ?concept ) .\n"
+				+ "  ?object a ?objtype .\n"
+				+ "  ?objtype rdfs:subClassOf ?concept . FILTER( ?objtype != ?concept ) .\n"
 				+ "}";
 
 		OneVarListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList( query );
@@ -222,9 +223,11 @@ public class NodeDerivationTools {
 		Set<URI> todo = new HashSet<>( rels ); // get unique set of input
 		// this query gets the top level URI for any specific URI
 		String query = "SELECT ?rel ?superrel WHERE {\n"
-				+ "  ?rel a ?superrel .\n"
-				+ "  ?superrel rdfs:subClassOf ?semrel .\n"
+				+ "  ?rel rdfs:subPropertyOf ?superrel .\n"
+				+ "  ?superrel rdfs:subPropertyOf ?semrel .\n"
 				+ "  FILTER( ?superrel != ?semrel ) .\n"
+				+ "  FILTER( ?rel != ?superrel ) .\n"
+				+ "  FILTER( ?rel != ?semrel ) ."
 				+ "  VALUES ?rel {" + Utility.implode( todo ) + "} ."
 				+ "}";
 		MapQueryAdapter<URI, URI> mqa = new MapQueryAdapter<URI, URI>( query ) {

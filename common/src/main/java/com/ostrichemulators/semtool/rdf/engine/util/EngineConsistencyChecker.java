@@ -118,9 +118,9 @@ public class EngineConsistencyChecker {
 
 	private void makeRelationDocuments( URI superclass ) {
 		// get all suclasses of superclass
-		String query = "SELECT DISTINCT ?rel ?label WHERE {"
-				+ " ?rel a ?superclass ; rdfs:label ?label . "
-				+ " FILTER( ?rel != ?superclass )"
+		String query = "SELECT DISTINCT ?rel ?label WHERE {\n"
+				+ " ?rel rdfs:subPropertyOf ?superclass ; rdfs:label ?label .\n"
+				+ " FILTER( ?rel != ?superclass )\n"
 				+ "} ORDER BY ?rel";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
 			URI lastRel = null;
@@ -148,7 +148,7 @@ public class EngineConsistencyChecker {
 		};
 
 		vqa.bind( "superclass", superclass );
-		// log.debug( vqa.bindAndGetSparql() );
+		log.debug( vqa.bindAndGetSparql() );
 		engine.queryNoEx( vqa );
 	}
 

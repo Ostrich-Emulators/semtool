@@ -36,7 +36,6 @@ import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.Constants;
-import info.aduna.iteration.Iterations;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -59,6 +58,8 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
+import org.openrdf.rio.helpers.StatementCollector;
+import org.openrdf.rio.turtle.TurtleParser;
 import org.openrdf.sail.memory.MemoryStore;
 
 /**
@@ -78,7 +79,7 @@ public class EngineUtil2 {
 	public static void clear( IEngine engine ) throws RepositoryException {
 		try {
 			final Map<URI, Value> metas = engine.query( new MetadataQuery() );
-			metas.remove(SEMTOOL.Database );
+			metas.remove( SEMTOOL.Database );
 
 			engine.execute( new ModificationExecutorAdapter( true ) {
 
@@ -178,7 +179,8 @@ public class EngineUtil2 {
 	 * @return the newly-created smss file, or null if something goes wrong
 	 *
 	 * @throws java.io.IOException
-	 * @throws com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
+	 * @throws
+	 * com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
 	 */
 	public static File createNew( EngineCreateBuilder ecb, ImportData conformanceErrors )
 			throws IOException, EngineManagementException {
@@ -280,17 +282,17 @@ public class EngineUtil2 {
 			// add the metadata
 			rc.begin();
 			ValueFactory vf = rc.getValueFactory();
-			rc.add(new StatementImpl( baseuri, RDF.TYPE, SEMTOOL.Database ) );
+			rc.add( new StatementImpl( baseuri, RDF.TYPE, SEMTOOL.Database ) );
 			Date today = new Date();
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
 					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
 
-			rc.add(new StatementImpl( baseuri, SEMTOOL.ReificationModel,
+			rc.add( new StatementImpl( baseuri, SEMTOOL.ReificationModel,
 					ecb.getReificationModel().uri ) );
 
-			rc.add(new StatementImpl( baseuri, SEMCORE.SOFTWARE_AGENT,
+			rc.add( new StatementImpl( baseuri, SEMCORE.SOFTWARE_AGENT,
 					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
 
 			String username = user.getProperty( User.UserProperty.USER_FULLNAME );
@@ -332,51 +334,18 @@ public class EngineUtil2 {
 
 	private static List<Statement> getStatementsFromResource( URL resource,
 			RDFFormat fmt ) {
-		List<Statement> stmts = new ArrayList<>();
 
-		Repository repo = null;
-		RepositoryConnection rc = null;
-
+		TurtleParser tp = new TurtleParser();
+		StatementCollector coll = new StatementCollector();
+		tp.setRDFHandler( coll );
 		try ( InputStream is = resource.openStream() ) {
-			repo = new SailRepository( new MemoryStore() );
-			repo.initialize();
-			rc = repo.getConnection();
-
-			rc.add( is, SEMONTO.BASE_URI, fmt );
-			rc.commit();
-			stmts.addAll( Iterations.asList( rc.getStatements( null, null, null, false ) ) );
+			tp.parse( is,SEMONTO.BASE_URI );
 		}
 		catch ( Exception e ) {
 			log.warn( "could not open/parse model resource: " + resource, e );
 		}
-		finally {
-			if ( null != rc ) {
-				try {
-					rc.close();
-				}
-				catch ( Exception e ) {
-					log.warn( "could not remove temp rc", e );
-				}
-			}
-			if ( null != repo ) {
-				try {
-					repo.shutDown();
-				}
-				catch ( Exception e ) {
-					log.warn( "could not remove temp rc", e );
-				}
-			}
-		}
 
-//		log.debug( "subjects from resource: " + resource );
-//		Set<Resource> uris = new HashSet<>();
-//		for ( Statement s : stmts ) {
-//			uris.add( s.getSubject() );
-//		}
-//		for ( Resource u : uris ) {
-//			log.debug( u );
-//		}
-		return stmts;
+		return new ArrayList<>( coll.getStatements() );
 	}
 
 	public static void createInsightStatements( File modelquestions,

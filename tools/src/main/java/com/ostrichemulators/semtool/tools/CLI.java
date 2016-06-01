@@ -350,7 +350,7 @@ public class CLI {
 			engine = new BigDataEngine( dbfile );
 
 			if ( cmd.hasOption( "insightsdb" ) ) {
-				InsightManagerImpl imi  = new InsightManagerImpl();
+				InsightManagerImpl imi = new InsightManagerImpl();
 				EngineUtil2.createInsightStatements( insights.get( 0 ), imi );
 				engine.updateInsights( imi );
 				engine.commit();
@@ -369,7 +369,7 @@ public class CLI {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( dbdir,
 					FilenameUtils.getBaseName( dbfile.getName() ) )
 					.setDefaultBaseUri( new URIImpl( baseURI ), false )
-					.setReificationModel(ReificationStyle.SEMTOOL )
+					.setReificationModel( ReificationStyle.SEMTOOL )
 					.setFiles( data )
 					.setVocabularies( vocab )
 					.setBooleans( stageInMemory, closure, createMetamodel );
@@ -604,7 +604,6 @@ public class CLI {
 		for ( File f : vocabfiles ) {
 			vocabs.add( f.toURI().toURL() );
 		}
-
 
 		LegacyUpgrader upg = new LegacyUpgrader( dbfile );
 		upg.upgradeTo( exportfile, vocabs );

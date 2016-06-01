@@ -64,3 +64,23 @@ semtool:reification
   rdfs:label "Reification" ;
   rdfs:range semtool:ReificationModel ;
 .
+
+semtool:Relation
+  rdf:type owl:ObjectProperty ;
+  rdfs:subClassOf rdfs:Property ;
+  rdfs:comment "A \"Relation\" is a graph edge. In general, an edge without additional properties will be an immediate subPropertyOf this class, while one with properties will be a grandchild of it." ;
+.
+
+semonto:Concept
+  rdf:type owl:Class ;
+  rdfs:comment "A SEMOSS Concept is a base class for any class constructed under the semtool: namespace.  The utility of the Concept class is merely for easy identification of the auto-created class of the SEMOSS importer." ;
+  rdfs:subClassOf owl:Thing ;
+  owl:sameAs <http://www.w3.org/2004/02/skos/core#Concept> ;
+.
+
+semtool:has
+  rdf:type owl:ObjectProperty ;
+  rdfs:subPropertyOf semtool:Relation ;
+  rdfs:label "Has" ;
+  rdfs:comment "\"Has\" is an atomic property for the use case where a Node type appears in an attribute header of another Node or Relation sheet." ;
+.

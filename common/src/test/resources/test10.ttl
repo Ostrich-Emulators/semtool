@@ -13,7 +13,7 @@
 
 <http://sales.data/purchases/2015> a owl:Ontology .
 
-<http://os-em.com/semtool/database/d4ee26d40-c99b-42cb-a946-5c28285745f7> semtool:ReificationModel semtool:SEMTOOL-Reification .
+<http://os-em.com/semtool/database/C7cde18fe-045b-4350-ae2e-96ded401d389> semtool:ReificationModel semtool:SEMTOOL-Reification .
 
 <http://sales.data/purchases/2015> rdfs:label "\"Purchase Dataset\"" .
 
@@ -38,15 +38,14 @@ testdata:Yuri a testowl:Human_Being ;
 testdata:Yugo a testowl:Car ;
 	rdfs:label "Yugo" .
 
-testdata:Yuri testowl:Purchased testdata:Yugo ;
-	testdata:Z1717a8a66fbe94aba40d1c198e3983c9 testdata:Yugo .
+testdata:Yuri testdata:Z1717a8a66fbe94aba40d1c198e3983c9 testdata:Yugo .
 
-testdata:Z1717a8a66fbe94aba40d1c198e3983c9 a testowl:Purchased ;
+testdata:Z1717a8a66fbe94aba40d1c198e3983c9 rdfs:subPropertyOf testowl:Purchased ;
 	rdfs:label "Purchased" ;
 	testowl:Price "3000 USD" ;
 	testowl:Date "2014-11-09T00:00:00.000-04:00"^^xsd:dateTime .
 
-<http://os-em.com/semtool/database/d4ee26d40-c99b-42cb-a946-5c28285745f7> void:subset <http://sales.data/purchases/2015> ;
+<http://os-em.com/semtool/database/C7cde18fe-045b-4350-ae2e-96ded401d389> void:subset <http://sales.data/purchases/2015> ;
 	owl:imports <http://sales.data/purchases/2015> .
 
 <http://sales.data/purchases/2015> a void:Dataset .

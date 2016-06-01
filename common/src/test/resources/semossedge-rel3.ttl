@@ -11,8 +11,6 @@
 @prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
 @prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-data:Yuri schema:Purchased data:Pinto .
-
 schema:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf schema:Concept .
@@ -23,7 +21,7 @@ schema:Car a owl:Class ;
 
 schema:Purchased rdfs:label "Purchased" ;
 	a owl:ObjectProperty ;
-	rdfs:subClassOf schema:Relation .
+	rdfs:subPropertyOf schema:Relation .
 
 schema:Price rdfs:label "Price" ;
 	a owl:DatatypeProperty .
@@ -43,13 +41,14 @@ data:Yuri a schema:Human_Being ;
 data:Yugo a schema:Car ;
 	rdfs:label "Yugo" .
 
-data:Yuri schema:Purchased data:Yugo ;
-	data:Yuri_Purchased_Yugo data:Yugo .
+data:Yuri data:Yuri_Purchased_Yugo data:Yugo .
 
-data:Yuri_Purchased_Yugo a schema:Purchased ;
+data:Yuri_Purchased_Yugo rdfs:subPropertyOf schema:Purchased ;
 	rdfs:label "Purchased" ;
 	schema:Price "3000 USD" ;
 	schema:Date "2031-10-22T06:58:59.015-04:00"^^xsd:dateTime .
 
 data:Pinto a schema:Car ;
 	rdfs:label "Pinto" .
+
+data:Yuri schema:Purchased data:Pinto .

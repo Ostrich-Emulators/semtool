@@ -23,7 +23,7 @@ semoss:Car a owl:Class ;
 
 semoss:Purchased rdfs:label "Purchased" ;
 	a owl:ObjectProperty ;
-	rdfs:subClassOf semoss:Relation .
+	rdfs:subPropertyOf semoss:Relation .
 
 semoss:Price rdfs:label "Price" ;
 	a owl:DatatypeProperty .

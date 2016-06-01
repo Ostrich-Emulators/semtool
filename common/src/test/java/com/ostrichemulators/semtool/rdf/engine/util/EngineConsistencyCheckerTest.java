@@ -9,9 +9,12 @@ import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineConsistencyChecker.Hit;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.UriBuilder;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Writer;
 import java.util.Arrays;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
 import org.junit.After;
@@ -28,7 +31,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.openrdf.rio.turtle.TurtleWriter;
 
 /**
  *
@@ -74,21 +77,23 @@ public class EngineConsistencyCheckerTest {
 
 		//rc.add( new StatementImpl( REL2, RDF.TYPE, REL ) );
 		rc.add( new StatementImpl( REL2, RDFS.LABEL, new LiteralImpl( "Yuri Purchased a Yigo" ) ) );
-		rc.add( new StatementImpl( REL2, RDF.TYPE, PURCHASE ) );
+		rc.add( new StatementImpl( REL2, RDFS.SUBPROPERTYOF, PURCHASE ) );
 		rc.add( new StatementImpl( REL2, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
 				new LiteralImpl( "8000 USD" ) ) );
 
 		rc.remove( REL1, null, null );
 		rc.add( new StatementImpl( REL1, RDFS.LABEL, new LiteralImpl( "Yuri Purchased Yugo" ) ) );
-		rc.add( new StatementImpl( REL1, RDF.TYPE, PURCHASE ) );
+		rc.add( new StatementImpl( REL1, RDFS.SUBPROPERTYOF, PURCHASE ) );
 		rc.add( new StatementImpl( REL1, new URIImpl( "http://os-em.com/ontologies/semtool/Price" ),
 				new LiteralImpl( "3000 USD" ) ) );
 
 		rc.commit();
 
 		if ( log.isTraceEnabled() ) {
-			try ( FileWriter gw = new FileWriter( "/tmp/x.nt" ) ) {
-				rc.export( new NTriplesWriter( gw ) );
+			File tmpdir = FileUtils.getTempDirectory();
+			try ( Writer w = new BufferedWriter( new FileWriter( new File( tmpdir,
+					"ecctest.ttl" ) ) ) ) {
+				engine.getRawConnection().export( new TurtleWriter( w ) );
 			}
 		}
 	}
@@ -128,6 +133,8 @@ public class EngineConsistencyCheckerTest {
 
 		hits = ecc.check( CAR, 0.6f );
 		assertEquals( 4, hits.size() );
+		// if this assertion fails, make sure the test12.nt file has the
+		// right database name (it changes everytime the db is regenerated)
 		assertEquals( 2, hits.getNN( YUGO ).size() );
 
 		hits = ecc.check( PURCHASE, 0.8f );

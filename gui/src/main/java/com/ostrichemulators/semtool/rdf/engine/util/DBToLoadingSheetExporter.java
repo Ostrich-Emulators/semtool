@@ -279,17 +279,17 @@ public class DBToLoadingSheetExporter {
 	public void exportAllRelationships( List<URI> subjectTypes, ImportData data ) {
 		findDupsToFilterOut();
 
-		String q = "SELECT DISTINCT ?sub ?subtype ?superrel ?obj ?objtype WHERE {"
-				+ "  ?sub a ?subtype ."
-				+ "  ?sub ?rel ?obj ."
-				+ "  ?objtype rdfs:subClassOf* ?concept ."
-				+ "  ?obj a ?objtype ."
-				+ "  ?rel a ?superrel ."
-				+ "  ?superrel rdfs:subClassOf ?semrel ."
-				+ "  FILTER ( ?objtype != ?concept ) ."
-				+ "  FILTER ( ?subtype != ?concept ) ."
-				+ "  FILTER ( ?superrel != ?rel ) ."
-				+ "  FILTER ( ?superrel != ?semrel ) ."
+		String q = "SELECT DISTINCT ?subtype ?superrel ?objtype WHERE {\n"
+				+ "  ?sub a ?subtype .\n"
+				+ "  ?sub ?rel ?obj .\n"
+				+ "  ?objtype rdfs:subClassOf* ?concept .\n"
+				+ "  ?obj a ?objtype .\n"
+				+ "  ?rel rdfs:subPropertyOf ?superrel .\n"
+				+ "  ?superrel rdfs:subPropertyOf ?semrel .\n"
+				+ "  FILTER ( ?objtype != ?concept ) .\n"
+				+ "  FILTER ( ?subtype != ?concept ) .\n"
+				+ "  FILTER ( ?superrel != ?rel ) .\n"
+				+ "  FILTER ( ?superrel != ?semrel ) .\n"
 				+ "}";
 		ListQueryAdapter<URI[]> triples = new ListQueryAdapter<URI[]>( q ) {
 
@@ -397,11 +397,11 @@ public class DBToLoadingSheetExporter {
 		final Map<String, NodeAndPropertyValues> seen = new HashMap<>();
 		final Set<URI> needlabels = new HashSet<>();
 
-		String query = "SELECT DISTINCT ?sub ?obj WHERE {"
-				+ "  ?sub a ?subtype ."
-				+ "  ?sub ?rel ?obj ."
-				+ "  ?obj a ?objtype ."
-				+ "  ?rel rdfs:subClassOf+ ?superrel ."
+		String query = "SELECT DISTINCT ?sub ?obj WHERE {\n"
+				+ "  ?sub a ?subtype .\n"
+				+ "  ?sub ?rel ?obj .\n"
+				+ "  ?obj a ?objtype .\n"
+				+ "  ?rel rdfs:subPropertyOf+ ?superrel .\n"
 				+ "}";
 
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
@@ -434,12 +434,12 @@ public class DBToLoadingSheetExporter {
 			logger.error( query, e );
 		}
 
-		String edgequery = "SELECT DISTINCT ?sub ?obj ?prop ?propval WHERE {"
-				+ "  ?sub a ?subtype ."
-				+ "  ?sub ?specificrel ?obj ."
-				+ "  ?obj a ?objtype ."
-				+ "  ?specificrel a ?rel ; ?prop ?propval ."
-				+ "  FILTER( isLiteral( ?propval ) ) ."
+		String edgequery = "SELECT DISTINCT ?sub ?obj ?prop ?propval WHERE {\n"
+				+ "  ?sub a ?subtype .\n"
+				+ "  ?sub ?specificrel ?obj .\n"
+				+ "  ?obj a ?objtype .\n"
+				+ "  ?specificrel rdfs:subPropertyOf ?rel ; ?prop ?propval .\n"
+				+ "  FILTER( isLiteral( ?propval ) ) .\n"
 				+ "}";
 		VoidQueryAdapter edges = new VoidQueryAdapter( edgequery ) {
 

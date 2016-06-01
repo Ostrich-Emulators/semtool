@@ -373,17 +373,19 @@ public class GraphDataModel {
 			}
 
 			if ( null != preds ) {
+				Map<SEMOSSEdge, URI> edgelabelurilkp = new HashMap<>();
+
 				preds = NodeDerivationTools.getTopLevelRelations( preds, engine );
 
 				// do the same thing, but for edges
 				String specificEdgeProps
-						= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {"
-						+ "  ?rel ?prop ?literal ; a ?superrel ."
-						+ "  ?s ?rel ?o ."
-						+ "  VALUES ?s { " + conceptimplosion + " } ."
-						+ "  VALUES ?o { " + conceptimplosion + " } ."
-						+ "  FILTER ( isLiteral( ?literal ) )"
-						+ "}"
+						= "SELECT ?s ?rel ?o ?prop ?literal ?superrel WHERE {\n"
+						+ "  ?rel ?prop ?literal ; rdfs:subPropertyOf ?superrel .\n"
+						+ "  ?s ?rel ?o .\n"
+						+ "  VALUES ?s { " + conceptimplosion + " } .\n"
+						+ "  VALUES ?o { " + conceptimplosion + " } .\n"
+						+ "  FILTER ( isLiteral( ?literal ) )\n"
+						+ "}\n"
 						+ "VALUES ?superrel { " + Utility.implode( preds ) + " }";
 
 				VoidQueryAdapter specifics = new VoidQueryAdapter( specificEdgeProps ) {

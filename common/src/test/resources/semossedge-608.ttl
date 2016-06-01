@@ -11,8 +11,6 @@
 @prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
 @prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-data:John schema:hates data:J489c0915-4009-43da-ad6d-cc4c28085c5d .
-
 schema:Person a owl:Class ;
 	rdfs:label "Person" ;
 	rdfs:subClassOf schema:Concept .
@@ -23,7 +21,7 @@ schema:Apple a owl:Class ;
 
 schema:likes rdfs:label "likes" ;
 	a owl:ObjectProperty ;
-	rdfs:subClassOf schema:Relation .
+	rdfs:subPropertyOf schema:Relation .
 
 schema:Orange a owl:Class ;
 	rdfs:label "Orange" ;
@@ -31,7 +29,7 @@ schema:Orange a owl:Class ;
 
 schema:hates rdfs:label "hates" ;
 	a owl:ObjectProperty ;
-	rdfs:subClassOf schema:Relation .
+	rdfs:subPropertyOf schema:Relation .
 
 data:John a schema:Person ;
 	rdfs:label "John" .
@@ -41,5 +39,7 @@ data:Golden_Delicious a schema:Apple ;
 
 data:John schema:likes data:Golden_Delicious .
 
-data:J489c0915-4009-43da-ad6d-cc4c28085c5d a schema:Orange ;
+data:Mebff93d7-a691-41b0-acbf-5817454f5ab9 a schema:Orange ;
 	rdfs:label "Golden Delicious" .
+
+data:John schema:hates data:Mebff93d7-a691-41b0-acbf-5817454f5ab9 .
