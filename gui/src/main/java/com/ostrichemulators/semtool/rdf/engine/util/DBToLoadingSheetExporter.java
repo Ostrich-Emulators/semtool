@@ -25,8 +25,6 @@ import org.openrdf.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.poi.main.XlsWriter.NodeAndPropertyValues;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.engine.api.QueryExecutor;
-import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
@@ -37,11 +35,11 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.openrdf.model.Value;
+import org.openrdf.model.vocabulary.SKOS;
 
 public class DBToLoadingSheetExporter {
 
 	private static final Logger logger = Logger.getLogger( DBToLoadingSheetExporter.class );
-	private final Map<URI, URI> dupsToFilterOut = new HashMap<>(); // less specific -> more specific
 	private IEngine engine;
 
 	public DBToLoadingSheetExporter( IEngine eng ) {
@@ -130,8 +128,6 @@ public class DBToLoadingSheetExporter {
 	}
 
 	public void exportNodes( List<URI> subjectTypes, ImportData data ) {
-		subjectTypes.addAll( findSubclassNodesToAdd( subjectTypes ) );
-
 		Map<URI, String> labels
 				= Utility.getInstanceLabels( subjectTypes, engine );
 
@@ -147,7 +143,7 @@ public class DBToLoadingSheetExporter {
 	}
 
 	public void exportTheseRelationships( List<URI[]> relationships, ImportData data ) {
-		relationships.addAll( findSubclassRelationshipsToAdd( relationships ) );
+		//relationships.addAll( findSubclassRelationshipsToAdd( relationships ) );
 
 		List<URI> needlabels = new ArrayList<>();
 		for ( URI[] spo : relationships ) {
@@ -204,80 +200,7 @@ public class DBToLoadingSheetExporter {
 		return new File( fileloc.toString() );
 	}
 
-	private List<URI> findSubclassNodesToAdd( List<URI> nodes ) {
-		findDupsToFilterOut();
-
-		List<URI> nodesToAdd = new ArrayList<>();
-		for ( URI node : nodes ) {
-			//e.g. if someone is asking to see all ApplicationModules, they will get a tab with the 
-			//subclass VCAMPApplicationModules as well
-			URI moreSpecificNodeType = dupsToFilterOut.get( node );
-			if ( moreSpecificNodeType != null && !nodes.contains( moreSpecificNodeType ) ) {
-				nodesToAdd.add( moreSpecificNodeType );
-			}
-		}
-
-		return nodesToAdd;
-	}
-
-	private List<URI[]> findSubclassRelationshipsToAdd( List<URI[]> relationships ) {
-		findDupsToFilterOut();
-
-		List<URI[]> relationshipsToAdd = new ArrayList<>();
-		for ( URI[] spo : relationships ) {
-			//e.g. if someone is asking to see all ApplicationModules, they will get a tab with the 
-			//subclass VCAMPApplicationModules as well
-			URI moreSpecificNodeType = dupsToFilterOut.get( spo[0] );
-			if ( moreSpecificNodeType != null ) {
-				relationshipsToAdd.add( new URI[]{ moreSpecificNodeType, spo[1], spo[2] } );
-			}
-		}
-
-		return relationshipsToAdd;
-	}
-
-	private void findDupsToFilterOut() {
-		if ( !dupsToFilterOut.isEmpty() ) {
-			return;
-		}
-
-		String q = "SELECT ?keeper ?duplicate WHERE {"
-				+ " ?keeper rdfs:subClassOf ?concept ."
-				+ " ?duplicate rdfs:subClassOf ?concept ."
-				+ " ?keeper rdfs:subClassOf ?duplicate ."
-				+ " FILTER( ?duplicate != ?concept ) }";
-		QueryExecutor<Void> qe = new QueryExecutorAdapter<Void>( q ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				Value dupe = set.getValue( "duplicate" );
-				Value keep = set.getValue( "keeper" );
-				dupsToFilterOut.put( URI.class.cast( dupe ), URI.class.cast( keep ) );
-			}
-		};
-
-		qe.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
-		IEngine eng = ( null == engine ? DIHelper.getInstance().getRdfEngine()
-				: engine );
-		try {
-			// logger.debug( qe.bindAndGetSparql() );
-			eng.query( qe );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( e, e );
-		}
-
-		if ( logger.isDebugEnabled() ) {
-			for ( Map.Entry<URI, URI> key : dupsToFilterOut.entrySet() ) {
-				logger.debug( "Found duplicate, if an instance with type " + key.getKey()
-						+ " has another instance of type " + key.getValue()
-						+ ", then disregard the instance with type " + key.getKey() + "." );
-			}
-		}
-	}
-
 	public void exportAllRelationships( List<URI> subjectTypes, ImportData data ) {
-		findDupsToFilterOut();
 
 		String q = "SELECT DISTINCT ?subtype ?superrel ?objtype WHERE {\n"
 				+ "  ?sub a ?subtype .\n"
@@ -287,6 +210,7 @@ public class DBToLoadingSheetExporter {
 				+ "  ?rel rdfs:subPropertyOf ?superrel .\n"
 				+ "  ?superrel rdfs:subPropertyOf ?semrel .\n"
 				+ "  FILTER ( ?objtype != ?concept ) .\n"
+				+ "  FILTER ( ?objtype != ?skos ) .\n"
 				+ "  FILTER ( ?subtype != ?concept ) .\n"
 				+ "  FILTER ( ?superrel != ?rel ) .\n"
 				+ "  FILTER ( ?superrel != ?semrel ) .\n"
@@ -305,6 +229,7 @@ public class DBToLoadingSheetExporter {
 		triples.useInferred( true );
 		triples.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 		triples.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
+		triples.bind( "skos", SKOS.CONCEPT );
 
 		for ( URI subjectType : subjectTypes ) {
 			triples.bind( "subtype", subjectType );
@@ -334,17 +259,10 @@ public class DBToLoadingSheetExporter {
 			final Collection<URI> properties, final Map<URI, String> labels ) {
 		final Map<URI, NodeAndPropertyValues> seen = new HashMap<>();
 
-		String queryFilterLine = "";
-		URI moreSpecificSubjectType = dupsToFilterOut.get( subjectType );
-		if ( moreSpecificSubjectType != null ) {
-			queryFilterLine = "  FILTER NOT EXISTS { ?s a ?specType } ";
-		}
-
 		String query
 				= "SELECT ?s ?p ?prop WHERE { "
 				+ " ?s ?p ?prop . "
 				+ " ?s a  ?subjType . "
-				+ queryFilterLine
 				+ " FILTER ( isLiteral( ?prop ) ) "
 				+ "} ";
 
@@ -368,9 +286,6 @@ public class DBToLoadingSheetExporter {
 			}
 		};
 
-		if ( null != moreSpecificSubjectType ) {
-			vqa.bind( "specType", moreSpecificSubjectType );
-		}
 		vqa.bind( "subjType", subjectType );
 
 		try {
