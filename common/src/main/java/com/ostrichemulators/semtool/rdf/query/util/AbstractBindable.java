@@ -37,7 +37,7 @@ public abstract class AbstractBindable implements Bindable {
 	private final Map<String, String> namespaces = new LinkedHashMap<>();
 	private final ValueFactory vf = new ValueFactoryImpl();
 	private String sparql;
-	private boolean infer = false;
+	private boolean infer = true;
 	private URI context;
 
 	public AbstractBindable() {

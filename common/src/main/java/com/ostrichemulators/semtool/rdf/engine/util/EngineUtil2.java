@@ -263,6 +263,14 @@ public class EngineUtil2 {
 
 		smssprops.setProperty( BigdataSail.Options.FILE, jnl.getAbsolutePath() );
 
+		if ( log.isDebugEnabled() ) {
+			StringBuilder sb = new StringBuilder( "creation properties:" );
+			for ( String key : smssprops.stringPropertyNames() ) {
+				sb.append( "\n" ).append( key ).append( "=>" ).append( smssprops.getProperty( key ) );
+			}
+			log.debug( sb.toString() );
+		}
+
 		BigdataSail sail = new BigdataSail( smssprops );
 		BigdataSailRepository repo = new BigdataSailRepository( sail );
 		try {
@@ -339,7 +347,7 @@ public class EngineUtil2 {
 		StatementCollector coll = new StatementCollector();
 		tp.setRDFHandler( coll );
 		try ( InputStream is = resource.openStream() ) {
-			tp.parse( is,SEMONTO.BASE_URI );
+			tp.parse( is, SEMONTO.BASE_URI );
 		}
 		catch ( Exception e ) {
 			log.warn( "could not open/parse model resource: " + resource, e );

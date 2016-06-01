@@ -82,6 +82,15 @@ public abstract class AbstractEngine implements IEngine {
 	@Override
 	public void openDB( Properties initprops ) throws RepositoryException {
 		prop = Utility.copyProperties( initprops );
+
+		if ( log.isDebugEnabled() ) {
+			StringBuilder sb = new StringBuilder( "db properties:" );
+			for ( String key : initprops.stringPropertyNames() ) {
+				sb.append( "\n" ).append( key ).append( "=>" ).append( initprops.getProperty( key ) );
+			}
+			log.debug( sb.toString() );
+		}
+
 		startLoading( prop );
 
 		String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
