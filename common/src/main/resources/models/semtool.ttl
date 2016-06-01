@@ -78,7 +78,7 @@ semonto:Concept
   owl:sameAs <http://www.w3.org/2004/02/skos/core#Concept> ;
 .
 
-semtool:has
+semonto:has
   rdf:type owl:ObjectProperty ;
   rdfs:subPropertyOf semtool:Relation ;
   rdfs:label "Has" ;
