@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.edgemodelers;
 
 import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
+import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.ImportMetadata;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
@@ -211,15 +212,15 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 			if ( !hasCachedInstanceClass( stype ) ) {
 				boolean nodeAlreadyMade = isUri( stype, namespaces );
 
-				URI uri = ( nodeAlreadyMade
+				URI subtype = ( nodeAlreadyMade
 						? getUriFromRawString( stype, namespaces )
 						: schema.build( stype ) );
-				cacheInstanceClass( uri, stype );
+				cacheInstanceClass( subtype, stype );
 
 				if ( save && !nodeAlreadyMade ) {
-					myrc.add( uri, RDF.TYPE, OWL.CLASS );
-					myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
-					myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+					myrc.add( subtype, RDF.TYPE, OWL.CLASS );
+					myrc.add( subtype, RDFS.LABEL, vf.createLiteral( stype ) );
+					myrc.add( subtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 				}
 			}
 
@@ -228,16 +229,16 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				if ( !hasCachedInstanceClass( otype ) ) {
 					boolean nodeAlreadyMade = isUri( otype, namespaces );
 
-					URI uri = ( nodeAlreadyMade
+					URI objtype = ( nodeAlreadyMade
 							? getUriFromRawString( otype, namespaces )
 							: schema.build( otype ) );
 
-					cacheInstanceClass( uri, otype );
+					cacheInstanceClass( objtype, otype );
 
 					if ( save && !nodeAlreadyMade ) {
-						myrc.add( uri, RDF.TYPE, OWL.CLASS );
-						myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
-						myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+						myrc.add( objtype, RDF.TYPE, OWL.CLASS );
+						myrc.add( objtype, RDFS.LABEL, vf.createLiteral( otype ) );
+						myrc.add( objtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 					}
 				}
 
@@ -246,21 +247,45 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				if ( !hasCachedRelationClass( rellabel ) ) {
 					boolean relationAlreadyMade = isUri( rellabel, namespaces );
 
-					URI ret = ( relationAlreadyMade
+					URI reltype = ( relationAlreadyMade
 							? getUriFromRawString( rellabel, namespaces )
 							: schema.build( rellabel ) );
-					cacheRelationClass( ret, rellabel );
+					cacheRelationClass( reltype, rellabel );
 
 					if ( save && !relationAlreadyMade ) {
-						myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
-						myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
-						myrc.add( ret, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+						myrc.add( reltype, RDFS.LABEL, vf.createLiteral( rellabel ) );
+						myrc.add( reltype, RDF.TYPE, OWL.OBJECTPROPERTY );
+						myrc.add( reltype, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+					}
+				}
+
+				if ( save ) {
+					// save the structure data
+					URI subtype = getCachedInstanceClass( stype );
+					if ( sheet.isRel() ) {
+						URI structure = schema.uniqueUri();
+
+						URI objtype = getCachedInstanceClass( sheet.getObjectType() );
+						URI edgetype = getCachedRelationClass( sheet.getRelname() );
+
+						myrc.add( structure, RDF.TYPE, SEMTOOL.Structure );
+						myrc.add( structure, RDF.PREDICATE, edgetype );
+						myrc.add( structure, RDFS.DOMAIN, subtype );
+						myrc.add( structure, RDFS.RANGE, objtype );
 					}
 				}
 			}
 		}
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
+			URI subtype = getCachedInstanceClass( sheet.getSubjectType() );
+			URI objtype = ( sheet.isRel()
+					? getCachedInstanceClass( sheet.getObjectType() )
+					: null );
+			URI edgetype = ( sheet.isRel()
+					? getCachedRelationClass( sheet.getRelname() )
+					: null );
+
 			for ( String propname : sheet.getProperties() ) {
 				// check to see if we're actually a link to some
 				// other node (and not really a new property
@@ -270,6 +295,16 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 					cacheRelationClass( SEMONTO.has,
 							sheet.getSubjectType() + sheet.getObjectType() + propname );
+
+					if ( save ) {
+						// keep the ontology info for posterity
+						URI structure = schema.uniqueUri();
+						myrc.add( structure, RDF.TYPE, SEMTOOL.Structure );
+						myrc.add( structure, RDF.PREDICATE, SEMONTO.has );
+						myrc.add( structure, RDFS.DOMAIN, subtype );
+						myrc.add( structure, RDFS.RANGE, objtype );
+					}
+
 					continue;
 				}
 
@@ -284,26 +319,20 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 				URI predicate = getCachedPropertyClass( propname );
 
-				if ( save && !alreadyMadeProp ) {
-					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-					myrc.add( predicate, RDF.TYPE, OWL.DATATYPEPROPERTY );
+				if ( save ) {
+					// save the ontology info for querying db structure
+					URI structure = schema.uniqueUri();
+					myrc.add( structure, RDF.TYPE, SEMTOOL.Structure );
+					myrc.add( structure, OWL.DATATYPEPROPERTY, predicate );
+					myrc.add( structure, RDFS.DOMAIN, sheet.isRel() ? edgetype : subtype );
+
+					if ( !alreadyMadeProp ) {
+						myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
+						myrc.add( predicate, RDF.TYPE, OWL.DATATYPEPROPERTY );
+					}
 				}
 			}
 		}
-	}
-
-	protected void makeTopClass( RepositoryConnection myrc, UriBuilder schema )
-			throws RepositoryException {
-		URI klass = schema.getConceptUri().build();
-		myrc.add( klass, RDF.TYPE, RDFS.CLASS );
-		myrc.add( klass, RDFS.LABEL, myrc.getValueFactory().createLiteral( "Concept" ) );
-	}
-
-	protected void makeTopRel( RepositoryConnection myrc, UriBuilder schema )
-			throws RepositoryException {
-		URI klass = schema.getRelationUri().build();
-		myrc.add( klass, RDF.TYPE, OWL.OBJECTPROPERTY );
-		myrc.add( klass, RDFS.LABEL, myrc.getValueFactory().createLiteral( "Relation" ) );
 	}
 
 	@Override

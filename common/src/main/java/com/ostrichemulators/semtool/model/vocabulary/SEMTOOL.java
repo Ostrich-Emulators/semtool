@@ -39,7 +39,6 @@ public class SEMTOOL {
 
 	public final static URI Custom_Reification;
 
-
 	public static final URI isLegacy;
 
 	public static final URI rendererClass;
@@ -49,6 +48,7 @@ public class SEMTOOL {
 	public static final URI ConceptsSparql;
 
 	public static final URI EdgesSparql;
+	public static final URI Structure;
 
 	static {
 		final ValueFactory factory = ValueFactoryImpl.getInstance();
@@ -65,6 +65,7 @@ public class SEMTOOL {
 		Custom_Reification = factory.createURI( NAMESPACE, "Custom-Reification" );
 		ConceptsSparql = factory.createURI( NAMESPACE, "Custom-Concept-Sparql" );
 		EdgesSparql = factory.createURI( NAMESPACE, "Custom-Edge-Sparql" );
+		Structure = factory.createURI( NAMESPACE, "StructureInfo" );
 
 		// ----- Properties ------
 		isLegacy = factory.createURI( NAMESPACE, "isLegacy" );

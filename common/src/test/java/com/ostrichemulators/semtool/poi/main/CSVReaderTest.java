@@ -5,8 +5,6 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.poi.main.CSVReader;
-import com.ostrichemulators.semtool.poi.main.ImportData;
 import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
