@@ -15,6 +15,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 /**
  *
  * @author ryan
+ * @param <T>
  */
 public abstract class DataPanel<T> extends JPanel implements DocumentListener {
 

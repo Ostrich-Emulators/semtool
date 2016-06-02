@@ -93,8 +93,8 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 
 	private GraphDataModel gdm;
 
-	protected int overlayLevel = 0;
-	protected int maxOverlayLevel = 0;
+	private int overlayLevel = 0;
+	private int maxOverlayLevel = 0;
 
 	private final List<GraphListener> listenees = new ArrayList<>();
 	private boolean inGraphOp = false;
@@ -627,5 +627,9 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			view.refresh();
 			fireGraphUpdated();
 		}
+	}
+
+	protected int getOverlayLevel(){
+		return overlayLevel;
 	}
 }

@@ -66,6 +66,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.GridRAWPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.GridScatterSheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet;
+import com.ostrichemulators.semtool.ui.components.playsheets.MetamodelPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
@@ -1658,9 +1659,9 @@ public class PlayPane extends JFrame {
 				GuiUtility.loadImageIcon( "icons16/questions_heat_map3_16.png" ),
 				"AppDupeHeatMapPlaySheet Hint: SELECT ?xAxisList ?yAxisList ?numericHeatValue WHERE{ ... } GROUP BY ?xAxisList ?yAxisList" );
 
-		reg.register( InsightOutputType.GRAPH_METAMODEL, GraphPlaySheet.class, "Metamodel Graph",
+		reg.register( InsightOutputType.GRAPH_METAMODEL, MetamodelPlaySheet.class, "Metamodel Graph",
 				GuiUtility.loadImageIcon( "icons16/questions_metamodel1_16.png" ),
-				"MetamodelGraphPlaySheet Hint: SELECT DISTINCT ?source ?relation ?target WHERE{ ... }" );
+				"MetamodelGraphPlaySheet Hint: The Metamodel does not use queries" );
 	}
 
 	protected class PlayPaneCloseableTab extends CloseableTab {

@@ -88,7 +88,9 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 
 	public void setDisplay( URI type, URI prop, boolean showit ) {
 		if ( showit ) {
-			displayables.add( type, prop );
+			if( !displayables.getNN( type ).contains( prop ) ){
+				displayables.add( type, prop );
+			}
 		}
 		else {
 			displayables.get( type ).remove( prop );

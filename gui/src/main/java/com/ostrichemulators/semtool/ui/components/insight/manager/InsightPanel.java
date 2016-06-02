@@ -10,6 +10,7 @@ import com.ostrichemulators.semtool.om.InsightOutputType;
 import com.ostrichemulators.semtool.om.Parameter;
 import com.ostrichemulators.semtool.ui.components.BindingPanel;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
+import com.ostrichemulators.semtool.ui.components.OutputTypeRegistry;
 import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.renderers.PlaySheetEnumRenderer;
@@ -44,13 +45,18 @@ public class InsightPanel extends DataPanel<Insight> {
 
 	/**
 	 * Creates new form InsightPanel
+	 *
+	 * @param tree
+	 * @param model
 	 */
 	public InsightPanel( JTree tree, DefaultTreeModel model ) {
 		this.tree = tree;
 		this.model = model;
 		initComponents();
 
-		playsheet.setModel( new DefaultComboBoxModel<>( InsightOutputType.values() ) );
+		OutputTypeRegistry otr = DIHelper.getInstance().getOutputTypeRegistry();
+
+		playsheet.setModel( new DefaultComboBoxModel<>( otr.getRegisterKeys().toArray( new InsightOutputType[0] ) ) );
 		playsheet.setRenderer( new PlaySheetEnumRenderer( DIHelper.getInstance().getOutputTypeRegistry() ) );
 
 		listenTo( insightDesc );

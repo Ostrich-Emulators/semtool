@@ -190,23 +190,8 @@ public class InsightManagerImpl implements InsightManager {
 	public Perspective getSystemPerspective( IEngine eng ) {
 		Perspective persps = new Perspective( urib.uniqueUri(), "Generic Perspective",
 				"System Generated Generic Perspective" );
-		URI conceptUri = eng.getSchemaBuilder().getConceptUri().build();
-		URI relUri = eng.getSchemaBuilder().getRelationUri().build();
 
-		String mmspql = "CONSTRUCT{ ?source ?relation ?target } WHERE {\n"
-				+ "  ?relation rdfs:subPropertyOf+ <" + relUri + "> .\n"
-				+ "  ?s ?relation ?o .\n"
-				+ "  ?s a ?source .\n"
-				+ "  ?o a ?target .\n"
-				+ "  FILTER( ?source != <" + conceptUri + ">"
-				+ "    && ?source != owl:Class"
-				+ "    && ?source != rdfs:Resource"
-				+ "    && ?source != <" + relUri + "> )\n"
-				+ "  FILTER( ?target != <" + conceptUri + ">"
-				+ "    && ?target != owl:Class"
-				+ "    && ?target != rdfs:Resource )\n"
-				+ "}";
-		Insight metamodel = new Insight( "View the Database Metamodel", mmspql,
+		Insight metamodel = new Insight( "View the Database Metamodel", null,
 				InsightOutputType.GRAPH_METAMODEL );
 
 		Insight explore = new Insight( "Explore an instance of a selected node type",

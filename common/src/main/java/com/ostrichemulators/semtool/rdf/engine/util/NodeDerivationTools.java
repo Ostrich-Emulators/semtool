@@ -19,6 +19,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.query.BindingSet;
 
 /**
@@ -60,7 +61,8 @@ public class NodeDerivationTools {
 			String query = "SELECT ?concept WHERE "
 					+ "{ "
 					+ "  ?concept rdfs:subClassOf+ ?top ."
-					+ "  FILTER( ?concept != ?top ) ."
+					+ "  FILTER( ?concept != ?top && \n"
+					+ "    ?concept != <http://www.w3.org/2004/02/skos/core#Concept> ) ."
 					+ "  VALUES ?top {<replace-with-binding>} "
 					+ " }";
 
@@ -94,7 +96,8 @@ public class NodeDerivationTools {
 	/**
 	 * Derives a query adapter capable of pulling out the predicates that connect
 	 * all subject nodes of a given type and all object nodes of a given type. The
-	 * results will contain *all* types, so they will generally be run through 	 {@link #getTopLevelRelations(java.util.Collection,
+	 * results will contain *all* types, so they will generally be run through
+	 * null	null	null	null	 {@link #getTopLevelRelations(java.util.Collection,
 	 * com.ostrichemulators.semtool.rdf.engine.api.IEngine) } to get only the
 	 * top-level relationships
 	 *
@@ -179,6 +182,43 @@ public class NodeDerivationTools {
 		return engine.queryNoEx( lqa );
 	}
 
+	/**
+	 * Gets the top-level connections between the give node types
+	 *
+	 * @param subtype
+	 * @param objtype
+	 * @param engine
+	 * @return
+	 */
+	public static Collection<URI> getConnections( URI subtype, URI objtype, IEngine engine ) {
+		String query = "SELECT DISTINCT ?rel {\n"
+				+ "  ?s a ?subtype .\n"
+				+ "  ?o a ?objtype .\n"
+				+ "  ?s ?rel ?o .\n"
+				+ "  ?rel rdfs:subPropertyOf ?semrel .\n"
+				+ "  FILTER( ?rel != ?semrel ) .\n"
+				+ "  FILTER( ?subtype != ?concept && ?subtype != ?skos ) .\n"
+				+ "  FILTER( ?objtype != ?concept && ?objtype != ?skos ) .\n"
+				+ "}";
+		ListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList( query );
+		lqa.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
+		lqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
+		lqa.bind( "skos", SKOS.CONCEPT );
+		lqa.bind( "subtype", subtype );
+		lqa.bind( "objtype", objtype );
+		Set<URI> edges = getTopLevelRelations( engine.queryNoEx( lqa ), engine );
+
+		return edges;
+	}
+
+	/**
+	 * Gets the subject (or object) types connected
+	 *
+	 * @param instances
+	 * @param engine
+	 * @param instanceIsSubject
+	 * @return
+	 */
 	public static List<URI> getConnectedConceptTypes( Collection<URI> instances,
 			IEngine engine, boolean instanceIsSubject ) {
 
@@ -221,6 +261,11 @@ public class NodeDerivationTools {
 			IEngine engine ) {
 
 		Set<URI> todo = new HashSet<>( rels ); // get unique set of input
+
+		if ( todo.isEmpty() ) {
+			return todo;
+		}
+
 		// this query gets the top level URI for any specific URI
 		String query = "SELECT ?rel ?superrel WHERE {\n"
 				+ "  ?rel rdfs:subPropertyOf ?superrel .\n"
@@ -241,6 +286,7 @@ public class NodeDerivationTools {
 		};
 		mqa.bind( "semrel", engine.getSchemaBuilder().getRelationUri().toUri() );
 
+		mqa.useInferred( false );
 		Map<URI, URI> inputOutput = engine.queryNoEx( mqa );
 
 		// anything *not* in the inputOutput map wasn't a specific relation,
