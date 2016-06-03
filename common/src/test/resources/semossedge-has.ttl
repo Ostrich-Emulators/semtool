@@ -27,6 +27,16 @@ schema:Implements rdfs:label "Implements" ;
 	a owl:ObjectProperty ;
 	rdfs:subPropertyOf schema:Relation .
 
+schema:Rule_Implements_Logic_Unit a semtool:StructureData ;
+	rdf:predicate schema:Implements ;
+	rdfs:domain schema:Rule ;
+	rdfs:range schema:Logic_Unit .
+
+schema:Rule_has_Logic_Unit a semtool:StructureData ;
+	rdf:predicate semonto:has ;
+	rdfs:domain schema:Rule ;
+	rdfs:range schema:Logic_Unit .
+
 data:BR_1 a schema:Rule ;
 	rdfs:label "BR 1" .
 

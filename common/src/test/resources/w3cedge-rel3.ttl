@@ -11,8 +11,6 @@
 @prefix vcamp: <http://va.gov/ontologies/> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 
-vcamp:Yuri semoss:Purchased vcamp:Pinto .
-
 semoss:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf semoss:Concept .
@@ -25,14 +23,35 @@ semoss:Purchased rdfs:label "Purchased" ;
 	a owl:ObjectProperty ;
 	rdfs:subPropertyOf semoss:Relation .
 
+semoss:Human_Being_Purchased_Car a semtool:StructureData ;
+	rdf:predicate semoss:Purchased ;
+	rdfs:domain semoss:Human_Being ;
+	rdfs:range semoss:Car .
+
+semoss:Purchased_Price a semtool:StructureData ;
+	owl:DatatypeProperty semoss:Price ;
+	rdfs:domain semoss:Purchased .
+
 semoss:Price rdfs:label "Price" ;
 	a owl:DatatypeProperty .
+
+semoss:Purchased_Date a semtool:StructureData ;
+	owl:DatatypeProperty semoss:Date ;
+	rdfs:domain semoss:Purchased .
 
 semoss:Date rdfs:label "Date" ;
 	a owl:DatatypeProperty .
 
+semoss:Human_Being_First_Name a semtool:StructureData ;
+	owl:DatatypeProperty semoss:First_Name ;
+	rdfs:domain semoss:Human_Being .
+
 semoss:First_Name rdfs:label "First Name" ;
 	a owl:DatatypeProperty .
+
+semoss:Human_Being_Last_Name a semtool:StructureData ;
+	owl:DatatypeProperty semoss:Last_Name ;
+	rdfs:domain semoss:Human_Being .
 
 semoss:Last_Name rdfs:label "Last Name" ;
 	a owl:DatatypeProperty .
@@ -58,3 +77,5 @@ vcamp:Yuri_Purchased_Yugo semoss:Price "3000 USD" ;
 
 vcamp:Pinto a semoss:Car ;
 	rdfs:label "Pinto" .
+
+vcamp:Yuri semoss:Purchased vcamp:Pinto .

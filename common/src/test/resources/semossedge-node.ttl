@@ -23,14 +23,35 @@ schema:Purchased rdfs:label "Purchased" ;
 	a owl:ObjectProperty ;
 	rdfs:subPropertyOf schema:Relation .
 
+schema:Human_Being_Purchased_Car a semtool:StructureData ;
+	rdf:predicate schema:Purchased ;
+	rdfs:domain schema:Human_Being ;
+	rdfs:range schema:Car .
+
+schema:Purchased_Price a semtool:StructureData ;
+	owl:DatatypeProperty schema:Price ;
+	rdfs:domain schema:Purchased .
+
 schema:Price rdfs:label "Price" ;
 	a owl:DatatypeProperty .
+
+schema:Purchased_Date a semtool:StructureData ;
+	owl:DatatypeProperty schema:Date ;
+	rdfs:domain schema:Purchased .
 
 schema:Date rdfs:label "Date" ;
 	a owl:DatatypeProperty .
 
+schema:Human_Being_First_Name a semtool:StructureData ;
+	owl:DatatypeProperty schema:First_Name ;
+	rdfs:domain schema:Human_Being .
+
 schema:First_Name rdfs:label "First Name" ;
 	a owl:DatatypeProperty .
+
+schema:Human_Being_Last_Name a semtool:StructureData ;
+	owl:DatatypeProperty schema:Last_Name ;
+	rdfs:domain schema:Human_Being .
 
 schema:Last_Name rdfs:label "Last Name" ;
 	a owl:DatatypeProperty .

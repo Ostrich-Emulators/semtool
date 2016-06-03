@@ -65,7 +65,7 @@ public class SEMTOOL {
 		Custom_Reification = factory.createURI( NAMESPACE, "Custom-Reification" );
 		ConceptsSparql = factory.createURI( NAMESPACE, "Custom-Concept-Sparql" );
 		EdgesSparql = factory.createURI( NAMESPACE, "Custom-Edge-Sparql" );
-		Structure = factory.createURI( NAMESPACE, "StructureInfo" );
+		Structure = factory.createURI( NAMESPACE, "StructureData" );
 
 		// ----- Properties ------
 		isLegacy = factory.createURI( NAMESPACE, "isLegacy" );

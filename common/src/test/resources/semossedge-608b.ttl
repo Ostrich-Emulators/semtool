@@ -25,9 +25,19 @@ schema:likes rdfs:label "likes" ;
 	a owl:ObjectProperty ;
 	rdfs:subPropertyOf schema:Relation .
 
+schema:Person_likes_Apple a semtool:StructureData ;
+	rdf:predicate schema:likes ;
+	rdfs:domain schema:Person ;
+	rdfs:range schema:Apple .
+
 schema:Orange a owl:Class ;
 	rdfs:label "Orange" ;
 	rdfs:subClassOf schema:Concept .
+
+schema:Person_likes_Orange a semtool:StructureData ;
+	rdf:predicate schema:likes ;
+	rdfs:domain schema:Person ;
+	rdfs:range schema:Orange .
 
 data:John a schema:Person ;
 	rdfs:label "John" .

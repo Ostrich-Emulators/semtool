@@ -11,9 +11,7 @@
 @prefix testdata: <http://sales.data/purchases#> .
 @prefix testowl: <http://sales.data/schema#> .
 
-<http://sales.data/purchases/2015> a owl:Ontology .
-
-<http://os-em.com/semtool/database/C7cde18fe-045b-4350-ae2e-96ded401d389> semtool:ReificationModel semtool:SEMTOOL-Reification .
+<http://os-em.com/semtool/database/Be33a5663-5a0c-4c16-9c6f-4240cee594e9> semtool:ReificationModel semtool:SEMTOOL-Reification .
 
 <http://sales.data/purchases/2015> rdfs:label "\"Purchase Dataset\"" .
 
@@ -21,14 +19,35 @@ testowl:Human_Being a owl:Class ;
 	rdfs:label "Human Being" ;
 	rdfs:subClassOf testowl:Concept .
 
+testowl:R5e97c4b329d6a4b877220054b480612e a semtool:StructureData ;
+	rdf:predicate testowl:Purchased ;
+	rdfs:domain testowl:Human_Being ;
+	rdfs:range testowl:Car .
+
+testowl:L7a32a626effe17b3a4844c6934b6234a a semtool:StructureData ;
+	owl:DatatypeProperty testowl:Price ;
+	rdfs:domain testowl:Purchased .
+
 testowl:Price rdfs:label "Price" ;
 	a owl:DatatypeProperty .
+
+testowl:H252fdf62d63838d1339fd74b7a3b354e a semtool:StructureData ;
+	owl:DatatypeProperty testowl:Date ;
+	rdfs:domain testowl:Purchased .
 
 testowl:Date rdfs:label "Date" ;
 	a owl:DatatypeProperty .
 
+testowl:Y2e10d9875cb1cfbac7ba9a6d32952be9 a semtool:StructureData ;
+	owl:DatatypeProperty testowl:First_Name ;
+	rdfs:domain testowl:Human_Being .
+
 testowl:First_Name rdfs:label "First Name" ;
 	a owl:DatatypeProperty .
+
+testowl:Ab0b966132d72a11c8b2205829612cce7 a semtool:StructureData ;
+	owl:DatatypeProperty testowl:Last_Name ;
+	rdfs:domain testowl:Human_Being .
 
 testdata:Yuri a testowl:Human_Being ;
 	rdfs:label "Yuri" ;
@@ -45,7 +64,7 @@ testdata:Z1717a8a66fbe94aba40d1c198e3983c9 rdfs:subPropertyOf testowl:Purchased 
 	testowl:Price "3000 USD" ;
 	testowl:Date "2014-11-09T00:00:00.000-04:00"^^xsd:dateTime .
 
-<http://os-em.com/semtool/database/C7cde18fe-045b-4350-ae2e-96ded401d389> void:subset <http://sales.data/purchases/2015> ;
+<http://os-em.com/semtool/database/Be33a5663-5a0c-4c16-9c6f-4240cee594e9> void:subset <http://sales.data/purchases/2015> ;
 	owl:imports <http://sales.data/purchases/2015> .
 
-<http://sales.data/purchases/2015> a void:Dataset .
+<http://sales.data/purchases/2015> a void:Dataset , owl:Ontology .

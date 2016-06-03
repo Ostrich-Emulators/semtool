@@ -18,13 +18,18 @@ import static com.ostrichemulators.semtool.util.RDFDatatypeTools.URISTARTPATTERN
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getRDFStringValue;
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getUriFromRawString;
 import com.ostrichemulators.semtool.util.UriBuilder;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -206,6 +211,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		boolean save = metas.isAutocreateMetamodel();
 
 		ValueFactory vf = myrc.getValueFactory();
+		Map<String, URI> structurelkp = new HashMap<>();
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
 			String stype = sheet.getSubjectType();
@@ -263,15 +269,13 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					// save the structure data
 					URI subtype = getCachedInstanceClass( stype );
 					if ( sheet.isRel() ) {
-						URI structure = schema.uniqueUri();
-
 						URI objtype = getCachedInstanceClass( sheet.getObjectType() );
 						URI edgetype = getCachedRelationClass( sheet.getRelname() );
 
-						myrc.add( structure, RDF.TYPE, SEMTOOL.Structure );
-						myrc.add( structure, RDF.PREDICATE, edgetype );
-						myrc.add( structure, RDFS.DOMAIN, subtype );
-						myrc.add( structure, RDFS.RANGE, objtype );
+						Collection<Statement> structures = getEdgeStructure( edgetype,
+								subtype, objtype, schema, structurelkp,
+								stype + "_" + sheet.getRelname() + "_" + sheet.getObjectType() );
+						myrc.add( structures );
 					}
 				}
 			}
@@ -298,11 +302,10 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 					if ( save ) {
 						// keep the ontology info for posterity
-						URI structure = schema.uniqueUri();
-						myrc.add( structure, RDF.TYPE, SEMTOOL.Structure );
-						myrc.add( structure, RDF.PREDICATE, SEMONTO.has );
-						myrc.add( structure, RDFS.DOMAIN, subtype );
-						myrc.add( structure, RDFS.RANGE, objtype );
+						Collection<Statement> structures = getEdgeStructure( SEMONTO.has,
+								subtype, objtype, schema, structurelkp,
+								sheet.getSubjectType() + "_has_" + sheet.getObjectType() );
+						myrc.add( structures );
 					}
 
 					continue;
@@ -321,10 +324,11 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 				if ( save ) {
 					// save the ontology info for querying db structure
-					URI structure = schema.uniqueUri();
-					myrc.add( structure, RDF.TYPE, SEMTOOL.Structure );
-					myrc.add( structure, OWL.DATATYPEPROPERTY, predicate );
-					myrc.add( structure, RDFS.DOMAIN, sheet.isRel() ? edgetype : subtype );
+					Collection<Statement> stmts = getPropStructure( predicate,
+							sheet.isRel() ? edgetype : subtype, schema, structurelkp,
+							( sheet.isRel() ? sheet.getRelname() : sheet.getSubjectType() )
+							+"_"+ propname );
+					myrc.add( stmts );
 
 					if ( !alreadyMadeProp ) {
 						myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
@@ -333,6 +337,47 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				}
 			}
 		}
+	}
+
+	private Collection<Statement> getEdgeStructure( URI predicate, URI domain,
+			URI range, UriBuilder schema, Map<String, URI> structurelkp, String name ) {
+
+		Model stmts = new LinkedHashModel();
+
+		String key = predicate.stringValue() + domain + range;
+		if ( !structurelkp.containsKey( key ) ) {
+			URI structure = schema.build( name );
+			structurelkp.put( key, structure );
+		}
+
+		URI structure = structurelkp.get( key );
+
+		stmts.add( structure, RDF.TYPE, SEMTOOL.Structure );
+		stmts.add( structure, RDF.PREDICATE, predicate );
+		stmts.add( structure, RDFS.DOMAIN, domain );
+		stmts.add( structure, RDFS.RANGE, range );
+
+		return stmts;
+	}
+
+	private Collection<Statement> getPropStructure( URI prop, URI domain,
+			UriBuilder schema, Map<String, URI> structurelkp, String title ) {
+
+		Model stmts = new LinkedHashModel();
+
+		String key = prop.stringValue() + domain;
+		if ( !structurelkp.containsKey( key ) ) {
+			URI structure = schema.build( title );
+			structurelkp.put( key, structure );
+		}
+
+		URI structure = structurelkp.get( key );
+
+		stmts.add( structure, RDF.TYPE, SEMTOOL.Structure );
+		stmts.add( structure, OWL.DATATYPEPROPERTY, prop );
+		stmts.add( structure, RDFS.DOMAIN, domain );
+
+		return stmts;
 	}
 
 	@Override
