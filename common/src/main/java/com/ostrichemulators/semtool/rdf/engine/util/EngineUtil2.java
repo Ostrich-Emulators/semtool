@@ -36,6 +36,7 @@ import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.Constants;
+import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -301,7 +302,8 @@ public class EngineUtil2 {
 					ecb.getReificationModel().uri ) );
 
 			rc.add( new StatementImpl( baseuri, SEMCORE.SOFTWARE_AGENT,
-					vf.createLiteral( System.getProperty( "build.name", "unknown" ) ) ) );
+					vf.createLiteral( Utility.getBuildProperties( EngineUtil2.class )
+							.getProperty( "name", "unknown" ) ) ) );
 
 			String username = user.getProperty( User.UserProperty.USER_FULLNAME );
 			String email = user.getProperty( User.UserProperty.USER_EMAIL );
