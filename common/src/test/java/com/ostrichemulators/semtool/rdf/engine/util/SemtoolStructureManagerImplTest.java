@@ -30,7 +30,7 @@ import org.openrdf.rio.turtle.TurtleWriter;
  *
  * @author ryan
  */
-public class StructureManagerTest {
+public class SemtoolStructureManagerImplTest {
 
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
 	private static final UriBuilder datab
@@ -47,9 +47,9 @@ public class StructureManagerTest {
 	private static final URI YURI = datab.build( "Yuri" );
 	private static final URI YPY = datab.build( "Yuri_Purchased_Yugo" );
 	private static InMemorySesameEngine engine;
-	private StructureManagerImpl structman;
+	private SemtoolStructureManagerImpl structman;
 
-	public StructureManagerTest() {
+	public SemtoolStructureManagerImplTest() {
 	}
 
 	@BeforeClass
@@ -70,7 +70,7 @@ public class StructureManagerTest {
 
 	@Before
 	public void setUp() {
-		structman = new StructureManagerImpl( engine );
+		structman = new SemtoolStructureManagerImpl( engine );
 	}
 
 	@After
@@ -175,5 +175,12 @@ public class StructureManagerTest {
 
 		result = structman.getPropertiesOf( HUMAN );
 		assertEquals( expResult, result );
+	}
+
+	@Test
+	public void testRebuild() throws Exception {
+		Model old = structman.getModel();
+		structman.rebuild( false );
+		assertEquals( old, structman.getModel() );
 	}
 }

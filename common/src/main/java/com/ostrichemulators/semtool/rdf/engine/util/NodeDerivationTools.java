@@ -77,7 +77,9 @@ public class NodeDerivationTools {
 	 *
 	 * @param engine The RDF knowledgebase
 	 * @return A list of concepts in URI form
+	 * @deprecated use {@link StructureManager#getTopLevelConcepts() }
 	 */
+	@Deprecated
 	public static List<URI> createConceptList( IEngine engine ) {
 		OneVarListQueryAdapter<URI> qe
 				= OneVarListQueryAdapter.getUriList( getConceptQuery( engine ) );
@@ -96,8 +98,8 @@ public class NodeDerivationTools {
 	/**
 	 * Derives a query adapter capable of pulling out the predicates that connect
 	 * all subject nodes of a given type and all object nodes of a given type. The
-	 * results will contain *all* types, so they will generally be run through
-	 * null	null	null	null	null	null	 {@link #getTopLevelRelations(java.util.Collection,
+	 * results will contain *all* types, so they will generally be run through {@link
+	 * #getTopLevelRelations(java.util.Collection,
 	 * com.ostrichemulators.semtool.rdf.engine.api.IEngine) } to get only the
 	 * top-level relationships
 	 *
@@ -234,7 +236,8 @@ public class NodeDerivationTools {
 	 * @param engine
 	 * @param instanceIsSubject
 	 * @return
-	 * @deprecated use {@link StructureManager#getConnectedConceptTypes(java.util.Collection) }
+	 * @deprecated use {@link StructureManager#getConnectedConceptTypes(java.util.Collection)
+	 * }
 	 * instead
 	 */
 	@Deprecated
@@ -275,7 +278,8 @@ public class NodeDerivationTools {
 	 * @param engine
 	 * @return the smallest set of relations that cover the input rels. All the
 	 * returned URIs will be <code>rdfs:subClassOf semonto:Relation</code>
-	 * @deprecated use {@link StructureManager#getTopLevelRelations(java.util.Collection)}
+	 * @deprecated use
+	 * {@link StructureManager#getTopLevelRelations(java.util.Collection)}
 	 */
 	@Deprecated
 	public static Set<URI> getTopLevelRelations( Collection<URI> rels,

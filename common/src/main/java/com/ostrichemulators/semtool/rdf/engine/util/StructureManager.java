@@ -59,6 +59,13 @@ public interface StructureManager {
 	public Set<URI> getTopLevelRelations( Collection<URI> instances );
 
 	/**
+	 * Gets all the top-level concepts. This function is not based on structure data,
+	 * but rather a query on the db
+	 * @return 
+	 */
+	public Set<URI> getTopLevelConcepts();
+
+	/**
 	 * Gets the set of concepts connected to these instances
 	 *
 	 * @param instances the instances (or concept classes) to connect
@@ -66,4 +73,19 @@ public interface StructureManager {
 	 * *and* subject class -&gt; edge type -&gt; instance
 	 */
 	public Model getConnectedConceptTypes( Collection<URI> instances );
+
+	/**
+	 * Rebuilds the {@link SEMTOOL#Structure} triples by inspecting the IEngine's
+	 * triples
+	 *
+	 * @param saveToEngine once calculated, save these statements in the engine?
+	 * @return All the Structure triples
+	 */
+	public Model rebuild( boolean saveToEngine );
+
+	/**
+	 * Gets all the current structure info
+	 * @return
+	 */
+	public Model getModel();
 }
