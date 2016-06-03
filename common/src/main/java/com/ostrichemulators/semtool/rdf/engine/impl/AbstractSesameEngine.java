@@ -138,7 +138,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			try {
 				// if the baseuri isn't already set, then query the kb for void:Dataset
 				RepositoryResult<Statement> rr
-						= getRawConnection().getStatements(null, RDF.TYPE, SEMTOOL.Database, false );
+						= getRawConnection().getStatements( null, RDF.TYPE, SEMTOOL.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {
 					baseuri = URI.class.cast( s.getSubject() );
@@ -178,7 +178,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	protected URI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
 		URI baseuri = getNewBaseUri();
-		rc.add(baseuri, RDF.TYPE, SEMTOOL.Database );
+		rc.add( baseuri, RDF.TYPE, SEMTOOL.Database );
 
 		// see if we have some old metadata we can move over, too
 		VoidQueryAdapter q = new VoidQueryAdapter( "SELECT ?pred ?val { ?uri a ?voidds . ?uri ?pred ?val}" ) {
@@ -212,8 +212,8 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void finishLoading( Properties props ) throws RepositoryException {
 		refreshSchemaData();
 
-		String realname = ( null == getEngineName()  
-				? props.getProperty( Constants.ENGINE_NAME, 
+		String realname = ( null == getEngineName()
+				? props.getProperty( Constants.ENGINE_NAME,
 						FilenameUtils.getBaseName( props.getProperty( Constants.SMSS_LOCATION ) ) )
 				: getEngineName() );
 		MetadataQuery mq = new MetadataQuery( RDFS.LABEL );
@@ -370,7 +370,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		ValueFactory vfac = new ValueFactoryImpl();
 		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql );
 
-		if( null != query.getContext() ){
+		if ( null != query.getContext() ) {
 			DatasetImpl dataset = new DatasetImpl();
 			dataset.addDefaultGraph( query.getContext() );
 			tq.setDataset( dataset );
@@ -474,6 +474,18 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	@Override
+	public Model constructNoEx( QueryExecutor<Model> q ) {
+		addUserNamespaces( q );
+		try {
+			return getConstruct( q, getRawConnection(), supportsSparqlBindings() );
+		}
+		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
+			log.error( "could not execute construct: " + q.getSparql(), e );
+			return null;
+		}
+	}
+
+	@Override
 	public void execute( ModificationExecutor exe ) throws RepositoryException {
 		RepositoryConnection rc = getRawConnection();
 
@@ -542,7 +554,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		ValueFactory vf = rc.getValueFactory();
 		try {
 			if ( null == baseuri ) {
-				RepositoryResult<Statement> rr = rc.getStatements(null, RDF.TYPE,
+				RepositoryResult<Statement> rr = rc.getStatements( null, RDF.TYPE,
 						SEMTOOL.Database, false );
 				List<Statement> stmts = Iterations.asList( rr );
 				for ( Statement s : stmts ) {

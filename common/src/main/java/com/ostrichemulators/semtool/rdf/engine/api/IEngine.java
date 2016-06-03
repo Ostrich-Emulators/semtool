@@ -229,6 +229,8 @@ public interface IEngine {
 	public Model construct( QueryExecutor<Model> query )
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException;
 
+	public Model constructNoEx( QueryExecutor<Model> query );
+
 	/**
 	 * Executes the given modification on the repository connection. The block
 	 * will be executed within a transaction.

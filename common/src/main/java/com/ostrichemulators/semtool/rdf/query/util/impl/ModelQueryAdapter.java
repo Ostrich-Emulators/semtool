@@ -9,6 +9,8 @@ import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.BindingSet;
@@ -32,9 +34,47 @@ public class ModelQueryAdapter extends QueryExecutorAdapter<Model> {
 		result = model;
 	}
 
+	/**
+	 * Sets the model to fill as the query gets executed
+	 *
+	 * @param m
+	 */
+	public void setModel( Model m ) {
+		result = m;
+	}
+
 	@Override
 	public void handleTuple( BindingSet set, ValueFactory fac ) {
-		Logger.getLogger( getClass() ).error( "use getResults().add() instead" );
+		// we can *sometimes* use a binding set instead of getResult().add(...)
+		// *) if it has only three elements of the type Resource URI Value,
+
+		boolean ok = false;
+		if ( 3 == set.size() ) {
+			String[] names = new String[3];
+			getBindingNames().toArray( names );
+
+			Resource subject = null;
+			URI predicate = null;
+			Value object = set.getValue( names[2] );
+
+			if ( set.hasBinding( names[0] )
+					&& set.getValue( names[0] ) instanceof Resource ) {
+				subject = Resource.class.cast( set.getValue( names[0] ) );
+			}
+			if ( set.hasBinding( names[1] )
+					&& set.getValue( names[1] ) instanceof URI ) {
+				predicate = URI.class.cast( set.getValue( names[1] ) );
+			}
+
+			if ( !( null == subject || null == predicate || null == object ) ) {
+				ok = true;
+				result.add( subject, predicate, object );
+			}
+		}
+
+		if ( !ok ) {
+			Logger.getLogger( getClass() ).error( "use getResults().add() instead" );
+		}
 	}
 
 	public static ModelQueryAdapter describe( Resource rsr ) {

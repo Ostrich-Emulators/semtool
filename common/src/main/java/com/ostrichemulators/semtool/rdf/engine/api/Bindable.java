@@ -78,6 +78,10 @@ public interface Bindable {
 
 	public Bindable bind( String var, Value v );
 
+	public Bindable unbind( String var );
+
+	public void clearBindings();
+
 	public void useInferred( boolean b );
 
 	public boolean usesInferred();

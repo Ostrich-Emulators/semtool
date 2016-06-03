@@ -97,7 +97,7 @@ public class NodeDerivationTools {
 	 * Derives a query adapter capable of pulling out the predicates that connect
 	 * all subject nodes of a given type and all object nodes of a given type. The
 	 * results will contain *all* types, so they will generally be run through
-	 * null	null	null	null	 {@link #getTopLevelRelations(java.util.Collection,
+	 * null	null	null	null	null	null	 {@link #getTopLevelRelations(java.util.Collection,
 	 * com.ostrichemulators.semtool.rdf.engine.api.IEngine) } to get only the
 	 * top-level relationships
 	 *
@@ -137,7 +137,10 @@ public class NodeDerivationTools {
 	 * will run the query designed to derive the various predicates between the
 	 * node types
 	 * @return A list of predicates, in URI
+	 * @deprecated use {@link StructureManager#getLinksBetween(org.openrdf.model.URI,
+	 * org.openrdf.model.URI) } instead
 	 */
+	@Deprecated
 	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
 			IEngine engine ) {
 		List<URI> values = engine.queryNoEx( getPredicatesBetweenQA( subjectNodeType,
@@ -155,6 +158,16 @@ public class NodeDerivationTools {
 		return engine.queryNoEx( OneValueQueryAdapter.getUri( query ).bind( "subject", instance ) );
 	}
 
+	/**
+	 *
+	 * @param instance
+	 * @param engine
+	 * @param instanceIsSubject
+	 * @return
+	 * @deprecated use {@link StructureManager#getConnectedConceptTypes(java.util.Collection)
+	 * } instead
+	 */
+	@Deprecated
 	public static List<URI> getConnectedConceptTypes( URI instance, IEngine engine,
 			boolean instanceIsSubject ) {
 		String query = "SELECT DISTINCT ?subtype ?objtype \n"
@@ -189,7 +202,10 @@ public class NodeDerivationTools {
 	 * @param objtype
 	 * @param engine
 	 * @return
+	 * @deprecated use {@link StructureManager#getLinksBetween(org.openrdf.model.URI,
+	 * org.openrdf.model.URI) } instead
 	 */
+	@Deprecated
 	public static Collection<URI> getConnections( URI subtype, URI objtype, IEngine engine ) {
 		String query = "SELECT DISTINCT ?rel {\n"
 				+ "  ?s a ?subtype .\n"
@@ -218,7 +234,10 @@ public class NodeDerivationTools {
 	 * @param engine
 	 * @param instanceIsSubject
 	 * @return
+	 * @deprecated use {@link StructureManager#getConnectedConceptTypes(java.util.Collection) }
+	 * instead
 	 */
+	@Deprecated
 	public static List<URI> getConnectedConceptTypes( Collection<URI> instances,
 			IEngine engine, boolean instanceIsSubject ) {
 
@@ -256,7 +275,9 @@ public class NodeDerivationTools {
 	 * @param engine
 	 * @return the smallest set of relations that cover the input rels. All the
 	 * returned URIs will be <code>rdfs:subClassOf semonto:Relation</code>
+	 * @deprecated use {@link StructureManager#getTopLevelRelations(java.util.Collection)}
 	 */
+	@Deprecated
 	public static Set<URI> getTopLevelRelations( Collection<URI> rels,
 			IEngine engine ) {
 

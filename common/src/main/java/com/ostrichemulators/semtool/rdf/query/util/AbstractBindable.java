@@ -189,6 +189,17 @@ public abstract class AbstractBindable implements Bindable {
 	}
 
 	@Override
+	public Bindable unbind( String var ) {
+		vmap.remove( var );
+		return this;
+	}
+
+	@Override
+	public void clearBindings() {
+		vmap.clear();
+	}
+
+	@Override
 	public void useInferred( boolean b ) {
 		infer = b;
 	}
