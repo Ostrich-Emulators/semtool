@@ -13,6 +13,7 @@ import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ModelQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
+import com.ostrichemulators.semtool.util.UriBuilder;
 import com.ostrichemulators.semtool.util.Utility;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,9 +23,16 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
@@ -133,6 +141,7 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 		ListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList(
 				"SELECT ?s WHERE { ?s rdfs:subClassOf ?concept }" );
 		lqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
+		lqa.useInferred( false );
 		return new HashSet<>( engine.queryNoEx( lqa ) );
 	}
 
@@ -157,6 +166,15 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
+	public Model getModel() {
+		ModelQueryAdapter qa = new ModelQueryAdapter(
+				"CONSTRUCT { ?s ?p ?o } WHERE { ?s a ?struct ; ?p ?o .}" );
+		qa.bind( "struct", SEMTOOL.Structure );
+		qa.useInferred( false );
+		return engine.constructNoEx( qa );
+	}
+
+	@Override
 	public Model rebuild( boolean saveToEngine ) {
 		// get all concepts
 		String cquery = "SELECT DISTINCT ?instance WHERE { ?instance rdfs:subClassOf ?concept }";
@@ -172,6 +190,78 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 		eqa.useInferred( false );
 		List<URI> edges = engine.queryNoEx( eqa );
 
+		Model edgemodel = rebuildEdges( concepts, edges );
+		Model propmodel = rebuildProps( concepts, edges );
+		Set<Resource> needlabels = new HashSet<>();
+
+		for ( Statement s : edgemodel ) {
+			needlabels.add( URI.class.cast( s.getSubject() ) );
+			needlabels.add( s.getPredicate() );
+			needlabels.add( URI.class.cast( s.getObject() ) );
+		}
+		for ( Statement s : propmodel ) {
+			needlabels.add( URI.class.cast( s.getSubject() ) );
+			needlabels.add( s.getPredicate() );
+		}
+
+		Map<Resource, String> labels = Utility.getInstanceLabels( needlabels, engine );
+		Map<String, URI> structurelkp = new HashMap<>();
+		UriBuilder schema = engine.getSchemaBuilder();
+
+		LinkedHashModel model = new LinkedHashModel();
+
+		for ( Statement s : edgemodel ) {
+			String sub = labels.get( s.getSubject() );
+			String rel = labels.get( s.getPredicate() );
+			String obj = labels.get( Resource.class.cast( s.getObject() ) );
+			String name = sub + "_" + rel + "_" + obj;
+
+			model.addAll( getEdgeStructure( s.getPredicate(),
+					URI.class.cast( s.getSubject() ), URI.class.cast( s.getObject() ),
+					schema, structurelkp, name ) );
+		}
+
+		for ( Statement s : propmodel ) {
+			String sub = labels.get( s.getSubject() );
+			String rel = labels.get( s.getPredicate() );
+			String name = sub + "_" + rel;
+
+			model.addAll( getPropStructure( s.getPredicate(),
+					URI.class.cast( s.getSubject() ), schema, structurelkp, name ) );
+		}
+
+		if ( saveToEngine ) {
+			save( model );
+		}
+
+		return model;
+	}
+
+	private Model rebuildProps( List<URI> concepts, List<URI> edges ) {
+		String cimplosion = Utility.implode( concepts );
+		String eimplosion = Utility.implode( edges );
+
+		// now see what properties are on concepts and edges
+		String query = "SELECT DISTINCT ?type ?prop WHERE {\n"
+				+ "  ?s ?prop ?propval . FILTER ( isLiteral( ?propval ) )\n"
+				+ "  ?s a|rdfs:subClassOf+|rdfs:subPropertyOf+ ?type .\n"
+				+ "  FILTER ( ?prop != rdfs:label ) .\n"
+				+ "} VALUES ?type { " + cimplosion + "\n" + eimplosion + " }";
+
+		ModelQueryAdapter mqa = new ModelQueryAdapter( query ) {
+
+			@Override
+			public void handleTuple( BindingSet set, ValueFactory fac ) {
+				URI type = URI.class.cast( set.getValue( "type" ) );
+				URI prop = URI.class.cast( set.getValue( "prop" ) );
+				result.add( type, prop, Constants.ANYNODE );
+			}
+		};
+
+		return engine.queryNoEx( mqa );
+	}
+
+	private Model rebuildEdges( List<URI> concepts, List<URI> edges ) {
 		String cimplosion = Utility.implode( concepts );
 		String eimplosion = Utility.implode( edges );
 
@@ -188,42 +278,75 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 
 		final Model model = engine.constructNoEx( new ModelQueryAdapter( query ) );
 
-		if ( saveToEngine ) {
-			// get URIs to completely remove
-			ListQueryAdapter<URI> oldqa
-					= OneVarListQueryAdapter.getUriList( "SELECT ?s WHERE { s a ?type }" );
-			oldqa.bind( "type", SEMTOOL.Structure );
-			List<URI> olds = engine.queryNoEx( oldqa );
-
-			ModificationExecutor eme = new ModificationExecutorAdapter() {
-
-				@Override
-				public void exec( RepositoryConnection conn ) throws RepositoryException {
-					for ( URI old : olds ) {
-						conn.remove( old, null, null );
-					}
-
-					conn.add( model );
-				}
-			};
-
-			try {
-				engine.execute( eme );
-			}
-			catch ( Exception e ) {
-				log.error( e, e );
-			}
-		}
-
 		return model;
 	}
 
-	@Override
-	public Model getModel() {
-		ModelQueryAdapter qa = new ModelQueryAdapter(
-				"CONSTRUCT { ?s ?p ?o } WHERE { ?s a ?struct ; ?p ?o .}" );
-		qa.bind( "struct", SEMTOOL.Structure );
-		qa.useInferred( false );
-		return engine.constructNoEx( qa );
+	private void save( Model model ) {
+		// get URIs to completely remove
+		ListQueryAdapter<URI> oldqa
+				= OneVarListQueryAdapter.getUriList( "SELECT ?s WHERE { s a ?type }" );
+		oldqa.bind( "type", SEMTOOL.Structure );
+		List<URI> olds = engine.queryNoEx( oldqa );
+
+		ModificationExecutor eme = new ModificationExecutorAdapter() {
+
+			@Override
+			public void exec( RepositoryConnection conn ) throws RepositoryException {
+				for ( URI old : olds ) {
+					conn.remove( old, null, null );
+				}
+
+				conn.add( model );
+			}
+		};
+
+		try {
+			engine.execute( eme );
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+		}
 	}
+
+	public static Collection<Statement> getEdgeStructure( URI predicate, URI domain,
+			URI range, UriBuilder schema, Map<String, URI> structurelkp, String name ) {
+
+		Model stmts = new LinkedHashModel();
+
+		String key = predicate.stringValue() + domain + range;
+		if ( !structurelkp.containsKey( key ) ) {
+			URI structure = schema.build( name );
+			structurelkp.put( key, structure );
+		}
+
+		URI structure = structurelkp.get( key );
+
+		stmts.add( structure, RDF.TYPE, SEMTOOL.Structure );
+		stmts.add( structure, RDF.PREDICATE, predicate );
+		stmts.add( structure, RDFS.DOMAIN, domain );
+		stmts.add( structure, RDFS.RANGE, range );
+
+		return stmts;
+	}
+
+	public static Collection<Statement> getPropStructure( URI prop, URI domain,
+			UriBuilder schema, Map<String, URI> structurelkp, String title ) {
+
+		Model stmts = new LinkedHashModel();
+
+		String key = prop.stringValue() + domain;
+		if ( !structurelkp.containsKey( key ) ) {
+			URI structure = schema.build( title );
+			structurelkp.put( key, structure );
+		}
+
+		URI structure = structurelkp.get( key );
+
+		stmts.add( structure, RDF.TYPE, SEMTOOL.Structure );
+		stmts.add( structure, OWL.DATATYPEPROPERTY, prop );
+		stmts.add( structure, RDFS.DOMAIN, domain );
+
+		return stmts;
+	}
+
 }

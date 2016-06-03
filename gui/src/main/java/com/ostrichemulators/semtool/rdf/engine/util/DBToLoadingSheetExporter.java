@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.query.BindingSet;
@@ -34,6 +33,7 @@ import com.ostrichemulators.semtool.util.Utility;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.SKOS;
 
@@ -60,7 +60,8 @@ public class DBToLoadingSheetExporter {
 	}
 
 	public ImportData runExport( boolean runNodeExport, boolean runRelationshipExport ) {
-		List<URI> nodes = NodeDerivationTools.createConceptList( getEngine() );
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
+		Set<URI> nodes = sm.getTopLevelConcepts();
 
 		ImportData data = EngineUtil2.createImportData( engine );
 
@@ -127,12 +128,13 @@ public class DBToLoadingSheetExporter {
 		return ret;
 	}
 
-	public void exportNodes( List<URI> subjectTypes, ImportData data ) {
+	public void exportNodes( Collection<URI> subjectTypes, ImportData data ) {
 		Map<URI, String> labels
 				= Utility.getInstanceLabels( subjectTypes, engine );
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
 		for ( URI subjectType : subjectTypes ) {
-			Set<URI> properties = new HashSet<>();
+			Set<URI> properties = sm.getPropertiesOf( subjectType );
 			Collection<NodeAndPropertyValues> hash
 					= getConceptInstanceData( subjectType, properties, labels );
 
@@ -200,7 +202,7 @@ public class DBToLoadingSheetExporter {
 		return new File( fileloc.toString() );
 	}
 
-	public void exportAllRelationships( List<URI> subjectTypes, ImportData data ) {
+	public void exportAllRelationships( Collection<URI> subjectTypes, ImportData data ) {
 
 		String q = "SELECT DISTINCT ?subtype ?superrel ?objtype WHERE {\n"
 				+ "  ?sub a ?subtype .\n"
@@ -235,7 +237,8 @@ public class DBToLoadingSheetExporter {
 			triples.bind( "subtype", subjectType );
 
 			try {
-				logger.debug( triples.bindAndGetSparql() );
+				String ss = triples.bindAndGetSparql();
+				logger.debug( ss );
 				List<URI[]> relsToExport = getEngine().query( triples );
 				exportTheseRelationships( relsToExport, data );
 			}
@@ -262,7 +265,7 @@ public class DBToLoadingSheetExporter {
 		String query
 				= "SELECT ?s ?p ?prop WHERE { "
 				+ " ?s ?p ?prop . "
-				+ " ?s a  ?subjType . "
+				+ " ?s a ?subjType . "
 				+ " FILTER ( isLiteral( ?prop ) ) "
 				+ "} ";
 
@@ -339,7 +342,8 @@ public class DBToLoadingSheetExporter {
 		vqa.bind( "subtype", subjectType );
 		vqa.bind( "superrel", predicateType );
 		vqa.bind( "objtype", objectType );
-		logger.debug( vqa.bindAndGetSparql() );
+		String ss = vqa.bindAndGetSparql();
+		logger.debug( ss );
 		vqa.useInferred( false );
 
 		try {

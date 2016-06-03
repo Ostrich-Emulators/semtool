@@ -373,8 +373,6 @@ public class GraphDataModel {
 			}
 
 			if ( null != preds ) {
-				Map<SEMOSSEdge, URI> edgelabelurilkp = new HashMap<>();
-
 				preds = NodeDerivationTools.getTopLevelRelations( preds, engine );
 
 				// do the same thing, but for edges

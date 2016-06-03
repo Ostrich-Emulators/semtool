@@ -20,11 +20,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.turtle.TurtleWriter;
 
 /**
  *
@@ -95,12 +93,6 @@ public class SemtoolStructureManagerImplTest {
 	public void testGetConnectedConceptTypes1() throws Exception {
 		Set<Value> expResult = new HashSet<>( Arrays.asList( CAR ) );
 		Model model = structman.getConnectedConceptTypes( Arrays.asList( YURI ) );
-		TurtleWriter tw = new TurtleWriter( System.out );
-		tw.startRDF();
-		for ( Statement s : model ) {
-			tw.handleStatement( s );
-		}
-		tw.endRDF();
 		assertEquals( expResult, model.objects() );
 	}
 
@@ -108,13 +100,6 @@ public class SemtoolStructureManagerImplTest {
 	public void testGetConnectedConceptTypes2() throws Exception {
 		Set<Value> expResult = new HashSet<>( Arrays.asList( HUMAN ) );
 		Model model = structman.getConnectedConceptTypes( Arrays.asList( YUGO ) );
-		TurtleWriter tw = new TurtleWriter( System.out );
-		tw.startRDF();
-		for ( Statement s : model ) {
-			tw.handleStatement( s );
-		}
-		tw.endRDF();
-
 		assertEquals( expResult, model.subjects() );
 		assertEquals( new HashSet<>( Arrays.asList( CAR ) ), model.objects() );
 	}
@@ -180,7 +165,7 @@ public class SemtoolStructureManagerImplTest {
 	@Test
 	public void testRebuild() throws Exception {
 		Model old = structman.getModel();
-		structman.rebuild( false );
-		assertEquals( old, structman.getModel() );
+		Model model = structman.rebuild( false );
+		assertEquals( old, model );
 	}
 }

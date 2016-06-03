@@ -23,7 +23,7 @@ public class StructureManagerFactory {
 
 	}
 
-	public StructureManager getStructureManager( IEngine engine ) {
+	public static StructureManager getStructureManager( IEngine engine ) {
 		MetadataQuery mq = new MetadataQuery( SEMTOOL.ReificationModel );
 		engine.queryNoEx( mq );
 		URI reif = URI.class.cast( mq.getOne() );
