@@ -282,9 +282,6 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
 			URI subtype = getCachedInstanceClass( sheet.getSubjectType() );
-			URI objtype = ( sheet.isRel()
-					? getCachedInstanceClass( sheet.getObjectType() )
-					: null );
 			URI edgetype = ( sheet.isRel()
 					? getCachedRelationClass( sheet.getRelname() )
 					: null );
@@ -303,8 +300,9 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 						// keep the ontology info for posterity
 						Collection<Statement> structures
 								= SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
-										subtype, objtype, schema, structurelkp,
-										sheet.getSubjectType() + "_has_" + sheet.getObjectType() );
+										subtype, getCachedInstanceClass( propname ),
+										schema, structurelkp,
+										sheet.getSubjectType() + "_has_" + propname );
 						myrc.add( structures );
 					}
 
