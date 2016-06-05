@@ -298,11 +298,19 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 					if ( save ) {
 						// keep the ontology info for posterity
-						Collection<Statement> structures
-								= SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
-										subtype, getCachedInstanceClass( propname ),
-										schema, structurelkp,
-										sheet.getSubjectType() + "_has_" + propname );
+						Collection<Statement> structures;
+						if ( sheet.isRel() ) {
+							structures = SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
+									edgetype, getCachedInstanceClass( propname ),
+									schema, structurelkp,
+									sheet.getRelname() + "_has_" + propname );
+						}
+						else {
+							structures = SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
+									subtype, getCachedInstanceClass( propname ),
+									schema, structurelkp,
+									sheet.getSubjectType() + "_has_" + propname );
+						}
 						myrc.add( structures );
 					}
 

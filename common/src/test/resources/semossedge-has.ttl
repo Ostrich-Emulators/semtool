@@ -11,6 +11,8 @@
 @prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
 @prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
+data:BR_1_Implements_LU_A semonto:has data:App_A1 .
+
 schema:Rule a owl:Class ;
 	rdfs:label "Rule" ;
 	rdfs:subClassOf schema:Concept .
@@ -32,10 +34,10 @@ schema:Rule_Implements_Logic_Unit a semtool:StructureData ;
 	rdfs:domain schema:Rule ;
 	rdfs:range schema:Logic_Unit .
 
-schema:Rule_has_Logic_Unit a semtool:StructureData ;
+schema:Implements_has_App a semtool:StructureData ;
 	rdf:predicate semonto:has ;
-	rdfs:domain schema:Rule ;
-	rdfs:range schema:Logic_Unit .
+	rdfs:domain schema:Implements ;
+	rdfs:range schema:App .
 
 data:BR_1 a schema:Rule ;
 	rdfs:label "BR 1" .
@@ -49,5 +51,4 @@ data:App_A1 a schema:App ;
 data:BR_1 data:BR_1_Implements_LU_A data:LU_A .
 
 data:BR_1_Implements_LU_A rdfs:subPropertyOf schema:Implements ;
-	rdfs:label "Implements" ;
-	semonto:has data:App_A1 .
+	rdfs:label "Implements" .
