@@ -132,9 +132,9 @@ public class SemtoolEdgeModelerTest {
 
 	@After
 	public void tearDown() {
+		qaer.release();
 		engine.closeDB();
 		loader.release();
-		qaer.release();
 	}
 
 	private static Model getExpectedGraph( File rdf ) {
@@ -216,7 +216,8 @@ public class SemtoolEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel = rels.add( "Yuri", "Yugo", props );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
@@ -229,7 +230,8 @@ public class SemtoolEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel = rels.add( "Alan", "Cadillac" );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
@@ -246,7 +248,8 @@ public class SemtoolEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel2 = rels.add( "Yuri", "Pinto" );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( rel1, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
@@ -266,7 +269,8 @@ public class SemtoolEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel3 = rels.add( "Yuri", "Pacer" );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( rel1, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
@@ -291,7 +295,8 @@ public class SemtoolEdgeModelerTest {
 		id.add( oranges );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
-		instance.createMetamodel( id, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( id, new HashMap<>(), null );
+		engine.getRawConnection().add(  model );
 
 		instance.addRel( apple, new HashMap<>(), apples, id.getMetadata(),
 				engine.getRawConnection() );
@@ -326,7 +331,8 @@ public class SemtoolEdgeModelerTest {
 		data.add( rels );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addNode( br, null, brs, data.getMetadata(), engine.getRawConnection() );
 		instance.addNode( lu, null, blus, data.getMetadata(), engine.getRawConnection() );
@@ -351,7 +357,8 @@ public class SemtoolEdgeModelerTest {
 		id.add( oranges );
 
 		SemtoolEdgeModeler instance = new SemtoolEdgeModeler( qaer );
-		instance.createMetamodel( id, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( id, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( apple, new HashMap<>(), apples, id.getMetadata(),
 				engine.getRawConnection() );

@@ -136,8 +136,8 @@ public class EngineFactory {
 			}
 
 			if ( !( null == engine || null == props ) ) {
-				engine.setProperty( Constants.SMSS_LOCATION, abspath );
 				engine.openDB( props );
+				engine.setProperty( Constants.SMSS_LOCATION, abspath );
 			}
 		}
 		catch ( IOException | RepositoryException ioe ) {

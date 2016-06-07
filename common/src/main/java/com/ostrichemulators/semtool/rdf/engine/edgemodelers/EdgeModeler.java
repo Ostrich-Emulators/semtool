@@ -11,8 +11,10 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import java.util.Map;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
@@ -84,9 +86,10 @@ public interface EdgeModeler {
 	 * {@link AbstractEdgeModeler#isValidMetadata(gov.va.semoss.poi.main.ImportMetadata) }
 	 * check
 	 * @param namespaces the namespaces to use for resolving metamodel elements
-	 * @param rc where to put the
+	 * @param vf the value factory to use, or null
+	 * @return a model containing all the mm statements
 	 * @throws RepositoryException
 	 */
-	public void createMetamodel( ImportData alldata, Map<String, String> namespaces,
-			RepositoryConnection rc ) throws RepositoryException;
+	public Model createMetamodel( ImportData alldata, Map<String, String> namespaces,
+			ValueFactory vf ) throws RepositoryException;
 }

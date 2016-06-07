@@ -128,9 +128,9 @@ public class W3CEdgeModelerTest {
 
 	@After
 	public void tearDown() {
+		qaer.release();
 		engine.closeDB();
 		loader.release();
-		qaer.release();
 	}
 
 	private static Model getExpectedGraph( File rdf ) {
@@ -212,7 +212,8 @@ public class W3CEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel = rels.add( "Yuri", "Yugo", props );
 
 		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
@@ -225,7 +226,8 @@ public class W3CEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel = rels.add( "Alan", "Cadillac" );
 
 		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( rel, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
@@ -242,7 +244,8 @@ public class W3CEdgeModelerTest {
 		LoadingNodeAndPropertyValues rel2 = rels.add( "Yuri", "Pinto" );
 
 		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( rel1, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );
@@ -265,7 +268,8 @@ public class W3CEdgeModelerTest {
 		id.add( oranges );
 
 		W3CEdgeModeler instance = new W3CEdgeModeler( qaer );
-		instance.createMetamodel( id, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( id, new HashMap<>(), null );
+		engine.getRawConnection().add( model );
 
 		instance.addRel( apple, new HashMap<>(), apples, id.getMetadata(),
 				engine.getRawConnection() );

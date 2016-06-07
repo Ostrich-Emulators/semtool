@@ -77,6 +77,12 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		return eng;
 	}
 
+	public static InMemorySesameEngine open( boolean infer ) {
+		Properties props = new Properties();
+		props.setProperty( INFER, Boolean.toString( infer ) );
+		return open( props );
+	}
+
 	public static Properties generateProperties( File file ) {
 
 		Properties props = new Properties();
@@ -182,6 +188,11 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		return this.rc;
 	}
 
+	/**
+	 * Creates a model from all the statements in this engine
+	 * @return
+	 * @throws RepositoryException
+	 */
 	public Model toModel() throws RepositoryException {
 		TreeModel model = new TreeModel();
 

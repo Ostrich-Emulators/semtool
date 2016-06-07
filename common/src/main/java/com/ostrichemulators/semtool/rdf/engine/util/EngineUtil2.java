@@ -308,9 +308,10 @@ public class EngineUtil2 {
 			rc.add( new StatementImpl( baseuri, SEMTOOL.ReificationModel,
 					ecb.getReificationModel().uri ) );
 
+			String tooling = Utility.getBuildProperties( EngineUtil2.class )
+							.getProperty( "name", "unknown" );
 			rc.add( new StatementImpl( baseuri, SEMCORE.SOFTWARE_AGENT,
-					vf.createLiteral( Utility.getBuildProperties( EngineUtil2.class )
-							.getProperty( "name", "unknown" ) ) ) );
+					vf.createLiteral( tooling ) ) );
 
 			String username = user.getProperty( User.UserProperty.USER_FULLNAME );
 			String email = user.getProperty( User.UserProperty.USER_EMAIL );

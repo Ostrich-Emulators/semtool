@@ -115,9 +115,9 @@ public class AbstractEdgeModelerTest {
 
 	@After
 	public void tearDown() {
+		qaer.release();
 		engine.closeDB();
 		loader.release();
-		qaer.release();
 	}
 
 	private static Model getExpectedGraph( File rdf ) {
@@ -194,7 +194,8 @@ public class AbstractEdgeModelerTest {
 	@Test
 	public void testCreateMetamodel() throws Exception {
 		TestModeler instance = new TestModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model mod = instance.createMetamodel( data, new HashMap<>(), null );
+		engine.getRawConnection().add( mod );
 		compare( engine, META );
 	}
 
@@ -206,7 +207,9 @@ public class AbstractEdgeModelerTest {
 		LoadingSheetData.LoadingNodeAndPropertyValues node = nodes.add( "Yuri", props );
 
 		TestModeler instance = new TestModeler( qaer );
-		instance.createMetamodel( data, new HashMap<>(), engine.getRawConnection() );
+		Model model = instance.createMetamodel( data, new HashMap<>(),
+				new ValueFactoryImpl() );
+		engine.getRawConnection().add( model );
 
 		instance.addNode( node, new HashMap<>(), rels, data.getMetadata(),
 				engine.getRawConnection() );

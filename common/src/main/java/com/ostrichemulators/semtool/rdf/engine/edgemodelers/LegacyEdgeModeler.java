@@ -21,9 +21,12 @@ import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.Date;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.TreeModel;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -210,13 +213,16 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 	}
 
 	@Override
-	public void createMetamodel( ImportData alldata, Map<String, String> namespaces,
-			RepositoryConnection myrc ) throws RepositoryException {
+	public Model createMetamodel( ImportData alldata, Map<String, String> namespaces,
+			ValueFactory vf ) throws RepositoryException {
+		Model model = new TreeModel();
 		ImportMetadata metas = alldata.getMetadata();
 		UriBuilder schema = metas.getSchemaBuilder();
 		boolean save = metas.isAutocreateMetamodel();
 
-		ValueFactory vf = myrc.getValueFactory();
+		if ( null == vf ) {
+			vf = new ValueFactoryImpl();
+		}
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
 			String stype = sheet.getSubjectType();
@@ -229,9 +235,9 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				cacheInstanceClass( uri, stype );
 
 				if ( save && !nodeAlreadyMade ) {
-					myrc.add( uri, RDF.TYPE, OWL.CLASS );
-					myrc.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
-					myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+					model.add( uri, RDF.TYPE, OWL.CLASS );
+					model.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
+					model.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 				}
 			}
 
@@ -247,9 +253,9 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 					cacheInstanceClass( uri, otype );
 
 					if ( save && !nodeAlreadyMade ) {
-						myrc.add( uri, RDF.TYPE, OWL.CLASS );
-						myrc.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
-						myrc.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+						model.add( uri, RDF.TYPE, OWL.CLASS );
+						model.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
+						model.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 					}
 				}
 
@@ -267,16 +273,16 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 					if ( save ) {
 						if ( !relationAlreadyMade ) {
-							myrc.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
-							myrc.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
-							myrc.add( ret, RDFS.SUBPROPERTYOF, relation );
+							model.add( ret, RDF.TYPE, OWL.OBJECTPROPERTY );
+							model.add( ret, RDFS.LABEL, vf.createLiteral( rellabel ) );
+							model.add( ret, RDFS.SUBPROPERTYOF, relation );
 						}
 						// myrc.add( suri, ret, schemaNodes.get( ocachekey ) );
 
-						myrc.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
+						model.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
 
-						myrc.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
-						myrc.add( relation, RDF.TYPE, RDF.PROPERTY );
+						model.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
+						model.add( relation, RDF.TYPE, RDF.PROPERTY );
 					}
 				}
 			}
@@ -287,10 +293,10 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				// check to see if we're actually a link to some
 				// other node (and not really a new property
 				if ( sheet.isLink( propname ) || hasCachedInstanceClass( propname ) ) {
-					log.debug("linking " + propname + " as a " + SEMONTO.has
+					log.debug( "linking " + propname + " as a " + SEMONTO.has
 							+ " relationship to " + getCachedInstanceClass( propname ) );
 
-					cacheRelationClass(SEMONTO.has, sheet.getSubjectType()
+					cacheRelationClass( SEMONTO.has, sheet.getSubjectType()
 							+ sheet.getObjectType() + propname );
 					continue;
 				}
@@ -311,15 +317,17 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				URI predicate = getCachedPropertyClass( propname );
 
 				if ( save && !alreadyMadeProp ) {
-					myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
+					model.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
 					// myrc.add( predicate, RDF.TYPE, schema.getContainsUri() );
-					myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+					model.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
 
 					if ( !metas.isLegacyMode() ) {
-						myrc.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
+						model.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
 					}
 				}
 			}
 		}
+
+		return model;
 	}
 }

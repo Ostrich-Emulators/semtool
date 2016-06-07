@@ -64,6 +64,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	public ImportCreateDbPanel() {
 		initComponents();
 
+		vocabPanel.setTitle( "Vocabularies" );
+
 		for ( ReificationStyle rs : ReificationStyle.values() ) {
 			if ( ReificationStyle.LEGACY != rs ) {
 				JRadioButton jrb = new JRadioButton( rs.toString() );
@@ -171,7 +173,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		file.addDocumentListener( dl2 );
 
 		Preferences vc = SemossPreferences.get();
-		calcInfers.setSelected( vc.getBoolean( Constants.CALC_INFERENCES_PREF, false ) );
+		calcInfers.setSelected( vc.getBoolean( Constants.CALC_INFERENCES_PREF, true ) );
 	}
 
 	private void checkOk() {
@@ -396,9 +398,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		final ReificationStyle reif = ReificationStyle.valueOf( bm.getActionCommand() );
 
 		Collection<File> files = file.getFiles();
-
-		
-
 
 		URI defaultBase = null;
 		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {

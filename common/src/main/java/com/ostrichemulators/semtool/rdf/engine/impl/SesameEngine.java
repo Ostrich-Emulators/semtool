@@ -11,6 +11,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.Er
 import com.ostrichemulators.semtool.rdf.engine.util.StatementSorter;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
+import com.ostrichemulators.semtool.util.Constants;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,6 +94,7 @@ public class SesameEngine extends AbstractSesameEngine {
 		props.setProperty( SesameEngine.REPOSITORY_KEY, new File( dir, "repo" ).toString() );
 		props.setProperty( SesameEngine.INSIGHTS_KEY, new File( dir, "insights" ).toString() );
 		props.setProperty( SesameEngine.REMOTE_KEY, Boolean.FALSE.toString() );
+		props.setProperty( Constants.SMSS_LOCATION, dir.toString() );
 
 		return props;
 	}

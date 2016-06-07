@@ -36,7 +36,11 @@ public class VocabularyPanel extends javax.swing.JPanel {
 		revalidate();
 		repaint();
 	}
-	
+
+	public void setTitle( String t ){
+		label.setText( t );
+	}
+
 	public List<URL> getSelectedVocabularies() {
 		List<URL> urls = new ArrayList<>();
 		for ( JCheckBox jcb : vocabs ) {

@@ -158,7 +158,7 @@ public class EngineLoaderTest {
 		Properties props = BigDataEngine.generateProperties( dbfile );
 		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
 		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		IEngine eng = EngineFactory.getEngine(  props );
+		IEngine eng = EngineFactory.getEngine( props );
 		eng.setDataBuilder( data );
 		eng.setSchemaBuilder( schema );
 		return eng;
@@ -250,8 +250,12 @@ public class EngineLoaderTest {
 		EngineLoader el = new EngineLoader();
 		el.setReader( "csv", rdr );
 		el.setDefaultBaseUri( BASEURI, true );
-		el.loadToEngine( Arrays.asList( CSVDATA2 ), engine, true, null );
-		el.release();
+		try {
+			el.loadToEngine( Arrays.asList( CSVDATA2 ), engine, true, null );
+		}
+		finally {
+			el.release();
+		}
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -273,8 +277,12 @@ public class EngineLoaderTest {
 		ImportData id = new ImportData();
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
-		el.loadToEngine( Arrays.asList( LEGACY ), engine, true, id );
-		el.release();
+		try {
+			el.loadToEngine( Arrays.asList( LEGACY ), engine, true, id );
+		}
+		finally {
+			el.release();
+		}
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -319,8 +327,8 @@ public class EngineLoaderTest {
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
-		Collection<Statement> owls
-				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, true, errors );
+		el.loadToEngine( Arrays.asList( CUSTOM ), engine, true, errors );
+		Model owls = el.getMetamodel();
 		el.release();
 
 		if ( log.isTraceEnabled() ) {
@@ -367,8 +375,8 @@ public class EngineLoaderTest {
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
 		ImportData errors = new ImportData();
-		Collection<Statement> owls
-				= el.loadToEngine( Arrays.asList( TESTSPECIAL ), engine, true, errors );
+		el.loadToEngine( Arrays.asList( TESTSPECIAL ), engine, true, errors );
+		Model owls = el.getMetamodel();
 		el.release();
 
 		if ( log.isTraceEnabled() ) {
@@ -394,7 +402,7 @@ public class EngineLoaderTest {
 		el.loadToEngine( Arrays.asList( TICKET584_EXP ), engine, true, errors );
 
 		// cleanup
-		engine.getRawConnection().remove((Resource) null, RDF.TYPE, SEMTOOL.Database );
+		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, SEMTOOL.Database );
 		el.release();
 
 		if ( log.isTraceEnabled() ) {
@@ -477,8 +485,8 @@ public class EngineLoaderTest {
 
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
-		Collection<Statement> owls
-				= el.loadToEngine( Arrays.asList( CUSTOM ), engine, false, null );
+		el.loadToEngine( Arrays.asList( CUSTOM ), engine, false, null );
+		Model owls = el.getMetamodel();
 		el.release();
 
 		if ( log.isTraceEnabled() ) {
@@ -639,7 +647,7 @@ public class EngineLoaderTest {
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
-		engine.getRawConnection().add(engine.getBaseUri(), SEMTOOL.ReificationModel,
+		engine.getRawConnection().add( engine.getBaseUri(), SEMTOOL.ReificationModel,
 				SEMTOOL.SEMTOOL_Reification );
 		engine.getRawConnection().commit();
 
@@ -704,8 +712,12 @@ public class EngineLoaderTest {
 		id.add( lsd );
 		lsd.add( "uno" );
 
-		el.loadToEngine( id, engine, errs );
-		el.release();
+		try {
+			el.loadToEngine( id, engine, errs );
+		}
+		finally {
+			el.release();
+		}
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
@@ -732,8 +744,12 @@ public class EngineLoaderTest {
 		id.add( lsd );
 		lsd.add( "uno" );
 
-		el.loadToEngine( id, engine, errs );
-		el.release();
+		try {
+			el.loadToEngine( id, engine, errs );
+		}
+		finally {
+			el.release();
+		}
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
@@ -779,7 +795,7 @@ public class EngineLoaderTest {
 		ImportData data = new ImportData();
 		EngineLoader.initNamespaces( data );
 		assertEquals( 10, data.getMetadata().getNamespaces().size() );
-		assertEquals(SEMTOOL.NAMESPACE, data.getMetadata().getNamespaces().get(SEMTOOL.PREFIX ) );
+		assertEquals( SEMTOOL.NAMESPACE, data.getMetadata().getNamespaces().get( SEMTOOL.PREFIX ) );
 	}
 
 	@Test
@@ -801,8 +817,12 @@ public class EngineLoaderTest {
 
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
-		el.loadToEngine( data, engine, null );
-		el.release();
+		try {
+			el.loadToEngine( data, engine, null );
+		}
+		finally {
+			el.release();
+		}
 
 		engine.getRawConnection().setNamespace( "testdata",
 				data.getMetadata().getDataBuilder().toString() );
@@ -899,8 +919,12 @@ public class EngineLoaderTest {
 
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
-		el.loadToEngine( Arrays.asList( TEST14 ), engine, true, null );
-		el.release();
+		try {
+			el.loadToEngine( Arrays.asList( TEST14 ), engine, true, null );
+		}
+		finally {
+			el.release();
+		}
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -930,8 +954,13 @@ public class EngineLoaderTest {
 
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
-		el.loadToEngine( Arrays.asList( TEST15 ), engine, true, null );
-		el.release();
+
+		try {
+			el.loadToEngine( Arrays.asList( TEST15 ), engine, true, null );
+		}
+		finally {
+			el.release();
+		}
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -951,8 +980,12 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( OWLSTART ) );
 
 		EngineLoader el = new EngineLoader();
-		el.loadToEngine( Arrays.asList( TEST17 ), engine, true, null );
-		el.release();
+		try {
+			el.loadToEngine( Arrays.asList( TEST17 ), engine, true, null );
+		}
+		finally {
+			el.release();
+		}
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
@@ -1079,7 +1112,7 @@ public class EngineLoaderTest {
 			boolean doCountsOnly ) throws IOException, RepositoryException, RDFHandlerException {
 
 		// get rid of the random database id
-		engine.getRawConnection().remove((Resource) null, RDF.TYPE, SEMTOOL.Database );
+		engine.getRawConnection().remove( (Resource) null, RDF.TYPE, SEMTOOL.Database );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();

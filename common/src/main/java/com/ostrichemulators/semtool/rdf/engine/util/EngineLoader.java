@@ -44,7 +44,6 @@ import com.ostrichemulators.semtool.rdf.engine.edgemodelers.LegacyEdgeModeler;
 import com.ostrichemulators.semtool.rdf.engine.edgemodelers.SemtoolEdgeModeler;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 
-import com.ostrichemulators.semtool.util.UriBuilder;
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getRDFStringValue;
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getUriFromRawString;
 import com.ostrichemulators.semtool.util.Utility;
@@ -52,13 +51,13 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Model;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.TreeModel;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
@@ -90,6 +89,7 @@ public class EngineLoader {
 	private File stagingdir;
 	private URI defaultBaseUri;
 	private QaChecker qaer = new QaChecker();
+	private final Model metamodel = new TreeModel();
 
 	static {
 		POIReader poi = new POIReader();
@@ -168,18 +168,15 @@ public class EngineLoader {
 	 * @param createmetamodel create the metamodel from the input files?
 	 * @param conformanceErrors if not-null, conformance will be checked and
 	 * errors added here
-	 * @return the metamodel statements created. will always be empty if the
-	 * <code>createmetamodel</code> is false
 	 * @throws RepositoryException
 	 * @throws IOException
 	 * @throws com.ostrichemulators.semtool.poi.main.ImportValidationException
 	 */
-	public Collection<Statement> loadToEngine( Collection<File> toload, IEngine engine,
+	public void loadToEngine( Collection<File> toload, IEngine engine,
 			boolean createmetamodel, ImportData conformanceErrors )
 			throws RepositoryException, IOException, ImportValidationException {
 
 		qaer.loadCaches( engine );
-		Set<Statement> mmstmts = new HashSet<>();
 
 		for ( File fileToLoad : toload ) {
 			ImportFileReader reader = getReader( fileToLoad );
@@ -212,10 +209,8 @@ public class EngineLoader {
 				loadIntermediateData( data, engine, conformanceErrors );
 			}
 
-			mmstmts.addAll( moveStagingToEngine( engine, createmetamodel ) );
+			moveStagingToEngine( engine, createmetamodel );
 		}
-
-		return mmstmts;
 	}
 
 	/**
@@ -232,10 +227,20 @@ public class EngineLoader {
 	 * @throws ImportValidationException
 	 */
 	public void loadToEngine( ImportData data, IEngine engine,
-			ImportData conformanceErrors ) throws RepositoryException, IOException, ImportValidationException {
+			ImportData conformanceErrors ) throws RepositoryException, IOException,
+			ImportValidationException {
 		qaer.loadCaches( engine );
 		loadIntermediateData( data, engine, conformanceErrors );
 		moveStagingToEngine( engine, data.getMetadata().isAutocreateMetamodel() );
+	}
+
+	/**
+	 * Gets the metamodel statements from previously-imported data
+	 *
+	 * @return the statements
+	 */
+	public Model getMetamodel() {
+		return new TreeModel( metamodel );
 	}
 
 	private void loadIntermediateData( ImportData data, IEngine engine,
@@ -289,9 +294,7 @@ public class EngineLoader {
 
 			// create all metamodel triples, even if we don't add them to the repository
 			EdgeModeler modeler = getEdgeModeler( EngineUtil2.getReificationStyle( engine ) );
-			myrc.begin();
-			modeler.createMetamodel( data, namespaces, myrc );
-			myrc.commit();
+			metamodel.addAll( modeler.createMetamodel( data, namespaces, null ) );
 
 			for ( LoadingSheetData n : data.getNodes() ) {
 				addToStaging( n, engine, data );
@@ -368,6 +371,7 @@ public class EngineLoader {
 
 			owls.clear();
 			qaer.clear();
+			metamodel.clear();
 		}
 		catch ( Exception e ) {
 			log.warn( e, e );
@@ -458,14 +462,12 @@ public class EngineLoader {
 	 * <code>copyowls</code> is false
 	 * @throws RepositoryException
 	 */
-	private Collection<Statement> moveStagingToEngine( IEngine engine,
+	private void moveStagingToEngine( IEngine engine,
 			boolean copyowls ) throws RepositoryException {
 		myrc.commit();
 		log.debug( "moving staging data to engine" );
-		Set<Statement> owlstmts = new HashSet<>();
 		final RepositoryResult<Statement> stmts
 				= myrc.getStatements( null, null, null, false );
-		UriBuilder schema = engine.getSchemaBuilder();
 
 		// we're done importing the files, so add all the statements to our engine
 		ModificationExecutor mea = new ModificationExecutorAdapter() {
@@ -474,16 +476,12 @@ public class EngineLoader {
 				initNamespaces( conn );
 
 				conn.begin();
-				while ( stmts.hasNext() ) {
-					Statement s = stmts.next();
-					conn.add( s );
+				conn.add( stmts );
 
-					if ( copyowls && schema.contains( s.getSubject() ) ) {
-						owlstmts.add( s );
-					}
+				if ( copyowls ) {
+					conn.add( metamodel );
 				}
-
-				// NOTE: no commit here
+				conn.commit();
 			}
 		};
 
@@ -499,14 +497,6 @@ public class EngineLoader {
 				log.warn( ioe, ioe );
 			}
 		}
-
-		if ( copyowls ) {
-			owls.addAll( owlstmts );
-			engine.addOwlData( owlstmts );
-		}
-
-		engine.commit();
-		return owlstmts;
 	}
 
 	/**

@@ -24,10 +24,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.TreeModel;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -202,13 +205,17 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	@Override
-	public void createMetamodel( ImportData alldata, Map<String, String> namespaces,
-			RepositoryConnection myrc ) throws RepositoryException {
+	public Model createMetamodel( ImportData alldata, Map<String, String> namespaces,
+			ValueFactory vf ) throws RepositoryException {
+		if ( null == vf ) {
+			vf = new ValueFactoryImpl();
+		}
+
+		Model model = new TreeModel();
+
 		ImportMetadata metas = alldata.getMetadata();
 		UriBuilder schema = metas.getSchemaBuilder();
-		boolean save = metas.isAutocreateMetamodel();
 
-		ValueFactory vf = myrc.getValueFactory();
 		Map<String, URI> structurelkp = new HashMap<>();
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
@@ -221,10 +228,10 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 						: schema.build( stype ) );
 				cacheInstanceClass( subtype, stype );
 
-				if ( save && !nodeAlreadyMade ) {
-					myrc.add( subtype, RDF.TYPE, OWL.CLASS );
-					myrc.add( subtype, RDFS.LABEL, vf.createLiteral( stype ) );
-					myrc.add( subtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+				if ( !nodeAlreadyMade ) {
+					model.add( subtype, RDF.TYPE, OWL.CLASS );
+					model.add( subtype, RDFS.LABEL, vf.createLiteral( stype ) );
+					model.add( subtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 				}
 			}
 
@@ -239,10 +246,10 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 					cacheInstanceClass( objtype, otype );
 
-					if ( save && !nodeAlreadyMade ) {
-						myrc.add( objtype, RDF.TYPE, OWL.CLASS );
-						myrc.add( objtype, RDFS.LABEL, vf.createLiteral( otype ) );
-						myrc.add( objtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+					if ( !nodeAlreadyMade ) {
+						model.add( objtype, RDF.TYPE, OWL.CLASS );
+						model.add( objtype, RDFS.LABEL, vf.createLiteral( otype ) );
+						model.add( objtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
 					}
 				}
 
@@ -256,26 +263,24 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 							: schema.build( rellabel ) );
 					cacheRelationClass( reltype, rellabel );
 
-					if ( save && !relationAlreadyMade ) {
-						myrc.add( reltype, RDFS.LABEL, vf.createLiteral( rellabel ) );
-						myrc.add( reltype, RDF.TYPE, OWL.OBJECTPROPERTY );
-						myrc.add( reltype, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+					if ( !relationAlreadyMade ) {
+						model.add( reltype, RDFS.LABEL, vf.createLiteral( rellabel ) );
+						model.add( reltype, RDF.TYPE, OWL.OBJECTPROPERTY );
+						model.add( reltype, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
 					}
 				}
 
-				if ( save ) {
-					// save the structure data
-					URI subtype = getCachedInstanceClass( stype );
-					if ( sheet.isRel() ) {
-						URI objtype = getCachedInstanceClass( sheet.getObjectType() );
-						URI edgetype = getCachedRelationClass( sheet.getRelname() );
+				// save the structure data
+				URI subtype = getCachedInstanceClass( stype );
+				if ( sheet.isRel() ) {
+					URI objtype = getCachedInstanceClass( sheet.getObjectType() );
+					URI edgetype = getCachedRelationClass( sheet.getRelname() );
 
-						Collection<Statement> structures
-								= SemtoolStructureManagerImpl.getEdgeStructure( edgetype,
-										subtype, objtype, schema, structurelkp,
-										stype + "_" + sheet.getRelname() + "_" + sheet.getObjectType() );
-						myrc.add( structures );
-					}
+					Collection<Statement> structures
+							= SemtoolStructureManagerImpl.getEdgeStructure( edgetype,
+									subtype, objtype, schema, structurelkp,
+									stype + "_" + sheet.getRelname() + "_" + sheet.getObjectType() );
+					model.addAll( structures );
 				}
 			}
 		}
@@ -296,23 +301,21 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					cacheRelationClass( SEMONTO.has,
 							sheet.getSubjectType() + sheet.getObjectType() + propname );
 
-					if ( save ) {
-						// keep the ontology info for posterity
-						Collection<Statement> structures;
-						if ( sheet.isRel() ) {
-							structures = SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
-									edgetype, getCachedInstanceClass( propname ),
-									schema, structurelkp,
-									sheet.getRelname() + "_has_" + propname );
-						}
-						else {
-							structures = SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
-									subtype, getCachedInstanceClass( propname ),
-									schema, structurelkp,
-									sheet.getSubjectType() + "_has_" + propname );
-						}
-						myrc.add( structures );
+					// keep the ontology info for posterity
+					Collection<Statement> structures;
+					if ( sheet.isRel() ) {
+						structures = SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
+								edgetype, getCachedInstanceClass( propname ),
+								schema, structurelkp,
+								sheet.getRelname() + "_has_" + propname );
 					}
+					else {
+						structures = SemtoolStructureManagerImpl.getEdgeStructure( SEMONTO.has,
+								subtype, getCachedInstanceClass( propname ),
+								schema, structurelkp,
+								sheet.getSubjectType() + "_has_" + propname );
+					}
+					model.addAll( structures );
 
 					continue;
 				}
@@ -328,22 +331,22 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 				URI predicate = getCachedPropertyClass( propname );
 
-				if ( save ) {
-					// save the ontology info for querying db structure
-					Collection<Statement> stmts
-							= SemtoolStructureManagerImpl.getPropStructure( predicate,
-									sheet.isRel() ? edgetype : subtype, schema, structurelkp,
-									( sheet.isRel() ? sheet.getRelname() : sheet.getSubjectType() )
-									+ "_" + propname );
-					myrc.add( stmts );
+				// save the ontology info for querying db structure
+				Collection<Statement> stmts
+						= SemtoolStructureManagerImpl.getPropStructure( predicate,
+								sheet.isRel() ? edgetype : subtype, schema, structurelkp,
+								( sheet.isRel() ? sheet.getRelname() : sheet.getSubjectType() )
+								+ "_" + propname );
+				model.addAll( stmts );
 
-					if ( !alreadyMadeProp ) {
-						myrc.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-						myrc.add( predicate, RDF.TYPE, OWL.DATATYPEPROPERTY );
-					}
+				if ( !alreadyMadeProp ) {
+					model.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
+					model.add( predicate, RDF.TYPE, OWL.DATATYPEPROPERTY );
 				}
 			}
 		}
+
+		return model;
 	}
 
 	@Override
