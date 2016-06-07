@@ -31,7 +31,6 @@ import org.junit.Test;
 public class EngineUtilTest {
 
 	private static final Logger log = Logger.getLogger( EngineUtilTest.class );
-	private static final File LEGACY = new File( "src/test/resources/legacy.xlsx" );
 	private File dbfile;
 	private IEngine eng;
 

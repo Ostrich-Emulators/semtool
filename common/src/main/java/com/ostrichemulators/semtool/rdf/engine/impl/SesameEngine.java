@@ -25,6 +25,9 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
+import org.openrdf.sail.nativerdf.NativeStore;
 
 /**
  *
@@ -40,38 +43,49 @@ public class SesameEngine extends AbstractSesameEngine {
 	protected void createRc( Properties props ) throws RepositoryException {
 		String url = props.getProperty( REPOSITORY_KEY );
 		String ins = props.getProperty( INSIGHTS_KEY );
-		boolean local = Boolean.parseBoolean( props.getProperty( REMOTE_KEY,
+		boolean remote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY,
 				Boolean.FALSE.toString() ) );
 
-		Pattern pat = Pattern.compile( "^(.*)/repositories/(.*)" );
-		Matcher m = pat.matcher( url );
-		if ( m.find() ) {
-			for ( int i = 0; i < m.groupCount(); i++ ) {
-				log.debug( m.group( i ) );
+		if ( remote ) {
+			Pattern pat = Pattern.compile( "^(.*)/repositories/(.*)" );
+			Matcher m = pat.matcher( url );
+			if ( m.find() ) {
+				for ( int i = 0; i < m.groupCount(); i++ ) {
+					log.debug( m.group( i ) );
+				}
 			}
+
+			String username = props.getProperty( "username", "" );
+			String password = props.getProperty( "password", "" );
+
+			HTTPRepository repo = ( m.find()
+					? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
+					: new HTTPRepository( url ) );
+			if ( !username.isEmpty() ) {
+				repo.setUsernameAndPassword( username, password );
+			}
+			repo.initialize();
+
+			data = repo.getConnection();
+
+			m.reset( ins );
+			HTTPRepository tmp = ( m.find()
+					? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
+					: new HTTPRepository( url ) );
+			if ( !username.isEmpty() ) {
+				tmp.setUsernameAndPassword( username, password );
+			}
+			insights = tmp;
 		}
+		else {
+			Repository repo = new SailRepository( new ForwardChainingRDFSInferencer(
+					new NativeStore( new File( url ) ) ) );
+			insights = new SailRepository( new ForwardChainingRDFSInferencer(
+					new NativeStore( new File( ins ) ) ) );
+			repo.initialize();
 
-		String username = props.getProperty( "username", "" );
-		String password = props.getProperty( "password", "" );
-
-		HTTPRepository repo = ( m.find()
-				? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
-				: new HTTPRepository( url ) );
-		if ( !username.isEmpty() ) {
-			repo.setUsernameAndPassword( username, password );
+			data = repo.getConnection();
 		}
-		repo.initialize();
-
-		data = repo.getConnection();
-
-		m.reset( ins );
-		HTTPRepository tmp = ( m.find()
-				? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
-				: new HTTPRepository( url ) );
-		if ( !username.isEmpty() ) {
-			tmp.setUsernameAndPassword( username, password );
-		}
-		insights = tmp;
 	}
 
 	public static Properties generateProperties( File dir ) {
@@ -91,6 +105,17 @@ public class SesameEngine extends AbstractSesameEngine {
 	@Override
 	protected InsightManager createInsightManager() {
 		return InsightManagerImpl.createFromRepository( insights );
+	}
+
+	@Override
+	public void closeDB() {
+		try {
+			insights.shutDown();
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+		}
+		super.closeDB();
 	}
 
 	@Override

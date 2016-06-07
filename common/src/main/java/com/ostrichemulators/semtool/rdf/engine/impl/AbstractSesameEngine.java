@@ -283,7 +283,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 				log.warn( e, e );
 			}
 		}
-
+		
 		if ( null != getRawConnection() ) {
 			RepositoryConnection rc = getRawConnection();
 			if ( null != rc ) {

@@ -5,8 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.bigdata.rdf.sail.BigdataSail;
-import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
 import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
@@ -28,6 +26,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.impl.AbstractEngine;
 import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
+import com.ostrichemulators.semtool.rdf.engine.impl.SesameEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
@@ -61,7 +60,9 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.turtle.TurtleParser;
+import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
+import org.openrdf.sail.nativerdf.NativeStore;
 
 /**
  * A class to centralize Engine operations. This class is thread-safe, and if
@@ -256,13 +257,15 @@ public class EngineUtil2 {
 		}
 
 		// make the big data journal, and then write out the (empty) OWL file
-		File jnl = new File( enginedir, dbname + ".jnl" );
+		//File jnl = new File( enginedir, dbname + ".jnl" );
+		File db = new File( enginedir, dbname );
 
-		if ( jnl.exists() ) {
+		if ( db.exists() ) {
 			throw new IOException( "KB journal already exists" );
 		}
 
-		smssprops.setProperty( BigdataSail.Options.FILE, jnl.getAbsolutePath() );
+		smssprops = SesameEngine.generateProperties( db );
+		//smssprops.setProperty( BigdataSail.Options.FILE, jnl.getAbsolutePath() );
 
 		if ( log.isDebugEnabled() ) {
 			StringBuilder sb = new StringBuilder( "creation properties:" );
@@ -272,8 +275,12 @@ public class EngineUtil2 {
 			log.debug( sb.toString() );
 		}
 
-		BigdataSail sail = new BigdataSail( smssprops );
-		BigdataSailRepository repo = new BigdataSailRepository( sail );
+		Repository repo = new SailRepository( new ForwardChainingRDFSInferencer(
+				new NativeStore( new File( smssprops.getProperty(
+						SesameEngine.REPOSITORY_KEY ) ) ) ) );
+
+		//BigdataSail sail = new BigdataSail( smssprops );
+		//BigdataSailRepository repo = new BigdataSailRepository( sail );
 		try {
 			repo.initialize();
 			RepositoryConnection rc = repo.getConnection();
@@ -339,7 +346,7 @@ public class EngineUtil2 {
 			return null;
 		}
 
-		return jnl;
+		return db;
 	}
 
 	private static List<Statement> getStatementsFromResource( URL resource,
