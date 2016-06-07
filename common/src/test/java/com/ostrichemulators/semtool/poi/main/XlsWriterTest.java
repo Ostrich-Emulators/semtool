@@ -182,7 +182,8 @@ public class XlsWriterTest {
 		writer.write( aos );
 
 		// we get slightly different sizes per builds
-		assertTrue( aos.size() > 3270 && aos.size() < 3300 );
+		assertTrue( "buffer out of range: " + aos.size(),
+				aos.size() > 3270 && aos.size() < 3350 );
 	}
 
 	@Test
