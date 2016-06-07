@@ -45,6 +45,7 @@ import javax.swing.JLabel;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.SKOS;
 
 /**
  * This class is used to create a popup menu for the TF instance relation.
@@ -127,6 +128,8 @@ public class TraverseFreelyPopup extends JMenu {
 					NodeDerivationTools.getConnectedConceptTypes( instances, engine,
 							subjectStyle ) );
 		}
+		neighborTypes.removeAll( Arrays.asList( OWL.THING, RDFS.RESOURCE, SKOS.CONCEPT,
+				engine.getSchemaBuilder().getConceptUri().build() ) );
 
 		for ( URI nt : neighborTypes ) {
 			logger.debug( "neighbor type: " + nt );
@@ -158,8 +161,9 @@ public class TraverseFreelyPopup extends JMenu {
 		StringBuilder query = new StringBuilder( "CONSTRUCT { ?subject ?predicate ?object } " )
 				.append( "WHERE { " )
 				.append( "  ?subject ?predicate ?object ." )
-				.append( "  ?subject a ?subtype ." )
-				.append( "  ?object a ?objtype . VALUES ?" )
+				.append( "  ?subject a ?subtype . FILTER( ?subtype != ?skos ) ." )
+				.append( "  ?object a ?objtype . FILTER( ?objtype != ?skos ) ." )
+				.append( "   VALUES ?" )
 				.append( instanceIsSubject ? "subject" : "object" );
 		query.append( "{ " )
 				.append( Utility.implode( instances ) )
@@ -167,6 +171,7 @@ public class TraverseFreelyPopup extends JMenu {
 		query.append( "}" );
 
 		ModelQueryAdapter mqa = new ModelQueryAdapter( query.toString() );
+		mqa.bind( "skos", SKOS.CONCEPT );
 		mqa.bind( instanceIsSubject ? "objtype" : "subtype", totype );
 		logger.debug( "expander query is: " + mqa.bindAndGetSparql() );
 

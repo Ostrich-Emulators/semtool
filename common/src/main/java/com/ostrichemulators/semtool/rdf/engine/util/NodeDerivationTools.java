@@ -176,17 +176,19 @@ public class NodeDerivationTools {
 				+ "WHERE { \n"
 				+ "  ?subject ?predicate ?object .\n"
 				+ "  ?subject a ?subtype .\n"
-				+ "  ?subtype rdfs:subClassOf ?concept . FILTER( ?subtype != ?concept ) .\n"
+				+ "  ?subtype rdfs:subClassOf ?concept . FILTER( ?subtype != ?concept && ?subtype != ?skos ) .\n"
 				+ "  ?object a ?objtype .\n"
-				+ "  ?objtype rdfs:subClassOf ?concept . FILTER( ?objtype != ?concept ) .\n"
+				+ "  ?objtype rdfs:subClassOf ?concept . FILTER( ?objtype != ?concept && ?objtype != ?skos ) .\n"
 				+ "}";
 
 		OneVarListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList( query );
 		lqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
+		lqa.bind( "skos", SKOS.CONCEPT );
+
 		if ( instanceIsSubject ) {
 			lqa.setVariableName( "objtype" );
 			lqa.bind( "subject", instance );
-		}
+	}
 		else {
 			lqa.setVariableName( "subtype" );
 			lqa.bind( "object", instance );
@@ -247,8 +249,9 @@ public class NodeDerivationTools {
 		StringBuilder query = new StringBuilder( "SELECT DISTINCT ?subtype ?objtype " )
 				.append( "WHERE { " )
 				.append( "  ?subject ?predicate ?object ." )
-				.append( "  ?subject a ?subtype ." )
+				.append( "  ?subject a ?subtype . FILTER( ?subtype != ?skos ) ." )
 				.append( "  ?object a ?objtype . FILTER isUri( ?object ) ." )
+				.append( "  FILTER( ?objtype != ?skos ) .")
 				.append( "  MINUS { ?subject a ?object } " )
 				.append( "} VALUES ?" );
 		query.append( instanceIsSubject ? "subject " : "object" );
@@ -258,6 +261,7 @@ public class NodeDerivationTools {
 
 		OneVarListQueryAdapter<URI> lqa
 				= OneVarListQueryAdapter.getUriList( query.toString() );
+		lqa.bind( "skos", SKOS.CONCEPT );
 		if ( instanceIsSubject ) {
 			lqa.setVariableName( "objtype" );
 		}
