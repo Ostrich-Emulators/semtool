@@ -60,6 +60,7 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.turtle.TurtleParser;
+import org.openrdf.sail.Sail;
 import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 import org.openrdf.sail.nativerdf.NativeStore;
@@ -275,9 +276,12 @@ public class EngineUtil2 {
 			log.debug( sb.toString() );
 		}
 
-		Repository repo = new SailRepository( new ForwardChainingRDFSInferencer(
-				new NativeStore( new File( smssprops.getProperty(
-						SesameEngine.REPOSITORY_KEY ) ) ) ) );
+		NativeStore store
+				= new NativeStore( new File( smssprops.getProperty( SesameEngine.REPOSITORY_KEY ) ) );
+		Sail sail = ( ecb.isCalcInfers()
+				? new ForwardChainingRDFSInferencer( store )
+				: store );
+		Repository repo = new SailRepository( sail );
 
 		//BigdataSail sail = new BigdataSail( smssprops );
 		//BigdataSailRepository repo = new BigdataSailRepository( sail );
@@ -309,7 +313,7 @@ public class EngineUtil2 {
 					ecb.getReificationModel().uri ) );
 
 			String tooling = Utility.getBuildProperties( EngineUtil2.class )
-							.getProperty( "name", "unknown" );
+					.getProperty( "name", "unknown" );
 			rc.add( new StatementImpl( baseuri, SEMCORE.SOFTWARE_AGENT,
 					vf.createLiteral( tooling ) ) );
 
