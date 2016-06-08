@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.JCheckBox;
 import org.openrdf.model.Model;
+import org.openrdf.model.Value;
 
 /**
  * @author john.marquiss
@@ -76,9 +77,8 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 	private File exportFile;
 	private String successMessage = "";
 	private List<URI[]> selectedTriples;
-	private final OneVarListQueryAdapter<URI> query
-			= OneVarListQueryAdapter.getUriList( "SELECT ?entity WHERE {?entity ?subclass ?concept}", "entity" );
 	private final JCheckBox togrid = new JCheckBox( "Export to Grid" );
+	private StructureManager structures;
 
 	public ExportSpecificRelationshipsToLoadingSheetAction( String optg, Frame _owner ) {
 		super( optg, EXPORTLSSOMERELS, "excel" );
@@ -86,7 +86,6 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		this.owner = _owner;
 		putValue( AbstractAction.SHORT_DESCRIPTION, "Export Specific Relationships" );
 		putValue( AbstractAction.MNEMONIC_KEY, KeyEvent.VK_S );
-		query.bind( "subclass", RDFS.SUBCLASSOF );
 	}
 
 	@Override
@@ -394,10 +393,14 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 			}
 		}
 
-		if ( getNumberOfVisibleRows() == 9 ) {
+		int numvis = getNumberOfVisibleRows();
+		if ( Constants.MAX_EXPORTS == numvis ) {
 			addRelationshipButton.setVisible( false );
 			maxExportLimitLabel.setVisible( true );
 		}
+
+		subjectSelectedActionPerformed(
+				new ActionEvent( subjectComboBoxes.get( numvis - 1 ), 1, null ) );
 
 		dialog.pack();
 	}
@@ -444,17 +447,12 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 	private void initAllNodes() {
 		initializeComboBox( relationComboBoxes.get( 0 ), true );
 		initializeComboBox( objectComboBoxes.get( 0 ), true );
+		structures = StructureManagerFactory.getStructureManager( getEngine() );
 
 		//populate all of the subject combo boxes
-		query.bind( "concept", getEngine().getSchemaBuilder().getConceptUri().build() );
 		Map<URI, String> labels = new HashMap<>();
-		try {
-			List<URI> uris = getEngine().query( query );
-			labels.putAll( Utility.getInstanceLabels( uris, getEngine() ) );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-		}
+		Set<URI> uris = structures.getTopLevelConcepts();
+		labels.putAll( Utility.getInstanceLabels( uris, getEngine() ) );
 
 		for ( int i = 1; i < Constants.MAX_EXPORTS; i++ ) {
 			removeRowButtons.get( i ).setVisible( false );
@@ -538,33 +536,17 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 	 * @param nodeType String
 	 */
 	private List<URI> runObjectsQuery( URI nodeType ) {
-		String q = "SELECT DISTINCT ?s WHERE { "
-				+ "  ?in  a         ?nodeType . "
-				+ "  ?s   ?subclass ?concept . "
-				+ "  ?out a         ?s . "
-				+ "  ?in  ?p        ?out . " // what is P?
-				+ "FILTER(?s != ?concept)"
-				+ "} ";
-
-		URI concept = getEngine().getSchemaBuilder().getConceptUri().build();
-		OneVarListQueryAdapter<URI> varq = OneVarListQueryAdapter.getUriList( q, "s" );
-		varq.bind( "nodeType", nodeType );
-		varq.bind( "subclass", RDFS.SUBCLASSOF );
-		varq.bind( "concept", concept );
-
-		List<URI> values;
-		try {
-			values = getEngine().query( varq );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			values = new ArrayList<>();
+		Model model = structures.getLinksBetween( nodeType, Constants.ANYNODE );
+		Set<URI> values = new HashSet<>();
+		for ( Value v : model.objects() ) {
+			values.add( URI.class.cast( v ) );
 		}
 
 		if ( values.isEmpty() ) {
 			values.add( Constants.ANYNODE );
 		}
 
-		return values;
+		return new ArrayList<>( values );
 	}
 
 	@Override
