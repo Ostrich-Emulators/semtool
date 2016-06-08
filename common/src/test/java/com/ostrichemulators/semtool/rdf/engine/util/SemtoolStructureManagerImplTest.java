@@ -11,12 +11,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.openrdf.model.Model;
@@ -44,35 +41,25 @@ public class SemtoolStructureManagerImplTest {
 	private static final URI YUGO = datab.build( "Yugo" );
 	private static final URI YURI = datab.build( "Yuri" );
 	private static final URI YPY = datab.build( "Yuri_Purchased_Yugo" );
-	private static InMemorySesameEngine engine;
+	private InMemorySesameEngine engine;
 	private SemtoolStructureManagerImpl structman;
 
 	public SemtoolStructureManagerImplTest() {
 	}
 
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		Properties props = new Properties();
-		props.setProperty( InMemorySesameEngine.INFER, Boolean.TRUE.toString() );
-		engine = InMemorySesameEngine.open( props );
+	@Before
+	public void setUp() throws Exception {
+		engine = InMemorySesameEngine.open( true );
 		engine.setBuilders( datab, owlb );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );
 		engine.getRawConnection().commit();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		engine.closeDB();
-	}
-
-	@Before
-	public void setUp() {
 		structman = new SemtoolStructureManagerImpl( engine );
 	}
 
 	@After
 	public void tearDown() {
+		engine.closeDB();
 	}
 
 	@Test
@@ -167,6 +154,22 @@ public class SemtoolStructureManagerImplTest {
 		Model old = structman.getModel();
 		Model model = structman.rebuild( false );
 		assertEquals( old, model );
+	}
+
+	@Test
+	public void testRebuildSave() throws Exception {
+		Model old = structman.getModel();
+
+		// get rid of the old model
+		engine.getRawConnection().begin();
+		engine.getRawConnection().remove( old );
+		engine.getRawConnection().commit();
+
+		assertTrue( structman.getModel().isEmpty() );
+
+		Model m = structman.rebuild( true );
+		assertEquals( old, structman.getModel() );
+		assertEquals( old, m );
 	}
 
 	@Test

@@ -296,20 +296,14 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	private void save( Model model ) {
-		// get URIs to completely remove
-		ListQueryAdapter<URI> oldqa
-				= OneVarListQueryAdapter.getUriList( "SELECT ?s WHERE { s a ?type }" );
-		oldqa.bind( "type", SEMTOOL.Structure );
-		List<URI> olds = engine.queryNoEx( oldqa );
+		// get old model, which we'll remove
+		Model olds = getModel();
 
-		ModificationExecutor eme = new ModificationExecutorAdapter() {
+		ModificationExecutor eme = new ModificationExecutorAdapter( true ) {
 
 			@Override
 			public void exec( RepositoryConnection conn ) throws RepositoryException {
-				for ( URI old : olds ) {
-					conn.remove( old, null, null );
-				}
-
+				conn.remove( olds );
 				conn.add( model );
 			}
 		};
