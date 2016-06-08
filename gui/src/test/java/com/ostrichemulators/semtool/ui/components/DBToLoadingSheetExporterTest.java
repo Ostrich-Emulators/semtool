@@ -6,7 +6,6 @@
 package com.ostrichemulators.semtool.ui.components;
 
 import com.ostrichemulators.semtool.rdf.engine.util.DBToLoadingSheetExporter;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +25,8 @@ import org.junit.Test;
 import org.openrdf.model.URI;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 
 import com.ostrichemulators.semtool.util.GuiUtility;
@@ -115,7 +116,8 @@ public class DBToLoadingSheetExporterTest {
 			}
 		} );
 
-		List<URI> concepts = NodeDerivationTools.createConceptList( eng );
+		StructureManager sm = StructureManagerFactory.getStructureManager( eng );
+		List<URI> concepts = new ArrayList<>( sm.getTopLevelConcepts() );
 		Collections.sort( concepts, new Comparator<URI>() {
 
 			@Override

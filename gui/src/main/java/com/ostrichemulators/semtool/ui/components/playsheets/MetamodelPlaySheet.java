@@ -31,7 +31,8 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.om.SEMOSSEdge;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.util.MultiMap;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -89,13 +90,16 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
 		LinkedHashModel model = new LinkedHashModel();
 
-		Collection<URI> concepts = NodeDerivationTools.createConceptList( engine );
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
+
+		Collection<URI> concepts = sm.getTopLevelConcepts();
 		// make sure we can add nodes for concepts that don't have any edges
 		Set<URI> conceptsNoEdges = new HashSet<>( concepts );
 
 		for ( URI stype : concepts ) {
 			for ( URI otype : concepts ) {
-				for ( URI edge : NodeDerivationTools.getConnections( stype, otype, engine ) ) {
+				Model m = sm.getLinksBetween( stype, otype );
+				for ( URI edge : m.predicates() ) {
 					model.add( stype, edge, otype );
 
 					conceptsNoEdges.remove( stype );

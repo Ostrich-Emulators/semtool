@@ -9,6 +9,7 @@ import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 
 /**

@@ -2,7 +2,6 @@ package com.ostrichemulators.semtool.ui.components;
 
 import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.rdf.engine.util.DBToLoadingSheetExporter;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.XlsWriter;
 
@@ -27,6 +26,8 @@ import org.openrdf.model.URI;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairRenderer;
 import com.ostrichemulators.semtool.ui.components.UriComboBox.UriLabelPair;
 import com.ostrichemulators.semtool.util.GuiUtility;
@@ -37,6 +38,7 @@ import com.ostrichemulators.semtool.util.Utility;
 import java.awt.Desktop;
 import java.util.Map;
 
+import java.util.Set;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 
@@ -121,7 +123,8 @@ public class ExportSpecificNodesPanel extends JPanel {
 	}
 
 	private URI[] getAllNodes() {
-		List<URI> uriconcepts = NodeDerivationTools.createConceptList( engine );
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
+		Set<URI> uriconcepts = sm.getTopLevelConcepts();
 		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 

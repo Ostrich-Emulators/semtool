@@ -8,6 +8,8 @@ package com.ostrichemulators.semtool.ui.components.semanticexplorer;
 import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import javax.swing.GroupLayout;
@@ -220,8 +223,9 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 		invisibleRoot.removeAllChildren();
 
 		ArrayList<URITreeNode> conceptListURITreeNodes = new ArrayList<>();
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-		List<URI> concepts = NodeDerivationTools.createConceptList( engine );
+		Set<URI> concepts = sm.getTopLevelConcepts();
 		for ( URI concept : concepts ) {
 			URITreeNode conceptNode = new URITreeNode( concept, useLabels );
 			conceptListURITreeNodes.add( conceptNode );

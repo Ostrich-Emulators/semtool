@@ -7,7 +7,8 @@ package com.ostrichemulators.semtool.ui.components.insight.manager;
 
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.Parameter;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.ui.components.UriComboBox;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairRenderer;
 import com.ostrichemulators.semtool.util.Constants;
@@ -17,6 +18,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JComboBox;
@@ -164,8 +166,8 @@ public class ParameterPanel extends DataPanel<Parameter> {
   }// </editor-fold>//GEN-END:initComponents
 
   private void conceptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conceptbtnActionPerformed
-
-		List<URI> uris = NodeDerivationTools.createConceptList( getEngine() );
+		StructureManager sm = StructureManagerFactory.getStructureManager( getEngine() );
+		Set<URI> uris = sm.getTopLevelConcepts();
 		Map<URI, String> labels = Utility.getInstanceLabels( uris, getEngine() );
 		labels = Utility.sortUrisByLabel( labels );
 

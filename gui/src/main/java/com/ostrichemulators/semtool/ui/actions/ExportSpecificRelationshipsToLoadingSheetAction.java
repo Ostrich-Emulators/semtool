@@ -35,7 +35,8 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.engine.util.DBToLoadingSheetExporter;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.ui.components.UriComboBox;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
@@ -49,7 +50,10 @@ import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.IOException;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.JCheckBox;
+import org.openrdf.model.Model;
 
 /**
  * @author john.marquiss
@@ -484,13 +488,15 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		UriComboBox subjectCB = subjectComboBoxes.get( index );
 		UriComboBox relCB = relationComboBoxes.get( index );
 		UriComboBox objectCB = objectComboBoxes.get( index );
+		StructureManager sm = StructureManagerFactory.getStructureManager( getEngine() );
 
-		List<URI> values = NodeDerivationTools.getPredicatesBetween( subjectCB.getSelectedUri(),
-				objectCB.getSelectedUri(), getEngine() );
-		if( values.isEmpty() ){
+		Model model = sm.getLinksBetween( subjectCB.getSelectedUri(),
+				objectCB.getSelectedUri() );
+		Set<URI> values = new HashSet<>( model.predicates() );
+		if ( model.isEmpty() ) {
 			values.add( Constants.ANYNODE );
 		}
-		
+
 		relCB.setEditable( false );
 		relCB.setData( Utility.getInstanceLabels( values, getEngine() ) );
 

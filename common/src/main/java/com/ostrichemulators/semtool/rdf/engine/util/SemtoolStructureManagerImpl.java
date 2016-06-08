@@ -11,6 +11,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.ModificationExecutor;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ModelQueryAdapter;
+import com.ostrichemulators.semtool.rdf.query.util.impl.OneValueQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.UriBuilder;
@@ -47,7 +48,7 @@ import org.openrdf.repository.RepositoryException;
  *
  * @author ryan
  */
-public class SemtoolStructureManagerImpl implements StructureManager {
+public final class SemtoolStructureManagerImpl implements StructureManager {
 
 	private static final Logger log = Logger.getLogger( SemtoolStructureManagerImpl.class );
 
@@ -59,10 +60,6 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 			+ "    owl:DatatypeProperty ?prop .\n"
 			+ "  ?dom a|rdfs:subPropertyOf* ?domain .\n"
 			+ "}" );
-
-	public StructureManager getStructureManager( IEngine eng ) {
-		return new SemtoolStructureManagerImpl( eng );
-	}
 
 	protected SemtoolStructureManagerImpl( IEngine engine ) {
 		this.engine = engine;
@@ -174,14 +171,16 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 		return engine.constructNoEx( qa );
 	}
 
-	@Override
-	public Model rebuild( boolean saveToEngine ) {
+	private Model doRebuild( Collection<URI> uris ){
 		// get all concepts
 		String cquery = "SELECT DISTINCT ?instance WHERE { ?instance rdfs:subClassOf ?concept }";
 		ListQueryAdapter<URI> cqa = OneVarListQueryAdapter.getUriList( cquery );
 		cqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 		cqa.useInferred( false );
 		List<URI> concepts = engine.queryNoEx( cqa );
+		if( null != uris ){
+			concepts.retainAll( uris );
+		}
 
 		// get all edge types
 		String equery = "SELECT DISTINCT ?instance WHERE { ?instance rdfs:subPropertyOf ?semrel }";
@@ -189,6 +188,9 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 		eqa.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
 		eqa.useInferred( false );
 		List<URI> edges = engine.queryNoEx( eqa );
+		if( null != uris ){
+			edges.retainAll( uris );
+		}
 
 		Model edgemodel = rebuildEdges( concepts, edges );
 		Model propmodel = rebuildProps( concepts, edges );
@@ -230,6 +232,18 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 					URI.class.cast( s.getSubject() ), schema, structurelkp, name ) );
 		}
 
+		return model;
+	}
+
+	@Override
+	public Model rebuild( Collection<URI> uris ){
+		return doRebuild( uris );
+	}
+
+	@Override
+	public Model rebuild( boolean saveToEngine ) {
+		Model model = doRebuild( null );
+
 		if ( saveToEngine ) {
 			save( model );
 		}
@@ -267,9 +281,9 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 
 		// now see what concepts connect to others via our edge types
 		String query = "CONSTRUCT { ?stype ?rtype ?otype } WHERE {\n"
-				+ "  ?s a ?stype .\n"
-				+ "  ?o a ?otype .\n"
-				+ "  ?r a|rdfs:subPropertyOf ?rtype .\n"
+				+ "  ?s a|rdfs:subClassOf+ ?stype .\n"
+				+ "  ?o a|rdfs:subClassOf+ ?otype .\n"
+				+ "  ?r a|rdfs:subPropertyOf+ ?rtype .\n"
 				+ "  ?s ?r ?o .\n"
 				+ "  VALUES ?stype {" + cimplosion + "} .\n"
 				+ "  VALUES ?otype {" + cimplosion + "} .\n"
@@ -349,4 +363,17 @@ public class SemtoolStructureManagerImpl implements StructureManager {
 		return stmts;
 	}
 
+	@Override
+	public URI getTopLevelType( URI instance ) {
+		String query = "SELECT ?type WHERE { "
+				+ "  ?subject a|rdfs:subClassOf|rdfs:subPropertyOf ?type "
+				+ "}";
+		OneValueQueryAdapter<URI> qa = OneValueQueryAdapter.getUri( query );
+		qa.bind( "subject", instance );
+		qa.useInferred( false );
+		String q = qa.bindAndGetSparql();
+		log.debug( "type query: " + q );
+
+		return engine.queryNoEx( qa );
+	}
 }

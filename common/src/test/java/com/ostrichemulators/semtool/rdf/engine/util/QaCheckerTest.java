@@ -9,6 +9,7 @@ import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
+import com.ostrichemulators.semtool.rdf.engine.util.QaChecker.CacheType;
 import com.ostrichemulators.semtool.util.DeterministicSanitizer;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.io.File;
@@ -39,11 +40,11 @@ import org.openrdf.rio.RDFFormat;
 public class QaCheckerTest {
 
 	private static final URI BASEURI = new URIImpl( "http://junk.com/testfiles" );
-	private static final URI OWLSTART = new URIImpl( "http://owl.junk.com/testfiles" );
+	private static final URI OWLSTART = new URIImpl( "http://owl.junk.com/testfiles/" );
 	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
-	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
+	private static final UriBuilder OWLB = UriBuilder.getBuilder( OWLSTART );
+	private static final UriBuilder DATAB = UriBuilder.getBuilder( DATAURI );
 
-	private static final File LEGACY = new File( "src/test/resources/legacy.xlsx" );
 	private static final File LEGACY_EXP = new File( "src/test/resources/legacy-mm.nt" );
 
 	private InMemorySesameEngine engine;
@@ -61,7 +62,7 @@ public class QaCheckerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		engine = InMemorySesameEngine.open();
+		engine = InMemorySesameEngine.open( true );
 		el = new QaChecker();
 	}
 
@@ -91,8 +92,7 @@ public class QaCheckerTest {
 
 	@Test
 	public void testLoadCachesLegacy() throws Exception {
-		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
-				UriBuilder.getBuilder( OWLSTART ) );
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ), OWLB );
 
 		RepositoryConnection rc = engine.getRawConnection();
 		rc.begin();
@@ -165,28 +165,67 @@ public class QaCheckerTest {
 
 	@Test
 	public void testLoadCachesModern() throws Exception {
-		engine.setBuilders( UriBuilder.getBuilder( BASEURI ),
-				UriBuilder.getBuilder( OWLSTART ) );
-		engine.getRawConnection().add(engine.getBaseUri(), SEMTOOL.ReificationModel,
+		engine.setBuilders( UriBuilder.getBuilder( BASEURI ), OWLB );
+		engine.getRawConnection().add( engine.getBaseUri(), SEMTOOL.ReificationModel,
 				SEMTOOL.SEMTOOL_Reification );
 
 		RepositoryConnection rc = engine.getRawConnection();
 		rc.begin();
+		rc.setNamespace( "schema", OWLB.toString() );
+		rc.setNamespace( "data", DATAURI.stringValue() );
 
-		final URI DESC = new URIImpl( "http://owl.junk.com/testfiles/Description" );
+		final URI DESC = OWLB.build( "Description" );
 		rc.add( DESC, RDF.TYPE, OWL.DATATYPEPROPERTY );
-		rc.add( DESC, RDFS.LABEL, new LiteralImpl( "Description" ) );
+		rc.add( DESC, RDFS.LABEL, new LiteralImpl( "508 Compliance" ) );
 
-		rc.add( new URIImpl( "http://schema.org/xyz" ), RDFS.LABEL,
-				new LiteralImpl( "508 Compliant?" ) );
-		rc.add( new URIImpl( "http://schema.org/xyz" ), RDF.TYPE, OWL.DATATYPEPROPERTY );
+		final URI RELDESC = OWLB.build( "RelDesc" );
+		rc.add( RELDESC, RDF.TYPE, OWL.DATATYPEPROPERTY );
+		rc.add( RELDESC, RDFS.LABEL, new LiteralImpl( "Zippalee!" ) );
+
+		final URI conceptclass = OWLB.build( "myconceptclass1" );
+		rc.add( conceptclass, RDF.TYPE, RDFS.CLASS );
+		rc.add( conceptclass, RDFS.SUBCLASSOF, OWLB.getConceptUri().build() );
+		rc.add( conceptclass, RDFS.LABEL, new LiteralImpl( "My Concept Class 1" ) );
+
+		final URI conceptclass2 = OWLB.build( "myconceptclass2" );
+		rc.add( conceptclass2, RDF.TYPE, RDFS.CLASS );
+		rc.add( conceptclass2, RDFS.SUBCLASSOF, OWLB.getConceptUri().build() );
+		rc.add( conceptclass2, RDFS.LABEL, new LiteralImpl( "My Concept Class 2" ) );
+
+		final URI concept = DATAB.build( "myconcept1" );
+		rc.add( concept, RDF.TYPE, RDFS.CLASS );
+		rc.add( concept, RDFS.SUBCLASSOF, conceptclass );
+		rc.add( concept, RDFS.LABEL, new LiteralImpl( "My Concept" ) );
+		rc.add( concept, DESC, new LiteralImpl( "508 Compliant?" ) );
+
+		final URI concept2 = DATAB.build( "myconcept2" );
+		rc.add( concept2, RDF.TYPE, RDFS.CLASS );
+		rc.add( concept2, RDFS.SUBCLASSOF, conceptclass2 );
+		rc.add( concept2, RDFS.LABEL, new LiteralImpl( "My Other Concept" ) );
+		rc.add( concept2, DESC, new LiteralImpl( "feliz cumpleaños" ) );
+
+		final URI relclass = OWLB.build( "relationclass" );
+		rc.add( relclass, RDF.TYPE, OWL.OBJECTPROPERTY );
+		rc.add( relclass, RDFS.SUBPROPERTYOF, OWLB.getRelationUri().build() );
+		rc.add( relclass, RDFS.LABEL, new LiteralImpl( "A Relation Class" ) );
+
+		final URI rel = DATAB.build( "myrel" );
+		rc.add( rel, RDFS.SUBPROPERTYOF, relclass );
+		rc.add( rel, RDFS.LABEL, new LiteralImpl( "My Relation" ) );
+		rc.add( rel, RELDESC, new LiteralImpl( "A Relation Prop" ) );
+		rc.add( concept, rel, concept2 );
 
 		rc.commit();
 
 		el.loadCaches( engine );
 
-		assertTrue( el.hasCachedPropertyClass( "Description" ) );
-		assertTrue( el.hasCachedPropertyClass( "508 Compliant?" ) );
+		assertFalse( el.hasCachedPropertyClass( "Description" ) );
+		assertTrue( el.hasCachedPropertyClass( "508 Compliance" ) );
+		assertTrue( el.hasCachedPropertyClass( "Zippalee!" ) );
+
+		assertEquals( 2, el.getCache( CacheType.CONCEPTCLASS ).size() );
+		assertEquals( 2, el.getCache( CacheType.PROPERTYCLASS ).size() );
+		assertEquals( 1, el.getCache( CacheType.RELATIONCLASS ).size() );
 	}
 
 	@Test
@@ -217,8 +256,7 @@ public class QaCheckerTest {
 
 	@Test
 	public void testSeparateConformanceErrors() throws Exception {
-		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
-				UriBuilder.getBuilder( OWLSTART ) );
+		engine.setBuilders( DATAB, OWLB );
 
 		engine.getRawConnection().add( LEGACY_EXP, "", RDFFormat.NTRIPLES );
 

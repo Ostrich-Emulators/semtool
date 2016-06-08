@@ -5,6 +5,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.MapQueryAdapter;
+import com.ostrichemulators.semtool.rdf.query.util.impl.ModelQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneValueQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
@@ -17,17 +18,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.query.BindingSet;
 
 /**
- * This class is responsible for providing a number of utility methods for the
- * SEMOSS system, specifically in the area of producing concept collections from
- * gross RDF content, and deriving predicates.
+ * This class analogous to {@link StructureManager}, but instances instead of
+ * top-level URIs.
  *
- * @author Wayne Warren
+ * @author ryan
  *
  */
 public class NodeDerivationTools {
@@ -71,28 +72,32 @@ public class NodeDerivationTools {
 		}
 	}
 
-	/**
-	 * Produces a list of concepts based on a given engine that has digested a RDF
-	 * knowledgebase.
-	 *
-	 * @param engine The RDF knowledgebase
-	 * @return A list of concepts in URI form
-	 * @deprecated use {@link StructureManager#getTopLevelConcepts() }
-	 */
-	@Deprecated
-	public static List<URI> createConceptList( IEngine engine ) {
-		OneVarListQueryAdapter<URI> qe
-				= OneVarListQueryAdapter.getUriList( getConceptQuery( engine ) );
-		final List<URI> conceptList = engine.queryNoEx( qe );
-		return conceptList;
-	}
-
 	public static List<URI> createInstanceList( URI concept, IEngine engine ) {
-		String query = "SELECT DISTINCT ?instance WHERE { ?instance rdf:type ?concept }";
+		String query = "SELECT DISTINCT ?instance WHERE { "
+				+ "  ?instance rdfs:subClassOf+|rdfs:subPropertyOf+ ?concept ."
+				+ "  FILTER( ?instance != ?concept ) ."
+				+ "}";
 		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query );
 		qa.bind( "concept", concept );
 
 		return engine.queryNoEx( qa );
+	}
+
+	public static Model getInstances( URI subtype, URI predtype, URI objtype,
+			IEngine engine ){
+
+		String query = "CONSTRUCT { ?s ?p ?o } WHERE {\n"
+				+ "  ?s a|rdfs:subClassOf ?subtype .\n"
+				+ "  ?o a|rdfs:subClassOf ?objtype .\n"
+				+ "  ?p a|rdfs:subPropertyOf+ ?predtype .\n"
+				+ "  FILTER( ?s != ?subtype && ?o != ?objtype ) .\n"
+				+ "  ?s ?p ?o .\n"
+				+ "}";
+		ModelQueryAdapter mqa = new ModelQueryAdapter( query );
+		mqa.bind( "subtype", subtype );
+		mqa.bind( "objtype", objtype );
+		mqa.bind( "predtype", predtype );
+		return engine.constructNoEx( mqa );
 	}
 
 	/**
@@ -148,16 +153,6 @@ public class NodeDerivationTools {
 		List<URI> values = engine.queryNoEx( getPredicatesBetweenQA( subjectNodeType,
 				objectNodeType, engine ) );
 		return new ArrayList<>( getTopLevelRelations( values, engine ) );
-	}
-
-	public static URI getType( URI instance, IEngine engine ) {
-		String query = "SELECT ?object "
-				+ "WHERE { "
-				+ "  ?subject a ?object "
-				+ "  FILTER NOT EXISTS { ?subject a ?subtype . ?subtype rdfs:subClassOf ?object }"
-				+ "}";
-
-		return engine.queryNoEx( OneValueQueryAdapter.getUri( query ).bind( "subject", instance ) );
 	}
 
 	/**

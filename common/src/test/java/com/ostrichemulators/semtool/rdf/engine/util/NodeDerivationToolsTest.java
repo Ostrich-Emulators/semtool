@@ -68,23 +68,10 @@ public class NodeDerivationToolsTest {
 	}
 
 	@Test
-	public void testCreateConceptList() {
-		Set<URI> result = new HashSet<>( NodeDerivationTools.createConceptList( engine ) );
-		Set<URI> expected = new HashSet<>( Arrays.asList( HUMAN, CAR ) );
-		assertEquals( expected, result );
-	}
-
-	@Test
 	public void testGetPredicatesBetween_3args() {
 		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
 		Set<URI> result = new HashSet<>( NodeDerivationTools.getPredicatesBetween( HUMAN, CAR, engine ) );
 		assertEquals( expResult, result );
-	}
-
-	@Test
-	public void testGetType() {
-		URI result = NodeDerivationTools.getType( YUGO, engine );
-		assertEquals( CAR, result );
 	}
 
 	@Test

@@ -7,6 +7,8 @@ package com.ostrichemulators.semtool.ui.components.models;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.util.Utility;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,8 +42,9 @@ public final class GraphElementTreeModel extends DefaultTreeModel {
 
 	private void populateConcepts() {
 		DefaultMutableTreeNode rootnode = DefaultMutableTreeNode.class.cast( getRoot() );
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-		concepts.addAll( NodeDerivationTools.createConceptList( engine ) );
+		concepts.addAll( sm.getTopLevelConcepts() );
 		for ( URI concept : concepts ) {
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode( concept );
 			DefaultMutableTreeNode fetching = new DefaultMutableTreeNode( FETCHING );

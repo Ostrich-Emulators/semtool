@@ -14,6 +14,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import static com.ostrichemulators.semtool.rdf.engine.util.EngineLoader.cleanValue;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
+import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
@@ -27,12 +28,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
+import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
@@ -497,94 +503,78 @@ public class QaChecker {
 	}
 
 	private void load( IEngine engine ) {
-		final Map<String, URI> map = new HashMap<>();
-		String subpropq = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . ?uri a ?type }";
-		VoidQueryAdapter vqa = new VoidQueryAdapter( subpropq ) {
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
+		Model model = sm.rebuild( false );
 
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				map.put( set.getValue( "label" ).stringValue(),
-						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
+		Set<URI> datatypeProps = new HashSet<>();
+		for ( Statement s : model.filter( null, OWL.DATATYPEPROPERTY, null ) ) {
+			datatypeProps.add( URI.class.cast( s.getObject() ) );
+		}
+		Map<URI, String> dtlabels = Utility.getInstanceLabels( datatypeProps, engine );
+		cacheUris( CacheType.PROPERTYCLASS, MultiMap.lossyflip( dtlabels ) );
+
+		Set<URI> rels = new HashSet<>();
+		for ( Value v : model.filter( null, RDF.PREDICATE, null ).objects() ) {
+			rels.add( URI.class.cast( v ) );
+		}
+		Map<URI, String> rellabels = Utility.getInstanceLabels( rels, engine );
+		cacheUris( CacheType.RELATIONCLASS, MultiMap.lossyflip( rellabels ) );
+
+		Map<URI, String> cpclabels = Utility.getInstanceLabels( sm.getTopLevelConcepts(), engine );
+		cacheUris( CacheType.CONCEPTCLASS, MultiMap.lossyflip( cpclabels ) );
+
+		// cache concept instances
+		for ( Map.Entry<URI, String> en : rellabels.entrySet() ) {
+			List<URI> instances
+					= NodeDerivationTools.createInstanceList( en.getKey(), engine );
+			Map<URI, String> names = Utility.getInstanceLabels( instances, engine );
+			for ( Map.Entry<URI, String> en2 : names.entrySet() ) {
+				cacheInstance( en2.getKey(), en.getValue(), en2.getValue() );
 			}
+		}
 
-			@Override
-			public void start( List<String> bnames ) {
-				super.start( bnames );
-				map.clear();
+		// cache relation instances
+		Model preds = model.filter( null, RDF.PREDICATE, null );
+		for ( Statement s : preds ) {
+			URI pred = URI.class.cast( s.getObject() );
+			String relname = rellabels.get( pred );
+
+			// get the subject from the RDFS.DOMAIN statements
+			// and the object from the RDFS.RANGE statements
+			for ( Statement t : model.filter( s.getSubject(), RDFS.DOMAIN, null ) ) {
+				URI stype = URI.class.cast( t.getObject() );
+				String stypelabel = cpclabels.get( stype );
+
+				for ( Statement u : model.filter( s.getSubject(), RDFS.RANGE, null ) ) {
+					URI otype = URI.class.cast( u.getObject() );
+					String otypelabel = cpclabels.get( otype );
+
+					//FIXME: this returns too many statements
+					Model instancemodel = NodeDerivationTools.getInstances( stype, pred, otype, engine );
+					List<Resource> objs = new ArrayList<>();
+					instancemodel.objects().forEach( new Consumer<Value>() {
+
+						@Override
+						public void accept( Value t ) {
+							objs.add( Resource.class.cast( t ) );
+						}
+					} );
+					Map<Resource, String> lkp
+							= Utility.getInstanceLabels( instancemodel.subjects(), engine );
+					lkp.putAll( Utility.getInstanceLabels( objs, engine ) );
+
+					for ( Statement instance : instancemodel ) {
+						RelationCacheKey rck = new RelationCacheKey(
+								stypelabel,
+								otypelabel,
+								relname,
+								lkp.get( instance.getSubject() ),
+								lkp.get( Resource.class.cast( instance.getObject() ) ) );
+						cacheRelationNode( instance.getPredicate(), rck );
+					}
+				}
 			}
-		};
-		vqa.useInferred( true );
-		UriBuilder owlb = engine.getSchemaBuilder();
-
-		vqa.bind( "type", OWL.DATATYPEPROPERTY );
-		engine.queryNoEx( vqa );
-		cacheUris( CacheType.PROPERTYCLASS, map );
-
-		vqa.bind( "type", OWL.OBJECTPROPERTY );
-		engine.queryNoEx( vqa );
-		cacheUris( CacheType.RELATIONCLASS, map );
-
-		String subpropq2 = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . "
-				+ "?uri rdfs:subClassOf+ owl:Thing }";
-		vqa.setSparql( subpropq2 );
-		engine.queryNoEx( vqa );
-		cacheUris( CacheType.CONCEPTCLASS, map );
-
-		String instq = "SELECT DISTINCT ?sub ?rawlabel ?typelabel WHERE {"
-				+ "?sub a ?type ."
-				+ "?sub rdfs:label ?rawlabel ."
-				+ "?type a owl:Class ."
-				+ "?type rdfs:subClassOf ?concept ."
-				+ "?type rdfs:label ?typelabel"
-				+ "}";
-		VoidQueryAdapter vqa3 = new VoidQueryAdapter( instq ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				QaChecker.this.cacheInstance(
-						URI.class.cast( set.getValue( "sub" ) ),
-						set.getValue( "typelabel" ).stringValue(),
-						set.getValue( "rawlabel" ).stringValue() );
-			}
-
-		};
-		vqa3.useInferred( true );
-		vqa3.bind( "concept", owlb.getConceptUri().build() );
-		engine.queryNoEx( vqa3 );
-
-		String relq2 = "SELECT DISTINCT ?specrel ?stypelabel ?otypelabel ?slabel ?olabel ?relname "
-				+ "WHERE {"
-				+ "  ?specrel a ?semossrel ."
-				+ "  ?specrel rdf:predicate ?superrel ."
-				+ "  ?sub ?specrel ?obj ."
-				+ "  ?sub a ?stype ."
-				+ "  ?obj a ?otype ."
-				+ "  ?sub rdfs:label ?slabel ."
-				+ "  ?obj rdfs:label ?olabel ."
-				+ "  ?stype rdfs:label ?stypelabel ."
-				+ "  ?otype rdfs:label ?otypelabel ."
-				+ "  ?superrel rdfs:label ?relname"
-				+ "}";
-		VoidQueryAdapter vqa4 = new VoidQueryAdapter( relq2 ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				RelationCacheKey rck = new RelationCacheKey(
-						set.getValue( "stypelabel" ).stringValue(),
-						set.getValue( "otypelabel" ).stringValue(),
-						set.getValue( "relname" ).stringValue(),
-						set.getValue( "slabel" ).stringValue(),
-						set.getValue( "olabel" ).stringValue() );
-
-				QaChecker.this.cacheRelationNode(
-						URI.class.cast( set.getValue( "specrel" ) ), rck );
-			}
-
-		};
-		vqa4.useInferred( true );
-		vqa4.bind( "semossrel", owlb.getRelationUri().build() );
-		engine.queryNoEx( vqa4 );
-
+		}
 	}
 
 	public static class ConceptInstanceCacheKey implements Serializable,

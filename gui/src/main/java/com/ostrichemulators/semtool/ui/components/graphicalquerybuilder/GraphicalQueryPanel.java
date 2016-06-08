@@ -18,7 +18,8 @@ import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.EditingPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
 import com.ostrichemulators.semtool.ui.components.tabbedqueries.SparqlTextArea;
@@ -198,8 +199,9 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 						typearea.removeAll();
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
+						StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-						List<URI> concepts = NodeDerivationTools.createConceptList( engine );
+						Set<URI> concepts = sm.getTopLevelConcepts();
 						Map<URI, String> conceptlabels
 								= Utility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );

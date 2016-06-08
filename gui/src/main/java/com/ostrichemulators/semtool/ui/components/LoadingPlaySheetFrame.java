@@ -451,7 +451,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 							if ( !( null == errs || errs.isEmpty() ) ) {
 								for ( LoadingSheetData lsd : errs.getSheets() ) {
 									DataIterator di = lsd.iterator();
-									while( di.hasNext() ){
+									while ( di.hasNext() ) {
 										LoadingNodeAndPropertyValues nap = di.next();
 										if ( nap.hasError() ) {
 											ok[0]++;
@@ -709,7 +709,7 @@ public class LoadingPlaySheetFrame extends PlaySheetFrame {
 					newrels.setProperties( rlsd.getPropertiesAndDataTypes() );
 
 					DataIterator di = rlsd.iterator();
-					while( di.hasNext() ){
+					while ( di.hasNext() ) {
 						LoadingNodeAndPropertyValues node = di.next();
 						if ( node.hasError() && dobads ) {
 							newrels.add( node );

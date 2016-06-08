@@ -25,7 +25,8 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Utility;
@@ -343,6 +344,7 @@ public class GraphDataModel {
 	private void fetchProperties( Collection<URI> concepts, Collection<URI> preds,
 			IEngine engine, int overlayLevel ) throws RepositoryException, QueryEvaluationException {
 
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 		String conceptimplosion = Utility.implode( concepts );
 		String conceptprops
 				= "SELECT ?s ?p ?o ?type WHERE {"
@@ -373,7 +375,7 @@ public class GraphDataModel {
 			}
 
 			if ( null != preds ) {
-				preds = NodeDerivationTools.getTopLevelRelations( preds, engine );
+				preds = sm.getTopLevelRelations( preds );
 
 				// do the same thing, but for edges
 				String specificEdgeProps

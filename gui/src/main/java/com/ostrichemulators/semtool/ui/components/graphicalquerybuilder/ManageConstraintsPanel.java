@@ -8,7 +8,8 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.ui.components.graphicalquerybuilder.GraphicalQueryPanel.QueryOrder;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
 import com.ostrichemulators.semtool.util.Constants;
@@ -28,6 +29,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.RDF;
@@ -184,17 +186,19 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 
 	private class ConstraintTable extends JTable {
 
-		private final List<URI> concepts;
+		private final Set<URI> concepts;
 		private final Map<URI, String> conceptmap;
 		private final IEngine engine;
 		private final ValueEditor types = new ValueEditor();
 		private final ValueEditor normal = new ValueEditor();
 		private final FilterEditor filterEditor = new FilterEditor();
 		private final DirectedGraph<QueryNode, QueryEdge> graph;
+		private final StructureManager structs;
 
 		public ConstraintTable( IEngine eng, DirectedGraph<QueryNode, QueryEdge> gr ) {
 			super();
-			concepts = NodeDerivationTools.createConceptList( eng );
+			structs = StructureManagerFactory.getStructureManager( eng );
+			concepts = structs.getTopLevelConcepts();
 			conceptmap
 					= Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, eng ) );
 			engine = eng;
@@ -231,9 +235,8 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 						URI starttype = verts.getFirst().getType();
 						URI endtype = verts.getSecond().getType();
 
-						List<URI> links = NodeDerivationTools.getPredicatesBetween( starttype,
-								endtype, engine );
-						Map<URI, String> labels = Utility.getInstanceLabels( links, engine );
+						Model links = structs.getLinksBetween( starttype, endtype );
+						Map<URI, String> labels = Utility.getInstanceLabels( links.predicates(), engine );
 						labels.put( Constants.ANYNODE, "<Any>" );
 						types.setChoices( Utility.sortUrisByLabel( labels ) );
 					}

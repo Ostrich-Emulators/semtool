@@ -8,6 +8,8 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 import edu.uci.ics.jung.graph.Graph;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
+import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairRenderer;
@@ -134,15 +136,17 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 
 	public static NodeEdgeBasePopup<QueryNode> forVertex( QueryNode v,
 			GraphicalQueryPanel pnl ) {
+		StructureManager sm = StructureManagerFactory.getStructureManager( pnl.getEngine() );
+
 		return new NodeEdgeBasePopup<QueryNode>( v, pnl ) {
 
 			@Override
 			protected Action makeTypeItem( QueryNode v, GraphicalQueryPanel pnl ) {
 				Map<URI, String> labels = Utility.getInstanceLabels(
-						NodeDerivationTools.createConceptList( pnl.getEngine() ), pnl.getEngine() );
+						sm.getTopLevelConcepts(), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
-						"Change the type of this Vertex", "New Type", 
+						"Change the type of this Vertex", "New Type",
 						Utility.sortUrisByLabel( labels ) );
 			}
 

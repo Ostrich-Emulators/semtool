@@ -15,7 +15,8 @@ import org.openrdf.model.URI;
 /**
  * A class to handle reading/writing {@link SEMTOOL#Structure} triples. All of
  * the functions can accept either the "top level" class/prop types, or an
- * instance of them.
+ * instance of them, but in all cases, they return top-level data only. For
+ * specific instances, use {@link NodeDerivationTools}.
  *
  * @author ryan
  */
@@ -82,6 +83,22 @@ public interface StructureManager {
 	 * @return All the Structure triples
 	 */
 	public Model rebuild( boolean saveToEngine );
+
+	/**
+	 * Rebuilds the {@link SEMTOOL#Structure} triples by inspecting the IEngine's
+	 * triples
+	 *
+	 * @param uris only rebuild structures for the given concepts/edges
+	 * @return The rebuilt Structure triples
+	 */
+	public Model rebuild( Collection<URI> uris );
+
+	/**
+	 * Gets the top-level type for this instance
+	 * @param instance
+	 * @return
+	 */
+	public URI getTopLevelType( URI instance );
 
 	/**
 	 * Gets all the current structure info

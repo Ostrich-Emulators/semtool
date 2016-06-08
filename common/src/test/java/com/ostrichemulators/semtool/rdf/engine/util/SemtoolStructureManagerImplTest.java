@@ -168,4 +168,11 @@ public class SemtoolStructureManagerImplTest {
 		Model model = structman.rebuild( false );
 		assertEquals( old, model );
 	}
+
+	@Test
+	public void testTypeQuery() throws Exception {
+		assertEquals( HUMAN, structman.getTopLevelType( YURI ) );
+		assertEquals( CAR, structman.getTopLevelType( YUGO ) );
+		assertEquals( PURCHASE, structman.getTopLevelType( YPY ) );
+	}
 }
