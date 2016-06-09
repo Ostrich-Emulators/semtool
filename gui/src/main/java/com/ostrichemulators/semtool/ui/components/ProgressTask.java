@@ -23,8 +23,16 @@ public class ProgressTask {
 		this.op = op;
 	}
 
+	public ProgressTask( String label ) {
+		this.label = label;
+	}
+
 	public ProgressTask( Runnable op ) {
 		this( "unlabeled task", op );
+	}
+
+	public void setOp( Runnable op ){
+		this.op = op;
 	}
 
 	public String getLabel() {

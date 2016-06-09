@@ -297,7 +297,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 			public void run() {
 				DBToLoadingSheetExporter exper = new DBToLoadingSheetExporter( getEngine() );
 				ImportData data = EngineUtil2.createImportData( getEngine() );
-				for( URI[] triples : selectedTriples ){
+				for ( URI[] triples : selectedTriples ) {
 					exper.exportOneRelationship( triples[0], triples[1], triples[2], data );
 				}
 
