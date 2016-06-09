@@ -17,8 +17,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.rio.RDFFormat;
@@ -29,16 +30,18 @@ import org.openrdf.rio.RDFFormat;
  */
 public class NodeDerivationToolsTest {
 
+	private static final UriBuilder OWLB
+			= UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool/" );
+	private static final UriBuilder DATAB
+			= UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/" );
+
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
-	private static final URI HUMAN = new URIImpl( "http://os-em.com/ontologies/semtool/Human_Being" );
-	private static final URI CAR = new URIImpl( "http://os-em.com/ontologies/semtool/Car" );
-	private static final URI YUGO
-			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yugo" );
-	private static final URI YURI
-			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yuri" );
-	private static final URI YPY
-			= new URIImpl( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/Yuri_Purchased_Yugo" );
-	private static final URI PURCHASE = new URIImpl( "http://os-em.com/ontologies/semtool/Purchased" );
+	private static final URI HUMAN = OWLB.build( "Human_Being" );
+	private static final URI CAR = OWLB.build( "Car" );
+	private static final URI PURCHASE = OWLB.build( "Purchased" );
+	private static final URI YUGO = DATAB.build( "Yugo" );
+	private static final URI YURI = DATAB.build( "Yuri" );
+	private static final URI YPY = DATAB.build( "Yuri_Purchased_Yugo" );
 	private static InMemorySesameEngine engine;
 
 	public NodeDerivationToolsTest() {
@@ -46,9 +49,8 @@ public class NodeDerivationToolsTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		engine = InMemorySesameEngine.open();
-		engine.setBuilders( UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/" ),
-				UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool" ) );
+		engine = InMemorySesameEngine.open( true );
+		engine.setBuilders( DATAB, OWLB );
 		engine.getRawConnection().begin();
 		engine.getRawConnection().add( LOADFILE, null, RDFFormat.NTRIPLES );
 		engine.getRawConnection().commit();
@@ -131,5 +133,28 @@ public class NodeDerivationToolsTest {
 		Set<URI> result = NodeDerivationTools.getTopLevelRelations(
 				Arrays.asList( YPY, PURCHASE ), engine );
 		assertEquals( expResult, result );
+	}
+
+	@Test
+	public void testGetInstancesNoPropsAvailable() throws Exception {
+		// this is just extra stuff that shouldn't be returned in the tests
+		final URI REL = OWLB.getRelationUri().build();
+		final URI EXTRA = OWLB.build( "AnotherRelType" );
+		final URI EXTRAIMPL = DATAB.build( "AnotherRel" );
+
+		final URI ALAN = DATAB.build( "Alan" );
+		final URI CADILLAC = DATAB.build( "Cadillac" );
+
+		engine.getRawConnection().add( EXTRA, RDFS.SUBPROPERTYOF, REL );
+		engine.getRawConnection().add( EXTRAIMPL, RDF.TYPE, REL );
+
+
+		Model expected = new LinkedHashModel();
+		expected.add( YURI, YPY, YUGO );
+		expected.add( ALAN, PURCHASE, CADILLAC );
+
+		Model model = NodeDerivationTools.getInstances( HUMAN, PURCHASE, CAR,
+				null, engine );
+		assertEquals( expected, model );
 	}
 }

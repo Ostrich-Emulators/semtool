@@ -19,8 +19,10 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.query.BindingSet;
 
@@ -88,8 +90,8 @@ public class NodeDerivationTools {
 
 		// round one: get the relationships themselves
 		String query = "CONSTRUCT { ?s ?p ?o } WHERE {\n"
-				+ "  ?s a|rdfs:subClassOf ?subtype .\n"
-				+ "  ?o a|rdfs:subClassOf ?objtype .\n"
+				+ "  ?s a|rdfs:subClassOf+ ?subtype .\n"
+				+ "  ?o a|rdfs:subClassOf+ ?objtype .\n"
 				+ "  ?p a|rdfs:subPropertyOf+ ?predtype .\n"
 				+ "  FILTER( ?s != ?subtype && ?o != ?objtype ) .\n"
 				+ "  ?s ?p ?o .\n"
@@ -103,6 +105,20 @@ public class NodeDerivationTools {
 
 		Model model = engine.constructNoEx( mqa );
 
+		// we get inferred rel types as well as declared types, so if we have
+		// both, use the declared type
+		List<Statement> removers = new ArrayList<>();
+		for ( Statement s : model ) {
+			URI subj = URI.class.cast( s.getSubject() );
+			URI obj = URI.class.cast( s.getObject() );
+
+			Model filts = model.filter( subj, null, obj );
+			if ( filts.size() > 1 ) {
+				removers.add( new StatementImpl( subj, predtype, obj ) );
+			}
+		}
+		model.removeAll( removers );
+
 		// round two: get properties for the relationships if they exist
 		if ( !( null == propsToInclude || propsToInclude.isEmpty() ) ) {
 			String propq = "CONSTRUCT { ?p ?prop ?propval } WHERE {\n"
@@ -114,8 +130,8 @@ public class NodeDerivationTools {
 			propqa.bind( "predtype", predtype );
 
 			propqa.setModel( model );
-			propqa.useInferred( true );
-			
+			propqa.useInferred( false );
+
 			engine.constructNoEx( propqa );
 		}
 
@@ -268,7 +284,8 @@ public class NodeDerivationTools {
 				.append( "  ?subject ?predicate ?object ." )
 				.append( "  ?subject a ?subtype . FILTER( ?subtype != ?skos ) ." )
 				.append( "  ?object a ?objtype . FILTER isUri( ?object ) ." )
-				.append( "  FILTER( ?objtype != ?skos ) ." )
+				.append( "  FILTER( ?objtype != ?skos && ?objtype != owl:Thing && ?objtype != rdfs:Resource && ?objtype != ?concept ) ." )
+				.append( "  FILTER( ?subtype != ?skos && ?subtype != owl:Thing && ?subtype != rdfs:Resource && ?subtype != ?concept ) ." )
 				.append( "  MINUS { ?subject a ?object } " )
 				.append( "} VALUES ?" );
 		query.append( instanceIsSubject ? "subject " : "object" );
@@ -279,6 +296,7 @@ public class NodeDerivationTools {
 		OneVarListQueryAdapter<URI> lqa
 				= OneVarListQueryAdapter.getUriList( query.toString() );
 		lqa.bind( "skos", SKOS.CONCEPT );
+		lqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
 		if ( instanceIsSubject ) {
 			lqa.setVariableName( "objtype" );
 		}
