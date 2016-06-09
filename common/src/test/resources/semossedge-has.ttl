@@ -13,31 +13,31 @@
 
 data:BR_1_Implements_LU_A semonto:has data:App_A1 .
 
-schema:Rule a owl:Class ;
-	rdfs:label "Rule" ;
+schema:App a owl:Class ;
+	rdfs:label "App" ;
 	rdfs:subClassOf schema:Concept .
+
+schema:Implements a owl:ObjectProperty ;
+	rdfs:label "Implements" ;
+	rdfs:subPropertyOf schema:Relation .
+
+schema:Implements_has_App rdf:predicate semonto:has ;
+	a semtool:StructureData ;
+	rdfs:domain schema:Implements ;
+	rdfs:range schema:App .
 
 schema:Logic_Unit a owl:Class ;
 	rdfs:label "Logic Unit" ;
 	rdfs:subClassOf schema:Concept .
 
-schema:App a owl:Class ;
-	rdfs:label "App" ;
+schema:Rule a owl:Class ;
+	rdfs:label "Rule" ;
 	rdfs:subClassOf schema:Concept .
 
-schema:Implements rdfs:label "Implements" ;
-	a owl:ObjectProperty ;
-	rdfs:subPropertyOf schema:Relation .
-
-schema:Rule_Implements_Logic_Unit a semtool:StructureData ;
-	rdf:predicate schema:Implements ;
+schema:Rule_Implements_Logic_Unit rdf:predicate schema:Implements ;
+	a semtool:StructureData ;
 	rdfs:domain schema:Rule ;
 	rdfs:range schema:Logic_Unit .
-
-schema:Implements_has_App a semtool:StructureData ;
-	rdf:predicate semonto:has ;
-	rdfs:domain schema:Implements ;
-	rdfs:range schema:App .
 
 data:BR_1 a schema:Rule ;
 	rdfs:label "BR 1" .

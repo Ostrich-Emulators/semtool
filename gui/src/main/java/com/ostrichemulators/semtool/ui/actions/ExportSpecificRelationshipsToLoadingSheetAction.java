@@ -26,13 +26,8 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.engine.util.DBToLoadingSheetExporter;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
@@ -517,7 +512,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 		URI subjectNodeType = subjectNodeTypeComboBox.getSelectedUri();
 
 		if ( subjectNodeType != null ) {
-			List<URI> results = runObjectsQuery( subjectNodeType );
+			List<URI> results = getDestinationConcepts( subjectNodeType );
 			int index = getIndexNumber( evt );
 
 			UriComboBox objs = objectComboBoxes.get( index );
@@ -535,7 +530,7 @@ public class ExportSpecificRelationshipsToLoadingSheetAction extends DbAction {
 	 *
 	 * @param nodeType String
 	 */
-	private List<URI> runObjectsQuery( URI nodeType ) {
+	private List<URI> getDestinationConcepts( URI nodeType ) {
 		Model model = structures.getLinksBetween( nodeType, Constants.ANYNODE );
 		Set<URI> values = new HashSet<>();
 		for ( Value v : model.objects() ) {

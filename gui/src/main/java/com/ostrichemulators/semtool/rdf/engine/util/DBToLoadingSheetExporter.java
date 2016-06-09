@@ -33,13 +33,18 @@ import com.ostrichemulators.semtool.util.Utility;
 import java.util.Arrays;
 import java.util.Collection;
 
+import java.util.function.Consumer;
+import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.vocabulary.SKOS;
 
 public class DBToLoadingSheetExporter {
 
-	private static final Logger logger = Logger.getLogger( DBToLoadingSheetExporter.class );
+	private static final Logger log = Logger.getLogger( DBToLoadingSheetExporter.class );
 	private IEngine engine;
 
 	public DBToLoadingSheetExporter( IEngine eng ) {
@@ -102,7 +107,7 @@ public class DBToLoadingSheetExporter {
 
 	private static LoadingSheetData convertToRelationshipLoadingSheetData( URI subjectType,
 			URI predType, URI objectType, Collection<NodeAndPropertyValues> data, Set<URI> properties,
-			Map<URI, String> labels ) {
+			Map<Resource, String> labels ) {
 
 		properties.remove( RDFS.LABEL ); // don't add an extra label column
 
@@ -147,15 +152,17 @@ public class DBToLoadingSheetExporter {
 	public void exportTheseRelationships( List<URI[]> relationships, ImportData data ) {
 		//relationships.addAll( findSubclassRelationshipsToAdd( relationships ) );
 
-		List<URI> needlabels = new ArrayList<>();
+		List<Resource> needlabels = new ArrayList<>();
 		for ( URI[] spo : relationships ) {
 			needlabels.addAll( Arrays.asList( spo ) );
 		}
-		Map<URI, String> labels = Utility.getInstanceLabels( needlabels, engine );
+		Map<Resource, String> labels = Utility.getInstanceLabels( needlabels, engine );
+
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
 		int count = 0;
 		for ( URI[] spo : relationships ) {
-			Set<URI> properties = new HashSet<>();
+			Set<URI> properties = sm.getPropertiesOf( spo[0], spo[1], spo[2] );
 			Collection<NodeAndPropertyValues> list = getOneRelationshipsData( spo[0], spo[1],
 					spo[2], properties, labels );
 
@@ -165,8 +172,8 @@ public class DBToLoadingSheetExporter {
 			data.add( rlsd );
 
 			count++;
-			if ( logger.isDebugEnabled() && 0 == count % 1000 ) {
-				logger.debug( "relcount: " + count );
+			if ( log.isDebugEnabled() && 0 == count % 1000 ) {
+				log.debug( "relcount: " + count );
 			}
 		}
 	}
@@ -238,12 +245,12 @@ public class DBToLoadingSheetExporter {
 
 			try {
 				String ss = triples.bindAndGetSparql();
-				logger.debug( ss );
+				log.debug( ss );
 				List<URI[]> relsToExport = getEngine().query( triples );
 				exportTheseRelationships( relsToExport, data );
 			}
 			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-				logger.error( e, e );
+				log.error( e, e );
 			}
 		}
 	}
@@ -295,7 +302,7 @@ public class DBToLoadingSheetExporter {
 			getEngine().query( vqa );
 		}
 		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( "Error processing subject " + subjectType + ": " + e, e );
+			log.error( "Error processing subject " + subjectType + ": " + e, e );
 		}
 
 		// don't refetch stuff already in the labels cache
@@ -306,97 +313,47 @@ public class DBToLoadingSheetExporter {
 
 	private Collection<NodeAndPropertyValues> getOneRelationshipsData( URI subjectType,
 			URI predicateType, URI objectType, final Collection<URI> properties,
-			Map<URI, String> labels ) {
-
-		// break this into two pieces...the first query gets the subjects and objects,
-		// and the second query gets properties for edges (if they exist)
-		logger.debug( "getOneRelData for " + subjectType.getLocalName() + "->"
+			Map<Resource, String> labels ) {
+		log.debug( "getOneRelData for " + subjectType.getLocalName() + "->"
 				+ predicateType.getLocalName() + "->" + objectType.getLocalName() );
-		final Map<String, NodeAndPropertyValues> seen = new HashMap<>();
-		final Set<URI> needlabels = new HashSet<>();
 
-		String query = "SELECT DISTINCT ?sub ?obj WHERE {\n"
-				+ "  ?sub a ?subtype .\n"
-				+ "  ?sub ?rel ?obj .\n"
-				+ "  ?obj a ?objtype .\n"
-				+ "  ?rel rdfs:subPropertyOf+ ?superrel .\n"
-				+ "}";
-
-		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
+		Model model = NodeDerivationTools.getInstances( subjectType, predicateType,
+				objectType, properties, engine );
+		Set<Resource> needlabels = new HashSet<>( model.subjects() );
+		needlabels.addAll( model.predicates() );
+		Model rels = new TreeModel();
+		Model props = new TreeModel();
+		model.forEach( new Consumer<Statement>() {
 
 			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI in = URI.class.cast( set.getValue( "sub" ) );
-				URI out = URI.class.cast( set.getValue( "obj" ) );
-
-				String key = in.toString() + out.toString();
-				if ( !seen.containsKey( key ) ) {
-					seen.put( key, new NodeAndPropertyValues( in, out ) );
+			public void accept( Statement t ) {
+				if ( t.getObject() instanceof URI ) {
+					rels.add( t );
+					needlabels.add( Resource.class.cast( t.getObject() ) );
 				}
-
-				needlabels.add( in );
-				needlabels.add( out );
-			}
-		};
-
-		vqa.bind( "subtype", subjectType );
-		vqa.bind( "superrel", predicateType );
-		vqa.bind( "objtype", objectType );
-		String ss = vqa.bindAndGetSparql();
-		logger.debug( ss );
-		vqa.useInferred( false );
-
-		try {
-			getEngine().query( vqa );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( query, e );
-		}
-
-		String edgequery = "SELECT DISTINCT ?sub ?obj ?prop ?propval WHERE {\n"
-				+ "  ?sub a ?subtype .\n"
-				+ "  ?sub ?specificrel ?obj .\n"
-				+ "  ?obj a ?objtype .\n"
-				+ "  ?specificrel rdfs:subPropertyOf ?rel ; ?prop ?propval .\n"
-				+ "  FILTER( isLiteral( ?propval ) ) .\n"
-				+ "}";
-		VoidQueryAdapter edges = new VoidQueryAdapter( edgequery ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI in = URI.class.cast( set.getValue( "sub" ) );
-				URI out = URI.class.cast( set.getValue( "obj" ) );
-				URI prop = URI.class.cast( set.getValue( "prop" ) );
-				Value val = set.getValue( "propval" );
-
-				String key = in.toString() + out.toString();
-				if ( !seen.containsKey( key ) ) {
-					seen.put( key, new NodeAndPropertyValues( in, out ) );
+				else {
+					props.add( t );
 				}
-
-				needlabels.add( prop );
-				properties.add( prop );
-
-				NodeAndPropertyValues nap = seen.get( key );
-				nap.put( prop, val );
 			}
-		};
+		} );
 
-		edges.bind( "subtype", subjectType );
-		edges.bind( "rel", predicateType );
-		edges.bind( "objtype", objectType );
-		edges.useInferred( false );
+		List<NodeAndPropertyValues> list = new ArrayList<>();
 
-		try {
-			getEngine().query( edges );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			logger.error( "could not retrieve edge properties", e );
+		for ( Statement s : rels ) {
+			URI in = URI.class.cast( s.getSubject() );
+			URI out = URI.class.cast( s.getObject() );
+
+			NodeAndPropertyValues nap = new NodeAndPropertyValues( in, out );
+			list.add( nap );
+
+			for( Statement p : props.filter( s.getPredicate(), null, null ) ){
+				nap.put( p.getPredicate(), p.getObject() );
+			}
 		}
 
 		// don't refetch stuff already in the labels cache
 		needlabels.removeAll( labels.keySet() );
 		labels.putAll( Utility.getInstanceLabels( needlabels, engine ) );
-		return seen.values();
+		return list;
 	}
 }

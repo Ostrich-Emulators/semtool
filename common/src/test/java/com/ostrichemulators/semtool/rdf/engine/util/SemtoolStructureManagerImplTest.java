@@ -7,6 +7,7 @@ package com.ostrichemulators.semtool.rdf.engine.util;
 
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.util.UriBuilder;
+import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,7 +153,9 @@ public class SemtoolStructureManagerImplTest {
 	@Test
 	public void testRebuild() throws Exception {
 		Model old = structman.getModel();
+		Utility.ttlToStdout( old );
 		Model model = structman.rebuild( false );
+		Utility.ttlToStdout( model );
 		assertEquals( old, model );
 	}
 

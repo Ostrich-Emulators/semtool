@@ -549,8 +549,8 @@ public class QaChecker {
 					URI otype = URI.class.cast( u.getObject() );
 					String otypelabel = cpclabels.get( otype );
 
-					//FIXME: this returns too many statements
-					Model instancemodel = NodeDerivationTools.getInstances( stype, pred, otype, engine );
+					Model instancemodel = NodeDerivationTools.getInstances( stype, pred,
+							otype, null, engine );
 					List<Resource> objs = new ArrayList<>();
 					instancemodel.objects().forEach( new Consumer<Value>() {
 

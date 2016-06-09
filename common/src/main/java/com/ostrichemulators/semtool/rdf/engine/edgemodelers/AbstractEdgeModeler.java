@@ -332,11 +332,19 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				URI predicate = getCachedPropertyClass( propname );
 
 				// save the ontology info for querying db structure
-				Collection<Statement> stmts
-						= SemtoolStructureManagerImpl.getPropStructure( predicate,
-								sheet.isRel() ? edgetype : subtype, schema, structurelkp,
-								( sheet.isRel() ? sheet.getRelname() : sheet.getSubjectType() )
-								+ "_" + propname );
+				Collection<Statement> stmts;
+				if ( sheet.isRel() ) {
+					stmts = SemtoolStructureManagerImpl.getPropStructure( edgetype, subtype,
+							getCachedInstanceClass( sheet.getObjectType() ), predicate,
+							schema, structurelkp,
+							sheet.getSubjectType() + "_" + sheet.getRelname()
+							+ "_" + sheet.getObjectType() );
+				}
+				else {
+					stmts = SemtoolStructureManagerImpl.getPropStructure( predicate, subtype,
+							schema, structurelkp, sheet.getSubjectType() + "_" + propname );
+				}
+
 				model.addAll( stmts );
 
 				if ( !alreadyMadeProp ) {

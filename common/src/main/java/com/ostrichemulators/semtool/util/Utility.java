@@ -24,6 +24,7 @@ import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
+import com.ostrichemulators.semtool.rdf.engine.util.EngineLoader;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -57,7 +58,9 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.BNode;
+import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -505,6 +508,24 @@ public class Utility {
 			log.warn( ioe, ioe );
 		}
 		return new Properties();
+	}
+
+	public static void ttlToStdout( Model model ) {
+		TurtleWriter tw = new TurtleWriter( System.out );
+		try {
+			tw.startRDF();
+			for ( Map.Entry<String, String> en : DEFAULTNAMESPACES.entrySet() ) {
+				tw.handleNamespace( en.getKey(), en.getValue() );
+			}
+
+			for ( Statement s : model ) {
+				tw.handleStatement( s );
+			}
+			tw.endRDF();
+		}
+		catch ( Exception e ) {
+			log.error( e, e );
+		}
 	}
 
 	private static class ResourceLabelPair implements Comparable<ResourceLabelPair> {

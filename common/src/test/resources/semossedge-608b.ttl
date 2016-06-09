@@ -13,31 +13,31 @@
 
 data:John schema:likes data:Navel .
 
-schema:Person a owl:Class ;
-	rdfs:label "Person" ;
-	rdfs:subClassOf schema:Concept .
-
 schema:Apple a owl:Class ;
 	rdfs:label "Apple" ;
 	rdfs:subClassOf schema:Concept .
-
-schema:likes rdfs:label "likes" ;
-	a owl:ObjectProperty ;
-	rdfs:subPropertyOf schema:Relation .
-
-schema:Person_likes_Apple a semtool:StructureData ;
-	rdf:predicate schema:likes ;
-	rdfs:domain schema:Person ;
-	rdfs:range schema:Apple .
 
 schema:Orange a owl:Class ;
 	rdfs:label "Orange" ;
 	rdfs:subClassOf schema:Concept .
 
-schema:Person_likes_Orange a semtool:StructureData ;
-	rdf:predicate schema:likes ;
+schema:Person a owl:Class ;
+	rdfs:label "Person" ;
+	rdfs:subClassOf schema:Concept .
+
+schema:Person_likes_Apple rdf:predicate schema:likes ;
+	a semtool:StructureData ;
+	rdfs:domain schema:Person ;
+	rdfs:range schema:Apple .
+
+schema:Person_likes_Orange rdf:predicate schema:likes ;
+	a semtool:StructureData ;
 	rdfs:domain schema:Person ;
 	rdfs:range schema:Orange .
+
+schema:likes a owl:ObjectProperty ;
+	rdfs:label "likes" ;
+	rdfs:subPropertyOf schema:Relation .
 
 data:John a schema:Person ;
 	rdfs:label "John" .

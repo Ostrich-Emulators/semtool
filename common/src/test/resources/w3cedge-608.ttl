@@ -11,37 +11,37 @@
 @prefix vcamp: <http://va.gov/ontologies/> .
 @prefix semoss: <http://semoss.org/ontologies/> .
 
-vcamp:John semoss:hates vcamp:l815b52b8-3b76-4d16-9adc-3b407e6bea91 .
-
-semoss:Person a owl:Class ;
-	rdfs:label "Person" ;
-	rdfs:subClassOf semoss:Concept .
+vcamp:John semoss:hates vcamp:d76115b45-32d4-42ab-9789-78858b27945d .
 
 semoss:Apple a owl:Class ;
 	rdfs:label "Apple" ;
 	rdfs:subClassOf semoss:Concept .
 
-semoss:likes rdfs:label "likes" ;
-	a owl:ObjectProperty ;
-	rdfs:subPropertyOf semoss:Relation .
-
-semoss:Person_likes_Apple a semtool:StructureData ;
-	rdf:predicate semoss:likes ;
-	rdfs:domain semoss:Person ;
-	rdfs:range semoss:Apple .
-
 semoss:Orange a owl:Class ;
 	rdfs:label "Orange" ;
 	rdfs:subClassOf semoss:Concept .
 
-semoss:hates rdfs:label "hates" ;
-	a owl:ObjectProperty ;
-	rdfs:subPropertyOf semoss:Relation .
+semoss:Person a owl:Class ;
+	rdfs:label "Person" ;
+	rdfs:subClassOf semoss:Concept .
 
-semoss:Person_hates_Orange a semtool:StructureData ;
-	rdf:predicate semoss:hates ;
+semoss:Person_hates_Orange rdf:predicate semoss:hates ;
+	a semtool:StructureData ;
 	rdfs:domain semoss:Person ;
 	rdfs:range semoss:Orange .
+
+semoss:Person_likes_Apple rdf:predicate semoss:likes ;
+	a semtool:StructureData ;
+	rdfs:domain semoss:Person ;
+	rdfs:range semoss:Apple .
+
+semoss:hates a owl:ObjectProperty ;
+	rdfs:label "hates" ;
+	rdfs:subPropertyOf semoss:Relation .
+
+semoss:likes a owl:ObjectProperty ;
+	rdfs:label "likes" ;
+	rdfs:subPropertyOf semoss:Relation .
 
 vcamp:John a semoss:Person ;
 	rdfs:label "John" .
@@ -51,5 +51,5 @@ vcamp:Golden_Delicious a semoss:Apple ;
 
 vcamp:John semoss:likes vcamp:Golden_Delicious .
 
-vcamp:l815b52b8-3b76-4d16-9adc-3b407e6bea91 a semoss:Orange ;
+vcamp:d76115b45-32d4-42ab-9789-78858b27945d a semoss:Orange ;
 	rdfs:label "Golden Delicious" .

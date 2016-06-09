@@ -30,7 +30,6 @@ import com.ostrichemulators.semtool.poi.main.ImportData;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
-import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
 import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineCreateBuilder;
@@ -347,7 +346,7 @@ public class CLI {
 		}
 
 		if ( replace && dbfile.exists() ) {
-			engine = new BigDataEngine( dbfile );
+			engine = EngineFactory.getEngine( dbfile );
 
 			if ( cmd.hasOption( "insightsdb" ) ) {
 				InsightManagerImpl imi = new InsightManagerImpl();
@@ -417,7 +416,7 @@ public class CLI {
 			throw new FileNotFoundException( dbfile.getAbsolutePath() );
 		}
 
-		engine = new BigDataEngine( dbfile );
+		engine = EngineFactory.getEngine( dbfile );
 
 		if ( cmd.hasOption( "insightsdb" ) ) {
 			List<File> data = getFileList( cmd, "insights" );
@@ -454,7 +453,7 @@ public class CLI {
 			}
 		}
 
-		engine = new BigDataEngine( dbfile );
+		engine = EngineFactory.getEngine( dbfile );
 		try ( BufferedWriter w = new BufferedWriter( null == exportfile
 				? new OutputStreamWriter( System.out ) : new FileWriter( exportfile ) ) ) {
 			RDFHandler handler = Utility.getExporterFor( null == exportfile
@@ -523,7 +522,7 @@ public class CLI {
 			tmpconn = sesame.getConnection();
 			final RepositoryConnection sesameconn = tmpconn;
 
-			engine = new BigDataEngine( dbfile );
+			engine = EngineFactory.getEngine( dbfile );
 
 			if ( cmd.hasOption( "insightsdb" ) ) {
 				try {

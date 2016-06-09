@@ -11,52 +11,46 @@
 @prefix data: <http://os-em.com/ontologies/semtool/test-data/> .
 @prefix schema: <http://os-em.com/ontologies/semtool/test-onto/> .
 
-schema:Human_Being a owl:Class ;
-	rdfs:label "Human Being" ;
-	rdfs:subClassOf schema:Concept .
+data:Yuri schema:Last_Name "Gagarin" .
 
 schema:Car a owl:Class ;
 	rdfs:label "Car" ;
 	rdfs:subClassOf schema:Concept .
 
-schema:Purchased rdfs:label "Purchased" ;
-	a owl:ObjectProperty ;
-	rdfs:subPropertyOf schema:Relation .
+schema:Date a owl:DatatypeProperty ;
+	rdfs:label "Date" .
 
-schema:Human_Being_Purchased_Car a semtool:StructureData ;
-	rdf:predicate schema:Purchased ;
-	rdfs:domain schema:Human_Being ;
-	rdfs:range schema:Car .
+schema:First_Name a owl:DatatypeProperty ;
+	rdfs:label "First Name" .
 
-schema:Purchased_Price a semtool:StructureData ;
-	owl:DatatypeProperty schema:Price ;
-	rdfs:domain schema:Purchased .
-
-schema:Price rdfs:label "Price" ;
-	a owl:DatatypeProperty .
-
-schema:Purchased_Date a semtool:StructureData ;
-	owl:DatatypeProperty schema:Date ;
-	rdfs:domain schema:Purchased .
-
-schema:Date rdfs:label "Date" ;
-	a owl:DatatypeProperty .
+schema:Human_Being a owl:Class ;
+	rdfs:label "Human Being" ;
+	rdfs:subClassOf schema:Concept .
 
 schema:Human_Being_First_Name a semtool:StructureData ;
-	owl:DatatypeProperty schema:First_Name ;
-	rdfs:domain schema:Human_Being .
-
-schema:First_Name rdfs:label "First Name" ;
-	a owl:DatatypeProperty .
+	rdfs:domain schema:Human_Being ;
+	owl:DatatypeProperty schema:First_Name .
 
 schema:Human_Being_Last_Name a semtool:StructureData ;
-	owl:DatatypeProperty schema:Last_Name ;
-	rdfs:domain schema:Human_Being .
+	rdfs:domain schema:Human_Being ;
+	owl:DatatypeProperty schema:Last_Name .
 
-schema:Last_Name rdfs:label "Last Name" ;
-	a owl:DatatypeProperty .
+schema:Human_Being_Purchased_Car rdf:predicate schema:Purchased ;
+	a semtool:StructureData ;
+	rdfs:domain schema:Human_Being ;
+	rdfs:range schema:Car ;
+	owl:DatatypeProperty schema:Date , schema:Price .
+
+schema:Last_Name a owl:DatatypeProperty ;
+	rdfs:label "Last Name" .
+
+schema:Price a owl:DatatypeProperty ;
+	rdfs:label "Price" .
+
+schema:Purchased a owl:ObjectProperty ;
+	rdfs:label "Purchased" ;
+	rdfs:subPropertyOf schema:Relation .
 
 data:Yuri a schema:Human_Being ;
 	rdfs:label "Yuri" ;
-	schema:First_Name "Yuri" ;
-	schema:Last_Name "Gagarin" .
+	schema:First_Name "Yuri" .

@@ -23,13 +23,22 @@ import org.openrdf.model.URI;
 public interface StructureManager {
 
 	/**
-	 * Gets the properties that can be applied to the given type (either node or
-	 * edge)
+	 * Gets the properties that can be applied to the given concept
 	 *
 	 * @param type the schema type to check
 	 * @return a set of all possible datatype properties this type might have
 	 */
 	public Set<URI> getPropertiesOf( URI type );
+
+	/**
+	 * Gets the properties that can be applied to the given relationship
+	 *
+	 * @param subtype
+	 * @param predtype
+	 * @param objtype
+	 * @return a set of all possible datatype properties this type might have
+	 */
+	public Set<URI> getPropertiesOf( URI subtype, URI predtype, URI objtype );
 
 	/**
 	 * Gets the links that can connect the subject and object class types.
@@ -60,9 +69,10 @@ public interface StructureManager {
 	public Set<URI> getTopLevelRelations( Collection<URI> instances );
 
 	/**
-	 * Gets all the top-level concepts. This function is not based on structure data,
-	 * but rather a query on the db
-	 * @return 
+	 * Gets all the top-level concepts. This function is not based on structure
+	 * data, but rather a query on the db
+	 *
+	 * @return
 	 */
 	public Set<URI> getTopLevelConcepts();
 
@@ -95,6 +105,7 @@ public interface StructureManager {
 
 	/**
 	 * Gets the top-level type for this instance
+	 *
 	 * @param instance
 	 * @return
 	 */
@@ -102,6 +113,7 @@ public interface StructureManager {
 
 	/**
 	 * Gets all the current structure info
+	 *
 	 * @return
 	 */
 	public Model getModel();

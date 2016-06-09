@@ -84,8 +84,9 @@ public class NodeDerivationTools {
 	}
 
 	public static Model getInstances( URI subtype, URI predtype, URI objtype,
-			IEngine engine ){
+			Collection<URI> propsToInclude, IEngine engine ) {
 
+		// round one: get the relationships themselves
 		String query = "CONSTRUCT { ?s ?p ?o } WHERE {\n"
 				+ "  ?s a|rdfs:subClassOf ?subtype .\n"
 				+ "  ?o a|rdfs:subClassOf ?objtype .\n"
@@ -93,11 +94,32 @@ public class NodeDerivationTools {
 				+ "  FILTER( ?s != ?subtype && ?o != ?objtype ) .\n"
 				+ "  ?s ?p ?o .\n"
 				+ "}";
+
 		ModelQueryAdapter mqa = new ModelQueryAdapter( query );
 		mqa.bind( "subtype", subtype );
 		mqa.bind( "objtype", objtype );
 		mqa.bind( "predtype", predtype );
-		return engine.constructNoEx( mqa );
+		mqa.useInferred( true );
+
+		Model model = engine.constructNoEx( mqa );
+
+		// round two: get properties for the relationships if they exist
+		if ( !( null == propsToInclude || propsToInclude.isEmpty() ) ) {
+			String propq = "CONSTRUCT { ?p ?prop ?propval } WHERE {\n"
+					+ "  ?p rdfs:subPropertyOf+ ?predtype ; ?prop ?propval .\n"
+					+ "  VALUES ?prop {" + Utility.implode( propsToInclude ) + "}.\n"
+					+ "}";
+
+			ModelQueryAdapter propqa = new ModelQueryAdapter( propq );
+			propqa.bind( "predtype", predtype );
+
+			propqa.setModel( model );
+			propqa.useInferred( true );
+			
+			engine.constructNoEx( propqa );
+		}
+
+		return model;
 	}
 
 	/**
@@ -183,7 +205,7 @@ public class NodeDerivationTools {
 		if ( instanceIsSubject ) {
 			lqa.setVariableName( "objtype" );
 			lqa.bind( "subject", instance );
-	}
+		}
 		else {
 			lqa.setVariableName( "subtype" );
 			lqa.bind( "object", instance );
@@ -246,7 +268,7 @@ public class NodeDerivationTools {
 				.append( "  ?subject ?predicate ?object ." )
 				.append( "  ?subject a ?subtype . FILTER( ?subtype != ?skos ) ." )
 				.append( "  ?object a ?objtype . FILTER isUri( ?object ) ." )
-				.append( "  FILTER( ?objtype != ?skos ) .")
+				.append( "  FILTER( ?objtype != ?skos ) ." )
 				.append( "  MINUS { ?subject a ?object } " )
 				.append( "} VALUES ?" );
 		query.append( instanceIsSubject ? "subject " : "object" );
