@@ -24,7 +24,6 @@ import org.openrdf.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.poi.main.XlsWriter.NodeAndPropertyValues;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
@@ -40,7 +39,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.vocabulary.SKOS;
 
 public class DBToLoadingSheetExporter {
 
@@ -149,33 +147,22 @@ public class DBToLoadingSheetExporter {
 		}
 	}
 
-	public void exportTheseRelationships( List<URI[]> relationships, ImportData data ) {
-		//relationships.addAll( findSubclassRelationshipsToAdd( relationships ) );
+	public void exportOneRelationship( URI subtype, URI predicate, URI objtype,
+			ImportData data ) {
 
-		List<Resource> needlabels = new ArrayList<>();
-		for ( URI[] spo : relationships ) {
-			needlabels.addAll( Arrays.asList( spo ) );
-		}
+		List<Resource> needlabels
+				= new ArrayList<>( Arrays.asList( subtype, predicate, objtype ) );
 		Map<Resource, String> labels = Utility.getInstanceLabels( needlabels, engine );
 
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-		int count = 0;
-		for ( URI[] spo : relationships ) {
-			Set<URI> properties = sm.getPropertiesOf( spo[0], spo[1], spo[2] );
-			Collection<NodeAndPropertyValues> list = getOneRelationshipsData( spo[0], spo[1],
-					spo[2], properties, labels );
+		Set<URI> properties = sm.getPropertiesOf( subtype, predicate, objtype );
+		Collection<NodeAndPropertyValues> list
+				= getOneRelationshipsData( subtype, predicate, objtype, properties, labels );
 
-			LoadingSheetData rlsd
-					= convertToRelationshipLoadingSheetData( spo[0], spo[1], spo[2], list,
-							properties, labels );
-			data.add( rlsd );
-
-			count++;
-			if ( log.isDebugEnabled() && 0 == count % 1000 ) {
-				log.debug( "relcount: " + count );
-			}
-		}
+		LoadingSheetData rlsd = convertToRelationshipLoadingSheetData( subtype,
+				predicate, objtype, list, properties, labels );
+		data.add( rlsd );
 	}
 
 	public static File getDefaultExportFile( File exploc, String fileType, boolean isAll ) {
@@ -210,47 +197,13 @@ public class DBToLoadingSheetExporter {
 	}
 
 	public void exportAllRelationships( Collection<URI> subjectTypes, ImportData data ) {
-
-		String q = "SELECT DISTINCT ?subtype ?superrel ?objtype WHERE {\n"
-				+ "  ?sub a ?subtype .\n"
-				+ "  ?sub ?rel ?obj .\n"
-				+ "  ?objtype rdfs:subClassOf* ?concept .\n"
-				+ "  ?obj a ?objtype .\n"
-				+ "  ?rel rdfs:subPropertyOf ?superrel .\n"
-				+ "  ?superrel rdfs:subPropertyOf ?semrel .\n"
-				+ "  FILTER ( ?objtype != ?concept ) .\n"
-				+ "  FILTER ( ?objtype != ?skos ) .\n"
-				+ "  FILTER ( ?subtype != ?concept ) .\n"
-				+ "  FILTER ( ?superrel != ?rel ) .\n"
-				+ "  FILTER ( ?superrel != ?semrel ) .\n"
-				+ "}";
-		ListQueryAdapter<URI[]> triples = new ListQueryAdapter<URI[]>( q ) {
-
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI triple[] = {
-					URI.class.cast( set.getValue( "subtype" ) ),
-					URI.class.cast( set.getValue( "superrel" ) ),
-					URI.class.cast( set.getValue( "objtype" ) ) };
-				add( triple );
-			}
-		};
-		triples.useInferred( true );
-		triples.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
-		triples.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
-		triples.bind( "skos", SKOS.CONCEPT );
-
-		for ( URI subjectType : subjectTypes ) {
-			triples.bind( "subtype", subjectType );
-
-			try {
-				String ss = triples.bindAndGetSparql();
-				log.debug( ss );
-				List<URI[]> relsToExport = getEngine().query( triples );
-				exportTheseRelationships( relsToExport, data );
-			}
-			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-				log.error( e, e );
+		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
+		for ( URI subtype : subjectTypes ) {
+			Model m = sm.getLinksBetween( subtype, Constants.ANYNODE );
+			for ( Statement s : m.filter( subtype, null, null ) ) {
+				exportOneRelationship( URI.class.cast( s.getSubject() ),
+						s.getPredicate(),
+						URI.class.cast( s.getObject() ), data );
 			}
 		}
 	}
@@ -346,7 +299,7 @@ public class DBToLoadingSheetExporter {
 			NodeAndPropertyValues nap = new NodeAndPropertyValues( in, out );
 			list.add( nap );
 
-			for( Statement p : props.filter( s.getPredicate(), null, null ) ){
+			for ( Statement p : props.filter( s.getPredicate(), null, null ) ) {
 				nap.put( p.getPredicate(), p.getObject() );
 			}
 		}
