@@ -204,9 +204,7 @@ public class EngineUtil2Test {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
-					.setDefaultsFiles( new File( "src/main/resources/defaultdb/Default.properties" ),
-							new File( "src/main/resources/models/semtool.ttl" ),
-							new File( "src/test/resources/insmgr.data-source.ttl" ) )
+					.setInsightsFile(	new File( "src/test/resources/insmgr.data-source.ttl" ) )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.addVocabulary( new File( "src/main/resources/models/semtool.ttl" ).toURI().toURL() )
 					.setBooleans( true, true, true );
@@ -230,12 +228,35 @@ public class EngineUtil2Test {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
-					.setDefaultsFiles( new File( "src/main/resources/defaultdb/Default.properties" ),
-							new File( "src/main/resources/models/semtool.ttl" ),
-							new File( "src/test/resources/insmgr.data-source.ttl" ) )
+					.setInsightsFile(	new File( "src/test/resources/insmgr.data-source.ttl" ) )
 					.setFiles( Arrays.asList( LEGACY ) )
-					.addVocabulary( new File( "src/main/resources/models/va-semoss.ttlx" ).toURI().toURL() )
+					.addVocabulary( new File( "src/main/resources/models/semtool.ttlx" ).toURI().toURL() )
 					.setBooleans( true, true, true );
+			smss = EngineUtil2.createNew( ecb, null );
+			assertTrue( smss.exists() );
+		}
+		finally {
+			FileUtils.deleteQuietly( topdir );
+			FileUtils.deleteQuietly( smss );
+		}
+	}
+
+	@Test
+	public void createNew4() throws IOException, EngineManagementException {
+		File topdir = File.createTempFile( "eutest-", "" );
+		topdir.delete();
+		topdir.mkdirs();
+		File smss = null;
+
+		try {
+			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
+					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
+					.setReificationModel( ReificationStyle.LEGACY )
+					.setInsightsFile(	new File( "src/test/resources/insmgr.data-source.ttl" ) )
+					.setFiles( Arrays.asList( LEGACY ) )
+					.addVocabulary( new File( "src/main/resources/models/semtool.ttl" ).toURI().toURL() )
+					.setBooleans( true, true, true )
+					.setEngineImpl( BigDataEngine.class );
 			smss = EngineUtil2.createNew( ecb, null );
 			assertTrue( smss.exists() );
 		}

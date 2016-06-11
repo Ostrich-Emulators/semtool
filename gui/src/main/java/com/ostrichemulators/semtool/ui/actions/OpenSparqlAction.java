@@ -14,8 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
-import com.ostrichemulators.semtool.ui.components.SemossFileView;
 
+import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ public class OpenSparqlAction extends DbAction {
 		JFileChooser chsr = new JFileChooser( f );
 		chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
 		chsr.setMultiSelectionEnabled( false );
-		chsr.setFileView( new SemossFileView() );
+		chsr.setFileView(new SemtoolFileView() );
 		chsr.setFileFilter( new CustomFileFilter( "SPARQL Files", "spq", "sparql" ) );
 		chsr.setDialogTitle( "Select SPARQL File to Open" );
 		chsr.setMultiSelectionEnabled( true );

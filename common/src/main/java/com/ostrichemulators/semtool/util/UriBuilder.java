@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 /**
@@ -119,7 +120,7 @@ public class UriBuilder {
 
 		boolean removeLast = ( uristart.endsWith( "/" )
 				|| uristart.endsWith( "#" ) || uristart.endsWith( ":" ) );
-				return vf.createURI( removeLast
+		return vf.createURI( removeLast
 				? uristart.substring( 0, uristart.length() - 1 ) : uristart );
 	}
 

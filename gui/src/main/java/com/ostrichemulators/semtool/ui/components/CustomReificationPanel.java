@@ -99,7 +99,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 		crp.setConceptSparql( concept );
 		crp.setEdgeSparql( edge );
 
-		String options[] = { "Customize", "Use SEMOSS Model", "Cancel" };
+		String options[] = { "Customize", "Use SEMTOOL Model", "Cancel" };
 		int ans = JOptionPane.showOptionDialog( frame, crp, "Customize Reification",
 				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
 				options[0] );

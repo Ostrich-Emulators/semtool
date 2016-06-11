@@ -24,8 +24,8 @@ import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.ui.components.FileBrowsePanel;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
-import com.ostrichemulators.semtool.ui.components.SemossFileView;
 
+import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import com.ostrichemulators.semtool.util.Utility;
 import javax.swing.JOptionPane;
 
@@ -69,7 +69,7 @@ public class ExportGraphAction extends DbAction {
 		File emptypref = FileBrowsePanel.getLocationForEmptyPref( prefs,
 				"lastgraphexp" );
 		JFileChooser chsr = new JFileChooser( emptypref );
-		chsr.setFileView( new SemossFileView() );
+		chsr.setFileView(new SemtoolFileView() );
 		if ( Style.GRAPHML == style ) {
 			chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "GraphML Files", "graphml" ) );
 		}

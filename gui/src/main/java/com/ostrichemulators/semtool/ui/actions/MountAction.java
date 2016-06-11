@@ -23,7 +23,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.Er
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
 import com.ostrichemulators.semtool.ui.components.FileBrowsePanel;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
-import com.ostrichemulators.semtool.ui.components.SemossFileView;
+import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +62,7 @@ public class MountAction extends DbAction {
 		chsr.setFileFilter( FileBrowsePanel.getDatabaseFilter( loaded ) );
 
 		chsr.setApproveButtonText( "Attach" );
-		chsr.setFileView( new SemossFileView() );
+		chsr.setFileView(new SemtoolFileView() );
 		int rslt = chsr.showOpenDialog( frame );
 		if ( JFileChooser.APPROVE_OPTION == rslt ) {
 			smssfiles.addAll( Arrays.asList( chsr.getSelectedFiles() ) );

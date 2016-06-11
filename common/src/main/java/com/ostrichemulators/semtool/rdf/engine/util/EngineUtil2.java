@@ -5,6 +5,8 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
+import com.bigdata.rdf.sail.BigdataSail;
+import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
 import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
@@ -24,6 +26,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.impl.AbstractEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
 import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.engine.impl.SesameEngine;
@@ -37,7 +40,6 @@ import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -46,7 +48,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -225,48 +226,31 @@ public class EngineUtil2 {
 
 	private static File createEngine( EngineCreateBuilder ecb, User user )
 			throws IOException, EngineManagementException {
+		boolean useBlazegraph = BigDataEngine.class.equals( ecb.getEngineImpl() );
 
 		String dbname = ecb.getEngineName();
 		File enginedir = ecb.getEngineDir();
-		File modelmap = ecb.getMap();
-
-		if ( null != modelmap && modelmap.exists() ) {
-			try {
-				FileUtils.copyFile( modelmap, new File( enginedir,
-						AbstractEngine.getDefaultName( Constants.ONTOLOGY, dbname ) ) );
-			}
-			catch ( IOException e ) {
-				log.error( e, e );
-				return null;
-			}
-		}
 
 		Properties smssprops = new Properties();
-		File modelsmss = ecb.getSmss();
-		if ( null == modelsmss || !modelsmss.exists() ) {
-			String dprop = "/defaultdb/Default.properties";
-			smssprops.load( EngineUtil2.class.getResourceAsStream( dprop ) );
-		}
-		else {
-			try ( FileReader rdr = new FileReader( modelsmss ) ) {
-				smssprops.load( rdr );
-			}
-			catch ( IOException e ) {
-				log.error( e, e );
-				return null;
-			}
-		}
+
+		File db;
 
 		// make the big data journal, and then write out the (empty) OWL file
-		//File jnl = new File( enginedir, dbname + ".jnl" );
-		File db = new File( enginedir, dbname );
+		if ( useBlazegraph ) {
+			db = new File( enginedir, dbname + ".jnl" );
+			String dprop = "/defaultdb/Default.properties";
+			smssprops.load( EngineUtil2.class.getResourceAsStream( dprop ) );
+			smssprops.setProperty( BigdataSail.Options.FILE, db.getAbsolutePath() );
+		}
+		else {
+			// right now, we only support Blazegraph and OpenRDF
+			db = new File( enginedir, dbname );
+			smssprops = SesameEngine.generateProperties( db );
+		}
 
 		if ( db.exists() ) {
 			throw new IOException( "KB journal already exists" );
 		}
-
-		smssprops = SesameEngine.generateProperties( db );
-		//smssprops.setProperty( BigdataSail.Options.FILE, jnl.getAbsolutePath() );
 
 		if ( log.isDebugEnabled() ) {
 			StringBuilder sb = new StringBuilder( "creation properties:" );
@@ -276,15 +260,19 @@ public class EngineUtil2 {
 			log.debug( sb.toString() );
 		}
 
-		NativeStore store
-				= new NativeStore( new File( smssprops.getProperty( SesameEngine.REPOSITORY_KEY ) ) );
-		Sail sail = ( ecb.isCalcInfers()
-				? new ForwardChainingRDFSInferencer( store )
-				: store );
-		Repository repo = new SailRepository( sail );
-
-		//BigdataSail sail = new BigdataSail( smssprops );
-		//BigdataSailRepository repo = new BigdataSailRepository( sail );
+		Repository repo;
+		if ( useBlazegraph ) {
+			BigdataSail sail = new BigdataSail( smssprops );
+			repo = new BigdataSailRepository( sail );
+		}
+		else {
+			NativeStore store
+					= new NativeStore( new File( smssprops.getProperty( SesameEngine.REPOSITORY_KEY ) ) );
+			Sail sail = ( ecb.isCalcInfers()
+					? new ForwardChainingRDFSInferencer( store )
+					: store );
+			repo = new SailRepository( sail );
+		}
 		try {
 			repo.initialize();
 			RepositoryConnection rc = repo.getConnection();

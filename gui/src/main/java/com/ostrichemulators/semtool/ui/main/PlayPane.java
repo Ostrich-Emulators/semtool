@@ -301,7 +301,7 @@ public class PlayPane extends JFrame {
 
 		initPreferenceValues( prefs );
 
-		VocabularyRegistry.registerVocabulary( "semoss",
+		VocabularyRegistry.registerVocabulary( "semtool",
 				IEngine.class.getResource( "/models/semtool.ttl" ), true );
 
 		setSize( new Dimension( 1024, 768 ) );

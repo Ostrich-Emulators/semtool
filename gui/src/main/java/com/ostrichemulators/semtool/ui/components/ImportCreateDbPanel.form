@@ -6,6 +6,8 @@
     </Component>
     <Component class="javax.swing.ButtonGroup" name="stagegroup">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="stylegroup">
+    </Component>
   </NonVisualComponents>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -23,42 +25,25 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                              <Component id="questionlbl" alignment="0" max="32767" attributes="0"/>
-                              <Component id="jLabel3" alignment="0" pref="160" max="32767" attributes="0"/>
-                              <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
-                              <Component id="urilbl" alignment="0" max="32767" attributes="0"/>
-                          </Group>
-                          <Component id="jLabel2" alignment="0" min="-2" pref="160" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="file" max="32767" attributes="0"/>
-                          <Component id="dbname" max="32767" attributes="0"/>
-                          <Component id="dbdir" max="32767" attributes="0"/>
-                          <Component id="questionfile" alignment="0" max="32767" attributes="0"/>
-                          <Component id="baseuri" alignment="0" max="32767" attributes="0"/>
-                      </Group>
+                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="questionlbl" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel3" alignment="0" pref="160" max="32767" attributes="0"/>
+                      <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
+                      <Component id="urilbl" alignment="0" max="32767" attributes="0"/>
                   </Group>
-                  <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="conformer" min="-2" max="-2" attributes="0"/>
-                          <Component id="calcInfers" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="metamodel" min="-2" max="-2" attributes="0"/>
-                          <Component id="jPanel1" alignment="0" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="edgemodelPanel" min="-2" pref="132" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="vocabPanel" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="jLabel2" alignment="0" min="-2" pref="160" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="file" max="32767" attributes="0"/>
+                  <Component id="dbname" max="32767" attributes="0"/>
+                  <Component id="dbdir" max="32767" attributes="0"/>
+                  <Component id="questionfile" alignment="0" max="32767" attributes="0"/>
+                  <Component id="baseuri" alignment="0" pref="460" max="32767" attributes="0"/>
               </Group>
           </Group>
+          <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -90,21 +75,8 @@
                   <Component id="file" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <Component id="calcInfers" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="metamodel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="conformer" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
-                  <Component id="vocabPanel" max="32767" attributes="0"/>
-                  <Component id="edgemodelPanel" alignment="0" max="32767" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -152,84 +124,6 @@
         <Property name="text" type="java.lang.String" value="Database Location"/>
       </Properties>
     </Component>
-    <Container class="javax.swing.JPanel" name="jPanel1">
-      <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Load Intermediate Data">
-              <Border PropertyName="innerBorder" info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
-                <LineBorder roundedCorners="true">
-                  <Color PropertyName="color" blue="80" green="80" id="gray" palette="1" red="80" type="palette"/>
-                </LineBorder>
-              </Border>
-              <Font PropertyName="font" name="SansSerif" size="12" style="0"/>
-            </TitledBorder>
-          </Border>
-        </Property>
-        <Property name="toolTipText" type="java.lang.String" value="Where should the raw data be loaded before importing?"/>
-      </Properties>
-
-      <Layout>
-        <DimensionLayout dim="0">
-          <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="diskStaging" min="-2" max="-2" attributes="0"/>
-                      <Component id="memoryStaging" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace min="0" pref="83" max="32767" attributes="0"/>
-              </Group>
-          </Group>
-        </DimensionLayout>
-        <DimensionLayout dim="1">
-          <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <Component id="diskStaging" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="memoryStaging" min="-2" max="-2" attributes="0"/>
-              </Group>
-          </Group>
-        </DimensionLayout>
-      </Layout>
-      <SubComponents>
-        <Component class="javax.swing.JRadioButton" name="diskStaging">
-          <Properties>
-            <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-              <ComponentRef name="stagegroup"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="On Disk"/>
-            <Property name="toolTipText" type="java.lang.String" value="Loading on disk can be slower, but uses less memory"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JRadioButton" name="memoryStaging">
-          <Properties>
-            <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-              <ComponentRef name="stagegroup"/>
-            </Property>
-            <Property name="selected" type="boolean" value="true"/>
-            <Property name="text" type="java.lang.String" value="In Memory"/>
-            <Property name="toolTipText" type="java.lang.String" value="Loading in memory can be faster, but uses more memory"/>
-          </Properties>
-        </Component>
-      </SubComponents>
-    </Container>
-    <Component class="javax.swing.JCheckBox" name="calcInfers">
-      <Properties>
-        <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Compute Dependent Relationships"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="metamodel">
-      <Properties>
-        <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Create Metamodel"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="conformer">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Check Quality"/>
-      </Properties>
-    </Component>
     <Component class="javax.swing.JComboBox" name="baseuri">
       <Properties>
         <Property name="editable" type="boolean" value="true"/>
@@ -238,29 +132,220 @@
         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
       </AuxValues>
     </Component>
-    <Container class="javax.swing.JPanel" name="edgemodelPanel">
-      <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Reification Model">
-              <Border PropertyName="innerBorder" info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
-                <EmptyBorder/>
+    <Container class="javax.swing.JPanel" name="jPanel2">
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" attributes="0">
+                  <EmptySpace min="-2" pref="0" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="conformer" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="metamodel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="calcInfers" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="57" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="vocabPanel" min="-2" pref="103" max="-2" attributes="0"/>
+                      <Component id="edgemodelPanel" min="-2" pref="131" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" attributes="0">
+                  <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Component id="calcInfers" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="metamodel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="conformer" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
+                      </Group>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="vocabPanel" min="-2" pref="69" max="-2" attributes="0"/>
+                              <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="edgemodelPanel" min="-2" pref="96" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Container class="com.ostrichemulators.semtool.ui.components.VocabularyPanel" name="vocabPanel">
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout">
+            <Property name="axis" type="int" value="3"/>
+          </Layout>
+        </Container>
+        <Container class="javax.swing.JPanel" name="jPanel1">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+                <TitledBorder title="Load Intermediate Data">
+                  <Border PropertyName="innerBorder" info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
+                    <LineBorder roundedCorners="true">
+                      <Color PropertyName="color" blue="80" green="80" id="gray" palette="1" red="80" type="palette"/>
+                    </LineBorder>
+                  </Border>
+                  <Font PropertyName="font" name="SansSerif" size="12" style="0"/>
+                </TitledBorder>
               </Border>
-              <Font PropertyName="font" name="SansSerif" size="12" style="0"/>
-            </TitledBorder>
-          </Border>
-        </Property>
-      </Properties>
+            </Property>
+            <Property name="toolTipText" type="java.lang.String" value="Where should the raw data be loaded before importing?"/>
+          </Properties>
 
-      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout">
-        <Property name="axis" type="int" value="3"/>
-      </Layout>
-    </Container>
-    <Container class="com.ostrichemulators.semtool.ui.components.VocabularyPanel" name="vocabPanel">
+          <Layout>
+            <DimensionLayout dim="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="diskStaging" min="-2" max="-2" attributes="0"/>
+                          <Component id="memoryStaging" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="69" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+            <DimensionLayout dim="1">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="diskStaging" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="memoryStaging" min="-2" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+          </Layout>
+          <SubComponents>
+            <Component class="javax.swing.JRadioButton" name="diskStaging">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="stagegroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="On Disk"/>
+                <Property name="toolTipText" type="java.lang.String" value="Loading on disk can be slower, but uses less memory"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JRadioButton" name="memoryStaging">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="stagegroup"/>
+                </Property>
+                <Property name="selected" type="boolean" value="true"/>
+                <Property name="text" type="java.lang.String" value="In Memory"/>
+                <Property name="toolTipText" type="java.lang.String" value="Loading in memory can be faster, but uses more memory"/>
+              </Properties>
+            </Component>
+          </SubComponents>
+        </Container>
+        <Component class="javax.swing.JCheckBox" name="metamodel">
+          <Properties>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="Create Metamodel"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="conformer">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Check Quality"/>
+          </Properties>
+        </Component>
+        <Container class="javax.swing.JPanel" name="edgemodelPanel">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+                <TitledBorder title="Reification Model">
+                  <Border PropertyName="innerBorder" info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder/>
+                  </Border>
+                  <Font PropertyName="font" name="SansSerif" size="12" style="0"/>
+                </TitledBorder>
+              </Border>
+            </Property>
+          </Properties>
 
-      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout">
-        <Property name="axis" type="int" value="3"/>
-      </Layout>
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout">
+            <Property name="axis" type="int" value="3"/>
+          </Layout>
+        </Container>
+        <Component class="javax.swing.JCheckBox" name="calcInfers">
+          <Properties>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="Compute Dependent Relationships"/>
+          </Properties>
+        </Component>
+        <Container class="javax.swing.JPanel" name="jPanel3">
+
+          <Layout>
+            <DimensionLayout dim="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel4" max="32767" attributes="0"/>
+                  <Component id="blazegraph" min="-2" max="-2" attributes="0"/>
+                  <Component id="openrdf" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
+            </DimensionLayout>
+            <DimensionLayout dim="1">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="openrdf" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="blazegraph" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+          </Layout>
+          <SubComponents>
+            <Component class="javax.swing.JLabel" name="jLabel4">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Dialog" size="12" style="0"/>
+                </Property>
+                <Property name="horizontalAlignment" type="int" value="0"/>
+                <Property name="text" type="java.lang.String" value="Engine Style"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JRadioButton" name="blazegraph">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="stylegroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Blazegraph (.jnl)"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JRadioButton" name="openrdf">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="stylegroup"/>
+                </Property>
+                <Property name="selected" type="boolean" value="true"/>
+                <Property name="text" type="java.lang.String" value="Sesame"/>
+              </Properties>
+            </Component>
+          </SubComponents>
+        </Container>
+      </SubComponents>
     </Container>
   </SubComponents>
 </Form>

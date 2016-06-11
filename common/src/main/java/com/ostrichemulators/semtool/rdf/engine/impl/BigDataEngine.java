@@ -200,7 +200,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 		if ( log.isTraceEnabled() ) {
 			File dumpfile
-					= new File( FileUtils.getTempDirectory(), "semoss-outsights-committed.ttl" );
+					= new File( FileUtils.getTempDirectory(), "semtool-outsights-committed.ttl" );
 			try ( Writer w = new BufferedWriter( new FileWriter( dumpfile ) ) ) {
 				TurtleWriter tw = new TurtleWriter( w );
 				for ( Statement s : stmts ) {

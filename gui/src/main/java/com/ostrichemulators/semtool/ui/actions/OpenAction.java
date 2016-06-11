@@ -27,7 +27,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
 
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
-import com.ostrichemulators.semtool.ui.components.SemossFileView;
+import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import com.ostrichemulators.semtool.ui.components.models.ValueTableModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.GridRAWPlaySheet;
 import com.ostrichemulators.semtool.util.Constants;
@@ -96,7 +96,7 @@ public class OpenAction extends DbAction {
 
 		JFileChooser chsr = new JFileChooser( f );
 		chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
-		chsr.setFileView( new SemossFileView() );
+		chsr.setFileView(new SemtoolFileView() );
 		chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
 		chsr.addChoosableFileFilter( FileBrowsePanel.getDatabaseFilter( openedDbs ) );
 		chsr.setDialogTitle( "Select File to Import" );

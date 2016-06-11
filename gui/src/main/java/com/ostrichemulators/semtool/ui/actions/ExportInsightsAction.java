@@ -35,7 +35,7 @@ import org.openrdf.repository.RepositoryException;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.ui.components.FileBrowsePanel;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
-import com.ostrichemulators.semtool.ui.components.SemossFileView;
+import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.Utility;
@@ -82,7 +82,7 @@ public class ExportInsightsAction extends DbAction {
 		File emptypref = FileBrowsePanel.getLocationForEmptyPref( prefs,
 				"lastinsightsexp" );
 		JFileChooser chsr = new JFileChooser( emptypref );
-		chsr.setFileView( new SemossFileView() );
+		chsr.setFileView(new SemtoolFileView() );
 		chsr.addChoosableFileFilter( new FileBrowsePanel.CustomFileFilter( "Turtle Files", "ttl" ) );
 		chsr.setDialogTitle( "Select Export Location" );
 		chsr.setApproveButtonText( "Export" );

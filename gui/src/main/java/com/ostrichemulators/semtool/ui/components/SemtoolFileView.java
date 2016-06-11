@@ -7,6 +7,8 @@ package com.ostrichemulators.semtool.ui.components;
 
 import com.ostrichemulators.semtool.ui.actions.DbAction;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Icon;
@@ -17,11 +19,11 @@ import org.apache.commons.io.FilenameUtils;
  *
  * @author ryan
  */
-public class SemossFileView extends FileView {
+public class SemtoolFileView extends FileView {
 
 	private final Map<String, Icon> icons = new HashMap<>();
 
-	public SemossFileView() {
+	public SemtoolFileView() {
 		icons.put( "smss", getIcon( "smssdoc" ) );
 		icons.put( "jnl", getIcon( "semossjnl" ) );
 		icons.put( "xls", getIcon( "excel" ) );
@@ -40,7 +42,13 @@ public class SemossFileView extends FileView {
 
 	@Override
 	public Icon getIcon( File f ) {
-		String ext = FilenameUtils.getExtension( f.getName() ).toLowerCase();
-		return ( icons.containsKey( ext ) ? icons.get( ext ) : null );
+		// directories might be OpenRDF data stores
+		if ( f.isDirectory() && Files.exists( Paths.get( f.getPath(), "repo" ) ) ) {
+			return icons.get( "jnl" );
+		}
+		else {
+			String ext = FilenameUtils.getExtension( f.getName() ).toLowerCase();
+			return ( icons.containsKey( ext ) ? icons.get( ext ) : null );
+		}
 	}
 }

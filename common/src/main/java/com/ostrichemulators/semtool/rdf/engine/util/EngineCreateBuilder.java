@@ -6,6 +6,8 @@
 package com.ostrichemulators.semtool.rdf.engine.util;
 
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
+import com.ostrichemulators.semtool.rdf.engine.impl.AbstractSesameEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.SesameEngine;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,14 +23,13 @@ public class EngineCreateBuilder {
 
 	private URI defaultBaseUri;
 	private ReificationStyle reificationModel;
-	private File smss;
-	private File map;
 	private File questions;
 	private final File topdir;
 	private boolean defaultBaseOverridesFiles;
 	private boolean stageInMemory;
 	private boolean calcInfers;
 	private boolean dometamodel;
+	private Class<? extends AbstractSesameEngine> impl = SesameEngine.class;
 	private final String engine;
 	private final List<File> toload = new ArrayList<>();
 	private final List<URL> vocabularies = new ArrayList<>();
@@ -44,25 +45,22 @@ public class EngineCreateBuilder {
 		return this;
 	}
 
+	public EngineCreateBuilder setEngineImpl( Class<? extends AbstractSesameEngine> klass ) {
+		impl = klass;
+		return this;
+	}
+
 	public EngineCreateBuilder setReificationModel( ReificationStyle model ) {
 		reificationModel = model;
 		return this;
 	}
 
-	public EngineCreateBuilder setDefaultsFiles( File smssmodel, File mapmodel,
-			File questionsmodel ) {
-		smss = smssmodel;
-		map = mapmodel;
+	public EngineCreateBuilder setInsightsFile( File questionsmodel ) {
 		questions = questionsmodel;
 		return this;
 	}
 
-	public EngineCreateBuilder setDefaultsFiles( String smssmodel, String mapmodel,
-			String questionsmodel ) {
-		smss = ( null == smssmodel || smssmodel.isEmpty()
-				? null : new File( smssmodel ) );
-		map = ( null == mapmodel || mapmodel.isEmpty()
-				? null : new File( mapmodel ) );
+	public EngineCreateBuilder setInsightsFile( String questionsmodel ) {
 		questions = ( null == questionsmodel || questionsmodel.isEmpty()
 				? null : new File( questionsmodel ) );
 		return this;
@@ -117,14 +115,6 @@ public class EngineCreateBuilder {
 		return reificationModel;
 	}
 
-	public File getSmss() {
-		return smss;
-	}
-
-	public File getMap() {
-		return map;
-	}
-
 	public File getQuestions() {
 		return questions;
 	}
@@ -147,5 +137,9 @@ public class EngineCreateBuilder {
 
 	public File getEngineDir() {
 		return topdir;
+	}
+
+	public Class<? extends AbstractSesameEngine> getEngineImpl() {
+		return impl;
 	}
 }

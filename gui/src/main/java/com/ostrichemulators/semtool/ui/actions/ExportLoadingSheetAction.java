@@ -24,7 +24,7 @@ import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.ui.components.FileBrowsePanel;
 import com.ostrichemulators.semtool.ui.components.LoadingPlaySheetFrame;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
-import com.ostrichemulators.semtool.ui.components.SemossFileView;
+import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import com.ostrichemulators.semtool.util.DIHelper;
 
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class ExportLoadingSheetAction extends DbAction {
 
 		JFileChooser chsr = new JFileChooser( prefs.get( "lastexp", "." ) );
 		chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( false ) );
-		chsr.setFileView( new SemossFileView() );
+		chsr.setFileView(new SemtoolFileView() );
 
 		chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
 		chsr.setDialogTitle( "Select Export File" );

@@ -39,7 +39,7 @@ public class FileBrowsePanel extends javax.swing.JPanel {
 	public FileBrowsePanel() {
 		initComponents();
 
-		chsr.setFileView( new SemossFileView() );
+		chsr.setFileView( new SemtoolFileView() );
 
 		btn.addActionListener( new ActionListener() {
 

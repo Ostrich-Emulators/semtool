@@ -165,7 +165,7 @@ public class ExportSpecificNodesPanel extends JPanel {
 		JFileChooser fileChooser = new JFileChooser( prefs.get( "lastexp", "." ) );
 
 		fileChooser.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( false ) );
-		fileChooser.setFileView( new SemossFileView() );
+		fileChooser.setFileView( new SemtoolFileView() );
 		fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 		fileChooser.setDialogTitle( "Select Name and Location for Export File" );
 		fileChooser.setSelectedFile(

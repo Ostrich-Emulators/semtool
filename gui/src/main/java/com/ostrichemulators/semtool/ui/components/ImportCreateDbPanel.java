@@ -13,6 +13,9 @@ import com.ostrichemulators.semtool.poi.main.ImportFileReader;
 import com.ostrichemulators.semtool.poi.main.ImportMetadata;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
+import com.ostrichemulators.semtool.rdf.engine.impl.AbstractSesameEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.SesameEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineCreateBuilder;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineLoader;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
@@ -34,7 +37,9 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonModel;
@@ -57,6 +62,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	public static final String METADATABASEURI = "Use Loading Sheet Metadata";
 
 	private boolean loadable = false;
+	private Map<JRadioButton, Class<? extends AbstractSesameEngine>> impls
+			= new HashMap<>();
 
 	/**
 	 * Creates new form ExistingDbPanel
@@ -78,6 +85,9 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				jrb.setSelected( ReificationStyle.SEMTOOL == rs );
 			}
 		}
+
+		impls.put( openrdf, SesameEngine.class );
+		impls.put( blazegraph, BigDataEngine.class );
 
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		file.setPreferencesKeys( prefs, "lastpath" );
@@ -195,6 +205,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
     edgegroup = new javax.swing.ButtonGroup();
     stagegroup = new javax.swing.ButtonGroup();
+    stylegroup = new javax.swing.ButtonGroup();
     jLabel2 = new javax.swing.JLabel();
     file = new com.ostrichemulators.semtool.ui.components.FileBrowsePanel();
     urilbl = new javax.swing.JLabel();
@@ -204,15 +215,20 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     questionfile = new com.ostrichemulators.semtool.ui.components.FileBrowsePanel();
     dbdir = new com.ostrichemulators.semtool.ui.components.FileBrowsePanel();
     jLabel1 = new javax.swing.JLabel();
+    baseuri = new javax.swing.JComboBox<String>();
+    jPanel2 = new javax.swing.JPanel();
+    vocabPanel = new com.ostrichemulators.semtool.ui.components.VocabularyPanel();
     jPanel1 = new javax.swing.JPanel();
     diskStaging = new javax.swing.JRadioButton();
     memoryStaging = new javax.swing.JRadioButton();
-    calcInfers = new javax.swing.JCheckBox();
     metamodel = new javax.swing.JCheckBox();
     conformer = new javax.swing.JCheckBox();
-    baseuri = new javax.swing.JComboBox<String>();
     edgemodelPanel = new javax.swing.JPanel();
-    vocabPanel = new com.ostrichemulators.semtool.ui.components.VocabularyPanel();
+    calcInfers = new javax.swing.JCheckBox();
+    jPanel3 = new javax.swing.JPanel();
+    jLabel4 = new javax.swing.JLabel();
+    blazegraph = new javax.swing.JRadioButton();
+    openrdf = new javax.swing.JRadioButton();
 
     jLabel2.setLabelFor(file);
     jLabel2.setText("Select File(s) to Import");
@@ -228,6 +244,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
     questionfile.setToolTipText("Enter file path and name or browse to find custom questions sheet");
 
     jLabel1.setText("Database Location");
+
+    baseuri.setEditable(true);
+
+    vocabPanel.setLayout(new javax.swing.BoxLayout(vocabPanel, javax.swing.BoxLayout.PAGE_AXIS));
 
     jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(java.awt.Color.gray, 1, true), "Load Intermediate Data", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
     jPanel1.setToolTipText("Where should the raw data be loaded before importing?");
@@ -249,7 +269,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(diskStaging)
           .addComponent(memoryStaging))
-        .addGap(0, 83, Short.MAX_VALUE))
+        .addGap(0, 69, Short.MAX_VALUE))
     );
     jPanel1Layout.setVerticalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -259,54 +279,111 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
         .addComponent(memoryStaging))
     );
 
-    calcInfers.setSelected(true);
-    calcInfers.setText("Compute Dependent Relationships");
-
     metamodel.setSelected(true);
     metamodel.setText("Create Metamodel");
 
     conformer.setText("Check Quality");
 
-    baseuri.setEditable(true);
-
     edgemodelPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), "Reification Model", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("SansSerif", 0, 12))); // NOI18N
     edgemodelPanel.setLayout(new javax.swing.BoxLayout(edgemodelPanel, javax.swing.BoxLayout.PAGE_AXIS));
 
-    vocabPanel.setLayout(new javax.swing.BoxLayout(vocabPanel, javax.swing.BoxLayout.PAGE_AXIS));
+    calcInfers.setSelected(true);
+    calcInfers.setText("Compute Dependent Relationships");
+
+    jLabel4.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+    jLabel4.setText("Engine Style");
+
+    stylegroup.add(blazegraph);
+    blazegraph.setText("Blazegraph (.jnl)");
+
+    stylegroup.add(openrdf);
+    openrdf.setSelected(true);
+    openrdf.setText("Sesame");
+
+    javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+    jPanel3.setLayout(jPanel3Layout);
+    jPanel3Layout.setHorizontalGroup(
+      jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+      .addComponent(blazegraph)
+      .addComponent(openrdf)
+    );
+    jPanel3Layout.setVerticalGroup(
+      jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel3Layout.createSequentialGroup()
+        .addComponent(jLabel4)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(openrdf)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(blazegraph)
+        .addGap(0, 0, Short.MAX_VALUE))
+    );
+
+    javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+    jPanel2.setLayout(jPanel2Layout);
+    jPanel2Layout.setHorizontalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addGap(0, 0, 0)
+        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(jPanel2Layout.createSequentialGroup()
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(conformer)
+              .addComponent(metamodel)
+              .addComponent(calcInfers))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(57, 57, 57)))
+        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(vocabPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(edgemodelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)))
+    );
+    jPanel2Layout.setVerticalGroup(
+      jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(jPanel2Layout.createSequentialGroup()
+        .addGap(0, 0, 0)
+        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(jPanel2Layout.createSequentialGroup()
+            .addComponent(calcInfers)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(metamodel)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(conformer)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addContainerGap())
+          .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(vocabPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+              .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(edgemodelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE))))
+    );
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addGap(0, 0, 0)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(layout.createSequentialGroup()
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                .addComponent(questionlbl, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(urilbl, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-              .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(file, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-              .addComponent(dbname)
-              .addComponent(dbdir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-              .addComponent(questionfile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-              .addComponent(baseuri, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-          .addGroup(layout.createSequentialGroup()
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(conformer)
-              .addComponent(calcInfers)
-              .addComponent(metamodel)
-              .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGap(18, 18, 18)
-            .addComponent(edgemodelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(vocabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addContainerGap())))
+          .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+            .addComponent(questionlbl, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
+            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(urilbl, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(file, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(dbname)
+          .addComponent(dbdir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(questionfile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(baseuri, 0, 460, Short.MAX_VALUE)))
+      .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -332,19 +409,8 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
           .addComponent(jLabel2)
           .addComponent(file, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(layout.createSequentialGroup()
-            .addComponent(calcInfers)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(metamodel)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(conformer)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addGap(0, 0, Short.MAX_VALUE))
-          .addComponent(vocabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(edgemodelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        .addContainerGap())
+        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(0, 0, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -473,11 +539,14 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 					File insights = questionfile.getFirstFile();
 
+					JRadioButton jrb = ( openrdf.isSelected() ? openrdf : blazegraph );
+
 					ecb.setDefaultBaseUri( defaultBaseUri,
 							defaultBaseUri.toString().equals( baseuri.getSelectedItem().toString() ) )
 							.setReificationModel( reif )
-							.setDefaultsFiles( null, null, insights )
+							.setInsightsFile( insights )
 							.setFiles( files )
+							.setEngineImpl( impls.get( jrb ) )
 							.setBooleans( stageInMemory, calc, dometamodel )
 							.setVocabularies( vocabPanel.getSelectedVocabularies() );
 
@@ -495,6 +564,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JComboBox<String> baseuri;
+  private javax.swing.JRadioButton blazegraph;
   private javax.swing.JCheckBox calcInfers;
   private javax.swing.JCheckBox conformer;
   private com.ostrichemulators.semtool.ui.components.FileBrowsePanel dbdir;
@@ -506,12 +576,17 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel4;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JPanel jPanel2;
+  private javax.swing.JPanel jPanel3;
   private javax.swing.JRadioButton memoryStaging;
   private javax.swing.JCheckBox metamodel;
+  private javax.swing.JRadioButton openrdf;
   private com.ostrichemulators.semtool.ui.components.FileBrowsePanel questionfile;
   private javax.swing.JLabel questionlbl;
   private javax.swing.ButtonGroup stagegroup;
+  private javax.swing.ButtonGroup stylegroup;
   private javax.swing.JLabel urilbl;
   private com.ostrichemulators.semtool.ui.components.VocabularyPanel vocabPanel;
   // End of variables declaration//GEN-END:variables

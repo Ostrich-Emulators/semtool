@@ -90,7 +90,7 @@ public class LegacyUpgrader {
 		EngineCreateBuilder ecb = new EngineCreateBuilder( tofile.getParentFile(),
 				FilenameUtils.getBaseName( tofile.getName() ) );
 		ecb.setReificationModel( ReificationStyle.SEMTOOL );
-		//ecb.setDefaultsFiles( null, null, null );
+		//ecb.setInsightsFile( null, null, null );
 		ecb.setDefaultBaseUri( schema, true );
 		ecb.setVocabularies( vocabs );
 		ecb.setBooleans( true, true, true );

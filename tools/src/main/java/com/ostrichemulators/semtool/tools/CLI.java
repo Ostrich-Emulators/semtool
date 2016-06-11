@@ -374,7 +374,7 @@ public class CLI {
 					.setBooleans( stageInMemory, closure, createMetamodel );
 
 			if ( !insights.isEmpty() ) {
-				ecb.setDefaultsFiles( null, null, insights.get( 0 ) );
+				ecb.setInsightsFile( insights.get( 0 ) );
 			}
 
 			File smss = EngineUtil2.createNew( ecb, errors );

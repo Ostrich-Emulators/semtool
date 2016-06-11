@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.ui.actions;
 
 import com.ostrichemulators.semtool.ui.components.FileBrowsePanel;
-import com.ostrichemulators.semtool.ui.components.SemossFileView;
+import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import com.ostrichemulators.semtool.util.DefaultIcons;
 import com.ostrichemulators.semtool.util.GuiUtility;
 
@@ -113,7 +113,7 @@ public abstract class AbstractSavingAction extends AbstractAction {
 			    saFrame.setIconImage(saicon.getImage()); 
 			    
 			JFileChooser fileChooser = new JFileChooser( dir );
-			fileChooser.setFileView( new SemossFileView() );
+			fileChooser.setFileView(new SemtoolFileView() );
 			//fileChooser.showDialog(dummyFrame, "Save As");
 			int returnVal;
 		
