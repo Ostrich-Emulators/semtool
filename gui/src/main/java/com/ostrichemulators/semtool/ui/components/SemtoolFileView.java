@@ -43,7 +43,7 @@ public class SemtoolFileView extends FileView {
 	@Override
 	public Icon getIcon( File f ) {
 		// directories might be OpenRDF data stores
-		if ( f.isDirectory() && Files.exists( Paths.get( f.getPath(), "repo" ) ) ) {
+		if ( f.isDirectory() && new File( f, "repo" ).exists() ) {
 			return icons.get( "jnl" );
 		}
 		else {

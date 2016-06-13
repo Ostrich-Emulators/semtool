@@ -255,7 +255,8 @@ public class EngineUtil2 {
 		if ( log.isDebugEnabled() ) {
 			StringBuilder sb = new StringBuilder( "creation properties:" );
 			for ( String key : smssprops.stringPropertyNames() ) {
-				sb.append( "\n" ).append( key ).append( "=>" ).append( smssprops.getProperty( key ) );
+				sb.append( System.getProperty( "line.separator" ) )
+						.append( key ).append( "=>" ).append( smssprops.getProperty( key ) );
 			}
 			log.debug( sb.toString() );
 		}
