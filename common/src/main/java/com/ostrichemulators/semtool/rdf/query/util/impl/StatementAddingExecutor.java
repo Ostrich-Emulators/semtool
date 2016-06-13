@@ -36,6 +36,10 @@ public class StatementAddingExecutor implements ModificationExecutor {
 		trans = intrans;
 	}
 
+	public StatementAddingExecutor( Collection<Statement> todo ) {
+		this( todo, true );
+	}
+
 	public void resetStatements( Collection<Statement> todo ) {
 		clear();
 		stmts.addAll( todo );

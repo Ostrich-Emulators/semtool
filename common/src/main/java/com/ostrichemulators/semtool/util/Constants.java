@@ -56,7 +56,6 @@ public class Constants {
 
 	public static final URI EDGE_NAME = RDFS.LABEL;
 	public static final URI EDGE_TYPE = RDF.TYPE;
-	public static final URI URI_KEY = RDF.SUBJECT;
 
 	//Used by POIReader
 	public static final String RELATION_URI_CONCATENATOR = "_x_"; //used in between the in node and out node for relation instance uris.
@@ -83,39 +82,11 @@ public class Constants {
 	public static final String QUERY = "QUERY";
 
 	public static final String ENGINE_NAME = "ENGINE";
-	public static final String ENGINE_PROPERTIES_FILE = "ENGINE_PROP";
 	public static final String ENGINE_IMPL = "ENGINE_TYPE";
 	public static final String DATASERIES = "dataSeries";
 
-	//colors
-	public static final String BROWN = "BROWN";
-	public static final String RED = "RED";
-	public static final String GREEN = "GREEN";
-	public static final String BLUE = "BLUE";
-	public static final String ORANGE = "ORANGE";
-	public static final String YELLOW = "YELLOW";
-	public static final String PURPLE = "PURPLE";
-	public static final String AQUA = "AQUA";
-	public static final String MAGENTA = "MAGENTA";
-	public static final String TRANSPARENT = "TRANSPARENT";
-
-	//shapes
-	public static final String SQUARE = "SQUARE";
-	public static final String TRIANGLE = "TRIANGLE";
-	public static final String DIAMOND = "DIAMOND";
-	public static final String STAR = "STAR";
-	public static final String CIRCLE = "CIRCLE";
-	public static final String HEXAGON = "HEXAGON";
-	public static final String PENTAGON = "PENTAGON";
-
 	public static final String ENTITY = "entity";
-	public static final String PREDICATE_URI = "PREDICATE_URI";
-	public static final String OPTION = "OPTION"; // used by entity filler
-	public static final String LABEL_TABLE = "labelTable";
-	public static final String TOOLTIP_TABLE = "tooltipTable";
 
-	public static final String COLOR_SHAPE_TABLE = "colorShapeTable";
-	public static final String SIZE_TABLE = "sizeTable";
 	public static final String BLANK_URL = "http://bornhere.com/noparent/blank/";
 
 	public static final String DREAMER = "DREAMER";
@@ -126,11 +97,6 @@ public class Constants {
 
 	//Load Sheet Export Panel
 	public static final int MAX_EXPORTS = 9;
-
-	public static final String COST_DB_BASE_URI_FIELD = "costDBBaseURIField";
-	public static final String WATCHERS = "WATCHERS";
-	public static final String ENGINE_WATCHER = "ENGINE_WATCHER";
-	public static final String ENGINE_EXT = "ENGINE_EXT";
 
 	public static final String OWLFILE = "OWL";
 	public static final String URL_PARAM = "URL_PARAM";
