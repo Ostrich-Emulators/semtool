@@ -31,7 +31,6 @@ public class PerspectiveRenderer extends DefaultListCellRenderer {
 	@Override
 	public Component getListCellRendererComponent( JList list, Object val, int idx,
 			boolean sel, boolean hasfocus ) {
-		// figure out
 
 		if ( null == val ) {
 			return super.getListCellRendererComponent( list, null, idx, sel, hasfocus );

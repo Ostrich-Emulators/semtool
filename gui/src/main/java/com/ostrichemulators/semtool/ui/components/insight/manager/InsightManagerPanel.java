@@ -60,7 +60,7 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 	public InsightManagerPanel() {
 		initComponents();
 		privateImBtn.setIcon( DbAction.getIcon( "privacy" ) );
-		
+
 		propChangeListener = new PropertyChangeListener() {
 
 			@Override
@@ -428,7 +428,12 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 		wim = im;
 		model.refresh( wim );
 
-		tree.setSelectionRow( 0 );
+		if ( wim.isEmpty() ) {
+			perspectiveData.setElement( null, null );
+		}
+		else {
+			tree.setSelectionRow( 0 );
+		}
 		commitbtn.setEnabled( false );
 		applybtn.setEnabled( false );
 	}
