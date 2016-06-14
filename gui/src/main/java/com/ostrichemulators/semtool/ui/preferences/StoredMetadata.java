@@ -314,16 +314,6 @@ public class StoredMetadata {
 		catch ( RepositoryException re ) {
 			log.warn( re, re );
 		}
-		finally {
-			if ( null != imirc ) {
-				try {
-					imirc.close();
-				}
-				catch ( Exception x ) {
-					log.warn( x, x );
-				}
-			}
-		}
 
 		return imi;
 	}
@@ -354,17 +344,6 @@ public class StoredMetadata {
 				}
 			}
 		}
-		finally {
-			if ( null != imirc ) {
-				try {
-					imirc.close();
-				}
-				catch ( Exception x ) {
-					log.warn( x, x );
-				}
-			}
-		}
-
 	}
 
 	private static URI getInsightContext( URI database ) {

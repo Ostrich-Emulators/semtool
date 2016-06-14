@@ -185,10 +185,7 @@ public class EngineUtil implements Runnable {
 				oldim.addAll( iic.im.getPerspectives(), iic.clearfirst );
 				try {
 					eng.updateInsights( oldim );
-					List<EngineOperationListener> lls = new ArrayList<>( listeners );
-					for ( EngineOperationListener eol : lls ) {
-						eol.insightsModified( eng, oldim.getPerspectives() );
-					}
+					notifyInsightsModified( eng, oldim );
 				}
 				catch ( EngineManagementException eme ) {
 					List<EngineOperationListener> lls = new ArrayList<>( listeners );
@@ -198,6 +195,13 @@ public class EngineUtil implements Runnable {
 				}
 			}
 			insightqueue.clear();
+		}
+	}
+
+	public void notifyInsightsModified( IEngine eng, InsightManager im ) {
+		List<EngineOperationListener> lls = new ArrayList<>( listeners );
+		for ( EngineOperationListener eol : lls ) {
+			eol.insightsModified( eng, im.getPerspectives() );
 		}
 	}
 
@@ -477,11 +481,6 @@ public class EngineUtil implements Runnable {
 					new InsightsImportConfig( from.getInsightManager(), false ) );
 			notify();
 		}
-
-		// RPB: I don't think we need to do this anymore
-		// we don't have a "reload" function, so just close and re-open
-//    to.closeDB();
-//    to.openDB( to.getProperties() ); // not sure this really works
 	}
 
 	/**

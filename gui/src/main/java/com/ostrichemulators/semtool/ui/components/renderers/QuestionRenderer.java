@@ -28,9 +28,8 @@ public class QuestionRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = Logger.getLogger( QuestionRenderer.class );
-	private final Map<URI, String> nameCache = new HashMap<>();
-	private Perspective perspective;
 	private final OutputTypeRegistry registry;
+	private Perspective perspective;
 
 	public QuestionRenderer( OutputTypeRegistry reg ) {
 		registry = reg;

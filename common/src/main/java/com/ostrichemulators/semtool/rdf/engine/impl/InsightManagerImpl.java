@@ -53,6 +53,7 @@ import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.turtle.TurtleParser;
@@ -148,8 +149,9 @@ public class InsightManagerImpl implements InsightManager {
 	public void loadFromRepository( RepositoryConnection rc ) {
 		List<Perspective> persps = new ArrayList<>();
 		try {
-			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
-					RDF.TYPE, SEMPERS.Perspective, true ) );
+			RepositoryResult<Statement> rrs = rc.getStatements( null, RDF.TYPE,
+					SEMPERS.Perspective, true );
+			List<Statement> stmts = Iterations.asList( rrs );
 			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
 				Perspective p = loadPerspective( URI.class.cast( s.getSubject() ), rc, urib );
@@ -186,6 +188,11 @@ public class InsightManagerImpl implements InsightManager {
 				insights.put( i.getId(), i );
 			}
 		}
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return ( perspectives.isEmpty() && insights.isEmpty() );
 	}
 
 	@Override

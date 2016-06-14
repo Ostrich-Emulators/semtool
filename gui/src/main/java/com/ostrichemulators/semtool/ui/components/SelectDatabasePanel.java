@@ -58,6 +58,9 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = 5868154574694278392L;
 	private static final Logger log = Logger.getLogger( SelectDatabasePanel.class );
 	private final ExecuteQueryProcessor insightAction = new InsightAction();
+	private final PerspectiveRenderer prenderer = new PerspectiveRenderer();
+	private final QuestionRenderer qrenderer
+			= new QuestionRenderer( DIHelper.getInstance().getOutputTypeRegistry() );
 
 	public SelectDatabasePanel() {
 		this( false );
@@ -75,14 +78,11 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 		paramLabel.setVisible( false );
 		repoList.setCellRenderer( new RepositoryRenderer() );
 
-		final PerspectiveRenderer pr = new PerspectiveRenderer();
-		perspectiveSelector.setRenderer( pr );
+		perspectiveSelector.setRenderer( prenderer );
 		perspectiveSelector.setToolTipText( "Select the point-of-view of the question you want to ask" );
 		perspectiveSelector.setBackground( new Color( 119, 136, 153 ) );
 
-		final QuestionRenderer qr
-				= new QuestionRenderer( DIHelper.getInstance().getOutputTypeRegistry() );
-		questionSelector.setRenderer( qr );
+		questionSelector.setRenderer( qrenderer );
 		questionSelector.setToolTipText( "Select the specific question you want to ask" );
 		questionSelector.setBackground( new Color( 119, 136, 153 ) );
 
@@ -95,8 +95,20 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			public void insightsModified( IEngine eng, Collection<Perspective> perspectives ) {
 				if ( repoList.getSelectedValue().equals( eng ) ) {
 					perspectiveSelector.removeAllItems();
+					prenderer.clear();
+					
 					InsightManager im = eng.getInsightManager();
 					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
+
+					InsightManager localim = DIHelper.getInstance().
+							getMetadataStore().getLocalInsightManager( eng.getBaseUri() );
+					if ( !localim.isEmpty() ) {
+						persps.addAll( localim.getPerspectives() );
+						for( Perspective p : localim.getPerspectives() ){
+							prenderer.setLocal( p, true );
+						}
+					}
+
 					Perspective systemp = im.getSystemPerspective( eng );
 					persps.add( systemp );
 
@@ -115,9 +127,21 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 				bindingPanel.setEngine( eng );
 
 				perspectiveSelector.removeAllItems();
+				prenderer.clear();
+				
 				if ( null != eng ) {
 					InsightManager im = eng.getInsightManager();
 					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
+
+					InsightManager localim = DIHelper.getInstance().
+							getMetadataStore().getLocalInsightManager( eng.getBaseUri() );
+					if ( !localim.isEmpty() ) {
+						persps.addAll( localim.getPerspectives() );
+						for( Perspective p : localim.getPerspectives() ){
+							prenderer.setLocal( p, true );
+						}
+					}
+
 					Perspective system = im.getSystemPerspective( eng );
 					persps.add( system );
 
@@ -154,7 +178,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 						= perspectiveSelector.getItemAt( perspectiveSelector.getSelectedIndex() );
 				log.debug( "selected perspective: " + persp );
 				if ( null != persp ) {
-					qr.setPerspective( persp );
+					qrenderer.setPerspective( persp );
 				}
 				questionSelector.removeAllItems();
 				IEngine eng = repoList.getSelectedValue();
@@ -197,7 +221,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 			Class<? extends IPlaySheet> psccClass
 					= ( null == pscc ? null : pscc.getClass() );
 			final InsightOutputType type = ii.getOutput();
-			appendChkBox.setEnabled( null == type 
+			appendChkBox.setEnabled( null == type
 					? false : type.equals( registry.getTypeFromClass( psccClass ) ) );
 		}
 

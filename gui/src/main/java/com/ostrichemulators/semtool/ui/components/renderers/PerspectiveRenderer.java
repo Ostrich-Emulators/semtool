@@ -10,7 +10,8 @@ import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import org.apache.log4j.Logger;
-import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -18,23 +19,44 @@ import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
  */
 public class PerspectiveRenderer extends DefaultListCellRenderer {
 
-  private static final Logger log = Logger.getLogger( PerspectiveRenderer.class );
-  private InsightManager engine;
+	private static final Logger log = Logger.getLogger( PerspectiveRenderer.class );
+	private final Set<Perspective> locals = new HashSet<>();
 
-  public PerspectiveRenderer() {
-  }
+	public PerspectiveRenderer() {
+	}
 
-  @Override
-  public Component getListCellRendererComponent( JList list, Object val, int idx,
-      boolean sel, boolean hasfocus ) {
-    // figure out 
-    
-    if ( null == val ) {
-      return super.getListCellRendererComponent( list, null, idx, sel, hasfocus );
-    }
+	@Override
+	public Component getListCellRendererComponent( JList list, Object val, int idx,
+			boolean sel, boolean hasfocus ) {
+		// figure out
 
-    Perspective p = Perspective.class.cast( val );
+		if ( null == val ) {
+			return super.getListCellRendererComponent( list, null, idx, sel, hasfocus );
+		}
+
+		Perspective p = Perspective.class.cast( val );
 		setToolTipText( p.getDescription() );
-    return super.getListCellRendererComponent( list, p.getLabel(), idx, sel, hasfocus );
-  }
+		String label = p.getLabel();
+		if ( locals.contains( p ) ) {
+			label = label + " (Private)";
+		}
+
+		return super.getListCellRendererComponent( list, label, idx,
+				sel, hasfocus );
+	}
+
+	public void clear() {
+		locals.clear();
+	}
+
+	public void setLocal( Perspective p, boolean local ) {
+		if ( local ) {
+			locals.add( p );
+		}
+		else {
+			locals.remove( p );
+		}
+
+		invalidate();
+	}
 }

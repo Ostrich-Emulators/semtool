@@ -103,4 +103,10 @@ public interface InsightManager {
 	 * Insights
 	 */
 	public Perspective getSystemPerspective( IEngine eng );
+
+	/**
+	 * Does this InsightManager have any data?
+	 * @return
+	 */
+	public boolean isEmpty();
 }

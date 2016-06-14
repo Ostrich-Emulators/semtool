@@ -210,15 +210,8 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 		parameterData.setEngine( engine );
 		perspectiveData.setEngine( engine );
 
-		wim = ( null == eng ? new InsightManagerImpl() : engine.getInsightManager() );
-		model.refresh( wim );
-
-//		for ( int i = 0; i < tree.getRowCount(); i++ ) {
-//			tree.expandRow( i );
-//		}
-		tree.setSelectionRow( 0 );
-		commitbtn.setEnabled( false );
-		applybtn.setEnabled( false );
+		setModel( null == eng ? new InsightManagerImpl()
+				: engine.getInsightManager() );
 	}
 
 	/**
@@ -230,7 +223,13 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
+    buttonGroup1 = new javax.swing.ButtonGroup();
+    jPanel2 = new javax.swing.JPanel();
     jSplitPane1 = new javax.swing.JSplitPane();
+    jPanel4 = new javax.swing.JPanel();
+    jPanel3 = new javax.swing.JPanel();
+    publicImBtn = new javax.swing.JToggleButton();
+    privateImBtn = new javax.swing.JToggleButton();
     jScrollPane1 = new javax.swing.JScrollPane();
     tree = new javax.swing.JTree();
     rightside = new javax.swing.JPanel();
@@ -242,14 +241,41 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
     applybtn = new javax.swing.JButton();
     commitbtn = new javax.swing.JButton();
 
+    jPanel2.setLayout(new java.awt.BorderLayout());
+
     jSplitPane1.setDividerLocation(250);
+
+    jPanel4.setLayout(new java.awt.BorderLayout());
+
+    buttonGroup1.add(publicImBtn);
+    publicImBtn.setSelected(true);
+    publicImBtn.setText("Public");
+    publicImBtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        publicImBtnActionPerformed(evt);
+      }
+    });
+    jPanel3.add(publicImBtn);
+
+    buttonGroup1.add(privateImBtn);
+    privateImBtn.setText("Private");
+    privateImBtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        privateImBtnActionPerformed(evt);
+      }
+    });
+    jPanel3.add(privateImBtn);
+
+    jPanel4.add(jPanel3, java.awt.BorderLayout.PAGE_START);
 
     tree.setModel(model);
     tree.setRootVisible(false);
     tree.setShowsRootHandles(true);
     jScrollPane1.setViewportView(tree);
 
-    jSplitPane1.setLeftComponent(jScrollPane1);
+    jPanel4.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+    jSplitPane1.setLeftComponent(jPanel4);
 
     rightside.setLayout(new java.awt.BorderLayout());
 
@@ -282,7 +308,7 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
     jPanel1Layout.setHorizontalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-        .addContainerGap(116, Short.MAX_VALUE)
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addComponent(commitbtn)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(applybtn)
@@ -302,15 +328,17 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 
     jSplitPane1.setRightComponent(rightside);
 
+    jPanel2.add(jSplitPane1, java.awt.BorderLayout.CENTER);
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 662, Short.MAX_VALUE)
+      .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
+      .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -367,23 +395,59 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 			public void run() {
 				wim.addAll( perspectives, true );
 				listening = false;
-				EngineUtil.getInstance().importInsights( engine, wim );
+				EngineUtil eu = EngineUtil.getInstance();
+
+				if ( publicImBtn.isSelected() ) {
+					eu.importInsights( engine, wim );
+				}
+				else {
+					DIHelper.getInstance().getMetadataStore().
+							setLocalInsights( engine.getBaseUri(), wim );
+					eu.notifyInsightsModified( engine, wim );
+				}
 			}
 		} );
 		OperationsProgress.getInstance( PlayPane.UIPROGRESS ).add( pt );
   }//GEN-LAST:event_commitbtnActionPerformed
 
+  private void publicImBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_publicImBtnActionPerformed
+		if ( null != engine ) {
+			setModel( engine.getInsightManager() );
+		}
+  }//GEN-LAST:event_publicImBtnActionPerformed
+
+  private void privateImBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_privateImBtnActionPerformed
+		if ( null != engine ) {
+			setModel( DIHelper.getInstance().getMetadataStore().getLocalInsightManager( engine.getBaseUri() ) );
+		}
+  }//GEN-LAST:event_privateImBtnActionPerformed
+
+	private void setModel( InsightManager im ) {
+		wim = im;
+		model.refresh( wim );
+
+		tree.setSelectionRow( 0 );
+		commitbtn.setEnabled( false );
+		applybtn.setEnabled( false );
+	}
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton applybtn;
+  private javax.swing.ButtonGroup buttonGroup1;
   private javax.swing.JButton commitbtn;
   private javax.swing.JPanel dataArea;
   private com.ostrichemulators.semtool.ui.components.insight.manager.InsightPanel insightData;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JPanel jPanel2;
+  private javax.swing.JPanel jPanel3;
+  private javax.swing.JPanel jPanel4;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JSplitPane jSplitPane1;
   private com.ostrichemulators.semtool.ui.components.insight.manager.ParameterPanel parameterData;
   private com.ostrichemulators.semtool.ui.components.insight.manager.PerspectivePanel perspectiveData;
+  private javax.swing.JToggleButton privateImBtn;
+  private javax.swing.JToggleButton publicImBtn;
   private javax.swing.JPanel rightside;
   private javax.swing.JTree tree;
   // End of variables declaration//GEN-END:variables
