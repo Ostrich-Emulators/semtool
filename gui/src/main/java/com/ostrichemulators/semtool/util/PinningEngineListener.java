@@ -9,13 +9,14 @@ import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineOperationListener;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
-import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
+import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 
 /**
  *
@@ -24,11 +25,7 @@ import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
 public class PinningEngineListener implements EngineOperationListener {
 
 	private static final Logger log = Logger.getLogger( PinningEngineListener.class );
-	private final StoredMetadata metas;
-
-	public PinningEngineListener( StoredMetadata metas ) {
-		this.metas = metas;
-	}
+	private final Set<String> pinWhenOpen = new HashSet<>();
 
 	private void repin( File file ) {
 		try {
@@ -42,17 +39,19 @@ public class PinningEngineListener implements EngineOperationListener {
 	public synchronized void reopenPinned() {
 		log.debug( "reopening pinned databases" );
 
-		Set<String> pinned = metas.getPinnedLocations();
+		Set<String> pinned = SemtoolPreferences.getPinnedLocations();
 
 		// open everything that has been pinned
 		for ( String smss : pinned ) {
 			log.debug( "found pinned database: " + smss );
+			pinWhenOpen.add( smss );
 			File smssfile = new File( smss );
 			if ( smssfile.exists() ) {
 				repin( smssfile );
 			}
 			else {
 				log.warn( "could not find pinned database: " + smss );
+				SemtoolPreferences.removePin( smss );
 			}
 		}
 	}
@@ -60,8 +59,16 @@ public class PinningEngineListener implements EngineOperationListener {
 	@Override
 	public void engineOpened( IEngine eng ) {
 		// check to see if this database should be pinned
-		if ( metas.isPinned( eng.getBaseUri() ) ) {
-			eng.setProperty( Constants.PIN_KEY, Boolean.TRUE.toString() );
+		String smss = eng.getProperty( Constants.SMSS_LOCATION );
+		if ( pinWhenOpen.contains( smss ) ) {
+			SemtoolPreferences.togglePin( eng );
+			pinWhenOpen.remove( smss );
+		}
+		else {
+			Set<String> pins = SemtoolPreferences.getPinnedLocations();
+			if ( pins.contains( smss ) ) {
+				eng.setProperty( Constants.PIN_KEY, Boolean.toString( true ) );
+			}
 		}
 	}
 

@@ -47,6 +47,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ListIterator;
+import org.openrdf.model.Model;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -513,8 +515,8 @@ public class InsightManagerImpl implements InsightManager {
 		return insight;
 	}
 
-	public static Collection<Statement> getStatements( InsightManager im, User user ) {
-		List<Statement> statements = new ArrayList<>();
+	public static Model getModel( InsightManager im, User user ) {
+		Model statements = new LinkedHashModel();
 		int idx = 0;
 
 		RDFParser parser = new TurtleParser();
@@ -549,8 +551,8 @@ public class InsightManagerImpl implements InsightManager {
 	 * @param user
 	 * @return a list of statements that completely represent the perspective tree
 	 */
-	public static Collection<Statement> getStatements( Perspective p, User user ) {
-		List<Statement> statements = new ArrayList<>();
+	public static Model getStatements( Perspective p, User user ) {
+		Model statements = new LinkedHashModel();
 		UriBuilder urib = UriBuilder.getBuilder( SEMPERS.NAMESPACE );
 
 		// if we're creating statements, mark our repository as an insights db
@@ -594,10 +596,10 @@ public class InsightManagerImpl implements InsightManager {
 		return statements;
 	}
 
-	protected static Collection<Statement> getPerspectiveStatements( Perspective p,
+	protected static Model getPerspectiveStatements( Perspective p,
 			ValueFactory vf, UriBuilder urib, User user ) {
 
-		List<Statement> statements = new ArrayList<>();
+		Model statements = new LinkedHashModel();
 		URI pid = p.getId();
 		Date now = new Date();
 
@@ -619,10 +621,10 @@ public class InsightManagerImpl implements InsightManager {
 		return statements;
 	}
 
-	protected static Collection<Statement> getInsightStatements( Insight insight,
+	protected static Model getInsightStatements( Insight insight,
 			ValueFactory vf, UriBuilder urib, User user ) {
 
-		List<Statement> statements = new ArrayList<>();
+		Model statements = new LinkedHashModel();
 		URI iid = insight.getId();
 
 		statements.add( new StatementImpl( iid, RDF.TYPE, SPIN.MagicProperty ) );
@@ -670,11 +672,11 @@ public class InsightManagerImpl implements InsightManager {
 		return statements;
 	}
 
-	protected static Collection<Statement> getParameterStatements( Parameter parameter,
+	protected static Model getParameterStatements( Parameter parameter,
 			URI predicateUri, URI queryUri, ValueFactory vf, UriBuilder urib,
 			User user ) {
 
-		List<Statement> statements = new ArrayList<>();
+		Model statements = new LinkedHashModel();
 
 		URI pid = parameter.getId();
 
@@ -692,9 +694,9 @@ public class InsightManagerImpl implements InsightManager {
 		return statements;
 	}
 
-	protected static Collection<Statement> getOrderingStatements( Perspective p,
+	protected static Model getOrderingStatements( Perspective p,
 			List<Insight> insights, ValueFactory vf, UriBuilder urib ) {
-		List<Statement> statements = new ArrayList<>();
+		Model statements = new LinkedHashModel();
 		int idx = 0;
 		for ( Insight i : insights ) {
 			URI slot = urib.build( p.getLabel() + "-slot-" + Integer.toString( ++idx ) );
@@ -708,7 +710,7 @@ public class InsightManagerImpl implements InsightManager {
 
 	protected static Collection<Statement> getConstraintStatements( Insight ins,
 			Collection<Parameter> params ) {
-		List<Statement> statements = new ArrayList<>();
+		Model statements = new LinkedHashModel();
 		for ( Parameter p : params ) {
 			statements.add( new StatementImpl( ins.getId(), SPIN.constraint, p.getId() ) );
 		}

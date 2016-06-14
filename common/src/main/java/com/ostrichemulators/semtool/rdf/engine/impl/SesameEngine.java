@@ -124,7 +124,7 @@ public class SesameEngine extends AbstractSesameEngine {
 	public void updateInsights( InsightManager im ) throws EngineManagementException {
 		List<Statement> stmts = new ArrayList<>();
 		User user = Security.getSecurity().getAssociatedUser( this );
-		stmts.addAll( InsightManagerImpl.getStatements( im, user ) );
+		stmts.addAll( InsightManagerImpl.getModel( im, user ) );
 		Collections.sort( stmts, new StatementSorter() );
 
 		RepositoryConnection rc = null;

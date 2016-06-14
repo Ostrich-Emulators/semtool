@@ -192,7 +192,7 @@ public class Starter {
 			}
 		}
 		else {
-			PinningEngineListener watcherInstance = new PinningEngineListener( metas );
+			PinningEngineListener watcherInstance = new PinningEngineListener();
 			engineutil.addEngineOpListener( watcherInstance );
 			watcherInstance.reopenPinned();
 		}

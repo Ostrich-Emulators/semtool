@@ -7,13 +7,14 @@ package com.ostrichemulators.semtool.ui.preferences;
 
 import com.ostrichemulators.semtool.om.GraphColorShapeRepository;
 import com.ostrichemulators.semtool.om.NamedShape;
-import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.rdf.engine.api.QueryExecutor;
 import com.ostrichemulators.semtool.rdf.engine.impl.AbstractSesameEngine;
+import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneValueQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import com.ostrichemulators.semtool.util.Constants;
+import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.util.Utility;
 import info.aduna.iteration.Iterations;
 import java.awt.Color;
@@ -27,15 +28,16 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ContextStatementImpl;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -52,8 +54,7 @@ public class StoredMetadata {
 	private static final Logger log = Logger.getLogger( StoredMetadata.class );
 	private RepositoryConnection rc;
 	private ValueFactory vf;
-	private URI PIN_SUB = Utility.makeInternalUri( "pin-locs" );
-	public static final URI PIN = Utility.makeInternalUri( "pinned" );
+
 	public static final URI INSIGHT_LOC = Utility.makeInternalUri( "insight-loc" );
 	public static final URI GRAPH_COLOR = Utility.makeInternalUri( "graph-color" );
 	public static final URI GRAPH_SHAPE = Utility.makeInternalUri( "graph-shape" );
@@ -62,7 +63,7 @@ public class StoredMetadata {
 	public StoredMetadata( File datadir ) {
 		try {
 			MemoryStore store = new MemoryStore( datadir );
-			store.setSyncDelay( 2000 ); // every two seconds
+			store.setSyncDelay( 2000 ); // every two seconds (arbitrary)
 			SailRepository repo = new SailRepository( store );
 			repo.initialize();
 			rc = repo.getConnection();
@@ -92,21 +93,6 @@ public class StoredMetadata {
 		}
 	}
 
-	public void pin( IEngine engine, boolean pin ) {
-		set( null, engine.getBaseUri(), PIN, pin );
-
-		Set<String> pins = getPinnedLocations();
-		String loc = engine.getProperty( Constants.SMSS_LOCATION );
-		if ( pin ) {
-			pins.add( loc );
-		}
-		else {
-			pins.remove( loc );
-		}
-
-		set( null, PIN_SUB, RDFS.LABEL, pins.toArray( new String[0] ) );
-	}
-
 	public Set<URI> getDatabases() {
 		Set<URI> set = new HashSet<>();
 		try {
@@ -119,14 +105,6 @@ public class StoredMetadata {
 		}
 
 		return set;
-	}
-
-	public boolean isPinned( URI database ) {
-		return getBool( null, database, PIN, false );
-	}
-
-	public Set<String> getPinnedLocations() {
-		return new HashSet<>( getStrings( null, PIN_SUB, RDFS.LABEL ) );
 	}
 
 	public Set<String> getInsightLocations( URI database ) {
@@ -323,5 +301,73 @@ public class StoredMetadata {
 	public URI getUri( URI ctx, URI uri, URI pref ) {
 		return get( ctx, uri, pref,
 				OneValueQueryAdapter.getUri( "SELECT ?val WHERE { ?db ?pred ?val }" ) );
+	}
+
+	public InsightManager getLocalInsightManager( URI database ) {
+		InsightManagerImpl imi = new InsightManagerImpl();
+		ContextAwareConnection imirc = null;
+		try {
+			imirc = new ContextAwareConnection( rc );
+			imirc.setReadContexts( getInsightContext( database ) );
+			imi.loadFromRepository( imirc );
+		}
+		catch ( RepositoryException re ) {
+			log.warn( re, re );
+		}
+		finally {
+			if ( null != imirc ) {
+				try {
+					imirc.close();
+				}
+				catch ( Exception x ) {
+					log.warn( x, x );
+				}
+			}
+		}
+
+		return imi;
+	}
+
+	public void setLocalInsights( URI database, InsightManager imi ) {
+		Model model = InsightManagerImpl.getModel( imi, new LocalUserImpl() );
+
+		ContextAwareConnection imirc = null;
+		try {
+			URI realctx = getInsightContext( database );
+			imirc = new ContextAwareConnection( rc );
+			imirc.setReadContexts( realctx );
+			imirc.setRemoveContexts( realctx );
+			imirc.setInsertContext( realctx );
+			imirc.begin();
+			imirc.clear();
+			imirc.add( model );
+			imirc.commit();
+		}
+		catch ( RepositoryException re ) {
+			log.warn( re, re );
+			if ( null != imirc ) {
+				try {
+					imirc.rollback();
+				}
+				catch ( Exception e ) {
+					log.warn( e, e );
+				}
+			}
+		}
+		finally {
+			if ( null != imirc ) {
+				try {
+					imirc.close();
+				}
+				catch ( Exception x ) {
+					log.warn( x, x );
+				}
+			}
+		}
+
+	}
+
+	private static URI getInsightContext( URI database ) {
+		return new URIImpl( database.toString() + "_insights" );
 	}
 }

@@ -160,7 +160,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 
 		List<Statement> stmts = new ArrayList<>();
 		User user = Security.getSecurity().getAssociatedUser( this );
-		stmts.addAll( InsightManagerImpl.getStatements( im, user ) );
+		stmts.addAll( InsightManagerImpl.getModel( im, user ) );
 		Collections.sort( stmts, new StatementSorter() );
 
 		try {

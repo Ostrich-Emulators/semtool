@@ -31,7 +31,7 @@ import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.GuiUtility;
-import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 import com.ostrichemulators.semtool.util.DIHelper;
 import java.awt.Frame;
 import java.io.File;
@@ -182,7 +182,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		dbdir.addDocumentListener( dl );
 		file.addDocumentListener( dl2 );
 
-		Preferences vc = SemossPreferences.get();
+		Preferences vc = SemtoolPreferences.get();
 		calcInfers.setSelected( vc.getBoolean( Constants.CALC_INFERENCES_PREF, true ) );
 	}
 

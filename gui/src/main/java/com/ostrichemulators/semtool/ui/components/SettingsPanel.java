@@ -21,7 +21,7 @@ import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.ui.actions.DbAction;
 import com.ostrichemulators.semtool.ui.components.models.NamespaceTableModel;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
-import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.user.User.UserProperty;
 import com.ostrichemulators.semtool.user.Security;
@@ -37,7 +37,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 
 	private final NamespaceTableModel namespacemodel = new NamespaceTableModel(
 			Security.getSecurity().getAssociatedUser( DIHelper.getInstance().getRdfEngine() ).isLocal() );
-	private Preferences prefs = SemossPreferences.get();
+	private Preferences prefs = SemtoolPreferences.get();
 
 	protected SettingsPanel() {
 		initComponents();
@@ -252,7 +252,7 @@ public class SettingsPanel extends javax.swing.JPanel {
 				"Confirm Reset", JOptionPane.WARNING_MESSAGE );
 		if ( JOptionPane.YES_OPTION == ok ) {
 			Class<?> classesToClear[] = { DbAction.class, FileBrowsePanel.class,
-				PlayPane.class, SemossPreferences.class, BindingPanel.class,
+				PlayPane.class, SemtoolPreferences.class, BindingPanel.class,
 				GraphPlaySheet.class
 			};
 

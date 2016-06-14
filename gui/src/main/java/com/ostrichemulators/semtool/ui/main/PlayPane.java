@@ -73,7 +73,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.semanticexplorer.SemanticExplorerPanel;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 import com.ostrichemulators.semtool.ui.preferences.StoredMetadata;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
@@ -1600,7 +1600,7 @@ public class PlayPane extends JFrame {
 	}
 
 	private static boolean getProp( String propstr, boolean defaultValue ) {
-		return SemossPreferences.get().getBoolean( propstr, defaultValue );
+		return SemtoolPreferences.get().getBoolean( propstr, defaultValue );
 	}
 
 	protected void initPreferenceValues( Preferences p ) {

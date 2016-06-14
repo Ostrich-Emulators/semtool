@@ -92,7 +92,7 @@ public class InsightManagerImplTest {
 		EngineUtil2.createInsightStatements( SRCFILE, imi );
 
 		Collection<Statement> stmts
-				= InsightManagerImpl.getStatements( imi, new LocalUserImpl() );
+				= InsightManagerImpl.getModel( imi, new LocalUserImpl() );
 
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();

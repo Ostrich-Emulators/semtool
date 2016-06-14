@@ -12,7 +12,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
-import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 import com.ostrichemulators.semtool.util.Constants;
 
 import com.ostrichemulators.semtool.util.IconBuilder;
@@ -217,7 +217,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 			return;
 		}
 
-		Preferences prefs = SemossPreferences.get();
+		Preferences prefs = SemtoolPreferences.get();
 		useLabels = prefs.getBoolean( Constants.SEMEX_USE_LABELS_PREF, true );
 
 		invisibleRoot.removeAllChildren();

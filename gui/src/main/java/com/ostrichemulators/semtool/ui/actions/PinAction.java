@@ -16,6 +16,7 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
+import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 
 /**
  *
@@ -52,8 +53,7 @@ public class PinAction extends DbAction {
         + getEngineName(), new Runnable() {
           @Override
           public void run() {
-						DIHelper.getInstance().getMetadataStore().pin( getEngine(), !ispinned );
-						getEngine().setProperty( Constants.PIN_KEY, Boolean.toString( !ispinned ) );
+						SemtoolPreferences.togglePin( getEngine() );
             setEngine( getEngine() );						
 						DIHelper.getInstance().getRepoList().repaint();
           }

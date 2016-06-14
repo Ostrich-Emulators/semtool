@@ -463,7 +463,7 @@ public class CLI {
 				try {
 					handler.startRDF();
 					InsightManager im = engine.getInsightManager();
-					for ( Statement s : InsightManagerImpl.getStatements( im, new LocalUserImpl() ) ) {
+					for ( Statement s : InsightManagerImpl.getModel( im, new LocalUserImpl() ) ) {
 						handler.handleStatement( s );
 					}
 					handler.endRDF();
@@ -528,7 +528,7 @@ public class CLI {
 				try {
 					sesameconn.begin();
 					InsightManager im = engine.getInsightManager();
-					sesameconn.add( InsightManagerImpl.getStatements( im, new LocalUserImpl() ) );
+					sesameconn.add( InsightManagerImpl.getModel( im, new LocalUserImpl() ) );
 					sesameconn.commit();
 				}
 				catch ( RepositoryException re ) {

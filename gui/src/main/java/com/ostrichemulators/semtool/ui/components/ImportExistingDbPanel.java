@@ -35,7 +35,7 @@ import com.ostrichemulators.semtool.ui.actions.OpenAction;
 import com.ostrichemulators.semtool.ui.actions.OpenAction.FileHandling;
 import com.ostrichemulators.semtool.ui.helpers.StatementsSizeGuesser;
 import com.ostrichemulators.semtool.util.Constants;
-import com.ostrichemulators.semtool.ui.preferences.SemossPreferences;
+import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -106,7 +106,7 @@ public class ImportExistingDbPanel extends JPanel {
 		
 		setEngine( eng );
 
-		Preferences vc = SemossPreferences.get();
+		Preferences vc = SemtoolPreferences.get();
 		calcInfers.setSelected( vc.getBoolean( Constants.CALC_INFERENCES_PREF, false ) );
 
 		baseuri.addItem( ImportCreateDbPanel.METADATABASEURI );

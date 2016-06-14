@@ -122,7 +122,7 @@ public class ExportInsightsAction extends DbAction {
 							repo.initialize();
 							final RepositoryConnection rc = repo.getConnection();
 							InsightManager im = getEngine().getInsightManager();
-							rc.add( InsightManagerImpl.getStatements( im, user ) );
+							rc.add( InsightManagerImpl.getModel( im, user ) );
 							rc.setNamespace( SPIN.PREFIX, SPIN.NAMESPACE );
 							rc.setNamespace( SP.PREFIX, SP.NAMESPACE );
 							rc.setNamespace( SPL.PREFIX, SPL.NAMESPACE );
