@@ -14,6 +14,7 @@ import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineOperationListener;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil;
+import com.ostrichemulators.semtool.ui.actions.DbAction;
 import com.ostrichemulators.semtool.ui.components.OperationsProgress;
 import com.ostrichemulators.semtool.ui.main.PlayPane;
 import com.ostrichemulators.semtool.ui.components.ProgressTask;
@@ -58,7 +59,8 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 	 */
 	public InsightManagerPanel() {
 		initComponents();
-
+		privateImBtn.setIcon( DbAction.getIcon( "privacy" ) );
+		
 		propChangeListener = new PropertyChangeListener() {
 
 			@Override

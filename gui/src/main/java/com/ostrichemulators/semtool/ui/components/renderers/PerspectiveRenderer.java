@@ -6,12 +6,15 @@
 package com.ostrichemulators.semtool.ui.components.renderers;
 
 import com.ostrichemulators.semtool.om.Perspective;
+import com.ostrichemulators.semtool.ui.actions.DbAction;
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import org.apache.log4j.Logger;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.BorderFactory;
 
 /**
  *
@@ -37,12 +40,15 @@ public class PerspectiveRenderer extends DefaultListCellRenderer {
 		Perspective p = Perspective.class.cast( val );
 		setToolTipText( p.getDescription() );
 		String label = p.getLabel();
+
+		Component cmp = super.getListCellRendererComponent( list, label, idx,
+				sel, hasfocus );
+
 		if ( locals.contains( p ) ) {
-			label = label + " (Private)";
+			setIcon( DbAction.getIcon( "privacy" ) );
 		}
 
-		return super.getListCellRendererComponent( list, label, idx,
-				sel, hasfocus );
+		return cmp;
 	}
 
 	public void clear() {
