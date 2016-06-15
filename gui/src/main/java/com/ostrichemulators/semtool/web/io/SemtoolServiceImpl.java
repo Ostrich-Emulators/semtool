@@ -9,11 +9,11 @@ package com.ostrichemulators.semtool.web.io;
  *
  * @author ryan
  */
-public class SemossServiceImpl implements SemossService {
+public class SemtoolServiceImpl implements SemtoolService {
 
 	private final String root;
 
-	public SemossServiceImpl( String root ) {
+	public SemtoolServiceImpl( String root ) {
 		this.root = root;
 	}
 

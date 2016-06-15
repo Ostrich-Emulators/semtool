@@ -13,17 +13,20 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.web.io.DbInfo;
-import com.ostrichemulators.semtool.web.io.SemossService;
-import com.ostrichemulators.semtool.web.io.SemossServiceImpl;
+import com.ostrichemulators.semtool.web.io.SemtoolClientImpl;
 import com.ostrichemulators.semtool.web.io.ServiceClient;
+import com.ostrichemulators.semtool.web.io.SesameClientImpl;
 import java.net.MalformedURLException;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  *
@@ -35,18 +38,55 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 	private final DefaultListModel model = new DefaultListModel();
 	private final LabeledPairRenderer<DbInfo> render = new LabeledPairRenderer<>();
 	private User user;
+	private boolean semtooldialect = true;
 
 	/**
 	 * Creates new form RemoteDbPanel
 	 */
 	public RemoteDbPanel() {
 		initComponents();
+		urllbl.setVisible( false );
+		urllblscroller.setVisible( false );
 		dblist.setModel( model );
 		dblist.setCellRenderer( render );
 
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		remoteurl.setText( prefs.get( "lastexturl", "http://" ) );
 		username.setText( prefs.get( "lastusername", "" ) );
+
+		remoteurl.getDocument().addDocumentListener( new DocumentListener() {
+
+			@Override
+			public void insertUpdate( DocumentEvent e ) {
+				updateTarget();
+			}
+
+			@Override
+			public void removeUpdate( DocumentEvent e ) {
+				updateTarget();
+			}
+
+			@Override
+			public void changedUpdate( DocumentEvent e ) {
+				updateTarget();
+			}
+		} );
+
+	}
+
+	private void updateTarget() {
+		String txt = remoteurl.getText();
+		if ( !semtooldialect ) {
+			txt += "/repositories";
+		}
+
+		urllbl.setText( txt );
+	}
+
+	public void setSemtoolTarget( boolean issemtool ) {
+		semtooldialect = issemtool;
+		urllbl.setVisible( !issemtool );
+		urllblscroller.setVisible( !issemtool );
 	}
 
 	public User getConnectedUser() {
@@ -60,11 +100,14 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 			props.setProperty( Constants.ENGINE_IMPL, SesameEngine.class.getCanonicalName() );
 
 			props.setProperty( SesameEngine.REPOSITORY_KEY, info.getDataUrl() );
-			props.setProperty( SesameEngine.INSIGHTS_KEY, info.getInsightsUrl() );
-			props.setProperty( AbstractSesameEngine.REMOTE_KEY, "true" );
+			if ( null != info.getInsightsUrl() ) {
+				props.setProperty( SesameEngine.INSIGHTS_KEY, info.getInsightsUrl() );
+			}
+			props.setProperty( AbstractSesameEngine.REMOTE_KEY, Boolean.TRUE.toString() );
 			props.setProperty( "username", user.getUsername() );
 			props.setProperty( "password", new String( password.getPassword() ) );
-			
+			props.setProperty( Constants.ENGINE_NAME, info.getName() );
+
 			return props;
 		}
 		return null;
@@ -87,6 +130,8 @@ public class RemoteDbPanel extends javax.swing.JPanel {
     connect = new javax.swing.JButton();
     jLabel1 = new javax.swing.JLabel();
     remoteurl = new javax.swing.JTextField();
+    urllblscroller = new javax.swing.JScrollPane();
+    urllbl = new javax.swing.JTextArea();
     jPanel2 = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
     dblist = new javax.swing.JList<DbInfo>();
@@ -106,6 +151,12 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 
     jLabel1.setText("Server URL");
 
+    urllbl.setEditable(false);
+    urllbl.setColumns(20);
+    urllbl.setLineWrap(true);
+    urllbl.setRows(5);
+    urllblscroller.setViewportView(urllbl);
+
     javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
     jPanel1.setLayout(jPanel1Layout);
     jPanel1Layout.setHorizontalGroup(
@@ -113,6 +164,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
       .addGroup(jPanel1Layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(urllblscroller)
           .addGroup(jPanel1Layout.createSequentialGroup()
             .addGap(0, 0, Short.MAX_VALUE)
             .addComponent(connect))
@@ -129,24 +181,26 @@ public class RemoteDbPanel extends javax.swing.JPanel {
                 .addComponent(jLabel4)
                 .addGap(19, 19, 19)))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-              .addComponent(password)
+              .addComponent(password, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
               .addComponent(username)
-              .addComponent(remoteurl, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE))))
+              .addComponent(remoteurl, javax.swing.GroupLayout.Alignment.TRAILING))))
         .addContainerGap())
     );
     jPanel1Layout.setVerticalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel1Layout.createSequentialGroup()
         .addGap(0, 0, 0)
-        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
           .addComponent(jLabel1)
           .addComponent(remoteurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        .addComponent(urllblscroller, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
           .addComponent(jLabel3)
           .addComponent(username))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
           .addComponent(jLabel4)
           .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -174,7 +228,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
       jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel2Layout.createSequentialGroup()
         .addGap(0, 0, 0)
-        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
+        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
         .addGap(0, 0, 0))
     );
 
@@ -201,13 +255,16 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 		user = null;
 		dblist.setEnabled( false );
 
-		ServiceClient rest = DIHelper.getInstance().getAppCtx().getBean( ServiceClient.class );
+		RestTemplate rt = DIHelper.getInstance().getAppCtx().getBean( RestTemplate.class );
 		String url = remoteurl.getText();
-		SemossService svc = new SemossServiceImpl( url );
-		rest.setAuthentication( svc, username.getText(), password.getPassword() );
+		ServiceClient rest = ( semtooldialect
+				? new SemtoolClientImpl( rt, url )
+				: new SesameClientImpl( rt, url ) );
+
+		rest.setAuthentication( username.getText(), password.getPassword() );
 
 		try {
-			DbInfo dbs[] = rest.getDbs( svc );
+			DbInfo dbs[] = rest.getDbs();
 
 			Preferences prefs = Preferences.userNodeForPackage( getClass() );
 			prefs.put( "lastexturl", url );
@@ -219,7 +276,7 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 			}
 			dblist.setEnabled( true );
 
-			user = rest.getUser( svc );
+			user = rest.getUser();
 		}
 		catch ( HttpStatusCodeException hse ) {
 			log.error( hse );
@@ -253,6 +310,8 @@ public class RemoteDbPanel extends javax.swing.JPanel {
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JPasswordField password;
   private javax.swing.JTextField remoteurl;
+  private javax.swing.JTextArea urllbl;
+  private javax.swing.JScrollPane urllblscroller;
   private javax.swing.JTextField username;
   // End of variables declaration//GEN-END:variables
 }

@@ -17,27 +17,31 @@ import org.springframework.web.client.RestTemplate;
  * @author ryan
  */
 @Component
-public class ServiceClientImpl extends AbstractServiceClient {
+public class SemtoolClientImpl extends AbstractServiceClient {
 
 	private static final Logger log = Logger.getLogger( ServiceClient.class );
 
-	public ServiceClientImpl(){
-		
+	public SemtoolClientImpl() {
+
 	}
-	
-	public ServiceClientImpl( RestTemplate rt ){
+
+	public SemtoolClientImpl( RestTemplate rt, String url ) {
 		setRestTemplate( rt );
+		setRoot( url );
 	}
-	
+
 	@Override
-	public DbInfo[] getDbs( SemossService svc ) throws RestClientException {
-		DbInfo[] dbs = rest.getForObject( svc.databases(), DbInfo[].class );
+	public DbInfo[] getDbs() throws RestClientException {
+		String url = getRoot() + "/databases/";
+
+		DbInfo[] dbs = rest.getForObject( url, DbInfo[].class );
 		return dbs;
 	}
 
 	@Override
-	public User getUser( SemossService svc ) throws RestClientException {
-		User user = rest.getForObject( svc.user(), RemoteUserImpl.class );
+	public User getUser() throws RestClientException {
+		String url = getRoot() + "/login?whoami";
+		User user = rest.getForObject( url, RemoteUserImpl.class );
 		return user;
 	}
 }

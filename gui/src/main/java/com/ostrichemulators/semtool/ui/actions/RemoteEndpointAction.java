@@ -26,25 +26,26 @@ import org.apache.log4j.Logger;
  *
  * @author ryan
  */
-public class RemoteDbAction extends DbAction {
+public class RemoteEndpointAction extends DbAction {
 
-	private static final Logger log = Logger.getLogger( RemoteDbAction.class );
+	private static final Logger log = Logger.getLogger( RemoteEndpointAction.class );
 	private final Frame frame;
 	private Properties props = null;
 	private User user = null;
 
-	public RemoteDbAction( String optg, Frame frame ) {
-		super( optg, "Open Semtool Server", "open-file3" );
+	public RemoteEndpointAction( String optg, Frame frame ) {
+		super( optg, "Open SPARQL Endpoint", "open-file3" );
 		this.frame = frame;
-		putValue( SHORT_DESCRIPTION, "Open Semtool Server" );
+		putValue( SHORT_DESCRIPTION, "Open SPARQL Endpoint" );
 	}
 
 	@Override
 	public boolean preAction( ActionEvent ae ) {
 		RemoteDbPanel panel = new RemoteDbPanel();
+		panel.setSemtoolTarget( false );
 
 		String options[] = { "Open", "Cancel" };
-		int opt = JOptionPane.showOptionDialog( frame, panel, "Open Semtool Server",
+		int opt = JOptionPane.showOptionDialog( frame, panel, "Open Remote DB",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
 				options[0] );
 		if ( 0 == opt ) {

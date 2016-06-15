@@ -46,6 +46,7 @@ import com.ostrichemulators.semtool.ui.actions.OpenURLAction;
 import com.ostrichemulators.semtool.ui.actions.PinAction;
 import com.ostrichemulators.semtool.ui.actions.PropertiesAction;
 import com.ostrichemulators.semtool.ui.actions.RemoteDbAction;
+import com.ostrichemulators.semtool.ui.actions.RemoteEndpointAction;
 import com.ostrichemulators.semtool.ui.actions.UnmountAction;
 import com.ostrichemulators.semtool.ui.components.CloseableTab;
 import com.ostrichemulators.semtool.ui.components.CustomSparqlPanel;
@@ -209,6 +210,8 @@ public class PlayPane extends JFrame {
 			= new ImportLoadingSheetAction( UIPROGRESS, this );
 
 	private final RemoteDbAction remoteDb = new RemoteDbAction( UIPROGRESS, this );
+	private final RemoteEndpointAction remoteEndpoint
+			= new RemoteEndpointAction( UIPROGRESS, this );
 	private final NewLoadingSheetAction newls
 			= new NewLoadingSheetAction( UIPROGRESS, this );
 	private final ImportInsightsAction resetInsights
@@ -1490,11 +1493,15 @@ public class PlayPane extends JFrame {
 		jmi.setIcon( DbAction.getIcon( "local-db" ) );
 
 		jmi = openmenu.add( remoteDb );
-		jmi.setText( "Remote DB" );
-		jmi.setToolTipText( "Open Remote Files to Import" );
-		jmi.getAccessibleContext().setAccessibleName( "Open Remote Files to Import" );
-		jmi.getAccessibleContext().setAccessibleDescription( "Open Remote Files to Import" );
+		jmi.getAccessibleContext().setAccessibleName( "Open Semtool Server" );
+		jmi.getAccessibleContext().setAccessibleDescription( "Open Semtool Server" );
 		jmi.setMnemonic( KeyEvent.VK_R );
+		jmi.setIcon( DbAction.getIcon( "remote-db" ) );
+
+		jmi = openmenu.add( remoteEndpoint );
+		jmi.getAccessibleContext().setAccessibleName( "Open Remote SPARQL Endpoint" );
+		jmi.getAccessibleContext().setAccessibleDescription( "Open Remote SPARQL Endpoint" );
+		jmi.setMnemonic( KeyEvent.VK_E );
 		jmi.setIcon( DbAction.getIcon( "remote-db" ) );
 
 		jmi = openmenu.add( new OpenSparqlAction( UIPROGRESS, this, customSparqlPanel ) );

@@ -17,15 +17,26 @@ public abstract class AbstractServiceClient implements ServiceClient {
 	protected RestTemplate rest;
 	@Autowired
 	protected BasicAuthRequestFactory authorizer;
+	private String root;
+	private String username;
+	private char[] password;
 
-	public void setRestTemplate( RestTemplate rt ){
+	public void setRestTemplate( RestTemplate rt ) {
 		rest = rt;
 		authorizer = BasicAuthRequestFactory.class.cast( rest.getRequestFactory() );
 	}
-			
+
+	public void setRoot( String root ) {
+		this.root = root;
+	}
+
+	public String getRoot() {
+		return root;
+	}
+
 	@Override
-	public final void setAuthentication( SemossService svc, String username, char[] pass ) {
-		Matcher m = DECOMPOSE.matcher( svc.root() );
+	public final void setAuthentication( String username, char[] pass ) {
+		Matcher m = DECOMPOSE.matcher( root );
 		if ( m.find() ) {
 			String host = m.group( 2 );
 			String portstr = m.group( 4 );
@@ -34,9 +45,19 @@ public abstract class AbstractServiceClient implements ServiceClient {
 
 			HttpHost hh = new HttpHost( host, port, scheme );
 			authorizer.cache( hh, username, pass );
+			this.username = username;
+			this.password = pass;
 		}
 		else {
-			log.error( "could not parse url: " + svc.root() );
+			log.error( "could not parse url: " + root );
 		}
+	}
+
+	protected String getUsername(){
+		return username;
+	}
+
+	protected String getPassword(){
+		return new String( password );
 	}
 }

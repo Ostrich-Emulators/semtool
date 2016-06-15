@@ -10,27 +10,28 @@ package com.ostrichemulators.semtool.web.io;
  * @author ryan
  */
 public class DbInfo {
+
 	private String name;
 	private String serverUrl;
 	private String dataUrl;
 	private String insightsUrl;
 
-	public DbInfo(String name, String serverUrl, String dataUrl, String insightsUrl) {
+	public DbInfo( String name, String serverUrl, String dataUrl, String insightsUrl ) {
 		this.name = name;
 		this.serverUrl = serverUrl;
 		this.dataUrl = dataUrl;
 		this.insightsUrl = insightsUrl;
 	}
-	
-	public DbInfo(){
-		
+
+	public DbInfo() {
+
 	}
-	
+
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName( String name ) {
 		this.name = name;
 	}
 
@@ -38,7 +39,7 @@ public class DbInfo {
 		return serverUrl;
 	}
 
-	public void setServerUrl(String serverUrl) {
+	public void setServerUrl( String serverUrl ) {
 		this.serverUrl = serverUrl;
 	}
 
@@ -46,7 +47,7 @@ public class DbInfo {
 		return dataUrl;
 	}
 
-	public void setDataUrl(String dataUrl) {
+	public void setDataUrl( String dataUrl ) {
 		this.dataUrl = dataUrl;
 	}
 
@@ -54,7 +55,7 @@ public class DbInfo {
 		return insightsUrl;
 	}
 
-	public void setInsightsUrl(String insightsUrl) {
+	public void setInsightsUrl( String insightsUrl ) {
 		this.insightsUrl = insightsUrl;
 	}
 }

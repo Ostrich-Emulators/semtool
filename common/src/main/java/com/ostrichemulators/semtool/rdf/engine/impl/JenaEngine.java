@@ -275,6 +275,7 @@ public class JenaEngine extends AbstractSesameEngine {
 		Properties props = new Properties();
 		props.setProperty( FILE_PROP, tdb.toString() );
 		props.setProperty( INMEM_PROP, Boolean.toString( true ) );
+		props.setProperty( Constants.SMSS_LOCATION, tdb.getAbsolutePath() );
 		props.setProperty( Constants.ENGINE_IMPL, JenaEngine.class.getCanonicalName() );
 		props.setProperty( Constants.SMSS_VERSION_KEY, "1.0" );
 

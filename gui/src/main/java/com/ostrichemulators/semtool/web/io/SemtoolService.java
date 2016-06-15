@@ -9,7 +9,7 @@ package com.ostrichemulators.semtool.web.io;
  * And interface describing the layout of the Semoss web service endpoints
  * @author ryan
  */
-public interface SemossService {
+public interface SemtoolService {
 
 	public String root();
 	
