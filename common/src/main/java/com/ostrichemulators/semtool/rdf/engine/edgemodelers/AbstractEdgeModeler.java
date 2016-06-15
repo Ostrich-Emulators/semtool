@@ -86,7 +86,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	/**
-	 * Same as {@link #isValidMetadata(gov.va.semoss.poi.main.ImportMetadata)},
+	 * Same as {@link #isValidMetadata(com.ostrichemulators.semtool.poi.main.ImportMetadata)},
 	 * but throw an exception if
 	 * {@link #isValidMetadata(gov.va.semoss.poi.main.ImportMetadata)} returns
 	 * <code>false</code>

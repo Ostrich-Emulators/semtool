@@ -31,7 +31,7 @@ public interface EdgeModeler {
 	 * @param namespaces
 	 * @param sheet
 	 * @param metas Metadata to use when loading. This argument MUST pass the
-	 * {@link AbstractEdgeModeler#isValidMetadata(gov.va.semoss.poi.main.ImportMetadata) }
+	 * {@link AbstractEdgeModeler#isValidMetadata(com.ostrichemulators.semtool.poi.main.ImportMetadata) }
 	 * check
 	 * @param rc
 	 * @return the newly-created relationship node
@@ -48,7 +48,7 @@ public interface EdgeModeler {
 	 * @param namespaces
 	 * @param sheet
 	 * @param metas Metadata to use when loading. This argument MUST pass the
-	 * {@link AbstractEdgeModeler#isValidMetadata(gov.va.semoss.poi.main.ImportMetadata) }
+	 * {@link AbstractEdgeModeler#isValidMetadata(com.ostrichemulators.semtool.poi.main.ImportMetadata) }
 	 * check
 	 * @param rc
 	 * @return the newly-create node
@@ -62,11 +62,11 @@ public interface EdgeModeler {
 	 * Create statements for all of the properties of the instanceURI
 	 *
 	 * @param subject URI containing the subject instance URI
-	 * @param properties Map&lt;String, Object&gt; that contains all properties
+	 * @param properties Map of all properties
 	 * @param namespaces
 	 * @param sheet
 	 * @param metas Metadata to use when loading. This argument MUST pass the
-	 * {@link AbstractEdgeModeler#isValidMetadata(gov.va.semoss.poi.main.ImportMetadata) }
+	 * {@link AbstractEdgeModeler#isValidMetadata(com.ostrichemulators.semtool.poi.main.ImportMetadata) }
 	 * check
 	 * @param rc
 	 *
@@ -83,7 +83,7 @@ public interface EdgeModeler {
 	 *
 	 * @param alldata the data that contains the model nodes. This
 	 * {@link ImportData#getMetadata()} must pass the 
-	 * {@link AbstractEdgeModeler#isValidMetadata(gov.va.semoss.poi.main.ImportMetadata) }
+	 * {@link AbstractEdgeModeler#isValidMetadata(com.ostrichemulators.semtool.poi.main.ImportMetadata) }
 	 * check
 	 * @param namespaces the namespaces to use for resolving metamodel elements
 	 * @param vf the value factory to use, or null

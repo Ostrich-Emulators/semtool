@@ -71,8 +71,7 @@ public abstract class AbstractEngine implements IEngine {
 	/**
 	 * Opens the database. This function calls (in this order)
 	 * <ol>
-	 * <li>{@link #loadAllProperties(java.util.Properties,
-	 * java.lang.String, java.io.File...) },
+	 * <li>{@link #startLoading(java.util.Properties) },
 	 * <li>{@link #setUris(java.lang.String, java.lang.String) },
 	 * <li>{@link #finishLoading(java.util.Properties) }
 	 * </ol>

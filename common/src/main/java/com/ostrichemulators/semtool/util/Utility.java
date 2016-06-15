@@ -379,7 +379,7 @@ public class Utility {
 	 * Gets the implosion suitable for building a SPARQL VALUES token . This is a
 	 * convenience function to {@link #implode(java.util.Collection,
 	 * java.lang.String, java.lang.String, java.lang.String)
-	 * implode( collection, "<", ">", " " ) }
+	 * implode( collection, "&lt;", "&gt;", " " ) }
 	 *
 	 * @param collection
 	 * @return
