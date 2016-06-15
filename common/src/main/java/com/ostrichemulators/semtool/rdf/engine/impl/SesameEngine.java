@@ -7,21 +7,14 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
-import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.ErrorCode;
-import com.ostrichemulators.semtool.rdf.engine.util.StatementSorter;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.Constants;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
-import org.openrdf.http.protocol.UnauthorizedException;
-import org.openrdf.model.Statement;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -37,56 +30,17 @@ import org.openrdf.sail.nativerdf.NativeStore;
 public class SesameEngine extends AbstractSesameEngine {
 
 	private static final Logger log = Logger.getLogger( SesameEngine.class );
-	private Repository insights;
+	private static final Pattern PAT = Pattern.compile( "^(.*)/repositories/(.*)" );
+	private String insightsloc;
 	private RepositoryConnection data;
 
 	@Override
 	protected void createRc( Properties props ) throws RepositoryException {
 		String url = props.getProperty( REPOSITORY_KEY );
-		String ins = props.getProperty( INSIGHTS_KEY );
-		boolean remote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY,
-				Boolean.FALSE.toString() ) );
-
-		if ( remote ) {
-			Pattern pat = Pattern.compile( "^(.*)/repositories/(.*)" );
-			Matcher m = pat.matcher( url );
-			if ( m.find() ) {
-				for ( int i = 0; i < m.groupCount(); i++ ) {
-					log.debug( m.group( i ) );
-				}
-			}
-
-			String username = props.getProperty( "username", "" );
-			String password = props.getProperty( "password", "" );
-
-			HTTPRepository repo = ( m.find()
-					? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
-					: new HTTPRepository( url ) );
-			if ( !username.isEmpty() ) {
-				repo.setUsernameAndPassword( username, password );
-			}
-			repo.initialize();
-
-			data = repo.getConnection();
-
-			m.reset( ins );
-			HTTPRepository tmp = ( m.find()
-					? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
-					: new HTTPRepository( url ) );
-			if ( !username.isEmpty() ) {
-				tmp.setUsernameAndPassword( username, password );
-			}
-			insights = tmp;
-		}
-		else {
-			Repository repo = new SailRepository( new ForwardChainingRDFSInferencer(
-					new NativeStore( new File( url ) ) ) );
-			insights = new SailRepository( new ForwardChainingRDFSInferencer(
-					new NativeStore( new File( ins ) ) ) );
-			repo.initialize();
-
-			data = repo.getConnection();
-		}
+		insightsloc = props.getProperty( INSIGHTS_KEY );
+		Repository repo = getRawRepository( url );
+		repo.initialize();
+		data = repo.getConnection();
 	}
 
 	public static Properties generateProperties( File dir ) {
@@ -104,56 +58,111 @@ public class SesameEngine extends AbstractSesameEngine {
 		return data;
 	}
 
-	@Override
-	protected InsightManager createInsightManager() {
-		return InsightManagerImpl.createFromRepository( insights );
+	private Repository getRawRepository( String loc ) throws RepositoryException {
+		Properties props = getProperties();
+
+		if ( null == loc ) {
+			return null;
+		}
+
+		boolean remote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY,
+				Boolean.FALSE.toString() ) );
+
+		Repository insightsrepo = null;
+
+		if ( remote ) {
+			Matcher m = PAT.matcher( loc );
+			String username = props.getProperty( "username", "" );
+			String password = props.getProperty( "password", "" );
+
+			HTTPRepository tmp = ( m.find()
+					? new HTTPRepository( m.group( 1 ), m.group( 2 ) )
+					: new HTTPRepository( loc ) );
+			if ( !username.isEmpty() ) {
+				tmp.setUsernameAndPassword( username, password );
+			}
+			insightsrepo = tmp;
+		}
+		else {
+			insightsrepo = new SailRepository( new ForwardChainingRDFSInferencer(
+					new NativeStore( new File( loc ) ) ) );
+		}
+
+		return insightsrepo;
 	}
 
 	@Override
-	public void closeDB() {
+	protected InsightManager createInsightManager() {
+		if ( null == insightsloc ) {
+			return new InsightManagerImpl();
+		}
+
+		InsightManager im;
+		Repository repo = null;
 		try {
-			insights.shutDown();
+			repo = getRawRepository( insightsloc );
+			repo.initialize();
+			im = InsightManagerImpl.createFromRepository( repo );
 		}
-		catch ( Exception e ) {
-			log.error( e, e );
+		catch ( RepositoryException re ) {
+			log.warn( re, re );
+			im = new InsightManagerImpl();
 		}
-		super.closeDB();
+		catch ( NullPointerException npe ) {
+			im = new InsightManagerImpl();
+		}
+		finally {
+			if ( null != repo ) {
+				try {
+					repo.shutDown();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
+		}
+
+		return im;
 	}
 
 	@Override
 	public void updateInsights( InsightManager im ) throws EngineManagementException {
-		List<Statement> stmts = new ArrayList<>();
-		User user = Security.getSecurity().getAssociatedUser( this );
-		stmts.addAll( InsightManagerImpl.getModel( im, user ) );
-		Collections.sort( stmts, new StatementSorter() );
+		if ( null == insightsloc ) {
+			log.warn( "No Insights location defined with this engine" );
+			return;
+		}
 
+		User user = Security.getSecurity().getAssociatedUser( this );
+		Repository repo = null;
 		RepositoryConnection rc = null;
 		try {
-			rc = insights.getConnection();
+			repo = getRawRepository( insightsloc );
+			repo.initialize();
+			rc = repo.getConnection();
 			rc.begin();
 			rc.clear();
-			rc.add( stmts );
+			rc.add( InsightManagerImpl.getModel( im, user ) );
 			rc.commit();
 		}
-		catch ( UnauthorizedException ue ) {
-			throw new EngineManagementException( ErrorCode.ACCESS_DENIED, ue );
-		}
 		catch ( RepositoryException re ) {
-			log.error( re, re );
-			if ( null != rc ) {
-				try {
-					rc.rollback();
-				}
-				catch ( RepositoryException re2 ) {
-					log.error( re2, re2 );
-				}
-			}
-			throw new EngineManagementException( ErrorCode.UNKNOWN, re );
+			log.warn( re, re );
+			im = new InsightManagerImpl();
+		}
+		catch ( NullPointerException npe ) {
+			im = new InsightManagerImpl();
 		}
 		finally {
 			if ( null != rc ) {
 				try {
 					rc.close();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
+			if ( null != repo ) {
+				try {
+					repo.shutDown();
 				}
 				catch ( RepositoryException re ) {
 					log.warn( re, re );

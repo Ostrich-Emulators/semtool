@@ -59,7 +59,7 @@ public abstract class AbstractEngine implements IEngine {
 	private static final Logger provenance = Logger.getLogger( "provenance" );
 
 	private String engineName = null;
-	protected Properties prop = new Properties();
+	private Properties prop = new Properties();
 	private InsightManager insightEngine;
 	private UriBuilder schemabuilder;
 	private UriBuilder databuilder;
@@ -84,8 +84,9 @@ public abstract class AbstractEngine implements IEngine {
 
 		if ( log.isDebugEnabled() ) {
 			StringBuilder sb = new StringBuilder( "db properties:" );
+			final String lf = System.getProperty( "line.separator" );
 			for ( String key : initprops.stringPropertyNames() ) {
-				sb.append( "\n" ).append( key ).append( "=>" ).append( initprops.getProperty( key ) );
+				sb.append( lf ).append( key ).append( "=>" ).append( initprops.getProperty( key ) );
 			}
 			log.debug( sb.toString() );
 		}
