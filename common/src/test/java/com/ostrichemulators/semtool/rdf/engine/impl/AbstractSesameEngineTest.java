@@ -5,22 +5,10 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
-import com.ostrichemulators.semtool.rdf.engine.impl.AbstractSesameEngine;
-import com.ostrichemulators.semtool.rdf.engine.api.ModificationExecutor;
-import com.ostrichemulators.semtool.rdf.engine.api.QueryExecutor;
-import com.ostrichemulators.semtool.rdf.engine.api.UpdateExecutor;
-import com.ostrichemulators.semtool.util.Constants;
-import java.io.File;
-import java.util.Map;
-import java.util.Properties;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.openrdf.model.Model;
-import org.openrdf.repository.RepositoryConnection;
 
 /**
  *
@@ -42,13 +30,5 @@ public class AbstractSesameEngineTest {
 
 	@After
 	public void tearDown() {
-	}
-
-	@Test( expected = IllegalArgumentException.class )
-	public void testGetDefaultName() {
-		assertEquals( "test_Questions.properties", AbstractSesameEngine.getDefaultName( Constants.DREAMER, "test" ) );
-		assertEquals( "test_Custom_Map.prop", AbstractSesameEngine.getDefaultName( Constants.ONTOLOGY, "test" ) );
-		assertEquals( "test_OWL.OWL", AbstractSesameEngine.getDefaultName( Constants.OWLFILE, "test" ) );
-		AbstractSesameEngine.getDefaultName( "breaks!", "test" );
 	}
 }

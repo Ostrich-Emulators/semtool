@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Statement;
 
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sail.SailRepository;
@@ -70,13 +69,6 @@ public class ClusterEngine extends AbstractSesameEngine {
 	public void addEngine( IEngine engine ) {
 		// put it in the hash
 		engineHash.put( engine.getEngineName(), engine );
-
-		// get the base owl file
-		// get the name of the engine
-		// get the ontology / base DB for this engine
-		// load it into the in memory
-		Collection<Statement> stmts = engine.getOwlData();
-		super.addOwlData( stmts );
 
 		// do the same with insights
 		initializeInsightBase();

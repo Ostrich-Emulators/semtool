@@ -21,9 +21,7 @@ package com.ostrichemulators.semtool.rdf.engine.api;
 
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.util.Constants;
-import java.util.Collection;
 import java.util.Properties;
-import org.openrdf.model.Statement;
 
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -145,36 +143,6 @@ public interface IEngine {
 	 * not been set
 	 */
 	public UriBuilder getDataBuilder();
-
-	/**
-	 * Gets the OWL statements for this engine
-	 *
-	 * @return
-	 */
-	public Collection<Statement> getOwlData();
-
-	/**
-	 * Sets the OWL statements for this engine
-	 *
-	 * @param stmts
-	 */
-	public void setOwlData( Collection<Statement> stmts );
-
-	public void addOwlData( Collection<Statement> stmts );
-
-	/**
-	 * Adds the given statement to the OWL data for this engine
-	 *
-	 * @param stmt
-	 */
-	public void addOwlData( Statement stmt );
-
-	/**
-	 * Removes the given statement from the OWL data
-	 *
-	 * @param stmt
-	 */
-	public void removeOwlData( Statement stmt );
 
 	/**
 	 * Gets a single property from {@link #getProperties()}

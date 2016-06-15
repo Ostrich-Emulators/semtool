@@ -37,15 +37,12 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.util.Constants;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -61,7 +58,6 @@ import com.ostrichemulators.semtool.rdf.engine.api.QueryExecutor;
 import com.ostrichemulators.semtool.rdf.engine.api.UpdateExecutor;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
-import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
@@ -93,8 +89,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	public static final String REPOSITORY_KEY = "repository";
 	public static final String INSIGHTS_KEY = "insights";
 
-	private RepositoryConnection owlRc;
-
 	public AbstractSesameEngine() {
 	}
 
@@ -120,7 +114,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected void startLoading( Properties props ) throws RepositoryException {
 		createRc( props );
 		super.startLoading( props );
-		owlRc = createOwlRc();
 	}
 
 	/**
@@ -210,8 +203,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	@Override
 	protected void finishLoading( Properties props ) throws RepositoryException {
-		refreshSchemaData();
-
 		String realname = ( null == getEngineName()
 				? props.getProperty( Constants.ENGINE_NAME,
 						FilenameUtils.getBaseName( props.getProperty( Constants.SMSS_LOCATION ) ) )
@@ -232,33 +223,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		rc.commit();
 	}
 
-	protected void refreshSchemaData() {
-		// load everything from the SEMONTO namespace as our OWL dataset
-		UriBuilder owlb = getSchemaBuilder();
-		if ( null == owlb ) {
-			throw new UnsupportedOperationException(
-					"Cannot determine base relationships before setting the schema URI" );
-		}
-
-		String q = "SELECT ?uri { ?uri rdfs:subClassOf+ ?root }";
-		OneVarListQueryAdapter<URI> uris
-				= OneVarListQueryAdapter.getUriList( q, "uri" );
-		uris.bind( "root", owlb.getConceptUri().build() );
-		try {
-			RepositoryConnection rc = getRawConnection();
-
-			List<Statement> stmts = new ArrayList<>();
-			for ( URI uri : query( uris ) ) {
-				stmts.addAll( Iterations.asList( rc.getStatements( uri, null, null,
-						false ) ) );
-			}
-			setOwlData( stmts );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.warn( "could not retrieve OWL data", e );
-		}
-	}
-
 	@Override
 	protected InsightManager createInsightManager() throws RepositoryException {
 		log.debug( "creating default (in-memory) insight repository" );
@@ -268,21 +232,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public void closeDB() {
 		log.debug( "closing db: " + getEngineName() );
-		if ( null != owlRc ) {
-			try {
-				owlRc.close();
-			}
-			catch ( Exception e ) {
-				log.warn( e, e );
-			}
-
-			try {
-				owlRc.getRepository().shutDown();
-			}
-			catch ( Exception e ) {
-				log.warn( e, e );
-			}
-		}
 		
 		if ( null != getRawConnection() ) {
 			RepositoryConnection rc = getRawConnection();
@@ -510,31 +459,6 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	/**
-	 * Retrieves the "by convention" name for the given file type
-	 *
-	 * @param filetype one of:
-	 * {@link Constants#ONTOLOGY}, {@link Constants#DREAMER}, or
-	 * {@link Constants#OWLFILE}
-	 * @param engineName the name of the engine
-	 *
-	 * @return the default name for the given file
-	 *
-	 * @throws IllegalArgumentException if an unknown file type arg is given
-	 */
-	public static String getDefaultName( String filetype, String engineName ) {
-		switch ( filetype ) {
-			case Constants.DREAMER:
-				return engineName + "_Questions.properties";
-			case Constants.ONTOLOGY:
-				return engineName + "_Custom_Map.prop";
-			case Constants.OWLFILE:
-				return engineName + "_OWL.OWL";
-			default:
-				throw new IllegalArgumentException( "unhandled file type: " + filetype );
-		}
-	}
-
-	/**
 	 * Does this engine support binding variables within the Sparql execution?
 	 *
 	 * @return true, if the engine supports sparql variable binding
@@ -578,77 +502,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	@Override
-	public Collection<Statement> getOwlData() {
-		final List<Statement> stmts = new ArrayList<>();
-
-		try {
-			for ( Statement st : Iterations.asList( owlRc.getStatements( null, null,
-					null, false ) ) ) {
-				// re-box, because BigData doesn't play nicely
-				Resource s = new URIImpl( st.getSubject().stringValue() );
-				URI p = new URIImpl( st.getPredicate().stringValue() );
-				Value o = st.getObject();
-				stmts.add( new StatementImpl( s, p, o ) );
-			}
-		}
-		catch ( RepositoryException re ) {
-			log.warn( re, re );
-		}
-
-		return stmts;
-	}
-
-	@Override
 	public void commit() {
 		try {
 			RepositoryConnection rc = getRawConnection();
 			// updateLastModifiedDate();
 			rc.commit();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public void setOwlData( Collection<Statement> stmts ) {
-		try {
-			owlRc.clear();
-			owlRc.commit();
-			addOwlData( stmts );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public void addOwlData( Collection<Statement> stmts ) {
-		try {
-			owlRc.add( stmts );
-			owlRc.commit();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public void addOwlData( Statement stmt ) {
-		try {
-			owlRc.add( stmt );
-			owlRc.commit();
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-	}
-
-	@Override
-	public void removeOwlData( Statement stmt ) {
-		try {
-			owlRc.remove( stmt );
-			owlRc.commit();
 		}
 		catch ( Exception e ) {
 			log.error( e, e );
