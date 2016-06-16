@@ -50,6 +50,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.Er
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.user.Security;
+import com.ostrichemulators.semtool.util.Utility;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -66,8 +67,8 @@ public class EngineUtil implements Runnable {
 
 	private static EngineUtil instance;
 
-	private final Map<File, Boolean> toopen = Collections.synchronizedMap( new HashMap<File, Boolean>() );
-	private final Map<File, User> openusers = Collections.synchronizedMap( new HashMap<File, User>() );
+	private final Map<String, Boolean> toopen = Collections.synchronizedMap( new HashMap<String, Boolean>() );
+	private final Map<String, User> openusers = Collections.synchronizedMap( new HashMap<String, User>() );
 	private final List<IEngine> toclose = Collections.synchronizedList( new ArrayList<IEngine>() );
 	private final List<EngineOperationListener> listeners = new ArrayList<>();
 	private final Map<IEngine, InsightsImportConfig> insightqueue = new HashMap<>();
@@ -130,8 +131,8 @@ public class EngineUtil implements Runnable {
 				}
 
 				// avoid concurrent mod exception
-				Map<File, Boolean> todo;
-				Map<File, User> users;
+				Map<String, Boolean> todo;
+				Map<String, User> users;
 				synchronized ( toopen ) { // we need an atomic copy and clear operation
 					todo = new HashMap<>( toopen );
 					toopen.clear();
@@ -141,20 +142,28 @@ public class EngineUtil implements Runnable {
 					openusers.clear();
 				}
 
-				for ( Map.Entry<File, Boolean> entry : todo.entrySet() ) {
+				for ( Map.Entry<String, Boolean> entry : todo.entrySet() ) {
+					boolean isfile = Utility.isFile( entry.getKey() );
+					String mysmss = entry.getKey();
+
 					try {
 						boolean domount = true;
 						for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
-							File mountedsmss = new File( eng.getProperty( Constants.SMSS_LOCATION ) );
-							if ( entry.getKey().getAbsolutePath().equals( mountedsmss.getAbsolutePath() ) ) {
-								log.debug( "db already mounted, skipping:" + entry.getKey() );
-								domount = false;
+							String otherloc = eng.getProperty( Constants.SMSS_LOCATION );
+							if ( isfile && Utility.isFile( otherloc ) ) {
+								File myloc = new File( mysmss );
+								File mountedsmss = new File( otherloc );
+
+								if ( myloc.getAbsolutePath().equals( mountedsmss.getAbsolutePath() ) ) {
+									log.debug( "db already mounted, skipping:" + mysmss );
+									domount = false;
+								}
 							}
 						}
 
 						if ( domount ) {
-							IEngine eng = GuiUtility.loadEngine( entry.getKey() );
-							Security.getSecurity().associateUser( eng, users.get( entry.getKey() ) );
+							IEngine eng = GuiUtility.loadEngine( mysmss );
+							Security.getSecurity().associateUser( eng, users.get( mysmss) );
 
 							// avoid a possible ConcurrentModificationException
 							List<EngineOperationListener> lls = new ArrayList<>( listeners );
@@ -228,7 +237,7 @@ public class EngineUtil implements Runnable {
 		File oldfile = new File( oldsmss );
 		// not opened, but maybe still exists
 		if ( null == from ) {
-			from = GuiUtility.loadEngine( oldfile );
+			from = GuiUtility.loadEngine( oldsmss );
 			fromWasOpened = true;
 		}
 
@@ -319,7 +328,7 @@ public class EngineUtil implements Runnable {
 		ecb.setReificationModel( ReificationStyle.fromUri( reification ) );
 
 		File newsmss = EngineUtil2.createNew( ecb, null );
-		IEngine neweng = GuiUtility.loadEngine( newsmss );
+		IEngine neweng = GuiUtility.loadEngine( newsmss.getAbsolutePath() );
 
 		merge( from, neweng, metadata.isData(), false );
 
@@ -330,7 +339,7 @@ public class EngineUtil implements Runnable {
 
 		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
 		GuiUtility.closeEngine( neweng );
-		mount( newsmss, addToRepoList, true, new LocalUserImpl() );
+		mount( newsmss.getAbsolutePath(), addToRepoList, true, new LocalUserImpl() );
 	}
 
 	/**
@@ -338,8 +347,7 @@ public class EngineUtil implements Runnable {
 	 * callers will want to follow a call to mount with one to
    * {@link #addRepositoryToList(com.ostrichemulators.semtool.rdf.engine.api.IEngine) }
 	 *
-	 * @param smssfile either the SMSS file, or the database containing the SMSS
-	 * file
+	 * @param loc either a database file, or database directory, or URL
 	 * @param updateRepoList should the repository list be updated once the
 	 * repository is loaded?
 	 * @param noDupeEx if the given SMSS is already loaded, do nothing instead of
@@ -348,63 +356,73 @@ public class EngineUtil implements Runnable {
 	 *
 	 * @throws EngineManagementException
 	 */
-	public synchronized void mount( File smssfile, boolean updateRepoList,
+	public synchronized void mount( String loc, boolean updateRepoList,
 			boolean noDupeEx, User user ) throws EngineManagementException {
 		// at this point, we don't know if smssfile is a directory containing the 
 		// smss file, or the file itself, so figure out what we're looking at    
 
-		if ( smssfile.isDirectory() ) {
-			// if this is a directory, we should have an smss file either in the
-			// directory, or at the same level as it
-			FilenameFilter fnf = new FilenameFilter() {
+		boolean isFile = Utility.isFile( loc );
+		if ( isFile ) {
+			File mounty = new File( loc );
+			if ( mounty.isDirectory() ) {
+				// if this is a directory, we should have an smss file either in the
+				// directory, or at the same level as it
+				FilenameFilter fnf = new FilenameFilter() {
 
-				@Override
-				public boolean accept( File dir, String name ) {
-					return ( name.endsWith( ".smss" ) || name.endsWith( ".jnl" ) );
-				}
-			};
-
-			// check inside this directory for an smss file
-			// (assume we'll only have one smss inside)
-			for ( File check : smssfile.listFiles( fnf ) ) {
-				smssfile = check;
-			}
-		}
-		// else we've been given the smss file itself
-
-		log.debug( "mounting db from smss:" + smssfile );
-
-		for ( IEngine engo : DIHelper.getInstance().getEngineMap().values() ) {
-			try {
-				File othersmss = new File( engo.getProperty( Constants.SMSS_LOCATION ) );
-				if ( othersmss.getCanonicalPath().equals( smssfile.getCanonicalPath() ) ) {
-					if ( noDupeEx ) {
-						log.debug( "ignoring already-mounted smss:" + smssfile );
-						return; // silently ignoring
+					@Override
+					public boolean accept( File dir, String name ) {
+						return ( name.endsWith( ".smss" ) || name.endsWith( ".jnl" ) );
 					}
-					else {
-						throw new EngineManagementException( ErrorCode.DUPLICATE_NAME,
-								"This database is already mounted" );
-					}
+				};
+
+				// check inside this directory for an smss file
+				// (assume we'll only have one smss inside)
+				for ( File check : mounty.listFiles( fnf ) ) {
+					mounty = check;
 				}
 			}
-			catch ( IOException ioe ) {
-				throw new EngineManagementException( ErrorCode.UNREADABLE_SMSS,
-						"Could not load properties file: " + smssfile, ioe );
+			// else we've been given the smss file itself
+		}
+
+		log.debug( "mounting db from smss:" + loc );
+
+		if ( isFile ) {
+			File mounty = new File( loc );
+			for ( IEngine engo : DIHelper.getInstance().getEngineMap().values() ) {
+				try {
+					String othersmss = engo.getProperty( Constants.SMSS_LOCATION );
+					if ( Utility.isFile( othersmss ) ) {
+						File other = new File( othersmss );
+						if ( other.getCanonicalPath().equals( mounty.getCanonicalPath() ) ) {
+							if ( noDupeEx ) {
+								log.debug( "ignoring already-mounted smss:" + loc );
+								return; // silently ignoring
+							}
+							else {
+								throw new EngineManagementException( ErrorCode.DUPLICATE_NAME,
+										"This database is already mounted" );
+							}
+						}
+					}
+				}
+				catch ( IOException ioe ) {
+					throw new EngineManagementException( ErrorCode.UNREADABLE_SMSS,
+							"Could not load properties file: " + loc, ioe );
+				}
 			}
 		}
 
-		toopen.put( smssfile, updateRepoList );
-		openusers.put( smssfile, user );
+		toopen.put( loc, updateRepoList );
+		openusers.put( loc, user );
 		notify();
 	}
 
-	public void mount( File smssfile, boolean updateRepoList )
+	public void mount( String smssfile, boolean updateRepoList )
 			throws EngineManagementException {
 		mount( smssfile, updateRepoList, new LocalUserImpl() );
 	}
 
-	public void mount( File smssfile, boolean updateRepoList, User user )
+	public void mount( String smssfile, boolean updateRepoList, User user )
 			throws EngineManagementException {
 		mount( smssfile, updateRepoList, false, user );
 	}

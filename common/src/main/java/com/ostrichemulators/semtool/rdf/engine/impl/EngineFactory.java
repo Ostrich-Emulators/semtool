@@ -33,6 +33,7 @@ public class EngineFactory {
 
 	/**
 	 * Gets a new in-memory engine
+	 *
 	 * @return
 	 */
 	public static IEngine memory() {
@@ -113,7 +114,6 @@ public class EngineFactory {
 		try {
 			if ( FilenameUtils.isExtension( name, Arrays.asList( "prop", "properties" ) ) ) {
 				engine = getEngine( Utility.loadProp( file ) );
-				engine.setProperty( Constants.SMSS_LOCATION, abspath );
 			}
 			else if ( FilenameUtils.isExtension( name, "jnl" ) ) {
 				engine = new BigDataEngine();
@@ -129,7 +129,7 @@ public class EngineFactory {
 			else if ( "tdb".equalsIgnoreCase( name ) ) {
 				engine = new JenaEngine();
 			}
-			else if( null !=file && file.isDirectory() ){
+			else if ( null != file && file.isDirectory() ) {
 				// default behaviour: assume it's a plain old openrdf triplestore
 				engine = new SesameEngine();
 				props = SesameEngine.generateProperties( file );
@@ -137,7 +137,9 @@ public class EngineFactory {
 
 			if ( !( null == engine || null == props ) ) {
 				engine.openDB( props );
-				engine.setProperty( Constants.SMSS_LOCATION, abspath );
+				if( null == engine.getProperty( Constants.SMSS_LOCATION ) ){
+					engine.setProperty( Constants.SMSS_LOCATION, abspath );
+				}
 			}
 		}
 		catch ( IOException | RepositoryException ioe ) {
@@ -145,5 +147,19 @@ public class EngineFactory {
 		}
 
 		return engine;
+	}
+
+	public static IEngine getEngine( String fileOrUrl ) {
+		if ( Utility.isFile( fileOrUrl ) ) {
+			return getEngine( new File( fileOrUrl ) );
+		}
+		else {
+			// this is a remote DB
+			Properties props = new Properties();
+			props.setProperty( SesameEngine.REMOTE_KEY, Boolean.TRUE.toString() );
+			props.setProperty( SesameEngine.REPOSITORY_KEY, fileOrUrl );
+			props.setProperty( Constants.SMSS_LOCATION, fileOrUrl );
+			return getEngine( props );
+		}
 	}
 }

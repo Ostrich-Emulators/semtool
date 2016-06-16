@@ -71,7 +71,7 @@ public class DBToLoadingSheetExporterTest {
 		}
 
 		try {
-			eng = GuiUtility.loadEngine( dbfile );
+			eng = GuiUtility.loadEngine( dbfile.toString() );
 		}
 		catch ( IOException ioe ) {
 			log.error( ioe, ioe );

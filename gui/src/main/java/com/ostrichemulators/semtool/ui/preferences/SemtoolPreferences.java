@@ -65,7 +65,7 @@ public class SemtoolPreferences {
 			names.remove( smssloc );
 		}
 		else {
-			eng.setProperty( Constants.PIN_KEY, Boolean.toString( true ) );
+			eng.setProperty( Constants.PIN_KEY, Boolean.TRUE.toString() );
 			names.add( smssloc );
 		}
 

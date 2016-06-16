@@ -24,7 +24,6 @@ import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
-import com.ostrichemulators.semtool.rdf.engine.util.EngineLoader;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -52,6 +51,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -107,6 +108,21 @@ public class Utility {
 
 	public static URI makeInternalUri( String something ) {
 		return BUILDER.build( something );
+	}
+
+	/**
+	 * Checks if a given string is a URL or File
+	 *
+	 * @param fileOrUrl
+	 * @return true, if the arg is a file
+	 */
+	public static boolean isFile( String fileOrUrl ) {
+		Pattern pat = Pattern.compile( "^\\w+?://" );
+		Matcher m = pat.matcher( fileOrUrl );
+		if ( m.find() ) {
+			return fileOrUrl.toLowerCase().startsWith( "file://" );
+		}
+		return true;
 	}
 
 	/**

@@ -76,7 +76,7 @@ public class RemoteDbAction extends DbAction {
 						props.store( fw, "" );
 					}
 
-					EngineUtil.getInstance().mount( propfile, true, user );
+					EngineUtil.getInstance().mount( propfile.toString(), true, user );
 				}
 				catch ( IOException | EngineManagementException e ) {
 					log.error( e, e );

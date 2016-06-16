@@ -38,6 +38,13 @@ public class SesameEngine extends AbstractSesameEngine {
 	protected void createRc( Properties props ) throws RepositoryException {
 		String url = props.getProperty( REPOSITORY_KEY );
 		insightsloc = props.getProperty( INSIGHTS_KEY );
+
+		boolean remote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY,
+				Boolean.FALSE.toString() ) );
+		if ( remote ) {
+			setProperty( Constants.SMSS_LOCATION, url );
+		}
+
 		Repository repo = getRawRepository( url );
 		repo.initialize();
 		data = repo.getConnection();
@@ -68,7 +75,7 @@ public class SesameEngine extends AbstractSesameEngine {
 		boolean remote = Boolean.parseBoolean( props.getProperty( REMOTE_KEY,
 				Boolean.FALSE.toString() ) );
 
-		Repository insightsrepo = null;
+		Repository repository = null;
 
 		if ( remote ) {
 			Matcher m = PAT.matcher( loc );
@@ -81,14 +88,14 @@ public class SesameEngine extends AbstractSesameEngine {
 			if ( !username.isEmpty() ) {
 				tmp.setUsernameAndPassword( username, password );
 			}
-			insightsrepo = tmp;
+			repository = tmp;
 		}
 		else {
-			insightsrepo = new SailRepository( new ForwardChainingRDFSInferencer(
+			repository = new SailRepository( new ForwardChainingRDFSInferencer(
 					new NativeStore( new File( loc ) ) ) );
 		}
 
-		return insightsrepo;
+		return repository;
 	}
 
 	@Override

@@ -282,7 +282,7 @@ public class OpenAction extends DbAction {
 				if ( !journals.isEmpty() ) {
 					for ( File f : journals ) {
 						try {
-							EngineUtil.getInstance().mount( f, true );
+							EngineUtil.getInstance().mount( f.toString(), true );
 						}
 						catch ( EngineManagementException e ) {
 							Logger.getLogger( OpenAction.class ).error( e, e );

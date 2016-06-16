@@ -551,7 +551,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 							.setVocabularies( vocabPanel.getSelectedVocabularies() );
 
 					smss[0] = EngineUtil2.createNew( ecb, errors );
-					EngineUtil.getInstance().mount( smss[0], true );
+					EngineUtil.getInstance().mount( smss[0].toString(), true );
 				}
 				catch ( IOException | EngineManagementException ioe ) {
 					log.error( ioe, ioe );

@@ -160,7 +160,7 @@ public class RepositoryList extends JList<IEngine> {
 					for ( File f : smsses ) {
 						log.debug( "dropping mountable file: " + f );
 						try {
-							EngineUtil.getInstance().mount( f, true );
+							EngineUtil.getInstance().mount( f.getAbsolutePath(), true );
 						}
 						catch ( EngineManagementException eme ) {
 							GuiUtility.showError( eme.getLocalizedMessage() );

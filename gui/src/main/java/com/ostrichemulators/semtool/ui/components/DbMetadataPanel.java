@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.ui.components;
 
-
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -84,8 +83,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		fieldlkp.put( MetadataConstants.DCT_PUBLISHER, poc );
 		fieldlkp.put( MetadataConstants.DCT_CREATED, created );
 		fieldlkp.put( MetadataConstants.DCT_MODIFIED, update );
-		fieldlkp.put(SEMTOOL.ReificationModel, edgemodel );
-		fieldlkp.put(SEMTOOL.Database, voiduri );
+		fieldlkp.put( SEMTOOL.ReificationModel, edgemodel );
+		fieldlkp.put( SEMTOOL.Database, voiduri );
 
 		voiduri.setEditable( null == baseuri );
 		voiduri.setBackground( null == baseuri ? title.getBackground()
@@ -219,13 +218,13 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		try {
 			MetadataQuery mq = new MetadataQuery();
 			Map<URI, Value> metadata = eng.query( mq );
-			if ( metadata.containsKey(SEMTOOL.Database ) ) {
-				baseuri = URI.class.cast(metadata.get(SEMTOOL.Database ) );
+			if ( metadata.containsKey( SEMTOOL.Database ) ) {
+				baseuri = URI.class.cast( metadata.get( SEMTOOL.Database ) );
 			}
 
-			if ( metadata.containsKey(SEMTOOL.ReificationModel ) ) {
-				URI reif = URI.class.cast(metadata.get(SEMTOOL.ReificationModel ) );
-				metadata.put(SEMTOOL.ReificationModel,
+			if ( metadata.containsKey( SEMTOOL.ReificationModel ) ) {
+				URI reif = URI.class.cast( metadata.get( SEMTOOL.ReificationModel ) );
+				metadata.put( SEMTOOL.ReificationModel,
 						new LiteralImpl( Utility.getInstanceLabel( reif, eng ) ) );
 			}
 
@@ -345,7 +344,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
     voiduri.setBackground(java.awt.Color.lightGray);
 
     mlbl.setLabelFor(smss);
-    mlbl.setText("SMSS File");
+    mlbl.setText("Location");
     mlbl.setPreferredSize(new java.awt.Dimension(132, 25));
 
     smss.setEditable(false);
@@ -516,14 +515,14 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		final String val = fieldlkp.get( uri ).getText();
 
 		try {
-			eng.execute(new ModificationExecutorAdapter( true ) {
+			eng.execute( new ModificationExecutorAdapter( true ) {
 
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					ValueFactory fac = conn.getValueFactory();
-					if ( uri.equals(SEMTOOL.Database ) ) {
+					if ( uri.equals( SEMTOOL.Database ) ) {
 						baseuri = fac.createURI( val );
-						conn.add(baseuri, RDF.TYPE, SEMTOOL.Database );
+						conn.add( baseuri, RDF.TYPE, SEMTOOL.Database );
 					}
 					else {
 						if ( conn.hasStatement( baseuri, uri, null, false ) ) {

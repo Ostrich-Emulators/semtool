@@ -183,7 +183,7 @@ public class Starter {
 			for ( String smss : args ) {
 				File smssfile = new File( smss );
 				try {
-					engineutil.mount( smssfile, true );
+					engineutil.mount( smssfile.toString(), true );
 				}
 				catch ( EngineManagementException ioe ) {
 					logger.error( "cannot open repository smss/dir: "

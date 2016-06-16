@@ -87,7 +87,7 @@ public class MountAction extends DbAction {
 					public void run() {
 						for ( File smssfile : smssfiles ) {
 							try {
-								EngineUtil.getInstance().mount( smssfile, true );
+								EngineUtil.getInstance().mount( smssfile.toString(), true );
 							}
 							catch ( EngineManagementException eme ) {
 								String msg = ( ErrorCode.DUPLICATE_NAME == eme.getCode()

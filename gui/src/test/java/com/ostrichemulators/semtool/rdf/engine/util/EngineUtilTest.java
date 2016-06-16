@@ -120,7 +120,7 @@ public class EngineUtilTest {
 				}
 			} );
 
-			EngineUtil.getInstance().mount( dbfile, false );
+			EngineUtil.getInstance().mount( dbfile.getAbsolutePath(), false );
 
 		}
 		finally {

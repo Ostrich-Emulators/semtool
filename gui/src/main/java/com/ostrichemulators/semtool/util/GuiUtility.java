@@ -157,7 +157,7 @@ public class GuiUtility {
 	 *
 	 * @throws java.io.IOException
 	 */
-	public static IEngine loadEngine( File smssfile ) throws IOException {
+	public static IEngine loadEngine( String smssfile ) throws IOException {
 		IEngine engine = EngineFactory.getEngine( smssfile );
 		DIHelper.getInstance().registerEngine( engine );
 		return engine;
