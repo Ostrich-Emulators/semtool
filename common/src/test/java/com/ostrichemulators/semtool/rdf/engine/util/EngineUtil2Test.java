@@ -168,7 +168,7 @@ public class EngineUtil2Test {
 		FileUtils.deleteQuietly( tmp );
 
 		assertTrue( eng.isConnected() );
-		assertEquals( tmp.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
+		assertEquals( dbfile.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
 	}
 
 	@Test
