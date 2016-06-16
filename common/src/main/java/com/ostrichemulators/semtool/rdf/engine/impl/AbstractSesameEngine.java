@@ -85,7 +85,6 @@ import org.openrdf.query.impl.DatasetImpl;
 public abstract class AbstractSesameEngine extends AbstractEngine {
 
 	private static final Logger log = Logger.getLogger( AbstractSesameEngine.class );
-	public static final String REMOTE_KEY = "repo-is-remote";
 	public static final String REPOSITORY_KEY = "repository";
 	public static final String INSIGHTS_KEY = "insights";
 

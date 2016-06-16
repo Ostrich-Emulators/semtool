@@ -55,6 +55,8 @@ import org.openrdf.model.impl.URIImpl;
  */
 public abstract class AbstractEngine implements IEngine {
 
+	public static final String REMOTE_KEY = "repo-is-remote";
+
 	private static final Logger log = Logger.getLogger( AbstractEngine.class );
 	private static final Logger provenance = Logger.getLogger( "provenance" );
 
@@ -296,31 +298,6 @@ public abstract class AbstractEngine implements IEngine {
 		return p;
 	}
 
-	/**
-	 * Retrieves the "by convention" name for the given file type
-	 *
-	 * @param filetype one of:
-	 * {@link Constants#ONTOLOGY}, {@link Constants#DREAMER}, or
-	 * {@link Constants#OWLFILE}
-	 * @param engineName the name of the engine
-	 *
-	 * @return the default name for the given file
-	 *
-	 * @throws IllegalArgumentException if an unknown file type arg is given
-	 */
-	public static String getDefaultName( String filetype, String engineName ) {
-		switch ( filetype ) {
-			case Constants.DREAMER:
-				return engineName + "_Questions.properties";
-			case Constants.ONTOLOGY:
-				return engineName + "_Custom_Map.prop";
-			case Constants.OWLFILE:
-				return engineName + "_OWL.OWL";
-			default:
-				throw new IllegalArgumentException( "unhandled file type: " + filetype );
-		}
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -356,5 +333,11 @@ public abstract class AbstractEngine implements IEngine {
 				provenance.info( user.getUsername() + ": " + stmt );
 			}
 		}
+	}
+
+	@Override
+	public boolean isRemote() {
+		return Boolean.parseBoolean( prop.getProperty( REMOTE_KEY,
+				Boolean.FALSE.toString() ) );
 	}
 }

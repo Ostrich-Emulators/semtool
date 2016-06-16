@@ -230,4 +230,10 @@ public interface IEngine {
 	public InsightManager getInsightManager();
 
 	public void setInsightManager( InsightManager eng );
+
+	/**
+	 * Is this database accessed through a network?
+	 * @return
+	 */
+	public boolean isRemote();
 }

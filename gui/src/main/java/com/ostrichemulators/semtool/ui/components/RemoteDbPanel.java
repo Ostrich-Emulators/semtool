@@ -20,8 +20,6 @@ import java.net.MalformedURLException;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -45,48 +43,16 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 	 */
 	public RemoteDbPanel() {
 		initComponents();
-		urllbl.setVisible( false );
-		urllblscroller.setVisible( false );
 		dblist.setModel( model );
 		dblist.setCellRenderer( render );
 
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		remoteurl.setText( prefs.get( "lastexturl", "http://" ) );
 		username.setText( prefs.get( "lastusername", "" ) );
-
-		remoteurl.getDocument().addDocumentListener( new DocumentListener() {
-
-			@Override
-			public void insertUpdate( DocumentEvent e ) {
-				updateTarget();
-			}
-
-			@Override
-			public void removeUpdate( DocumentEvent e ) {
-				updateTarget();
-			}
-
-			@Override
-			public void changedUpdate( DocumentEvent e ) {
-				updateTarget();
-			}
-		} );
-
-	}
-
-	private void updateTarget() {
-		String txt = remoteurl.getText();
-		if ( !semtooldialect ) {
-			txt += "/repositories";
-		}
-
-		urllbl.setText( txt );
 	}
 
 	public void setSemtoolTarget( boolean issemtool ) {
 		semtooldialect = issemtool;
-		urllbl.setVisible( !issemtool );
-		urllblscroller.setVisible( !issemtool );
 	}
 
 	public User getConnectedUser() {
@@ -130,8 +96,6 @@ public class RemoteDbPanel extends javax.swing.JPanel {
     connect = new javax.swing.JButton();
     jLabel1 = new javax.swing.JLabel();
     remoteurl = new javax.swing.JTextField();
-    urllblscroller = new javax.swing.JScrollPane();
-    urllbl = new javax.swing.JTextArea();
     jPanel2 = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
     dblist = new javax.swing.JList<DbInfo>();
@@ -151,12 +115,6 @@ public class RemoteDbPanel extends javax.swing.JPanel {
 
     jLabel1.setText("Server URL");
 
-    urllbl.setEditable(false);
-    urllbl.setColumns(20);
-    urllbl.setLineWrap(true);
-    urllbl.setRows(5);
-    urllblscroller.setViewportView(urllbl);
-
     javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
     jPanel1.setLayout(jPanel1Layout);
     jPanel1Layout.setHorizontalGroup(
@@ -164,7 +122,6 @@ public class RemoteDbPanel extends javax.swing.JPanel {
       .addGroup(jPanel1Layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(urllblscroller)
           .addGroup(jPanel1Layout.createSequentialGroup()
             .addGap(0, 0, Short.MAX_VALUE)
             .addComponent(connect))
@@ -193,8 +150,6 @@ public class RemoteDbPanel extends javax.swing.JPanel {
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
           .addComponent(jLabel1)
           .addComponent(remoteurl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(urllblscroller, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
           .addComponent(jLabel3)
@@ -310,8 +265,6 @@ public class RemoteDbPanel extends javax.swing.JPanel {
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JPasswordField password;
   private javax.swing.JTextField remoteurl;
-  private javax.swing.JTextArea urllbl;
-  private javax.swing.JScrollPane urllblscroller;
   private javax.swing.JTextField username;
   // End of variables declaration//GEN-END:variables
 }
