@@ -34,9 +34,21 @@ public class RemoteEndpointAction extends DbAction {
 	private User user = null;
 
 	public RemoteEndpointAction( String optg, Frame frame ) {
-		super( optg, "Open SPARQL Endpoint", "open-file3" );
+		this( optg, frame, "Open SPARQL Endpoint", "open-file3" );
+	}
+
+	public RemoteEndpointAction( String optg, Frame frame, String title, String iconimg ) {
+		super( optg, title, iconimg );
 		this.frame = frame;
-		putValue( SHORT_DESCRIPTION, "Open SPARQL Endpoint" );
+		putValue( SHORT_DESCRIPTION, title );
+	}
+
+	protected Properties getProperties(){
+		return props;
+	}
+
+	protected User getUser(){
+		return user;
 	}
 
 	@Override
@@ -45,7 +57,7 @@ public class RemoteEndpointAction extends DbAction {
 		panel.setSemtoolTarget( false );
 
 		String options[] = { "Open", "Cancel" };
-		int opt = JOptionPane.showOptionDialog( frame, panel, "Open Remote DB",
+		int opt = JOptionPane.showOptionDialog( frame, panel, "Open Remote SPARQL Endpoint",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
 				options[0] );
 		if ( 0 == opt ) {

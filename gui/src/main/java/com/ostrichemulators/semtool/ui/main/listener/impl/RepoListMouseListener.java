@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.ui.actions.AttachRemoteInsightsAction;
 import com.ostrichemulators.semtool.ui.actions.CheckConsistencyAction;
 import com.ostrichemulators.semtool.ui.components.RepositoryList;
 import com.ostrichemulators.semtool.ui.components.RepositoryList.RepositoryListModel;
@@ -81,7 +82,7 @@ public class RepoListMouseListener extends MouseAdapter {
 	private final ImportInsightsAction resetInsights;
 	private final ImportInsightsAction importInsights;
 	private final CheckConsistencyAction consistencyCheck;
-	
+	private final AttachRemoteInsightsAction remoteInsights;
 
 	public RepoListMouseListener( RepositoryList repos ) {
 		repoList = repos;
@@ -103,23 +104,24 @@ public class RepoListMouseListener extends MouseAdapter {
 				true, true );
 		exprels = new ExportLoadingSheetAction( PlayPane.UIPROGRESS, frame,
 				false, true );
-		expgraphml = new ExportGraphAction( PlayPane.UIPROGRESS, frame, 
+		expgraphml = new ExportGraphAction( PlayPane.UIPROGRESS, frame,
 				ExportGraphAction.Style.GRAPHML );
-		expgson = new ExportGraphAction( PlayPane.UIPROGRESS, frame, 
+		expgson = new ExportGraphAction( PlayPane.UIPROGRESS, frame,
 				ExportGraphAction.Style.GSON );
 		expSpecNodes = new ExportSpecificNodesToLoadingSheetAction(
 				PlayPane.UIPROGRESS, frame );
 		expSpecRels = new ExportSpecificRelationshipsToLoadingSheetAction(
 				PlayPane.UIPROGRESS, frame );
 		importls = new ImportLoadingSheetAction( PlayPane.UIPROGRESS, frame );
-		// importrtm = new ImportRtmAction( PlayPane.UIPROGRESS, frame );
+		remoteInsights = new AttachRemoteInsightsAction( PlayPane.UIPROGRESS, frame );
+
 		creater = new CreateDbAction( PlayPane.UIPROGRESS, frame );
 		exportinsights = new ExportInsightsAction( PlayPane.UIPROGRESS, frame );
 		resetInsights = new ImportInsightsAction( UIPROGRESS, true, frame );
 		importInsights = new ImportInsightsAction( UIPROGRESS, false, frame );
 
 		consistencyCheck = new CheckConsistencyAction( UIPROGRESS, frame );
-		unmounter = new  UnmountAction(  frame, "Close DB"  );
+		unmounter = new UnmountAction( frame, "Close DB" );
 		mergeroot = new JMenu( MERGE );
 	}
 
@@ -159,9 +161,10 @@ public class RepoListMouseListener extends MouseAdapter {
 
 		if ( null != engine ) {
 			for ( DbAction dba : new DbAction[]{ toggler, proper, cloner, clearer, unmounter,
-				exportttl, exportnt, exportrdf, exportinsights, importls, mounter, 
-				expnodes, exprels, expSpecNodes, expSpecRels, expall, creater, 
-				resetInsights, importInsights, consistencyCheck, expgraphml, expgson } ) {
+				exportttl, exportnt, exportrdf, exportinsights, importls, mounter,
+				expnodes, exprels, expSpecNodes, expSpecRels, expall, creater,
+				resetInsights, importInsights, consistencyCheck, expgraphml, expgson,
+				remoteInsights } ) {
 				dba.setEngine( opEngine );
 			}
 
@@ -220,12 +223,12 @@ public class RepoListMouseListener extends MouseAdapter {
 
 			loadingsheets.add( expall );
 			exptop.add( exportinsights );
-			
+
 			JMenu gexp = new JMenu( "Graph 234" );
 			gexp.add( expgraphml );
 			gexp.add( expgson );
-			
-			exptop.add( gexp );			
+
+			exptop.add( gexp );
 			db.add( exptop );
 
 			JMenu importtop = new JMenu( "Import" );
@@ -255,6 +258,7 @@ public class RepoListMouseListener extends MouseAdapter {
 			//Ticket #792
 			insights.add( importInsights );
 			insights.add( resetInsights );
+			insights.add( remoteInsights );
 			importtop.add( insights );
 			//Insite Manager Icon
 			insights.setIcon( DbAction.getIcon( "insight_manager_tab1" ) );
@@ -264,7 +268,6 @@ public class RepoListMouseListener extends MouseAdapter {
 			db.add( cloner );
 			db.add( clearer );
 
-			
 			db.add( unmounter );
 			db.addSeparator();
 

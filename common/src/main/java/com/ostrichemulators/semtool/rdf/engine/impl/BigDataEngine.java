@@ -68,6 +68,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 	private BigdataSail sail = null;
 	private BigdataSailRepository insightrepo = null;
 	private InsightManagerImpl insightEngine = null;
+	private boolean externallySetInsightManager = false;
 
 	public BigDataEngine() {
 	}
@@ -128,6 +129,12 @@ public class BigDataEngine extends AbstractSesameEngine {
 	@Override
 	protected RepositoryConnection getRawConnection() {
 		return rc;
+	}
+
+	@Override
+	public void setInsightManager( InsightManager ie ) {
+		super.setInsightManager( ie );
+		externallySetInsightManager = true;
 	}
 
 	@Override
@@ -216,7 +223,9 @@ public class BigDataEngine extends AbstractSesameEngine {
 	@Override
 	public void updateInsights( InsightManager im ) throws EngineManagementException {
 		try {
-			copyInsightsToDisk( im );
+			if( !externallySetInsightManager ){
+				copyInsightsToDisk( im );
+			}
 			insightEngine.addAll( im.getPerspectives(), true );
 		}
 		catch ( UnauthorizedException ue ) {

@@ -25,6 +25,7 @@ import com.ostrichemulators.semtool.om.InsightOutputType;
 import com.ostrichemulators.semtool.om.Perspective;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.VocabularyRegistry;
+import com.ostrichemulators.semtool.ui.actions.AttachRemoteInsightsAction;
 import com.ostrichemulators.semtool.ui.actions.CheckConsistencyAction;
 import com.ostrichemulators.semtool.ui.actions.ClearAction;
 import com.ostrichemulators.semtool.ui.actions.CloneAction;
@@ -218,6 +219,8 @@ public class PlayPane extends JFrame {
 			= new ImportInsightsAction( UIPROGRESS, true, this );
 	private final ImportInsightsAction importInsights
 			= new ImportInsightsAction( UIPROGRESS, false, this );
+	private final AttachRemoteInsightsAction remoteInsights
+			= new AttachRemoteInsightsAction( UIPROGRESS, this );
 
 	private final CheckConsistencyAction consistencyCheck
 			= new CheckConsistencyAction( UIPROGRESS, this );
@@ -439,7 +442,8 @@ public class PlayPane extends JFrame {
 				DbAction actions[] = {
 					toggler, proper, cloner, clearer, exportttl, exportnt, expgraphml,
 					expgson, exportrdf, exportinsights, expall, exprels, expnodes,
-					expSpecNodes, expSpecRels, unmounter, importls, consistencyCheck };
+					expSpecNodes, expSpecRels, unmounter, importls, consistencyCheck,
+					remoteInsights };
 				for ( DbAction dba : actions ) {
 					dba.setEngine( engine );
 					dba.setEnabled( null != engine );
@@ -987,6 +991,7 @@ public class PlayPane extends JFrame {
 		//Ticket #792
 		insights.add( importInsights );
 		insights.add( resetInsights );
+		insights.add( remoteInsights );
 		importtop.add( insights );
 		//Insite Manager Icon
 		insights.setIcon( DbAction.getIcon( "insight_manager_tab1" ) );
@@ -998,7 +1003,7 @@ public class PlayPane extends JFrame {
 
 		db.add( cloner );
 		db.add( clearer );
-		//db.add( unmounter) ;
+
 		db.addSeparator();
 
 		db.add( proper );
