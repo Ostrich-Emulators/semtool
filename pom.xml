@@ -226,14 +226,20 @@
     
 	<profiles>
 		<profile>
-			<id>jacoco</id>
-			
+			<id>full-build</id>
+
 			<build>
+				<defaultGoal>validate test</defaultGoal>
 				<plugins>
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.6.201602180812</version>
+						<version>0.7.7.201606060606</version>
+						<configuration>
+							<!-- if we ever use the "check" feature, we'll need some rules -->
+							<rules/>
+						</configuration>
+
 						<executions>
 							<execution>
 								<id>pre-unit-test</id>
@@ -265,6 +271,11 @@
 				<configuration>
 					<aggregate>true</aggregate>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.7.201606060606</version>
 			</plugin>
 		</plugins>
 	</reporting>
