@@ -27,6 +27,7 @@ under the License.
 		<menu name="Getting Started">
 			<item name="Introduction" href="getting-started.html"/>
 			<item name="Loading Data" href="loading-data.html"/>
+			<item name="Downloads" href="downloads.html"/>
 		</menu>
 		<menu ref="modules"/>
 		<menu ref="reports"/>
