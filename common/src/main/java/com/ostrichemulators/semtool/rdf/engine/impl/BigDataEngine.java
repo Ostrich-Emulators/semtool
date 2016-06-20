@@ -142,9 +142,12 @@ public class BigDataEngine extends AbstractSesameEngine {
 		// create an in-memory KB, but copy everything from our jnl-based
 		// KB to it
 
-		BigdataSailRepositoryConnection insightrc = insightrepo.getReadOnlyConnection();
 		insightEngine = new InsightManagerImpl();
-		log.debug( "loading on-disk insights stmts: " + insightrc.size() );
+		BigdataSailRepositoryConnection insightrc = null;
+		try {
+			insightrc = insightrepo.getReadOnlyConnection();
+
+			log.debug( "loading on-disk insights stmts: " + insightrc.size() );
 //
 //		try ( Writer w = new BufferedWriter( new FileWriter( "/tmp/x.ttl" ) ) ) {
 //			insightrc.export( new TurtleWriter( w ) );
@@ -153,7 +156,19 @@ public class BigDataEngine extends AbstractSesameEngine {
 //				// don't care
 //		}
 
-		insightEngine.loadFromRepository( insightrc );
+			insightEngine.loadFromRepository( insightrc );
+		}
+		finally {
+			if ( null != insightrc ) {
+				try {
+					insightrc.close();
+				}
+				catch ( RepositoryException re ) {
+					log.warn( re, re );
+				}
+			}
+		}
+		
 		return insightEngine;
 	}
 
@@ -223,7 +238,7 @@ public class BigDataEngine extends AbstractSesameEngine {
 	@Override
 	public void updateInsights( InsightManager im ) throws EngineManagementException {
 		try {
-			if( !externallySetInsightManager ){
+			if ( !externallySetInsightManager ) {
 				copyInsightsToDisk( im );
 			}
 			insightEngine.addAll( im.getPerspectives(), true );
