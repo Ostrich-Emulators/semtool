@@ -13,7 +13,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<openrdf.version>2.7.12</openrdf.version>
-		<blazegraph.version>2.1.0</blazegraph.version>
+		<blazegraph.version>2.1.2</blazegraph.version>
 		<lucene.version>5.5.0</lucene.version>
 		<spring.version>4.2.5.RELEASE</spring.version>
 		<http.version>4.4</http.version>
@@ -28,7 +28,7 @@
   
 	<scm>
 		<connection>scm:git:https://github.com/Ostrich-Emulators/semtool.git</connection>
-		<url>https://github.com/Ostrich-Emulators/semtool.git</url>
+		<url>https://github.com/Ostrich-Emulators/semtool</url>
 	</scm>
     
 	<dependencies>
@@ -227,9 +227,11 @@
 	<profiles>
 		<profile>
 			<id>full-build</id>
-
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			
 			<build>
-				<defaultGoal>validate test</defaultGoal>
 				<plugins>
 					<plugin>
 						<groupId>org.jacoco</groupId>
@@ -246,13 +248,26 @@
 								<goals>
 									<goal>prepare-agent</goal>
 								</goals>
+								<configuration>
+									<propertyName>surefireArgLine</propertyName>
+									<append>true</append>
+								</configuration>
 							</execution>
 							<execution>
 								<id>post-unit-test</id>
 								<phase>test</phase>
 								<goals>
-									<goal>report</goal>		
-									<goal>check</goal>
+									<goal>report</goal>
+								</goals>
+								<configuration>
+									<append>true</append>
+								</configuration>
+							</execution>
+							<execution>
+								<id>default-report</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>report</goal>
 								</goals>
 							</execution>
 						</executions>
@@ -353,7 +368,6 @@
 		<url>http://ostrich-emulators.com</url>
 		<name>Ostrich Emulators</name>
 	</organization>
-	<url>https://github.com/Ostrich-Emulators/semtool</url>
 
 	<distributionManagement>
 		<site>

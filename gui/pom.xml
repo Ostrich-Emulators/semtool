@@ -153,43 +153,6 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.jacoco</groupId>
-						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.7.201606060606</version>
-						<configuration>
-							<!-- if we ever use the "check" feature, we'll need some rules -->
-							<rules/>
-
-							<excludes>
-								<exclude>com/ostrichemulators/semtool/ui/**</exclude>
-								<exclude>com/ostrichemulators/semtool/util/GuiUtility.class</exclude>
-								<exclude>com/ostrichemulators/semtool/util/ExportUtility.class</exclude>
-								<exclude>com/ostrichemulators/semtool/util/PinningEngineListener.class</exclude>
-								<exclude>com/ostrichemulators/semtool/rdf/engine/util/EngineUtil.class</exclude>
-								<exclude>com/ostrichemulators/semtool/algorithm/impl/IslandIdentifierProcessor.class</exclude>
-								<exclude>com/ostrichemulators/semtool/search/**</exclude>
-							</excludes>
-
-						</configuration>
-						<executions>
-							<execution>
-								<id>pre-unit-test</id>
-								<goals>
-									<goal>prepare-agent</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>post-unit-test</id>
-								<phase>test</phase>
-								<goals>
-									<goal>report</goal>
-									<goal>check</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-
-					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
 						<executions>
@@ -264,12 +227,12 @@
 										</opts>
 									</jre>
 									<versionInfo>
-										<fileVersion>2.0.0.0</fileVersion>
+										<fileVersion>1.0.0.0</fileVersion>
 										<txtFileVersion>${project.version}</txtFileVersion>
 										<fileDescription>${project.name} Launcher</fileDescription>
 										<copyright>2016, Ostrich Emulators</copyright>
-										<productVersion>2.0.0.0</productVersion>
-										<txtProductVersion>OS-EM Semantic Tool v2</txtProductVersion>
+										<productVersion>1.0.0.0</productVersion>
+										<txtProductVersion>OS-EM Semantic Tool v1</txtProductVersion>
 										<productName>${project.name}</productName>
 										<companyName>Ostrich Emulators</companyName>
 										<internalName>Semtool</internalName>
@@ -336,4 +299,10 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<scm>
+		<connection>scm:git:https://github.com/Ostrich-Emulators/semtool.git</connection>
+		<url>https://github.com/Ostrich-Emulators/semtool/tree/master/gui</url>
+	</scm>
+
 </project>
