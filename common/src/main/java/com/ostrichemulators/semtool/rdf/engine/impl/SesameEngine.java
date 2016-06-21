@@ -89,6 +89,10 @@ public class SesameEngine extends AbstractSesameEngine {
 				tmp.setUsernameAndPassword( username, password );
 			}
 			repository = tmp;
+
+			
+
+
 		}
 		else {
 			repository = new SailRepository( new ForwardChainingRDFSInferencer(

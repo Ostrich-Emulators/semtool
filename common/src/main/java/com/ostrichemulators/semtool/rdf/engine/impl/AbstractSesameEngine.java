@@ -124,35 +124,30 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected abstract void createRc( Properties props ) throws RepositoryException;
 
 	@Override
-	protected URI setUris( String data, String schema ) {
+	protected URI setUris( String data, String schema ) throws RepositoryException {
 		URI baseuri = null;
 		if ( data.isEmpty() ) {
-			try {
-				// if the baseuri isn't already set, then query the kb for void:Dataset
-				RepositoryResult<Statement> rr
-						= getRawConnection().getStatements( null, RDF.TYPE, SEMTOOL.Database, false );
-				List<Statement> stmts = Iterations.asList( rr );
-				for ( Statement s : stmts ) {
-					baseuri = URI.class.cast( s.getSubject() );
-					break;
-				}
-
-				if ( null == baseuri ) {
-					// not set yet, so make one (this is a silent upgrade)
-					RepositoryConnection rc = getRawConnection();
-					rc.begin();
-					try {
-						baseuri = silentlyUpgrade( rc );
-						rc.commit();
-					}
-					catch ( RepositoryException e ) {
-						log.error( e, e );
-						rc.rollback();
-					}
-				}
+			// if the baseuri isn't already set, then query the kb for void:Dataset
+			RepositoryResult<Statement> rr
+					= getRawConnection().getStatements( null, RDF.TYPE, SEMTOOL.Database, false );
+			List<Statement> stmts = Iterations.asList( rr );
+			for ( Statement s : stmts ) {
+				baseuri = URI.class.cast( s.getSubject() );
+				break;
 			}
-			catch ( RepositoryException e ) {
-				log.error( e, e );
+
+			if ( null == baseuri ) {
+				// not set yet, so make one (this is a silent upgrade)
+				RepositoryConnection rc = getRawConnection();
+				rc.begin();
+				try {
+					baseuri = silentlyUpgrade( rc );
+					rc.commit();
+				}
+				catch ( RepositoryException e ) {
+					log.error( e, e );
+					rc.rollback();
+				}
 			}
 		}
 		else {
@@ -231,7 +226,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	@Override
 	public void closeDB() {
 		log.debug( "closing db: " + getEngineName() );
-		
+
 		if ( null != getRawConnection() ) {
 			RepositoryConnection rc = getRawConnection();
 			if ( null != rc ) {

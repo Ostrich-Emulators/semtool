@@ -153,7 +153,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		control.setLabelCache( getLabelCache() );
 
 		graphSplitPane = new JSplitPane();
-		graphSplitPane.setOneTouchExpandable( true );
+		graphSplitPane.setOneTouchExpandable( false );
 		graphSplitPane.setOrientation( JSplitPane.HORIZONTAL_SPLIT );
 
 		setLayout( new BorderLayout() );
@@ -172,6 +172,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		graphSplitPane.setRightComponent( control );
 		graphSplitPane.setDividerLocation( 1d );
 		graphSplitPane.setResizeWeight( 1d );
+		graphSplitPane.setDividerSize( 0 );
 
 		addGraphListener( legendPanel );
 		addGraphListener( control );
@@ -224,17 +225,28 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			public void actionPerformed( ActionEvent e ) {
 				Preferences prefs = Preferences.userNodeForPackage( getClass() );
 
+				graphSplitPane.setOneTouchExpandable( graphprops.isSelected() );
+
 				if ( graphprops.isSelected() ) {
+					graphSplitPane.setDividerSize( 10 );
 					int pos = prefs.getInt( PROPERTY_PREF, -1 );
 					if ( pos < 0 ) {
-						graphSplitPane.setDividerLocation( 0.25 );
+						graphSplitPane.setDividerLocation( 0.75 );
 					}
 					else {
 						graphSplitPane.setDividerLocation( pos );
 					}
 				}
 				else {
-					prefs.putInt( PROPERTY_PREF, graphSplitPane.getDividerLocation() );
+					graphSplitPane.setDividerSize( 0 );
+					int loc = graphSplitPane.getDividerLocation();
+					int width = getWidth() - 20;
+					if ( loc < width ) { // don't save a "closed" pref panel's location
+						prefs.putInt( PROPERTY_PREF, graphSplitPane.getDividerLocation() );
+					}
+					else {
+						prefs.remove( PROPERTY_PREF );
+					}
 					graphSplitPane.setDividerLocation( 1d );
 				}
 			}
@@ -629,7 +641,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		}
 	}
 
-	protected int getOverlayLevel(){
+	protected int getOverlayLevel() {
 		return overlayLevel;
 	}
 }

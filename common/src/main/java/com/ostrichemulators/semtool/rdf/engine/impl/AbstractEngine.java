@@ -166,8 +166,9 @@ public abstract class AbstractEngine implements IEngine {
 	 * (possibly empty)
 	 * @param schema the schema builder uri (never empty)
 	 * @return this database's unique id. this will include some sort of UUID
+	 * @throws org.openrdf.repository.RepositoryException
 	 */
-	protected abstract URI setUris( String data, String schema );
+	protected abstract URI setUris( String data, String schema ) throws RepositoryException;
 
 	/**
 	 * Update the "last modified" date of the dataset. This operation should fail
