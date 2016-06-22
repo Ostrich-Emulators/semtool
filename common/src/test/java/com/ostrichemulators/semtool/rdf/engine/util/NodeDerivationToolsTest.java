@@ -70,13 +70,6 @@ public class NodeDerivationToolsTest {
 	}
 
 	@Test
-	public void testGetPredicatesBetween_3args() {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
-		Set<URI> result = new HashSet<>( NodeDerivationTools.getPredicatesBetween( HUMAN, CAR, engine ) );
-		assertEquals( expResult, result );
-	}
-
-	@Test
 	public void testGetConnectedConceptTypes_3args_1() {
 		Set<URI> expResult = new HashSet<>( Arrays.asList( CAR ) );
 		Set<URI> result
@@ -102,36 +95,6 @@ public class NodeDerivationToolsTest {
 		result.clear();
 		result.addAll( NodeDerivationTools.getConnectedConceptTypes( Arrays.asList( YUGO ),
 				engine, false ) );
-		assertEquals( expResult, result );
-	}
-
-	@Test
-	public void testTopLevelRelsGeneric() throws Exception {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
-		Set<URI> result = NodeDerivationTools.getTopLevelRelations( expResult, engine );
-		assertEquals( expResult, result );
-	}
-
-	@Test
-	public void testTopLevelRelsSpecific() throws Exception {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
-		Set<URI> result = NodeDerivationTools.getTopLevelRelations(
-				Arrays.asList( YPY ), engine );
-		assertEquals( expResult, result );
-	}
-
-	@Test
-	public void testTopLevelRelsMixed() throws Exception {
-		// this is just extra stuff that shouldn't be returned in the tests
-		final URI REL = engine.getSchemaBuilder().getRelationUri().build();
-		final URI EXTRA = engine.getSchemaBuilder().build( "AnotherRelType" );
-		final URI EXTRAIMPL = engine.getDataBuilder().build( "AnotherRel" );
-		engine.getRawConnection().add( EXTRA, RDFS.SUBPROPERTYOF, REL );
-		engine.getRawConnection().add( EXTRAIMPL, RDF.TYPE, REL );
-
-		Set<URI> expResult = new HashSet<>( Arrays.asList( PURCHASE ) );
-		Set<URI> result = NodeDerivationTools.getTopLevelRelations(
-				Arrays.asList( YPY, PURCHASE ), engine );
 		assertEquals( expResult, result );
 	}
 

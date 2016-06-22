@@ -174,35 +174,12 @@ public class NodeDerivationTools {
 	}
 
 	/**
-	 * Get a list of predicates that connect subjects and objects of given types
-	 *
-	 * @param subjectNodeType The type of subject node
-	 * @param objectNodeType The type of object node
-	 * @param engine The engine, which contains a digested knowledgebase, which
-	 * will run the query designed to derive the various predicates between the
-	 * node types
-	 * @return A list of predicates, in URI
-	 * @deprecated use {@link StructureManager#getLinksBetween(org.openrdf.model.URI,
-	 * org.openrdf.model.URI) } instead
-	 */
-	@Deprecated
-	public static List<URI> getPredicatesBetween( URI subjectNodeType, URI objectNodeType,
-			IEngine engine ) {
-		List<URI> values = engine.queryNoEx( getPredicatesBetweenQA( subjectNodeType,
-				objectNodeType, engine ) );
-		return new ArrayList<>( getTopLevelRelations( values, engine ) );
-	}
-
-	/**
 	 *
 	 * @param instance
 	 * @param engine
 	 * @param instanceIsSubject
 	 * @return
-	 * @deprecated use {@link StructureManager#getConnectedConceptTypes(java.util.Collection)
-	 * } instead
 	 */
-	@Deprecated
 	public static List<URI> getConnectedConceptTypes( URI instance, IEngine engine,
 			boolean instanceIsSubject ) {
 		String query = "SELECT DISTINCT ?subtype ?objtype \n"
@@ -238,11 +215,8 @@ public class NodeDerivationTools {
 	 * @param subtype
 	 * @param objtype
 	 * @param engine
-	 * @return
-	 * @deprecated use {@link StructureManager#getLinksBetween(org.openrdf.model.URI,
-	 * org.openrdf.model.URI) } instead
+	 * @return a collection of connections
 	 */
-	@Deprecated
 	public static Collection<URI> getConnections( URI subtype, URI objtype, IEngine engine ) {
 		String query = "SELECT DISTINCT ?rel {\n"
 				+ "  ?s a ?subtype .\n"
@@ -270,12 +244,8 @@ public class NodeDerivationTools {
 	 * @param instances
 	 * @param engine
 	 * @param instanceIsSubject
-	 * @return
-	 * @deprecated use {@link StructureManager#getConnectedConceptTypes(java.util.Collection)
-	 * }
-	 * instead
+	 * @return a list of top-level types
 	 */
-	@Deprecated
 	public static List<URI> getConnectedConceptTypes( Collection<URI> instances,
 			IEngine engine, boolean instanceIsSubject ) {
 
@@ -317,11 +287,8 @@ public class NodeDerivationTools {
 	 * @param engine
 	 * @return the smallest set of relations that cover the input rels. All the
 	 * returned URIs will be <code>rdfs:subClassOf semonto:Relation</code>
-	 * @deprecated use
-	 * {@link StructureManager#getTopLevelRelations(java.util.Collection)}
 	 */
-	@Deprecated
-	public static Set<URI> getTopLevelRelations( Collection<URI> rels,
+	private static Set<URI> getTopLevelRelations( Collection<URI> rels,
 			IEngine engine ) {
 
 		Set<URI> todo = new HashSet<>( rels ); // get unique set of input

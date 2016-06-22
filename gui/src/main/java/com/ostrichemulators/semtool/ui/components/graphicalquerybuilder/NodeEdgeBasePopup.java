@@ -7,7 +7,6 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import edu.uci.ics.jung.graph.Graph;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
-import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
@@ -36,6 +35,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -166,6 +166,9 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 
 	public static NodeEdgeBasePopup<QueryEdge> forEdge( QueryEdge v,
 			GraphicalQueryPanel pnl ) {
+
+		StructureManager sm = StructureManagerFactory.getStructureManager( pnl.getEngine() );
+
 		return new NodeEdgeBasePopup<QueryEdge>( v, pnl ) {
 
 			@Override
@@ -176,23 +179,19 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 				URI starttype = graph.getSource( v ).getType();
 				URI endtype = graph.getDest( v ).getType();
 
-				ListQueryAdapter<URI> links
-						= NodeDerivationTools.getPredicatesBetweenQA( starttype, endtype,
-								pnl.getEngine() );
+				Model alllinks = sm.getLinksBetween( starttype, endtype );
+				Model links = alllinks.filter( starttype, null, null );
 
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
-						"Change the type of this Edge", "New Type", links );
+						"Change the type of this Edge", "New Type", links.predicates() );
 			}
 
 			@Override
 			protected void finishMenu( QueryEdge v, GraphicalQueryPanel pnl ) {
-				String query = "SELECT DISTINCT ?pred WHERE { ?s ?pred ?o . ?s rdf:predicate ?type . FILTER ( isLiteral( ?o ) ) }";
-				ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query, "pred" );
-				URI type = v.getType();
-				qa.bind( "type", type );
+				Set<URI> preds = sm.getPropertiesOf( v.getType() );
 
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
-						"Add a constraint to this Edge", "New Value", qa ) );
+						"Add a constraint to this Edge", "New Value", preds ) );
 				addConstraintRemover( v, pnl );
 			}
 

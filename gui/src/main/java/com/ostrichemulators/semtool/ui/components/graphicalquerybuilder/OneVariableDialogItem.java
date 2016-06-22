@@ -5,24 +5,20 @@
  */
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
-import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
 import com.ostrichemulators.semtool.ui.components.graphicalquerybuilder.ConstraintPanel.ConstraintValueSet;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.Utility;
 import java.awt.event.ActionEvent;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
-import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 /**
  *
@@ -36,7 +32,7 @@ public class OneVariableDialogItem extends AbstractAction {
 	private final GraphicalQueryPanel panel;
 	private final Set<Value> currvals;
 	private Map<URI, String> propTypeChoices;
-	private ListQueryAdapter<URI> choicesQuery;
+	private Collection<URI> choicesModel;
 
 	public OneVariableDialogItem( QueryGraphElement node, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext ) {
@@ -71,7 +67,7 @@ public class OneVariableDialogItem extends AbstractAction {
 
 	public OneVariableDialogItem( QueryGraphElement nod, GraphicalQueryPanel panel,
 			URI prop, String label, String tooltip, String dlgtext,
-			ListQueryAdapter<URI> choicesQ ) {
+			Collection<URI> choicesQ ) {
 
 		super( label );
 		putValue( Action.SHORT_DESCRIPTION, tooltip );
@@ -82,32 +78,27 @@ public class OneVariableDialogItem extends AbstractAction {
 		property = prop;
 		currvals = ( null == node.getValues( property )
 				? new HashSet<>() : node.getValues( property ) );
-		choicesQuery = choicesQ;
+		choicesModel = choicesQ;
 	}
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		ConstraintValueSet values = null;
 
-		if ( null != choicesQuery ) {
-			try {
-				List<URI> uris = panel.getEngine().query( choicesQuery );
-				propTypeChoices = Utility.getInstanceLabels( uris, panel.getEngine() );
+		if ( null != choicesModel ) {
+			Set<URI> uris = new HashSet<>( choicesModel );
+			propTypeChoices = Utility.getInstanceLabels( uris, panel.getEngine() );
 
-				// if there are no property choices, don't show the dialog
-				if ( propTypeChoices.isEmpty() ) {
-					JOptionPane.showMessageDialog( panel,
-							"There are no properties for this entity type", "No Properties",
-							JOptionPane.INFORMATION_MESSAGE );
-					return;
-				}
+			// if there are no property choices, don't show the dialog
+			if ( propTypeChoices.isEmpty() ) {
+				JOptionPane.showMessageDialog( panel,
+						"There are no properties for this entity type", "No Properties",
+						JOptionPane.INFORMATION_MESSAGE );
+				return;
+			}
 
-				propTypeChoices.put( Constants.ANYNODE, "<Any>" );
-				propTypeChoices = Utility.sortUrisByLabel( propTypeChoices );
-			}
-			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException ex ) {
-				Logger.getLogger( getClass() ).error( ex, ex );
-			}
+			propTypeChoices.put( Constants.ANYNODE, "<Any>" );
+			propTypeChoices = Utility.sortUrisByLabel( propTypeChoices );
 		}
 
 		if ( null == propTypeChoices ) {
