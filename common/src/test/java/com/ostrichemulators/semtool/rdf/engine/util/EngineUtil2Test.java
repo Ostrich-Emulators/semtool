@@ -67,7 +67,7 @@ public class EngineUtil2Test {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		if ( null != dbfile ) {
 			FileUtils.deleteQuietly( dbfile );
 		}
@@ -204,7 +204,7 @@ public class EngineUtil2Test {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
-					.setInsightsFile(	new File( "src/test/resources/insmgr.data-source.ttl" ) )
+					.setInsightsFile( new File( "src/test/resources/insmgr.data-source.ttl" ) )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.addVocabulary( new File( "src/main/resources/models/semtool.ttl" ).toURI().toURL() )
 					.setBooleans( true, true, true );
@@ -228,7 +228,7 @@ public class EngineUtil2Test {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
-					.setInsightsFile(	new File( "src/test/resources/insmgr.data-source.ttl" ) )
+					.setInsightsFile( new File( "src/test/resources/insmgr.data-source.ttl" ) )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.addVocabulary( new File( "src/main/resources/models/semtool.ttlx" ).toURI().toURL() )
 					.setBooleans( true, true, true );
@@ -252,7 +252,7 @@ public class EngineUtil2Test {
 			EngineCreateBuilder ecb = new EngineCreateBuilder( topdir, "testdb" )
 					.setDefaultBaseUri( new URIImpl( "http://va.gov/ontologies" ), true )
 					.setReificationModel( ReificationStyle.LEGACY )
-					.setInsightsFile(	new File( "src/test/resources/insmgr.data-source.ttl" ) )
+					.setInsightsFile( new File( "src/test/resources/insmgr.data-source.ttl" ) )
 					.setFiles( Arrays.asList( LEGACY ) )
 					.addVocabulary( new File( "src/main/resources/models/semtool.ttl" ).toURI().toURL() )
 					.setBooleans( true, true, true )

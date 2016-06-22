@@ -46,7 +46,7 @@ public class EngineUtilTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		if ( null != dbfile ) {
 			FileUtils.deleteQuietly( dbfile );
 		}

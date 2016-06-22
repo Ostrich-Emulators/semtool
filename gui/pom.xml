@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.ostrichemulators.semantics.tool</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.0</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<packaging>jar</packaging>
 	<name>OS-EM Semantic Tool GUI</name>

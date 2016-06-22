@@ -31,8 +31,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -136,15 +134,13 @@ public class EngineLoaderTest {
 	private InMemorySesameEngine engine;
 	private File dbfile;
 
-	private IEngine extractKb() {
+	private IEngine extractKb() throws Exception {
 		if ( null != dbfile ) {
 			FileUtils.deleteQuietly( dbfile );
 		}
 
 		try {
 			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
-			Files.copy( new File( "src/test/resources/test.jnl" ).toPath(),
-					dbfile.toPath(), StandardCopyOption.REPLACE_EXISTING );
 		}
 		catch ( Exception e ) {
 			log.error( e, e );

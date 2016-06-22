@@ -22,6 +22,7 @@ package com.ostrichemulators.semtool.util;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 
+import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import static com.ostrichemulators.semtool.util.Utility.unzip;
 import java.awt.Desktop;
 import java.awt.Frame;
@@ -154,11 +155,11 @@ public class GuiUtility {
 	 * @param smssfile
 	 *
 	 * @return Loaded engine.
-	 *
-	 * @throws java.io.IOException
+	 * @throws
+	 * com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
 	 */
-	public static IEngine loadEngine( String smssfile ) throws IOException {
-		IEngine engine = EngineFactory.getEngine( smssfile );
+	public static IEngine loadEngine( String smssfile ) throws EngineManagementException {
+		IEngine	engine = EngineFactory.getEngine( smssfile );
 		DIHelper.getInstance().registerEngine( engine );
 		return engine;
 	}

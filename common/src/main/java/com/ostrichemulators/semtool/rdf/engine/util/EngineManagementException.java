@@ -14,7 +14,7 @@ public class EngineManagementException extends Exception {
 	public enum ErrorCode {
 
 		DUPLICATE_NAME, UNREADABLE_SMSS, UNKNOWN, MISSING_REQUIRED_TUPLE, FILE_ERROR,
-		MISSING_BASE_URI, ACCESS_DENIED
+		MISSING_BASE_URI, ACCESS_DENIED, BAD_CONNECTION
 	};
 
 	private ErrorCode code;

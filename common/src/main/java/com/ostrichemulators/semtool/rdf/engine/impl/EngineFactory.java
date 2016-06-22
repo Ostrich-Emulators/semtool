@@ -7,6 +7,8 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 
 import com.bigdata.rdf.sail.BigdataSail;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
+import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.ErrorCode;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
@@ -37,14 +39,7 @@ public class EngineFactory {
 	 * @return
 	 */
 	public static IEngine memory() {
-		IEngine eng = new InMemorySesameEngine();
-		try {
-			eng.openDB( new Properties() );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-		return eng;
+		return InMemorySesameEngine.open();
 	}
 
 	/**
@@ -54,8 +49,10 @@ public class EngineFactory {
 	 *
 	 * @param props
 	 * @return
+	 * @throws
+	 * com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
 	 */
-	public static IEngine getEngine( Properties props ) {
+	public static IEngine getEngine( Properties props ) throws EngineManagementException {
 		IEngine engine = null;
 		Class<? extends IEngine> klass = null;
 		if ( props.containsKey( Constants.ENGINE_IMPL ) ) {
@@ -85,15 +82,20 @@ public class EngineFactory {
 		}
 
 		if ( null == klass ) {
-			log.error( "unable to determine engine type" );
+			throw new EngineManagementException( ErrorCode.UNKNOWN,
+					"unable to determine engine type" );
 		}
 		else {
 			try {
 				engine = klass.newInstance();
 				engine.openDB( props );
 			}
-			catch ( InstantiationException | IllegalAccessException | RepositoryException e ) {
-				log.error( e, e );
+			catch ( InstantiationException | IllegalAccessException e ) {
+				throw new EngineManagementException( ErrorCode.UNKNOWN,
+						"Unable to determine engine type", e );
+			}
+			catch ( RepositoryException e ) {
+				throw new EngineManagementException( ErrorCode.BAD_CONNECTION, e );
 			}
 		}
 
@@ -105,8 +107,10 @@ public class EngineFactory {
 	 *
 	 * @param file
 	 * @return
+	 * @throws
+	 * com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException
 	 */
-	public static IEngine getEngine( File file ) {
+	public static IEngine getEngine( File file ) throws EngineManagementException {
 		IEngine engine = null;
 		final String name = ( null == file ? "" : file.getName() );
 		final String abspath = ( null == file ? "null" : file.getAbsolutePath() );
@@ -137,19 +141,22 @@ public class EngineFactory {
 
 			if ( !( null == engine || null == props ) ) {
 				engine.openDB( props );
-				if( null == engine.getProperty( Constants.SMSS_LOCATION ) ){
+				if ( null == engine.getProperty( Constants.SMSS_LOCATION ) ) {
 					engine.setProperty( Constants.SMSS_LOCATION, abspath );
 				}
 			}
 		}
-		catch ( IOException | RepositoryException ioe ) {
-			log.error( ioe, ioe );
+		catch ( IOException ioe ) {
+			throw new EngineManagementException( ErrorCode.FILE_ERROR, ioe );
+		}
+		catch ( RepositoryException ioe ) {
+			throw new EngineManagementException( ErrorCode.BAD_CONNECTION, ioe );
 		}
 
 		return engine;
 	}
 
-	public static IEngine getEngine( String fileOrUrl ) {
+	public static IEngine getEngine( String fileOrUrl ) throws EngineManagementException {
 		if ( Utility.isFile( fileOrUrl ) ) {
 			return getEngine( new File( fileOrUrl ) );
 		}

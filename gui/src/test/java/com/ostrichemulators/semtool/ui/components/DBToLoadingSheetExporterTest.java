@@ -8,7 +8,6 @@ package com.ostrichemulators.semtool.ui.components;
 import com.ostrichemulators.semtool.rdf.engine.util.DBToLoadingSheetExporter;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +24,7 @@ import org.junit.Test;
 import org.openrdf.model.URI;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
@@ -73,7 +73,7 @@ public class DBToLoadingSheetExporterTest {
 		try {
 			eng = GuiUtility.loadEngine( dbfile.toString() );
 		}
-		catch ( IOException ioe ) {
+		catch ( EngineManagementException ioe ) {
 			log.error( ioe, ioe );
 		}
 	}

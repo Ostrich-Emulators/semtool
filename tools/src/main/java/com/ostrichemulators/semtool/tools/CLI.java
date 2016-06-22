@@ -438,7 +438,8 @@ public class CLI {
 		}
 	}
 
-	public void export( CommandLine cmd ) throws IOException, RepositoryException {
+	public void export( CommandLine cmd ) throws IOException, RepositoryException,
+			EngineManagementException {
 		if ( !dbfile.exists() ) {
 			throw new FileNotFoundException( dbfile.getAbsolutePath() );
 		}
@@ -554,7 +555,7 @@ public class CLI {
 				} );
 			}
 		}
-		catch ( Exception x ) {
+		catch ( RepositoryException | EngineManagementException x ) {
 			log.fatal( x, x );
 		}
 		finally {

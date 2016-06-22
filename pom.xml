@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ostrichemulators.semantics.tool</groupId>
 	<artifactId>parent</artifactId>
-	<version>1.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>OS-EM Semantic Tool Parent</name>
 	<description>A Semantic database explorer and management tool</description>
@@ -250,7 +250,6 @@
 								</goals>
 								<configuration>
 									<propertyName>surefireArgLine</propertyName>
-									<append>true</append>
 								</configuration>
 							</execution>
 							<execution>
@@ -259,15 +258,12 @@
 								<goals>
 									<goal>report</goal>
 								</goals>
-								<configuration>
-									<append>true</append>
-								</configuration>
 							</execution>
 							<execution>
 								<id>default-report</id>
 								<phase>prepare-package</phase>
 								<goals>
-									<goal>report</goal>
+									<goal>check</goal>
 								</goals>
 							</execution>
 						</executions>

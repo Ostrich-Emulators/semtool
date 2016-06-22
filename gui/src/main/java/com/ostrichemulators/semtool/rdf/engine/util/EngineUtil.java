@@ -51,6 +51,7 @@ import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.util.Utility;
+import javax.swing.JOptionPane;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -146,24 +147,24 @@ public class EngineUtil implements Runnable {
 					boolean isfile = Utility.isFile( entry.getKey() );
 					String mysmss = entry.getKey();
 
-					try {
-						boolean domount = true;
-						for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
-							String otherloc = eng.getProperty( Constants.SMSS_LOCATION );
-							if ( isfile && Utility.isFile( otherloc ) ) {
-								File myloc = new File( mysmss );
-								File mountedsmss = new File( otherloc );
+					boolean domount = true;
+					for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
+						String otherloc = eng.getProperty( Constants.SMSS_LOCATION );
+						if ( isfile && Utility.isFile( otherloc ) ) {
+							File myloc = new File( mysmss );
+							File mountedsmss = new File( otherloc );
 
-								if ( myloc.getAbsolutePath().equals( mountedsmss.getAbsolutePath() ) ) {
-									log.debug( "db already mounted, skipping:" + mysmss );
-									domount = false;
-								}
+							if ( myloc.getAbsolutePath().equals( mountedsmss.getAbsolutePath() ) ) {
+								log.debug( "db already mounted, skipping:" + mysmss );
+								domount = false;
 							}
 						}
+					}
 
-						if ( domount ) {
+					if ( domount ) {
+						try {
 							IEngine eng = GuiUtility.loadEngine( mysmss );
-							Security.getSecurity().associateUser( eng, users.get( mysmss) );
+							Security.getSecurity().associateUser( eng, users.get( mysmss ) );
 
 							// avoid a possible ConcurrentModificationException
 							List<EngineOperationListener> lls = new ArrayList<>( listeners );
@@ -176,11 +177,20 @@ public class EngineUtil implements Runnable {
 								EngineUtil.addRepositoryToList( eng );
 							}
 						}
-					}
-					catch ( IOException ioe ) {
-						log.error( ioe );
+						catch ( EngineManagementException eme ) {
+							Throwable ex = eme.getCause();
+							String msg = mysmss + "\n" + ( null == ex
+									? eme.getLocalizedMessage()
+									: ex.getLocalizedMessage() );
+							
+							// some problem occurred, so alert the user
+							JOptionPane.showMessageDialog( JOptionPane.getRootFrame(),
+									msg, "Error Attaching Database",
+									JOptionPane.ERROR_MESSAGE );
+						}
 					}
 				}
+
 				todo.clear();
 			}
 
@@ -317,14 +327,17 @@ public class EngineUtil implements Runnable {
 		}
 		catch ( QueryEvaluationException | MalformedQueryException meq ) {
 			log.error( "no metadata to clone", meq );
+
 		}
 
 		URI reification = ( oldmetadata.containsKey( SEMTOOL.ReificationModel )
-				? URI.class.cast( oldmetadata.get( SEMTOOL.ReificationModel ) )
+				? URI.class
+				.cast( oldmetadata.get( SEMTOOL.ReificationModel ) )
 				: SEMTOOL.SEMTOOL_Reification );
 
 		EngineCreateBuilder ecb
 				= new EngineCreateBuilder( metadata.getLocation(), metadata.getName() );
+
 		ecb.setReificationModel( ReificationStyle.fromUri( reification ) );
 
 		File newsmss = EngineUtil2.createNew( ecb, null );
@@ -339,6 +352,7 @@ public class EngineUtil implements Runnable {
 
 		EngineUtil.makeNewMetadata( from, neweng, metadata.getTitle() );
 		GuiUtility.closeEngine( neweng );
+
 		mount( newsmss.getAbsolutePath(), addToRepoList, true, new LocalUserImpl() );
 	}
 
@@ -587,6 +601,7 @@ public class EngineUtil implements Runnable {
 		}
 		catch ( MalformedQueryException | QueryEvaluationException e ) {
 			log.error( e, e );
+
 		}
 	}
 
