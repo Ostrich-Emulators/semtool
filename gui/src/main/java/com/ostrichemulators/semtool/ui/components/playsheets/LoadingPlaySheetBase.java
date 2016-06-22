@@ -63,7 +63,8 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 			tbl.getColumnModel().getColumn( 1 ).setCellRenderer( renderer );
 		}
 
-		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( getModel() );
+		ValueTableModel m = getModel();
+		TableRowSorter<ValueTableModel> sorter = new TableRowSorter<>( m );
 		sorter.setRowFilter( filter );
 		tbl.setRowSorter( sorter );
 
@@ -73,10 +74,10 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 			public void tableChanged( TableModelEvent e ) {
 				// not sure why we need to reset the renderer so much
 				TableColumnModel tcm = tbl.getColumnModel();
-					tcm.getColumn( 0 ).setCellRenderer( renderer );
+				tcm.getColumn( 0 ).setCellRenderer( renderer );
 				if ( LoadingPlaySheetBase.this.getLoadingModel().isRel() ) {
-						tcm.getColumn( 1 ).setCellRenderer( renderer );
-					}
+					tcm.getColumn( 1 ).setCellRenderer( renderer );
+				}
 
 				setErrorLabel();
 			}
@@ -225,11 +226,10 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 
 		@Override
 		public boolean include( RowFilter.Entry<? extends ValueTableModel, ? extends Integer> entry ) {
-			LoadingSheetModel lsm = LoadingSheetModel.class.cast( entry.getModel() );
-			LoadingSheetData.LoadingNodeAndPropertyValues nap = lsm.getNap( entry.getIdentifier() );
-			// log.debug( nap );
-
 			if ( filtering ) {
+				LoadingSheetModel lsm = LoadingSheetModel.class.cast( entry.getModel() );
+				LoadingSheetData.LoadingNodeAndPropertyValues nap
+						= lsm.getNap( entry.getIdentifier() );
 				return ( null == nap ? true : nap.hasError() );
 			}
 			return true;

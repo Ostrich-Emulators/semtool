@@ -334,19 +334,29 @@ public class LoadingSheetModel extends ValueTableModel {
 		sheetdata = naps;
 		errorcount = 0;
 
+		int count = 0;
+
 		log.debug( "filling model for tab: " + naps.getName() );
 		ValueFactory vf = new ValueFactoryImpl();
 		List<String> heads = naps.getHeaders();
 		List<Value[]> valdata = new ArrayList<>();
-		
+
 		DataIterator di = naps.iterator();
-		while( di.hasNext() ){
+		while ( di.hasNext() ) {
+			count++;
+
 			LoadingNodeAndPropertyValues node = di.next();
 			valdata.add( node.convertToValueArray( vf ) );
 			if ( node.hasError() ) {
 				errorcount++;
 			}
+
+			if ( 0 == count % 100 ) {
+				log.debug( String.format( "filled %d rows", count ) );
+			}
 		}
+		log.debug( String.format( "filled %d rows", count ) );
+
 
 		super.setData( valdata, heads );
 	}
