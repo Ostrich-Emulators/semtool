@@ -61,7 +61,7 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 
 		return sum - 1;
 	}
-	
+
 	public LoadingSheetXmlHandler( List<String> sst, StylesTable styles,
 			String sheetname, Map<String, String> ns, boolean lsInMem ) {
 		super( sst );
@@ -177,7 +177,14 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 								vf.createLiteral( DateUtil.getJavaDate( Double.parseDouble( getContents() ) ) ) );
 					}
 					else {
-						currentrowdata.put( colnum, vf.createLiteral( Double.parseDouble( getContents() ) ) );
+						// see if we can use an integer instead of a double
+						// (excel doesn't distinguish between the two, but I can't figure
+						// out how to get exactly what's shown in the cell via the cell style)
+						String contents = getContents();
+						Value val = ( contents.endsWith( ".0" )
+								? vf.createLiteral( Integer.parseInt( contents.substring( 0, contents.length() - 2 ) ) )
+								: vf.createLiteral( Double.parseDouble( contents ) ) );
+						currentrowdata.put( colnum, val );
 					}
 					break;
 				case Cell.CELL_TYPE_ERROR:
