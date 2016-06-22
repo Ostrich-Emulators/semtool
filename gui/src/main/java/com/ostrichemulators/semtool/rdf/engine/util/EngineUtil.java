@@ -178,15 +178,11 @@ public class EngineUtil implements Runnable {
 							}
 						}
 						catch ( EngineManagementException eme ) {
-							Throwable ex = eme.getCause();
-							String msg = mysmss + "\n" + ( null == ex
-									? eme.getLocalizedMessage()
-									: ex.getLocalizedMessage() );
-							
-							// some problem occurred, so alert the user
-							JOptionPane.showMessageDialog( JOptionPane.getRootFrame(),
-									msg, "Error Attaching Database",
-									JOptionPane.ERROR_MESSAGE );
+							List<EngineOperationListener> lls = new ArrayList<>( listeners );
+							for ( EngineOperationListener eol : lls ) {
+
+								eol.handleLoadingError( mysmss, eme );
+							}
 						}
 					}
 				}

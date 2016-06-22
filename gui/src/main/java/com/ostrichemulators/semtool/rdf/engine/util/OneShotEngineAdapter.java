@@ -87,4 +87,9 @@ public class OneShotEngineAdapter extends EngineOperationAdapter {
 	public void handleError( IEngine eng, EngineManagementException eme ) {
 		GuiUtility.showError( eme.getLocalizedMessage() );
 	}
+
+	@Override
+	public void handleLoadingError( String smss, EngineManagementException eme ) {
+		GuiUtility.showError( eme.getLocalizedMessage() );
+	}
 }

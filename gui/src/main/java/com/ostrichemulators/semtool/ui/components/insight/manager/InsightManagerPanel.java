@@ -485,4 +485,8 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 	@Override
 	public void handleError( IEngine eng, EngineManagementException eme ) {
 	}
+
+	@Override
+	public void handleLoadingError( String smss, EngineManagementException eme ) {
+	}
 }

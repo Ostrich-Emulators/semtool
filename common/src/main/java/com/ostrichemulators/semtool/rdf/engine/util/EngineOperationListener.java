@@ -22,4 +22,6 @@ public interface EngineOperationListener {
   public void insightsModified( IEngine eng, Collection<Perspective> perspectives );
 
 	public void handleError( IEngine eng, EngineManagementException eme );
+
+	public void handleLoadingError( String smss, EngineManagementException eme );
 }

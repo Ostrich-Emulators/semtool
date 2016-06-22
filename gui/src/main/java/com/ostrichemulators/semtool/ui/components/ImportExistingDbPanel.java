@@ -12,20 +12,13 @@ import com.ostrichemulators.semtool.poi.main.ImportValidationException;
 import com.ostrichemulators.semtool.poi.main.ImportData;
 import java.awt.Frame;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.apache.log4j.Logger;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineLoader;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
@@ -316,7 +309,7 @@ public class ImportExistingDbPanel extends JPanel {
 		final boolean conformance = conformer.isSelected();
 		final boolean gridy = togridbtn.isSelected();
 
-		if ( gridy || ( ( replace && runOverrideCheck( file.getFiles() ) )
+		if ( gridy || ( ( replace && runOverrideCheck() )
 				|| ( !replace && runCheck() ) ) ) {
 
 			final IEngine eng
@@ -471,77 +464,18 @@ public class ImportExistingDbPanel extends JPanel {
 	private boolean runCheck() {
 		Object[] buttons = { "Cancel Loading", "Continue With Loading" };
 		int response = JOptionPane.showOptionDialog( null,
-				"This move cannot be undone. Please make sure the excel file is "
-				+ "formatted correctly \nand make a back up jnl file before "
-				+ "continuing. Would you still like to continue?", "Warning",
-				JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+				"This move cannot be undone.\n"
+						+ "Please make a backup of your database before continuing.",
+				"Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
 				buttons, buttons[1] );
 		return response == 1;
 	}
 
-	private boolean runOverrideCheck( Collection<File> fileNames ) {
-
-		StringBuilder replacedString = new StringBuilder();
-
-		for ( File onefile : fileNames ) {
-			try ( FileInputStream fis = new FileInputStream( onefile ) ) {
-				XSSFWorkbook book = new XSSFWorkbook( fis );
-				XSSFSheet lSheet = book.getSheet( "Loader" );
-				int lastRow = lSheet.getLastRowNum();
-
-				List<String> nodes = new ArrayList<>();
-				List<String[]> relationships = new ArrayList<>();
-				for ( int rIndex = 1; rIndex <= lastRow; rIndex++ ) {
-					XSSFRow sheetNameRow = lSheet.getRow( rIndex );
-					XSSFCell cell = sheetNameRow.getCell( 0 );
-					XSSFSheet sheet = book.getSheet( cell.getStringCellValue() );
-
-					XSSFRow row = sheet.getRow( 0 );
-					String sheetType = "";
-					if ( row.getCell( 0 ) != null ) {
-						sheetType = row.getCell( 0 ).getStringCellValue();
-					}
-					if ( "Node".equalsIgnoreCase( sheetType ) ) {
-						if ( row.getCell( 1 ) != null ) {
-							nodes.add( row.getCell( 1 ).getStringCellValue() );
-						}
-					}
-					if ( "Relation".equalsIgnoreCase( sheetType ) ) {
-						String subject;
-						String object;
-						String relationship = "";
-						if ( row.getCell( 1 ) != null && row.getCell( 2 ) != null ) {
-							subject = row.getCell( 1 ).getStringCellValue();
-							object = row.getCell( 2 ).getStringCellValue();
-
-							row = sheet.getRow( 1 );
-							if ( row.getCell( 0 ) != null ) {
-								relationship = row.getCell( 0 ).getStringCellValue();
-							}
-
-							relationships.add( new String[]{ subject, relationship, object } );
-						}
-					}
-				}
-				for ( String node : nodes ) {
-					replacedString.append( node ).append( "\n" );
-				}
-				for ( String[] rel : relationships ) {
-					replacedString.append( rel[0] ).append( " " ).append( rel[1] );
-					replacedString.append( " " ).append( rel[2] ).append( "\n" );
-				}
-			}
-			catch ( Exception e ) {
-				log.error( e );
-			}
-		}
-
+	private boolean runOverrideCheck() {
 		Object[] buttons = { "Cancel", "Continue" };
 		int response = JOptionPane.showOptionDialog( null,
-				"This move cannot be undone.\nPlease make sure the excel file is formatted "
-				+ "correctly and make a back up jnl file before continuing.\n\nThe "
-				+ "following data will be replaced:\n\n" + replacedString + "\n"
-				+ "Would you still like to continue?",
+				"This move cannot be undone.\n"
+						+ "Please make a backup of your database before continuing.",
 				"Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
 				buttons, buttons[1] );
 		return response == 1;

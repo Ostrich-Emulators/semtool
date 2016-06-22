@@ -30,4 +30,8 @@ public abstract class EngineOperationAdapter implements EngineOperationListener 
 	@Override
 	public void handleError( IEngine eng, EngineManagementException eme ) {
 	}
+
+	@Override
+	public void handleLoadingError( String smss, EngineManagementException eme ) {
+	}
 }

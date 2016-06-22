@@ -17,6 +17,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineOperationListener;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 import java.io.File;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -81,5 +82,20 @@ public class PinningEngineListener implements EngineOperationListener {
 
 	@Override
 	public void handleError( IEngine eng, EngineManagementException eme ) {
+	}
+
+	@Override
+	public void handleLoadingError( String smss, EngineManagementException eme ) {
+		SemtoolPreferences.removePin( smss );
+
+		Throwable ex = eme.getCause();
+		String msg = smss + "\n" + ( null == ex
+				? eme.getLocalizedMessage()
+				: ex.getLocalizedMessage() );
+
+		// some problem occurred, so alert the user
+		JOptionPane.showMessageDialog( JOptionPane.getRootFrame(),
+				msg, "Error Attaching Database",
+				JOptionPane.ERROR_MESSAGE );
 	}
 }
