@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.util;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
@@ -55,7 +56,7 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 	public boolean isCaching() {
 		return caching;
 	}
-	
+
 	/**
 	 * Should this cache actually cache results?
 	 *
@@ -69,33 +70,57 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 	public String get( Object value ) {
 		if ( value instanceof Value ) {
 			Value val = Value.class.cast( value );
-			String label = null;
-
 			if ( !super.containsKey( val ) ) {
-				if ( value instanceof URI ) {
-					URI uri = URI.class.cast( value );
-					label = ( null == engine
-							? uri.getLocalName()
-							: Utility.getInstanceLabel( uri, engine ) );
-				}
-				else if ( value instanceof Literal ) {
-					Literal lit = Literal.class.cast( value );
-					label = lit.getLabel();
-				}
-				else {
-					label = value.toString();
-				}
-
-				if ( caching ) {
-					put( Value.class.cast( value ), label );
-				}
-				else {
+				String label = cache( val );
+				if ( !caching ) {
 					return label;
 				}
 			}
 		}
 
 		return super.get( value );
+	}
+
+	/**
+	 * Caches a label for the given value. If the value is already cached, null is
+	 * returned (NOT the cached value).
+	 *
+	 * @param value
+	 * @return
+	 */
+	public String cache( Value value ) {
+		Value val = Value.class.cast( value );
+		String label = null;
+
+		if ( !super.containsKey( val ) ) {
+			if ( value instanceof URI ) {
+				URI uri = URI.class.cast( value );
+				label = ( null == engine
+						? uri.getLocalName()
+						: Utility.getInstanceLabel( uri, engine ) );
+			}
+			else if ( value instanceof Literal ) {
+				Literal lit = Literal.class.cast( value );
+				label = lit.getLabel();
+			}
+			else {
+				label = value.toString();
+			}
+
+			if ( caching ) {
+				put( Value.class.cast( value ), label );
+			}
+		}
+
+		return label;
+	}
+
+	public void cache( Collection<? extends Value> values ) {
+		for ( Value val : values ) {
+			if ( !super.containsKey( val ) ) {
+				cache( val );
+			}
+		}
 	}
 
 	public void reset( Map<Value, String> newdata ) {

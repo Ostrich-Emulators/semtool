@@ -40,6 +40,7 @@ import org.openrdf.model.vocabulary.RDFS;
 
 /**
  * Transforms the property label on a node vertex in the graph.
+ *
  * @param <T>
  */
 public class LabelTransformer<T extends GraphElement> extends SelectingTransformer<T, String> {
@@ -88,7 +89,7 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 
 	public void setDisplay( URI type, URI prop, boolean showit ) {
 		if ( showit ) {
-			if( !displayables.getNN( type ).contains( prop ) ){
+			if ( !displayables.getNN( type ).contains( prop ) ) {
 				displayables.add( type, prop );
 			}
 		}
@@ -144,11 +145,14 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
 		boolean first = true;
 		for ( URI property : propertiesList ) {
-			if ( !first ) {
-				html.append( "<font size='1'><br></font>" );
-			}
-
 			if ( vertex.hasProperty( property ) ) {
+				if ( first ) {
+					first = false;
+				}
+				else {
+					html.append( "<font size='1'><br></font>" );
+				}
+
 				if ( displayLabelFor( property ) ) {
 					String label = getLabel( property );
 					html.append( label ).append( ": " );
@@ -159,7 +163,6 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 						? getLabel( URI.class.cast( val ) ) : val.stringValue() );
 				html.append( chop( propval, 50 ) );
 			}
-			first = false;
 		}
 
 		html.append( "</html>" );

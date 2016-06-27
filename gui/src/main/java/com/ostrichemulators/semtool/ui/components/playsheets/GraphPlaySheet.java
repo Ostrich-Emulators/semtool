@@ -196,6 +196,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	public void setLabelCache( RetrievingLabelCache t ) {
 		super.setLabelCache( t );
 		control.setLabelCache( t );
+		view.setLabelCache( t );
 	}
 
 	@Override
