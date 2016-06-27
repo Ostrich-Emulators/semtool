@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LiteralImpl;
@@ -29,12 +30,27 @@ import org.openrdf.model.vocabulary.XMLSchema;
  *
  * @author ryan
  */
-public abstract class AbstractGraphElement implements GraphElement, Comparable<AbstractGraphElement> {
+public abstract class AbstractGraphElement
+		implements GraphElement, Comparable<AbstractGraphElement> {
 
+	private static final Set<URI> COUNTABLES = new HashSet<>();
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
 	private final transient Map<URI, Value> properties = new HashMap<>();
 	private URI graphid;
 	private Map<String, Object> propHash = new HashMap<>(); //this is sent to the js (ChartIt)
+
+	static {
+		COUNTABLES.add( XMLSchema.INT );
+		COUNTABLES.add( XMLSchema.INTEGER );
+		COUNTABLES.add( XMLSchema.FLOAT );
+		COUNTABLES.add( XMLSchema.DOUBLE );
+		COUNTABLES.add( XMLSchema.DECIMAL );
+		COUNTABLES.add( XMLSchema.DATE );
+		COUNTABLES.add( XMLSchema.DATETIME );
+		COUNTABLES.add( XMLSchema.TIME );
+		COUNTABLES.add( XMLSchema.LONG );
+		COUNTABLES.add( XMLSchema.SHORT );
+	}
 
 	public AbstractGraphElement( URI id ) {
 		this( id, null, id.getLocalName() );
@@ -82,7 +98,8 @@ public abstract class AbstractGraphElement implements GraphElement, Comparable<A
 	}
 
 	/**
-	 * Sets a new label for this vertex. This function is a convenience to 	 {@link #setValue(org.openrdf.model.URI, org.openrdf.model.Value)
+	 * Sets a new label for this vertex. This function is a convenience to null
+	 * null	null	null	null	null	 {@link #setValue(org.openrdf.model.URI, org.openrdf.model.Value)
 	 * }
 	 * Any name is acceptable. We can always rename a vertex or edge.
 	 *
@@ -211,7 +228,29 @@ public abstract class AbstractGraphElement implements GraphElement, Comparable<A
 	}
 
 	@Override
-	public int compareTo( AbstractGraphElement o ){
+	public int compareTo( AbstractGraphElement o ) {
 		return toString().compareTo( o.toString() );
 	}
+
+	/**
+	 * Gets all the property keys that have "countable" values (int, double, date)
+	 *
+	 * @param age
+	 * @return
+	 */
+	public static List<URI> getCountablePropertyKeys( GraphElement age ) {
+		List<URI> keys = new ArrayList<>();
+		for ( Map.Entry<URI, Value> en : age.getValues().entrySet() ) {
+			Value val = en.getValue();
+			if ( val instanceof Literal ) {
+				Literal lit = Literal.class.cast( val );
+				URI dt = lit.getDatatype();
+				if ( COUNTABLES.contains( dt ) ) {
+					keys.add( en.getKey() );
+				}
+			}
+		}
+		return keys;
+	}
+
 }
