@@ -14,7 +14,11 @@ import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.util.MultiMap;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.visualization.VisualizationServer.Paintable;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -87,6 +91,9 @@ public class AnimateGraph extends AbstractAction {
 		}
 
 		final List<Value> vals = RDFDatatypeTools.sortValues( iterations.keySet() );
+		AnimationPaintable ap = new AnimationPaintable();
+		gps.getView().addPostRenderPaintable( ap );
+		gps.getView().setGraphLayout( CircleLayout.class );
 		Timer timer = new Timer( 3000, new ActionListener() {
 			int listpos = 0;
 
@@ -103,6 +110,7 @@ public class AnimateGraph extends AbstractAction {
 				}
 
 				gps.getView().hide( hidden );
+				ap.text = val.stringValue();
 
 				if ( listpos >= iterations.size() ) {
 					listpos = 0;
@@ -111,5 +119,21 @@ public class AnimateGraph extends AbstractAction {
 		} );
 
 		timer.start();
+	}
+
+	private class AnimationPaintable implements Paintable {
+
+		public String text = "";
+
+		@Override
+		public void paint( Graphics g ) {
+			g.setColor( Color.BLACK );
+			g.drawString( text, 10, 10 );
+		}
+
+		@Override
+		public boolean useTransform() {
+			return false;
+		}
 	}
 }
