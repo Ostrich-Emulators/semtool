@@ -50,11 +50,6 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 
 	public void setEngine( IEngine e ) {
 		engine = e;
-
-		for ( Map.Entry<Value, String> en : entrySet() ) {
-			log.debug( "entry: " + en.getKey() + " => " + en.getValue() );
-		}
-
 		for ( URI u : labelFromLocalName ) {
 			super.remove( u );
 		}
