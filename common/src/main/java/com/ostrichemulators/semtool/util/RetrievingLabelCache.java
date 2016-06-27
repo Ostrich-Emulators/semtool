@@ -8,7 +8,9 @@ package com.ostrichemulators.semtool.util;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
@@ -26,6 +28,8 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 	private static final Logger log = Logger.getLogger( RetrievingLabelCache.class );
 	private IEngine engine;
 	private boolean caching = true;
+	// if we use the localname to determine the label, recache when an engine is set
+	private final Set<URI> labelFromLocalName = new HashSet<>();
 
 	public RetrievingLabelCache( IEngine eng, boolean docache ) {
 		engine = eng;
@@ -46,6 +50,15 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 
 	public void setEngine( IEngine e ) {
 		engine = e;
+
+		for ( Map.Entry<Value, String> en : entrySet() ) {
+			log.debug( "entry: " + en.getKey() + " => " + en.getValue() );
+		}
+
+		for ( URI u : labelFromLocalName ) {
+			super.remove( u );
+		}
+		labelFromLocalName.clear();
 	}
 
 	@Override
@@ -95,9 +108,14 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 		if ( !super.containsKey( val ) ) {
 			if ( value instanceof URI ) {
 				URI uri = URI.class.cast( value );
-				label = ( null == engine
-						? uri.getLocalName()
-						: Utility.getInstanceLabel( uri, engine ) );
+
+				if ( null == engine ) {
+					labelFromLocalName.add( uri );
+					label = uri.getLocalName();
+				}
+				else {
+					label = Utility.getInstanceLabel( uri, engine );
+				}
 			}
 			else if ( value instanceof Literal ) {
 				Literal lit = Literal.class.cast( value );

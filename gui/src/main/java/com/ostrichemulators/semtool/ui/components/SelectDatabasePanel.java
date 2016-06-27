@@ -421,8 +421,6 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 
 		@Override
 		protected String getTitle() {
-			Perspective persp
-					= perspectiveSelector.getItemAt( perspectiveSelector.getSelectedIndex() );
 			Insight insight = questionSelector.getItemAt( questionSelector.getSelectedIndex() );
 			return insight.getLabel();
 		}

@@ -34,12 +34,14 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.util.MultiMap;
+import com.ostrichemulators.semtool.util.Utility;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
@@ -143,11 +145,26 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 				graph.addEdge( edge, src, dst );
 			}
 
+
+			Map<URI, String> edgelabels
+					= Utility.getInstanceLabels( model.predicates(), engine );
+			for ( Statement s : model ) {
+
+				String edgekey = s.getPredicate().stringValue()
+						+ s.getSubject().stringValue()
+						+ s.getObject().stringValue();
+				SEMOSSEdge edge = edgeStore.get( edgekey );
+				String elabel = edgelabels.get( s.getPredicate() );
+				edge.setLabel( elabel );
+			}
+
+			fireModelChanged( overlayLevel );
 			return elementsFromLevel( overlayLevel );
 		}
 
 		@Override
-		public Collection<GraphElement> addGraphLevel( Collection<URI> nodes, IEngine engine, int overlayLevel ) {
+		public Collection<GraphElement> addGraphLevel( Collection<URI> nodes,
+				IEngine engine, int overlayLevel ) {
 			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = super.getGraph();
 
 			for ( URI u : nodes ) {
@@ -156,6 +173,7 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 				graph.addVertex( src );
 			}
 
+			fireModelChanged( overlayLevel );
 			return elementsFromLevel( overlayLevel );
 		}
 
