@@ -12,15 +12,24 @@ import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.GraphAnimationPanel;
 import com.ostrichemulators.semtool.ui.components.api.GraphListener;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
+import com.ostrichemulators.semtool.util.MultiMap;
+import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 
 /**
  *
@@ -56,15 +65,51 @@ public class AnimateGraph extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		Collection<? extends GraphElement> edges = gps.getVisibleGraph().getEdges();
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
+		Collection<SEMOSSEdge> edges = graph.getEdges();
 
-		Map<URI, URI> map = GraphAnimationPanel.getAnimationInput(
+		final Map<URI, URI> map = GraphAnimationPanel.getAnimationInput(
 				JOptionPane.getRootFrame(), gps.getLabelCache(),
 				gps.getEngine(), edges );
 
+		final Set<SEMOSSEdge> animatedEdges = new HashSet<>();
 
-		for( Map.Entry<URI, URI> ee : map.entrySet() ){
-			log.debug( ee );
+		final MultiMap<Value, SEMOSSEdge> iterations = new MultiMap<>();
+		// we only support one element in this map (for now, at least)
+		for ( Map.Entry<URI, URI> ee : map.entrySet() ) {
+			for ( SEMOSSEdge edge : edges ) {
+				if ( edge.getType().equals( ee.getKey() ) && edge.hasProperty( ee.getValue() ) ) {
+					Value v = edge.getValue( ee.getValue() );
+					iterations.add( v, edge );
+					animatedEdges.add( edge );
+				}
+			}
 		}
+
+		final List<Value> vals = RDFDatatypeTools.sortValues( iterations.keySet() );
+		Timer timer = new Timer( 3000, new ActionListener() {
+			int listpos = 0;
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				Value val = vals.get( listpos++ );
+
+				Map<SEMOSSEdge, Boolean> hidden = new HashMap<>();
+				for ( SEMOSSEdge edge : iterations.getNN( val ) ) {
+					hidden.put( edge, false );
+				}
+				for ( SEMOSSEdge edge : animatedEdges ) {
+					hidden.putIfAbsent( edge, true );
+				}
+
+				gps.getView().hide( hidden );
+
+				if ( listpos >= iterations.size() ) {
+					listpos = 0;
+				}
+			}
+		} );
+
+		timer.start();
 	}
 }

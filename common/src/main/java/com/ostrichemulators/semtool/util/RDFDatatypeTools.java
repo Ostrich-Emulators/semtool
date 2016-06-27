@@ -1,7 +1,11 @@
 package com.ostrichemulators.semtool.util;
 
+import static com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter.getDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -236,8 +240,8 @@ public class RDFDatatypeTools {
 	 * Gets the datatype of the given val. If val is null, returns null. It
 	 * returns {@link XMLSchema#ANYURI} for a URI, {@link XMLSchema#ENTITY} for a
 	 * BNode, and {@link Literal#getDatatype()} if it's a literal. If it's not a
-	 * {@link Value}, then it is converted to a Value first, and reprocessed.
-	 * If we have a literal, but a null datatype, returns {@link XMLSchema#STRING}
+	 * {@link Value}, then it is converted to a Value first, and reprocessed. If
+	 * we have a literal, but a null datatype, returns {@link XMLSchema#STRING}
 	 *
 	 * @param val
 	 * @return
@@ -300,10 +304,54 @@ public class RDFDatatypeTools {
 		}
 
 		if ( theClass == Date.class ) {
-			return ( isempty ? null : input.calendarValue() );
+			return ( isempty ? null : getDate( input.calendarValue() ) );
 		}
 
 		return input.stringValue();
+	}
+
+	/**
+	 * Gets a proper native object from a given RDF value
+	 *
+	 * @param value The RDF Value
+	 * @return A proper native object
+	 */
+	public static Number getNumberFromValue( Value value ) {
+		if ( value == null ) {
+			return null;
+		}
+
+		Class<?> theClass = getClassForValue( value );
+
+		if ( URI.class == theClass ) {
+			return null;
+		}
+
+		Literal input = Literal.class.cast( value );
+		String val = input.getLabel();
+		boolean isempty = val.isEmpty();
+
+		if ( theClass == Double.class ) {
+			return ( isempty ? null : input.doubleValue() );
+		}
+
+		if ( theClass == Integer.class ) {
+			return ( isempty ? null : input.intValue() );
+		}
+
+		if ( theClass == Boolean.class ) {
+			return ( isempty ? 0 : 1 );
+		}
+
+		if ( theClass == Float.class ) {
+			return ( isempty ? null : input.floatValue() );
+		}
+
+		if ( theClass == Date.class ) {
+			return ( isempty ? null : getDate( input.calendarValue() ).getTime() );
+		}
+
+		return null;
 	}
 
 	public static boolean isNumericValue( Value value ) {
@@ -387,6 +435,29 @@ public class RDFDatatypeTools {
 	 */
 	public static Value getValueFromDatatypeAndString( URI datatype, String content ) {
 		return vf.createLiteral( content, datatype );
+	}
+
+	public static List<Value> sortValues( Collection<Value> vals ) {
+		List<Value> values = new ArrayList<>( vals );
+		Collections.sort( values, new Comparator<Value>() {
+
+			@Override
+			public int compare( Value v1, Value v2 ) {
+				Number n1 = getNumberFromValue( v1 );
+				Number n2 = getNumberFromValue( v2 );
+
+				double diff = n1.doubleValue() - n2.doubleValue();
+				if ( diff < 0 ) {
+					return -1;
+				}
+				else if ( diff > 0 ) {
+					return 1;
+				}
+				return 0;
+			}
+		} );
+
+		return values;
 	}
 
 	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {

@@ -186,6 +186,20 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		refresh();
 	}
 
+	public void hide( Map<? extends GraphElement, Boolean> hidings ) {
+		for ( Map.Entry<? extends GraphElement, Boolean> en : hidings.entrySet() ) {
+			if ( en.getValue() ) {
+				hiddenSingles.add( en.getKey().getGraphId() );
+			}
+			else {
+				hiddenSingles.remove( en.getKey().getGraphId() );
+			}
+		}
+
+		firePropertyChange( VISIBILITY_CHANGED, false, true );
+		refresh();
+	}
+
 	public void clearHiddens() {
 		hiddenSingles.clear();
 		hiddenTypes.clear();
