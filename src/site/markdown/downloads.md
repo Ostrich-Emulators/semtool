@@ -23,3 +23,11 @@ The OS-EM Semantic Toolkit team is pleased to announce version 1.0! [It is avail
   * Convert table to graph and vice versa
   * Attach to remote Sesame endpoints
   * Public and Private Perspective/Insight repositories
+
+### Features Complete in 1.0.1
+[1.0.1 Snapshot](https://github.com/Ostrich-Emulators/Ostrich-Emulators.github.io/raw/master/os-em-semtool-1.0.1-SNAPSHOT.zip) 
+
+  * Animate Graph (something similar to GapMinder)
+  * Blazegraph updates
+
+
