@@ -18,6 +18,7 @@ import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.visualization.VisualizationServer.Paintable;
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -65,6 +66,10 @@ public class AnimateGraph extends AbstractAction {
 				// don't care
 			}
 		} );
+
+		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
+		Collection<SEMOSSEdge> edges = graph.getEdges();
+		setEnabled( GraphAnimationPanel.hasAnimationCandidates( edges ) );
 	}
 
 	@Override
@@ -80,10 +85,12 @@ public class AnimateGraph extends AbstractAction {
 
 		final MultiMap<Value, SEMOSSEdge> iterations = new MultiMap<>();
 		// we only support one element in this map (for now, at least)
+		URI pred = null;
 		for ( Map.Entry<URI, URI> ee : map.entrySet() ) {
+			pred = ee.getValue();
 			for ( SEMOSSEdge edge : edges ) {
-				if ( edge.getType().equals( ee.getKey() ) && edge.hasProperty( ee.getValue() ) ) {
-					Value v = edge.getValue( ee.getValue() );
+				if ( edge.getType().equals( ee.getKey() ) && edge.hasProperty( pred ) ) {
+					Value v = edge.getValue( pred );
 					iterations.add( v, edge );
 					animatedEdges.add( edge );
 				}
@@ -91,29 +98,36 @@ public class AnimateGraph extends AbstractAction {
 		}
 
 		final List<Value> vals = RDFDatatypeTools.sortValues( iterations.keySet() );
-		AnimationPaintable ap = new AnimationPaintable();
+		AnimationPaintable ap = new AnimationPaintable( gps.getLabelCache().get( pred ) );
 		gps.getView().addPostRenderPaintable( ap );
 		gps.getView().setGraphLayout( CircleLayout.class );
 		Timer timer = new Timer( 3000, new ActionListener() {
-			int listpos = 0;
+			int listpos = -1;
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				Value val = vals.get( listpos++ );
-
 				Map<SEMOSSEdge, Boolean> hidden = new HashMap<>();
-				for ( SEMOSSEdge edge : iterations.getNN( val ) ) {
-					hidden.put( edge, false );
+				if ( listpos < 0 ) {
+					gps.getView().hide( animatedEdges, false );
+					ap.text = "All";
 				}
-				for ( SEMOSSEdge edge : animatedEdges ) {
-					hidden.putIfAbsent( edge, true );
+				else {
+					Value val = vals.get( listpos );
+
+					for ( SEMOSSEdge edge : iterations.getNN( val ) ) {
+						hidden.put( edge, false );
+					}
+					for ( SEMOSSEdge edge : animatedEdges ) {
+						hidden.putIfAbsent( edge, true );
+					}
+
+					gps.getView().hide( hidden );
+					ap.text = val.stringValue();
 				}
 
-				gps.getView().hide( hidden );
-				ap.text = val.stringValue();
-
+				listpos++;
 				if ( listpos >= iterations.size() ) {
-					listpos = 0;
+					listpos = -1;
 				}
 			}
 		} );
@@ -123,12 +137,18 @@ public class AnimateGraph extends AbstractAction {
 
 	private class AnimationPaintable implements Paintable {
 
-		public String text = "";
+		public String text = "All";
+		public final String field;
+
+		public AnimationPaintable( String field ) {
+			this.field = field;
+		}
 
 		@Override
 		public void paint( Graphics g ) {
 			g.setColor( Color.BLACK );
-			g.drawString( text, 10, 10 );
+			FontMetrics fm = g.getFontMetrics();
+			g.drawString( field + ": " + text, fm.stringWidth( " " ), fm.getHeight() );
 		}
 
 		@Override
