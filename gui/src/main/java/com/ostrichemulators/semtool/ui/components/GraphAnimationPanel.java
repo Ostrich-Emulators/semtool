@@ -136,7 +136,7 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
       }
     });
 
-    jLabel2.setText("Edge Type");
+    jLabel2.setText("Type");
 
     jLabel3.setText("Field");
 

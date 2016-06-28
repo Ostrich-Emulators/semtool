@@ -22,6 +22,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,26 +74,34 @@ public class AnimateGraph extends AbstractAction {
 	}
 
 	@Override
-	public void actionPerformed( ActionEvent e ) {
+	public void actionPerformed( ActionEvent ae ) {
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
-		Collection<SEMOSSEdge> edges = graph.getEdges();
+
+		final Set<SEMOSSEdge> alledges = new HashSet<>( graph.getEdges() );
+		final Set<SEMOSSVertex> allverts = new HashSet<>( graph.getVertices() );
+
+		List<GraphElement> elements = new ArrayList<>();
+		elements.addAll( alledges );
+		elements.addAll( allverts );
 
 		final Map<URI, URI> map = GraphAnimationPanel.getAnimationInput(
 				JOptionPane.getRootFrame(), gps.getLabelCache(),
-				gps.getEngine(), edges );
+				gps.getEngine(), elements );
 
-		final Set<SEMOSSEdge> animatedEdges = new HashSet<>();
+		final Set<GraphElement> animateds = new HashSet<>();
+		final MultiMap<Value, GraphElement> iterations = new MultiMap<>();
 
-		final MultiMap<Value, SEMOSSEdge> iterations = new MultiMap<>();
 		// we only support one element in this map (for now, at least)
 		URI pred = null;
 		for ( Map.Entry<URI, URI> ee : map.entrySet() ) {
+			URI key = ee.getKey();
 			pred = ee.getValue();
-			for ( SEMOSSEdge edge : edges ) {
-				if ( edge.getType().equals( ee.getKey() ) && edge.hasProperty( pred ) ) {
-					Value v = edge.getValue( pred );
-					iterations.add( v, edge );
-					animatedEdges.add( edge );
+
+			for ( GraphElement graphel : elements ) {
+				if ( graphel.getType().equals( key ) && graphel.hasProperty( pred ) ) {
+					Value v = graphel.getValue( pred );
+					iterations.add( v, graphel );
+					animateds.add( graphel );
 				}
 			}
 		}
@@ -106,19 +115,19 @@ public class AnimateGraph extends AbstractAction {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				Map<SEMOSSEdge, Boolean> hidden = new HashMap<>();
+				Map<GraphElement, Boolean> hidden = new HashMap<>();
 				if ( listpos < 0 ) {
-					gps.getView().hide( animatedEdges, false );
+					gps.getView().hide( animateds, false );
 					ap.text = "All";
 				}
 				else {
 					Value val = vals.get( listpos );
 
-					for ( SEMOSSEdge edge : iterations.getNN( val ) ) {
-						hidden.put( edge, false );
+					for ( GraphElement ele : iterations.getNN( val ) ) {
+						hidden.put( ele, false );
 					}
-					for ( SEMOSSEdge edge : animatedEdges ) {
-						hidden.putIfAbsent( edge, true );
+					for ( GraphElement ele : animateds ) {
+						hidden.putIfAbsent( ele, true );
 					}
 
 					gps.getView().hide( hidden );
