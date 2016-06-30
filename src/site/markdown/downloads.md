@@ -1,9 +1,12 @@
 ## Version 1.0
-The OS-EM Semantic Toolkit team is pleased to announce version 1.0! [It is available](https://github.com/Ostrich-Emulators/Ostrich-Emulators.github.io/raw/master/os-em-semtool-1.0.zip) for your semantic enjoyment.
+The OS-EM Semantic Toolkit team is pleased to announce version 1.0!
+[It is available](https://github.com/Ostrich-Emulators/Ostrich-Emulators.github.io/raw/master/os-em-semtool-1.0.zip)
+for your semantic enjoyment.
 
 ### Features in 1.0
   * Multiple output styles (graphs, tables, charts)
   * Lots of graph functionality
+
     * Island, loop identification
     * Customizable icons, colors, text
     * Arbitrary graph traversal
