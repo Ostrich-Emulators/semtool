@@ -147,6 +147,6 @@ as show below.
 
 ![Database Loader Dialog](images/newdb.png "Database Loader Dialog")
 
-Your data file goes in the "File(s) to Import" field. The other fields are optional,
-and the defaults work in the vast majority of cases. The field can contain multiple
-files in any of the supported formats. Good luck!
+Your data file goes in the "File(s) to Import" field. It can contain multiple
+files in any of the supported formats. The other fields are optional, and the
+defaults work for the vast majority of cases. Good luck!
