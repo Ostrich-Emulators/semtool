@@ -76,7 +76,7 @@ public class NodeDerivationTools {
 
 	public static List<URI> createInstanceList( URI concept, IEngine engine ) {
 		String query = "SELECT DISTINCT ?instance WHERE { "
-				+ "  ?instance rdfs:subClassOf+|rdfs:subPropertyOf+ ?concept ."
+				+ "  ?instance a|rdfs:subClassOf+|rdfs:subPropertyOf+ ?concept ."
 				+ "  FILTER( ?instance != ?concept ) ."
 				+ "}";
 		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query );

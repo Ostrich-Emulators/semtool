@@ -5,52 +5,41 @@
  */
 package com.ostrichemulators.semtool.ui.components.semanticexplorer;
 
-import com.ostrichemulators.semtool.om.NamedShape;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
-import com.ostrichemulators.semtool.rdf.query.util.impl.ListQueryAdapter;
-import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
+import com.ostrichemulators.semtool.rdf.query.util.impl.ModelQueryAdapter;
+import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
+import com.ostrichemulators.semtool.ui.components.renderers.ResourceTreeRenderer;
 import com.ostrichemulators.semtool.ui.preferences.SemtoolPreferences;
 import com.ostrichemulators.semtool.util.Constants;
-
-import com.ostrichemulators.semtool.util.IconBuilder;
-import com.ostrichemulators.semtool.util.RDFDatatypeTools;
+import com.ostrichemulators.semtool.util.DIHelper;
+import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
-import java.awt.Color;
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.prefs.Preferences;
 
 import javax.swing.GroupLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
+import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
  *
@@ -62,13 +51,14 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 	private static final Logger log = Logger.getLogger( SemanticExplorerPanel.class );
 	private final JTree nodeClassesAndInstances;
 	private IEngine engine;
-	private final DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "Please wait while classes and instances populate..." );
-	private final DefaultColorShapeRepository shapefactory = new DefaultColorShapeRepository();
+	private final DefaultMutableTreeNode invisibleRoot
+			= new DefaultMutableTreeNode( "Please wait while classes and instances populate..." );
 	private final JScrollPane leftSide, rightSide;
 	private final JSplitPane jSplitPane;
-	private final JTable propertyTable;
-
-	private boolean useLabels = false;
+	private final ResourceTreeRenderer renderer = new ResourceTreeRenderer();
+	private final InstancePropertyTableModel tablemodel
+			= new InstancePropertyTableModel();
+	private final JTable propertyTable = new JTable( tablemodel );
 
 	/**
 	 * Creates new SemanticExplorerPanel
@@ -78,12 +68,11 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 		nodeClassesAndInstances.setSelectionModel( getDeselectableTreeSelectionModel() );
 		nodeClassesAndInstances.addTreeSelectionListener( getTreeSelectionListener() );
 		nodeClassesAndInstances.setModel( new DefaultTreeModel( invisibleRoot ) );
-		nodeClassesAndInstances.setCellRenderer( getTreeCellRenderer() );
+		nodeClassesAndInstances.setCellRenderer( renderer );
 
 		leftSide = new JScrollPane();
 		leftSide.setViewportView( nodeClassesAndInstances );
 
-		propertyTable = new JTable();
 		propertyTable.setAutoCreateRowSorter( true );
 
 		rightSide = new JScrollPane();
@@ -106,33 +95,6 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				layout.createParallelGroup( GroupLayout.Alignment.LEADING )
 				.addComponent( jSplitPane, GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE )
 		);
-	}
-
-	private List<Value[]> runPropertiesQuery( URI instance ) {
-		String propertiesQuery
-				= "SELECT DISTINCT ?predicate ?object WHERE {"
-				+ "  ?subject ?predicate ?object . "
-				+ "} ORDER BY ?predicate";
-
-		ListQueryAdapter<Value[]> propertiesQA = new ListQueryAdapter<Value[]>( propertiesQuery ) {
-			@Override
-			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				Value triple[] = {
-					Value.class.cast( set.getValue( "predicate" ) ),
-					Value.class.cast( set.getValue( "object" ) )
-				};
-				add( triple );
-			}
-		};
-		propertiesQA.bind( "subject", instance );
-
-		try {
-			return engine.query( propertiesQA );
-		}
-		catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
-			log.error( e, e );
-			return null;
-		}
 	}
 
 	private DefaultTreeSelectionModel getDeselectableTreeSelectionModel() {
@@ -168,46 +130,23 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 			public void valueChanged( TreeSelectionEvent e ) {
 				TreePath path = e.getPath();
 
-				if ( path.getPathCount() == 1 ) {
-					//This shouldn't be possible because the root node is invisible.
+				switch ( path.getPathCount() ) {
+					case 1:
+						//This shouldn't be possible because the root node is invisible.
+						break;
+					case 2:
+						tablemodel.clear();
+						break;
+					case 3:
+						DefaultMutableTreeNode dmtn = DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
+						URI instance = URI.class.cast( dmtn.getUserObject() );
+						ModelQueryAdapter mqa = ModelQueryAdapter.describe( instance );
+						mqa.useInferred( false );
+						tablemodel.setModel( engine.constructNoEx( mqa ) );
+						break;
+					default:
+						break;
 				}
-				else if ( path.getPathCount() == 2 ) {
-					propertyTable.setModel( new DefaultTableModel() );
-				}
-				else if ( path.getPathCount() == 3 ) {
-					//DefaultMutableTreeNode conceptNode = DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
-					//URI concept = URI.class.cast( conceptNode.getUserObject() );
-					DefaultMutableTreeNode dmtn = DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
-					URI instance = URI.class.cast( dmtn.getUserObject() );
-
-					List<Value[]> propertyList = runPropertiesQuery( instance );
-					propertyTable.setModel( new InstancePropertyTableModel( propertyList, engine ) );
-				}
-			}
-		};
-	}
-
-	private TreeCellRenderer getTreeCellRenderer() {
-		return new DefaultTreeCellRenderer() {
-			private static final long serialVersionUID = 4433791433874526433L;
-
-			@Override
-			public Component getTreeCellRendererComponent( JTree tree, Object value,
-					boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus ) {
-				super.getTreeCellRendererComponent( tree, value, selected, expanded,
-						leaf, row, hasFocus );
-
-				DefaultMutableTreeNode dmtNode = (DefaultMutableTreeNode) value;
-				if ( ( dmtNode.getUserObject() instanceof URI ) && !dmtNode.isLeaf() ) {
-					NamedShape shape = shapefactory.getShape( URI.class.cast( dmtNode.getUserObject() ) );
-					setIcon( new IconBuilder( shape ).setStroke( Color.BLACK )
-							.setPadding( 2 ).setIconSize( 18 ).build() );
-				}
-				else {
-					//setIcon( null );
-				}
-
-				return this;
 			}
 		};
 	}
@@ -217,43 +156,53 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 			return;
 		}
 
-		Preferences prefs = SemtoolPreferences.get();
-		useLabels = prefs.getBoolean( Constants.SEMEX_USE_LABELS_PREF, true );
+		SwingUtilities.invokeLater( new Runnable() {
 
-		invisibleRoot.removeAllChildren();
+			@Override
+			public void run() {
 
-		ArrayList<URITreeNode> conceptListURITreeNodes = new ArrayList<>();
-		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
+				invisibleRoot.removeAllChildren();
 
-		Set<URI> concepts = sm.getTopLevelConcepts();
-		for ( URI concept : concepts ) {
-			URITreeNode conceptNode = new URITreeNode( concept, useLabels );
-			conceptListURITreeNodes.add( conceptNode );
+				RetrievingLabelCache rlc = new RetrievingLabelCache( engine );
 
-			List<URITreeNode> instanceListURITreeNodes = new ArrayList<>();
-			List<URI> instances = NodeDerivationTools.createInstanceList( concept, engine );
-			Map<URI, String> labels = Utility.getInstanceLabels( instances, engine );
+				renderer.setLabelCache( rlc );
+				renderer.setColorShapeRepository( DIHelper.getInstance().
+						getMetadataStore().getCSRepo( engine.getBaseUri() ) );
+				renderer.setUseLabels( SemtoolPreferences.get()
+						.getBoolean( Constants.SEMEX_USE_LABELS_PREF, true ) );
 
-			for ( URI instance : instances ) {
-				instanceListURITreeNodes.add( new URITreeNode( instance,
-						RDFDatatypeTools.getValueFromObject( labels.get( instance ) ),
-						useLabels ) );
+				StructureManager sm = StructureManagerFactory.getStructureManager( engine );
+
+				Set<URI> concepts = sm.getTopLevelConcepts();
+				Map<URI, String> clbls = Utility.getInstanceLabels( concepts, engine );
+				Map<URI, String> sortedconcepts = Utility.sortUrisByLabel( clbls );
+				rlc.putAll( clbls );
+
+				for ( URI concept : sortedconcepts.keySet() ) {
+					DefaultMutableTreeNode conceptNode = new DefaultMutableTreeNode( concept );
+					invisibleRoot.add( conceptNode );
+
+					List<URI> instances = NodeDerivationTools.createInstanceList( concept, engine );
+					Map<URI, String> labels = Utility.getInstanceLabels( instances, engine );
+					labels = Utility.sortUrisByLabel( labels );
+					rlc.putAll( labels );
+
+					for ( URI instance : labels.keySet() ) {
+						DefaultMutableTreeNode instNode = new DefaultMutableTreeNode( instance );
+						conceptNode.add( instNode );
+					}
+				}
+
+				nodeClassesAndInstances.setModel( new DefaultTreeModel( invisibleRoot ) );
+				nodeClassesAndInstances.setRootVisible( false );
+
+				LabeledPairTableCellRenderer<Value> tablerenderer
+						= LabeledPairTableCellRenderer.getValuePairRenderer( rlc );
+				propertyTable.setDefaultRenderer( URI.class, tablerenderer );
+				propertyTable.setDefaultRenderer( Value.class, tablerenderer );
+				tablerenderer.cache( XMLSchema.ANYURI, "URI" );
 			}
-
-			Collections.sort( instanceListURITreeNodes );
-			for ( URITreeNode instanceNode : instanceListURITreeNodes ) {
-				conceptNode.add( instanceNode );
-			}
-		}
-
-		Collections.sort( conceptListURITreeNodes );
-		for ( URITreeNode conceptNode : conceptListURITreeNodes ) {
-			invisibleRoot.add( conceptNode );
-		}
-
-		nodeClassesAndInstances.setModel( new DefaultTreeModel( invisibleRoot ) );
-		nodeClassesAndInstances.setRootVisible( false );
-		nodeClassesAndInstances.repaint();
+		} );
 	}
 
 	public void setEngine( IEngine engine ) {
