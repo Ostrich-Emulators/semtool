@@ -28,9 +28,11 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
+import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LinkedHashModel;
 
 /**
  * This class is used to create a table model for vertex properties.
@@ -57,13 +59,17 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 		rows = new ArrayList<>();
 	}
 
-	public void setModel( Collection<Statement> newdata ){
+	public Model getModel() {
+		return new LinkedHashModel( rows );
+	}
+
+	public void setModel( Collection<Statement> newdata ) {
 		rows.clear();
 		rows.addAll( newdata );
 		fireTableDataChanged();
 	}
 
-	public void clear(){
+	public void clear() {
 		rows.clear();
 		fireTableDataChanged();
 	}

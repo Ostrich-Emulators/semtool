@@ -17,6 +17,9 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DIHelper;
 import com.ostrichemulators.semtool.util.RetrievingLabelCache;
 import com.ostrichemulators.semtool.util.Utility;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +32,6 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
@@ -77,6 +79,31 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 		rightSide = new JScrollPane();
 		rightSide.setViewportView( propertyTable );
+
+		propertyTable.addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseClicked( MouseEvent e ) {
+				int col = propertyTable.columnAtPoint( e.getPoint() );
+				if ( 2 == col ) {
+					int row = propertyTable.rowAtPoint( e.getPoint() );
+					Object obj = tablemodel.getValueAt( row, col );
+					if ( obj instanceof URI ) {
+						URI uri = URI.class.cast( obj );
+
+						Enumeration<DefaultMutableTreeNode> enumer = invisibleRoot.depthFirstEnumeration();
+						while ( enumer.hasMoreElements() ) {
+							DefaultMutableTreeNode node = enumer.nextElement();
+							if ( node.getUserObject().equals( uri ) ) {
+								TreePath tp = new TreePath( node.getPath() );
+								nodeClassesAndInstances.getSelectionModel().
+										setSelectionPath( tp );
+								nodeClassesAndInstances.scrollPathToVisible( tp );
+							}
+						}
+					}
+				}
+			}
+		} );
 
 		jSplitPane = new JSplitPane();
 		jSplitPane.setDividerLocation( 250 );
