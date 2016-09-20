@@ -5,8 +5,6 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.poi.main.ImportMetadata;
-import com.ostrichemulators.semtool.poi.main.LowMemXlsReader;
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
 import java.io.IOException;

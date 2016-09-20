@@ -197,10 +197,6 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 					log.warn( "unhandled cell type: " + celltype );
 			}
 
-//			if ( null != currentcell ) {
-//				log.debug( sheet.getSheetName() + "(" + currentrow.getRowNum() + ","
-//						+ currentcell.getColumnIndex() + ") " + currentcell.getStringCellValue() );
-//			}
 			setReading( false );
 		}
 	}

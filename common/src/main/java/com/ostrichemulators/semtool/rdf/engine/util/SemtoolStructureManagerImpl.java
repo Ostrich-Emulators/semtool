@@ -442,7 +442,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 
 		Model stmts = new LinkedHashModel();
 
-		String key = prop.stringValue() + domain;
+		String key = prop.stringValue() + domain + range;
 		if ( !structurelkp.containsKey( key ) ) {
 			URI structure = schema.build( title );
 			structurelkp.put( key, structure );

@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.poi.main.xlsxml;
 
-import com.ostrichemulators.semtool.poi.main.xlsxml.LoadingSheetXmlHandler;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
