@@ -106,7 +106,7 @@ public class EngineUtil2Test {
 		FileUtils.deleteQuietly( dbfile );
 	}
 
-	//@Test
+	@Test
 	public void testClear() throws Exception {
 		StatementAddingExecutor sae = new StatementAddingExecutor();
 		sae.addStatement( new StatementImpl( RDFS.DATATYPE, RDFS.LABEL,
@@ -126,7 +126,7 @@ public class EngineUtil2Test {
 		assertTrue( newuris.isEmpty() );
 	}
 
-	//@Test
+	@Test
 	public void testGetLabel() throws Exception {
 
 		assertEquals( eng.getEngineName(), EngineUtil2.getEngineLabel( eng ) );
@@ -142,7 +142,7 @@ public class EngineUtil2Test {
 		assertEquals( expected, label );
 	}
 
-	//@Test
+	@Test
 	public void testReifStyle() throws Exception {
 		assertEquals( ReificationStyle.SEMTOOL, EngineUtil2.getReificationStyle( eng ) );
 
@@ -158,7 +158,7 @@ public class EngineUtil2Test {
 		assertEquals( ReificationStyle.W3C, reif );
 	}
 
-	//@Test
+	@Test
 	public void testLoadEngine1() throws Exception {
 		eng.closeDB();
 		assertFalse( eng.isConnected() );
@@ -167,7 +167,7 @@ public class EngineUtil2Test {
 		assertEquals( dbfile.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
 	}
 
-	//@Test
+	@Test
 	public void testLoadEngine2() throws Exception {
 		eng.closeDB();
 		assertFalse( eng.isConnected() );
@@ -184,7 +184,7 @@ public class EngineUtil2Test {
 		assertEquals( dbfile.toString(), eng.getProperty( Constants.SMSS_LOCATION ) );
 	}
 
-	//@Test
+	@Test
 	public void createNew() throws IOException, EngineManagementException {
 		File topdir = File.createTempFile( "eutest-", "" );
 		topdir.delete();
@@ -206,7 +206,7 @@ public class EngineUtil2Test {
 		}
 	}
 
-	//@Test
+	@Test
 	public void createNew2() throws IOException, EngineManagementException {
 		File topdir = File.createTempFile( "eutest-", "" );
 		topdir.delete();
@@ -230,7 +230,7 @@ public class EngineUtil2Test {
 		}
 	}
 
-	//@Test
+	@Test
 	public void createNew3() throws IOException, EngineManagementException {
 		File topdir = File.createTempFile( "eutest-", "" );
 		topdir.delete();
@@ -254,7 +254,7 @@ public class EngineUtil2Test {
 		}
 	}
 
-	//@Test
+	@Test
 	public void createNew4() throws IOException, EngineManagementException {
 		File topdir = File.createTempFile( "eutest-", "" );
 		topdir.delete();
@@ -279,7 +279,7 @@ public class EngineUtil2Test {
 		}
 	}
 
-	//@Test
+	@Test
 	public void testCreateInsights() throws Exception {
 		File insights = new File( "src/test/resources/insmgr.data-source.ttl" );
 		InsightManagerImpl imi = new InsightManagerImpl();
@@ -288,7 +288,7 @@ public class EngineUtil2Test {
 		assertEquals( 1, persps.size() );
 	}
 
-	//@Test( expected = EngineManagementException.class )
+	@Test( expected = EngineManagementException.class )
 	public void testMustHaveInsightDataset() throws Exception {
 		File insights = new File( "src/main/resources/models/semtool.ttl" );
 		InsightManagerImpl imi = new InsightManagerImpl();
