@@ -142,7 +142,7 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 		//uri required for uniqueness, need these font tags so that when you increase 
 		//font through font transformer, the label doesn't get really far away from the vertex
 		StringBuilder html = new StringBuilder();
-		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
+		html.append( "<html><!--" ).append( vertex.getIRI() ).append( "-->" );
 		boolean first = true;
 		for ( URI property : propertiesList ) {
 			if ( vertex.hasProperty( property ) ) {

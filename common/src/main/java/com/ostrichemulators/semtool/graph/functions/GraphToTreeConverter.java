@@ -155,7 +155,7 @@ public class GraphToTreeConverter<V, E> {
 				? Collections.asLifoQueue( deque )
 				: deque );
 
-		URI rootu = Utility.getUniqueUri();
+		URI rootu = Utility.getUniqueIri();
 		vlookup.put( rootu, root );
 		revlkp.put( root, rootu );
 		tree.setRoot( rootu );
@@ -177,8 +177,8 @@ public class GraphToTreeConverter<V, E> {
 			for ( E e : outgoings ) {
 				V child = graph.getOpposite( v, e );
 
-				URI edgeuri = Utility.getUniqueUri();
-				URI tgturi = Utility.getUniqueUri();
+				URI edgeuri = Utility.getUniqueIri();
+				URI tgturi = Utility.getUniqueIri();
 
 				elookup.put( edgeuri, e );
 				vlookup.put( tgturi, child );

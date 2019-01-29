@@ -21,11 +21,11 @@ import org.apache.log4j.Logger;
 import org.apache.xerces.util.XMLChar;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.impl.SimpleValueFactory;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 /**
@@ -41,12 +41,12 @@ public class RDFDatatypeTools {
 	 * The logger for this class
 	 */
 	private static final Logger logger = Logger.getLogger( RDFDatatypeTools.class );
-	private static final ValueFactory vf = new ValueFactoryImpl();
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 	public static final Pattern NAMEPATTERN
 			= Pattern.compile( "(?:(?:\"([^\"]+)\")|([^@]+))@([a-z-A-Z]{1,8})" );
 	public static final Pattern DTPATTERN
 			= Pattern.compile( "\"([^\\\\^]+)\"\\^\\^(.*)" );
-	public static final Pattern URISTARTPATTERN
+	public static final Pattern IRISTARTPATTERN
 			= Pattern.compile( "(^[A-Za-z_-]+://).*" );
 
 	/**
@@ -54,8 +54,8 @@ public class RDFDatatypeTools {
 	 * might find in an XML Schema as keys, and the corresponding native Java
 	 * classes as values
 	 */
-	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
-	private static final Map<Class<?>, URI> REVTYPELOOKUP = new HashMap<>();
+	private static final Map<IRI, Class<?>> TYPELOOKUP = new HashMap<>();
+	private static final Map<Class<?>, IRI> REVTYPELOOKUP = new HashMap<>();
 
 	static {
 		TYPELOOKUP.put( XMLSchema.INT, Integer.class );
@@ -184,12 +184,12 @@ public class RDFDatatypeTools {
 	 * @return The class describing the value's data type
 	 */
 	public static Class<?> getClassForValue( Value v ) {
-		if ( v instanceof URI ) {
-			return URI.class;
+		if ( v instanceof IRI ) {
+			return IRI.class;
 		}
 		if ( v instanceof Literal ) {
 			Literal l = Literal.class.cast( v );
-			URI dt = l.getDatatype();
+			IRI dt = l.getDatatype();
 			return ( TYPELOOKUP.containsKey( dt )
 					? TYPELOOKUP.get( dt ) : String.class );
 		}
@@ -212,9 +212,9 @@ public class RDFDatatypeTools {
 			return removeExtraneousDoubleQuotes( input );
 		}
 		Class<?> theClass = null;
-		for ( URI datatypeUri : TYPELOOKUP.keySet() ) {
-			if ( pieces[2].contains( datatypeUri.stringValue() ) ) {
-				theClass = TYPELOOKUP.get( datatypeUri );
+		for ( IRI datatypeIRI : TYPELOOKUP.keySet() ) {
+			if ( pieces[2].contains( datatypeIRI.stringValue() ) ) {
+				theClass = TYPELOOKUP.get( datatypeIRI );
 			}
 		}
 		String dataPiece = pieces[1];
@@ -238,7 +238,7 @@ public class RDFDatatypeTools {
 
 	/**
 	 * Gets the datatype of the given val. If val is null, returns null. It
-	 * returns {@link XMLSchema#ANYURI} for a URI, {@link XMLSchema#ENTITY} for a
+	 * returns {@link XMLSchema#ANYIRI} for a IRI, {@link XMLSchema#ENTITY} for a
 	 * BNode, and {@link Literal#getDatatype()} if it's a literal. If it's not a
 	 * {@link Value}, then it is converted to a Value first, and reprocessed. If
 	 * we have a literal, but a null datatype, returns {@link XMLSchema#STRING}
@@ -246,12 +246,12 @@ public class RDFDatatypeTools {
 	 * @param val
 	 * @return
 	 */
-	public static URI getDatatype( Object val ) {
+	public static IRI getDatatype( Object val ) {
 		if ( null == val ) {
 			return null;
 		}
 
-		if ( val instanceof URI ) {
+		if ( val instanceof IRI ) {
 			return XMLSchema.ANYURI;
 		}
 		else if ( val instanceof Literal ) {
@@ -279,7 +279,7 @@ public class RDFDatatypeTools {
 
 		Class<?> theClass = getClassForValue( value );
 
-		if ( URI.class == theClass ) {
+		if ( IRI.class == theClass ) {
 			return value;
 		}
 
@@ -323,7 +323,7 @@ public class RDFDatatypeTools {
 
 		Class<?> theClass = getClassForValue( value );
 
-		if ( URI.class == theClass ) {
+		if ( IRI.class == theClass ) {
 			return null;
 		}
 
@@ -418,7 +418,7 @@ public class RDFDatatypeTools {
 		return input;
 	}
 
-	public static boolean isValidUriChars( String raw ) {
+	public static boolean isValidIriChars( String raw ) {
 		// Check if character is valid in the localpart (http://en.wikipedia.org/wiki/QName)
 		// NC is "non-colonized" name:  http://www.w3.org/TR/xmlschema-2/#NCName
 		return XMLChar.isValidNCName( raw );
@@ -429,11 +429,11 @@ public class RDFDatatypeTools {
 	 * Derives an RDF Value from a proper datatype and the stringified version of
 	 * the content
 	 *
-	 * @param datatype URI describing the datatype of the RDF entity
+	 * @param datatype IRI describing the datatype of the RDF entity
 	 * @param content The stringified version of the value
 	 * @return A proper RDF value
 	 */
-	public static Value getValueFromDatatypeAndString( URI datatype, String content ) {
+	public static Value getValueFromDatatypeAndString( IRI datatype, String content ) {
 		return vf.createLiteral( content, datatype );
 	}
 
@@ -460,19 +460,19 @@ public class RDFDatatypeTools {
 		return values;
 	}
 
-	public static URI getUriFromRawString( String raw, Map<String, String> namespaces ) {
+	public static IRI getIriFromRawString( String raw, Map<String, String> namespaces ) {
 		//resolve namespace
-		URI uri = null;
+		IRI IRI = null;
 
 		if ( raw.startsWith( "<" ) && raw.endsWith( ">" ) ) {
-			uri = vf.createURI( raw.substring( 1, raw.length() - 1 ) );
-			return uri;
+			IRI = vf.createIRI( raw.substring( 1, raw.length() - 1 ) );
+			return IRI;
 		}
 
-		// if raw starts with <something>://, then assume it's just a URI
-		Matcher m = URISTARTPATTERN.matcher( raw );
+		// if raw starts with <something>://, then assume it's just a IRI
+		Matcher m = IRISTARTPATTERN.matcher( raw );
 		if ( m.matches() ) {
-			return vf.createURI( raw );
+			return vf.createIRI( raw );
 		}
 
 		if ( raw.contains( ":" ) ) {
@@ -483,7 +483,7 @@ public class RDFDatatypeTools {
 					logger.warn( "No namespace found for raw value: " + raw );
 				}
 				else {
-					uri = vf.createURI( namespace, pieces[1] );
+					IRI = vf.createIRI( namespace, pieces[1] );
 				}
 			}
 			else {
@@ -491,20 +491,20 @@ public class RDFDatatypeTools {
 			}
 		}
 		//else {
-		// since this will will always throw an error (it can't be an absolute URI)
+		// since this will will always throw an error (it can't be an absolute IRI)
 		// we'll just return null, as usual
-		//uri = vf.createURI( raw );
+		//IRI = vf.createIRI( raw );
 		//}
 
-		return uri;
+		return IRI;
 	}
 
 	public static Value getRDFStringValue( String rawval, Map<String, String> namespaces,
 			ValueFactory vf ) {
-		// if rawval looks like a URI, assume it is
-		Matcher urimatcher = URISTARTPATTERN.matcher( rawval );
-		if ( urimatcher.matches() ) {
-			return vf.createURI( rawval );
+		// if rawval looks like a IRI, assume it is
+		Matcher IRImatcher = IRISTARTPATTERN.matcher( rawval );
+		if ( IRImatcher.matches() ) {
+			return vf.createIRI( rawval );
 		}
 
 		Matcher m = NAMEPATTERN.matcher( rawval );
@@ -525,9 +525,9 @@ public class RDFDatatypeTools {
 				val = m.group( 1 );
 				String typestr = m.group( 2 );
 				try {
-					URI type = getUriFromRawString( typestr, namespaces );
+					IRI type = getIriFromRawString( typestr, namespaces );
 					if ( null == type ) {
-						logger.warn( "probably misinterpreting as string (unknown type URI?) :"
+						logger.warn( "probably misinterpreting as string (unknown type IRI?) :"
 								+ rawval );
 						val = rawval;
 					}
@@ -536,7 +536,7 @@ public class RDFDatatypeTools {
 					}
 				}
 				catch ( Exception e ) {
-					logger.warn( "probably misinterpreting as string (unknown type URI?) :"
+					logger.warn( "probably misinterpreting as string (unknown type IRI?) :"
 							+ rawval, e );
 					val = rawval;
 				}

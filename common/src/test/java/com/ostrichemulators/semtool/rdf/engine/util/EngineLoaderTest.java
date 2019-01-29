@@ -643,7 +643,7 @@ public class EngineLoaderTest {
 		engine.setBuilders( UriBuilder.getBuilder( DATAURI ),
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
-		engine.getRawConnection().add( engine.getBaseUri(), SEMTOOL.ReificationModel,
+		engine.getRawConnection().add( engine.getBaseIri(), SEMTOOL.ReificationModel,
 				SEMTOOL.SEMTOOL_Reification );
 		engine.getRawConnection().commit();
 
@@ -684,7 +684,7 @@ public class EngineLoaderTest {
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
-		q.bind( "db", engine.getBaseUri() );
+		q.bind( "db", engine.getBaseIri() );
 		q.bind( "subset", MetadataConstants.VOID_SUBSET );
 		List<URI> uris = engine.query( q );
 		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
@@ -717,7 +717,7 @@ public class EngineLoaderTest {
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
-		q.bind( "db", engine.getBaseUri() );
+		q.bind( "db", engine.getBaseIri() );
 		q.bind( "subset", MetadataConstants.VOID_SUBSET );
 		List<URI> uris = engine.query( q );
 		assertEquals( "http://base.foo.bar", uris.get( 0 ).stringValue() );
@@ -749,7 +749,7 @@ public class EngineLoaderTest {
 
 		OneVarListQueryAdapter<URI> q
 				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
-		q.bind( "db", engine.getBaseUri() );
+		q.bind( "db", engine.getBaseIri() );
 		q.bind( "subset", MetadataConstants.VOID_SUBSET );
 		List<URI> uris = engine.query( q );
 		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
@@ -1049,9 +1049,9 @@ public class EngineLoaderTest {
 
 		compare( "category concept", expected, test, bldr.getConceptUri( "Category" ), null, null );
 		compare( "product concept", expected, test, bldr.getConceptUri( "Product" ), null, null );
-		compare( "category relation", expected, test, bldr.getRelationUri( "Category" ), null, null );
+		compare( "category relation", expected, test, bldr.getRelationIri( "Category" ), null, null );
 		compare( "contains relation", expected, test, bldr.getConceptUri( "Contains" ), null, null );
-		URI contains = bldr.getRelationUri( "Contains" );
+		URI contains = bldr.getRelationIri( "Contains" );
 		UriBuilder bldr2 = UriBuilder.getBuilder( contains );
 		compare( "contains relation description",
 				expected, test, bldr2.add( "Description" ).build(), null, null );
@@ -1071,7 +1071,7 @@ public class EngineLoaderTest {
 		compare( "category concept", expected, test, null, RDF.TYPE,
 				owl.getConceptUri( "Category" ) );
 		compare( "beverages concept", expected, test,
-				base.getConceptUri().add( "Category" ).add( "Beverages" ).build(),
+				base.getConceptIri().add( "Category" ).add( "Beverages" ).build(),
 				null, null );
 		compare( "dairy products", expected, test,
 				null, RDFS.LABEL, new LiteralImpl( "Dairy Products" ) );
@@ -1079,9 +1079,9 @@ public class EngineLoaderTest {
 				null, RDFS.LABEL, new LiteralImpl( "Chai Category Beverages" ) );
 
 		URI bev
-				= base.getRelationUri().add( "Category" ).add( "Chai_x_Beverages" ).build();
+				= base.getRelationIri().add( "Category" ).add( "Chai_x_Beverages" ).build();
 		compare( "chai-beverages category", expected, test,
-				bev, RDFS.SUBPROPERTYOF, owl.getRelationUri( "Category" ) );
+				bev, RDFS.SUBPROPERTYOF, owl.getRelationIri( "Category" ) );
 	}
 
 	private void compare( String label, Model expected, Model test, Resource s,

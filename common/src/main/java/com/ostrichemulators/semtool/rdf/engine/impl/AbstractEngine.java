@@ -149,7 +149,7 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public org.openrdf.model.URI getBaseUri() {
+	public org.openrdf.model.URI getBaseIri() {
 		return baseuri;
 	}
 
@@ -304,7 +304,7 @@ public abstract class AbstractEngine implements IEngine {
 		StringBuilder sb = new StringBuilder();
 		sb.append( null == engineName ? "unnamed" : engineName );
 		sb.append( " (base:" );
-		sb.append( null == databuilder ? "not set" : getBaseUri() ).append( ")" );
+		sb.append(null == databuilder ? "not set" : getBaseIri() ).append( ")" );
 		return sb.toString();
 	}
 

@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -58,11 +59,11 @@ import org.openrdf.repository.RepositoryException;
 public class QaChecker {
 
 	private static final Logger log = Logger.getLogger( QaChecker.class );
-	private final Map<ConceptInstanceCacheKey, URI> dataNodes;
-	private final Map<String, URI> instanceClassCache;
-	private final Map<String, URI> relationBaseClassCache;
-	private final Map<RelationCacheKey, URI> relationCache;
-	private final Map<String, URI> propertyClassCache;
+	private final Map<ConceptInstanceCacheKey, IRI> dataNodes;
+	private final Map<String, IRI> instanceClassCache;
+	private final Map<String, IRI> relationBaseClassCache;
+	private final Map<RelationCacheKey, IRI> relationCache;
+	private final Map<String, IRI> propertyClassCache;
 	private final File backingfile;
 	private final DB db;
 
@@ -121,7 +122,7 @@ public class QaChecker {
 		Set<URI> set = new HashSet<>( instanceClassCache.size()
 				+ relationBaseClassCache.size() + relationCache.size()
 				+ propertyClassCache.size() + dataNodes.size() );
-		for ( Map<?, URI> map : Arrays.asList( instanceClassCache, relationBaseClassCache,
+		for ( Map<?, IRI> map : Arrays.asList( instanceClassCache, relationBaseClassCache,
 				relationCache, propertyClassCache, dataNodes ) ) {
 			set.addAll( map.values() );
 		}
@@ -178,7 +179,7 @@ public class QaChecker {
 			data.setRelationIsError( !hasCachedRelationClass( data.getRelname() ) );
 		}
 
-		for ( Map.Entry<String, URI> en : data.getPropertiesAndDataTypes().entrySet() ) {
+		for ( Map.Entry<String, IRI> en : data.getPropertiesAndDataTypes().entrySet() ) {
 			data.setPropertyIsError( en.getKey(), !propertyClassCache.containsKey( en.getKey() ) );
 		}
 
@@ -257,7 +258,7 @@ public class QaChecker {
 		return dataNodes.containsKey( new ConceptInstanceCacheKey( type, label ) );
 	}
 
-	public void cacheUris( CacheType type, Map<String, URI> newtocache ) {
+	public void cacheUris( CacheType type, Map<String, IRI> newtocache ) {
 		if ( null == type ) {
 			throw new IllegalArgumentException( "cache type cannot be null" );
 		}
@@ -276,7 +277,7 @@ public class QaChecker {
 		}
 	}
 
-	public Map<String, URI> getCache( CacheType type ) {
+	public Map<String, IRI> getCache( CacheType type ) {
 		switch ( type ) {
 			case CONCEPTCLASS:
 				return new HashMap<>( instanceClassCache );
@@ -289,10 +290,10 @@ public class QaChecker {
 		}
 	}
 
-	public void cacheConceptInstances( Map<String, URI> instances, String typelabel ) {
-		for ( Map.Entry<String, URI> en : instances.entrySet() ) {
+	public void cacheConceptInstances( Map<String, IRI> instances, String typelabel ) {
+		for ( Map.Entry<String, IRI> en : instances.entrySet() ) {
 			String l = en.getKey();
-			URI uri = en.getValue();
+			IRI uri = en.getValue();
 
 			ConceptInstanceCacheKey key = new ConceptInstanceCacheKey( typelabel, l );
 			//log.debug( "conceptinstances : " + key + " -> " + en.getValue() );
@@ -320,10 +321,10 @@ public class QaChecker {
 	 * @param relationCache
 	 * @param propertyClassCache
 	 */
-	public void setCaches( Map<String, URI> schemaNodes,
-			Map<ConceptInstanceCacheKey, URI> dataNodes,
-			Map<String, URI> relationClassCache,
-			Map<RelationCacheKey, URI> relationCache, Map<String, URI> propertyClassCache ) {
+	public void setCaches( Map<String, IRI> schemaNodes,
+			Map<ConceptInstanceCacheKey, IRI> dataNodes,
+			Map<String, IRI> relationClassCache,
+			Map<RelationCacheKey, IRI> relationCache, Map<String, IRI> propertyClassCache ) {
 		clear();
 		this.instanceClassCache.putAll( schemaNodes );
 		this.dataNodes.putAll( dataNodes );
@@ -334,24 +335,24 @@ public class QaChecker {
 		this.propertyClassCache.putAll( propertyClassCache );
 	}
 
-	public URI getCachedRelationClass( String key ) {
+	public IRI getCachedRelationClass( String key ) {
 		return relationBaseClassCache.get( key );
 		//return propertiedRelationClassCache.get( key );
 	}
 
-	public URI getCachedPropertyClass( String name ) {
+	public IRI getCachedPropertyClass( String name ) {
 		return propertyClassCache.get( name );
 	}
 
-	public URI getCachedRelation( RelationCacheKey key ) {
+	public IRI getCachedRelation( RelationCacheKey key ) {
 		return relationCache.get( key );
 	}
 
-	public URI getCachedInstance( String typename, String rawlabel ) {
+	public IRI getCachedInstance( String typename, String rawlabel ) {
 		return dataNodes.get( new ConceptInstanceCacheKey( typename, rawlabel ) );
 	}
 
-	public URI getCachedInstanceClass( String name ) {
+	public IRI getCachedInstanceClass( String name ) {
 		return instanceClassCache.get( name );
 	}
 
@@ -385,41 +386,41 @@ public class QaChecker {
 		return instanceClassCache.containsKey( name );
 	}
 
-	public void cachePropertyClass( URI uri, String name ) {
+	public void cachePropertyClass( IRI uri, String name ) {
 		propertyClassCache.put( name, uri );
 	}
 
-	public void cacheInstanceClass( URI uri, String label ) {
+	public void cacheInstanceClass( IRI uri, String label ) {
 		instanceClassCache.put( label, uri );
 	}
 
-	public void cacheRelationNode( URI uri, String stype, String otype,
+	public void cacheRelationNode( IRI uri, String stype, String otype,
 			String relname, String slabel, String olabel ) {
 		cacheRelationNode( uri, new RelationCacheKey( stype, otype, relname, slabel,
 				olabel ) );
 	}
 
-	public void cacheRelationNode( URI uri, RelationCacheKey key ) {
+	public void cacheRelationNode( IRI uri, RelationCacheKey key ) {
 		relationCache.put( key, uri );
 	}
 
-	public void cacheRelationClass( URI uri, String key ) {
+	public void cacheRelationClass( IRI uri, String key ) {
 		relationBaseClassCache.put( key, uri );
 	}
 
-	public void cacheInstance( URI uri, String typelabel, String rawlabel ) {
+	public void cacheInstance( IRI uri, String typelabel, String rawlabel ) {
 		dataNodes.put( new ConceptInstanceCacheKey( typelabel, rawlabel ), uri );
 	}
 
 	private void loadLegacy( IEngine engine ) {
-		final Map<String, URI> map = new HashMap<>();
+		final Map<String, IRI> map = new HashMap<>();
 		String subpropq = "SELECT ?uri ?label WHERE { ?uri rdfs:label ?label . ?uri ?isa ?type }";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( subpropq ) {
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
 				map.put( set.getValue( "label" ).stringValue(),
-						URI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
+						IRI.class.cast( cleanValue( set.getValue( "uri" ), fac ) ) );
 			}
 
 			@Override
@@ -432,34 +433,34 @@ public class QaChecker {
 		UriBuilder owlb = engine.getSchemaBuilder();
 
 		try {
-			URI type = owlb.getRelationUri().build();
+			IRI type = owlb.getRelationIri().build();
 			vqa.bind( "type", type );
 			vqa.bind( "isa", RDFS.SUBPROPERTYOF );
 			engine.query( vqa );
 
-			Map<String, URI> props = new HashMap<>();
-			for ( Map.Entry<String, URI> en : map.entrySet() ) {
+			Map<String, IRI> props = new HashMap<>();
+			for ( Map.Entry<String, IRI> en : map.entrySet() ) {
 				props.put( en.getKey(), en.getValue() );
 			}
 
 			cacheUris( CacheType.PROPERTYCLASS, props );
 
 			vqa.bind( "isa", RDFS.SUBCLASSOF );
-			type = owlb.getConceptUri().build();
+			type = owlb.getConceptIri().build();
 			vqa.bind( "type", type );
 			engine.query( vqa );
 			cacheUris( CacheType.CONCEPTCLASS, map );
 
 			vqa.bind( "isa", RDF.TYPE );
-			Map<String, URI> concepts = new HashMap<>( map );
-			for ( Map.Entry<String, URI> en : concepts.entrySet() ) {
+			Map<String, IRI> concepts = new HashMap<>( map );
+			for ( Map.Entry<String, IRI> en : concepts.entrySet() ) {
 				vqa.bind( "type", en.getValue() );
 
 				engine.query( vqa );
 				cacheConceptInstances( map, en.getKey() );
 			}
 
-			Set<URI> needlabels = new HashSet<>();
+			Set<IRI> needlabels = new HashSet<>();
 			String relq = "SELECT DISTINCT * WHERE {"
 					+ " ?left a ?lefttype ."
 					+ " ?lefttype a owl:Class ."
@@ -469,18 +470,18 @@ public class QaChecker {
 					+ " ?specrel rdfs:subPropertyOf ?reltype ."
 					+ "}";
 
-			ListQueryAdapter<URI[]> vqa2 = new ListQueryAdapter<URI[]>( relq ) {
+			ListQueryAdapter<IRI[]> vqa2 = new ListQueryAdapter<IRI[]>( relq ) {
 
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					URI reltype = URI.class.cast( set.getValue( "reltype" ) );
-					URI lefttype = URI.class.cast( set.getValue( "lefttype" ) );
-					URI righttype = URI.class.cast( set.getValue( "righttype" ) );
-					URI left = URI.class.cast( set.getValue( "left" ) );
-					URI right = URI.class.cast( set.getValue( "right" ) );
-					URI specrel = URI.class.cast( set.getValue( "specrel" ) );
+					IRI reltype = IRI.class.cast( set.getValue( "reltype" ) );
+					IRI lefttype = IRI.class.cast( set.getValue( "lefttype" ) );
+					IRI righttype = IRI.class.cast( set.getValue( "righttype" ) );
+					IRI left = IRI.class.cast( set.getValue( "left" ) );
+					IRI right = IRI.class.cast( set.getValue( "right" ) );
+					IRI specrel = IRI.class.cast( set.getValue( "specrel" ) );
 
-					URI[] uris = new URI[]{ lefttype, righttype, reltype, left, right, specrel };
+					IRI[] uris = new IRI[]{ lefttype, righttype, reltype, left, right, specrel };
 					needlabels.addAll( Arrays.asList( uris ) );
 					add( uris );
 				}
@@ -488,9 +489,9 @@ public class QaChecker {
 			};
 
 			vqa2.useInferred( false );
-			List<URI[]> data = engine.query( vqa2 );
-			Map<URI, String> labels = Utility.getInstanceLabels( needlabels, engine );
-			for ( URI[] uris : data ) {
+			List<IRI[]> data = engine.query( vqa2 );
+			Map<IRI, String> labels = Utility.getInstanceLabels( needlabels, engine );
+			for ( IRI[] uris : data ) {
 				cacheRelationNode( uris[5], labels.get( uris[0] ),
 						labels.get( uris[1] ), labels.get( uris[2] ),
 						labels.get( uris[3] ), labels.get( uris[4] ) );
@@ -506,29 +507,29 @@ public class QaChecker {
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 		Model model = sm.rebuild( false );
 
-		Set<URI> datatypeProps = new HashSet<>();
+		Set<IRI> datatypeProps = new HashSet<>();
 		for ( Statement s : model.filter( null, OWL.DATATYPEPROPERTY, null ) ) {
-			datatypeProps.add( URI.class.cast( s.getObject() ) );
+			datatypeProps.add( IRI.class.cast( s.getObject() ) );
 		}
-		Map<URI, String> dtlabels = Utility.getInstanceLabels( datatypeProps, engine );
+		Map<IRI, String> dtlabels = Utility.getInstanceLabels( datatypeProps, engine );
 		cacheUris( CacheType.PROPERTYCLASS, MultiMap.lossyflip( dtlabels ) );
 
-		Set<URI> rels = new HashSet<>();
+		Set<IRI> rels = new HashSet<>();
 		for ( Value v : model.filter( null, RDF.PREDICATE, null ).objects() ) {
-			rels.add( URI.class.cast( v ) );
+			rels.add( IRI.class.cast( v ) );
 		}
-		Map<URI, String> rellabels = Utility.getInstanceLabels( rels, engine );
+		Map<IRI, String> rellabels = Utility.getInstanceLabels( rels, engine );
 		cacheUris( CacheType.RELATIONCLASS, MultiMap.lossyflip( rellabels ) );
 
-		Map<URI, String> cpclabels = Utility.getInstanceLabels( sm.getTopLevelConcepts(), engine );
+		Map<IRI, String> cpclabels = Utility.getInstanceLabels( sm.getTopLevelConcepts(), engine );
 		cacheUris( CacheType.CONCEPTCLASS, MultiMap.lossyflip( cpclabels ) );
 
 		// cache concept instances
-		for ( Map.Entry<URI, String> en : rellabels.entrySet() ) {
-			List<URI> instances
+		for ( Map.Entry<IRI, String> en : rellabels.entrySet() ) {
+			List<IRI> instances
 					= NodeDerivationTools.createInstanceList( en.getKey(), engine );
-			Map<URI, String> names = Utility.getInstanceLabels( instances, engine );
-			for ( Map.Entry<URI, String> en2 : names.entrySet() ) {
+			Map<IRI, String> names = Utility.getInstanceLabels( instances, engine );
+			for ( Map.Entry<IRI, String> en2 : names.entrySet() ) {
 				cacheInstance( en2.getKey(), en.getValue(), en2.getValue() );
 			}
 		}
@@ -536,17 +537,17 @@ public class QaChecker {
 		// cache relation instances
 		Model preds = model.filter( null, RDF.PREDICATE, null );
 		for ( Statement s : preds ) {
-			URI pred = URI.class.cast( s.getObject() );
+			IRI pred = IRI.class.cast( s.getObject() );
 			String relname = rellabels.get( pred );
 
 			// get the subject from the RDFS.DOMAIN statements
 			// and the object from the RDFS.RANGE statements
 			for ( Statement t : model.filter( s.getSubject(), RDFS.DOMAIN, null ) ) {
-				URI stype = URI.class.cast( t.getObject() );
+				IRI stype = IRI.class.cast( t.getObject() );
 				String stypelabel = cpclabels.get( stype );
 
 				for ( Statement u : model.filter( s.getSubject(), RDFS.RANGE, null ) ) {
-					URI otype = URI.class.cast( u.getObject() );
+					IRI otype = IRI.class.cast( u.getObject() );
 					String otypelabel = cpclabels.get( otype );
 
 					Model instancemodel = NodeDerivationTools.getInstances( stype, pred,

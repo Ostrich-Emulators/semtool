@@ -18,10 +18,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.openrdf.model.IRI;
 import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.SimpleValueFactory;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -33,10 +33,10 @@ import org.openrdf.model.vocabulary.XMLSchema;
 public abstract class AbstractGraphElement
 		implements GraphElement, Comparable<AbstractGraphElement> {
 
-	private static final Set<URI> COUNTABLES = new HashSet<>();
+	private static final Set<IRI> COUNTABLES = new HashSet<>();
 	private final transient List<PropertyChangeListener> listeners = new ArrayList<>();
-	private final transient Map<URI, Value> properties = new HashMap<>();
-	private URI graphid;
+	private final transient Map<IRI, Value> properties = new HashMap<>();
+	private IRI graphid;
 	private Map<String, Object> propHash = new HashMap<>(); //this is sent to the js (ChartIt)
 
 	static {
@@ -52,13 +52,13 @@ public abstract class AbstractGraphElement
 		COUNTABLES.add( XMLSchema.SHORT );
 	}
 
-	public AbstractGraphElement( URI id ) {
+	public AbstractGraphElement( IRI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
-	public AbstractGraphElement( URI id, URI type, String label ) {
+	public AbstractGraphElement( IRI id, IRI type, String label ) {
 		properties.put( RDF.SUBJECT, id );
-		properties.put( RDFS.LABEL, new LiteralImpl( label ) );
+		properties.put( RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( label ) );
 		properties.put( RDF.TYPE, null == type ? Constants.ANYNODE : type );
 		graphid = id;
 	}
@@ -99,7 +99,7 @@ public abstract class AbstractGraphElement
 
 	/**
 	 * Sets a new label for this vertex. This function is a convenience to null
-	 * null	null	null	null	null	 {@link #setValue(org.openrdf.model.URI, org.openrdf.model.Value)
+	 * null	null	null	null	null	 {@link #setValue(org.openrdf.model.IRI, org.openrdf.model.Value)
 	 * }
 	 * Any name is acceptable. We can always rename a vertex or edge.
 	 *
@@ -111,7 +111,7 @@ public abstract class AbstractGraphElement
 	}
 
 	@Override
-	public Set<URI> getPropertyKeys() {
+	public Set<IRI> getPropertyKeys() {
 		return new HashSet<>( properties.keySet() );
 	}
 
@@ -122,7 +122,7 @@ public abstract class AbstractGraphElement
 	}
 
 	@Override
-	public void setValue( URI prop, Value val ) {
+	public void setValue( IRI prop, Value val ) {
 		Value oldval = properties.get( prop );
 		properties.put( prop, val );
 		fireIfPropertyChanged( prop.toString(), oldval, val );
@@ -137,54 +137,54 @@ public abstract class AbstractGraphElement
 	}
 
 	@Override
-	public Value getValue( URI prop ) {
+	public Value getValue( IRI prop ) {
 		return properties.get( prop );
 	}
 
 	@Override
-	public Map<URI, Value> getValues() {
+	public Map<IRI, Value> getValues() {
 		return properties;
 	}
 
 	@Override
-	public boolean hasProperty( URI prop ) {
+	public boolean hasProperty( IRI prop ) {
 		return properties.containsKey( prop );
 	}
 
 	@Override
-	public void setURI( URI uri ) {
-		setValue( RDF.SUBJECT, uri );
+	public void setIRI( IRI IRI ) {
+		setValue( RDF.SUBJECT, IRI );
 	}
 
 	@Override
-	public URI getURI() {
-		return URI.class.cast( getValue( RDF.SUBJECT ) );
+	public IRI getIRI() {
+		return IRI.class.cast( getValue( RDF.SUBJECT ) );
 	}
 
 	@Override
-	public URI getType() {
-		return URI.class.cast( getValue( RDF.TYPE ) );
+	public IRI getType() {
+		return IRI.class.cast( getValue( RDF.TYPE ) );
 	}
 
 	@Override
-	public void setType( URI type ) {
+	public void setType( IRI type ) {
 		setValue( RDF.TYPE, type );
 	}
 
 	@Override
-	public void removeProperty( URI prop ) {
+	public void removeProperty( IRI prop ) {
 		properties.remove( prop );
 	}
 
 	/**
 	 * Gets the datatype for the value that would be returned for the given
-	 * property from a call to {@link #getValue(org.openrdf.model.URI) }
+	 * property from a call to {@link #getValue(org.openrdf.model.IRI) }
 	 *
 	 * @param prop the property to find
-	 * @return the datatype, or {@link XMLSchema#ANYURI} if the value is a URI, or
+	 * @return the datatype, or {@link XMLSchema#ANYIRI} if the value is a IRI, or
 	 * {@link XMLSchema#ENTITY} for a BNode.
 	 */
-	public URI getDataType( URI prop ) {
+	public IRI getDataType( IRI prop ) {
 		if ( properties.containsKey( prop ) ) {
 			Value data = properties.get( prop );
 			return RDFDatatypeTools.getDatatype( data );
@@ -193,12 +193,12 @@ public abstract class AbstractGraphElement
 	}
 
 	@Override
-	public URI getGraphId() {
+	public IRI getGraphId() {
 		return graphid;
 	}
 
 	@Override
-	public void setGraphId( URI graphid ) {
+	public void setGraphId( IRI graphid ) {
 		this.graphid = graphid;
 	}
 
@@ -224,7 +224,7 @@ public abstract class AbstractGraphElement
 
 	@Override
 	public String toString() {
-		return getURI() + "; " + getType().getLocalName() + "; " + getLabel();
+		return getIRI() + "; " + getType().getLocalName() + "; " + getLabel();
 	}
 
 	@Override
@@ -238,13 +238,13 @@ public abstract class AbstractGraphElement
 	 * @param age
 	 * @return
 	 */
-	public static List<URI> getCountablePropertyKeys( GraphElement age ) {
-		List<URI> keys = new ArrayList<>();
-		for ( Map.Entry<URI, Value> en : age.getValues().entrySet() ) {
+	public static List<IRI> getCountablePropertyKeys( GraphElement age ) {
+		List<IRI> keys = new ArrayList<>();
+		for ( Map.Entry<IRI, Value> en : age.getValues().entrySet() ) {
 			Value val = en.getValue();
 			if ( val instanceof Literal ) {
 				Literal lit = Literal.class.cast( val );
-				URI dt = lit.getDatatype();
+				IRI dt = lit.getDatatype();
 				if ( COUNTABLES.contains( dt ) ) {
 					keys.add( en.getKey() );
 				}

@@ -29,7 +29,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairRenderer;
-import com.ostrichemulators.semtool.ui.components.UriComboBox.UriLabelPair;
+import com.ostrichemulators.semtool.ui.components.IriComboBox.IriLabelPair;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.ui.actions.ExportLoadingSheetAction;
 import com.ostrichemulators.semtool.util.DIHelper;
@@ -128,15 +128,15 @@ public class ExportSpecificNodesPanel extends JPanel {
 		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 
-		List<UriLabelPair> pairs = new ArrayList<>();
+		List<IriLabelPair> pairs = new ArrayList<>();
 		for ( Map.Entry<URI, String> en : labels.entrySet() ) {
-			pairs.add( new UriLabelPair( en.getKey(), en.getValue() ) );
+			pairs.add(new IriLabelPair( en.getKey(), en.getValue() ) );
 		}
 
 		Collections.sort( pairs );
 
 		List<URI> uris = new ArrayList<>();
-		for ( UriLabelPair lup : pairs ) {
+		for ( IriLabelPair lup : pairs ) {
 			uris.add( lup.getUri() );
 		}
 

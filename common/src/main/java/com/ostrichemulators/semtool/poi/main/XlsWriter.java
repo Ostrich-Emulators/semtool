@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import java.awt.Color;
 import java.io.File;
 import java.util.Arrays;
@@ -118,8 +118,8 @@ public class XlsWriter implements GraphWriter {
 			String[] row = new String[2 + props.size()];
 			CellStyle[] fmts = new CellStyle[2 + props.size()];
 
-			Map<String, URI> proplkp = nodes.getPropertiesAndDataTypes();
-			URI[] datatypes = new URI[2 + props.size()];
+			Map<String, IRI> proplkp = nodes.getPropertiesAndDataTypes();
+			IRI[] datatypes = new IRI[2 + props.size()];
 			int dtcol = 2;
 			for ( String propname : props ) {
 				if ( null != proplkp.get( propname ) ) {
@@ -157,8 +157,8 @@ public class XlsWriter implements GraphWriter {
 				row[0] = rels.getRelname();
 			}
 
-			Map<String, URI> proplkp = rels.getPropertiesAndDataTypes();
-			URI[] datatypes = new URI[3 + props.size()];
+			Map<String, IRI> proplkp = rels.getPropertiesAndDataTypes();
+			IRI[] datatypes = new IRI[3 + props.size()];
 			int dtcol = 3;
 			for ( String propname : props ) {
 				if ( null != proplkp.get( propname ) ) {
@@ -201,7 +201,7 @@ public class XlsWriter implements GraphWriter {
 	 *
 	 * @return true if the next call to {@link #addRow(
 	 * java.lang.String[], org.apache.poi.ss.usermodel.CellStyle[],
-	 * org.openrdf.model.URI[])} will be the first row of the tab
+	 * org.openrdf.model.IRI[])} will be the first row of the tab
 	 */
 	protected boolean nextRowIsFirstRowOfTab() {
 		if ( maxtabrows == rowcount ) {
@@ -279,7 +279,7 @@ public class XlsWriter implements GraphWriter {
 	 * @param datatypes
 	 * @return true, if a new tab is created, else false
 	 */
-	public boolean addRow( String[] values, CellStyle[] formatting, URI[] datatypes ) {
+	public boolean addRow( String[] values, CellStyle[] formatting, IRI[] datatypes ) {
 		boolean newtab = ( maxtabrows == rowcount );
 
 		if ( newtab ) {
@@ -329,7 +329,7 @@ public class XlsWriter implements GraphWriter {
 			rows[i] = ( null == values[i] ? null : values[i].toString() );
 		}
 
-		return addRow( rows, formatting, new URI[values.length] );
+		return addRow( rows, formatting, new IRI[values.length] );
 	}
 
 	/**
@@ -505,25 +505,25 @@ public class XlsWriter implements GraphWriter {
 		return nodeKey;
 	}
 
-	public static class NodeAndPropertyValues extends HashMap<URI, Value> {
+	public static class NodeAndPropertyValues extends HashMap<IRI, Value> {
 
-		private final URI subject;
-		private final URI object;
+		private final IRI subject;
+		private final IRI object;
 
-		public NodeAndPropertyValues( URI subj ) {
+		public NodeAndPropertyValues( IRI subj ) {
 			this( subj, null );
 		}
 
-		public NodeAndPropertyValues( URI subject, URI object ) {
+		public NodeAndPropertyValues( IRI subject, IRI object ) {
 			this.subject = subject;
 			this.object = object;
 		}
 
-		public URI getSubject() {
+		public IRI getSubject() {
 			return subject;
 		}
 
-		public URI getObject() {
+		public IRI getObject() {
 			return object;
 		}
 

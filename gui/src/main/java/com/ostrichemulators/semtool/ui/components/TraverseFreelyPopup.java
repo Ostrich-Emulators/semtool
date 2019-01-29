@@ -89,7 +89,7 @@ public class TraverseFreelyPopup extends JMenu {
 		}
 
 		for ( SEMOSSVertex thisVert : verts ) {
-			instances.add( thisVert.getURI() );
+			instances.add( thisVert.getIRI() );
 		}
 
 		addMouseListener( new MouseAdapter() {
@@ -129,7 +129,7 @@ public class TraverseFreelyPopup extends JMenu {
 							subjectStyle ) );
 		}
 		neighborTypes.removeAll( Arrays.asList( OWL.THING, RDFS.RESOURCE, SKOS.CONCEPT,
-				engine.getSchemaBuilder().getConceptUri().build() ) );
+				engine.getSchemaBuilder().getConceptIri().build() ) );
 
 		for ( URI nt : neighborTypes ) {
 			logger.debug( "neighbor type: " + nt );

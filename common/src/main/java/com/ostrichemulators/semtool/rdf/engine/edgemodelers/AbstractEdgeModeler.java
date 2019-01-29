@@ -231,7 +231,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				if ( !nodeAlreadyMade ) {
 					model.add( subtype, RDF.TYPE, OWL.CLASS );
 					model.add( subtype, RDFS.LABEL, vf.createLiteral( stype ) );
-					model.add( subtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+					model.add( subtype, RDFS.SUBCLASSOF, schema.getConceptIri().build() );
 				}
 			}
 
@@ -249,7 +249,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					if ( !nodeAlreadyMade ) {
 						model.add( objtype, RDF.TYPE, OWL.CLASS );
 						model.add( objtype, RDFS.LABEL, vf.createLiteral( otype ) );
-						model.add( objtype, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+						model.add( objtype, RDFS.SUBCLASSOF, schema.getConceptIri().build() );
 					}
 				}
 
@@ -266,7 +266,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					if ( !relationAlreadyMade ) {
 						model.add( reltype, RDFS.LABEL, vf.createLiteral( rellabel ) );
 						model.add( reltype, RDF.TYPE, OWL.OBJECTPROPERTY );
-						model.add( reltype, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+						model.add( reltype, RDFS.SUBPROPERTYOF, schema.getRelationIri().build() );
 					}
 				}
 

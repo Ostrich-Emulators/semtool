@@ -94,7 +94,7 @@ public class EngineUtil2 {
 
 					// re-add the metadata
 					for ( Map.Entry<URI, Value> en : metas.entrySet() ) {
-						conn.add( engine.getBaseUri(),
+						conn.add( engine.getBaseIri(),
 								URI.class.cast( EngineLoader.cleanValue( en.getKey(), vf ) ),
 								EngineLoader.cleanValue( en.getValue(), vf ) );
 					}
@@ -147,7 +147,7 @@ public class EngineUtil2 {
 			metas = new ImportMetadata();
 		}
 		else {
-			metas = new ImportMetadata( eng.getBaseUri(), eng.getSchemaBuilder(),
+			metas = new ImportMetadata( eng.getBaseIri(), eng.getSchemaBuilder(),
 					eng.getDataBuilder() );
 			metas.setNamespaces( eng.getNamespaces() );
 		}

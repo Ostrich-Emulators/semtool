@@ -80,9 +80,9 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 //			dbmodel.addElement( u );
 //		}
 		for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
-			dbrenderer.cache( eng.getBaseUri(), eng.getEngineName() );
-			if ( !dbs.contains( eng.getBaseUri() ) ) {
-				//dbmodel.addElement( eng.getBaseUri() );
+			dbrenderer.cache( eng.getBaseIri(), eng.getEngineName() );
+			if ( !dbs.contains( eng.getBaseIri() ) ) {
+				//dbmodel.addElement( eng.getBaseIri() );
 			}
 		}
 

@@ -92,7 +92,7 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 		updateLabels( properties );
 
 		StringBuilder html = new StringBuilder();
-		html.append( "<html><!--" ).append( vertex.getURI() ).append( "-->" );
+		html.append( "<html><!--" ).append( vertex.getIRI() ).append( "-->" );
 		boolean first = true;
 
 		List<URI> orderedProps = new ArrayList<>( properties.keySet() );

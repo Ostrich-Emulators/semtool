@@ -90,7 +90,7 @@ public class RDFDatatypeToolsTest {
 
 	@Test
 	public void testIsValidUriChars() {
-		assertFalse( RDFDatatypeTools.isValidUriChars( "http://www.w3.org/2001/   XMLSchema#float" ) );
+		assertFalse( RDFDatatypeTools.isValidIriChars( "http://www.w3.org/2001/   XMLSchema#float" ) );
 	}
 
 	@Test

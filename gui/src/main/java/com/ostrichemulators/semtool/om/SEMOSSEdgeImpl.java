@@ -20,7 +20,7 @@
 package com.ostrichemulators.semtool.om;
 
 import java.util.Map;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 
 /**
@@ -30,29 +30,29 @@ import org.openrdf.model.Value;
  */
 public class SEMOSSEdgeImpl extends AbstractGraphElement implements SEMOSSEdge {
 
-	private URI specifictype;
+	private IRI specifictype;
 
-	public SEMOSSEdgeImpl( URI _uri ) {
+	public SEMOSSEdgeImpl( IRI _uri ) {
 		super( _uri, null, _uri.getLocalName() );
 	}
 
 	@Override
-	public void setSpecificType( URI st ) {
+	public void setSpecificType( IRI st ) {
 		specifictype = st;
 	}
 
 	@Override
-	public URI getSpecificType() {
+	public IRI getSpecificType() {
 		return specifictype;
 	}
 
 	@Override
 	public SEMOSSEdgeImpl duplicate() {
-		SEMOSSEdgeImpl newone = new SEMOSSEdgeImpl( getURI() );
+		SEMOSSEdgeImpl newone = new SEMOSSEdgeImpl( getIRI() );
 		newone.setLabel( getLabel() );
 		newone.setSpecificType( specifictype );
 
-		for ( Map.Entry<URI, Value> en : getValues().entrySet() ) {
+		for ( Map.Entry<IRI, Value> en : getValues().entrySet() ) {
 			newone.setValue( en.getKey(), en.getValue() );
 		}
 

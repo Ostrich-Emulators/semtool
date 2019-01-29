@@ -395,7 +395,7 @@ public class CLI {
 						for ( Map.Entry<URI, String> en : metadatas.entrySet() ) {
 							Value val = getRDFStringValue( en.getValue(),
 									engine.getNamespaces(), vf );
-							conn.add( engine.getBaseUri(), en.getKey(), val );
+							conn.add( engine.getBaseIri(), en.getKey(), val );
 						}
 					}
 				} );

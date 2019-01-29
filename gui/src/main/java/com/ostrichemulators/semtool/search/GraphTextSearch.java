@@ -58,9 +58,10 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.SimpleValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -71,15 +72,16 @@ public class GraphTextSearch {
 
 	private static final Logger log = Logger.getLogger( GraphTextSearch.class );
 	private static final String ALL_TEXT = "alltext";
-	private static final String URI_FIELD = "URI";
+	private static final String IRI_FIELD = "IRI";
 
 	private final StandardAnalyzer analyzer = new StandardAnalyzer();
 	private final Directory ramdir = new RAMDirectory();
 	private DirectoryReader reader;
 	private IndexSearcher searcher;
-	private final Map<URI, GraphElement> vertStore = new HashMap<>();
+	private final Map<IRI, GraphElement> vertStore = new HashMap<>();
 	private boolean indexing = false;
-	private final Map<URI, Float> boosts = new HashMap<>();
+	private final Map<IRI, Float> boosts = new HashMap<>();
+  private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
 	/**
 	 * Creates a new index using {@link RDFS#LABEL}, {@link RDF#TYPE}, and
@@ -91,7 +93,7 @@ public class GraphTextSearch {
 		boosts.put( DCTERMS.DESCRIPTION, 2f );
 	}
 
-	public GraphTextSearch( Map<URI, Float> boosts ) {
+	public GraphTextSearch( Map<IRI, Float> boosts ) {
 		this.boosts.putAll( boosts );
 	}
 
@@ -163,10 +165,10 @@ public class GraphTextSearch {
 
 			for ( ScoreDoc sd : hits.scoreDocs ) {
 				Document doc = searcher.doc( sd.doc );
-				URI uri = new URIImpl( doc.get( URI_FIELD ) );
+				IRI IRI = vf.createIRI( doc.get( IRI_FIELD ) );
 
-				if ( vertStore.containsKey( uri ) ) {
-					GraphElement v = vertStore.get( uri );
+				if ( vertStore.containsKey( IRI ) ) {
+					GraphElement v = vertStore.get( IRI );
 					if ( v.isNode() ) {
 						nodes.add( SEMOSSVertex.class.cast( v ) );
 					}
@@ -206,7 +208,7 @@ public class GraphTextSearch {
 
 		// pre-fetch the stuff we know we're going to need
 		RetrievingLabelCache rlc = new RetrievingLabelCache( engine );
-		Set<URI> needLabels = new HashSet<>();
+		Set<IRI> needLabels = new HashSet<>();
 		for ( SEMOSSEdge e : graph.getEdges() ) {
 			needLabels.addAll( e.getPropertyKeys() );
 		}
@@ -218,12 +220,12 @@ public class GraphTextSearch {
 		// now we can run the indexer
 		RepositoryIndexer ri = new RepositoryIndexer( rlc );
 		for ( SEMOSSEdge e : graph.getEdges() ) {
-			vertStore.put( e.getURI(), e );
-			ri.handleProperties( e.getURI(), e.getValues() );
+			vertStore.put( e.getIRI(), e );
+			ri.handleProperties( e.getIRI(), e.getValues() );
 		}
 		for ( SEMOSSVertex v : graph.getVertices() ) {
-			vertStore.put( v.getURI(), v );
-			ri.handleProperties( v.getURI(), v.getValues() );
+			vertStore.put( v.getIRI(), v );
+			ri.handleProperties( v.getIRI(), v.getValues() );
 		}
 
 		ri.finish();
@@ -254,8 +256,8 @@ public class GraphTextSearch {
 	private class RepositoryIndexer {
 
 		private IndexWriter indexer;
-		private final Map<URI, Document> doccache = new HashMap<>();
-		private final Map<URI, StringBuilder> textcache = new HashMap<>();
+		private final Map<IRI, Document> doccache = new HashMap<>();
+		private final Map<IRI, StringBuilder> textcache = new HashMap<>();
 		private final RetrievingLabelCache labels;
 
 		public RepositoryIndexer( RetrievingLabelCache rlc ) {
@@ -272,7 +274,7 @@ public class GraphTextSearch {
 
 		public void finish() {
 			try {
-				for ( Map.Entry<URI, Document> en : doccache.entrySet() ) {
+				for ( Map.Entry<IRI, Document> en : doccache.entrySet() ) {
 					String sb = textcache.get( en.getKey() ).toString().trim();
 					if ( !sb.isEmpty() ) {
 						en.getValue().add( new TextField( ALL_TEXT, sb, Field.Store.YES ) );
@@ -302,14 +304,14 @@ public class GraphTextSearch {
 			}
 		}
 
-		public void handleProperties( URI sub, Map<URI, Value> props ) {
-			for ( Map.Entry<URI, Value> en : props.entrySet() ) {
-				URI pred = en.getKey();
+		public void handleProperties( IRI sub, Map<IRI, Value> props ) {
+			for ( Map.Entry<IRI, Value> en : props.entrySet() ) {
+				IRI pred = en.getKey();
 
 				if ( !doccache.containsKey( sub ) ) {
 					Document doc = new Document();
 					doccache.put( sub, doc );
-					doc.add( new StringField( "URI", sub.stringValue(), Field.Store.YES ) );
+					doc.add( new StringField( "IRI", sub.stringValue(), Field.Store.YES ) );
 					textcache.put( sub, new StringBuilder() );
 				}
 

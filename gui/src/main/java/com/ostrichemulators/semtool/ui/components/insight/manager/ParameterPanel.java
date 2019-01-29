@@ -9,7 +9,7 @@ import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.Parameter;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManager;
 import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
-import com.ostrichemulators.semtool.ui.components.UriComboBox;
+import com.ostrichemulators.semtool.ui.components.IriComboBox;
 import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairRenderer;
 import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.Utility;
@@ -197,7 +197,7 @@ public class ParameterPanel extends DataPanel<Parameter> {
 
 		labels.put( Constants.ANYNODE, "<Any Concept>" );
 
-		JComboBox<URI> combo = new UriComboBox( uris );
+		JComboBox<URI> combo = new IriComboBox( uris );
 		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
 		renderer.cache( labels );
 		combo.setRenderer( renderer );
@@ -209,7 +209,7 @@ public class ParameterPanel extends DataPanel<Parameter> {
 			URI type = combo.getItemAt( combo.getSelectedIndex() );
 			if ( Constants.ANYNODE.equals( type ) ) {
 				parameterQuery.setText( "SELECT ?concept\nWHERE {\n  ?concept rdfs:subClassOf <"
-						+ getEngine().getSchemaBuilder().getConceptUri().build() + ">\n}" );
+						+ getEngine().getSchemaBuilder().getConceptIri().build() + ">\n}" );
 			}
 			else if ( parameters.containsKey( type ) ) {
 				Parameter p = parameters.get( type );

@@ -574,7 +574,7 @@ public class EngineUtil implements Runnable {
 		try {
 			final ValueFactory vf = new ValueFactoryImpl();
 			final Map<URI, Value> oldmetas = from.query( new MetadataQuery() );
-			final URI newbase = to.getBaseUri();
+			final URI newbase = to.getBaseIri();
 			Date now = new Date();
 			Properties props = GuiUtility.getBuildProperties();
 			oldmetas.put( SEMCORE.SOFTWARE_AGENT,

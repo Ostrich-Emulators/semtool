@@ -241,7 +241,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 			OneVarListQueryAdapter<URI> q
 					= OneVarListQueryAdapter.getUriList( "SELECT ?o { ?base ?subset ?o }",
 							"o" );
-			q.bind( "base", engine.getBaseUri() );
+			q.bind( "base", engine.getBaseIri() );
 			q.bind( "subset", MetadataConstants.VOID_SUBSET );
 			List<URI> subsetUris = engine.query( q );
 			for ( URI u : subsetUris ) {

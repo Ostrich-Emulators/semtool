@@ -133,7 +133,7 @@ public class EngineUtil2Test {
 
 		String expected = "TEST LABEL";
 		StatementAddingExecutor sae = new StatementAddingExecutor();
-		sae.addStatement( new StatementImpl( eng.getBaseUri(), RDFS.LABEL,
+		sae.addStatement( new StatementImpl( eng.getBaseIri(), RDFS.LABEL,
 				new LiteralImpl( expected ) ) );
 
 		eng.execute( sae );
@@ -149,7 +149,7 @@ public class EngineUtil2Test {
 		assertEquals( ReificationStyle.LEGACY, EngineUtil2.getReificationStyle( null ) );
 
 		StatementAddingExecutor sae = new StatementAddingExecutor();
-		sae.addStatement( new StatementImpl( eng.getBaseUri(), SEMTOOL.ReificationModel,
+		sae.addStatement( new StatementImpl( eng.getBaseIri(), SEMTOOL.ReificationModel,
 				SEMTOOL.W3C_Reification ) );
 
 		eng.execute( sae );

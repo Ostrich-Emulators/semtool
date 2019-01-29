@@ -62,7 +62,7 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.DCTERMS;
@@ -73,6 +73,7 @@ import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.BindingSet;
 import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
@@ -102,11 +103,11 @@ public class Utility {
 		DEFAULTNAMESPACES.put( SEMONTO.PREFIX, SEMONTO.NAMESPACE );
 	}
 
-	public static URI getUniqueUri() {
-		return BUILDER.uniqueUri();
+	public static IRI getUniqueIri() {
+		return BUILDER.uniqueIri();
 	}
 
-	public static URI makeInternalUri( String something ) {
+	public static IRI makeInternalIRI( String something ) {
 		return BUILDER.build( something );
 	}
 
@@ -131,15 +132,15 @@ public class Utility {
 	 * consistent iteration pattern
 	 *
 	 * @param <X>
-	 * @param urilabels a mapping of URIs to their labels. Say, the results of {@link #getInstanceLabels(java.util.Collection,
+	 * @param IRIlabels a mapping of IRIs to their labels. Say, the results of {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) }
 	 *
 	 * @return the results
 	 */
-	public static <X extends Resource> Map<X, String> sortUrisByLabel( Map<X, String> urilabels ) {
+	public static <X extends Resource> Map<X, String> sortIrisByLabel( Map<X, String> IRIlabels ) {
 		List<ResourceLabelPair> pairs = new ArrayList<>();
 
-		for ( Map.Entry<X, String> p : urilabels.entrySet() ) {
+		for ( Map.Entry<X, String> p : IRIlabels.entrySet() ) {
 			Resource r = p.getKey();
 
 			pairs.add( new ResourceLabelPair( r, p.getValue() ) );
@@ -400,7 +401,7 @@ public class Utility {
 	 * @param collection
 	 * @return
 	 */
-	public static String implode( Collection<URI> collection ) {
+	public static String implode( Collection<IRI> collection ) {
 		return implode( collection, "<", ">", " " );
 	}
 
@@ -432,36 +433,36 @@ public class Utility {
 
 	/**
 	 * A convenience function to {@link #getInstanceLabels(java.util.Collection,
-	 * gov.va.semoss.rdf.engine.api.IEngine) } when you only have a single URI. If
-	 * you have more than one URI, {@link #getInstanceLabels(java.util.Collection,
+	 * gov.va.semoss.rdf.engine.api.IEngine) } when you only have a single IRI. If
+	 * you have more than one IRI, {@link #getInstanceLabels(java.util.Collection,
 	 * gov.va.semoss.rdf.engine.api.IEngine) } is much more performant.
 	 *
 	 * @param <X>
 	 * @param eng where to get the label from
-	 * @param uri the uri we need a label for
+	 * @param IRI the IRI we need a label for
 	 *
 	 * @return the label, or the localname if no label is in the engine
 	 */
-	public static <X extends Resource> String getInstanceLabel( X uri, IEngine eng ) {
-		return getInstanceLabels( Arrays.asList( uri ), eng ).get( uri );
+	public static <X extends Resource> String getInstanceLabel( X IRI, IEngine eng ) {
+		return getInstanceLabels( Arrays.asList( IRI ), eng ).get( IRI );
 	}
 
 	/**
-	 * Gets labels for the given uris from the given engine. If the engine doesn't
+	 * Gets labels for the given IRIs from the given engine. If the engine doesn't
 	 * contain a {@link RDFS#LABEL} element, just use a
 	 * {@link URLDecoder#decode(java.lang.String, java.lang.String) URLDecoded}
 	 * version of the local name
 	 *
 	 * @param <X>
-	 * @param uris the URIs to retrieve the labels from
+	 * @param IRIs the IRIs to retrieve the labels from
 	 * @param eng the engine to search for labels
 	 *
-	 * @return a map of URI=&gt;label
+	 * @return a map of IRI=&gt;label
 	 */
 	public static <X extends Resource> Map<X, String>
-			getInstanceLabels( final Collection<X> uris, IEngine eng ) {
+			getInstanceLabels( final Collection<X> IRIs, IEngine eng ) {
 
-		if ( null == uris || uris.isEmpty() ) {
+		if ( null == IRIs || IRIs.isEmpty() ) {
 			return new HashMap<>();
 		}
 
@@ -470,13 +471,13 @@ public class Utility {
 		StringBuilder sb
 				= new StringBuilder( "SELECT ?s ?label WHERE { ?s rdfs:label ?label }" );
 		sb.append( " VALUES ?s {" );
-		for ( Resource uri : uris ) {
-			if ( null == uri ) {
+		for ( Resource IRI : IRIs ) {
+			if ( null == IRI ) {
 				log.warn( "trying to find the label of a null Resource? (probably a bug)" );
 			}
 			else {
-				if ( !( uri instanceof BNode ) ) { // don't know how to query a BNode
-					sb.append( " <" ).append( uri.stringValue() ).append( ">\n" );
+				if ( !( IRI instanceof BNode ) ) { // don't know how to query a BNode
+					sb.append( " <" ).append( IRI.stringValue() ).append( ">\n" );
 				}
 			}
 		}
@@ -498,12 +499,12 @@ public class Utility {
 			eng.queryNoEx( vqa );
 		}
 
-		// add any URIs that don't have a label, but were in the argument collection
-		Set<Resource> todo = new HashSet<>( uris );
+		// add any IRIs that don't have a label, but were in the argument collection
+		Set<Resource> todo = new HashSet<>( IRIs );
 		todo.removeAll( retHash.keySet() );
 		for ( Resource u : todo ) {
-			if ( u instanceof URI ) {
-				retHash.put( u, URI.class.cast( u ).getLocalName() );
+			if ( u instanceof IRI ) {
+				retHash.put( u, IRI.class.cast( u ).getLocalName() );
 			}
 			else if ( u instanceof BNode ) {
 				retHash.put( u, BNode.class.cast( u ).getID() );
@@ -539,7 +540,7 @@ public class Utility {
 			}
 			tw.endRDF();
 		}
-		catch ( Exception e ) {
+		catch ( RDFHandlerException e ) {
 			log.error( e, e );
 		}
 	}

@@ -100,7 +100,7 @@ public class DBToLoadingSheetExporterTest {
 			public void exec( RepositoryConnection conn ) throws RepositoryException {
 				ValueFactory vf = conn.getValueFactory();
 				List<Statement> owls = new ArrayList<>();
-				URI concept = eng.getSchemaBuilder().getConceptUri().build();
+				URI concept = eng.getSchemaBuilder().getConceptIri().build();
 				owls.add( new StatementImpl( vf.createURI( "http://semoss.org/ontologies/Concept/DataElement" ),
 						RDFS.SUBCLASSOF, concept ) );
 				owls.add( new StatementImpl( vf.createURI( "http://semoss.org/ontologies/Concept/InterfaceControlDocument" ),

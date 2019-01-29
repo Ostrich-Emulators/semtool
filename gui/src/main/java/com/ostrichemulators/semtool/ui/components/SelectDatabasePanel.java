@@ -101,7 +101,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
 
 					InsightManager localim = DIHelper.getInstance().
-							getMetadataStore().getLocalInsightManager( eng.getBaseUri() );
+							getMetadataStore().getLocalInsightManager( eng.getBaseIri() );
 					if ( !localim.isEmpty() ) {
 						persps.addAll( localim.getPerspectives() );
 						for( Perspective p : localim.getPerspectives() ){
@@ -134,7 +134,7 @@ public class SelectDatabasePanel extends javax.swing.JPanel {
 					List<Perspective> persps = new ArrayList<>( im.getPerspectives() );
 
 					InsightManager localim = DIHelper.getInstance().
-							getMetadataStore().getLocalInsightManager( eng.getBaseUri() );
+							getMetadataStore().getLocalInsightManager( eng.getBaseIri() );
 					if ( !localim.isEmpty() ) {
 						persps.addAll( localim.getPerspectives() );
 						for( Perspective p : localim.getPerspectives() ){

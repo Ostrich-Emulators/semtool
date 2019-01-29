@@ -82,7 +82,7 @@ public class StatementPersistenceUtility {
 
 	public static void deleteNodeOrEdgeProperty( IEngine engine, GraphElement nodeOrEdge,
 			URI name, Value value ) {
-		Value subject = nodeOrEdge.getURI();
+		Value subject = nodeOrEdge.getIRI();
 		if ( !( subject instanceof Resource ) ) {
 			log.warn( "Trying to delete property with name: " + name + " and value: " + value
 					+ ", but subject: " + subject + " is not an instanceof Resource." );
@@ -94,7 +94,7 @@ public class StatementPersistenceUtility {
 
 	public static void saveNodeOrEdgeProperty( IEngine engine, GraphElement nodeOrEdge,
 			URI name, Value value ) {
-		Value subject = nodeOrEdge.getURI();
+		Value subject = nodeOrEdge.getIRI();
 		if ( !( subject instanceof Resource ) ) {
 			log.warn( "Trying to save property with name: " + name + " and value: "
 					+ value + ", but subject: " + subject + " is not an instanceof Resource." );

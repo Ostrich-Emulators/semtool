@@ -9,7 +9,8 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 
 /**
@@ -24,25 +25,25 @@ public interface GraphElement {
 
 	public void setLabel( String name );
 
-	public URI getType();
+	public IRI getType();
 
-	public URI getURI();
+	public IRI getIRI();
 
-	public Value getValue( URI prop );
+	public Value getValue( IRI prop );
 
-	public Map<URI, Value> getValues();
+	public Map<IRI, Value> getValues();
 
-	public Set<URI> getPropertyKeys();
+	public Set<IRI> getPropertyKeys();
 
-	public boolean hasProperty( URI prop );
+	public boolean hasProperty( IRI prop );
 
-	public void removeProperty( URI prop );
+	public void removeProperty( IRI prop );
 
-	public void setType( URI type );
+	public void setType( IRI type );
 
-	public void setURI( URI uri );
+	public void setIRI( IRI IRI );
 
-	public void setValue( URI prop, Value val );
+	public void setValue( IRI prop, Value val );
 
 	/**
 	 * Duplicates this graph element
@@ -60,14 +61,14 @@ public interface GraphElement {
 	 *
 	 * @param graphid
 	 */
-	public void setGraphId( URI graphid );
+	public void setGraphId( IRI graphid );
 
 	/**
 	 * Gets the ID for the graphing system.
 	 *
 	 * @return
 	 */
-	public URI getGraphId();
+	public IRI getGraphId();
 
 	public void addPropertyChangeListener( PropertyChangeListener pcl );
 

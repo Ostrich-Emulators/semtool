@@ -109,7 +109,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public void set( GraphElement ge, Color color, NamedShape shape ) {
-		set( ge.getURI(), color, shape );
+		set( ge.getIRI(), color, shape );
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public void set( GraphElement ge, URL imageloc ) {
-		set( ge.getURI(), imageloc );
+		set( ge.getIRI(), imageloc );
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public NamedShape getShape( GraphElement ge ) {
-		return getShape( ge.getType(), ge.getURI() );
+		return getShape( ge.getType(), ge.getIRI() );
 	}
 
 	@Override
@@ -146,8 +146,8 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 
 	@Override
 	public Color getColor( GraphElement ge ) {
-		return ( colorlkp.containsKey( ge.getURI() )
-				? getColor( ge.getURI() )
+		return ( colorlkp.containsKey( ge.getIRI() )
+				? getColor( ge.getIRI() )
 				: getColor( ge.getType() ) );
 	}
 
@@ -192,7 +192,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	public void set( Collection<GraphElement> ges, Color color, NamedShape shape ) {
 		List<URI> saves = new ArrayList<>();
 		for ( GraphElement ge : ges ) {
-			URI u = ge.getURI();
+			URI u = ge.getIRI();
 			saves.add( u );
 			shapelkp.put( u, shape );
 			colorlkp.put( u, color );

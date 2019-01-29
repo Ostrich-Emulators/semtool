@@ -64,8 +64,8 @@ public class InMemorySesameEngineTest {
 		rc.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
 				new LiteralImpl( "label" ) ) );
 
-		rc.remove( eng.getBaseUri(), MetadataConstants.DCT_MODIFIED, null );
-		rc.add( eng.getBaseUri(), MetadataConstants.DCT_MODIFIED,
+		rc.remove( eng.getBaseIri(), MetadataConstants.DCT_MODIFIED, null );
+		rc.add( eng.getBaseIri(), MetadataConstants.DCT_MODIFIED,
 				rc.getValueFactory().createLiteral( new Date() ) );
 
 		rc.commit();
@@ -91,7 +91,7 @@ public class InMemorySesameEngineTest {
 		assertEquals( 94, eng.getRawConnection().size() );
 
 		List<Statement> stmts = Iterations.asList( eng.getRawConnection().
-				getStatements( eng.getBaseUri(), MetadataConstants.DCT_MODIFIED,
+				getStatements( eng.getBaseIri(), MetadataConstants.DCT_MODIFIED,
 						null, false ) );
 		Literal val = Literal.class.cast( stmts.get( 0 ).getObject() );
 		Date upd = getDate( val.calendarValue() );
@@ -104,7 +104,7 @@ public class InMemorySesameEngineTest {
 		repo.initialize();
 		RepositoryConnection rc = repo.getConnection();
 		
-		URI base = Utility.getUniqueUri();
+		URI base = Utility.getUniqueIri();
 		Date now = new Date();
 		rc.add( new StatementImpl( base, MetadataConstants.DCT_MODIFIED,
 				rc.getValueFactory().createLiteral( now ) ) );
@@ -112,7 +112,7 @@ public class InMemorySesameEngineTest {
 		AbstractSesameEngine.updateLastModifiedDate( rc, null );
 
 		List<Statement> stmts = Iterations.asList( eng.getRawConnection().
-				getStatements( eng.getBaseUri(), MetadataConstants.DCT_MODIFIED,
+				getStatements( eng.getBaseIri(), MetadataConstants.DCT_MODIFIED,
 						null, false ) );
 		Literal val = Literal.class.cast( stmts.get( 0 ).getObject() );
 		Date upd = getDate( val.calendarValue() );

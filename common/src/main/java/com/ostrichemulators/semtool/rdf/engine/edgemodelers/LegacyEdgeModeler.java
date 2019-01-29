@@ -82,11 +82,11 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			String rellocalname;
 			if ( alreadyMadeRel ) {
 				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
-				connector = metas.getDataBuilder().getRelationUri().build( rellocalname );
+				connector = metas.getDataBuilder().getRelationIri().build( rellocalname );
 			}
 			else {
 				UriBuilder typebuilder
-						= metas.getDataBuilder().getRelationUri().add( sheet.getRelname() );
+						= metas.getDataBuilder().getRelationIri().add( sheet.getRelname() );
 				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
 				connector = typebuilder.add( rellocalname ).build();
 			}
@@ -192,7 +192,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			}
 			else {
 				if ( metas.isAutocreateMetamodel() ) {
-					UriBuilder nodebuilder = metas.getDataBuilder().getConceptUri();
+					UriBuilder nodebuilder = metas.getDataBuilder().getConceptIri();
 					if ( !typename.contains( ":" ) ) {
 						nodebuilder.add( typename );
 					}
@@ -237,7 +237,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				if ( save && !nodeAlreadyMade ) {
 					model.add( uri, RDF.TYPE, OWL.CLASS );
 					model.add( uri, RDFS.LABEL, vf.createLiteral( stype ) );
-					model.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+					model.add( uri, RDFS.SUBCLASSOF, schema.getConceptIri().build() );
 				}
 			}
 
@@ -255,7 +255,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 					if ( save && !nodeAlreadyMade ) {
 						model.add( uri, RDF.TYPE, OWL.CLASS );
 						model.add( uri, RDFS.LABEL, vf.createLiteral( otype ) );
-						model.add( uri, RDFS.SUBCLASSOF, schema.getConceptUri().build() );
+						model.add( uri, RDFS.SUBCLASSOF, schema.getConceptIri().build() );
 					}
 				}
 
@@ -266,8 +266,8 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 					URI ret = ( relationAlreadyMade
 							? getUriFromRawString( rellabel, namespaces )
-							: schema.getRelationUri( rellabel ) );
-					URI relation = schema.getRelationUri().build();
+							: schema.getRelationIri( rellabel ) );
+					URI relation = schema.getRelationIri().build();
 
 					cacheRelationClass( ret, rellabel );
 
@@ -279,9 +279,9 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 						}
 						// myrc.add( suri, ret, schemaNodes.get( ocachekey ) );
 
-						model.add( schema.getConceptUri().build(), RDF.TYPE, RDFS.CLASS );
+						model.add( schema.getConceptIri().build(), RDF.TYPE, RDFS.CLASS );
 
-						model.add( schema.getContainsUri(), RDFS.SUBPROPERTYOF, schema.getContainsUri() );
+						model.add( schema.getContainsIri(), RDFS.SUBPROPERTYOF, schema.getContainsIri() );
 						model.add( relation, RDF.TYPE, RDF.PROPERTY );
 					}
 				}
@@ -309,7 +309,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 						predicate = getUriFromRawString( propname, namespaces );
 					}
 					else {
-						// UriBuilder bb = schema.getRelationUri().add( Constants.CONTAINS );
+						// UriBuilder bb = schema.getRelationIri().add( Constants.CONTAINS );
 						predicate = schema.build( propname );
 					}
 					cachePropertyClass( predicate, propname );
@@ -318,11 +318,11 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 				if ( save && !alreadyMadeProp ) {
 					model.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );
-					// myrc.add( predicate, RDF.TYPE, schema.getContainsUri() );
-					model.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationUri().build() );
+					// myrc.add( predicate, RDF.TYPE, schema.getContainsIri() );
+					model.add( predicate, RDFS.SUBPROPERTYOF, schema.getRelationIri().build() );
 
 					if ( !metas.isLegacyMode() ) {
-						model.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsUri() );
+						model.add( predicate, RDFS.SUBPROPERTYOF, schema.getContainsIri() );
 					}
 				}
 			}

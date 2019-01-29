@@ -7,8 +7,8 @@ package com.ostrichemulators.semtool.rdf.engine.api;
 
 import java.util.Date;
 import java.util.Map;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.Operation;
@@ -25,14 +25,14 @@ public interface Bindable {
 	 *
 	 * @param ctx
 	 */
-	public void setContext( URI ctx );
+	public void setContext( IRI ctx );
 
 	/**
 	 * Gets the context for this Bindable, if set
 	 *
 	 * @return
 	 */
-	public URI getContext();
+	public IRI getContext();
 
 	public void setSparql( String sparql );
 

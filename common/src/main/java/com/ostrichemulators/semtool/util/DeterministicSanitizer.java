@@ -20,13 +20,13 @@ public class DeterministicSanitizer implements UriSanitizer {
 
 	@Override
 	public String sanitize( String raw ) {
-		if ( RDFDatatypeTools.isValidUriChars( raw ) ) {
+		if ( RDFDatatypeTools.isValidIriChars( raw ) ) {
 			return raw;
 		}
 
 		// Attempt a simple sanitizing:
 		String rawWithUnderscores = raw.trim().replaceAll( " ", "_" );
-		if ( RDFDatatypeTools.isValidUriChars( rawWithUnderscores ) ) {
+		if ( RDFDatatypeTools.isValidIriChars( rawWithUnderscores ) ) {
 			return rawWithUnderscores;
 		}
 

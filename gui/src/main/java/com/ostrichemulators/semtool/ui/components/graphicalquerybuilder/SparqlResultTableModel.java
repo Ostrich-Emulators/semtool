@@ -163,7 +163,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 
 		@Override
 		public int compareTo( RowLocator o ) {
-			int diff = base.getURI().stringValue().compareTo( o.base.getURI().stringValue() );
+			int diff = base.getIRI().stringValue().compareTo( o.base.getIRI().stringValue() );
 			if ( 0 == diff ) {
 				diff = property.stringValue().compareTo( o.property.stringValue() );
 			}

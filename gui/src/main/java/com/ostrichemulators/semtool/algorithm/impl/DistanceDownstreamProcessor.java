@@ -86,9 +86,9 @@ public class DistanceDownstreamProcessor extends AbstractAction {
 			while ( !q.isEmpty() ) {
 				SEMOSSVertex child = q.poll();
 				Value row[] = {
-					root.getURI(),
+					root.getIRI(),
 					vf.createLiteral( tree.getDepth( child ) ),
-					child.getURI(),
+					child.getIRI(),
 					child.getType()
 				};
 				rows.add( row );

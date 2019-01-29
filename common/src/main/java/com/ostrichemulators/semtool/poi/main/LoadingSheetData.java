@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -41,7 +41,7 @@ public class LoadingSheetData {
 	private final Set<String> propErrs = new HashSet<>();
 
 	// property name => datatype lookup
-	private final Map<String, URI> propcache = new LinkedHashMap<>();
+	private final Map<String, IRI> propcache = new LinkedHashMap<>();
 	private final Set<String> proplink = new HashSet<>();
 	private final Set<String> napcache = new HashSet<>();
 	private final List<LoadingNodeAndPropertyValues> data = new ArrayList<>();
@@ -51,7 +51,7 @@ public class LoadingSheetData {
 		this( tabtitle, type, new HashMap<>() );
 	}
 
-	protected LoadingSheetData( String tabtitle, String type, Map<String, URI> props ) {
+	protected LoadingSheetData( String tabtitle, String type, Map<String, IRI> props ) {
 		this( tabtitle, type, null, null, props );
 	}
 
@@ -61,7 +61,7 @@ public class LoadingSheetData {
 	}
 
 	protected LoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Map<String, URI> props ) {
+			String relname, Map<String, IRI> props ) {
 		subjectType = sType;
 		tabname = tabtitle;
 		this.objectType = oType;
@@ -163,12 +163,12 @@ public class LoadingSheetData {
 	}
 
 	/**
-	 * Sets the URI for a given property
+	 * Sets the IRI for a given property
 	 *
 	 * @param prop the property name
 	 * @param type the datatype it should be
 	 */
-	public void setPropertyDataType( String prop, URI type ) {
+	public void setPropertyDataType( String prop, IRI type ) {
 		propcache.put( prop, type );
 	}
 
@@ -177,7 +177,7 @@ public class LoadingSheetData {
 				? null != propcache.get( prop ) : false );
 	}
 
-	public URI getPropertyDataType( String prop ) {
+	public IRI getPropertyDataType( String prop ) {
 		return propcache.get( prop );
 	}
 
@@ -197,7 +197,7 @@ public class LoadingSheetData {
 		addProperty( prop, null );
 	}
 
-	public void addProperty( String prop, URI type ) {
+	public void addProperty( String prop, IRI type ) {
 		propcache.put( prop, type );
 	}
 
@@ -234,12 +234,12 @@ public class LoadingSheetData {
 		propcache.clear();
 	}
 
-	public void setProperties( Map<String, URI> props ) {
+	public void setProperties( Map<String, IRI> props ) {
 		propcache.clear();
 		propcache.putAll( props );
 	}
 
-	public Map<String, URI> getPropertiesAndDataTypes() {
+	public Map<String, IRI> getPropertiesAndDataTypes() {
 		return new HashMap<>( propcache );
 	}
 
@@ -366,13 +366,13 @@ public class LoadingSheetData {
 		// also, worry about propagating errors 
 		String[] oldkeys = propcache.keySet().toArray( new String[0] );
 		int col = 0;
-		Map<String, URI> newtypes = new LinkedHashMap<>();
+		Map<String, IRI> newtypes = new LinkedHashMap<>();
 		Set<String> newerrors = new HashSet<>();
 		ListIterator<String> propit = newheads.listIterator( firstPropCol );
 		while ( propit.hasNext() ) {
 			String newkey = propit.next();
 			String oldkey = oldkeys[col++];
-			URI proptype = propcache.get( oldkey );
+			IRI proptype = propcache.get( oldkey );
 			newtypes.put( newkey, proptype );
 			if ( this.propertyIsError( oldkey ) ) {
 				newerrors.add( newkey );
@@ -611,7 +611,7 @@ public class LoadingSheetData {
 			return vals;
 		}
 
-		public boolean hasProperty( URI needle, Map<String, String> namespaces ) {
+		public boolean hasProperty( IRI needle, Map<String, String> namespaces ) {
 			ValueFactory vf = new ValueFactoryImpl();
 			for ( String head : keySet() ) {
 				if ( head.contains( ":" ) ) {
@@ -620,8 +620,8 @@ public class LoadingSheetData {
 					String localname = head.substring( idx + 1 );
 
 					if ( namespaces.containsKey( headns ) ) {
-						URI uri = vf.createURI( namespaces.get( headns ), localname );
-						if ( uri.equals( needle ) ) {
+						IRI IRI = vf.createIRI( namespaces.get( headns ), localname );
+						if ( IRI.equals( needle ) ) {
 							return true;
 						}
 					}

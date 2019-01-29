@@ -290,7 +290,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 					@Override
 					public int compare( QueryEdge o1, QueryEdge o2 ) {
-						return o1.getURI().stringValue().compareTo( o2.getURI().stringValue() );
+						return o1.getIRI().stringValue().compareTo( o2.getIRI().stringValue() );
 					}
 				} );
 				return edges.indexOf( e );

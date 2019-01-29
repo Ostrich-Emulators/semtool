@@ -31,7 +31,7 @@ import org.openrdf.model.impl.URIImpl;
  * This class allows the user to pick parameters by combining a button and a
  * drop-down list.
  */
-public class ParamComboBox extends UriComboBox {
+public class ParamComboBox extends IriComboBox {
 
   private static final Logger log = Logger.getLogger( ParamComboBox.class );
   private String fieldName = null;

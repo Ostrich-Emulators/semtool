@@ -101,7 +101,7 @@ public class NodeDerivationToolsTest {
 	@Test
 	public void testGetInstancesNoPropsAvailable() throws Exception {
 		// this is just extra stuff that shouldn't be returned in the tests
-		final URI REL = OWLB.getRelationUri().build();
+		final URI REL = OWLB.getRelationIri().build();
 		final URI EXTRA = OWLB.build( "AnotherRelType" );
 		final URI EXTRAIMPL = DATAB.build( "AnotherRel" );
 

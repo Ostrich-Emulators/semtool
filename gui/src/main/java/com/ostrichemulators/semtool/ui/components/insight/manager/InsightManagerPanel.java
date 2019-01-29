@@ -404,7 +404,7 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 				}
 				else {
 					DIHelper.getInstance().getMetadataStore().
-							setLocalInsights( engine.getBaseUri(), wim );
+							setLocalInsights( engine.getBaseIri(), wim );
 					eu.notifyInsightsModified( engine, wim );
 				}
 			}
@@ -420,7 +420,7 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 
   private void privateImBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_privateImBtnActionPerformed
 		if ( null != engine ) {
-			setModel( DIHelper.getInstance().getMetadataStore().getLocalInsightManager( engine.getBaseUri() ) );
+			setModel( DIHelper.getInstance().getMetadataStore().getLocalInsightManager( engine.getBaseIri() ) );
 		}
   }//GEN-LAST:event_privateImBtnActionPerformed
 

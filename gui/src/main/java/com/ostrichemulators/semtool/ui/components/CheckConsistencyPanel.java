@@ -24,7 +24,7 @@ import javax.swing.JList;
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
 import org.apache.lucene.search.spell.StringDistance;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 
 /**
  *
@@ -33,10 +33,10 @@ import org.openrdf.model.URI;
 public final class CheckConsistencyPanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger(CheckConsistencyPanel.class );
-	private final List<URI> conceptmodellist = new ArrayList<>();
-	private final List<URI> relationmodellist = new ArrayList<>();
-	private final LabeledPairRenderer<URI> crenderer = LabeledPairRenderer.getUriPairRenderer();
-	private final LabeledPairRenderer<URI> rrenderer = LabeledPairRenderer.getUriPairRenderer();
+	private final List<IRI> conceptmodellist = new ArrayList<>();
+	private final List<IRI> relationmodellist = new ArrayList<>();
+	private final LabeledPairRenderer<IRI> crenderer = LabeledPairRenderer.getUriPairRenderer();
+	private final LabeledPairRenderer<IRI> rrenderer = LabeledPairRenderer.getUriPairRenderer();
 	private final DefaultComboBoxModel<StringDistance> distancemodel = new DefaultComboBoxModel<>();
 
 	public CheckConsistencyPanel() {
@@ -73,11 +73,11 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
 		crenderer.clearCache();
 		rrenderer.clearCache();
 
-		Map<URI, String> cs = MultiMap.lossyflip( checker.getCache( CacheType.CONCEPTCLASS ) );
-		cs = Utility.sortUrisByLabel( cs );
+		Map<IRI, String> cs = MultiMap.lossyflip( checker.getCache( CacheType.CONCEPTCLASS ) );
+		cs = Utility.sortIrisByLabel( cs );
 
-		Map<URI, String> rs = MultiMap.lossyflip( checker.getCache( CacheType.RELATIONCLASS ) );
-		rs = Utility.sortUrisByLabel( rs );
+		Map<IRI, String> rs = MultiMap.lossyflip( checker.getCache( CacheType.RELATIONCLASS ) );
+		rs = Utility.sortIrisByLabel( rs );
 		
 		checker.release();
 
@@ -107,11 +107,11 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
 		return checkAcross.isSelected();
 	}
 
-	public List<URI> getSelectedNodes() {
+	public List<IRI> getSelectedNodes() {
 		return conceptList.getSelectedValuesList();
 	}
 
-	public List<URI> getSelectedRelations() {
+	public List<IRI> getSelectedRelations() {
 		return relationList.getSelectedValuesList();
 	}
 
@@ -152,15 +152,15 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
     jPanel1 = new javax.swing.JPanel();
     doConcepts = new javax.swing.JCheckBox();
     jScrollPane3 = new javax.swing.JScrollPane();
-    conceptList = new javax.swing.JList<URI>();
+    conceptList = new javax.swing.JList<>();
     jPanel2 = new javax.swing.JPanel();
     jScrollPane4 = new javax.swing.JScrollPane();
-    relationList = new javax.swing.JList<URI>();
+    relationList = new javax.swing.JList<>();
     doRels = new javax.swing.JCheckBox();
     checkAcross = new javax.swing.JCheckBox();
     minDistance = new javax.swing.JSlider();
     jLabel1 = new javax.swing.JLabel();
-    algorithm = new javax.swing.JComboBox<StringDistance>();
+    algorithm = new javax.swing.JComboBox<>();
     jLabel2 = new javax.swing.JLabel();
 
     doConcepts.setSelected(true);
@@ -293,7 +293,7 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JComboBox<StringDistance> algorithm;
   private javax.swing.JCheckBox checkAcross;
-  private javax.swing.JList<URI> conceptList;
+  private javax.swing.JList<IRI> conceptList;
   private javax.swing.JCheckBox doConcepts;
   private javax.swing.JCheckBox doRels;
   private javax.swing.JLabel jLabel1;
@@ -303,14 +303,14 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
   private javax.swing.JScrollPane jScrollPane3;
   private javax.swing.JScrollPane jScrollPane4;
   private javax.swing.JSlider minDistance;
-  private javax.swing.JList<URI> relationList;
+  private javax.swing.JList<IRI> relationList;
   // End of variables declaration//GEN-END:variables
 
-	private class UriModel extends DefaultListModel<URI> {
+	private class UriModel extends DefaultListModel<IRI> {
 
-		private final List<URI> data;
+		private final List<IRI> data;
 
-		public UriModel( List<URI> data ) {
+		public UriModel( List<IRI> data ) {
 			this.data = data;
 		}
 
@@ -320,11 +320,11 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
 		}
 
 		@Override
-		public URI getElementAt( int index ) {
+		public IRI getElementAt( int index ) {
 			return data.get( index );
 		}
 
-		public void fire( JList<URI> list ) {
+		public void fire( JList<IRI> list ) {
 			fireContentsChanged( list, 0, conceptmodellist.size() );
 		}
 	}

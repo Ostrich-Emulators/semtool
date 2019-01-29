@@ -173,7 +173,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	public Set<URI> getTopLevelConcepts() {
 		ListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList(
 				"SELECT ?s WHERE { ?s rdfs:subClassOf ?concept }" );
-		lqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
+		lqa.bind( "concept", engine.getSchemaBuilder().getConceptIri().build() );
 		lqa.useInferred( false );
 		return new HashSet<>( engine.queryNoEx( lqa ) );
 	}
@@ -211,7 +211,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		// get all concepts
 		String cquery = "SELECT DISTINCT ?instance WHERE { ?instance rdfs:subClassOf ?concept }";
 		ListQueryAdapter<URI> cqa = OneVarListQueryAdapter.getUriList( cquery );
-		cqa.bind( "concept", engine.getSchemaBuilder().getConceptUri().build() );
+		cqa.bind( "concept", engine.getSchemaBuilder().getConceptIri().build() );
 		cqa.useInferred( false );
 		List<URI> concepts = engine.queryNoEx( cqa );
 		if ( null != uris ) {
@@ -221,7 +221,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		// get all edge types
 		String equery = "SELECT DISTINCT ?instance WHERE { ?instance rdfs:subPropertyOf ?semrel }";
 		ListQueryAdapter<URI> eqa = OneVarListQueryAdapter.getUriList( equery );
-		eqa.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
+		eqa.bind( "semrel", engine.getSchemaBuilder().getRelationIri().build() );
 		eqa.useInferred( false );
 		List<URI> edges = engine.queryNoEx( eqa );
 		if ( null != uris ) {

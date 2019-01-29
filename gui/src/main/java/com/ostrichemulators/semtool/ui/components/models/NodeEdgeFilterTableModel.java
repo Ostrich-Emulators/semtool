@@ -100,7 +100,7 @@ public class NodeEdgeFilterTableModel<T extends GraphElement> extends AbstractTa
 			case 1:
 				return ( vfRow.isHeader() ? vfRow.type : null );
 			case 2:
-				return ( vfRow.isHeader() ? null : vfRow.instance.getURI() );
+				return ( vfRow.isHeader() ? null : vfRow.instance.getIRI() );
 			default:
 				return null;
 		}
@@ -149,7 +149,7 @@ public class NodeEdgeFilterTableModel<T extends GraphElement> extends AbstractTa
 		}
 		else {
 			// we are only dealing with one vertex
-			//viz.hide( vfRow.instance.getURI(), hideit );
+			//viz.hide( vfRow.instance.getIRI(), hideit );
 			viz.hide( Arrays.asList( vfRow.instance ), hideit );
 			fireTableCellUpdated( row, row );
 		}

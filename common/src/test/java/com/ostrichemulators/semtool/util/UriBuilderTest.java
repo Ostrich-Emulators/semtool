@@ -78,21 +78,21 @@ public class UriBuilderTest {
   public void testGetRelationUri_String() {
     UriBuilder bldr = UriBuilder.getBuilder( OWLSTART );
     URI uri = new URIImpl( OWLSTART + "Relation/bobo" );
-    assertEquals( uri, bldr.getRelationUri( "bobo" ) );
+    assertEquals( uri, bldr.getRelationIri( "bobo" ) );
   }
 
   @Test
   public void testGetContainsUri() {
     UriBuilder bldr = UriBuilder.getBuilder( OWLSTART );
     URI uri = new URIImpl( OWLSTART + "Relation/Contains" );
-    assertEquals( uri, bldr.getContainsUri() );
+    assertEquals( uri, bldr.getContainsIri() );
   }
 
   @Test
   public void testGetConceptUri() {
     UriBuilder bldr = UriBuilder.getBuilder( OWLSTART );
     URI uri = new URIImpl( OWLSTART + "Concept" );
-    assertEquals( uri, bldr.getConceptUri().build() );
+    assertEquals( uri, bldr.getConceptIri().build() );
   }
 
   @Test

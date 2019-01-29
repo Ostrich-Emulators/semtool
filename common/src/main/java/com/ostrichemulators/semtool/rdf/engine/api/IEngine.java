@@ -29,8 +29,8 @@ import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.Map;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Model;
-import org.openrdf.model.URI;
 
 /**
  * This interface standardizes the functionality of the engines to be used. All
@@ -122,7 +122,7 @@ public interface IEngine {
 
 	/**
 	 * Sets the start of the URI to be used for separating data statements from
-	 * OWL statements. Defaults to using the namespace of {@link #getBaseUri()}
+	 * OWL statements. Defaults to using the namespace of {@link #getBaseIri()}
 	 *
 	 * @param bldr
 	 */
@@ -215,7 +215,7 @@ public interface IEngine {
 	 *
 	 * @return the base uri for this engine, or null, if one has not been set
 	 */
-	public URI getBaseUri();
+	public IRI getBaseIri();
 
 	/**
 	 * Updates to disk the Insights for this engine

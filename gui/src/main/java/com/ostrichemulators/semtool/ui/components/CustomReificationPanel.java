@@ -89,7 +89,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 
 		OneValueQueryAdapter<String> qa
 				= OneValueQueryAdapter.getString( "SELECT ?val WHERE { ?base ?pred ?val }" );
-		qa.bind( "base", engine.getBaseUri() );
+		qa.bind( "base", engine.getBaseIri() );
 		qa.bind("pred", SEMTOOL.ConceptsSparql );
 		String concept = engine.queryNoEx( qa );
 
@@ -113,7 +113,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 					@Override
 					public void exec( RepositoryConnection conn ) throws RepositoryException {
 						ValueFactory vf = conn.getValueFactory();
-						URI base = engine.getBaseUri();
+						URI base = engine.getBaseIri();
 
 						conn.remove(base, SEMTOOL.ReificationModel, null );
 						conn.remove(base, SEMTOOL.ConceptsSparql, null );

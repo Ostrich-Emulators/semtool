@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.query.util.impl;
 
 import java.util.List;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
@@ -65,18 +65,18 @@ public abstract class OneVarListQueryAdapter<T> extends ListQueryAdapter<T> {
 
 	protected abstract T getValue( Value val, ValueFactory fac );
 
-	public static OneVarListQueryAdapter<URI> getUriList( String sparql, String var ) {
-		return new OneVarListQueryAdapter<URI>( sparql, var ) {
+	public static OneVarListQueryAdapter<IRI> getIriList( String sparql, String var ) {
+		return new OneVarListQueryAdapter<IRI>( sparql, var ) {
 
 			@Override
-			protected URI getValue( Value value, ValueFactory fac ) {
-				return URI.class.cast( value );
+			protected IRI getValue( Value value, ValueFactory fac ) {
+				return IRI.class.cast( value );
 			}
 		};
 	}
 
-	public static OneVarListQueryAdapter<URI> getUriList( String sparql ) {
-		return getUriList( sparql, null );
+	public static OneVarListQueryAdapter<IRI> getIriList( String sparql ) {
+		return getIriList( sparql, null );
 	}
 
 	public static OneVarListQueryAdapter<String> getStringList( String sparql, String var ) {
@@ -93,7 +93,7 @@ public abstract class OneVarListQueryAdapter<T> extends ListQueryAdapter<T> {
 		return getStringList( sparql, null );
 	}
 
-	public static OneVarListQueryAdapter<String> getLabels( URI subject ) {
+	public static OneVarListQueryAdapter<String> getLabels( IRI subject ) {
 		OneVarListQueryAdapter<String> query
 				= getStringList( "SELECT ?label WHERE { ?s rdfs:label ?label }" );
 		query.bind( "s", subject );

@@ -13,7 +13,7 @@ import org.jgrapht.graph.SimpleGraph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
@@ -30,7 +30,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Utility;
-import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.impl.SimpleValueFactory;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data
@@ -44,10 +44,11 @@ public class GraphDataModel {
 	private final List<GraphModelListener> listenees = new ArrayList<>();
 	private final Map<GraphElement, Integer> level = new HashMap<>();
 
-	protected Map<URI, SEMOSSVertex> vertStore = new HashMap<>();
+	protected Map<IRI, SEMOSSVertex> vertStore = new HashMap<>();
 	protected Map<String, SEMOSSEdge> edgeStore = new HashMap<>();
 
 	private DirectedGraph<SEMOSSVertex, SEMOSSEdge> vizgraph;
+  private final ValueFactory vf = SimpleValueFactory.getInstance();
 
 	public GraphDataModel() {
 		this( new DirectedSparseGraph<>() );
@@ -96,7 +97,7 @@ public class GraphDataModel {
 
 	/**
 	 * Gets duplicates (if they exist) of the given node. A duplicate node is one
-	 * in which {@link GraphElement#getURI()} matches the given node's value. Note
+	 * in which {@link GraphElement#getIRI()} matches the given node's value. Note
 	 * that each returned GraphElement will have a different
 	 * {@link GraphElement#getGraphId() GraphID}
 	 *
@@ -105,19 +106,19 @@ public class GraphDataModel {
 	 * @return
 	 */
 	public <X extends GraphElement> Set<X> getDuplicatesOf( X v ) {
-		URI uri = v.getURI();
+		IRI IRI = v.getIRI();
 
 		Set<X> set = new HashSet<>();
 		if ( v.isNode() ) {
 			for ( SEMOSSVertex s : getGraph().getVertices() ) {
-				if ( s.getURI().equals( uri ) ) {
+				if ( s.getIRI().equals( IRI ) ) {
 					set.add( (X) s );
 				}
 			}
 		}
 		else {
 			for ( SEMOSSEdge s : getGraph().getEdges() ) {
-				if ( s.getURI().equals( uri ) ) {
+				if ( s.getIRI().equals( IRI ) ) {
 					set.add( (X) s );
 				}
 			}
@@ -139,34 +140,34 @@ public class GraphDataModel {
 			int overlayLevel ) {
 
 		try {
-			Map<Value, URI> nonUriIds = new HashMap<>();
+			Map<Value, IRI> nonIRIIds = new HashMap<>();
 
-			Set<URI> needProps = new HashSet<>();
+			Set<IRI> needProps = new HashSet<>();
 			for ( Resource r : model.subjects() ) {
-				needProps.add( URI.class.cast( r ) );
+				needProps.add( IRI.class.cast( r ) );
 			}
 
 			for ( Statement s : model ) {
-				URI sub = URI.class.cast( s.getSubject() );
-				URI pred = s.getPredicate();
+				IRI sub = IRI.class.cast( s.getSubject() );
+				IRI pred = s.getPredicate();
 				Value obj = s.getObject();
 
-				if ( obj instanceof URI ) {
-					needProps.add( URI.class.cast( obj ) );
+				if ( obj instanceof IRI ) {
+					needProps.add( IRI.class.cast( obj ) );
 				}
 
 				SEMOSSVertex src = createOrRetrieveVertex( sub, overlayLevel );
 				SEMOSSVertex dst;
-				if ( obj instanceof URI ) {
-					dst = createOrRetrieveVertex( URI.class.cast( obj ), overlayLevel );
+				if ( obj instanceof IRI ) {
+					dst = createOrRetrieveVertex( IRI.class.cast( obj ), overlayLevel );
 				}
 				else {
-					URI uri = Utility.getUniqueUri();
-					dst = createOrRetrieveVertex( uri, overlayLevel );
+					IRI IRI = Utility.getUniqueIri();
+					dst = createOrRetrieveVertex( IRI, overlayLevel );
 					dst.setLabel( obj.stringValue() );
-					URI type = RDFDatatypeTools.getDatatype( obj );
+					IRI type = RDFDatatypeTools.getDatatype( obj );
 					dst.setType( type );
-					nonUriIds.put( obj, uri );
+					nonIRIIds.put( obj, IRI );
 				}
 
 				vizgraph.addVertex( src );
@@ -182,14 +183,14 @@ public class GraphDataModel {
 				}
 			}
 
-			Map<URI, String> edgelabels
+			Map<IRI, String> edgelabels
 					= Utility.getInstanceLabels( model.predicates(), engine );
 			for ( Statement s : model ) {
 
 				String edgekey = s.getPredicate().stringValue()
 						+ s.getSubject().stringValue()
-						+ ( nonUriIds.containsKey( s.getObject() )
-								? nonUriIds.get( s.getObject() )
+						+ ( nonIRIIds.containsKey( s.getObject() )
+								? nonIRIIds.get( s.getObject() )
 								: s.getObject() ).stringValue();
 				SEMOSSEdge edge = edgeStore.get( edgekey );
 				String elabel = edgelabels.get( s.getPredicate() );
@@ -206,10 +207,10 @@ public class GraphDataModel {
 		return elementsFromLevel( overlayLevel );
 	}
 
-	public Collection<GraphElement> addGraphLevel( Collection<URI> nodes,
+	public Collection<GraphElement> addGraphLevel( Collection<IRI> nodes,
 			IEngine engine, int overlayLevel ) {
 		try {
-			for ( URI sub : nodes ) {
+			for ( IRI sub : nodes ) {
 				SEMOSSVertex vert1 = createOrRetrieveVertex( sub, overlayLevel );
 				vizgraph.addVertex( vert1 );
 			}
@@ -247,7 +248,7 @@ public class GraphDataModel {
 		List<SEMOSSVertex> nodesToRemove = new ArrayList<>();
 		for ( SEMOSSVertex v : vizgraph.getVertices() ) {
 			if ( getLevel( v ) > overlayLevel ) {
-				nodesToRemove.add( vertStore.remove( v.getURI() ) );
+				nodesToRemove.add(vertStore.remove(v.getIRI() ) );
 			}
 		}
 
@@ -262,7 +263,7 @@ public class GraphDataModel {
 
 				SEMOSSVertex src = vizgraph.getSource( e );
 				SEMOSSVertex dst = vizgraph.getDest( e );
-				String edgekey = getEdgeKey( e.getURI(), src, dst );
+				String edgekey = getEdgeKey(e.getIRI(), src, dst );
 				edgeStore.remove( edgekey );
 			}
 
@@ -294,38 +295,38 @@ public class GraphDataModel {
 		return getLevel( check ) <= level;
 	}
 
-	protected SEMOSSVertex createOrRetrieveVertex( URI vertexKey, int overlayLevel ) {
-		URI uri = new URIImpl( vertexKey.stringValue() );
-		if ( !vertStore.containsKey( uri ) ) {
-			SEMOSSVertex vertex = createVertex( uri );
+	protected SEMOSSVertex createOrRetrieveVertex( IRI vertexKey, int overlayLevel ) {
+		IRI IRI = vf.createIRI( vertexKey.stringValue() );
+		if ( !vertStore.containsKey( IRI ) ) {
+			SEMOSSVertex vertex = createVertex( IRI );
 			level.put( vertex, overlayLevel );
-			vertStore.put( uri, vertex );
+			vertStore.put( IRI, vertex );
 		}
 
-		return vertStore.get( uri );
+		return vertStore.get( IRI );
 	}
 
-	protected SEMOSSVertex createVertex( URI uri ) {
-		SEMOSSVertexImpl impl = new SEMOSSVertexImpl( uri );
-		impl.setGraphId( Utility.getUniqueUri() );
+	protected SEMOSSVertex createVertex( IRI IRI ) {
+		SEMOSSVertexImpl impl = new SEMOSSVertexImpl( IRI );
+		impl.setGraphId( Utility.getUniqueIri() );
 		return impl;
 	}
 
-	protected final String getEdgeKey( URI edge, SEMOSSVertex src, SEMOSSVertex dst ) {
-		return getEdgeKey( edge, src.getURI(), dst.getURI() );
+	protected final String getEdgeKey( IRI edge, SEMOSSVertex src, SEMOSSVertex dst ) {
+		return getEdgeKey(edge, src.getIRI(), dst.getIRI() );
 	}
 
-	protected final String getEdgeKey( URI edge, URI src, URI dst ) {
+	protected final String getEdgeKey( IRI edge, IRI src, IRI dst ) {
 		return edge.stringValue() + src + dst;
 	}
 
-	protected SEMOSSEdge createOrRetrieveEdge( URI edgeKey, SEMOSSVertex src,
+	protected SEMOSSEdge createOrRetrieveEdge( IRI edgeKey, SEMOSSVertex src,
 			SEMOSSVertex dst, int overlayLevel ) {
-		URI uri = new URIImpl( edgeKey.stringValue() );
+		IRI IRI = vf.createIRI( edgeKey.stringValue() );
 		String key = getEdgeKey( edgeKey, src, dst );
 
 		if ( !edgeStore.containsKey( key ) ) {
-			SEMOSSEdge edge = createEdge( src, dst, uri );
+			SEMOSSEdge edge = createEdge( src, dst, IRI );
 			level.put( edge, overlayLevel );
 			edgeStore.put( key, edge );
 		}
@@ -333,15 +334,15 @@ public class GraphDataModel {
 		return edgeStore.get( key );
 	}
 
-	protected SEMOSSEdge createEdge( SEMOSSVertex src, SEMOSSVertex dst, URI uri ) {
-		SEMOSSEdge edge = new SEMOSSEdgeImpl( uri );
-		edge.setGraphId( Utility.getUniqueUri() );
-		edge.setType( uri );
+	protected SEMOSSEdge createEdge( SEMOSSVertex src, SEMOSSVertex dst, IRI IRI ) {
+		SEMOSSEdge edge = new SEMOSSEdgeImpl( IRI );
+		edge.setGraphId( Utility.getUniqueIri() );
+		edge.setType( IRI );
 		return edge;
 
 	}
 
-	private void fetchProperties( Collection<URI> concepts, Collection<URI> preds,
+	private void fetchProperties( Collection<IRI> concepts, Collection<IRI> preds,
 			IEngine engine, int overlayLevel ) throws RepositoryException, QueryEvaluationException {
 
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
@@ -358,10 +359,10 @@ public class GraphDataModel {
 
 				@Override
 				public void handleTuple( BindingSet set, ValueFactory fac ) {
-					URI s = URI.class.cast( set.getValue( "s" ) );
-					URI prop = URI.class.cast( set.getValue( "p" ) );
+					IRI s = IRI.class.cast( set.getValue( "s" ) );
+					IRI prop = IRI.class.cast( set.getValue( "p" ) );
 					Value val = set.getValue( "o" );
-					URI type = URI.class.cast( set.getValue( "type" ) );
+					IRI type = IRI.class.cast( set.getValue( "type" ) );
 
 					SEMOSSVertex v = createOrRetrieveVertex( s, overlayLevel );
 					v.setValue( prop, val );
@@ -393,31 +394,31 @@ public class GraphDataModel {
 					@Override
 					public void handleTuple( BindingSet set, ValueFactory fac ) {
 						// ?s ?rel ?o ?prop ?literal
-						URI s = URI.class.cast( set.getValue( "s" ) );
-						URI rel = URI.class.cast( set.getValue( "rel" ) );
-						URI prop = URI.class.cast( set.getValue( "prop" ) );
-						URI o = URI.class.cast( set.getValue( "o" ) );
+						IRI s = IRI.class.cast( set.getValue( "s" ) );
+						IRI rel = IRI.class.cast( set.getValue( "rel" ) );
+						IRI prop = IRI.class.cast( set.getValue( "prop" ) );
+						IRI o = IRI.class.cast( set.getValue( "o" ) );
 						Value propval = set.getValue( "literal" );
-						URI superrel = URI.class.cast( set.getValue( "superrel" ) );
+						IRI superrel = IRI.class.cast( set.getValue( "superrel" ) );
 
 						SEMOSSVertex src = createOrRetrieveVertex( s, overlayLevel );
 						SEMOSSVertex dst = createOrRetrieveVertex( o, overlayLevel );
 
 						// we don't know if our edge is stored as the generic or specific
-						// version (if it's been stored at all). Regardless, set the URI and
+						// version (if it's been stored at all). Regardless, set the IRI and
 						// type of the edge as best as we can
 						String key = getEdgeKey( superrel, src, dst );
-						URI fetchkey = ( edgeStore.containsKey( key ) ? superrel : rel );
+						IRI fetchkey = ( edgeStore.containsKey( key ) ? superrel : rel );
 
 						SEMOSSEdge edge = createOrRetrieveEdge( fetchkey, src, dst, overlayLevel );
 						edge.setValue( prop, propval );
-						edge.setURI( rel );
+						edge.setIRI( rel );
 						edge.setType( superrel );
 					}
 				};
 
 				specifics.useInferred( false );
-				specifics.bind( "semrel", engine.getSchemaBuilder().getRelationUri().build() );
+				specifics.bind( "semrel", engine.getSchemaBuilder().getRelationIRI().build() );
 				log.debug( specifics.bindAndGetSparql() );
 				engine.query( specifics );
 			}

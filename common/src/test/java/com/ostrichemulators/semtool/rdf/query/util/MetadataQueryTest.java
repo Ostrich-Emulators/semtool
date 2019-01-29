@@ -45,9 +45,9 @@ public class MetadataQueryTest {
 		rc.begin();
 		rc.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL, new LiteralImpl( "test" ) ) );
 		// DC.PULISHER should get silently upgraded to MetadataConstants.DCT_PUBLISHER
-		rc.add( new StatementImpl( eng.getBaseUri(), DC.PUBLISHER,
+		rc.add( new StatementImpl( eng.getBaseIri(), DC.PUBLISHER,
 				new LiteralImpl( "me" ) ) );
-		rc.add(new StatementImpl( eng.getBaseUri(), RDF.TYPE, SEMTOOL.Database ) );
+		rc.add(new StatementImpl( eng.getBaseIri(), RDF.TYPE, SEMTOOL.Database ) );
 		rc.commit();
 	}
 
@@ -69,7 +69,7 @@ public class MetadataQueryTest {
 		MetadataQuery mq = new MetadataQuery( SEMTOOL.Database );
 		eng.queryNoEx( mq );
 		assertEquals( 1, mq.asStrings().size() );
-		assertEquals(eng.getBaseUri().stringValue(), mq.asStrings().get(SEMTOOL.Database ) );
+		assertEquals(eng.getBaseIri().stringValue(), mq.asStrings().get(SEMTOOL.Database ) );
 	}
 
 	@Test

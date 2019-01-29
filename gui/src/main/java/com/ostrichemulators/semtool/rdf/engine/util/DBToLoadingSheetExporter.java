@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.TreeModel;
 
@@ -64,7 +64,7 @@ public class DBToLoadingSheetExporter {
 
 	public ImportData runExport( boolean runNodeExport, boolean runRelationshipExport ) {
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
-		Set<URI> nodes = sm.getTopLevelConcepts();
+		Set<IRI> nodes = sm.getTopLevelConcepts();
 
 		ImportData data = EngineUtil2.createImportData( engine );
 
@@ -79,15 +79,15 @@ public class DBToLoadingSheetExporter {
 		return data;
 	}
 
-	private static LoadingSheetData convertToNodes( URI subjectType,
-			Collection<NodeAndPropertyValues> data, Set<URI> properties,
-			Map<URI, String> labels ) {
+	private static LoadingSheetData convertToNodes( IRI subjectType,
+			Collection<NodeAndPropertyValues> data, Set<IRI> properties,
+			Map<IRI, String> labels ) {
 
 		properties.remove( RDFS.LABEL ); // don't add an extra label column
 
 		String sheetname = labels.get( subjectType );
 		LoadingSheetData ret = LoadingSheetData.nodesheet( sheetname );
-		for ( URI prop : properties ) {
+		for ( IRI prop : properties ) {
 			ret.addProperty( labels.get( prop ) );
 		}
 
@@ -95,7 +95,7 @@ public class DBToLoadingSheetExporter {
 			String sname = labels.get( nap.getSubject() );
 			LoadingNodeAndPropertyValues ls = ret.add( sname );
 
-			for ( Map.Entry<URI, Value> en : nap.entrySet() ) {
+			for ( Map.Entry<IRI, Value> en : nap.entrySet() ) {
 				ls.put( labels.get( en.getKey() ), en.getValue() );
 			}
 		}
@@ -103,8 +103,8 @@ public class DBToLoadingSheetExporter {
 		return ret;
 	}
 
-	private static LoadingSheetData convertToRelationshipLoadingSheetData( URI subjectType,
-			URI predType, URI objectType, Collection<NodeAndPropertyValues> data, Set<URI> properties,
+	private static LoadingSheetData convertToRelationshipLoadingSheetData( IRI subjectType,
+			IRI predType, IRI objectType, Collection<NodeAndPropertyValues> data, Set<IRI> properties,
 			Map<Resource, String> labels ) {
 
 		properties.remove( RDFS.LABEL ); // don't add an extra label column
@@ -114,7 +114,7 @@ public class DBToLoadingSheetExporter {
 		String relname = labels.get( predType );
 
 		LoadingSheetData ret = LoadingSheetData.relsheet( stname, otname, relname );
-		for ( URI prop : properties ) {
+		for ( IRI prop : properties ) {
 			ret.addProperty( labels.get( prop ) );
 		}
 
@@ -123,7 +123,7 @@ public class DBToLoadingSheetExporter {
 			String oname = labels.get( nap.getObject() );
 			LoadingNodeAndPropertyValues ls = ret.add( sname, oname );
 
-			for ( Map.Entry<URI, Value> en : nap.entrySet() ) {
+			for ( Map.Entry<IRI, Value> en : nap.entrySet() ) {
 				ls.put( labels.get( en.getKey() ), en.getValue() );
 			}
 		}
@@ -131,13 +131,13 @@ public class DBToLoadingSheetExporter {
 		return ret;
 	}
 
-	public void exportNodes( Collection<URI> subjectTypes, ImportData data ) {
-		Map<URI, String> labels
+	public void exportNodes( Collection<IRI> subjectTypes, ImportData data ) {
+		Map<IRI, String> labels
 				= Utility.getInstanceLabels( subjectTypes, engine );
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-		for ( URI subjectType : subjectTypes ) {
-			Set<URI> properties = sm.getPropertiesOf( subjectType );
+		for ( IRI subjectType : subjectTypes ) {
+			Set<IRI> properties = sm.getPropertiesOf( subjectType );
 			Collection<NodeAndPropertyValues> hash
 					= getConceptInstanceData( subjectType, properties, labels );
 
@@ -147,7 +147,7 @@ public class DBToLoadingSheetExporter {
 		}
 	}
 
-	public void exportOneRelationship( URI subtype, URI predicate, URI objtype,
+	public void exportOneRelationship( IRI subtype, IRI predicate, IRI objtype,
 			ImportData data ) {
 
 		List<Resource> needlabels
@@ -156,7 +156,7 @@ public class DBToLoadingSheetExporter {
 
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-		Set<URI> properties = sm.getPropertiesOf( subtype, predicate, objtype );
+		Set<IRI> properties = sm.getPropertiesOf( subtype, predicate, objtype );
 		Collection<NodeAndPropertyValues> list
 				= getOneRelationshipsData( subtype, predicate, objtype, properties, labels );
 
@@ -196,14 +196,14 @@ public class DBToLoadingSheetExporter {
 		return new File( fileloc.toString() );
 	}
 
-	public void exportAllRelationships( Collection<URI> subjectTypes, ImportData data ) {
+	public void exportAllRelationships( Collection<IRI> subjectTypes, ImportData data ) {
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
-		for ( URI subtype : subjectTypes ) {
+		for ( IRI subtype : subjectTypes ) {
 			Model m = sm.getLinksBetween( subtype, Constants.ANYNODE );
 			for ( Statement s : m.filter( subtype, null, null ) ) {
-				exportOneRelationship( URI.class.cast( s.getSubject() ),
+				exportOneRelationship( IRI.class.cast( s.getSubject() ),
 						s.getPredicate(),
-						URI.class.cast( s.getObject() ), data );
+						IRI.class.cast( s.getObject() ), data );
 			}
 		}
 	}
@@ -214,13 +214,13 @@ public class DBToLoadingSheetExporter {
 	 * @param subjectType the type nodes to retrieve
 	 * @param properties all properties found in the data will be added to this
 	 * set
-	 * @param labels this map will be filled with URI labels for later use
+	 * @param labels this map will be filled with IRI labels for later use
 	 *
 	 * @return a list of all the data for this subject type
 	 */
-	private Collection<NodeAndPropertyValues> getConceptInstanceData( URI subjectType,
-			final Collection<URI> properties, final Map<URI, String> labels ) {
-		final Map<URI, NodeAndPropertyValues> seen = new HashMap<>();
+	private Collection<NodeAndPropertyValues> getConceptInstanceData( IRI subjectType,
+			final Collection<IRI> properties, final Map<IRI, String> labels ) {
+		final Map<IRI, NodeAndPropertyValues> seen = new HashMap<>();
 
 		String query
 				= "SELECT ?s ?p ?prop WHERE { "
@@ -229,13 +229,13 @@ public class DBToLoadingSheetExporter {
 				+ " FILTER ( isLiteral( ?prop ) ) "
 				+ "} ";
 
-		final List<URI> needlabels = new ArrayList<>();
+		final List<IRI> needlabels = new ArrayList<>();
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI s = URI.class.cast( set.getValue( "s" ) );
-				URI p = URI.class.cast( set.getValue( "p" ) );
+				IRI s = IRI.class.cast( set.getValue( "s" ) );
+				IRI p = IRI.class.cast( set.getValue( "p" ) );
 				Value prop = set.getValue( "prop" );
 
 				needlabels.add( s );
@@ -264,8 +264,8 @@ public class DBToLoadingSheetExporter {
 		return seen.values();
 	}
 
-	private Collection<NodeAndPropertyValues> getOneRelationshipsData( URI subjectType,
-			URI predicateType, URI objectType, final Collection<URI> properties,
+	private Collection<NodeAndPropertyValues> getOneRelationshipsData( IRI subjectType,
+			IRI predicateType, IRI objectType, final Collection<IRI> properties,
 			Map<Resource, String> labels ) {
 		log.debug( "getOneRelData for " + subjectType.getLocalName() + "->"
 				+ predicateType.getLocalName() + "->" + objectType.getLocalName() );
@@ -280,7 +280,7 @@ public class DBToLoadingSheetExporter {
 
 			@Override
 			public void accept( Statement t ) {
-				if ( t.getObject() instanceof URI ) {
+				if ( t.getObject() instanceof IRI ) {
 					rels.add( t );
 					needlabels.add( Resource.class.cast( t.getObject() ) );
 				}
@@ -293,8 +293,8 @@ public class DBToLoadingSheetExporter {
 		List<NodeAndPropertyValues> list = new ArrayList<>();
 
 		for ( Statement s : rels ) {
-			URI in = URI.class.cast( s.getSubject() );
-			URI out = URI.class.cast( s.getObject() );
+			IRI in = IRI.class.cast( s.getSubject() );
+			IRI out = IRI.class.cast( s.getObject() );
 
 			NodeAndPropertyValues nap = new NodeAndPropertyValues( in, out );
 			list.add( nap );

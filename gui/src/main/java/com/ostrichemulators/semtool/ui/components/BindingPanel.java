@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import org.apache.log4j.Logger;
+import org.openrdf.model.IRI;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
@@ -48,7 +49,7 @@ public class BindingPanel extends JPanel {
 			= Pattern.compile( "^\\s*(?:SELECT\\s*[^\\{]+|CONSTRUCT\\s*\\{.*)\\{(.*)\\}$",
 					Pattern.CASE_INSENSITIVE );
 	private static final Pattern ONEVAR = Pattern.compile( "\\?(\\w+)" );
-	private final Map<Parameter, UriComboBox> combos = new HashMap<>();
+	private final Map<Parameter, IriComboBox> combos = new HashMap<>();
 	private final ParameterValueListener listener = new ParameterValueListener();
 	private Tree<Parameter, Integer> ordered;
 	private IEngine engine;
@@ -74,7 +75,7 @@ public class BindingPanel extends JPanel {
 	public void setParameters( Collection<Parameter> params ) {
 		ordered = treeify( params );
 
-		for ( UriComboBox c : combos.values() ) {
+		for ( IriComboBox c : combos.values() ) {
 			c.removeItemListener( listener );
 		}
 		removeAll();
@@ -95,7 +96,7 @@ public class BindingPanel extends JPanel {
 				JLabel lbl = new JLabel( child.getLabel() );
 				lbl.setBackground( getBackground() );
 
-				UriComboBox cmb = new UriComboBox();
+				IriComboBox cmb = new IriComboBox();
 				cmb.setBackground( getBackground() );
 				cmb.addItemListener( listener );
 				cmb.getUriModel().addListDataListener( listener );
@@ -127,8 +128,8 @@ public class BindingPanel extends JPanel {
 
 	public Map<Parameter, Value> getBindings() {
 		Map<Parameter, Value> map = new HashMap<>();
-		for ( Map.Entry<Parameter, UriComboBox> en : combos.entrySet() ) {
-			UriComboBox cmb = en.getValue();
+		for ( Map.Entry<Parameter, IriComboBox> en : combos.entrySet() ) {
+			IriComboBox cmb = en.getValue();
 			map.put( en.getKey(), cmb.getItemAt( cmb.getSelectedIndex() ) );
 		}
 
@@ -163,22 +164,22 @@ public class BindingPanel extends JPanel {
 
 	private void requery( Parameter child ) {
 		log.debug( "requerying for parameter: " + child );
-		OneVarListQueryAdapter<URI> onevar
-				= OneVarListQueryAdapter.getUriList( child.getDefaultQuery() );
+		OneVarListQueryAdapter<IRI> onevar
+				= OneVarListQueryAdapter.getIriList( child.getDefaultQuery() );
 		for ( Parameter ancestor : ordered.getPredecessors( child ) ) {
 			if ( !ancestor.equals( ordered.getRoot() ) ) {
-				UriComboBox cmb = combos.get( ancestor );
+				IriComboBox cmb = combos.get( ancestor );
 				onevar.bind( ancestor.getVariable(),
 						cmb.getItemAt( cmb.getSelectedIndex() ) );
 			}
 		}
 
 		log.debug( "approximate requery is: " + onevar.bindAndGetSparql() );
-		List<URI> vals = engine.queryNoEx( onevar );
-		UriComboBox combo = combos.get( child );
+		List<IRI> vals = engine.queryNoEx( onevar );
+		IriComboBox combo = combos.get( child );
 		combo.removeItemListener( listener );
-		Map<URI, String> labels = Utility.getInstanceLabels( vals, engine );
-		combo.setData( Utility.sortUrisByLabel( labels ) );
+		Map<IRI, String> labels = Utility.getInstanceLabels( vals, engine );
+		combo.setData( Utility.sortIrisByLabel( labels ) );
 		//combo.setMaximumSize( new Dimension( 100, 25  ) );
 		//combo.setPreferredSize( new Dimension( 100, 25  ) );
 		combo.setMinimumSize( new Dimension( 10, 25 ) );
@@ -271,7 +272,7 @@ public class BindingPanel extends JPanel {
 		@Override
 		public void itemStateChanged( ItemEvent e ) {
 			log.debug( "item state changed for " + e.getSource() );
-			handleChange( UriComboBox.class.cast( e.getSource() ) );
+			handleChange( IriComboBox.class.cast( e.getSource() ) );
 		}
 
 		@Override
@@ -288,7 +289,7 @@ public class BindingPanel extends JPanel {
 			// this is a little ugly, because the model is doing the signalling,
 			// so we need to figure out which combobox it came from
 			Object model = e.getSource();
-			for ( Map.Entry<Parameter, UriComboBox> en : combos.entrySet() ) {
+			for ( Map.Entry<Parameter, IriComboBox> en : combos.entrySet() ) {
 				if ( en.getValue().getUriModel().equals( model ) ) {
 					log.debug( "contents changed for " + en.getValue() );
 					handleChange( en.getValue() );
@@ -296,10 +297,10 @@ public class BindingPanel extends JPanel {
 			}
 		}
 
-		private void handleChange( UriComboBox combo ) {
+		private void handleChange( IriComboBox combo ) {
 			// figure out what parameter we're talking about
 			// so we can decide if it's children need to requery
-			for ( Map.Entry<Parameter, UriComboBox> en : combos.entrySet() ) {
+			for ( Map.Entry<Parameter, IriComboBox> en : combos.entrySet() ) {
 				if ( en.getValue().equals( combo ) ) {
 					for ( Parameter p : ordered.getChildren( en.getKey() ) ) {
 						log.debug( "new value for parameter: " + en.getKey() );

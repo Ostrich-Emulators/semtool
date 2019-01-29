@@ -166,7 +166,7 @@ public class QaCheckerTest {
 	@Test
 	public void testLoadCachesModern() throws Exception {
 		engine.setBuilders( UriBuilder.getBuilder( BASEURI ), OWLB );
-		engine.getRawConnection().add( engine.getBaseUri(), SEMTOOL.ReificationModel,
+		engine.getRawConnection().add( engine.getBaseIri(), SEMTOOL.ReificationModel,
 				SEMTOOL.SEMTOOL_Reification );
 
 		RepositoryConnection rc = engine.getRawConnection();
@@ -184,12 +184,12 @@ public class QaCheckerTest {
 
 		final URI conceptclass = OWLB.build( "myconceptclass1" );
 		rc.add( conceptclass, RDF.TYPE, RDFS.CLASS );
-		rc.add( conceptclass, RDFS.SUBCLASSOF, OWLB.getConceptUri().build() );
+		rc.add( conceptclass, RDFS.SUBCLASSOF, OWLB.getConceptIri().build() );
 		rc.add( conceptclass, RDFS.LABEL, new LiteralImpl( "My Concept Class 1" ) );
 
 		final URI conceptclass2 = OWLB.build( "myconceptclass2" );
 		rc.add( conceptclass2, RDF.TYPE, RDFS.CLASS );
-		rc.add( conceptclass2, RDFS.SUBCLASSOF, OWLB.getConceptUri().build() );
+		rc.add( conceptclass2, RDFS.SUBCLASSOF, OWLB.getConceptIri().build() );
 		rc.add( conceptclass2, RDFS.LABEL, new LiteralImpl( "My Concept Class 2" ) );
 
 		final URI concept = DATAB.build( "myconcept1" );
@@ -206,7 +206,7 @@ public class QaCheckerTest {
 
 		final URI relclass = OWLB.build( "relationclass" );
 		rc.add( relclass, RDF.TYPE, OWL.OBJECTPROPERTY );
-		rc.add( relclass, RDFS.SUBPROPERTYOF, OWLB.getRelationUri().build() );
+		rc.add( relclass, RDFS.SUBPROPERTYOF, OWLB.getRelationIri().build() );
 		rc.add( relclass, RDFS.LABEL, new LiteralImpl( "A Relation Class" ) );
 
 		final URI rel = DATAB.build( "myrel" );

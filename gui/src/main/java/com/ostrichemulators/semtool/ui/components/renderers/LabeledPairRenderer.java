@@ -14,9 +14,9 @@ import java.util.Map;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import org.apache.log4j.Logger;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 
 /**
@@ -79,10 +79,10 @@ public class LabeledPairRenderer<T> extends DefaultListCellRenderer {
 		return val.toString();
 	}
 
-	public static LabeledPairRenderer<URI> getUriPairRenderer() {
-		return new LabeledPairRenderer<URI>() {
+	public static LabeledPairRenderer<IRI> getUriPairRenderer() {
+		return new LabeledPairRenderer<IRI>() {
 			@Override
-			protected String getLabelForCacheMiss( URI val ) {
+			protected String getLabelForCacheMiss( IRI val ) {
 				return val.getLocalName();
 			}
 		};
@@ -101,8 +101,8 @@ public class LabeledPairRenderer<T> extends DefaultListCellRenderer {
 				}
 
 				String ret;
-				if ( val instanceof URI ) {
-					URI uri = URI.class.cast( val );
+				if ( val instanceof IRI ) {
+					IRI uri = IRI.class.cast( val );
 					ret = ( null == eng ? uri.getLocalName()
 							: Utility.getInstanceLabel( Resource.class.cast( val ), eng ) );
 					cache( val, ret );
@@ -131,15 +131,15 @@ public class LabeledPairRenderer<T> extends DefaultListCellRenderer {
 		};
 	}
 
-	public static LabeledPairRenderer<URI> getUriPairRenderer( IEngine eng ) {
-		return new LabeledPairRenderer<URI>() {
+	public static LabeledPairRenderer<IRI> getUriPairRenderer( IEngine eng ) {
+		return new LabeledPairRenderer<IRI>() {
 			@Override
-			protected String getLabelForCacheMiss( URI val ) {
+			protected String getLabelForCacheMiss( IRI val ) {
 				if ( null == val ) {
 					return "";
 				}
 
-				URI uri = URI.class.cast( val );
+				IRI uri = IRI.class.cast( val );
 				String ret = ( null == eng ? uri.getLocalName()
 						: Utility.getInstanceLabel( Resource.class.cast( val ), eng ) );
 				cache( val, ret );

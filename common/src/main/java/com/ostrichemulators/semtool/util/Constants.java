@@ -19,8 +19,9 @@
  */
 package com.ostrichemulators.semtool.util;
 
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.SimpleValueFactory;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 
@@ -31,6 +32,8 @@ public class Constants {
 
 	private Constants() {
 	}
+
+  private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
 	public static final String PDF = "PDF";
 	public static final String PNG = "PNG";
@@ -45,25 +48,25 @@ public class Constants {
 	public static final String PROCESS_CURRENT_USER = "PROCESS_CURRENT_USER";
 	public static final String BASE_FOLDER = "BaseFolder";
 
-	public static final URI VERTEX_NAME = RDFS.LABEL;
-	public static final URI VERTEX_TYPE = RDF.TYPE;
-	public static final URI IN_EDGE_CNT = new URIImpl( "semoss://count.edge.in" );
-	public static final URI OUT_EDGE_CNT = new URIImpl( "semoss://count.edge.out" );
-	public static final URI EDGE_CNT = new URIImpl( "semoss://count.edge" );
+	public static final IRI VERTEX_NAME = RDFS.LABEL;
+	public static final IRI VERTEX_TYPE = RDF.TYPE;
+	public static final IRI IN_EDGE_CNT = vf.createIRI( "semoss://count.edge.in" );
+	public static final IRI OUT_EDGE_CNT = vf.createIRI( "semoss://count.edge.out" );
+	public static final IRI EDGE_CNT = vf.createIRI( "semoss://count.edge" );
 
-	public static final URI ANYNODE = new URIImpl( "semoss://any" );
-	public static final URI NONODE = new URIImpl( "semoss://none" );
+	public static final IRI ANYNODE = vf.createIRI( "semoss://any" );
+	public static final IRI NONODE = vf.createIRI( "semoss://none" );
 
-	public static final URI EDGE_NAME = RDFS.LABEL;
-	public static final URI EDGE_TYPE = RDF.TYPE;
+	public static final IRI EDGE_NAME = RDFS.LABEL;
+	public static final IRI EDGE_TYPE = RDF.TYPE;
 
 	//Used by POIReader
-	public static final String RELATION_URI_CONCATENATOR = "_x_"; //used in between the in node and out node for relation instance uris.
-	public static final String RELATION_LABEL_CONCATENATOR = ":"; //used in between the in node and out node for relation instance uris.
+	public static final String RELATION_IRI_CONCATENATOR = "_x_"; //used in between the in node and out node for relation instance IRIs.
+	public static final String RELATION_LABEL_CONCATENATOR = ":"; //used in between the in node and out node for relation instance IRIs.
 	public static final String DEFAULT_NODE_CLASS = "Concept";
 	public static final String CONTAINS = "Contains";
 
-	public static final String SEMOSS_URI = "SEMOSS_URI";
+	public static final String SEMOSS_IRI = "SEMOSS_IRI";
 	public static final String INTERNAL_NS = "semoss://internal/";
 
 //	// layouts
@@ -107,11 +110,11 @@ public class Constants {
 	public static final String SMSS_RWSTORE_KEY = "RWStore";
 
 	public static final String METADATA_SHEET_NAME = "Metadata";
-	public static final String HELPURI_KEY = "HelpURI";
+	public static final String HELPIRI_KEY = "HelpIRI";
 	public static final String LATESTRELEASE_KEY = "LatestRelease";
 	public static final String EXPERIMENTALRELEASE_KEY = "ExperimentalRelease";
-	public static final String LICENSEURI_KEY = "LicenseURI";
-	public static final String BASEURI_KEY = "baseuri";
+	public static final String LICENSEIRI_KEY = "LicenseIRI";
+	public static final String BASEIRI_KEY = "baseIRI";
 	public static final String PIN_KEY = "pinned";
 	public static final String DEFAULTUI_KEY = "DefaultUI";
 

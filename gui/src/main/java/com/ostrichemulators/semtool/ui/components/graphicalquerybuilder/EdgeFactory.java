@@ -17,7 +17,7 @@ public class EdgeFactory implements Supplier<QueryEdge> {
 
 	@Override
 	public QueryEdge get() {
-		QueryEdge edge = new QueryEdge( Utility.getUniqueUri() );
+		QueryEdge edge = new QueryEdge( Utility.getUniqueIri() );
 		edge.removeProperty( RDFS.LABEL );
 
 		return edge;

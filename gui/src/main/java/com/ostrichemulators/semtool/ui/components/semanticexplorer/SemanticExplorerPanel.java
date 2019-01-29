@@ -194,7 +194,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 				renderer.setLabelCache( rlc );
 				renderer.setColorShapeRepository( DIHelper.getInstance().
-						getMetadataStore().getCSRepo( engine.getBaseUri() ) );
+						getMetadataStore().getCSRepo( engine.getBaseIri() ) );
 				renderer.setUseLabels( SemtoolPreferences.get()
 						.getBoolean( Constants.SEMEX_USE_LABELS_PREF, true ) );
 

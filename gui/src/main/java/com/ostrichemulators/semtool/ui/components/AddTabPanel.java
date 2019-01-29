@@ -9,8 +9,9 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.ui.components.models.ValueTableModel;
 import java.util.Arrays;
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.IRI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -19,7 +20,9 @@ import org.openrdf.model.impl.URIImpl;
 public class AddTabPanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger( AddTabPanel.class );
-	private final ValueTableModel model = new ValueTableModel( false );
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
+  private final ValueTableModel model = new ValueTableModel( false );
+
 
 	/**
 	 * Creates new form AddTabPanel
@@ -47,13 +50,13 @@ public class AddTabPanel extends javax.swing.JPanel {
 				: LoadingSheetData.nodesheet( subj ) );
 
 		for ( int r = 0; r < model.getRealRowCount(); r++ ) {
-			URI dt = null;
+			IRI dt = null;
 			Object pval = model.getValueAt( r, 0 );
 			Object dtval = null;
 			try {
 				dtval = model.getValueAt( r, 1 );
 				if ( null != dtval ) {
-					dt = new URIImpl( dtval.toString() );
+					dt = vf.createIRI( dtval.toString() );
 				}
 			}
 			catch ( Exception e ) {

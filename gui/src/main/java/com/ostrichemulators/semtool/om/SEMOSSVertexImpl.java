@@ -20,7 +20,7 @@
 package com.ostrichemulators.semtool.om;
 
 import java.util.Map;
-import org.openrdf.model.URI;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
 
 /**
@@ -28,19 +28,19 @@ import org.openrdf.model.Value;
  */
 public class SEMOSSVertexImpl extends AbstractGraphElement implements SEMOSSVertex{
 
-	public SEMOSSVertexImpl( URI id ) {
+	public SEMOSSVertexImpl( IRI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
-	public SEMOSSVertexImpl( URI id, URI type, String label ) {
+	public SEMOSSVertexImpl( IRI id, IRI type, String label ) {
 		super( id, type, label );
 	}
 
 	@Override
 	public SEMOSSVertex duplicate() {
-		SEMOSSVertexImpl newone = new SEMOSSVertexImpl( getURI(), getType(), getLabel() );
+		SEMOSSVertexImpl newone = new SEMOSSVertexImpl( getIRI(), getType(), getLabel() );
 
-		for ( Map.Entry<URI, Value> en : getValues().entrySet() ) {
+		for ( Map.Entry<IRI, Value> en : getValues().entrySet() ) {
 			newone.setValue( en.getKey(), en.getValue() );
 		}
 

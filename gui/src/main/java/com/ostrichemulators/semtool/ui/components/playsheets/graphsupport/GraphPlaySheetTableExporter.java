@@ -81,7 +81,7 @@ public class GraphPlaySheetTableExporter extends AbstractAction {
 				// Value obj = vf.createLiteral( o.toString() );
 				vals.add( new Value[]{ subj, pred, o } );
 			}
-			o = v.getURI();
+			o = v.getIRI();
 			if ( null != o ) {
 				Value pred = vf.createLiteral( "URI" );
 				Value obj = vf.createLiteral( o.toString() );
@@ -100,7 +100,7 @@ public class GraphPlaySheetTableExporter extends AbstractAction {
 				//Value obj = vf.createLiteral( o.toString() );
 				vals.add( new Value[]{ subj, pred, o } );
 			}
-			o = v.getURI();
+			o = v.getIRI();
 			if ( null != o ) {
 				Value pred = vf.createLiteral( "URI" );
 				Value obj = vf.createLiteral( o.toString() );

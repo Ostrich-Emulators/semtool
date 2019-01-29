@@ -20,7 +20,7 @@ public class VertexFactory implements Supplier<QueryNode> {
 
 	@Override
 	public QueryNode get() {
-		QueryNode v = new QueryNode( Utility.getUniqueUri(), verttype, "" );
+		QueryNode v = new QueryNode( Utility.getUniqueIri(), verttype, "" );
 		v.setSelected( RDFS.LABEL, true );
 		return v;
 	}
