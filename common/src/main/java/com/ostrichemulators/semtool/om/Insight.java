@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 public class Insight implements Serializable {
 

@@ -1,10 +1,7 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
-import org.openrdf.model.Namespace;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.NamespaceImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 
 
 /**
@@ -29,6 +26,6 @@ public class ARG {
 	 * An immutable {@link Namespace} constant that represents the SPIN ARG
 	 * schema namespace.
 	 */
-	public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
+	public static final Namespace NS = new SimpleNamespace(PREFIX, NAMESPACE);
 
 }

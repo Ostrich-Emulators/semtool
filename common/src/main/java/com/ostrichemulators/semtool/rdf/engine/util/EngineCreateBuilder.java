@@ -13,7 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  *

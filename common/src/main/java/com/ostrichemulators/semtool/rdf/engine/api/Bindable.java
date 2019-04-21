@@ -7,11 +7,11 @@ package com.ostrichemulators.semtool.rdf.engine.api;
 
 import java.util.Date;
 import java.util.Map;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.Operation;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.query.Operation;
 
 /**
  *
@@ -96,7 +96,7 @@ public interface Bindable {
 	/**
 	 * If the engine that will run this Executor doesn't support bindings, then
 	 * this function can simulate bindings. It is strictly an alternate to calling
-   * {@link #setBindings(org.openrdf.query.Operation, org.openrdf.model.ValueFactory) }
+   * {@link #setBindings(org.eclipse.rdf4j.query.Operation, org.eclipse.rdf4j.model.ValueFactory) }
 	 * followed by {@link #getSparql()} when your engine doesn't support this
 	 * behavior.
 	 *

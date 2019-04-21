@@ -2,7 +2,7 @@ package com.ostrichemulators.semtool.web.security;
 
 import java.util.HashMap;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 public class DBPrivileges extends HashMap<URI, DbAccess>{
 

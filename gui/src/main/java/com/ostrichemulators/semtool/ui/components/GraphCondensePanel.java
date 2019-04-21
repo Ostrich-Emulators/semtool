@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  *

@@ -7,7 +7,7 @@ package com.ostrichemulators.semtool.om;
 
 import java.awt.Color;
 import java.net.URL;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  *

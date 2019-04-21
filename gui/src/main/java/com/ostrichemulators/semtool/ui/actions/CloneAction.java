@@ -13,7 +13,7 @@ import java.io.IOException;
 import javax.swing.AbstractAction;
 
 import org.apache.log4j.Logger;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.util.GuiUtility;

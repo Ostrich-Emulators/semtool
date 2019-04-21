@@ -24,8 +24,8 @@ import com.ostrichemulators.semtool.ui.components.PlaySheetFrame;
 import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
-import org.openrdf.model.Model;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * This interface class is used to define the basic functionality for all play

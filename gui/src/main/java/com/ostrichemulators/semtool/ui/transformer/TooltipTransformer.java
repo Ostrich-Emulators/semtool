@@ -23,9 +23,9 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.List;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 /**
  * Transforms what is displayed on the tooltip when a vertex/node is selected on

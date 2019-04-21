@@ -8,14 +8,14 @@ package com.ostrichemulators.semtool.rdf.query.util;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.util.HashMap;
 import java.util.Map;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.DC;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.BindingSet;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.DC;
+import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.BindingSet;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * A Query Adapter that returns the metadata for an engine. The metadata is in

@@ -57,7 +57,7 @@ import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameEvent;
 
 import org.apache.commons.io.FileUtils;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * Class to move the "Custom Sparql Query" window and related controls out of

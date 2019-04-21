@@ -1,10 +1,10 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
-import org.openrdf.model.Namespace;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.NamespaceImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 public class SEMONTO {
 
@@ -27,7 +27,7 @@ public class SEMONTO {
 	 * An immutable {@link Namespace} constant that represents the SEMONTO
 	 * namespace.
 	 */
-	public static final Namespace NS = new NamespaceImpl( PREFIX, NAMESPACE );
+	public static final Namespace NS = new SimpleNamespace( PREFIX, NAMESPACE );
 
 	// ----- Classes ------
 	/**
@@ -47,13 +47,13 @@ public class SEMONTO {
 	public static final URI has;
 
 	static {
-		final ValueFactory factory = ValueFactoryImpl.getInstance();
+		final ValueFactory factory = SimpleValueFactory.getInstance();
 
 		// ----- Classes ------
-		Concept = factory.createURI( NAMESPACE, "Concept" );
-		Relation = factory.createURI( NAMESPACE, "Relation" );
+		Concept = factory.createIRI( NAMESPACE, "Concept" );
+		Relation = factory.createIRI( NAMESPACE, "Relation" );
 
 		// ----- Properties ------
-		has = factory.createURI( NAMESPACE, "has" );
+		has = factory.createIRI( NAMESPACE, "has" );
 	}
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  * A class for managing a collection of {@link Insight}.

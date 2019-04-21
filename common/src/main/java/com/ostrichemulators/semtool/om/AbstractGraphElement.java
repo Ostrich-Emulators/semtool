@@ -18,13 +18,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.openrdf.model.IRI;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.SimpleValueFactory;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 /**
  *
@@ -99,7 +99,7 @@ public abstract class AbstractGraphElement
 
 	/**
 	 * Sets a new label for this vertex. This function is a convenience to null
-	 * null	null	null	null	null	 {@link #setValue(org.openrdf.model.IRI, org.openrdf.model.Value)
+	 * null	null	null	null	null	 {@link #setValue(org.eclipse.rdf4j.model.IRI, org.eclipse.rdf4j.model.Value)
 	 * }
 	 * Any name is acceptable. We can always rename a vertex or edge.
 	 *
@@ -178,7 +178,7 @@ public abstract class AbstractGraphElement
 
 	/**
 	 * Gets the datatype for the value that would be returned for the given
-	 * property from a call to {@link #getValue(org.openrdf.model.IRI) }
+	 * property from a call to {@link #getValue(org.eclipse.rdf4j.model.IRI) }
 	 *
 	 * @param prop the property to find
 	 * @return the datatype, or {@link XMLSchema#ANYIRI} if the value is a IRI, or

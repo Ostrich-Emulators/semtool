@@ -23,7 +23,7 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.ui.components.models.LoadingSheetModel;
 import java.util.List;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  */

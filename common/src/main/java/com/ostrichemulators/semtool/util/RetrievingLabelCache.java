@@ -12,14 +12,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * A class that will cache labels for URIs. Cache misses will result in a label
  * retrieval. This class is really just a convenience around
- * {@link Utility#getInstanceLabel(org.openrdf.model.Resource, com.ostrichemulators.semtool.rdf.engine.api.IEngine) }
+ * {@link Utility#getInstanceLabel(org.eclipse.rdf4j.model.Resource, com.ostrichemulators.semtool.rdf.engine.api.IEngine) }
  *
  * @author ryan
  */

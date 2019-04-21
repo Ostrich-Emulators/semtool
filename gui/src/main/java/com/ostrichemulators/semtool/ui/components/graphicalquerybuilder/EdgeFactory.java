@@ -7,7 +7,7 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import com.google.common.base.Supplier;
 import com.ostrichemulators.semtool.util.Utility;
-import org.openrdf.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 /**
  *

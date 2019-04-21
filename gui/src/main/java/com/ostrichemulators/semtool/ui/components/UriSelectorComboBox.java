@@ -8,7 +8,7 @@ package com.ostrichemulators.semtool.ui.components;
 import java.util.Collection;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  *

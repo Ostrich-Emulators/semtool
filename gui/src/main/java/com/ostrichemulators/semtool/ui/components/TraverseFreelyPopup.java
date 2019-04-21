@@ -42,10 +42,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JLabel;
-import org.openrdf.model.URI;
-import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.SKOS;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.SKOS;
 
 /**
  * This class is used to create a popup menu for the TF instance relation.

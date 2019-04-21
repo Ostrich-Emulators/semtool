@@ -14,13 +14,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -31,8 +31,8 @@ import org.xml.sax.SAXException;
 public class LoadingSheetXmlHandler extends XlsXmlBase {
 
 	private static final Logger log = Logger.getLogger( LoadingSheetXmlHandler.class );
-	private static final Map<String, Integer> formats = new HashMap<>();
-	private static final ValueFactory vf = new ValueFactoryImpl();
+	private static final Map<String, CellType> formats = new HashMap<>();
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
 	private final Map<Integer, Value> currentrowdata = new LinkedHashMap<>();
 	private final Map<Integer, String> proplkp = new HashMap<>();
@@ -42,12 +42,12 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 	private boolean isdate = false;
 	private int rownum;
 	private int colnum;
-	private int celltype;
+	private CellType celltype;
 
 	static {
-		formats.put( "s", Cell.CELL_TYPE_STRING );
-		formats.put( "n", Cell.CELL_TYPE_NUMERIC );
-		formats.put( "b", Cell.CELL_TYPE_BOOLEAN );
+		formats.put( "s", CellType.STRING );
+		formats.put( "n", CellType.NUMERIC );
+		formats.put( "b", CellType.BOOLEAN );
 	}
 
 	public static int getColNum( String colname ) {
@@ -94,10 +94,10 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 				case "c": // c is a new cell
 					String celltypestr = attributes.getValue( "t" );
 					celltype = ( formats.containsKey( celltypestr )
-							? formats.get( celltypestr ) : Cell.CELL_TYPE_BLANK );
+							? formats.get( celltypestr ) : CellType.BLANK );
 					// dates don't always have a type attribute
-					if ( Cell.CELL_TYPE_NUMERIC == celltype || null == celltypestr ) {
-						celltype = Cell.CELL_TYPE_NUMERIC;
+					if ( CellType.NUMERIC == celltype || null == celltypestr ) {
+						celltype = CellType.NUMERIC;
 
 						// check if it's a date
 						String styleidstr = attributes.getValue( "s" );
@@ -159,19 +159,19 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 		if ( isReading() ) {
 			// If we've fully read the data, add it to our row mapping
 			switch ( celltype ) {
-				case Cell.CELL_TYPE_STRING:
+				case STRING:
 					String strval = this.getStringFromContentsInt();
 					if ( !strval.isEmpty() ) {
 						currentrowdata.put( colnum, getRDFStringValue( strval, namespaces, vf ) );
 					}
 					break;
-				case Cell.CELL_TYPE_BLANK:
+				case BLANK:
 					break;
-				case Cell.CELL_TYPE_BOOLEAN:
+				case BOOLEAN:
 					currentrowdata.put( colnum,
 							vf.createLiteral( "1".equals( getContents() ) ) );
 					break;
-				case Cell.CELL_TYPE_NUMERIC:
+				case NUMERIC:
 					if ( isdate ) {
 						currentrowdata.put( colnum,
 								vf.createLiteral( DateUtil.getJavaDate( Double.parseDouble( getContents() ) ) ) );
@@ -187,10 +187,10 @@ public class LoadingSheetXmlHandler extends XlsXmlBase {
 						currentrowdata.put( colnum, val );
 					}
 					break;
-				case Cell.CELL_TYPE_ERROR:
+				case ERROR:
 					log.warn( "unhandled cell type: CELL_TYPE_ERROR" );
 					break;
-				case Cell.CELL_TYPE_FORMULA:
+				case FORMULA:
 					log.warn( "unhandled cell type: CELL_TYPE_FORMULA" );
 					break;
 				default:

@@ -15,8 +15,8 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.util.Properties;
 import org.apache.log4j.Logger;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.http.HTTPRepository;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.http.HTTPRepository;
 
 /**
  *

@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.impl.URIImpl;
 
 /**
  * Holds a Parameter data for one Parameter of an Insight.

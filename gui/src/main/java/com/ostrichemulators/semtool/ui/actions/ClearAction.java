@@ -16,8 +16,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.rdf.query.util.ModificationExecutorAdapter;
 import com.ostrichemulators.semtool.util.GuiUtility;

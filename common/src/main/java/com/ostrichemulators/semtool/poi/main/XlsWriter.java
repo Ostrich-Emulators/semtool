@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openrdf.model.IRI;
+import org.eclipse.rdf4j.model.IRI;
 import java.awt.Color;
 import java.io.File;
 import java.util.Arrays;
@@ -42,10 +42,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * Create a workbook containing data formated in the Microsoft Excel Sheet
@@ -107,7 +109,7 @@ public class XlsWriter implements GraphWriter {
 		createWorkbook( data );
 
 		CellStyle errorstyle = currentwb.createCellStyle();
-		errorstyle.setFillPattern( CellStyle.SOLID_FOREGROUND );
+		errorstyle.setFillPattern( FillPatternType.SOLID_FOREGROUND );
 		errorstyle.setFillForegroundColor( IndexedColors.PINK.getIndex() );
 
 		for ( LoadingSheetData nodes : data.getNodes() ) {
@@ -171,7 +173,8 @@ public class XlsWriter implements GraphWriter {
 			while ( di.hasNext() ) {
 				LoadingNodeAndPropertyValues nap = di.next();
 				if ( rels.hasErrors() ) {
-					currentsheet.setTabColor( IndexedColors.ROSE.getIndex() );
+					log.warn( "tab color not set (refactor, please)");
+					//currentsheet.setTabColor( IndexedColors.ROSE.getIndex() );
 				}
 
 				// do we need the relation name in the first column?
@@ -201,7 +204,7 @@ public class XlsWriter implements GraphWriter {
 	 *
 	 * @return true if the next call to {@link #addRow(
 	 * java.lang.String[], org.apache.poi.ss.usermodel.CellStyle[],
-	 * org.openrdf.model.IRI[])} will be the first row of the tab
+	 * org.eclipse.rdf4j.model.IRI[])} will be the first row of the tab
 	 */
 	protected boolean nextRowIsFirstRowOfTab() {
 		if ( maxtabrows == rowcount ) {
@@ -300,7 +303,6 @@ public class XlsWriter implements GraphWriter {
 			if ( null != val ) {
 				if ( null == datatypes[col] ) {
 					if ( NUMERIC.matcher( val ).find() ) {
-						cell.setCellType( Cell.CELL_TYPE_NUMERIC );
 						cell.setCellValue( Double.parseDouble( val ) );
 					}
 					else {

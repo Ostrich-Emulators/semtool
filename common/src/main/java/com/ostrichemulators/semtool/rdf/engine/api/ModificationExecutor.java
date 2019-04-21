@@ -1,7 +1,7 @@
 package com.ostrichemulators.semtool.rdf.engine.api;
 
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  * An interface to specify generic update/inserts against the triplestore

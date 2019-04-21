@@ -7,10 +7,10 @@ package com.ostrichemulators.semtool.rdf.engine.util;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.openrdf.model.Statement;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.StatementImpl;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 /**
  *

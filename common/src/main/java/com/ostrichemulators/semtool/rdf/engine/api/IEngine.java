@@ -23,14 +23,14 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.util.Constants;
 import java.util.Properties;
 
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.UpdateExecutionException;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.UpdateExecutionException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.Map;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Model;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 
 /**
  * This interface standardizes the functionality of the engines to be used. All
@@ -54,7 +54,7 @@ public interface IEngine {
 	 * @param props contains all information regarding the data store and how the
 	 * engine should be instantiated. Dependent on what type of engine is being
 	 * instantiated.
-	 * @throws org.openrdf.repository.RepositoryException if something goes wrong
+	 * @throws org.eclipse.rdf4j.repository.RepositoryException if something goes wrong
 	 */
 	public void openDB( Properties props ) throws RepositoryException;
 
@@ -79,7 +79,7 @@ public interface IEngine {
 	 * Makes the engine calculate inferences, if the engine supports such
 	 * calculations. This function also commits the current transaction
 	 *
-	 * @throws org.openrdf.repository.RepositoryException if anything goes wrong
+	 * @throws org.eclipse.rdf4j.repository.RepositoryException if anything goes wrong
 	 */
 	public void calculateInferences() throws RepositoryException;
 
@@ -185,9 +185,9 @@ public interface IEngine {
 	 * Runs an update on the engine.
 	 *
 	 * @param ue
-	 * @throws org.openrdf.repository.RepositoryException
-	 * @throws org.openrdf.query.MalformedQueryException
-	 * @throws org.openrdf.query.UpdateExecutionException
+	 * @throws org.eclipse.rdf4j.repository.RepositoryException
+	 * @throws org.eclipse.rdf4j.query.MalformedQueryException
+	 * @throws org.eclipse.rdf4j.query.UpdateExecutionException
 	 * @throws SecurityException if the user does not have enough permissions to
 	 * run the update
 	 */

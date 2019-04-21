@@ -13,8 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.openrdf.model.impl.URIImpl;
+import org.apache.poi.ss.usermodel.CellType;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
 public class MetadataTabXmlHandler extends XlsXmlBase {
 
 	private static final Logger log = Logger.getLogger( MetadataTabXmlHandler.class );
-	private static final Map<String, Integer> formats = new HashMap<>();
+	private static final Map<String, CellType> formats = new HashMap<>();
 
 	private final Map<Integer, String> currentrowdata = new LinkedHashMap<>();
 	private final ImportMetadata metas;
@@ -34,15 +34,15 @@ public class MetadataTabXmlHandler extends XlsXmlBase {
 
 	private int rownum;
 	private int colnum;
-	private int celltype;
+	private CellType celltype;
 	private String datanamespace = null;
 	private String schemanamespace = null;
 	private String baseuri = null;
 
 	static {
-		formats.put( "s", Cell.CELL_TYPE_STRING );
-		formats.put( "n", Cell.CELL_TYPE_NUMERIC );
-		formats.put( "b", Cell.CELL_TYPE_BOOLEAN );
+		formats.put( "s", CellType.STRING );
+		formats.put( "n", CellType.NUMERIC );
+		formats.put( "b", CellType.BOOLEAN );
 	}
 
 	public MetadataTabXmlHandler( List<String> sst, ImportMetadata metadata ) {
@@ -67,7 +67,7 @@ public class MetadataTabXmlHandler extends XlsXmlBase {
 				case "c": // c is a new cell
 					String celltypestr = attributes.getValue( "t" );
 					celltype = ( formats.containsKey( celltypestr )
-							? formats.get( celltypestr ) : Cell.CELL_TYPE_BLANK );
+							? formats.get( celltypestr ) : CellType.BLANK );
 
 					String colname = attributes.getValue( "r" );
 					colnum = LoadingSheetXmlHandler.getColNum( colname.substring( 0,
@@ -92,7 +92,7 @@ public class MetadataTabXmlHandler extends XlsXmlBase {
 
 		if ( isReading() ) {
 			// If we've fully read the data, add it to our row mapping
-			if ( Cell.CELL_TYPE_STRING == celltype ) {
+			if ( CellType.STRING == celltype ) {
 				String strval = getStringFromContentsInt();
 				if ( !strval.isEmpty() ) {
 					currentrowdata.put( colnum, strval );
@@ -123,7 +123,7 @@ public class MetadataTabXmlHandler extends XlsXmlBase {
 		// now set the data
 		if ( null != baseuri ) {
 			log.debug( "setting base uri to " + baseuri );
-			metas.setBase( new URIImpl( baseuri ) );
+			metas.setBase( SimpleValueFactory.getInstance().createIRI( baseuri ) );
 		}
 		if ( null != datanamespace ) {
 			log.debug( "setting data namespace to " + datanamespace );

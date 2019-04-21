@@ -25,7 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.IRI;
+import org.eclipse.rdf4j.model.IRI;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.DBToLoadingSheetExporter;
@@ -48,8 +48,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.JCheckBox;
-import org.openrdf.model.Model;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * @author john.marquiss

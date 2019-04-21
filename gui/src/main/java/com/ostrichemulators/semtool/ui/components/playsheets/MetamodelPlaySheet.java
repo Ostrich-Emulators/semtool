@@ -22,9 +22,9 @@ package com.ostrichemulators.semtool.ui.components.playsheets;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import com.ostrichemulators.semtool.om.GraphDataModel;
 import com.ostrichemulators.semtool.om.GraphElement;
@@ -43,9 +43,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 /**
  */

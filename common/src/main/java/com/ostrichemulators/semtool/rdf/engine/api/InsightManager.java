@@ -7,7 +7,7 @@ package com.ostrichemulators.semtool.rdf.engine.api;
 
 import java.util.Collection;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.Perspective;

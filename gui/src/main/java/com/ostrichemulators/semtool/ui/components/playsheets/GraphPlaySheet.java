@@ -31,11 +31,11 @@ import javax.swing.JSplitPane;
 
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleGraph;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -522,7 +522,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 * Creates graph nodes from the given data. If the {@code Value[]}s have
 	 * length 1, the values are expected to be nodes ({@link Resource}s. If they
 	 * have length 3, then they are repackaged as Statements, and forwarded on to
-	 * {@link #create(org.openrdf.model.Model, com.ostrichemulators.semtool.rdf.engine.api.IEngine) }.
+	 * {@link #create(org.eclipse.rdf4j.model.Model, com.ostrichemulators.semtool.rdf.engine.api.IEngine) }.
 	 * Anything else will throw an exception
 	 *
 	 * @param data the data to add are expected to be

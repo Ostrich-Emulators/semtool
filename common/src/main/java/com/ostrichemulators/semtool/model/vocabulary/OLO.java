@@ -1,10 +1,10 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
-import org.openrdf.model.Namespace;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.NamespaceImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  * Minimal vocabulary of the Ordered List Ontology.
@@ -31,7 +31,7 @@ public class OLO {
 	 * An immutable {@link Namespace} constant that represents the V-CAMP SEMOSS
 	 * Tool namespace.
 	 */
-	public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
+	public static final Namespace NS = new SimpleNamespace(PREFIX, NAMESPACE);
 	
 	
 

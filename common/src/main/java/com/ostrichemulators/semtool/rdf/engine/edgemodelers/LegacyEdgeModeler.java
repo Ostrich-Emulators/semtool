@@ -21,17 +21,17 @@ import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.Date;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Model;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.TreeModel;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  *
@@ -46,7 +46,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 	}
 
 	@Override
-	public URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
+	public IRI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
 			throws RepositoryException {
 
@@ -62,14 +62,14 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 					= sheet.new LoadingNodeAndPropertyValues( srawlabel );
 			addNode( filler, namespaces, sheet, metas, myrc );
 		}
-		URI subject = getCachedInstance( stype, srawlabel );
+		IRI subject = getCachedInstance( stype, srawlabel );
 
 		if ( !hasCachedInstance( otype, orawlabel ) ) {
 			LoadingSheetData lsd = LoadingSheetData.nodesheet( sheet.getName(), otype );
 			LoadingNodeAndPropertyValues filler = lsd.add( orawlabel );
 			addNode( filler, namespaces, lsd, metas, myrc );
 		}
-		URI object = getCachedInstance( otype, orawlabel );
+		IRI object = getCachedInstance( otype, orawlabel );
 
 		boolean alreadyMadeRel = isUri( sheet.getRelname(), namespaces );
 
@@ -113,7 +113,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 	}
 
 	@Override
-	public URI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
+	public IRI addNode( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
 
 		String typename = nap.getSubjectType();

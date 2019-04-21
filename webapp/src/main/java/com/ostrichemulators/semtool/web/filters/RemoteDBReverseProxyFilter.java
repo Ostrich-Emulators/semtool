@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
-import org.openrdf.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.impl.URIImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
@@ -274,9 +274,9 @@ public class RemoteDBReverseProxyFilter implements Filter {
 	}
 
 	private DbAccess getAccess( DbInfo dbi, SemossUser user, boolean forInsightsDb ) {
-		Map<org.openrdf.model.URI, DbAccess> accesses = usermapper.getAccesses( user );
-		org.openrdf.model.URI insuri = new URIImpl( dbi.getInsightsUrl() );
-		org.openrdf.model.URI dburi = new URIImpl( dbi.getDataUrl() );
+		Map<org.eclipse.rdf4j.model.URI, DbAccess> accesses = usermapper.getAccesses( user );
+		org.eclipse.rdf4j.model.URI insuri = new URIImpl( dbi.getInsightsUrl() );
+		org.eclipse.rdf4j.model.URI dburi = new URIImpl( dbi.getDataUrl() );
 
 		if ( forInsightsDb ) {
 			if ( accesses.containsKey( insuri ) ) {

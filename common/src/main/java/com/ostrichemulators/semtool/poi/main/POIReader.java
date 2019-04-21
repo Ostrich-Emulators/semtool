@@ -27,14 +27,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openrdf.model.ValueFactory;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  * Loading data into SEMOSS using Microsoft Excel Loading Sheet files
@@ -164,11 +164,11 @@ public class POIReader implements ImportFileReader {
 		}
 
 		switch ( cell.getCellType() ) {
-			case Cell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 				return Double.toString( cell.getNumericCellValue() );
-			case Cell.CELL_TYPE_BOOLEAN:
+			case BOOLEAN:
 				return Boolean.toString( cell.getBooleanCellValue() );
-			case Cell.CELL_TYPE_FORMULA:
+			case FORMULA:
 				return cell.getCellFormula();
 			default:
 				return cell.getStringCellValue();

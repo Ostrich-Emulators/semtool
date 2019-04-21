@@ -52,9 +52,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  */

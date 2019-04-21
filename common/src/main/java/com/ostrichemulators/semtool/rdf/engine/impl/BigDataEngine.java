@@ -22,7 +22,7 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 import com.bigdata.journal.ITx;
 import com.bigdata.journal.Journal;
 
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.util.Constants;
 import com.bigdata.rdf.rules.InferenceEngine;
@@ -37,7 +37,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Statement;
+import org.eclipse.rdf4j.model.Statement;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.StatementSorter;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
@@ -50,9 +50,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
-import org.openrdf.http.protocol.UnauthorizedException;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.rio.turtle.TurtleWriter;
+import org.eclipse.rdf4j.http.protocol.UnauthorizedException;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 
 /**
  * Big data engine serves to connect the .jnl files, which contain the RDF

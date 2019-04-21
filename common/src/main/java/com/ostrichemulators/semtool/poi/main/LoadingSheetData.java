@@ -18,10 +18,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  * A class to encapsulate relationship loading sheet information.

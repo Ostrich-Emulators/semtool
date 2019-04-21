@@ -10,7 +10,7 @@ import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  * A renderer for DefaultMutableTreeNodes that have a Resource as a UserObject

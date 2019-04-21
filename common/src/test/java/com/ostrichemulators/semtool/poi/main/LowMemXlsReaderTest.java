@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.model.vocabulary.FOAF;
+import org.eclipse.rdf4j.model.vocabulary.FOAF;
 
 /**
  *

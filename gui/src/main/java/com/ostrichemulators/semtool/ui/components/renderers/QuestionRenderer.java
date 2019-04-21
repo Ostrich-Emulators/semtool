@@ -13,7 +13,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.InsightOutputType;

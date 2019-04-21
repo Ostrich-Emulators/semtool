@@ -38,12 +38,12 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 /**
  *
@@ -505,7 +505,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	}
 
 	// for the record, I have no idea why I can't use import statements for these classes
-	public static class ConstraintValueSet extends java.util.LinkedHashSet<org.openrdf.model.Value> {
+	public static class ConstraintValueSet extends java.util.LinkedHashSet<org.eclipse.rdf4j.model.Value> {
 
 		public enum JoinType {
 

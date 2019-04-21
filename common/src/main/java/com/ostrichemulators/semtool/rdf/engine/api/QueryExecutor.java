@@ -1,8 +1,8 @@
 package com.ostrichemulators.semtool.rdf.engine.api;
 
 import java.util.List;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
 
 /**
  * An interface to specify generic SPARQL against the triplestore. This handles

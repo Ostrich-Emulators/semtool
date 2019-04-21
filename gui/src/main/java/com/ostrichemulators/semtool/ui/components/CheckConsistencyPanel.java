@@ -24,7 +24,7 @@ import javax.swing.JList;
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
 import org.apache.lucene.search.spell.StringDistance;
-import org.openrdf.model.IRI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *

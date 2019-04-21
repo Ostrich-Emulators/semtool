@@ -34,17 +34,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
 import java.io.FileNotFoundException;
 import java.util.Properties;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  * Loading data into SEMOSS using comma separated value (CSV) files
@@ -59,7 +59,7 @@ public class CSVReader implements ImportFileReader {
 	private final static String RELATION_PROP = "RELATION_PROP";
 	private static final Pattern RELATION_PAT = Pattern.compile( "^(.*)[@](.*)[@](.*)$" );
 	private static final Pattern NODEPROP_PAT = Pattern.compile( "^([^%]+)[%](.*)$" );
-	private static final Map<String, URI> datatypes = new HashMap<>();
+	private static final Map<String, IRI> datatypes = new HashMap<>();
 
 	private CsvMapReader mapReader;
 	private String[] header;
@@ -137,7 +137,7 @@ public class CSVReader implements ImportFileReader {
 	 */
 	public void createProcessors() {
 		// Columns in prop file that are NON_OPTIMAL must contain a value
-		Map<String, URI> dtlkp = new HashMap<>();
+		Map<String, IRI> dtlkp = new HashMap<>();
 		dtlkp.put( "Double", XMLSchema.DOUBLE );
 		dtlkp.put( "Int", XMLSchema.INT );
 		dtlkp.put( "Integer", XMLSchema.INTEGER );

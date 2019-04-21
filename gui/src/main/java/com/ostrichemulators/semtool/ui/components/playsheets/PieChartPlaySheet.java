@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 import java.util.List;
 import java.util.Map;
 
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Value;
 
 public class PieChartPlaySheet extends BrowserPlaySheet2 {
 

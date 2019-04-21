@@ -23,19 +23,19 @@ import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.openrdf.model.BNode;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFHandler;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.sail.memory.MemoryStore;
-import org.openrdf.sail.nativerdf.NativeStore;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
 /**
  * A class to handle reading TDB files. Instead of maintaining an internal jena
@@ -311,7 +311,7 @@ public class JenaEngine extends AbstractSesameEngine {
 		}
 
 		@Override
-		public void handleStatement( org.openrdf.model.Statement stmt ) throws RDFHandlerException {
+		public void handleStatement( org.eclipse.rdf4j.model.Statement stmt ) throws RDFHandlerException {
 			Resource rsr = stmt.getSubject();
 			com.hp.hpl.jena.rdf.model.Resource sub;
 			if ( rsr instanceof URI ) {
@@ -333,8 +333,8 @@ public class JenaEngine extends AbstractSesameEngine {
 				BNode node = BNode.class.cast( val );
 				obj = model.createResource( new AnonId( node.getID() ) );
 			}
-			else if ( val instanceof org.openrdf.model.Literal ) {
-				org.openrdf.model.Literal lit = org.openrdf.model.Literal.class.cast( val );
+			else if ( val instanceof org.eclipse.rdf4j.model.Literal ) {
+				org.eclipse.rdf4j.model.Literal lit = org.eclipse.rdf4j.model.Literal.class.cast( val );
 				if ( null == lit.getDatatype() ) {
 					if ( null == lit.getLanguage() ) {
 						obj = model.createLiteral( val.stringValue() );

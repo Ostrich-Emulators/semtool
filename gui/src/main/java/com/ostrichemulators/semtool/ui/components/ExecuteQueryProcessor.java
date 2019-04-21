@@ -18,9 +18,9 @@ import javax.swing.Icon;
 import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
 
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.UpdateExecutionException;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.UpdateExecutionException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 public abstract class ExecuteQueryProcessor extends AbstractAction {
 

@@ -41,8 +41,8 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  */

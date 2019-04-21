@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  *

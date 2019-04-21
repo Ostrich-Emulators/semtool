@@ -9,8 +9,8 @@ import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.util.Constants;
 import java.util.Collection;
 import java.util.Set;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Model;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 
 /**
  * A class to handle reading/writing {@link SEMTOOL#Structure} triples. All of

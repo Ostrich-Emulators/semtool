@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 
@@ -45,9 +45,9 @@ import com.ostrichemulators.semtool.util.UriBuilder;
 import com.ostrichemulators.semtool.util.Utility;
 import java.util.Collection;
 import org.apache.log4j.Level;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * An Abstract Engine that sets up the base constructs needed to create an
@@ -65,7 +65,7 @@ public abstract class AbstractEngine implements IEngine {
 	private InsightManager insightEngine;
 	private UriBuilder schemabuilder;
 	private UriBuilder databuilder;
-	private URI baseuri;
+	private IRI baseuri;
 
 	public AbstractEngine() {
 	}
@@ -101,7 +101,7 @@ public abstract class AbstractEngine implements IEngine {
 			log.warn( "no schema URI set...using " + SEMONTO.NAMESPACE );
 			owlstarter = SEMONTO.NAMESPACE;
 		}
-		baseuri = new URIImpl( setUris( baseuristr, owlstarter ).stringValue() );
+		baseuri = SimpleValueFactory.getInstance().createIRI(setUris( baseuristr, owlstarter ).stringValue() );
 
 		finishLoading( prop );
 	}
@@ -149,11 +149,11 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	@Override
-	public org.openrdf.model.URI getBaseIri() {
+	public IRI getBaseIri() {
 		return baseuri;
 	}
 
-	protected void setBaseUri( URI base ) {
+	protected void setBaseUri( IRI base ) {
 		baseuri = base;
 	}
 
@@ -166,9 +166,9 @@ public abstract class AbstractEngine implements IEngine {
 	 * (possibly empty)
 	 * @param schema the schema builder uri (never empty)
 	 * @return this database's unique id. this will include some sort of UUID
-	 * @throws org.openrdf.repository.RepositoryException
+	 * @throws org.eclipse.rdf4j.repository.RepositoryException
 	 */
-	protected abstract URI setUris( String data, String schema ) throws RepositoryException;
+	protected abstract IRI setUris( String data, String schema ) throws RepositoryException;
 
 	/**
 	 * Update the "last modified" date of the dataset. This operation should fail
@@ -315,8 +315,8 @@ public abstract class AbstractEngine implements IEngine {
 		// nothing to do
 	}
 
-	public static final URI getNewBaseUri() {
-		URI baseuri = UriBuilder.getBuilder( "http://os-em.com/semtool/database/" ).uniqueUri();
+	public static final IRI getNewBaseUri() {
+		IRI baseuri = UriBuilder.getBuilder( "http://os-em.com/semtool/database/" ).uniqueUri();
 		return baseuri;
 	}
 

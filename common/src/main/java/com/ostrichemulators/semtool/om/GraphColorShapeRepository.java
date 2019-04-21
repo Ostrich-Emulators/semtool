@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  * A repository to hold colors and shapes (and icons, too!) for graph elements.
@@ -54,7 +54,7 @@ public interface GraphColorShapeRepository {
 
 	/**
 	 *
-	 * A convenience function to {@link #getShape(org.openrdf.model.URI, org.openrdf.model.URI)
+	 * A convenience function to {@link #getShape(org.eclipse.rdf4j.model.URI, org.eclipse.rdf4j.model.URI)
 	 * }
 	 *
 	 * @param ge
@@ -63,7 +63,7 @@ public interface GraphColorShapeRepository {
 	public NamedShape getShape( GraphElement ge );
 
 	/**
-	 * A convenience function to {@link #getColor(org.openrdf.model.URI, org.openrdf.model.URI)
+	 * A convenience function to {@link #getColor(org.eclipse.rdf4j.model.URI, org.eclipse.rdf4j.model.URI)
 	 * }
 	 *
 	 * @param ge

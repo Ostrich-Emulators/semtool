@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  * An extension of SEMOSSVertex to allow multiple values for one property

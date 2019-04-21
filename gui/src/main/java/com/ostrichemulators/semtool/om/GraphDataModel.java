@@ -10,16 +10,16 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleGraph;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
@@ -30,7 +30,7 @@ import com.ostrichemulators.semtool.rdf.engine.util.StructureManagerFactory;
 import com.ostrichemulators.semtool.rdf.query.util.impl.VoidQueryAdapter;
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
 import com.ostrichemulators.semtool.util.Utility;
-import org.openrdf.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /*
  * This contains all data that is fundamental to a SEMOSS Graph This data

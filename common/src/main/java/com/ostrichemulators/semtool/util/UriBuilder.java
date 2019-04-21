@@ -11,10 +11,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Resource;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * A class that helps to build IRIs.
@@ -37,7 +37,7 @@ public class UriBuilder {
   /**
    * Sets the class to use when a user calls
    * {@link #getBuilder(java.lang.String)} or
-   * {@link #getBuilder(org.openrdf.model.IRI)}
+   * {@link #getBuilder(org.eclipse.rdf4j.model.IRI)}
    *
    * @param <T> the type of class (must extend or be UriBuilder)
    * @param klass the class to use
@@ -263,7 +263,7 @@ public class UriBuilder {
 
   /**
    * Checks if the given IRI's namespace is the same as our current content.
-   * This is a stricter check than {@link #contains(org.openrdf.model.Resource)}
+   * This is a stricter check than {@link #contains(org.eclipse.rdf4j.model.Resource)}
    * because the namespace must match the this builder's content exactly, and
    * not just start the same way
    *

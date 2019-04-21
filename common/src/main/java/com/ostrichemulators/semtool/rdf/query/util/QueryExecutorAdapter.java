@@ -14,7 +14,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.List;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Resource;
 
 /**
  * A class that handles all the housekeeping of the QueryExecutor interface

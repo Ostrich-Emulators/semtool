@@ -29,10 +29,10 @@ import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.util.GuiUtility;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import org.openrdf.model.Model;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  * This class is used to create a menu item for the neighborhood.

@@ -36,7 +36,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.output.WriterOutputStream;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * Creates a GraphML file from the given data

@@ -7,11 +7,11 @@ package com.ostrichemulators.semtool.rdf.query.util.impl;
 
 import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
 import java.util.List;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
 
 /**
  * A query adapter that returns a single value for the variable. If no variable

@@ -34,11 +34,11 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * A class to encapsulate relationship loading sheet information.
@@ -64,7 +64,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	}
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String type,
-			Map<String, URI> props ) throws IOException {
+			Map<String, IRI> props ) throws IOException {
 		this( tabtitle, type, null, null, props );
 	}
 
@@ -84,7 +84,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 	}
 
 	protected DiskBackedLoadingSheetData( String tabtitle, String sType, String oType,
-			String relname, Map<String, URI> props ) throws IOException {
+			String relname, Map<String, IRI> props ) throws IOException {
 		super( tabtitle, sType, oType, relname, props );
 
 		backingfile = File.createTempFile( tabtitle + "-", ".lsdata" );
@@ -232,13 +232,13 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 				if ( val instanceof Literal ) {
 					Literal l = Literal.class.cast( val );
 					if ( null == l.getLanguage() ) {
-						URI dt = l.getDatatype();
+						IRI dt = l.getDatatype();
 						if ( null != dt ) {
 							jgen.writeStringField( "dt", dt.stringValue() );
 						}
 					}
 					else {
-						jgen.writeStringField( "lang", l.getLanguage() );
+						jgen.writeStringField( "lang", l.getLanguage().get() );
 					}
 				}
 				jgen.writeEndObject();
@@ -252,7 +252,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 
 		@Override
 		public LoadingNodeAndPropertyValues deserialize( JsonParser jp, DeserializationContext ctxt ) throws IOException, JsonProcessingException {
-			ValueFactory vf = new ValueFactoryImpl();
+			ValueFactory vf = SimpleValueFactory.getInstance();
 
 			JsonNode node = jp.getCodec().readTree( jp );
 			LoadingNodeAndPropertyValues nap

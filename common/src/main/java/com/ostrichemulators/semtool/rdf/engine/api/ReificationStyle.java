@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.api;
 
 import com.ostrichemulators.semtool.util.Constants;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  *

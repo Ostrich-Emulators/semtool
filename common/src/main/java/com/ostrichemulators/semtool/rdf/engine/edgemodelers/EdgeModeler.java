@@ -11,12 +11,12 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import java.util.Map;
-import org.openrdf.model.Model;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  *
@@ -37,7 +37,7 @@ public interface EdgeModeler {
 	 * @return the newly-created relationship node
 	 * @throws RepositoryException
 	 */
-	public URI addRel( LoadingNodeAndPropertyValues nap,
+	public IRI addRel( LoadingNodeAndPropertyValues nap,
 			Map<String, String> namespaces, LoadingSheetData sheet,
 			ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException;
 
@@ -54,7 +54,7 @@ public interface EdgeModeler {
 	 * @return the newly-create node
 	 * @throws RepositoryException
 	 */
-	public URI addNode( LoadingNodeAndPropertyValues nap,
+	public IRI addNode( LoadingNodeAndPropertyValues nap,
 			Map<String, String> namespaces, LoadingSheetData sheet,
 			ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException;
 
@@ -72,7 +72,7 @@ public interface EdgeModeler {
 	 *
 	 * @throws RepositoryException
 	 */
-	public void addProperties( URI subject, Map<String, Value> properties,
+	public void addProperties( IRI subject, Map<String, Value> properties,
 			Map<String, String> namespaces, LoadingSheetData sheet,
 			ImportMetadata metas, RepositoryConnection rc ) throws RepositoryException;
 

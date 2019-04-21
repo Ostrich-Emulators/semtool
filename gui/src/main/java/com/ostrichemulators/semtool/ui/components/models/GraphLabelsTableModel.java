@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 /**
  *

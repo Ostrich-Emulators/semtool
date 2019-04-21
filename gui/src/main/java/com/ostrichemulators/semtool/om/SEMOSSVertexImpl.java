@@ -20,8 +20,8 @@
 package com.ostrichemulators.semtool.om;
 
 import java.util.Map;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * Variables are transient because this tells the json writer to ignore them

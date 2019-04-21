@@ -7,13 +7,13 @@ package com.ostrichemulators.semtool.rdf.query.util.impl;
 
 import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.query.BindingSet;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.query.BindingSet;
 
 /**
  *

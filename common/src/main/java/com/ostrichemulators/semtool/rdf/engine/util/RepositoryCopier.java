@@ -6,10 +6,10 @@
 package com.ostrichemulators.semtool.rdf.engine.util;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Statement;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.rio.RDFHandler;
-import org.openrdf.rio.RDFHandlerException;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
 
 /**
  *

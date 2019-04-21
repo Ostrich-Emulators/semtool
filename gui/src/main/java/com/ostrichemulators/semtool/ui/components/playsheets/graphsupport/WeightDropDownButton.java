@@ -62,8 +62,8 @@ import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  * This class is used to create the button that allows the weight to be

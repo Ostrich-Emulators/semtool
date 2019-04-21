@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Value;
 
 import com.google.gson.Gson;
 

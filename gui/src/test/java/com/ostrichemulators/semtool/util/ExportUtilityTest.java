@@ -15,8 +15,8 @@ import javax.swing.JFrame;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.model.Model;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 
 
 public class ExportUtilityTest {

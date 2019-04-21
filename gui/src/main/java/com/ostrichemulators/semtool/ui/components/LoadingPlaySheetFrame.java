@@ -60,8 +60,8 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Value;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  *

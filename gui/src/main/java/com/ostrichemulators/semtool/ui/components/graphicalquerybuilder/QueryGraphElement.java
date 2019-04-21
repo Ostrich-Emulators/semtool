@@ -9,8 +9,8 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
 
 /**
  *

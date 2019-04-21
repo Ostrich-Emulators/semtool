@@ -29,8 +29,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 
 import org.apache.log4j.Logger;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.util.GuiUtility;
 import com.ostrichemulators.semtool.ui.components.FileBrowsePanel;
@@ -46,11 +46,11 @@ import java.io.FileWriter;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FilenameUtils;
-import org.openrdf.model.Namespace;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.ntriples.NTriplesWriter;
-import org.openrdf.rio.turtle.TurtleWriter;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 /**
  *

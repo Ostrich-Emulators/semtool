@@ -24,18 +24,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import org.apache.log4j.Logger;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.impl.TreeModel;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  *
@@ -44,7 +45,7 @@ import org.openrdf.repository.RepositoryException;
 public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 	private static final Logger log = Logger.getLogger( AbstractEdgeModeler.class );
-	private final Set<URI> duplicates;
+	private final Set<IRI> duplicates;
 	private QaChecker qaer;
 
 	public AbstractEdgeModeler( QaChecker qa ) {
@@ -110,16 +111,16 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	 * @param myrc
 	 * @param checkCacheFirst
 	 * @return
-	 * @throws org.openrdf.repository.RepositoryException
+	 * @throws org.eclipse.rdf4j.repository.RepositoryException
 	 */
-	protected URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
+	protected IRI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
 			ImportMetadata metas, RepositoryConnection myrc, boolean checkCacheFirst )
 			throws RepositoryException {
 
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
 
 		if ( nodeIsAlreadyUri ) {
-			URI subject = getUriFromRawString( rawlabel, namespaces );
+			IRI subject = getUriFromRawString( rawlabel, namespaces );
 			cacheInstance( subject, typename, rawlabel );
 		}
 		else {
@@ -138,7 +139,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		return subject;
 	}
 
-	protected URI ensureUnique( URI uri ) {
+	protected IRI ensureUnique( IRI uri ) {
 		if ( duplicates.contains( uri ) ) {
 			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
 			uri = dupefixer.uniqueUri();
@@ -148,7 +149,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	@Override
-	public URI addNode( LoadingSheetData.LoadingNodeAndPropertyValues nap,
+	public IRI addNode( LoadingSheetData.LoadingNodeAndPropertyValues nap,
 			Map<String, String> namespaces, LoadingSheetData sheet, ImportMetadata metas,
 			RepositoryConnection myrc ) throws RepositoryException {
 
@@ -165,7 +166,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 			Value val = getRDFStringValue( rawlabel, namespaces, vf );
 			// check if we have a prefixed URI
-			URI u = getUriFromRawString( rawlabel, namespaces );
+			IRI u = getUriFromRawString( rawlabel, namespaces );
 			savelabel = ( savelabel && null == u );
 			rawlabel = val.stringValue();
 		}
@@ -208,7 +209,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	public Model createMetamodel( ImportData alldata, Map<String, String> namespaces,
 			ValueFactory vf ) throws RepositoryException {
 		if ( null == vf ) {
-			vf = new ValueFactoryImpl();
+			vf = SimpleValueFactory.getInstance();
 		}
 
 		Model model = new TreeModel();
@@ -223,7 +224,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 			if ( !hasCachedInstanceClass( stype ) ) {
 				boolean nodeAlreadyMade = isUri( stype, namespaces );
 
-				URI subtype = ( nodeAlreadyMade
+				IRI subtype = ( nodeAlreadyMade
 						? getUriFromRawString( stype, namespaces )
 						: schema.build( stype ) );
 				cacheInstanceClass( subtype, stype );
@@ -240,7 +241,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				if ( !hasCachedInstanceClass( otype ) ) {
 					boolean nodeAlreadyMade = isUri( otype, namespaces );
 
-					URI objtype = ( nodeAlreadyMade
+					IRI objtype = ( nodeAlreadyMade
 							? getUriFromRawString( otype, namespaces )
 							: schema.build( otype ) );
 
@@ -323,7 +324,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				boolean alreadyMadeProp = isUri( propname, namespaces );
 
 				if ( !hasCachedPropertyClass( propname ) ) {
-					URI predicate = ( alreadyMadeProp
+					IRI predicate = ( alreadyMadeProp
 							? getUriFromRawString( propname, namespaces )
 							: schema.build( propname ) );
 					cachePropertyClass( predicate, propname );
@@ -362,23 +363,23 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		qaer = q;
 	}
 
-	public URI getCachedRelation( RelationCacheKey key ) {
+	public IRI getCachedRelation( RelationCacheKey key ) {
 		return qaer.getCachedRelation( key );
 	}
 
-	public URI getCachedInstance( String typename, String rawlabel ) {
+	public IRI getCachedInstance( String typename, String rawlabel ) {
 		return qaer.getCachedInstance( typename, rawlabel );
 	}
 
-	public URI getCachedInstanceClass( String name ) {
+	public IRI getCachedInstanceClass( String name ) {
 		return qaer.getCachedInstanceClass( name );
 	}
 
-	public URI getCachedRelationClass( String rel ) {
+	public IRI getCachedRelationClass( String rel ) {
 		return qaer.getCachedRelationClass( rel );
 	}
 
-	public URI getCachedPropertyClass( String name ) {
+	public IRI getCachedPropertyClass( String name ) {
 		return qaer.getCachedPropertyClass( name );
 	}
 
@@ -407,33 +408,33 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		return qaer.hasCachedInstanceClass( name );
 	}
 
-	public void cacheInstanceClass( URI uri, String label ) {
+	public void cacheInstanceClass( IRI uri, String label ) {
 		qaer.cacheInstanceClass( uri, label );
 		duplicates.add( uri );
 	}
 
-	public void cacheRelationNode( URI uri, String stype, String otype,
+	public void cacheRelationNode( IRI uri, String stype, String otype,
 			String relname, String slabel, String olabel ) {
 		qaer.cacheRelationNode( uri, stype, otype, relname, slabel, olabel );
 		duplicates.add( uri );
 	}
 
-	public void cacheRelationNode( URI uri, RelationCacheKey key ) {
+	public void cacheRelationNode( IRI uri, RelationCacheKey key ) {
 		qaer.cacheRelationNode( uri, key );
 		duplicates.add( uri );
 	}
 
-	public void cacheRelationClass( URI uri, String rel ) {
+	public void cacheRelationClass( IRI uri, String rel ) {
 		qaer.cacheRelationClass( uri, rel );
 		duplicates.add( uri );
 	}
 
-	public void cacheInstance( URI uri, String typelabel, String rawlabel ) {
+	public void cacheInstance( IRI uri, String typelabel, String rawlabel ) {
 		qaer.cacheInstance( uri, typelabel, rawlabel );
 		duplicates.add( uri );
 	}
 
-	public void cachePropertyClass( URI uri, String name ) {
+	public void cachePropertyClass( IRI uri, String name ) {
 		qaer.cachePropertyClass( uri, name );
 		duplicates.add( uri );
 	}

@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.InsightOutputType;
 import com.ostrichemulators.semtool.om.Parameter;
@@ -30,7 +30,7 @@ import com.ostrichemulators.semtool.util.Utility;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  *

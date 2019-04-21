@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.util;
 
 import java.util.Comparator;
-import org.openrdf.model.Statement;
+import org.eclipse.rdf4j.model.Statement;
 
 /**
  * A class to sort a list of Statements. From almost every angle, this class is
