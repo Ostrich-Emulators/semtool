@@ -38,9 +38,8 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -60,7 +59,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	};
 
 	private static final String[] columnNames = { "Name ", "Value" };
-	private static final Class<?>[] classNames = { URI.class, Value.class };
+	private static final Class<?>[] classNames = { IRI.class, Value.class };
 	private final List<PropertyRow> rows = new ArrayList<>();
 	private GraphElement vertex = null;
 	private SemossGraphVisualization viz;
@@ -94,9 +93,9 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 		Collection<SEMOSSEdge> outs = viz.getGraph().getOutEdges( item );
 		
 		rows.add( new PropertyRow( Constants.IN_EDGE_CNT,
-				new LiteralImpl( Integer.toString( ins.size() ), XMLSchema.INT ), true ) );
+				SimpleValueFactory.getInstance().createLiteral( Integer.toString( ins.size() ), XMLSchema.INT ), true ) );
 		rows.add( new PropertyRow( Constants.OUT_EDGE_CNT,
-				new LiteralImpl( Integer.toString( outs.size() ), XMLSchema.INT ), true ) );
+				SimpleValueFactory.getInstance().createLiteral( Integer.toString( outs.size() ), XMLSchema.INT ), true ) );
 		refresh( item );
 	}
 

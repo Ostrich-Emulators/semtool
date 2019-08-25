@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * This class is used to create a table model for the vertex filter.
@@ -41,7 +41,7 @@ import org.eclipse.rdf4j.model.URI;
 public class NodeEdgeFilterTableModel<T extends GraphElement> extends AbstractTableModel {
 
 	private static final long serialVersionUID = 6010606033514579342L;
-	private static final Class<?>[] classNames = { Boolean.class, URI.class, URI.class };
+	private static final Class<?>[] classNames = { Boolean.class, IRI.class, IRI.class };
 
 	private final String[] columnNames = { "Show", "", "Instance" };
 	private final List<FilterRow> data = new ArrayList<>();
@@ -60,12 +60,12 @@ public class NodeEdgeFilterTableModel<T extends GraphElement> extends AbstractTa
 		data.clear();
 		viz = v;
 
-		MultiMap<URI, T> typeToInstances = new MultiMap<>();
+		MultiMap<IRI, T> typeToInstances = new MultiMap<>();
 		for ( T t : instances ) {
 			typeToInstances.add( t.getType(), t );
 		}
 
-		for ( Map.Entry<URI, List<T>> en : typeToInstances.entrySet() ) {
+		for ( Map.Entry<IRI, List<T>> en : typeToInstances.entrySet() ) {
 			data.add( new FilterRow( en.getKey(), null ) );
 
 			for ( T instance : en.getValue() ) {
@@ -106,7 +106,7 @@ public class NodeEdgeFilterTableModel<T extends GraphElement> extends AbstractTa
 		}
 	}
 
-	private boolean typeIsHidden( URI type ) {
+	private boolean typeIsHidden( IRI type ) {
 		int visible = 0;
 
 		for ( FilterRow fr : data ) {
@@ -200,10 +200,10 @@ public class NodeEdgeFilterTableModel<T extends GraphElement> extends AbstractTa
 
 	public class FilterRow<T extends GraphElement> implements Comparable<FilterRow> {
 
-		public final URI type;
+		public final IRI type;
 		public final T instance;
 
-		public FilterRow( URI type, T nodeedge ) {
+		public FilterRow( IRI type, T nodeedge ) {
 			this.type = type;
 			this.instance = nodeedge;
 		}

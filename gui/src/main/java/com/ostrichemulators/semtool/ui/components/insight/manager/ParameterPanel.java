@@ -28,7 +28,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -167,22 +167,22 @@ public class ParameterPanel extends DataPanel<Parameter> {
 
   private void conceptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conceptbtnActionPerformed
 		StructureManager sm = StructureManagerFactory.getStructureManager( getEngine() );
-		Set<URI> uris = sm.getTopLevelConcepts();
-		Map<URI, String> labels = Utility.getInstanceLabels( uris, getEngine() );
-		labels = Utility.sortUrisByLabel( labels );
+		Set<IRI> uris = sm.getTopLevelConcepts();
+		Map<IRI, String> labels = Utility.getInstanceLabels( uris, getEngine() );
+		labels = Utility.sortIrisByLabel( labels );
 
 		Parameter parameter = getElement();
-		Map<URI, Parameter> parameters = new HashMap<>();
+		Map<IRI, Parameter> parameters = new HashMap<>();
 		// we want the user to be able to select a parent parameter,
 		// but we don't have that functionality yet, so we'll simulate it here
-				
+
 		List<Parameter> currentparams = new ArrayList<>();
-		Enumeration<DefaultMutableTreeNode> en = getNode().children();
-		while( en.hasMoreElements() ){
-			DefaultMutableTreeNode child = en.nextElement();
+		Enumeration en = getNode().children();
+		while ( en.hasMoreElements() ) {
+			DefaultMutableTreeNode child = DefaultMutableTreeNode.class.cast( en.nextElement() );
 			currentparams.add( Parameter.class.cast( child.getUserObject() ) );
 		}
-		
+
 		for ( Parameter p : currentparams ) {
 			if ( !p.equals( parameter ) ) {
 				parameters.put( p.getId(), p );
@@ -197,8 +197,8 @@ public class ParameterPanel extends DataPanel<Parameter> {
 
 		labels.put( Constants.ANYNODE, "<Any Concept>" );
 
-		JComboBox<URI> combo = new IriComboBox( uris );
-		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
+		JComboBox<IRI> combo = new IriComboBox( uris );
+		LabeledPairRenderer<IRI> renderer = LabeledPairRenderer.getUriPairRenderer();
 		renderer.cache( labels );
 		combo.setRenderer( renderer );
 		String opts[] = { "Ok", "Cancel" };
@@ -206,7 +206,7 @@ public class ParameterPanel extends DataPanel<Parameter> {
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0] );
 
 		if ( JOptionPane.YES_OPTION == ans ) {
-			URI type = combo.getItemAt( combo.getSelectedIndex() );
+			IRI type = combo.getItemAt( combo.getSelectedIndex() );
 			if ( Constants.ANYNODE.equals( type ) ) {
 				parameterQuery.setText( "SELECT ?concept\nWHERE {\n  ?concept rdfs:subClassOf <"
 						+ getEngine().getSchemaBuilder().getConceptIri().build() + ">\n}" );
@@ -252,7 +252,7 @@ public class ParameterPanel extends DataPanel<Parameter> {
 	}
 
 	@Override
-	protected void clear(){
+	protected void clear() {
 		vartext.setText( null );
 		parameterQuery.setText( null );
 		parameterQuery.setText( null );

@@ -36,9 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
@@ -89,7 +88,7 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 
 		// make sure we display the sparql id
 		properties.put( RDF.SUBJECT,
-				new HashSet<>( Arrays.asList( new LiteralImpl( vertex.getQueryId() ) ) ) );
+				new HashSet<>( Arrays.asList( SimpleValueFactory.getInstance().createLiteral( vertex.getQueryId() ) ) ) );
 
 		updateLabels( properties );
 
@@ -108,8 +107,8 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 				if ( null == propval || propval.isEmpty() ) {
 					propval = "&lt;Any&gt;";
 				}
-				if ( value instanceof URI ) {
-					propval = labels.get( URI.class.cast( value ) );
+				if ( value instanceof IRI ) {
+					propval = labels.get( IRI.class.cast( value ) );
 				}
 
 				if ( !first ) {

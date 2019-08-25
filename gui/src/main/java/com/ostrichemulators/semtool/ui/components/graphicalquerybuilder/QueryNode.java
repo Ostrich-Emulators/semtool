@@ -8,7 +8,6 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 
 /**
  * An extension of SEMOSSVertex to allow multiple values for one property

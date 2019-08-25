@@ -11,10 +11,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 /**
@@ -23,7 +23,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
  */
 public class SimpleValueEditor extends DefaultCellEditor {
 
-	private URI datatype;
+	private IRI datatype;
 
 	public SimpleValueEditor() {
 		super( new JTextField() );
@@ -45,7 +45,7 @@ public class SimpleValueEditor extends DefaultCellEditor {
 	@Override
 	public Object getCellEditorValue() {
 		Object o = super.getCellEditorValue();
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		Value val = null;
 		try {
 			val = vf.createLiteral( o.toString(), datatype );

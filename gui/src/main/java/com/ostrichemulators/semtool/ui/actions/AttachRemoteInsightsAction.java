@@ -47,7 +47,7 @@ public class AttachRemoteInsightsAction extends RemoteEndpointAction {
 					//String password = props.getProperty( "password", "" );
 
 					repo = new HTTPRepository( insights );
-					repo.initialize();
+					repo.init();
 					InsightManager imi = InsightManagerImpl.createFromRepository( repo );
 					getEngine().setInsightManager( imi );
 					EngineUtil.getInstance().notifyInsightsModified( getEngine(), imi );

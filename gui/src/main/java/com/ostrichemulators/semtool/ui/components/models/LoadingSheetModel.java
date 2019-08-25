@@ -17,7 +17,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -146,7 +146,7 @@ public class LoadingSheetModel extends ValueTableModel {
 	public void setValueAt( Object aValue, int r, int c ) {
 		boolean isinsert = isInsertRow( r );
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 
 		if ( isinsert ) {
 			LoadingNodeAndPropertyValues nap = sheetdata.add( aValue.toString() );
@@ -337,7 +337,7 @@ public class LoadingSheetModel extends ValueTableModel {
 		int count = 0;
 
 		log.debug( "filling model for tab: " + naps.getName() );
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		List<String> heads = naps.getHeaders();
 		List<Value[]> valdata = new ArrayList<>();
 
@@ -356,7 +356,6 @@ public class LoadingSheetModel extends ValueTableModel {
 			}
 		}
 		log.debug( String.format( "filled %d rows", count ) );
-
 
 		super.setData( valdata, heads );
 	}

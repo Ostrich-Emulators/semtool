@@ -68,9 +68,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.impl.URIImpl;
 
 /**
  *
@@ -418,7 +416,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 	}
 
-	private String createVariableId( QueryGraphElement v, URI type,
+	private String createVariableId( QueryGraphElement v, IRI type,
 			Collection<QueryGraphElement> nodesAndEdges ) {
 		// just like createQueryId, but for objects
 		Set<String> used = new HashSet<>();

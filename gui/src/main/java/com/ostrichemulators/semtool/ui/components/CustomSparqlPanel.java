@@ -50,6 +50,7 @@ import com.ostrichemulators.semtool.util.MultiMap;
 import java.io.File;
 import java.io.IOException;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -348,7 +349,7 @@ public class CustomSparqlPanel extends JPanel {
 
 	public void loadFileToEmptyEditor( File file ) {
 		try {
-			String sparql = FileUtils.readFileToString( file );
+			String sparql = FileUtils.readFileToString( file, Charset.defaultCharset() );
 			sparqlArea.loadToEmptyTab( sparql );
 		}
 		catch ( IOException ioe ) {

@@ -74,6 +74,7 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
 import com.google.gson.Gson;
+import java.nio.charset.Charset;
 
 /**
  * The BrowserPlaySheet creates an instance of a browser to utilize the D3
@@ -370,7 +371,7 @@ public abstract class BrowserPlaySheet2 extends ImageExportingPlaySheet {
 			if ( null != svgdoc ) {
 				try {
 					File errsvg = new File( FileUtils.getTempDirectory(), "graphvisualization.svg" );
-					FileUtils.write( errsvg, svgdoc.asXML() );
+					FileUtils.write( errsvg, svgdoc.asXML(), Charset.defaultCharset() );
 					msg = "Could not create the image. SVG data store here: "
 							+ errsvg.getAbsolutePath();
 				}

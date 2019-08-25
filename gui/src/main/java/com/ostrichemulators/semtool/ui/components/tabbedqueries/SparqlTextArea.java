@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 
+import java.nio.charset.Charset;
 import javax.swing.JFileChooser;
 import javax.swing.JPopupMenu;
 import javax.swing.filechooser.FileFilter;
@@ -246,7 +247,7 @@ public class SparqlTextArea extends RSyntaxTextArea {
 
 		@Override
 		protected void saveTo( File exploc ) throws IOException {
-			FileUtils.write(exploc, SparqlTextArea.this.getText() );
+			FileUtils.write(exploc, SparqlTextArea.this.getText(), Charset.defaultCharset());
 		}
 
 		@Override

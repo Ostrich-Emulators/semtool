@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -59,8 +59,8 @@ public class CountyHeatMapPlaySheet extends BrowserPlaySheet2 {
 			for ( int j = 0; j < var.length; j++ ) {
 				String colName = var[j];
 				Value v = listElement[j];
-				if ( v instanceof URI ) {
-					URI u = URI.class.cast( v );
+				if ( v instanceof IRI ) {
+					IRI u = IRI.class.cast( v );
 					elementHash.put( colName, u.getLocalName() );
 				}
 				else if ( v instanceof Literal ) {

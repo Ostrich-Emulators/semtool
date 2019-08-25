@@ -42,7 +42,6 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 
 /**
  *
@@ -77,7 +76,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		Set<IRI> dbs = DIHelper.getInstance().getMetadataStore().getDatabases();
 
 		// per-database graph settings don't work yet, so don't give a user the option
-//		for ( URI u : dbs ) {
+//		for ( IRI u : dbs ) {
 //			dbmodel.addElement( u );
 //		}
 		for ( IEngine eng : DIHelper.getInstance().getEngineMap().values() ) {
@@ -184,8 +183,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	}
 
 	public IRI getDb() {
-		IRI uri = dbchsr.getItemAt( dbchsr.getSelectedIndex() );
-		return ( Constants.ANYNODE.equals( uri ) ? null : uri );
+		IRI IRI = dbchsr.getItemAt( dbchsr.getSelectedIndex() );
+		return ( Constants.ANYNODE.equals( IRI ) ? null : IRI );
 	}
 
 	public Map<IRI, Color> getColors() {
@@ -203,8 +202,8 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		return icons;
 	}
 
-	private void setPanel( URI type, URI instance ) {
-		URI me = instance;
+	private void setPanel( IRI type, IRI instance ) {
+		IRI me = instance;
 
 		title.setText( String.format( cache.get( me ) ) );
 		uri.setText( me.stringValue() );
@@ -228,7 +227,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 
 	private void setNewPanel() {
 		if ( null != tree.getSelectionPath() ) {
-			URI me = getUriFromPath( tree.getSelectionPath() );
+			IRI me = getUriFromPath( tree.getSelectionPath() );
 			shapefactory.set( me, colors.getSelectedValue(), shapes.getSelectedValue() );
 		}
 
@@ -237,9 +236,9 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 				.setPadding( 2 ).setIconSize( 40 ).build() );
 	}
 
-	private static URI getUriFromPath( TreePath tp ) {
+	private static IRI getUriFromPath( TreePath tp ) {
 		DefaultMutableTreeNode node = DefaultMutableTreeNode.class.cast( tp.getLastPathComponent() );
-		URI uri = URI.class.cast( node.getUserObject() );
+		IRI uri = IRI.class.cast( node.getUserObject() );
 		return uri;
 	}
 

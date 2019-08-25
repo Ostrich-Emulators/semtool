@@ -58,7 +58,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
@@ -96,7 +96,7 @@ public class OpenAction extends DbAction {
 
 		JFileChooser chsr = new JFileChooser( f );
 		chsr.setFileSelectionMode( JFileChooser.FILES_ONLY );
-		chsr.setFileView(new SemtoolFileView() );
+		chsr.setFileView( new SemtoolFileView() );
 		chsr.setFileFilter( FileBrowsePanel.getLoadingSheetsFilter( true ) );
 		chsr.addChoosableFileFilter( FileBrowsePanel.getDatabaseFilter( openedDbs ) );
 		chsr.setDialogTitle( "Select File to Import" );
@@ -343,7 +343,7 @@ public class OpenAction extends DbAction {
 			psf.addProgress( "Reading " + fileToLoad, progressPerFile );
 			try {
 				psf.setTitle( fileToLoad.getName() );
-				ValueFactory vf = new ValueFactoryImpl();
+				ValueFactory vf = SimpleValueFactory.getInstance();
 				ImportData data = POIReader.readNonloadingSheet( fileToLoad );
 				for ( LoadingSheetData lsd : data.getSheets() ) {
 					ValueTableModel vtm = new ValueTableModel();

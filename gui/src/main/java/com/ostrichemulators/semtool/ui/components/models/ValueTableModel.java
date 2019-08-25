@@ -21,11 +21,11 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 /**
@@ -41,9 +41,9 @@ public class ValueTableModel extends AbstractTableModel {
 	private static final Logger log = Logger.getLogger( ValueTableModel.class );
 	private static final long serialVersionUID = 7491106662313232478L;
 	private static final String EVERYTHING = "everything"; // for prop listeners
-	private static final Map<URI, Class<?>> TYPELOOKUP = new HashMap<>();
-	private static final Map<Class<?>, URI> DATATYPELOOKUP = new HashMap<>();
-	private static final ValueFactory VF = new ValueFactoryImpl();
+	private static final Map<IRI, Class<?>> TYPELOOKUP = new HashMap<>();
+	private static final Map<Class<?>, IRI> DATATYPELOOKUP = new HashMap<>();
+	private static final ValueFactory VF = SimpleValueFactory.getInstance();
 
 	private final List<Object[]> data = new ArrayList<>();
 	private final List<String> headers = new ArrayList<>();
@@ -177,11 +177,11 @@ public class ValueTableModel extends AbstractTableModel {
 		fireTableStructureChanged();
 	}
 
-	public void setHeaders( Map<String, URI> heads ) {
+	public void setHeaders( Map<String, IRI> heads ) {
 		headers.clear();
 		columnClasses.clear();
 
-		for ( Map.Entry<String, URI> en : heads.entrySet() ) {
+		for ( Map.Entry<String, IRI> en : heads.entrySet() ) {
 			headers.add( en.getKey() );
 			columnClasses.add( TYPELOOKUP.get( en.getValue() ) );
 		}
@@ -239,7 +239,7 @@ public class ValueTableModel extends AbstractTableModel {
 
 		String valstr = val.toString();
 		Class<?> klass = getColumnClass( c );
-		URI datatype = DATATYPELOOKUP.get( klass );
+		IRI datatype = DATATYPELOOKUP.get( klass );
 		return ( null == datatype ? VF.createLiteral( valstr )
 				: VF.createLiteral( valstr, datatype ) );
 	}
@@ -332,8 +332,8 @@ public class ValueTableModel extends AbstractTableModel {
 					if ( null == val ) {
 						arr[i] = null;
 					}
-					else if ( URI.class == cc ) {
-						arr[i] = URI.class.cast( val );
+					else if ( IRI.class == cc ) {
+						arr[i] = IRI.class.cast( val );
 					}
 					else if ( Object.class == cc ) {
 						arr[i] = val.stringValue();

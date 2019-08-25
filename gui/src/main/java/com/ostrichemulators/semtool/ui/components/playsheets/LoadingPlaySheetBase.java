@@ -32,13 +32,12 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -284,7 +283,7 @@ public abstract class LoadingPlaySheetBase extends GridRAWPlaySheet implements A
 		public void actionPerformed( ActionEvent e ) {
 			TableColumnModel tcm = getTable().getColumnModel();
 			List<Value[]> vals = new ArrayList<>();
-			ValueFactory vf = new ValueFactoryImpl();
+			ValueFactory vf = SimpleValueFactory.getInstance();
 			for ( int col = 0; col < tcm.getColumnCount(); col++ ) {
 				String val = tcm.getColumn( col ).getHeaderValue().toString();
 				vals.add( new Value[]{ vf.createLiteral( val ) } );

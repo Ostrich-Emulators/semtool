@@ -15,9 +15,9 @@ import java.util.HashSet;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
@@ -81,7 +81,7 @@ public class StatementPersistenceUtility {
 	}
 
 	public static void deleteNodeOrEdgeProperty( IEngine engine, GraphElement nodeOrEdge,
-			URI name, Value value ) {
+			IRI name, Value value ) {
 		Value subject = nodeOrEdge.getIRI();
 		if ( !( subject instanceof Resource ) ) {
 			log.warn( "Trying to delete property with name: " + name + " and value: " + value
@@ -89,11 +89,11 @@ public class StatementPersistenceUtility {
 			return;
 		}
 
-		deleteStatement( engine, new StatementImpl( (Resource) subject, name, value ) );
+		deleteStatement( engine, SimpleValueFactory.getInstance().createStatement( (Resource) subject, name, value ) );
 	}
 
 	public static void saveNodeOrEdgeProperty( IEngine engine, GraphElement nodeOrEdge,
-			URI name, Value value ) {
+			IRI name, Value value ) {
 		Value subject = nodeOrEdge.getIRI();
 		if ( !( subject instanceof Resource ) ) {
 			log.warn( "Trying to save property with name: " + name + " and value: "
@@ -101,11 +101,11 @@ public class StatementPersistenceUtility {
 			return;
 		}
 
-		saveStatement( engine, new StatementImpl( (Resource) subject, name, value ) );
+		saveStatement( engine, SimpleValueFactory.getInstance().createStatement( (Resource) subject, name, value ) );
 	}
 
 	public static void updateNodeOrEdgePropertyValue( IEngine engine, 
-			GraphElement nodeOrEdge, URI name, Value oldValue, Value newValue ) {
+			GraphElement nodeOrEdge, IRI name, Value oldValue, Value newValue ) {
 		deleteNodeOrEdgeProperty( engine, nodeOrEdge, name, oldValue );
 		saveNodeOrEdgeProperty( engine, nodeOrEdge, name, newValue );
 	}

@@ -65,7 +65,7 @@ public class PieChartPlaySheet extends BrowserPlaySheet2 {
 		}
 
 		for ( HashMap<String, Object> thisMap : dataSeries ) {
-			Float percent = 100F * new Float( thisMap.get( "value" ).toString() ) / valuesTotal;
+			Float percent = 100F * Float.parseFloat( thisMap.get( "value" ).toString() ) / valuesTotal;
 			thisMap.put( "y", percent );
 		}
 

@@ -30,7 +30,7 @@ import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
@@ -43,7 +43,7 @@ public class InstancePropertyTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = -1980815818428292267L;
 
 	private static final String[] COLNAMES = { "Property Name", "XML Datatype", "Value" };
-	private static final Class<?>[] CLASSNAMES = { URI.class, URI.class, Value.class };
+	private static final Class<?>[] CLASSNAMES = { IRI.class, IRI.class, Value.class };
 	private final List<Statement> rows;
 
 	/**

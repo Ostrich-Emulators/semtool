@@ -226,9 +226,9 @@ public class InsightPanel extends DataPanel<Insight> {
 
 		List<Parameter> params = new ArrayList<>();
 		DefaultMutableTreeNode node = getNode();
-		Enumeration<DefaultMutableTreeNode> en = node.children();
+		Enumeration en = node.children();
 		while ( en.hasMoreElements() ) {
-			DefaultMutableTreeNode child = en.nextElement();
+			DefaultMutableTreeNode child = DefaultMutableTreeNode.class.cast( en.nextElement() );
 			params.add( Parameter.class.cast( child.getUserObject() ) );
 		}
 
@@ -289,9 +289,9 @@ public class InsightPanel extends DataPanel<Insight> {
 			return;
 		}
 
-		Enumeration<DefaultMutableTreeNode> en = getNode().children();
+		Enumeration en = getNode().children();
 		while ( en.hasMoreElements() ) {
-			DefaultMutableTreeNode n = en.nextElement();
+			DefaultMutableTreeNode n = DefaultMutableTreeNode.class.cast( en.nextElement() );
 			Parameter p = Parameter.class.cast( n.getUserObject() );
 			map.put( p.getVariable(), p );
 		}

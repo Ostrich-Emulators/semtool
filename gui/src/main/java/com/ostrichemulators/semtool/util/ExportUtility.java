@@ -41,6 +41,7 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -57,7 +58,7 @@ public class ExportUtility {
 		}
 
 		try {
-			FileUtils.write( file, data );
+			FileUtils.write( file, data, Charset.defaultCharset() );
 			GuiUtility.showExportMessage( JOptionPane.getFrameForComponent( component ),
 					"Export successful: " + file.getAbsolutePath(), "Export Successful", file );
 		}

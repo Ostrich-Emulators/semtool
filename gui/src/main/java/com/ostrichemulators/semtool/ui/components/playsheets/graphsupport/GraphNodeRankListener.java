@@ -25,7 +25,6 @@ import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 
 import com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.GridRAWPlaySheet;
-import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTableCellRenderer;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,10 +34,10 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Controls the running of the node rank algorithm
@@ -90,9 +89,9 @@ public class GraphNodeRankListener extends AbstractAction {
 		List<Value[]> list = new ArrayList<>();
 
 		// process the graph and list out all nodes, type, pagerank
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		for ( SEMOSSVertex v : col ) {
-			URI type = v.getType();
+			IRI type = v.getType();
 			double r = ranker.getVertexScore( v );
 
 			Value[] scores

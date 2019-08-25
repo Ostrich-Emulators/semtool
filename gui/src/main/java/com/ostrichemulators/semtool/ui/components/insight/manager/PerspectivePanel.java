@@ -103,9 +103,9 @@ public class PerspectivePanel extends DataPanel<Perspective> {
 		perspectiveName.setText( p.getLabel() );
 		perspectiveDesc.setText( p.getDescription() );
 
-		Enumeration<DefaultMutableTreeNode> en = node.children();
+		Enumeration en = node.children();
 		while ( en.hasMoreElements() ) {
-			DefaultMutableTreeNode insightnode = en.nextElement();
+			DefaultMutableTreeNode insightnode = DefaultMutableTreeNode.class.cast( en.nextElement() );
 			Insight ins = Insight.class.cast( insightnode.getUserObject() );
 			insightmodel.addElement( ins );
 		}

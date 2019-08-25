@@ -41,11 +41,10 @@ import java.util.Queue;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.URIImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * This class uses the information from DistanceDownstreamInserter in order to
@@ -54,7 +53,7 @@ import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 public class DistanceDownstreamProcessor extends AbstractAction {
 
 	private static final long serialVersionUID = 3191222375480129585L;
-	public static final URI WEIGHT = new URIImpl( "semoss://weight" );
+	public static final IRI WEIGHT = SimpleValueFactory.getInstance().createIRI( "semoss://weight" );
 	private static final Logger log
 			= Logger.getLogger( DistanceDownstreamProcessor.class );
 	protected final DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph;
@@ -71,7 +70,7 @@ public class DistanceDownstreamProcessor extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 
 		Forest<SEMOSSVertex, SEMOSSEdge> forest
 				= GraphToTreeConverter.convertq( graph, selecteds, Search.BFS );

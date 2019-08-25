@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.ui.components.models;
 
-import com.ostrichemulators.semtool.user.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -34,7 +33,7 @@ public class NamespaceTableModel extends ValueTableModel {
 
 	public void setNamespaces( Map<String, String> ns ) {
 		List<Value[]> vals = new ArrayList<>();
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		for ( Map.Entry<String, String> en : ns.entrySet() ) {
 			Value row[] = { vf.createLiteral( en.getKey() ), vf.createLiteral( en.getValue() ) };
 			vals.add( row );

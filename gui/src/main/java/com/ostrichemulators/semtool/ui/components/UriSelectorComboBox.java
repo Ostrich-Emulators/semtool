@@ -8,32 +8,32 @@ package com.ostrichemulators.semtool.ui.components;
 import java.util.Collection;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
  * @author ryan
  */
-public class UriSelectorComboBox extends JComboBox<URI> {
+public class UriSelectorComboBox extends JComboBox<IRI> {
 
-  public UriSelectorComboBox( ComboBoxModel<URI> aModel ) {
+  public UriSelectorComboBox( ComboBoxModel<IRI> aModel ) {
     super( aModel );
   }
 
-  public UriSelectorComboBox( URI[] items ) {
+  public UriSelectorComboBox( IRI[] items ) {
     super( items );
   }
 
-  public UriSelectorComboBox( Collection<URI> items ) {
-    this( items.toArray( new URI[]{} ) );
+  public UriSelectorComboBox( Collection<IRI> items ) {
+    this( items.toArray( new IRI[]{} ) );
   }
 
   public UriSelectorComboBox() {
   }
 
-  public void reset( Collection<URI> newitems ) {
+  public void reset( Collection<IRI> newitems ) {
     removeAllItems();
-    for ( URI u : newitems ) {
+    for ( IRI u : newitems ) {
       this.addItem( u );
     }
   }

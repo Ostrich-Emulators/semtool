@@ -14,7 +14,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -77,10 +77,10 @@ public class LabeledPairTreeCellRenderer<T> extends DefaultTreeCellRenderer {
 		return val.toString();
 	}
 
-	public static LabeledPairTreeCellRenderer<URI> getUriPairRenderer() {
-		return new LabeledPairTreeCellRenderer<URI>() {
+	public static LabeledPairTreeCellRenderer<IRI> getUriPairRenderer() {
+		return new LabeledPairTreeCellRenderer<IRI>() {
 			@Override
-			protected String getLabelForCacheMiss( URI val ) {
+			protected String getLabelForCacheMiss( IRI val ) {
 				return val.getLocalName();
 			}
 		};

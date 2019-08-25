@@ -35,7 +35,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Controls the export graph to grid feature.
@@ -67,7 +67,7 @@ public class GraphPlaySheetEdgeListExporter extends AbstractAction {
 
 		DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = gps.getVisibleGraph();
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		List<Value[]> vals = new ArrayList<>();
 
 		for ( SEMOSSEdge edge : graph.getEdges() ) {

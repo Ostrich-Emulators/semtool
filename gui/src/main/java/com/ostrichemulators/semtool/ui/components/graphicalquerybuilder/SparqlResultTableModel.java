@@ -13,7 +13,6 @@ import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
@@ -27,7 +26,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	private static final String[] COLS
 			= { "Node", "Property", "Value", "Label", "Returned?", "Optional?", "Filter" };
 	private static final Class<?>[] COLCLASSES
-			= { String.class, URI.class, Value.class, String.class, Boolean.class,
+			= { String.class, IRI.class, Value.class, String.class, Boolean.class,
 				Boolean.class, String.class };
 	private final List<QueryOrder> list = new ArrayList<>();
 
@@ -155,9 +154,9 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	public static class RowLocator implements Comparable<RowLocator> {
 
 		public final QueryGraphElement base;
-		public final URI property;
+		public final IRI property;
 
-		public RowLocator( QueryGraphElement base, URI prop ) {
+		public RowLocator( QueryGraphElement base, IRI prop ) {
 			this.base = base;
 			this.property = prop;
 		}

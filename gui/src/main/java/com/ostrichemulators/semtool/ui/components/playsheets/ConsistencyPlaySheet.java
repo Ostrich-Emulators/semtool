@@ -43,10 +43,9 @@ import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -57,7 +56,7 @@ public class ConsistencyPlaySheet extends GridRAWPlaySheet {
 	private static final Logger log = Logger.getLogger( ConsistencyPlaySheet.class );
 	private final JSlider slider = new JSlider( 70, 100 );
 
-	public ConsistencyPlaySheet( URI type, MultiMap<IRI, EngineConsistencyChecker.Hit> hits,
+	public ConsistencyPlaySheet( IRI type, MultiMap<IRI, EngineConsistencyChecker.Hit> hits,
 			Map<IRI, String> labels, IEngine engine ) {
 		super( new ValueTableModel( false ) );
 		getModel().setReadOnly( true );
@@ -76,8 +75,7 @@ public class ConsistencyPlaySheet extends GridRAWPlaySheet {
 		log.debug( "making grid for " + type + " (" + labels.get( type ) + ")" );
 
 		List<Value[]> data = new ArrayList<>();
-		ValueFactory vf = new ValueFactoryImpl();
-
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		// get all the labels we need
 		List<IRI> needlabels = new ArrayList<>();
 
@@ -99,7 +97,7 @@ public class ConsistencyPlaySheet extends GridRAWPlaySheet {
 		float max = -Float.MAX_VALUE;
 
 		for ( Map.Entry<IRI, List<Hit>> en : hits.entrySet() ) {
-			URI needle = en.getKey();
+			IRI needle = en.getKey();
 			for ( Hit hit : en.getValue() ) {
 				float score = hit.getScore();
 				if ( score > max ) {

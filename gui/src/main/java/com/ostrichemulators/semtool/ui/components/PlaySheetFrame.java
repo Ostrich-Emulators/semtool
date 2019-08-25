@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -382,12 +383,12 @@ public class PlaySheetFrame extends JInternalFrame {
 						}
 						else {
 							try {
-								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
+								PlaySheetCentralComponent pscc = overlayee.getClass().getConstructor().newInstance();
 								pscc.setTitle( tabTitleIfNeeded );
 								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
 								pscc.create( model, engine );
 							}
-							catch ( InstantiationException | IllegalAccessException e ) {
+							catch ( IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
 								log.error( e, e );
 							}
 						}
@@ -406,12 +407,12 @@ public class PlaySheetFrame extends JInternalFrame {
 						}
 						else {
 							try {
-								PlaySheetCentralComponent pscc = overlayee.getClass().newInstance();
+								PlaySheetCentralComponent pscc = overlayee.getClass().getConstructor().newInstance();
 								pscc.setTitle( tabTitleIfNeeded );
 								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
 								pscc.create( data, headers, engine );
 							}
-							catch ( InstantiationException | IllegalAccessException e ) {
+							catch ( Exception e ) {
 								log.error( e, e );
 							}
 						}

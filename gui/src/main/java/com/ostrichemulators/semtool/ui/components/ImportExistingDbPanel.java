@@ -36,8 +36,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
@@ -105,7 +105,7 @@ public class ImportExistingDbPanel extends JPanel {
 		baseuri.addItem( ImportCreateDbPanel.METADATABASEURI );
 		Set<String> seen = new HashSet<>();
 		seen.add( ImportCreateDbPanel.METADATABASEURI );
-		for ( String uri : prefs.get( "lastontopath", SEMONTO.BASE_URI ).split( ";" ) ) {
+		for ( String uri : prefs.get( "lastontopath", SEMONTO.BASE_IRI ).split( ";" ) ) {
 			if ( !seen.contains( uri ) ) {
 				baseuri.addItem( uri );
 				seen.add( uri );
@@ -317,7 +317,7 @@ public class ImportExistingDbPanel extends JPanel {
 
 			Set<File> files = new HashSet<>( file.getFiles() );
 
-			URI defaultBase = null;
+			IRI defaultBase = null;
 			String mybase = baseuri.getSelectedItem().toString();
 
 			MultiMap<FileHandling, File> handlings
@@ -345,11 +345,11 @@ public class ImportExistingDbPanel extends JPanel {
 
 			if ( null == mybase || mybase.isEmpty()
 					|| ImportCreateDbPanel.METADATABASEURI.equals( mybase ) ) {
-				Set<URI> uris = new HashSet<>();
+				Set<IRI> uris = new HashSet<>();
 				Preferences prefs = Preferences.userNodeForPackage( getClass() );
 				String basepref = prefs.get( "lastontopath", SEMONTO.NAMESPACE );
 				for ( String b : basepref.split( ";" ) ) {
-					uris.add( new URIImpl( b ) );
+					uris.add( SimpleValueFactory.getInstance().createIRI( b ) );
 				}
 
 				defaultBase = ImportCreateDbPanel.getDefaultBaseUri(
@@ -363,7 +363,7 @@ public class ImportExistingDbPanel extends JPanel {
 					// user specified something
 					uris.add( defaultBase );
 					StringBuilder sb = new StringBuilder();
-					for ( URI u : uris ) {
+					for ( IRI u : uris ) {
 						if ( 0 != sb.length() ) {
 							sb.append( ";" );
 						}
@@ -371,13 +371,13 @@ public class ImportExistingDbPanel extends JPanel {
 					}
 					prefs.put( "lastontopath", sb.toString() );
 				}
-				// else {} // every file has a base URI specified
+				// else {} // every file has a base IRI specified
 			}
 			else {
-				defaultBase = new URIImpl( mybase );
+				defaultBase = SimpleValueFactory.getInstance().createIRI( mybase );
 			}
 
-			final URI defaultBaseUri = defaultBase;
+			final IRI defaultBaseUri = defaultBase;
 
 			ProgressTask pt;
 			if ( gridy ) {

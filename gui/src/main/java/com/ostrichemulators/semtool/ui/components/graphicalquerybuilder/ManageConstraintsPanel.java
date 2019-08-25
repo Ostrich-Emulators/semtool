@@ -29,9 +29,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
@@ -67,7 +66,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 
 		LabeledPairTableCellRenderer renderer
 				= LabeledPairTableCellRenderer.getUriPairRenderer();
-		Set<URI> labels = getAllProperties( elements );
+		Set<IRI> labels = getAllProperties( elements );
 		renderer.cache( Utility.getInstanceLabels( labels, engine ) );
 
 		LabeledPairTableCellRenderer trenderer
@@ -76,7 +75,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 
 		table.setFillsViewportHeight( true );
 
-		table.setDefaultRenderer( URI.class, renderer );
+		table.setDefaultRenderer( IRI.class, renderer );
 		table.setDefaultRenderer( Value.class, trenderer );
 
 		table.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
@@ -177,8 +176,8 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
   private javax.swing.JButton upbtn;
   // End of variables declaration//GEN-END:variables
 
-	private static Set<URI> getAllProperties( Collection<QueryGraphElement> data ) {
-		Set<URI> props = new HashSet<>();
+	private static Set<IRI> getAllProperties( Collection<QueryGraphElement> data ) {
+		Set<IRI> props = new HashSet<>();
 		for ( QueryGraphElement b : data ) {
 			props.addAll( b.getAllValues().keySet() );
 		}

@@ -20,7 +20,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -135,7 +134,7 @@ public class GraphToSparql {
 		sb.append( lit.getLabel() );
 		sb.append( '"' );
 
-		URI dt = lit.getDatatype();
+		IRI dt = lit.getDatatype();
 		if ( null != dt ) {
 			sb.append( "^^" );
 

@@ -71,7 +71,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.HeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.MetamodelPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.ParallelCoordinatesPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.PieChartPlaySheet;
-import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
+//import com.ostrichemulators.semtool.ui.components.playsheets.USHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.WorldHeatMapPlaySheet;
 import com.ostrichemulators.semtool.ui.components.semanticexplorer.SemanticExplorerPanel;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
@@ -99,6 +99,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -811,7 +812,7 @@ public class PlayPane extends JFrame {
 		if ( aboutFile != null ) {
 			try {
 				helpdata.append( "<pre>" );
-				helpdata.append( IOUtils.toString( aboutFile ) );
+				helpdata.append( IOUtils.toString( aboutFile, Charset.defaultCharset() ) );
 				helpdata.append( "</pre>" );
 			}
 			catch ( IOException ioe ) {
@@ -824,7 +825,7 @@ public class PlayPane extends JFrame {
 		if ( releaseFile != null ) {
 			try {
 				helpdata.append( "<pre>" );
-				helpdata.append( IOUtils.toString( releaseFile ) );
+				helpdata.append( IOUtils.toString( releaseFile, Charset.defaultCharset() ) );
 				helpdata.append( "</pre>" );
 			}
 			catch ( IOException ioe ) {
@@ -1658,9 +1659,9 @@ public class PlayPane extends JFrame {
 //		reg.register( InsightOutputType.SANKEY, SankeyPlaySheet.class, "Sankey Diagram",
 //				GuiUtility.loadImageIcon( "icons16/questions_sankey2_16.png" ),
 //				"SankeyPlaySheet Hint: SELECT ?source ?target ?value ?target2 ?value2 ?target3 ?value3...etc  Note: ?target is the source for ?target2 and ?target2 is the source for ?target3...etc WHERE{ ... }" );
-		reg.register( InsightOutputType.HEATMAP_US, USHeatMapPlaySheet.class, "US Heat Map",
-				GuiUtility.loadImageIcon( "icons16/questions_us_heat_map1_16.png" ),
-				"USHeatMapPlaySheet Hint: SELECT ?state ?numericHeatValue WHERE{ ... }" );
+//		reg.register( InsightOutputType.HEATMAP_US, USHeatMapPlaySheet.class, "US Heat Map",
+//				GuiUtility.loadImageIcon( "icons16/questions_us_heat_map1_16.png" ),
+//				"USHeatMapPlaySheet Hint: SELECT ?state ?numericHeatValue WHERE{ ... }" );
 
 		reg.register( InsightOutputType.HEATMAP_WORLD, WorldHeatMapPlaySheet.class, "World Heat Map",
 				GuiUtility.loadImageIcon( "icons16/questions_world_heat_map3_16.png" ),

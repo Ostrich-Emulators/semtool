@@ -20,7 +20,6 @@
 package com.ostrichemulators.semtool.ui.components.playsheets.graphsupport;
 
 import com.ostrichemulators.semtool.om.GraphElement;
-import com.ostrichemulators.semtool.om.SEMOSSVertex;
 import com.ostrichemulators.semtool.ui.components.playsheets.GraphPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet;
 import com.ostrichemulators.semtool.util.MultiMap;
@@ -35,10 +34,10 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * This class is used to display information about a node in a popup window.
@@ -60,16 +59,16 @@ public class NodeInfoPopup extends AbstractAction {
 
 	@Override
 	public void actionPerformed( ActionEvent ae ) {
-		MultiMap<URI, GraphElement> typeCounts = new MultiMap<>();
+		MultiMap<IRI, GraphElement> typeCounts = new MultiMap<>();
 		for ( GraphElement v : pickedVertex ) {
-			URI vType = v.getType();
+			IRI vType = v.getType();
 			typeCounts.add( vType, v );
 		}
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		List<Value[]> data = new ArrayList<>();
 		int total = 0;
-		for ( Map.Entry<URI, List<GraphElement>> en : typeCounts.entrySet() ) {
+		for ( Map.Entry<IRI, List<GraphElement>> en : typeCounts.entrySet() ) {
 			Value[] row = { en.getKey(), vf.createLiteral( en.getValue().size() ) };
 			data.add( row );
 			total += en.getValue().size();

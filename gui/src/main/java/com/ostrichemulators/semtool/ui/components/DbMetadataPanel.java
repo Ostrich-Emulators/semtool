@@ -18,9 +18,7 @@ import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.URIImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -51,7 +49,6 @@ import javax.swing.JOptionPane;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 
@@ -123,7 +120,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
 			@Override
 			public void mouseClicked( MouseEvent e ) {
-				final IRI uri = subsets.getSelectedValue();
+				final IRI IRI = subsets.getSelectedValue();
 				GridPlaySheet gps = new GridPlaySheet();
 
 				ListQueryAdapter<Value[]> q = new ListQueryAdapter( "SELECT ?p ?o { ?s ?p ?o }" ) {
@@ -135,13 +132,13 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 					}
 				};
 
-				q.bind( "s", uri );
+				q.bind( "s", IRI );
 				try {
 					List<Value[]> rows = engine.query( q );
 					gps.create( rows, Arrays.asList( "Property", "Value" ), engine );
 
 					JOptionPane.showMessageDialog( created, gps,
-							"Properties of " + uri, JOptionPane.INFORMATION_MESSAGE
+							"Properties of " + IRI, JOptionPane.INFORMATION_MESSAGE
 					);
 				}
 				catch ( RepositoryException | MalformedQueryException | QueryEvaluationException | HeadlessException ex ) {
@@ -187,7 +184,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				}
 				else {
 					JOptionPane.showMessageDialog( f, "You must specify a schema and data namespace URIs to continue",
-							"No base URI set!", JOptionPane.ERROR_MESSAGE );
+							"No base IRI set!", JOptionPane.ERROR_MESSAGE );
 				}
 			}
 			else {
@@ -470,7 +467,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
   private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 		Frame frame = JOptionPane.getFrameForComponent( this );
-		URI reif = CustomReificationPanel.showDialog( frame, engine );
+		IRI reif = CustomReificationPanel.showDialog( frame, engine );
 
 		if ( null != reif ) {
 			edgemodel.setText( Utility.getInstanceLabel( reif, engine ) );
@@ -514,8 +511,8 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 	public void actionPerformed( ActionEvent ae ) {
 		final IEngine eng
 				= ( null == engine ? DIHelper.getInstance().getRdfEngine() : engine );
-		final IRI uri = SimpleValueFactory.getInstance().createIRI( ae.getActionCommand() );
-		final String val = fieldlkp.get( uri ).getText();
+		final IRI IRI = SimpleValueFactory.getInstance().createIRI( ae.getActionCommand() );
+		final String val = fieldlkp.get( IRI ).getText();
 
 		try {
 			eng.execute( new ModificationExecutorAdapter( true ) {
@@ -523,24 +520,24 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					ValueFactory fac = conn.getValueFactory();
-					if ( uri.equals( SEMTOOL.Database ) ) {
+					if ( IRI.equals( SEMTOOL.Database ) ) {
 						baseuri = fac.createIRI( val );
 						conn.add( baseuri, RDF.TYPE, SEMTOOL.Database );
 					}
 					else {
-						if ( conn.hasStatement( baseuri, uri, null, false ) ) {
+						if ( conn.hasStatement( baseuri, IRI, null, false ) ) {
 							// remove the old value, and add the new one
 							// (we don't want multiple values for these URIs)
-							conn.remove( baseuri, uri, null );
+							conn.remove( baseuri, IRI, null );
 						}
 						if ( !( null == val || val.isEmpty() ) ) {
-							conn.add( baseuri, uri, fac.createLiteral( val ) );
+							conn.add( baseuri, IRI, fac.createLiteral( val ) );
 						}
 					}
 				}
 			} );
 
-			if ( RDFS.LABEL.equals( uri ) ) {
+			if ( RDFS.LABEL.equals( IRI ) ) {
 				eng.setEngineName( val );
 			}
 		}

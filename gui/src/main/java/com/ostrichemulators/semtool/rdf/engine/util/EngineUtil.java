@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -53,7 +52,6 @@ import com.ostrichemulators.semtool.util.Utility;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  * A class to centralize Engine operations. This class is thread-safe, and if
@@ -247,7 +245,7 @@ public class EngineUtil implements Runnable {
 			fromWasOpened = true;
 		}
 
-		Map<URI, Value> metas = new HashMap<>();
+		Map<IRI, Value> metas = new HashMap<>();
 		try {
 			metas.putAll( from.query( new MetadataQuery() ) );
 		}
@@ -572,7 +570,7 @@ public class EngineUtil implements Runnable {
 	private static void makeNewMetadata( final IEngine from, final IEngine to,
 			String title ) throws RepositoryException {
 		try {
-			final ValueFactory vf = new ValueFactoryImpl();
+			final ValueFactory vf = SimpleValueFactory.getInstance();
 			final Map<IRI, Value> oldmetas = from.query( new MetadataQuery() );
 			final IRI newbase = to.getBaseIri();
 			Date now = new Date();

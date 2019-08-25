@@ -21,7 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -76,7 +76,7 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 
 	private void setRenderer( RetrievingLabelCache cacher ) {
 		cacher.put( Constants.ANYNODE, "SELECT ALL" );
-		cacher.put( RDF.SUBJECT, "URI" );
+		cacher.put( RDF.SUBJECT, "IRI" );
 		cacher.put( RDFS.LABEL, "Label" );
 		cacher.put( RDF.TYPE, "Type" );
 		cacher.put( Constants.IN_EDGE_CNT, "Inputs" );
@@ -85,7 +85,7 @@ public class VisualizationControlPanel extends JTabbedPane implements GraphListe
 		LabeledPairTableCellRenderer<Value> renderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( cacher );
 		for ( JTable jt : new JTable[]{ nodes, edges, nodelabels, edgelabels, selecteds } ) {
-			jt.setDefaultRenderer( URI.class, renderer );
+			jt.setDefaultRenderer( IRI.class, renderer );
 			jt.setDefaultRenderer( Value.class, renderer );
 		}
 

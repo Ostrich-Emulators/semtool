@@ -35,12 +35,12 @@ public class CloneDataPanel extends javax.swing.JPanel {
 		initComponents();
 
 		Preferences prefs = Preferences.userNodeForPackage( DbCloneMetadata.class );
-		dbdir.setPreferencesKeys( prefs, "lastclonedir" );
-		dbdir.setFileTextFromInit();
+		//dbdir.setPreferencesKeys( prefs, "lastclonedir" );
+		//dbdir.setFileTextFromInit();
 	}
 
 	public void setDbDir( File dir ) {
-		dbdir.setFileText( dir );
+		//dbdir.setFileText( dir );
 	}
 
 	/**
@@ -157,9 +157,10 @@ public class CloneDataPanel extends javax.swing.JPanel {
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null,
 				new String[]{ "Copy", "Cancel" }, "Copy" );
 		if ( 0 == ans ) {
-			return new DbCloneMetadata( cdp.dbdir.getFirstFile(),
-					cdp.dbname.getText(), cdp.title.getText(),
-					cdp.insights.isSelected(), cdp.data.isSelected() );
+			throw new UnsupportedOperationException( "this needs to be refactored" );
+//			return new DbCloneMetadata( cdp.dbdir.getFirstFile(),
+//					cdp.dbname.getText(), cdp.title.getText(),
+//					cdp.insights.isSelected(), cdp.data.isSelected() );
 
 		}
 		return null;

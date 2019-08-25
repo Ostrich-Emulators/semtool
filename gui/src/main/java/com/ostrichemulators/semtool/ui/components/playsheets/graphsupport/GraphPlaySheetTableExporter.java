@@ -37,7 +37,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 /**
@@ -71,7 +71,7 @@ public class GraphPlaySheetTableExporter extends AbstractAction {
 		Set<SEMOSSVertex> verts	= new HashSet<>( gps.getVisibleGraph().getVertices() );
 		Set<SEMOSSEdge> edges	= new HashSet<>( gps.getVisibleGraph().getEdges() );
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		List<Value[]> vals = new ArrayList<>();
 		for ( SEMOSSVertex v : verts ) {
 			Value subj = vf.createLiteral( v.getLabel() );

@@ -49,9 +49,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.impl.URIImpl;
 
 /**
  *
@@ -105,10 +103,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		baseuri.addItem( METADATABASEURI );
 		Set<String> seen = new HashSet<>();
 		seen.add( METADATABASEURI );
-		for ( String uri : prefs.get( "lastontopath", SEMONTO.NAMESPACE ).split( ";" ) ) {
-			if ( !seen.contains( uri ) ) {
-				baseuri.addItem( uri );
-				seen.add( uri );
+		for ( String IRI : prefs.get( "lastontopath", SEMONTO.NAMESPACE ).split( ";" ) ) {
+			if ( !seen.contains( IRI ) ) {
+				baseuri.addItem( IRI );
+				seen.add( IRI );
 			}
 		}
 
@@ -485,7 +483,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				// user specified something
 				uris.add( defaultBase );
 				StringBuilder sb = new StringBuilder();
-				for ( URI u : uris ) {
+				for ( IRI u : uris ) {
 					if ( 0 != sb.length() ) {
 						sb.append( ";" );
 					}
@@ -493,7 +491,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				}
 				prefs.put( "lastontopath", sb.toString() );
 			}
-			// else {} // every file has a base URI specified
+			// else {} // every file has a base IRI specified
 		}
 		else {
 			defaultBase = SimpleValueFactory.getInstance().createIRI( mybase );
@@ -592,13 +590,13 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
   // End of variables declaration//GEN-END:variables
 
 	/**
-	 * Checks every file to make sure it has a base uri set. If any files are
-	 * missing a base uri, ask the user to specify one
+	 * Checks every file to make sure it has a base IRI set. If any files are
+	 * missing a base IRI, ask the user to specify one
 	 *
 	 * @param files the files to check
 	 * @param choices choices for a dropdown for the user
-	 * @return the URI the user chose, null if the user canceled, or
-	 * {@link Constants#ANYNODE} if every file has a base URI specified
+	 * @return the IRI the user chose, null if the user canceled, or
+	 * {@link Constants#ANYNODE} if every file has a base IRI specified
 	 * @throws com.ostrichemulators.semtool.poi.main.ImportValidationException
 	 * @throws java.io.IOException
 	 */
@@ -641,12 +639,12 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				JPanel pnl = new JPanel();
 				pnl.setLayout( new BoxLayout( pnl, BoxLayout.LINE_AXIS ) );
 				pnl.add( new JLabel( "<html>Not all the files have Base URIs set.<br>"
-						+ "Please specify a Base URI to use<br>when one is not provided." ) );
+						+ "Please specify a Base IRI to use<br>when one is not provided." ) );
 				JPanel junk = new JPanel();
 				junk.add( box );
 				pnl.add( junk );
 
-				int opt = JOptionPane.showOptionDialog( null, pnl, "Specify the Base URI",
+				int opt = JOptionPane.showOptionDialog( null, pnl, "Specify the Base IRI",
 						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
 						null, null );
 				if ( JOptionPane.OK_OPTION != opt ) {

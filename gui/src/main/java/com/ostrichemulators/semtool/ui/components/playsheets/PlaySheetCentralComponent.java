@@ -32,9 +32,9 @@ import javax.swing.JToolBar;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -177,30 +177,30 @@ public abstract class PlaySheetCentralComponent extends JComponent implements IP
 	}
 
 	/**
-	 * Replaces all instances of URI values with their label (as a string)
+	 * Replaces all instances of IRI values with their label (as a string)
 	 *
 	 * @param data
 	 * @param eng
 	 * @return the data list (the <code>data</code> argument), for convenience
 	 */
 	public static List<Value[]> convertUrisToLabels( List<Value[]> data, IEngine eng ) {
-		Set<URI> needLabels = new HashSet<>();
+		Set<IRI> needLabels = new HashSet<>();
 
 		for ( Value[] valarr : data ) {
 			for ( Value v : valarr ) {
-				if ( v instanceof URI ) {
-					needLabels.add( URI.class.cast( v ) );
+				if ( v instanceof IRI ) {
+					needLabels.add( IRI.class.cast( v ) );
 				}
 			}
 		}
 
-		Map<URI, String> labels = Utility.getInstanceLabels( needLabels, eng );
+		Map<IRI, String> labels = Utility.getInstanceLabels( needLabels, eng );
 		ListIterator<Value[]> valit = data.listIterator();
 		while ( valit.hasNext() ) {
 			Value[] valarr = valit.next();
 			for ( int i = 0; i < valarr.length; i++ ) {
-				if ( valarr[i] instanceof URI ) {
-					valarr[i] = new LiteralImpl( labels.get( URI.class.cast( valarr[i] ) ) );
+				if ( valarr[i] instanceof IRI ) {
+					valarr[i] = SimpleValueFactory.getInstance().createLiteral( labels.get( IRI.class.cast( valarr[i] ) ) );
 				}
 			}
 			valit.set( valarr );

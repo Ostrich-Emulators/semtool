@@ -13,7 +13,7 @@ import java.util.Map;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -69,10 +69,10 @@ public class LabeledPairTableCellRenderer<T> extends DefaultTableCellRenderer {
 		return val.toString();
 	}
 
-	public static LabeledPairTableCellRenderer<URI> getUriPairRenderer() {
-		return new LabeledPairTableCellRenderer<URI>() {
+	public static LabeledPairTableCellRenderer<IRI> getUriPairRenderer() {
+		return new LabeledPairTableCellRenderer<IRI>() {
 			@Override
-			protected String getLabelForCacheMiss( URI val ) {
+			protected String getLabelForCacheMiss( IRI val ) {
 				return val.getLocalName();
 			}
 		};

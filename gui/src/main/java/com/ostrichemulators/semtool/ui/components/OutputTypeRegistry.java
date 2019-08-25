@@ -11,6 +11,7 @@ import com.ostrichemulators.semtool.ui.components.playsheets.GridPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.GridRAWPlaySheet;
 import com.ostrichemulators.semtool.ui.components.playsheets.PlaySheetCentralComponent;
 import com.ostrichemulators.semtool.util.GuiUtility;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,9 +60,9 @@ public class OutputTypeRegistry {
 	public IPlaySheet getSheetInstance( InsightOutputType type ) {
 		if ( lookup.containsKey( type ) ) {
 			try {
-				return lookup.get( type ).newInstance();
+				return lookup.get( type ).getConstructor().newInstance();
 			}
-			catch ( InstantiationException | IllegalAccessException e ) {
+			catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
 				Logger.getLogger( getClass() ).warn( "cannot instantiate playsheet class", e );
 				return new GridPlaySheet();
 			}

@@ -20,9 +20,8 @@ import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.IRI;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -37,7 +36,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger( CustomReificationPanel.class );
 	private final SparqlTextArea sparqlarea = new SparqlTextArea();
-	private final DefaultListModel<URI> resultsmodel = new DefaultListModel<>();
+	private final DefaultListModel<IRI> resultsmodel = new DefaultListModel<>();
 	private final IEngine engine;
 	private String conceptquery;
 	private String edgequery;
@@ -85,7 +84,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 		scroller.setVisible( false );
 	}
 
-	public static URI showDialog( Frame frame, IEngine engine ) {
+	public static IRI showDialog( Frame frame, IEngine engine ) {
 		CustomReificationPanel crp = new CustomReificationPanel( engine );
 
 		OneValueQueryAdapter<String> qa
@@ -105,7 +104,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
 				options[0] );
 
-		URI model[] = { null };
+		IRI model[] = { null };
 		if ( JOptionPane.CANCEL_OPTION != ans ) {
 
 			try {
@@ -114,7 +113,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 					@Override
 					public void exec( RepositoryConnection conn ) throws RepositoryException {
 						ValueFactory vf = conn.getValueFactory();
-						URI base = engine.getBaseIri();
+						IRI base = engine.getBaseIri();
 
 						conn.remove(base, SEMTOOL.ReificationModel, null );
 						conn.remove(base, SEMTOOL.ConceptsSparql, null );

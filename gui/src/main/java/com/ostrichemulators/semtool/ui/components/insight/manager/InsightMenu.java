@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
  * @author ryan
  */
 public class InsightMenu extends MouseAdapter {
+
 	private static final Logger log = Logger.getLogger( InsightMenu.class );
 	private final JTree tree;
 	private final DefaultTreeModel model;
@@ -130,9 +131,9 @@ public class InsightMenu extends MouseAdapter {
 						= DefaultMutableTreeNode.class.cast( node.getParent() );
 
 				int idx = 0;
-				Enumeration<DefaultMutableTreeNode> en = node.children();
+				Enumeration en = node.children();
 				while ( en.hasMoreElements() ) {
-					DefaultMutableTreeNode childnode = en.nextElement();
+					DefaultMutableTreeNode childnode = DefaultMutableTreeNode.class.cast( en.nextElement() );
 					Parameter oldp = Parameter.class.cast( childnode.getUserObject() );
 					Parameter pchild = new Parameter( oldp.getLabel() );
 					pchild.setDefaultQuery( oldp.getDefaultQuery() );

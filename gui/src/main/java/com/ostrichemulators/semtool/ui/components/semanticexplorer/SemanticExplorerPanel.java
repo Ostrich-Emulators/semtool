@@ -90,9 +90,9 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 					if ( obj instanceof IRI ) {
 						IRI uri = IRI.class.cast( obj );
 
-						Enumeration<DefaultMutableTreeNode> enumer = invisibleRoot.depthFirstEnumeration();
+						Enumeration enumer = invisibleRoot.depthFirstEnumeration();
 						while ( enumer.hasMoreElements() ) {
-							DefaultMutableTreeNode node = enumer.nextElement();
+							DefaultMutableTreeNode node = DefaultMutableTreeNode.class.cast( enumer.nextElement() );
 							if ( node.getUserObject().equals( uri ) ) {
 								TreePath tp = new TreePath( node.getPath() );
 								nodeClassesAndInstances.getSelectionModel().
@@ -202,7 +202,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 				Set<IRI> concepts = sm.getTopLevelConcepts();
 				Map<IRI, String> clbls = Utility.getInstanceLabels( concepts, engine );
-				Map<IRI, String> sortedconcepts = Utility.sortUrisByLabel( clbls );
+				Map<IRI, String> sortedconcepts = Utility.sortIrisByLabel( clbls );
 				rlc.putAll( clbls );
 
 				for ( IRI concept : sortedconcepts.keySet() ) {
@@ -211,7 +211,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 					List<IRI> instances = NodeDerivationTools.createInstanceList( concept, engine );
 					Map<IRI, String> labels = Utility.getInstanceLabels( instances, engine );
-					labels = Utility.sortUrisByLabel( labels );
+					labels = Utility.sortIrisByLabel( labels );
 					rlc.putAll( labels );
 
 					for ( IRI instance : labels.keySet() ) {

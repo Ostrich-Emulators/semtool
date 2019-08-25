@@ -357,24 +357,24 @@ public class InsightManagerPanel extends javax.swing.JPanel implements EngineOpe
 		List<Perspective> perspectives = new ArrayList<>();
 		DefaultMutableTreeNode root
 				= DefaultMutableTreeNode.class.cast( model.getRoot() );
-		Enumeration<DefaultMutableTreeNode> perspIt = root.children();
+		Enumeration perspIt = root.children();
 
 		while ( perspIt.hasMoreElements() ) {
-			DefaultMutableTreeNode perspnode = perspIt.nextElement();
+			DefaultMutableTreeNode perspnode = DefaultMutableTreeNode.class.cast( perspIt.nextElement() );
 			Perspective persp = Perspective.class.cast( perspnode.getUserObject() );
 			perspectives.add( persp );
 
 			List<Insight> insights = new ArrayList<>();
-			Enumeration<DefaultMutableTreeNode> insIt = perspnode.children();
+			Enumeration insIt = perspnode.children();
 			while ( insIt.hasMoreElements() ) {
-				DefaultMutableTreeNode insnode = insIt.nextElement();
+				DefaultMutableTreeNode insnode = DefaultMutableTreeNode.class.cast( insIt.nextElement() );
 				Insight ins = Insight.class.cast( insnode.getUserObject() );
 				insights.add( ins );
 
 				List<Parameter> params = new ArrayList<>();
-				Enumeration<DefaultMutableTreeNode> parmIt = insnode.children();
+				Enumeration parmIt = insnode.children();
 				while ( parmIt.hasMoreElements() ) {
-					DefaultMutableTreeNode parmnode = parmIt.nextElement();
+					DefaultMutableTreeNode parmnode = DefaultMutableTreeNode.class.cast(parmIt.nextElement() );
 					Parameter param = Parameter.class.cast( parmnode.getUserObject() );
 					params.add( param );
 				}

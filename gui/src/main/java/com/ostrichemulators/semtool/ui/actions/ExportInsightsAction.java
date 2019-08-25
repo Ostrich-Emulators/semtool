@@ -119,7 +119,7 @@ public class ExportInsightsAction extends DbAction {
 							//  Repo, so we can convert namespaces nicely
 							User user = Security.getSecurity().getAssociatedUser( getEngine() );
 							SailRepository repo = new SailRepository( new MemoryStore() );
-							repo.initialize();
+							repo.init();
 							final RepositoryConnection rc = repo.getConnection();
 							InsightManager im = getEngine().getInsightManager();
 							rc.add( InsightManagerImpl.getModel( im, user ) );
