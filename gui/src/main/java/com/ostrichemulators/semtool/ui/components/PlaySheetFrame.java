@@ -383,7 +383,7 @@ public class PlaySheetFrame extends JInternalFrame {
 						}
 						else {
 							try {
-								PlaySheetCentralComponent pscc = overlayee.getClass().getConstructor().newInstance();
+								PlaySheetCentralComponent pscc = overlayee.getClass().getDeclaredConstructor().newInstance();
 								pscc.setTitle( tabTitleIfNeeded );
 								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
 								pscc.create( model, engine );
@@ -407,7 +407,7 @@ public class PlaySheetFrame extends JInternalFrame {
 						}
 						else {
 							try {
-								PlaySheetCentralComponent pscc = overlayee.getClass().getConstructor().newInstance();
+								PlaySheetCentralComponent pscc = overlayee.getClass().getDeclaredConstructor().newInstance();
 								pscc.setTitle( tabTitleIfNeeded );
 								PlaySheetFrame.this.addTab( tabTitleIfNeeded, pscc );
 								pscc.create( data, headers, engine );

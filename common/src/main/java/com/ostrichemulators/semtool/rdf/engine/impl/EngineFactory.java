@@ -86,7 +86,7 @@ public class EngineFactory {
 		}
 		else {
 			try {
-				engine = klass.getConstructor().newInstance();
+				engine = klass.getDeclaredConstructor().newInstance();
 				engine.openDB( props );
 			}
 			catch ( IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {

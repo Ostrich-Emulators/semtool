@@ -60,7 +60,7 @@ public class OutputTypeRegistry {
 	public IPlaySheet getSheetInstance( InsightOutputType type ) {
 		if ( lookup.containsKey( type ) ) {
 			try {
-				return lookup.get( type ).getConstructor().newInstance();
+				return lookup.get( type ).getDeclaredConstructor().newInstance();
 			}
 			catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
 				Logger.getLogger( getClass() ).warn( "cannot instantiate playsheet class", e );
